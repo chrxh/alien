@@ -11,7 +11,7 @@ struct FlowCenter
     float posX = 0;
     float posY = 0;
     float radius = 200.0f;
-    float strength = 0.01f;
+    float strength = 0.001f;
     Orientation orientation = Orientation::Clockwise;
 
     bool operator==(FlowCenter const& other) const

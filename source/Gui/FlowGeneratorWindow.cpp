@@ -94,7 +94,7 @@ void _FlowGeneratorWindow::processIntern()
                         .min(0)
                         .max(0.5f)
                         .logarithmic(true)
-                        .format("%.4f")
+                        .format("%.5f")
                         .defaultValue(origFlowCenter.strength),
                     flowCenter.strength);
 
