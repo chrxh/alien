@@ -39,11 +39,8 @@ private:
     __inline__ __device__ static Cell* getFirstCellOfConstructionSite(Cell* hostCell);
     __inline__ __device__ static bool
     startNewConstruction(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData);
-    __inline__ __device__ static bool continueConstruction(
-        SimulationData& data,
-        SimulationResult& result,
-        Cell* hostCell,
-        Cell* firstConstructedCell,
+    __inline__ __device__ static bool
+    continueConstruction(SimulationData& data, SimulationResult& result, Cell* hostCell, Cell* firstConstructedCell,
         ConstructionData const& constructionData);
 
     __inline__ __device__ static bool isConnectable(int numConnections, int maxConnections, bool adaptMaxConnections);
