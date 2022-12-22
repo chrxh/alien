@@ -14,8 +14,10 @@ private:
     static int constexpr NumScanPoints = 64;
 
     __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
-    __inline__ __device__ static void searchNeighborhood(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity);
-    __inline__ __device__ static void searchByAngle(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity);
+    __inline__ __device__ static void
+    searchNeighborhood(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity& activity);
+    __inline__ __device__ static void
+    searchByAngle(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity& activity);
 
     __inline__ __device__ static uint8_t convertAngleToData(float angle);
 };
@@ -36,8 +38,8 @@ __inline__ __device__ void SensorProcessor::process(SimulationData& data, Simula
 __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
 {
     __shared__ Activity activity;
+    __shared__ int inputExecutionOrderNumber;
     if (threadIdx.x == 0) {
-        int inputExecutionOrderNumber;
         activity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
     }
     __syncthreads();
@@ -45,10 +47,10 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     if (activity.channels[0] > cudaSimulationParameters.cellFunctionSensorActivityThreshold) {
         switch (cell->cellFunctionData.sensor.mode) {
         case Enums::SensorMode_Neighborhood: {
-            searchNeighborhood(data, result, cell, activity);
+            searchNeighborhood(data, result, cell, inputExecutionOrderNumber, activity);
         } break;
         case Enums::SensorMode_FixedAngle: {
-            searchByAngle(data, result, cell, activity);
+            searchByAngle(data, result, cell, inputExecutionOrderNumber, activity);
         } break;
         }
     }
@@ -59,7 +61,8 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     }
 }
 
-__inline__ __device__ void SensorProcessor::searchNeighborhood(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity)
+__inline__ __device__ void
+SensorProcessor::searchNeighborhood(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity& activity)
 {
     __shared__ int minDensity;
     __shared__ int color;
@@ -67,8 +70,7 @@ __inline__ __device__ void SensorProcessor::searchNeighborhood(SimulationData& d
     __shared__ uint32_t lookupResult;
 
     if (threadIdx.x == 0) {
-        refScanAngle = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, cell, 0).actualAngle;
-
+        refScanAngle = Math::angleOfVector(CellFunctionProcessor::calcSignalDirection(data, cell, inputExecutionOrderNumber));
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 100);
         color = cell->cellFunctionData.sensor.color;
 
@@ -97,7 +99,7 @@ __inline__ __device__ void SensorProcessor::searchNeighborhood(SimulationData& d
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffff) {
-            activity.channels[0] = 1;   //something found
+            activity.channels[0] = 1;                                                     //something found
             activity.channels[1] = static_cast<float>((lookupResult >> 8) & 0xff) / 256;  //density
             activity.channels[2] = static_cast<float>(lookupResult >> 16) / 256;  //distance
             activity.channels[3] = static_cast<float>(static_cast<int8_t>(lookupResult & 0xff)) / 256;  //angle
@@ -108,7 +110,8 @@ __inline__ __device__ void SensorProcessor::searchNeighborhood(SimulationData& d
     __syncthreads();
 }
 
-__inline__ __device__ void SensorProcessor::searchByAngle(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity)
+__inline__ __device__ void
+SensorProcessor::searchByAngle(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity& activity)
 {
     __shared__ int minDensity;
     __shared__ int color;
@@ -119,8 +122,7 @@ __inline__ __device__ void SensorProcessor::searchByAngle(SimulationData& data, 
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 255);
         color = cell->cellFunctionData.sensor.color;
 
-        auto refScanAngle = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, cell, 0).actualAngle;
-        searchDelta = Math::unitVectorOfAngle(refScanAngle);
+        searchDelta = CellFunctionProcessor::calcSignalDirection(data, cell, inputExecutionOrderNumber);
         searchDelta = Math::rotateClockwise(searchDelta, cell->cellFunctionData.sensor.angle);
 
         lookupResult = 0xffffffff;

@@ -31,7 +31,7 @@ struct SimulationParameters
     bool cellFunctionConstructionInheritColor = true;
     float cellFunctionConstructorOffspringDistance = 2.0f;
     float cellFunctionConstructorConnectingCellMaxDistance = 1.5f;
-    float cellFunctionConstructorActivityThreshold = 0.25f;
+    float cellFunctionConstructorActivityThreshold = 0.1f;
 
     float cellFunctionAttackerRadius = 1.6f;
     float cellFunctionAttackerStrength = 0.05f;
@@ -39,7 +39,7 @@ struct SimulationParameters
     bool cellFunctionAttackerEnergyDistributionSameColor = true;
     float cellFunctionAttackerEnergyDistributionValue = 10.0f;
     float cellFunctionAttackerColorInhomogeneityFactor = 1.0f;
-    float cellFunctionAttackerActivityThreshold = 0.25f;
+    float cellFunctionAttackerActivityThreshold = 0.1f;
 
     bool cellFunctionTransmitterEnergyDistributionSameColor = true;
     float cellFunctionTransmitterEnergyDistributionRadius = 3.6f;
@@ -50,7 +50,7 @@ struct SimulationParameters
     float cellFunctionMuscleBendingAngle = 5.0f;
 
     float cellFunctionSensorRange = 255.0f;
-    float cellFunctionSensorActivityThreshold = 0.25f;
+    float cellFunctionSensorActivityThreshold = 0.1f;
 
     bool particleTransformationAllowed = false;
     bool particleTransformationRandomCellFunction = false;

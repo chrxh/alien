@@ -494,6 +494,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Attacker
          */
+        ImGui::PushID("Attacker");
         AlienImGui::Group("Cell function: Attacker");
         AlienImGui::InputColorMatrix(
             AlienImGui::InputColorMatrixParameters()
@@ -589,6 +590,7 @@ void _SimulationParametersWindow::processBase(
                 .max(1.0f)
                 .defaultValue(origSimParameters.cellFunctionAttackerActivityThreshold),
             simParameters.cellFunctionAttackerActivityThreshold);
+        ImGui::PopID();
 
         /**
          * Transmitter

@@ -560,12 +560,12 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
     case Enums::CellFunction_Sensor: {
         auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
         sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
-    }
+    } break;
     case Enums::CellFunction_Nerve: {
         auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
         nerve.pulseMode = std::max(0, nerve.pulseMode);
         nerve.alternationMode = std::max(0, nerve.alternationMode);
-    }
+    } break;
     }
 }
 

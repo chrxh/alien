@@ -23,6 +23,8 @@ public:
     };
     __inline__ __device__ static ReferenceAndActualAngle calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation);
 
+    __inline__ __device__ static float2 calcSignalDirection(SimulationData& data, Cell* cell, int inputExecutionOrderNumber);
+
 private:
     __inline__ __device__ static int calcInputExecutionOrder(Cell* cell);   //returns -1 if no input has been found
 };
@@ -152,6 +154,20 @@ CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& dat
     angleFromPreviousConnection = max(min(angleFromPreviousConnection, cell->connections[index].angleFromPrevious), 0.0f);
 
     return ReferenceAndActualAngle{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
+}
+
+__inline__ __device__ float2 CellFunctionProcessor::calcSignalDirection(SimulationData& data, Cell* cell, int inputExecutionOrderNumber)
+{
+    float2 result{0, 0};
+    for (int i = 0; i < cell->numConnections; ++i) {
+        auto& connectedCell = cell->connections[i].cell;
+        if (connectedCell->executionOrderNumber == inputExecutionOrderNumber && !connectedCell->outputBlocked) {
+            auto directionDelta = cell->absPos - connectedCell->absPos;
+            data.cellMap.correctDirection(directionDelta);
+            result = result + Math::normalized(directionDelta);
+        }
+    }
+    return Math::normalized(result);
 }
 
 __inline__ __device__ int CellFunctionProcessor::calcInputExecutionOrder(Cell* cell)

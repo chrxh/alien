@@ -51,9 +51,16 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
         energyDelta = cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionValue;
     } else {
         atomicAdd(&cell->energy, cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionValue);  //revert
-        return;
     }
-
+    for (int i = 0; i < cell->numConnections; ++i) {
+        auto connectedCell = cell->connections[i].cell;
+        auto origEnergy = atomicAdd(&connectedCell->energy, -cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionValue);
+        if (origEnergy > cudaSimulationParameters.cellNormalEnergy) {
+            energyDelta += cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionValue;
+        } else {
+            atomicAdd(&connectedCell->energy, cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionValue);  //revert
+        }
+    }
 
     if (cell->cellFunctionData.transmitter.mode == Enums::EnergyDistributionMode_ConnectedCells) {
         int numReceivers = cell->numConnections;
