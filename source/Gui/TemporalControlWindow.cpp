@@ -83,7 +83,7 @@ void _TemporalControlWindow::processTpsRestriction()
     ImGui::SameLine();
     ImGui::BeginDisabled(!_slowDown);
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-    ImGui::SliderInt("", &_tpsRestriction, 1, 400, "%d TPS", ImGuiSliderFlags_Logarithmic);
+    ImGui::SliderInt("", &_tpsRestriction, 1, 1000, "%d TPS", ImGuiSliderFlags_Logarithmic);
     if (_slowDown) {
         _simController->setTpsRestriction(_tpsRestriction);
     } else {

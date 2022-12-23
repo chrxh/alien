@@ -3,7 +3,7 @@
         "time step": "0",
         "world size": {
             "x": "500",
-            "y": "200"
+            "y": "250"
         }
     },
     "simulation parameters": {
@@ -11,19 +11,18 @@
         "friction": "0.00100000",
         "rigidity": "0.00000000",
         "cell": {
-            "binding force": "1.00000000",
             "max velocity": "2.00000000",
             "max binding distance": "3.59999990",
             "repulsion strength": "0.08000000",
             "normal energy": "100.00000000",
             "min distance": "0.30000001",
-            "max distance": "1.29999995",
+            "max collision distance": "1.29999995",
             "max force": "0.80000001",
             "max force decay probability": "0.20000000",
             "max bonds": "6",
             "max execution order number": "6",
             "min energy": "50.00000000",
-            "fusion velocity": "0.40000001",
+            "fusion velocity": "0.82400000",
             "max binding energy": "500000.00000000",
             "color transition rules": {
                 "duration[0]": "0",
@@ -42,14 +41,18 @@
                 "target color[6]": "6"
             },
             "function": {
-                "sensor": {
-                    "range": "255.00000000"
-                },
                 "constructor": {
-                    "inherit color": "true",
+                    "inherit color": "false",
                     "offspring distance": "2.00000000",
                     "connecting cell max distance": "1.50000000",
-                    "activity threshold": "0.25000000"
+                    "activity threshold": "0.25000000",
+                    "mutation probability": {
+                        "neuron data": "0.00100000",
+                        "data": "0.00000000",
+                        "cell function": "0.00000000",
+                        "insertion": "0.00000000",
+                        "deletion": "0.00000000"
+                    }
                 },
                 "attacker": {
                     "radius": "1.60000002",
@@ -57,24 +60,24 @@
                     "energy distribution radius": "3.59999990",
                     "energy distribution same color": "true",
                     "energy distribution value": "10.00000000",
-                    "inhomogeneity bonus": "1.00000000",
-                    "activity threshold": "0.25000000",
+                    "color inhomogeneity factor": "1.00000000",
+                    "activity threshold": "0.11100000",
                     "energy cost": "0.00000000",
                     "geometry deviation exponent": "0.00000000",
                     "food chain color matrix[0, 0]": "0.00000000",
                     "food chain color matrix[0, 1]": "0.00000000",
                     "food chain color matrix[0, 2]": "1.00000000",
-                    "food chain color matrix[0, 3]": "0.00000000",
-                    "food chain color matrix[0, 4]": "0.00000000",
-                    "food chain color matrix[0, 5]": "0.00000000",
-                    "food chain color matrix[0, 6]": "0.00000000",
-                    "food chain color matrix[1, 0]": "1.00000000",
-                    "food chain color matrix[1, 1]": "1.00000000",
+                    "food chain color matrix[0, 3]": "0.20000000",
+                    "food chain color matrix[0, 4]": "0.20000000",
+                    "food chain color matrix[0, 5]": "0.20000000",
+                    "food chain color matrix[0, 6]": "0.20000000",
+                    "food chain color matrix[1, 0]": "0.00000000",
+                    "food chain color matrix[1, 1]": "0.00000000",
                     "food chain color matrix[1, 2]": "1.00000000",
-                    "food chain color matrix[1, 3]": "1.00000000",
-                    "food chain color matrix[1, 4]": "1.00000000",
-                    "food chain color matrix[1, 5]": "1.00000000",
-                    "food chain color matrix[1, 6]": "1.00000000",
+                    "food chain color matrix[1, 3]": "0.20000000",
+                    "food chain color matrix[1, 4]": "0.20000000",
+                    "food chain color matrix[1, 5]": "0.20000000",
+                    "food chain color matrix[1, 6]": "0.20000000",
                     "food chain color matrix[2, 0]": "0.00000000",
                     "food chain color matrix[2, 1]": "0.00000000",
                     "food chain color matrix[2, 2]": "0.00000000",
@@ -82,34 +85,34 @@
                     "food chain color matrix[2, 4]": "0.00000000",
                     "food chain color matrix[2, 5]": "0.00000000",
                     "food chain color matrix[2, 6]": "0.00000000",
-                    "food chain color matrix[3, 0]": "1.00000000",
-                    "food chain color matrix[3, 1]": "1.00000000",
-                    "food chain color matrix[3, 2]": "1.00000000",
-                    "food chain color matrix[3, 3]": "1.00000000",
-                    "food chain color matrix[3, 4]": "1.00000000",
-                    "food chain color matrix[3, 5]": "1.00000000",
-                    "food chain color matrix[3, 6]": "1.00000000",
-                    "food chain color matrix[4, 0]": "1.00000000",
-                    "food chain color matrix[4, 1]": "1.00000000",
-                    "food chain color matrix[4, 2]": "1.00000000",
-                    "food chain color matrix[4, 3]": "1.00000000",
-                    "food chain color matrix[4, 4]": "1.00000000",
-                    "food chain color matrix[4, 5]": "1.00000000",
-                    "food chain color matrix[4, 6]": "1.00000000",
-                    "food chain color matrix[5, 0]": "1.00000000",
-                    "food chain color matrix[5, 1]": "1.00000000",
-                    "food chain color matrix[5, 2]": "1.00000000",
-                    "food chain color matrix[5, 3]": "1.00000000",
-                    "food chain color matrix[5, 4]": "1.00000000",
-                    "food chain color matrix[5, 5]": "1.00000000",
-                    "food chain color matrix[5, 6]": "1.00000000",
-                    "food chain color matrix[6, 0]": "1.00000000",
-                    "food chain color matrix[6, 1]": "1.00000000",
-                    "food chain color matrix[6, 2]": "1.00000000",
-                    "food chain color matrix[6, 3]": "1.00000000",
-                    "food chain color matrix[6, 4]": "1.00000000",
-                    "food chain color matrix[6, 5]": "1.00000000",
-                    "food chain color matrix[6, 6]": "1.00000000",
+                    "food chain color matrix[3, 0]": "0.00000000",
+                    "food chain color matrix[3, 1]": "0.00000000",
+                    "food chain color matrix[3, 2]": "0.00000000",
+                    "food chain color matrix[3, 3]": "0.00000000",
+                    "food chain color matrix[3, 4]": "0.00000000",
+                    "food chain color matrix[3, 5]": "0.00000000",
+                    "food chain color matrix[3, 6]": "0.00000000",
+                    "food chain color matrix[4, 0]": "0.00000000",
+                    "food chain color matrix[4, 1]": "0.00000000",
+                    "food chain color matrix[4, 2]": "0.00000000",
+                    "food chain color matrix[4, 3]": "0.00000000",
+                    "food chain color matrix[4, 4]": "0.00000000",
+                    "food chain color matrix[4, 5]": "0.00000000",
+                    "food chain color matrix[4, 6]": "0.00000000",
+                    "food chain color matrix[5, 0]": "0.00000000",
+                    "food chain color matrix[5, 1]": "0.00000000",
+                    "food chain color matrix[5, 2]": "0.00000000",
+                    "food chain color matrix[5, 3]": "0.00000000",
+                    "food chain color matrix[5, 4]": "0.00000000",
+                    "food chain color matrix[5, 5]": "0.00000000",
+                    "food chain color matrix[5, 6]": "0.00000000",
+                    "food chain color matrix[6, 0]": "0.00000000",
+                    "food chain color matrix[6, 1]": "0.00000000",
+                    "food chain color matrix[6, 2]": "0.00000000",
+                    "food chain color matrix[6, 3]": "0.00000000",
+                    "food chain color matrix[6, 4]": "0.00000000",
+                    "food chain color matrix[6, 5]": "0.00000000",
+                    "food chain color matrix[6, 6]": "0.00000000",
                     "connections mismatch penalty": "0.33000001"
                 },
                 "transmitter": {
@@ -119,25 +122,29 @@
                 },
                 "muscle": {
                     "contraction expansion delta": "0.05000000",
-                    "movement delta": "0.01000000",
+                    "movement acceleration": "0.01900000",
                     "bending angle": "5.00000000"
+                },
+                "sensor": {
+                    "range": "255.00000000",
+                    "activity threshold": "0.25000000"
                 }
             }
         },
         "radiation": {
-            "factor": "0.00000600",
+            "factor": "0.00001000",
             "probability": "0.03000000",
             "velocity multiplier": "1.00000000",
             "velocity perturbation": "0.50000000",
-            "absorption by cell color[0]": "false",
-            "absorption by cell color[1]": "false",
-            "absorption by cell color[2]": "true",
-            "absorption by cell color[3]": "false",
-            "absorption by cell color[4]": "false",
-            "absorption by cell color[5]": "false",
-            "absorption by cell color[6]": "false",
+            "absorption by cell color[0]": "0.00000000",
+            "absorption by cell color[1]": "0.00000000",
+            "absorption by cell color[2]": "0.20000000",
+            "absorption by cell color[3]": "0.20000000",
+            "absorption by cell color[4]": "0.20000000",
+            "absorption by cell color[5]": "0.20000000",
+            "absorption by cell color[6]": "0.20000000",
             "min cell energy": "500.00000000",
-            "min cell age": "500000"
+            "min cell age": "148695"
         },
         "cluster": {
             "decay": "true",
@@ -171,7 +178,6 @@
                 "cell": {
                     "max force": "0.80000001",
                     "min energy": "50.00000000",
-                    "binding force": "1.00000000",
                     "fusion velocity": "0.40000001",
                     "max binding energy": "500000.00000000",
                     "color transition rules": {
@@ -195,6 +201,14 @@
                             "energy cost": "0.00000000",
                             "geometry deviation exponent": "0.00000000",
                             "connections mismatch penalty": "0.33000001"
+                        },
+                        "constructor": {
+                            "mutation probability": {
+                                "neuron data": "0.00100000",
+                                "cell function": "0.00000000",
+                                "insertion": "0.00000000",
+                                "deletion": "0.00000000"
+                            }
                         }
                     }
                 },
@@ -249,6 +263,15 @@
                         "color matrix[6, 4]": "1.00000000",
                         "color matrix[6, 5]": "1.00000000",
                         "color matrix[6, 6]": "1.00000000"
+                    }
+                },
+                " cell": {
+                    "function": {
+                        "constructor": {
+                            "mutation probability": {
+                                "data ": "0.00000000"
+                            }
+                        }
                     }
                 }
             },
@@ -271,7 +294,6 @@
                 "cell": {
                     "max force": "0.80000001",
                     "min energy": "50.00000000",
-                    "binding force": "1.00000000",
                     "fusion velocity": "0.40000001",
                     "max binding energy": "500000.00000000",
                     "color transition rules": {
@@ -295,6 +317,14 @@
                             "energy cost": "0.00000000",
                             "geometry deviation exponent": "0.00000000",
                             "connections mismatch penalty": "0.33000001"
+                        },
+                        "constructor": {
+                            "mutation probability": {
+                                "neuron data": "0.00100000",
+                                "cell function": "0.00000000",
+                                "insertion": "0.00000000",
+                                "deletion": "0.00000000"
+                            }
                         }
                     }
                 },
@@ -350,20 +380,29 @@
                         "color matrix[6, 5]": "1.00000000",
                         "color matrix[6, 6]": "1.00000000"
                     }
+                },
+                " cell": {
+                    "function": {
+                        "constructor": {
+                            "mutation probability": {
+                                "data ": "0.00000000"
+                            }
+                        }
+                    }
                 }
             }
         }
     },
     "flow field": {
-        "active": "false",
+        "active": "true",
         "num centers": "1",
         "center0": {
             "pos": {
-                "x": "250.00000000",
-                "y": "100.00000000"
+                "x": "101.00000000",
+                "y": "125.00000000"
             },
-            "radius": "200.00000000",
-            "strength": "0.01000000"
+            "radius": "250.00000000",
+            "strength": "0.00011000"
         },
         "center1": {
             "pos": {
@@ -371,7 +410,7 @@
                 "y": "0.00000000"
             },
             "radius": "200.00000000",
-            "strength": "0.01000000"
+            "strength": "0.00100000"
         }
     }
 }

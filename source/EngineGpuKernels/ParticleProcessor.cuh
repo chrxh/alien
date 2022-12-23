@@ -83,12 +83,18 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                 if (particle->tryLock()) {
 
                     auto energyToTransfer = particle->energy * cudaSimulationParameters.radiationAbsorptionByCellColor[cell->color];
+                    if (particle->energy < 5) {
+                        energyToTransfer = particle->energy;
+                    }
                     cell->energy += energyToTransfer;
                     particle->energy -= energyToTransfer;
-
+                    bool killParticle = particle->energy < NEAR_ZERO;
+                        
                     particle->releaseLock();
 
-                    particle = nullptr;
+                    if (killParticle) {
+                        particle = nullptr;
+                    }
                 }
                 cell->releaseLock();
             }
