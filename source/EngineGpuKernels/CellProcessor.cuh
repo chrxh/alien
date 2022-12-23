@@ -439,7 +439,8 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
             auto radiationFactor = SpotCalculator::calcParameter(&SimulationParametersSpotValues::radiationFactor, data, cell->absPos);
             if (radiationFactor > 0) {
 
-                auto& pos = cell->absPos;
+                //auto& pos = cell->absPos;
+                float2 pos{250.0f, 100.0f};
                 float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
                     + float2{
                         (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,

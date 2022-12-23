@@ -48,5 +48,10 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
             continue;
         }
         cell->vel = cell->vel + calcVelocity(cell->absPos, data.cellMap);
+        //auto d2 = Math::unitVectorOfAngle(data.numberGen1.random() * 360);
+        //cell->vel = cell->vel + d2/3000;
+        //auto d = float2{200, 100} - cell->absPos;
+        //auto l = Math::length(d);
+        //cell->vel = cell->vel + d/(l*l)/1000;
     }
 }
