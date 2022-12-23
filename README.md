@@ -14,6 +14,8 @@ The development is driven by the desire to better understand the conditions for 
 An important goal is to make the simulator user-friendly through a modern user interface, visually appealing rendering and a playful approach. 
 </p>
 
+**IMPORTANT:** This branch contains the ongoing development for the next major upgrade.
+
 # Main features
 ### Physics and graphics engine
 - Particles for simulating soft body mechanics, heat dissipation, bondings, damages, phase transitions, etc.
@@ -21,14 +23,10 @@ An important goal is to make the simulator user-friendly through a modern user i
 - Simulation runs entirely on GPU via CUDA
 - Rendering and post-processing via OpenGL using CUDA-OpenGL interoperability
 
-<img src="img/physics engine.gif" width=100%>
-
 ### Artificial Life extensions
 - Dynamically programmable matter approach for simulating digital organisms and studying evolution
 - Information and energy transportation layer between connected particles
 - Spatiotemporally varying simulation parameters
-
-<img src="img/alife engine.gif" width=100%>
 
 ### Extensive editing tools
 - Built-in graph editor
@@ -114,30 +112,8 @@ A short architectural overview of the source code can be found in the [documenta
 - [vcpkg](https://vcpkg.io/en/index.html)
 
 # Screenshots
-#### Startup screen
-<h1 align="center">
-<img src="img/screenshot1.png" width=100%>
-</h1>
 
-#### Evolving self-replicating machines in action
-<h1 align="center">
-<img src="img/screenshot2.png" width=100%>
-</h1>
-
-#### Explosion inside a large grid of robots
-<h1 align="center">
-<img src="img/screenshot3.png" width=100%>
-</h1>
-
-#### Statistics tools
-<h1 align="center">
-<img src="img/screenshot4.png" width=100%>
-</h1>
-
-#### Pattern editor and programming environment
-<h1 align="center">
-<img src="img/screenshot5.png" width=100%>
-</h1>
+They will be provided here when version 4 is ready.
 
 # License
 ALIEN is licensed under the [GPLv3](LICENSE).
