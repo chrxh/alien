@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SimulationParametersSpotValues.h"
+#include "ParticleSource.h"
 
 struct SimulationParameters
 {
@@ -57,11 +58,23 @@ struct SimulationParameters
     bool particleTransformationRandomCellFunction = false;
     int particleTransformationMaxGenomeSize = 300;
 
+    //particle sources
+    int numParticleSources = 0;
+    ParticleSource particleSources[MAX_PARTICLE_SOURCES];
+
     //inherit color
     bool operator==(SimulationParameters const& other) const
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
             if (radiationAbsorptionByCellColor[i] != other.radiationAbsorptionByCellColor[i]) {
+                return false;
+            }
+        }
+        if (numParticleSources != other.numParticleSources) {
+            return false;
+        }
+        for (int i = 0; i < numParticleSources; ++i) {
+            if (particleSources[i] != other.particleSources[i]) {
                 return false;
             }
         }

@@ -278,17 +278,51 @@ cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight
 
 __global__ void cudaDrawFlowCenters(uint64_t* targetImage, float2 rectUpperLeft, int2 imageSize, float zoom)
 {
-    if (cudaFlowFieldSettings.active) {
-        for (int i = 0; i < cudaFlowFieldSettings.numCenters; ++i) {
-            auto const& radialFlowData = cudaFlowFieldSettings.centers[i];
-            int screenPosX = toInt(radialFlowData.posX * zoom) - rectUpperLeft.x * zoom;
-            int screenPosY = toInt(radialFlowData.posY * zoom) - rectUpperLeft.y * zoom;
-            auto drawX = screenPosX;
+    for (int i = 0; i < cudaFlowFieldSettings.numCenters; ++i) {
+        auto const& radialFlowData = cudaFlowFieldSettings.centers[i];
+        int screenPosX = toInt(radialFlowData.posX * zoom) - rectUpperLeft.x * zoom;
+        int screenPosY = toInt(radialFlowData.posY * zoom) - rectUpperLeft.y * zoom;
+        for (int dx = -5; dx <= 5; ++dx) {
+            auto drawX = screenPosX + dx;
             auto drawY = screenPosY;
             if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
                 int index = drawX + drawY * imageSize.x;
-                targetImage[index] = 0xffff00000000;
+                targetImage[index] = 0x01ff01ff01ff;
+            }
+        }
+        for (int dy = -5; dy <= 5; ++dy) {
+            auto drawX = screenPosX;
+            auto drawY = screenPosY + dy;
+            if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
+                int index = drawX + drawY * imageSize.x;
+                targetImage[index] = 0x01ff01ff01ff;
             }
         }
     }
 }
+
+__global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpperLeft, int2 imageSize, float zoom)
+{
+    for (int i = 0; i < cudaSimulationParameters.numParticleSources; ++i) {
+        auto const& particleSource = cudaSimulationParameters.particleSources[i];
+        int screenPosX = toInt(particleSource.posX * zoom) - rectUpperLeft.x * zoom;
+        int screenPosY = toInt(particleSource.posY * zoom) - rectUpperLeft.y * zoom;
+        for (int dx = -5; dx <= 5; ++dx) {
+            auto drawX = screenPosX + dx;
+            auto drawY = screenPosY;
+            if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
+                int index = drawX + drawY * imageSize.x;
+                targetImage[index] = 0x0000000001ff;
+            }
+        }
+        for (int dy = -5; dy <= 5; ++dy) {
+            auto drawX = screenPosX;
+            auto drawY = screenPosY + dy;
+            if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
+                int index = drawX + drawY * imageSize.x;
+                targetImage[index] = 0x0000000001ff;
+            }
+        }
+    }
+}
+

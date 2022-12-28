@@ -291,11 +291,21 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         "simulation parameters.cell.function.sensor.activity threshold",
         parserTask);
 
+    //particle sources
+    JsonParser::encodeDecode(tree, simPar.numParticleSources, defaultPar.numParticleSources, "simulation parameters.particle sources.num sources", parserTask);
+    for (int index = 0; index < simPar.numParticleSources; ++index) {
+        std::string base = "simulation parameters.particle sources." + std::to_string(index) + ".";
+        auto& source = simPar.particleSources[index];
+        auto& defaultSource = defaultPar.particleSources[index];
+        JsonParser::encodeDecode(tree, source.posX, defaultSource.posX, base + "pos.x", parserTask);
+        JsonParser::encodeDecode(tree, source.posY, defaultSource.posY, base + "pos.y", parserTask);
+    }
+
     //spots
     auto& spots = settings.simulationParametersSpots;
     auto& defaultSpots = defaultSettings.simulationParametersSpots;
     JsonParser::encodeDecode(tree, spots.numSpots, defaultSpots.numSpots, "simulation parameters.spots.num spots", parserTask);
-    for (int index = 0; index <= 1; ++index) {
+    for (int index = 0; index < settings.simulationParametersSpots.numSpots; ++index) {
         std::string base = "simulation parameters.spots." + std::to_string(index) + ".";
         auto& spot = spots.spots[index];
         auto& defaultSpot = defaultSpots.spots[index];
@@ -396,9 +406,8 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
     }
 
     //flow field settings
-    JsonParser::encodeDecode(tree, settings.flowFieldSettings.active, defaultSettings.flowFieldSettings.active, "flow field.active", parserTask);
     JsonParser::encodeDecode(tree, settings.flowFieldSettings.numCenters, defaultSettings.flowFieldSettings.numCenters, "flow field.num centers", parserTask);
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < MAX_FLOW_CENTERS; ++i) {
         std::string node = "flow field.center" + std::to_string(i) + ".";
         auto& radialData = settings.flowFieldSettings.centers[i];
         auto& defaultRadialData = defaultSettings.flowFieldSettings.centers[i];
