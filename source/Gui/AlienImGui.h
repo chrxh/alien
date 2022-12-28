@@ -185,6 +185,15 @@ public:
     static bool BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup, float focus = true);  //return toggle
     static void EndMenuButton();
     static bool ShutdownButton();
+
+    struct ColorButtonWithPickerParameters
+    {
+        MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::string, name, "");
+        MEMBER_DECLARATION(ColorButtonWithPickerParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::optional<uint32_t>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static void ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color, uint32_t& backupColor, uint32_t (&savedPalette)[32]);
     static void ColorButtonWithPicker(
         std::string const& text,
         uint32_t& color,

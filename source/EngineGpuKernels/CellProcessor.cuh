@@ -486,9 +486,11 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         auto cellMaxBindingEnergy =
             SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMaxBindingEnergy, data, cell->absPos);
 
+        bool decay = false;
         if (cell->livingState == Enums::LivingState_Dying) {
             if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb) {
                 CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
+                decay = true;
             }
         }
         if (cell->energy < cellMinEnergy) {
@@ -496,9 +498,20 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 cell->livingState = Enums::LivingState_Dying;
             } else {
                 CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
+                decay = true;
             }
         } else if (cell->energy > cellMaxBindingEnergy) {
             CellConnectionProcessor::scheduleDelConnections(data, cell);
+            decay = true;
+        }
+
+        if (decay && cell->livingState != Enums::LivingState_UnderConstruction) {
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto& connectedCell = cell->connections[i].cell;
+                if (connectedCell->livingState == Enums::LivingState_UnderConstruction) {
+                    connectedCell->livingState = Enums::LivingState_JustReady;
+                }
+            }
         }
     }
 }

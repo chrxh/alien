@@ -154,7 +154,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
 
     BaseMap map;
     map.init(worldSize);
-    auto baseColor = colorToFloat3(Const::SpaceColor);
+    auto baseColor = colorToFloat3(cudaSimulationParameters.spaceColor);
     auto spotColor1 = colorToFloat3(cudaSimulationParametersSpots.spots[0].color);
     auto spotColor2 = colorToFloat3(cudaSimulationParametersSpots.spots[1].color);
 
