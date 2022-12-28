@@ -57,6 +57,7 @@ public:
 
     virtual SimulationParameters const& getSimulationParameters() const = 0;
     virtual SimulationParameters getOriginalSimulationParameters() const = 0;
+    virtual void setOriginalSimulationParameters(SimulationParameters const& parameters) = 0;
     virtual void setSimulationParameters_async(SimulationParameters const& parameters) = 0;
 
     virtual SimulationParametersSpots getSimulationParametersSpots() const = 0;

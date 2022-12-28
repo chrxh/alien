@@ -439,12 +439,14 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
             auto radiationFactor = SpotCalculator::calcParameter(&SimulationParametersSpotValues::radiationFactor, data, cell->absPos);
             if (radiationFactor > 0) {
 
-                //auto& pos = cell->absPos;
-                float2 pos{250.0f, 100.0f};
-                float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
-                    + float2{
-                        (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
-                        (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
+                auto pos = cell->absPos;
+                if (cudaSimulationParameters.numParticleSources > 0) {
+                    auto sourceIndex = data.numberGen1.random(cudaSimulationParameters.numParticleSources - 1);
+                    pos.x = cudaSimulationParameters.particleSources[sourceIndex].posX;
+                    pos.y = cudaSimulationParameters.particleSources[sourceIndex].posY;
+                }
+                float2 particleVel = cell->vel * cudaSimulationParameters.radiationVelocityMultiplier
+                    + Math::unitVectorOfAngle(data.numberGen1.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
                 float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
                 data.cellMap.correctPosition(particlePos);
 

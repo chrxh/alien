@@ -18,6 +18,7 @@ add_library(alien_engine_interface_lib
     InspectedEntityIds.h
     MonitorData.h
     OverlayDescriptions.h
+    ParticleSource.h
     SelectionShallowData.h
     Serializer.cpp
     Serializer.h

@@ -72,6 +72,7 @@ public:
 
     SimulationParameters const& getSimulationParameters() const override;
     SimulationParameters getOriginalSimulationParameters() const override;
+    void setOriginalSimulationParameters(SimulationParameters const& parameters) override;
     void setSimulationParameters_async(SimulationParameters const& parameters) override;
 
     SimulationParametersSpots getSimulationParametersSpots() const override;

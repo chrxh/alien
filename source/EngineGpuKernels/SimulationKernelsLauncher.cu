@@ -14,7 +14,7 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
 {
     auto const gpuSettings = settings.gpuSettings;
     KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, result);
-    if (settings.flowFieldSettings.active) {
+    if (settings.flowFieldSettings.numCenters > 0) {
         KERNEL_CALL(cudaApplyFlowFieldSettings, data);
     }
 

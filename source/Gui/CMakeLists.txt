@@ -78,6 +78,8 @@ PUBLIC
     OpenPatternDialog.h
     OpenSimulationDialog.cpp
     OpenSimulationDialog.h
+    ParticleSourcesWindow.cpp
+    ParticleSourcesWindow.h
     PatternAnalysisDialog.cpp
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp

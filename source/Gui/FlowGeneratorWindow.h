@@ -13,7 +13,7 @@ public:
 private:
     void processIntern() override;
 
-    FlowCenter createFlowCenter();
+    FlowCenter createFlowCenter() const;
 
     SimulationController _simController;
 };

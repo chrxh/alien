@@ -24,9 +24,7 @@ struct FlowCenter
 
 struct FlowFieldSettings
 {
-    bool active = false;
-
-    int numCenters = 1; //only 2 centers supported
+    int numCenters = 0; //only 2 centers supported
     FlowCenter centers[2];
 
     bool operator==(FlowFieldSettings const& other) const
@@ -39,7 +37,7 @@ struct FlowFieldSettings
                 return false;
             }
         }
-        return active == other.active;
+        return true;
     }
     bool operator!=(FlowFieldSettings const& other) const { return !operator==(other); }
 };

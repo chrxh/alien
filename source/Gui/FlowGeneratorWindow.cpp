@@ -27,21 +27,11 @@ void _FlowGeneratorWindow::processIntern()
 
     auto worldSize = _simController->getWorldSize();
 
-    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name(" "), flowFieldSettings.active);
-    ImGui::SameLine();
-    
-    const char* flowTypes[] = {"Radial flow"};
-    int currentFlowTypes = 0;
-    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-    ImGui::Combo("##", &currentFlowTypes, flowTypes, IM_ARRAYSIZE(flowTypes));
-    ImGui::PopItemWidth();
-
-    ImGui::BeginDisabled(!flowFieldSettings.active);
     if (ImGui::BeginTabBar(
             "##Flow",
             ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
-        if (flowFieldSettings.numCenters < 2) {
+        if (flowFieldSettings.numCenters < MAX_FLOW_CENTERS) {
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
                 auto index = flowFieldSettings.numCenters;
                 flowFieldSettings.centers[index] = createFlowCenter();
@@ -56,10 +46,12 @@ void _FlowGeneratorWindow::processIntern()
             FlowCenter& origFlowCenter = origFlowFieldSettings.centers[tab];
             bool open = true;
             char name[18] = {};
-            bool* openPtr = flowFieldSettings.numCenters == 1 ? nullptr : &open;
+            bool* openPtr = &open;
             snprintf(name, IM_ARRAYSIZE(name), "Center %01d", tab + 1);
             if (ImGui::BeginTabItem(name, openPtr, ImGuiTabItemFlags_None)) {
 
+                int dummy = 0;
+                AlienImGui::Combo(AlienImGui::ComboParameters().name("Type").values({"Radial flow"}).textWidth(MaxContentTextWidth), dummy);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Position X")
@@ -123,14 +115,12 @@ void _FlowGeneratorWindow::processIntern()
 
         ImGui::EndTabBar();
     }
-    ImGui::EndDisabled();
-
     if (flowFieldSettings != lastFlowFieldSettings) {
         _simController->setFlowFieldSettings_async(flowFieldSettings);
     }
 }
 
-FlowCenter _FlowGeneratorWindow::createFlowCenter()
+FlowCenter _FlowGeneratorWindow::createFlowCenter() const
 {
     FlowCenter result;
     auto worldSize = _simController->getWorldSize();
@@ -138,6 +128,5 @@ FlowCenter _FlowGeneratorWindow::createFlowCenter()
     result.posY = toFloat(worldSize.y / 2);
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
     result.radius = maxRadius / 3;
-
     return result;
 }
