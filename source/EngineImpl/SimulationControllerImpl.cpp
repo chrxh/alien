@@ -243,27 +243,6 @@ void _SimulationControllerImpl::setGpuSettings_async(GpuSettings const& gpuSetti
     _worker.setGpuSettings_async(gpuSettings);
 }
 
-FlowFieldSettings _SimulationControllerImpl::getFlowFieldSettings() const
-{
-    return _settings.flowFieldSettings;
-}
-
-FlowFieldSettings _SimulationControllerImpl::getOriginalFlowFieldSettings() const
-{
-    return _origSettings.flowFieldSettings;
-}
-
-void _SimulationControllerImpl::setOriginalFlowFieldCenter(FlowCenter const& value, int index)
-{
-    _origSettings.flowFieldSettings.centers[index] = value;
-}
-
-void _SimulationControllerImpl::setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings)
-{
-    _settings.flowFieldSettings = flowFieldSettings;
-    _worker.setFlowFieldSettings_async(flowFieldSettings);
-}
-
 void _SimulationControllerImpl::applyForce_async(
     RealVector2D const& start,
     RealVector2D const& end,

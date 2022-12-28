@@ -278,8 +278,8 @@ cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight
 
 __global__ void cudaDrawFlowCenters(uint64_t* targetImage, float2 rectUpperLeft, int2 imageSize, float zoom)
 {
-    for (int i = 0; i < cudaFlowFieldSettings.numCenters; ++i) {
-        auto const& radialFlowData = cudaFlowFieldSettings.centers[i];
+    for (int i = 0; i < cudaSimulationParameters.numFlowCenters; ++i) {
+        auto const& radialFlowData = cudaSimulationParameters.flowCenters[i];
         int screenPosX = toInt(radialFlowData.posX * zoom) - rectUpperLeft.x * zoom;
         int screenPosY = toInt(radialFlowData.posY * zoom) - rectUpperLeft.y * zoom;
         for (int dx = -5; dx <= 5; ++dx) {

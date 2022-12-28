@@ -363,12 +363,6 @@ void EngineWorker::setGpuSettings_async(GpuSettings const& gpuSettings)
     _updateGpuSettingsJob = gpuSettings;
 }
 
-void EngineWorker::setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings)
-{
-    std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
-    _flowFieldSettings = flowFieldSettings;
-}
-
 void EngineWorker::applyForce_async(
     RealVector2D const& start,
     RealVector2D const& end,
@@ -553,10 +547,6 @@ void EngineWorker::processJobs()
     if (_updateGpuSettingsJob) {
         _cudaSimulation->setGpuConstants(*_updateGpuSettingsJob);
         _updateGpuSettingsJob = std::nullopt;
-    }
-    if (_flowFieldSettings) {
-        _cudaSimulation->setFlowFieldSettings(*_flowFieldSettings);
-        _flowFieldSettings = std::nullopt;
     }
     if (!_applyForceJobs.empty()) {
         for (auto const& applyForceJob : _applyForceJobs) {

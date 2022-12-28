@@ -1,6 +1,6 @@
 ﻿#include "FlowFieldKernels.cuh"
 
-#include "EngineInterface/FlowFieldSettings.h"
+#include "EngineInterface/SimulationParameters.h"
 
 #include "ConstantMemory.cuh"
 
@@ -9,8 +9,8 @@ namespace
     __device__ float getHeight(float2 const& pos, BaseMap const& mapInfo)
     {
         float result = 0;
-        for (int i = 0; i < cudaFlowFieldSettings.numCenters; ++i) {
-            auto& radialFlow = cudaFlowFieldSettings.centers[i];
+        for (int i = 0; i < cudaSimulationParameters.numFlowCenters; ++i) {
+            auto& radialFlow = cudaSimulationParameters.flowCenters[i];
             auto dist = mapInfo.getDistance(pos, float2{radialFlow.posX, radialFlow.posY});
             if (dist > radialFlow.radius) {
                 dist = radialFlow.radius;

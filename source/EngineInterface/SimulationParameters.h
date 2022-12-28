@@ -2,6 +2,7 @@
 
 #include "SimulationParametersSpotValues.h"
 #include "ParticleSource.h"
+#include "FlowCenter.h"
 
 struct SimulationParameters
 {
@@ -62,6 +63,10 @@ struct SimulationParameters
     int numParticleSources = 0;
     ParticleSource particleSources[MAX_PARTICLE_SOURCES];
 
+    //flow centers
+    int numFlowCenters = 0;
+    FlowCenter flowCenters[MAX_FLOW_CENTERS];
+
     //inherit color
     bool operator==(SimulationParameters const& other) const
     {
@@ -78,6 +83,15 @@ struct SimulationParameters
                 return false;
             }
         }
+        if (numFlowCenters != other.numFlowCenters) {
+            return false;
+        }
+        for (int i = 0; i < 2; ++i) {
+            if (flowCenters[i] != other.flowCenters[i]) {
+                return false;
+            }
+        }
+
         return spotValues == other.spotValues && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity
             && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
             && cellMaxCollisionDistance == other.cellMaxCollisionDistance && cellMaxForceDecayProb == other.cellMaxForceDecayProb
