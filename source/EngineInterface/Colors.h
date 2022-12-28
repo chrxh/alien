@@ -24,6 +24,5 @@ namespace Const
     uint32_t const CellFunctionInfoColor = 0x404090;
     uint32_t const BranchNumberInfoColor = 0x000000;
 
-    uint32_t const SpaceColor = 0x1b0000;
     uint32_t const NothingnessColor = 0x000000;
 }

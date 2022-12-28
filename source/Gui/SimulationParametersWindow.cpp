@@ -170,6 +170,17 @@ void _SimulationParametersWindow::processBase(
     SimulationParameters const& origSimParameters)
 {
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+
+        /**
+         * Colors
+         */
+        AlienImGui::Group("Color");
+        AlienImGui::ColorButtonWithPicker(
+            AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(MaxContentTextWidth).defaultValue(origSimParameters.spaceColor),
+            simParameters.spaceColor,
+            _backupColor,
+            _savedPalette);
+
         /**
          * Numerics
          */
@@ -694,20 +705,13 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
         /**
          * Location and metadata
          */
-        AlienImGui::Group("Location and metadata");
+        AlienImGui::Group("Location and color");
 
-        auto& color = spot.color;
         AlienImGui::ColorButtonWithPicker(
-            "##",
-            color,
+            AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(MaxContentTextWidth).defaultValue(origSpot.color),
+            spot.color,
             _backupColor,
-            _savedPalette,
-            RealVector2D(
-                ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().scaleContent(MaxContentTextWidth),
-                0));
-
-        ImGui::SameLine();
-        ImGui::Text("Background color");
+            _savedPalette);
 
         int shape = static_cast<int>(spot.shape);
         AlienImGui::Combo(

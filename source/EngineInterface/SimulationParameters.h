@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include "SimulationParametersSpotValues.h"
 #include "ParticleSource.h"
 #include "FlowCenter.h"
@@ -7,6 +9,8 @@
 struct SimulationParameters
 {
     SimulationParametersSpotValues spotValues;
+
+    uint32_t spaceColor = 0x1b0000;
 
     float timestepSize = 1.0f;
     float innerFriction = 0.3f;
@@ -92,15 +96,14 @@ struct SimulationParameters
             }
         }
 
-        return spotValues == other.spotValues && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity
-            && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
+        return spaceColor == other.spaceColor && spotValues == other.spotValues && timestepSize == other.timestepSize
+            && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
             && cellMaxCollisionDistance == other.cellMaxCollisionDistance && cellMaxForceDecayProb == other.cellMaxForceDecayProb
             && cellMaxBonds == other.cellMaxBonds && cellMaxExecutionOrderNumbers == other.cellMaxExecutionOrderNumbers
-            && cellFunctionAttackerStrength == other.cellFunctionAttackerStrength
-            && cellFunctionSensorRange == other.cellFunctionSensorRange && radiationProb == other.radiationProb
-            && radiationVelocityMultiplier == other.radiationVelocityMultiplier && radiationVelocityPerturbation == other.radiationVelocityPerturbation
-            && cellRepulsionStrength == other.cellRepulsionStrength && cellNormalEnergy == other.cellNormalEnergy
-            && cellFunctionAttackerColorInhomogeneityFactor == other.cellFunctionAttackerColorInhomogeneityFactor
+            && cellFunctionAttackerStrength == other.cellFunctionAttackerStrength && cellFunctionSensorRange == other.cellFunctionSensorRange
+            && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
+            && radiationVelocityPerturbation == other.radiationVelocityPerturbation && cellRepulsionStrength == other.cellRepulsionStrength
+            && cellNormalEnergy == other.cellNormalEnergy && cellFunctionAttackerColorInhomogeneityFactor == other.cellFunctionAttackerColorInhomogeneityFactor
             && cellFunctionAttackerRadius == other.cellFunctionAttackerRadius
             && cellFunctionAttackerEnergyDistributionRadius == other.cellFunctionAttackerEnergyDistributionRadius
             && cellFunctionAttackerEnergyDistributionValue == cellFunctionAttackerEnergyDistributionValue
