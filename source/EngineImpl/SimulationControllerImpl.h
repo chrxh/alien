@@ -84,11 +84,6 @@ public:
     GpuSettings getOriginalGpuSettings() const override;
     void setGpuSettings_async(GpuSettings const& gpuSettings) override;
 
-    FlowFieldSettings getFlowFieldSettings() const override;
-    FlowFieldSettings getOriginalFlowFieldSettings() const override;
-    void setOriginalFlowFieldCenter(FlowCenter const& value, int index) override;
-    void setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings) override;
-
     void
     applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) override;
 

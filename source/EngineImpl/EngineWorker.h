@@ -17,7 +17,6 @@
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/MonitorData.h"
 #include "EngineInterface/OverlayDescriptions.h"
-#include "EngineInterface/FlowFieldSettings.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
@@ -82,7 +81,6 @@ public:
     void setSimulationParameters_async(SimulationParameters const& parameters);
     void setSimulationParametersSpots_async(SimulationParametersSpots const& spots);
     void setGpuSettings_async(GpuSettings const& gpuSettings);
-    void setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings);
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
 
@@ -131,7 +129,6 @@ private:
     std::optional<SimulationParameters> _updateSimulationParametersJob;
     std::optional<SimulationParametersSpots> _updateSimulationParametersSpotsJob;
     std::optional<GpuSettings> _updateGpuSettingsJob;
-    std::optional<FlowFieldSettings> _flowFieldSettings;
     std::optional<GLuint> _imageResourceToRegister;
 
     struct ApplyForceJob

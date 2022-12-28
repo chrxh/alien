@@ -86,9 +86,6 @@ void _NewSimulationDialog::onNewSimulation()
     if (_adoptSimulationParameters) {
         settings.simulationParameters = _simController->getSimulationParameters();
     }
-    settings.flowFieldSettings.centers[0].posX = toFloat(_width) / 2;
-    settings.flowFieldSettings.centers[0].posY = toFloat(_height) / 2;
-
     _simController->newSimulation(0, settings);
     _viewport->setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     _viewport->setZoomFactor(4.0f);

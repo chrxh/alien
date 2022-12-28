@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/FlowFieldSettings.h"
+#include "EngineInterface/FlowCenter.h"
 #include "Definitions.h"
 #include "AlienWindow.h"
 

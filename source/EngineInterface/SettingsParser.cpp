@@ -208,8 +208,8 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         defaultPar.spotValues.cellFunctionAttackerGeometryDeviationExponent,
         "simulation parameters.cell.function.attacker.geometry deviation exponent",
         parserTask);
-    for (int i = 0; i < 7; ++i) {
-        for (int j = 0; j < 7; ++j) {
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        for (int j = 0; j < MAX_COLORS; ++j) {
             JsonParser::encodeDecode(
                 tree,
                 simPar.spotValues.cellFunctionAttackerFoodChainColorMatrix[i][j],
@@ -406,11 +406,12 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
     }
 
     //flow field settings
-    JsonParser::encodeDecode(tree, settings.flowFieldSettings.numCenters, defaultSettings.flowFieldSettings.numCenters, "flow field.num centers", parserTask);
+    JsonParser::encodeDecode(
+        tree, settings.simulationParameters.numFlowCenters, defaultSettings.simulationParameters.numFlowCenters, "simulation parameters.flow fields.num centers", parserTask);
     for (int i = 0; i < MAX_FLOW_CENTERS; ++i) {
-        std::string node = "flow field.center" + std::to_string(i) + ".";
-        auto& radialData = settings.flowFieldSettings.centers[i];
-        auto& defaultRadialData = defaultSettings.flowFieldSettings.centers[i];
+        std::string node = "simulation parameters.flow fields." + std::to_string(i) + ".";
+        auto& radialData = settings.simulationParameters.flowCenters[i];
+        auto& defaultRadialData = defaultSettings.simulationParameters.flowCenters[i];
         JsonParser::encodeDecode(tree, radialData.posX, defaultRadialData.posX, node + "pos.x", parserTask);
         JsonParser::encodeDecode(tree, radialData.posY, defaultRadialData.posY, node + "pos.y", parserTask);
         JsonParser::encodeDecode(tree, radialData.radius, defaultRadialData.radius, node + "radius", parserTask);

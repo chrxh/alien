@@ -69,11 +69,6 @@ public:
     virtual GpuSettings getOriginalGpuSettings() const = 0;
     virtual void setGpuSettings_async(GpuSettings const& gpuSettings) = 0;
 
-    virtual FlowFieldSettings getFlowFieldSettings() const = 0;
-    virtual FlowFieldSettings getOriginalFlowFieldSettings() const = 0;
-    virtual void setOriginalFlowFieldCenter(FlowCenter const& value, int index) = 0;
-    virtual void setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings) = 0;
-
     virtual void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) = 0;
 
     virtual void switchSelection(RealVector2D const& pos, float radius) = 0;
