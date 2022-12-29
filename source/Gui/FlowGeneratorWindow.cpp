@@ -31,6 +31,7 @@ void _FlowGeneratorWindow::processIntern()
             "##Flow",
             ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
+        //add flow
         if (parameters.numFlowCenters < MAX_FLOW_CENTERS) {
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
                 auto index = parameters.numFlowCenters;
@@ -107,6 +108,8 @@ void _FlowGeneratorWindow::processIntern()
                     currentOrientation == 0 ? Orientation::Clockwise : Orientation::CounterClockwise;
                 ImGui::EndTabItem();
             }
+
+            //delete flow
             if (!open) {
                 for (int i = tab; i < parameters.numFlowCenters - 1; ++i) {
                     parameters.flowCenters[i] = parameters.flowCenters[i + 1];

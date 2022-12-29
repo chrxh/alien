@@ -28,7 +28,7 @@ add_library(alien_engine_interface_lib
     ShallowUpdateSelectionData.h
     SimulationController.h
     SimulationParameters.h
-    SimulationParametersSpots.h
+    SimulationParametersSpot.h
     SimulationParametersSpotValues.h
     SpaceCalculator.cpp
     SpaceCalculator.h

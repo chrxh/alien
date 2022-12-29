@@ -154,9 +154,9 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
 
     BaseMap map;
     map.init(worldSize);
-    auto baseColor = colorToFloat3(cudaSimulationParameters.spaceColor);
-    auto spotColor1 = colorToFloat3(cudaSimulationParametersSpots.spots[0].color);
-    auto spotColor2 = colorToFloat3(cudaSimulationParametersSpots.spots[1].color);
+    auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
+    auto spotColor1 = colorToFloat3(cudaSimulationParameters.spots[0].color);
+    auto spotColor2 = colorToFloat3(cudaSimulationParameters.spots[1].color);
 
     auto const block = calcPartition(imageSize.x * imageSize.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = block.startIndex; index <= block.endIndex; ++index) {

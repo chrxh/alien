@@ -13,8 +13,8 @@ public:
     {
         SimulationParameters result;
         result.innerFriction = 0;
-        result.spotValues.friction = 0;
-        result.spotValues.radiationFactor = 0;
+        result.baseValues.friction = 0;
+        result.baseValues.radiationFactor = 0;
         return result;
     }
 

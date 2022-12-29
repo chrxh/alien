@@ -5,12 +5,13 @@
 #include "SimulationParametersSpotValues.h"
 #include "ParticleSource.h"
 #include "FlowCenter.h"
+#include "SimulationParametersSpot.h"
 
 struct SimulationParameters
 {
-    SimulationParametersSpotValues spotValues;
+    SimulationParametersSpotValues baseValues;
 
-    uint32_t spaceColor = 0x1b0000;
+    uint32_t backgroundColor = 0x1b0000;
 
     float timestepSize = 1.0f;
     float innerFriction = 0.3f;
@@ -71,6 +72,10 @@ struct SimulationParameters
     int numFlowCenters = 0;
     FlowCenter flowCenters[MAX_FLOW_CENTERS];
 
+    //spots
+    int numSpots = 0;
+    SimulationParametersSpot spots[MAX_SPOTS];
+
     //inherit color
     bool operator==(SimulationParameters const& other) const
     {
@@ -95,8 +100,16 @@ struct SimulationParameters
                 return false;
             }
         }
+        if (numSpots != other.numSpots) {
+            return false;
+        }
+        for (int i = 0; i < 2; ++i) {
+            if (spots[i] != other.spots[i]) {
+                return false;
+            }
+        }
 
-        return spaceColor == other.spaceColor && spotValues == other.spotValues && timestepSize == other.timestepSize
+        return backgroundColor == other.backgroundColor && baseValues == other.baseValues && timestepSize == other.timestepSize
             && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
             && cellMaxCollisionDistance == other.cellMaxCollisionDistance && cellMaxForceDecayProb == other.cellMaxForceDecayProb
             && cellMaxBonds == other.cellMaxBonds && cellMaxExecutionOrderNumbers == other.cellMaxExecutionOrderNumbers

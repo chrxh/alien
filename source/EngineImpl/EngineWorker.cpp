@@ -351,12 +351,6 @@ void EngineWorker::setSimulationParameters_async(SimulationParameters const& par
     _updateSimulationParametersJob = parameters;
 }
 
-void EngineWorker::setSimulationParametersSpots_async(SimulationParametersSpots const& spots)
-{
-    std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
-    _updateSimulationParametersSpotsJob = spots;
-}
-
 void EngineWorker::setGpuSettings_async(GpuSettings const& gpuSettings)
 {
     std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
@@ -539,10 +533,6 @@ void EngineWorker::processJobs()
     if (_updateSimulationParametersJob) {
         _cudaSimulation->setSimulationParameters(*_updateSimulationParametersJob);
         _updateSimulationParametersJob = std::nullopt;
-    }
-    if (_updateSimulationParametersSpotsJob) {
-        _cudaSimulation->setSimulationParametersSpots(*_updateSimulationParametersSpotsJob);
-        _updateSimulationParametersSpotsJob = std::nullopt;
     }
     if (_updateGpuSettingsJob) {
         _cudaSimulation->setGpuConstants(*_updateGpuSettingsJob);

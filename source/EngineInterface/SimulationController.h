@@ -60,11 +60,6 @@ public:
     virtual void setOriginalSimulationParameters(SimulationParameters const& parameters) = 0;
     virtual void setSimulationParameters_async(SimulationParameters const& parameters) = 0;
 
-    virtual SimulationParametersSpots getSimulationParametersSpots() const = 0;
-    virtual SimulationParametersSpots getOriginalSimulationParametersSpots() const = 0;
-    virtual void setOriginalSimulationParametersSpot(SimulationParametersSpot const& value, int index) = 0;
-    virtual void setSimulationParametersSpots_async(SimulationParametersSpots const& value) = 0;
-
     virtual GpuSettings getGpuSettings() const = 0;
     virtual GpuSettings getOriginalGpuSettings() const = 0;
     virtual void setGpuSettings_async(GpuSettings const& gpuSettings) = 0;

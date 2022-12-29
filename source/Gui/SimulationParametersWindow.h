@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/SimulationParametersSpots.h"
+#include "EngineInterface/SimulationParametersSpot.h"
 #include "Definitions.h"
 #include "AlienWindow.h"
 
