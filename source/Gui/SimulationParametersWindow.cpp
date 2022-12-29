@@ -703,9 +703,9 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
         auto worldSize = _simController->getWorldSize();
 
         /**
-         * Location and metadata
+         * Color and location
          */
-        AlienImGui::Group("Location and color");
+        AlienImGui::Group("Color and location");
 
         AlienImGui::ColorButtonWithPicker(
             AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(MaxContentTextWidth).defaultValue(origSpot.color),

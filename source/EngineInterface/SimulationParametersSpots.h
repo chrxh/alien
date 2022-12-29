@@ -30,7 +30,7 @@ struct SimulationParametersSpot{
     bool operator==(SimulationParametersSpot const& other) const
     {
         return color == other.color && posX == other.posX && posY == other.posY && fadeoutRadius == other.fadeoutRadius && coreRadius == other.coreRadius
-            && width == other.width && height == other.height && values == other.values;
+            && width == other.width && height == other.height && values == other.values && shape == other.shape;
     }
     bool operator!=(SimulationParametersSpot const& other) const { return !operator==(other); }
 };

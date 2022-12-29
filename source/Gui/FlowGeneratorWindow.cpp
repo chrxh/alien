@@ -35,6 +35,7 @@ void _FlowGeneratorWindow::processIntern()
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
                 auto index = parameters.numFlowCenters;
                 parameters.flowCenters[index] = createFlowCenter();
+                origParameters.flowCenters[index] = createFlowCenter();
                 ++parameters.numFlowCenters;
                 ++origParameters.numFlowCenters;
                 _simController->setSimulationParameters_async(parameters);
@@ -45,7 +46,7 @@ void _FlowGeneratorWindow::processIntern()
 
         for (int tab = 0; tab < parameters.numFlowCenters; ++tab) {
             FlowCenter& flowCenter = parameters.flowCenters[tab];
-            FlowCenter& origFlowCenter = parameters.flowCenters[tab];
+            FlowCenter& origFlowCenter = origParameters.flowCenters[tab];
             bool open = true;
             char name[18] = {};
             bool* openPtr = &open;
