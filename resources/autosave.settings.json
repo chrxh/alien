@@ -1,12 +1,13 @@
 {
     "general": {
-        "time step": "0",
+        "time step": "4058599",
         "world size": {
-            "x": "500",
-            "y": "250"
+            "x": "1000",
+            "y": "500"
         }
     },
     "simulation parameters": {
+        "background color": "1769472",
         "time step size": "1.00000000",
         "friction": "0.00100000",
         "rigidity": "0.00000000",
@@ -122,7 +123,7 @@
                 },
                 "muscle": {
                     "contraction expansion delta": "0.05000000",
-                    "movement acceleration": "0.01900000",
+                    "movement acceleration": "0.01300000",
                     "bending angle": "5.00000000"
                 },
                 "sensor": {
@@ -132,7 +133,7 @@
             }
         },
         "radiation": {
-            "factor": "0.00001000",
+            "factor": "0.00001500",
             "probability": "0.03000000",
             "velocity multiplier": "1.00000000",
             "velocity perturbation": "0.50000000",
@@ -161,8 +162,8 @@
             "num sources": "1",
             "0": {
                 "pos": {
-                    "x": "102.00000000",
-                    "y": "56.00000000"
+                    "x": "257.00000000",
+                    "y": "102.00000000"
                 }
             }
         },
@@ -173,11 +174,11 @@
             "num centers": "1",
             "0": {
                 "pos": {
-                    "x": "247.00000000",
+                    "x": "0.00000000",
                     "y": "125.00000000"
                 },
-                "radius": "188.00000000",
-                "strength": "0.00018000"
+                "radius": "500.00000000",
+                "strength": "0.00030000"
             },
             "1": {
                 "pos": {

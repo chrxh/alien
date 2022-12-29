@@ -15,7 +15,7 @@ IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParam
     if (parameters) {
         settings.simulationParameters = *parameters;
     } else {
-        settings.simulationParameters.spotValues.radiationFactor = 0;
+        settings.simulationParameters.baseValues.radiationFactor = 0;
     }
     _simController->newSimulation(0, settings);
     _parameters = _simController->getSimulationParameters();

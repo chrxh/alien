@@ -79,7 +79,6 @@ public:
     void setCurrentTimestep(uint64_t value);
 
     void setSimulationParameters_async(SimulationParameters const& parameters);
-    void setSimulationParametersSpots_async(SimulationParametersSpots const& spots);
     void setGpuSettings_async(GpuSettings const& gpuSettings);
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
@@ -127,7 +126,6 @@ private:
     //async jobs
     mutable std::mutex _mutexForAsyncJobs;
     std::optional<SimulationParameters> _updateSimulationParametersJob;
-    std::optional<SimulationParametersSpots> _updateSimulationParametersSpotsJob;
     std::optional<GpuSettings> _updateGpuSettingsJob;
     std::optional<GLuint> _imageResourceToRegister;
 

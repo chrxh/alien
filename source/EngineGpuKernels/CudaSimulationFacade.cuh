@@ -58,7 +58,6 @@ public:
 
     void setGpuConstants(GpuSettings const& cudaConstants);
     void setSimulationParameters(SimulationParameters const& parameters);
-    void setSimulationParametersSpots(SimulationParametersSpots const& spots);
 
     ArraySizes getArraySizes() const;
 

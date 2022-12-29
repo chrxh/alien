@@ -118,7 +118,6 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
     setSimulationParameters(settings.simulationParameters);
-    setSimulationParametersSpots(settings.simulationParametersSpots);
     setGpuConstants(settings.gpuSettings);
 
     log(Priority::Important, "initialize simulation");
@@ -463,13 +462,6 @@ void _CudaSimulationFacade::setSimulationParameters(SimulationParameters const& 
 {
     _settings.simulationParameters = parameters;
     CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
-}
-
-void _CudaSimulationFacade::setSimulationParametersSpots(SimulationParametersSpots const& spots)
-{
-    _settings.simulationParametersSpots = spots;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(
-        cudaSimulationParametersSpots, &spots, sizeof(SimulationParametersSpots), 0, cudaMemcpyHostToDevice));
 }
 
 void _CudaSimulationFacade::clear()

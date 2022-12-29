@@ -67,10 +67,10 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
 
 bool _SimulationKernelsLauncher::isRigidityUpdateEnabled(Settings const& settings) const
 {
-    for(int i = 0; i < settings.simulationParametersSpots.numSpots; ++i) {
-        if (settings.simulationParametersSpots.spots[i].values.rigidity != 0) {
+    for (int i = 0; i < settings.simulationParameters.numSpots; ++i) {
+        if (settings.simulationParameters.spots[i].values.rigidity != 0) {
             return true;
         }
     }
-    return settings.simulationParameters.spotValues.rigidity != 0;
+    return settings.simulationParameters.baseValues.rigidity != 0;
 }

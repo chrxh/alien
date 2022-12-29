@@ -61,36 +61,36 @@ _SimulationParametersWindow::~_SimulationParametersWindow()
 
 void _SimulationParametersWindow::processIntern()
 {
-    auto simParameters = _simController->getSimulationParameters();
-    auto origSimParameters = _simController->getOriginalSimulationParameters();
-    auto lastSimParameters = simParameters;
-
-    auto simParametersSpots = _simController->getSimulationParametersSpots();
-    auto origSimParametersSpots = _simController->getOriginalSimulationParametersSpots();
-    auto lastSimParametersSpots = simParametersSpots;
+    auto parameters = _simController->getSimulationParameters();
+    auto origParameters = _simController->getOriginalSimulationParameters();
+    auto lastParameters = parameters;
 
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(78)), false)) {
 
         if (ImGui::BeginTabBar("##Flow", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
-            if (simParametersSpots.numSpots < 2) {
+            //add spot
+            if (parameters.numSpots < 2) {
                 if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-                    int index = simParametersSpots.numSpots;
-                    simParametersSpots.spots[index] = createSpot(simParameters, index);
-                    _simController->setOriginalSimulationParametersSpot(simParametersSpots.spots[index], index);
-                    ++simParametersSpots.numSpots;
+                    int index = parameters.numSpots;
+                    parameters.spots[index] = createSpot(parameters, index);
+                    origParameters.spots[index] = createSpot(parameters, index);
+                    ++parameters.numSpots;
+                    ++origParameters.numSpots;
+                    _simController->setSimulationParameters_async(parameters);
+                    _simController->setOriginalSimulationParameters(origParameters);
                 }
                 AlienImGui::Tooltip("Add spot");
             }
 
             if (ImGui::BeginTabItem("Base", nullptr, ImGuiTabItemFlags_None)) {
-                processBase(simParameters, origSimParameters);
+                processBase(parameters, origParameters);
                 ImGui::EndTabItem();
             }
 
-            for (int tab = 0; tab < simParametersSpots.numSpots; ++tab) {
-                SimulationParametersSpot& spot = simParametersSpots.spots[tab];
-                SimulationParametersSpot const& origSpot = origSimParametersSpots.spots[tab];
+            for (int tab = 0; tab < parameters.numSpots; ++tab) {
+                SimulationParametersSpot& spot = parameters.spots[tab];
+                SimulationParametersSpot const& origSpot = origParameters.spots[tab];
                 bool open = true;
                 std::string name = "Spot " + std::to_string(tab+1);
                 if (ImGui::BeginTabItem(name.c_str(), &open, ImGuiTabItemFlags_None)) {
@@ -98,12 +98,16 @@ void _SimulationParametersWindow::processIntern()
                     ImGui::EndTabItem();
                 }
 
+                //delete spot
                 if (!open) {
-                    for (int i = tab; i < simParametersSpots.numSpots - 1; ++i) {
-                        simParametersSpots.spots[i] = simParametersSpots.spots[i + 1];
-                        _simController->setOriginalSimulationParametersSpot(simParametersSpots.spots[i], i);
+                    for (int i = tab; i < parameters.numSpots - 1; ++i) {
+                        parameters.spots[i] = parameters.spots[i + 1];
+                        origParameters.spots[i] = origParameters.spots[i + 1];
                     }
-                    --simParametersSpots.numSpots;
+                    --parameters.numSpots;
+                    --origParameters.numSpots;
+                    _simController->setSimulationParameters_async(parameters);
+                    _simController->setOriginalSimulationParameters(origParameters);
                 }
             }
 
@@ -124,23 +128,19 @@ void _SimulationParametersWindow::processIntern()
     ImGui::Spacing();
     ImGui::BeginDisabled(!_changeAutomatically);
     auto timestepsPerEpoch = _simulationParametersChanger->getTimestepsPerEpoch();
-    if(AlienImGui::InputInt(
+    if (AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
                 .name("Epoch time steps")
                 .defaultValue(_simulationParametersChanger->getOriginalTimestepsPerEpoch())
                 .textWidth(MaxContentTextWidth)
                 .tooltip("Duration in time steps after which a change is applied."),
-        timestepsPerEpoch)) {
+            timestepsPerEpoch)) {
         _simulationParametersChanger->setTimestepsPerEpoch(timestepsPerEpoch);
     }
     ImGui::EndDisabled();
 
-    if (simParameters != lastSimParameters) {
-        _simController->setSimulationParameters_async(simParameters);
-    }
-
-    if (simParametersSpots != lastSimParametersSpots) {
-        _simController->setSimulationParametersSpots_async(simParametersSpots);
+    if (parameters != lastParameters) {
+        _simController->setSimulationParameters_async(parameters);
     }
 }
 
@@ -161,7 +161,7 @@ SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParam
     spot.fadeoutRadius = maxRadius / 3;
     spot.color = _savedPalette[(2 + index) * 8];
 
-    spot.values = simParameters.spotValues;
+    spot.values = simParameters.baseValues;
     return spot;
 }
 
@@ -177,8 +177,8 @@ void _SimulationParametersWindow::processBase(
          */
         if (ImGui::TreeNodeEx("Colors", flags)) {
             AlienImGui::ColorButtonWithPicker(
-                AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(MaxContentTextWidth).defaultValue(origSimParameters.spaceColor),
-                simParameters.spaceColor,
+                AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(MaxContentTextWidth).defaultValue(origSimParameters.backgroundColor),
+                simParameters.backgroundColor,
                 _backupColor,
                 _savedPalette);
             ImGui::TreePop();
@@ -213,9 +213,9 @@ void _SimulationParametersWindow::processBase(
                     .max(1.0f)
                     .logarithmic(true)
                     .format("%.4f")
-                    .defaultValue(origSimParameters.spotValues.friction)
+                    .defaultValue(origSimParameters.baseValues.friction)
                     .tooltip(std::string("Specifies how much the movements are slowed down per time step.")),
-                simParameters.spotValues.friction);
+                simParameters.baseValues.friction);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Rigidity")
@@ -223,9 +223,9 @@ void _SimulationParametersWindow::processBase(
                     .min(0)
                     .max(1.0f)
                     .format("%.2f")
-                    .defaultValue(origSimParameters.spotValues.rigidity)
+                    .defaultValue(origSimParameters.baseValues.rigidity)
                     .tooltip(std::string("Controls the rigidity of connected cells.\nA higher value will cause connected cells to move more uniformly.")),
-                simParameters.spotValues.rigidity);
+                simParameters.baseValues.rigidity);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum velocity")
@@ -241,9 +241,9 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(MaxContentTextWidth)
                     .min(0)
                     .max(3.0f)
-                    .defaultValue(origSimParameters.spotValues.cellMaxForce)
+                    .defaultValue(origSimParameters.baseValues.cellMaxForce)
                     .tooltip(std::string("Maximum force that can be applied to a cell without causing it to disintegrate.")),
-                simParameters.spotValues.cellMaxForce);
+                simParameters.baseValues.cellMaxForce);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum distance")
@@ -268,9 +268,9 @@ void _SimulationParametersWindow::processBase(
                     .max(0.01f)
                     .logarithmic(true)
                     .format("%.6f")
-                    .defaultValue(origSimParameters.spotValues.radiationFactor)
+                    .defaultValue(origSimParameters.baseValues.radiationFactor)
                     .tooltip(std::string("Indicates how energetic the emitted particles of cells are.")),
-                simParameters.spotValues.radiationFactor);
+                simParameters.baseValues.radiationFactor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum energy")
@@ -309,9 +309,9 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(MaxContentTextWidth)
                     .min(10.0f)
                     .max(200.0f)
-                    .defaultValue(origSimParameters.spotValues.cellMinEnergy)
+                    .defaultValue(origSimParameters.baseValues.cellMinEnergy)
                     .tooltip(std::string("Minimum energy a cell needs to exist.")),
-                simParameters.spotValues.cellMinEnergy);
+                simParameters.baseValues.cellMinEnergy);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Normal energy")
@@ -372,9 +372,9 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(MaxContentTextWidth)
                     .min(0)
                     .max(1.0f)
-                    .defaultValue(origSimParameters.spotValues.cellFusionVelocity)
+                    .defaultValue(origSimParameters.baseValues.cellFusionVelocity)
                     .tooltip(std::string("Minimum velocity of two colliding cells so that a connection can be established.")),
-                simParameters.spotValues.cellFusionVelocity);
+                simParameters.baseValues.cellFusionVelocity);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Binding maximum energy")
@@ -383,11 +383,11 @@ void _SimulationParametersWindow::processBase(
                     .max(1000000.0f)
                     .logarithmic(true)
                     .format("%.0f")
-                    .defaultValue(origSimParameters.spotValues.cellMaxBindingEnergy)
+                    .defaultValue(origSimParameters.baseValues.cellMaxBindingEnergy)
                     .tooltip(std::string("Maximum energy of a cell at which they can maintain a connection.")),
-                simParameters.spotValues.cellMaxBindingEnergy);
-            if (simParameters.spotValues.cellMaxBindingEnergy < simParameters.spotValues.cellMinEnergy + 10.0f) {
-                simParameters.spotValues.cellMaxBindingEnergy = simParameters.spotValues.cellMinEnergy + 10.0f;
+                simParameters.baseValues.cellMaxBindingEnergy);
+            if (simParameters.baseValues.cellMaxBindingEnergy < simParameters.baseValues.cellMinEnergy + 10.0f) {
+                simParameters.baseValues.cellMaxBindingEnergy = simParameters.baseValues.cellMinEnergy + 10.0f;
             }
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
@@ -410,8 +410,8 @@ void _SimulationParametersWindow::processBase(
                 auto parameters = AlienImGui::InputColorTransitionParameters()
                                       .textWidth(MaxContentTextWidth)
                                       .color(color)
-                                      .defaultTargetColor(origSimParameters.spotValues.cellColorTransitionTargetColor[color])
-                                      .defaultTransitionAge(origSimParameters.spotValues.cellColorTransitionDuration[color])
+                                      .defaultTargetColor(origSimParameters.baseValues.cellColorTransitionTargetColor[color])
+                                      .defaultTransitionAge(origSimParameters.baseValues.cellColorTransitionDuration[color])
                                       .logarithmic(true);
                 if (0 == color) {
                     parameters.name("Target color and duration")
@@ -422,8 +422,8 @@ void _SimulationParametersWindow::processBase(
                 AlienImGui::InputColorTransition(
                     parameters,
                     color,
-                    simParameters.spotValues.cellColorTransitionTargetColor[color],
-                    simParameters.spotValues.cellColorTransitionDuration[color]);
+                    simParameters.baseValues.cellColorTransitionTargetColor[color],
+                    simParameters.baseValues.cellColorTransitionDuration[color]);
                 ImGui::PopID();
             }
             ImGui::TreePop();
@@ -441,8 +441,8 @@ void _SimulationParametersWindow::processBase(
                     .max(0.01f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSimParameters.spotValues.cellFunctionConstructorMutationNeuronDataProbability),
-                simParameters.spotValues.cellFunctionConstructorMutationNeuronDataProbability);
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell function properties")
@@ -451,8 +451,8 @@ void _SimulationParametersWindow::processBase(
                     .max(0.01f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSimParameters.spotValues.cellFunctionConstructorMutationDataProbability),
-                simParameters.spotValues.cellFunctionConstructorMutationDataProbability);
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDataProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationDataProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell function type")
@@ -461,8 +461,8 @@ void _SimulationParametersWindow::processBase(
                     .max(0.01f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSimParameters.spotValues.cellFunctionConstructorMutationCellFunctionProbability),
-                simParameters.spotValues.cellFunctionConstructorMutationCellFunctionProbability);
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell insertion")
@@ -471,8 +471,8 @@ void _SimulationParametersWindow::processBase(
                     .max(0.01f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSimParameters.spotValues.cellFunctionConstructorMutationInsertionProbability),
-                simParameters.spotValues.cellFunctionConstructorMutationInsertionProbability);
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationInsertionProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationInsertionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell deletion")
@@ -481,8 +481,8 @@ void _SimulationParametersWindow::processBase(
                     .max(0.01f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSimParameters.spotValues.cellFunctionConstructorMutationDeletionProbability),
-                simParameters.spotValues.cellFunctionConstructorMutationDeletionProbability);
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDeletionProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationDeletionProbability);
             ImGui::TreePop();
         }
 
@@ -540,36 +540,36 @@ void _SimulationParametersWindow::processBase(
                         "0 "
                         "is "
                         "entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells.")
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.spotValues.cellFunctionAttackerFoodChainColorMatrix)),
-                simParameters.spotValues.cellFunctionAttackerFoodChainColorMatrix);
+                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.baseValues.cellFunctionAttackerFoodChainColorMatrix)),
+                simParameters.baseValues.cellFunctionAttackerFoodChainColorMatrix);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy cost")
                     .textWidth(MaxContentTextWidth)
                     .min(0)
                     .max(1.0f)
-                    .defaultValue(origSimParameters.spotValues.cellFunctionAttackerEnergyCost)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionAttackerEnergyCost)
                     .tooltip(std::string("Amount of energy lost by an attempted attack of a cell in the form of emitted energy particles.")),
-                simParameters.spotValues.cellFunctionAttackerEnergyCost);
+                simParameters.baseValues.cellFunctionAttackerEnergyCost);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Geometry penalty")
                     .textWidth(MaxContentTextWidth)
                     .min(0)
                     .max(5.0f)
-                    .defaultValue(origSimParameters.spotValues.cellFunctionAttackerGeometryDeviationExponent)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent)
                     .tooltip(std::string("The larger this value is, the less energy a cell can gain from an attack if the local "
                                          "geometry of the attacked cell does not match the attacking cell.")),
-                simParameters.spotValues.cellFunctionAttackerGeometryDeviationExponent);
+                simParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Connections mismatch penalty")
                     .textWidth(MaxContentTextWidth)
                     .min(0)
                     .max(1.0f)
-                    .defaultValue(origSimParameters.spotValues.cellFunctionAttackerConnectionsMismatchPenalty)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty)
                     .tooltip(std::string("The larger this parameter is, the more difficult it is to digest cells that contain more connections.")),
-                simParameters.spotValues.cellFunctionAttackerConnectionsMismatchPenalty);
+                simParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Attack radius")
@@ -1036,8 +1036,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            parameters.spotValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
-                std::max(0.0f, std::min(1.0f, parameters.spotValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
+            parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
+                std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
         }
         parameters.radiationAbsorptionByCellColor[i] = std::max(0.0f, std::min(1.0f, parameters.radiationAbsorptionByCellColor[i]));
     }

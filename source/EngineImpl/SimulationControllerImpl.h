@@ -75,11 +75,6 @@ public:
     void setOriginalSimulationParameters(SimulationParameters const& parameters) override;
     void setSimulationParameters_async(SimulationParameters const& parameters) override;
 
-    SimulationParametersSpots getSimulationParametersSpots() const override;
-    SimulationParametersSpots getOriginalSimulationParametersSpots() const override;
-    void setOriginalSimulationParametersSpot(SimulationParametersSpot const& value, int index) override;
-    void setSimulationParametersSpots_async(SimulationParametersSpots const& value) override;
-
     GpuSettings getGpuSettings() const override;
     GpuSettings getOriginalGpuSettings() const override;
     void setGpuSettings_async(GpuSettings const& gpuSettings) override;

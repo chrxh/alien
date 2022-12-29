@@ -140,8 +140,8 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
                     && Math::length(velDelta)
                         >= SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFusionVelocity, data, cell->absPos)
-                    && isApproaching && cell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy
-                    && otherCell->energy <= cudaSimulationParameters.spotValues.cellMaxBindingEnergy
+                    && isApproaching && cell->energy <= cudaSimulationParameters.baseValues.cellMaxBindingEnergy
+                    && otherCell->energy <= cudaSimulationParameters.baseValues.cellMaxBindingEnergy
                     && !cell->barrier && !otherCell->barrier) {
                         CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
                 }

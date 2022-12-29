@@ -6,3 +6,4 @@
 #define MAX_COLORS 7
 #define MAX_PARTICLE_SOURCES 3
 #define MAX_FLOW_CENTERS 2
+#define MAX_SPOTS 2

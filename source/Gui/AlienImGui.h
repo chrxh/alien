@@ -194,12 +194,6 @@ public:
         MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color, uint32_t& backupColor, uint32_t (&savedPalette)[32]);
-    static void ColorButtonWithPicker(
-        std::string const& text,
-        uint32_t& color,
-        uint32_t& backupColor,
-        uint32_t (&savedPalette)[32],
-        RealVector2D const& size);
 
     static void Separator();
     static void Group(std::string const& text);

@@ -206,27 +206,6 @@ void _SimulationControllerImpl::setSimulationParameters_async(
     _worker.setSimulationParameters_async(parameters);
 }
 
-SimulationParametersSpots _SimulationControllerImpl::getSimulationParametersSpots() const
-{
-    return _settings.simulationParametersSpots;
-}
-
-SimulationParametersSpots _SimulationControllerImpl::getOriginalSimulationParametersSpots() const
-{
-    return _origSettings.simulationParametersSpots;
-}
-
-void _SimulationControllerImpl::setOriginalSimulationParametersSpot(SimulationParametersSpot const& value, int index)
-{
-    _origSettings.simulationParametersSpots.spots[index] = value;
-}
-
-void _SimulationControllerImpl::setSimulationParametersSpots_async(SimulationParametersSpots const& value)
-{
-    _settings.simulationParametersSpots = value;
-    _worker.setSimulationParametersSpots_async(value);
-}
-
 GpuSettings _SimulationControllerImpl::getGpuSettings() const
 {
     return _settings.gpuSettings;
