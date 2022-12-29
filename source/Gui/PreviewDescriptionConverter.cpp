@@ -66,7 +66,7 @@ namespace
         RealVector2D pos;
         RealVector2D direction(0, -1);
 
-        std::unordered_map<IntVector2D, std::vector<CellPreviewDescriptionIntern>> cellsInternBySlot;
+        std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
         std::vector<CellPreviewDescriptionIntern> cellsIntern;
         int index = 0;
         for (auto const& node : genome) {
@@ -104,9 +104,10 @@ namespace
             IntVector2D intPos{toInt(pos.x), toInt(pos.y)};
             for (int dx = -2; dx <= 2; ++dx) {
                 for (int dy = -2; dy <= 2; ++dy) {
-                    auto const& findResult = cellsInternBySlot.find({intPos.x + dx, intPos.y + dy});
-                    if (findResult != cellsInternBySlot.end()) {
-                        for (auto& otherCell : findResult->second) {
+                    auto const& findResult = cellInternIndicesBySlot.find({intPos.x + dx, intPos.y + dy});
+                    if (findResult != cellInternIndicesBySlot.end()) {
+                        for (auto const& otherCellIndex : findResult->second) {
+                            auto& otherCell = cellsIntern.at(otherCellIndex);
                             if (Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance) {
                                 if (otherCell.connectionIndices.size() < parameters.cellMaxBonds
                                     && cellIntern.connectionIndices.size() < parameters.cellMaxBonds) {
@@ -120,7 +121,7 @@ namespace
                 }
             }
 
-            cellsInternBySlot[intPos].emplace_back(cellIntern);
+            cellInternIndicesBySlot[intPos].emplace_back(toInt(cellsIntern.size()));
             cellsIntern.emplace_back(cellIntern);
             ++index;
         }
