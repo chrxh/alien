@@ -27,6 +27,7 @@ namespace
     auto const MaxCellContentTextWidth = 180.0f;
     auto const MaxCellMetadataContentTextWidth = 80.0f;
     auto const MaxParticleContentTextWidth = 80.0f;
+    auto const TreeNodeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
 }
 
 _InspectorWindow::_InspectorWindow(
@@ -144,25 +145,32 @@ void _InspectorWindow::showCellPhysicsTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Physics", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxCellContentTextWidth), cell.energy);
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position X").format("%.2f").textWidth(MaxCellContentTextWidth), cell.pos.x);
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(MaxCellContentTextWidth), cell.pos.y);
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity X").format("%.2f").textWidth(MaxCellContentTextWidth), cell.vel.x);
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity Y").format("%.2f").textWidth(MaxCellContentTextWidth), cell.vel.y);
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(MaxCellContentTextWidth), cell.stiffness);
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxCellContentTextWidth), cell.maxConnections);
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(MaxCellContentTextWidth), cell.barrier);
-            AlienImGui::Group("Connections to other cells");
-            for (auto const& [index, connection] : cell.connections | boost::adaptors::indexed(0)) {
-                if (ImGui::TreeNodeEx(("Connection [" + std::to_string(index) + "]").c_str(), ImGuiTreeNodeFlags_None)) {
-                    AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Reference distance").format("%.2f").textWidth(MaxCellContentTextWidth).readOnly(true),
-                        connection.distance);
-                    AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Reference angle").format("%.2f").textWidth(MaxCellContentTextWidth).readOnly(true),
-                        connection.angleFromPrevious);
-                    ImGui::TreePop();
+            if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxCellContentTextWidth), cell.energy);
+                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position X").format("%.2f").textWidth(MaxCellContentTextWidth), cell.pos.x);
+                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(MaxCellContentTextWidth), cell.pos.y);
+                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity X").format("%.2f").textWidth(MaxCellContentTextWidth), cell.vel.x);
+                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity Y").format("%.2f").textWidth(MaxCellContentTextWidth), cell.vel.y);
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(MaxCellContentTextWidth), cell.stiffness);
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxCellContentTextWidth), cell.maxConnections);
+                AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(MaxCellContentTextWidth), cell.barrier);
+                ImGui::TreePop();
+            }
+
+            if (ImGui::TreeNodeEx("Connections to other cells", TreeNodeFlags)) {
+                for (auto const& [index, connection] : cell.connections | boost::adaptors::indexed(0)) {
+                    if (ImGui::TreeNodeEx(("Connection [" + std::to_string(index) + "]").c_str(), ImGuiTreeNodeFlags_None)) {
+                        AlienImGui::InputFloat(
+                            AlienImGui::InputFloatParameters().name("Reference distance").format("%.2f").textWidth(MaxCellContentTextWidth).readOnly(true),
+                            connection.distance);
+                        AlienImGui::InputFloat(
+                            AlienImGui::InputFloatParameters().name("Reference angle").format("%.2f").textWidth(MaxCellContentTextWidth).readOnly(true),
+                            connection.angleFromPrevious);
+                        ImGui::TreePop();
+                    }
                 }
+                ImGui::TreePop();
             }
         }
         ImGui::EndChild();
@@ -336,106 +344,132 @@ void _InspectorWindow::showCellMetadataTab(CellDescription& cell)
 
 void _InspectorWindow::showNerveContent(NerveDescription& nerve)
 {
-    bool pulseGeneration = nerve.pulseMode > 0;
-    if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Pulse generation").textWidth(MaxCellContentTextWidth), pulseGeneration)) {
-        nerve.pulseMode = pulseGeneration ? 1 : 0; 
-    }
-    if (pulseGeneration) {
-        AlienImGui::InputInt(
-            AlienImGui::InputIntParameters().name("Periodicity").textWidth(MaxCellContentTextWidth), nerve.pulseMode);
-        bool alternation = nerve.alternationMode > 0;
-        if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(MaxCellContentTextWidth), alternation)) {
-            nerve.alternationMode = alternation ? 1 : 0;
+    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+
+        bool pulseGeneration = nerve.pulseMode > 0;
+        if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Pulse generation").textWidth(MaxCellContentTextWidth), pulseGeneration)) {
+            nerve.pulseMode = pulseGeneration ? 1 : 0;
         }
-        if (alternation) {
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Number of pulses").textWidth(MaxCellContentTextWidth), nerve.alternationMode);
+        if (pulseGeneration) {
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(MaxCellContentTextWidth), nerve.pulseMode);
+            bool alternation = nerve.alternationMode > 0;
+            if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(MaxCellContentTextWidth), alternation)) {
+                nerve.alternationMode = alternation ? 1 : 0;
+            }
+            if (alternation) {
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Number of pulses").textWidth(MaxCellContentTextWidth), nerve.alternationMode);
+            }
         }
+        ImGui::TreePop();
     }
 }
 
 void _InspectorWindow::showNeuronContent(NeuronDescription& neuron)
 {
-    AlienImGui::InputFloatMatrix(AlienImGui::InputFloatMatrixParameters().step(0.1f).name("Weights").textWidth(MaxCellMetadataContentTextWidth), neuron.weights);
-    AlienImGui::InputFloatVector(AlienImGui::InputFloatVectorParameters().step(0.1f).name("Bias").textWidth(MaxCellMetadataContentTextWidth), neuron.bias);
+    if (ImGui::TreeNodeEx("Weights and bias", TreeNodeFlags)) {
+        AlienImGui::InputNeuronProperties(AlienImGui::InputNeuronPropertiesParameters(), neuron.weights, neuron.bias, _selectedInput, _selectedOutput);
+        ImGui::TreePop();
+    }
 }
 
 void _InspectorWindow::showConstructorContent(ConstructorDescription& constructor)
 {
-    auto parameters = _simController->getSimulationParameters();
-    
-    AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(MaxCellContentTextWidth), constructor.singleConstruction);
-    AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Separate construction").textWidth(MaxCellContentTextWidth), constructor.separateConstruction);
-    AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Adapt max connections").textWidth(MaxCellContentTextWidth), constructor.adaptMaxConnections);
-    int constructorMode = constructor.activationMode == 0 ? 0 : 1;
-    if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Activation mode").textWidth(MaxCellContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
-        constructor.activationMode = constructorMode;
+    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+        auto parameters = _simController->getSimulationParameters();
+
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(MaxCellContentTextWidth), constructor.singleConstruction);
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters().name("Separate construction").textWidth(MaxCellContentTextWidth), constructor.separateConstruction);
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters().name("Adapt max connections").textWidth(MaxCellContentTextWidth), constructor.adaptMaxConnections);
+        int constructorMode = constructor.activationMode == 0 ? 0 : 1;
+        if (AlienImGui::Combo(
+                AlienImGui::ComboParameters().name("Activation mode").textWidth(MaxCellContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
+            constructor.activationMode = constructorMode;
+        }
+        if (constructorMode == 1) {
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(MaxCellContentTextWidth), constructor.activationMode);
+        }
+        AlienImGui::AngleAlignmentCombo(
+            AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxCellContentTextWidth), constructor.angleAlignment);
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.1f).textWidth(MaxCellContentTextWidth), constructor.stiffness);
+        AlienImGui::InputInt(
+            AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(MaxCellContentTextWidth), constructor.constructionActivationTime);
+        ImGui::TreePop();
+
     }
-    if (constructorMode == 1) {
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(MaxCellContentTextWidth), constructor.activationMode);
-    }
-    AlienImGui::AngleAlignmentCombo(
-        AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxCellContentTextWidth), constructor.angleAlignment);
-    AlienImGui::InputFloat(
-        AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.1f).textWidth(MaxCellContentTextWidth), constructor.stiffness);
-    AlienImGui::InputInt(
-        AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(MaxCellContentTextWidth), constructor.constructionActivationTime);
 }
 
 void _InspectorWindow::showAttackerContent(AttackerDescription& attacker)
 {
-    AlienImGui::Combo(
-        AlienImGui::ComboParameters()
-            .name("Energy distribution")
-            .values({"Connected cells", "Transmitters and Constructors"})
-            .textWidth(MaxCellContentTextWidth),
-        attacker.mode);
+    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters()
+                .name("Energy distribution")
+                .values({"Connected cells", "Transmitters and Constructors"})
+                .textWidth(MaxCellContentTextWidth),
+            attacker.mode);
+        ImGui::TreePop();
+    }
 }
 
 void _InspectorWindow::showTransmitterContent(TransmitterDescription& transmitter)
 {
-    AlienImGui::Combo(
-        AlienImGui::ComboParameters()
-            .name("Energy distribution")
-            .values({"Connected cells", "Transmitters and Constructors"})
-            .textWidth(MaxCellContentTextWidth),
-        transmitter.mode);
+    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters()
+                .name("Energy distribution")
+                .values({"Connected cells", "Transmitters and Constructors"})
+                .textWidth(MaxCellContentTextWidth),
+            transmitter.mode);
+        ImGui::TreePop();
+    }
 }
 
 void _InspectorWindow::showMuscleContent(MuscleDescription& muscle)
 {
-    AlienImGui::Combo(
-        AlienImGui::ComboParameters()
-            .name("Mode").values({"Movement", "Contraction and expansion", "Bending"})
-            .textWidth(MaxCellContentTextWidth),
-        muscle.mode);
+    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters().name("Mode").values({"Movement", "Contraction and expansion", "Bending"}).textWidth(MaxCellContentTextWidth),
+            muscle.mode);
+        ImGui::TreePop();
+    }
 }
 
 void _InspectorWindow::showSensorContent(SensorDescription& sensor)
 {
-    int mode = sensor.getSensorMode();
-    if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Mode").values({"Scan vicinity", "Scan specific region"}).textWidth(MaxCellContentTextWidth), mode)) {
-        if (mode == Enums::SensorMode_Neighborhood) {
-            sensor.fixedAngle.reset();
-        } else {
-            sensor.fixedAngle = 0.0f;
+    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+        int mode = sensor.getSensorMode();
+        if (AlienImGui::Combo(
+                AlienImGui::ComboParameters().name("Mode").values({"Scan vicinity", "Scan specific region"}).textWidth(MaxCellContentTextWidth), mode)) {
+            if (mode == Enums::SensorMode_Neighborhood) {
+                sensor.fixedAngle.reset();
+            } else {
+                sensor.fixedAngle = 0.0f;
+            }
         }
+        if (sensor.fixedAngle) {
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Scan angle").format("%.1f").textWidth(MaxCellContentTextWidth), *sensor.fixedAngle);
+        }
+        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(MaxCellContentTextWidth), sensor.color);
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters().name("Min density").format("%.2f").step(0.05f).textWidth(MaxCellContentTextWidth), sensor.minDensity);
+        ImGui::TreePop();
     }
-    if (sensor.fixedAngle) {
-        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Scan angle").format("%.1f").textWidth(MaxCellContentTextWidth), *sensor.fixedAngle);
-    }
-    AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(MaxCellContentTextWidth), sensor.color);
-    AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Min density").format("%.2f").step(0.05f).textWidth(MaxCellContentTextWidth), sensor.minDensity);
 }
 
 void _InspectorWindow::showActivityContent(CellDescription& cell)
 {
-    AlienImGui::Group("Activity");
-    int index = 0;
-    for (auto& channel : cell.activity.channels) {
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Channel [" + std::to_string(index) + "]").format("%.2f").step(0.1f).textWidth(MaxCellContentTextWidth),
-            channel);
-        ++index;
+    if (ImGui::TreeNodeEx("Activity", TreeNodeFlags)) {
+        int index = 0;
+        for (auto& channel : cell.activity.channels) {
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.2f").step(0.1f).textWidth(MaxCellContentTextWidth),
+                channel);
+            ++index;
+        }
+        ImGui::TreePop();
     }
 }
 

@@ -4,7 +4,6 @@
 
 #include "SimulationParametersSpotValues.h"
 #include "ParticleSource.h"
-#include "FlowCenter.h"
 #include "SimulationParametersSpot.h"
 
 struct SimulationParameters
@@ -68,10 +67,6 @@ struct SimulationParameters
     int numParticleSources = 0;
     ParticleSource particleSources[MAX_PARTICLE_SOURCES];
 
-    //flow centers
-    int numFlowCenters = 0;
-    FlowCenter flowCenters[MAX_FLOW_CENTERS];
-
     //spots
     int numSpots = 0;
     SimulationParametersSpot spots[MAX_SPOTS];
@@ -92,18 +87,10 @@ struct SimulationParameters
                 return false;
             }
         }
-        if (numFlowCenters != other.numFlowCenters) {
-            return false;
-        }
-        for (int i = 0; i < 2; ++i) {
-            if (flowCenters[i] != other.flowCenters[i]) {
-                return false;
-            }
-        }
         if (numSpots != other.numSpots) {
             return false;
         }
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < numSpots; ++i) {
             if (spots[i] != other.spots[i]) {
                 return false;
             }

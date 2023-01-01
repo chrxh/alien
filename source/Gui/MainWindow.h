@@ -42,7 +42,6 @@ private:
     SpatialControlWindow _spatialControlWindow;
     SimulationParametersWindow _simulationParametersWindow;
     StatisticsWindow _statisticsWindow;
-    FlowGeneratorWindow _flowGeneratorWindow;
     LogWindow _logWindow;
     GettingStartedWindow _gettingStartedWindow;
     BrowserWindow _browserWindow;

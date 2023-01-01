@@ -18,12 +18,6 @@ std::pair<uint64_t, Settings> SettingsParser::decodeTimestepAndSettings(boost::p
     return std::make_pair(timestep, settings);
 }
 
-namespace
-{
-    std::unordered_map<SpotShape, std::string> shapeStringMap = {{SpotShape::Circular, "circular"}, {SpotShape::Rectangular, "rectangular"}};
-    std::unordered_map<std::string, SpotShape> shapeEnumMap = {{"circular", SpotShape::Circular}, {"rectangular", SpotShape::Rectangular}};
-}
-
 void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, ParserTask parserTask)
 {
     Settings defaultSettings;
@@ -312,13 +306,24 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         JsonParser::encodeDecode(tree, spot.posX, defaultSpot.posX, base + "pos.x", parserTask);
         JsonParser::encodeDecode(tree, spot.posY, defaultSpot.posY, base + "pos.y", parserTask);
 
-        auto shapeString = shapeStringMap.at(spot.shape);
-        JsonParser::encodeDecode(tree, shapeString, shapeStringMap.at(defaultSpot.shape), base + "shape", parserTask);
-        spot.shape = shapeEnumMap.at(shapeString);
+        JsonParser::encodeDecode(tree, spot.shapeType, defaultSpot.shapeType, base + "shape.type", parserTask);
+        if (spot.shapeType == ShapeType_Circular) {
+            JsonParser::encodeDecode(
+                tree, spot.shapeData.circularSpot.coreRadius, defaultSpot.shapeData.circularSpot.coreRadius, base + "shape.circular.core radius", parserTask);
+        }
+        if (spot.shapeType == ShapeType_Rectangular) {
+            JsonParser::encodeDecode(tree, spot.shapeData.rectangularSpot.width, defaultSpot.shapeData.rectangularSpot.width, base + "shape.rectangular.core width", parserTask);
+            JsonParser::encodeDecode(
+                tree, spot.shapeData.rectangularSpot.height, defaultSpot.shapeData.rectangularSpot.height, base + "shape.rectangular.core height", parserTask);
+        }
+        JsonParser::encodeDecode(tree, spot.flowType, defaultSpot.flowType, base + "flow.type", parserTask);
+        if (spot.flowType == FlowType_Radial) {
+            JsonParser::encodeDecode(
+                tree, spot.flowData.radialFlow.orientation, defaultSpot.flowData.radialFlow.orientation, base + "flow.radial.orientation", parserTask);
+            JsonParser::encodeDecode(
+                tree, spot.flowData.radialFlow.strength, defaultSpot.flowData.radialFlow.strength, base + "flow.radial.strength", parserTask);
+        }
 
-        JsonParser::encodeDecode(tree, spot.width, defaultSpot.width, base + "core width", parserTask);
-        JsonParser::encodeDecode(tree, spot.height, defaultSpot.height, base + "core height", parserTask);
-        JsonParser::encodeDecode(tree, spot.coreRadius, defaultSpot.coreRadius, base + "core radius", parserTask);
         JsonParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", parserTask);
         JsonParser::encodeDecode(tree, spot.values.friction, defaultSpot.values.friction, base + "friction", parserTask);
         JsonParser::encodeDecode(tree, spot.values.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
@@ -402,18 +407,5 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
             defaultSpot.values.cellFunctionConstructorMutationDeletionProbability,
             base + "cell.function.constructor.mutation probability.deletion",
             parserTask);
-    }
-
-    //flow field settings
-    JsonParser::encodeDecode(
-        tree, settings.simulationParameters.numFlowCenters, defaultSettings.simulationParameters.numFlowCenters, "simulation parameters.flow fields.num centers", parserTask);
-    for (int i = 0; i < MAX_FLOW_CENTERS; ++i) {
-        std::string node = "simulation parameters.flow fields." + std::to_string(i) + ".";
-        auto& radialData = settings.simulationParameters.flowCenters[i];
-        auto& defaultRadialData = defaultSettings.simulationParameters.flowCenters[i];
-        JsonParser::encodeDecode(tree, radialData.posX, defaultRadialData.posX, node + "pos.x", parserTask);
-        JsonParser::encodeDecode(tree, radialData.posY, defaultRadialData.posY, node + "pos.y", parserTask);
-        JsonParser::encodeDecode(tree, radialData.radius, defaultRadialData.radius, node + "radius", parserTask);
-        JsonParser::encodeDecode(tree, radialData.strength, defaultRadialData.strength, node + "strength", parserTask);
     }
 }

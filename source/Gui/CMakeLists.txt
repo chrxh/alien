@@ -33,8 +33,6 @@ PUBLIC
     ExportStatisticsDialog.h
     FileLogger.cpp
     FileLogger.h
-    FlowGeneratorWindow.cpp
-    FlowGeneratorWindow.h
     FpsController.cpp
     FpsController.h
     GenericOpenFileDialog.cpp
