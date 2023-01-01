@@ -155,10 +155,13 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
     BaseMap map;
     map.init(worldSize);
     auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
-    auto spotColor1 = colorToFloat3(cudaSimulationParameters.spots[0].color);
-    auto spotColor2 = colorToFloat3(cudaSimulationParameters.spots[1].color);
+    float3 spotColors[MAX_SPOTS];
+    for (int i = 0; i < MAX_SPOTS; ++i) {
+        spotColors[i] = colorToFloat3(cudaSimulationParameters.spots[i].color);
+    }
 
     auto const block = calcPartition(imageSize.x * imageSize.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+//    auto first = true;
     for (int index = block.startIndex; index <= block.endIndex; ++index) {
         auto x = index % imageSize.x;
         auto y = index / imageSize.x;
@@ -166,7 +169,21 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
             imageData[index] = 0;
         } else {
             float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
-            auto color = SpotCalculator::calcColor(map, worldPos, baseColor, spotColor1, spotColor2);
+
+            int spotIndex1, spotIndex2;
+            SpotCalculator::getNearbySpots(map, worldPos, spotIndex1, spotIndex2);
+            auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors[spotIndex1], spotColors[spotIndex2], spotIndex1, spotIndex2);
+            //if (first && threadIdx.x == 0 /* && blockIdx.x == 0 */) {
+            //    printf(
+            //        "%f, %f, %f : %f, %f, %f\n",
+            //        spotColors[spotIndex1].x,
+            //        spotColors[spotIndex1].y,
+            //        spotColors[spotIndex1].z,
+            //        spotColors[spotIndex2].x,
+            //        spotColors[spotIndex2].y,
+            //        spotColors[spotIndex2].z);
+            //    first = false;
+            //}
             drawPixel(imageData, index, color);
         }
     }
@@ -272,31 +289,6 @@ cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight
             auto const color = calcColor(particle, 0 != particle->selected);
             auto radius = 1 == particle->selected ? zoom / 2 : zoom / 3;
             drawCircle(imageData, imageSize, particleImagePos, color, radius);
-        }
-    }
-}
-
-__global__ void cudaDrawFlowCenters(uint64_t* targetImage, float2 rectUpperLeft, int2 imageSize, float zoom)
-{
-    for (int i = 0; i < cudaSimulationParameters.numFlowCenters; ++i) {
-        auto const& radialFlowData = cudaSimulationParameters.flowCenters[i];
-        int screenPosX = toInt(radialFlowData.posX * zoom) - rectUpperLeft.x * zoom;
-        int screenPosY = toInt(radialFlowData.posY * zoom) - rectUpperLeft.y * zoom;
-        for (int dx = -5; dx <= 5; ++dx) {
-            auto drawX = screenPosX + dx;
-            auto drawY = screenPosY;
-            if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
-                int index = drawX + drawY * imageSize.x;
-                targetImage[index] = 0x01ff01ff01ff;
-            }
-        }
-        for (int dy = -5; dy <= 5; ++dy) {
-            auto drawX = screenPosX;
-            auto drawY = screenPosY + dy;
-            if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
-                int index = drawX + drawY * imageSize.x;
-                targetImage[index] = 0x01ff01ff01ff;
-            }
         }
     }
 }

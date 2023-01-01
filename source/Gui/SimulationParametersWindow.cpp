@@ -70,7 +70,7 @@ void _SimulationParametersWindow::processIntern()
         if (ImGui::BeginTabBar("##Flow", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
             //add spot
-            if (parameters.numSpots < 2) {
+            if (parameters.numSpots < MAX_SPOTS) {
                 if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
                     int index = parameters.numSpots;
                     parameters.spots[index] = createSpot(parameters, index);
@@ -157,9 +157,10 @@ SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParam
     spot.posY = toFloat(worldSize.y / 2);
 
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
-    spot.coreRadius = maxRadius / 3;
+    spot.shapeType = ShapeType_Circular;
+    spot.shapeData.circularSpot.coreRadius = maxRadius / 3;
     spot.fadeoutRadius = maxRadius / 3;
-    spot.color = _savedPalette[(2 + index) * 8];
+    spot.color = _savedPalette[((2 + index) * 8) % IM_ARRAYSIZE(_savedPalette)];
 
     spot.values = simParameters.baseValues;
     return spot;
@@ -737,7 +738,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
         auto worldSize = _simController->getWorldSize();
 
         /**
-         * Color and location
+         * Colors and location
          */
         if (ImGui::TreeNodeEx("Colors and location", flags)) {
             AlienImGui::ColorButtonWithPicker(
@@ -746,15 +747,15 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 _backupColor,
                 _savedPalette);
 
-            int shape = static_cast<int>(spot.shape);
+            int shape = static_cast<int>(spot.shapeType);
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Shape")
                     .values({"Circular", "Rectangular"})
                     .textWidth(MaxContentTextWidth)
-                    .defaultValue(static_cast<int>(origSpot.shape)),
+                    .defaultValue(static_cast<int>(origSpot.shapeType)),
                 shape);
-            spot.shape = static_cast<SpotShape>(shape);
+            spot.shapeType = static_cast<ShapeType>(shape);
             auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -774,36 +775,36 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .defaultValue(origSpot.posY)
                     .format("%.1f"),
                 spot.posY);
-            if (spot.shape == SpotShape::Circular) {
+            if (spot.shapeType == ShapeType_Circular) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Core radius")
                         .textWidth(MaxContentTextWidth)
                         .min(0)
                         .max(maxRadius)
-                        .defaultValue(origSpot.coreRadius)
+                        .defaultValue(origSpot.shapeData.circularSpot.coreRadius)
                         .format("%.1f"),
-                    spot.coreRadius);
+                    spot.shapeData.circularSpot.coreRadius);
             }
-            if (spot.shape == SpotShape::Rectangular) {
+            if (spot.shapeType == ShapeType_Rectangular) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Core width")
                         .textWidth(MaxContentTextWidth)
                         .min(0)
                         .max(worldSize.x)
-                        .defaultValue(origSpot.width)
+                        .defaultValue(origSpot.shapeData.rectangularSpot.width)
                         .format("%.1f"),
-                    spot.width);
+                    spot.shapeData.rectangularSpot.width);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Core height")
                         .textWidth(MaxContentTextWidth)
                         .min(0)
                         .max(worldSize.y)
-                        .defaultValue(origSpot.height)
+                        .defaultValue(origSpot.shapeData.rectangularSpot.height)
                         .format("%.1f"),
-                    spot.height);
+                    spot.shapeData.rectangularSpot.height);
             }
 
             AlienImGui::SliderFloat(
@@ -815,6 +816,36 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .defaultValue(origSpot.fadeoutRadius)
                     .format("%.1f"),
                 spot.fadeoutRadius);
+            ImGui::TreePop();
+        }
+
+        /**
+         * Flow
+         */
+        if (ImGui::TreeNodeEx("Flow", flags)) {
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters().name("Type").values({"None", "Radial flow"}).textWidth(MaxContentTextWidth).defaultValue(origSpot.flowType),
+                spot.flowType);
+
+            if (spot.flowType == FlowType_Radial) {
+                AlienImGui::Combo(
+                    AlienImGui::ComboParameters()
+                        .name("Orientation")
+                        .textWidth(MaxContentTextWidth)
+                        .defaultValue(origSpot.flowData.radialFlow.orientation)
+                        .values({"Clockwise", "Counter clockwise"}),
+                    spot.flowData.radialFlow.orientation);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Strength")
+                        .textWidth(MaxContentTextWidth)
+                        .min(0)
+                        .max(0.5f)
+                        .logarithmic(true)
+                        .format("%.5f")
+                        .defaultValue(origSpot.flowData.radialFlow.strength),
+                    spot.flowData.radialFlow.strength);
+            }
             ImGui::TreePop();
         }
 

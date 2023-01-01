@@ -916,3 +916,37 @@ bool AlienImGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, 
     std::vector const AngleAlignmentStrings = {"None"s, "Align to 180 deg"s, "Align to 120 deg"s, "Align to 90 deg"s, "Align to 72 deg"s, "Align to 60 deg"s};
     return AlienImGui::Combo(AlienImGui::ComboParameters().name(parameters._name).values(AngleAlignmentStrings).textWidth(parameters._textWidth), value);
 }
+
+void AlienImGui::InputNeuronProperties(
+    InputNeuronPropertiesParameters const& parameters,
+    std::vector<std::vector<float>>& weights,
+    std::vector<float>& bias,
+    int& selectedInput,
+    int& selectedOutput)
+{
+    auto setDefaultColors = [] {
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0.1));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0, 0, 0.2));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0, 0, 0.2));
+    };
+    auto setHightlightingColors = [] {
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.08, 0.5, 0.5));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.08, 0.5, 0.7));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.08, 0.5, 0.7));
+    };
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        
+        i == selectedInput ? setHightlightingColors() : setDefaultColors();
+        if (ImGui::Button(("Input #" + std::to_string(i)).c_str())) {
+            selectedInput = i;
+        }
+        ImGui::PopStyleColor(3);
+
+        ImGui::SameLine(0, 100.0f);
+        i == selectedOutput ? setHightlightingColors() : setDefaultColors();
+        if (ImGui::Button(("Output #" + std::to_string(i)).c_str())) {
+            selectedOutput = i;
+        }
+        ImGui::PopStyleColor(3);
+    }
+}

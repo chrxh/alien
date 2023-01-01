@@ -46,9 +46,6 @@ using NewSimulationDialog = std::shared_ptr<_NewSimulationDialog>;
 class _StartupController;
 using StartupController = std::shared_ptr<_StartupController>;
 
-class _FlowGeneratorWindow;
-using FlowGeneratorWindow = std::shared_ptr<_FlowGeneratorWindow>;
-
 class _AboutDialog;
 using AboutDialog = std::shared_ptr<_AboutDialog>;
 

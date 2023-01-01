@@ -35,7 +35,6 @@
 #include "Viewport.h"
 #include "NewSimulationDialog.h"
 #include "StartupController.h"
-#include "FlowGeneratorWindow.h"
 #include "AlienImGui.h"
 #include "AboutDialog.h"
 #include "ColorizeDialog.h"
@@ -138,7 +137,6 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
     _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow, _viewport);
-    _flowGeneratorWindow = std::make_shared<_FlowGeneratorWindow>(_simController);
     _aboutDialog = std::make_shared<_AboutDialog>();
     _colorizeDialog = std::make_shared<_ColorizeDialog>(_simController);
     _logWindow = std::make_shared<_LogWindow>(_logger);
@@ -441,16 +439,13 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Simulation parameters", "ALT+4", _simulationParametersWindow->isOn())) {
                 _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
             }
-            if (ImGui::MenuItem("Flow generator", "ALT+5", _flowGeneratorWindow->isOn())) {
-                _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
-            }
-            if (ImGui::MenuItem("Particle sources", "ALT+6", _flowGeneratorWindow->isOn())) {
+            if (ImGui::MenuItem("Particle sources", "ALT+5", _particleSourcesWindow->isOn())) {
                 _particleSourcesWindow->setOn(!_particleSourcesWindow->isOn());
             }
-            if (ImGui::MenuItem("Shader parameters", "ALT+7", _shaderWindow->isOn())) {
+            if (ImGui::MenuItem("Shader parameters", "ALT+6", _shaderWindow->isOn())) {
                 _shaderWindow->setOn(!_shaderWindow->isOn());
             }
-            if (ImGui::MenuItem("Log", "ALT+8", _logWindow->isOn())) {
+            if (ImGui::MenuItem("Log", "ALT+7", _logWindow->isOn())) {
                 _logWindow->setOn(!_logWindow->isOn());
             }
             AlienImGui::EndMenuButton();
@@ -612,15 +607,12 @@ void _MainWindow::processMenubar()
             _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_5)) {
-            _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_6)) {
             _particleSourcesWindow->setOn(!_particleSourcesWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_7)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_6)) {
             _shaderWindow->setOn(!_shaderWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_8)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_7)) {
             _logWindow->setOn(!_logWindow->isOn());
         }
 
@@ -719,7 +711,6 @@ void _MainWindow::processWindows()
     _modeController->process();
     _statisticsWindow->process();
     _simulationParametersWindow->process();
-    _flowGeneratorWindow->process();
     _logWindow->process();
     _browserWindow->process();
     _gettingStartedWindow->process();

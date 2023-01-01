@@ -9,7 +9,6 @@ add_library(alien_engine_interface_lib
     Descriptions.cpp
     Descriptions.h
     Enums.h
-    FlowCenter.h
     GenomeDescriptionConverter.cpp
     GenomeDescriptionConverter.h
     GenomeDescriptions.h

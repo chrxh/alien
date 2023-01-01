@@ -220,4 +220,19 @@ public:
         MEMBER_DECLARATION(AngleAlignmentComboParameters, int, textWidth, 100);
     };
     static bool AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, int& value);
+
+    struct InputNeuronPropertiesParameters
+    {
+        MEMBER_DECLARATION(InputNeuronPropertiesParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputNeuronPropertiesParameters, float, step, 0.05f);
+        MEMBER_DECLARATION(InputNeuronPropertiesParameters, std::string, format, "%.2f");
+        MEMBER_DECLARATION(InputNeuronPropertiesParameters, int, textWidth, 0);
+    };
+    static void InputNeuronProperties(
+        InputNeuronPropertiesParameters const& parameters,
+        std::vector<std::vector<float>>& weights,
+        std::vector<float>& bias,
+        int& selectedInput,
+        int& selectedOutput
+    );
 };
