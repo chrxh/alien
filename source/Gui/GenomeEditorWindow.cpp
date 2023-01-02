@@ -23,7 +23,7 @@ namespace
 {
     auto const ContentTextWidth = 165.0f;
     auto const WeightsAndBiasTextWidth = 100.0f;
-    auto const WeightsAndBiasSelectionTextWidth = 200.0f;
+    auto const WeightsAndBiasSelectionTextWidth = 400.0f;
     auto const DynamicTableColumnWidth = 240.0f;
 }
 
@@ -480,7 +480,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         switch (type) {
         case CellFunction_Neuron: {
             auto& neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
-            if (ImGui::TreeNodeEx("Weights and bias", ImGuiTreeNodeFlags_None)) {
+            if (ImGui::TreeNodeEx("Neural network", ImGuiTreeNodeFlags_None)) {
                 AlienImGui::NeuronSelection(
                     AlienImGui::NeuronSelectionParameters().outputButtonPositionFromRight(WeightsAndBiasSelectionTextWidth),
                     neuron.weights,
@@ -499,15 +499,6 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 }
                 ImGui::TreePop();
             }
-
-            //if (ImGui::TreeNodeEx("Weight matrix", ImGuiTreeNodeFlags_None)) {
-            //    AlienImGui::InputFloatMatrix(AlienImGui::InputFloatMatrixParameters().step(0.1f), neuron.weights);
-            //    ImGui::TreePop();
-            //}
-            //if (ImGui::TreeNodeEx("Bias", ImGuiTreeNodeFlags_None)) {
-            //    AlienImGui::InputFloatVector(AlienImGui::InputFloatVectorParameters().step(0.1f), neuron.bias);
-            //    ImGui::TreePop();
-            //}
         } break;
         case CellFunction_Constructor: {
             auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
