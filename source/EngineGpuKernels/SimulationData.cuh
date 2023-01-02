@@ -2,7 +2,7 @@
 
 #include <atomic>
 
-#include "EngineInterface/Enums.h"
+#include "EngineInterface/CellFunctionEnums.h"
 #include "EngineInterface/GpuSettings.h"
 
 #include "Base.cuh"

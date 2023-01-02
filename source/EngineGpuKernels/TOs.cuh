@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "EngineInterface/Constants.h"
-#include "EngineInterface/Enums.h"
+#include "EngineInterface/CellFunctionEnums.h"
 
 struct ParticleTO
 {
