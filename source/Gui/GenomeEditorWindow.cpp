@@ -21,8 +21,10 @@
 
 namespace
 {
-    auto const MaxContentTextWidth = 165.0f;
-    auto const MaxContentWidth = 240.0f;
+    auto const ContentTextWidth = 165.0f;
+    auto const WeightsAndBiasTextWidth = 100.0f;
+    auto const WeightsAndBiasSelectionTextWidth = 200.0f;
+    auto const DynamicTableColumnWidth = 240.0f;
 }
 
 _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController)
@@ -215,7 +217,7 @@ namespace
         bool begin()
         {
             auto width = StyleRepository::getInstance().scaleContent(ImGui::GetContentRegionAvail().x);
-            _columns = std::max(toInt(width / MaxContentWidth), 1);
+            _columns = std::max(toInt(width / DynamicTableColumnWidth), 1);
             auto result = ImGui::BeginTable("##", _columns, ImGuiTableFlags_None);
             if (result) {
                 ImGui::TableNextRow();
@@ -335,25 +337,25 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
     //cell type
     DynamicTableLayout table;
     if (table.begin()) {
-        if (AlienImGui::CellFunctionCombo(AlienImGui::CellFunctionComboParameters().name("Specialization").textWidth(MaxContentTextWidth), type)) {
+        if (AlienImGui::CellFunctionCombo(AlienImGui::CellFunctionComboParameters().name("Specialization").textWidth(ContentTextWidth), type)) {
             applyNewCellFunction(cell, type);
         }
         table.next();
 
-        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(MaxContentTextWidth), cell.color);
+        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(ContentTextWidth), cell.color);
         table.next();
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Distance").textWidth(MaxContentTextWidth).format("%.2f").step(0.1f), cell.referenceDistance);
+            AlienImGui::InputFloatParameters().name("Distance").textWidth(ContentTextWidth).format("%.2f").step(0.1f), cell.referenceDistance);
         table.next();
-        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(MaxContentTextWidth).format("%.1f"), cell.referenceAngle);
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f"), cell.referenceAngle);
         table.next();
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(MaxContentTextWidth), cell.maxConnections);
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(ContentTextWidth), cell.maxConnections);
         table.next();
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution order").textWidth(MaxContentTextWidth), cell.executionOrderNumber);
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution order").textWidth(ContentTextWidth), cell.executionOrderNumber);
         table.next();
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(MaxContentTextWidth), cell.inputBlocked);
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(ContentTextWidth), cell.inputBlocked);
         table.next();
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(MaxContentTextWidth), cell.outputBlocked);
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(ContentTextWidth), cell.outputBlocked);
 
         switch (type) {
         case CellFunction_Neuron: {
@@ -366,40 +368,40 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 AlienImGui::ComboParameters()
                     .name("Energy distribution")
                     .values({"Connected cells", "Transmitters and Constructors"})
-                    .textWidth(MaxContentTextWidth),
+                    .textWidth(ContentTextWidth),
                 transmitter.mode);
         } break;
         case CellFunction_Constructor: {
             auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
 
             table.next();
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(MaxContentTextWidth), constructor.singleConstruction);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(ContentTextWidth), constructor.singleConstruction);
             table.next();
             AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Separate construction").textWidth(MaxContentTextWidth), constructor.separateConstruction);
+                AlienImGui::CheckboxParameters().name("Separate construction").textWidth(ContentTextWidth), constructor.separateConstruction);
             table.next();
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Adapt max connections").textWidth(MaxContentTextWidth), constructor.adaptMaxConnections);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Adapt max connections").textWidth(ContentTextWidth), constructor.adaptMaxConnections);
             int constructorMode = constructor.mode == 0 ? 0 : 1;
             table.next();
-            if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Activation mode").textWidth(MaxContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
+            if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Activation mode").textWidth(ContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
                 constructor.mode = constructorMode;
             }
             if (constructorMode == 1) {
                 table.next();
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(MaxContentTextWidth), constructor.mode);
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(ContentTextWidth), constructor.mode);
                 if (constructor.mode < 0) {
                     constructor.mode = 0;
                 }
             }
             table.next();
             AlienImGui::AngleAlignmentCombo(
-                AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(MaxContentTextWidth), constructor.angleAlignment);
+                AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(ContentTextWidth), constructor.angleAlignment);
             table.next();
             AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.05f).textWidth(MaxContentTextWidth),
+                AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth),
                 constructor.stiffness);
             table.next();
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(MaxContentTextWidth), constructor.constructionActivationTime);
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(ContentTextWidth), constructor.constructionActivationTime);
         } break;
         case CellFunction_Sensor: {
             auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
@@ -407,7 +409,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
 
             table.next();
             if (AlienImGui::Combo(
-                    AlienImGui::ComboParameters().name("Mode").textWidth(MaxContentTextWidth).values({"Scan vicinity", "Scan specific region"}), sensorMode)) {
+                    AlienImGui::ComboParameters().name("Mode").textWidth(ContentTextWidth).values({"Scan vicinity", "Scan specific region"}), sensorMode)) {
                 if (sensorMode == SensorMode_Neighborhood) {
                     sensor.fixedAngle.reset();
                 } else {
@@ -416,33 +418,33 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             }
             if (sensorMode == SensorMode_FixedAngle) {
                 table.next();
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Scan angle").textWidth(MaxContentTextWidth).format("%.1f"), *sensor.fixedAngle);
+                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Scan angle").textWidth(ContentTextWidth).format("%.1f"), *sensor.fixedAngle);
             }
             table.next();
-            AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(MaxContentTextWidth), sensor.color);
+            AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth), sensor.color);
 
             table.next();
             AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Min density").format("%.2f").step(0.05f).textWidth(MaxContentTextWidth), sensor.minDensity);
+                AlienImGui::InputFloatParameters().name("Min density").format("%.2f").step(0.05f).textWidth(ContentTextWidth), sensor.minDensity);
         } break;
         case CellFunction_Nerve: {
             auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
             bool pulseGeneration = nerve.pulseMode > 0;
             table.next();
-            if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Pulse generation").textWidth(MaxContentTextWidth), pulseGeneration)) {
+            if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Pulse generation").textWidth(ContentTextWidth), pulseGeneration)) {
                 nerve.pulseMode = pulseGeneration ? 1 : 0;
             }
             if (pulseGeneration) {
                 table.next();
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(MaxContentTextWidth), nerve.pulseMode);
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(ContentTextWidth), nerve.pulseMode);
                 bool alternation = nerve.alternationMode > 0;
                 table.next();
-                if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(MaxContentTextWidth), alternation)) {
+                if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(ContentTextWidth), alternation)) {
                     nerve.alternationMode = alternation ? 1 : 0;
                 }
                 if (alternation) {
                     table.next();
-                    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Number of pulses").textWidth(MaxContentTextWidth), nerve.alternationMode);
+                    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Number of pulses").textWidth(ContentTextWidth), nerve.alternationMode);
                 }
             }
         } break;
@@ -453,7 +455,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 AlienImGui::ComboParameters()
                     .name("Energy distribution")
                     .values({"Connected cells", "Transmitters and Constructors"})
-                    .textWidth(MaxContentTextWidth),
+                    .textWidth(ContentTextWidth),
                 attacker.mode);
         } break;
         case CellFunction_Injector: {
@@ -462,7 +464,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             auto& muscle = std::get<MuscleGenomeDescription>(*cell.cellFunction);
             table.next();
             AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Mode").values({"Movement", "Contraction and expansion", "Bending"}).textWidth(MaxContentTextWidth),
+                AlienImGui::ComboParameters().name("Mode").values({"Movement", "Contraction and expansion", "Bending"}).textWidth(ContentTextWidth),
                 muscle.mode);
         } break;
         case CellFunction_Placeholder1: {
@@ -478,14 +480,34 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         switch (type) {
         case CellFunction_Neuron: {
             auto& neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
-            if (ImGui::TreeNodeEx("Weight matrix", ImGuiTreeNodeFlags_None)) {
-                AlienImGui::InputFloatMatrix(AlienImGui::InputFloatMatrixParameters().step(0.1f), neuron.weights);
+            if (ImGui::TreeNodeEx("Weights and bias", ImGuiTreeNodeFlags_None)) {
+                AlienImGui::NeuronSelection(
+                    AlienImGui::NeuronSelectionParameters().outputButtonPositionFromRight(WeightsAndBiasSelectionTextWidth),
+                    neuron.weights,
+                    neuron.bias,
+                    _selectedInput,
+                    _selectedOutput);
+                DynamicTableLayout table;
+                if (table.begin()) {
+                    AlienImGui::InputFloat(
+                        AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(WeightsAndBiasTextWidth),
+                        neuron.weights[_selectedOutput][_selectedInput]);
+                    table.next();
+                    AlienImGui::InputFloat(
+                        AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(WeightsAndBiasTextWidth), neuron.bias[_selectedOutput]);
+                    table.end();
+                }
                 ImGui::TreePop();
             }
-            if (ImGui::TreeNodeEx("Bias", ImGuiTreeNodeFlags_None)) {
-                AlienImGui::InputFloatVector(AlienImGui::InputFloatVectorParameters().step(0.1f), neuron.bias);
-                ImGui::TreePop();
-            }
+
+            //if (ImGui::TreeNodeEx("Weight matrix", ImGuiTreeNodeFlags_None)) {
+            //    AlienImGui::InputFloatMatrix(AlienImGui::InputFloatMatrixParameters().step(0.1f), neuron.weights);
+            //    ImGui::TreePop();
+            //}
+            //if (ImGui::TreeNodeEx("Bias", ImGuiTreeNodeFlags_None)) {
+            //    AlienImGui::InputFloatVector(AlienImGui::InputFloatVectorParameters().step(0.1f), neuron.bias);
+            //    ImGui::TreePop();
+            //}
         } break;
         case CellFunction_Constructor: {
             auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);

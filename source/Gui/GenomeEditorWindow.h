@@ -38,6 +38,8 @@ private:
 
     std::vector<TabData> _tabDatas;
     int _selectedTabIndex = 0;
+    int _selectedInput = 0;
+    int _selectedOutput = 0;
 
     //actions
     std::optional<int> _tabIndexToSelect;

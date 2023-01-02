@@ -917,36 +917,79 @@ bool AlienImGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, 
     return AlienImGui::Combo(AlienImGui::ComboParameters().name(parameters._name).values(AngleAlignmentStrings).textWidth(parameters._textWidth), value);
 }
 
-void AlienImGui::InputNeuronProperties(
-    InputNeuronPropertiesParameters const& parameters,
-    std::vector<std::vector<float>>& weights,
-    std::vector<float>& bias,
+void AlienImGui::NeuronSelection(
+    NeuronSelectionParameters const& parameters,
+    std::vector<std::vector<float>> const& weights,
+    std::vector<float> const& bias,
     int& selectedInput,
     int& selectedOutput)
 {
     auto setDefaultColors = [] {
-        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0.1));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0, 0, 0.2));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0, 0, 0.2));
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::NeuronChannelButtonColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::NeuronChannelHoveredColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::NeuronChannelHoveredColor);
     };
     auto setHightlightingColors = [] {
-        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.08, 0.5, 0.5));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.08, 0.5, 0.7));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.08, 0.5, 0.7));
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::NeuronChannelActiveColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::NeuronChannelActiveColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::NeuronChannelActiveColor);
     };
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    auto windowPos = ImGui::GetWindowPos();
+    auto outputButtonPositionFromRight = StyleRepository::getInstance().scaleContent(parameters._outputButtonPositionFromRight);
+    RealVector2D inputPos[MAX_CHANNELS];
+    RealVector2D outputPos[MAX_CHANNELS];
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         
+        auto startButtonPos = ImGui::GetCursorPos();
+
         i == selectedInput ? setHightlightingColors() : setDefaultColors();
         if (ImGui::Button(("Input #" + std::to_string(i)).c_str())) {
             selectedInput = i;
         }
         ImGui::PopStyleColor(3);
+        auto buttonSize = ImGui::GetItemRectSize();
+        inputPos[i] = RealVector2D(
+            windowPos.x - ImGui::GetScrollX() + startButtonPos.x + buttonSize.x, windowPos.y - ImGui::GetScrollY() + startButtonPos.y + buttonSize.y / 2);
 
-        ImGui::SameLine(0, 100.0f);
+        ImGui::SameLine(0, ImGui::GetContentRegionAvail().x - buttonSize.x - outputButtonPositionFromRight + ImGui::GetStyle().FramePadding.x);
+        startButtonPos = ImGui::GetCursorPos();
+        outputPos[i] =
+            RealVector2D(windowPos.x - ImGui::GetScrollX() + startButtonPos.x, windowPos.y - ImGui::GetScrollY() + startButtonPos.y + buttonSize.y / 2);
+
         i == selectedOutput ? setHightlightingColors() : setDefaultColors();
         if (ImGui::Button(("Output #" + std::to_string(i)).c_str())) {
             selectedOutput = i;
         }
         ImGui::PopStyleColor(3);
     }
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int j = 0; j < MAX_CHANNELS; ++j) {
+            if (std::abs(weights[j][i]) > NEAR_ZERO) {
+                continue;
+            }
+            drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, ImColor::HSV(0.0f, 0.0f, 0.1f), 2.0f);
+        }
+    }
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int j = 0; j < MAX_CHANNELS; ++j) {
+            if (std::abs(weights[j][i]) <= NEAR_ZERO) {
+                continue;
+            }
+            auto color = [&] {
+                auto factor = std::min(1.0f, std::abs(weights[j][i]));
+                if (weights[j][i] > NEAR_ZERO) {
+                    return ImColor::HSV(0.61f, 0.5f, 0.8f * factor);
+                } else if (weights[j][i] < -NEAR_ZERO) {
+                    return ImColor::HSV(0.0f, 0.5f, 0.8f * factor);
+                } else {
+                    return ImColor::HSV(0.0f, 0.0f, 0.1f);
+                }
+            }();
+            auto thickness = std::min(4.0f, std::abs(weights[j][i]));
+            drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, color, thickness);
+        }
+    }
+    drawList->AddLine(
+        {inputPos[selectedInput].x, inputPos[selectedInput].y}, {outputPos[selectedOutput].x, outputPos[selectedOutput].y}, ImColor::HSV(0.0f, 0.0f, 1.0f));
 }
