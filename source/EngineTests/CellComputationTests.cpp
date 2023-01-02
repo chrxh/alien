@@ -40,6 +40,10 @@ std::string CellComputationTests::runSimpleCellComputer(std::string const& progr
 
     CompilationResult compiledProgram = CellComputationCompiler::compileSourceCode(program, symbols, parameters);
 
+    if(!compiledProgram.compilationOk) {
+        return "";
+    }
+
     DataDescription origData
         = DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().width(2).height(1));
     auto& origFirstCell = origData.cells.at(0);
@@ -426,3 +430,64 @@ TEST_F(CellComputationTests, divisionByZero)
     auto data = runSimpleCellComputer(program);
     EXPECT_EQ(0, data.at(1));
 }
+
+TEST_F(CellComputationTests, singleLineComment)
+{
+    std::string program = " # this is ignored\n";
+    auto data = runSimpleCellComputer(program);
+    EXPECT_EQ(0, data.at(1));
+}
+
+TEST_F(CellComputationTests, lineComment)
+{
+    std::string program = "mov [1], 55\n"
+                          "# this is ignored\n"
+                          "sub [1], 13\n";
+    auto data = runSimpleCellComputer(program);
+    EXPECT_EQ(42, data.at(1));
+}
+
+TEST_F(CellComputationTests, opComments)
+{
+    std::string program = "mov [1], 55 # this is ignored\n"
+                          "add [1], -13\n";
+    auto data = runSimpleCellComputer(program);
+    EXPECT_EQ(42, data.at(1));
+}
+
+TEST_F(CellComputationTests, ifelseendifComments)
+{
+    std::string program = "mov [1], 55\n"
+                          "if [1] < 3       # if comment\n"
+                          "div [1], 1\n"
+                          "else             # else comment\n"
+                          "div [1], 1\n"
+                          "endif            # endif comment\n";
+    auto data = runSimpleCellComputer(program);
+    EXPECT_EQ(55, data.at(1));
+}
+
+TEST_F(CellComputationTests, allComments)
+{
+    std::string program = "# first line comment\n"
+                          "mov [1], 2       # mov comment\n"
+                          "# empty line comment\n"
+                          "if [1] < 3       # if comment\n"
+                          "mov [2], 1       # mov comment\n"
+                          "else             # else comment\n"
+                          "                 # space line comment\n"
+                          "mov [2],2        # mov comment\n"
+                          "endif            # endif comment\n"
+                          "                 # last line comment";
+    auto data = runSimpleCellComputer(program);
+    EXPECT_EQ(1, data.at(2));
+}
+
+TEST_F(CellComputationTests, compileError)
+{
+    std::string program = "mov [1], 55  this triggers an error\n"
+                          "add [1], -13\n";
+    auto data = runSimpleCellComputer(program);
+    EXPECT_EQ(0, data.size());
+}
+
