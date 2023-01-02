@@ -74,17 +74,17 @@ __global__ void cudaCleanupAuxiliaryData(Array<Cell*> cellPointers, RawMemory au
         copyAndAssignNewAuxiliaryData(cell->metadata.name, cell->metadata.nameSize, auxiliaryData);
         copyAndAssignNewAuxiliaryData(cell->metadata.description, cell->metadata.descriptionSize, auxiliaryData);
         switch (cell->cellFunction) {
-        case Enums::CellFunction_Neuron:
+        case CellFunction_Neuron:
             copyAndAssignNewAuxiliaryData(
                 reinterpret_cast<uint8_t*&>(cell->cellFunctionData.neuron.neuronState),
                 sizeof(*cell->cellFunctionData.neuron.neuronState),
                 auxiliaryData);
             break;
-        case Enums::CellFunction_Constructor:
+        case CellFunction_Constructor:
             copyAndAssignNewAuxiliaryData(
                 cell->cellFunctionData.constructor.genome, cell->cellFunctionData.constructor.genomeSize, auxiliaryData);
             break;
-        case Enums::CellFunction_Injector:
+        case CellFunction_Injector:
             copyAndAssignNewAuxiliaryData(
                 cell->cellFunctionData.injector.genome, cell->cellFunctionData.injector.genomeSize, auxiliaryData);
             break;

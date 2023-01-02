@@ -105,7 +105,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
         writeBool(result, cell.inputBlocked);
         writeBool(result, cell.outputBlocked);
         switch (cell.getCellFunctionType()) {
-        case Enums::CellFunction_Neuron: {
+        case CellFunction_Neuron: {
             auto const& neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
             for (int row = 0; row < MAX_CHANNELS; ++row) {
                 for (int col = 0; col < MAX_CHANNELS; ++col) {
@@ -116,11 +116,11 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
                 writeNeuronProperty(result, neuron.bias[i]);
             }
         } break;
-        case Enums::CellFunction_Transmitter: {
+        case CellFunction_Transmitter: {
             auto const& transmitter = std::get<TransmitterGenomeDescription>(*cell.cellFunction);
             writeByte(result, transmitter.mode);
         } break;
-        case Enums::CellFunction_Constructor: {
+        case CellFunction_Constructor: {
             auto const& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
             writeByte(result, constructor.mode);
             writeBool(result, constructor.singleConstruction);
@@ -131,33 +131,33 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             writeWord(result, constructor.constructionActivationTime);
             writeGenome(result, constructor.genome);
         } break;
-        case Enums::CellFunction_Sensor: {
+        case CellFunction_Sensor: {
             auto const& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
-            writeByte(result, sensor.fixedAngle.has_value() ? Enums::SensorMode_FixedAngle : Enums::SensorMode_Neighborhood);
+            writeByte(result, sensor.fixedAngle.has_value() ? SensorMode_FixedAngle : SensorMode_Neighborhood);
             writeAngle(result, sensor.fixedAngle.has_value() ? *sensor.fixedAngle : 0.0f);
             writeDensity(result, sensor.minDensity);
             writeByte(result, sensor.color);
         } break;
-        case Enums::CellFunction_Nerve: {
+        case CellFunction_Nerve: {
             auto const& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
             writeByte(result, nerve.pulseMode);
             writeByte(result, nerve.alternationMode);
         } break;
-        case Enums::CellFunction_Attacker: {
+        case CellFunction_Attacker: {
             auto const& attacker = std::get<AttackerGenomeDescription>(*cell.cellFunction);
             writeByte(result, attacker.mode);
         } break;
-        case Enums::CellFunction_Injector: {
+        case CellFunction_Injector: {
             auto const& injector = std::get<InjectorGenomeDescription>(*cell.cellFunction);
             writeGenome(result, injector.genome);
         } break;
-        case Enums::CellFunction_Muscle: {
+        case CellFunction_Muscle: {
             auto const& muscle = std::get<MuscleGenomeDescription>(*cell.cellFunction);
             writeByte(result, muscle.mode);
         } break;
-        case Enums::CellFunction_Placeholder1: {
+        case CellFunction_Placeholder1: {
         } break;
-        case Enums::CellFunction_Placeholder2: {
+        case CellFunction_Placeholder2: {
         } break;
         }
         ++index;
@@ -170,7 +170,7 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
     int pos = 0;
     GenomeDescription result;
     while (pos < data.size()) {
-        Enums::CellFunction cellFunction = readByte(data, pos) % Enums::CellFunction_Count;
+        CellFunction cellFunction = readByte(data, pos) % CellFunction_Count;
 
         CellGenomeDescription cell;
         cell.referenceAngle = readAngle(data, pos);
@@ -182,7 +182,7 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
         cell.outputBlocked = readBool(data, pos);
 
         switch (cellFunction) {
-        case Enums::CellFunction_Neuron: {
+        case CellFunction_Neuron: {
             NeuronGenomeDescription neuron;
             for (int row = 0; row < MAX_CHANNELS; ++row) {
                 for (int col = 0; col < MAX_CHANNELS; ++col) {
@@ -194,59 +194,59 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
             }
             cell.cellFunction = neuron;
         } break;
-        case Enums::CellFunction_Transmitter: {
+        case CellFunction_Transmitter: {
             TransmitterGenomeDescription transmitter;
-            transmitter.mode = readByte(data, pos) % Enums::EnergyDistributionMode_Count;
+            transmitter.mode = readByte(data, pos) % EnergyDistributionMode_Count;
             cell.cellFunction = transmitter;
         } break;
-        case Enums::CellFunction_Constructor: {
+        case CellFunction_Constructor: {
             ConstructorGenomeDescription constructor;
             constructor.mode = readByte(data, pos);
             constructor.singleConstruction = readBool(data, pos);
             constructor.separateConstruction = readBool(data, pos);
             constructor.adaptMaxConnections = readBool(data, pos);
-            constructor.angleAlignment = readByte(data, pos) % Enums::ConstructorAngleAlignment_Count;
+            constructor.angleAlignment = readByte(data, pos) % ConstructorAngleAlignment_Count;
             constructor.stiffness = readStiffness(data, pos);
             constructor.constructionActivationTime = readWord(data, pos);
             constructor.genome = readGenome(data, pos);
             cell.cellFunction = constructor;
         } break;
-        case Enums::CellFunction_Sensor: {
+        case CellFunction_Sensor: {
             SensorGenomeDescription sensor;
-            auto mode = readByte(data, pos) % Enums::SensorMode_Count;
+            auto mode = readByte(data, pos) % SensorMode_Count;
             auto angle = readAngle(data, pos);
-            if (mode == Enums::SensorMode_FixedAngle) {
+            if (mode == SensorMode_FixedAngle) {
                 sensor.fixedAngle = angle;
             }
             sensor.minDensity = readDensity(data, pos);
             sensor.color = readByte(data, pos) % MAX_COLORS;
             cell.cellFunction = sensor;
         } break;
-        case Enums::CellFunction_Nerve: {
+        case CellFunction_Nerve: {
             NerveGenomeDescription nerve;
             nerve.pulseMode = readByte(data, pos);
             nerve.alternationMode = readByte(data, pos);
             cell.cellFunction = nerve;
         } break;
-        case Enums::CellFunction_Attacker: {
+        case CellFunction_Attacker: {
             AttackerGenomeDescription attacker;
-            attacker.mode = readByte(data, pos) % Enums::EnergyDistributionMode_Count;
+            attacker.mode = readByte(data, pos) % EnergyDistributionMode_Count;
             cell.cellFunction = attacker;
         } break;
-        case Enums::CellFunction_Injector: {
+        case CellFunction_Injector: {
             InjectorGenomeDescription injector;
             injector.genome = readGenome(data, pos);
             cell.cellFunction = injector;
         } break;
-        case Enums::CellFunction_Muscle: {
+        case CellFunction_Muscle: {
             MuscleGenomeDescription muscle;
-            muscle.mode = readByte(data, pos) % Enums::MuscleMode_Count;
+            muscle.mode = readByte(data, pos) % MuscleMode_Count;
             cell.cellFunction = muscle;
         } break;
-        case Enums::CellFunction_Placeholder1: {
+        case CellFunction_Placeholder1: {
             cell.cellFunction = PlaceHolderGenomeDescription1();
         } break;
-        case Enums::CellFunction_Placeholder2: {
+        case CellFunction_Placeholder2: {
             cell.cellFunction = PlaceHolderGenomeDescription2();
         } break;
         }

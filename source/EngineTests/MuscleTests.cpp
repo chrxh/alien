@@ -30,7 +30,7 @@ TEST_F(MuscleTests, doNothing)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({10.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(MuscleDescription().setMode(Enums::MuscleMode_Movement)),
+        {CellDescription().setId(1).setPos({10.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(MuscleDescription().setMode(MuscleMode_Movement)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -65,7 +65,7 @@ TEST_F(MuscleTests, moveForward)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
-             .setCellFunction(MuscleDescription().setMode(Enums::MuscleMode_Movement)),
+             .setCellFunction(MuscleDescription().setMode(MuscleMode_Movement)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -100,7 +100,7 @@ TEST_F(MuscleTests, moveBackward)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
-             .setCellFunction(MuscleDescription().setMode(Enums::MuscleMode_Movement)),
+             .setCellFunction(MuscleDescription().setMode(MuscleMode_Movement)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -134,7 +134,7 @@ TEST_F(MuscleTests, multipleMovementDirections)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(MuscleDescription().setMode(Enums::MuscleMode_Movement)),
+            .setCellFunction(MuscleDescription().setMode(MuscleMode_Movement)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -175,7 +175,7 @@ TEST_F(MuscleTests, expansion)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
-             .setCellFunction(MuscleDescription().setMode(Enums::MuscleMode_ContractionExpansion)),
+             .setCellFunction(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
          CellDescription()
              .setId(2)
              .setPos({10.0f + smallDistance, 10.0f})
@@ -211,7 +211,7 @@ TEST_F(MuscleTests, expansionNotPossible)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
-             .setCellFunction(MuscleDescription().setMode(Enums::MuscleMode_ContractionExpansion)),
+             .setCellFunction(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
          CellDescription()
              .setId(2)
              .setPos({10.0f + largeDistance, 10.0f})
@@ -243,7 +243,7 @@ TEST_F(MuscleTests, contraction)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
-             .setCellFunction(MuscleDescription().setMode(Enums::MuscleMode_ContractionExpansion)),
+             .setCellFunction(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
          CellDescription()
              .setId(2)
              .setPos({10.0f + largeDistance, 10.0f})
@@ -276,7 +276,7 @@ TEST_F(MuscleTests, multipleContraction)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(MuscleDescription().setMode(Enums::MuscleMode_ContractionExpansion)),
+            .setCellFunction(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
         CellDescription()
             .setId(2)
             .setPos({10.0f + largeDistance, 10.0f})
@@ -319,7 +319,7 @@ TEST_F(MuscleTests, contractionNotPossible)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
-             .setCellFunction(MuscleDescription().setMode(Enums::MuscleMode_ContractionExpansion)),
+             .setCellFunction(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
          CellDescription()
              .setId(2)
              .setPos({10.0f + smallDistance, 10.0f})
@@ -350,7 +350,7 @@ TEST_F(MuscleTests, bendClockwise)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(MuscleDescription().setMode(Enums::MuscleMode_Bending)),
+            .setCellFunction(MuscleDescription().setMode(MuscleMode_Bending)),
         CellDescription()
             .setId(3)
             .setPos({11.0f, 10.0f})
@@ -390,7 +390,7 @@ TEST_F(MuscleTests, bendCounterClockwise)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(MuscleDescription().setMode(Enums::MuscleMode_Bending)),
+            .setCellFunction(MuscleDescription().setMode(MuscleMode_Bending)),
         CellDescription()
             .setId(3)
             .setPos({11.0f, 10.0f})

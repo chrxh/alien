@@ -128,7 +128,7 @@ namespace
 
         //process sub genomes
         for (auto const& [node, cellIntern] : boost::combine(genome, cellsIntern)) {
-            if (node.getCellFunctionType() == Enums::CellFunction_Constructor) {
+            if (node.getCellFunctionType() == CellFunction_Constructor) {
                 auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
                 if (constructor.isMakeGenomeCopy()) {
                     continue;

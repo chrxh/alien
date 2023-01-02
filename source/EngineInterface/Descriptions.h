@@ -83,11 +83,11 @@ struct NeuronDescription
 
 struct TransmitterDescription
 {
-    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_TransmittersAndConstructors;
+    EnergyDistributionMode mode = EnergyDistributionMode_TransmittersAndConstructors;
 
     auto operator<=>(TransmitterDescription const&) const = default;
 
-    TransmitterDescription& setMode(Enums::EnergyDistributionMode value)
+    TransmitterDescription& setMode(EnergyDistributionMode value)
     {
         mode = value;
         return *this;
@@ -100,7 +100,7 @@ struct ConstructorDescription
     bool singleConstruction = false;
     bool separateConstruction = true;
     bool adaptMaxConnections = true;
-    Enums::ConstructorAngleAlignment angleAlignment = Enums::ConstructorAngleAlignment_60;
+    ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
     float stiffness = 1.0f;
     int constructionActivationTime = 100;
     std::vector<uint8_t> genome;
@@ -130,7 +130,7 @@ struct ConstructorDescription
         adaptMaxConnections = value;
         return *this;
     }
-    ConstructorDescription& setAngleAlignment(Enums::ConstructorAngleAlignment value)
+    ConstructorDescription& setAngleAlignment(ConstructorAngleAlignment value)
     {
         angleAlignment = value;
         return *this;
@@ -165,7 +165,7 @@ struct SensorDescription
 
     auto operator<=>(SensorDescription const&) const = default;
 
-    Enums::SensorMode getSensorMode() const { return fixedAngle.has_value() ? Enums::SensorMode_FixedAngle : Enums::SensorMode_Neighborhood; }
+    SensorMode getSensorMode() const { return fixedAngle.has_value() ? SensorMode_FixedAngle : SensorMode_Neighborhood; }
     SensorDescription& setFixedAngle(float value)
     {
         fixedAngle = value;
@@ -199,11 +199,11 @@ struct NerveDescription
 
 struct AttackerDescription
 {
-    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_TransmittersAndConstructors;
+    EnergyDistributionMode mode = EnergyDistributionMode_TransmittersAndConstructors;
 
     auto operator<=>(AttackerDescription const&) const = default;
 
-    AttackerDescription& setMode(Enums::EnergyDistributionMode value)
+    AttackerDescription& setMode(EnergyDistributionMode value)
     {
         mode = value;
         return *this;
@@ -219,11 +219,11 @@ struct InjectorDescription
 
 struct MuscleDescription
 {
-    Enums::MuscleMode mode = Enums::MuscleMode_Movement;
+    MuscleMode mode = MuscleMode_Movement;
 
     auto operator<=>(MuscleDescription const&) const = default;
 
-    MuscleDescription& setMode(Enums::MuscleMode value)
+    MuscleDescription& setMode(MuscleMode value)
     {
         mode = value;
         return *this;
@@ -268,7 +268,7 @@ struct CellDescription
     int age = 0;
 
     //cell function
-    Enums::LivingState livingState = Enums::LivingState_Ready;
+    LivingState livingState = LivingState_Ready;
     int executionOrderNumber = 0;
     bool inputBlocked = false;
     bool outputBlocked = false;
@@ -337,7 +337,7 @@ struct CellDescription
         executionOrderNumber = value;
         return *this;
     }
-    CellDescription& setConstructionState(Enums::LivingState value)
+    CellDescription& setConstructionState(LivingState value)
     {
         livingState = value;
         return *this;
@@ -352,7 +352,7 @@ struct CellDescription
         outputBlocked = value;
         return *this;
     }
-    Enums::CellFunction getCellFunctionType() const;
+    CellFunction getCellFunctionType() const;
     template <typename CellFunctionDesc>
     CellDescription& setCellFunction(CellFunctionDesc const& value)
     {

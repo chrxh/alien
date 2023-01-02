@@ -63,7 +63,7 @@ namespace
         }
 
         switch (cell->cellFunction) {
-        case Enums::CellFunction_Neuron: {
+        case CellFunction_Neuron: {
             uint64_t targetSize;    //not used
             copyAuxiliaryData(
                 sizeof(NeuronFunction::NeuronState),
@@ -73,10 +73,10 @@ namespace
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
         } break;
-        case Enums::CellFunction_Transmitter: {
+        case CellFunction_Transmitter: {
             cellTO.cellFunctionData.transmitter.mode = cell->cellFunctionData.transmitter.mode;
         } break;
-        case Enums::CellFunction_Constructor: {
+        case CellFunction_Constructor: {
             cellTO.cellFunctionData.constructor.activationMode = cell->cellFunctionData.constructor.activationMode;
             cellTO.cellFunctionData.constructor.singleConstruction = cell->cellFunctionData.constructor.singleConstruction;
             cellTO.cellFunctionData.constructor.separateConstruction = cell->cellFunctionData.constructor.separateConstruction;
@@ -93,20 +93,20 @@ namespace
                 dataTO.auxiliaryData);
             cellTO.cellFunctionData.constructor.currentGenomePos = cell->cellFunctionData.constructor.currentGenomePos;
         } break;
-        case Enums::CellFunction_Sensor: {
+        case CellFunction_Sensor: {
             cellTO.cellFunctionData.sensor.mode = cell->cellFunctionData.sensor.mode;
             cellTO.cellFunctionData.sensor.angle = cell->cellFunctionData.sensor.angle;
             cellTO.cellFunctionData.sensor.minDensity = cell->cellFunctionData.sensor.minDensity;
             cellTO.cellFunctionData.sensor.color = cell->cellFunctionData.sensor.color;
         } break;
-        case Enums::CellFunction_Nerve: {
+        case CellFunction_Nerve: {
             cellTO.cellFunctionData.nerve.pulseMode = cell->cellFunctionData.nerve.pulseMode;
             cellTO.cellFunctionData.nerve.alternationMode = cell->cellFunctionData.nerve.alternationMode;
         } break;
-        case Enums::CellFunction_Attacker: {
+        case CellFunction_Attacker: {
             cellTO.cellFunctionData.attacker.mode = cell->cellFunctionData.attacker.mode;
         } break;
-        case Enums::CellFunction_Injector: {
+        case CellFunction_Injector: {
             copyAuxiliaryData(
                 cell->cellFunctionData.injector.genomeSize,
                 cell->cellFunctionData.injector.genome,
@@ -115,12 +115,12 @@ namespace
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
         } break;
-        case Enums::CellFunction_Muscle: {
+        case CellFunction_Muscle: {
             cellTO.cellFunctionData.muscle.mode = cell->cellFunctionData.muscle.mode;
         } break;
-        case Enums::CellFunction_Placeholder1: {
+        case CellFunction_Placeholder1: {
         } break;
-        case Enums::CellFunction_Placeholder2: {
+        case CellFunction_Placeholder2: {
         } break;
         }
     }

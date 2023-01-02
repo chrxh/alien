@@ -31,7 +31,7 @@ private:
 /************************************************************************/
 __device__ __inline__ void MuscleProcessor::process(SimulationData& data, SimulationResult& result)
 {
-    auto& operations = data.cellFunctionOperations[Enums::CellFunction_Muscle];
+    auto& operations = data.cellFunctionOperations[CellFunction_Muscle];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, result, operations.at(i).cell);
@@ -44,13 +44,13 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     auto activity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
 
     switch (cell->cellFunctionData.muscle.mode) {
-    case Enums::MuscleMode_Movement: {
+    case MuscleMode_Movement: {
         movement(data, result, cell, inputExecutionOrderNumber, activity);
     } break;
-    case Enums::MuscleMode_ContractionExpansion: {
+    case MuscleMode_ContractionExpansion: {
         contractionExpansion(data, result, cell, inputExecutionOrderNumber, activity);
     } break;
-    case Enums::MuscleMode_Bending: {
+    case MuscleMode_Bending: {
         bending(data, result, cell, inputExecutionOrderNumber, activity);
     } break;
     }

@@ -904,10 +904,10 @@ bool AlienImGui::CellFunctionCombo(CellFunctionComboParameters& parameters, int&
     modCellFunctionStrings.pop_back();
     modCellFunctionStrings.insert(modCellFunctionStrings.begin(), noneString);
 
-    value = (value + 1) % Enums::CellFunction_Count;
+    value = (value + 1) % CellFunction_Count;
     auto result =
         AlienImGui::Combo(AlienImGui::ComboParameters().name(parameters._name).values(modCellFunctionStrings).textWidth(parameters._textWidth), value);
-    value = (value + Enums::CellFunction_Count - 1) % Enums::CellFunction_Count;
+    value = (value + CellFunction_Count - 1) % CellFunction_Count;
     return result;
 }
 

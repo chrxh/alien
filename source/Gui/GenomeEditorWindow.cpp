@@ -241,40 +241,40 @@ namespace
         int _elementNumber = 0;
     };
 
-    void applyNewCellFunction(CellGenomeDescription&cell, Enums::CellFunction type)
+    void applyNewCellFunction(CellGenomeDescription&cell, CellFunction type)
     {
         switch (type) {
-        case Enums::CellFunction_Neuron: {
+        case CellFunction_Neuron: {
             cell.cellFunction = NeuronGenomeDescription();
         } break;
-        case Enums::CellFunction_Transmitter: {
+        case CellFunction_Transmitter: {
             cell.cellFunction = TransmitterGenomeDescription();
         } break;
-        case Enums::CellFunction_Constructor: {
+        case CellFunction_Constructor: {
             cell.cellFunction = ConstructorGenomeDescription();
         } break;
-        case Enums::CellFunction_Sensor: {
+        case CellFunction_Sensor: {
             cell.cellFunction = SensorGenomeDescription();
         } break;
-        case Enums::CellFunction_Nerve: {
+        case CellFunction_Nerve: {
             cell.cellFunction = NerveGenomeDescription();
         } break;
-        case Enums::CellFunction_Attacker: {
+        case CellFunction_Attacker: {
             cell.cellFunction = AttackerGenomeDescription();
         } break;
-        case Enums::CellFunction_Injector: {
+        case CellFunction_Injector: {
             cell.cellFunction = InjectorGenomeDescription();
         } break;
-        case Enums::CellFunction_Muscle: {
+        case CellFunction_Muscle: {
             cell.cellFunction = MuscleGenomeDescription();
         } break;
-        case Enums::CellFunction_Placeholder1: {
+        case CellFunction_Placeholder1: {
             cell.cellFunction = PlaceHolderGenomeDescription1();
         } break;
-        case Enums::CellFunction_Placeholder2: {
+        case CellFunction_Placeholder2: {
             cell.cellFunction = PlaceHolderGenomeDescription2();
         } break;
-        case Enums::CellFunction_None: {
+        case CellFunction_None: {
             cell.cellFunction.reset();
         } break;
         }
@@ -356,9 +356,9 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(MaxContentTextWidth), cell.outputBlocked);
 
         switch (type) {
-        case Enums::CellFunction_Neuron: {
+        case CellFunction_Neuron: {
         } break;
-        case Enums::CellFunction_Transmitter: {
+        case CellFunction_Transmitter: {
             auto& transmitter = std::get<TransmitterGenomeDescription>(*cell.cellFunction);
 
             table.next();
@@ -369,7 +369,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                     .textWidth(MaxContentTextWidth),
                 transmitter.mode);
         } break;
-        case Enums::CellFunction_Constructor: {
+        case CellFunction_Constructor: {
             auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
 
             table.next();
@@ -401,20 +401,20 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             table.next();
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(MaxContentTextWidth), constructor.constructionActivationTime);
         } break;
-        case Enums::CellFunction_Sensor: {
+        case CellFunction_Sensor: {
             auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
             auto sensorMode = sensor.getSensorMode();
 
             table.next();
             if (AlienImGui::Combo(
                     AlienImGui::ComboParameters().name("Mode").textWidth(MaxContentTextWidth).values({"Scan vicinity", "Scan specific region"}), sensorMode)) {
-                if (sensorMode == Enums::SensorMode_Neighborhood) {
+                if (sensorMode == SensorMode_Neighborhood) {
                     sensor.fixedAngle.reset();
                 } else {
                     sensor.fixedAngle = 0.0f;
                 }
             }
-            if (sensorMode == Enums::SensorMode_FixedAngle) {
+            if (sensorMode == SensorMode_FixedAngle) {
                 table.next();
                 AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Scan angle").textWidth(MaxContentTextWidth).format("%.1f"), *sensor.fixedAngle);
             }
@@ -425,7 +425,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Min density").format("%.2f").step(0.05f).textWidth(MaxContentTextWidth), sensor.minDensity);
         } break;
-        case Enums::CellFunction_Nerve: {
+        case CellFunction_Nerve: {
             auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
             bool pulseGeneration = nerve.pulseMode > 0;
             table.next();
@@ -446,7 +446,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 }
             }
         } break;
-        case Enums::CellFunction_Attacker: {
+        case CellFunction_Attacker: {
             auto& attacker = std::get<AttackerGenomeDescription>(*cell.cellFunction);
             table.next();
             AlienImGui::Combo(
@@ -456,27 +456,27 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                     .textWidth(MaxContentTextWidth),
                 attacker.mode);
         } break;
-        case Enums::CellFunction_Injector: {
+        case CellFunction_Injector: {
         } break;
-        case Enums::CellFunction_Muscle: {
+        case CellFunction_Muscle: {
             auto& muscle = std::get<MuscleGenomeDescription>(*cell.cellFunction);
             table.next();
             AlienImGui::Combo(
                 AlienImGui::ComboParameters().name("Mode").values({"Movement", "Contraction and expansion", "Bending"}).textWidth(MaxContentTextWidth),
                 muscle.mode);
         } break;
-        case Enums::CellFunction_Placeholder1: {
+        case CellFunction_Placeholder1: {
         } break;
-        case Enums::CellFunction_Placeholder2: {
+        case CellFunction_Placeholder2: {
         } break;
-        case Enums::CellFunction_None: {
+        case CellFunction_None: {
         } break;
         }
 
         table.end();
 
         switch (type) {
-        case Enums::CellFunction_Neuron: {
+        case CellFunction_Neuron: {
             auto& neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
             if (ImGui::TreeNodeEx("Weight matrix", ImGuiTreeNodeFlags_None)) {
                 AlienImGui::InputFloatMatrix(AlienImGui::InputFloatMatrixParameters().step(0.1f), neuron.weights);
@@ -487,7 +487,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 ImGui::TreePop();
             }
         } break;
-        case Enums::CellFunction_Constructor: {
+        case CellFunction_Constructor: {
             auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
             std::string content;
             if (constructor.isMakeGenomeCopy()) {
@@ -550,18 +550,18 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
     cell.referenceDistance = std::max(0.0f, cell.referenceDistance);
 
     switch (cell.getCellFunctionType()) {
-    case Enums::CellFunction_Constructor: {
+    case CellFunction_Constructor: {
         auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
         if (constructor.mode < 0) {
             constructor.mode = 0;
         }
         constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
     } break;
-    case Enums::CellFunction_Sensor: {
+    case CellFunction_Sensor: {
         auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
         sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
     } break;
-    case Enums::CellFunction_Nerve: {
+    case CellFunction_Nerve: {
         auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
         nerve.pulseMode = std::max(0, nerve.pulseMode);
         nerve.alternationMode = std::max(0, nerve.alternationMode);

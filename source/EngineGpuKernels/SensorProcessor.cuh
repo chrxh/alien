@@ -28,7 +28,7 @@ private:
 
 __inline__ __device__ void SensorProcessor::process(SimulationData& data, SimulationResult& result)
 {
-    auto& operations = data.cellFunctionOperations[Enums::CellFunction_Sensor];
+    auto& operations = data.cellFunctionOperations[CellFunction_Sensor];
     auto partition = calcBlockPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, result, operations.at(i).cell);
@@ -46,10 +46,10 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 
     if (activity.channels[0] > cudaSimulationParameters.cellFunctionSensorActivityThreshold) {
         switch (cell->cellFunctionData.sensor.mode) {
-        case Enums::SensorMode_Neighborhood: {
+        case SensorMode_Neighborhood: {
             searchNeighborhood(data, result, cell, inputExecutionOrderNumber, activity);
         } break;
-        case Enums::SensorMode_FixedAngle: {
+        case SensorMode_FixedAngle: {
             searchByAngle(data, result, cell, inputExecutionOrderNumber, activity);
         } break;
         }

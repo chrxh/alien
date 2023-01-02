@@ -37,7 +37,7 @@ public:
     __inline__ __device__ static float2 rotateClockwise(float2 const& v, float angle);
     __inline__ __device__ static float subtractAngle(float angleMinuend, float angleSubtrahend);
     __inline__ __device__ static float calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, float boundary = 0);
-    __inline__ __device__ static float alignAngle(float angle, Enums::ConstructorAngleAlignment alignment);
+    __inline__ __device__ static float alignAngle(float angle, ConstructorAngleAlignment alignment);
     __inline__ __device__ static bool
     crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd);
 };
@@ -263,9 +263,9 @@ Math::calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSeg
     return abs(signedDistanceFromLine);
 }
 
-__inline__ __device__ float Math::alignAngle(float angle, Enums::ConstructorAngleAlignment alignment)
+__inline__ __device__ float Math::alignAngle(float angle, ConstructorAngleAlignment alignment)
 {
-    if (Enums::ConstructorAngleAlignment_None == alignment) {
+    if (ConstructorAngleAlignment_None == alignment) {
         return angle;
     }
     float unitAngle = 360.0f / (alignment + 1);

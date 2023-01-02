@@ -34,7 +34,7 @@ private:
     __inline__ __device__ static int getNextCellFunctionType(ConstructorFunction const& constructor, int genomePos);
     __inline__ __device__ static bool getNextCellFunctionMakeSelfCopy(ConstructorFunction const& constructor, int genomePos);
     __inline__ __device__ static int getCellFunctionDataSize(
-        Enums::CellFunction cellFunction,
+        CellFunction cellFunction,
         bool makeSelfCopy,
         int genomeSize);  //genomeSize only relevant for cellFunction = constructor or injector
 };
@@ -67,7 +67,7 @@ __inline__ __device__ void MutationProcessor::mutateData(SimulationData& data, C
             auto delta = data.numberGen1.random(nextCellFunctionGenomeBytes - 1);
             auto type = getNextCellFunctionType(constructor, genomePos);
             //do not override makeSelfCopy flag and length bytes (at relative position is CellBasicBytes + ConstructorFixedBytes)!
-            if (type == Enums::CellFunction_Constructor) {
+            if (type == CellFunction_Constructor) {
                 if (delta == ConstructorFixedBytes) {
                     return;
                 }
@@ -76,7 +76,7 @@ __inline__ __device__ void MutationProcessor::mutateData(SimulationData& data, C
                     return;
                 }
             }
-            if (type == Enums::CellFunction_Injector) {
+            if (type == CellFunction_Injector) {
                 if (delta == InjectorFixedBytes) {
                     return;
                 }
@@ -102,7 +102,7 @@ __inline__ __device__ void MutationProcessor::mutateNeuronData(SimulationData& d
     auto genomePos = getGenomeByteIndex(constructor, cellIndex);
 
     auto type = getNextCellFunctionType(constructor, genomePos);
-    if (type == Enums::CellFunction_Neuron) {
+    if (type == CellFunction_Neuron) {
         auto delta = data.numberGen1.random(NeuronBytes - 1);
         genomePos = (genomePos + CellBasicBytes + delta) % constructor.genomeSize;
         constructor.genome[genomePos] = data.numberGen1.randomByte();
@@ -141,7 +141,7 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
     //        targetGenome[pos] = constructor.genome[pos];
     //    }
 
-    //    targetGenome[sourceGenomePos] = data.numberGen1.random(Enums::CellFunction_Count - 1);
+    //    targetGenome[sourceGenomePos] = data.numberGen1.random(CellFunction_Count - 1);
     //    auto cellFunctionDataSize =
     //        getCellFunctionDataSize(targetGenome[sourceGenomePos], data.numberGen1.randomByte(), data.numberGen1.random(CellFunctionMutationMaxGenomeSize));
     //    for (int pos = sourceGenomePos + CellBasicBytes; pos < sourceGenomePos + CellBasicBytes + cellFunctionDataSize; ++pos) {
@@ -234,11 +234,11 @@ __inline__ __device__ int MutationProcessor::getNextCellFunctionGenomeBytes(Cons
 {
     auto cellFunction = getNextCellFunctionType(constructor, genomePos);
     switch (cellFunction) {
-    case Enums::CellFunction_Neuron:
+    case CellFunction_Neuron:
         return NeuronBytes;
-    case Enums::CellFunction_Transmitter:
+    case CellFunction_Transmitter:
         return TransmitterBytes;
-    case Enums::CellFunction_Constructor: {
+    case CellFunction_Constructor: {
         auto makeCopyIndex = genomePos + CellBasicBytes + ConstructorFixedBytes;
         auto isMakeCopy = GenomeDecoder::convertByteToBool(constructor.genome[makeCopyIndex % constructor.genomeSize]);
         if (isMakeCopy) {
@@ -250,13 +250,13 @@ __inline__ __device__ int MutationProcessor::getNextCellFunctionGenomeBytes(Cons
             return ConstructorFixedBytes + 3 + genomeSize;
         }
     }
-    case Enums::CellFunction_Sensor:
+    case CellFunction_Sensor:
         return SensorBytes;
-    case Enums::CellFunction_Nerve:
+    case CellFunction_Nerve:
         return NerveBytes;
-    case Enums::CellFunction_Attacker:
+    case CellFunction_Attacker:
         return AttackerBytes;
-    case Enums::CellFunction_Injector: {
+    case CellFunction_Injector: {
         auto makeCopyIndex = genomePos + CellBasicBytes + InjectorFixedBytes;
         auto isMakeCopy = GenomeDecoder::convertByteToBool(constructor.genome[makeCopyIndex % constructor.genomeSize]);
         if (isMakeCopy) {
@@ -268,7 +268,7 @@ __inline__ __device__ int MutationProcessor::getNextCellFunctionGenomeBytes(Cons
             return InjectorFixedBytes + 3 + genomeSize;
         }
     }
-    case Enums::CellFunction_Muscle:
+    case CellFunction_Muscle:
         return MuscleBytes;
     default:
         return 0;
@@ -277,41 +277,41 @@ __inline__ __device__ int MutationProcessor::getNextCellFunctionGenomeBytes(Cons
 
 __inline__ __device__ int MutationProcessor::getNextCellFunctionType(ConstructorFunction const& constructor, int genomePos)
 {
-    return constructor.genome[genomePos] % Enums::CellFunction_Count;
+    return constructor.genome[genomePos] % CellFunction_Count;
 }
 
 __inline__ __device__ bool MutationProcessor::getNextCellFunctionMakeSelfCopy(ConstructorFunction const& constructor, int genomePos)
 {
     switch (getNextCellFunctionType(constructor, genomePos)) {
-    case Enums::CellFunction_Constructor:
+    case CellFunction_Constructor:
         return GenomeDecoder::convertByteToBool(constructor.genome[(genomePos + CellBasicBytes + ConstructorFixedBytes) % constructor.genomeSize]);
-    case Enums::CellFunction_Injector:
+    case CellFunction_Injector:
         return GenomeDecoder::convertByteToBool(constructor.genome[(genomePos + CellBasicBytes + InjectorFixedBytes) % constructor.genomeSize]);
     default:
         return false;
     }
 }
 
-__inline__ __device__ int MutationProcessor::getCellFunctionDataSize(Enums::CellFunction cellFunction, bool makeSelfCopy, int genomeSize)
+__inline__ __device__ int MutationProcessor::getCellFunctionDataSize(CellFunction cellFunction, bool makeSelfCopy, int genomeSize)
 {
     switch (cellFunction) {
-    case Enums::CellFunction_Neuron:
+    case CellFunction_Neuron:
         return NeuronBytes;
-    case Enums::CellFunction_Transmitter:
+    case CellFunction_Transmitter:
         return TransmitterBytes;
-    case Enums::CellFunction_Constructor: {
+    case CellFunction_Constructor: {
         return makeSelfCopy ? ConstructorFixedBytes + 1 : ConstructorFixedBytes + 3 + genomeSize;
     }
-    case Enums::CellFunction_Sensor:
+    case CellFunction_Sensor:
         return SensorBytes;
-    case Enums::CellFunction_Nerve:
+    case CellFunction_Nerve:
         return NerveBytes;
-    case Enums::CellFunction_Attacker:
+    case CellFunction_Attacker:
         return AttackerBytes;
-    case Enums::CellFunction_Injector: {
+    case CellFunction_Injector: {
         return makeSelfCopy ? InjectorFixedBytes + 1 : InjectorFixedBytes + 3 + genomeSize;
     }
-    case Enums::CellFunction_Muscle:
+    case CellFunction_Muscle:
         return MuscleBytes;
     default:
         return 0;

@@ -26,7 +26,7 @@ public:
         float desiredAngleOnCell1,
         float desiredAngleOnCell2,
         float desiredDistance,
-        Enums::ConstructorAngleAlignment angleAlignment = Enums::ConstructorAngleAlignment_None);
+        ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_None);
     __inline__ __device__ static void delConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void delConnectionOneWay(Cell* cell1, Cell* cell2);
 
@@ -41,7 +41,7 @@ private:
         float2 const& posDelta,
         float desiredDistance,
         float desiredAngleOnCell1 = 0,
-        Enums::ConstructorAngleAlignment angleAlignment = Enums::ConstructorAngleAlignment_None);
+        ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_None);
     __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, Cell* cell2);
 
     __inline__ __device__ static void delConnectionsIntern(SimulationData& data, Cell* cell);
@@ -150,7 +150,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnections(
     float desiredAngleOnCell1,
     float desiredAngleOnCell2,
     float desiredDistance,
-    Enums::ConstructorAngleAlignment angleAlignment)
+    ConstructorAngleAlignment angleAlignment)
 {
     auto posDelta = cell2->absPos - cell1->absPos;
     data.cellMap.correctDirection(posDelta);
@@ -212,7 +212,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     float2 const& posDelta,
     float desiredDistance,
     float desiredAngleOnCell1,
-    Enums::ConstructorAngleAlignment angleAlignment)
+    ConstructorAngleAlignment angleAlignment)
 {
     if (wouldResultInOverlappingConnection(cell1, cell2)) {
         return false;
@@ -238,7 +238,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         if (0 != desiredAngleOnCell1) {
             angleDiff = desiredAngleOnCell1;
         }
-        angleDiff = Math::alignAngle(angleDiff, angleAlignment % Enums::ConstructorAngleAlignment_Count);
+        angleDiff = Math::alignAngle(angleDiff, angleAlignment % ConstructorAngleAlignment_Count);
         if (abs(angleDiff) < NEAR_ZERO || abs(angleDiff - 360.0f) < NEAR_ZERO || abs(angleDiff + 360.0f) < NEAR_ZERO) {
             return false;
         }
@@ -286,7 +286,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
             newConnection.angleFromPrevious = desiredAngleOnCell1;
         }
         newConnection.angleFromPrevious = min(newConnection.angleFromPrevious, refAngle);
-        newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment % Enums::ConstructorAngleAlignment_Count);
+        newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment % ConstructorAngleAlignment_Count);
     }
     if (newConnection.angleFromPrevious < NEAR_ZERO) {
         return false;
@@ -294,7 +294,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
 
     //adjust reference angle of next connection
     auto nextAngleFromPrevious = refAngle - newConnection.angleFromPrevious;
-    auto nextAngleFromPreviousAligned = Math::alignAngle(nextAngleFromPrevious, angleAlignment % Enums::ConstructorAngleAlignment_Count);
+    auto nextAngleFromPreviousAligned = Math::alignAngle(nextAngleFromPrevious, angleAlignment % ConstructorAngleAlignment_Count);
     auto angleDiff = nextAngleFromPreviousAligned - nextAngleFromPrevious;
 
     auto nextIndex = index % cell1->numConnections;

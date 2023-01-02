@@ -343,7 +343,7 @@ void _SimulationView::updateImageFromSimulation()
                 {
                     auto fontSize = std::min(40.0f, _viewport->getZoomFactor()) / 2;
                     auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
-                    if (overlayElement.cellType != Enums::CellFunction_None) {
+                    if (overlayElement.cellType != CellFunction_None) {
                         auto text = Const::CellFunctionToStringMap.at(overlayElement.cellType);
                         drawList->AddText(
                             StyleRepository::getInstance().getMediumFont(),

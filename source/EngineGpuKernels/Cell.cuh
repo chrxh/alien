@@ -39,7 +39,7 @@ struct NeuronFunction
 
 struct TransmitterFunction
 {
-    Enums::EnergyDistributionMode mode;
+    EnergyDistributionMode mode;
 };
 
 struct ConstructorFunction
@@ -49,7 +49,7 @@ struct ConstructorFunction
     bool singleConstruction;
     bool separateConstruction;
     bool adaptMaxConnections;
-    Enums::ConstructorAngleAlignment angleAlignment;
+    ConstructorAngleAlignment angleAlignment;
     float stiffness;
     int constructionActivationTime;
 
@@ -63,7 +63,7 @@ struct ConstructorFunction
 
 struct SensorFunction
 {
-    Enums::SensorMode mode;
+    SensorMode mode;
     float angle;
     float minDensity;
     int color;
@@ -77,7 +77,7 @@ struct NerveFunction
 
 struct AttackerFunction
 {
-    Enums::EnergyDistributionMode mode;
+    EnergyDistributionMode mode;
 };
 
 struct InjectorFunction
@@ -88,7 +88,7 @@ struct InjectorFunction
 
 struct MuscleFunction
 {
-    Enums::MuscleMode mode;
+    MuscleMode mode;
 };
 
 struct PlaceHolderFunction1
@@ -128,11 +128,11 @@ struct Cell
     int age;
 
     //cell function
-    Enums::LivingState livingState;
+    LivingState livingState;
     int executionOrderNumber;
     bool inputBlocked;
     bool outputBlocked;
-    Enums::CellFunction cellFunction;
+    CellFunction cellFunction;
     CellFunctionData cellFunctionData;
     Activity activity;
     int activationTime;

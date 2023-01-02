@@ -208,7 +208,7 @@ OverlayDescription DescriptionConverter::convertTOtoOverlayDescription(DataTO co
         element.id = cellTO.id;
         element.cell = true;
         element.pos = {cellTO.pos.x, cellTO.pos.y};
-        element.cellType = static_cast<Enums::CellFunction>(static_cast<unsigned int>(cellTO.cellFunction) % Enums::CellFunction_Count);
+        element.cellType = static_cast<CellFunction>(static_cast<unsigned int>(cellTO.cellFunction) % CellFunction_Count);
         element.selected = cellTO.selected;
         element.executionOrderNumber = cellTO.executionOrderNumber;
         result.elements.emplace_back(element);
@@ -277,28 +277,28 @@ void DescriptionConverter::addAdditionalDataSizeForCell(CellDescription const& c
 {
     additionalDataSize += cell.metadata.name.size() + cell.metadata.description.size();
     switch (cell.getCellFunctionType()) {
-    case Enums::CellFunction_Neuron: {
+    case CellFunction_Neuron: {
         additionalDataSize += MAX_CHANNELS * (MAX_CHANNELS + 1) * sizeof(float);
     } break;
-    case Enums::CellFunction_Transmitter:
+    case CellFunction_Transmitter:
         break;
-    case Enums::CellFunction_Constructor:
+    case CellFunction_Constructor:
         additionalDataSize += std::get<ConstructorDescription>(*cell.cellFunction).genome.size();
         break;
-    case Enums::CellFunction_Sensor:
+    case CellFunction_Sensor:
         break;
-    case Enums::CellFunction_Nerve:
+    case CellFunction_Nerve:
         break;
-    case Enums::CellFunction_Attacker:
+    case CellFunction_Attacker:
         break;
-    case Enums::CellFunction_Injector:
+    case CellFunction_Injector:
         additionalDataSize += std::get<InjectorDescription>(*cell.cellFunction).genome.size();
         break;
-    case Enums::CellFunction_Muscle:
+    case CellFunction_Muscle:
         break;
-    case Enums::CellFunction_Placeholder1:
+    case CellFunction_Placeholder1:
         break;
-    case Enums::CellFunction_Placeholder2:
+    case CellFunction_Placeholder2:
         break;
     }
 }    
@@ -404,19 +404,19 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.metadata = metadata;
 
     switch (cellTO.cellFunction) {
-    case Enums::CellFunction_Neuron: {
+    case CellFunction_Neuron: {
         NeuronDescription neuron;
         std::vector<float> weigthsAndBias;
         convert(dataTO, sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1), cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex, weigthsAndBias);
         std::tie(neuron.weights, neuron.bias) = splitWeightsAndBias(weigthsAndBias);
         result.cellFunction = neuron;
     } break;
-    case Enums::CellFunction_Transmitter: {
+    case CellFunction_Transmitter: {
         TransmitterDescription transmitter;
         transmitter.mode = cellTO.cellFunctionData.transmitter.mode;
         result.cellFunction = transmitter;
     } break;
-    case Enums::CellFunction_Constructor: {
+    case CellFunction_Constructor: {
         ConstructorDescription constructor;
         constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         constructor.singleConstruction = cellTO.cellFunctionData.constructor.singleConstruction;
@@ -429,9 +429,9 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.currentGenomePos = toInt(cellTO.cellFunctionData.constructor.currentGenomePos);
         result.cellFunction = constructor;
     } break;
-    case Enums::CellFunction_Sensor: {
+    case CellFunction_Sensor: {
         SensorDescription sensor;
-        if (cellTO.cellFunctionData.sensor.mode == Enums::SensorMode_FixedAngle) {
+        if (cellTO.cellFunctionData.sensor.mode == SensorMode_FixedAngle) {
             sensor.fixedAngle = cellTO.cellFunctionData.sensor.angle;
         } else {
             sensor.fixedAngle.reset();
@@ -440,32 +440,32 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         sensor.color = cellTO.cellFunctionData.sensor.color;
         result.cellFunction = sensor;
     } break;
-    case Enums::CellFunction_Nerve: {
+    case CellFunction_Nerve: {
         NerveDescription nerve;
         nerve.pulseMode = cellTO.cellFunctionData.nerve.pulseMode;
         nerve.alternationMode = cellTO.cellFunctionData.nerve.alternationMode;
         result.cellFunction = nerve;
     } break;
-    case Enums::CellFunction_Attacker: {
+    case CellFunction_Attacker: {
         AttackerDescription attacker;
         attacker.mode = cellTO.cellFunctionData.attacker.mode;
         result.cellFunction = attacker;
     } break;
-    case Enums::CellFunction_Injector: {
+    case CellFunction_Injector: {
         InjectorDescription injector;
         convert(dataTO, cellTO.cellFunctionData.injector.genomeSize, cellTO.cellFunctionData.injector.genomeDataIndex, injector.genome);
         result.cellFunction = injector;
     } break;
-    case Enums::CellFunction_Muscle: {
+    case CellFunction_Muscle: {
         MuscleDescription muscle;
         muscle.mode = cellTO.cellFunctionData.muscle.mode;
         result.cellFunction = muscle;
     } break;
-    case Enums::CellFunction_Placeholder1: {
+    case CellFunction_Placeholder1: {
         PlaceHolderDescription1 placeHolder;
         result.cellFunction = placeHolder;
     } break;
-    case Enums::CellFunction_Placeholder2: {
+    case CellFunction_Placeholder2: {
         PlaceHolderDescription2 placeHolder;
         result.cellFunction = placeHolder;
     } break;
@@ -507,7 +507,7 @@ void DescriptionConverter::addCell(
     cellTO.outputBlocked = cellDesc.outputBlocked;
     cellTO.cellFunction = cellDesc.getCellFunctionType();
     switch (cellDesc.getCellFunctionType()) {
-    case Enums::CellFunction_Neuron: {
+    case CellFunction_Neuron: {
         NeuronTO neuronTO;
         auto const& neuronDesc = std::get<NeuronDescription>(*cellDesc.cellFunction);
         std::vector<float> weigthsAndBias = unitWeightsAndBias(neuronDesc.weights, neuronDesc.bias);
@@ -516,13 +516,13 @@ void DescriptionConverter::addCell(
         CHECK(targetSize == sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1));
         cellTO.cellFunctionData.neuron = neuronTO;
     } break;
-    case Enums::CellFunction_Transmitter: {
+    case CellFunction_Transmitter: {
         auto const& transmitterDesc = std::get<TransmitterDescription>(*cellDesc.cellFunction);
         TransmitterTO transmitterTO;
         transmitterTO.mode = transmitterDesc.mode;
         cellTO.cellFunctionData.transmitter = transmitterTO;
     } break;
-    case Enums::CellFunction_Constructor: {
+    case CellFunction_Constructor: {
         auto const& constructorDesc = std::get<ConstructorDescription>(*cellDesc.cellFunction);
         ConstructorTO constructorTO;
         constructorTO.activationMode = constructorDesc.activationMode;
@@ -536,7 +536,7 @@ void DescriptionConverter::addCell(
         constructorTO.currentGenomePos = constructorDesc.currentGenomePos;
         cellTO.cellFunctionData.constructor = constructorTO;
     } break;
-    case Enums::CellFunction_Sensor: {
+    case CellFunction_Sensor: {
         auto const& sensorDesc = std::get<SensorDescription>(*cellDesc.cellFunction);
         SensorTO sensorTO;
         sensorTO.mode = sensorDesc.getSensorMode();
@@ -545,35 +545,35 @@ void DescriptionConverter::addCell(
         sensorTO.angle = sensorDesc.fixedAngle.value_or(0);
         cellTO.cellFunctionData.sensor = sensorTO;
     } break;
-    case Enums::CellFunction_Nerve: {
+    case CellFunction_Nerve: {
         auto const& nerveDesc = std::get<NerveDescription>(*cellDesc.cellFunction);
         NerveTO nerveTO;
         nerveTO.pulseMode = nerveDesc.pulseMode;
         nerveTO.alternationMode = nerveDesc.alternationMode;
         cellTO.cellFunctionData.nerve = nerveTO;
     } break;
-    case Enums::CellFunction_Attacker: {
+    case CellFunction_Attacker: {
         auto const& attackerDesc = std::get<AttackerDescription>(*cellDesc.cellFunction);
         AttackerTO attackerTO;
         attackerTO.mode = attackerDesc.mode;
         cellTO.cellFunctionData.attacker = attackerTO;
     } break;
-    case Enums::CellFunction_Injector: {
+    case CellFunction_Injector: {
         InjectorTO injectorTO;
         convert(dataTO, std::get<InjectorDescription>(*cellDesc.cellFunction).genome, injectorTO.genomeSize, injectorTO.genomeDataIndex);
         cellTO.cellFunctionData.injector = injectorTO;
     } break;
-    case Enums::CellFunction_Muscle: {
+    case CellFunction_Muscle: {
         auto const& muscleDesc = std::get<MuscleDescription>(*cellDesc.cellFunction);
         MuscleTO muscleTO;
         muscleTO.mode = muscleDesc.mode;
         cellTO.cellFunctionData.muscle = muscleTO;
     } break;
-    case Enums::CellFunction_Placeholder1: {
+    case CellFunction_Placeholder1: {
         PlaceHolderTO1 placeHolderTO;
         cellTO.cellFunctionData.placeHolder1 = placeHolderTO;
     } break;
-    case Enums::CellFunction_Placeholder2: {
+    case CellFunction_Placeholder2: {
         PlaceHolderTO2 placeHolderTO;
         cellTO.cellFunctionData.placeHolder2 = placeHolderTO;
     } break;

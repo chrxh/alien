@@ -18,7 +18,7 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     numberGen2.init(1536941);  //some array size for random numbers (~ 1.5 MB)
 
     structuralOperations.init();
-    for (int i = 0; i < Enums::CellFunction_WithoutNoneCount; ++i) {
+    for (int i = 0; i < CellFunction_WithoutNoneCount; ++i) {
         cellFunctionOperations[i].init();
     }
 }
@@ -34,7 +34,7 @@ __device__ void SimulationData::prepareForNextTimestep()
 
     structuralOperations.setMemory(processMemory.getTypedSubArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
 
-    for (int i = 0; i < Enums::CellFunction_WithoutNoneCount; ++i) {
+    for (int i = 0; i < CellFunction_WithoutNoneCount; ++i) {
         cellFunctionOperations[i].setMemory(processMemory.getTypedSubArray<CellFunctionOperation>(maxCellFunctionOperations), maxCellFunctionOperations);
     }
 
@@ -75,7 +75,7 @@ void SimulationData::resizeObjects()
     cellMap.resize(cellArraySize);
     particleMap.resize(cellArraySize);
 
-    int upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(CellFunctionOperation) * Enums::CellFunction_Count + 200) * (cellArraySize + 1000); //heuristic
+    int upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(CellFunctionOperation) * CellFunction_Count + 200) * (cellArraySize + 1000); //heuristic
     processMemory.resize(upperBoundDynamicMemory);
 }
 
@@ -96,7 +96,7 @@ void SimulationData::free()
     processMemory.free();
 
     structuralOperations.free();
-    for (int i = 0; i < Enums::CellFunction_WithoutNoneCount; ++i) {
+    for (int i = 0; i < CellFunction_WithoutNoneCount; ++i) {
         cellFunctionOperations[i].free();
     }
 }

@@ -35,28 +35,28 @@ private:
 __device__ __inline__ void ScannerProcessor::process(Token* token, SimulationData& data)
 {
     auto& tokenMem = token->memory;
-    unsigned int n = static_cast<unsigned char>(tokenMem[Enums::Scanner_InOutCellNumber]);
+    unsigned int n = static_cast<unsigned char>(tokenMem[Scanner_InOutCellNumber]);
     auto cell = token->cell;
 
     auto lookupResult = spiralLookupAlgorithm(n + 1, cell, token->sourceCell, data);
 
     //restart?
     if (lookupResult.finish) {
-        tokenMem[Enums::Scanner_InOutCellNumber] = 0;
+        tokenMem[Scanner_InOutCellNumber] = 0;
         lookupResult.prevPrevCell = lookupResult.prevCell;
         lookupResult.prevCell = lookupResult.cell;
-        tokenMem[Enums::Scanner_Output] = Enums::ScannerOut_Finished;
+        tokenMem[Scanner_Output] = ScannerOut_Finished;
     }
 
     //no restart? => increase cell number
     else {
-        tokenMem[Enums::Scanner_InOutCellNumber] = n + 1;
-        tokenMem[Enums::Scanner_Output] = Enums::ScannerOut_Success;
+        tokenMem[Scanner_InOutCellNumber] = n + 1;
+        tokenMem[Scanner_Output] = ScannerOut_Success;
     }
 
     //start cell
     if (n == 0) {
-        tokenMem[Enums::Scanner_OutDistance] = 0;
+        tokenMem[Scanner_OutDistance] = 0;
     }
 
     //further cell
@@ -64,7 +64,7 @@ __device__ __inline__ void ScannerProcessor::process(Token* token, SimulationDat
         //distance from cell n-1 to cell n-2
         auto prevCellToPrevPrevCellIndex = getConnectionIndex(lookupResult.prevCell, lookupResult.prevPrevCell);
         auto distance = lookupResult.prevCell->connections[prevCellToPrevPrevCellIndex].distance;
-        tokenMem[Enums::Scanner_OutDistance] = QuantityConverter::convertDistanceToData(distance);
+        tokenMem[Scanner_OutDistance] = QuantityConverter::convertDistanceToData(distance);
 
         if (!lookupResult.finish) {
             auto prevCellToCellIndex = getConnectionIndex(lookupResult.prevCell, lookupResult.cell);
@@ -86,37 +86,37 @@ __device__ __inline__ void ScannerProcessor::process(Token* token, SimulationDat
                     angle += connection.angleFromPrevious;
                 }
             }
-            tokenMem[Enums::Scanner_OutAngle] = QuantityConverter::convertAngleToData(angle - 180.0f);
+            tokenMem[Scanner_OutAngle] = QuantityConverter::convertAngleToData(angle - 180.0f);
         }
     }
 
     //scan cell
     int cellEnergy = min(static_cast<int>(floorf(lookupResult.prevCell->energy)), 255);
-    tokenMem[Enums::Scanner_OutEnergy] = cellEnergy;
-    tokenMem[Enums::Scanner_OutCellMaxConnections] = lookupResult.prevCell->maxConnections;
-    tokenMem[Enums::Scanner_OutCellBranchNumber] = lookupResult.prevCell->executionOrderNumber;
-    tokenMem[Enums::Scanner_OutCellColor] = lookupResult.prevCell->metadata.color;
-    tokenMem[Enums::Scanner_OutCellFunction] = static_cast<char>(lookupResult.prevCell->getCellFunctionType());
-    if (lookupResult.prevCell->getCellFunctionType() != Enums::CellFunction_Neuron) {
+    tokenMem[Scanner_OutEnergy] = cellEnergy;
+    tokenMem[Scanner_OutCellMaxConnections] = lookupResult.prevCell->maxConnections;
+    tokenMem[Scanner_OutCellBranchNumber] = lookupResult.prevCell->executionOrderNumber;
+    tokenMem[Scanner_OutCellColor] = lookupResult.prevCell->metadata.color;
+    tokenMem[Scanner_OutCellFunction] = static_cast<char>(lookupResult.prevCell->getCellFunctionType());
+    if (lookupResult.prevCell->getCellFunctionType() != CellFunction_Neuron) {
 
         //encoding to support older versions
         auto len = min(48 - 1, static_cast<unsigned char>(lookupResult.prevCell->staticData[0]) * 3);
-        tokenMem[Enums::Scanner_OutCellFunctionData] = len;
+        tokenMem[Scanner_OutCellFunctionData] = len;
         for (int i = 0; i < len; ++i) {
-            tokenMem[Enums::Scanner_OutCellFunctionData + i + 1] = lookupResult.prevCell->staticData[i + 1];
+            tokenMem[Scanner_OutCellFunctionData + i + 1] = lookupResult.prevCell->staticData[i + 1];
         }
-        tokenMem[Enums::Scanner_OutCellFunctionData + len + 1] = 8;
+        tokenMem[Scanner_OutCellFunctionData + len + 1] = 8;
         for (int i = 0; i < 8; ++i) {
-            tokenMem[Enums::Scanner_OutCellFunctionData + len + 2 + i] = lookupResult.prevCell->mutableData[i];
+            tokenMem[Scanner_OutCellFunctionData + len + 2 + i] = lookupResult.prevCell->mutableData[i];
         }
     } else {
 
         //new encoding
         for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
-            tokenMem[Enums::Scanner_OutCellFunctionData + i] = lookupResult.prevCell->staticData[i];
+            tokenMem[Scanner_OutCellFunctionData + i] = lookupResult.prevCell->staticData[i];
         }
         for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
-            tokenMem[Enums::Scanner_OutCellFunctionData + MAX_CELL_STATIC_BYTES + i] = lookupResult.prevCell->mutableData[i];
+            tokenMem[Scanner_OutCellFunctionData + MAX_CELL_STATIC_BYTES + i] = lookupResult.prevCell->mutableData[i];
         }
     }
 }
