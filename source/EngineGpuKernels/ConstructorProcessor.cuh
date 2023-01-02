@@ -29,7 +29,7 @@ private:
         int color;
         bool inputBlocked;
         bool outputBlocked;
-        Enums::CellFunction cellFunction;
+        CellFunction cellFunction;
     };
     __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
 
@@ -58,7 +58,7 @@ private:
 
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationResult& result)
 {
-    auto& operations = data.cellFunctionOperations[Enums::CellFunction_Constructor];
+    auto& operations = data.cellFunctionOperations[CellFunction_Constructor];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, result, operations.at(i).cell);
@@ -122,7 +122,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     auto& constructor = cell->cellFunctionData.constructor;
 
     ConstructionData result;
-    result.cellFunction = GenomeDecoder::readByte(constructor) % Enums::CellFunction_Count;
+    result.cellFunction = GenomeDecoder::readByte(constructor) % CellFunction_Count;
     result.angle = GenomeDecoder::readAngle(constructor);
     result.distance = GenomeDecoder::readFloat(constructor) + 1.0f;
     result.maxConnections = GenomeDecoder::readByte(constructor) % (cudaSimulationParameters.cellMaxBonds + 1);
@@ -164,7 +164,7 @@ __inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite
     Cell* result = nullptr;
     for (int i = 0; i < hostCell->numConnections; ++i) {
         auto const& connectingCell = hostCell->connections[i].cell;
-        if (connectingCell->livingState == Enums::LivingState_UnderConstruction) {
+        if (connectingCell->livingState == LivingState_UnderConstruction) {
             result = connectingCell;
         }
     }
@@ -208,7 +208,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
         CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
     }
     if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
-        newCell->livingState = Enums::LivingState_JustReady;
+        newCell->livingState = LivingState_JustReady;
     }
     if (adaptMaxConnections) {
         hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
@@ -257,7 +257,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
     auto const& constructor = hostCell->cellFunctionData.constructor;
     if (GenomeDecoder::isFinished(constructor)) {
-        newCell->livingState = Enums::LivingState_JustReady;
+        newCell->livingState = LivingState_JustReady;
     }
 
     float angleFromPreviousForUnderConstructionCell;
@@ -297,7 +297,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     int numOtherCells;
     data.cellMap.getMatchingCells(
         otherCells, 18, numOtherCells, newCellPos, cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance, [&](Cell* const& otherCell) {
-            if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != Enums::LivingState_UnderConstruction) {
+            if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != LivingState_UnderConstruction) {
                 return false;
             }
             if (cudaSimulationParameters.cellFunctionConstructionInheritColor && otherCell->color != hostCell->color) {
@@ -417,7 +417,7 @@ ConstructorProcessor::constructCellIntern(
     result->activationTime = constructor.constructionActivationTime;
 
     switch (constructionData.cellFunction) {
-    case Enums::CellFunction_Neuron: {
+    case CellFunction_Neuron: {
         result->cellFunctionData.neuron.neuronState = data.objects.auxiliaryData.getTypedSubArray<NeuronFunction::NeuronState>(1);
         for (int i = 0; i < MAX_CHANNELS *  MAX_CHANNELS; ++i) {
             result->cellFunctionData.neuron.neuronState->weights[i] = GenomeDecoder::readFloat(constructor) * 4;
@@ -426,43 +426,43 @@ ConstructorProcessor::constructCellIntern(
             result->cellFunctionData.neuron.neuronState->bias[i] = GenomeDecoder::readFloat(constructor) * 4;
         }
     } break;
-    case Enums::CellFunction_Transmitter: {
-        result->cellFunctionData.transmitter.mode = GenomeDecoder::readByte(constructor) % Enums::EnergyDistributionMode_Count;
+    case CellFunction_Transmitter: {
+        result->cellFunctionData.transmitter.mode = GenomeDecoder::readByte(constructor) % EnergyDistributionMode_Count;
     } break;
-    case Enums::CellFunction_Constructor: {
+    case CellFunction_Constructor: {
         auto& newConstructor = result->cellFunctionData.constructor;
         newConstructor.activationMode = GenomeDecoder::readByte(constructor);
         newConstructor.singleConstruction = GenomeDecoder::readBool(constructor);
         newConstructor.separateConstruction = GenomeDecoder::readBool(constructor);
         newConstructor.adaptMaxConnections = GenomeDecoder::readBool(constructor);
-        newConstructor.angleAlignment = GenomeDecoder::readByte(constructor) % Enums::ConstructorAngleAlignment_Count;
+        newConstructor.angleAlignment = GenomeDecoder::readByte(constructor) % ConstructorAngleAlignment_Count;
         newConstructor.stiffness = toFloat(GenomeDecoder::readByte(constructor)) / 255;
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor);
         newConstructor.currentGenomePos = 0;
         GenomeDecoder::copyGenome(data, constructor, newConstructor);
     } break;
-    case Enums::CellFunction_Sensor: {
-        result->cellFunctionData.sensor.mode = GenomeDecoder::readByte(constructor) % Enums::SensorMode_Count;
+    case CellFunction_Sensor: {
+        result->cellFunctionData.sensor.mode = GenomeDecoder::readByte(constructor) % SensorMode_Count;
         result->cellFunctionData.sensor.angle = GenomeDecoder::readAngle(constructor);
         result->cellFunctionData.sensor.minDensity = (GenomeDecoder::readFloat(constructor) + 1.0f) / 2;
         result->cellFunctionData.sensor.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
     } break;
-    case Enums::CellFunction_Nerve: {
+    case CellFunction_Nerve: {
         result->cellFunctionData.nerve.pulseMode = GenomeDecoder::readByte(constructor);
         result->cellFunctionData.nerve.alternationMode = GenomeDecoder::readByte(constructor);
     } break;
-    case Enums::CellFunction_Attacker: {
-        result->cellFunctionData.attacker.mode = GenomeDecoder::readByte(constructor) % Enums::EnergyDistributionMode_Count;
+    case CellFunction_Attacker: {
+        result->cellFunctionData.attacker.mode = GenomeDecoder::readByte(constructor) % EnergyDistributionMode_Count;
     } break;
-    case Enums::CellFunction_Injector: {
+    case CellFunction_Injector: {
         GenomeDecoder::copyGenome(data, constructor, result->cellFunctionData.injector);
     } break;
-    case Enums::CellFunction_Muscle: {
-        result->cellFunctionData.muscle.mode = GenomeDecoder::readByte(constructor) % Enums::MuscleMode_Count;
+    case CellFunction_Muscle: {
+        result->cellFunctionData.muscle.mode = GenomeDecoder::readByte(constructor) % MuscleMode_Count;
     } break;
-    case Enums::CellFunction_Placeholder1: {
+    case CellFunction_Placeholder1: {
     } break;
-    case Enums::CellFunction_Placeholder2: {
+    case CellFunction_Placeholder2: {
     } break;
     }
 

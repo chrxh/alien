@@ -110,17 +110,17 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
 
     cell->cellFunction = cellTO.cellFunction;
     switch (cellTO.cellFunction) {
-    case Enums::CellFunction_Neuron: {
+    case CellFunction_Neuron: {
         createAuxiliaryDataWithFixedSize(
             sizeof(NeuronFunction::NeuronState),
             cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex,
             dataTO.auxiliaryData,
             reinterpret_cast<uint8_t*&>(cell->cellFunctionData.neuron.neuronState));
     } break;
-    case Enums::CellFunction_Transmitter: {
+    case CellFunction_Transmitter: {
         cell->cellFunctionData.transmitter.mode = cellTO.cellFunctionData.transmitter.mode;
     } break;
-    case Enums::CellFunction_Constructor: {
+    case CellFunction_Constructor: {
         cell->cellFunctionData.constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         cell->cellFunctionData.constructor.singleConstruction = cellTO.cellFunctionData.constructor.singleConstruction;
         cell->cellFunctionData.constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
@@ -136,20 +136,20 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cell->cellFunctionData.constructor.genome);
         cell->cellFunctionData.constructor.currentGenomePos = cellTO.cellFunctionData.constructor.currentGenomePos;
     } break;
-    case Enums::CellFunction_Sensor: {
+    case CellFunction_Sensor: {
         cell->cellFunctionData.sensor.mode = cellTO.cellFunctionData.sensor.mode;
         cell->cellFunctionData.sensor.angle = cellTO.cellFunctionData.sensor.angle;
         cell->cellFunctionData.sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         cell->cellFunctionData.sensor.color = cellTO.cellFunctionData.sensor.color;
     } break;
-    case Enums::CellFunction_Nerve: {
+    case CellFunction_Nerve: {
         cell->cellFunctionData.nerve.pulseMode = cellTO.cellFunctionData.nerve.pulseMode;
         cell->cellFunctionData.nerve.alternationMode = cellTO.cellFunctionData.nerve.alternationMode;
     } break;
-    case Enums::CellFunction_Attacker: {
+    case CellFunction_Attacker: {
         cell->cellFunctionData.attacker.mode = cellTO.cellFunctionData.attacker.mode;
     } break;
-    case Enums::CellFunction_Injector: {
+    case CellFunction_Injector: {
         createAuxiliaryData(
             cellTO.cellFunctionData.injector.genomeSize,
             cellTO.cellFunctionData.injector.genomeDataIndex,
@@ -157,12 +157,12 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cell->cellFunctionData.injector.genomeSize,
             cell->cellFunctionData.injector.genome);
     } break;
-    case Enums::CellFunction_Muscle: {
+    case CellFunction_Muscle: {
         cell->cellFunctionData.muscle.mode = cellTO.cellFunctionData.muscle.mode;
     } break;
-    case Enums::CellFunction_Placeholder1: {
+    case CellFunction_Placeholder1: {
     } break;
-    case Enums::CellFunction_Placeholder2: {
+    case CellFunction_Placeholder2: {
     } break;
     }
 }
@@ -237,9 +237,9 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     }
 
     if (cudaSimulationParameters.particleTransformationRandomCellFunction) {
-        result->cellFunction = _data->numberGen1.random(Enums::CellFunction_Count - 1);
+        result->cellFunction = _data->numberGen1.random(CellFunction_Count - 1);
         switch (result->cellFunction) {
-        case Enums::CellFunction_Neuron: {
+        case CellFunction_Neuron: {
             result->cellFunctionData.neuron.neuronState =
                 reinterpret_cast<NeuronFunction::NeuronState*>(_data->objects.auxiliaryData.getAlignedSubArray(sizeof(NeuronFunction::NeuronState)));
             for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
@@ -249,10 +249,10 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
                 result->cellFunctionData.neuron.neuronState->bias[i] = _data->numberGen1.random(2.0f) - 1.0f;
             }
         } break;
-        case Enums::CellFunction_Transmitter: {
-            result->cellFunctionData.transmitter.mode = _data->numberGen1.random(Enums::EnergyDistributionMode_Count - 1);
+        case CellFunction_Transmitter: {
+            result->cellFunctionData.transmitter.mode = _data->numberGen1.random(EnergyDistributionMode_Count - 1);
         } break;
-        case Enums::CellFunction_Constructor: {
+        case CellFunction_Constructor: {
             if (_data->numberGen1.randomBool()) {
                 result->cellFunctionData.constructor.activationMode = 0;
             } else {
@@ -261,7 +261,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             result->cellFunctionData.constructor.singleConstruction = _data->numberGen1.randomBool();
             result->cellFunctionData.constructor.separateConstruction = _data->numberGen1.randomBool();
             result->cellFunctionData.constructor.adaptMaxConnections = _data->numberGen1.randomBool();
-            result->cellFunctionData.constructor.angleAlignment = _data->numberGen1.random(Enums::ConstructorAngleAlignment_Count - 1);
+            result->cellFunctionData.constructor.angleAlignment = _data->numberGen1.random(ConstructorAngleAlignment_Count - 1);
             result->cellFunctionData.constructor.stiffness = _data->numberGen1.random();
             result->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
             result->cellFunctionData.constructor.genomeSize = _data->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
@@ -272,18 +272,18 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             }
             result->cellFunctionData.constructor.currentGenomePos = 0;
         } break;
-        case Enums::CellFunction_Sensor: {
-            result->cellFunctionData.sensor.mode = _data->numberGen1.random(Enums::SensorMode_Count - 1);
+        case CellFunction_Sensor: {
+            result->cellFunctionData.sensor.mode = _data->numberGen1.random(SensorMode_Count - 1);
             result->cellFunctionData.sensor.angle = _data->numberGen1.random(360.0f) - 180.0f;
             result->cellFunctionData.sensor.minDensity = _data->numberGen1.random(1.0f);
             result->cellFunctionData.sensor.color = _data->numberGen1.random(MAX_COLORS - 1);
         } break;
-        case Enums::CellFunction_Nerve: {
+        case CellFunction_Nerve: {
         } break;
-        case Enums::CellFunction_Attacker: {
-            result->cellFunctionData.attacker.mode = _data->numberGen1.random(Enums::EnergyDistributionMode_Count - 1);
+        case CellFunction_Attacker: {
+            result->cellFunctionData.attacker.mode = _data->numberGen1.random(EnergyDistributionMode_Count - 1);
         } break;
-        case Enums::CellFunction_Injector: {
+        case CellFunction_Injector: {
             result->cellFunctionData.injector.genomeSize = _data->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
             result->cellFunctionData.injector.genome = _data->objects.auxiliaryData.getAlignedSubArray(result->cellFunctionData.injector.genomeSize);
             auto& genome = result->cellFunctionData.injector.genome;
@@ -291,17 +291,17 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
                 genome[i] = _data->numberGen1.randomByte();
             }
         } break;
-        case Enums::CellFunction_Muscle: {
-            result->cellFunctionData.muscle.mode = _data->numberGen1.random(Enums::MuscleMode_Count - 1);
+        case CellFunction_Muscle: {
+            result->cellFunctionData.muscle.mode = _data->numberGen1.random(MuscleMode_Count - 1);
         } break;
-        case Enums::CellFunction_Placeholder1: {
+        case CellFunction_Placeholder1: {
         } break;
-        case Enums::CellFunction_Placeholder2: {
+        case CellFunction_Placeholder2: {
         } break;
         }
 
     } else {
-        result->cellFunction = Enums::CellFunction_None;
+        result->cellFunction = CellFunction_None;
     }
     return result;
 }

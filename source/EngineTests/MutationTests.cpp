@@ -74,7 +74,7 @@ protected:
             if (expectedCell.getCellFunctionType() != actualCell.getCellFunctionType()) {
                 return false;
             }
-            if (expectedCell.getCellFunctionType() != Enums::CellFunction_Neuron && expectedCell != actualCell) {
+            if (expectedCell.getCellFunctionType() != CellFunction_Neuron && expectedCell != actualCell) {
                 return false;
             }
         }

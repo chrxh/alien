@@ -42,7 +42,7 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
     auto executionOrderNumber = data.timestep % maxExecutionOrderNumber;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->cellFunction != Enums::CellFunction_None && cell->executionOrderNumber == executionOrderNumber && cell->activationTime == 0) {
+        if (cell->cellFunction != CellFunction_None && cell->executionOrderNumber == executionOrderNumber && cell->activationTime == 0) {
             data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
         }
     }
@@ -80,7 +80,7 @@ __inline__ __device__ void CellFunctionProcessor::aging(SimulationData& data)
             cell->color = targetColor;
             cell->age = 0;
         }
-        if (cell->livingState == Enums::LivingState_Ready && cell->activationTime > 0) {
+        if (cell->livingState == LivingState_Ready && cell->activationTime > 0) {
             --cell->activationTime;
         }
     }
@@ -101,7 +101,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
 
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked || connectedCell->livingState || connectedCell->cellFunction == Enums::CellFunction_None) {
+        if (connectedCell->outputBlocked || connectedCell->livingState || connectedCell->cellFunction == CellFunction_None) {
             continue;
         }
         if (connectedCell->executionOrderNumber == inputExecutionOrderNumber) {

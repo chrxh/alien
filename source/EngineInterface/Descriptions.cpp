@@ -5,42 +5,42 @@
 #include "Base/Math.h"
 #include "Base/Physics.h"
 
-Enums::CellFunction CellDescription::getCellFunctionType() const
+CellFunction CellDescription::getCellFunctionType() const
 {
     if (!cellFunction) {
-        return Enums::CellFunction_None;
+        return CellFunction_None;
     }
     if (std::holds_alternative<NeuronDescription>(*cellFunction)) {
-        return Enums::CellFunction_Neuron;
+        return CellFunction_Neuron;
     }
     if (std::holds_alternative<TransmitterDescription>(*cellFunction)) {
-        return Enums::CellFunction_Transmitter;
+        return CellFunction_Transmitter;
     }
     if (std::holds_alternative<ConstructorDescription>(*cellFunction)) {
-        return Enums::CellFunction_Constructor;
+        return CellFunction_Constructor;
     }
     if (std::holds_alternative<SensorDescription>(*cellFunction)) {
-        return Enums::CellFunction_Sensor;
+        return CellFunction_Sensor;
     }
     if (std::holds_alternative<NerveDescription>(*cellFunction)) {
-        return Enums::CellFunction_Nerve;
+        return CellFunction_Nerve;
     }
     if (std::holds_alternative<AttackerDescription>(*cellFunction)) {
-        return Enums::CellFunction_Attacker;
+        return CellFunction_Attacker;
     }
     if (std::holds_alternative<InjectorDescription>(*cellFunction)) {
-        return Enums::CellFunction_Injector;
+        return CellFunction_Injector;
     }
     if (std::holds_alternative<MuscleDescription>(*cellFunction)) {
-        return Enums::CellFunction_Muscle;
+        return CellFunction_Muscle;
     }
     if (std::holds_alternative<PlaceHolderDescription1>(*cellFunction)) {
-        return Enums::CellFunction_Placeholder1;
+        return CellFunction_Placeholder1;
     }
     if (std::holds_alternative<PlaceHolderDescription2>(*cellFunction)) {
-        return Enums::CellFunction_Placeholder2;
+        return CellFunction_Placeholder2;
     }
-    return Enums::CellFunction_None;
+    return CellFunction_None;
 }
 
 bool CellDescription::isConnectedTo(uint64_t id) const

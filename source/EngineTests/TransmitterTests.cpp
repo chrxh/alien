@@ -34,7 +34,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(TransmitterDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors))
+            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy * 2),
         CellDescription()
             .setId(2)
@@ -80,7 +80,7 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardActivity)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(TransmitterDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors))
+            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy * 2),
         CellDescription()
             .setId(2)
@@ -126,7 +126,7 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(TransmitterDescription().setMode(Enums::EnergyDistributionMode_ConnectedCells))
+            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_ConnectedCells))
             .setEnergy(_parameters.cellNormalEnergy * 2),
         CellDescription()
             .setId(2)
@@ -168,7 +168,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(TransmitterDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors))
+            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy * 2),
         CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(ConstructorDescription()),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
@@ -205,7 +205,7 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(TransmitterDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors))
+            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy * 2),
         CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(ConstructorDescription().setSingleConstruction(true)),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
@@ -242,7 +242,7 @@ TEST_F(TransmitterTests, distributeOnlyToTransmittersWithSameColor)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(TransmitterDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors))
+            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy * 2),
         CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(TransmitterDescription()).setColor(1),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),

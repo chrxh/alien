@@ -14,17 +14,17 @@ namespace Const
     std::vector const CellFunctionStrings =
         {"Neuron"s, "Transmitter"s, "Constructor"s, "Sensor"s, "Nerve"s, "Attacker"s, "Injector"s, "Muscle"s, "Placeholder1"s, "Placeholder2"s, "None"s};
 
-    std::map<Enums::CellFunction, std::string> const CellFunctionToStringMap = {
-        {Enums::CellFunction_Constructor, "Constructor"},
-        {Enums::CellFunction_Attacker, "Attacker"},
-        {Enums::CellFunction_Injector, "Injector"},
-        {Enums::CellFunction_Muscle, "Muscle"},
-        {Enums::CellFunction_Nerve, "Nerve"},
-        {Enums::CellFunction_Neuron, "Neuron"},
-        {Enums::CellFunction_Sensor, "Sensor"},
-        {Enums::CellFunction_Transmitter, "Transmitter"},
-        {Enums::CellFunction_Placeholder1, "Placeholder1"},
-        {Enums::CellFunction_Placeholder2, "Placeholder2"},
-        {Enums::CellFunction_None, "None"},
+    std::map<CellFunction, std::string> const CellFunctionToStringMap = {
+        {CellFunction_Constructor, "Constructor"},
+        {CellFunction_Attacker, "Attacker"},
+        {CellFunction_Injector, "Injector"},
+        {CellFunction_Muscle, "Muscle"},
+        {CellFunction_Nerve, "Nerve"},
+        {CellFunction_Neuron, "Neuron"},
+        {CellFunction_Sensor, "Sensor"},
+        {CellFunction_Transmitter, "Transmitter"},
+        {CellFunction_Placeholder1, "Placeholder1"},
+        {CellFunction_Placeholder2, "Placeholder2"},
+        {CellFunction_None, "None"},
     };
 }

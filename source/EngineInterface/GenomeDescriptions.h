@@ -27,11 +27,11 @@ struct NeuronGenomeDescription
 
 struct TransmitterGenomeDescription
 {
-    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_TransmittersAndConstructors;
+    EnergyDistributionMode mode = EnergyDistributionMode_TransmittersAndConstructors;
 
     auto operator<=>(TransmitterGenomeDescription const&) const = default;
 
-    TransmitterGenomeDescription& setMode(Enums::EnergyDistributionMode value)
+    TransmitterGenomeDescription& setMode(EnergyDistributionMode value)
     {
         mode = value;
         return *this;
@@ -44,7 +44,7 @@ struct ConstructorGenomeDescription
     bool singleConstruction = false;
     bool separateConstruction = true;
     bool adaptMaxConnections = true;
-    Enums::ConstructorAngleAlignment angleAlignment = Enums::ConstructorAngleAlignment_60;
+    ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
     float stiffness = 1.0f;
     int constructionActivationTime = 100;
 
@@ -72,7 +72,7 @@ struct ConstructorGenomeDescription
         adaptMaxConnections = value;
         return *this;
     }
-    ConstructorGenomeDescription& setAngleAlignment(Enums::ConstructorAngleAlignment value)
+    ConstructorGenomeDescription& setAngleAlignment(ConstructorAngleAlignment value)
     {
         angleAlignment = value;
         return *this;
@@ -109,7 +109,7 @@ struct SensorGenomeDescription
 
     auto operator<=>(SensorGenomeDescription const&) const = default;
 
-    Enums::SensorMode getSensorMode() const { return fixedAngle.has_value() ? Enums::SensorMode_FixedAngle : Enums::SensorMode_Neighborhood; }
+    SensorMode getSensorMode() const { return fixedAngle.has_value() ? SensorMode_FixedAngle : SensorMode_Neighborhood; }
 
     SensorGenomeDescription& setFixedAngle(float const& value)
     {
@@ -151,11 +151,11 @@ struct NerveGenomeDescription
 
 struct AttackerGenomeDescription
 {
-    Enums::EnergyDistributionMode mode = Enums::EnergyDistributionMode_TransmittersAndConstructors;
+    EnergyDistributionMode mode = EnergyDistributionMode_TransmittersAndConstructors;
 
     auto operator<=>(AttackerGenomeDescription const&) const = default;
 
-    AttackerGenomeDescription& setMode(Enums::EnergyDistributionMode value)
+    AttackerGenomeDescription& setMode(EnergyDistributionMode value)
     {
         mode = value;
         return *this;
@@ -184,11 +184,11 @@ struct InjectorGenomeDescription
 
 struct MuscleGenomeDescription
 {
-    Enums::MuscleMode mode = Enums::MuscleMode_Movement;
+    MuscleMode mode = MuscleMode_Movement;
 
     auto operator<=>(MuscleGenomeDescription const&) const = default;
 
-    MuscleGenomeDescription& setMode(Enums::MuscleMode value)
+    MuscleGenomeDescription& setMode(MuscleMode value)
     {
         mode = value;
         return *this;
@@ -267,42 +267,42 @@ struct CellGenomeDescription
         outputBlocked = value;
         return *this;
     }
-    Enums::CellFunction getCellFunctionType() const
+    CellFunction getCellFunctionType() const
     {
         if (!cellFunction) {
-            return Enums::CellFunction_None;
+            return CellFunction_None;
         }
         if (std::holds_alternative<NeuronGenomeDescription>(*cellFunction)) {
-            return Enums::CellFunction_Neuron;
+            return CellFunction_Neuron;
         }
         if (std::holds_alternative<TransmitterGenomeDescription>(*cellFunction)) {
-            return Enums::CellFunction_Transmitter;
+            return CellFunction_Transmitter;
         }
         if (std::holds_alternative<ConstructorGenomeDescription>(*cellFunction)) {
-            return Enums::CellFunction_Constructor;
+            return CellFunction_Constructor;
         }
         if (std::holds_alternative<SensorGenomeDescription>(*cellFunction)) {
-            return Enums::CellFunction_Sensor;
+            return CellFunction_Sensor;
         }
         if (std::holds_alternative<NerveGenomeDescription>(*cellFunction)) {
-            return Enums::CellFunction_Nerve;
+            return CellFunction_Nerve;
         }
         if (std::holds_alternative<AttackerGenomeDescription>(*cellFunction)) {
-            return Enums::CellFunction_Attacker;
+            return CellFunction_Attacker;
         }
         if (std::holds_alternative<InjectorGenomeDescription>(*cellFunction)) {
-            return Enums::CellFunction_Injector;
+            return CellFunction_Injector;
         }
         if (std::holds_alternative<MuscleGenomeDescription>(*cellFunction)) {
-            return Enums::CellFunction_Muscle;
+            return CellFunction_Muscle;
         }
         if (std::holds_alternative<PlaceHolderGenomeDescription1>(*cellFunction)) {
-            return Enums::CellFunction_Placeholder1;
+            return CellFunction_Placeholder1;
         }
         if (std::holds_alternative<PlaceHolderGenomeDescription2>(*cellFunction)) {
-            return Enums::CellFunction_Placeholder2;
+            return CellFunction_Placeholder2;
         }
-        return Enums::CellFunction_None;
+        return CellFunction_None;
     }
     template <typename CellFunctionDesc>
     CellGenomeDescription& setCellFunction(CellFunctionDesc const& value)

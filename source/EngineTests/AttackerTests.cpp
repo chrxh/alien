@@ -103,7 +103,7 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(AttackerDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors)),
+            .setCellFunction(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -144,7 +144,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(AttackerDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors)),
+            .setCellFunction(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -185,7 +185,7 @@ TEST_F(AttackerTests, successDistributeToOneTransmittersWithSameColor)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(AttackerDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors)),
+            .setCellFunction(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -227,7 +227,7 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(AttackerDescription().setMode(Enums::EnergyDistributionMode_TransmittersAndConstructors)),
+            .setCellFunction(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -268,7 +268,7 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(AttackerDescription().setMode(Enums::EnergyDistributionMode_ConnectedCells)),
+            .setCellFunction(AttackerDescription().setMode(EnergyDistributionMode_ConnectedCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})

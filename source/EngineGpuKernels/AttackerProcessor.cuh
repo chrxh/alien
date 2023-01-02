@@ -31,7 +31,7 @@ private:
 
 __device__ __inline__ void AttackerProcessor::process(SimulationData& data, SimulationResult& result)
 {
-    auto& operations = data.cellFunctionOperations[Enums::CellFunction_Attacker];
+    auto& operations = data.cellFunctionOperations[CellFunction_Attacker];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, result, operations.at(i).cell);
@@ -53,7 +53,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, cudaSimulationParameters.cellFunctionAttackerRadius);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
-        if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier && otherCell->livingState != Enums::LivingState_UnderConstruction) {
+        if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier && otherCell->livingState != LivingState_UnderConstruction) {
             auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength;
             if (energyToTransfer < 0) {
                 continue;
@@ -161,7 +161,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
         atomicAdd(&cell->energy, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionValue);    //revert
     }
 
-    if (cell->cellFunctionData.attacker.mode == Enums::EnergyDistributionMode_ConnectedCells) {
+    if (cell->cellFunctionData.attacker.mode == EnergyDistributionMode_ConnectedCells) {
         int numReceivers = cell->numConnections;
         for (int i = 0; i < cell->numConnections; ++i) {
             numReceivers += cell->connections[i].cell->numConnections;
@@ -186,12 +186,12 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
         }
     }
 
-    if (cell->cellFunctionData.attacker.mode == Enums::EnergyDistributionMode_TransmittersAndConstructors) {
+    if (cell->cellFunctionData.attacker.mode == EnergyDistributionMode_TransmittersAndConstructors) {
 
         auto matchActiveConstructorFunc = [&](Cell* const& otherCell) {
             auto const& constructor = otherCell->cellFunctionData.constructor;
             auto const isActive = !(constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize);
-            if (otherCell->cellFunction == Enums::CellFunction_Constructor && isActive) {
+            if (otherCell->cellFunction == CellFunction_Constructor && isActive) {
                 if (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color) {
                     return true;
                 }
@@ -199,7 +199,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
             return false;
         };
         auto matchTransmitterFunc = [&](Cell* const& otherCell) {
-            if (otherCell->cellFunction == Enums::CellFunction_Transmitter) {
+            if (otherCell->cellFunction == CellFunction_Transmitter) {
                 if (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color) {
                     return true;
                 }

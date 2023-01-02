@@ -45,7 +45,7 @@ struct NeuronTO
 
 struct TransmitterTO
 {
-    Enums::EnergyDistributionMode mode;
+    EnergyDistributionMode mode;
 };
 
 struct ConstructorTO
@@ -54,7 +54,7 @@ struct ConstructorTO
     bool singleConstruction;
     bool separateConstruction;
     bool adaptMaxConnections;
-    Enums::ConstructorAngleAlignment angleAlignment;
+    ConstructorAngleAlignment angleAlignment;
     float stiffness;
     int constructionActivationTime;
 
@@ -67,7 +67,7 @@ struct ConstructorTO
 
 struct SensorTO
 {
-    Enums::SensorMode mode;
+    SensorMode mode;
     float angle;
     float minDensity;
     int color;
@@ -81,7 +81,7 @@ struct NerveTO
 
 struct AttackerTO
 {
-    Enums::EnergyDistributionMode mode;
+    EnergyDistributionMode mode;
 };
 
 struct InjectorTO
@@ -92,7 +92,7 @@ struct InjectorTO
 
 struct MuscleTO
 {
-    Enums::MuscleMode mode;
+    MuscleMode mode;
 };
 
 struct PlaceHolderTO1
@@ -132,11 +132,11 @@ struct CellTO
     int age;
 
     //cell function
-    Enums::LivingState livingState;
+    LivingState livingState;
     int executionOrderNumber;
     bool inputBlocked;
     bool outputBlocked;
-    Enums::CellFunction cellFunction;
+    CellFunction cellFunction;
     CellFunctionTO cellFunctionData;
     ActivityTO activity;
     int activationTime;

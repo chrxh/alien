@@ -361,18 +361,18 @@ __inline__ __device__ void CellProcessor::constructionStateTransition(Simulation
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        auto underConstruction = atomicCAS(&cell->livingState, Enums::LivingState_JustReady, Enums::LivingState_Ready);
-        if (underConstruction == Enums::LivingState_JustReady) {
+        auto underConstruction = atomicCAS(&cell->livingState, LivingState_JustReady, LivingState_Ready);
+        if (underConstruction == LivingState_JustReady) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectedCell = cell->connections[i].cell;
-                atomicCAS(&connectedCell->livingState, Enums::LivingState_UnderConstruction, Enums::LivingState_JustReady);
+                atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_JustReady);
             }
         }
-        if (underConstruction == Enums::LivingState_Dying) {
+        if (underConstruction == LivingState_Dying) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectedCell = cell->connections[i].cell;
-                if (connectedCell->cellFunction != Enums::CellFunction_None) {
-                    atomicExch(&connectedCell->livingState, Enums::LivingState_Dying);
+                if (connectedCell->cellFunction != CellFunction_None) {
+                    atomicExch(&connectedCell->livingState, LivingState_Dying);
                 }
             }
         }
@@ -487,7 +487,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMaxBindingEnergy, data, cell->absPos);
 
         bool decay = false;
-        if (cell->livingState == Enums::LivingState_Dying) {
+        if (cell->livingState == LivingState_Dying) {
             if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb) {
                 CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
                 decay = true;
@@ -495,7 +495,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
         if (cell->energy < cellMinEnergy) {
             if (cudaSimulationParameters.clusterDecay) {
-                cell->livingState = Enums::LivingState_Dying;
+                cell->livingState = LivingState_Dying;
             } else {
                 CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
                 decay = true;
@@ -505,11 +505,11 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             decay = true;
         }
 
-        if (decay && cell->livingState != Enums::LivingState_UnderConstruction) {
+        if (decay && cell->livingState != LivingState_UnderConstruction) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto& connectedCell = cell->connections[i].cell;
-                if (connectedCell->livingState == Enums::LivingState_UnderConstruction) {
-                    connectedCell->livingState = Enums::LivingState_JustReady;
+                if (connectedCell->livingState == LivingState_UnderConstruction) {
+                    connectedCell->livingState = LivingState_JustReady;
                 }
             }
         }

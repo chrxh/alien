@@ -186,37 +186,37 @@ void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
             int type = cell.getCellFunctionType();
             if (AlienImGui::CellFunctionCombo(AlienImGui::CellFunctionComboParameters().name("Function").textWidth(MaxCellContentTextWidth), type)) {
                 switch (type) {
-                case Enums::CellFunction_Neuron: {
+                case CellFunction_Neuron: {
                     cell.cellFunction = NeuronDescription();
                 } break;
-                case Enums::CellFunction_Transmitter: {
+                case CellFunction_Transmitter: {
                     cell.cellFunction = TransmitterDescription();
                 } break;
-                case Enums::CellFunction_Constructor: {
+                case CellFunction_Constructor: {
                     cell.cellFunction = ConstructorDescription();
                 } break;
-                case Enums::CellFunction_Sensor: {
+                case CellFunction_Sensor: {
                     cell.cellFunction = SensorDescription();
                 } break;
-                case Enums::CellFunction_Nerve: {
+                case CellFunction_Nerve: {
                     cell.cellFunction = NerveDescription();
                 } break;
-                case Enums::CellFunction_Attacker: {
+                case CellFunction_Attacker: {
                     cell.cellFunction = AttackerDescription();
                 } break;
-                case Enums::CellFunction_Injector: {
+                case CellFunction_Injector: {
                     cell.cellFunction = InjectorDescription();
                 } break;
-                case Enums::CellFunction_Muscle: {
+                case CellFunction_Muscle: {
                     cell.cellFunction = MuscleDescription();
                 } break;
-                case Enums::CellFunction_Placeholder1: {
+                case CellFunction_Placeholder1: {
                     cell.cellFunction = PlaceHolderDescription1();
                 } break;
-                case Enums::CellFunction_Placeholder2: {
+                case CellFunction_Placeholder2: {
                     cell.cellFunction = PlaceHolderDescription2();
                 } break;
-                case Enums::CellFunction_None: {
+                case CellFunction_None: {
                     cell.cellFunction.reset();
                 } break;
                 }
@@ -243,7 +243,7 @@ void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
 
 void _InspectorWindow::showCellFunctionPropertiesTab(CellDescription& cell)
 {
-    if (cell.getCellFunctionType() == Enums::CellFunction_None) {
+    if (cell.getCellFunctionType() == CellFunction_None) {
         return;
     }
 
@@ -251,32 +251,32 @@ void _InspectorWindow::showCellFunctionPropertiesTab(CellDescription& cell)
     if (ImGui::BeginTabItem(title.c_str(), nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             switch (cell.getCellFunctionType()) {
-            case Enums::CellFunction_Neuron: {
+            case CellFunction_Neuron: {
                 showNeuronContent(std::get<NeuronDescription>(*cell.cellFunction));
             } break;
-            case Enums::CellFunction_Transmitter: {
+            case CellFunction_Transmitter: {
                 showTransmitterContent(std::get<TransmitterDescription>(*cell.cellFunction));
             } break;
-            case Enums::CellFunction_Constructor: {
+            case CellFunction_Constructor: {
                 showConstructorContent(std::get<ConstructorDescription>(*cell.cellFunction));
             } break;
-            case Enums::CellFunction_Sensor: {
+            case CellFunction_Sensor: {
                 showSensorContent(std::get<SensorDescription>(*cell.cellFunction));
             } break;
-            case Enums::CellFunction_Nerve: {
+            case CellFunction_Nerve: {
                 showNerveContent(std::get<NerveDescription>(*cell.cellFunction));
             } break;
-            case Enums::CellFunction_Attacker: {
+            case CellFunction_Attacker: {
                 showAttackerContent(std::get<AttackerDescription>(*cell.cellFunction));
             } break;
-            case Enums::CellFunction_Injector: {
+            case CellFunction_Injector: {
             } break;
-            case Enums::CellFunction_Muscle: {
+            case CellFunction_Muscle: {
                 showMuscleContent(std::get<MuscleDescription>(*cell.cellFunction));
             } break;
-            case Enums::CellFunction_Placeholder1: {
+            case CellFunction_Placeholder1: {
             } break;
-            case Enums::CellFunction_Placeholder2: {
+            case CellFunction_Placeholder2: {
             } break;
             }
             showActivityContent(cell);
@@ -288,7 +288,7 @@ void _InspectorWindow::showCellFunctionPropertiesTab(CellDescription& cell)
 
 void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
 {
-    if (cell.getCellFunctionType() != Enums::CellFunction_Constructor) {
+    if (cell.getCellFunctionType() != CellFunction_Constructor) {
         return;
     }
     auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
@@ -443,7 +443,7 @@ void _InspectorWindow::showSensorContent(SensorDescription& sensor)
         int mode = sensor.getSensorMode();
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters().name("Mode").values({"Scan vicinity", "Scan specific region"}).textWidth(MaxCellContentTextWidth), mode)) {
-            if (mode == Enums::SensorMode_Neighborhood) {
+            if (mode == SensorMode_Neighborhood) {
                 sensor.fixedAngle.reset();
             } else {
                 sensor.fixedAngle = 0.0f;
@@ -503,7 +503,7 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
     cell.stiffness = std::max(0.0f, std::min(1.0f, cell.stiffness));
     cell.energy = std::max(0.0f, cell.energy);
     switch (cell.getCellFunctionType()) {
-    case Enums::CellFunction_Constructor: {
+    case CellFunction_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
         if (constructor.currentGenomePos < 0) {
             constructor.currentGenomePos = 0;
@@ -516,11 +516,11 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
         }
         constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
     } break;
-    case Enums::CellFunction_Sensor: {
+    case CellFunction_Sensor: {
         auto& sensor = std::get<SensorDescription>(*cell.cellFunction);
         sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
     } break;
-    case Enums::CellFunction_Nerve: {
+    case CellFunction_Nerve: {
         auto& nerve = std::get<NerveDescription>(*cell.cellFunction);
         nerve.pulseMode = std::max(0, nerve.pulseMode);
         nerve.alternationMode = std::max(0, nerve.alternationMode);
