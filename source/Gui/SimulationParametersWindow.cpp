@@ -158,12 +158,25 @@ SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParam
 
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
     spot.shapeType = ShapeType_Circular;
-    spot.shapeData.circularSpot.coreRadius = maxRadius / 3;
+    createDefaultSpotData(spot);
     spot.fadeoutRadius = maxRadius / 3;
     spot.color = _savedPalette[((2 + index) * 8) % IM_ARRAYSIZE(_savedPalette)];
 
     spot.values = simParameters.baseValues;
     return spot;
+}
+
+void _SimulationParametersWindow::createDefaultSpotData(SimulationParametersSpot& spot)
+{
+    auto worldSize = _simController->getWorldSize();
+
+    auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
+    if (spot.shapeType == ShapeType_Circular) {
+        spot.shapeData.circularSpot.coreRadius = maxRadius / 3;
+    } else {
+        spot.shapeData.rectangularSpot.height = maxRadius / 3;
+        spot.shapeData.rectangularSpot.width = maxRadius / 3;
+    }
 }
 
 void _SimulationParametersWindow::processBase(
@@ -748,15 +761,15 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 _backupColor,
                 _savedPalette);
 
-            int shape = static_cast<int>(spot.shapeType);
-            AlienImGui::Combo(
+            if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Shape")
                     .values({"Circular", "Rectangular"})
                     .textWidth(MaxContentTextWidth)
-                    .defaultValue(static_cast<int>(origSpot.shapeType)),
-                shape);
-            spot.shapeType = static_cast<ShapeType>(shape);
+                    .defaultValue(origSpot.shapeType),
+                spot.shapeType)) {
+                createDefaultSpotData(spot);
+            }
             auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y));
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()

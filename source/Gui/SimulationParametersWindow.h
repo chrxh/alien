@@ -16,6 +16,7 @@ private:
     void processBackground() override;
 
     SimulationParametersSpot createSpot(SimulationParameters const& simParameters, int index);
+    void createDefaultSpotData(SimulationParametersSpot& spot);
 
     void processBase(SimulationParameters& simParameters, SimulationParameters const& origSimParameters);
     void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot);
