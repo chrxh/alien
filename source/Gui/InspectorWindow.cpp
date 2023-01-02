@@ -455,7 +455,7 @@ void _InspectorWindow::showSensorContent(SensorDescription& sensor)
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         int mode = sensor.getSensorMode();
         if (AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Mode").values({"Scan vicinity", "Scan specific region"}).textWidth(CellFunctionTextWidth), mode)) {
+                AlienImGui::ComboParameters().name("Mode").values({"Scan vicinity", "Scan specific direction"}).textWidth(CellFunctionTextWidth), mode)) {
             if (mode == SensorMode_Neighborhood) {
                 sensor.fixedAngle.reset();
             } else {
