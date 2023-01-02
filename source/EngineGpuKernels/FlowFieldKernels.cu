@@ -66,18 +66,17 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
     auto& cells = data.objects.cellPointers;
     auto partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-    int spotIndex1, spotIndex2;
-
+    float2 accelerations[MAX_SPOTS];
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->barrier) {
             continue;
         }
-        SpotCalculator::getNearbySpots(data.cellMap, cell->absPos, spotIndex1, spotIndex2);
-        auto acceleration1 = calcAcceleration(data.cellMap, cell->absPos, spotIndex1);
-        auto acceleration2 = calcAcceleration(data.cellMap, cell->absPos, spotIndex2);
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            accelerations[i] = calcAcceleration(data.cellMap, cell->absPos, i);
+        }
         auto resultingAcceleration =
-            SpotCalculator::calcResultingValue(data.cellMap, cell->absPos, float2{0, 0}, acceleration1, acceleration2, spotIndex1, spotIndex2);
+            SpotCalculator::calcResultingValue(data.cellMap, cell->absPos, float2{0, 0}, accelerations);
         cell->vel = cell->vel + resultingAcceleration;
     }
 }

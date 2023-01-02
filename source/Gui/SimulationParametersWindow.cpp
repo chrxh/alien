@@ -330,6 +330,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(MaxContentTextWidth)
                     .min(0.0)
                     .max(1.0f)
+                    .format("%.5f")
                     .defaultValue(origSimParameters.clusterDecayProb),
                 simParameters.clusterDecayProb);
             ImGui::TreePop();
@@ -756,7 +757,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .defaultValue(static_cast<int>(origSpot.shapeType)),
                 shape);
             spot.shapeType = static_cast<ShapeType>(shape);
-            auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
+            auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y));
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Position X")

@@ -156,7 +156,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
     map.init(worldSize);
     auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
     float3 spotColors[MAX_SPOTS];
-    for (int i = 0; i < MAX_SPOTS; ++i) {
+    for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
         spotColors[i] = colorToFloat3(cudaSimulationParameters.spots[i].color);
     }
 
@@ -169,9 +169,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
         } else {
             float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
 
-            int spotIndex1, spotIndex2;
-            SpotCalculator::getNearbySpots(map, worldPos, spotIndex1, spotIndex2);
-            auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors[spotIndex1], spotColors[spotIndex2], spotIndex1, spotIndex2);
+            auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors);
             drawPixel(imageData, index, color);
         }
     }
