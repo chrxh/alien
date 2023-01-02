@@ -9,6 +9,37 @@
 class SpotCalculator
 {
 public:
+    __device__ __inline__ static float mix(float const& baseValue, float (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS])
+    {
+        float baseFactor = 1;
+        float sum = 0;
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            baseFactor *= spotWeights[i];
+            sum += 1 - spotWeights[i];
+        }
+        float result = baseValue * baseFactor;
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            result += spotValues[i] * (1 - spotWeights[i]) / sum;
+        }
+        return result;
+    }
+
+    template <typename T>
+    __device__ __inline__ static T calcResultingValue(BaseMap const& map, float2 const& worldPos, T const& baseValue, T (&spotValues)[MAX_SPOTS])
+    {
+        if (0 == cudaSimulationParameters.numSpots) {
+            return baseValue;
+        } else {
+            float spotWeights[MAX_SPOTS];
+            for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+                float2 spotPos = {cudaSimulationParameters.spots[i].posX, cudaSimulationParameters.spots[i].posY};
+                auto delta = map.getCorrectedDirection(spotPos - worldPos);
+                spotWeights[i] = calcWeight(delta, i);
+            }
+            return mix(baseValue, spotValues, spotWeights);
+        }
+    }
+
     __device__ __inline__ static float calcParameter(float SimulationParametersSpotValues::*value, SimulationData const& data, float2 const& worldPos)
     {
         int spotIndex1, spotIndex2;
@@ -157,8 +188,9 @@ public:
     {
         if (cudaSimulationParameters.spots[spotIndex].shapeType == ShapeType_Rectangular) {
             return calcWeightForRectSpot(delta, spotIndex);
+        } else {
+            return calcWeightForCircularSpot(delta, spotIndex);
         }
-        return calcWeightForCircularSpot(delta, spotIndex);
     }
 
 private:
