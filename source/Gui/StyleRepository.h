@@ -19,9 +19,13 @@ namespace Const
     ImColor const MenuButtonHoveredColor = ImColor::HSV(0.6f, 1.0f, 1.0f);
     ImColor const MenuButtonActiveColor = ImColor::HSV(0.6f, 0.6f, 0.6f);
 
-    ImColor const ShutdownButtonColor = ImColor::HSV(0.f, 0.6f, 0.6f);
+    ImColor const ShutdownButtonColor = ImColor::HSV(0.0f, 0.6f, 0.6f);
     ImColor const ShutdownButtonHoveredColor = ImColor::HSV(0.0f, 1.0f, 1.0f);
     ImColor const ShutdownButtonActiveColor = ImColor::HSV(0.0f, 1.0f, 1.0f);
+
+    ImColor const NeuronChannelButtonColor = ImColor::HSV(0.0f, 0.0f, 0.2f);
+    ImColor const NeuronChannelHoveredColor = ImColor::HSV(0.08, 0.5, 0.5);
+    ImColor const NeuronChannelActiveColor = ImColor::HSV(0.08, 0.5, 0.7);
 
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 
