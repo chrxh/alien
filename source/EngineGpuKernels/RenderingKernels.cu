@@ -161,7 +161,6 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
     }
 
     auto const block = calcPartition(imageSize.x * imageSize.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-//    auto first = true;
     for (int index = block.startIndex; index <= block.endIndex; ++index) {
         auto x = index % imageSize.x;
         auto y = index / imageSize.x;
@@ -173,17 +172,6 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
             int spotIndex1, spotIndex2;
             SpotCalculator::getNearbySpots(map, worldPos, spotIndex1, spotIndex2);
             auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors[spotIndex1], spotColors[spotIndex2], spotIndex1, spotIndex2);
-            //if (first && threadIdx.x == 0 /* && blockIdx.x == 0 */) {
-            //    printf(
-            //        "%f, %f, %f : %f, %f, %f\n",
-            //        spotColors[spotIndex1].x,
-            //        spotColors[spotIndex1].y,
-            //        spotColors[spotIndex1].z,
-            //        spotColors[spotIndex2].x,
-            //        spotColors[spotIndex2].y,
-            //        spotColors[spotIndex2].z);
-            //    first = false;
-            //}
             drawPixel(imageData, index, color);
         }
     }
