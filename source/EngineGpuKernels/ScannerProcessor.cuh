@@ -1,7 +1,7 @@
 #pragma once
 #include "cuda_runtime_api.h"
 
-#include "EngineInterface/Enums.h"
+#include "EngineInterface/CellFunctionEnums.h"
 
 #include "SimulationData.cuh"
 #include "Math.cuh"

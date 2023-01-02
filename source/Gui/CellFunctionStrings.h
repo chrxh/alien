@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include "EngineInterface/Enums.h"
+#include "EngineInterface/CellFunctionEnums.h"
 
 
 using namespace std::string_literals;

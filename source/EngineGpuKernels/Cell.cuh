@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineInterface/Constants.h"
-#include "EngineInterface/Enums.h"
+#include "EngineInterface/CellFunctionEnums.h"
 
 #include "Base.cuh"
 
