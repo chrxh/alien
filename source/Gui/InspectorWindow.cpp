@@ -371,7 +371,7 @@ void _InspectorWindow::showNerveContent(NerveDescription& nerve)
 
 void _InspectorWindow::showNeuronContent(NeuronDescription& neuron)
 {
-    if (ImGui::TreeNodeEx("Weights and bias", TreeNodeFlags)) {
+    if (ImGui::TreeNodeEx("Neural network", TreeNodeFlags)) {
         AlienImGui::NeuronSelection(
             AlienImGui::NeuronSelectionParameters().outputButtonPositionFromRight(ActivityTextWidth),
             neuron.weights,

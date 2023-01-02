@@ -939,6 +939,9 @@ void AlienImGui::NeuronSelection(
     auto outputButtonPositionFromRight = StyleRepository::getInstance().scaleContent(parameters._outputButtonPositionFromRight);
     RealVector2D inputPos[MAX_CHANNELS];
     RealVector2D outputPos[MAX_CHANNELS];
+    auto biasFieldWidth = ImGui::GetStyle().FramePadding.x * 2;
+
+    //draw buttons and save positions to visualize weights
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         
         auto startButtonPos = ImGui::GetCursorPos();
@@ -954,8 +957,8 @@ void AlienImGui::NeuronSelection(
 
         ImGui::SameLine(0, ImGui::GetContentRegionAvail().x - buttonSize.x - outputButtonPositionFromRight + ImGui::GetStyle().FramePadding.x);
         startButtonPos = ImGui::GetCursorPos();
-        outputPos[i] =
-            RealVector2D(windowPos.x - ImGui::GetScrollX() + startButtonPos.x, windowPos.y - ImGui::GetScrollY() + startButtonPos.y + buttonSize.y / 2);
+        outputPos[i] = RealVector2D(
+            windowPos.x - ImGui::GetScrollX() + startButtonPos.x - biasFieldWidth, windowPos.y - ImGui::GetScrollY() + startButtonPos.y + buttonSize.y / 2);
 
         i == selectedOutput ? setHightlightingColors() : setDefaultColors();
         if (ImGui::Button(("Output #" + std::to_string(i)).c_str())) {
@@ -971,25 +974,39 @@ void AlienImGui::NeuronSelection(
             drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, ImColor::HSV(0.0f, 0.0f, 0.1f), 2.0f);
         }
     }
+    auto calcColor = [](float value) {
+        auto factor = std::min(1.0f, std::abs(value));
+        if (value > NEAR_ZERO) {
+            return ImColor::HSV(0.61f, 0.5f, 0.8f * factor);
+        } else if (value < -NEAR_ZERO) {
+            return ImColor::HSV(0.0f, 0.5f, 0.8f * factor);
+        } else {
+            return ImColor::HSV(0.0f, 0.0f, 0.1f);
+        }
+    };
+
+    //visualize weights
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         for (int j = 0; j < MAX_CHANNELS; ++j) {
             if (std::abs(weights[j][i]) <= NEAR_ZERO) {
                 continue;
             }
-            auto color = [&] {
-                auto factor = std::min(1.0f, std::abs(weights[j][i]));
-                if (weights[j][i] > NEAR_ZERO) {
-                    return ImColor::HSV(0.61f, 0.5f, 0.8f * factor);
-                } else if (weights[j][i] < -NEAR_ZERO) {
-                    return ImColor::HSV(0.0f, 0.5f, 0.8f * factor);
-                } else {
-                    return ImColor::HSV(0.0f, 0.0f, 0.1f);
-                }
-            }();
             auto thickness = std::min(4.0f, std::abs(weights[j][i]));
-            drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, color, thickness);
+            drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, calcColor(weights[j][i]), thickness);
         }
     }
+
+    //visualize bias
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        drawList->AddRectFilled(
+            {outputPos[i].x, outputPos[i].y - biasFieldWidth}, {outputPos[i].x + biasFieldWidth, outputPos[i].y + biasFieldWidth}, calcColor(bias[i]));
+    }
+
+    //draw selection
+    drawList->AddRectFilled(
+        {outputPos[selectedOutput].x, outputPos[selectedOutput].y - biasFieldWidth},
+        {outputPos[selectedOutput].x + biasFieldWidth, outputPos[selectedOutput].y + biasFieldWidth},
+        ImColor::HSV(0.0f, 0.0f, 1.0f, 0.35f));
     drawList->AddLine(
-        {inputPos[selectedInput].x, inputPos[selectedInput].y}, {outputPos[selectedOutput].x, outputPos[selectedOutput].y}, ImColor::HSV(0.0f, 0.0f, 1.0f));
+        {inputPos[selectedInput].x, inputPos[selectedInput].y}, {outputPos[selectedOutput].x, outputPos[selectedOutput].y}, ImColor::HSV(0.0f, 0.0f, 1.0f, 0.35f), 8.0f);
 }
