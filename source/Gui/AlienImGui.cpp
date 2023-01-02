@@ -943,7 +943,7 @@ void AlienImGui::NeuronSelection(
 
     //draw buttons and save positions to visualize weights
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        
+
         auto startButtonPos = ImGui::GetCursorPos();
 
         i == selectedInput ? setHightlightingColors() : setDefaultColors();
@@ -951,6 +951,24 @@ void AlienImGui::NeuronSelection(
             selectedInput = i;
         }
         ImGui::PopStyleColor(3);
+        if (i == 0) {
+            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT
+                    " Constructor: 0 = construction failed, 1 = construction successful\n" ICON_FA_CARET_RIGHT " Sensor: 0 = nothing found, 1 = region found");
+        }
+        if (i == 1) {
+            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT " Sensor: cell density of found region");
+        }
+        if (i == 2) {
+            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT " Sensor: distance to found region");
+        }
+        if (i == 3) {
+            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT
+                    " Sensor: relative angle of found region (when 'scan specific direction' is activated)");
+        }
+        if (i > 3) {
+            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell");
+        }
+
         auto buttonSize = ImGui::GetItemRectSize();
         inputPos[i] = RealVector2D(
             windowPos.x - ImGui::GetScrollX() + startButtonPos.x + buttonSize.x, windowPos.y - ImGui::GetScrollY() + startButtonPos.y + buttonSize.y / 2);
@@ -965,6 +983,17 @@ void AlienImGui::NeuronSelection(
             selectedOutput = i;
         }
         ImGui::PopStyleColor(3);
+        if (i == 0) {
+            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell\n" ICON_FA_CARET_RIGHT
+                    " Constructor: = 0 means do nothing, abs(*) > threshold means try construct cell\n" ICON_FA_CARET_RIGHT
+                    " Attacker: = 0 means do nothing, abs(*) > threshold means try attack nearby cells\n" ICON_FA_CARET_RIGHT
+                    " Sensor: = 0 means do nothing, abs(*) > threshold means scan vicinity for cells\n" ICON_FA_CARET_RIGHT
+                    " Injector: = 0 means do nothing, abs(*) > threshold means try inject genome to other constructors\n" ICON_FA_CARET_RIGHT
+                    " Muscle: abs(*) intensity of muscle process and sign(*) direction of muscle process");
+        }
+        if (i > 0) {
+            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell");
+        }
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         for (int j = 0; j < MAX_CHANNELS; ++j) {
