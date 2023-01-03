@@ -3,6 +3,7 @@
 #include <vector>
 #include <optional>
 #include <variant>
+#include <cstdint>
 
 #include "Constants.h"
 #include "CellFunctionEnums.h"

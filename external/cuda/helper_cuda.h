@@ -1277,6 +1277,14 @@ inline bool checkCudaCapabilities(int major_version, int minor_version)
 }
 #endif
 
+inline __device__ uint64_t atomicAdd(uint64_t *address, uint64_t val) {
+    return (uint64_t)atomicAdd(reinterpret_cast<unsigned long long int *>(address), val);
+}
+
+inline __device__ uint64_t atomicSub(uint64_t *address, uint64_t val) {
+    return (uint64_t)atomicSub(reinterpret_cast<unsigned int *>(address), val);
+}
+
 // end of CUDA Helper Functions
 
 

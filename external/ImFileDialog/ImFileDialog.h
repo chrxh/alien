@@ -105,8 +105,8 @@ namespace ifd {
 		void m_parseFilter(const std::string& filter);
 
 		std::vector<int> m_iconIndices;
-		std::vector<std::u8string> m_iconFilepaths; // m_iconIndices[x] <-> m_iconFilepaths[x]
-		std::unordered_map<std::u8string, void*> m_icons;
+		std::vector<std::string> m_iconFilepaths; // m_iconIndices[x] <-> m_iconFilepaths[x]
+		std::unordered_map<std::string, void*> m_icons;
 		void* m_getIcon(const std::filesystem::path& path);
 		void m_clearIcons();
 		void m_refreshIconPreview();

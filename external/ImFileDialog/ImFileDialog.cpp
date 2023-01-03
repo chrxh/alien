@@ -588,7 +588,7 @@ namespace ifd {
 			if (filename.size() == 0)
 				filename = m_selections[0].u8string(); // drive
 
-			std::memcpy(m_inputTextbox, filename.c_str(), filename.size());
+			::memcpy(m_inputTextbox, filename.c_str(), filename.size());
 			m_inputTextbox[filename.size()] = 0;
 		}
 		else {
@@ -600,7 +600,7 @@ namespace ifd {
 
 				textboxVal += "\"" + filename + "\", ";
 			}
-			std::memcpy(m_inputTextbox, textboxVal.substr(0, textboxVal.size() - 2).c_str(), textboxVal.size() - 2);
+			::memcpy(m_inputTextbox, textboxVal.substr(0, textboxVal.size() - 2).c_str(), textboxVal.size() - 2);
 			m_inputTextbox[textboxVal.size() - 2] = 0;
 		}
 	}
