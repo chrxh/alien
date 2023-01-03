@@ -18,7 +18,9 @@ namespace
         LOOKING_FOR_SEPARATOR,
         LOOKING_FOR_COMPARATOR,
         LOOKING_FOR_OP2_START,
-        LOOKING_FOR_OP2_END
+        LOOKING_FOR_OP2_END,
+        LOOKING_FOR_COMMENT,
+        LOOKING_FOR_COMMENT_END,
     };
 
     struct InstructionUncoded
@@ -62,12 +64,15 @@ namespace
             if (std::isalpha(currentSymbol)) {
                 state = CompilerState::LOOKING_FOR_INSTR_END;
                 instruction.name = currentSymbol;
+            } else if (currentSymbol == '#') {
+                instruction.name = currentSymbol;
+                state = CompilerState::LOOKING_FOR_COMMENT_END;
             }
         } break;
         case CompilerState::LOOKING_FOR_INSTR_END: {
             if (!std::isalpha(currentSymbol)) {
                 if (instruction.name == "else" || instruction.name == "endif")
-                    instruction.readingFinished = true;
+                    state = CompilerState::LOOKING_FOR_COMMENT;
                 else
                     state = CompilerState::LOOKING_FOR_OP1_START;
             } else {
@@ -133,12 +138,26 @@ namespace
         case CompilerState::LOOKING_FOR_OP2_END: {
             if (!isNameChar(currentSymbol) && (currentSymbol != '-') && (currentSymbol != '_') && (currentSymbol != '[')
                 && (currentSymbol != ']') && (currentSymbol != '(') && (currentSymbol != ')'))
-                instruction.readingFinished = true;
+                state = CompilerState::LOOKING_FOR_COMMENT;
             else {
                 instruction.operand2 += currentSymbol;
                 if ((bytePos + 1) == codeSize)
                     instruction.readingFinished = true;
             }
+        } break;
+        case CompilerState::LOOKING_FOR_COMMENT: {
+            if (currentSymbol == '\n' || (bytePos + 1) == codeSize)
+                instruction.readingFinished = true;
+            else if (currentSymbol == '#')
+                state = CompilerState::LOOKING_FOR_COMMENT_END;
+            else if (currentSymbol != ' ' && currentSymbol != '\t') {
+                instruction.readingFinished = true;
+                return false;
+            }
+        } break;
+        case CompilerState::LOOKING_FOR_COMMENT_END: {
+            if (currentSymbol == '\n' || (bytePos + 1) == codeSize)
+                instruction.readingFinished = true;
         } break;
         }
         if ((currentSymbol == '\n') || ((bytePos + 1) == codeSize)) {
@@ -221,7 +240,9 @@ namespace
                 instructionCoded.operation = Enums::ComputationOperation_Else;
             else if (instructionUncoded.name == "endif")
                 instructionCoded.operation = Enums::ComputationOperation_Endif;
-            else {
+            else if (instructionUncoded.name == "#") {
+                return true;
+            } else {
                 return false;
             }
 
@@ -324,7 +345,8 @@ CompilationResult CellComputationCompiler::compileSourceCode(std::string const& 
                 result.lineOfFirstError = linePos;
                 return result;
             }
-            writeInstruction(result.compilation, instructionCoded);
+            if(instructionUncoded.name != "#")
+                writeInstruction(result.compilation, instructionCoded);
             state = CompilerState::LOOKING_FOR_INSTR_START;
             instructionUncoded = InstructionUncoded();
         }
@@ -347,6 +369,13 @@ namespace
         stream << "0x" << std::hex << static_cast<int>(value);
         return stream.str();
     }
+    template<typename T>
+    std::string toDecString(T value)
+    {
+        std::stringstream stream;
+        stream << std::dec << static_cast<int>(value);
+        return stream.str();
+    }
 }
 
 std::string CellComputationCompiler::decompileSourceCode(
@@ -354,8 +383,13 @@ std::string CellComputationCompiler::decompileSourceCode(
     SymbolMap const& symbols,
     SimulationParameters const& parameters)
 {
+    SymbolMap revsymbols;
+    for (auto const& symbol : symbols) {
+        revsymbols[symbol.second] = symbol.first;
+    }
     std::string text;
-    std::string textOp1, textOp2;
+    std::string textOp1, textOp2, comment1, comment2;
+    size_t lineStart, opEnd;
     int nestingLevel = 0;
     auto dataSize = (data.size() / 3) * 3;
     auto isNullInstruction = [&data](int address) {
@@ -369,7 +403,19 @@ std::string CellComputationCompiler::decompileSourceCode(
         }
     }
 
+    auto commentAlign = [&]() {
+        auto lineSize = text.size() - lineStart;
+        std::string spaces = "        ";
+        spaces = spaces.substr(0, 8 - lineSize % 4);
+        return spaces;
+    };
+
+    auto getOp = [&]() {
+        return text.substr(lineStart, opEnd - lineStart + 1);
+    };
+
     for (int instructionPointer = 0; instructionPointer < dataSize;) {
+        lineStart = text.size();
 
         //decode instruction data
         CellInstruction instruction;
@@ -414,42 +460,95 @@ std::string CellComputationCompiler::decompileSourceCode(
             text += "endif";
         }
 
-        //write operands
-        if (instruction.opType1 == Enums::ComputationOpType_Mem)
-            textOp1 = "[" + toHexString(convertToAddress(instruction.operand1, parameters.tokenMemorySize)) + "]";
-        if (instruction.opType1 == Enums::ComputationOpType_MemMem)
-            textOp1 = "[[" + toHexString(convertToAddress(instruction.operand1, parameters.tokenMemorySize)) + "]]";
-        if (instruction.opType1 == Enums::ComputationOpType_Cmem)
-            textOp1 = "("
-                + toHexString(convertToAddress(instruction.operand1, parameters.cellFunctionComputerCellMemorySize))
-                + ")";
-        if (instruction.opType2 == Enums::ComputationOpType_Mem)
-            textOp2 = "[" + toHexString(convertToAddress(instruction.operand2, parameters.tokenMemorySize)) + "]";
-        if (instruction.opType2 == Enums::ComputationOpType_MemMem)
-            textOp2 = "[[" + toHexString(convertToAddress(instruction.operand2, parameters.tokenMemorySize)) + "]]";
-        if (instruction.opType2 == Enums::ComputationOpType_Cmem)
-            textOp2 = "("
-                + toHexString(convertToAddress(instruction.operand2, parameters.cellFunctionComputerCellMemorySize))
-                + ")";
-        if (instruction.opType2 == Enums::ComputationOpType_Constant)
-            textOp2 = toHexString(convertToAddress(instruction.operand2, parameters.tokenMemorySize));
+        opEnd = text.size();
 
+        //write operands
+        if (instruction.opType1 == Enums::ComputationOpType_Mem) {
+            comment1 = "[" + toDecString(convertToAddress(instruction.operand1, parameters.tokenMemorySize)) + "]";
+            if (revsymbols.find(comment1) != revsymbols.end())
+                comment1 = revsymbols[comment1];
+            textOp1 = "[" + toHexString(convertToAddress(instruction.operand1, parameters.tokenMemorySize)) + "]";
+        }
+        if (instruction.opType1 == Enums::ComputationOpType_MemMem) {
+            comment1 = "[[" + toDecString(convertToAddress(instruction.operand1, parameters.tokenMemorySize)) + "]]";
+            if (revsymbols.find(comment1) != revsymbols.end())
+                comment1 = revsymbols[comment1];
+            textOp1 = "[[" + toHexString(convertToAddress(instruction.operand1, parameters.tokenMemorySize)) + "]]";
+        }
+        if (instruction.opType1 == Enums::ComputationOpType_Cmem) {
+            comment1 = "("
+                      + toDecString(convertToAddress(instruction.operand1, parameters.cellFunctionComputerCellMemorySize))
+                      + ")";
+            if (revsymbols.find(comment1) != revsymbols.end())
+                comment1 = revsymbols[comment1];
+            textOp1 = "("
+                      + toHexString(convertToAddress(instruction.operand1, parameters.cellFunctionComputerCellMemorySize))
+                      + ")";
+        }
+        if (instruction.opType2 == Enums::ComputationOpType_Mem) {
+            comment2 = "[" + toDecString(convertToAddress(instruction.operand2, parameters.tokenMemorySize)) + "]";
+            if (revsymbols.find(comment2) != revsymbols.end())
+                comment2 = revsymbols[comment2];
+            textOp2 = "[" + toHexString(convertToAddress(instruction.operand2, parameters.tokenMemorySize)) + "]";
+        }
+        if (instruction.opType2 == Enums::ComputationOpType_MemMem) {
+            comment2 = "[[" + toDecString(convertToAddress(instruction.operand2, parameters.tokenMemorySize)) + "]]";
+            if (revsymbols.find(comment2) != revsymbols.end())
+                comment2 = revsymbols[comment2];
+            textOp2 = "[[" + toHexString(convertToAddress(instruction.operand2, parameters.tokenMemorySize)) + "]]";
+        }
+        if (instruction.opType2 == Enums::ComputationOpType_Cmem) {
+            comment2 = "("
+                      + toDecString(convertToAddress(instruction.operand2, parameters.cellFunctionComputerCellMemorySize))
+                      + ")";
+            if (revsymbols.find(comment2) != revsymbols.end())
+                comment2 = revsymbols[comment2];
+            textOp2 = "("
+                      + toHexString(convertToAddress(instruction.operand2, parameters.cellFunctionComputerCellMemorySize))
+                      + ")";
+        }
+        if (instruction.opType2 == Enums::ComputationOpType_Constant) {
+            // try to be smart about constants
+            auto number = toDecString(convertToAddress(instruction.operand2, parameters.tokenMemorySize));
+            comment2 = number;
+            for (auto &it : symbols) {
+                auto pos = it.first.find(':');
+                if (it.first.substr(0,pos) == comment1.substr(0,pos) && it.second == number) {
+                    comment2 = it.first;
+                    break;
+                }
+            }
+            textOp2 = toHexString(convertToAddress(instruction.operand2, parameters.tokenMemorySize));
+        }
         //write separation/comparator
         if (instruction.operation <= Enums::ComputationOperation_And) {
             text += " " + textOp1 + ", " + textOp2;
+            text += commentAlign() + "# " + getOp() + comment1 + ", " + comment2;
         }
-        if (instruction.operation == Enums::ComputationOperation_Ifg)
+        if (instruction.operation == Enums::ComputationOperation_Ifg) {
             text += " " + textOp1 + " > " + textOp2;
-        if (instruction.operation == Enums::ComputationOperation_Ifge)
+            text += commentAlign() + "# " + getOp() + comment1 + " > " + comment2;
+        }
+        if (instruction.operation == Enums::ComputationOperation_Ifge) {
             text += " " + textOp1 + " >= " + textOp2;
-        if (instruction.operation == Enums::ComputationOperation_Ife)
+            text += commentAlign() + "# " + getOp() + comment1 + " >= " + comment2;
+        }
+        if (instruction.operation == Enums::ComputationOperation_Ife) {
             text += " " + textOp1 + " = " + textOp2;
-        if (instruction.operation == Enums::ComputationOperation_Ifne)
+            text += commentAlign() + "# " + getOp() + comment1 + " = " + comment2;
+        }
+        if (instruction.operation == Enums::ComputationOperation_Ifne) {
             text += " " + textOp1 + " != " + textOp2;
-        if (instruction.operation == Enums::ComputationOperation_Ifle)
+            text += commentAlign() + "# " + getOp() + comment1 + " != " + comment2;
+        }
+        if (instruction.operation == Enums::ComputationOperation_Ifle) {
             text += " " + textOp1 + " <= " + textOp2;
-        if (instruction.operation == Enums::ComputationOperation_Ifl)
+            text += commentAlign() + "# " + getOp() + comment1 + " <= " + comment2;
+        }
+        if (instruction.operation == Enums::ComputationOperation_Ifl) {
             text += " " + textOp1 + " < " + textOp2;
+            text += commentAlign() + "# " + getOp() + comment1 + " < " + comment2;
+        }
         if (instructionPointer < dataSize)
             text += "\n";
     }
