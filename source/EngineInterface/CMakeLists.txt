@@ -1,6 +1,7 @@
 
 add_library(alien_engine_interface_lib
     ArraySizes.h
+    CellFunctionEnums.h
     Colors.h
     Constants.h
     Definitions.h
@@ -8,7 +9,6 @@ add_library(alien_engine_interface_lib
     DescriptionHelper.h
     Descriptions.cpp
     Descriptions.h
-    Enums.h
     GenomeDescriptionConverter.cpp
     GenomeDescriptionConverter.h
     GenomeDescriptions.h
@@ -17,7 +17,7 @@ add_library(alien_engine_interface_lib
     InspectedEntityIds.h
     MonitorData.h
     OverlayDescriptions.h
-    ParticleSource.h
+    RadiationSource.h
     SelectionShallowData.h
     Serializer.cpp
     Serializer.h

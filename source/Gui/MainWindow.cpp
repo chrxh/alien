@@ -69,7 +69,7 @@
 #include "GenericOpenFileDialog.h"
 #include "ShaderWindow.h"
 #include "GenomeEditorWindow.h"
-#include "ParticleSourcesWindow.h"
+#include "RadiationSourcesWindow.h"
 
 namespace
 {
@@ -158,7 +158,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_viewport, _simController);
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
-    _particleSourcesWindow = std::make_shared<_ParticleSourcesWindow>(_simController);
+    _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController);
 
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog);
@@ -439,8 +439,8 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Simulation parameters", "ALT+4", _simulationParametersWindow->isOn())) {
                 _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
             }
-            if (ImGui::MenuItem("Particle sources", "ALT+5", _particleSourcesWindow->isOn())) {
-                _particleSourcesWindow->setOn(!_particleSourcesWindow->isOn());
+            if (ImGui::MenuItem("Radiation sources", "ALT+5", _radiationSourcesWindow->isOn())) {
+                _radiationSourcesWindow->setOn(!_radiationSourcesWindow->isOn());
             }
             if (ImGui::MenuItem("Shader parameters", "ALT+6", _shaderWindow->isOn())) {
                 _shaderWindow->setOn(!_shaderWindow->isOn());
@@ -607,7 +607,7 @@ void _MainWindow::processMenubar()
             _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_5)) {
-            _particleSourcesWindow->setOn(!_particleSourcesWindow->isOn());
+            _radiationSourcesWindow->setOn(!_radiationSourcesWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_6)) {
             _shaderWindow->setOn(!_shaderWindow->isOn());
@@ -715,7 +715,7 @@ void _MainWindow::processWindows()
     _browserWindow->process();
     _gettingStartedWindow->process();
     _shaderWindow->process();
-    _particleSourcesWindow->process();
+    _radiationSourcesWindow->process();
 }
 
 void _MainWindow::processControllers()

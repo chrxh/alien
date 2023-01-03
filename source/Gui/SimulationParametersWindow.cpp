@@ -276,7 +276,7 @@ void _SimulationParametersWindow::processBase(
         if (ImGui::TreeNodeEx("Physics: Radiation", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Radiation factor")
+                    .name("Radiation strength")
                     .textWidth(MaxContentTextWidth)
                     .min(0)
                     .max(0.01f)
@@ -903,7 +903,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
         if (ImGui::TreeNodeEx("Physics: Radiation", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Radiation factor")
+                    .name("Radiation strength")
                     .textWidth(MaxContentTextWidth)
                     .min(0)
                     .max(0.01f)

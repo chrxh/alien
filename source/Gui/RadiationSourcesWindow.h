@@ -4,15 +4,15 @@
 
 #include "AlienWindow.h"
 
-class _ParticleSourcesWindow : public _AlienWindow
+class _RadiationSourcesWindow : public _AlienWindow
 {
 public:
-    _ParticleSourcesWindow(SimulationController const& simController);
+    _RadiationSourcesWindow(SimulationController const& simController);
 
 private:
     void processIntern() override;
 
-    ParticleSource createParticleSource() const;
+    RadiationSource createParticleSource() const;
 
     SimulationController _simController;
 };
