@@ -3,7 +3,7 @@
 #include <cstdint>
 
 #include "SimulationParametersSpotValues.h"
-#include "ParticleSource.h"
+#include "RadiationSource.h"
 #include "SimulationParametersSpot.h"
 
 struct SimulationParameters
@@ -65,7 +65,7 @@ struct SimulationParameters
 
     //particle sources
     int numParticleSources = 0;
-    ParticleSource particleSources[MAX_PARTICLE_SOURCES];
+    RadiationSource particleSources[MAX_PARTICLE_SOURCES];
 
     //spots
     int numSpots = 0;

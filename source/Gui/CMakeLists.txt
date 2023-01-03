@@ -76,8 +76,6 @@ PUBLIC
     OpenPatternDialog.h
     OpenSimulationDialog.cpp
     OpenSimulationDialog.h
-    ParticleSourcesWindow.cpp
-    ParticleSourcesWindow.h
     PatternAnalysisDialog.cpp
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
@@ -85,6 +83,8 @@ PUBLIC
     PreviewDescriptionConverter.cpp
     PreviewDescriptionConverter.h
     PreviewDescriptions.h
+    RadiationSourcesWindow.cpp
+    RadiationSourcesWindow.h
     RemoteSimulationData.cpp
     RemoteSimulationData.h
     RemoteSimulationDataParser.cpp

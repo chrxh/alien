@@ -4,7 +4,7 @@
 #include "Base/Definitions.h"
 #include "EngineInterface/SimulationController.h"
 
-#include "ParticleSourcesWindow.h"
+#include "RadiationSourcesWindow.h"
 #include "GlobalSettings.h"
 #include "StyleRepository.h"
 
@@ -13,12 +13,12 @@ namespace
     auto const MaxContentTextWidth = 120.0f;
 }
 
-_ParticleSourcesWindow::_ParticleSourcesWindow(SimulationController const& simController)
-    : _AlienWindow("Particle sources", "windows.particle sources", false)
+_RadiationSourcesWindow::_RadiationSourcesWindow(SimulationController const& simController)
+    : _AlienWindow("Radiation sources", "windows.radiation sources", false)
     , _simController(simController)
 {}
 
-void _ParticleSourcesWindow::processIntern()
+void _RadiationSourcesWindow::processIntern()
 {
 
     auto parameters = _simController->getSimulationParameters();
@@ -44,8 +44,8 @@ void _ParticleSourcesWindow::processIntern()
         }
 
         for (int tab = 0; tab < parameters.numParticleSources; ++tab) {
-            ParticleSource& flowCenter = parameters.particleSources[tab];
-            ParticleSource& origFlowCenter = origParameters.particleSources[tab];
+            RadiationSource& flowCenter = parameters.particleSources[tab];
+            RadiationSource& origFlowCenter = origParameters.particleSources[tab];
             bool open = true;
             char name[18] = {};
             bool* openPtr = &open;
@@ -94,9 +94,9 @@ void _ParticleSourcesWindow::processIntern()
     }
 }
 
-ParticleSource _ParticleSourcesWindow::createParticleSource() const
+RadiationSource _RadiationSourcesWindow::createParticleSource() const
 {
-    ParticleSource result;
+    RadiationSource result;
     auto worldSize = _simController->getWorldSize();
     result.posX = toFloat(worldSize.x / 2);
     result.posY = toFloat(worldSize.y / 2);

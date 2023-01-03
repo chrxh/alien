@@ -169,8 +169,8 @@ using ImageToPatternDialog = std::shared_ptr<_ImageToPatternDialog>;
 class _GenomeEditorWindow;
 using GenomeEditorWindow = std::shared_ptr<_GenomeEditorWindow>;
 
-class _ParticleSourcesWindow;
-using ParticleSourcesWindow = std::shared_ptr<_ParticleSourcesWindow>;
+class _RadiationSourcesWindow;
+using RadiationSourcesWindow = std::shared_ptr<_RadiationSourcesWindow>;
 
 struct GLFWvidmode;
 struct GLFWwindow;

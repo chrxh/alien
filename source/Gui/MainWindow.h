@@ -46,7 +46,7 @@ private:
     GettingStartedWindow _gettingStartedWindow;
     BrowserWindow _browserWindow;
     ShaderWindow _shaderWindow;
-    ParticleSourcesWindow _particleSourcesWindow;
+    RadiationSourcesWindow _radiationSourcesWindow;
 
     GpuSettingsDialog _gpuSettingsDialog;
     ColorizeDialog _colorizeDialog;
