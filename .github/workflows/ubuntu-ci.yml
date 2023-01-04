@@ -28,7 +28,7 @@ jobs:
         sudo apt-get update -qq
         sudo apt-get install -y --no-install-recommends libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
         
-    - uses: Jimver/cuda-toolkit@v0.2.5
+    - uses: Jimver/cuda-toolkit@v0.2.8
       id: cuda-toolkit
       with:
         cuda: '11.7.0'
