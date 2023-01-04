@@ -12,6 +12,14 @@
 #include "CellFunctionStrings.h"
 #include "StyleRepository.h"
 
+namespace
+{
+    bool revertButton(std::string const& id)
+    {
+        return ImGui::Button((ICON_FA_UNDO "##" + id).c_str());
+    }
+}
+
 void AlienImGui::HelpMarker(std::string const& text)
 {
     ImGui::SameLine();
@@ -41,7 +49,7 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& val
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -64,7 +72,7 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -105,7 +113,7 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -130,7 +138,7 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             value = *parameters._defaultValue;
         }
         ImGui::EndDisabled();
@@ -235,7 +243,7 @@ void AlienImGui::InputColorMatrix(InputColorMatrixParameters const& parameters, 
                 }
             }
             ImGui::BeginDisabled(!changed);
-            if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+            if (revertButton(parameters._name)) {
                 for (int row = 0; row < MAX_COLORS; ++row) {
                     for (int col = 0; col < MAX_COLORS; ++col) {
                         value[row][col] = (*parameters._defaultValue)[row][col];
@@ -287,7 +295,7 @@ void AlienImGui::InputColorVector(InputColorVectorParameters const& parameters, 
                 }
             }
             ImGui::BeginDisabled(!changed);
-            if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+            if (revertButton(parameters._name)) {
                 for (int col = 0; col < MAX_COLORS; ++col) {
                     value[col] = (*parameters._defaultValue)[col];
                 }
@@ -330,7 +338,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(std::string(buffer) == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             StringHelper::copy(buffer, bufferSize, *parameters._defaultValue);
         }
         ImGui::EndDisabled();
@@ -410,7 +418,7 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -505,7 +513,7 @@ void AlienImGui::InputColorTransition(InputColorTransitionParameters const& para
     if (parameters._defaultTransitionAge && parameters._defaultTargetColor) {
         ImGui::SameLine();
         ImGui::BeginDisabled(transitionAge == *parameters._defaultTransitionAge && targetColor == *parameters._defaultTargetColor);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             transitionAge = *parameters._defaultTransitionAge;
             targetColor = *parameters._defaultTargetColor;
         }
@@ -532,7 +540,7 @@ bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -709,7 +717,7 @@ void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& pa
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(color == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             color = *parameters._defaultValue;
         }
         ImGui::EndDisabled();
@@ -773,6 +781,25 @@ bool AlienImGui::Button(std::string const& text)
 /*
     ImGui::PopStyleColor(4);
 */
+    return result;
+}
+
+bool AlienImGui::Button(ButtonParameters const& parameters)
+{
+    auto width = ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto result = ImGui::Button(parameters._buttonText.c_str(), {width, 0});
+    ImGui::SameLine();
+
+    if (parameters._showDisabledRevertButton) {
+        ImGui::BeginDisabled(true);
+        revertButton(parameters._name);
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+    }
+    ImGui::TextUnformatted(parameters._name.c_str());
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
     return result;
 }
 

@@ -10,7 +10,7 @@
 
 namespace
 {
-    auto const MaxContentTextWidth = 120.0f;
+    auto const RightColumnWidth = 120.0f;
 }
 
 _RadiationSourcesWindow::_RadiationSourcesWindow(SimulationController const& simController)
@@ -55,7 +55,7 @@ void _RadiationSourcesWindow::processIntern()
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Position X")
-                        .textWidth(MaxContentTextWidth)
+                        .textWidth(RightColumnWidth)
                         .min(0)
                         .max(toFloat(worldSize.x))
                         .format("%.0f")
@@ -64,7 +64,7 @@ void _RadiationSourcesWindow::processIntern()
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Position Y")
-                        .textWidth(MaxContentTextWidth)
+                        .textWidth(RightColumnWidth)
                         .min(0)
                         .max(toFloat(worldSize.y))
                         .format("%.0f")
