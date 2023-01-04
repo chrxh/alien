@@ -6,7 +6,7 @@
 
 namespace
 {
-    auto const MaxContentTextWidth = 140.0f;
+    auto const RightColumnWidth = 140.0f;
 }
 
 _ShaderWindow::_ShaderWindow(SimulationView const& simulationView)
@@ -31,15 +31,15 @@ _ShaderWindow::~_ShaderWindow()
 void _ShaderWindow::processIntern()
 {
     if (AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters().name("Brightness").min(0).max(3.0f).textWidth(MaxContentTextWidth).defaultValue(1.0f), _brightness)) {
+            AlienImGui::SliderFloatParameters().name("Brightness").min(0).max(3.0f).textWidth(RightColumnWidth).defaultValue(1.0f), _brightness)) {
         _simulationView->setBrightness(_brightness);
     }
     if (AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters().name("Contrast").min(0).max(2.0f).textWidth(MaxContentTextWidth).defaultValue(1.0f), _contrast)) {
+            AlienImGui::SliderFloatParameters().name("Contrast").min(0).max(2.0f).textWidth(RightColumnWidth).defaultValue(1.0f), _contrast)) {
         _simulationView->setContrast(_contrast);
     }
     if (AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters().name("Motion blur").min(0).max(10.0f).textWidth(MaxContentTextWidth).logarithmic(true).defaultValue(1.0f), _motionBlur)) {
+            AlienImGui::SliderFloatParameters().name("Motion blur").min(0).max(10.0f).textWidth(RightColumnWidth).logarithmic(true).defaultValue(1.0f), _motionBlur)) {
         _simulationView->setMotionBlur(_motionBlur);
     }
 }

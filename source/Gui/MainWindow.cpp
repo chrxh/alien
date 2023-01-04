@@ -134,7 +134,8 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simController);
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _viewport);
-    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController);
+    _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController);
+    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
     _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow, _viewport);
     _aboutDialog = std::make_shared<_AboutDialog>();
@@ -158,7 +159,6 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_viewport, _simController);
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
-    _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController);
 
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog);
