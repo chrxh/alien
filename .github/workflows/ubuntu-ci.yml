@@ -31,7 +31,7 @@ jobs:
     - uses: Jimver/cuda-toolkit@v0.2.5
       id: cuda-toolkit
       with:
-        cuda: '11.6.2'
+        cuda: '11.6.1'
         
     - name: Run vcpkg
       uses: lukka/run-vcpkg@v6
