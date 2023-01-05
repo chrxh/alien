@@ -1,9 +1,14 @@
 ﻿#include "RenderingKernels.cuh"
 
+#include "CellFunctionProcessor.cuh"
 #include "SpotCalculator.cuh"
 
 namespace
 {
+    auto constexpr ZoomLevelForActivity = 3.0f;
+    auto constexpr ZoomLevelForConnections = 1.0f;
+    auto constexpr ZoomLevelForArrows = 15.0f;
+
     __device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, float3 const& color)
     {
         imageData[index] = toUInt64(color.y * 225.0f) << 16 | toUInt64(color.x * 225.0f) << 0 | toUInt64(color.z * 225.0f) << 32;
@@ -177,7 +182,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
 
 __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
 {
-    auto const partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     BaseMap map;
     map.init(universeSize);
@@ -189,16 +194,18 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
         map.correctPosition(cellPos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
             auto cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
+
+            //draw cell
             auto color = calcColor(cell, cell->selected);
             auto radius = 1 == cell->selected ? zoom / 2 : zoom / 3;
             drawCircle(imageData, imageSize, cellImagePos, color, radius, true);
             color = color * min((zoom - 1.0f) / 3, 1.0f);
-            if (cell->isActive() && zoom >= 3) {
+            if (cell->isActive() && zoom >= ZoomLevelForActivity) {
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, radius);
             }
 
-            //draw connection lines
-            if (zoom >= 1.0f) {
+            //draw connections
+            if (zoom >= ZoomLevelForConnections) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const otherCell = cell->connections[i].cell;
                     auto const otherCellPos = otherCell->absPos;
@@ -211,48 +218,35 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
             }
 
             //draw arrows
-/*
-            if (zoom >= 15.0f) {
-                for (int i = 0; i < cell->numConnections; ++i) {
-                    auto const otherCell = cell->connections[i].cell;
-                    auto const otherCellPos = otherCell->absPos;
-                    auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
-                    if (Math::lengthSquared(topologyCorrection) > NEAR_ZERO) {
-                        continue;
-                    }
-                    if ((cell->branchNumber + 1 - otherCell->branchNumber) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0) {
-                        auto const arrowEnd =
-                            mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos + Math::normalized(cellPos - otherCellPos) / 3, zoom);
-                        auto direction = Math::normalized(arrowEnd - cellImagePos);
-                        {
-                            float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
-                            arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
-                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.7f);
-                        }
-                        {
-                            float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
-                            arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
-                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.7f);
-                        }
-                    }
-                    if ((cell->branchNumber - 1 - otherCell->branchNumber) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0) {
-                        auto const arrowEnd = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 3, zoom);
-                        auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
-                        auto direction = Math::normalized(arrowEnd - otherCellImagePos);
-                        {
-                            float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
-                            arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
-                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.7f);
-                        }
-                        {
-                            float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
-                            arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
-                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.7f);
+            if (zoom >= ZoomLevelForArrows) {
+                auto inputExecution = CellFunctionProcessor::calcInputExecutionOrder(cell);
+                if (inputExecution != -1) {
+                    for (int i = 0; i < cell->numConnections; ++i) {
+                        auto const& otherCell = cell->connections[i].cell;
+                        if (otherCell->executionOrderNumber == inputExecution) {
+                            auto const otherCellPos = otherCell->absPos;
+                            auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
+                            if (Math::lengthSquared(topologyCorrection) > NEAR_ZERO) {
+                                continue;
+                            }
+
+                            auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
+                            auto const arrowEnd = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 3, zoom);
+                            auto direction = Math::normalized(arrowEnd - otherCellImagePos);
+                            {
+                                float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
+                                arrowPartStart = arrowPartStart * zoom / 8 + arrowEnd;
+                                drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                            }
+                            {
+                                float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
+                                arrowPartStart = arrowPartStart * zoom / 8 + arrowEnd;
+                                drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                            }
                         }
                     }
                 }
             }
-*/
         }
     }
 }

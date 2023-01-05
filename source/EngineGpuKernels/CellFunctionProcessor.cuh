@@ -25,7 +25,6 @@ public:
 
     __inline__ __device__ static float2 calcSignalDirection(SimulationData& data, Cell* cell, int inputExecutionOrderNumber);
 
-private:
     __inline__ __device__ static int calcInputExecutionOrder(Cell* cell);   //returns -1 if no input has been found
 };
 
