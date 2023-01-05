@@ -26,6 +26,7 @@ public:
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos) const;
     RealVector2D mapWorldToViewPosition(RealVector2D const& worldPos) const;
     RealRect getVisibleWorldRect() const;
+    bool isVisible(RealVector2D const& viewPos) const;
 
 private:
     float _zoomFactor = 1.0f;

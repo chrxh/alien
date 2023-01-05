@@ -27,7 +27,7 @@ _SimulationView::_SimulationView(
     Viewport const& viewport)
     : _viewport(viewport)
 {
-    _isOverlayActive = GlobalSettings::getInstance().getBoolState("settings.simulation view.overlay", _isOverlayActive);
+    _isCellDetailOverlayActive = GlobalSettings::getInstance().getBoolState("settings.simulation view.overlay", _isCellDetailOverlayActive);
     _modeWindow = modeWindow;
 
     _simController = simController;
@@ -90,7 +90,7 @@ _SimulationView::_SimulationView(
 
 _SimulationView::~_SimulationView()
 {
-    GlobalSettings::getInstance().setBoolState("settings.simulation view.overlay", _isOverlayActive);
+    GlobalSettings::getInstance().setBoolState("settings.simulation view.overlay", _isCellDetailOverlayActive);
 }
 
 void _SimulationView::resize(IntVector2D const& size)
@@ -291,12 +291,12 @@ void _SimulationView::processControls()
 
 bool _SimulationView::isOverlayActive() const
 {
-    return _isOverlayActive;
+    return _isCellDetailOverlayActive;
 }
 
 void _SimulationView::setOverlayActive(bool active)
 {
-    _isOverlayActive = active;
+    _isCellDetailOverlayActive = active;
 }
 
 void _SimulationView::setBrightness(float value)
@@ -321,7 +321,7 @@ void _SimulationView::updateImageFromSimulation()
     auto viewSize = _viewport->getViewSize();
     auto zoomFactor = _viewport->getZoomFactor();
 
-    if (_isOverlayActive && zoomFactor >= ZoomFactorForOverlay) {
+    if (zoomFactor >= ZoomFactorForOverlay) {
         auto overlay = _simController->tryDrawVectorGraphicsAndReturnOverlay(
             worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
         if (overlay) {
@@ -336,10 +336,10 @@ void _SimulationView::updateImageFromSimulation()
         _overlay = std::nullopt;
     }
 
-    if(_overlay) {
+    if (_overlay) {
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         for (auto const& overlayElement : _overlay->elements) {
-            if (overlayElement.cell) {
+            if (_isCellDetailOverlayActive && overlayElement.cell) {
                 {
                     auto fontSize = std::min(40.0f, _viewport->getZoomFactor()) / 2;
                     auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
@@ -378,9 +378,10 @@ void _SimulationView::updateImageFromSimulation()
             }
 
             if (overlayElement.selected == 1) {
-                auto center = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y});
-                drawList->AddCircle(
-                    {center.x, center.y}, _viewport->getZoomFactor() * 0.65f, Const::SelectedCellOverlayColor, 0, 2.0f);
+                auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y});
+                if (_viewport->isVisible(viewPos)) {
+                    drawList->AddCircle({viewPos.x, viewPos.y}, _viewport->getZoomFactor() * 0.65f, Const::SelectedCellOverlayColor, 0, 2.0f);
+                }
             }
         }
     }
