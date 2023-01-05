@@ -53,7 +53,7 @@ void _OpenSimulationDialog::process()
             _viewport->setCenterInWorldPos(
                 {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
                  toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
-            _viewport->setZoomFactor(2.0f);
+            _viewport->setZoomFactor(12.0f);
             _temporalControlWindow->onSnapshot();
         } else {
             MessageDialog::getInstance().show("Open simulation", "The selected file could not be opened.");
