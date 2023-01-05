@@ -31,7 +31,7 @@ namespace
         {CreationMode::Drawing, "Draw freehand cell cluster"},
     };
 
-    auto const MaxContentTextWidth = 180.0f;
+    auto const RightColumnWidth = 180.0f;
 }
 
 _CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport)
@@ -76,41 +76,41 @@ void _CreatorWindow::processIntern()
         auto parameters = _simController->getSimulationParameters();
 
         AlienImGui::Group(ModeText.at(_mode));
-        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(MaxContentTextWidth), _energy);
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(MaxContentTextWidth), _barrier);
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth), _energy);
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(RightColumnWidth), _barrier);
         if (_mode != CreationMode::CreateParticle) {
-            AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(MaxContentTextWidth), _stiffness);
+            AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth), _stiffness);
         }
         
         if (_mode == CreationMode::CreateCell) {
             AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
+                AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(RightColumnWidth), _maxConnections);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(RightColumnWidth), _ascendingBranchNumbers);
         }
         if (_mode == CreationMode::CreateRectangle) {
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(MaxContentTextWidth), _rectHorizontalCells);
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Vertical cells").textWidth(MaxContentTextWidth), _rectVerticalCells);
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(RightColumnWidth), _rectHorizontalCells);
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Vertical cells").textWidth(RightColumnWidth), _rectVerticalCells);
         }
         if (_mode == CreationMode::CreateHexagon) {
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Layers").textWidth(MaxContentTextWidth), _layers);
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Layers").textWidth(RightColumnWidth), _layers);
         }
         if (_mode == CreationMode::CreateDisc) {
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Outer radius").textWidth(MaxContentTextWidth).format("%.2f"), _outerRadius);
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Inner radius").textWidth(MaxContentTextWidth).format("%.2f"), _innerRadius);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Outer radius").textWidth(RightColumnWidth).format("%.2f"), _outerRadius);
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.2f"), _innerRadius);
         }
 
         if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc
             || _mode == CreationMode::Drawing) {
             AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(MaxContentTextWidth), _cellDistance);
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(MaxContentTextWidth), _makeSticky);
+                AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(RightColumnWidth), _cellDistance);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(RightColumnWidth), _makeSticky);
             ImGui::BeginDisabled(!_makeSticky);
             AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(MaxContentTextWidth), _maxConnections);
+                AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(RightColumnWidth), _maxConnections);
             ImGui::EndDisabled();
         }
         if (_mode == CreationMode::Drawing) {
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(MaxContentTextWidth), _ascendingBranchNumbers);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(RightColumnWidth), _ascendingBranchNumbers);
         }
 
         AlienImGui::Separator();

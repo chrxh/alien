@@ -10,7 +10,7 @@
 
 namespace
 {
-    auto const MaxContentTextWidth = 150.0f;
+    auto const RightColumnWidth = 150.0f;
 }
 
 _NetworkSettingsDialog::_NetworkSettingsDialog(BrowserWindow const& browserWindow, NetworkController const& networkController)
@@ -30,7 +30,7 @@ void _NetworkSettingsDialog::process()
     ImGui::OpenPopup("Network settings");
     if (ImGui::BeginPopupModal("Network settings", NULL, ImGuiWindowFlags_None)) {
         AlienImGui::InputText(
-            AlienImGui::InputTextParameters().name("Blocks").defaultValue(_origServerAddress).name("Server address").textWidth(MaxContentTextWidth),
+            AlienImGui::InputTextParameters().name("Blocks").defaultValue(_origServerAddress).name("Server address").textWidth(RightColumnWidth),
             _serverAddress);
 
         AlienImGui::Separator();

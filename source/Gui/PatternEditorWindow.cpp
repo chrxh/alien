@@ -21,7 +21,7 @@
 namespace
 {
     auto const MaxInspectorWindowsToAdd = 10;
-    auto const MaxContentTextWidth = 120.0f;
+    auto const RightColumnWidth = 120.0f;
 }
 
 _PatternEditorWindow::_PatternEditorWindow(
@@ -110,7 +110,7 @@ void _PatternEditorWindow::processIntern()
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
                 .name("Position X")
-                .textWidth(MaxContentTextWidth)
+                .textWidth(RightColumnWidth)
                 .format("%.3f"),
             centerPosX);
 
@@ -119,7 +119,7 @@ void _PatternEditorWindow::processIntern()
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
                 .name("Position Y")
-                .textWidth(MaxContentTextWidth)
+                .textWidth(RightColumnWidth)
                 .format("%.3f"),
             centerPosY);
 
@@ -128,7 +128,7 @@ void _PatternEditorWindow::processIntern()
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
                 .name("Velocity X")
-                .textWidth(MaxContentTextWidth)
+                .textWidth(RightColumnWidth)
                 .step(0.1f)
                 .format("%.3f"),
             centerVelX);
@@ -138,7 +138,7 @@ void _PatternEditorWindow::processIntern()
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
                 .name("Velocity Y")
-                .textWidth(MaxContentTextWidth)
+                .textWidth(RightColumnWidth)
                 .step(0.1f)
                 .format("%.3f"),
             centerVelY);
@@ -148,7 +148,7 @@ void _PatternEditorWindow::processIntern()
         AlienImGui::SliderInputFloat(
             AlienImGui::SliderInputFloatParameters()
                 .name("Angle")
-                .textWidth(MaxContentTextWidth)
+                .textWidth(RightColumnWidth)
                 .inputWidth(StyleRepository::getInstance().scaleContent(50))
                 .min(-180.0f)
                 .max(180.0f)
@@ -159,7 +159,7 @@ void _PatternEditorWindow::processIntern()
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
                 .name("Angular velocity")
-                .textWidth(MaxContentTextWidth)
+                .textWidth(RightColumnWidth)
                 .step(0.01f)
                 .format("%.2f"),
             _angularVel);

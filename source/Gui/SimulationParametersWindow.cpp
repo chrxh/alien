@@ -7,11 +7,12 @@
 #include "AlienImGui.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
+#include "RadiationSourcesWindow.h"
 #include "SimulationParametersChanger.h"
 
 namespace
 {
-    auto const MaxContentTextWidth = 260.0f;
+    auto const RightColumnWidth = 260.0f;
 
     template <int numRows, int numCols>
     std::vector<std::vector<float>> toVector(float const v[numRows][numCols])
@@ -38,9 +39,10 @@ namespace
     }
 }
 
-_SimulationParametersWindow::_SimulationParametersWindow(SimulationController const& simController)
+_SimulationParametersWindow::_SimulationParametersWindow(SimulationController const& simController, RadiationSourcesWindow const& radiationSourcesWindow)
     : _AlienWindow("Simulation parameters", "windows.simulation parameters", false)
     , _simController(simController)
+    , _radiationSourcesWindow(radiationSourcesWindow)
 {
     for (int n = 0; n < IM_ARRAYSIZE(_savedPalette); n++) {
         ImVec4 color;
@@ -132,7 +134,7 @@ void _SimulationParametersWindow::processIntern()
             AlienImGui::InputIntParameters()
                 .name("Epoch time steps")
                 .defaultValue(_simulationParametersChanger->getOriginalTimestepsPerEpoch())
-                .textWidth(MaxContentTextWidth)
+                .textWidth(RightColumnWidth)
                 .tooltip("Duration in time steps after which a change is applied."),
             timestepsPerEpoch)) {
         _simulationParametersChanger->setTimestepsPerEpoch(timestepsPerEpoch);
@@ -191,7 +193,7 @@ void _SimulationParametersWindow::processBase(
          */
         if (ImGui::TreeNodeEx("Colors", flags)) {
             AlienImGui::ColorButtonWithPicker(
-                AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(MaxContentTextWidth).defaultValue(origSimParameters.backgroundColor),
+                AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(RightColumnWidth).defaultValue(origSimParameters.backgroundColor),
                 simParameters.backgroundColor,
                 _backupColor,
                 _savedPalette);
@@ -205,7 +207,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Time step size")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .defaultValue(origSimParameters.timestepSize)
@@ -222,7 +224,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Friction")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .logarithmic(true)
@@ -233,7 +235,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Rigidity")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .format("%.2f")
@@ -243,7 +245,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum velocity")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(6.0f)
                     .defaultValue(origSimParameters.cellMaxVelocity)
@@ -252,7 +254,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum force")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(3.0f)
                     .defaultValue(origSimParameters.baseValues.cellMaxForce)
@@ -261,7 +263,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum distance")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .defaultValue(origSimParameters.cellMinDistance)
@@ -277,7 +279,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Radiation strength")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.01f)
                     .logarithmic(true)
@@ -288,27 +290,34 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum energy")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(100000)
                     .logarithmic(true)
-                    .defaultValue(origSimParameters.radiationMinCellEnergy),
+                    .defaultValue(origSimParameters.radiationMinCellEnergy)
+                    .tooltip(""),
                 simParameters.radiationMinCellEnergy);
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
                     .name("Minimum age")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1000000)
                     .logarithmic(true)
-                    .defaultValue(origSimParameters.radiationMinCellAge),
+                    .defaultValue(origSimParameters.radiationMinCellAge)
+                    .tooltip(""),
                 simParameters.radiationMinCellAge);
             AlienImGui::InputColorVector(
                 AlienImGui::InputColorVectorParameters()
                     .name("Absorption factors")
-                    .textWidth(MaxContentTextWidth)
-                    .defaultValue(toVector<MAX_COLORS>(origSimParameters.radiationAbsorptionByCellColor)),
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(toVector<MAX_COLORS>(origSimParameters.radiationAbsorptionByCellColor))
+                    .tooltip(""),
                 simParameters.radiationAbsorptionByCellColor);
+            if(AlienImGui::Button(
+                AlienImGui::ButtonParameters().buttonText("Define").name("Particle sources editor").textWidth(RightColumnWidth).tooltip(""))) {
+                _radiationSourcesWindow->setOn(true);
+            }
             ImGui::TreePop();
         }
 
@@ -320,7 +329,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum energy")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(10.0f)
                     .max(200.0f)
                     .defaultValue(origSimParameters.baseValues.cellMinEnergy)
@@ -329,18 +338,18 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Normal energy")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(10.0f)
                     .max(200.0f)
                     .defaultValue(origSimParameters.cellNormalEnergy),
                 simParameters.cellNormalEnergy);
             AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Cell cluster decay").textWidth(MaxContentTextWidth).defaultValue(origSimParameters.clusterDecay),
+                AlienImGui::CheckboxParameters().name("Cell cluster decay").textWidth(RightColumnWidth).defaultValue(origSimParameters.clusterDecay),
                 simParameters.clusterDecay);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell cluster decay probability")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.0)
                     .max(1.0f)
                     .format("%.5f")
@@ -357,7 +366,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Repulsion strength")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.3f)
                     .defaultValue(origSimParameters.cellRepulsionStrength)
@@ -366,7 +375,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum collision distance")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(3.0f)
                     .defaultValue(origSimParameters.cellMaxCollisionDistance)
@@ -375,7 +384,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum binding distance")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(5.0f)
                     .defaultValue(origSimParameters.cellMaxBindingDistance)
@@ -384,7 +393,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Binding creation velocity")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .defaultValue(origSimParameters.baseValues.cellFusionVelocity)
@@ -393,7 +402,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Binding maximum energy")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(50.0f)
                     .max(1000000.0f)
                     .logarithmic(true)
@@ -407,7 +416,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
                     .name("Maximum cell bonds")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellMaxBonds)
                     .min(0)
                     .max(6)
@@ -423,7 +432,7 @@ void _SimulationParametersWindow::processBase(
             for (int color = 0; color < MAX_COLORS; ++color) {
                 ImGui::PushID(color);
                 auto parameters = AlienImGui::InputColorTransitionParameters()
-                                      .textWidth(MaxContentTextWidth)
+                                      .textWidth(RightColumnWidth)
                                       .color(color)
                                       .defaultTargetColor(origSimParameters.baseValues.cellColorTransitionTargetColor[color])
                                       .defaultTransitionAge(origSimParameters.baseValues.cellColorTransitionDuration[color])
@@ -451,7 +460,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Neuron weights and bias")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.01f)
                     .format("%.6f")
@@ -461,7 +470,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell function properties")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.01f)
                     .format("%.6f")
@@ -471,7 +480,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell function type")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.01f)
                     .format("%.6f")
@@ -481,7 +490,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell insertion")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.01f)
                     .format("%.6f")
@@ -491,7 +500,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell deletion")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.01f)
                     .format("%.6f")
@@ -508,13 +517,13 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Offspring inherit color")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellFunctionConstructionInheritColor),
                 simParameters.cellFunctionConstructionInheritColor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Offspring distance")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.1f)
                     .max(3.0f)
                     .defaultValue(origSimParameters.cellFunctionConstructorOffspringDistance),
@@ -522,7 +531,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Offspring connection distance")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.1f)
                     .max(3.0f)
                     .defaultValue(origSimParameters.cellFunctionConstructorConnectingCellMaxDistance),
@@ -530,7 +539,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Activity threshold")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(1.0f)
                     .defaultValue(origSimParameters.cellFunctionConstructorActivityThreshold),
@@ -546,7 +555,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::InputColorMatrix(
                 AlienImGui::InputColorMatrixParameters()
                     .name("Food chain color matrix")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .tooltip(
                         "This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell is shown in the "
                         "header "
@@ -560,7 +569,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy cost")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .defaultValue(origSimParameters.baseValues.cellFunctionAttackerEnergyCost)
@@ -569,7 +578,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Geometry penalty")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(5.0f)
                     .defaultValue(origSimParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent)
@@ -579,7 +588,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Connections mismatch penalty")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .defaultValue(origSimParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty)
@@ -588,7 +597,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Attack radius")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(2.5f)
                     .defaultValue(origSimParameters.cellFunctionAttackerRadius),
@@ -596,7 +605,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Attack strength")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.1f)
                     .defaultValue(origSimParameters.cellFunctionAttackerStrength),
@@ -604,7 +613,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy distribution radius")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(5.0f)
                     .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionRadius),
@@ -612,7 +621,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy distribution Value")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(20.0f)
                     .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionValue),
@@ -620,13 +629,13 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Same color energy distribution")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionSameColor),
                 simParameters.cellFunctionAttackerEnergyDistributionSameColor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Color inhomogeneity factor")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .defaultValue(origSimParameters.cellFunctionAttackerColorInhomogeneityFactor),
@@ -634,7 +643,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Activity threshold")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .defaultValue(origSimParameters.cellFunctionAttackerActivityThreshold),
@@ -650,13 +659,13 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Same color energy distribution")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionSameColor),
                 simParameters.cellFunctionTransmitterEnergyDistributionSameColor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy distribution radius")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(5.0f)
                     .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionRadius),
@@ -664,7 +673,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy distribution Value")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(20.0f)
                     .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionValue),
@@ -679,7 +688,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Contraction and expansion delta")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.1f)
                     .defaultValue(origSimParameters.cellFunctionMuscleContractionExpansionDelta),
@@ -687,7 +696,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Acceleration")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.15f)
                     .logarithmic(true)
@@ -696,7 +705,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Bending angle")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(10.0f)
                     .defaultValue(origSimParameters.cellFunctionMuscleBendingAngle),
@@ -711,7 +720,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Range")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(10.0f)
                     .max(512.0f)
                     .defaultValue(origSimParameters.cellFunctionSensorRange)
@@ -720,7 +729,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Activity threshold")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .defaultValue(origSimParameters.cellFunctionSensorActivityThreshold),
@@ -735,7 +744,7 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Unlimited energy for constructor")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellFunctionConstructionUnlimitedEnergy),
                 simParameters.cellFunctionConstructionUnlimitedEnergy);
             ImGui::TreePop();
@@ -756,7 +765,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
          */
         if (ImGui::TreeNodeEx("Colors and location", flags)) {
             AlienImGui::ColorButtonWithPicker(
-                AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(MaxContentTextWidth).defaultValue(origSpot.color),
+                AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(RightColumnWidth).defaultValue(origSpot.color),
                 spot.color,
                 _backupColor,
                 _savedPalette);
@@ -765,7 +774,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 AlienImGui::ComboParameters()
                     .name("Shape")
                     .values({"Circular", "Rectangular"})
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .defaultValue(origSpot.shapeType),
                 spot.shapeType)) {
                 createDefaultSpotData(spot);
@@ -774,7 +783,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Position X")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(toFloat(worldSize.x))
                     .defaultValue(origSpot.posX)
@@ -783,7 +792,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Position Y")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(toFloat(worldSize.y))
                     .defaultValue(origSpot.posY)
@@ -793,7 +802,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Core radius")
-                        .textWidth(MaxContentTextWidth)
+                        .textWidth(RightColumnWidth)
                         .min(0)
                         .max(maxRadius)
                         .defaultValue(origSpot.shapeData.circularSpot.coreRadius)
@@ -804,7 +813,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Core width")
-                        .textWidth(MaxContentTextWidth)
+                        .textWidth(RightColumnWidth)
                         .min(0)
                         .max(worldSize.x)
                         .defaultValue(origSpot.shapeData.rectangularSpot.width)
@@ -813,7 +822,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Core height")
-                        .textWidth(MaxContentTextWidth)
+                        .textWidth(RightColumnWidth)
                         .min(0)
                         .max(worldSize.y)
                         .defaultValue(origSpot.shapeData.rectangularSpot.height)
@@ -824,7 +833,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Fade-out radius")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(maxRadius)
                     .defaultValue(origSpot.fadeoutRadius)
@@ -838,21 +847,21 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
          */
         if (ImGui::TreeNodeEx("Flow", flags)) {
             AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Type").values({"None", "Radial flow"}).textWidth(MaxContentTextWidth).defaultValue(origSpot.flowType),
+                AlienImGui::ComboParameters().name("Type").values({"None", "Radial flow"}).textWidth(RightColumnWidth).defaultValue(origSpot.flowType),
                 spot.flowType);
 
             if (spot.flowType == FlowType_Radial) {
                 AlienImGui::Combo(
                     AlienImGui::ComboParameters()
                         .name("Orientation")
-                        .textWidth(MaxContentTextWidth)
+                        .textWidth(RightColumnWidth)
                         .defaultValue(origSpot.flowData.radialFlow.orientation)
                         .values({"Clockwise", "Counter clockwise"}),
                     spot.flowData.radialFlow.orientation);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Strength")
-                        .textWidth(MaxContentTextWidth)
+                        .textWidth(RightColumnWidth)
                         .min(0)
                         .max(0.5f)
                         .logarithmic(true)
@@ -870,7 +879,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Friction")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1)
                     .logarithmic(true)
@@ -880,7 +889,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Rigidity")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1)
                     .defaultValue(origSpot.values.rigidity)
@@ -889,7 +898,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum force")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(3.0f)
                     .defaultValue(origSpot.values.cellMaxForce),
@@ -904,7 +913,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Radiation strength")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.01f)
                     .logarithmic(true)
@@ -921,7 +930,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum energy")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(10.0f)
                     .max(200.0f)
                     .defaultValue(origSpot.values.cellMinEnergy),
@@ -936,7 +945,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Binding creation velocity")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .defaultValue(origSpot.values.cellFusionVelocity),
@@ -944,7 +953,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Binding max energy")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(50.0f)
                     .max(1000000.0f)
                     .logarithmic(true)
@@ -964,7 +973,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             for (int color = 0; color < MAX_COLORS; ++color) {
                 ImGui::PushID(color);
                 auto parameters = AlienImGui::InputColorTransitionParameters()
-                                      .textWidth(MaxContentTextWidth)
+                                      .textWidth(RightColumnWidth)
                                       .color(color)
                                       .defaultTargetColor(origSpot.values.cellColorTransitionTargetColor[color])
                                       .defaultTransitionAge(origSpot.values.cellColorTransitionDuration[color])
@@ -986,7 +995,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Neuron weights and bias")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.01f)
                     .format("%.6f")
@@ -996,7 +1005,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell function properties")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.01f)
                     .format("%.6f")
@@ -1006,7 +1015,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell function type")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.01f)
                     .format("%.6f")
@@ -1016,7 +1025,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell insertion")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.01f)
                     .format("%.6f")
@@ -1026,7 +1035,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell deletion")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.01f)
                     .format("%.6f")
@@ -1043,13 +1052,13 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::InputColorMatrix(
                 AlienImGui::InputColorMatrixParameters()
                     .name("Food chain color matrix")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerFoodChainColorMatrix)),
                 spot.values.cellFunctionAttackerFoodChainColorMatrix);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy cost")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .defaultValue(origSpot.values.cellFunctionAttackerEnergyCost),
@@ -1057,7 +1066,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Geometry penalty")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(5.0f)
                     .defaultValue(origSpot.values.cellFunctionAttackerGeometryDeviationExponent),
@@ -1065,7 +1074,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Connections mismatch penalty")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
                     .defaultValue(origSpot.values.cellFunctionAttackerConnectionsMismatchPenalty),

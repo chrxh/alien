@@ -14,7 +14,7 @@
 
 namespace
 {
-    auto const MaxContentTextWidth = 185.0f;
+    auto const RightColumnWidth = 185.0f;
 }
 
 _DisplaySettingsDialog::_DisplaySettingsDialog(WindowController const& windowController)
@@ -53,7 +53,7 @@ void _DisplaySettingsDialog::process()
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Resolution")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .defaultValue(_origSelectionIndex)
                     .values(_videoModeStrings),
                 _selectionIndex)) {
@@ -66,7 +66,7 @@ void _DisplaySettingsDialog::process()
         if (AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
                     .name("Frames per second")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .defaultValue(_origFps)
                     .min(20)
                     .max(100)

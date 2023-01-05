@@ -201,6 +201,16 @@ public:
     static bool ToolbarButton(std::string const& text);
     static bool Button(std::string const& text);
 
+    struct ButtonParameters
+    {
+        MEMBER_DECLARATION(ButtonParameters, std::string, buttonText, "");
+        MEMBER_DECLARATION(ButtonParameters, std::string, name, "");
+        MEMBER_DECLARATION(ButtonParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(ButtonParameters, bool, showDisabledRevertButton, true);
+        MEMBER_DECLARATION(ButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static bool Button(ButtonParameters const& parameters);
+
     static void Tooltip(std::string const& text);
     static void Tooltip(std::function<std::string()> const& textFunc);
 
