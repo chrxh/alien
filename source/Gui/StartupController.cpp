@@ -56,7 +56,7 @@ void _StartupController::process()
         _viewport->setCenterInWorldPos(
             {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
              toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
-        _viewport->setZoomFactor(2.0f);
+        _viewport->setZoomFactor(12.0f);
         _temporalControlWindow->onSnapshot();
 
         _lastActivationTimepoint = std::chrono::steady_clock::now();
