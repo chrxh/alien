@@ -7,7 +7,7 @@ namespace
     {
         {
             auto& cells = data.entities.cellPointers;
-            auto const partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+            auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
             for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
                 auto& cell = cells.at(index);
@@ -48,7 +48,7 @@ __global__ void cudaGetCudaMonitorData_substep1(SimulationData data, CudaMonitor
 __global__ void cudaGetCudaMonitorData_substep2(SimulationData data, CudaMonitorData monitorData)
 {
     auto& cells = data.objects.cellPointers;
-    auto const partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);

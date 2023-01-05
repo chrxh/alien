@@ -114,7 +114,7 @@ void _StartupController::processWindow()
     auto styleRep = StyleRepository::getInstance();
     auto center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    auto imageScale = styleRep.scaleContent(2.0f);
+    auto imageScale = styleRep.scaleContent(1.0f);
     ImGui::SetNextWindowSize(ImVec2(_logo.width * imageScale + 30.0f, _logo.height * imageScale + 30.0f));
 
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
@@ -130,14 +130,14 @@ void _StartupController::processWindow()
 
     drawList->AddText(
         styleRep.getLargeFont(),
-        styleRep.scaleContent(48.0f),
-        {center.x - styleRep.scaleContent(250), center.y + styleRep.scaleContent(160)},
+        styleRep.scaleContent(32.0f),
+        {center.x - styleRep.scaleContent(165), center.y + styleRep.scaleContent(100 + 150)},
         textColor,
         "Artificial Life Environment");
     drawList->AddText(
         styleRep.getMediumFont(),
         styleRep.scaleContent(20.0f),
-        {center.x - styleRep.scaleContent(50), center.y + styleRep.scaleContent(220)},
+        {center.x - styleRep.scaleContent(50), center.y + styleRep.scaleContent(150 + 150)},
         textColor,
         ("Version " + Const::ProgramVersion).c_str());
 }

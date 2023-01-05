@@ -36,7 +36,7 @@ namespace
 __global__ void cudaApplyFlowFieldSettings(SimulationData data)
 {
     auto& cells = data.objects.cellPointers;
-    auto partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     float2 accelerations[MAX_SPOTS];
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {

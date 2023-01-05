@@ -39,7 +39,7 @@ __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cel
 __global__ void cudaCleanupCellsStep2(Array<Cell> cells)
 {
     {
-        auto partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cell = cells.at(index);
