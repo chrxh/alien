@@ -49,7 +49,7 @@ private:
     SimulationScrollbar _scrollbarY;
 
     //overlay
-    bool _isOverlayActive = false;
+    bool _isCellDetailOverlayActive = false;
     float _motionBlurFactor = 1.0f;
     enum class NavigationState {
         Static, Moving
