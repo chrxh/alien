@@ -119,6 +119,17 @@ namespace
                     auto rSquared = x * x + y * y;
                     if (rSquared <= radiusSquared) {
                         auto factor = inverted ? (rSquared / radiusSquared) * 2 : (1.0f - rSquared / radiusSquared) * 2;
+                        auto angle = Math::angleOfVector({x, y});
+                        if (radius > 2.0f) {
+                            angle -= 45.0f;
+                            if (angle > 180.0f) {
+                                angle -= 360.0f;
+                            }
+                            if (angle < -180.0f) {
+                                angle += 360.0f;
+                            }
+                            factor *= min(1.0f, 30.0f / (abs(angle) + 1.0f)); 
+                        }
                         drawDot(imageData, imageSize, pos + float2{x, y}, color * min(factor, 1.0f));
                     }
                 }
