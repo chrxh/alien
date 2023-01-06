@@ -84,6 +84,38 @@ bool Math::isAngleInBetween(float angle1, float angle2, float angleBetweenCandid
     return angle2 - angle1 < 360.0f;
 }
 
+bool Math::crossing(
+    RealVector2D const& segmentStart,
+    RealVector2D const& segmentEnd,
+    RealVector2D const& otherSegmentStart,
+    RealVector2D const& otherSegmentEnd)
+{
+    auto const& p1 = segmentStart;
+    auto v1 = segmentEnd - segmentStart;
+    auto const& p2 = otherSegmentStart;
+    auto v2 = otherSegmentEnd - otherSegmentStart;
+
+    auto divisor = v2.x * v1.y - v2.y * v1.x;
+    if (abs(divisor) < NEAR_ZERO) {
+        return false;
+    }
+    auto mue = (v1.x * (p2.y - p1.y) - v1.y * (p2.x - p1.x)) / divisor;
+    if (mue < 0 || mue > 1) {
+        return false;
+    }
+
+    float lambda;
+    if (abs(v1.x) > NEAR_ZERO) {
+        lambda = (p2.x - p1.x + mue * v2.x) / v1.x;
+    } else if (abs(v1.y) > NEAR_ZERO) {
+        lambda = (p2.y - p1.y + mue * v2.y) / v1.y;
+    } else {
+        return false;
+    }
+
+    return lambda >= 0 && lambda <= 1;
+}
+
 RealVector2D operator*(RealMatrix2D const& m, RealVector2D const& v)
 {
     return {m[0][0] * v.x + m[0][1] * v.y, m[1][0] * v.x + m[1][1] * v.y};

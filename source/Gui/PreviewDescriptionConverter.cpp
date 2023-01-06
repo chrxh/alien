@@ -51,6 +51,42 @@ namespace
     using SelectNode = std::variant<SelectAllNodes, SelectNoNodes, int>;
 
 
+    bool noOverlappingConnection(
+        std::vector<CellPreviewDescriptionIntern> const& cells,
+        CellPreviewDescriptionIntern const& cell1,
+        CellPreviewDescriptionIntern const& cell2)
+    {
+        auto n = cell1.connectionIndices.size();
+        if (n < 2) {
+            return true;
+        }
+        for (auto const& connectionIndex : cell1.connectionIndices) {
+            if (connectionIndex >= cells.size()) {
+                continue;
+            }
+            auto connectedCell = cells.at(connectionIndex);
+            std::set<int> otherConnectionIndices;
+            std::set_intersection(
+                cell1.connectionIndices.begin(),
+                cell1.connectionIndices.end(),
+                connectedCell.connectionIndices.begin(),
+                connectedCell.connectionIndices.end(),
+                std::inserter(otherConnectionIndices, otherConnectionIndices.begin()));
+
+            for (auto const& otherConnectionIndex : otherConnectionIndices) {
+                if (otherConnectionIndex >= cells.size()) {
+                    continue;
+                }
+                auto otherConnectedCell = cells.at(otherConnectionIndex);
+                if (Math::crossing(cell1.pos, cell2.pos, connectedCell.pos, otherConnectedCell.pos)) {
+                    return false;
+                }
+                
+            }
+        }
+        return true;
+    }
+
     struct ProcessedGenomeDescriptionResult
     {
         PreviewDescription preview;
@@ -97,6 +133,9 @@ namespace
             if (index < genome.size() - 1) {
                 cellIntern.connectionIndices.insert(index + 1);
             }
+
+            //find nearby cells
+            std::vector<int> nearbyCellIndices; 
             IntVector2D intPos{toInt(pos.x), toInt(pos.y)};
             for (int dx = -2; dx <= 2; ++dx) {
                 for (int dy = -2; dy <= 2; ++dy) {
@@ -104,12 +143,10 @@ namespace
                     if (findResult != cellInternIndicesBySlot.end()) {
                         for (auto const& otherCellIndex : findResult->second) {
                             auto& otherCell = result.cellsIntern.at(otherCellIndex);
-                            if (Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance) {
+                            if (otherCellIndex != index && Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance) {
                                 if (otherCell.connectionIndices.size() < parameters.cellMaxBonds
                                     && cellIntern.connectionIndices.size() < parameters.cellMaxBonds) {
-                                    result.preview.connections.emplace_back(otherCell.pos, pos);
-                                    cellIntern.connectionIndices.insert(otherCell.nodeIndex);
-                                    otherCell.connectionIndices.insert(index);
+                                    nearbyCellIndices.emplace_back(otherCellIndex);
                                 }
                             }
                         }
@@ -117,11 +154,28 @@ namespace
                 }
             }
 
+            //sort by distance
+            std::sort(nearbyCellIndices.begin(), nearbyCellIndices.end(), [&](int index1, int index2) {
+                auto const& otherCell1 = result.cellsIntern.at(index1);
+                auto const& otherCell2 = result.cellsIntern.at(index2);
+                return Math::length(otherCell1.pos - pos) < Math::length(otherCell2.pos - pos);
+            });
+
+            //add connections
+            for (auto const& otherCellIndex : nearbyCellIndices) {
+                auto& otherCell = result.cellsIntern.at(otherCellIndex);
+                if (noOverlappingConnection(result.cellsIntern, cellIntern, otherCell) && noOverlappingConnection(result.cellsIntern, otherCell, cellIntern)) {
+                    result.preview.connections.emplace_back(otherCell.pos, pos);
+                    cellIntern.connectionIndices.insert(otherCellIndex);
+                    otherCell.connectionIndices.insert(index);
+                }
+            }
+
             cellInternIndicesBySlot[intPos].emplace_back(toInt(result.cellsIntern.size()));
             result.cellsIntern.emplace_back(cellIntern);
             ++index;
         }
-        return std::move(result);
+        return result;
     }
 
     PreviewDescription convertIntern(
