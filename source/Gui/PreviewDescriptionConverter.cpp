@@ -14,10 +14,6 @@ namespace
         for (auto& cell : preview.cells) {
             cell.pos = rotMatrix * (cell.pos - center) + center;
         }
-        for (auto& connection : preview.connections) {
-            connection.cell1 = rotMatrix * (connection.cell1 - center) + center;
-            connection.cell2 = rotMatrix * (connection.cell2 - center) + center;
-        }
     }
 
     void translate(PreviewDescription& preview, RealVector2D const& delta)
@@ -25,14 +21,15 @@ namespace
         for (auto& cell : preview.cells) {
             cell.pos += delta;
         }
-        for (auto& connection : preview.connections) {
-            connection.cell1 += delta;
-            connection.cell2 += delta;
-        }
     }
 
     void insert(PreviewDescription& target, PreviewDescription const& source)
     {
+        auto offset = toInt(source.cells.size());
+        for (auto& connection : target.connections) {
+            connection.cellIndex1 += offset;
+            connection.cellIndex2 += offset;
+        }
         target.cells.insert(target.cells.begin(), source.cells.begin(), source.cells.end());
         target.connections.insert(target.connections.begin(), source.connections.begin(), source.connections.end());
     }
@@ -108,21 +105,21 @@ namespace
                 pos += result.direction * node.referenceDistance;
             }
 
-            CellPreviewDescription cell{.pos = pos, .color = node.color};
+            //create CellPreviewDescription
+            CellPreviewDescription cell{.pos = pos, .executionOrderNumber = node.executionOrderNumber, .color = node.color};
             if (std::holds_alternative<int>(selectedNode)) {
                 cell.selected = index == std::get<int>(selectedNode);
             }
             if (std::holds_alternative<SelectAllNodes>(selectedNode)) {
                 cell.selected = true;
             }
-
             result.preview.cells.emplace_back(cell);
             if (index > 0) {
                 result.direction = Math::rotateClockwise(-result.direction, -(180.0f - node.referenceAngle));
-                result.preview.connections.emplace_back(prevPos, pos);
+                result.preview.connections.emplace_back(index - 1, index);
             }
 
-            //create cell description intern
+            //create CellPreviewDescriptionIntern
             CellPreviewDescriptionIntern cellIntern;
             cellIntern.nodeIndex = index;
             cellIntern.selected = cell.selected;
@@ -165,7 +162,7 @@ namespace
             for (auto const& otherCellIndex : nearbyCellIndices) {
                 auto& otherCell = result.cellsIntern.at(otherCellIndex);
                 if (noOverlappingConnection(result.cellsIntern, cellIntern, otherCell) && noOverlappingConnection(result.cellsIntern, otherCell, cellIntern)) {
-                    result.preview.connections.emplace_back(otherCell.pos, pos);
+                    result.preview.connections.emplace_back(otherCellIndex, index);
                     cellIntern.connectionIndices.insert(otherCellIndex);
                     otherCell.connectionIndices.insert(index);
                 }
@@ -192,6 +189,7 @@ namespace
         ProcessedGenomeDescriptionResult result = processGenomeDescription(genome, selectedNode, parameters);
 
         //process sub genomes
+        int cellIndexOffset = 0;
         for (auto const& [node, cellIntern] : boost::combine(genome, result.cellsIntern)) {
             if (node.getCellFunctionType() == CellFunction_Constructor) {
                 auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
@@ -240,9 +238,11 @@ namespace
                     cellIntern.pos + direction,
                     targetAngle,
                     parameters);
+
+                cellIndexOffset += toInt(previewPart.cells.size());
                 insert(result.preview, previewPart);
                 if (!constructor.separateConstruction) {
-                    result.preview.connections.emplace_back(previewPart.cells.back().pos, cellIntern.pos);
+                    result.preview.connections.emplace_back(toInt(previewPart.cells.size()) - 1, cellIntern.nodeIndex + cellIndexOffset);
                 }
             }
         }
