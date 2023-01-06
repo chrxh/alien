@@ -904,7 +904,7 @@ void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc)
         auto windowPos = ImGui::GetWindowPos();
         RealVector2D offset{windowPos.x + CellSize, windowPos.y + CellSize};
 
-        ImGui::SetCursorPos({previewSize.x, previewSize.y});
+        ImGui::SetCursorPos({previewSize.x - 1, previewSize.y - 1});
 
         for (auto const& connection : desc.connections) {
             auto startPos = (connection.cell1 - upperLeft) * CellSize + offset;
