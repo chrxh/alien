@@ -4,14 +4,15 @@
 struct CellPreviewDescription
 {
     RealVector2D pos;
+    int executionOrderNumber = 0;
     int color = 0;
     bool selected = false;
 };
 
 struct ConnectionPreviewDescription
 {
-    RealVector2D cell1;
-    RealVector2D cell2;
+    int cellIndex1;
+    int cellIndex2;
 };
 
 struct PreviewDescription
