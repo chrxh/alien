@@ -44,36 +44,32 @@ namespace
         RealVector2D pos;
         std::set<int> connectionIndices;
     };
-
     struct SelectAllNodes
     {};
     struct SelectNoNodes
     {};
     using SelectNode = std::variant<SelectAllNodes, SelectNoNodes, int>;
-    PreviewDescription convertIntern(
-        GenomeDescription const& genome,
-        SelectNode selectedNode,
-        std::optional<RealVector2D> const& desiredEndPos,
-        std::optional<float> const& desiredEndAngle,
-        SimulationParameters const& parameters)
-    {
-        if (genome.empty()) {
-            return PreviewDescription();
-        }
 
-        PreviewDescription result;
+
+    struct ProcessedGenomeDescriptionResult
+    {
+        PreviewDescription preview;
+        std::vector<CellPreviewDescriptionIntern> cellsIntern;
+        RealVector2D direction;
+    };
+    ProcessedGenomeDescriptionResult processGenomeDescription(GenomeDescription const& genome, SelectNode selectedNode, SimulationParameters const& parameters)
+    {
+        ProcessedGenomeDescriptionResult result;
+        result.direction = RealVector2D{0, -1};
 
         RealVector2D pos;
-        RealVector2D direction(0, -1);
-
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
-        std::vector<CellPreviewDescriptionIntern> cellsIntern;
         int index = 0;
         for (auto const& node : genome) {
             RealVector2D prevPos = pos;
 
             if (index > 0) {
-                pos += direction * node.referenceDistance;
+                pos += result.direction * node.referenceDistance;
             }
 
             CellPreviewDescription cell{.pos = pos, .color = node.color};
@@ -84,10 +80,10 @@ namespace
                 cell.selected = true;
             }
 
-            result.cells.emplace_back(cell);
+            result.preview.cells.emplace_back(cell);
             if (index > 0) {
-                direction = Math::rotateClockwise(-direction, -(180.0f - node.referenceAngle));
-                result.connections.emplace_back(prevPos, pos);
+                result.direction = Math::rotateClockwise(-result.direction, -(180.0f - node.referenceAngle));
+                result.preview.connections.emplace_back(prevPos, pos);
             }
 
             //create cell description intern
@@ -107,11 +103,11 @@ namespace
                     auto const& findResult = cellInternIndicesBySlot.find({intPos.x + dx, intPos.y + dy});
                     if (findResult != cellInternIndicesBySlot.end()) {
                         for (auto const& otherCellIndex : findResult->second) {
-                            auto& otherCell = cellsIntern.at(otherCellIndex);
+                            auto& otherCell = result.cellsIntern.at(otherCellIndex);
                             if (Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance) {
                                 if (otherCell.connectionIndices.size() < parameters.cellMaxBonds
                                     && cellIntern.connectionIndices.size() < parameters.cellMaxBonds) {
-                                    result.connections.emplace_back(otherCell.pos, pos);
+                                    result.preview.connections.emplace_back(otherCell.pos, pos);
                                     cellIntern.connectionIndices.insert(otherCell.nodeIndex);
                                     otherCell.connectionIndices.insert(index);
                                 }
@@ -121,13 +117,28 @@ namespace
                 }
             }
 
-            cellInternIndicesBySlot[intPos].emplace_back(toInt(cellsIntern.size()));
-            cellsIntern.emplace_back(cellIntern);
+            cellInternIndicesBySlot[intPos].emplace_back(toInt(result.cellsIntern.size()));
+            result.cellsIntern.emplace_back(cellIntern);
             ++index;
         }
+        return std::move(result);
+    }
+
+    PreviewDescription convertIntern(
+        GenomeDescription const& genome,
+        SelectNode selectedNode,
+        std::optional<RealVector2D> const& desiredEndPos,
+        std::optional<float> const& desiredEndAngle,
+        SimulationParameters const& parameters)
+    {
+        if (genome.empty()) {
+            return PreviewDescription();
+        }
+
+        ProcessedGenomeDescriptionResult result = processGenomeDescription(genome, selectedNode, parameters);
 
         //process sub genomes
-        for (auto const& [node, cellIntern] : boost::combine(genome, cellsIntern)) {
+        for (auto const& [node, cellIntern] : boost::combine(genome, result.cellsIntern)) {
             if (node.getCellFunctionType() == CellFunction_Constructor) {
                 auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
                 if (constructor.isMakeGenomeCopy()) {
@@ -142,7 +153,7 @@ namespace
                 //angles of connected cells
                 std::vector<float> angles;
                 for (auto const& connectedCellIndex : cellIntern.connectionIndices) {
-                    auto connectedCellIntern = cellsIntern.at(connectedCellIndex);
+                    auto connectedCellIntern = result.cellsIntern.at(connectedCellIndex);
                     angles.emplace_back(Math::angleOfVector(connectedCellIntern.pos - cellIntern.pos));
                 }
                 std::ranges::sort(angles);
@@ -175,25 +186,23 @@ namespace
                     cellIntern.pos + direction,
                     targetAngle,
                     parameters);
-                insert(result, previewPart);
+                insert(result.preview, previewPart);
                 if (!constructor.separateConstruction) {
-                    result.connections.emplace_back(previewPart.cells.back().pos, cellIntern.pos);
+                    result.preview.connections.emplace_back(previewPart.cells.back().pos, cellIntern.pos);
                 }
             }
-
-            ++index;
         }
 
         //transform to desired position and angle
         if (desiredEndAngle) {
-            auto actualEndAngle = Math::angleOfVector(direction);
+            auto actualEndAngle = Math::angleOfVector(result.direction);
             auto angleDiff = Math::subtractAngle(*desiredEndAngle, actualEndAngle);
-            rotate(result, result.cells.back().pos, angleDiff + 180.0f);
+            rotate(result.preview, result.preview.cells.back().pos, angleDiff + 180.0f);
         }
         if (desiredEndPos) {
-            translate(result, *desiredEndPos - result.cells.back().pos);
+            translate(result.preview, *desiredEndPos - result.preview.cells.back().pos);
         }
-        return result;
+        return result.preview;
     }
 }
 
