@@ -94,10 +94,10 @@ struct RealVector2D
     void operator+=(RealVector2D const& vec);
     void operator-=(RealVector2D const& vec);
     template <typename T>
-    void operator*=(T divisor)
+    void operator*=(T factor)
     {
-        x *= divisor;
-        y *= divisor;
+        x *= factor;
+        y *= factor;
     }
     template <typename T>
     void operator/=(T divisor)
@@ -113,6 +113,7 @@ struct RealVector2D
     RealVector2D operator+(RealVector2D const& other) const;
     RealVector2D operator-(RealVector2D const& other) const;
     RealVector2D operator-() const;
+    RealVector2D operator*(float factor) const;
     RealVector2D operator/(float divisor) const;
 };
 
