@@ -914,6 +914,21 @@ void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
             float h, s, v;
             AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
             drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize / 4, ImColor::HSV(h, s * 0.7f, v * 0.7f));
+
+            RealVector2D textPos(cellPos.x - cellSize / 8, cellPos.y - cellSize / 4);
+            drawList->AddText(
+                StyleRepository::getInstance().getLargeFont(),
+                cellSize / 2,
+                {textPos.x, textPos.y},
+                Const::BranchNumberOverlayShadowColor,
+                std::to_string(cell.executionOrderNumber).c_str());
+            drawList->AddText(
+                StyleRepository::getInstance().getLargeFont(),
+                cellSize / 2,
+                {textPos.x + 1, textPos.y + 1},
+                Const::BranchNumberOverlayColor,
+                std::to_string(cell.executionOrderNumber).c_str());
+
             if (cell.selected) {
                 drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
             }
@@ -953,6 +968,7 @@ void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
     }
     ImGui::EndChild();
 
+    //zoom buttons
     ImGui::SetCursorPos({ImGui::GetScrollX() + contentScale(10), ImGui::GetScrollY() + windowSize.y - contentScale(35)});
     if (ImGui::BeginChild("##buttons", ImVec2(100, 30), false)) {
         ImGui::SetCursorPos({0, 0});
