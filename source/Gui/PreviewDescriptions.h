@@ -13,6 +13,8 @@ struct ConnectionPreviewDescription
 {
     RealVector2D cell1;
     RealVector2D cell2;
+    bool arrowToCell1 = false;
+    bool arrowToCell2 = false;
 };
 
 struct PreviewDescription

@@ -7,41 +7,12 @@
 
 namespace
 {
-    void rotate(PreviewDescription& preview, RealVector2D const& center, float angle)
-    {
-        auto rotMatrix = Math::calcRotationMatrix(angle);
-
-        for (auto& cell : preview.cells) {
-            cell.pos = rotMatrix * (cell.pos - center) + center;
-        }
-        for (auto& connection : preview.connections) {
-            connection.cell1 = rotMatrix * (connection.cell1 - center) + center;
-            connection.cell2 = rotMatrix * (connection.cell2 - center) + center;
-        }
-    }
-
-    void translate(PreviewDescription& preview, RealVector2D const& delta)
-    {
-        for (auto& cell : preview.cells) {
-            cell.pos += delta;
-        }
-        for (auto& connection : preview.connections) {
-            connection.cell1 += delta;
-            connection.cell2 += delta;
-        }
-    }
-
-    void insert(PreviewDescription& target, PreviewDescription const& source)
-    {
-        target.cells.insert(target.cells.begin(), source.cells.begin(), source.cells.end());
-        target.connections.insert(target.connections.begin(), source.connections.begin(), source.connections.end());
-    }
-
     struct CellPreviewDescriptionIntern
     {
-        int nodeIndex = 0;
-        bool selected = false;
         RealVector2D pos;
+        bool selected = false;
+        int executionOrderNumber = 0;
+        int color = 0;
         std::set<int> connectionIndices;
     };
     struct SelectAllNodes
@@ -50,6 +21,34 @@ namespace
     {};
     using SelectNode = std::variant<SelectAllNodes, SelectNoNodes, int>;
 
+    void insert(std::vector<CellPreviewDescriptionIntern>& target, std::vector<CellPreviewDescriptionIntern> const& source)
+    {
+        auto offset = toInt(source.size());
+        for (auto& cell : target) {
+            std::set<int> newConnectionIndices;
+            for (auto const& connectionIndex : cell.connectionIndices) {
+                newConnectionIndices.insert(connectionIndex + offset);
+            }
+            cell.connectionIndices = newConnectionIndices;
+        }
+        target.insert(target.begin(), source.begin(), source.end());
+    }
+
+    void rotate(std::vector<CellPreviewDescriptionIntern>& cells, RealVector2D const& center, float angle)
+    {
+        auto rotMatrix = Math::calcRotationMatrix(angle);
+
+        for (auto& cell : cells) {
+            cell.pos = rotMatrix * (cell.pos - center) + center;
+        }
+    }
+
+    void translate(std::vector<CellPreviewDescriptionIntern>& cells, RealVector2D const& delta)
+    {
+        for (auto& cell : cells) {
+            cell.pos += delta;
+        }
+    }
 
     bool noOverlappingConnection(
         std::vector<CellPreviewDescriptionIntern> const& cells,
@@ -88,11 +87,10 @@ namespace
 
     struct ProcessedGenomeDescriptionResult
     {
-        PreviewDescription preview;
         std::vector<CellPreviewDescriptionIntern> cellsIntern;
         RealVector2D direction;
     };
-    ProcessedGenomeDescriptionResult processGenomeDescription(GenomeDescription const& genome, SelectNode selectedNode, SimulationParameters const& parameters)
+    ProcessedGenomeDescriptionResult processMainGenomeDescription(GenomeDescription const& genome, SelectNode selectedNode, SimulationParameters const& parameters)
     {
         ProcessedGenomeDescriptionResult result;
         result.direction = RealVector2D{0, -1};
@@ -107,24 +105,20 @@ namespace
                 pos += result.direction * node.referenceDistance;
             }
 
-            CellPreviewDescription cell{.pos = pos, .executionOrderNumber = node.executionOrderNumber, .color = node.color};
-            if (std::holds_alternative<int>(selectedNode)) {
-                cell.selected = index == std::get<int>(selectedNode);
-            }
-            if (std::holds_alternative<SelectAllNodes>(selectedNode)) {
-                cell.selected = true;
-            }
-
-            result.preview.cells.emplace_back(cell);
             if (index > 0) {
                 result.direction = Math::rotateClockwise(-result.direction, -(180.0f - node.referenceAngle));
-                result.preview.connections.emplace_back(prevPos, pos);
             }
 
             //create cell description intern
             CellPreviewDescriptionIntern cellIntern;
-            cellIntern.nodeIndex = index;
-            cellIntern.selected = cell.selected;
+            cellIntern.color = node.color;
+            cellIntern.executionOrderNumber = node.executionOrderNumber;
+            if (std::holds_alternative<int>(selectedNode)) {
+                cellIntern.selected = index == std::get<int>(selectedNode);
+            }
+            if (std::holds_alternative<SelectAllNodes>(selectedNode)) {
+                cellIntern.selected = true;
+            }
             cellIntern.pos = pos;
             if (index > 0) {
                 cellIntern.connectionIndices.insert(index - 1);
@@ -164,7 +158,6 @@ namespace
             for (auto const& otherCellIndex : nearbyCellIndices) {
                 auto& otherCell = result.cellsIntern.at(otherCellIndex);
                 if (noOverlappingConnection(result.cellsIntern, cellIntern, otherCell) && noOverlappingConnection(result.cellsIntern, otherCell, cellIntern)) {
-                    result.preview.connections.emplace_back(otherCell.pos, pos);
                     cellIntern.connectionIndices.insert(otherCellIndex);
                     otherCell.connectionIndices.insert(index);
                 }
@@ -177,7 +170,7 @@ namespace
         return result;
     }
 
-    PreviewDescription convertIntern(
+    std::vector<CellPreviewDescriptionIntern> processGenomeDescription(
         GenomeDescription const& genome,
         SelectNode selectedNode,
         std::optional<RealVector2D> const& desiredEndPos,
@@ -185,13 +178,17 @@ namespace
         SimulationParameters const& parameters)
     {
         if (genome.empty()) {
-            return PreviewDescription();
+            return {};
         }
 
-        ProcessedGenomeDescriptionResult result = processGenomeDescription(genome, selectedNode, parameters);
+        ProcessedGenomeDescriptionResult processedGenome = processMainGenomeDescription(genome, selectedNode, parameters);
+
+        std::vector<CellPreviewDescriptionIntern> result = processedGenome.cellsIntern;
 
         //process sub genomes
-        for (auto const& [node, cellIntern] : boost::combine(genome, result.cellsIntern)) {
+        size_t indexOffset = 0;
+        int index = 0;
+        for (auto const& [node, cellIntern] : boost::combine(genome, processedGenome.cellsIntern)) {
             if (node.getCellFunctionType() == CellFunction_Constructor) {
                 auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
                 if (constructor.isMakeGenomeCopy()) {
@@ -206,7 +203,7 @@ namespace
                 //angles of connected cells
                 std::vector<float> angles;
                 for (auto const& connectedCellIndex : cellIntern.connectionIndices) {
-                    auto connectedCellIntern = result.cellsIntern.at(connectedCellIndex);
+                    auto connectedCellIntern = processedGenome.cellsIntern.at(connectedCellIndex);
                     angles.emplace_back(Math::angleOfVector(connectedCellIntern.pos - cellIntern.pos));
                 }
                 std::ranges::sort(angles);
@@ -233,34 +230,64 @@ namespace
                 }
 
                 auto direction = Math::unitVectorOfAngle(targetAngle);
-                auto previewPart = convertIntern(
+                auto previewPart = processGenomeDescription(
                     subGenome,
                     cellIntern.selected ? SelectNode(SelectAllNodes()) : SelectNode(SelectNoNodes()),
                     cellIntern.pos + direction,
                     targetAngle,
                     parameters);
-                insert(result.preview, previewPart);
+                insert(result, previewPart);
+                indexOffset += previewPart.size();
                 if (!constructor.separateConstruction) {
-                    result.preview.connections.emplace_back(previewPart.cells.back().pos, cellIntern.pos);
+                    auto cellIndex1 = previewPart.size() - 1;
+                    auto cellIndex2 = index + indexOffset;
+                    result.at(cellIndex1).connectionIndices.insert(toInt(cellIndex2));
+                    result.at(cellIndex2).connectionIndices.insert(toInt(cellIndex1));
                 }
             }
+            ++index;
         }
 
         //transform to desired position and angle
         if (desiredEndAngle) {
-            auto actualEndAngle = Math::angleOfVector(result.direction);
+            auto actualEndAngle = Math::angleOfVector(processedGenome.direction);
             auto angleDiff = Math::subtractAngle(*desiredEndAngle, actualEndAngle);
-            rotate(result.preview, result.preview.cells.back().pos, angleDiff + 180.0f);
+            rotate(result, result.back().pos, angleDiff + 180.0f);
         }
         if (desiredEndPos) {
-            translate(result.preview, *desiredEndPos - result.preview.cells.back().pos);
+            translate(result, *desiredEndPos - result.back().pos);
         }
-        return result.preview;
+        return result;
+    }
+
+    PreviewDescription createPreviewDescription(std::vector<CellPreviewDescriptionIntern> const& cells)
+    {
+        PreviewDescription result;
+        std::set<std::pair<int, int>> createdConnections;
+        int index = 0;
+        for (auto const& cell : cells) {
+            CellPreviewDescription cellPreview{.pos = cell.pos, .executionOrderNumber = cell.executionOrderNumber, .color = cell.color, .selected = cell.selected};
+            result.cells.emplace_back(cellPreview);
+            for (auto const& connectionIndex : cell.connectionIndices) {
+                auto const& otherCell = cells.at(connectionIndex);
+                if (!createdConnections.contains(std::pair(index, connectionIndex))) {
+                    ConnectionPreviewDescription connection;
+                    connection.cell1 = cell.pos;
+                    connection.cell2 = otherCell.pos;
+                    result.connections.emplace_back(connection);
+                    createdConnections.insert(std::pair(connectionIndex, index));
+                }
+            }
+            ++index;
+        }
+        return result;
     }
 }
 
 PreviewDescription
 PreviewDescriptionConverter::convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters)
 {
-    return convertIntern(genome, selectedNode ? SelectNode(*selectedNode) : SelectNode(SelectNoNodes()), std::nullopt, std::nullopt, parameters);
+    auto cellInterDescriptions =
+        processGenomeDescription(genome, selectedNode ? SelectNode(*selectedNode) : SelectNode(SelectNoNodes()), std::nullopt, std::nullopt, parameters);
+    return createPreviewDescription(cellInterDescriptions);
 }
