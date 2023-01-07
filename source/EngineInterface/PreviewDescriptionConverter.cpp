@@ -95,7 +95,7 @@ namespace
     ProcessedGenomeDescriptionResult processMainGenomeDescription(GenomeDescription const& genome, SelectNode selectedNode, SimulationParameters const& parameters)
     {
         ProcessedGenomeDescriptionResult result;
-        result.direction = RealVector2D{0, -1};
+        result.direction = RealVector2D{0, 1};
 
         RealVector2D pos;
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;

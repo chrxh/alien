@@ -194,7 +194,7 @@ void _GenomeEditorWindow::processToolbar()
 void _GenomeEditorWindow::processTab(TabData& tab)
 {
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewHeight), true)) {
-        AlienImGui::Group("Genotype");
+        AlienImGui::Group("Construction sequence");
         processGenomeEditTab(tab);
     }
     ImGui::EndChild();
@@ -202,7 +202,7 @@ void _GenomeEditorWindow::processTab(TabData& tab)
     if (ImGui::IsItemActive()) {
         _previewHeight -= ImGui::GetIO().MouseDelta.y;
     }
-    AlienImGui::Group("Preview");
+    AlienImGui::Group("Preview (approximation)");
     if (ImGui::BeginChild("##child4", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         showPreview(tab);
     }
