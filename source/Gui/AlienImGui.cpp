@@ -907,8 +907,8 @@ void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc)
         ImGui::SetCursorPos({previewSize.x - 1, previewSize.y - 1});
 
         for (auto const& connection : desc.connections) {
-            auto startPos = (desc.cells.at(connection.cellIndex1).pos - upperLeft) * CellSize + offset;
-            auto endPos = (desc.cells.at(connection.cellIndex2).pos - upperLeft) * CellSize + offset;
+            auto startPos = (connection.cell1 - upperLeft) * CellSize + offset;
+            auto endPos = (connection.cell2 - upperLeft) * CellSize + offset;
             drawList->AddLine({startPos.x, startPos.y}, {endPos.x, endPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
         }
         for (auto const& cell : desc.cells) {

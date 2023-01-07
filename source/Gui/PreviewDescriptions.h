@@ -11,8 +11,8 @@ struct CellPreviewDescription
 
 struct ConnectionPreviewDescription
 {
-    int cellIndex1;
-    int cellIndex2;
+    RealVector2D cell1;
+    RealVector2D cell2;
 };
 
 struct PreviewDescription
