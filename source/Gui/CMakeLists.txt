@@ -80,9 +80,6 @@ PUBLIC
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
-    PreviewDescriptionConverter.cpp
-    PreviewDescriptionConverter.h
-    PreviewDescriptions.h
     RadiationSourcesWindow.cpp
     RadiationSourcesWindow.h
     RemoteSimulationData.cpp

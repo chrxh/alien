@@ -69,7 +69,7 @@ namespace
                 sizeof(NeuronFunction::NeuronState),
                 reinterpret_cast<uint8_t*>(cell->cellFunctionData.neuron.neuronState),
                 targetSize,
-                cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex,
+                cellTO.cellFunctionData.neuron.weightsAndBiasesDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
         } break;

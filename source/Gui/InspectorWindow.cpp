@@ -9,6 +9,7 @@
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/GenomeDescriptionConverter.h"
+#include "EngineInterface/PreviewDescriptionConverter.h"
 
 #include "StyleRepository.h"
 #include "Viewport.h"
@@ -16,7 +17,6 @@
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
 #include "GenomeEditorWindow.h"
-#include "PreviewDescriptionConverter.h"
 
 using namespace std::string_literals;
 
@@ -375,12 +375,12 @@ void _InspectorWindow::showNeuronContent(NeuronDescription& neuron)
         AlienImGui::NeuronSelection(
             AlienImGui::NeuronSelectionParameters().outputButtonPositionFromRight(ActivityTextWidth),
             neuron.weights,
-            neuron.bias,
+            neuron.biases,
             _selectedInput,
             _selectedOutput);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(ActivityTextWidth), neuron.weights[_selectedOutput][_selectedInput]);
-        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(ActivityTextWidth), neuron.bias[_selectedOutput]);
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(ActivityTextWidth), neuron.biases[_selectedOutput]);
         ImGui::TreePop();
     }
 }

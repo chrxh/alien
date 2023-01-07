@@ -423,7 +423,7 @@ ConstructorProcessor::constructCellIntern(
             result->cellFunctionData.neuron.neuronState->weights[i] = GenomeDecoder::readFloat(constructor) * 4;
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result->cellFunctionData.neuron.neuronState->bias[i] = GenomeDecoder::readFloat(constructor) * 4;
+            result->cellFunctionData.neuron.neuronState->biases[i] = GenomeDecoder::readFloat(constructor) * 4;
         }
     } break;
     case CellFunction_Transmitter: {

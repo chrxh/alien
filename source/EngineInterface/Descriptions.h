@@ -1,7 +1,6 @@
 #pragma once
 
 #include <variant>
-#include <array>
 
 #include "Base/Definitions.h"
 #include "EngineInterface/Constants.h"
@@ -71,12 +70,12 @@ struct ActivityDescription
 struct NeuronDescription
 {
     std::vector<std::vector<float>> weights;
-    std::vector<float> bias;
+    std::vector<float> biases;
 
     NeuronDescription()
     {
         weights.resize(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
-        bias.resize(MAX_CHANNELS, 0);
+        biases.resize(MAX_CHANNELS, 0);
     }
     auto operator<=>(NeuronDescription const&) const = default;
 };

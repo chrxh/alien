@@ -407,8 +407,8 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     case CellFunction_Neuron: {
         NeuronDescription neuron;
         std::vector<float> weigthsAndBias;
-        convert(dataTO, sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1), cellTO.cellFunctionData.neuron.weightsAndBiasDataIndex, weigthsAndBias);
-        std::tie(neuron.weights, neuron.bias) = splitWeightsAndBias(weigthsAndBias);
+        convert(dataTO, sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1), cellTO.cellFunctionData.neuron.weightsAndBiasesDataIndex, weigthsAndBias);
+        std::tie(neuron.weights, neuron.biases) = splitWeightsAndBias(weigthsAndBias);
         result.cellFunction = neuron;
     } break;
     case CellFunction_Transmitter: {
@@ -510,9 +510,9 @@ void DescriptionConverter::addCell(
     case CellFunction_Neuron: {
         NeuronTO neuronTO;
         auto const& neuronDesc = std::get<NeuronDescription>(*cellDesc.cellFunction);
-        std::vector<float> weigthsAndBias = unitWeightsAndBias(neuronDesc.weights, neuronDesc.bias);
+        std::vector<float> weigthsAndBias = unitWeightsAndBias(neuronDesc.weights, neuronDesc.biases);
         uint64_t targetSize;
-        convert(dataTO, weigthsAndBias, targetSize, neuronTO.weightsAndBiasDataIndex);
+        convert(dataTO, weigthsAndBias, targetSize, neuronTO.weightsAndBiasesDataIndex);
         CHECK(targetSize == sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1));
         cellTO.cellFunctionData.neuron = neuronTO;
     } break;

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineInterface/GenomeDescriptions.h"
-#include "EngineInterface/SimulationParameters.h"
+#include "GenomeDescriptions.h"
+#include "SimulationParameters.h"
 #include "PreviewDescriptions.h"
 
 

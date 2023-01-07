@@ -1,9 +1,9 @@
 #pragma once
 
 #include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/PreviewDescriptions.h"
 
 #include "AlienWindow.h"
-#include "PreviewDescriptions.h"
 
 class _GenomeEditorWindow : public _AlienWindow
 {

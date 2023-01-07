@@ -975,7 +975,7 @@ bool AlienImGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, 
 void AlienImGui::NeuronSelection(
     NeuronSelectionParameters const& parameters,
     std::vector<std::vector<float>> const& weights,
-    std::vector<float> const& bias,
+    std::vector<float> const& biases,
     int& selectedInput,
     int& selectedOutput)
 {
@@ -1083,7 +1083,7 @@ void AlienImGui::NeuronSelection(
     //visualize biases
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         drawList->AddRectFilled(
-            {outputPos[i].x, outputPos[i].y - biasFieldWidth}, {outputPos[i].x + biasFieldWidth, outputPos[i].y + biasFieldWidth}, calcColor(bias[i]));
+            {outputPos[i].x, outputPos[i].y - biasFieldWidth}, {outputPos[i].x + biasFieldWidth, outputPos[i].y + biasFieldWidth}, calcColor(biases[i]));
     }
 
     //draw selection

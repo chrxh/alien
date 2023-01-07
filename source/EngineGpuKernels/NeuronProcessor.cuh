@@ -42,7 +42,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __shared__ float sumInput[MAX_CHANNELS];
     auto channelPartition = calcPartition(MAX_CHANNELS, threadIdx.x, blockDim.x);
     for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
-        sumInput[i] = cell->cellFunctionData.neuron.neuronState->bias[i];
+        sumInput[i] = cell->cellFunctionData.neuron.neuronState->biases[i];
     }
     __syncthreads();
 

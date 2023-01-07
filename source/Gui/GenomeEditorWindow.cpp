@@ -12,11 +12,11 @@
 #include "EngineInterface/GenomeDescriptionConverter.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationParameters.h"
+#include "EngineInterface/PreviewDescriptionConverter.h"
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
 #include "EditorModel.h"
-#include "PreviewDescriptionConverter.h"
 #include "StyleRepository.h"
 
 namespace
