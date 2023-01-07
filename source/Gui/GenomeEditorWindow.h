@@ -40,6 +40,7 @@ private:
     int _selectedTabIndex = 0;
     int _selectedInput = 0;
     int _selectedOutput = 0;
+    float _genomeZoom = 20.0f;
 
     //actions
     std::optional<int> _tabIndexToSelect;

@@ -59,8 +59,8 @@ void _InspectorWindow::process()
         return;
     }
     auto width = calcWindowWidth();
-    auto height = isCell() ? StyleRepository::getInstance().scaleContent(370.0f)
-                           : StyleRepository::getInstance().scaleContent(70.0f);
+    auto height = isCell() ? StyleRepository::getInstance().contentScale(370.0f)
+                           : StyleRepository::getInstance().contentScale(70.0f);
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
@@ -74,7 +74,7 @@ void _InspectorWindow::process()
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
-        auto factor = StyleRepository::getInstance().scaleContent(1);
+        auto factor = StyleRepository::getInstance().contentScale(1);
 
         drawList->AddLine(
             {windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor},
@@ -317,14 +317,14 @@ void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
             if (AlienImGui::Button("Edit")) {
                 _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters));
             }
-
+            ImGui::SameLine();
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Read position").textWidth(GenomeTabTextWidth), constructor.currentGenomePos);
 
             AlienImGui::Group("Preview");
             if (ImGui::BeginChild("##child", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar)) {
                 auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters);
                 auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);
-                AlienImGui::ShowPreviewDescription(previewDesc);
+                AlienImGui::ShowPreviewDescription(previewDesc, _genomeZoom);
             }
             ImGui::EndChild();
         }
@@ -501,9 +501,9 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
 float _InspectorWindow::calcWindowWidth() const
 {
     if (isCell()) {
-        return StyleRepository::getInstance().scaleContent(CellWindowWidth);
+        return StyleRepository::getInstance().contentScale(CellWindowWidth);
     } else {
-        return StyleRepository::getInstance().scaleContent(ParticleWindowWidth);
+        return StyleRepository::getInstance().contentScale(ParticleWindowWidth);
     }
 }
 

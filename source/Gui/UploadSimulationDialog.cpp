@@ -51,7 +51,7 @@ void _UploadSimulationDialog::process()
                 .hint("Description (optional)")
                 .textWidth(0)
                 .height(
-                ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(50)),
+                ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().contentScale(50)),
             _simDescription);
 
         AlienImGui::Separator();

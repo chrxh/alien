@@ -38,7 +38,7 @@ void AlienImGui::HelpMarker(std::string const& text)
 
 bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& value)
 {
-    auto width = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto width = StyleRepository::getInstance().contentScale(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
     auto result = ImGui::SliderFloat(
         ("##" + parameters._name).c_str(),
@@ -66,7 +66,7 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& val
 
 bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
 {
-    auto width = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto width = StyleRepository::getInstance().contentScale(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
     auto result = ImGui::SliderInt(
         ("##" + parameters._name).c_str(), &value, parameters._min, parameters._max, "%d", parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
@@ -90,8 +90,8 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
 
 void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
-    auto inputWidth = StyleRepository::getInstance().scaleContent(parameters._inputWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
+    auto inputWidth = StyleRepository::getInstance().contentScale(parameters._inputWidth);
 
     ImGui::SetNextItemWidth(
         ImGui::GetContentRegionAvail().x - textWidth - inputWidth
@@ -107,7 +107,7 @@ void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, 
 
 bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
 
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
     auto result = ImGui::InputInt(("##" + parameters._name).c_str(), &value);
@@ -131,7 +131,7 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
 
 void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value)
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
 
     ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
@@ -162,7 +162,7 @@ void AlienImGui::InputFloatVector(InputFloatVectorParameters const& parameters, 
 
 void AlienImGui::InputFloatMatrix(InputFloatMatrixParameters const& parameters, std::vector<std::vector<float>>& value)
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
     auto rows = value.size();
     auto cols = value.front().size();
     if (ImGui::BeginTable(("##" + parameters._name).c_str(), cols, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
@@ -188,7 +188,7 @@ void AlienImGui::InputFloatMatrix(InputFloatMatrixParameters const& parameters, 
 bool AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
 {
     if (width == 0) {
-        width = StyleRepository::getInstance().scaleContent(30);
+        width = StyleRepository::getInstance().contentScale(30);
     }
     float h, s, v;
     AlienImGui::ConvertRGBtoHSV(cellColor, h, s, v);
@@ -207,7 +207,7 @@ bool AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
 
 void AlienImGui::InputColorMatrix(InputColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS])
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
 
     if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS + 1, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
         for (int row = 0; row < MAX_COLORS + 1; ++row) {
@@ -265,7 +265,7 @@ void AlienImGui::InputColorMatrix(InputColorMatrixParameters const& parameters, 
 
 void AlienImGui::InputColorVector(InputColorVectorParameters const& parameters, float (&value)[MAX_COLORS])
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
 
     if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
         for (int row = 0; row < 2; ++row) {
@@ -315,7 +315,7 @@ void AlienImGui::InputColorVector(InputColorVectorParameters const& parameters, 
 
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
     if (parameters._monospaceFont) {
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
@@ -368,10 +368,10 @@ void AlienImGui::InputTextMultiline(InputTextMultilineParameters const& paramete
     static char buffer[1024*16];
     StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
 
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
     auto height = parameters._height == 0
         ? ImGui::GetContentRegionAvail().y
-        : StyleRepository::getInstance().scaleContent(parameters._height);
+        : StyleRepository::getInstance().contentScale(parameters._height);
     auto id = parameters._hint.empty() ? ("##" + parameters._name).c_str() : ("##" + parameters._hint).c_str();
     ImGui::InputTextEx(
         ("##" + parameters._name).c_str(),
@@ -400,7 +400,7 @@ namespace
 
 bool AlienImGui::Combo(ComboParameters& parameters, int& value)
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
 
     const char** items = new const char*[parameters._values.size()];
     for (int i = 0; i < parameters._values.size(); ++i) {
@@ -435,10 +435,10 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
 bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
 {
     auto& styleRep = StyleRepository::getInstance();
-    auto textWidth = styleRep.scaleContent(parameters._textWidth);
-    auto comboWidth = !parameters._name.empty() ? ImGui::GetContentRegionAvail().x - textWidth : styleRep.scaleContent(70);
-    auto colorFieldWidth1 = comboWidth - styleRep.scaleContent(40);
-    auto colorFieldWidth2 = comboWidth - styleRep.scaleContent(30);
+    auto textWidth = styleRep.contentScale(parameters._textWidth);
+    auto comboWidth = !parameters._name.empty() ? ImGui::GetContentRegionAvail().x - textWidth : styleRep.contentScale(70);
+    auto colorFieldWidth1 = comboWidth - styleRep.contentScale(40);
+    auto colorFieldWidth2 = comboWidth - styleRep.contentScale(30);
 
     const char* items[] = { "##1", "##2", "##3", "##4", "##5", "##6", "##7" };
 
@@ -506,7 +506,7 @@ void AlienImGui::InputColorTransition(InputColorTransitionParameters const& para
 
     //slider for transition age
     ImGui::PushID(2);
-    auto width = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto width = StyleRepository::getInstance().contentScale(parameters._textWidth);
 
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
     ImGui::SliderInt(
@@ -664,7 +664,7 @@ void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& pa
         ("##" + parameters._name).c_str(),
         imGuiColor,
         ImGuiColorEditFlags_NoBorder,
-        {ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().scaleContent(parameters._textWidth), 0});
+        {ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().contentScale(parameters._textWidth), 0});
     if (openColorPicker) {
         ImGui::OpenPopup("colorpicker");
         imGuiBackupColor = imGuiColor;
@@ -759,7 +759,7 @@ bool AlienImGui::ToolbarButton(std::string const& text)
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.4f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 0.6f));
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::ToolbarButtonColor);
-    auto buttonSize = StyleRepository::getInstance().scaleContent(40.0f);
+    auto buttonSize = StyleRepository::getInstance().contentScale(40.0f);
     auto result = ImGui::Button(text.c_str(), {buttonSize, buttonSize});
     ImGui::PopStyleColor(4);
     ImGui::PopStyleVar();
@@ -787,7 +787,7 @@ bool AlienImGui::Button(std::string const& text)
 
 bool AlienImGui::Button(ButtonParameters const& parameters)
 {
-    auto width = ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto width = ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().contentScale(parameters._textWidth);
     auto result = ImGui::Button(parameters._buttonText.c_str(), {width, 0});
     ImGui::SameLine();
 
@@ -874,9 +874,13 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
     return value != origValue;
 }
 
-void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc)
+void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoom)
 {
-    auto const CellSize = StyleRepository::getInstance().scaleContent(20.0f);
+    
+    auto color = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
+    auto windowSize = ImGui::GetWindowSize();
+
+    auto const cellSize = contentScale(zoom);
 
     RealVector2D upperLeft;
     RealVector2D lowerRight;
@@ -894,60 +898,79 @@ void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc)
             lowerRight.y = cell.pos.y;
         }
     }
-    RealVector2D previewSize = (lowerRight - upperLeft) * CellSize + RealVector2D(CellSize, CellSize) * 2;
+    RealVector2D previewSize = (lowerRight - upperLeft) * cellSize + RealVector2D(cellSize, cellSize) * 2;
 
-    auto windowSize = ImGui::GetWindowSize();
     ImGui::SetCursorPos({std::max(0.0f, windowSize.x - previewSize.x) / 2, std::max(0.0f, windowSize.y - previewSize.y) / 2});
-
-    if (ImGui::BeginChild("##", ImVec2(previewSize.x, previewSize.y), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("##genome", ImVec2(previewSize.x, previewSize.y), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         auto windowPos = ImGui::GetWindowPos();
-        RealVector2D offset{windowPos.x + CellSize, windowPos.y + CellSize};
+        RealVector2D offset{windowPos.x + cellSize, windowPos.y + cellSize};
 
         ImGui::SetCursorPos({previewSize.x - 1, previewSize.y - 1});
 
         for (auto const& cell : desc.cells) {
-            auto cellPos = (cell.pos - upperLeft) * CellSize + offset;
+            auto cellPos = (cell.pos - upperLeft) * cellSize + offset;
             float h, s, v;
             AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
-            drawList->AddCircleFilled({cellPos.x, cellPos.y}, CellSize / 4, ImColor::HSV(h, s * 0.7f, v * 0.7f));
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize / 4, ImColor::HSV(h, s * 0.7f, v * 0.7f));
             if (cell.selected) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, CellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
+                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
             }
         }
 
         for (auto const& connection : desc.connections) {
-            auto cellPos1 = (connection.cell1 - upperLeft) * CellSize + offset;
-            auto cellPos2 = (connection.cell2 - upperLeft) * CellSize + offset;
+            auto cellPos1 = (connection.cell1 - upperLeft) * cellSize + offset;
+            auto cellPos2 = (connection.cell2 - upperLeft) * cellSize + offset;
 
             auto direction = cellPos1 - cellPos2;
 
             Math::normalize(direction);
-            auto connectionStartPos = cellPos1 - direction * CellSize / 4;
-            auto connectionEndPos = cellPos2 + direction * CellSize / 4;
+            auto connectionStartPos = cellPos1 - direction * cellSize / 4;
+            auto connectionEndPos = cellPos2 + direction * cellSize / 4;
             drawList->AddLine({connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
 
             if (connection.arrowToCell1) {
                 auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
-                auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * CellSize / 8;
+                auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8;
                 drawList->AddLine({arrowPartStart1.x, arrowPartStart1.y}, {connectionStartPos.x, connectionStartPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
 
                 auto arrowPartDirection2 = RealVector2D{-direction.x - direction.y, direction.x - direction.y};
-                auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * CellSize / 8;
+                auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 8;
                 drawList->AddLine({arrowPartStart2.x, arrowPartStart2.y}, {connectionStartPos.x, connectionStartPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
             }
 
             if (connection.arrowToCell2) {
                 auto arrowPartDirection1 = RealVector2D{direction.x - direction.y, direction.x + direction.y};
-                auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * CellSize / 8;
+                auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 8;
                 drawList->AddLine({arrowPartStart1.x, arrowPartStart1.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
 
                 auto arrowPartDirection2 = RealVector2D{direction.x + direction.y, -direction.x + direction.y};
-                auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * CellSize / 8;
+                auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * cellSize / 8;
                 drawList->AddLine({arrowPartStart2.x, arrowPartStart2.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
             }
         }
+    }
+    ImGui::EndChild();
+
+    ImGui::SetCursorPos({ImGui::GetScrollX() + contentScale(10), ImGui::GetScrollY() + windowSize.y - contentScale(35)});
+    if (ImGui::BeginChild("##buttons", ImVec2(100, 30), false)) {
+        ImGui::SetCursorPos({0, 0});
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
+        ImGui::PushID(1);
+        if (ImGui::Button(ICON_FA_SEARCH_PLUS)) {
+            zoom *= 1.5f;
+        }
+        ImGui::PopID();
+        ImGui::SameLine();
+        ImGui::PushID(2);
+        if (ImGui::Button(ICON_FA_SEARCH_MINUS)) {
+            zoom /= 1.5f;
+        }
+        ImGui::PopID();
+        ImGui::PopStyleColor(3);
     }
     ImGui::EndChild();
 }
@@ -991,7 +1014,7 @@ void AlienImGui::NeuronSelection(
     };
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     auto windowPos = ImGui::GetWindowPos();
-    auto outputButtonPositionFromRight = StyleRepository::getInstance().scaleContent(parameters._outputButtonPositionFromRight);
+    auto outputButtonPositionFromRight = StyleRepository::getInstance().contentScale(parameters._outputButtonPositionFromRight);
     RealVector2D inputPos[MAX_CHANNELS];
     RealVector2D outputPos[MAX_CHANNELS];
     auto biasFieldWidth = ImGui::GetStyle().FramePadding.x * 2;

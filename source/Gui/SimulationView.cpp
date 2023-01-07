@@ -280,7 +280,7 @@ void _SimulationView::processControls()
     float childWidth = 1 + style.ScrollbarSize + style.WindowPadding.x * 2.0f;
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    auto mainMenubarHeight = StyleRepository::getInstance().scaleContent(22);
+    auto mainMenubarHeight = StyleRepository::getInstance().contentScale(22);
     auto scrollbarThickness = 17;   //fixed
     _scrollbarX->process(
         {{viewport->Pos.x, viewport->Size.y - scrollbarThickness}, {viewport->Size.x - 1 - scrollbarThickness, 1}});

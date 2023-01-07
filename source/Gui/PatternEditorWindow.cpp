@@ -96,7 +96,7 @@ void _PatternEditorWindow::processIntern()
 
     if (ImGui::BeginChild(
         "##",
-        ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(50.0f)),
+        ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().contentScale(50.0f)),
         false,
         ImGuiWindowFlags_HorizontalScrollbar)) {
 
@@ -149,7 +149,7 @@ void _PatternEditorWindow::processIntern()
             AlienImGui::SliderInputFloatParameters()
                 .name("Angle")
                 .textWidth(RightColumnWidth)
-                .inputWidth(StyleRepository::getInstance().scaleContent(50))
+                .inputWidth(StyleRepository::getInstance().contentScale(50))
                 .min(-180.0f)
                 .max(180.0f)
                 .format("%.1f"),

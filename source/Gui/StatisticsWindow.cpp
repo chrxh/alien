@@ -52,7 +52,7 @@ void _StatisticsWindow::processIntern()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().scaleContent(60));
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().contentScale(60));
     ImGui::SliderFloat("", &_liveStatistics.history, 1, LiveStatistics::MaxLiveHistory, "%.1f s");
     ImGui::EndDisabled();
 
@@ -72,7 +72,7 @@ void _StatisticsWindow::processLiveStatistics()
 {
     ImGui::Spacing();
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter, ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().scaleContent(HeadColWidth));
+        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().contentScale(HeadColWidth));
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
         ImPlot::PushColormap(ImPlotColormap_Cool);
@@ -110,7 +110,7 @@ void _StatisticsWindow::processLiveStatistics()
 
     ImGui::Spacing();
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter, ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("Processes per time step", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().scaleContent(HeadColWidth));
+        ImGui::TableSetupColumn("Processes per time step", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().contentScale(HeadColWidth));
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
         ImPlot::PushColormap(ImPlotColormap_Cool);
@@ -152,7 +152,7 @@ void _StatisticsWindow::processLongtermStatistics()
             2,
             /*ImGuiTableFlags_BordersV | */ ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter,
             ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().scaleContent(HeadColWidth));
+        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().contentScale(HeadColWidth));
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
         ImPlot::PushColormap(ImPlotColormap_Cool);
@@ -193,7 +193,7 @@ void _StatisticsWindow::processLongtermStatistics()
             2,
             /*ImGuiTableFlags_BordersV | */ ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter,
             ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("Processes per time step", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().scaleContent(HeadColWidth));
+        ImGui::TableSetupColumn("Processes per time step", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().contentScale(HeadColWidth));
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
         ImPlot::PushColormap(ImPlotColormap_Cool);
@@ -244,7 +244,7 @@ void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& value
         maxValue * 1.5,
         ImGuiCond_Always);
     if (ImPlot::BeginPlot(
-            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().scaleContent(80.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().contentScale(80.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         auto color = ImPlot::GetColormapColor(row + 2);
 
         if (ImGui::GetStyle().Alpha == 1.0f) {
@@ -291,7 +291,7 @@ void _StatisticsWindow::processLivePlotForCellsByColor(int row)
     ImPlot::SetNextPlotLimits(
         _liveStatistics.timepointsHistory.back() - _liveStatistics.history, _liveStatistics.timepointsHistory.back(), 0, maxValue * 1.5, ImGuiCond_Always);
     if (ImPlot::BeginPlot(
-            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().scaleContent(160)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().contentScale(160)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         for (int i = 0; i < 7; ++i) {
             ImGui::PushID(i);
             auto colorRaw = getCellColor(i);
@@ -327,7 +327,7 @@ void _StatisticsWindow::processLongtermPlot(int row, std::vector<float> const& v
         maxValue * 1.5,
         ImGuiCond_Always);  
     if (ImPlot::BeginPlot(
-            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().scaleContent(80.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().contentScale(80.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         auto color = ImPlot::GetColormapColor(row + 2);
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::AnnotateClamped(
@@ -367,7 +367,7 @@ void _StatisticsWindow::processLongtermPlotForCellsByColor(int row)
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(_longtermStatistics.timestepHistory.front(), _longtermStatistics.timestepHistory.back(), 0, maxValue * 1.5, ImGuiCond_Always);
     if (ImPlot::BeginPlot(
-            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().scaleContent(160.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().contentScale(160.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         for (int i = 0; i < 7; ++i) {
             ImGui::PushID(i);
             auto colorRaw = getCellColor(i);

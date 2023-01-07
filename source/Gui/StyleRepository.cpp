@@ -98,12 +98,12 @@ ImFont* StyleRepository::getMonospaceFont() const
     return _monospaceFont;
 }
 
-float StyleRepository::scaleContent(float value) const
+float StyleRepository::contentScale(float value) const
 {
     return _contentScaleFactor * value;
 }
 
-float StyleRepository::scaleBackContent(float value) const
+float StyleRepository::contentInverseScale(float value) const
 {
     return _contentScaleFactor / value;
 }
