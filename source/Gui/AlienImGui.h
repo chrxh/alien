@@ -4,7 +4,7 @@
 
 #include "Base/Definitions.h"
 #include "EngineInterface/Constants.h"
-#include "PreviewDescriptions.h"
+#include "EngineInterface/PreviewDescriptions.h"
 #include "Definitions.h"
 
 class AlienImGui
@@ -241,7 +241,7 @@ public:
     static void NeuronSelection(
         NeuronSelectionParameters const& parameters,
         std::vector<std::vector<float>> const& weights,
-        std::vector<float> const& bias,
+        std::vector<float> const& biases,
         int& selectedInput,
         int& selectedOutput
     );

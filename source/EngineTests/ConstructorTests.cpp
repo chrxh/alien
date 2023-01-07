@@ -495,7 +495,7 @@ TEST_F(ConstructorTests, constructNeuronCell)
         }
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        EXPECT_TRUE(lowPrecisionCompare(neuron.bias[i], actualNeuron.bias[i]));
+        EXPECT_TRUE(lowPrecisionCompare(neuron.bias[i], actualNeuron.biases[i]));
     }
 }
 

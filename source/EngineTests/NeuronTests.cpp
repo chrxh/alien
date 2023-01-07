@@ -22,7 +22,7 @@ protected:
 TEST_F(NeuronTests, bias)
 {
     NeuronDescription neuron;
-    neuron.bias = {0, 0, 1, 0, 0, 0, 0, -1};
+    neuron.biases = {0, 0, 1, 0, 0, 0, 0, -1};
 
     auto data = DataDescription().addCells({CellDescription().setId(1).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0)});
 

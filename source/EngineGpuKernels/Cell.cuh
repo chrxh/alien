@@ -31,7 +31,7 @@ struct NeuronFunction
     struct NeuronState
     {
         float weights[MAX_CHANNELS * MAX_CHANNELS];
-        float bias[MAX_CHANNELS];
+        float biases[MAX_CHANNELS];
     };
 
     NeuronState* neuronState;
