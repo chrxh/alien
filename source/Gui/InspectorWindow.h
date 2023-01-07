@@ -65,4 +65,5 @@ private:
     char _tokenMemory[256];
     int _selectedInput = 0;
     int _selectedOutput = 0;
+    float _genomeZoom = 20.0f;
 };

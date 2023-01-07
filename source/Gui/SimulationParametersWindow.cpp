@@ -67,7 +67,7 @@ void _SimulationParametersWindow::processIntern()
     auto origParameters = _simController->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scaleContent(78)), false)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().contentScale(78)), false)) {
 
         if (ImGui::BeginTabBar("##Flow", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 

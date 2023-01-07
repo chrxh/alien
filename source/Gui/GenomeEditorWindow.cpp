@@ -198,7 +198,7 @@ void _GenomeEditorWindow::processTab(TabData& tab)
         processGenomeEditTab(tab);
     }
     ImGui::EndChild();
-    ImGui::Button("", ImVec2(-1, StyleRepository::getInstance().scaleContent(5.0f)));
+    ImGui::Button("", ImVec2(-1, StyleRepository::getInstance().contentScale(5.0f)));
     if (ImGui::IsItemActive()) {
         _previewHeight -= ImGui::GetIO().MouseDelta.y;
     }
@@ -216,7 +216,7 @@ namespace
     public:
         bool begin()
         {
-            auto width = StyleRepository::getInstance().scaleContent(ImGui::GetContentRegionAvail().x);
+            auto width = StyleRepository::getInstance().contentScale(ImGui::GetContentRegionAvail().x);
             _columns = std::max(toInt(width / DynamicTableColumnWidth), 1);
             auto result = ImGui::BeginTable("##", _columns, ImGuiTableFlags_None);
             if (result) {
@@ -550,7 +550,7 @@ void _GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
     auto preview = PreviewDescriptionConverter::convert(genome, tab.selectedNode, _simulationController->getSimulationParameters());
-    AlienImGui::ShowPreviewDescription(preview);
+    AlienImGui::ShowPreviewDescription(preview, _genomeZoom);
 }
 
 void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const

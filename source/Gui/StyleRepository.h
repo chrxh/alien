@@ -71,8 +71,8 @@ public:
     ImFont* getLargeFont() const;
     ImFont* getMonospaceFont() const;
 
-    float scaleContent(float value) const;
-    float scaleBackContent(float value) const;
+    float contentScale(float value) const;
+    float contentInverseScale(float value) const;
 
 private:
     StyleRepository() = default;
@@ -83,3 +83,8 @@ private:
     ImFont* _largeFont = nullptr;
     ImFont* _monospaceFont = nullptr;
 };
+
+inline float contentScale(float value)
+{
+    return StyleRepository::getInstance().contentScale(value);
+}
