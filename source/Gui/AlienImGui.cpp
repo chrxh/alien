@@ -6,6 +6,7 @@
 #include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/StringHelper.h"
+#include "Base/Math.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/Constants.h"
 
@@ -906,11 +907,6 @@ void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc)
 
         ImGui::SetCursorPos({previewSize.x - 1, previewSize.y - 1});
 
-        for (auto const& connection : desc.connections) {
-            auto startPos = (connection.cell1 - upperLeft) * CellSize + offset;
-            auto endPos = (connection.cell2 - upperLeft) * CellSize + offset;
-            drawList->AddLine({startPos.x, startPos.y}, {endPos.x, endPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
-        }
         for (auto const& cell : desc.cells) {
             auto cellPos = (cell.pos - upperLeft) * CellSize + offset;
             float h, s, v;
@@ -918,6 +914,38 @@ void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc)
             drawList->AddCircleFilled({cellPos.x, cellPos.y}, CellSize / 4, ImColor::HSV(h, s * 0.7f, v * 0.7f));
             if (cell.selected) {
                 drawList->AddCircle({cellPos.x, cellPos.y}, CellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
+            }
+        }
+
+        for (auto const& connection : desc.connections) {
+            auto cellPos1 = (connection.cell1 - upperLeft) * CellSize + offset;
+            auto cellPos2 = (connection.cell2 - upperLeft) * CellSize + offset;
+
+            auto direction = cellPos1 - cellPos2;
+
+            Math::normalize(direction);
+            auto connectionStartPos = cellPos1 - direction * CellSize / 4;
+            auto connectionEndPos = cellPos2 + direction * CellSize / 4;
+            drawList->AddLine({connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+
+            if (connection.arrowToCell1) {
+                auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
+                auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * CellSize / 8;
+                drawList->AddLine({arrowPartStart1.x, arrowPartStart1.y}, {connectionStartPos.x, connectionStartPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+
+                auto arrowPartDirection2 = RealVector2D{-direction.x - direction.y, direction.x - direction.y};
+                auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * CellSize / 8;
+                drawList->AddLine({arrowPartStart2.x, arrowPartStart2.y}, {connectionStartPos.x, connectionStartPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+            }
+
+            if (connection.arrowToCell2) {
+                auto arrowPartDirection1 = RealVector2D{direction.x - direction.y, direction.x + direction.y};
+                auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * CellSize / 8;
+                drawList->AddLine({arrowPartStart1.x, arrowPartStart1.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+
+                auto arrowPartDirection2 = RealVector2D{direction.x + direction.y, -direction.x + direction.y};
+                auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * CellSize / 8;
+                drawList->AddLine({arrowPartStart2.x, arrowPartStart2.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
             }
         }
     }
@@ -1052,7 +1080,7 @@ void AlienImGui::NeuronSelection(
         }
     }
 
-    //visualize bias
+    //visualize biases
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         drawList->AddRectFilled(
             {outputPos[i].x, outputPos[i].y - biasFieldWidth}, {outputPos[i].x + biasFieldWidth, outputPos[i].y + biasFieldWidth}, calcColor(bias[i]));

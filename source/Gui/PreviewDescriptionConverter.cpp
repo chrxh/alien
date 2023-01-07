@@ -12,6 +12,8 @@ namespace
         RealVector2D pos;
         bool selected = false;
         int executionOrderNumber = 0;
+        bool inputBlocked = false;
+        bool outputBlocked = false;
         int color = 0;
         std::set<int> connectionIndices;
     };
@@ -112,6 +114,8 @@ namespace
             //create cell description intern
             CellPreviewDescriptionIntern cellIntern;
             cellIntern.color = node.color;
+            cellIntern.inputBlocked = node.inputBlocked;
+            cellIntern.outputBlocked = node.outputBlocked;
             cellIntern.executionOrderNumber = node.executionOrderNumber;
             if (std::holds_alternative<int>(selectedNode)) {
                 cellIntern.selected = index == std::get<int>(selectedNode);
@@ -260,22 +264,60 @@ namespace
         return result;
     }
 
-    PreviewDescription createPreviewDescription(std::vector<CellPreviewDescriptionIntern> const& cells)
+    int calcInputExecutionOrder(
+        std::vector<CellPreviewDescriptionIntern> const& cells,
+        CellPreviewDescriptionIntern const& cell,
+        SimulationParameters const& parameters)
+    {
+        if (cell.inputBlocked) {
+            return -1;
+        }
+        int result = -parameters.cellMaxExecutionOrderNumbers;
+        for (auto const& connectionIndex : cell.connectionIndices) {
+            auto connectedCell = cells.at(connectionIndex);
+            if (connectedCell.outputBlocked) {
+                continue;
+            }
+            auto otherExecutionOrderNumber = connectedCell.executionOrderNumber;
+            if (otherExecutionOrderNumber > cell.executionOrderNumber) {
+                otherExecutionOrderNumber -= parameters.cellMaxExecutionOrderNumbers;
+            }
+            if (otherExecutionOrderNumber > result && otherExecutionOrderNumber != cell.executionOrderNumber) {
+                result = otherExecutionOrderNumber;
+            }
+        }
+
+        if (result == -parameters.cellMaxExecutionOrderNumbers) {
+            return -1;
+        }
+        if (result < 0) {
+            result += parameters.cellMaxExecutionOrderNumbers;
+        }
+        return result;
+    }
+
+    PreviewDescription createPreviewDescription(std::vector<CellPreviewDescriptionIntern> const& cells, SimulationParameters const& parameters)
     {
         PreviewDescription result;
-        std::set<std::pair<int, int>> createdConnections;
+        std::map<std::pair<int, int>, int> cellIndicesToCreatedConnectionIndex;
         int index = 0;
         for (auto const& cell : cells) {
             CellPreviewDescription cellPreview{.pos = cell.pos, .executionOrderNumber = cell.executionOrderNumber, .color = cell.color, .selected = cell.selected};
             result.cells.emplace_back(cellPreview);
+            auto inputExecutionOrder = calcInputExecutionOrder(cells, cell, parameters);
             for (auto const& connectionIndex : cell.connectionIndices) {
                 auto const& otherCell = cells.at(connectionIndex);
-                if (!createdConnections.contains(std::pair(index, connectionIndex))) {
+                auto findResult = cellIndicesToCreatedConnectionIndex.find(std::pair(index, connectionIndex));
+                if (findResult == cellIndicesToCreatedConnectionIndex.end()) {
                     ConnectionPreviewDescription connection;
                     connection.cell1 = cell.pos;
                     connection.cell2 = otherCell.pos;
+                    connection.arrowToCell1 = inputExecutionOrder == otherCell.executionOrderNumber;
                     result.connections.emplace_back(connection);
-                    createdConnections.insert(std::pair(connectionIndex, index));
+                    cellIndicesToCreatedConnectionIndex.emplace(std::pair(connectionIndex, index), toInt(result.connections.size() - 1));
+                } else {
+                    auto connectionIndex = findResult->second;
+                    result.connections.at(connectionIndex).arrowToCell2 = inputExecutionOrder == otherCell.executionOrderNumber;
                 }
             }
             ++index;
@@ -289,5 +331,5 @@ PreviewDescriptionConverter::convert(GenomeDescription const& genome, std::optio
 {
     auto cellInterDescriptions =
         processGenomeDescription(genome, selectedNode ? SelectNode(*selectedNode) : SelectNode(SelectNoNodes()), std::nullopt, std::nullopt, parameters);
-    return createPreviewDescription(cellInterDescriptions);
+    return createPreviewDescription(cellInterDescriptions, parameters);
 }
