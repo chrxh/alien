@@ -874,9 +874,10 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
     return value != origValue;
 }
 
-void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode)
+bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode)
 {
-    
+    auto result = false;
+
     auto color = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
     auto windowSize = ImGui::GetWindowSize();
 
@@ -908,7 +909,6 @@ void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
         RealVector2D offset{windowPos.x + cellSize, windowPos.y + cellSize};
 
         ImGui::SetCursorPos({previewSize.x - 1, previewSize.y - 1});
-
         for (auto const& cell : desc.cells) {
             auto cellPos = (cell.pos - upperLeft) * cellSize + offset;
             float h, s, v;
@@ -932,6 +932,15 @@ void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
             if (selectedNode && cell.nodeIndex == *selectedNode) {
                 drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
             }
+
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                auto mousePos = ImGui::GetMousePos();
+                if (mousePos.x >= cellPos.x - cellSize / 3 && mousePos.y >= cellPos.y - cellSize / 3 && mousePos.x <= cellPos.x + cellSize / 3
+                    && mousePos.y <= cellPos.y + cellSize / 3) {
+                    selectedNode = cell.nodeIndex;
+                }
+            }
+
         }
 
         for (auto const& connection : desc.connections) {
@@ -989,6 +998,8 @@ void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
         ImGui::PopStyleColor(3);
     }
     ImGui::EndChild();
+
+    return result;
 }
 
 bool AlienImGui::CellFunctionCombo(CellFunctionComboParameters& parameters, int& value)

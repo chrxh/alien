@@ -554,7 +554,9 @@ void _GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
     auto preview = PreviewDescriptionConverter::convert(genome, tab.selectedNode, _simulationController->getSimulationParameters());
-    AlienImGui::ShowPreviewDescription(preview, _genomeZoom, tab.selectedNode);
+    if (AlienImGui::ShowPreviewDescription(preview, _genomeZoom, tab.selectedNode)) {
+        _nodeIndexToJump = tab.selectedNode;
+    }
 }
 
 void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const
