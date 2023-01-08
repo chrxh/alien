@@ -216,7 +216,7 @@ public:
 
     static void ConvertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v);
 
-    static void ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode);
+    static bool ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode);
 
     struct CellFunctionComboParameters
     {
