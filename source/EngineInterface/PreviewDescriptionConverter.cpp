@@ -10,18 +10,13 @@ namespace
     struct CellPreviewDescriptionIntern
     {
         RealVector2D pos;
-        bool selected = false;
+        int nodeIndex = 0;
         int executionOrderNumber = 0;
         bool inputBlocked = false;
         bool outputBlocked = false;
         int color = 0;
         std::set<int> connectionIndices;
     };
-    struct SelectAllNodes
-    {};
-    struct SelectNoNodes
-    {};
-    using SelectNode = std::variant<SelectAllNodes, SelectNoNodes, int>;
 
     void insert(std::vector<CellPreviewDescriptionIntern>& target, std::vector<CellPreviewDescriptionIntern> const& source)
     {
@@ -92,7 +87,7 @@ namespace
         std::vector<CellPreviewDescriptionIntern> cellsIntern;
         RealVector2D direction;
     };
-    ProcessedGenomeDescriptionResult processMainGenomeDescription(GenomeDescription const& genome, SelectNode selectedNode, SimulationParameters const& parameters)
+    ProcessedGenomeDescriptionResult processMainGenomeDescription(GenomeDescription const& genome, std::optional<int> nodeIndex, SimulationParameters const& parameters)
     {
         ProcessedGenomeDescriptionResult result;
         result.direction = RealVector2D{0, 1};
@@ -117,12 +112,7 @@ namespace
             cellIntern.inputBlocked = node.inputBlocked;
             cellIntern.outputBlocked = node.outputBlocked;
             cellIntern.executionOrderNumber = node.executionOrderNumber;
-            if (std::holds_alternative<int>(selectedNode)) {
-                cellIntern.selected = index == std::get<int>(selectedNode);
-            }
-            if (std::holds_alternative<SelectAllNodes>(selectedNode)) {
-                cellIntern.selected = true;
-            }
+            cellIntern.nodeIndex = nodeIndex ? *nodeIndex : index;
             cellIntern.pos = pos;
             if (index > 0) {
                 cellIntern.connectionIndices.insert(index - 1);
@@ -176,7 +166,7 @@ namespace
 
     std::vector<CellPreviewDescriptionIntern> processGenomeDescription(
         GenomeDescription const& genome,
-        SelectNode selectedNode,
+        std::optional<int> nodeIndex,
         std::optional<RealVector2D> const& desiredEndPos,
         std::optional<float> const& desiredEndAngle,
         SimulationParameters const& parameters)
@@ -185,7 +175,7 @@ namespace
             return {};
         }
 
-        ProcessedGenomeDescriptionResult processedGenome = processMainGenomeDescription(genome, selectedNode, parameters);
+        ProcessedGenomeDescriptionResult processedGenome = processMainGenomeDescription(genome, nodeIndex, parameters);
 
         std::vector<CellPreviewDescriptionIntern> result = processedGenome.cellsIntern;
 
@@ -234,12 +224,7 @@ namespace
                 }
 
                 auto direction = Math::unitVectorOfAngle(targetAngle);
-                auto previewPart = processGenomeDescription(
-                    subGenome,
-                    cellIntern.selected ? SelectNode(SelectAllNodes()) : SelectNode(SelectNoNodes()),
-                    cellIntern.pos + direction,
-                    targetAngle,
-                    parameters);
+                auto previewPart = processGenomeDescription(subGenome, cellIntern.nodeIndex, cellIntern.pos + direction, targetAngle, parameters);
                 insert(result, previewPart);
                 indexOffset += previewPart.size();
                 if (!constructor.separateConstruction) {
@@ -302,7 +287,7 @@ namespace
         std::map<std::pair<int, int>, int> cellIndicesToCreatedConnectionIndex;
         int index = 0;
         for (auto const& cell : cells) {
-            CellPreviewDescription cellPreview{.pos = cell.pos, .executionOrderNumber = cell.executionOrderNumber, .color = cell.color, .selected = cell.selected};
+            CellPreviewDescription cellPreview{.pos = cell.pos, .executionOrderNumber = cell.executionOrderNumber, .color = cell.color, .nodeIndex = cell.nodeIndex};
             result.cells.emplace_back(cellPreview);
             auto inputExecutionOrder = calcInputExecutionOrder(cells, cell, parameters);
             for (auto const& connectionIndex : cell.connectionIndices) {
@@ -330,6 +315,6 @@ PreviewDescription
 PreviewDescriptionConverter::convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters)
 {
     auto cellInterDescriptions =
-        processGenomeDescription(genome, selectedNode ? SelectNode(*selectedNode) : SelectNode(SelectNoNodes()), std::nullopt, std::nullopt, parameters);
+        processGenomeDescription(genome, std::nullopt, std::nullopt, std::nullopt, parameters);
     return createPreviewDescription(cellInterDescriptions, parameters);
 }
