@@ -297,6 +297,10 @@ void _GenomeEditorWindow::processGenomeEditTab(TabData& tab)
             if (tab.selectedNode && *tab.selectedNode == index) {
                 flags |= ImGuiTreeNodeFlags_Selected;
             }
+            if (_nodeIndexToJump && *_nodeIndexToJump == index) {
+                ImGui::SetScrollHereY();
+                _nodeIndexToJump = std::nullopt;
+            }
 
             if (_collapseAllNodes) {
                 ImGui::SetNextTreeNodeOpen(false);
@@ -550,7 +554,7 @@ void _GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
     auto preview = PreviewDescriptionConverter::convert(genome, tab.selectedNode, _simulationController->getSimulationParameters());
-    AlienImGui::ShowPreviewDescription(preview, _genomeZoom);
+    AlienImGui::ShowPreviewDescription(preview, _genomeZoom, tab.selectedNode);
 }
 
 void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const

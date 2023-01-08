@@ -874,7 +874,7 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
     return value != origValue;
 }
 
-void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoom)
+void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode)
 {
     
     auto color = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
@@ -929,7 +929,7 @@ void AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
                 Const::BranchNumberOverlayColor,
                 std::to_string(cell.executionOrderNumber).c_str());
 
-            if (cell.selected) {
+            if (selectedNode && cell.nodeIndex == *selectedNode) {
                 drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
             }
         }

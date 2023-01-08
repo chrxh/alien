@@ -44,6 +44,7 @@ private:
 
     //actions
     std::optional<int> _tabIndexToSelect;
+    std::optional<int> _nodeIndexToJump;
     std::optional<TabData> _tabToAdd;
     bool _collapseAllNodes = false;
 

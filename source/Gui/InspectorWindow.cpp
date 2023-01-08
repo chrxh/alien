@@ -324,7 +324,8 @@ void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
             if (ImGui::BeginChild("##child", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar)) {
                 auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters);
                 auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);
-                AlienImGui::ShowPreviewDescription(previewDesc, _genomeZoom);
+                std::optional<int> selectedNodeDummy;
+                AlienImGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
             }
             ImGui::EndChild();
         }

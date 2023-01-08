@@ -6,7 +6,7 @@ struct CellPreviewDescription
     RealVector2D pos;
     int executionOrderNumber = 0;
     int color = 0;
-    bool selected = false;
+    int nodeIndex = 0;
 };
 
 struct ConnectionPreviewDescription
