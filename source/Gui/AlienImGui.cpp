@@ -938,6 +938,7 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
                 if (mousePos.x >= cellPos.x - cellSize / 3 && mousePos.y >= cellPos.y - cellSize / 3 && mousePos.x <= cellPos.x + cellSize / 3
                     && mousePos.y <= cellPos.y + cellSize / 3) {
                     selectedNode = cell.nodeIndex;
+                    result = true;
                 }
             }
 
