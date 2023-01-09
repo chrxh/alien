@@ -44,7 +44,6 @@ void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
     setOn(true);
     std::optional<int> tabIndex;
     for (auto const& [index, tabData] : _tabDatas | boost::adaptors::indexed(0)) {
-        ;
         if (tabData.genome == genome) {
             tabIndex = toInt(index);
         }
@@ -110,6 +109,9 @@ void _GenomeEditorWindow::processIntern()
             }
         }
         if (_tabToAdd.has_value()) {
+            if (_tabDatas.size() == 1 && _tabDatas.front().genome.empty()) {
+                _tabDatas.clear();
+            }
             _tabDatas.emplace_back(*_tabToAdd);
             _tabToAdd.reset();
         }
