@@ -17,6 +17,7 @@ public:
 
     bool isInspectionPossible() const;
     void onInspectSelectedObjects();
+    void onInspectSelectedGenomes();
 
     bool isCopyingPossible() const;
     void onCopy();
