@@ -163,7 +163,7 @@ void _EditorController::onInspectSelectedObjects()
 void _EditorController::onInspectSelectedGenomes()
 {
     DataDescription selectedData = _simController->getSelectedSimulationData(true);
-    onInspectObjects(DescriptionHelper::getConstructors(selectedData), true);
+    onInspectObjects(DescriptionHelper::getConstructorToUniqueGenomes(selectedData), true);
 }
 
 void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> const& entities, bool selectGenomeTab)
