@@ -436,7 +436,31 @@ std::vector<CellOrParticleDescription> DescriptionHelper::getObjects(
     return result;
 }
 
-std::vector<CellOrParticleDescription> DescriptionHelper::getConstructors(DataDescription const& data)
+namespace
+{
+    template <typename T1, typename T2>
+    bool contains(std::vector<T1> const& a, std::vector<T2> const& b)
+    {
+        for (auto i = a.begin(), y = a.end(); i != y; ++i) {
+            bool match = true;
+
+            auto ii = i;
+            for (auto j = b.begin(), z = b.end(); j != z; ++j) {
+                if (ii == a.end() || *j != *ii) {
+                    match = false;
+                    break;
+                }
+                ii++;
+            }
+            if (match) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+std::vector<CellOrParticleDescription> DescriptionHelper::getConstructorToUniqueGenomes(DataDescription const& data)
 {
     std::map<std::vector<uint8_t>, size_t> genomeToCellIndex;
     for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {
@@ -447,10 +471,26 @@ std::vector<CellOrParticleDescription> DescriptionHelper::getConstructors(DataDe
             }
         }
     }
+    std::vector<std::pair<std::vector<uint8_t>, size_t>> genomeAndCellIndex;
+    for (auto const& [genome, index] : genomeToCellIndex) {
+        genomeAndCellIndex.emplace_back(std::make_pair(genome, index));
+    }
+    std::ranges::sort(genomeAndCellIndex, [](auto const& element1, auto const& element2) { return element1.first.size() > element2.first.size(); });
 
     std::vector<CellOrParticleDescription> result;
-    for (auto const& index : genomeToCellIndex | boost::adaptors::map_values) {
-        result.emplace_back(data.cells.at(index));
+    for (auto it = genomeAndCellIndex.begin(); it != genomeAndCellIndex.end(); ++it) {
+        bool alreadyContained = false;
+        for (auto it2 = genomeAndCellIndex.begin(); it2 != it; ++it2) {
+            auto const& genome1 = it->first;
+            auto const& genome2 = it2->first;
+            if (contains(genome2, genome1)) {
+                alreadyContained = true;
+                break;
+            }
+        }
+        if (!alreadyContained) {
+            result.emplace_back(data.cells.at(it->second));
+        }
     }
     return result;
 }

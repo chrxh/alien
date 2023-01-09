@@ -90,7 +90,7 @@ void _PatternEditorWindow::processIntern()
     ImGui::SameLine();
     ImGui::BeginDisabled(!isInspectionPossible());
     if (AlienImGui::ToolbarButton(ICON_FA_MICROSCOPE)) {
-        onInspectSelectedObjects();
+        _editorController->onInspectSelectedObjects();
     }
     ImGui::EndDisabled();
 
@@ -98,7 +98,7 @@ void _PatternEditorWindow::processIntern()
     ImGui::SameLine();
     ImGui::BeginDisabled(!isInspectionPossible());
     if (AlienImGui::ToolbarButton(ICON_FA_DNA)) {
-        onInspectSelectedGenomes();
+        _editorController->onInspectSelectedGenomes();
     }
     ImGui::EndDisabled();
 
@@ -297,16 +297,6 @@ bool _PatternEditorWindow::isInspectionPossible() const
 {
     auto selection = _editorModel->getSelectionShallowData();
     return !_editorModel->isSelectionEmpty() && selection.numCells + selection.numParticles <= MaxInspectorWindowsToAdd;
-}
-
-void _PatternEditorWindow::onInspectSelectedObjects()
-{
-    _editorController->onInspectSelectedObjects();
-}
-
-void _PatternEditorWindow::onInspectSelectedGenomes()
-{
-    _editorController->onInspectSelectedGenomes();
 }
 
 bool _PatternEditorWindow::isCopyingPossible() const
