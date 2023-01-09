@@ -41,13 +41,15 @@ _InspectorWindow::_InspectorWindow(
     EditorModel const& editorModel,
     GenomeEditorWindow const& genomeEditorWindow,
     uint64_t entityId,
-    RealVector2D const& initialPos)
+    RealVector2D const& initialPos,
+    bool selectGenomeTab)
     : _entityId(entityId)
     , _initialPos(initialPos)
     , _viewport(viewport)
     , _editorModel(editorModel)
     , _simController(simController)
     , _genomeEditorWindow(genomeEditorWindow)
+    , _selectGenomeTab(selectGenomeTab)
 {
 }
 
@@ -299,7 +301,12 @@ void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
     auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
     auto const& parameters = _simController->getSimulationParameters();
 
-    if (ImGui::BeginTabItem("Genome", nullptr, ImGuiTabItemFlags_None)) {
+    int flags = ImGuiTabItemFlags_None;
+    if (_selectGenomeTab) {
+        flags = flags | ImGuiTabItemFlags_SetSelected;
+        _selectGenomeTab = false;
+    }
+    if (ImGui::BeginTabItem("Genome", nullptr, flags)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             auto width = ImGui::GetContentRegionAvail().x;
             if (ImGui::BeginChild("##", ImVec2(width, ImGui::GetTextLineHeight() * 2), true)) {

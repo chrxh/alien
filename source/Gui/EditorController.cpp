@@ -157,10 +157,16 @@ bool _EditorController::isInspectionPossible() const
 void _EditorController::onInspectSelectedObjects()
 {
     DataDescription selectedData = _simController->getSelectedSimulationData(false);
-    onInspectObjects(DescriptionHelper::getObjects(selectedData));
+    onInspectObjects(DescriptionHelper::getObjects(selectedData), false);
 }
 
-void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> const& entities)
+void _EditorController::onInspectSelectedGenomes()
+{
+    DataDescription selectedData = _simController->getSelectedSimulationData(true);
+    onInspectObjects(DescriptionHelper::getConstructors(selectedData), true);
+}
+
+void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> const& entities, bool selectGenomeTab)
 {
     if (entities.empty()) {
         return;
@@ -214,7 +220,7 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
         windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 500.0f) + 40.0f;
         _inspectorWindows.emplace_back(
-            std::make_shared<_InspectorWindow>(_simController, _viewport, _editorModel, _genomeEditorWindow, id, RealVector2D{windowPosX, windowPosY}));
+            std::make_shared<_InspectorWindow>(_simController, _viewport, _editorModel, _genomeEditorWindow, id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
     }
 }
 

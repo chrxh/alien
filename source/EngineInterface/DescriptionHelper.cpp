@@ -1,6 +1,7 @@
 #include "DescriptionHelper.h"
 
 #include <boost/range/adaptor/indexed.hpp>
+#include <boost/range/adaptor/map.hpp>
 
 #include "Base/NumberGenerator.h"
 #include "Base/Math.h"
@@ -431,6 +432,25 @@ std::vector<CellOrParticleDescription> DescriptionHelper::getObjects(
     }
     for (auto const& cell : data.cells) {
         result.emplace_back(cell);
+    }
+    return result;
+}
+
+std::vector<CellOrParticleDescription> DescriptionHelper::getConstructors(DataDescription const& data)
+{
+    std::map<std::vector<uint8_t>, size_t> genomeToCellIndex;
+    for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {
+        if (cell.getCellFunctionType() == CellFunction_Constructor) {
+            auto const& genome = std::get<ConstructorDescription>(*cell.cellFunction).genome;
+            if (!genomeToCellIndex.contains(genome) || cell.livingState != LivingState_UnderConstruction) {
+                genomeToCellIndex[genome] = index;
+            }
+        }
+    }
+
+    std::vector<CellOrParticleDescription> result;
+    for (auto const& index : genomeToCellIndex | boost::adaptors::map_values) {
+        result.emplace_back(data.cells.at(index));
     }
     return result;
 }

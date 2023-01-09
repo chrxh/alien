@@ -71,6 +71,7 @@ public:
     static uint64_t getId(CellOrParticleDescription const& entity);
     static RealVector2D getPos(CellOrParticleDescription const& entity);
     static std::vector<CellOrParticleDescription> getObjects(DataDescription const& data);
+    static std::vector<CellOrParticleDescription> getConstructors(DataDescription const& data);
 
     static void removeMetadata(DataDescription& data);
 
