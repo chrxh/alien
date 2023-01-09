@@ -16,7 +16,8 @@ public:
         EditorModel const& editorModel,
         GenomeEditorWindow const& genomeEditorWindow,
         uint64_t entityId,
-        RealVector2D const& initialPos);
+        RealVector2D const& initialPos,
+        bool selectGenomeTab);
     ~_InspectorWindow();
 
     void process();
@@ -66,4 +67,5 @@ private:
     int _selectedInput = 0;
     int _selectedOutput = 0;
     float _genomeZoom = 20.0f;
+    bool _selectGenomeTab = false;
 };

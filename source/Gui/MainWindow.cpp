@@ -477,8 +477,13 @@ void _MainWindow::processMenubar()
             ImGui::EndDisabled();
             ImGui::Separator();
             ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isInspectionPossible());
-            if (ImGui::MenuItem("Inspect entities", "ALT+N")) {
+            if (ImGui::MenuItem("Inspect objects", "ALT+N")) {
                 _editorController->onInspectSelectedObjects();
+            }
+            ImGui::EndDisabled();
+            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isInspectionPossible());
+            if (ImGui::MenuItem("Inspect genomes", "ALT+F")) {
+                _editorController->onInspectSelectedGenomes();
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->areInspectionWindowsActive());
@@ -637,6 +642,9 @@ void _MainWindow::processMenubar()
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_N) && _editorController->isInspectionPossible()) {
             _editorController->onInspectSelectedObjects();
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_F) && _editorController->isInspectionPossible()) {
+            _editorController->onInspectSelectedGenomes();
         }
         if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) {
             _editorController->onCloseAllInspectorWindows();

@@ -293,8 +293,7 @@ bool _PatternEditorWindow::isInspectionPossible() const
 
 void _PatternEditorWindow::onInspectSelectedObjects()
 {
-    DataDescription selectedData = _simController->getSelectedSimulationData(false);
-    _editorController->onInspectObjects(DescriptionHelper::getObjects(selectedData));
+    _editorController->onInspectSelectedObjects();
 }
 
 bool _PatternEditorWindow::isCopyingPossible() const
