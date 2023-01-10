@@ -99,13 +99,3 @@ bool _EditorModel::isRolloutToClusters() const
 {
     return _rolloutToClusters && !_forceNoRollout;
 }
-
-void _EditorModel::setCopiedGenome(std::vector<uint8_t> const& copiedGenome)
-{
-    _copiedGenome = copiedGenome;
-}
-
-std::optional<std::vector<uint8_t>> const& _EditorModel::getCopiedGenome() const
-{
-    return _copiedGenome;
-}
