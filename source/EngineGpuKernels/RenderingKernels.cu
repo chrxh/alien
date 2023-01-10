@@ -5,7 +5,7 @@
 
 namespace
 {
-    auto constexpr ZoomLevelForActivity = 3.0f;
+    auto constexpr ZoomLevelForActivity = 0.3f;
     auto constexpr ZoomLevelForConnections = 1.0f;
     auto constexpr ZoomLevelForShadedCells = 3.0f;
     auto constexpr ZoomLevelForArrows = 15.0f;
@@ -113,7 +113,7 @@ namespace
 
     __device__ __inline__ void drawCircle(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius, bool shaded = true, bool inverted = false)
     {
-        if (radius > 1.5 - NEAR_ZERO) {
+        if (radius > 2.0 - NEAR_ZERO) {
             auto radiusSquared = radius * radius;
             for (float x = -radius; x <= radius; x += 1.0f) {
                 for (float y = -radius; y <= radius; y += 1.0f) {
@@ -212,6 +212,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
             auto color = calcColor(cell, cell->selected);
             auto radius = 1 == cell->selected ? zoom / 2 : zoom / 3;
             drawCircle(imageData, imageSize, cellImagePos, color, radius, shadedCells, true);
+
             color = color * min((zoom - 1.0f) / 3, 1.0f);
             if (cell->isActive() && zoom >= ZoomLevelForActivity) {
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, radius, shadedCells);

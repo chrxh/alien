@@ -105,7 +105,7 @@ void _TemporalControlWindow::processTpsRestriction()
     ImGui::BeginDisabled(!syncSimulationWithRendering);
     ImGui::SameLine(contentScale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
     auto syncSimulationWithRenderingRatio = _simController->getSyncSimulationWithRenderingRatio();
-    if (AlienImGui::SliderInt(AlienImGui::SliderIntParameters().textWidth(0).min(1).max(20).format("1:%d ratio"), syncSimulationWithRenderingRatio)) {
+    if (AlienImGui::SliderInt(AlienImGui::SliderIntParameters().textWidth(0).min(1).max(40).logarithmic(true).format("1:%d ratio"), syncSimulationWithRenderingRatio)) {
         _simController->setSyncSimulationWithRenderingRatio(syncSimulationWithRenderingRatio);
     }
     ImGui::EndDisabled();
