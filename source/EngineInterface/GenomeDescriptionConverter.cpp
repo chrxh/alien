@@ -165,92 +165,126 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
     return result;
 }
 
+namespace
+{
+    struct ConversionResult
+    {
+        GenomeDescription genome;
+        int lastBytePosition = 0;
+    };
+    
+    ConversionResult
+    convertBytesToDescriptionIntern(
+        std::vector<uint8_t> const& data,
+        SimulationParameters const& parameters,
+        size_t maxBytePosition,
+        size_t maxEntries)
+    {
+        ConversionResult result;
+        int entry = 0;
+        auto& bytePosition = result.lastBytePosition;
+        while (bytePosition < maxBytePosition && entry < maxEntries) {
+            CellFunction cellFunction = readByte(data, bytePosition) % CellFunction_Count;
+
+            CellGenomeDescription cell;
+            cell.referenceAngle = readAngle(data, bytePosition);
+            cell.referenceDistance = readFloat(data, bytePosition) + 1.0f;
+            cell.maxConnections = readByte(data, bytePosition) % (parameters.cellMaxBonds + 1);
+            cell.executionOrderNumber = readByte(data, bytePosition) % parameters.cellMaxExecutionOrderNumbers;
+            cell.color = readByte(data, bytePosition) % 7;
+            cell.inputBlocked = readBool(data, bytePosition);
+            cell.outputBlocked = readBool(data, bytePosition);
+
+            switch (cellFunction) {
+            case CellFunction_Neuron: {
+                NeuronGenomeDescription neuron;
+                for (int row = 0; row < MAX_CHANNELS; ++row) {
+                    for (int col = 0; col < MAX_CHANNELS; ++col) {
+                        neuron.weights[row][col] = readNeuronProperty(data, bytePosition);
+                    }
+                }
+                for (int i = 0; i < MAX_CHANNELS; ++i) {
+                    neuron.bias[i] = readNeuronProperty(data, bytePosition);
+                }
+                cell.cellFunction = neuron;
+            } break;
+            case CellFunction_Transmitter: {
+                TransmitterGenomeDescription transmitter;
+                transmitter.mode = readByte(data, bytePosition) % EnergyDistributionMode_Count;
+                cell.cellFunction = transmitter;
+            } break;
+            case CellFunction_Constructor: {
+                ConstructorGenomeDescription constructor;
+                constructor.mode = readByte(data, bytePosition);
+                constructor.singleConstruction = readBool(data, bytePosition);
+                constructor.separateConstruction = readBool(data, bytePosition);
+                constructor.adaptMaxConnections = readBool(data, bytePosition);
+                constructor.angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;
+                constructor.stiffness = readStiffness(data, bytePosition);
+                constructor.constructionActivationTime = readWord(data, bytePosition);
+                constructor.genome = readGenome(data, bytePosition);
+                cell.cellFunction = constructor;
+            } break;
+            case CellFunction_Sensor: {
+                SensorGenomeDescription sensor;
+                auto mode = readByte(data, bytePosition) % SensorMode_Count;
+                auto angle = readAngle(data, bytePosition);
+                if (mode == SensorMode_FixedAngle) {
+                    sensor.fixedAngle = angle;
+                }
+                sensor.minDensity = readDensity(data, bytePosition);
+                sensor.color = readByte(data, bytePosition) % MAX_COLORS;
+                cell.cellFunction = sensor;
+            } break;
+            case CellFunction_Nerve: {
+                NerveGenomeDescription nerve;
+                nerve.pulseMode = readByte(data, bytePosition);
+                nerve.alternationMode = readByte(data, bytePosition);
+                cell.cellFunction = nerve;
+            } break;
+            case CellFunction_Attacker: {
+                AttackerGenomeDescription attacker;
+                attacker.mode = readByte(data, bytePosition) % EnergyDistributionMode_Count;
+                cell.cellFunction = attacker;
+            } break;
+            case CellFunction_Injector: {
+                InjectorGenomeDescription injector;
+                injector.genome = readGenome(data, bytePosition);
+                cell.cellFunction = injector;
+            } break;
+            case CellFunction_Muscle: {
+                MuscleGenomeDescription muscle;
+                muscle.mode = readByte(data, bytePosition) % MuscleMode_Count;
+                cell.cellFunction = muscle;
+            } break;
+            case CellFunction_Placeholder1: {
+                cell.cellFunction = PlaceHolderGenomeDescription1();
+            } break;
+            case CellFunction_Placeholder2: {
+                cell.cellFunction = PlaceHolderGenomeDescription2();
+            } break;
+            }
+            result.genome.emplace_back(cell);
+            ++entry;
+        }
+        return result;
+    }
+
+}
+
 GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vector<uint8_t> const& data, SimulationParameters const& parameters)
 {
-    int pos = 0;
-    GenomeDescription result;
-    while (pos < data.size()) {
-        CellFunction cellFunction = readByte(data, pos) % CellFunction_Count;
+    return convertBytesToDescriptionIntern(data, parameters, data.size(), data.size()).genome;
+}
 
-        CellGenomeDescription cell;
-        cell.referenceAngle = readAngle(data, pos);
-        cell.referenceDistance = readFloat(data, pos) + 1.0f;
-        cell.maxConnections = readByte(data, pos) % (parameters.cellMaxBonds + 1);
-        cell.executionOrderNumber = readByte(data, pos) % parameters.cellMaxExecutionOrderNumbers;
-        cell.color = readByte(data, pos) % 7;
-        cell.inputBlocked = readBool(data, pos);
-        cell.outputBlocked = readBool(data, pos);
+int GenomeDescriptionConverter::convertBytePositionToEntryIndex(std::vector<uint8_t> const& data, int bytePos)
+{
+    //wasteful approach but sufficient for GUI
+    return convertBytesToDescriptionIntern(data, SimulationParameters(), bytePos, data.size()).genome.size();
+}
 
-        switch (cellFunction) {
-        case CellFunction_Neuron: {
-            NeuronGenomeDescription neuron;
-            for (int row = 0; row < MAX_CHANNELS; ++row) {
-                for (int col = 0; col < MAX_CHANNELS; ++col) {
-                    neuron.weights[row][col] = readNeuronProperty(data, pos);
-                }
-            }
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
-                neuron.bias[i] = readNeuronProperty(data, pos);
-            }
-            cell.cellFunction = neuron;
-        } break;
-        case CellFunction_Transmitter: {
-            TransmitterGenomeDescription transmitter;
-            transmitter.mode = readByte(data, pos) % EnergyDistributionMode_Count;
-            cell.cellFunction = transmitter;
-        } break;
-        case CellFunction_Constructor: {
-            ConstructorGenomeDescription constructor;
-            constructor.mode = readByte(data, pos);
-            constructor.singleConstruction = readBool(data, pos);
-            constructor.separateConstruction = readBool(data, pos);
-            constructor.adaptMaxConnections = readBool(data, pos);
-            constructor.angleAlignment = readByte(data, pos) % ConstructorAngleAlignment_Count;
-            constructor.stiffness = readStiffness(data, pos);
-            constructor.constructionActivationTime = readWord(data, pos);
-            constructor.genome = readGenome(data, pos);
-            cell.cellFunction = constructor;
-        } break;
-        case CellFunction_Sensor: {
-            SensorGenomeDescription sensor;
-            auto mode = readByte(data, pos) % SensorMode_Count;
-            auto angle = readAngle(data, pos);
-            if (mode == SensorMode_FixedAngle) {
-                sensor.fixedAngle = angle;
-            }
-            sensor.minDensity = readDensity(data, pos);
-            sensor.color = readByte(data, pos) % MAX_COLORS;
-            cell.cellFunction = sensor;
-        } break;
-        case CellFunction_Nerve: {
-            NerveGenomeDescription nerve;
-            nerve.pulseMode = readByte(data, pos);
-            nerve.alternationMode = readByte(data, pos);
-            cell.cellFunction = nerve;
-        } break;
-        case CellFunction_Attacker: {
-            AttackerGenomeDescription attacker;
-            attacker.mode = readByte(data, pos) % EnergyDistributionMode_Count;
-            cell.cellFunction = attacker;
-        } break;
-        case CellFunction_Injector: {
-            InjectorGenomeDescription injector;
-            injector.genome = readGenome(data, pos);
-            cell.cellFunction = injector;
-        } break;
-        case CellFunction_Muscle: {
-            MuscleGenomeDescription muscle;
-            muscle.mode = readByte(data, pos) % MuscleMode_Count;
-            cell.cellFunction = muscle;
-        } break;
-        case CellFunction_Placeholder1: {
-            cell.cellFunction = PlaceHolderGenomeDescription1();
-        } break;
-        case CellFunction_Placeholder2: {
-            cell.cellFunction = PlaceHolderGenomeDescription2();
-        } break;
-        }
-        result.emplace_back(cell);
-    };
-    return result;
+int GenomeDescriptionConverter::convertEntryIndexToBytePosition(std::vector<uint8_t> const& data, int entryIndex)
+{
+    //wasteful approach but sufficient for GUI
+    return convertBytesToDescriptionIntern(data, SimulationParameters(), data.size(), entryIndex).lastBytePosition;
 }
