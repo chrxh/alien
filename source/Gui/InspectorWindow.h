@@ -30,7 +30,7 @@ private:
     std::string generateTitle() const;
 
     void processCell(CellDescription cell);
-    void showCellPhysicsTab(CellDescription& cell);
+    void showCellBaseTab(CellDescription& cell);
     void showCellFunctionTab(CellDescription& cell);
     void showCellFunctionPropertiesTab(CellDescription& cell);
     void showCellGenomeTab(CellDescription& cell);

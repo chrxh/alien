@@ -47,6 +47,11 @@ public:
     std::optional<OverlayDescription>
     tryDrawVectorGraphicsAndReturnOverlay(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
 
+    bool isSyncSimulationWithRendering() const;
+    void setSyncSimulationWithRendering(bool value);
+    int getSyncSimulationWithRenderingRatio() const;
+    void setSyncSimulationWithRenderingRatio(int value);
+
     ClusteredDataDescription getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters);
@@ -111,14 +116,20 @@ private:
     void updateMonitorDataIntern(bool afterMinDuration = false);
     void processJobs();
 
+    void syncSimulationWithRenderingIfDesired();
     void waitAndAllowAccess(std::chrono::microseconds const& duration);
     void measureTPS();
     void slowdownTPS();
 
     CudaSimulationFacade _cudaSimulation;
 
+    //settings
+    Settings _settings;
+
     //sync
-    std::atomic<int> _accessState{0};    //0 = worker thread has access, 1 = require access from other thread, 2 = access granted to other thread
+    std::atomic<bool> _syncSimulationWithRendering{false};
+    std::atomic<int> _syncSimulationWithRenderingRatio{2};
+    std::atomic<int> _accessState{0};  //0 = worker thread has access, 1 = require access from other thread, 2 = access granted to other thread
     std::atomic<bool> _isSimulationRunning{false};
     std::atomic<bool> _isShutdown{false};
     ExceptionData _exceptionData;
@@ -146,9 +157,6 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _slowDownTimepoint;
     std::optional<std::chrono::microseconds> _slowDownOvershot;
   
-    //settings
-    Settings _settings;
-
     //statistics data
     std::optional<std::chrono::steady_clock::time_point> _lastMonitorUpdate;
     mutable std::mutex _mutexForStatistics;

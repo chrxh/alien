@@ -48,6 +48,26 @@ std::optional<OverlayDescription> _SimulationControllerImpl::tryDrawVectorGraphi
     return _worker.tryDrawVectorGraphicsAndReturnOverlay(rectUpperLeft, rectLowerRight, imageSize, zoom);
 }
 
+bool _SimulationControllerImpl::isSyncSimulationWithRendering() const
+{
+    return _worker.isSyncSimulationWithRendering();
+}
+
+void _SimulationControllerImpl::setSyncSimulationWithRendering(bool value)
+{
+    _worker.setSyncSimulationWithRendering(value);
+}
+
+int _SimulationControllerImpl::getSyncSimulationWithRenderingRatio() const
+{
+    return _worker.getSyncSimulationWithRenderingRatio();
+}
+
+void _SimulationControllerImpl::setSyncSimulationWithRenderingRatio(int value)
+{
+    _worker.setSyncSimulationWithRenderingRatio(value);
+}
+
 ClusteredDataDescription _SimulationControllerImpl::getClusteredSimulationData()
 {
     auto size = getWorldSize();

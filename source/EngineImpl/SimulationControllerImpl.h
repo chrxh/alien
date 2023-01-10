@@ -39,6 +39,11 @@ public:
         IntVector2D const& imageSize,
         double zoom) override;
 
+    bool isSyncSimulationWithRendering() const override;
+    void setSyncSimulationWithRendering(bool value) override;
+    int getSyncSimulationWithRenderingRatio() const override;
+    void setSyncSimulationWithRenderingRatio(int value) override;
+
     ClusteredDataDescription getClusteredSimulationData() override;
     DataDescription getSimulationData() override;
     ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters) override;
