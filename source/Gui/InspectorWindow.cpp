@@ -133,7 +133,7 @@ void _InspectorWindow::processCell(CellDescription cell)
     if (ImGui::BeginTabBar(
             "##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto origCell = cell;
-        showCellPhysicsTab(cell);
+        showCellBaseTab(cell);
         showCellFunctionTab(cell);
         showCellFunctionPropertiesTab(cell);
         showCellGenomeTab(cell);
@@ -148,9 +148,9 @@ void _InspectorWindow::processCell(CellDescription cell)
     }
 }
 
-void _InspectorWindow::showCellPhysicsTab(CellDescription& cell)
+void _InspectorWindow::showCellBaseTab(CellDescription& cell)
 {
-    if (ImGui::BeginTabItem("Physics", nullptr, ImGuiTabItemFlags_None)) {
+    if (ImGui::BeginTabItem("Base", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
                 AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(PhysicsTabTextWidth), cell.energy);

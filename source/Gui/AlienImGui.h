@@ -30,6 +30,7 @@ public:
         MEMBER_DECLARATION(SliderIntParameters, std::string, name, "");
         MEMBER_DECLARATION(SliderIntParameters, int, min, 0);
         MEMBER_DECLARATION(SliderIntParameters, int, max, 0);
+        MEMBER_DECLARATION(SliderIntParameters, std::string, format, "%d");
         MEMBER_DECLARATION(SliderIntParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(SliderIntParameters, int, textWidth, 100);
         MEMBER_DECLARATION(SliderIntParameters, std::optional<int>, defaultValue, std::nullopt);
@@ -68,6 +69,18 @@ public:
         MEMBER_DECLARATION(InputFloatParameters, bool, readOnly, false);
     };
     static void InputFloat(InputFloatParameters const& parameters, float& value);
+
+    struct InputFloat2Parameters
+    {
+        MEMBER_DECLARATION(InputFloat2Parameters, std::string, name, "");
+        MEMBER_DECLARATION(InputFloat2Parameters, std::string, format, "%.3f");
+        MEMBER_DECLARATION(InputFloat2Parameters, int, textWidth, 100);
+        MEMBER_DECLARATION(InputFloat2Parameters, std::optional<float>, defaultValue1, std::nullopt);
+        MEMBER_DECLARATION(InputFloat2Parameters, std::optional<float>, defaultValue2, std::nullopt);
+        MEMBER_DECLARATION(InputFloat2Parameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(InputFloat2Parameters, bool, readOnly, false);
+    };
+    static void InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2);
 
     struct InputFloatVectorParameters
     {

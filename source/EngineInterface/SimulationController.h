@@ -24,6 +24,11 @@ public:
     virtual std::optional<OverlayDescription>
     tryDrawVectorGraphicsAndReturnOverlay(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom) = 0;
 
+    virtual bool isSyncSimulationWithRendering() const = 0;
+    virtual void setSyncSimulationWithRendering(bool value) = 0;
+    virtual int getSyncSimulationWithRenderingRatio() const = 0;
+    virtual void setSyncSimulationWithRenderingRatio(int value) = 0;
+
     virtual ClusteredDataDescription getClusteredSimulationData() = 0;
     virtual DataDescription getSimulationData() = 0;
     virtual ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters) = 0;

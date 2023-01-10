@@ -69,7 +69,7 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
     auto width = StyleRepository::getInstance().contentScale(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
     auto result = ImGui::SliderInt(
-        ("##" + parameters._name).c_str(), &value, parameters._min, parameters._max, "%d", parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+        ("##" + parameters._name).c_str(), &value, parameters._min, parameters._max, parameters._format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
@@ -79,8 +79,10 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
         }
         ImGui::EndDisabled();
     }
-    ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    if (!parameters._name.empty()) {
+        ImGui::SameLine();
+        ImGui::TextUnformatted(parameters._name.c_str());
+    }
 
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
@@ -148,7 +150,36 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     ImGui::TextUnformatted(parameters._name.c_str());
 
     if (parameters._tooltip) {
-        AlienImGui::HelpMarker(*parameters._tooltip);
+        HelpMarker(*parameters._tooltip);
+    }
+}
+
+void AlienImGui::InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2)
+{
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
+
+    ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
+    float value[2];
+    value[0] = value1;
+    value[1] = value2;
+    ImGui::InputFloat2(("##" + parameters._name).c_str(), value, parameters._format.c_str(), flags);
+    value1 = value[0];
+    value2 = value[1];
+    ImGui::SameLine();
+    if (parameters._defaultValue1 && parameters._defaultValue2) {
+        ImGui::BeginDisabled(value1 == *parameters._defaultValue1 && value2 == *parameters._defaultValue2);
+        if (revertButton(parameters._name)) {
+            value1 = *parameters._defaultValue1;
+            value2 = *parameters._defaultValue2;
+        }
+        ImGui::EndDisabled();
+    }
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
+
+    if (parameters._tooltip) {
+        HelpMarker(*parameters._tooltip);
     }
 }
 

@@ -68,6 +68,7 @@ void EngineWorker::tryDrawVectorGraphics(
             _cudaResource,
             {imageSize.x, imageSize.y},
             zoom);
+        syncSimulationWithRenderingIfDesired();
     }
 }
 
@@ -97,9 +98,30 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
         DescriptionConverter converter(_settings.simulationParameters);
         auto result = converter.convertTOtoOverlayDescription(dataTO);
 
+        syncSimulationWithRenderingIfDesired();
         return result;
     }
     return std::nullopt;
+}
+
+bool EngineWorker::isSyncSimulationWithRendering() const
+{
+    return _syncSimulationWithRendering;
+}
+
+void EngineWorker::setSyncSimulationWithRendering(bool value)
+{
+    _syncSimulationWithRendering = value;
+}
+
+int EngineWorker::getSyncSimulationWithRenderingRatio() const
+{
+    return _syncSimulationWithRenderingRatio;
+}
+
+void EngineWorker::setSyncSimulationWithRenderingRatio(int value)
+{
+    _syncSimulationWithRenderingRatio = value;
 }
 
 ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
@@ -435,9 +457,10 @@ void EngineWorker::runThreadLoop()
 
         while (!_isShutdown.load()) {
 
-            if (_accessState == 0) {
+            if (!_syncSimulationWithRendering && _accessState == 0) {
                 if (_isSimulationRunning.load()) {
                     _cudaSimulation->calcTimestep();
+
                     if (++_monitorCounter == 3) {  //for performance reasons...
                         updateMonitorDataIntern(true);
                         _monitorCounter = 0;
@@ -446,7 +469,7 @@ void EngineWorker::runThreadLoop()
                 measureTPS();
                 slowdownTPS();
             }
-
+            
             processJobs();
 
             if (_accessState == 1) {
@@ -548,6 +571,17 @@ void EngineWorker::processJobs()
                  false});
         }
         _applyForceJobs.clear();
+    }
+}
+
+void EngineWorker::syncSimulationWithRenderingIfDesired()
+{
+    if (_syncSimulationWithRendering && _isSimulationRunning) {
+        for (int i = 0; i < _syncSimulationWithRenderingRatio; ++i) {
+            calcSingleTimestep();
+            measureTPS();
+            slowdownTPS();
+        }
     }
 }
 

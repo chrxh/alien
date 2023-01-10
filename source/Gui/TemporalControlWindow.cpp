@@ -13,6 +13,11 @@
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
 
+namespace
+{
+    auto const LeftColumnWidth = 180.0f;
+}
+
 _TemporalControlWindow::_TemporalControlWindow(
     SimulationController const& simController,
     StatisticsWindow const& statisticsWindow)
@@ -80,7 +85,7 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
 void _TemporalControlWindow::processTpsRestriction()
 {
     AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Slow down"), _slowDown);
-    ImGui::SameLine();
+    ImGui::SameLine(contentScale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
     ImGui::BeginDisabled(!_slowDown);
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
     ImGui::SliderInt("", &_tpsRestriction, 1, 1000, "%d TPS", ImGuiSliderFlags_Logarithmic);
@@ -90,6 +95,19 @@ void _TemporalControlWindow::processTpsRestriction()
         _simController->setTpsRestriction(std::nullopt);
     }
     ImGui::PopItemWidth();
+    ImGui::EndDisabled();
+
+    auto syncSimulationWithRendering = _simController->isSyncSimulationWithRendering();
+    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Sync with rendering"), syncSimulationWithRendering)) {
+        _simController->setSyncSimulationWithRendering(syncSimulationWithRendering);
+    }
+
+    ImGui::BeginDisabled(!syncSimulationWithRendering);
+    ImGui::SameLine(contentScale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
+    auto syncSimulationWithRenderingRatio = _simController->getSyncSimulationWithRenderingRatio();
+    if (AlienImGui::SliderInt(AlienImGui::SliderIntParameters().textWidth(0).min(1).max(20).format("1:%d ratio"), syncSimulationWithRenderingRatio)) {
+        _simController->setSyncSimulationWithRenderingRatio(syncSimulationWithRenderingRatio);
+    }
     ImGui::EndDisabled();
 }
 
