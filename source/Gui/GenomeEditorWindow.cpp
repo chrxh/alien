@@ -57,6 +57,11 @@ void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
     }
 }
 
+GenomeDescription const& _GenomeEditorWindow::getCurrentGenome() const
+{
+    return _tabDatas.at(_selectedTabIndex).genome;
+}
+
 namespace
 {
     std::string generateShortDescription(int index, CellGenomeDescription const& cell)
@@ -180,7 +185,7 @@ void _GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
-        _editorModel->setCopiedGenome(GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome));
+        _copiedGenome = GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome);
     }
     AlienImGui::Tooltip("Copy genome");
 
@@ -529,12 +534,12 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             }
             ImGui::SameLine();
             if (AlienImGui::Button("Copy")) {
-                _editorModel->setCopiedGenome(constructor.isMakeGenomeCopy() ? GenomeDescriptionConverter::convertDescriptionToBytes(tab.genome) : constructor.getGenomeData());
+                _copiedGenome = constructor.isMakeGenomeCopy() ? GenomeDescriptionConverter::convertDescriptionToBytes(tab.genome) : constructor.getGenomeData();
             }
             ImGui::SameLine();
-            ImGui::BeginDisabled(!_editorModel->getCopiedGenome().has_value());
+            ImGui::BeginDisabled(!_copiedGenome.has_value());
             if (AlienImGui::Button("Paste")) {
-                constructor.genome = *_editorModel->getCopiedGenome();
+                constructor.genome = *_copiedGenome;
             }
             ImGui::EndDisabled();
             ImGui::SameLine();

@@ -979,7 +979,7 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
     ImGui::EndChild();
 
     //zoom buttons
-    ImGui::SetCursorPos({ImGui::GetScrollX() + contentScale(10), ImGui::GetScrollY() + windowSize.y - contentScale(35)});
+    ImGui::SetCursorPos({ImGui::GetScrollX() + contentScale(10), ImGui::GetScrollY() + windowSize.y - contentScale(40)});
     if (ImGui::BeginChild("##buttons", ImVec2(100, 30), false)) {
         ImGui::SetCursorPos({0, 0});
         ImGui::PushStyleColor(ImGuiCol_Button, color);

@@ -35,16 +35,11 @@ public:
     void setRolloutToClusters(bool value);
     bool isRolloutToClusters() const;
 
-    void setCopiedGenome(std::vector<uint8_t> const& copiedGenome);
-    std::optional<std::vector<uint8_t>> const& getCopiedGenome () const;
-
 private:
     SimulationController _simController;
     SelectionShallowData _selectionShallowData;
 
     std::unordered_map<uint64_t, CellOrParticleDescription> _inspectedEntityById;
-
-    std::optional<std::vector<uint8_t>> _copiedGenome;
 
     bool _drawMode = false;
     int _defaultColorCode = 0;

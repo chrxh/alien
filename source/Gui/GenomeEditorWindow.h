@@ -12,6 +12,7 @@ public:
     ~_GenomeEditorWindow() override;
 
     void openTab(GenomeDescription const& genome);
+    GenomeDescription const& getCurrentGenome() const;
 
 private:
     void processIntern() override;
@@ -41,6 +42,7 @@ private:
     int _selectedInput = 0;
     int _selectedOutput = 0;
     float _genomeZoom = 20.0f;
+    std::optional<std::vector<uint8_t>> _copiedGenome;
 
     //actions
     std::optional<int> _tabIndexToSelect;
