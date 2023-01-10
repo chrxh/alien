@@ -28,7 +28,7 @@ namespace
     auto const CellFunctionTextWidth = 180.0f;
     auto const CellFunctionBaseTabTextWidth = 120.0f;
     auto const ActivityTextWidth = 100.0f;
-    auto const GenomeTabTextWidth = 120.0f;
+    auto const GenomeTabTextWidth = 140.0f;
     auto const CellMetadataContentTextWidth = 80.0f;
     auto const ParticleContentTextWidth = 80.0f;
 
@@ -314,6 +314,10 @@ void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
             }
             ImGui::EndChild();
 
+            auto entry = GenomeDescriptionConverter::convertBytePositionToEntryIndex(constructor.genome, constructor.currentGenomePos);
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Current entry index").textWidth(GenomeTabTextWidth), entry);
+            constructor.currentGenomePos = GenomeDescriptionConverter::convertEntryIndexToBytePosition(constructor.genome, entry);
+
             ImGui::BeginDisabled(!_editorModel->getCopiedGenome().has_value());
             if (AlienImGui::Button("Paste")) {
                 constructor.genome = *_editorModel->getCopiedGenome();
@@ -324,8 +328,6 @@ void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
             if (AlienImGui::Button("Edit")) {
                 _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters));
             }
-            ImGui::SameLine();
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Read position").textWidth(GenomeTabTextWidth), constructor.currentGenomePos);
 
             AlienImGui::Group("Preview (approximation)");
             if (ImGui::BeginChild("##child", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar)) {
