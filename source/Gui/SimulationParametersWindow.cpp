@@ -469,7 +469,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Cell function properties")
+                    .name("Cell properties")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.01f)
@@ -1004,7 +1004,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 spot.values.cellFunctionConstructorMutationNeuronDataProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Cell function properties")
+                    .name("Cell properties")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.01f)
