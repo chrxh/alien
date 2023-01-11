@@ -324,9 +324,9 @@ void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
                 constructor.currentGenomePos = 0;
             }
 
-            auto entry = GenomeDescriptionConverter::convertBytePositionToCellIndex(constructor.genome, constructor.currentGenomePos);
+            auto entry = GenomeDescriptionConverter::convertByteIndexToCellIndex(constructor.genome, constructor.currentGenomePos);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth), entry);
-            constructor.currentGenomePos = GenomeDescriptionConverter::convertCellIndexToBytePosition(constructor.genome, entry);
+            constructor.currentGenomePos = GenomeDescriptionConverter::convertCellIndexToByteIndex(constructor.genome, entry);
 
             AlienImGui::Group("Preview (approximation)");
             if (ImGui::BeginChild("##child", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar)) {

@@ -106,11 +106,7 @@ public:
     float getTps() const override;
 
     //for tests
-    void testOnly_mutateNeuronData(uint64_t cellId) override;
-    void testOnly_mutateData(uint64_t cellId) override;
-    void testOnly_mutateCellFunction(uint64_t cellId) override;
-    void testOnly_mutateInsert(uint64_t cellId) override;
-    void testOnly_mutateDelete(uint64_t cellId) override;
+    void testOnly_mutate(uint64_t cellId, MutationType mutationType) override;
 
 private:
     bool _selectionNeedsUpdate = false;

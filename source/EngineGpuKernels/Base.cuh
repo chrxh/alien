@@ -97,7 +97,14 @@ public:
     {
         return static_cast<uint8_t>(random(255));
     }
-        
+
+    __device__ __inline__ void randomBytes(uint8_t* data, int size)
+    {
+        for (int i = 0; i < size; ++i) {
+            data[i] = randomByte();
+        }
+    }
+
     __device__ __inline__ unsigned long long int createNewId_kernel() { return atomicAdd(_currentId, 1); }
 
     __device__ __inline__ void adaptMaxId(unsigned long long int id)

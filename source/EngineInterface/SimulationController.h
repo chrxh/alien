@@ -5,6 +5,7 @@
 #include "Settings.h"
 #include "ShallowUpdateSelectionData.h"
 #include "SimulationController.h"
+#include "MutationType.h"
 
 class _SimulationController
 {
@@ -90,9 +91,5 @@ public:
     virtual float getTps() const = 0;
 
     //for tests
-    virtual void testOnly_mutateNeuronData(uint64_t cellId) = 0;
-    virtual void testOnly_mutateData(uint64_t cellId) = 0;
-    virtual void testOnly_mutateCellFunction(uint64_t cellId) = 0;
-    virtual void testOnly_mutateInsert(uint64_t cellId) = 0;
-    virtual void testOnly_mutateDelete(uint64_t cellId) = 0;
+    virtual void testOnly_mutate(uint64_t cellId, MutationType mutationType) = 0;
 };
