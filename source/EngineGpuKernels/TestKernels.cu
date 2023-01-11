@@ -2,7 +2,7 @@
 
 #include "MutationProcessor.cuh"
 
-__global__ void cudaMutateNeuronData(SimulationData data, uint64_t cellId)
+__global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationType mutationType)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -10,20 +10,18 @@ __global__ void cudaMutateNeuronData(SimulationData data, uint64_t cellId)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->id == cellId) {
-            MutationProcessor::mutateNeuronData(data, cell);
+            switch (mutationType) {
+            case MutationType::Data:
+                MutationProcessor::mutateData(data, cell);
+                break;
+            case MutationType::NeuronData:
+                MutationProcessor::mutateNeuronData(data, cell);
+                break;
+            case MutationType::CellFunction:
+                MutationProcessor::mutateCellFunction(data, cell);
+                break;
+            }
         }
     }
 }
 
-__global__ void cudaMutateData(SimulationData data, uint64_t cellId)
-{
-    auto& cells = data.objects.cellPointers;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
-        if (cell->id == cellId) {
-            MutationProcessor::mutateData(data, cell);
-        }
-    }
-}

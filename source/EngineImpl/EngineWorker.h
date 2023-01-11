@@ -20,6 +20,7 @@
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
+#include "EngineInterface/MutationType.h"
 #include "EngineGpuKernels/Definitions.h"
 
 #include "Definitions.h"
@@ -104,11 +105,7 @@ public:
     bool isSimulationRunning() const;
 
     //for tests
-    void testOnly_mutateNeuronData(uint64_t cellId);
-    void testOnly_mutateData(uint64_t cellId);
-    void testOnly_mutateCellFunction(uint64_t cellId);
-    void testOnly_mutateInsert(uint64_t cellId);
-    void testOnly_mutateDelete(uint64_t cellId);
+    void testOnly_mutate(uint64_t cellId, MutationType mutationType);
 
 private:
     DataTO provideTO(); 

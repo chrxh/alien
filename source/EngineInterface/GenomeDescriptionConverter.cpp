@@ -277,13 +277,13 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
     return convertBytesToDescriptionIntern(data, parameters, data.size(), data.size()).genome;
 }
 
-int GenomeDescriptionConverter::convertBytePositionToCellIndex(std::vector<uint8_t> const& data, int bytePos)
+int GenomeDescriptionConverter::convertByteIndexToCellIndex(std::vector<uint8_t> const& data, int byteIndex)
 {
     //wasteful approach but sufficient for GUI
-    return convertBytesToDescriptionIntern(data, SimulationParameters(), bytePos, data.size()).genome.size();
+    return convertBytesToDescriptionIntern(data, SimulationParameters(), byteIndex, data.size()).genome.size();
 }
 
-int GenomeDescriptionConverter::convertCellIndexToBytePosition(std::vector<uint8_t> const& data, int cellIndex)
+int GenomeDescriptionConverter::convertCellIndexToByteIndex(std::vector<uint8_t> const& data, int cellIndex)
 {
     //wasteful approach but sufficient for GUI
     return convertBytesToDescriptionIntern(data, SimulationParameters(), data.size(), cellIndex).lastBytePosition;

@@ -477,34 +477,12 @@ void _CudaSimulationFacade::resizeArraysIfNecessary(ArraySizes const& additional
     }
 }
 
-void _CudaSimulationFacade::testOnly_mutateNeuronData(uint64_t cellId)
+void _CudaSimulationFacade::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
-    _testKernels->testOnly_mutateNeuronData(_settings.gpuSettings, getSimulationDataIntern(), cellId);
+    _testKernels->testOnly_mutate(_settings.gpuSettings, getSimulationDataIntern(), cellId, mutationType);
     syncAndCheck();
-}
 
-void _CudaSimulationFacade::testOnly_mutateData(uint64_t cellId)
-{
-    _testKernels->testOnly_mutateData(_settings.gpuSettings, getSimulationDataIntern(), cellId);
-    syncAndCheck();
-}
-
-void _CudaSimulationFacade::testOnly_mutateCellFunction(uint64_t cellId)
-{
-    _testKernels->testOnly_mutateCellFunction(_settings.gpuSettings, getSimulationDataIntern(), cellId);
-    syncAndCheck();
-}
-
-void _CudaSimulationFacade::testOnly_mutateInsert(uint64_t cellId)
-{
-    _testKernels->testOnly_mutateInsert(_settings.gpuSettings, getSimulationDataIntern(), cellId);
-    syncAndCheck();
-}
-
-void _CudaSimulationFacade::testOnly_mutateDelete(uint64_t cellId)
-{
-    _testKernels->testOnly_mutateDelete(_settings.gpuSettings, getSimulationDataIntern(), cellId);
-    syncAndCheck();
+    resizeArraysIfNecessary();
 }
 
 void _CudaSimulationFacade::syncAndCheck()
