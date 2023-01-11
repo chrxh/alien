@@ -191,12 +191,8 @@ __inline__ __device__ void MutationProcessor::mutateCellFunction(SimulationData&
     targetGenome[mutationByteIndex] = newCellFunction;
     setRandomCellFunctionData(data, targetGenome + mutationByteIndex + CellBasicBytes, newCellFunction, makeSelfCopy, subGenomeSize);
 
-    for (int i = 0, endIndex = toInt(constructor.genomeSize) - (mutationByteIndex + CellBasicBytes + oldCellFunctionSize); i < endIndex; ++i) {
-        targetGenome[mutationByteIndex + CellBasicBytes + newCellFunctionSize + i] = constructor.genome[mutationByteIndex + CellBasicBytes + oldCellFunctionSize + i];
-    }
-
     for (int i = mutationByteIndex + CellBasicBytes + oldCellFunctionSize; i < constructor.genomeSize; ++i) {
-        targetGenome[i + newCellFunctionSize - oldCellFunctionSize] = constructor.genome[i];
+        targetGenome[(i + newCellFunctionSize - oldCellFunctionSize) % MAX_GENOME_BYTES] = constructor.genome[i];
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
