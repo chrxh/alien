@@ -100,7 +100,7 @@ bool Math::crossing(
         return false;
     }
     auto mue = (v1.x * (p2.y - p1.y) - v1.y * (p2.x - p1.x)) / divisor;
-    if (mue < 0 || mue > 1) {
+    if (mue < -NEAR_ZERO || mue > 1 + NEAR_ZERO) {
         return false;
     }
 
@@ -113,7 +113,7 @@ bool Math::crossing(
         return false;
     }
 
-    return lambda >= 0 && lambda <= 1;
+    return lambda >= NEAR_ZERO && lambda <= 1 - NEAR_ZERO;
 }
 
 RealVector2D operator*(RealMatrix2D const& m, RealVector2D const& v)
