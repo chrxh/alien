@@ -188,7 +188,10 @@ __inline__ __device__ void MutationProcessor::mutateCellFunction(SimulationData&
     auto newCellFunctionSize = getCellFunctionDataSize(newCellFunction, makeSelfCopy, subGenomeSize);
     auto oldCellFunctionSize = getNextCellFunctionGenomeBytes(constructor, mutationByteIndex);
 
-    auto targetGenomeSize = max(min(toInt(constructor.genomeSize) + newCellFunctionSize - oldCellFunctionSize, MAX_GENOME_BYTES), 0);
+    auto targetGenomeSize =
+        max(min(toInt(constructor.genomeSize) + newCellFunctionSize - oldCellFunctionSize, MAX_GENOME_BYTES),
+            mutationByteIndex + CellBasicBytes + newCellFunctionSize);
+
     auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(targetGenomeSize);
 
     for (int i = 0; i < mutationByteIndex + CellBasicBytes; ++i) {

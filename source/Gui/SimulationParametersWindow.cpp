@@ -462,7 +462,7 @@ void _SimulationParametersWindow::processBase(
                     .name("Neuron weights and bias")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
-                    .max(0.01f)
+                    .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability),
@@ -472,7 +472,7 @@ void _SimulationParametersWindow::processBase(
                     .name("Cell properties")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
-                    .max(0.01f)
+                    .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDataProbability),
@@ -482,7 +482,7 @@ void _SimulationParametersWindow::processBase(
                     .name("Cell function type")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
-                    .max(0.01f)
+                    .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability),
@@ -492,7 +492,7 @@ void _SimulationParametersWindow::processBase(
                     .name("Cell insertion")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
-                    .max(0.01f)
+                    .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationInsertionProbability),
@@ -502,7 +502,7 @@ void _SimulationParametersWindow::processBase(
                     .name("Cell deletion")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
-                    .max(0.01f)
+                    .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDeletionProbability),
@@ -997,7 +997,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .name("Neuron weights and bias")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
-                    .max(0.01f)
+                    .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationNeuronDataProbability),
@@ -1007,7 +1007,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .name("Cell properties")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
-                    .max(0.01f)
+                    .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationDataProbability),
@@ -1017,7 +1017,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .name("Cell function type")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
-                    .max(0.01f)
+                    .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationCellFunctionProbability),
@@ -1027,7 +1027,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .name("Cell insertion")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
-                    .max(0.01f)
+                    .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationInsertionProbability),
@@ -1037,7 +1037,7 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .name("Cell deletion")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
-                    .max(0.01f)
+                    .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationDeletionProbability),
