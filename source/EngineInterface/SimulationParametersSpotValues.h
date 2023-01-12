@@ -32,6 +32,8 @@ struct SimulationParametersSpotValues
     float cellFunctionConstructorMutationCellFunctionProbability = 0;
     float cellFunctionConstructorMutationInsertionProbability = 0;
     float cellFunctionConstructorMutationDeletionProbability = 0;
+    float cellFunctionConstructorMutationTranslationProbability = 0;
+    float cellFunctionConstructorMutationDuplicationProbability = 0;
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {

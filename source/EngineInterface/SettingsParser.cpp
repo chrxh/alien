@@ -149,6 +149,18 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         defaultParameters.baseValues.cellFunctionConstructorMutationDeletionProbability,
         "simulation parameters.cell.function.constructor.mutation probability.deletion",
         parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        parameters.baseValues.cellFunctionConstructorMutationTranslationProbability,
+        defaultParameters.baseValues.cellFunctionConstructorMutationTranslationProbability,
+        "simulation parameters.cell.function.constructor.mutation probability.translation",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        parameters.baseValues.cellFunctionConstructorMutationDuplicationProbability,
+        defaultParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability,
+        "simulation parameters.cell.function.constructor.mutation probability.duplication",
+        parserTask);
 
 
     JsonParser::encodeDecode(
@@ -406,6 +418,18 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
             spot.values.cellFunctionConstructorMutationDeletionProbability,
             defaultSpot.values.cellFunctionConstructorMutationDeletionProbability,
             base + "cell.function.constructor.mutation probability.deletion",
+            parserTask);
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellFunctionConstructorMutationTranslationProbability,
+            defaultSpot.values.cellFunctionConstructorMutationTranslationProbability,
+            "cell.function.constructor.mutation probability.translation",
+            parserTask);
+        JsonParser::encodeDecode(
+            tree,
+            spot.values.cellFunctionConstructorMutationDuplicationProbability,
+            defaultSpot.values.cellFunctionConstructorMutationDuplicationProbability,
+            "cell.function.constructor.mutation probability.duplication",
             parserTask);
     }
 }

@@ -489,7 +489,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Cell insertion")
+                    .name("Insertion")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
@@ -499,7 +499,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.baseValues.cellFunctionConstructorMutationInsertionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Cell deletion")
+                    .name("Deletion")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
@@ -507,6 +507,26 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDeletionProbability),
                 simParameters.baseValues.cellFunctionConstructorMutationDeletionProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Translation")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationTranslationProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationTranslationProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Duplication")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability);
             ImGui::TreePop();
         }
 
@@ -1042,6 +1062,26 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .logarithmic(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationDeletionProbability),
                 spot.values.cellFunctionConstructorMutationDeletionProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Translation")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationTranslationProbability),
+                spot.values.cellFunctionConstructorMutationTranslationProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Duplication")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationDuplicationProbability),
+                spot.values.cellFunctionConstructorMutationDuplicationProbability);
             ImGui::TreePop();
         }
 
