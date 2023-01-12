@@ -15,8 +15,14 @@ public:
     __inline__ __device__ static void mutateCellFunction(SimulationData& data, Cell* cell);
 
 private:
-    __inline__ __device__ static void
-    setRandomCellFunctionData(SimulationData& data, uint8_t* genomeData, CellFunction const& cellFunction, bool makeSelfCopy, int subGenomeSize);
+    __inline__ __device__ static void setRandomCellFunctionData(
+        SimulationData& data,
+        uint8_t* genomeData,
+        uint64_t targetGenomeSize,
+        int offset,
+        CellFunction const& cellFunction,
+        bool makeSelfCopy,
+        int subGenomeSize);
 
     
     //internal constants
@@ -33,9 +39,9 @@ private:
     __inline__ __device__ static int getNumGenomeCells(ConstructorFunction const& constructor);
     __inline__ __device__ static int convertCellIndexToByteIndex(ConstructorFunction const& constructor, int cellIndex);
     __inline__ __device__ static int convertByteIndexToCellIndex(ConstructorFunction const& constructor, int byteIndex);
-    __inline__ __device__ static int getNextCellFunctionGenomeBytes(ConstructorFunction const& constructor, int genomePos);
-    __inline__ __device__ static int getNextCellFunctionType(ConstructorFunction const& constructor, int genomePos);
-    __inline__ __device__ static bool getNextCellFunctionMakeSelfCopy(ConstructorFunction const& constructor, int genomePos);
+    __inline__ __device__ static int getNextCellFunctionGenomeBytes(ConstructorFunction const& constructor, int byteIndex);
+    __inline__ __device__ static int getNextCellFunctionType(ConstructorFunction const& constructor, int byteIndex);
+    __inline__ __device__ static bool getNextCellFunctionMakeSelfCopy(ConstructorFunction const& constructor, int byteIndex);
     __inline__ __device__ static int getCellFunctionDataSize(
         CellFunction cellFunction,
         bool makeSelfCopy,
@@ -182,35 +188,41 @@ __inline__ __device__ void MutationProcessor::mutateCellFunction(SimulationData&
     auto newCellFunctionSize = getCellFunctionDataSize(newCellFunction, makeSelfCopy, subGenomeSize);
     auto oldCellFunctionSize = getNextCellFunctionGenomeBytes(constructor, mutationByteIndex);
 
-    auto targetGenomeSize = min(toInt(constructor.genomeSize) + newCellFunctionSize - oldCellFunctionSize, MAX_GENOME_BYTES);
+    auto targetGenomeSize = max(min(toInt(constructor.genomeSize) + newCellFunctionSize - oldCellFunctionSize, MAX_GENOME_BYTES), 0);
     auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(targetGenomeSize);
 
     for (int i = 0; i < mutationByteIndex + CellBasicBytes; ++i) {
-        targetGenome[i] = constructor.genome[i];
+        targetGenome[i % targetGenomeSize] = constructor.genome[i % constructor.genomeSize];
     }
     targetGenome[mutationByteIndex] = newCellFunction;
-    setRandomCellFunctionData(data, targetGenome + mutationByteIndex + CellBasicBytes, newCellFunction, makeSelfCopy, subGenomeSize);
+    setRandomCellFunctionData(data, targetGenome, targetGenomeSize, mutationByteIndex + CellBasicBytes, newCellFunction, makeSelfCopy, subGenomeSize);
 
     for (int i = mutationByteIndex + CellBasicBytes + oldCellFunctionSize; i < constructor.genomeSize; ++i) {
-        targetGenome[(i + newCellFunctionSize - oldCellFunctionSize) % MAX_GENOME_BYTES] = constructor.genome[i];
+        targetGenome[(i + newCellFunctionSize - oldCellFunctionSize) % targetGenomeSize] = constructor.genome[i];
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
-    constructor.currentGenomePos = convertCellIndexToByteIndex(constructor, origCurrentCellIndex);
+    constructor.currentGenomePos = origCurrentCellIndex == numGenomeCells ? targetGenomeSize : convertCellIndexToByteIndex(constructor, origCurrentCellIndex);
 }
 
-__inline__ __device__ void
-MutationProcessor::setRandomCellFunctionData(SimulationData& data, uint8_t* genomeData, CellFunction const& cellFunction, bool makeSelfCopy, int subGenomeSize)
+__inline__ __device__ void MutationProcessor::setRandomCellFunctionData(
+    SimulationData& data,
+    uint8_t* genomeData,
+    uint64_t targetGenomeSize,
+    int offset,
+    CellFunction const& cellFunction,
+    bool makeSelfCopy,
+    int subGenomeSize)
 {
     auto newCellFunctionSize = getCellFunctionDataSize(cellFunction, makeSelfCopy, subGenomeSize);
-    data.numberGen1.randomBytes(genomeData, newCellFunctionSize);
+    data.numberGen1.randomBytes(genomeData + offset, newCellFunctionSize);
     if (cellFunction == CellFunction_Constructor || cellFunction == CellFunction_Injector) {
         auto genomeByteIndex =
             cellFunction == CellFunction_Constructor ? ConstructorFixedBytes : InjectorFixedBytes;
-        genomeData[genomeByteIndex % MAX_GENOME_BYTES] = makeSelfCopy ? 1 : 0;
+        genomeData[(genomeByteIndex + offset) % targetGenomeSize] = makeSelfCopy ? 1 : 0;
         if (!makeSelfCopy) {
-            genomeData[(genomeByteIndex + 1) % MAX_GENOME_BYTES] = static_cast<uint8_t>(subGenomeSize & 0xff);
-            genomeData[(genomeByteIndex + 2) % MAX_GENOME_BYTES] = static_cast<uint8_t>((subGenomeSize >> 8) & 0xff);
+            genomeData[(genomeByteIndex + offset + 1) % targetGenomeSize] = static_cast<uint8_t>(subGenomeSize & 0xff);
+            genomeData[(genomeByteIndex + offset + 2) % targetGenomeSize] = static_cast<uint8_t>((subGenomeSize >> 8) & 0xff);
         }
     }
 }
@@ -254,21 +266,21 @@ __inline__ __device__ int MutationProcessor::convertByteIndexToCellIndex(Constru
     return 0;
 }
 
-__inline__ __device__ int MutationProcessor::getNextCellFunctionGenomeBytes(ConstructorFunction const& constructor, int genomePos)
+__inline__ __device__ int MutationProcessor::getNextCellFunctionGenomeBytes(ConstructorFunction const& constructor, int byteIndex)
 {
-    auto cellFunction = getNextCellFunctionType(constructor, genomePos);
+    auto cellFunction = getNextCellFunctionType(constructor, byteIndex);
     switch (cellFunction) {
     case CellFunction_Neuron:
         return NeuronBytes;
     case CellFunction_Transmitter:
         return TransmitterBytes;
     case CellFunction_Constructor: {
-        auto makeCopyIndex = genomePos + CellBasicBytes + ConstructorFixedBytes;
+        auto makeCopyIndex = byteIndex + CellBasicBytes + ConstructorFixedBytes;
         auto isMakeCopy = GenomeDecoder::convertByteToBool(constructor.genome[makeCopyIndex % constructor.genomeSize]);
         if (isMakeCopy) {
             return ConstructorFixedBytes + 1;
         } else {
-            auto genomeSizeIndex = genomePos + CellBasicBytes + ConstructorFixedBytes + 1;
+            auto genomeSizeIndex = byteIndex + CellBasicBytes + ConstructorFixedBytes + 1;
             auto genomeSize = GenomeDecoder::convertBytesToWord(
                 constructor.genome[genomeSizeIndex % constructor.genomeSize], constructor.genome[(genomeSizeIndex + 1) % constructor.genomeSize]);
             return ConstructorFixedBytes + 3 + genomeSize;
@@ -281,12 +293,12 @@ __inline__ __device__ int MutationProcessor::getNextCellFunctionGenomeBytes(Cons
     case CellFunction_Attacker:
         return AttackerBytes;
     case CellFunction_Injector: {
-        auto makeCopyIndex = genomePos + CellBasicBytes + InjectorFixedBytes;
+        auto makeCopyIndex = byteIndex + CellBasicBytes + InjectorFixedBytes;
         auto isMakeCopy = GenomeDecoder::convertByteToBool(constructor.genome[makeCopyIndex % constructor.genomeSize]);
         if (isMakeCopy) {
             return InjectorFixedBytes + 1;
         } else {
-            auto genomeSizeIndex = genomePos + CellBasicBytes + InjectorFixedBytes + 1;
+            auto genomeSizeIndex = byteIndex + CellBasicBytes + InjectorFixedBytes + 1;
             auto genomeSize = GenomeDecoder::convertBytesToWord(
                 constructor.genome[genomeSizeIndex % constructor.genomeSize], constructor.genome[(genomeSizeIndex + 1) % constructor.genomeSize]);
             return InjectorFixedBytes + 3 + genomeSize;
@@ -299,18 +311,18 @@ __inline__ __device__ int MutationProcessor::getNextCellFunctionGenomeBytes(Cons
     }
 }
 
-__inline__ __device__ int MutationProcessor::getNextCellFunctionType(ConstructorFunction const& constructor, int genomePos)
+__inline__ __device__ int MutationProcessor::getNextCellFunctionType(ConstructorFunction const& constructor, int byteIndex)
 {
-    return constructor.genome[genomePos] % CellFunction_Count;
+    return constructor.genome[byteIndex % constructor.genomeSize] % CellFunction_Count;
 }
 
-__inline__ __device__ bool MutationProcessor::getNextCellFunctionMakeSelfCopy(ConstructorFunction const& constructor, int genomePos)
+__inline__ __device__ bool MutationProcessor::getNextCellFunctionMakeSelfCopy(ConstructorFunction const& constructor, int byteIndex)
 {
-    switch (getNextCellFunctionType(constructor, genomePos)) {
+    switch (getNextCellFunctionType(constructor, byteIndex)) {
     case CellFunction_Constructor:
-        return GenomeDecoder::convertByteToBool(constructor.genome[(genomePos + CellBasicBytes + ConstructorFixedBytes) % constructor.genomeSize]);
+        return GenomeDecoder::convertByteToBool(constructor.genome[(byteIndex + CellBasicBytes + ConstructorFixedBytes) % constructor.genomeSize]);
     case CellFunction_Injector:
-        return GenomeDecoder::convertByteToBool(constructor.genome[(genomePos + CellBasicBytes + InjectorFixedBytes) % constructor.genomeSize]);
+        return GenomeDecoder::convertByteToBool(constructor.genome[(byteIndex + CellBasicBytes + InjectorFixedBytes) % constructor.genomeSize]);
     default:
         return false;
     }
