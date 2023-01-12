@@ -13,6 +13,7 @@ public:
     __inline__ __device__ static void mutateData(SimulationData& data, Cell* cell);
     __inline__ __device__ static void mutateNeuronData(SimulationData& data, Cell* cell);
     __inline__ __device__ static void mutateCellFunction(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void mutateInsertion(SimulationData& data, Cell* cell);
 
 private:
     __inline__ __device__ static void setRandomCellFunctionData(
@@ -60,6 +61,8 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionConstructorMutationDataProbability, data, cell->absPos);
     auto cellFunctionConstructorMutationCellFunctionProbability =
         SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionConstructorMutationCellFunctionProbability, data, cell->absPos);
+    auto cellFunctionConstructorMutationInsertionProbability =
+        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionConstructorMutationInsertionProbability, data, cell->absPos);
 
     if (data.numberGen1.random() < cellFunctionConstructorMutationNeuronProbability) {
         mutateNeuronData(data, cell);
@@ -69,6 +72,9 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
     }
     if (data.numberGen1.random() < cellFunctionConstructorMutationCellFunctionProbability) {
         mutateCellFunction(data, cell);
+    }
+    if (data.numberGen1.random() < cellFunctionConstructorMutationInsertionProbability) {
+        mutateInsertion(data, cell);
     }
     //insert mutation
 
@@ -191,7 +197,6 @@ __inline__ __device__ void MutationProcessor::mutateCellFunction(SimulationData&
     auto targetGenomeSize =
         max(min(toInt(constructor.genomeSize) + newCellFunctionSize - oldCellFunctionSize, MAX_GENOME_BYTES),
             mutationByteIndex + CellBasicBytes + newCellFunctionSize);
-
     auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(targetGenomeSize);
 
     for (int i = 0; i < mutationByteIndex + CellBasicBytes; ++i) {
@@ -206,6 +211,45 @@ __inline__ __device__ void MutationProcessor::mutateCellFunction(SimulationData&
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
     constructor.currentGenomePos = origCurrentCellIndex == numGenomeCells ? targetGenomeSize : convertCellIndexToByteIndex(constructor, origCurrentCellIndex);
+}
+
+__inline__ __device__ void MutationProcessor::mutateInsertion(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    auto numGenomeCells = getNumGenomeCells(constructor);
+    if (numGenomeCells == 0) {
+        return;
+    }
+    auto origCurrentCellIndex = convertByteIndexToCellIndex(constructor, constructor.currentGenomePos);
+
+    auto mutationCellIndex = data.numberGen1.random(numGenomeCells - 1);
+    auto mutationByteIndex = convertCellIndexToByteIndex(constructor, mutationCellIndex);
+
+    auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
+    auto makeSelfCopy = false;
+    auto subGenomeSize = 0;
+    if (newCellFunction == CellFunction_Constructor || newCellFunction == CellFunction_Injector) {
+        subGenomeSize = data.numberGen1.random(CellFunctionMutationMaxGenomeSize);
+        makeSelfCopy = data.numberGen1.randomBool();
+    }
+    auto newCellFunctionSize = getCellFunctionDataSize(newCellFunction, makeSelfCopy, subGenomeSize);
+
+    auto targetGenomeSize = min(toInt(constructor.genomeSize) + CellBasicBytes + newCellFunctionSize, MAX_GENOME_BYTES);
+    auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(targetGenomeSize);
+
+    for (int i = 0; i < mutationByteIndex; ++i) {
+        targetGenome[i % targetGenomeSize] = constructor.genome[i % constructor.genomeSize];
+    }
+    targetGenome[mutationByteIndex] = newCellFunction;
+    data.numberGen1.randomBytes(targetGenome + mutationByteIndex + 1, CellBasicBytes - 1);
+    setRandomCellFunctionData(data, targetGenome, targetGenomeSize, mutationByteIndex + CellBasicBytes, newCellFunction, makeSelfCopy, subGenomeSize);
+
+    for (int i = mutationByteIndex; i < constructor.genomeSize; ++i) {
+        targetGenome[(i + CellBasicBytes +  newCellFunctionSize) % targetGenomeSize] = constructor.genome[i];
+    }
+    constructor.genomeSize = targetGenomeSize;
+    constructor.genome = targetGenome;
+    constructor.currentGenomePos = convertCellIndexToByteIndex(constructor, origCurrentCellIndex);
 }
 
 __inline__ __device__ void MutationProcessor::setRandomCellFunctionData(

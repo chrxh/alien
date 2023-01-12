@@ -2,6 +2,8 @@
 
 #include <variant>
 
+#include "Base/Definitions.h"
+
 namespace
 {
     void writeByte(std::vector<uint8_t>& data, int value) {data.emplace_back(static_cast<uint8_t>(value)); }
@@ -77,7 +79,7 @@ namespace
         if (makeGenomeCopy) {
             result = MakeGenomeCopy();
         } else {
-            auto size = readWord(data, pos) % MAX_GENOME_BYTES;
+            auto size = std::min(readWord(data, pos), toInt(data.size()));
             std::vector<uint8_t> copiedGenome;
             copiedGenome.reserve(size);
             for (int i = 0; i < size; ++i) {
