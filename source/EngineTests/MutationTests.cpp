@@ -24,12 +24,22 @@ protected:
     std::vector<uint8_t> createGenomeWithMultipleCellsWithDifferentFunctions() const
     {
         std::vector<uint8_t> dummyData(8, 0);
+        std::vector<uint8_t> subGenome;
+        for (int i = 0; i < 15; ++i) {
+            subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription{
+                CellGenomeDescription().setCellFunction(NeuronGenomeDescription()),
+                CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()),
+                CellGenomeDescription(),
+                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeGenomeCopy()),
+                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)),
+            });
+        };
         return GenomeDescriptionConverter::convertDescriptionToBytes({
             CellGenomeDescription().setCellFunction(NeuronGenomeDescription()),
             CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()),
             CellGenomeDescription(),
             CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeGenomeCopy()),
-            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(dummyData)),
+            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)),
             CellGenomeDescription().setCellFunction(SensorGenomeDescription()),
             CellGenomeDescription().setCellFunction(NerveGenomeDescription()),
             CellGenomeDescription().setCellFunction(AttackerGenomeDescription()),
@@ -54,6 +64,21 @@ protected:
         for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome, actualGenome)) {
             if (expectedCell.getCellFunctionType() != actualCell.getCellFunctionType()) {
                 return false;
+            }
+            if (expectedCell.color != actualCell.color) {
+                return false;
+            }
+            if (expectedCell.getCellFunctionType() == CellFunction_Constructor) {
+                auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellFunction);
+                auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellFunction);
+                if (expectedConstructor.isMakeGenomeCopy() != actualConstructor.isMakeGenomeCopy()) {
+                    return false;
+                }
+                if (!expectedConstructor.isMakeGenomeCopy()) {
+                    if (!compareDataMutation(expectedConstructor.getGenomeData(), actualConstructor.getGenomeData())) {
+                        return false;
+                    }
+                }
             }
         }
         return true;

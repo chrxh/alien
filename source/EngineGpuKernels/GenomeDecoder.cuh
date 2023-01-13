@@ -73,7 +73,8 @@ __inline__ __device__ void GenomeDecoder::copyGenome(SimulationData& data, Genom
 {
     bool makeGenomeCopy = readBool(source);
     if (!makeGenomeCopy) {
-        auto size = min(readWord(source), toInt(source.genomeSize));
+        auto size = readWord(source);
+        size = min(size, toInt(source.genomeSize) - toInt(source.currentGenomePos));
         target.genomeSize = size;
         target.genome = data.objects.auxiliaryData.getAlignedSubArray(size);
         //#TODO can be optimized
