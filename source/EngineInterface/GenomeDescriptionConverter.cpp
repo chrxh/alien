@@ -79,7 +79,8 @@ namespace
         if (makeGenomeCopy) {
             result = MakeGenomeCopy();
         } else {
-            auto size = std::min(readWord(data, pos), toInt(data.size()));
+            auto size = readWord(data, pos);
+            size = std::min(size, toInt(data.size()) - pos);
             std::vector<uint8_t> copiedGenome;
             copiedGenome.reserve(size);
             for (int i = 0; i < size; ++i) {
