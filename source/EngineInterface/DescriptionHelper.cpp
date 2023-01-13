@@ -460,7 +460,7 @@ namespace
     }
 }
 
-std::vector<CellOrParticleDescription> DescriptionHelper::getConstructorToUniqueGenomes(DataDescription const& data)
+std::vector<CellOrParticleDescription> DescriptionHelper::getConstructorToMainGenomes(DataDescription const& data)
 {
     std::map<std::vector<uint8_t>, size_t> genomeToCellIndex;
     for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {

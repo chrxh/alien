@@ -7,7 +7,7 @@ namespace
 {
     auto constexpr ZoomLevelForActivity = 0.3f;
     auto constexpr ZoomLevelForConnections = 1.0f;
-    auto constexpr ZoomLevelForShadedCells = 3.0f;
+    auto constexpr ZoomLevelForShadedCells = 6.0f;
     auto constexpr ZoomLevelForArrows = 15.0f;
 
     __device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, float3 const& color)
