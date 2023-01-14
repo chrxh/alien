@@ -43,7 +43,7 @@ protected:
             CellGenomeDescription().setCellFunction(SensorGenomeDescription()),
             CellGenomeDescription().setCellFunction(NerveGenomeDescription()),
             CellGenomeDescription().setCellFunction(AttackerGenomeDescription()),
-            CellGenomeDescription().setCellFunction(InjectorGenomeDescription()),
+            CellGenomeDescription().setCellFunction(InjectorGenomeDescription().setGenome(subGenome)),
             CellGenomeDescription().setCellFunction(MuscleGenomeDescription()),
             CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription1()),
             CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription2()),
