@@ -80,6 +80,18 @@ protected:
                     }
                 }
             }
+            if (expectedCell.getCellFunctionType() == CellFunction_Injector) {
+                auto expectedInjector = std::get<InjectorGenomeDescription>(*expectedCell.cellFunction);
+                auto actualInjector = std::get<InjectorGenomeDescription>(*actualCell.cellFunction);
+                if (expectedInjector.isMakeGenomeCopy() != actualInjector.isMakeGenomeCopy()) {
+                    return false;
+                }
+                if (!expectedInjector.isMakeGenomeCopy()) {
+                    if (!compareDataMutation(expectedInjector.getGenomeData(), actualInjector.getGenomeData())) {
+                        return false;
+                    }
+                }
+            }
         }
         return true;
     }
@@ -99,9 +111,38 @@ protected:
             if (expectedCell.getCellFunctionType() != actualCell.getCellFunctionType()) {
                 return false;
             }
-            if (expectedCell.getCellFunctionType() != CellFunction_Neuron && expectedCell != actualCell) {
+            if (expectedCell.getCellFunctionType() != CellFunction_Neuron && expectedCell.getCellFunctionType() != CellFunction_Constructor
+                && expectedCell.getCellFunctionType() != CellFunction_Injector && expectedCell != actualCell) {
                 return false;
             }
+            if (expectedCell.color != actualCell.color) {
+                return false;
+            }
+            if (expectedCell.getCellFunctionType() == CellFunction_Constructor) {
+                auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellFunction);
+                auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellFunction);
+                if (expectedConstructor.isMakeGenomeCopy() != actualConstructor.isMakeGenomeCopy()) {
+                    return false;
+                }
+                if (!expectedConstructor.isMakeGenomeCopy()) {
+                    if (!compareNeuronDataMutation(expectedConstructor.getGenomeData(), actualConstructor.getGenomeData())) {
+                        return false;
+                    }
+                }
+            }
+            if (expectedCell.getCellFunctionType() == CellFunction_Injector) {
+                auto expectedInjector = std::get<InjectorGenomeDescription>(*expectedCell.cellFunction);
+                auto actualInjector = std::get<InjectorGenomeDescription>(*actualCell.cellFunction);
+                if (expectedInjector.isMakeGenomeCopy() != actualInjector.isMakeGenomeCopy()) {
+                    return false;
+                }
+                if (!expectedInjector.isMakeGenomeCopy()) {
+                    if (!compareNeuronDataMutation(expectedInjector.getGenomeData(), actualInjector.getGenomeData())) {
+                        return false;
+                    }
+                }
+            }
+
         }
         return true;
     }
