@@ -130,7 +130,6 @@ __inline__ __device__ void MutationProcessor::mutateNeuronData(SimulationData& d
     auto type = getNextCellFunctionType(genome, genomeSize, byteIndex);
     if (type == CellFunction_Neuron) {
         auto delta = data.numberGen1.random(NeuronBytes - 1);
-        byteIndex = (byteIndex + CellBasicBytes + delta) % constructor.genomeSize;
         writeByte(genome, genomeSize, byteIndex + CellBasicBytes + delta, data.numberGen1.randomByte());
     }
 }
