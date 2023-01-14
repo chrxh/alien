@@ -17,6 +17,7 @@ public:
 
     __inline__ __device__ static bool convertByteToBool(uint8_t b);
     __inline__ __device__ static int convertBytesToWord(uint8_t b1, uint8_t b2);
+    __inline__ __device__ static void convertWordToBytes(int word, uint8_t& b1, uint8_t& b2);
 };
 
 /************************************************************************/
@@ -66,6 +67,12 @@ __inline__ __device__ bool GenomeDecoder::convertByteToBool(uint8_t b)
 __inline__ __device__ int GenomeDecoder::convertBytesToWord(uint8_t b1, uint8_t b2)
 {
     return static_cast<int>(b1) | (static_cast<int>(b2 << 8));
+}
+
+__inline__ __device__ void GenomeDecoder::convertWordToBytes(int word, uint8_t& b1, uint8_t& b2)
+{
+    b1 = static_cast<uint8_t>(word & 0xff);
+    b2 = static_cast<uint8_t>((word >> 8) & 0xff);
 }
 
 template <typename GenomeHolderSource, typename GenomeHolderTarget>

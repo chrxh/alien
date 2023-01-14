@@ -23,7 +23,6 @@ public:
 protected:
     std::vector<uint8_t> createGenomeWithMultipleCellsWithDifferentFunctions() const
     {
-        std::vector<uint8_t> dummyData(8, 0);
         std::vector<uint8_t> subGenome;
         for (int i = 0; i < 15; ++i) {
             subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription{
