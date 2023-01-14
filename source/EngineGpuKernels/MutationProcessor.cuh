@@ -119,20 +119,20 @@ __inline__ __device__ void MutationProcessor::mutateData(SimulationData& data, C
 
 __inline__ __device__ void MutationProcessor::mutateNeuronData(SimulationData& data, Cell* cell)
 {
-    //auto& constructor = cell->cellFunctionData.constructor;
-    //auto numGenomeCells = getNumGenomeCells(constructor);
-    //if (numGenomeCells == 0) {
-    //    return;
-    //}
-    //auto cellIndex = data.numberGen1.random(numGenomeCells - 1);
-    //auto byteIndex = convertCellIndexToByteIndex(constructor, cellIndex);
+    auto& constructor = cell->cellFunctionData.constructor;
+    auto& genome = constructor.genome;
+    auto genomeSize = toInt(constructor.genomeSize);
+    if (genomeSize == 0) {
+        return;
+    }
+    auto byteIndex = getRandomGenomeByteIndex(data, genome, genomeSize);
 
-    //auto type = getNextCellFunctionType(constructor, byteIndex);
-    //if (type == CellFunction_Neuron) {
-    //    auto delta = data.numberGen1.random(NeuronBytes - 1);
-    //    byteIndex = (byteIndex + CellBasicBytes + delta) % constructor.genomeSize;
-    //    constructor.genome[byteIndex] = data.numberGen1.randomByte();
-    //}
+    auto type = getNextCellFunctionType(genome, genomeSize, byteIndex);
+    if (type == CellFunction_Neuron) {
+        auto delta = data.numberGen1.random(NeuronBytes - 1);
+        byteIndex = (byteIndex + CellBasicBytes + delta) % constructor.genomeSize;
+        writeByte(genome, genomeSize, byteIndex + CellBasicBytes + delta, data.numberGen1.randomByte());
+    }
 }
 
 __inline__ __device__ void MutationProcessor::mutateCellFunction(SimulationData& data, Cell* cell)
