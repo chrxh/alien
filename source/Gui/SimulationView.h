@@ -44,6 +44,8 @@ private:
     void updateImageFromSimulation();
     void updateMotionBlur();
 
+    void drawActionCursor();
+
     //widgets
     SimulationScrollbar _scrollbarX;
     SimulationScrollbar _scrollbarY;
