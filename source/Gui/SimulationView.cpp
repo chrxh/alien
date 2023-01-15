@@ -16,9 +16,10 @@
 
 namespace
 {
-    auto const MotionBlurStatic = 0.8f;
-    auto const MotionBlurMoving = 0.5f;
-    auto const ZoomFactorForOverlay = 16.0f;
+    auto constexpr MotionBlurStatic = 0.8f;
+    auto constexpr MotionBlurMoving = 0.5f;
+    auto constexpr ZoomFactorForOverlay = 8.0f;
+    auto constexpr ActionCursorRadius = 10.0f;
 }
 
 _SimulationView::_SimulationView(
@@ -230,6 +231,9 @@ void _SimulationView::processEvents()
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
             middleMouseButtonReleased();
         }
+
+        drawActionCursor();
+
         _prevMousePosInt = mousePosInt;
     }
 }
@@ -396,5 +400,14 @@ void _SimulationView::updateMotionBlur()
         motionBlur = std::min(1.0f, motionBlur / _motionBlurFactor);
     }
     _shader->setFloat("motionBlurFactor", motionBlur);
+}
+
+void _SimulationView::drawActionCursor()
+{
+    if (_modeWindow->getMode() == _ModeController::Mode::Action) {
+        auto mousePos = ImGui::GetMousePos();
+        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+        drawList->AddCircleFilled(mousePos, ActionCursorRadius, ImColor(1.0f, 1.0f, 1.0f, 0.4f));
+    }
 }
 

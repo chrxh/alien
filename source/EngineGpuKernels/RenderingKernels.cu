@@ -7,7 +7,7 @@ namespace
 {
     auto constexpr ZoomLevelForActivity = 0.3f;
     auto constexpr ZoomLevelForConnections = 1.0f;
-    auto constexpr ZoomLevelForShadedCells = 6.0f;
+    auto constexpr ZoomLevelForShadedCells = 6.5f;
     auto constexpr ZoomLevelForArrows = 15.0f;
 
     __device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, float3 const& color)
@@ -210,7 +210,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
 
             //draw cell
             auto color = calcColor(cell, cell->selected);
-            auto radius = 1 == cell->selected ? zoom / 2 : zoom / 3;
+            auto radius = zoom / 3;
             drawCircle(imageData, imageSize, cellImagePos, color, radius, shadedCells, true);
 
             color = color * min((zoom - 1.0f) / 3, 1.0f);
@@ -284,7 +284,7 @@ cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight
         auto const particleImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, particlePos, zoom);
         if (isContainedInRect({0, 0}, imageSize, particleImagePos)) {
             auto const color = calcColor(particle, 0 != particle->selected);
-            auto radius = 1 == particle->selected ? zoom / 2 : zoom / 3;
+            auto radius = zoom / 3;
             drawCircle(imageData, imageSize, particleImagePos, color, radius);
         }
     }
