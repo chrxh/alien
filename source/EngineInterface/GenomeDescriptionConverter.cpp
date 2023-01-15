@@ -30,7 +30,7 @@ namespace
     }
     void writeDistance(std::vector<uint8_t>& data, float value)
     {
-        data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>((value - 1.0f) * 128)));
+        writeFloat(data, value - 1.0f);
     }
     void writeNeuronProperty(std::vector<uint8_t>& data, float value)
     {
@@ -66,6 +66,10 @@ namespace
     float readAngle(std::vector<uint8_t> const& data, int& pos) { return static_cast<float>(static_cast<int8_t>(readByte(data, pos))) / 120 * 180; }
     float readDensity(std::vector<uint8_t> const& data, int& pos) { return (readFloat(data, pos) + 1.0f) / 2; }
     float readNeuronProperty(std::vector<uint8_t> const& data, int& pos) { return readFloat(data, pos) * 4; }
+    float readDistance(std::vector<uint8_t> const& data, int& pos)
+    {
+        return readFloat(data, pos) + 1.0f;
+    }
     float readStiffness(std::vector<uint8_t> const& data, int& pos)
     {
         return static_cast<float>(readByte(data, pos)) / 255;
@@ -191,7 +195,7 @@ namespace
 
             CellGenomeDescription cell;
             cell.referenceAngle = readAngle(data, bytePosition);
-            cell.referenceDistance = readFloat(data, bytePosition) + 1.0f;
+            cell.referenceDistance = std::max(readDistance(data, bytePosition), parameters.cellMinDistance);
             cell.maxConnections = readByte(data, bytePosition) % (parameters.cellMaxBonds + 1);
             cell.executionOrderNumber = readByte(data, bytePosition) % parameters.cellMaxExecutionOrderNumbers;
             cell.color = readByte(data, bytePosition) % 7;
