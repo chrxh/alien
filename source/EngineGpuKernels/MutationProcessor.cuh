@@ -154,7 +154,8 @@ __inline__ __device__ void MutationProcessor::mutateCellFunction(SimulationData&
     auto nodeIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, false, subGenomesSizeIndices, &numSubGenomesSizeIndices);
 
     auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
-    auto makeSelfCopy = data.numberGen1.randomBool();   //only used if newCellFunction == Constructor or Injector
+    auto makeSelfCopy = false;
+    //data.numberGen1.randomBool();  //only used if newCellFunction == Constructor or Injector
 
     auto newCellFunctionSize = getCellFunctionDataSize(newCellFunction, makeSelfCopy, 0);
     auto origCellFunctionSize = getNextCellFunctionDataSize(genome, genomeSize, nodeIndex);

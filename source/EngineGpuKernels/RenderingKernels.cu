@@ -7,7 +7,7 @@ namespace
 {
     auto constexpr ZoomLevelForActivity = 0.3f;
     auto constexpr ZoomLevelForConnections = 1.0f;
-    auto constexpr ZoomLevelForShadedCells = 6.5f;
+    auto constexpr ZoomLevelForShadedCells = 8.0f;
     auto constexpr ZoomLevelForArrows = 15.0f;
 
     __device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, float3 const& color)
@@ -129,7 +129,7 @@ namespace
                             if (angle < -180.0f) {
                                 angle += 360.0f;
                             }
-                            factor *= min(2.0f, 65.0f / (abs(angle) + 1.0f)); 
+                            factor *= 65.0f / (abs(angle) + 1.0f); 
                         }
                         drawDot(imageData, imageSize, pos + float2{x, y}, color * min(factor, 1.0f));
                     }

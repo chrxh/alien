@@ -124,7 +124,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     ConstructionData result;
     result.cellFunction = GenomeDecoder::readByte(constructor) % CellFunction_Count;
     result.angle = GenomeDecoder::readAngle(constructor);
-    result.distance = GenomeDecoder::readFloat(constructor) + 1.0f;
+    result.distance = max(GenomeDecoder::readFloat(constructor) + 1.0f, cudaSimulationParameters.cellMinDistance);
     result.maxConnections = GenomeDecoder::readByte(constructor) % (cudaSimulationParameters.cellMaxBonds + 1);
     result.executionOrderNumber = GenomeDecoder::readByte(constructor) % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     result.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
