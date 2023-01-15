@@ -99,7 +99,7 @@ namespace
             RealVector2D prevPos = pos;
 
             if (index > 0) {
-                pos += result.direction * node.referenceDistance;
+                pos += result.direction * std::max(node.referenceDistance, parameters.cellMinDistance);
             }
 
             if (index > 0) {
