@@ -64,8 +64,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (!isHomogene(otherCell)) {
                 energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerColorInhomogeneityFactor;
             }
-            auto cellFunctionWeaponGeometryDeviationExponent =
-                SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionAttackerGeometryDeviationExponent, data, cell->absPos);
+            auto cellFunctionWeaponGeometryDeviationExponent = SpotCalculator::calcParameter(
+                &SimulationParametersSpotValues::cellFunctionAttackerGeometryDeviationExponent,
+                &SimulationParametersSpotActivatedValues::cellFunctionAttackerGeometryDeviationExponent,
+                data,
+                cell->absPos);
 
             if (abs(cellFunctionWeaponGeometryDeviationExponent) > 0) {
                 auto d = otherCell->absPos - cell->absPos;
@@ -77,7 +80,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             auto color = calcMod(cell->color, MAX_COLORS);
             auto otherColor = calcMod(otherCell->color, MAX_COLORS);
-            energyToTransfer *= SpotCalculator::calcColorMatrix(color, otherColor, data, cell->absPos);
+            energyToTransfer *= SpotCalculator::calcFoodChainColorMatrix(color, otherColor, data, cell->absPos);
 
             if (abs(energyToTransfer) < NEAR_ZERO) {
                 continue;
@@ -128,7 +131,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
 __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell* cell)
 {
-    auto cellFunctionWeaponEnergyCost = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionAttackerEnergyCost, data, cell->absPos);
+    auto cellFunctionWeaponEnergyCost = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionAttackerEnergyCost,
+        &SimulationParametersSpotActivatedValues::cellFunctionAttackerEnergyCost,
+        data,
+        cell->absPos);
     if (cellFunctionWeaponEnergyCost > 0) {
         auto const cellEnergy = atomicAdd(&cell->energy, 0);
 
