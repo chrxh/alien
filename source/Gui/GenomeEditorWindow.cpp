@@ -42,6 +42,9 @@ _GenomeEditorWindow::~_GenomeEditorWindow()
 void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
 {
     setOn(true);
+    if (_tabDatas.size() == 1 && _tabDatas.front().genome.empty()) {
+        _tabDatas.clear();
+    }
     std::optional<int> tabIndex;
     for (auto const& [index, tabData] : _tabDatas | boost::adaptors::indexed(0)) {
         if (tabData.genome == genome) {
@@ -51,9 +54,7 @@ void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
     if (tabIndex) {
         _tabIndexToSelect = *tabIndex;
     } else {
-        TabData tabData;
-        tabData.genome = genome;
-        _tabToAdd = tabData;
+        scheduleAddTab(genome);
     }
 }
 
@@ -79,7 +80,7 @@ void _GenomeEditorWindow::processIntern()
     if (ImGui::BeginTabBar("##", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
         if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-            _tabDatas.emplace_back(TabData());
+            scheduleAddTab(GenomeDescription());
         }
         AlienImGui::Tooltip("New genome");
 
@@ -90,6 +91,7 @@ void _GenomeEditorWindow::processIntern()
         //process tabs
         for (auto const& [index, tabData] : _tabDatas | boost::adaptors::indexed(0)) {
 
+            ImGui::PushID(tabData.id);
             bool open = true;
             bool* openPtr = nullptr;
             if (_tabDatas.size() > 1) {
@@ -104,19 +106,19 @@ void _GenomeEditorWindow::processIntern()
             if (openPtr && *openPtr == false) {
                 tabToDelete = toInt(index);
             }
+            ImGui::PopID();
         }
 
-        //modify tabs
+        //delete tab
         if (tabToDelete.has_value()) {
             _tabDatas.erase(_tabDatas.begin() + *tabToDelete);
             if (_selectedTabIndex == _tabDatas.size()) {
                 _selectedTabIndex = toInt(_tabDatas.size() - 1);
             }
         }
+
+        //add tab
         if (_tabToAdd.has_value()) {
-            if (_tabDatas.size() == 1 && _tabDatas.front().genome.empty()) {
-                _tabDatas.clear();
-            }
             _tabDatas.emplace_back(*_tabToAdd);
             _tabToAdd.reset();
         }
@@ -127,6 +129,9 @@ void _GenomeEditorWindow::processIntern()
 
 void _GenomeEditorWindow::processToolbar()
 {
+    if (_tabDatas.empty()) {
+        return;
+    }
     auto& tabData = _tabDatas.at(_selectedTabIndex);
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
         CellGenomeDescription newNode;
@@ -593,5 +598,13 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
         nerve.alternationMode = std::max(0, nerve.alternationMode);
     } break;
     }
+}
+
+void _GenomeEditorWindow::scheduleAddTab(GenomeDescription const& genome)
+{
+    TabData newTab;
+    newTab.id = ++_tabSequenceNumber;
+    newTab.genome = genome;
+    _tabToAdd = newTab;
 }
 

@@ -21,6 +21,7 @@ private:
 
     struct TabData
     {
+        int id;
         GenomeDescription genome;
         std::optional<int> selectedNode;
     };
@@ -32,11 +33,14 @@ private:
 
     void validationAndCorrection(CellGenomeDescription& cell) const;
 
+    void scheduleAddTab(GenomeDescription const& genome);
+
     EditorModel _editorModel;
     SimulationController _simulationController;
 
     float _previewHeight = 200.0f;
 
+    mutable int _tabSequenceNumber = 0;
     std::vector<TabData> _tabDatas;
     int _selectedTabIndex = 0;
     int _selectedInput = 0;
