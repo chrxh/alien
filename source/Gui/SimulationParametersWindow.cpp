@@ -781,7 +781,7 @@ void _SimulationParametersWindow::processBase(
         if (ImGui::TreeNodeEx("Danger zone", flags)) {
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Unlimited energy for constructor")
+                    .name("Unlimited energy for constructors")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellFunctionConstructionUnlimitedEnergy),
                 simParameters.cellFunctionConstructionUnlimitedEnergy);
