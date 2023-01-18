@@ -68,14 +68,26 @@ private:
 
 __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData& data, Cell* cell)
 {
-    auto cellFunctionConstructorMutationNeuronProbability =
-        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionConstructorMutationNeuronDataProbability, data, cell->absPos);
-    auto cellFunctionConstructorMutationDataProbability =
-        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionConstructorMutationDataProbability, data, cell->absPos);
-    auto cellFunctionConstructorMutationCellFunctionProbability =
-        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionConstructorMutationCellFunctionProbability, data, cell->absPos);
-    auto cellFunctionConstructorMutationInsertionProbability =
-        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFunctionConstructorMutationInsertionProbability, data, cell->absPos);
+    auto cellFunctionConstructorMutationNeuronProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationNeuronDataProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationNeuronDataProbability,
+        data,
+        cell->absPos);
+    auto cellFunctionConstructorMutationDataProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationDataProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDataProbability,
+        data,
+        cell->absPos);
+    auto cellFunctionConstructorMutationCellFunctionProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationCellFunctionProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCellFunctionProbability,
+        data,
+        cell->absPos);
+    auto cellFunctionConstructorMutationInsertionProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationInsertionProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationInsertionProbability,
+        data,
+        cell->absPos);
 
     if (data.numberGen1.random() < cellFunctionConstructorMutationNeuronProbability) {
         mutateNeuronData(data, cell);

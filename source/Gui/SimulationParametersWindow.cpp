@@ -1028,7 +1028,7 @@ void _SimulationParametersWindow::processSpot(
          * Cell color transition rules
          */
         if (ImGui::TreeNodeEx("Cell color transition rules", flags)) {
-            ImGui::Checkbox("##test", &spot.activatedValues.cellColorTransition);
+            ImGui::Checkbox("##cellColorTransition", &spot.activatedValues.cellColorTransition);
             ImGui::SameLine();
             ImGui::BeginDisabled(!spot.activatedValues.cellColorTransition);
             auto posX = ImGui::GetCursorPos().x;
@@ -1070,8 +1070,10 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSpot.values.cellFunctionConstructorMutationNeuronDataProbability),
-                spot.values.cellFunctionConstructorMutationNeuronDataProbability);
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationNeuronDataProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability),
+                spot.values.cellFunctionConstructorMutationNeuronDataProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationNeuronDataProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell properties")
@@ -1080,8 +1082,10 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSpot.values.cellFunctionConstructorMutationDataProbability),
-                spot.values.cellFunctionConstructorMutationDataProbability);
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationDataProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationDataProbability),
+                spot.values.cellFunctionConstructorMutationDataProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationDataProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell function type")
@@ -1090,8 +1094,10 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSpot.values.cellFunctionConstructorMutationCellFunctionProbability),
-                spot.values.cellFunctionConstructorMutationCellFunctionProbability);
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationCellFunctionProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability),
+                spot.values.cellFunctionConstructorMutationCellFunctionProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationCellFunctionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell insertion")
@@ -1100,8 +1106,10 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSpot.values.cellFunctionConstructorMutationInsertionProbability),
-                spot.values.cellFunctionConstructorMutationInsertionProbability);
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationInsertionProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationInsertionProbability),
+                spot.values.cellFunctionConstructorMutationInsertionProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationInsertionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell deletion")
@@ -1110,8 +1118,10 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSpot.values.cellFunctionConstructorMutationDeletionProbability),
-                spot.values.cellFunctionConstructorMutationDeletionProbability);
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationDeletionProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationDeletionProbability),
+                spot.values.cellFunctionConstructorMutationDeletionProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationDeletionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Translation")
@@ -1120,8 +1130,10 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSpot.values.cellFunctionConstructorMutationTranslationProbability),
-                spot.values.cellFunctionConstructorMutationTranslationProbability);
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationTranslationProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationTranslationProbability),
+                spot.values.cellFunctionConstructorMutationTranslationProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationTranslationProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Duplication")
@@ -1130,8 +1142,10 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSpot.values.cellFunctionConstructorMutationDuplicationProbability),
-                spot.values.cellFunctionConstructorMutationDuplicationProbability);
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationDuplicationProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationDuplicationProbability),
+                spot.values.cellFunctionConstructorMutationDuplicationProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationDuplicationProbability);
             ImGui::TreePop();
         }
 
@@ -1139,12 +1153,25 @@ void _SimulationParametersWindow::processSpot(
          * Attacker
          */
         if (ImGui::TreeNodeEx("Cell function: Attacker", flags)) {
+            ImGui::Checkbox("##foodChainColorMatrix", &spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
+            ImGui::SameLine();
+            ImGui::BeginDisabled(!spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
             AlienImGui::InputColorMatrix(
                 AlienImGui::InputColorMatrixParameters()
                     .name("Food chain color matrix")
                     .textWidth(RightColumnWidth)
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerFoodChainColorMatrix)),
                 spot.values.cellFunctionAttackerFoodChainColorMatrix);
+            ImGui::EndDisabled();
+            if (!spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix) {
+                for (int i = 0; i < MAX_COLORS; ++i) {
+                    for (int j = 0; j < MAX_COLORS; ++j) {
+                        spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j] = parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j];
+                        spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j] = parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j];
+                    }
+                }
+            }
+
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy cost")
@@ -1153,24 +1180,30 @@ void _SimulationParametersWindow::processSpot(
                     .max(1.0f)
                     .format("%.5f")
                     .logarithmic(true)
-                    .defaultValue(origSpot.values.cellFunctionAttackerEnergyCost),
-                spot.values.cellFunctionAttackerEnergyCost);
+                    .defaultValue(origSpot.values.cellFunctionAttackerEnergyCost)
+                    .disabledValue(parameters.baseValues.cellFunctionAttackerEnergyCost),
+                spot.values.cellFunctionAttackerEnergyCost,
+                &spot.activatedValues.cellFunctionAttackerEnergyCost);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Geometry penalty")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(5.0f)
-                    .defaultValue(origSpot.values.cellFunctionAttackerGeometryDeviationExponent),
-                spot.values.cellFunctionAttackerGeometryDeviationExponent);
+                    .defaultValue(origSpot.values.cellFunctionAttackerGeometryDeviationExponent)
+                    .disabledValue(parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent),
+                spot.values.cellFunctionAttackerGeometryDeviationExponent,
+                &spot.activatedValues.cellFunctionAttackerGeometryDeviationExponent);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Connections mismatch penalty")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
-                    .defaultValue(origSpot.values.cellFunctionAttackerConnectionsMismatchPenalty),
-                spot.values.cellFunctionAttackerConnectionsMismatchPenalty);
+                    .defaultValue(origSpot.values.cellFunctionAttackerConnectionsMismatchPenalty)
+                    .disabledValue(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty),
+                spot.values.cellFunctionAttackerConnectionsMismatchPenalty,
+                &spot.activatedValues.cellFunctionAttackerConnectionsMismatchPenalty);
         }
         ImGui::TreePop();
     }

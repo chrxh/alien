@@ -64,27 +64,25 @@ public:
         return calcResultingValue(data.cellMap, worldPos, cudaSimulationParameters.baseValues.*value, spotValues, valueActivated);
     }
 
-    __device__ __inline__ static float calcParameter(float SimulationParametersSpotValues::*value, SimulationData const& data, float2 const& worldPos)
-    {
-        float spotValues[MAX_SPOTS];
-        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            spotValues[i] = cudaSimulationParameters.spots[i].values.*value;
-        }
-
-        return calcResultingValue(data.cellMap, worldPos, cudaSimulationParameters.baseValues.*value, spotValues);
-    }
-
-    __device__ __inline__ static int calcParameter(int SimulationParametersSpotValues::*value, SimulationData const& data, float2 const& worldPos)
+    __device__ __inline__ static int calcParameter(
+        int SimulationParametersSpotValues::*value,
+        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        SimulationData const& data,
+        float2 const& worldPos)
     {
         float spotValues[MAX_SPOTS];
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
             spotValues[i] = toFloat(cudaSimulationParameters.spots[i].values.*value);
         }
 
-        return toInt(calcResultingValue(data.cellMap, worldPos, toFloat(cudaSimulationParameters.baseValues.*value), spotValues));
+        return toInt(calcResultingValue(data.cellMap, worldPos, toFloat(cudaSimulationParameters.baseValues.*value), spotValues, valueActivated));
     }
 
-    __device__ __inline__ static float calcColorMatrix(int color, int otherColor, SimulationData const& data, float2 const& worldPos)
+    __device__ __inline__ static float calcFoodChainColorMatrix(
+        int color,
+        int otherColor,
+        SimulationData const& data,
+        float2 const& worldPos)
     {
         float spotValues[MAX_SPOTS];
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
@@ -92,17 +90,27 @@ public:
         }
 
         return calcResultingValue(
-            data.cellMap, worldPos, cudaSimulationParameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[color][otherColor], spotValues);
+            data.cellMap,
+            worldPos,
+            cudaSimulationParameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[color][otherColor],
+            spotValues,
+            &SimulationParametersSpotActivatedValues::cellFunctionAttackerFoodChainColorMatrix);
     }
 
-    __device__ __inline__ static int calcColorTransitionDuration(int color, SimulationData const& data, float2 const& worldPos)
+    __device__ __inline__ static int
+    calcColorTransitionDuration(int color, SimulationData const& data, float2 const& worldPos)
     {
         float spotValues[MAX_SPOTS];
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
             spotValues[i] = toFloat(cudaSimulationParameters.spots[i].values.cellColorTransitionDuration[color]);
         }
 
-        return toInt(calcResultingValue(data.cellMap, worldPos, toFloat(cudaSimulationParameters.baseValues.cellColorTransitionDuration[color]), spotValues));
+        return toInt(calcResultingValue(
+            data.cellMap,
+            worldPos,
+            toFloat(cudaSimulationParameters.baseValues.cellColorTransitionDuration[color]),
+            spotValues,
+            &SimulationParametersSpotActivatedValues::cellColorTransition));
     }
 
     __device__ __inline__ static int calcColorTransitionTargetColor(int color, SimulationData const& data, float2 const& worldPos)
@@ -113,7 +121,13 @@ public:
         }
 
         return toInt(
-            calcResultingValue(data.cellMap, worldPos, toFloat(cudaSimulationParameters.baseValues.cellColorTransitionTargetColor[color]), spotValues) + 0.5f);
+            calcResultingValue(
+                data.cellMap,
+                worldPos,
+                toFloat(cudaSimulationParameters.baseValues.cellColorTransitionTargetColor[color]),
+                spotValues,
+                &SimulationParametersSpotActivatedValues::cellColorTransition)
+            + 0.5f);
     }
 
 private:
