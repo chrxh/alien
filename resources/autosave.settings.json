@@ -7,7 +7,7 @@
         }
     },
     "simulation parameters": {
-        "background color": "1769472",
+        "background color": "5703174",
         "time step size": "1.00000000",
         "friction": "0.00100000",
         "rigidity": "0.00000000",
@@ -52,7 +52,9 @@
                         "data": "0.00000000",
                         "cell function": "0.00000000",
                         "insertion": "0.00000000",
-                        "deletion": "0.00000000"
+                        "deletion": "0.00000000",
+                        "translation": "0.00000000",
+                        "duplication": "0.00000000"
                     }
                 },
                 "attacker": {
@@ -124,7 +126,9 @@
                 "muscle": {
                     "contraction expansion delta": "0.05000000",
                     "movement acceleration": "0.01300000",
-                    "bending angle": "5.00000000"
+                    "bending angle": "5.00000000",
+                    "bending acceleration": "0.08000000",
+                    "bending acceleration threshold": "0.10000000"
                 },
                 "sensor": {
                     "range": "255.00000000",
@@ -189,16 +193,37 @@
                     }
                 },
                 "fadeout radius": "49.09999847",
-                "friction": "0.00100000",
-                "rigidity": "0.00000000",
+                "friction": {
+                    "activated": "false",
+                    "value": "0.00100000"
+                },
+                "rigidity": {
+                    "activated": "false",
+                    "value": "0.00000000"
+                },
                 "radiation": {
-                    "factor": "0.00001500"
+                    "factor": {
+                        "activated": "false",
+                        "value": "0.00001500"
+                    }
                 },
                 "cell": {
-                    "max force": "0.80000001",
-                    "min energy": "50.00000000",
-                    "fusion velocity": "0.82400000",
-                    "max binding energy": "500000.00000000",
+                    "max force": {
+                        "activated": "false",
+                        "value": "0.80000001"
+                    },
+                    "min energy": {
+                        "activated": "false",
+                        "value": "50.00000000"
+                    },
+                    "fusion velocity": {
+                        "activated": "false",
+                        "value": "0.82400000"
+                    },
+                    "max binding energy": {
+                        "activated": "false",
+                        "value": "500000.00000000"
+                    },
                     "color transition rules": {
                         "duration[0]": "0",
                         "target color[0]": "0",
@@ -292,6 +317,16 @@
                             }
                         }
                     }
+                }
+            }
+        }
+    },
+    "cell": {
+        "function": {
+            "constructor": {
+                "mutation probability": {
+                    "translation": "0.00000000",
+                    "duplication": "0.00000000"
                 }
             }
         }
