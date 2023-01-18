@@ -269,6 +269,18 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         defaultParameters.cellFunctionMuscleBendingAngle,
         "simulation parameters.cell.function.muscle.bending angle",
         parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        parameters.cellFunctionMuscleBendingAcceleration,
+        defaultParameters.cellFunctionMuscleBendingAcceleration,
+        "simulation parameters.cell.function.muscle.bending acceleration",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        parameters.cellFunctionMuscleBendingAccelerationThreshold,
+        defaultParameters.cellFunctionMuscleBendingAccelerationThreshold,
+        "simulation parameters.cell.function.muscle.bending acceleration threshold",
+        parserTask);
 
     JsonParser::encodeDecode(
         tree,
@@ -335,16 +347,31 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
             JsonParser::encodeDecode(
                 tree, spot.flowData.radialFlow.strength, defaultSpot.flowData.radialFlow.strength, base + "flow.radial.strength", parserTask);
         }
-
         JsonParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", parserTask);
-        JsonParser::encodeDecode(tree, spot.values.friction, defaultSpot.values.friction, base + "friction", parserTask);
-        JsonParser::encodeDecode(tree, spot.values.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
-        JsonParser::encodeDecode(tree, spot.values.radiationFactor, defaultSpot.values.radiationFactor, base + "radiation.factor", parserTask);
-        JsonParser::encodeDecode(tree, spot.values.cellMaxForce, defaultSpot.values.cellMaxForce, base + "cell.max force", parserTask);
-        JsonParser::encodeDecode(tree, spot.values.cellMinEnergy, defaultSpot.values.cellMinEnergy, base + "cell.min energy", parserTask);
 
-        JsonParser::encodeDecode(tree, spot.values.cellFusionVelocity, defaultSpot.values.cellFusionVelocity, base + "cell.fusion velocity", parserTask);
-        JsonParser::encodeDecode(tree, spot.values.cellMaxBindingEnergy, defaultSpot.values.cellMaxBindingEnergy, base + "cell.max binding energy", parserTask);
+        encodeDecodeSpotProperty(tree, spot.values.friction, spot.activatedValues.friction, defaultSpot.values.friction, base + "friction", parserTask);
+        encodeDecodeSpotProperty(tree, spot.values.rigidity, spot.activatedValues.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
+        encodeDecodeSpotProperty(
+            tree, spot.values.radiationFactor, spot.activatedValues.radiationFactor, defaultSpot.values.radiationFactor, base + "radiation.factor", parserTask);
+        encodeDecodeSpotProperty(
+            tree, spot.values.cellMaxForce, spot.activatedValues.cellMaxForce, defaultSpot.values.cellMaxForce, base + "cell.max force", parserTask);
+        encodeDecodeSpotProperty(
+            tree, spot.values.cellMinEnergy, spot.activatedValues.cellMinEnergy, defaultSpot.values.cellMinEnergy, base + "cell.min energy", parserTask);
+
+        encodeDecodeSpotProperty(
+            tree,
+            spot.values.cellFusionVelocity,
+            spot.activatedValues.cellFusionVelocity,
+            defaultSpot.values.cellFusionVelocity,
+            base + "cell.fusion velocity",
+            parserTask);
+        encodeDecodeSpotProperty(
+            tree,
+            spot.values.cellMaxBindingEnergy,
+            spot.activatedValues.cellMaxBindingEnergy,
+            defaultSpot.values.cellMaxBindingEnergy,
+            base + "cell.max binding energy",
+            parserTask);
 
         for (int i = 0; i < MAX_COLORS; ++i) {
             JsonParser::encodeDecode(
@@ -432,4 +459,17 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
             "cell.function.constructor.mutation probability.duplication",
             parserTask);
     }
+}
+
+template <typename T>
+void SettingsParser::encodeDecodeSpotProperty(
+    boost::property_tree::ptree& tree,
+    T& parameter,
+    bool& isActivated,
+    T const& defaultValue,
+    std::string const& node,
+    ParserTask task)
+{
+    JsonParser::encodeDecode(tree, isActivated, false, node + ".activated", task);
+    JsonParser::encodeDecode(tree, parameter, defaultValue, node + ".value", task);
 }

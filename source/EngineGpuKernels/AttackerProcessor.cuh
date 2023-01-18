@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "EngineInterface/CellFunctionEnums.h"
 
 #include "Cell.cuh"
@@ -46,7 +47,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         return;
     }
     float energyDelta = 0;
-    auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
+    auto cellMinEnergy =
+        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->absPos);
 
     Cell* otherCells[18];
     int numOtherCells;
@@ -132,8 +134,9 @@ __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell
 
         auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);
         auto origEnergy = atomicAdd(&cell->energy, -radiationEnergy);
-        auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
-        if (origEnergy < cellMinEnergy + 1.0f) {
+        auto cellMinEnergy = SpotCalculator::calcParameter(
+            &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->absPos);
+        if (origEnergy < 1.0f) {
             atomicAdd(&cell->energy, radiationEnergy);  //revert
             return;
         }

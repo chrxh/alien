@@ -22,8 +22,9 @@ public:
         MEMBER_DECLARATION(SliderFloatParameters, int, textWidth, 100);
         MEMBER_DECLARATION(SliderFloatParameters, std::optional<float>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SliderFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(SliderFloatParameters, std::optional<float>, disabledValue, std::nullopt);
     };
-    static bool SliderFloat(SliderFloatParameters const& parameters, float& value);
+    static bool SliderFloat(SliderFloatParameters const& parameters, float& value, bool* enabled = nullptr);
 
     struct SliderIntParameters
     {
@@ -258,4 +259,7 @@ public:
         int& selectedInput,
         int& selectedOutput
     );
+
+private:
+    static bool ActivationCheckbox(std::string const& idString);
 };

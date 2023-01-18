@@ -19,7 +19,7 @@ private:
     void createDefaultSpotData(SimulationParametersSpot& spot);
 
     void processBase(SimulationParameters& simParameters, SimulationParameters const& origSimParameters);
-    void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot);
+    void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot, SimulationParameters const& parameters);
 
     void validationAndCorrection(SimulationParameters& parameters) const;
     void validationAndCorrection(SimulationParametersSpot& spot) const;

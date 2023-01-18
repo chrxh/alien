@@ -124,21 +124,35 @@ MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* c
     if (!cell->tryLock()) {
         return;
     }
+    float2 acceleration{0, 0};
+    int numMatchingCells;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connection = cell->connections[i];
         if (connection.cell->executionOrderNumber == inputExecutionOrderNumber) {
-            auto intensity = cudaSimulationParameters.cellFunctionMuscleBendingAngle * getIntensity(activity);
+            auto intensity = getIntensity(activity);
+            auto bendingAngle = cudaSimulationParameters.cellFunctionMuscleBendingAngle * intensity;
 
-            if (intensity < 0 && connection.angleFromPrevious <= -intensity) {
+            if (bendingAngle < 0 && connection.angleFromPrevious <= -bendingAngle) {
                 continue;
             }
             auto& nextConnection = cell->connections[(i + 1) % cell->numConnections];
-            if (intensity > 0 && nextConnection.angleFromPrevious <= intensity) {
+            if (bendingAngle > 0 && nextConnection.angleFromPrevious <= bendingAngle) {
                 continue;
             }
-            connection.angleFromPrevious += intensity;
-            nextConnection.angleFromPrevious -= intensity;
+            connection.angleFromPrevious += bendingAngle;
+            nextConnection.angleFromPrevious -= bendingAngle;
+            if (abs(activity.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold) {
+                auto delta = Math::normalized(data.cellMap.getCorrectedDirection(connection.cell->absPos - cell->absPos));
+                Math::rotateQuarterCounterClockwise(delta);
+                delta = delta * intensity * cudaSimulationParameters.cellFunctionMuscleBendingAcceleration;
+                acceleration = acceleration + delta;
+                ++numMatchingCells;
+            }
         }
+    }
+    if (numMatchingCells > 0) {
+        atomicAdd(&cell->vel.x, acceleration.x / numMatchingCells);
+        atomicAdd(&cell->vel.y, acceleration.y / numMatchingCells);
     }
     cell->releaseLock();
     result.incMuscleActivity();

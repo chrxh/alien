@@ -2,6 +2,8 @@
 
 #include "Constants.h"
 
+//NOTE: header is also included in CUDA code
+
 struct SimulationParametersSpotValues
 {
     float friction = 0.001f;
@@ -9,10 +11,8 @@ struct SimulationParametersSpotValues
     float radiationFactor = 0.0002f;
     float cellMaxForce = 0.8f;
     float cellMinEnergy = 50.0f;
-
     float cellFusionVelocity = 0.4f;
     float cellMaxBindingEnergy = 500000.0f;
-
     int cellColorTransitionDuration[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
     int cellColorTransitionTargetColor[MAX_COLORS] = {0, 1, 2, 3, 4, 5, 6};
     float cellFunctionAttackerEnergyCost = 0.0f;
@@ -24,6 +24,7 @@ struct SimulationParametersSpotValues
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1}};
+
     float cellFunctionAttackerGeometryDeviationExponent = 0.0f;
     float cellFunctionAttackerConnectionsMismatchPenalty = 0.33f;
 
@@ -60,6 +61,7 @@ struct SimulationParametersSpotValues
             && cellFunctionConstructorMutationDataProbability == other.cellFunctionConstructorMutationDataProbability
             && cellFunctionConstructorMutationCellFunctionProbability == other.cellFunctionConstructorMutationCellFunctionProbability
             && cellFunctionConstructorMutationInsertionProbability == other.cellFunctionConstructorMutationInsertionProbability
-            && cellFunctionConstructorMutationDeletionProbability == other.cellFunctionConstructorMutationDeletionProbability;
+            && cellFunctionConstructorMutationDeletionProbability == other.cellFunctionConstructorMutationDeletionProbability
+        ;
     }
 };

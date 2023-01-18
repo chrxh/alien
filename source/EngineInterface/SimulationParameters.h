@@ -55,6 +55,8 @@ struct SimulationParameters
     float cellFunctionMuscleContractionExpansionDelta = 0.05f;
     float cellFunctionMuscleMovementAcceleration = 0.02f;
     float cellFunctionMuscleBendingAngle = 5.0f;
+    float cellFunctionMuscleBendingAcceleration = 0.08f;
+    float cellFunctionMuscleBendingAccelerationThreshold = 0.1f;
 
     float cellFunctionSensorRange = 255.0f;
     float cellFunctionSensorActivityThreshold = 0.1f;
@@ -126,6 +128,8 @@ struct SimulationParameters
             && clusterDecay == other.clusterDecay && radiationMinCellAge == other.radiationMinCellAge && radiationMinCellEnergy == other.radiationMinCellEnergy
             && cellFunctionSensorActivityThreshold == other.cellFunctionSensorActivityThreshold
             && cellFunctionConstructionUnlimitedEnergy == other.cellFunctionConstructionUnlimitedEnergy
+            && cellFunctionMuscleBendingAcceleration == other.cellFunctionMuscleBendingAcceleration
+            && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
         ;
     }
 

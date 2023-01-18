@@ -96,7 +96,7 @@ void _SimulationParametersWindow::processIntern()
                 bool open = true;
                 std::string name = "Spot " + std::to_string(tab+1);
                 if (ImGui::BeginTabItem(name.c_str(), &open, ImGuiTabItemFlags_None)) {
-                    processSpot(spot, origSpot);
+                    processSpot(spot, origSpot, parameters);
                     ImGui::EndTabItem();
                 }
 
@@ -592,6 +592,8 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
+                    .format("%.5f")
+                    .logarithmic(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionAttackerEnergyCost)
                     .tooltip(std::string("Amount of energy lost by an attempted attack of a cell in the form of emitted energy particles.")),
                 simParameters.baseValues.cellFunctionAttackerEnergyCost);
@@ -715,7 +717,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.cellFunctionMuscleContractionExpansionDelta);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Acceleration")
+                    .name("Movement acceleration")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.15f)
@@ -730,6 +732,22 @@ void _SimulationParametersWindow::processBase(
                     .max(10.0f)
                     .defaultValue(origSimParameters.cellFunctionMuscleBendingAngle),
                 simParameters.cellFunctionMuscleBendingAngle);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Bending acceleration")
+                    .textWidth(RightColumnWidth)
+                    .min(0)
+                    .max(0.5f)
+                    .defaultValue(origSimParameters.cellFunctionMuscleBendingAcceleration),
+                simParameters.cellFunctionMuscleBendingAcceleration);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Bending acceleration threshold")
+                    .textWidth(RightColumnWidth)
+                    .min(0)
+                    .max(1.0f)
+                    .defaultValue(origSimParameters.cellFunctionMuscleBendingAccelerationThreshold),
+                simParameters.cellFunctionMuscleBendingAccelerationThreshold);
             ImGui::TreePop();
         }
 
@@ -774,7 +792,10 @@ void _SimulationParametersWindow::processBase(
     validationAndCorrection(simParameters);
 }
 
-void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot)
+void _SimulationParametersWindow::processSpot(
+    SimulationParametersSpot& spot,
+    SimulationParametersSpot const& origSpot,
+    SimulationParameters const& parameters)
 {
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
@@ -867,9 +888,12 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
          */
         if (ImGui::TreeNodeEx("Flow", flags)) {
             AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Type").values({"None", "Radial flow"}).textWidth(RightColumnWidth).defaultValue(origSpot.flowType),
+                AlienImGui::ComboParameters()
+                    .name("Type")
+                    .values({"None", "Radial flow"})
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSpot.flowType),
                 spot.flowType);
-
             if (spot.flowType == FlowType_Radial) {
                 AlienImGui::Combo(
                     AlienImGui::ComboParameters()
@@ -904,8 +928,10 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .max(1)
                     .logarithmic(true)
                     .defaultValue(origSpot.values.friction)
+                    .disabledValue(parameters.baseValues.friction)
                     .format("%.4f"),
-                spot.values.friction);
+                spot.values.friction,
+                &spot.activatedValues.friction);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Rigidity")
@@ -913,16 +939,20 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .min(0)
                     .max(1)
                     .defaultValue(origSpot.values.rigidity)
+                    .disabledValue(parameters.baseValues.rigidity)
                     .format("%.2f"),
-                spot.values.rigidity);
+                spot.values.rigidity,
+                &spot.activatedValues.rigidity);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum force")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(3.0f)
-                    .defaultValue(origSpot.values.cellMaxForce),
-                spot.values.cellMaxForce);
+                    .defaultValue(origSpot.values.cellMaxForce)
+                    .disabledValue(parameters.baseValues.cellMaxForce),
+                spot.values.cellMaxForce,
+                &spot.activatedValues.cellMaxForce);
             ImGui::TreePop();
         }
 
@@ -938,8 +968,10 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .max(0.01f)
                     .logarithmic(true)
                     .defaultValue(origSpot.values.radiationFactor)
+                    .disabledValue(parameters.baseValues.radiationFactor)
                     .format("%.6f"),
-                spot.values.radiationFactor);
+                spot.values.radiationFactor,
+                &spot.activatedValues.radiationFactor);
             ImGui::TreePop();
         }
 
@@ -953,8 +985,10 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .textWidth(RightColumnWidth)
                     .min(10.0f)
                     .max(200.0f)
-                    .defaultValue(origSpot.values.cellMinEnergy),
-                spot.values.cellMinEnergy);
+                    .defaultValue(origSpot.values.cellMinEnergy)
+                    .disabledValue(parameters.baseValues.cellMinEnergy),
+                spot.values.cellMinEnergy,
+                &spot.activatedValues.cellMinEnergy);
             ImGui::TreePop();
         }
 
@@ -968,8 +1002,10 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
-                    .defaultValue(origSpot.values.cellFusionVelocity),
-                spot.values.cellFusionVelocity);
+                    .defaultValue(origSpot.values.cellFusionVelocity)
+                    .disabledValue(parameters.baseValues.cellFusionVelocity),
+                spot.values.cellFusionVelocity,
+                &spot.activatedValues.cellFusionVelocity);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Binding max energy")
@@ -978,8 +1014,10 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .max(1000000.0f)
                     .logarithmic(true)
                     .format("%.0f")
-                    .defaultValue(origSpot.values.cellMaxBindingEnergy),
-                spot.values.cellMaxBindingEnergy);
+                    .defaultValue(origSpot.values.cellMaxBindingEnergy)
+                    .disabledValue(parameters.baseValues.cellMaxBindingEnergy),
+                spot.values.cellMaxBindingEnergy,
+                &spot.activatedValues.cellMaxBindingEnergy);
             if (spot.values.cellMaxBindingEnergy < spot.values.cellMinEnergy + 10.0f) {
                 spot.values.cellMaxBindingEnergy = spot.values.cellMinEnergy + 10.0f;
             }
@@ -990,7 +1028,12 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
          * Cell color transition rules
          */
         if (ImGui::TreeNodeEx("Cell color transition rules", flags)) {
+            ImGui::Checkbox("##test", &spot.activatedValues.cellColorTransition);
+            ImGui::SameLine();
+            ImGui::BeginDisabled(!spot.activatedValues.cellColorTransition);
+            auto posX = ImGui::GetCursorPos().x;
             for (int color = 0; color < MAX_COLORS; ++color) {
+                ImGui::SetCursorPosX(posX);
                 ImGui::PushID(color);
                 auto parameters = AlienImGui::InputColorTransitionParameters()
                                       .textWidth(RightColumnWidth)
@@ -1006,6 +1049,13 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                 ImGui::PopID();
             }
             ImGui::TreePop();
+            ImGui::EndDisabled();
+            if (!spot.activatedValues.cellColorTransition) {
+                for (int color = 0; color < MAX_COLORS; ++color) {
+                    spot.values.cellColorTransitionTargetColor[color] = parameters.baseValues.cellColorTransitionTargetColor[color];
+                    spot.values.cellColorTransitionDuration[color] = parameters.baseValues.cellColorTransitionDuration[color];
+                }
+            }
         }
 
         /**
@@ -1101,6 +1151,8 @@ void _SimulationParametersWindow::processSpot(SimulationParametersSpot& spot, Si
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
+                    .format("%.5f")
+                    .logarithmic(true)
                     .defaultValue(origSpot.values.cellFunctionAttackerEnergyCost),
                 spot.values.cellFunctionAttackerEnergyCost);
             AlienImGui::SliderFloat(
