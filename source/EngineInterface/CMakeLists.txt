@@ -32,6 +32,7 @@ add_library(alien_engine_interface_lib
     SimulationController.h
     SimulationParameters.h
     SimulationParametersSpot.h
+    SimulationParametersSpotActivatedValues.h
     SimulationParametersSpotValues.h
     SpaceCalculator.cpp
     SpaceCalculator.h

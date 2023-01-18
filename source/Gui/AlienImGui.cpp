@@ -36,9 +36,18 @@ void AlienImGui::HelpMarker(std::string const& text)
     }
 }
 
-bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& value)
+bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& value, bool* enabled)
 {
     auto width = StyleRepository::getInstance().contentScale(parameters._textWidth);
+
+    if (enabled) {
+        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
+        if (!(*enabled)) {
+            value = *parameters._disabledValue;
+        }
+        ImGui::BeginDisabled(!(*enabled));
+        ImGui::SameLine();
+    }
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
     auto result = ImGui::SliderFloat(
         ("##" + parameters._name).c_str(),
@@ -60,6 +69,9 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& val
     ImGui::TextUnformatted(parameters._name.c_str());
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
+    }
+    if (enabled) {
+        ImGui::EndDisabled();
     }
     return result;
 }
@@ -427,6 +439,7 @@ namespace
         *outText = vector.at(idx).c_str();
         return true;
     };
+
 }
 
 bool AlienImGui::Combo(ComboParameters& parameters, int& value)
@@ -459,7 +472,6 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
     delete[] items;
-
     return result;
 }
 
@@ -1176,3 +1188,4 @@ void AlienImGui::NeuronSelection(
     drawList->AddLine(
         {inputPos[selectedInput].x, inputPos[selectedInput].y}, {outputPos[selectedOutput].x, outputPos[selectedOutput].y}, ImColor::HSV(0.0f, 0.0f, 1.0f, 0.35f), 8.0f);
 }
+

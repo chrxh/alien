@@ -18,7 +18,7 @@ namespace
 {
     auto constexpr MotionBlurStatic = 0.8f;
     auto constexpr MotionBlurMoving = 0.5f;
-    auto constexpr ZoomFactorForOverlay = 8.0f;
+    auto constexpr ZoomFactorForOverlay = 12.0f;
     auto constexpr ActionCursorRadius = 10.0f;
 }
 

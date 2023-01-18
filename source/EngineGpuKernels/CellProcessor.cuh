@@ -137,11 +137,20 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                     atomicAdd(&otherCell->temp1.y, -force.y);
                 }
 
+                auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
+                    &SimulationParametersSpotValues::cellMaxBindingEnergy,
+                    &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy,
+                    data,
+                    cell->absPos);
+
                 if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
-                    && Math::length(velDelta)
-                        >= SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellFusionVelocity, data, cell->absPos)
-                    && isApproaching && cell->energy <= cudaSimulationParameters.baseValues.cellMaxBindingEnergy
-                    && otherCell->energy <= cudaSimulationParameters.baseValues.cellMaxBindingEnergy
+                    && Math::length(velDelta) >= SpotCalculator::calcParameter(
+                           &SimulationParametersSpotValues::cellFusionVelocity,
+                           &SimulationParametersSpotActivatedValues::cellFusionVelocity,
+                           data,
+                           cell->absPos)
+                    && isApproaching && cell->energy <= cellMaxBindingEnergy
+                    && otherCell->energy <= cellMaxBindingEnergy
                     && !cell->barrier && !otherCell->barrier) {
                         CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
                 }
@@ -186,7 +195,8 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
             continue;
         }
 
-        if (Math::length(cell->temp1) > SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMaxForce, data, cell->absPos)) {
+        if (Math::length(cell->temp1) > SpotCalculator::calcParameter(
+                &SimulationParametersSpotValues::cellMaxForce, &SimulationParametersSpotActivatedValues::cellMaxForce, data, cell->absPos)) {
             if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
             }
@@ -418,7 +428,8 @@ __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
             continue;
         }
 
-        auto friction = SpotCalculator::calcParameter(&SimulationParametersSpotValues::friction, data, cell->absPos);
+        auto friction = SpotCalculator::calcParameter(
+            &SimulationParametersSpotValues::friction, &SimulationParametersSpotActivatedValues::friction, data, cell->absPos);
         cell->vel = cell->vel * (1.0f - friction);
     }
 }
@@ -436,7 +447,8 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         }
         if (data.numberGen1.random() < cudaSimulationParameters.radiationProb
             && (cell->energy > cudaSimulationParameters.radiationMinCellEnergy || cell->age > cudaSimulationParameters.radiationMinCellAge)) {
-            auto radiationFactor = SpotCalculator::calcParameter(&SimulationParametersSpotValues::radiationFactor, data, cell->absPos);
+            auto radiationFactor = SpotCalculator::calcParameter(
+                &SimulationParametersSpotValues::radiationFactor, &SimulationParametersSpotActivatedValues::radiationFactor, data, cell->absPos);
             if (radiationFactor > 0) {
 
                 auto pos = cell->absPos;
@@ -482,9 +494,10 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             continue;
         }
 
-        auto cellMinEnergy = SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell->absPos);
-        auto cellMaxBindingEnergy =
-            SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMaxBindingEnergy, data, cell->absPos);
+        auto cellMinEnergy = SpotCalculator::calcParameter(
+            &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->absPos);
+        auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
+            &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->absPos);
 
         bool decay = false;
         if (cell->livingState == LivingState_Dying) {

@@ -15,4 +15,13 @@ public:
 
 private:
     static void encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, ParserTask task);
+
+    template <typename T>
+    static void encodeDecodeSpotProperty(
+        boost::property_tree::ptree& tree,
+        T& parameter,
+        bool& isActivated,
+        T const& defaultValue,
+        std::string const& node,
+        ParserTask task);
 };

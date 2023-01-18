@@ -10,6 +10,31 @@ class SpotCalculator
 {
 public:
     template <typename T>
+    __device__ __inline__ static T calcResultingValue(
+        BaseMap const& map,
+        float2 const& worldPos,
+        T const& baseValue,
+        T (&spotValues)[MAX_SPOTS],
+        bool SimulationParametersSpotActivatedValues::*valueActivated)
+    {
+        if (0 == cudaSimulationParameters.numSpots) {
+            return baseValue;
+        } else {
+            float spotWeights[MAX_SPOTS];
+            int numValues = 0;
+            for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+                if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                    float2 spotPos = {cudaSimulationParameters.spots[i].posX, cudaSimulationParameters.spots[i].posY};
+                    auto delta = map.getCorrectedDirection(spotPos - worldPos);
+                    spotWeights[numValues] = calcWeight(delta, i);
+                    ++numValues;
+                }
+            }
+            return mix(baseValue, spotValues, spotWeights, numValues);
+        }
+    }
+
+    template <typename T>
     __device__ __inline__ static T calcResultingValue(BaseMap const& map, float2 const& worldPos, T const& baseValue, T (&spotValues)[MAX_SPOTS])
     {
         if (0 == cudaSimulationParameters.numSpots) {
@@ -23,6 +48,20 @@ public:
             }
             return mix(baseValue, spotValues, spotWeights);
         }
+    }
+
+    __device__ __inline__ static float calcParameter(
+        float SimulationParametersSpotValues::*value,
+        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        SimulationData const& data,
+        float2 const& worldPos)
+    {
+        float spotValues[MAX_SPOTS];
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            spotValues[i] = cudaSimulationParameters.spots[i].values.*value;
+        }
+
+        return calcResultingValue(data.cellMap, worldPos, cudaSimulationParameters.baseValues.*value, spotValues, valueActivated);
     }
 
     __device__ __inline__ static float calcParameter(float SimulationParametersSpotValues::*value, SimulationData const& data, float2 const& worldPos)
@@ -108,7 +147,23 @@ private:
         return result;
     }
 
-        __device__ __inline__ static float mix(float const& baseValue, float (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS])
+    __device__ __inline__ static float mix(float const& baseValue, float (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS], int numValues)
+    {
+        float baseFactor = 1;
+        float sum = 0;
+        for (int i = 0; i < numValues; ++i) {
+            baseFactor *= spotWeights[i];
+            sum += 1 - spotWeights[i];
+        }
+        sum += baseFactor;
+        float result = baseValue * baseFactor;
+        for (int i = 0; i < numValues; ++i) {
+            result += spotValues[i] * (1 - spotWeights[i]) / sum;
+        }
+        return result;
+    }
+
+    __device__ __inline__ static float mix(float const& baseValue, float (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS])
     {
         float baseFactor = 1;
         float sum = 0;

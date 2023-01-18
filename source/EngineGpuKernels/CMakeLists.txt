@@ -29,7 +29,6 @@ add_library(alien_engine_gpu_kernels_lib
     EditKernels.cuh
     EditKernelsLauncher.cu
     EditKernelsLauncher.cuh
-    EnergyGuidance.cuh
     FlowFieldKernels.cu
     FlowFieldKernels.cuh
     GarbageCollectorKernels.cu

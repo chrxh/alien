@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+#include "SimulationParametersSpotActivatedValues.h"
 #include "SimulationParametersSpotValues.h"
 
 using ShapeType = int;
@@ -78,6 +79,7 @@ struct SimulationParametersSpot
     FlowData flowData = {RadialFlow()};
 
     SimulationParametersSpotValues values;
+    SimulationParametersSpotActivatedValues activatedValues;
 
     bool operator==(SimulationParametersSpot const& other) const
     {
@@ -103,7 +105,8 @@ struct SimulationParametersSpot
             }
         }
 
-        return color == other.color && posX == other.posX && posY == other.posY && fadeoutRadius == other.fadeoutRadius && values == other.values && shapeType == other.shapeType;
+        return color == other.color && posX == other.posX && posY == other.posY && fadeoutRadius == other.fadeoutRadius && values == other.values
+            && activatedValues == other.activatedValues && shapeType == other.shapeType;
     }
     bool operator!=(SimulationParametersSpot const& other) const { return !operator==(other); }
 };
