@@ -447,12 +447,12 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
             bool pulseGeneration = nerve.pulseMode > 0;
             table.next();
-            if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Pulse generation").textWidth(ContentTextWidth), pulseGeneration)) {
+            if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(ContentTextWidth), pulseGeneration)) {
                 nerve.pulseMode = pulseGeneration ? 1 : 0;
             }
             if (pulseGeneration) {
                 table.next();
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(ContentTextWidth), nerve.pulseMode);
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Pulse interval").textWidth(ContentTextWidth), nerve.pulseMode);
                 bool alternation = nerve.alternationMode > 0;
                 table.next();
                 if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(ContentTextWidth), alternation)) {
@@ -460,7 +460,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 }
                 if (alternation) {
                     table.next();
-                    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Number of pulses").textWidth(ContentTextWidth), nerve.alternationMode);
+                    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(ContentTextWidth), nerve.alternationMode);
                 }
             }
         } break;
@@ -520,7 +520,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
             std::string content;
             if (constructor.isMakeGenomeCopy()) {
-                content = "Make copy of this genome";
+                content = "Self-copy of genome";
             } else {
                 auto size = constructor.getGenomeData().size();
                 if (size > 0) {
@@ -548,13 +548,13 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             }
             ImGui::EndDisabled();
             ImGui::SameLine();
-            if (AlienImGui::Button("This")) {
-                constructor.setMakeGenomeCopy();
-            }
-            ImGui::SameLine();
             if (AlienImGui::Button("Edit")) {
                 auto genomeToOpen = constructor.isMakeGenomeCopy() ? tab.genome : GenomeDescriptionConverter::convertBytesToDescription(constructor.getGenomeData(), _simulationController->getSimulationParameters());
                 openTab(genomeToOpen);
+            }
+            ImGui::SameLine();
+            if (AlienImGui::Button("Set self-copy")) {
+                constructor.setMakeGenomeCopy();
             }
         } break;
         }
