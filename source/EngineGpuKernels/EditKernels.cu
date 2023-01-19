@@ -296,6 +296,7 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
         auto const& cell = data.objects.cellPointers.at(index);
         if (isSelected(cell, updateData.considerClusters)) {
             cell->absPos = cell->absPos + float2{updateData.posDeltaX, updateData.posDeltaY};
+            data.cellMap.correctPosition(cell->absPos);
             cell->vel = cell->vel + float2{updateData.velDeltaX, updateData.velDeltaY};
         }
     }
@@ -305,6 +306,7 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
         auto const& particle = data.objects.particlePointers.at(index);
         if (0 != particle->selected) {
             particle->absPos = particle->absPos + float2{updateData.posDeltaX, updateData.posDeltaY};
+            data.particleMap.correctPosition(particle->absPos);
             particle->vel = particle->vel + float2{updateData.velDeltaX, updateData.velDeltaY};
         }
     }
