@@ -384,7 +384,7 @@ void _SimulationView::updateImageFromSimulation()
             if (overlayElement.selected == 1) {
                 auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y});
                 if (_viewport->isVisible(viewPos)) {
-                    drawList->AddCircle({viewPos.x, viewPos.y}, _viewport->getZoomFactor() * 0.65f, Const::SelectedCellOverlayColor, 0, 2.0f);
+                    drawList->AddCircle({viewPos.x, viewPos.y}, _viewport->getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
                 }
             }
         }

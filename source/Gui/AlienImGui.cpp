@@ -1134,13 +1134,17 @@ void AlienImGui::NeuronSelection(
         ImGui::PopStyleColor(3);
         if (i == 0) {
             Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell\n" ICON_FA_CARET_RIGHT
-                    " Constructor: = 0 means do nothing, abs(*) > threshold means try construct cell\n" ICON_FA_CARET_RIGHT
-                    " Attacker: = 0 means do nothing, abs(*) > threshold means try attack nearby cells\n" ICON_FA_CARET_RIGHT
-                    " Sensor: = 0 means do nothing, abs(*) > threshold means scan vicinity for cells\n" ICON_FA_CARET_RIGHT
-                    " Injector: = 0 means do nothing, abs(*) > threshold means try inject genome to other constructors\n" ICON_FA_CARET_RIGHT
+                    " Constructor: = 0 means do nothing, abs(*) > threshold triggers cell construction\n" ICON_FA_CARET_RIGHT
+                    " Attacker: = 0 means do nothing, abs(*) > threshold triggers attacking of nearby cells\n" ICON_FA_CARET_RIGHT
+                    " Sensor: = 0 means do nothing, abs(*) > threshold triggers scanning for cells\n" ICON_FA_CARET_RIGHT
+                    " Injector: = 0 means do nothing, abs(*) > threshold triggers injection of a genome to other constructors\n" ICON_FA_CARET_RIGHT
                     " Muscle: abs(*) intensity of muscle process and sign(*) direction of muscle process");
         }
-        if (i > 0) {
+        if (i == 1) {
+            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell\n" ICON_FA_CARET_RIGHT
+                    " Muscle: abs(*) > threshold triggers tangential movement during bending");
+        }
+        if (i > 1) {
             Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell");
         }
     }
