@@ -63,8 +63,6 @@ private:
 
     bool _on = false;
 
-    std::optional<RealVector2D> _prevMousePosInt;
-
     struct SelectionRect
     {
         RealVector2D startPos;
@@ -73,4 +71,6 @@ private:
     std::optional<SelectionRect> _selectionRect;
     std::vector<InspectorWindow> _inspectorWindows;
     DataDescription _drawing;
+    std::optional<RealVector2D> _selectionPositionOnClick;
+    std::optional<RealVector2D> _prevMousePos;
 };

@@ -209,52 +209,79 @@ void _EditorController::onDelete()
 
 void _EditorController::processEvents()
 {
+    auto running = _simController->isSimulationRunning();
+
+    RealVector2D mousePos{ImGui::GetMousePos().x, ImGui::GetMousePos().y};
+    RealVector2D prevMousePos = _prevMousePos ? *_prevMousePos : mousePos;
+
     if (!ImGui::GetIO().WantCaptureMouse) {
-        auto mousePosImVec = ImGui::GetMousePos();
-        RealVector2D mousePos{mousePosImVec.x, mousePosImVec.y};
-        RealVector2D prevMousePosInt = _prevMousePosInt ? *_prevMousePosInt : mousePos;
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            if (!_simController->isSimulationRunning()) {
+            if (!running) {
                 if (!_editorModel->isDrawMode()) {
                     selectEntities(mousePos, ImGui::GetIO().KeyCtrl);
                 } else {
                     _creatorWindow->onDrawing();
                 }
+            } else {
+                selectEntities(mousePos, ImGui::GetIO().KeyCtrl);
+                auto shallowData = _simController->getSelectionShallowData();
+                _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
             }
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            if (!_simController->isSimulationRunning()) {
+            if (!running) {
                 if (!_editorModel->isDrawMode()) {
-                    moveSelectedEntities(mousePos, prevMousePosInt);
+                    moveSelectedEntities(mousePos, prevMousePos);
                 } else {
                     _creatorWindow->onDrawing();
                 }
             } else {
-                applyForces(mousePos, prevMousePosInt);
+                auto shallowData = _simController->getSelectionShallowData();
+                auto selectionPosition = RealVector2D{shallowData.centerPosX, shallowData.centerPosY};
+                auto selectionDelta = selectionPosition - *_selectionPositionOnClick;
+                auto mouseDelta = ImGui::GetMouseDragDelta();
+
+                auto zoom = _viewport->getZoomFactor();
+                ShallowUpdateSelectionData updateData;
+                updateData.considerClusters = true;
+                updateData.posDeltaX = -selectionDelta.x + mouseDelta.x / zoom;
+                updateData.posDeltaY = -selectionDelta.y + mouseDelta.y / zoom;
+                _simController->shallowUpdateSelectedObjects(updateData);
             }
         }
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-            if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
+            if (!running && !_editorModel->isDrawMode()) {
                 createSelectionRect(mousePos);
             }
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
-            if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
-                resizeSelectionRect(mousePos, prevMousePosInt);
+            if (!running && !_editorModel->isDrawMode()) {
+                resizeSelectionRect(mousePos, prevMousePos);
+            }
+            if (running) {
+                applyForces(mousePos, prevMousePos);
             }
         }
-
-        _prevMousePosInt = mousePos;
     }
 
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-        if (_editorModel->isDrawMode()) {
-            _creatorWindow->finishDrawing();
+        if (!running) {
+            if (_editorModel->isDrawMode()) {
+                _creatorWindow->finishDrawing();
+            }
+        } else {
+            auto zoom = _viewport->getZoomFactor();
+            ShallowUpdateSelectionData updateData;
+            updateData.considerClusters = true;
+            auto mouseDelta = mousePos - prevMousePos;
+            updateData.velDeltaX = mouseDelta.x / zoom / 10;
+            updateData.velDeltaY = mouseDelta.y / zoom / 10;
+            _simController->shallowUpdateSelectedObjects(updateData);
         }
     }
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
-        if (!_simController->isSimulationRunning()) {
+        if (!running) {
             removeSelectionRect();
         }
     }
@@ -262,6 +289,7 @@ void _EditorController::processEvents()
     if (_simController->updateSelectionIfNecessary()) {
         _editorModel->update();
     }
+    _prevMousePos = mousePos;
 }
 
 void _EditorController::processSelectionRect()
