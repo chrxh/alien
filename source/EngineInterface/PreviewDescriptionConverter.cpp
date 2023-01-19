@@ -103,7 +103,7 @@ namespace
             }
 
             if (index > 0) {
-                result.direction = Math::rotateClockwise(-result.direction, -(180.0f - node.referenceAngle));
+                result.direction = Math::rotateClockwise(-result.direction, (180.0f + node.referenceAngle));
             }
 
             //create cell description intern
@@ -222,7 +222,7 @@ namespace
                 if (angles.size() == 1) {
                     targetAngle = angles.front() + 180.0f;
                 }
-
+                targetAngle += subGenome.front().referenceAngle;
                 auto direction = Math::unitVectorOfAngle(targetAngle);
                 auto previewPart = processGenomeDescription(subGenome, cellIntern.nodeIndex, cellIntern.pos + direction, targetAngle, parameters);
                 insert(result, previewPart);
