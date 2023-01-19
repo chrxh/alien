@@ -240,14 +240,17 @@ void _EditorController::processEvents()
                 auto shallowData = _simController->getSelectionShallowData();
                 auto selectionPosition = RealVector2D{shallowData.centerPosX, shallowData.centerPosY};
                 auto selectionDelta = selectionPosition - *_selectionPositionOnClick;
-                auto mouseDelta = ImGui::GetMouseDragDelta();
+                auto worldSize = _simController->getWorldSize();
+                if (Math::length(selectionDelta) < std::min(worldSize.x, worldSize.y) / 2 ) {
+                    auto mouseDelta = ImGui::GetMouseDragDelta();
 
-                auto zoom = _viewport->getZoomFactor();
-                ShallowUpdateSelectionData updateData;
-                updateData.considerClusters = true;
-                updateData.posDeltaX = -selectionDelta.x + mouseDelta.x / zoom;
-                updateData.posDeltaY = -selectionDelta.y + mouseDelta.y / zoom;
-                _simController->shallowUpdateSelectedObjects(updateData);
+                    auto zoom = _viewport->getZoomFactor();
+                    ShallowUpdateSelectionData updateData;
+                    updateData.considerClusters = true;
+                    updateData.posDeltaX = -selectionDelta.x + mouseDelta.x / zoom;
+                    updateData.posDeltaY = -selectionDelta.y + mouseDelta.y / zoom;
+                    _simController->shallowUpdateSelectedObjects(updateData);
+                }
             }
         }
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
