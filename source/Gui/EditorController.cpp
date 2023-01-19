@@ -59,59 +59,8 @@ void _EditorController::process()
     processInspectorWindows();
 
     _editorModel->setForceNoRollout(ImGui::GetIO().KeyShift);
-    if (!ImGui::GetIO().WantCaptureMouse) {
-        auto mousePosImVec = ImGui::GetMousePos();
-        RealVector2D mousePos{mousePosImVec.x, mousePosImVec.y};
-        RealVector2D prevMousePosInt = _prevMousePosInt ? *_prevMousePosInt : mousePos;
 
-        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            if (!_simController->isSimulationRunning()) {
-                if (!_editorModel->isDrawMode()) {
-                    selectEntities(mousePos, ImGui::GetIO().KeyCtrl);
-                } else {
-                    _creatorWindow->onDrawing();
-                }
-            }
-        }
-        if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            if (!_simController->isSimulationRunning()) {
-                if (!_editorModel->isDrawMode()) {
-                    moveSelectedEntities(mousePos, prevMousePosInt);
-                } else {
-                    _creatorWindow->onDrawing();
-                }
-            } else {
-                applyForces(mousePos, prevMousePosInt);
-            }
-        }
-        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-            if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
-                createSelectionRect(mousePos);
-            }
-        }
-        if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
-            if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
-                resizeSelectionRect(mousePos, prevMousePosInt);
-            }
-        }
-
-        _prevMousePosInt = mousePos;
-    }
-
-    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-        if (_editorModel->isDrawMode()) {
-            _creatorWindow->finishDrawing();
-        }
-    }
-    if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
-        if (!_simController->isSimulationRunning()) {
-            removeSelectionRect();
-        }
-    }
-
-    if (_simController->updateSelectionIfNecessary()) {
-        _editorModel->update();
-    }
+    processEvents();
 }
 
 SelectionWindow _EditorController::getSelectionWindow() const
@@ -256,6 +205,63 @@ bool _EditorController::isDeletingPossible() const
 void _EditorController::onDelete()
 {
     _patternEditorWindow->onDelete();
+}
+
+void _EditorController::processEvents()
+{
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        auto mousePosImVec = ImGui::GetMousePos();
+        RealVector2D mousePos{mousePosImVec.x, mousePosImVec.y};
+        RealVector2D prevMousePosInt = _prevMousePosInt ? *_prevMousePosInt : mousePos;
+
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+            if (!_simController->isSimulationRunning()) {
+                if (!_editorModel->isDrawMode()) {
+                    selectEntities(mousePos, ImGui::GetIO().KeyCtrl);
+                } else {
+                    _creatorWindow->onDrawing();
+                }
+            }
+        }
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+            if (!_simController->isSimulationRunning()) {
+                if (!_editorModel->isDrawMode()) {
+                    moveSelectedEntities(mousePos, prevMousePosInt);
+                } else {
+                    _creatorWindow->onDrawing();
+                }
+            } else {
+                applyForces(mousePos, prevMousePosInt);
+            }
+        }
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+            if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
+                createSelectionRect(mousePos);
+            }
+        }
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+            if (!_simController->isSimulationRunning() && !_editorModel->isDrawMode()) {
+                resizeSelectionRect(mousePos, prevMousePosInt);
+            }
+        }
+
+        _prevMousePosInt = mousePos;
+    }
+
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+        if (_editorModel->isDrawMode()) {
+            _creatorWindow->finishDrawing();
+        }
+    }
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+        if (!_simController->isSimulationRunning()) {
+            removeSelectionRect();
+        }
+    }
+
+    if (_simController->updateSelectionIfNecessary()) {
+        _editorModel->update();
+    }
 }
 
 void _EditorController::processSelectionRect()

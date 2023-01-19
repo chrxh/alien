@@ -38,9 +38,9 @@ public:
 
 
 private:
+    void processEvents();
     void processSelectionRect();
     void processInspectorWindows();
-
 
     void selectEntities(RealVector2D const& viewPos, bool modifierKeyPressed);
     void moveSelectedEntities(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
