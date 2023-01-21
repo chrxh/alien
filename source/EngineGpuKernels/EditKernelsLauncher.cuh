@@ -19,19 +19,20 @@ public:
     void updateSelection(GpuSettings const& gpuSettings, SimulationData const& data);
 
     void getSelectionShallowData(GpuSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult);
-    void shallowUpdateSelectedEntities(
+    void shallowUpdateSelectedObjects(
         GpuSettings const& gpuSettings,
         SimulationData const& data,
         ShallowUpdateSelectionData const& updateData);
-    void removeSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
-    void relaxSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
-    void uniformVelocitiesForSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
+    void removeSelectedObjects(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
+    void relaxSelectedObjects(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
+    void uniformVelocities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
     void makeSticky(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
     void removeStickiness(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
     void setBarrier(GpuSettings const& gpuSettings, SimulationData const& data, bool value, bool includeClusters);
-    void reconnectSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data);
+    void reconnect(GpuSettings const& gpuSettings, SimulationData const& data);
     void changeSimulationData(GpuSettings const& gpuSettings, SimulationData const& data, DataTO const& changeDataTO);
     void colorSelectedCells(GpuSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters);
+    void setDetached(GpuSettings const& gpuSettings, SimulationData const& data, bool value);
 
     void applyForce(GpuSettings const& gpuSettings, SimulationData const& data, ApplyForceData const& applyData);
 

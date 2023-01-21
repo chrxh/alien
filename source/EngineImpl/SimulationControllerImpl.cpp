@@ -153,6 +153,11 @@ void _SimulationControllerImpl::reconnectSelectedObjects()
     _worker.reconnectSelectedObjects();
 }
 
+void _SimulationControllerImpl::setDetached(bool value)
+{
+    _worker.setDetached(value);
+}
+
 void _SimulationControllerImpl::changeCell(CellDescription const& changedCell)
 {
     _worker.changeCell(changedCell);

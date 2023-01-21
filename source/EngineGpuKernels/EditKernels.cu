@@ -602,3 +602,15 @@ __global__ void cudaFinalizeSelectionResult(SelectionResult result)
 {
     result.finalize();
 }
+
+__global__ void cudaSetDetached(SimulationData data, bool value)
+{
+    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = data.objects.cellPointers.at(index);
+        if (0 != cell->selected) {
+            cell->detached = value ? 1 : 0;
+        }
+    }
+}

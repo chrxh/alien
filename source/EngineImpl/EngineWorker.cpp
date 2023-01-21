@@ -449,6 +449,12 @@ void EngineWorker::reconnectSelectedObjects()
     _cudaSimulation->reconnectSelectedObjects();
 }
 
+void EngineWorker::setDetached(bool value)
+{
+    EngineWorkerGuard access(this);
+    _cudaSimulation->setDetached(value);
+}
+
 void EngineWorker::runThreadLoop()
 {
     try {

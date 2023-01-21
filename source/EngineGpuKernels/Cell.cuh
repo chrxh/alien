@@ -141,6 +141,7 @@ struct Cell
 
     //editing data
     int selected;   //0 = no, 1 = selected, 2 = cluster selected
+    int detached;  //0 = no, 1 = yes
 
     //temporary data for algorithms
     int activityFetched; //0 = no, 1 = yes
