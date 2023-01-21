@@ -71,7 +71,7 @@ void _EditKernelsLauncher::getSelectionShallowData(GpuSettings const& gpuSetting
     KERNEL_CALL_1_1(cudaFinalizeSelectionResult, selectionResult);
 }
 
-void _EditKernelsLauncher::shallowUpdateSelectedEntities(
+void _EditKernelsLauncher::shallowUpdateSelectedObjects(
     GpuSettings const& gpuSettings,
     SimulationData const& data,
     ShallowUpdateSelectionData const& updateData)
@@ -133,7 +133,7 @@ void _EditKernelsLauncher::shallowUpdateSelectedEntities(
     }
 }
 
-void _EditKernelsLauncher::removeSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void _EditKernelsLauncher::removeSelectedObjects(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
 {
     KERNEL_CALL(cudaRemoveSelectedCellConnections, data, includeClusters);
 
@@ -143,12 +143,12 @@ void _EditKernelsLauncher::removeSelectedEntities(GpuSettings const& gpuSettings
     _garbageCollector->cleanupAfterDataManipulation(gpuSettings, data);
 }
 
-void _EditKernelsLauncher::relaxSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void _EditKernelsLauncher::relaxSelectedObjects(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
 {
     KERNEL_CALL(cudaRelaxSelectedEntities, data, includeClusters);
 }
 
-void _EditKernelsLauncher::uniformVelocitiesForSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void _EditKernelsLauncher::uniformVelocities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
 {
     setValueToDevice(_cudaVelocity, float2{0, 0});
     setValueToDevice(_cudaNumEntities, 0);
@@ -177,7 +177,7 @@ void _EditKernelsLauncher::setBarrier(GpuSettings const& gpuSettings, Simulation
     KERNEL_CALL(cudaSetBarrier, data, value, includeClusters);
 }
 
-void _EditKernelsLauncher::reconnectSelectedEntities(GpuSettings const& gpuSettings, SimulationData const& data)
+void _EditKernelsLauncher::reconnect(GpuSettings const& gpuSettings, SimulationData const& data)
 {
     int counter = 10;
     do {
@@ -238,6 +238,11 @@ void _EditKernelsLauncher::changeSimulationData(GpuSettings const& gpuSettings, 
 void _EditKernelsLauncher::colorSelectedCells(GpuSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters)
 {
     KERNEL_CALL(cudaColorSelectedCells, data, color, includeClusters);
+}
+
+void _EditKernelsLauncher::setDetached(GpuSettings const& gpuSettings, SimulationData const& data, bool value)
+{
+    KERNEL_CALL(cudaSetDetached, data, value);
 }
 
 void _EditKernelsLauncher::applyForce(GpuSettings const& gpuSettings, SimulationData const& data, ApplyForceData const& applyData)

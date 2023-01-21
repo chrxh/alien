@@ -98,6 +98,7 @@ public:
     void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData);
     void colorSelectedObjects(unsigned char color, bool includeClusters);
     void reconnectSelectedObjects();
+    void setDetached(bool value);
 
     void runThreadLoop();
     void runSimulation();

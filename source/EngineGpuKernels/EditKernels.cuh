@@ -48,3 +48,4 @@ __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData);
 __global__ void cudaResetSelectionResult(SelectionResult result);
 __global__ void cudaGetSelectionShallowData(SimulationData data, SelectionResult result);
 __global__ void cudaFinalizeSelectionResult(SelectionResult result);
+__global__ void cudaSetDetached(SimulationData data, bool value);

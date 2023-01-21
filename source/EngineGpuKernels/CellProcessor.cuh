@@ -91,6 +91,9 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
             if (!otherCell || otherCell == cell) {
                 continue;
             }
+            if (cell->detached + otherCell->detached == 1) {
+                continue;
+            }
 
             auto posDelta = cell->absPos - otherCell->absPos;
             data.cellMap.correctDirection(posDelta);
@@ -99,10 +102,6 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
             if (distance >= cudaSimulationParameters.cellMaxCollisionDistance
                 /*|| distance <= cudaSimulationParameters.cellMinDistance*/) {
                 continue;
-            }
-
-            if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1 && !cell->barrier) {
-//                CellConnectionProcessor::scheduleDelConnections(data, cell);
             }
 
             bool alreadyConnected = false;

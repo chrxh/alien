@@ -288,19 +288,19 @@ void _CudaSimulationFacade::setSimulationData(DataTO const& dataTO)
 
 void _CudaSimulationFacade::removeSelectedObjects(bool includeClusters)
 {
-    _editKernels->removeSelectedEntities(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
+    _editKernels->removeSelectedObjects(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::relaxSelectedObjects(bool includeClusters)
 {
-    _editKernels->relaxSelectedEntities(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
+    _editKernels->relaxSelectedObjects(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
     syncAndCheck();
 }
 
 void _CudaSimulationFacade::uniformVelocitiesForSelectedObjects(bool includeClusters)
 {
-    _editKernels->uniformVelocitiesForSelectedEntities(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
+    _editKernels->uniformVelocities(_settings.gpuSettings, getSimulationDataIntern(), includeClusters);
     syncAndCheck();
 }
 
@@ -363,7 +363,7 @@ void _CudaSimulationFacade::setSelection(AreaSelectionData const& selectionData)
 
 void _CudaSimulationFacade::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& shallowUpdateData)
 {
-    _editKernels->shallowUpdateSelectedEntities(_settings.gpuSettings, getSimulationDataIntern(), shallowUpdateData);
+    _editKernels->shallowUpdateSelectedObjects(_settings.gpuSettings, getSimulationDataIntern(), shallowUpdateData);
     syncAndCheck();
 }
 
@@ -387,7 +387,13 @@ void _CudaSimulationFacade::colorSelectedObjects(unsigned char color, bool inclu
 
 void _CudaSimulationFacade::reconnectSelectedObjects()
 {
-    _editKernels->reconnectSelectedEntities(_settings.gpuSettings, getSimulationDataIntern());
+    _editKernels->reconnect(_settings.gpuSettings, getSimulationDataIntern());
+    syncAndCheck();
+}
+
+void _CudaSimulationFacade::setDetached(bool value)
+{
+    _editKernels->setDetached(_settings.gpuSettings, getSimulationDataIntern(), value);
     syncAndCheck();
 }
 

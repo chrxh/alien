@@ -66,6 +66,9 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO
 
     changeCellFromTO(dataTO, cellTO, cell);
     cell->id = createIds ? _data->numberGen1.createNewId_kernel() : cellTO.id;
+    cell->locked = 0;
+    cell->detached = 0;
+    cell->selected = 0;
     cell->numConnections = cellTO.numConnections;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connectingCell = cell->connections[i];
@@ -209,90 +212,91 @@ ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel
 
 __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2 const& pos, float2 const& vel)
 {
-    auto result = _data->objects.cells.getNewElement();
+    auto cell = _data->objects.cells.getNewElement();
     auto cellPointers = _data->objects.cellPointers.getNewElement();
-    *cellPointers = result;
+    *cellPointers = cell;
 
-    result->id = _data->numberGen1.createNewId_kernel();
-    result->absPos = pos;
-    result->vel = vel;
-    result->energy = energy;
-    result->stiffness = _data->numberGen1.random();
-    result->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
-    result->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumbers - 1);
-    result->numConnections = 0;
-    result->livingState = false;
-    result->locked = 0;
-    result->selected = 0;
-    result->color = 0;
-    result->metadata.nameSize = 0;
-    result->metadata.descriptionSize = 0;
-    result->barrier = false;
-    result->age = 0;
-    result->activationTime = 0;
-    result->inputBlocked = _data->numberGen1.randomBool();
-    result->outputBlocked = _data->numberGen1.randomBool();
+    cell->id = _data->numberGen1.createNewId_kernel();
+    cell->absPos = pos;
+    cell->vel = vel;
+    cell->energy = energy;
+    cell->stiffness = _data->numberGen1.random();
+    cell->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
+    cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumbers - 1);
+    cell->numConnections = 0;
+    cell->livingState = false;
+    cell->locked = 0;
+    cell->selected = 0;
+    cell->detached = 0;
+    cell->color = 0;
+    cell->metadata.nameSize = 0;
+    cell->metadata.descriptionSize = 0;
+    cell->barrier = false;
+    cell->age = 0;
+    cell->activationTime = 0;
+    cell->inputBlocked = _data->numberGen1.randomBool();
+    cell->outputBlocked = _data->numberGen1.randomBool();
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        result->activity.channels[i] = 0;
+        cell->activity.channels[i] = 0;
     }
 
     if (cudaSimulationParameters.particleTransformationRandomCellFunction) {
-        result->cellFunction = _data->numberGen1.random(CellFunction_Count - 1);
-        switch (result->cellFunction) {
+        cell->cellFunction = _data->numberGen1.random(CellFunction_Count - 1);
+        switch (cell->cellFunction) {
         case CellFunction_Neuron: {
-            result->cellFunctionData.neuron.neuronState =
+            cell->cellFunctionData.neuron.neuronState =
                 reinterpret_cast<NeuronFunction::NeuronState*>(_data->objects.auxiliaryData.getAlignedSubArray(sizeof(NeuronFunction::NeuronState)));
             for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-                result->cellFunctionData.neuron.neuronState->weights[i] = _data->numberGen1.random(2.0f) - 1.0f;
+                cell->cellFunctionData.neuron.neuronState->weights[i] = _data->numberGen1.random(2.0f) - 1.0f;
             }
             for (int i = 0; i < MAX_CHANNELS; ++i) {
-                result->cellFunctionData.neuron.neuronState->biases[i] = _data->numberGen1.random(2.0f) - 1.0f;
+                cell->cellFunctionData.neuron.neuronState->biases[i] = _data->numberGen1.random(2.0f) - 1.0f;
             }
         } break;
         case CellFunction_Transmitter: {
-            result->cellFunctionData.transmitter.mode = _data->numberGen1.random(EnergyDistributionMode_Count - 1);
+            cell->cellFunctionData.transmitter.mode = _data->numberGen1.random(EnergyDistributionMode_Count - 1);
         } break;
         case CellFunction_Constructor: {
             if (_data->numberGen1.randomBool()) {
-                result->cellFunctionData.constructor.activationMode = 0;
+                cell->cellFunctionData.constructor.activationMode = 0;
             } else {
-                result->cellFunctionData.constructor.activationMode = _data->numberGen1.random(50);
+                cell->cellFunctionData.constructor.activationMode = _data->numberGen1.random(50);
             }
-            result->cellFunctionData.constructor.singleConstruction = _data->numberGen1.randomBool();
-            result->cellFunctionData.constructor.separateConstruction = _data->numberGen1.randomBool();
-            result->cellFunctionData.constructor.adaptMaxConnections = _data->numberGen1.randomBool();
-            result->cellFunctionData.constructor.angleAlignment = _data->numberGen1.random(ConstructorAngleAlignment_Count - 1);
-            result->cellFunctionData.constructor.stiffness = _data->numberGen1.random();
-            result->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
-            result->cellFunctionData.constructor.genomeSize = _data->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
-            result->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(result->cellFunctionData.constructor.genomeSize);
-            auto& genome = result->cellFunctionData.constructor.genome;
-            for (int i = 0; i < result->cellFunctionData.constructor.genomeSize; ++i) {
+            cell->cellFunctionData.constructor.singleConstruction = _data->numberGen1.randomBool();
+            cell->cellFunctionData.constructor.separateConstruction = _data->numberGen1.randomBool();
+            cell->cellFunctionData.constructor.adaptMaxConnections = _data->numberGen1.randomBool();
+            cell->cellFunctionData.constructor.angleAlignment = _data->numberGen1.random(ConstructorAngleAlignment_Count - 1);
+            cell->cellFunctionData.constructor.stiffness = _data->numberGen1.random();
+            cell->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
+            cell->cellFunctionData.constructor.genomeSize = _data->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
+            cell->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.constructor.genomeSize);
+            auto& genome = cell->cellFunctionData.constructor.genome;
+            for (int i = 0; i < cell->cellFunctionData.constructor.genomeSize; ++i) {
                 genome[i] = _data->numberGen1.randomByte();
             }
-            result->cellFunctionData.constructor.currentGenomePos = 0;
+            cell->cellFunctionData.constructor.currentGenomePos = 0;
         } break;
         case CellFunction_Sensor: {
-            result->cellFunctionData.sensor.mode = _data->numberGen1.random(SensorMode_Count - 1);
-            result->cellFunctionData.sensor.angle = _data->numberGen1.random(360.0f) - 180.0f;
-            result->cellFunctionData.sensor.minDensity = _data->numberGen1.random(1.0f);
-            result->cellFunctionData.sensor.color = _data->numberGen1.random(MAX_COLORS - 1);
+            cell->cellFunctionData.sensor.mode = _data->numberGen1.random(SensorMode_Count - 1);
+            cell->cellFunctionData.sensor.angle = _data->numberGen1.random(360.0f) - 180.0f;
+            cell->cellFunctionData.sensor.minDensity = _data->numberGen1.random(1.0f);
+            cell->cellFunctionData.sensor.color = _data->numberGen1.random(MAX_COLORS - 1);
         } break;
         case CellFunction_Nerve: {
         } break;
         case CellFunction_Attacker: {
-            result->cellFunctionData.attacker.mode = _data->numberGen1.random(EnergyDistributionMode_Count - 1);
+            cell->cellFunctionData.attacker.mode = _data->numberGen1.random(EnergyDistributionMode_Count - 1);
         } break;
         case CellFunction_Injector: {
-            result->cellFunctionData.injector.genomeSize = _data->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
-            result->cellFunctionData.injector.genome = _data->objects.auxiliaryData.getAlignedSubArray(result->cellFunctionData.injector.genomeSize);
-            auto& genome = result->cellFunctionData.injector.genome;
-            for (int i = 0; i < result->cellFunctionData.injector.genomeSize; ++i) {
+            cell->cellFunctionData.injector.genomeSize = _data->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
+            cell->cellFunctionData.injector.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.injector.genomeSize);
+            auto& genome = cell->cellFunctionData.injector.genome;
+            for (int i = 0; i < cell->cellFunctionData.injector.genomeSize; ++i) {
                 genome[i] = _data->numberGen1.randomByte();
             }
         } break;
         case CellFunction_Muscle: {
-            result->cellFunctionData.muscle.mode = _data->numberGen1.random(MuscleMode_Count - 1);
+            cell->cellFunctionData.muscle.mode = _data->numberGen1.random(MuscleMode_Count - 1);
         } break;
         case CellFunction_Placeholder1: {
         } break;
@@ -301,30 +305,31 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
         }
 
     } else {
-        result->cellFunction = CellFunction_None;
+        cell->cellFunction = CellFunction_None;
     }
-    return result;
+    return cell;
 }
 
 __inline__ __device__ Cell* ObjectFactory::createCell()
 {
-    auto result = _data->objects.cells.getNewElement();
+    auto cell = _data->objects.cells.getNewElement();
     auto cellPointer = _data->objects.cellPointers.getNewElement();
-    *cellPointer = result;
+    *cellPointer = cell;
 
-    result->id = _data->numberGen1.createNewId_kernel();
-    result->stiffness = 1.0f;
-    result->selected = 0;
-    result->locked = 0;
-    result->color = 0;
-    result->metadata.nameSize = 0;
-    result->metadata.descriptionSize = 0;
-    result->barrier = 0;
-    result->age = 0;
-    result->vel = {0, 0};
-    result->activationTime = 0;
+    cell->id = _data->numberGen1.createNewId_kernel();
+    cell->stiffness = 1.0f;
+    cell->selected = 0;
+    cell->detached = 0;
+    cell->locked = 0;
+    cell->color = 0;
+    cell->metadata.nameSize = 0;
+    cell->metadata.descriptionSize = 0;
+    cell->barrier = 0;
+    cell->age = 0;
+    cell->vel = {0, 0};
+    cell->activationTime = 0;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        result->activity.channels[i] = 0;
+        cell->activity.channels[i] = 0;
     }
-    return result;
+    return cell;
 }

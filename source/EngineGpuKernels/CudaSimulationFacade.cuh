@@ -56,6 +56,7 @@ public:
     void updateSelection();
     void colorSelectedObjects(unsigned char color, bool includeClusters);
     void reconnectSelectedObjects();
+    void setDetached(bool value);
 
     void setGpuConstants(GpuSettings const& cudaConstants);
     void setSimulationParameters(SimulationParameters const& parameters);

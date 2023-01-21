@@ -151,8 +151,10 @@ public:
                     if (numCells == 18) {
                         return;
                     }
-                    cells[numCells] = slotCell;
-                    ++numCells;
+                    if (slotCell->detached + slotCell->detached != 1) {
+                        cells[numCells] = slotCell;
+                        ++numCells;
+                    }
                     slotCell = slotCell->nextCell;
                 }
             }
@@ -177,7 +179,7 @@ public:
                     if (!slotCell) {
                         break;
                     }
-                    if (Math::length(slotCell->absPos - pos) <= radius) {
+                    if (Math::length(slotCell->absPos - pos) <= radius && slotCell->detached + slotCell->detached != 1) {
                         cells[numCells] = slotCell;
                         ++numCells;
                     }
@@ -206,7 +208,7 @@ public:
                     if (!slotCell) {
                         break;
                     }
-                    if (Math::length(slotCell->absPos - pos) <= radius && matchFunc(slotCell)) {
+                    if (Math::length(slotCell->absPos - pos) <= radius && slotCell->detached + slotCell->detached != 1 && matchFunc(slotCell)) {
                         cells[numCells] = slotCell;
                         ++numCells;
                     }

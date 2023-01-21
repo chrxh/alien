@@ -61,6 +61,7 @@ public:
     void setBarrier(bool value, bool includeClusters) override;
     void colorSelectedObjects(unsigned char color, bool includeClusters) override;
     void reconnectSelectedObjects() override;
+    void setDetached(bool value) override;
     void changeCell(CellDescription const& changedCell) override;
     void changeParticle(ParticleDescription const& changedParticle) override;
 
