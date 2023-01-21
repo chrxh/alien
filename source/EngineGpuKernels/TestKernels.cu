@@ -20,6 +20,9 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationTyp
             case MutationType::CellFunction:
                 MutationProcessor::mutateCellFunction(data, cell);
                 break;
+            case MutationType::Insertion:
+                MutationProcessor::mutateInsertion(data, cell);
+                break;
             }
         }
     }

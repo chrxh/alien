@@ -267,6 +267,40 @@ struct CellGenomeDescription
         outputBlocked = value;
         return *this;
     }
+    std::optional<std::vector<uint8_t>> getSubGenome() const
+    {
+        switch (getCellFunctionType()) {
+        case CellFunction_Constructor: {
+            auto constructor = std::get<ConstructorGenomeDescription>(*cellFunction);
+            if (!constructor.isMakeGenomeCopy()) {
+                return constructor.getGenomeData();
+            } else {
+                return std::nullopt;
+            }
+        }
+        case CellFunction_Injector: {
+            auto injector = std::get<InjectorGenomeDescription>(*cellFunction);
+            if (!injector.isMakeGenomeCopy()) {
+                return injector.getGenomeData();
+            } else {
+                return std::nullopt;
+            }
+        }
+        default:
+            return std::nullopt;
+        }
+    }
+    std::optional<bool> isMakeGenomeCopy() const
+    {
+        switch (getCellFunctionType()) {
+        case CellFunction_Constructor:
+            return std::get<ConstructorGenomeDescription>(*cellFunction).isMakeGenomeCopy();
+        case CellFunction_Injector:
+            return std::get<InjectorGenomeDescription>(*cellFunction).isMakeGenomeCopy();
+        default:
+            return std::nullopt;
+        }
+    }
     CellFunction getCellFunctionType() const
     {
         if (!cellFunction) {
