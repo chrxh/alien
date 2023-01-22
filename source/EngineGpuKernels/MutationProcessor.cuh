@@ -50,7 +50,9 @@ private:
     __inline__ __device__ static int findStartNodeIndex(uint8_t* genome, int genomeSize, int refIndex);
     __inline__ __device__ static int getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeIndex);
     __inline__ __device__ static int getNextCellFunctionType(uint8_t* genome, int nodeIndex);
+    __inline__ __device__ static int getNextCellColor(uint8_t* genome, int nodeIndex);
     __inline__ __device__ static void setNextCellFunctionType(uint8_t* genome, int nodeIndex, CellFunction cellFunction);
+    __inline__ __device__ static void setNextCellColor(uint8_t* genome, int nodeIndex, int color);
     __inline__ __device__
         static int getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeIndex);  //prerequisites: (constructor or injector) and !makeSelfCopy
     __inline__ __device__
@@ -210,6 +212,10 @@ __inline__ __device__ void MutationProcessor::mutateInsertion(SimulationData& da
     int numSubGenomesSizeIndices;
     auto nodeIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, true, subGenomesSizeIndices, &numSubGenomesSizeIndices);
 
+    auto newColor = cell->color;
+    if (nodeIndex < genomeSize) {
+        newColor = getNextCellColor(genome, nodeIndex);
+    }
     auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
     auto makeSelfCopy = false;
 
@@ -226,6 +232,7 @@ __inline__ __device__ void MutationProcessor::mutateInsertion(SimulationData& da
     }
     data.numberGen1.randomBytes(targetGenome + nodeIndex, CellBasicBytes);
     setNextCellFunctionType(targetGenome, nodeIndex, newCellFunction);
+    setNextCellColor(targetGenome, nodeIndex, newColor);
     setRandomCellFunctionData(data, targetGenome, nodeIndex + CellBasicBytes, newCellFunction, makeSelfCopy, 0);
 
     for (int i = nodeIndex; i < genomeSize; ++i) {
@@ -423,9 +430,19 @@ __inline__ __device__ int MutationProcessor::getNextCellFunctionType(uint8_t* ge
     return genome[nodeIndex] % CellFunction_Count;
 }
 
+__inline__ __device__ int MutationProcessor::getNextCellColor(uint8_t* genome, int nodeIndex)
+{
+    return genome[nodeIndex + 5] % MAX_COLORS;
+}
+
 __inline__ __device__ void MutationProcessor::setNextCellFunctionType(uint8_t* genome, int nodeIndex, CellFunction cellFunction)
 {
     genome[nodeIndex] = static_cast<uint8_t>(cellFunction);
+}
+
+__inline__ __device__ void MutationProcessor::setNextCellColor(uint8_t* genome, int nodeIndex, int color)
+{
+    genome[nodeIndex + 5] = color;
 }
 
 __inline__ __device__ int MutationProcessor::getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeIndex)
