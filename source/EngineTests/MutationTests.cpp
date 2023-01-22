@@ -23,31 +23,32 @@ public:
     ~MutationTests() = default;
 
 protected:
+    std::vector<int> const GenomeCellColors = {1, 4, 5};
     std::vector<uint8_t> createGenomeWithMultipleCellsWithDifferentFunctions() const
     {
         std::vector<uint8_t> subGenome;
         for (int i = 0; i < 15; ++i) {
             subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription{
-                CellGenomeDescription().setCellFunction(NeuronGenomeDescription()),
-                CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()),
-                CellGenomeDescription(),
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeGenomeCopy()),
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)),
+                CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(GenomeCellColors[0]),
+                CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(GenomeCellColors[1]),
+                CellGenomeDescription().setColor(GenomeCellColors[2]),
+                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeGenomeCopy()).setColor(GenomeCellColors[2]),
+                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)).setColor(GenomeCellColors[0]),
             });
         };
         return GenomeDescriptionConverter::convertDescriptionToBytes({
-            CellGenomeDescription().setCellFunction(NeuronGenomeDescription()),
-            CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()),
-            CellGenomeDescription(),
-            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeGenomeCopy()),
-            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)),
-            CellGenomeDescription().setCellFunction(SensorGenomeDescription()),
-            CellGenomeDescription().setCellFunction(NerveGenomeDescription()),
-            CellGenomeDescription().setCellFunction(AttackerGenomeDescription()),
-            CellGenomeDescription().setCellFunction(InjectorGenomeDescription().setGenome(subGenome)),
-            CellGenomeDescription().setCellFunction(MuscleGenomeDescription()),
-            CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription1()),
-            CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription2()),
+            CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(GenomeCellColors[0]),
+            CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(GenomeCellColors[1]),
+            CellGenomeDescription().setColor(GenomeCellColors[0]),
+            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeGenomeCopy()).setColor(GenomeCellColors[1]),
+            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)).setColor(GenomeCellColors[0]),
+            CellGenomeDescription().setCellFunction(SensorGenomeDescription()).setColor(GenomeCellColors[2]),
+            CellGenomeDescription().setCellFunction(NerveGenomeDescription()).setColor(GenomeCellColors[1]),
+            CellGenomeDescription().setCellFunction(AttackerGenomeDescription()).setColor(GenomeCellColors[0]),
+            CellGenomeDescription().setCellFunction(InjectorGenomeDescription().setGenome(subGenome)).setColor(GenomeCellColors[0]),
+            CellGenomeDescription().setCellFunction(MuscleGenomeDescription()).setColor(GenomeCellColors[2]),
+            CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription1()).setColor(GenomeCellColors[2]),
+            CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription2()).setColor(GenomeCellColors[0]),
         });
     }
 
@@ -185,7 +186,11 @@ protected:
     {
         auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before, _parameters);
         auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after, _parameters);
-
+        for (auto const& cell : afterGenome) {
+            if (std::ranges::find(GenomeCellColors, cell.color) == GenomeCellColors.end()) {
+                return false;
+            }
+        }
         for (auto const& beforeCell : beforeGenome) {
             auto matchingAfterCells = beforeGenome | std::views::filter([&beforeCell](auto const& afterCell) {
                 auto beforeCellClone = beforeCell;
@@ -331,8 +336,9 @@ TEST_F(MutationTests, insertMutation_emptyGenome)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
+    auto cellColor = 3;
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription()).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription()).setExecutionOrderNumber(0).setColor(cellColor)});
 
     _simController->setSimulationData(data);
     _simController->testOnly_mutate(1, MutationType::Insertion);
@@ -344,6 +350,7 @@ TEST_F(MutationTests, insertMutation_emptyGenome)
 
     auto actualGenomeDescription = GenomeDescriptionConverter::convertBytesToDescription(actualConstructor.genome, _parameters);
     EXPECT_EQ(1, actualGenomeDescription.size());
+    EXPECT_EQ(cellColor, actualGenomeDescription.front().color);
 }
 
 TEST_F(MutationTests, insertMutation)
