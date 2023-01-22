@@ -14,6 +14,7 @@ public:
     __inline__ __device__ static void mutateNeuronData(SimulationData& data, Cell* cell);
     __inline__ __device__ static void mutateCellFunction(SimulationData& data, Cell* cell);
     __inline__ __device__ static void mutateInsertion(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void mutateDeletion(SimulationData& data, Cell* cell);
 
 private:
     static auto constexpr MAX_SUBGENOME_RECURSION_DEPTH = 20;
@@ -205,7 +206,7 @@ __inline__ __device__ void MutationProcessor::mutateInsertion(SimulationData& da
     auto& genome = constructor.genome;
     auto genomeSize = toInt(constructor.genomeSize);
 
-    int subGenomesSizeIndices[MAX_SUBGENOME_RECURSION_DEPTH];
+    int subGenomesSizeIndices[MAX_SUBGENOME_RECURSION_DEPTH + 1];
     int numSubGenomesSizeIndices;
     auto nodeIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, true, subGenomesSizeIndices, &numSubGenomesSizeIndices);
 
@@ -235,8 +236,46 @@ __inline__ __device__ void MutationProcessor::mutateInsertion(SimulationData& da
         auto subGenomeSize = readWord(genome, subGenomesSizeIndices[i]);
         writeWord(targetGenome, subGenomesSizeIndices[i], subGenomeSize + sizeDelta);
     }
-    if (constructor.currentGenomePos > nodeIndex) {
+    if (constructor.currentGenomePos > nodeIndex || constructor.currentGenomePos == constructor.genomeSize) {
         constructor.currentGenomePos += sizeDelta;
+    }
+    constructor.genomeSize = targetGenomeSize;
+    constructor.genome = targetGenome;
+}
+
+__inline__ __device__ void MutationProcessor::mutateDeletion(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    auto& genome = constructor.genome;
+    auto genomeSize = toInt(constructor.genomeSize);
+    if (genomeSize == 0) {
+        return;
+    }
+
+    int subGenomesSizeIndices[MAX_SUBGENOME_RECURSION_DEPTH];
+    int numSubGenomesSizeIndices;
+    auto nodeIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, false, subGenomesSizeIndices, &numSubGenomesSizeIndices);
+
+    auto origCellFunctionSize = getNextCellFunctionDataSize(genome, genomeSize, nodeIndex);
+    auto deleteSize = origCellFunctionSize + CellBasicBytes;
+
+    auto targetGenomeSize = genomeSize - deleteSize;
+    auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(targetGenomeSize);
+    for (int i = 0; i < nodeIndex; ++i) {
+        targetGenome[i] = genome[i];
+    }
+    data.numberGen1.randomBytes(targetGenome + nodeIndex, CellBasicBytes);
+
+    for (int i = nodeIndex; i < genomeSize; ++i) {
+        targetGenome[i] = genome[i + deleteSize];
+    }
+
+    for (int i = 0; i < numSubGenomesSizeIndices; ++i) {
+        auto subGenomeSize = readWord(genome, subGenomesSizeIndices[i]);
+        writeWord(targetGenome, subGenomesSizeIndices[i], subGenomeSize - deleteSize);
+    }
+    if (constructor.currentGenomePos > nodeIndex) {
+        constructor.currentGenomePos -= deleteSize;
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
@@ -250,13 +289,13 @@ __inline__ __device__ int MutationProcessor::getRandomGenomeNodeIndex(
     int* subGenomesSizeIndices,
     int* numSubGenomesSizeIndices)
 {
+    if (numSubGenomesSizeIndices) {
+        *numSubGenomesSizeIndices = 0;
+    }
     if (genomeSize == 0) {
         return 0;
     }
     auto randomRefIndex = data.numberGen1.random(genomeSize - 1);
-    if (numSubGenomesSizeIndices) {
-        *numSubGenomesSizeIndices = 0;
-    }
 
     int result = 0;
     for (int depth = 0; depth < MAX_SUBGENOME_RECURSION_DEPTH; ++depth) {
