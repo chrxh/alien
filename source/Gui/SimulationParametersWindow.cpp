@@ -550,12 +550,6 @@ void _SimulationParametersWindow::processBase(
          * Constructor
          */
         if (ImGui::TreeNodeEx("Cell function: Constructor", flags)) {
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Offspring inherit color")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.cellFunctionConstructionInheritColor),
-                simParameters.cellFunctionConstructionInheritColor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Offspring distance")

@@ -300,9 +300,6 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != LivingState_UnderConstruction) {
                 return false;
             }
-            if (cudaSimulationParameters.cellFunctionConstructionInheritColor && otherCell->color != hostCell->color) {
-                return false;
-            }
             return true;
         });
 
@@ -410,7 +407,7 @@ ConstructorProcessor::constructCellIntern(
     result->executionOrderNumber = constructionData.executionOrderNumber;
     result->livingState = true;
     result->cellFunction = constructionData.cellFunction;
-    result->color = cudaSimulationParameters.cellFunctionConstructionInheritColor ? hostCell->color : constructionData.color;
+    result->color = constructionData.color;
     result->inputBlocked = constructionData.inputBlocked;
     result->outputBlocked = constructionData.outputBlocked;
 
