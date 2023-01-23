@@ -161,6 +161,18 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         defaultParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability,
         "simulation parameters.cell.function.constructor.mutation probability.duplication",
         parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        parameters.cellFunctionConstructorMutationColor,
+        defaultParameters.cellFunctionConstructorMutationColor,
+        "simulation parameters.cell.function.constructor.mutation color",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        parameters.cellFunctionConstructorMutationSelfReplication,
+        defaultParameters.cellFunctionConstructorMutationSelfReplication,
+        "simulation parameters.cell.function.constructor.mutation self replication",
+        parserTask);
 
 
     JsonParser::encodeDecode(
