@@ -52,7 +52,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
 
         auto row = c / MAX_CHANNELS;
         auto col = c % MAX_CHANNELS;
-        atomicAdd_block(&sumInput[row], neuronsState->weights[col + row * MAX_CHANNELS] * inputActivity.channels[col]);
+        atomicAdd_block(&sumInput[row], neuronsState->weights[c] * inputActivity.channels[col]);
     }
     __syncthreads();
 
