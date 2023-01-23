@@ -192,7 +192,7 @@ protected:
             }
         }
         for (auto const& beforeCell : beforeGenome) {
-            auto matchingAfterCells = beforeGenome | std::views::filter([&beforeCell](auto const& afterCell) {
+            auto matchingAfterCells = afterGenome | std::views::filter([&beforeCell](auto const& afterCell) {
                 auto beforeCellClone = beforeCell;
                 auto afterCellClone = afterCell;
                 beforeCellClone.cellFunction.reset();
@@ -209,11 +209,55 @@ protected:
                 for (auto const& afterCell : matchingAfterCells) {
                     auto afterIsMakeCopyGenome = afterCell.isMakeGenomeCopy();
                     if (beforeIsMakeCopyGenome && *beforeIsMakeCopyGenome && afterIsMakeCopyGenome && *afterIsMakeCopyGenome) {
-                        return true;
+                        matches = true;
+                        break;
                     }
                     auto afterSubGenome = afterCell.getSubGenome();
                     if (beforeSubGenome && afterSubGenome) {
                         matches |= compareInsertMutation(*beforeSubGenome, *afterSubGenome);
+                    }
+                }
+                if (!matches) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    bool compareDeleteMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after)
+    {
+        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before, _parameters);
+        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after, _parameters);
+        for (auto const& cell : afterGenome) {
+            if (std::ranges::find(GenomeCellColors, cell.color) == GenomeCellColors.end()) {
+                return false;
+            }
+        }
+        for (auto const& afterCell : afterGenome) {
+            auto matchingBeforeCells = beforeGenome | std::views::filter([&afterCell](auto const& beforeCell) {
+                                          auto beforeCellClone = beforeCell;
+                                          auto afterCellClone = afterCell;
+                                          beforeCellClone.cellFunction.reset();
+                                          afterCellClone.cellFunction.reset();
+                                          return beforeCellClone == afterCellClone;
+                                      });
+            if (matchingBeforeCells.empty()) {
+                return false;
+            }
+            if (afterCell.getCellFunctionType() == CellFunction_Constructor || afterCell.getCellFunctionType() == CellFunction_Injector) {
+                auto matches = false;
+                auto afterSubGenome = afterCell.getSubGenome();
+                auto afterIsMakeCopyGenome = afterCell.isMakeGenomeCopy();
+                for (auto const& beforeCell : matchingBeforeCells) {
+                    auto beforeIsMakeCopyGenome = beforeCell.isMakeGenomeCopy();
+                    if (afterIsMakeCopyGenome && *afterIsMakeCopyGenome && beforeIsMakeCopyGenome && *beforeIsMakeCopyGenome) {
+                        matches = true;
+                        break;
+                    }
+                    auto beforeSubGenome = beforeCell.getSubGenome();
+                    if (beforeSubGenome && beforeSubGenome) {
+                        matches |= compareDeleteMutation(*beforeSubGenome, *beforeSubGenome);
                     }
                 }
                 if (!matches) {
@@ -370,5 +414,65 @@ TEST_F(MutationTests, insertMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareInsertMutation(genome, actualConstructor.genome));
+    EXPECT_EQ(0, actualConstructor.currentGenomePos);
+}
+
+TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
+{
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({
+        CellGenomeDescription().setCellFunction(NeuronGenomeDescription()),
+    });
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setCurrentGenomePos(0)).setExecutionOrderNumber(0)});
+
+    _simController->setSimulationData(data);
+    _simController->testOnly_mutate(1, MutationType::Deletion);
+
+    auto actualData = _simController->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    EXPECT_TRUE(actualConstructor.genome.empty());
+    EXPECT_EQ(0, actualConstructor.currentGenomePos);
+}
+
+TEST_F(MutationTests, deleteMutation_eraseLargeGenome)
+{
+    auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setCurrentGenomePos(0)).setExecutionOrderNumber(0)});
+
+    _simController->setSimulationData(data);
+    for (int i = 0; i < 10000; ++i) {
+        _simController->testOnly_mutate(1, MutationType::Deletion);
+    }
+
+    auto actualData = _simController->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    EXPECT_TRUE(actualConstructor.genome.empty());
+    EXPECT_EQ(0, actualConstructor.currentGenomePos);
+}
+
+TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
+{
+    auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setCurrentGenomePos(0)).setExecutionOrderNumber(0)});
+
+    _simController->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simController->testOnly_mutate(1, MutationType::Deletion);
+    }
+
+    auto actualData = _simController->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    EXPECT_TRUE(compareDeleteMutation(genome, actualConstructor.genome));
     EXPECT_EQ(0, actualConstructor.currentGenomePos);
 }

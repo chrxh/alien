@@ -10,14 +10,15 @@ class MutationProcessor
 public:
     __inline__ __device__ static void applyRandomMutation(SimulationData& data, Cell* cell);
 
-    __inline__ __device__ static void mutateData(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void mutateNeuronData(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void mutateCellFunction(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void mutateInsertion(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void mutateDeletion(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void changePropertiesMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void changeNeuronPropertiesMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void changeCellFunctionMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void insertMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void deleteMutation(SimulationData& data, Cell* cell);
 
 private:
     static auto constexpr MAX_SUBGENOME_RECURSION_DEPTH = 20;
+    __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
 
     __inline__ __device__ static int getRandomGenomeNodeIndex(
         SimulationData& data,
@@ -91,22 +92,30 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationInsertionProbability,
         data,
         cell->absPos);
+    auto cellFunctionConstructorMutationDeletionProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationDeletionProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDeletionProbability,
+        data,
+        cell->absPos);
 
-    if (data.numberGen1.random() < cellFunctionConstructorMutationNeuronProbability) {
-        mutateNeuronData(data, cell);
+    if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
+        changeNeuronPropertiesMutation(data, cell);
     }
-    if (data.numberGen1.random() < cellFunctionConstructorMutationDataProbability) {
-        mutateData(data, cell);
+    if (isRandomEvent(data, cellFunctionConstructorMutationDataProbability)) {
+        changePropertiesMutation(data, cell);
     }
-    if (data.numberGen1.random() < cellFunctionConstructorMutationCellFunctionProbability) {
-        mutateCellFunction(data, cell);
+    if (isRandomEvent(data, cellFunctionConstructorMutationCellFunctionProbability)) {
+        changeCellFunctionMutation(data, cell);
     }
-    if (data.numberGen1.random() < cellFunctionConstructorMutationInsertionProbability) {
-        mutateInsertion(data, cell);
+    if (isRandomEvent(data, cellFunctionConstructorMutationInsertionProbability)) {
+        insertMutation(data, cell);
+    }
+    if (isRandomEvent(data, cellFunctionConstructorMutationDeletionProbability)) {
+        deleteMutation(data, cell);
     }
 }
 
-__inline__ __device__ void MutationProcessor::mutateData(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::changePropertiesMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
@@ -139,7 +148,7 @@ __inline__ __device__ void MutationProcessor::mutateData(SimulationData& data, C
     }
 }
 
-__inline__ __device__ void MutationProcessor::mutateNeuronData(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::changeNeuronPropertiesMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
@@ -156,7 +165,7 @@ __inline__ __device__ void MutationProcessor::mutateNeuronData(SimulationData& d
     }
 }
 
-__inline__ __device__ void MutationProcessor::mutateCellFunction(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::changeCellFunctionMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
@@ -202,7 +211,7 @@ __inline__ __device__ void MutationProcessor::mutateCellFunction(SimulationData&
     constructor.genome = targetGenome;
 }
 
-__inline__ __device__ void MutationProcessor::mutateInsertion(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::insertMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
@@ -250,7 +259,7 @@ __inline__ __device__ void MutationProcessor::mutateInsertion(SimulationData& da
     constructor.genome = targetGenome;
 }
 
-__inline__ __device__ void MutationProcessor::mutateDeletion(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
@@ -267,25 +276,27 @@ __inline__ __device__ void MutationProcessor::mutateDeletion(SimulationData& dat
     auto deleteSize = origCellFunctionSize + CellBasicBytes;
 
     auto targetGenomeSize = genomeSize - deleteSize;
-    auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(targetGenomeSize);
-    for (int i = 0; i < nodeIndex; ++i) {
-        targetGenome[i] = genome[i];
-    }
-    data.numberGen1.randomBytes(targetGenome + nodeIndex, CellBasicBytes);
-
-    for (int i = nodeIndex; i < genomeSize; ++i) {
-        targetGenome[i] = genome[i + deleteSize];
+    for (int i = nodeIndex; i < targetGenomeSize; ++i) {
+        genome[i] = genome[i + deleteSize];
     }
 
     for (int i = 0; i < numSubGenomesSizeIndices; ++i) {
         auto subGenomeSize = readWord(genome, subGenomesSizeIndices[i]);
-        writeWord(targetGenome, subGenomesSizeIndices[i], subGenomeSize - deleteSize);
+        writeWord(genome, subGenomesSizeIndices[i], subGenomeSize - deleteSize);
     }
     if (constructor.currentGenomePos > nodeIndex) {
         constructor.currentGenomePos -= deleteSize;
     }
     constructor.genomeSize = targetGenomeSize;
-    constructor.genome = targetGenome;
+}
+
+__inline__ __device__ bool MutationProcessor::isRandomEvent(SimulationData& data, float probability)
+{
+    if (probability > 0.001f) {
+        return data.numberGen1.random() < probability;
+    } else {
+        return data.numberGen1.random() < probability * 1000 && data.numberGen2.random() < 0.001f;
+    }
 }
 
 __inline__ __device__ int MutationProcessor::getRandomGenomeNodeIndex(
