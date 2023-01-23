@@ -97,12 +97,6 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
 
     JsonParser::encodeDecode(
         tree,
-        parameters.cellFunctionConstructionInheritColor,
-        defaultParameters.cellFunctionConstructionInheritColor,
-        "simulation parameters.cell.function.constructor.inherit color",
-        parserTask);
-    JsonParser::encodeDecode(
-        tree,
         parameters.cellFunctionConstructorOffspringDistance,
         defaultParameters.cellFunctionConstructorOffspringDistance,
         "simulation parameters.cell.function.constructor.offspring distance",

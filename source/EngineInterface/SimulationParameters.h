@@ -35,7 +35,6 @@ struct SimulationParameters
     float clusterDecayProb = 0.0001f;
     
     bool cellFunctionConstructionUnlimitedEnergy = false;
-    bool cellFunctionConstructionInheritColor = true;
     float cellFunctionConstructorOffspringDistance = 2.0f;
     float cellFunctionConstructorConnectingCellMaxDistance = 1.5f;
     float cellFunctionConstructorActivityThreshold = 0.1f;
@@ -126,7 +125,7 @@ struct SimulationParameters
             && particleTransformationAllowed == other.particleTransformationAllowed
             && particleTransformationRandomCellFunction == other.particleTransformationRandomCellFunction
             && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
-            && cellFunctionConstructionInheritColor == other.cellFunctionConstructionInheritColor && clusterDecayProb == other.clusterDecayProb
+            && clusterDecayProb == other.clusterDecayProb
             && clusterDecay == other.clusterDecay && radiationMinCellAge == other.radiationMinCellAge && radiationMinCellEnergy == other.radiationMinCellEnergy
             && cellFunctionSensorActivityThreshold == other.cellFunctionSensorActivityThreshold
             && cellFunctionConstructionUnlimitedEnergy == other.cellFunctionConstructionUnlimitedEnergy
