@@ -134,7 +134,7 @@ public:
     }
 
     //returns at most 18 cells
-    __device__ __inline__ void get(Cell* cells[], int& numCells, float2 const& pos) const
+    __device__ __inline__ void get(Cell* cells[], int& numCells, float2 const& pos, int detached) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numCells = 0;
@@ -151,7 +151,7 @@ public:
                     if (numCells == 18) {
                         return;
                     }
-                    if (slotCell->detached + slotCell->detached != 1) {
+                    if (detached + slotCell->detached != 1) {
                         cells[numCells] = slotCell;
                         ++numCells;
                     }
@@ -161,7 +161,7 @@ public:
         }
     }
 
-    __device__ __inline__ void get(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius) const
+    __device__ __inline__ void get(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int detached) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numCells = 0;
@@ -179,7 +179,7 @@ public:
                     if (!slotCell) {
                         break;
                     }
-                    if (Math::length(slotCell->absPos - pos) <= radius && slotCell->detached + slotCell->detached != 1) {
+                    if (Math::length(slotCell->absPos - pos) <= radius && detached + slotCell->detached != 1) {
                         cells[numCells] = slotCell;
                         ++numCells;
                     }
@@ -190,7 +190,8 @@ public:
     }
 
     template<typename MatchFunc>
-    __device__ __inline__ void getMatchingCells(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, MatchFunc matchFunc) const
+    __device__ __inline__ void getMatchingCells(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int detached, MatchFunc matchFunc)
+        const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numCells = 0;
@@ -208,7 +209,7 @@ public:
                     if (!slotCell) {
                         break;
                     }
-                    if (Math::length(slotCell->absPos - pos) <= radius && slotCell->detached + slotCell->detached != 1 && matchFunc(slotCell)) {
+                    if (Math::length(slotCell->absPos - pos) <= radius && detached + slotCell->detached != 1 && matchFunc(slotCell)) {
                         cells[numCells] = slotCell;
                         ++numCells;
                     }
