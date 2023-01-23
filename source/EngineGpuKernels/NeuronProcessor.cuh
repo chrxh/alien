@@ -47,12 +47,12 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 
     auto matrixPartition = calcPartition(MAX_CHANNELS * MAX_CHANNELS, threadIdx.x, blockDim.x);
-    for (int c = matrixPartition.startIndex; c <= matrixPartition.endIndex; ++c) {
+    for (int entry = matrixPartition.startIndex; entry <= matrixPartition.endIndex; ++entry) {
         auto& neuronsState = cell->cellFunctionData.neuron.neuronState;
 
-        auto row = c / MAX_CHANNELS;
-        auto col = c % MAX_CHANNELS;
-        atomicAdd_block(&sumInput[row], neuronsState->weights[c] * inputActivity.channels[col]);
+        auto row = entry / MAX_CHANNELS;
+        auto col = entry % MAX_CHANNELS;
+        atomicAdd(&sumInput[row], neuronsState->weights[entry] * inputActivity.channels[col]);
     }
     __syncthreads();
 
