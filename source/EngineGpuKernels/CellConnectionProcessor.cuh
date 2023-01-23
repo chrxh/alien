@@ -30,7 +30,7 @@ public:
     __inline__ __device__ static void delConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void delConnectionOneWay(Cell* cell1, Cell* cell2);
 
-    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2);
+    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached);
 
 private:
     __inline__ __device__ static void lockAndtryAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
@@ -402,7 +402,7 @@ __inline__ __device__ void CellConnectionProcessor::delConnectionOneWay(Cell* ce
     }
 }
 
-__inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2)
+__inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached)
 {
     auto distance = Math::length(pos1 - pos2);
     if (distance > cudaSimulationParameters.cellMaxBindingDistance) {
@@ -411,7 +411,7 @@ __inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(Sim
 
     Cell* otherCells[18];
     int numOtherCells;
-    data.cellMap.get(otherCells, 18, numOtherCells, (pos1 + pos2) / 2, distance);
+    data.cellMap.get(otherCells, 18, numOtherCells, (pos1 + pos2) / 2, distance, detached);
     for (int i = 0; i < numOtherCells; ++i) {
         Cell* otherCell = otherCells[i];
         if ((otherCell->absPos.x == pos1.x && otherCell->absPos.y == pos1.y) || (otherCell->absPos.x == pos2.x && otherCell->absPos.y == pos2.y)) {

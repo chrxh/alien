@@ -84,7 +84,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
     int numOtherCells;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        data.cellMap.get(otherCells, numOtherCells, cell->absPos);
+        data.cellMap.get(otherCells, numOtherCells, cell->absPos, cell->detached);
         for (int i = 0; i < numOtherCells; ++i) {
             Cell* otherCell = otherCells[i];
 

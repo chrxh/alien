@@ -188,7 +188,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
     auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle) * cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
-    if (CellConnectionProcessor::existCrossingConnections(data, hostCell->absPos, newCellPos)) {
+    if (CellConnectionProcessor::existCrossingConnections(data, hostCell->absPos, newCellPos, hostCell->detached)) {
         return false;
     }
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
@@ -296,7 +296,13 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     Cell* otherCells[18];
     int numOtherCells;
     data.cellMap.getMatchingCells(
-        otherCells, 18, numOtherCells, newCellPos, cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance, [&](Cell* const& otherCell) {
+        otherCells,
+        18,
+        numOtherCells,
+        newCellPos,
+        cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance,
+        hostCell->detached,
+        [&](Cell* const& otherCell) {
             if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != LivingState_UnderConstruction) {
                 return false;
             }
