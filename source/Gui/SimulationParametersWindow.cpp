@@ -527,6 +527,22 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability),
                 simParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability);
+            auto preserveColor = !simParameters.cellFunctionConstructorMutationColor;
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Preserve color")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(!origSimParameters.cellFunctionConstructorMutationColor),
+                preserveColor);
+            simParameters.cellFunctionConstructorMutationColor = !preserveColor;
+            auto preserveSelfReplication = !simParameters.cellFunctionConstructorMutationSelfReplication;
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Preserve self-replication")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(!origSimParameters.cellFunctionConstructorMutationSelfReplication),
+                preserveSelfReplication);
+            simParameters.cellFunctionConstructorMutationSelfReplication = !preserveSelfReplication;
             ImGui::TreePop();
         }
 

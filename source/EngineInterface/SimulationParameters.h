@@ -39,6 +39,8 @@ struct SimulationParameters
     float cellFunctionConstructorOffspringDistance = 2.0f;
     float cellFunctionConstructorConnectingCellMaxDistance = 1.5f;
     float cellFunctionConstructorActivityThreshold = 0.1f;
+    bool cellFunctionConstructorMutationColor = false;
+    bool cellFunctionConstructorMutationSelfReplication = false;
 
     float cellFunctionAttackerRadius = 1.6f;
     float cellFunctionAttackerStrength = 0.05f;
@@ -130,6 +132,8 @@ struct SimulationParameters
             && cellFunctionConstructionUnlimitedEnergy == other.cellFunctionConstructionUnlimitedEnergy
             && cellFunctionMuscleBendingAcceleration == other.cellFunctionMuscleBendingAcceleration
             && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
+            && cellFunctionConstructorMutationColor == other.cellFunctionConstructorMutationColor
+            && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication
         ;
     }
 
