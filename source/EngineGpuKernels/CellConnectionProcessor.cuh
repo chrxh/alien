@@ -11,13 +11,13 @@ class CellConnectionProcessor
 {
 public:
     __inline__ __device__ static void scheduleAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
-    __inline__ __device__ static void scheduleDelConnections(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void scheduleDelConnection(SimulationData& data, Cell* cell1, Cell* cell2);
-    __inline__ __device__ static void scheduleDelCell(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void scheduleDelCellAndConnections(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void scheduleDeleteConnections(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void scheduleDeleteConnection(SimulationData& data, Cell* cell1, Cell* cell2);
+    __inline__ __device__ static void scheduleDeleteCell(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void scheduleDeleteCellAndConnections(SimulationData& data, Cell* cell);
 
-    __inline__ __device__ static void processAddConnectionsOperations(SimulationData& data);
-    __inline__ __device__ static void processOperations(SimulationData& data);
+    __inline__ __device__ static void processAddOperations(SimulationData& data);
+    __inline__ __device__ static void processDeleteOperations(SimulationData& data);
 
     __inline__ __device__ static bool tryAddConnections(
         SimulationData& data,
@@ -27,8 +27,8 @@ public:
         float desiredAngleOnCell2,
         float desiredDistance,
         ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_None);
-    __inline__ __device__ static void delConnections(Cell* cell1, Cell* cell2);
-    __inline__ __device__ static void delConnectionOneWay(Cell* cell1, Cell* cell2);
+    __inline__ __device__ static void deleteConnections(Cell* cell1, Cell* cell2);
+    __inline__ __device__ static void deleteConnectionOneWay(Cell* cell1, Cell* cell2);
 
     __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached);
 
@@ -46,10 +46,7 @@ private:
         ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_None);
     __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, Cell* cell2);
 
-    __inline__ __device__ static void delConnectionsIntern(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void delConnectionsIntern(Cell* cell1, Cell* cell2);
-
-    __inline__ __device__ static void delCell(SimulationData& data, Cell* cell, int cellIndex);
+    __inline__ __device__ static void deleteCell(SimulationData& data, Cell* cell, int cellIndex);
 };
 
 /************************************************************************/
@@ -66,7 +63,7 @@ CellConnectionProcessor::scheduleAddConnections(SimulationData& data, Cell* cell
     data.structuralOperations.tryAddEntry(operation);
 }
 
-__inline__ __device__ void CellConnectionProcessor::scheduleDelConnections(SimulationData& data, Cell* cell)
+__inline__ __device__ void CellConnectionProcessor::scheduleDeleteConnections(SimulationData& data, Cell* cell)
 {
     {
         StructuralOperation operation;
@@ -90,7 +87,7 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDelConnections(Simul
 }
 
 __inline__ __device__ void
-CellConnectionProcessor::scheduleDelConnection(SimulationData& data, Cell* cell1, Cell* cell2)
+CellConnectionProcessor::scheduleDeleteConnection(SimulationData& data, Cell* cell1, Cell* cell2)
 {
     {
         StructuralOperation operation;
@@ -114,7 +111,7 @@ CellConnectionProcessor::scheduleDelConnection(SimulationData& data, Cell* cell1
     }
 }
 
-__inline__ __device__ void CellConnectionProcessor::scheduleDelCell(SimulationData& data, Cell* cell)
+__inline__ __device__ void CellConnectionProcessor::scheduleDeleteCell(SimulationData& data, Cell* cell)
 {
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::DelCell;
@@ -125,13 +122,13 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDelCell(SimulationDa
     }
 }
 
-__inline__ __device__ void CellConnectionProcessor::scheduleDelCellAndConnections(SimulationData& data, Cell* cell)
+__inline__ __device__ void CellConnectionProcessor::scheduleDeleteCellAndConnections(SimulationData& data, Cell* cell)
 {
-    scheduleDelConnections(data, cell);
-    scheduleDelCell(data, cell);
+    scheduleDeleteConnections(data, cell);
+    scheduleDeleteCell(data, cell);
 }
 
-__inline__ __device__ void CellConnectionProcessor::processAddConnectionsOperations(SimulationData& data)
+__inline__ __device__ void CellConnectionProcessor::processAddOperations(SimulationData& data)
 {
     auto partition = calcAllThreadsPartition(data.structuralOperations.getNumOrigEntries());
 
@@ -146,7 +143,7 @@ __inline__ __device__ void CellConnectionProcessor::processAddConnectionsOperati
     }
 }
 
-__inline__ __device__ void CellConnectionProcessor::processOperations(SimulationData& data)
+__inline__ __device__ void CellConnectionProcessor::processDeleteOperations(SimulationData& data)
 {
     auto partition = calcAllThreadsPartition(data.objects.cellPointers.getNumOrigEntries());
 
@@ -159,7 +156,7 @@ __inline__ __device__ void CellConnectionProcessor::processOperations(Simulation
                 auto operation = data.structuralOperations.at(scheduledOperationIndex);
                 switch (operation.type) {
                 case StructuralOperation::Type::DelConnection: {
-                    delConnectionOneWay(cell, operation.data.delConnection.connectedCell);
+                    deleteConnectionOneWay(cell, operation.data.delConnection.connectedCell);
                 } break;
                 case StructuralOperation::Type::DelAllConnections: {
                     cell->numConnections = 0;
@@ -174,7 +171,7 @@ __inline__ __device__ void CellConnectionProcessor::processOperations(Simulation
                 }
             }
             if (scheduleDeleteCell) {
-                delCell(data, cell, index);
+                deleteCell(data, cell, index);
             } else {
                 cell->scheduledOperationIndex = -1;
             }
@@ -213,10 +210,10 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnections(
 }
 
 __inline__ __device__ void
-CellConnectionProcessor::delConnections(Cell* cell1, Cell* cell2)
+CellConnectionProcessor::deleteConnections(Cell* cell1, Cell* cell2)
 {
-    delConnectionOneWay(cell1, cell2);
-    delConnectionOneWay(cell2, cell1);
+    deleteConnectionOneWay(cell1, cell2);
+    deleteConnectionOneWay(cell2, cell1);
 }
 
 __inline__ __device__ void
@@ -388,39 +385,7 @@ __inline__ __device__ bool CellConnectionProcessor::wouldResultInOverlappingConn
     return false;
 }
 
-__inline__ __device__ void CellConnectionProcessor::delConnectionsIntern(SimulationData& data, Cell* cell)
-{
-    for (int i = cell->numConnections - 1; i >= 0; --i) {
-        auto connectedCell = cell->connections[0].cell;
-        for (int j = 0; j < 10; ++j) {
-            SystemDoubleLock lock;
-            lock.init(&cell->locked, &connectedCell->locked, data.numberGen1.randomBool());
-            if (lock.tryLock()) {
-
-                if (cell->numConnections > 0) {
-                    delConnectionOneWay(cell, connectedCell);
-                    delConnectionOneWay(connectedCell, cell);
-                }
-
-                lock.releaseLock();
-                break;
-            }
-        }
-    }
-}
-
-__inline__ __device__ void CellConnectionProcessor::delConnectionsIntern(Cell* cell1, Cell* cell2)
-{
-    SystemDoubleLock lock;
-    lock.init(&cell1->locked, &cell2->locked);
-    if (lock.tryLock()) {
-        delConnectionOneWay(cell1, cell2);
-        delConnectionOneWay(cell2, cell1);
-        lock.releaseLock();
-    }
-}
-
-__inline__ __device__ void CellConnectionProcessor::delConnectionOneWay(Cell* cell1, Cell* cell2)
+__inline__ __device__ void CellConnectionProcessor::deleteConnectionOneWay(Cell* cell1, Cell* cell2)
 {
     for (int i = 0; i < cell1->numConnections; ++i) {
         if (cell1->connections[i].cell == cell2) {
@@ -482,7 +447,7 @@ __inline__ __device__ bool CellConnectionProcessor::scheduleOperation(Simulation
 }
 
 
-__inline__ __device__ void CellConnectionProcessor::delCell(SimulationData& data, Cell* cell, int cellIndex)
+__inline__ __device__ void CellConnectionProcessor::deleteCell(SimulationData& data, Cell* cell, int cellIndex)
 {
     if (0 == cell->numConnections && !cell->isDeleted() /* && _data->entities.cellPointers.at(cellIndex) == cell*/) {
         ObjectFactory factory;

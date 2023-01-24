@@ -197,7 +197,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
         if (Math::length(cell->temp1) > SpotCalculator::calcParameter(
                 &SimulationParametersSpotValues::cellMaxForce, &SimulationParametersSpotActivatedValues::cellMaxForce, data, cell->absPos)) {
             if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
-                CellConnectionProcessor::scheduleDelCellAndConnections(data, cell);
+                CellConnectionProcessor::scheduleDeleteCellAndConnections(data, cell);
             }
         }
     }
@@ -322,7 +322,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
             }
         }
         if (scheduleForDestruction) {
-            CellConnectionProcessor::scheduleDelConnections(data, cell);
+            CellConnectionProcessor::scheduleDeleteConnections(data, cell);
         }
     }
 }
@@ -501,7 +501,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         bool decay = false;
         if (cell->livingState == LivingState_Dying) {
             if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb) {
-                CellConnectionProcessor::scheduleDelCellAndConnections(data, cell);
+                CellConnectionProcessor::scheduleDeleteCellAndConnections(data, cell);
                 decay = true;
             }
         }
@@ -509,11 +509,11 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             if (cudaSimulationParameters.clusterDecay) {
                 cell->livingState = LivingState_Dying;
             } else {
-                CellConnectionProcessor::scheduleDelCellAndConnections(data, cell);
+                CellConnectionProcessor::scheduleDeleteCellAndConnections(data, cell);
                 decay = true;
             }
         } else if (cell->energy > cellMaxBindingEnergy) {
-            CellConnectionProcessor::scheduleDelConnections(data, cell);
+            CellConnectionProcessor::scheduleDeleteConnections(data, cell);
             decay = true;
         }
 
