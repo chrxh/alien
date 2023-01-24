@@ -14,7 +14,6 @@ public:
     static SimulationParameters getParameters()
     {
         SimulationParameters result;
-        result.cellFunctionConstructionInheritColor = false;
         result.innerFriction = 0;
         result.baseValues.friction = 0;
         result.baseValues.radiationFactor = 0;

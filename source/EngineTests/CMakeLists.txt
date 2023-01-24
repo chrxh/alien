@@ -1,6 +1,7 @@
 target_sources(tests
 PUBLIC
     AttackerTests.cpp
+    CellConnectionTests.cpp
     ConstructorTests.cpp
     DataTransferTests.cpp
     DescriptionHelperTests.cpp

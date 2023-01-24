@@ -31,7 +31,7 @@ struct SimulationParameters
     float radiationVelocityPerturbation = 0.5f;
     float radiationMinCellEnergy = 500;
     int radiationMinCellAge = 500000;
-    bool clusterDecay = true;
+    bool clusterDecay = false;
     float clusterDecayProb = 0.0001f;
     
     bool cellFunctionConstructionUnlimitedEnergy = false;
