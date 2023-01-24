@@ -156,7 +156,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
             }
 /*
             if (!alreadyConnected) {
-                auto velDelta = cell->vel - otherCell->vel;
+                auto velDelta = cell->vel - connectedCell->vel;
                 auto isApproaching = Math::dot(posDelta, velDelta) < 0;
 
                 if (Math::length(cell->vel) < 0.5f || !isApproaching || cell->numConnections > 0) {
@@ -169,13 +169,13 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                     auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2 * Math::lengthSquared(posDelta));
                     atomicAdd(&cell->temp1.x, force1.x);
                     atomicAdd(&cell->temp1.y, force1.y);
-                    atomicAdd(&otherCell->temp1.x, force2.x);
-                    atomicAdd(&otherCell->temp1.y, force2.y);
+                    atomicAdd(&connectedCell->temp1.x, force2.x);
+                    atomicAdd(&connectedCell->temp1.y, force2.y);
                 }
 
-                if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
+                if (cell->numConnections < cell->maxConnections && connectedCell->numConnections < connectedCell->maxConnections
                     && Math::length(velDelta) >= cudaSimulationParameters.cellFusionVelocity && isApproaching) {
-                    CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
+                    CellConnectionProcessor::scheduleAddConnections(data, cell, connectedCell);
                 }
             }
 */
@@ -197,7 +197,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
         if (Math::length(cell->temp1) > SpotCalculator::calcParameter(
                 &SimulationParametersSpotValues::cellMaxForce, &SimulationParametersSpotActivatedValues::cellMaxForce, data, cell->absPos)) {
             if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
-                CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
+                CellConnectionProcessor::scheduleDelCellAndConnections(data, cell);
             }
         }
     }
@@ -501,7 +501,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         bool decay = false;
         if (cell->livingState == LivingState_Dying) {
             if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb) {
-                CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
+                CellConnectionProcessor::scheduleDelCellAndConnections(data, cell);
                 decay = true;
             }
         }
@@ -509,7 +509,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             if (cudaSimulationParameters.clusterDecay) {
                 cell->livingState = LivingState_Dying;
             } else {
-                CellConnectionProcessor::scheduleDelCellAndConnections(data, cell, index);
+                CellConnectionProcessor::scheduleDelCellAndConnections(data, cell);
                 decay = true;
             }
         } else if (cell->energy > cellMaxBindingEnergy) {

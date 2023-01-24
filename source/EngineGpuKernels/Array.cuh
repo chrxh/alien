@@ -238,15 +238,16 @@ public:
     __device__ __inline__ T& at(int index) { return (*_data)[index]; }
     __device__ __inline__ T const& at(int index) const { return (*_data)[index]; }
 
-    __device__ __inline__ bool tryAddEntry(T const& entry)
+    //returns index if successfull, otherwise -1
+    __device__ __inline__ int tryAddEntry(T const& entry)   
     {
         auto index = atomicAdd(_numEntries, 1);
         if (index < *_size) {
             (*_data)[index] = entry;
-            return true;
+            return index;
         } else {
             atomicSub(_numEntries, 1);
-            return false;
+            return -1;
         }
     }
 };
