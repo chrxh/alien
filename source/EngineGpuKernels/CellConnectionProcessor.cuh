@@ -65,6 +65,9 @@ CellConnectionProcessor::scheduleAddConnections(SimulationData& data, Cell* cell
 
 __inline__ __device__ void CellConnectionProcessor::scheduleDeleteConnections(SimulationData& data, Cell* cell)
 {
+    if (cell->numConnections == 0) {
+        return;
+    }
     {
         StructuralOperation operation;
         operation.type = StructuralOperation::Type::DelAllConnections;
