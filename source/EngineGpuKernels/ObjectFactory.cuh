@@ -69,6 +69,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO
     cell->locked = 0;
     cell->detached = 0;
     cell->selected = 0;
+    cell->scheduledOperationIndex = -1;
     cell->numConnections = cellTO.numConnections;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connectingCell = cell->connections[i];
@@ -228,6 +229,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->locked = 0;
     cell->selected = 0;
     cell->detached = 0;
+    cell->scheduledOperationIndex = -1;
     cell->color = 0;
     cell->metadata.nameSize = 0;
     cell->metadata.descriptionSize = 0;
@@ -320,6 +322,7 @@ __inline__ __device__ Cell* ObjectFactory::createCell()
     cell->stiffness = 1.0f;
     cell->selected = 0;
     cell->detached = 0;
+    cell->scheduledOperationIndex = -1;
     cell->locked = 0;
     cell->color = 0;
     cell->metadata.nameSize = 0;

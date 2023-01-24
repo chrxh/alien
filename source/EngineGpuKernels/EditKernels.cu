@@ -391,7 +391,7 @@ __global__ void cudaPrepareConnectionChanges(SimulationData data)
 
 __global__ void cudaProcessConnectionChanges(SimulationData data)
 {
-    CellConnectionProcessor::processConnectionsOperations(data);
+    CellConnectionProcessor::processAddConnectionsOperations(data);
 }
 
 __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData data, int* result)

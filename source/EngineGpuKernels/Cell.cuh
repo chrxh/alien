@@ -143,13 +143,14 @@ struct Cell
     int selected;   //0 = no, 1 = selected, 2 = cluster selected
     int detached;  //0 = no, 1 = yes
 
-    //temporary data for algorithms
+    //internal algorithm data
     int activityFetched; //0 = no, 1 = yes
     int locked;	//0 = unlocked, 1 = locked
     int tag;
     float2 temp1;
     float2 temp2;
-    Cell* nextCell;
+    Cell* nextCell; //linked list for finding all overlapping cells
+    int scheduledOperationIndex;    // -1 = no operation scheduled
 
     //cluster data
     int clusterIndex;

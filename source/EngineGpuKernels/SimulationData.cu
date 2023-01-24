@@ -29,7 +29,7 @@ __device__ void SimulationData::prepareForNextTimestep()
     particleMap.reset();
     processMemory.reset();
 
-    auto maxStructureOperations = 2 + objects.cellPointers.getNumEntries() / 2; //heuristic
+    auto maxStructureOperations = 100 + objects.cellPointers.getNumEntries() / 2; //heuristic
     auto maxCellFunctionOperations = objects.cellPointers.getNumEntries();  //heuristic
 
     structuralOperations.setMemory(processMemory.getTypedSubArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);

@@ -13,11 +13,11 @@ public:
     __inline__ __device__ static void scheduleAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
     __inline__ __device__ static void scheduleDelConnections(SimulationData& data, Cell* cell);
     __inline__ __device__ static void scheduleDelConnection(SimulationData& data, Cell* cell1, Cell* cell2);
-    __inline__ __device__ static void scheduleDelCell(SimulationData& data, Cell* cell, int cellIndex);
-    __inline__ __device__ static void scheduleDelCellAndConnections(SimulationData& data, Cell* cell, int cellIndex);
+    __inline__ __device__ static void scheduleDelCell(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void scheduleDelCellAndConnections(SimulationData& data, Cell* cell);
 
-    __inline__ __device__ static void processConnectionsOperations(SimulationData& data);
-    __inline__ __device__ static void processDelCellOperations(SimulationData& data);
+    __inline__ __device__ static void processAddConnectionsOperations(SimulationData& data);
+    __inline__ __device__ static void processOperations(SimulationData& data);
 
     __inline__ __device__ static bool tryAddConnections(
         SimulationData& data,
@@ -33,6 +33,8 @@ public:
     __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached);
 
 private:
+    __inline__ __device__ static bool scheduleOperation(SimulationData& data, Cell* cell, int operationIndex);
+
     __inline__ __device__ static void lockAndtryAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
     __inline__ __device__ static bool tryAddConnectionOneWay(
         SimulationData& data,
@@ -58,90 +60,127 @@ CellConnectionProcessor::scheduleAddConnections(SimulationData& data, Cell* cell
 {
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::AddConnections;
-    operation.data.addConnectionOperation.cell = cell1;
-    operation.data.addConnectionOperation.otherCell = cell2;
+    operation.data.addConnection.cell = cell1;
+    operation.data.addConnection.otherCell = cell2;
+    operation.nextOperationIndex = -1;
     data.structuralOperations.tryAddEntry(operation);
 }
 
-
 __inline__ __device__ void CellConnectionProcessor::scheduleDelConnections(SimulationData& data, Cell* cell)
 {
-    StructuralOperation operation;
-    operation.type = StructuralOperation::Type::DelConnections;
-    operation.data.delConnectionsOperation.cell = cell;
-    data.structuralOperations.tryAddEntry(operation);
+    {
+        StructuralOperation operation;
+        operation.type = StructuralOperation::Type::DelAllConnections;
+        operation.nextOperationIndex = -1;
+        auto operationIndex = data.structuralOperations.tryAddEntry(operation);
+        if (operationIndex != -1) {
+            scheduleOperation(data, cell, operationIndex);
+        }
+    }
+    for (int i = 0; i < cell->numConnections; ++i) {
+        StructuralOperation operation;
+        operation.type = StructuralOperation::Type::DelConnection;
+        operation.data.delConnection.connectedCell = cell;
+        operation.nextOperationIndex = -1;
+        auto operationIndex = data.structuralOperations.tryAddEntry(operation);
+        if (operationIndex != -1) {
+            scheduleOperation(data, cell->connections[i].cell, operationIndex);
+        }
+    }
 }
 
 __inline__ __device__ void
 CellConnectionProcessor::scheduleDelConnection(SimulationData& data, Cell* cell1, Cell* cell2)
 {
-    StructuralOperation operation;
-    operation.type = StructuralOperation::Type::DelConnection;
-    operation.data.delConnectionOperation.cell1 = cell1;
-    operation.data.delConnectionOperation.cell2 = cell2;
-    data.structuralOperations.tryAddEntry(operation);
+    {
+        StructuralOperation operation;
+        operation.type = StructuralOperation::Type::DelConnection;
+        operation.data.delConnection.connectedCell = cell2;
+        operation.nextOperationIndex = -1;
+        auto operationIndex = data.structuralOperations.tryAddEntry(operation);
+        if (operationIndex != -1) {
+            scheduleOperation(data, cell1, operationIndex);
+        }
+    }
+    {
+        StructuralOperation operation;
+        operation.type = StructuralOperation::Type::DelConnection;
+        operation.data.delConnection.connectedCell = cell1;
+        operation.nextOperationIndex = -1;
+        auto operationIndex = data.structuralOperations.tryAddEntry(operation);
+        if (operationIndex != -1) {
+            scheduleOperation(data, cell2, operationIndex);
+        }
+    }
 }
 
-__inline__ __device__ void CellConnectionProcessor::scheduleDelCell(SimulationData& data, Cell* cell, int cellIndex)
+__inline__ __device__ void CellConnectionProcessor::scheduleDelCell(SimulationData& data, Cell* cell)
 {
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::DelCell;
-    operation.data.delCellOperation.cell = cell;
-    operation.data.delCellOperation.cellIndex = cellIndex;
-    data.structuralOperations.tryAddEntry(operation);
+    operation.nextOperationIndex = -1;
+    auto operationIndex = data.structuralOperations.tryAddEntry(operation);
+    if (operationIndex != -1) {
+        scheduleOperation(data, cell, operationIndex);
+    }
 }
 
-__inline__ __device__ void
-CellConnectionProcessor::scheduleDelCellAndConnections(SimulationData& data, Cell* cell, int cellIndex)
+__inline__ __device__ void CellConnectionProcessor::scheduleDelCellAndConnections(SimulationData& data, Cell* cell)
 {
-    StructuralOperation operation;
-    operation.type = StructuralOperation::Type::DelCellAndConnections;
-    operation.data.delCellAndConnectionOperation.cell = cell;
-    operation.data.delCellAndConnectionOperation.cellIndex = cellIndex;
-    data.structuralOperations.tryAddEntry(operation);
+    scheduleDelConnections(data, cell);
+    scheduleDelCell(data, cell);
 }
 
-__inline__ __device__ void CellConnectionProcessor::processConnectionsOperations(SimulationData& data)
+__inline__ __device__ void CellConnectionProcessor::processAddConnectionsOperations(SimulationData& data)
 {
     auto partition = calcAllThreadsPartition(data.structuralOperations.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& operation = data.structuralOperations.at(index);
-        if (StructuralOperation::Type::DelConnection == operation.type) {
-            delConnectionsIntern(operation.data.delConnectionOperation.cell1, operation.data.delConnectionOperation.cell2);
-        }
-        if (StructuralOperation::Type::DelConnections == operation.type) {
-            delConnectionsIntern(data, operation.data.delConnectionsOperation.cell);
-        }
-        if (StructuralOperation::Type::DelCellAndConnections == operation.type) {
-            delConnectionsIntern(data, operation.data.delConnectionsOperation.cell);
-
-            scheduleDelCell(
-                data,
-                operation.data.delCellAndConnectionOperation.cell,
-                operation.data.delCellAndConnectionOperation.cellIndex);
-        }
         if (StructuralOperation::Type::AddConnections == operation.type) {
             lockAndtryAddConnections(
                 data,
-                operation.data.addConnectionOperation.cell,
-                operation.data.addConnectionOperation.otherCell);
+                operation.data.addConnection.cell,
+                operation.data.addConnection.otherCell);
         }
     }
 }
 
-__inline__ __device__ void CellConnectionProcessor::processDelCellOperations(SimulationData& data)
+__inline__ __device__ void CellConnectionProcessor::processOperations(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.structuralOperations.getNumEntries());
+    auto partition = calcAllThreadsPartition(data.objects.cellPointers.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto const& operation = data.structuralOperations.at(index);
-        if (StructuralOperation::Type::DelCell == operation.type) {
-            delCell(data, operation.data.delCellOperation.cell, operation.data.delCellOperation.cellIndex);
+        auto& cell = data.objects.cellPointers.at(index);
+        auto scheduledOperationIndex = cell->scheduledOperationIndex;
+        if (scheduledOperationIndex != -1) {
+            bool scheduleDeleteCell = false;
+            for (int depth = 0; depth < 10; ++depth) {
+                auto operation = data.structuralOperations.at(scheduledOperationIndex);
+                switch (operation.type) {
+                case StructuralOperation::Type::DelConnection: {
+                    delConnectionOneWay(cell, operation.data.delConnection.connectedCell);
+                } break;
+                case StructuralOperation::Type::DelAllConnections: {
+                    cell->numConnections = 0;
+                } break;
+                case StructuralOperation::Type::DelCell: {
+                    scheduleDeleteCell = true;
+                } break;
+                }
+                scheduledOperationIndex = operation.nextOperationIndex;
+                if (scheduledOperationIndex == -1) {
+                    break;
+                }
+            }
+            if (scheduleDeleteCell) {
+                delCell(data, cell, index);
+            } else {
+                cell->scheduledOperationIndex = -1;
+            }
         }
     }
 }
-
 
 __inline__ __device__ bool CellConnectionProcessor::tryAddConnections(
     SimulationData& data,
@@ -430,19 +469,27 @@ __inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(Sim
     return false;
 }
 
+__inline__ __device__ bool CellConnectionProcessor::scheduleOperation(SimulationData& data, Cell* cell, int operationIndex)
+{
+    auto origOperationIndex = atomicCAS(&cell->scheduledOperationIndex, -1, operationIndex);
+    for (int depth = 0; depth < 10; ++depth) {
+        if (origOperationIndex == -1) {
+            break;
+        }
+        auto& origOperation = data.structuralOperations.at(origOperationIndex);
+        origOperationIndex = atomicCAS(&origOperation.nextOperationIndex, -1, operationIndex);
+    }
+}
+
+
 __inline__ __device__ void CellConnectionProcessor::delCell(SimulationData& data, Cell* cell, int cellIndex)
 {
-    if (cell->tryLock()) {
+    if (0 == cell->numConnections && !cell->isDeleted() /* && _data->entities.cellPointers.at(cellIndex) == cell*/) {
+        ObjectFactory factory;
+        factory.init(&data);
+        factory.createParticle(cell->energy, cell->absPos, cell->vel, cell->color);
+        cell->setDeleted();
 
-        if (0 == cell->numConnections && cell->energy != 0 /* && _data->entities.cellPointers.at(cellIndex) == cell*/) {
-            ObjectFactory factory;
-            factory.init(&data);
-            factory.createParticle(cell->energy, cell->absPos, cell->vel, cell->color);
-            cell->setDeleted();
-
-            data.objects.cellPointers.at(cellIndex) = nullptr;
-        }
-
-        cell->releaseLock();
+        data.objects.cellPointers.at(cellIndex) = nullptr;
     }
 }

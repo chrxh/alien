@@ -9,36 +9,25 @@ struct AddConnectionOperation {
     Cell* otherCell;
 };
 
-struct DelConnectionsOperation
+struct DelAllConnectionsOperation
 {
-    Cell* cell;
 };
 
 struct DelConnectionOperation
 {
-    Cell* cell1;
-    Cell* cell2;
+    Cell* connectedCell;
 };
 
 struct DelCellOperation
 {
-    Cell* cell;
-    int cellIndex;
-};
-
-struct DelCellAndConnectionOperations
-{
-    Cell* cell;
-    int cellIndex;
 };
 
 union StructureOperationData
 {
-    AddConnectionOperation addConnectionOperation;
-    DelConnectionsOperation delConnectionsOperation;
-    DelConnectionOperation delConnectionOperation;
-    DelCellOperation delCellOperation;
-    DelCellAndConnectionOperations delCellAndConnectionOperation;
+    AddConnectionOperation addConnection;
+    DelAllConnectionsOperation delAllConnections;
+    DelConnectionOperation delConnection;
+    DelCellOperation delCell;
 };
 
 struct StructuralOperation
@@ -46,13 +35,13 @@ struct StructuralOperation
     enum class Type
     {
         AddConnections,
-        DelConnections,
+        DelAllConnections,
         DelConnection,
         DelCell,
-        DelCellAndConnections,
     };
     Type type;
     StructureOperationData data;
+    int nextOperationIndex; //linked list, = -1 end
 };
 
 struct CellFunctionOperation
