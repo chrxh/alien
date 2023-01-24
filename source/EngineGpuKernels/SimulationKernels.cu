@@ -125,12 +125,12 @@ __global__ void cudaNextTimestep_structuralOperations_substep1(SimulationData da
 
 __global__ void cudaNextTimestep_structuralOperations_substep2(SimulationData data)
 {
-    CellConnectionProcessor::processAddConnectionsOperations(data);
+    CellConnectionProcessor::processAddOperations(data);
 }
 
 __global__ void cudaNextTimestep_structuralOperations_substep3(SimulationData data)
 {
-    CellConnectionProcessor::processOperations(data);
+    CellConnectionProcessor::processDeleteOperations(data);
 }
 
 __global__ void cudaNextTimestep_structuralOperations_substep4(SimulationData data)

@@ -87,7 +87,8 @@ void _EditKernelsLauncher::shallowUpdateSelectedObjects(
             setValueToDevice(_cudaUpdateResult, 0);
             KERNEL_CALL(cudaScheduleDisconnectSelectionFromRemainings, data, _cudaUpdateResult);
             KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
-            KERNEL_CALL(cudaProcessConnectionChanges, data);
+            KERNEL_CALL(cudaProcessDeleteConnectionChanges, data);
+            KERNEL_CALL(cudaProcessAddConnectionChanges, data);
             cudaDeviceSynchronize();
         } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all affecting connections may be removed at first => repeat
     }
@@ -122,7 +123,8 @@ void _EditKernelsLauncher::shallowUpdateSelectedObjects(
             KERNEL_CALL(cudaUpdateMapForReconnection, data);
             KERNEL_CALL(cudaScheduleConnectSelection, data, false, _cudaUpdateResult);
             KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
-            KERNEL_CALL(cudaProcessConnectionChanges, data);
+            KERNEL_CALL(cudaProcessDeleteConnectionChanges, data);
+            KERNEL_CALL(cudaProcessAddConnectionChanges, data);
 
             KERNEL_CALL(cudaCleanupCellMap, data);
             cudaDeviceSynchronize();
@@ -186,7 +188,8 @@ void _EditKernelsLauncher::reconnect(GpuSettings const& gpuSettings, SimulationD
         setValueToDevice(_cudaUpdateResult, 0);
         KERNEL_CALL(cudaScheduleDisconnectSelectionFromRemainings, data, _cudaUpdateResult);
         KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
-        KERNEL_CALL(cudaProcessConnectionChanges, data);
+        KERNEL_CALL(cudaProcessDeleteConnectionChanges, data);
+        KERNEL_CALL(cudaProcessAddConnectionChanges, data);
         cudaDeviceSynchronize();
     } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all affecting connections may be removed at first => repeat
 
@@ -201,7 +204,8 @@ void _EditKernelsLauncher::reconnect(GpuSettings const& gpuSettings, SimulationD
         KERNEL_CALL(cudaUpdateMapForReconnection, data);
         KERNEL_CALL(cudaScheduleConnectSelection, data, false, _cudaUpdateResult);
         KERNEL_CALL_1_1(cudaPrepareConnectionChanges, data);
-        KERNEL_CALL(cudaProcessConnectionChanges, data);
+        KERNEL_CALL(cudaProcessDeleteConnectionChanges, data);
+        KERNEL_CALL(cudaProcessAddConnectionChanges, data);
 
         KERNEL_CALL(cudaCleanupCellMap, data);
         cudaDeviceSynchronize();

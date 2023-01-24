@@ -95,7 +95,7 @@ __global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool incl
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
             if ((includeClusters && cell->selected != 0) || (!includeClusters && (cell->selected == 1 || connectedCell->selected == 1))) {
-                CellConnectionProcessor::delConnectionOneWay(cell, connectedCell);
+                CellConnectionProcessor::deleteConnectionOneWay(cell, connectedCell);
                 --i;
             }
         }
@@ -376,7 +376,7 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
 
                 if (1 != connectedCell->selected
                     && data.cellMap.getDistance(cell->absPos, connectedCell->absPos) > cudaSimulationParameters.cellMaxBindingDistance) {
-                    CellConnectionProcessor::scheduleDelConnection(data, cell, connectedCell);
+                    CellConnectionProcessor::scheduleDeleteConnection(data, cell, connectedCell);
                     atomicExch(result, 1);
                 }
             }
@@ -389,9 +389,14 @@ __global__ void cudaPrepareConnectionChanges(SimulationData data)
     data.structuralOperations.saveNumEntries();
 }
 
-__global__ void cudaProcessConnectionChanges(SimulationData data)
+__global__ void cudaProcessDeleteConnectionChanges(SimulationData data)
 {
-    CellConnectionProcessor::processAddConnectionsOperations(data);
+    CellConnectionProcessor::processDeleteOperations(data);
+}
+
+__global__ void cudaProcessAddConnectionChanges(SimulationData data)
+{
+    CellConnectionProcessor::processAddOperations(data);
 }
 
 __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData data, int* result)

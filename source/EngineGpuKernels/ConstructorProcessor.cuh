@@ -269,7 +269,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     }
 
     //cut connections
-    CellConnectionProcessor::delConnections(hostCell, underConstructionCell);
+    CellConnectionProcessor::deleteConnections(hostCell, underConstructionCell);
 
     //possibly connect newCell to hostCell
     bool adaptReferenceAngle = false;
