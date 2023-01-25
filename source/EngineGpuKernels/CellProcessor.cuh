@@ -236,9 +236,11 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
         float2 force{0, 0};
         float2 prevDisplacement = cell->connections[cell->numConnections - 1].cell->absPos - cell->absPos;
         data.cellMap.correctDirection(prevDisplacement);
+        auto cellStiffnessSquared = cell->stiffness * cell->stiffness;
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
+            auto connectedCellStiffnessSquared = connectedCell->stiffness * connectedCell->stiffness;
 
             auto displacement = connectedCell->absPos - cell->absPos;
             data.cellMap.correctDirection(displacement);
@@ -246,7 +248,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
             auto actualDistance = Math::length(displacement);
             auto bondDistance = cell->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
-            force = force + Math::normalized(displacement) * deviation * (cell->stiffness + connectedCell->stiffness) / 4;
+            force = force + Math::normalized(displacement) * deviation * (cellStiffnessSquared + connectedCellStiffnessSquared) / 4;
 
             if (considerAngles && cell->numConnections >= 2) {
 
@@ -269,7 +271,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
                     auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
                     auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
 
-                    auto strength = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * cell->stiffness;
+                    auto strength = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * cellStiffnessSquared;
 
                     auto force1 = Math::normalized(displacement) / max(Math::length(displacement), cudaSimulationParameters.cellMinDistance) * strength;
                     Math::rotateQuarterClockwise(force1);
