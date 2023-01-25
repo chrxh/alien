@@ -423,7 +423,7 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
             constructor.activationMode = constructorMode;
         }
         if (constructorMode == 1) {
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(CellFunctionTextWidth), constructor.activationMode);
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Interval").textWidth(CellFunctionTextWidth), constructor.activationMode);
         }
         AlienImGui::AngleAlignmentCombo(
             AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(CellFunctionTextWidth), constructor.angleAlignment);
