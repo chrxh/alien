@@ -404,7 +404,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             }
             if (constructorMode == 1) {
                 table.next();
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Periodicity").textWidth(ContentTextWidth), constructor.mode);
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Interval").textWidth(ContentTextWidth), constructor.mode);
                 if (constructor.mode < 0) {
                     constructor.mode = 0;
                 }
