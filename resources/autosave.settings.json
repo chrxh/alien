@@ -126,9 +126,9 @@
                 },
                 "muscle": {
                     "contraction expansion delta": "0.05000000",
-                    "movement acceleration": "0.01300000",
+                    "movement acceleration": "0.01500000",
                     "bending angle": "5.00000000",
-                    "bending acceleration": "0.08000000",
+                    "bending acceleration": "0.13500001",
                     "bending acceleration threshold": "0.10000000"
                 },
                 "sensor": {
