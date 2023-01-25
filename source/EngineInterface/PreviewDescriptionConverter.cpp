@@ -186,10 +186,12 @@ namespace
             if (node.getCellFunctionType() == CellFunction_Constructor) {
                 auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
                 if (constructor.isMakeGenomeCopy()) {
+                    ++index;
                     continue;
                 }
                 auto data = constructor.getGenomeData();
                 if (data.empty()) {
+                    ++index;
                     continue;
                 }
                 auto subGenome = GenomeDescriptionConverter::convertBytesToDescription(data, parameters);

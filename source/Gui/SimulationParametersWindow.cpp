@@ -459,7 +459,7 @@ void _SimulationParametersWindow::processBase(
         if (ImGui::TreeNodeEx("Cell function: Genome mutation probabilities", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Neuron weights and bias")
+                    .name("Neuron weights and biases")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
@@ -1074,7 +1074,7 @@ void _SimulationParametersWindow::processSpot(
         if (ImGui::TreeNodeEx("Cell function: Genome mutation probabilities", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Neuron weights and bias")
+                    .name("Neuron weights and biases")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
