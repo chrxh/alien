@@ -2,7 +2,6 @@
     require './helpers.php';
 
     $db = connectToDB();
-
     $response = $db->query("SELECT SIMULATION_ID as id, count(1) as likes FROM userlike GROUP BY SIMULATION_ID");
 
     $likesBySimulation = array();

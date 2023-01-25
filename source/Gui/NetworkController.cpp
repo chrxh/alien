@@ -210,14 +210,16 @@ bool _NetworkController::setNewPassword(std::string const& userName, std::string
     return parseBoolResult(result->body);
 }
 
-bool _NetworkController::getRemoteSimulationDataList(std::vector<RemoteSimulationData>& result, bool withRetry) const
+bool _NetworkController::getSimulationDataList(std::vector<RemoteSimulationData>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get simulation list");
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
-    auto postResult = executeRequest([&] { return client.Get("/alien-server/getsimulationinfo.php"); }, withRetry);
+    httplib::Params params;
+    params.emplace("version", Const::ProgramVersion);
+    auto postResult = executeRequest([&] { return client.Post("/alien-server/getversionedsimulationlist.php", params); }, withRetry);
 
     try {
         std::stringstream stream(postResult->body);
