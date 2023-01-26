@@ -56,7 +56,7 @@ void _BrowserWindow::onRefresh()
 void _BrowserWindow::refreshIntern(bool firstTimeStartup)
 {
     try {
-        if (!_networkController->getRemoteSimulationDataList(_remoteSimulationDatas, !firstTimeStartup)) {
+        if (!_networkController->getSimulationDataList(_remoteSimulationDatas, !firstTimeStartup)) {
             if (!firstTimeStartup) {
                 MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
             }
