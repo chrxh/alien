@@ -719,7 +719,7 @@ void _SimulationParametersWindow::processBase(
         if (ImGui::TreeNodeEx("Cell function: Muscle", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Contraction and expansion delta")
+                    .name("Contraction and expansion size")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.1f)
@@ -896,15 +896,24 @@ void _SimulationParametersWindow::processSpot(
         /**
          * Flow
          */
-        if (ImGui::TreeNodeEx("Flow", flags)) {
-            AlienImGui::Combo(
-                AlienImGui::ComboParameters()
-                    .name("Type")
-                    .values({"None", "Radial flow"})
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origSpot.flowType),
-                spot.flowType);
-            if (spot.flowType == FlowType_Radial) {
+        if (ImGui::TreeNodeEx("Force field", flags)) {
+            auto isForceFieldActive = spot.flowType != FlowType_None;
+            auto forceFieldType = spot.flowType == FlowType_None ? FlowType_Radial : spot.flowType;
+            auto origForceFieldType = origSpot.flowType == FlowType_None ? FlowType_Radial : origSpot.flowType;
+            if (ImGui::Checkbox("##cellColorTransition", &isForceFieldActive)) {
+                spot.flowType = isForceFieldActive ? FlowType_Radial : FlowType_None;
+            }
+            ImGui::SameLine();
+            ImGui::BeginDisabled(!isForceFieldActive);
+            auto posX = ImGui::GetCursorPos().x;
+            if (AlienImGui::Combo(
+                AlienImGui::ComboParameters().name("Type").values({"Radial flow"}).textWidth(RightColumnWidth).defaultValue(origForceFieldType),
+                forceFieldType)) {
+                spot.flowType = forceFieldType;
+            }
+
+            if (forceFieldType == FlowType_Radial) {
+                ImGui::SetCursorPosX(posX);
                 AlienImGui::Combo(
                     AlienImGui::ComboParameters()
                         .name("Orientation")
@@ -912,6 +921,7 @@ void _SimulationParametersWindow::processSpot(
                         .defaultValue(origSpot.flowData.radialFlow.orientation)
                         .values({"Clockwise", "Counter clockwise"}),
                     spot.flowData.radialFlow.orientation);
+                ImGui::SetCursorPosX(posX);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Strength")
@@ -923,6 +933,7 @@ void _SimulationParametersWindow::processSpot(
                         .defaultValue(origSpot.flowData.radialFlow.strength),
                     spot.flowData.radialFlow.strength);
             }
+            ImGui::EndDisabled();
             ImGui::TreePop();
         }
 
@@ -1058,8 +1069,8 @@ void _SimulationParametersWindow::processSpot(
                     parameters, color, spot.values.cellColorTransitionTargetColor[color], spot.values.cellColorTransitionDuration[color]);
                 ImGui::PopID();
             }
-            ImGui::TreePop();
             ImGui::EndDisabled();
+            ImGui::TreePop();
             if (!spot.activatedValues.cellColorTransition) {
                 for (int color = 0; color < MAX_COLORS; ++color) {
                     spot.values.cellColorTransitionTargetColor[color] = parameters.baseValues.cellColorTransitionTargetColor[color];
