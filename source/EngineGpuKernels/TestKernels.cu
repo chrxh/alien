@@ -26,6 +26,9 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationTyp
             case MutationType::Deletion:
                 MutationProcessor::deleteMutation(data, cell);
                 break;
+            case MutationType::Duplication:
+                MutationProcessor::duplicateMutation(data, cell);
+                break;
             }
         }
     }
