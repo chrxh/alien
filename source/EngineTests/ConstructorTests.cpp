@@ -465,7 +465,7 @@ TEST_F(ConstructorTests, constructNeuronCell)
     auto neuron = NeuronGenomeDescription();
     neuron.weights[1][7] = 3.9f;
     neuron.weights[7][1] = -1.9f;
-    neuron.bias[3] = 3.8f;
+    neuron.biases[3] = 3.8f;
 
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(neuron)});
 
@@ -494,7 +494,7 @@ TEST_F(ConstructorTests, constructNeuronCell)
         }
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        EXPECT_TRUE(lowPrecisionCompare(neuron.bias[i], actualNeuron.biases[i]));
+        EXPECT_TRUE(lowPrecisionCompare(neuron.biases[i], actualNeuron.biases[i]));
     }
 }
 

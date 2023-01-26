@@ -476,3 +476,23 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
     EXPECT_TRUE(compareDeleteMutation(genome, actualConstructor.genome));
     EXPECT_EQ(0, actualConstructor.currentGenomePos);
 }
+
+TEST_F(MutationTests, duplicateMutation)
+{
+    auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setCurrentGenomePos(0)).setExecutionOrderNumber(0)});
+
+    _simController->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simController->testOnly_mutate(1, MutationType::Duplication);
+    }
+
+    auto actualData = _simController->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    EXPECT_TRUE(compareInsertMutation(genome, actualConstructor.genome));
+    EXPECT_EQ(0, actualConstructor.currentGenomePos);
+}

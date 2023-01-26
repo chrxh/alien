@@ -120,7 +120,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
                 }
             }
             for (int i = 0; i < MAX_CHANNELS; ++i) {
-                writeNeuronProperty(result, neuron.bias[i]);
+                writeNeuronProperty(result, neuron.biases[i]);
             }
         } break;
         case CellFunction_Transmitter: {
@@ -211,7 +211,7 @@ namespace
                     }
                 }
                 for (int i = 0; i < MAX_CHANNELS; ++i) {
-                    neuron.bias[i] = readNeuronProperty(data, bytePosition);
+                    neuron.biases[i] = readNeuronProperty(data, bytePosition);
                 }
                 cell.cellFunction = neuron;
             } break;

@@ -15,12 +15,12 @@ struct MakeGenomeCopy
 struct NeuronGenomeDescription
 {
     std::vector<std::vector<float>> weights;
-    std::vector<float> bias;
+    std::vector<float> biases;
 
     NeuronGenomeDescription()
     {
         weights.resize(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
-        bias.resize(MAX_CHANNELS, 0);
+        biases.resize(MAX_CHANNELS, 0);
     }
     auto operator<=>(NeuronGenomeDescription const&) const = default;
 };

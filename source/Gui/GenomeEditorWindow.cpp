@@ -500,7 +500,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 AlienImGui::NeuronSelection(
                     AlienImGui::NeuronSelectionParameters().outputButtonPositionFromRight(WeightsAndBiasSelectionTextWidth),
                     neuron.weights,
-                    neuron.bias,
+                    neuron.biases,
                     _selectedInput,
                     _selectedOutput);
                 DynamicTableLayout table;
@@ -510,7 +510,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                         neuron.weights[_selectedOutput][_selectedInput]);
                     table.next();
                     AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(WeightsAndBiasTextWidth), neuron.bias[_selectedOutput]);
+                        AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(WeightsAndBiasTextWidth), neuron.biases[_selectedOutput]);
                     table.end();
                 }
                 ImGui::TreePop();

@@ -15,6 +15,7 @@ public:
     __inline__ __device__ static void changeCellFunctionMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void insertMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void deleteMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void duplicateMutation(SimulationData& data, Cell* cell);
 
 private:
     static auto constexpr MAX_SUBGENOME_RECURSION_DEPTH = 20;
@@ -48,7 +49,9 @@ private:
     static int constexpr InjectorFixedBytes = 0;
     static int constexpr MuscleBytes = 1;
     __inline__ __device__ static int getNumGenomeCells(uint8_t* genome, int genomeSize);
-    __inline__ __device__ static int findStartNodeIndex(uint8_t* genome, int genomeSize, int refIndex);
+    __inline__ __device__ static int getNodeIndex(uint8_t* genome, int genomeSize, int cellIndex);
+    __inline__ __device__
+        static int findStartNodeIndex(uint8_t* genome, int genomeSize, int refIndex);
     __inline__ __device__ static int getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeIndex);
     __inline__ __device__ static int getNextCellFunctionType(uint8_t* genome, int nodeIndex);
     __inline__ __device__ static int getNextCellColor(uint8_t* genome, int nodeIndex);
@@ -97,6 +100,11 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDeletionProbability,
         data,
         cell->absPos);
+    auto cellFunctionConstructorMutationDuplicationProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationDuplicationProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDuplicationProbability,
+        data,
+        cell->absPos);
 
     if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
         changeNeuronDataMutation(data, cell);
@@ -112,6 +120,9 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationDeletionProbability)) {
         deleteMutation(data, cell);
+    }
+    if (isRandomEvent(data, cellFunctionConstructorMutationDuplicationProbability)) {
+        duplicateMutation(data, cell);
     }
 }
 
@@ -296,6 +307,73 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
     constructor.genomeSize = targetGenomeSize;
 }
 
+__inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    auto& genome = constructor.genome;
+    auto genomeSize = toInt(constructor.genomeSize);
+    if (genomeSize == 0) {
+        return;
+    }
+
+    int startSourceIndex;
+    int endSourceIndex;
+    {
+        int subGenomesSizeIndices[MAX_SUBGENOME_RECURSION_DEPTH + 1];
+        int numSubGenomesSizeIndices;
+        startSourceIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, false, subGenomesSizeIndices, &numSubGenomesSizeIndices);
+
+        int subGenomeSize;
+        uint8_t* subGenome;
+        if (numSubGenomesSizeIndices > 0) {
+            auto sizeIndex = subGenomesSizeIndices[numSubGenomesSizeIndices - 1];
+            subGenome = genome + sizeIndex + 2;  //after the 2 size bytes the subGenome starts
+            subGenomeSize = readWord(genome, sizeIndex);
+        } else {
+            subGenome = genome;
+            subGenomeSize = genomeSize;
+        }
+        auto numCells = getNumGenomeCells(subGenome, subGenomeSize);
+        auto endRelativeCellIndex = data.numberGen1.random(numCells - 1) + 1;
+        auto endRelativeNodeIndex = getNodeIndex(subGenome, subGenomeSize, endRelativeCellIndex);
+        endSourceIndex = toInt(endRelativeNodeIndex + (subGenome - genome));
+        if (endSourceIndex <= startSourceIndex) {
+            return;
+        }
+    }
+
+    int subGenomesSizeIndices[MAX_SUBGENOME_RECURSION_DEPTH + 1];
+    int numSubGenomesSizeIndices;
+    auto startTargetIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, true, subGenomesSizeIndices, &numSubGenomesSizeIndices);
+
+    auto sizeDelta = endSourceIndex - startSourceIndex;
+
+    auto targetGenomeSize = genomeSize + sizeDelta;
+    if (targetGenomeSize > MAX_GENOME_BYTES) {
+        return;
+    }
+    auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(targetGenomeSize);
+    for (int i = 0; i < startTargetIndex; ++i) {
+        targetGenome[i] = genome[i];
+    }
+    for (int i = 0; i < sizeDelta; ++i) {
+        targetGenome[startTargetIndex + i] = genome[startSourceIndex + i];
+    }
+    for (int i = 0; i < genomeSize - startTargetIndex; ++i) {
+        targetGenome[startTargetIndex + sizeDelta + i] = genome[startTargetIndex + i];
+    }
+
+    for (int i = 0; i < numSubGenomesSizeIndices; ++i) {
+        auto subGenomeSize = readWord(targetGenome, subGenomesSizeIndices[i]);
+        writeWord(targetGenome, subGenomesSizeIndices[i], subGenomeSize + sizeDelta);
+    }
+    if (constructor.currentGenomePos > startTargetIndex || constructor.currentGenomePos == constructor.genomeSize) {
+        constructor.currentGenomePos += sizeDelta;
+    }
+    constructor.genomeSize = targetGenomeSize;
+    constructor.genome = targetGenome;
+}
+
 __inline__ __device__ bool MutationProcessor::isRandomEvent(SimulationData& data, float probability)
 {
     if (probability > 0.001f) {
@@ -391,6 +469,20 @@ __inline__ __device__ int MutationProcessor::getNumGenomeCells(uint8_t* genome, 
 
     return result;
 }
+
+__inline__ __device__ int MutationProcessor::getNodeIndex(uint8_t* genome, int genomeSize, int cellIndex)
+{
+    int currentNodeIndex = 0;
+    for (int currentCellIndex = 0; currentCellIndex < cellIndex; ++currentCellIndex) {
+        if (currentNodeIndex >= genomeSize) {
+            break;
+        }
+        currentNodeIndex += CellBasicBytes + getNextCellFunctionDataSize(genome, genomeSize, currentNodeIndex);
+    }
+
+    return currentNodeIndex;
+}
+
 
 __inline__ __device__ int MutationProcessor::findStartNodeIndex(uint8_t* genome, int genomeSize, int refIndex)
 {
