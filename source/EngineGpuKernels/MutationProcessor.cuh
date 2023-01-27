@@ -378,12 +378,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
             targetGenome[startSourceIndex + delta1 + delta2 + i] = genome[startTargetIndex + i];
         }
 
-        if (constructor.currentGenomePos >= startSourceIndex && constructor.currentGenomePos < endSourceIndex) {
-            constructor.currentGenomePos += startTargetIndex - endSourceIndex;
-        }
-        if (constructor.currentGenomePos >= endSourceIndex && constructor.currentGenomePos < startTargetIndex) {
-            constructor.currentGenomePos -= sourceRangeSize;
-        }
+        constructor.currentGenomePos = startSourceIndex;
 
         //adjust sub genome size fields
         for (int i = 0; i < numSubGenomesSizeIndices1; ++i) {
@@ -416,13 +411,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
         for (int i = 0; i < delta3; ++i) {
             targetGenome[startTargetIndex + delta1 + delta2 + i] = genome[endSourceIndex + i];
         }
-
-        if (constructor.currentGenomePos >= startTargetIndex && constructor.currentGenomePos < startSourceIndex) {
-            constructor.currentGenomePos += sourceRangeSize;
-        }
-        if (constructor.currentGenomePos >= startSourceIndex && constructor.currentGenomePos < endSourceIndex) {
-            constructor.currentGenomePos -= startSourceIndex - startTargetIndex;
-        }
+        constructor.currentGenomePos = startTargetIndex;
 
         //adjust sub genome size fields
         for (int i = 0; i < numSubGenomesSizeIndices1; ++i) {
