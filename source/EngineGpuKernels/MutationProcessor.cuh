@@ -15,6 +15,7 @@ public:
     __inline__ __device__ static void changeCellFunctionMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void insertMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void deleteMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void translateMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void duplicateMutation(SimulationData& data, Cell* cell);
 
 private:
@@ -100,6 +101,11 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDeletionProbability,
         data,
         cell->absPos);
+    auto cellFunctionConstructorMutationTranslationProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationTranslationProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationTranslationProbability,
+        data,
+        cell->absPos);
     auto cellFunctionConstructorMutationDuplicationProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationDuplicationProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDuplicationProbability,
@@ -120,6 +126,9 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationDeletionProbability)) {
         deleteMutation(data, cell);
+    }
+    if (isRandomEvent(data, cellFunctionConstructorMutationTranslationProbability)) {
+        translateMutation(data, cell);
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationDuplicationProbability)) {
         duplicateMutation(data, cell);
@@ -301,10 +310,138 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
         auto subGenomeSize = readWord(genome, subGenomesSizeIndices[i]);
         writeWord(genome, subGenomesSizeIndices[i], subGenomeSize - deleteSize);
     }
-    if (constructor.currentGenomePos > nodeIndex) {
+    if (constructor.currentGenomePos > nodeIndex || constructor.currentGenomePos == constructor.genomeSize) {
         constructor.currentGenomePos -= deleteSize;
     }
     constructor.genomeSize = targetGenomeSize;
+}
+
+__inline__ __device__ void MutationProcessor::translateMutation(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    auto& genome = constructor.genome;
+    auto genomeSize = toInt(constructor.genomeSize);
+    if (genomeSize == 0) {
+        return;
+    }
+
+    //calc source range
+    int subGenomesSizeIndices1[MAX_SUBGENOME_RECURSION_DEPTH + 1];
+    int numSubGenomesSizeIndices1;
+    auto startSourceIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, false, subGenomesSizeIndices1, &numSubGenomesSizeIndices1);
+
+    int subGenomeSize;
+    uint8_t* subGenome;
+    if (numSubGenomesSizeIndices1 > 0) {
+        auto sizeIndex = subGenomesSizeIndices1[numSubGenomesSizeIndices1 - 1];
+        subGenome = genome + sizeIndex + 2;  //after the 2 size bytes the subGenome starts
+        subGenomeSize = readWord(genome, sizeIndex);
+    } else {
+        subGenome = genome;
+        subGenomeSize = genomeSize;
+    }
+    auto numCells = getNumGenomeCells(subGenome, subGenomeSize);
+    auto endRelativeCellIndex = data.numberGen1.random(numCells - 1) + 1;
+    auto endRelativeNodeIndex = getNodeIndex(subGenome, subGenomeSize, endRelativeCellIndex);
+    auto endSourceIndex = toInt(endRelativeNodeIndex + (subGenome - genome));
+    if (endSourceIndex <= startSourceIndex) {
+        return;
+    }
+    auto sourceRangeSize = endSourceIndex - startSourceIndex;
+
+    //calc target insertion point
+    int subGenomesSizeIndices2[MAX_SUBGENOME_RECURSION_DEPTH + 1];
+    int numSubGenomesSizeIndices2;
+    auto startTargetIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, true, subGenomesSizeIndices2, &numSubGenomesSizeIndices2);
+
+    if (startTargetIndex >= startSourceIndex && startTargetIndex <= endSourceIndex) {
+        return;
+    }
+
+    auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(genomeSize);
+    if (startTargetIndex >= endSourceIndex) {
+
+        //copy genome
+        for (int i = 0; i < startSourceIndex; ++i) {
+            targetGenome[i] = genome[i];
+        }
+        int delta1 = startTargetIndex - endSourceIndex;
+        for (int i = 0; i < delta1; ++i) {
+            targetGenome[startSourceIndex + i] = genome[endSourceIndex + i];
+        }
+        int delta2 = sourceRangeSize;
+        for (int i = 0; i < delta2; ++i) {
+            targetGenome[startSourceIndex + delta1 + i] = genome[startSourceIndex + i];
+        }
+        int delta3 = genomeSize - startTargetIndex;
+        for (int i = 0; i < delta3; ++i) {
+            targetGenome[startSourceIndex + delta1 + delta2 + i] = genome[startTargetIndex + i];
+        }
+
+        if (constructor.currentGenomePos >= startSourceIndex && constructor.currentGenomePos < endSourceIndex) {
+            constructor.currentGenomePos += startTargetIndex - endSourceIndex;
+        }
+        if (constructor.currentGenomePos >= endSourceIndex && constructor.currentGenomePos < startTargetIndex) {
+            constructor.currentGenomePos -= sourceRangeSize;
+        }
+
+        //adjust sub genome size fields
+        for (int i = 0; i < numSubGenomesSizeIndices1; ++i) {
+            auto subGenomeSize = readWord(targetGenome, subGenomesSizeIndices1[i]);
+            writeWord(targetGenome, subGenomesSizeIndices1[i], subGenomeSize - sourceRangeSize);
+        }
+        for (int i = 0; i < numSubGenomesSizeIndices2; ++i) {
+            auto address = subGenomesSizeIndices2[i];
+            if (address >= startSourceIndex) {
+                address -= sourceRangeSize;
+            }
+            auto subGenomeSize = readWord(targetGenome, address);
+            writeWord(targetGenome, address, subGenomeSize + sourceRangeSize);
+        }
+
+    } else {
+        //copy genome
+        for (int i = 0; i < startTargetIndex; ++i) {
+            targetGenome[i] = genome[i];
+        }
+        int delta1 = sourceRangeSize;
+        for (int i = 0; i < delta1; ++i) {
+            targetGenome[startTargetIndex + i] = genome[startSourceIndex + i];
+        }
+        int delta2 = startSourceIndex - startTargetIndex;
+        for (int i = 0; i < delta2; ++i) {
+            targetGenome[startTargetIndex + delta1 + i] = genome[startTargetIndex + i];
+        }
+        int delta3 = genomeSize - endSourceIndex;
+        for (int i = 0; i < delta3; ++i) {
+            targetGenome[startTargetIndex + delta1 + delta2 + i] = genome[endSourceIndex + i];
+        }
+
+        if (constructor.currentGenomePos >= startTargetIndex && constructor.currentGenomePos < startSourceIndex) {
+            constructor.currentGenomePos += sourceRangeSize;
+        }
+        if (constructor.currentGenomePos >= startSourceIndex && constructor.currentGenomePos < endSourceIndex) {
+            constructor.currentGenomePos -= startSourceIndex - startTargetIndex;
+        }
+
+        //adjust sub genome size fields
+        for (int i = 0; i < numSubGenomesSizeIndices1; ++i) {
+            auto address = subGenomesSizeIndices1[i];
+            if (address >= startTargetIndex) {
+                address += sourceRangeSize;
+            }
+            auto subGenomeSize = readWord(targetGenome, address);
+            writeWord(targetGenome, address, subGenomeSize - sourceRangeSize);
+        }
+        for (int i = 0; i < numSubGenomesSizeIndices2; ++i) {
+            auto subGenomeSize = readWord(targetGenome, subGenomesSizeIndices2[i]);
+            writeWord(targetGenome, subGenomesSizeIndices2[i], subGenomeSize + sourceRangeSize);
+        }
+
+        return;
+    }
+
+    constructor.genome = targetGenome;
 }
 
 __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& data, Cell* cell)
