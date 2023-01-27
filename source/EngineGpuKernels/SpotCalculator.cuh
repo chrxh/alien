@@ -26,8 +26,7 @@ public:
                 if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
                     float2 spotPos = {cudaSimulationParameters.spots[i].posX, cudaSimulationParameters.spots[i].posY};
                     auto delta = map.getCorrectedDirection(spotPos - worldPos);
-                    spotWeights[numValues] = calcWeight(delta, i);
-                    ++numValues;
+                    spotWeights[numValues++] = calcWeight(delta, i);
                 }
             }
             return mix(baseValue, spotValues, spotWeights, numValues);
@@ -57,8 +56,11 @@ public:
         float2 const& worldPos)
     {
         float spotValues[MAX_SPOTS];
+        int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            spotValues[i] = cudaSimulationParameters.spots[i].values.*value;
+            if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                spotValues[numValues++] = cudaSimulationParameters.spots[i].values.*value;
+            }
         }
 
         return calcResultingValue(data.cellMap, worldPos, cudaSimulationParameters.baseValues.*value, spotValues, valueActivated);
@@ -71,8 +73,11 @@ public:
         float2 const& worldPos)
     {
         float spotValues[MAX_SPOTS];
+        int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            spotValues[i] = toFloat(cudaSimulationParameters.spots[i].values.*value);
+            if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                spotValues[numValues++] = toFloat(cudaSimulationParameters.spots[i].values.*value);
+            }
         }
 
         return toInt(calcResultingValue(data.cellMap, worldPos, toFloat(cudaSimulationParameters.baseValues.*value), spotValues, valueActivated));
@@ -85,8 +90,11 @@ public:
         float2 const& worldPos)
     {
         float spotValues[MAX_SPOTS];
+        int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            spotValues[i] = cudaSimulationParameters.spots[i].values.cellFunctionAttackerFoodChainColorMatrix[color][otherColor];
+            if (cudaSimulationParameters.spots[i].activatedValues.cellFunctionAttackerFoodChainColorMatrix) {
+                spotValues[numValues++] = cudaSimulationParameters.spots[i].values.cellFunctionAttackerFoodChainColorMatrix[color][otherColor];
+            }
         }
 
         return calcResultingValue(
@@ -101,8 +109,11 @@ public:
     calcColorTransitionDuration(int color, SimulationData const& data, float2 const& worldPos)
     {
         float spotValues[MAX_SPOTS];
+        int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            spotValues[i] = toFloat(cudaSimulationParameters.spots[i].values.cellColorTransitionDuration[color]);
+            if (cudaSimulationParameters.spots[i].activatedValues.cellColorTransition) {
+                spotValues[numValues++] = toFloat(cudaSimulationParameters.spots[i].values.cellColorTransitionDuration[color]);
+            }
         }
 
         return toInt(calcResultingValue(
@@ -116,8 +127,11 @@ public:
     __device__ __inline__ static int calcColorTransitionTargetColor(int color, SimulationData const& data, float2 const& worldPos)
     {
         float spotValues[MAX_SPOTS];
+        int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            spotValues[i] = toFloat(cudaSimulationParameters.spots[i].values.cellColorTransitionTargetColor[color]);
+            if (cudaSimulationParameters.spots[i].activatedValues.cellColorTransition) {
+                spotValues[numValues++] = toFloat(cudaSimulationParameters.spots[i].values.cellColorTransitionTargetColor[color]);
+            }
         }
 
         return toInt(
