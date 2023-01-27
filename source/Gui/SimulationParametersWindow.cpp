@@ -907,7 +907,7 @@ void _SimulationParametersWindow::processSpot(
             ImGui::BeginDisabled(!isForceFieldActive);
             auto posX = ImGui::GetCursorPos().x;
             if (AlienImGui::Combo(
-                    AlienImGui::ComboParameters().name("Type").values({"Radial flow"}).textWidth(RightColumnWidth).defaultValue(origForceFieldTypeIntern),
+                    AlienImGui::ComboParameters().name("Type").values({"Radial"}).textWidth(RightColumnWidth).defaultValue(origForceFieldTypeIntern),
                     forceFieldTypeIntern)) {
                 spot.flowType = origForceFieldTypeIntern + 1;
             }
