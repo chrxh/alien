@@ -898,8 +898,8 @@ void _SimulationParametersWindow::processSpot(
          */
         if (ImGui::TreeNodeEx("Force field", flags)) {
             auto isForceFieldActive = spot.flowType != FlowType_None;
-            auto forceFieldType = spot.flowType == FlowType_None ? FlowType_Radial : spot.flowType;
-            auto origForceFieldType = origSpot.flowType == FlowType_None ? FlowType_Radial : origSpot.flowType;
+            auto forceFieldTypeIntern = spot.flowType == FlowType_None ? 0 : spot.flowType - 1;
+            auto origForceFieldTypeIntern = origSpot.flowType == FlowType_None ? 0 : origSpot.flowType - 1;
             if (ImGui::Checkbox("##cellColorTransition", &isForceFieldActive)) {
                 spot.flowType = isForceFieldActive ? FlowType_Radial : FlowType_None;
             }
@@ -907,12 +907,11 @@ void _SimulationParametersWindow::processSpot(
             ImGui::BeginDisabled(!isForceFieldActive);
             auto posX = ImGui::GetCursorPos().x;
             if (AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Type").values({"Radial flow"}).textWidth(RightColumnWidth).defaultValue(origForceFieldType),
-                forceFieldType)) {
-                spot.flowType = forceFieldType;
+                    AlienImGui::ComboParameters().name("Type").values({"Radial flow"}).textWidth(RightColumnWidth).defaultValue(origForceFieldTypeIntern),
+                    forceFieldTypeIntern)) {
+                spot.flowType = origForceFieldTypeIntern + 1;
             }
-
-            if (forceFieldType == FlowType_Radial) {
+            if (spot.flowType == FlowType_Radial) {
                 ImGui::SetCursorPosX(posX);
                 AlienImGui::Combo(
                     AlienImGui::ComboParameters()
