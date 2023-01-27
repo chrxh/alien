@@ -354,12 +354,12 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
     int numSubGenomesSizeIndices2;
     auto startTargetIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, true, subGenomesSizeIndices2, &numSubGenomesSizeIndices2);
 
-    if (startTargetIndex >= startSourceIndex && startTargetIndex <= endSourceIndex) {
+    if (startTargetIndex >= startSourceIndex && startTargetIndex < endSourceIndex) {
         return;
     }
 
     auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(genomeSize);
-    if (startTargetIndex >= endSourceIndex) {
+    if (startTargetIndex > endSourceIndex) {
 
         //copy genome
         for (int i = 0; i < startSourceIndex; ++i) {
