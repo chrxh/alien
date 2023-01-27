@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <ranges>
+#include <cstdlib>
 #include <boost/range/combine.hpp>
 
 #include <gtest/gtest.h>
@@ -33,7 +34,7 @@ protected:
                 CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(GenomeCellColors[1]),
                 CellGenomeDescription().setColor(GenomeCellColors[2]),
                 CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeGenomeCopy()).setColor(GenomeCellColors[2]),
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)).setColor(GenomeCellColors[0]),
+                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome).setMode(std::rand() % 100)).setColor(GenomeCellColors[0]),
             });
         };
         return GenomeDescriptionConverter::convertDescriptionToBytes({
@@ -50,6 +51,21 @@ protected:
             CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription1()).setColor(GenomeCellColors[2]),
             CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription2()).setColor(GenomeCellColors[0]),
         });
+    }
+
+    void rollout(GenomeDescription const& input, std::set<CellGenomeDescription>& result)
+    {
+        for (auto const& cell : input) {
+            if (auto subGenome = cell.getSubGenome()) {
+                auto subGenomeCells = GenomeDescriptionConverter::convertBytesToDescription(*subGenome, _parameters);
+                rollout(subGenomeCells, result);
+                auto cellClone = cell;
+                cellClone.setSubGenome({});
+                result.insert(cellClone);
+            } else {
+                result.insert(cell);
+            }
+        }
     }
 
     bool compareDataMutation(std::vector<uint8_t> const& expected, std::vector<uint8_t> const& actual)
@@ -186,7 +202,9 @@ protected:
     {
         auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before, _parameters);
         auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after, _parameters);
-        for (auto const& cell : afterGenome) {
+        std::set<CellGenomeDescription> afterGenomeRollout;
+        rollout(afterGenome, afterGenomeRollout);
+        for (auto const& cell : afterGenomeRollout) {
             if (std::ranges::find(GenomeCellColors, cell.color) == GenomeCellColors.end()) {
                 return false;
             }
@@ -229,7 +247,9 @@ protected:
     {
         auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before, _parameters);
         auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after, _parameters);
-        for (auto const& cell : afterGenome) {
+        std::set<CellGenomeDescription> afterGenomeRollout;
+        rollout(afterGenome, afterGenomeRollout);
+        for (auto const& cell : afterGenomeRollout) {
             if (std::ranges::find(GenomeCellColors, cell.color) == GenomeCellColors.end()) {
                 return false;
             }
@@ -266,6 +286,19 @@ protected:
             }
         }
         return true;
+    }
+
+    bool compareTranslateMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after)
+    {
+        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before, _parameters);
+        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after, _parameters);
+
+        std::set<CellGenomeDescription> beforeGenomeRollout;
+        rollout(beforeGenome, beforeGenomeRollout);
+        std::set<CellGenomeDescription> afterGenomeRollout;
+        rollout(afterGenome, afterGenomeRollout);
+
+        return beforeGenomeRollout == afterGenomeRollout;
     }
 };
 
@@ -495,4 +528,23 @@ TEST_F(MutationTests, duplicateMutation)
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareInsertMutation(genome, actualConstructor.genome));
     EXPECT_EQ(0, actualConstructor.currentGenomePos);
+}
+
+TEST_F(MutationTests, translateMutation)
+{
+    auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setCurrentGenomePos(0)).setExecutionOrderNumber(0)});
+
+    _simController->setSimulationData(data);
+    for (int i = 0; i < 10000; ++i) {
+        _simController->testOnly_mutate(1, MutationType::Translation);
+    }
+
+    auto actualData = _simController->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    EXPECT_TRUE(compareTranslateMutation(genome, actualConstructor.genome));
 }

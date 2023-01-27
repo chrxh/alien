@@ -271,7 +271,7 @@ struct CellGenomeDescription
     {
         switch (getCellFunctionType()) {
         case CellFunction_Constructor: {
-            auto constructor = std::get<ConstructorGenomeDescription>(*cellFunction);
+            auto const& constructor = std::get<ConstructorGenomeDescription>(*cellFunction);
             if (!constructor.isMakeGenomeCopy()) {
                 return constructor.getGenomeData();
             } else {
@@ -279,7 +279,7 @@ struct CellGenomeDescription
             }
         }
         case CellFunction_Injector: {
-            auto injector = std::get<InjectorGenomeDescription>(*cellFunction);
+            auto const& injector = std::get<InjectorGenomeDescription>(*cellFunction);
             if (!injector.isMakeGenomeCopy()) {
                 return injector.getGenomeData();
             } else {
@@ -288,6 +288,23 @@ struct CellGenomeDescription
         }
         default:
             return std::nullopt;
+        }
+    }
+    void setSubGenome(std::vector<uint8_t> const& genome)
+    {
+        switch (getCellFunctionType()) {
+        case CellFunction_Constructor: {
+            auto& constructor = std::get<ConstructorGenomeDescription>(*cellFunction);
+            if (!constructor.isMakeGenomeCopy()) {
+                constructor.genome = genome;
+            }
+        } break;
+        case CellFunction_Injector: {
+            auto& injector = std::get<InjectorGenomeDescription>(*cellFunction);
+            if (!injector.isMakeGenomeCopy()) {
+                injector.genome = genome;
+            }
+        } break;
         }
     }
     std::optional<bool> isMakeGenomeCopy() const
