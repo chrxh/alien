@@ -911,7 +911,7 @@ void _SimulationParametersWindow::processSpot(
                     forceFieldTypeIntern)) {
                 spot.flowType = origForceFieldTypeIntern + 1;
             }
-            if (spot.flowType == FlowType_Radial) {
+            if (forceFieldTypeIntern + 1 == FlowType_Radial) {
                 ImGui::SetCursorPosX(posX);
                 AlienImGui::Combo(
                     AlienImGui::ComboParameters()
