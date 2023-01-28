@@ -44,13 +44,11 @@ void _EditorController::process()
         return;
     }
 
-    if (!_simController->isSimulationRunning()) {
-        _selectionWindow->process();
-        _patternEditorWindow->process();
-        _creatorWindow->process();
-        _multiplierWindow->process();
-        _genomeEditorWindow->process();
-    }
+    _selectionWindow->process();
+    _patternEditorWindow->process();
+    _creatorWindow->process();
+    _multiplierWindow->process();
+    _genomeEditorWindow->process();
     if (!_creatorWindow->isOn()) {
         _editorModel->setDrawMode(false);
     }
