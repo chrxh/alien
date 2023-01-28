@@ -84,6 +84,7 @@ public:
     uint64_t getCurrentTimestep() const;
     void setCurrentTimestep(uint64_t value);
 
+    void setSimulationParameters(SimulationParameters const& parameters);
     void setSimulationParameters_async(SimulationParameters const& parameters);
     void setGpuSettings_async(GpuSettings const& gpuSettings);
 

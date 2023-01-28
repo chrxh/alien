@@ -219,6 +219,12 @@ SimulationParameters _SimulationControllerImpl::getOriginalSimulationParameters(
     return _origSettings.simulationParameters;
 }
 
+void _SimulationControllerImpl::setSimulationParameters(SimulationParameters const& parameters)
+{
+    _settings.simulationParameters = parameters;
+    _worker.setSimulationParameters(parameters);
+}
+
 void _SimulationControllerImpl::setOriginalSimulationParameters(SimulationParameters const& parameters)
 {
     _origSettings.simulationParameters = parameters;
