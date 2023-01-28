@@ -321,20 +321,16 @@ void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
     }
     if (ImGui::BeginTabItem("Genome", nullptr, flags)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            auto width = ImGui::GetContentRegionAvail().x;
-            if (ImGui::BeginChild("##", ImVec2(width, contentScale(60.0f)), true)) {
-                AlienImGui::MonospaceText("Genome: " + std::to_string(constructor.genome.size()) + " bytes");
-                if (AlienImGui::Button("Edit")) {
-                    _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters));
-                }
-
-                ImGui::SameLine();
-                if (AlienImGui::Button("Retrieve from genome editor")) {
-                    constructor.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
-                    constructor.currentGenomePos = 0;
-                }
+            AlienImGui::Group("Genome: " + std::to_string(constructor.genome.size()) + " bytes");
+            if (AlienImGui::Button("Edit")) {
+                _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters));
             }
-            ImGui::EndChild();
+
+            ImGui::SameLine();
+            if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Retrieve from editor").textWidth(GenomeTabTextWidth))) {
+                constructor.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
+                constructor.currentGenomePos = 0;
+            }
 
             auto entry = GenomeDescriptionConverter::convertByteIndexToCellIndex(constructor.genome, constructor.currentGenomePos);
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Sequence number").textWidth(GenomeTabTextWidth), entry);
