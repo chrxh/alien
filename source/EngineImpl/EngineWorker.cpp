@@ -367,6 +367,12 @@ void EngineWorker::setCurrentTimestep(uint64_t value)
     resetProcessMonitorData();
 }
 
+void EngineWorker::setSimulationParameters(SimulationParameters const& parameters)
+{
+    EngineWorkerGuard access(this);
+    _cudaSimulation->setSimulationParameters(parameters);
+}
+
 void EngineWorker::setSimulationParameters_async(SimulationParameters const& parameters)
 {
     std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);

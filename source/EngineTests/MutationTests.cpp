@@ -470,7 +470,7 @@ TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
     EXPECT_EQ(0, actualConstructor.currentGenomePos);
 }
 
-TEST_F(MutationTests, deleteMutation_eraseLargeGenome)
+TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
@@ -486,7 +486,38 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome)
     auto actualCellById = getCellById(actualData);
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
-    EXPECT_TRUE(actualConstructor.genome.empty());
+    auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(actualConstructor.genome, _parameters);
+
+    std::set<CellGenomeDescription> afterGenomeRollout;
+    rollout(afterGenome, afterGenomeRollout);
+    for (auto const& cell : afterGenomeRollout) {
+        auto cellFunctionType = cell.getCellFunctionType();
+        EXPECT_TRUE(cellFunctionType == CellFunction_Constructor || cellFunctionType == CellFunction_Injector);
+    }
+    EXPECT_EQ(0, actualConstructor.currentGenomePos);
+}
+
+TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
+{
+    auto parameters = _parameters;
+    parameters.cellFunctionConstructorMutationSelfReplication = true;
+    _simController->setSimulationParameters(parameters);
+
+    auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setCurrentGenomePos(0)).setExecutionOrderNumber(0)});
+
+    _simController->setSimulationData(data);
+    for (int i = 0; i < 10000; ++i) {
+        _simController->testOnly_mutate(1, MutationType::Deletion);
+    }
+
+    auto actualData = _simController->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    EXPECT_EQ(0, actualConstructor.genome.size());
     EXPECT_EQ(0, actualConstructor.currentGenomePos);
 }
 
