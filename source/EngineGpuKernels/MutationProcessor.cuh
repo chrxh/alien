@@ -354,7 +354,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
     int numSubGenomesSizeIndices2;
     auto startTargetIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, true, subGenomesSizeIndices2, &numSubGenomesSizeIndices2);
 
-    if (startTargetIndex >= startSourceIndex && startTargetIndex < endSourceIndex) {
+    if (startTargetIndex >= startSourceIndex && startTargetIndex <= endSourceIndex) {
         return;
     }
 
@@ -378,7 +378,9 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
             targetGenome[startSourceIndex + delta1 + delta2 + i] = genome[startTargetIndex + i];
         }
 
-        constructor.currentGenomePos = startSourceIndex;
+        if (constructor.currentGenomePos >= startSourceIndex && constructor.currentGenomePos <= startTargetIndex) {
+            constructor.currentGenomePos = 0;
+        }
 
         //adjust sub genome size fields
         for (int i = 0; i < numSubGenomesSizeIndices1; ++i) {
@@ -395,6 +397,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
         }
 
     } else {
+
         //copy genome
         for (int i = 0; i < startTargetIndex; ++i) {
             targetGenome[i] = genome[i];
@@ -411,7 +414,9 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
         for (int i = 0; i < delta3; ++i) {
             targetGenome[startTargetIndex + delta1 + delta2 + i] = genome[endSourceIndex + i];
         }
-        constructor.currentGenomePos = startTargetIndex;
+        if (constructor.currentGenomePos >= startTargetIndex && constructor.currentGenomePos <= endSourceIndex) {
+            constructor.currentGenomePos = 0;
+        }
 
         //adjust sub genome size fields
         for (int i = 0; i < numSubGenomesSizeIndices1; ++i) {
@@ -426,8 +431,6 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
             auto subGenomeSize = readWord(targetGenome, subGenomesSizeIndices2[i]);
             writeWord(targetGenome, subGenomesSizeIndices2[i], subGenomeSize + sourceRangeSize);
         }
-
-        return;
     }
 
     constructor.genome = targetGenome;
