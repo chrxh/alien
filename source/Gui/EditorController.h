@@ -24,7 +24,8 @@ public:
     bool areInspectionWindowsActive() const;
     void onCloseAllInspectorWindows();
 
-    bool isInspectionPossible() const;
+    bool isObjectInspectionPossible() const;
+    bool isGenomeInspectionPossible() const;
     void onInspectSelectedObjects();
     void onInspectSelectedGenomes();
     void onInspectObjects(std::vector<CellOrParticleDescription> const& entities, bool selectGenomeTab);

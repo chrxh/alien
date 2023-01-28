@@ -15,7 +15,8 @@ public:
         Viewport const& viewport,
         EditorControllerWeakPtr const& editorController);
 
-    bool isInspectionPossible() const;
+    bool isObjectInspectionPossible() const;
+    bool isGenomeInspectionPossible() const;
 
     bool isCopyingPossible() const;
     void onCopy();

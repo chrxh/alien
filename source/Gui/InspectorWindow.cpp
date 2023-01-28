@@ -322,23 +322,22 @@ void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
     if (ImGui::BeginTabItem("Genome", nullptr, flags)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             auto width = ImGui::GetContentRegionAvail().x;
-            if (ImGui::BeginChild("##", ImVec2(width, ImGui::GetTextLineHeight() * 2), true)) {
-                AlienImGui::MonospaceText(std::to_string(constructor.genome.size()) + " bytes of genetic information");
+            if (ImGui::BeginChild("##", ImVec2(width, contentScale(60.0f)), true)) {
+                AlienImGui::MonospaceText("Genome: " + std::to_string(constructor.genome.size()) + " bytes");
+                if (AlienImGui::Button("Edit")) {
+                    _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters));
+                }
+
+                ImGui::SameLine();
+                if (AlienImGui::Button("Retrieve from genome editor")) {
+                    constructor.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
+                    constructor.currentGenomePos = 0;
+                }
             }
             ImGui::EndChild();
 
-            if (AlienImGui::Button("Edit")) {
-                _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters));
-            }
-
-            ImGui::SameLine();
-            if (AlienImGui::Button("Retrieve")) {
-                constructor.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
-                constructor.currentGenomePos = 0;
-            }
-
             auto entry = GenomeDescriptionConverter::convertByteIndexToCellIndex(constructor.genome, constructor.currentGenomePos);
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth), entry);
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Sequence number").textWidth(GenomeTabTextWidth), entry);
             constructor.currentGenomePos = GenomeDescriptionConverter::convertCellIndexToByteIndex(constructor.genome, entry);
 
             AlienImGui::Group("Preview (approximation)");

@@ -98,9 +98,14 @@ void _EditorController::onCloseAllInspectorWindows()
     _inspectorWindows.clear();
 }
 
-bool _EditorController::isInspectionPossible() const
+bool _EditorController::isObjectInspectionPossible() const
 {
-    return _patternEditorWindow->isInspectionPossible();
+    return _patternEditorWindow->isObjectInspectionPossible();
+}
+
+bool _EditorController::isGenomeInspectionPossible() const
+{
+    return _patternEditorWindow->isGenomeInspectionPossible();
 }
 
 void _EditorController::onInspectSelectedObjects()
@@ -113,8 +118,8 @@ void _EditorController::onInspectSelectedGenomes()
 {
     DataDescription selectedData = _simController->getSelectedSimulationData(true);
     auto constructors = DescriptionHelper::getConstructorToMainGenomes(selectedData);
-    if (constructors.size() > 3) {
-        constructors = std::vector<CellOrParticleDescription>(constructors.begin(), constructors.begin() + 3);
+    if (constructors.size() > 1) {
+        constructors = {constructors.front()};
     }
     onInspectObjects(constructors, true);
 }
