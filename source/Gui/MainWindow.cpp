@@ -476,13 +476,13 @@ void _MainWindow::processMenubar()
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isInspectionPossible());
+            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isObjectInspectionPossible());
             if (ImGui::MenuItem("Inspect objects", "ALT+N")) {
                 _editorController->onInspectSelectedObjects();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isInspectionPossible());
-            if (ImGui::MenuItem("Inspect genomes", "ALT+F")) {
+            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isGenomeInspectionPossible());
+            if (ImGui::MenuItem("Inspect principal genome", "ALT+F")) {
                 _editorController->onInspectSelectedGenomes();
             }
             ImGui::EndDisabled();
@@ -640,10 +640,10 @@ void _MainWindow::processMenubar()
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
             multiplierWindow->setOn(!multiplierWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_N) && _editorController->isInspectionPossible()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_N) && _editorController->isObjectInspectionPossible()) {
             _editorController->onInspectSelectedObjects();
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_F) && _editorController->isInspectionPossible()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_F) && _editorController->isGenomeInspectionPossible()) {
             _editorController->onInspectSelectedGenomes();
         }
         if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) {
