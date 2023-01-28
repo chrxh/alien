@@ -314,8 +314,12 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(toVector<MAX_COLORS>(origSimParameters.radiationAbsorptionByCellColor))
                     .tooltip(""),
                 simParameters.radiationAbsorptionByCellColor);
-            if(AlienImGui::Button(
-                AlienImGui::ButtonParameters().buttonText("Define").name("Particle sources editor").textWidth(RightColumnWidth).tooltip(""))) {
+            if (AlienImGui::Button(AlienImGui::ButtonParameters()
+                                       .buttonText("Define")
+                                       .name("Particle sources editor")
+                                       .textWidth(RightColumnWidth)
+                                       .tooltip("")
+                                       .showDisabledRevertButton(true))) {
                 _radiationSourcesWindow->setOn(true);
             }
             ImGui::TreePop();

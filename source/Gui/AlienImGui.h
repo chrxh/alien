@@ -220,7 +220,7 @@ public:
         MEMBER_DECLARATION(ButtonParameters, std::string, buttonText, "");
         MEMBER_DECLARATION(ButtonParameters, std::string, name, "");
         MEMBER_DECLARATION(ButtonParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(ButtonParameters, bool, showDisabledRevertButton, true);
+        MEMBER_DECLARATION(ButtonParameters, bool, showDisabledRevertButton, false);
         MEMBER_DECLARATION(ButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Button(ButtonParameters const& parameters);
