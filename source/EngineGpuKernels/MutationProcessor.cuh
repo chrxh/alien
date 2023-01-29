@@ -209,6 +209,12 @@ __inline__ __device__ void MutationProcessor::changeCellFunctionMutation(Simulat
     auto origCellFunctionSize = getNextCellFunctionDataSize(genome, genomeSize, nodeIndex);
     auto sizeDelta = newCellFunctionSize - origCellFunctionSize;
 
+    if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
+        if (hasSelfCopy(genome + nodeIndex, CellBasicBytes + origCellFunctionSize)) {
+            return;
+        }
+    }
+
     auto targetGenomeSize = genomeSize + sizeDelta;
     if (targetGenomeSize > MAX_GENOME_BYTES) {
         return;
