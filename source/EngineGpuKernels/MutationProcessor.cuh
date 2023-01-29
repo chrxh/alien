@@ -205,6 +205,12 @@ __inline__ __device__ void MutationProcessor::changeCellFunctionMutation(Simulat
     auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
     auto makeSelfCopy = cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication ? data.numberGen1.randomBool() : false;
 
+    auto origCellFunction = getNextCellFunctionType(genome, nodeIndex);
+    if (origCellFunction == CellFunction_Constructor || origCellFunction == CellFunction_Injector) {
+        if (getNextSubGenomeSize(genome, genomeSize, nodeIndex) > 0) {
+            return;
+        }
+    }
     auto newCellFunctionSize = getCellFunctionDataSize(newCellFunction, makeSelfCopy, 0);
     auto origCellFunctionSize = getNextCellFunctionDataSize(genome, genomeSize, nodeIndex);
     auto sizeDelta = newCellFunctionSize - origCellFunctionSize;

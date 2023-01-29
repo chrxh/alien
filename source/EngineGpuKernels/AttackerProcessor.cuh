@@ -86,6 +86,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 continue;
             }
 
+            atomicAdd(&otherCell->activity.channels[7], 1.0f);
+
             if (energyToTransfer >= 0) {
                 auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
                 if (origEnergy > cellMinEnergy + energyToTransfer) {
