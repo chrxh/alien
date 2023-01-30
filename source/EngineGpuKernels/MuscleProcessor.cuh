@@ -141,7 +141,7 @@ MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* c
             }
             connection.angleFromPrevious += bendingAngle;
             nextConnection.angleFromPrevious -= bendingAngle;
-            if (abs(activity.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold) {
+            if (cell->numConnections <= 2 && abs(activity.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold) {
                 auto delta = Math::normalized(data.cellMap.getCorrectedDirection(connection.cell->absPos - cell->absPos));
                 Math::rotateQuarterCounterClockwise(delta);
                 delta = delta * intensity * cudaSimulationParameters.cellFunctionMuscleBendingAcceleration;
