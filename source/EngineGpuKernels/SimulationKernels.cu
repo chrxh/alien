@@ -20,48 +20,55 @@ __global__ void cudaNextTimestep_physics_init(SimulationData data)
     CellProcessor::init(data);
 }
 
-__global__ void cudaNextTimestep_physics_substep1(SimulationData data)
+__global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
 {
     CellProcessor::updateMap(data);
     CellProcessor::radiation(data);  //do not use ParticleProcessor in this kernel
     CellProcessor::clearDensityMap(data);
 }
 
-__global__ void cudaNextTimestep_physics_substep1a(SimulationData data)
+__global__ void cudaNextTimestep_physics_calcPressure(SimulationData data)
 {
     CellProcessor::calcPressure(data);
 }
 
-__global__ void cudaNextTimestep_physics_substep2(SimulationData data)
+__global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
 {
-//    CellProcessor::collisions(data);
     CellProcessor::calcFluidForce(data);
     CellProcessor::fillDensityMap(data);
 
     ParticleProcessor::updateMap(data);
 }
 
-__global__ void cudaNextTimestep_physics_substep3(SimulationData data)
+__global__ void cudaNextTimestep_physics_calcCollisionForces(SimulationData data)
+{
+    CellProcessor::collisions(data);
+    CellProcessor::fillDensityMap(data);
+
+    ParticleProcessor::updateMap(data);
+}
+
+__global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
 {
     CellProcessor::checkForces(data);
-    CellProcessor::updateVelocities(data);
+    CellProcessor::applyForces(data);
 
     ParticleProcessor::movement(data);
     ParticleProcessor::collision(data);
 }
 
-__global__ void cudaNextTimestep_physics_substep4(SimulationData data)
+__global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data)
 {
     CellProcessor::verletPositionUpdate(data);
     CellProcessor::checkConnections(data);
 }
 
-__global__ void cudaNextTimestep_physics_substep5(SimulationData data, bool considerAngles)
+__global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData data, bool considerAngles)
 {
     CellProcessor::calcConnectionForces(data, considerAngles);
 }
 
-__global__ void cudaNextTimestep_physics_substep6(SimulationData data)
+__global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData data)
 {
     CellProcessor::verletVelocityUpdate(data);
 }

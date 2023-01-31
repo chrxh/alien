@@ -158,7 +158,7 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
         if (1 != cell->selected) {
             continue;
         }
-        data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, cudaSimulationParameters.cellMaxCollisionDistance, cell->detached);
+        data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, 1.3f, cell->detached);
         for (int i = 0; i < numOtherCells; ++i) {
             Cell* otherCell = otherCells[i];
 

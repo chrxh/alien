@@ -24,14 +24,18 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     bool considerRigidityUpdate = (data.timestep % 3 == 0);
 
     KERNEL_CALL(cudaNextTimestep_physics_init, data);
-    KERNEL_CALL(cudaNextTimestep_physics_substep1, data);
-    KERNEL_CALL(cudaNextTimestep_physics_substep1a, data);
-    KERNEL_CALL(cudaNextTimestep_physics_substep2, data);
-    KERNEL_CALL(cudaNextTimestep_physics_substep3, data);
-    KERNEL_CALL(cudaNextTimestep_physics_substep5, data, considerForcesFromAngleDifferences);
-    KERNEL_CALL(cudaNextTimestep_physics_substep4, data);
-    KERNEL_CALL(cudaNextTimestep_physics_substep5, data, considerForcesFromAngleDifferences);
-    KERNEL_CALL(cudaNextTimestep_physics_substep6, data);
+    KERNEL_CALL(cudaNextTimestep_physics_fillMaps, data);
+    if (settings.simulationParameters.motionType == MotionType_Fluid) {
+        KERNEL_CALL(cudaNextTimestep_physics_calcPressure, data);
+        KERNEL_CALL(cudaNextTimestep_physics_calcFluidForces, data);
+    } else {
+        KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, data);
+    }
+    KERNEL_CALL(cudaNextTimestep_physics_applyForces, data);
+    KERNEL_CALL(cudaNextTimestep_physics_calcConnectionForces, data, considerForcesFromAngleDifferences);
+    KERNEL_CALL(cudaNextTimestep_physics_verletPositionUpdate, data);
+    KERNEL_CALL(cudaNextTimestep_physics_calcConnectionForces, data, considerForcesFromAngleDifferences);
+    KERNEL_CALL(cudaNextTimestep_physics_verletVelocityUpdate, data);
 
     //cell functions
     KERNEL_CALL(cudaNextTimestep_cellFunction_prepare_substep1, data);

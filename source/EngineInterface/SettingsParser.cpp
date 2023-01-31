@@ -32,16 +32,31 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
     auto& defaultParameters = defaultSettings.simulationParameters;
     JsonParser::encodeDecode(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
     JsonParser::encodeDecode(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);
+
+    JsonParser::encodeDecode(tree, parameters.motionType, defaultParameters.motionType, "simulation parameters.motion.type", parserTask);
+    if (parameters.motionType == MotionType_Collision) {
+        JsonParser::encodeDecode(
+            tree,
+            parameters.motionData.collisionMotion.cellMaxCollisionDistance,
+            defaultParameters.motionData.collisionMotion.cellMaxCollisionDistance,
+            "simulation parameters.motion.collision.max distance",
+            parserTask);
+        JsonParser::encodeDecode(
+            tree,
+            parameters.motionData.collisionMotion.cellRepulsionStrength,
+            defaultParameters.motionData.collisionMotion.cellRepulsionStrength,
+            "simulation parameters.motion.collision.repulsion strength",
+            parserTask);
+    }
+
     JsonParser::encodeDecode(tree, parameters.baseValues.friction, defaultParameters.baseValues.friction, "simulation parameters.friction", parserTask);
     JsonParser::encodeDecode(tree, parameters.baseValues.rigidity, defaultParameters.baseValues.rigidity, "simulation parameters.rigidity", parserTask);
     JsonParser::encodeDecode(tree, parameters.cellMaxVelocity, defaultParameters.cellMaxVelocity, "simulation parameters.cell.max velocity", parserTask);
     JsonParser::encodeDecode(
         tree, parameters.cellMaxBindingDistance, defaultParameters.cellMaxBindingDistance, "simulation parameters.cell.max binding distance", parserTask);
-    JsonParser::encodeDecode(tree, parameters.cellRepulsionStrength, defaultParameters.cellRepulsionStrength, "simulation parameters.cell.repulsion strength", parserTask);
     JsonParser::encodeDecode(tree, parameters.cellNormalEnergy, defaultParameters.cellNormalEnergy, "simulation parameters.cell.normal energy", parserTask);
 
     JsonParser::encodeDecode(tree, parameters.cellMinDistance, defaultParameters.cellMinDistance, "simulation parameters.cell.min distance", parserTask);
-    JsonParser::encodeDecode(tree, parameters.cellMaxCollisionDistance, defaultParameters.cellMaxCollisionDistance, "simulation parameters.cell.max collision distance", parserTask);
     JsonParser::encodeDecode(tree, parameters.baseValues.cellMaxForce, defaultParameters.baseValues.cellMaxForce, "simulation parameters.cell.max force", parserTask);
     JsonParser::encodeDecode(
         tree, parameters.cellMaxForceDecayProb, defaultParameters.cellMaxForceDecayProb, "simulation parameters.cell.max force decay probability", parserTask);
