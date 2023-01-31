@@ -147,6 +147,8 @@ struct Cell
     int activityFetched; //0 = no, 1 = yes
     int locked;	//0 = unlocked, 1 = locked
     int tag;
+    float density;
+    float pressure;
     float2 temp1;
     float2 temp2;
     Cell* nextCell; //linked list for finding all overlapping cells
