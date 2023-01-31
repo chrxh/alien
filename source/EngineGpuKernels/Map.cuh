@@ -219,6 +219,31 @@ public:
         }
     }
 
+    template <typename ExecFunc>
+    __device__ __inline__ void executeForEach(float2 const& pos, float radius, int detached, ExecFunc const& execFunc) const
+    {
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
+        int radiusInt = ceilf(radius);
+        for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
+            for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
+                int2 scanPos{posInt.x + dx, posInt.y + dy};
+                correctPosition(scanPos);
+                int slot = scanPos.x + scanPos.y * _size.x;
+                auto slotCell = _map[slot];
+                for (int level = 0; level < 10; ++level) {
+                    if (!slotCell) {
+                        break;
+                    }
+                    if (Math::length(slotCell->absPos - pos) <= radius && detached + slotCell->detached != 1) {
+                        execFunc(slotCell);
+                    }
+                    slotCell = slotCell->nextCell;
+                }
+            }
+        }
+    }
+
+
     __device__ __inline__ Cell* getFirst(float2 const& pos) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};

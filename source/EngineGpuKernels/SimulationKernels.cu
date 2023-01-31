@@ -27,9 +27,15 @@ __global__ void cudaNextTimestep_physics_substep1(SimulationData data)
     CellProcessor::clearDensityMap(data);
 }
 
+__global__ void cudaNextTimestep_physics_substep1a(SimulationData data)
+{
+    CellProcessor::calcPressure(data);
+}
+
 __global__ void cudaNextTimestep_physics_substep2(SimulationData data)
 {
-    CellProcessor::collisions(data);
+//    CellProcessor::collisions(data);
+    CellProcessor::calcFluidForce(data);
     CellProcessor::fillDensityMap(data);
 
     ParticleProcessor::updateMap(data);

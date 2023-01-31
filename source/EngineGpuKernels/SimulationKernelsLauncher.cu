@@ -25,6 +25,7 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
 
     KERNEL_CALL(cudaNextTimestep_physics_init, data);
     KERNEL_CALL(cudaNextTimestep_physics_substep1, data);
+    KERNEL_CALL(cudaNextTimestep_physics_substep1a, data);
     KERNEL_CALL(cudaNextTimestep_physics_substep2, data);
     KERNEL_CALL(cudaNextTimestep_physics_substep3, data);
     KERNEL_CALL(cudaNextTimestep_physics_substep5, data, considerForcesFromAngleDifferences);

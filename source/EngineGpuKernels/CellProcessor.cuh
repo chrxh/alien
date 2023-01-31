@@ -19,9 +19,12 @@ public:
     __inline__ __device__ static void clearDensityMap(SimulationData& data);
     __inline__ __device__ static void fillDensityMap(SimulationData& data);
 
-    __inline__ __device__ static void collisions(SimulationData& data);  //prerequisite: clearTag
+    __inline__ __device__ static void calcPressure(SimulationData& data);
+    __inline__ __device__ static void calcFluidForce(SimulationData& data);
+
+    __inline__ __device__ static void collisions(SimulationData& data);
     __inline__ __device__ static void checkForces(SimulationData& data);
-    __inline__ __device__ static void updateVelocities(SimulationData& data);  //prerequisite: tag from collisions
+    __inline__ __device__ static void updateVelocities(SimulationData& data);  //prerequisite: data from collisions
 
     __inline__ __device__ static void calcConnectionForces(SimulationData& data, bool considerAngles);
     __inline__ __device__ static void checkConnections(SimulationData& data);
@@ -52,6 +55,8 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
         cell->activityFetched = 0;
         cell->temp1 = {0, 0};
         cell->nextCell = nullptr;
+        cell->pressure = 0;
+        cell->density = 0;
     }
 }
 
@@ -72,6 +77,124 @@ __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
     auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         data.preprocessedCellFunctionData.densityMap.addCell(data.objects.cellPointers.at(index));
+    }
+}
+
+namespace
+{
+    __inline__ __device__ float f(float q)
+    {
+        float result;
+        if (q < 1) {
+            result = 2.0f / 3.0f - q * q + 0.5f * q * q * q;
+        } else if (q < 2) {
+            result = 2.0f - q;
+            result = result * result * result / 6;
+        } else {
+            result = 0;
+        }
+        result *= 3.0f / (2.0f * Const::PI);
+        return result;
+    }
+
+    __inline__ __device__ float f_d(float q)
+    {
+        float result;
+        if (q < 1) {
+            result = -2 * q + 3.0f / 2.0f * q * q;
+        } else if (q < 2) {
+            result = -0.5f * (2.0f - q) * (2.0f - q);
+        } else {
+            result = 0;
+        }
+        result *= 3.0f / (2.0f * Const::PI);
+        return result;
+    }
+}
+
+__inline__ __device__ void CellProcessor::calcPressure(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    Cell* otherCells[100];
+    int numOtherCells;
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        data.cellMap.get(otherCells, 100, numOtherCells, cell->absPos, 2.0f, cell->detached);
+        float p = 0;
+        for (int i = 0; i < numOtherCells; ++i) {
+            auto const& otherCell = otherCells[i];
+
+            //if (cell == otherCell) {
+            //    continue;
+            //}
+            //bool alreadyConnected = false;
+            //for (int i = 0; i < cell->numConnections; ++i) {
+            //    auto const& connectedCell = cell->connections[i].cell;
+            //    if (connectedCell == otherCell) {
+            //        alreadyConnected = true;
+            //        break;
+            //    }
+            //}
+            //if (alreadyConnected) {
+            //    continue;
+            //}
+
+            auto q = data.cellMap.getDistance(cell->absPos, otherCell->absPos);
+            p += f(q);
+        }
+        cell->density = p;
+        cell->pressure = (p - 0.0f) * 1.0f;
+    }
+}
+
+__inline__ __device__ void CellProcessor::calcFluidForce(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    Cell* otherCells[100];
+    int numOtherCells;
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        data.cellMap.get(otherCells, 100, numOtherCells, cell->absPos, 2.0f, cell->detached);
+        float2 grad_pressure = {0, 0};
+        float2 F_viscosity = {0, 0};
+        for (int i = 0; i < numOtherCells; ++i) {
+            auto const& otherCell = otherCells[i];
+
+            //if (cell == otherCell) {
+            //    continue;
+            //}
+            //bool alreadyConnected = false;
+            //for (int i = 0; i < cell->numConnections; ++i) {
+            //    auto const& connectedCell = cell->connections[i].cell;
+            //    if (connectedCell == otherCell) {
+            //        alreadyConnected = true;
+            //        break;
+            //    }
+            //}
+            //if (alreadyConnected) {
+            //    continue;
+            //}
+
+            auto factor = (cell->pressure / (cell->density * cell->density)
+                + otherCell->pressure / (otherCell->density * otherCell->density));
+
+            auto q = data.cellMap.getDistance(cell->absPos, otherCell->absPos);
+            if (abs(q) < NEAR_ZERO) {
+                continue;
+            }
+            float f_derivative = f_d(q);
+            grad_pressure = grad_pressure + (cell->absPos - otherCell->absPos) / q * factor * f_derivative; //needs topology correction
+
+            F_viscosity = F_viscosity + (cell->vel - otherCell->vel) / otherCell->density * q * f_derivative  / (q * q + 0.01f);
+
+        }
+        auto F_pressure = grad_pressure / -20;
+        atomicAdd(&cell->temp1.x, F_pressure.x + F_viscosity.x / 10);
+        atomicAdd(&cell->temp1.y, F_pressure.y + F_viscosity.y / 10);
     }
 }
 
@@ -215,7 +338,7 @@ __inline__ __device__ void CellProcessor::updateVelocities(SimulationData& data)
             continue;
         }
 
-        cell->vel = cell->vel + cell->temp1;
+        cell->vel = cell->vel + cell->temp1 * cudaSimulationParameters.timestepSize;
         if (Math::length(cell->vel) > cudaSimulationParameters.cellMaxVelocity) {
             cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.cellMaxVelocity;
         }
@@ -450,7 +573,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
             && (cell->energy > cudaSimulationParameters.radiationMinCellEnergy || cell->age > cudaSimulationParameters.radiationMinCellAge)) {
             auto radiationFactor = SpotCalculator::calcParameter(
                 &SimulationParametersSpotValues::radiationFactor, &SimulationParametersSpotActivatedValues::radiationFactor, data, cell->absPos);
-            if (radiationFactor > 0) {
+            if (radiationFactor > NEAR_ZERO) {
 
                 auto pos = cell->absPos;
                 if (cudaSimulationParameters.numParticleSources > 0) {
