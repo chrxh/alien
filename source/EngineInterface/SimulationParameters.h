@@ -6,6 +6,37 @@
 #include "RadiationSource.h"
 #include "SimulationParametersSpot.h"
 
+struct FluidMotion
+{
+    bool operator==(FluidMotion const& other) const { return true; }
+    bool operator!=(FluidMotion const& other) const { return true; }
+};
+
+struct CollisionMotion
+{
+    float cellMaxCollisionDistance = 1.3f;
+    float cellRepulsionStrength = 0.08f;
+
+    bool operator==(CollisionMotion const& other) const
+    {
+        return cellMaxCollisionDistance == other.cellMaxCollisionDistance && cellRepulsionStrength == other.cellRepulsionStrength;
+    }
+    bool operator!=(CollisionMotion const& other) const { return !operator==(other); }
+};
+
+union MotionData
+{
+    FluidMotion fluidMotion;
+    CollisionMotion collisionMotion;
+};
+
+using MotionType = int;
+enum MotionType_
+{
+    MotionType_Fluid,
+    MotionType_Collision
+};
+
 struct SimulationParameters
 {
     SimulationParametersSpotValues baseValues;
@@ -13,14 +44,15 @@ struct SimulationParameters
     uint32_t backgroundColor = 0x1b0000;
 
     float timestepSize = 1.0f;
+    MotionType motionType = MotionType_Fluid;
+    MotionData motionData = {FluidMotion()};
+
     float innerFriction = 0.3f;
     float cellMaxVelocity = 2.0f;              
     float cellMaxBindingDistance = 3.6f;
-    float cellRepulsionStrength = 0.08f;
 
     float cellNormalEnergy = 100.0f;
     float cellMinDistance = 0.3f;         
-    float cellMaxCollisionDistance = 1.3f;
     float cellMaxForceDecayProb = 0.2f;
     int cellMaxBonds = 6;
     int cellMaxExecutionOrderNumbers = 6;
@@ -77,6 +109,20 @@ struct SimulationParameters
     //inherit color
     bool operator==(SimulationParameters const& other) const
     {
+        if (motionType != other.motionType) {
+            return false;
+        }
+        if (motionType == MotionType_Fluid) {
+            if (motionData.fluidMotion != other.motionData.fluidMotion) {
+                return false;
+            }
+        }
+        if (motionType == MotionType_Collision) {
+            if (motionData.collisionMotion != other.motionData.collisionMotion) {
+                return false;
+            }
+        }
+
         for (int i = 0; i < MAX_COLORS; ++i) {
             if (radiationAbsorptionByCellColor[i] != other.radiationAbsorptionByCellColor[i]) {
                 return false;
@@ -101,11 +147,11 @@ struct SimulationParameters
 
         return backgroundColor == other.backgroundColor && baseValues == other.baseValues && timestepSize == other.timestepSize
             && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
-            && cellMaxCollisionDistance == other.cellMaxCollisionDistance && cellMaxForceDecayProb == other.cellMaxForceDecayProb
+            && cellMaxForceDecayProb == other.cellMaxForceDecayProb
             && cellMaxBonds == other.cellMaxBonds && cellMaxExecutionOrderNumbers == other.cellMaxExecutionOrderNumbers
             && cellFunctionAttackerStrength == other.cellFunctionAttackerStrength && cellFunctionSensorRange == other.cellFunctionSensorRange
             && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
-            && radiationVelocityPerturbation == other.radiationVelocityPerturbation && cellRepulsionStrength == other.cellRepulsionStrength
+            && radiationVelocityPerturbation == other.radiationVelocityPerturbation
             && cellNormalEnergy == other.cellNormalEnergy && cellFunctionAttackerColorInhomogeneityFactor == other.cellFunctionAttackerColorInhomogeneityFactor
             && cellFunctionAttackerRadius == other.cellFunctionAttackerRadius
             && cellFunctionAttackerEnergyDistributionRadius == other.cellFunctionAttackerEnergyDistributionRadius

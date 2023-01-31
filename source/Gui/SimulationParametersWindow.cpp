@@ -218,9 +218,42 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
-         * Physics: General
+         * Physics: Motion
          */
-        if (ImGui::TreeNodeEx("Physics: General", flags)) {
+        if (ImGui::TreeNodeEx("Physics: Motion", flags)) {
+            if (AlienImGui::Combo(
+                    AlienImGui::ComboParameters()
+                        .name("Motion")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origSimParameters.motionType)
+                        .values({"Fluid flow", "Collision-based"}),
+                    simParameters.motionType)) {
+                if (simParameters.motionType == MotionType_Fluid) {
+                    simParameters.motionData.fluidMotion = FluidMotion();
+                } else {
+                    simParameters.motionData.collisionMotion = CollisionMotion();
+                }
+            }
+            if (simParameters.motionType == MotionType_Collision) {
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Repulsion strength")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(0.3f)
+                        .defaultValue(origSimParameters.motionData.collisionMotion.cellRepulsionStrength)
+                        .tooltip(std::string("The strength of the repulsive forces, between two cells that do not connect.")),
+                    simParameters.motionData.collisionMotion.cellRepulsionStrength);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Maximum collision distance")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(3.0f)
+                        .defaultValue(origSimParameters.motionData.collisionMotion.cellMaxCollisionDistance)
+                        .tooltip(std::string("Maximum distance up to which a collision of two cells is possible.")),
+                    simParameters.motionData.collisionMotion.cellMaxCollisionDistance);
+            }
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Friction")
@@ -242,6 +275,13 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.baseValues.rigidity)
                     .tooltip(std::string("Controls the rigidity of connected cells.\nA higher value will cause connected cells to move more uniformly.")),
                 simParameters.baseValues.rigidity);
+            ImGui::TreePop();
+        }
+
+        /**
+         * Physics: Thresholds
+         */
+        if (ImGui::TreeNodeEx("Physics: Thresholds", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum velocity")
@@ -366,25 +406,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Physics: Collision and binding
          */
-        if (ImGui::TreeNodeEx("Physics: Collision and binding", flags)) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Repulsion strength")
-                    .textWidth(RightColumnWidth)
-                    .min(0)
-                    .max(0.3f)
-                    .defaultValue(origSimParameters.cellRepulsionStrength)
-                    .tooltip(std::string("The strength of the repulsive forces, between two cells that do not connect.")),
-                simParameters.cellRepulsionStrength);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Maximum collision distance")
-                    .textWidth(RightColumnWidth)
-                    .min(0)
-                    .max(3.0f)
-                    .defaultValue(origSimParameters.cellMaxCollisionDistance)
-                    .tooltip(std::string("Maximum distance up to which a collision of two cells is possible.")),
-                simParameters.cellMaxCollisionDistance);
+        if (ImGui::TreeNodeEx("Physics: Binding", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum binding distance")

@@ -16,13 +16,14 @@
 
 __global__ void cudaNextTimestep_prepare(SimulationData data, SimulationResult result);
 __global__ void cudaNextTimestep_physics_init(SimulationData data);
-__global__ void cudaNextTimestep_physics_substep1(SimulationData data);
-__global__ void cudaNextTimestep_physics_substep1a(SimulationData data);
-__global__ void cudaNextTimestep_physics_substep2(SimulationData data);
-__global__ void cudaNextTimestep_physics_substep3(SimulationData data);
-__global__ void cudaNextTimestep_physics_substep4(SimulationData data);
-__global__ void cudaNextTimestep_physics_substep5(SimulationData data, bool considerAngles);
-__global__ void cudaNextTimestep_physics_substep6(SimulationData data);
+__global__ void cudaNextTimestep_physics_fillMaps(SimulationData data);
+__global__ void cudaNextTimestep_physics_calcPressure(SimulationData data);
+__global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data);
+__global__ void cudaNextTimestep_physics_calcCollisionForces(SimulationData data);
+__global__ void cudaNextTimestep_physics_applyForces(SimulationData data);
+__global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data);
+__global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData data, bool considerAngles);
+__global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData data);
 __global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData data);
 __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data);
 __global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationResult result);

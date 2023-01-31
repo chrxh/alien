@@ -24,7 +24,7 @@ public:
 
     __inline__ __device__ static void collisions(SimulationData& data);
     __inline__ __device__ static void checkForces(SimulationData& data);
-    __inline__ __device__ static void updateVelocities(SimulationData& data);  //prerequisite: data from collisions
+    __inline__ __device__ static void applyForces(SimulationData& data);  //prerequisite: data from collisions
 
     __inline__ __device__ static void calcConnectionForces(SimulationData& data, bool considerAngles);
     __inline__ __device__ static void checkConnections(SimulationData& data);
@@ -114,7 +114,7 @@ namespace
 
 namespace 
 {
-    float constexpr h = 0.75f;
+    float constexpr h = 0.5f;
 }
 __inline__ __device__ void CellProcessor::calcPressure(SimulationData& data)
 {
@@ -206,16 +206,12 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
             if (!otherCell || otherCell == cell) {
                 continue;
             }
-            if (cell->detached + otherCell->detached == 1) {
-                continue;
-            }
 
             auto posDelta = cell->absPos - otherCell->absPos;
             data.cellMap.correctDirection(posDelta);
 
             auto distance = Math::length(posDelta);
-            if (distance >= cudaSimulationParameters.cellMaxCollisionDistance
-                /*|| distance <= cudaSimulationParameters.cellMinDistance*/) {
+            if (distance >= cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance) {
                 continue;
             }
 
@@ -233,7 +229,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 auto isApproaching = Math::dot(posDelta, velDelta) < 0;
                 auto barrierFactor = cell->barrier ? 2 : 1;
 
-                if (Math::length(cell->vel) > 0.5f && isApproaching) {  //&& cell->numConnections == 0 
+                if (Math::length(cell->vel) > 0.5f && isApproaching) {
                     auto distanceSquared = distance * distance + 0.25;
                     auto force = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared) * barrierFactor;
                     atomicAdd(&cell->temp1.x, force.x);
@@ -243,8 +239,8 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 }
                 else {
                     auto force = Math::normalized(posDelta)
-                        * (cudaSimulationParameters.cellMaxCollisionDistance - Math::length(posDelta))
-                        * cudaSimulationParameters.cellRepulsionStrength * barrierFactor;  ///12, 32
+                        * (cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance - Math::length(posDelta))
+                        * cudaSimulationParameters.motionData.collisionMotion.cellRepulsionStrength * barrierFactor;
                     atomicAdd(&cell->temp1.x, force.x);
                     atomicAdd(&cell->temp1.y, force.y);
                     atomicAdd(&otherCell->temp1.x, -force.x);
@@ -269,31 +265,6 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                         CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
                 }
             }
-/*
-            if (!alreadyConnected) {
-                auto velDelta = cell->vel - connectedCell->vel;
-                auto isApproaching = Math::dot(posDelta, velDelta) < 0;
-
-                if (Math::length(cell->vel) < 0.5f || !isApproaching || cell->numConnections > 0) {
-                    auto force = Math::normalized(posDelta)
-                        * (cudaSimulationParameters.cellMaxDistance - Math::length(posDelta)) / 6;
-                    atomicAdd(&cell->temp1.x, force.x);
-                    atomicAdd(&cell->temp1.y, force.y);
-                } else {
-                    auto force1 = posDelta * Math::dot(velDelta, posDelta) / (-2 * Math::lengthSquared(posDelta));
-                    auto force2 = posDelta * Math::dot(velDelta, posDelta) / (2 * Math::lengthSquared(posDelta));
-                    atomicAdd(&cell->temp1.x, force1.x);
-                    atomicAdd(&cell->temp1.y, force1.y);
-                    atomicAdd(&connectedCell->temp1.x, force2.x);
-                    atomicAdd(&connectedCell->temp1.y, force2.y);
-                }
-
-                if (cell->numConnections < cell->maxConnections && connectedCell->numConnections < connectedCell->maxConnections
-                    && Math::length(velDelta) >= cudaSimulationParameters.cellFusionVelocity && isApproaching) {
-                    CellConnectionProcessor::scheduleAddConnections(data, cell, connectedCell);
-                }
-            }
-*/
         }
     }
 }
@@ -318,7 +289,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
     }
 }
 
-__inline__ __device__ void CellProcessor::updateVelocities(SimulationData& data)
+__inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto const partition =
