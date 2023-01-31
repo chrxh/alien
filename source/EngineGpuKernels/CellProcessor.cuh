@@ -112,38 +112,23 @@ namespace
     }
 }
 
+namespace 
+{
+    float constexpr h = 0.75f;
+}
 __inline__ __device__ void CellProcessor::calcPressure(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    Cell* otherCells[100];
-    int numOtherCells;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        data.cellMap.get(otherCells, 100, numOtherCells, cell->absPos, 2.0f, cell->detached);
         float p = 0;
-        for (int i = 0; i < numOtherCells; ++i) {
-            auto const& otherCell = otherCells[i];
-
-            //if (cell == otherCell) {
-            //    continue;
-            //}
-            //bool alreadyConnected = false;
-            //for (int i = 0; i < cell->numConnections; ++i) {
-            //    auto const& connectedCell = cell->connections[i].cell;
-            //    if (connectedCell == otherCell) {
-            //        alreadyConnected = true;
-            //        break;
-            //    }
-            //}
-            //if (alreadyConnected) {
-            //    continue;
-            //}
-
+        data.cellMap.executeForEach(cell->absPos, 2 * h, cell->detached, [&](auto const& otherCell) {
             auto q = data.cellMap.getDistance(cell->absPos, otherCell->absPos);
-            p += f(q);
-        }
+            p += f(q / h) / (h * h);
+        });
+
         cell->density = p;
         cell->pressure = (p - 0.0f) * 1.0f;
     }
@@ -154,47 +139,54 @@ __inline__ __device__ void CellProcessor::calcFluidForce(SimulationData& data)
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    Cell* otherCells[100];
-    int numOtherCells;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        data.cellMap.get(otherCells, 100, numOtherCells, cell->absPos, 2.0f, cell->detached);
-        float2 grad_pressure = {0, 0};
+
+        auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
+            &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->absPos);
+
+        float2 F_pressure = {0, 0};
         float2 F_viscosity = {0, 0};
-        for (int i = 0; i < numOtherCells; ++i) {
-            auto const& otherCell = otherCells[i];
-
-            //if (cell == otherCell) {
-            //    continue;
-            //}
-            //bool alreadyConnected = false;
-            //for (int i = 0; i < cell->numConnections; ++i) {
-            //    auto const& connectedCell = cell->connections[i].cell;
-            //    if (connectedCell == otherCell) {
-            //        alreadyConnected = true;
-            //        break;
-            //    }
-            //}
-            //if (alreadyConnected) {
-            //    continue;
-            //}
-
-            auto factor = (cell->pressure / (cell->density * cell->density)
-                + otherCell->pressure / (otherCell->density * otherCell->density));
-
-            auto q = data.cellMap.getDistance(cell->absPos, otherCell->absPos);
-            if (abs(q) < NEAR_ZERO) {
-                continue;
+        float2 F_barrier = {0, 0};
+        data.cellMap.executeForEach(cell->absPos, 2 * h, cell->detached, [&](auto const& otherCell) {
+            if (cell == otherCell) {
+                return;
             }
-            float f_derivative = f_d(q);
-            grad_pressure = grad_pressure + (cell->absPos - otherCell->absPos) / q * factor * f_derivative; //needs topology correction
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto const& connectedCell = cell->connections[i].cell;
+                if (connectedCell == otherCell) {
+                    return;
+                }
+            }
 
-            F_viscosity = F_viscosity + (cell->vel - otherCell->vel) / otherCell->density * q * f_derivative  / (q * q + 0.01f);
+            auto posDelta = cell->absPos - otherCell->absPos;
+            data.cellMap.correctDirection(posDelta);
+            auto distance = Math::length(posDelta);
+            auto velDelta = cell->vel - otherCell->vel;
 
-        }
-        auto F_pressure = grad_pressure / -20;
-        atomicAdd(&cell->temp1.x, F_pressure.x + F_viscosity.x / 10);
-        atomicAdd(&cell->temp1.y, F_pressure.y + F_viscosity.y / 10);
+            if (!otherCell->barrier) {
+                auto factor = (cell->pressure / (cell->density * cell->density) + otherCell->pressure / (otherCell->density * otherCell->density));
+
+                if (abs(distance) < NEAR_ZERO) {
+                    return;
+                }
+                float f_derivative = f_d(distance / h) / (h * h * h);
+                F_pressure = F_pressure - posDelta / distance * factor * f_derivative;
+                F_viscosity = F_viscosity + velDelta / otherCell->density * distance * f_derivative / (distance * distance + 0.01f);
+            } else {
+                F_barrier = F_barrier + posDelta * Math::dot(velDelta, posDelta) / (-distance * distance - 0.5f) * 2;
+            }
+
+            auto isApproaching = Math::dot(posDelta, velDelta) < 0;
+            if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
+                && Math::length(velDelta) >= SpotCalculator::calcParameter(
+                       &SimulationParametersSpotValues::cellFusionVelocity, &SimulationParametersSpotActivatedValues::cellFusionVelocity, data, cell->absPos)
+                && isApproaching && cell->energy <= cellMaxBindingEnergy && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier
+                && !otherCell->barrier) {
+                CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
+            }
+        });
+        cell->temp1 = cell->temp1 + (F_pressure + F_viscosity) / 10 + F_barrier;
     }
 }
 
