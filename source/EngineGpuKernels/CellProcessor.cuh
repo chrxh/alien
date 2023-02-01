@@ -196,7 +196,8 @@ __inline__ __device__ void CellProcessor::calcFluidForceAndReconnectCells(Simula
                 CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
             }
         });
-        cell->shared1 = cell->shared1 + (F_pressure + F_viscosity) / 10 + F_boundary;
+        cell->shared1 = cell->shared1 + F_pressure * cudaSimulationParameters.motionData.fluidMotion.pressureForce
+            + F_viscosity * cudaSimulationParameters.motionData.fluidMotion.viscosityForce + F_boundary;
     }
 }
 

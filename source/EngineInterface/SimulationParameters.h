@@ -9,8 +9,13 @@
 struct FluidMotion
 {
     float smoothingLength = 0.66f;
+    float viscosityForce = 0.1f;
+    float pressureForce = 0.1f;
 
-    bool operator==(FluidMotion const& other) const { return smoothingLength == other.smoothingLength; }
+    bool operator==(FluidMotion const& other) const
+    {
+        return smoothingLength == other.smoothingLength && viscosityForce == other.viscosityForce && pressureForce == other.pressureForce;
+    }
     bool operator!=(FluidMotion const& other) const { return !operator==(other); }
 };
 

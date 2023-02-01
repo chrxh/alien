@@ -133,7 +133,14 @@ public:
         __syncthreads();
     }
 
-    template<typename MatchFunc>
+    __device__ __inline__ Cell* getFirst(float2 const& pos) const
+    {
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
+        correctPosition(posInt);
+        return _map[posInt.x + posInt.y * _size.x];
+    }
+
+    template <typename MatchFunc>
     __device__ __inline__ void getMatchingCells(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int detached, MatchFunc matchFunc)
         const
     {
@@ -185,13 +192,6 @@ public:
                 }
             }
         }
-    }
-
-    __device__ __inline__ Cell* getFirst(float2 const& pos) const
-    {
-        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
-        correctPosition(posInt);
-        return _map[posInt.x + posInt.y * _size.x];
     }
 
     __device__ __inline__ void cleanup_system()
