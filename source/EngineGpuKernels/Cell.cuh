@@ -153,6 +153,7 @@ struct Cell
     float2 temp2;
     Cell* nextCell; //linked list for finding all overlapping cells
     int scheduledOperationIndex;    // -1 = no operation scheduled
+    bool toDelete;
 
     //cluster data
     int clusterIndex;
@@ -173,12 +174,9 @@ struct Cell
         return false;
     }
 
-    __device__ __inline__ bool isDeleted() const { return abs(energy) < NEAR_ZERO; }
+    __device__ __inline__ bool isDeleted() const { return toDelete; }
 
-    __device__ __inline__ void setDeleted()
-    {
-        energy = 0;
-    }
+    __device__ __inline__ void setDeleted() { toDelete = true; }
 
     __device__ __inline__ void getLock()
     {

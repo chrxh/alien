@@ -8,8 +8,10 @@
 
 struct FluidMotion
 {
-    bool operator==(FluidMotion const& other) const { return true; }
-    bool operator!=(FluidMotion const& other) const { return true; }
+    float smoothingLength = 0.5f;
+
+    bool operator==(FluidMotion const& other) const { return smoothingLength == other.smoothingLength; }
+    bool operator!=(FluidMotion const& other) const { return !operator==(other); }
 };
 
 struct CollisionMotion

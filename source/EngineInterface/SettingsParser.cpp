@@ -34,7 +34,14 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
     JsonParser::encodeDecode(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);
 
     JsonParser::encodeDecode(tree, parameters.motionType, defaultParameters.motionType, "simulation parameters.motion.type", parserTask);
-    if (parameters.motionType == MotionType_Collision) {
+    if (parameters.motionType == MotionType_Fluid) {
+        JsonParser::encodeDecode(
+            tree,
+            parameters.motionData.fluidMotion.smoothingLength,
+            defaultParameters.motionData.fluidMotion.smoothingLength,
+            "simulation parameters.fluid.smoothing length",
+            parserTask);
+    } else {
         JsonParser::encodeDecode(
             tree,
             parameters.motionData.collisionMotion.cellMaxCollisionDistance,

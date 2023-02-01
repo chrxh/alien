@@ -223,10 +223,10 @@ void _SimulationParametersWindow::processBase(
         if (ImGui::TreeNodeEx("Physics: Motion", flags)) {
             if (AlienImGui::Combo(
                     AlienImGui::ComboParameters()
-                        .name("Motion")
+                        .name("Motion type")
                         .textWidth(RightColumnWidth)
                         .defaultValue(origSimParameters.motionType)
-                        .values({"Fluid flow", "Collision-based"}),
+                        .values({"Fluid dynamics", "Collision-based"}),
                     simParameters.motionType)) {
                 if (simParameters.motionType == MotionType_Fluid) {
                     simParameters.motionData.fluidMotion = FluidMotion();
@@ -234,7 +234,17 @@ void _SimulationParametersWindow::processBase(
                     simParameters.motionData.collisionMotion = CollisionMotion();
                 }
             }
-            if (simParameters.motionType == MotionType_Collision) {
+            if (simParameters.motionType == MotionType_Fluid) {
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Smoothing length")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(3.0f)
+                        .defaultValue(origSimParameters.motionData.fluidMotion.smoothingLength)
+                        .tooltip(std::string("")),
+                    simParameters.motionData.fluidMotion.smoothingLength);
+            } else {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Repulsion strength")
@@ -448,34 +458,6 @@ void _SimulationParametersWindow::processBase(
                     .max(6)
                     .tooltip(std::string("Maximum number of connections a cell can establish with others.")),
                 simParameters.cellMaxBonds);
-            ImGui::TreePop();
-        }
-
-        /**
-         * Cell color transition rules
-         */
-        if (ImGui::TreeNodeEx("Cell color transition rules", flags)) {
-            for (int color = 0; color < MAX_COLORS; ++color) {
-                ImGui::PushID(color);
-                auto parameters = AlienImGui::InputColorTransitionParameters()
-                                      .textWidth(RightColumnWidth)
-                                      .color(color)
-                                      .defaultTargetColor(origSimParameters.baseValues.cellColorTransitionTargetColor[color])
-                                      .defaultTransitionAge(origSimParameters.baseValues.cellColorTransitionDuration[color])
-                                      .logarithmic(true);
-                if (0 == color) {
-                    parameters.name("Target color and duration")
-                        .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent color can "
-                                 "be defined for each cell color. In addition, durations must be specified that define how many time steps the corresponding "
-                                 "color are kept.");
-                }
-                AlienImGui::InputColorTransition(
-                    parameters,
-                    color,
-                    simParameters.baseValues.cellColorTransitionTargetColor[color],
-                    simParameters.baseValues.cellColorTransitionDuration[color]);
-                ImGui::PopID();
-            }
             ImGui::TreePop();
         }
 
@@ -812,6 +794,34 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
+         * Cell color transition rules
+         */
+        if (ImGui::TreeNodeEx("Cell color transition rules", flags)) {
+            for (int color = 0; color < MAX_COLORS; ++color) {
+                ImGui::PushID(color);
+                auto parameters = AlienImGui::InputColorTransitionParameters()
+                                      .textWidth(RightColumnWidth)
+                                      .color(color)
+                                      .defaultTargetColor(origSimParameters.baseValues.cellColorTransitionTargetColor[color])
+                                      .defaultTransitionAge(origSimParameters.baseValues.cellColorTransitionDuration[color])
+                                      .logarithmic(true);
+                if (0 == color) {
+                    parameters.name("Target color and duration")
+                        .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent color can "
+                                 "be defined for each cell color. In addition, durations must be specified that define how many time steps the corresponding "
+                                 "color are kept.");
+                }
+                AlienImGui::InputColorTransition(
+                    parameters,
+                    color,
+                    simParameters.baseValues.cellColorTransitionTargetColor[color],
+                    simParameters.baseValues.cellColorTransitionDuration[color]);
+                ImGui::PopID();
+            }
+            ImGui::TreePop();
+        }
+
+        /**
          * Danger zone
          */
         if (ImGui::TreeNodeEx("Danger zone", flags)) {
@@ -926,7 +936,7 @@ void _SimulationParametersWindow::processSpot(
             auto isForceFieldActive = spot.flowType != FlowType_None;
             auto forceFieldTypeIntern = spot.flowType == FlowType_None ? 0 : spot.flowType - 1;
             auto origForceFieldTypeIntern = origSpot.flowType == FlowType_None ? 0 : origSpot.flowType - 1;
-            if (ImGui::Checkbox("##cellColorTransition", &isForceFieldActive)) {
+            if (ImGui::Checkbox("##forceField", &isForceFieldActive)) {
                 spot.flowType = isForceFieldActive ? FlowType_Radial : FlowType_None;
             }
             ImGui::SameLine();
@@ -1068,40 +1078,6 @@ void _SimulationParametersWindow::processSpot(
                 spot.values.cellMaxBindingEnergy = spot.values.cellMinEnergy + 10.0f;
             }
             ImGui::TreePop();
-        }
-
-        /**
-         * Cell color transition rules
-         */
-        if (ImGui::TreeNodeEx("Cell color transition rules", flags)) {
-            ImGui::Checkbox("##cellColorTransition", &spot.activatedValues.cellColorTransition);
-            ImGui::SameLine();
-            ImGui::BeginDisabled(!spot.activatedValues.cellColorTransition);
-            auto posX = ImGui::GetCursorPos().x;
-            for (int color = 0; color < MAX_COLORS; ++color) {
-                ImGui::SetCursorPosX(posX);
-                ImGui::PushID(color);
-                auto parameters = AlienImGui::InputColorTransitionParameters()
-                                      .textWidth(RightColumnWidth)
-                                      .color(color)
-                                      .defaultTargetColor(origSpot.values.cellColorTransitionTargetColor[color])
-                                      .defaultTransitionAge(origSpot.values.cellColorTransitionDuration[color])
-                                      .logarithmic(true);
-                if (0 == color) {
-                    parameters.name("Target color and duration");
-                }
-                AlienImGui::InputColorTransition(
-                    parameters, color, spot.values.cellColorTransitionTargetColor[color], spot.values.cellColorTransitionDuration[color]);
-                ImGui::PopID();
-            }
-            ImGui::EndDisabled();
-            ImGui::TreePop();
-            if (!spot.activatedValues.cellColorTransition) {
-                for (int color = 0; color < MAX_COLORS; ++color) {
-                    spot.values.cellColorTransitionTargetColor[color] = parameters.baseValues.cellColorTransitionTargetColor[color];
-                    spot.values.cellColorTransitionDuration[color] = parameters.baseValues.cellColorTransitionDuration[color];
-                }
-            }
         }
 
         /**
@@ -1250,8 +1226,42 @@ void _SimulationParametersWindow::processSpot(
                     .disabledValue(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty),
                 spot.values.cellFunctionAttackerConnectionsMismatchPenalty,
                 &spot.activatedValues.cellFunctionAttackerConnectionsMismatchPenalty);
+            ImGui::TreePop();
         }
-        ImGui::TreePop();
+
+        /**
+         * Cell color transition rules
+         */
+        if (ImGui::TreeNodeEx("Cell color transition rules", flags)) {
+            ImGui::Checkbox("##cellColorTransition", &spot.activatedValues.cellColorTransition);
+            ImGui::SameLine();
+            ImGui::BeginDisabled(!spot.activatedValues.cellColorTransition);
+            auto posX = ImGui::GetCursorPos().x;
+            for (int color = 0; color < MAX_COLORS; ++color) {
+                ImGui::SetCursorPosX(posX);
+                ImGui::PushID(color);
+                auto parameters = AlienImGui::InputColorTransitionParameters()
+                                      .textWidth(RightColumnWidth)
+                                      .color(color)
+                                      .defaultTargetColor(origSpot.values.cellColorTransitionTargetColor[color])
+                                      .defaultTransitionAge(origSpot.values.cellColorTransitionDuration[color])
+                                      .logarithmic(true);
+                if (0 == color) {
+                    parameters.name("Target color and duration");
+                }
+                AlienImGui::InputColorTransition(
+                    parameters, color, spot.values.cellColorTransitionTargetColor[color], spot.values.cellColorTransitionDuration[color]);
+                ImGui::PopID();
+            }
+            ImGui::EndDisabled();
+            ImGui::TreePop();
+            if (!spot.activatedValues.cellColorTransition) {
+                for (int color = 0; color < MAX_COLORS; ++color) {
+                    spot.values.cellColorTransitionTargetColor[color] = parameters.baseValues.cellColorTransitionTargetColor[color];
+                    spot.values.cellColorTransitionDuration[color] = parameters.baseValues.cellColorTransitionDuration[color];
+                }
+            }
+        }
     }
     ImGui::EndChild();
     validationAndCorrection(spot);
