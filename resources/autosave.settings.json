@@ -9,15 +9,20 @@
     "simulation parameters": {
         "background color": "5703174",
         "time step size": "1.00000000",
+        "motion": {
+            "type": "1",
+            "collision": {
+                "max distance": "1.29999995",
+                "repulsion strength": "0.08000000"
+            }
+        },
         "friction": "0.00100000",
         "rigidity": "0.00000000",
         "cell": {
             "max velocity": "2.00000000",
             "max binding distance": "3.59999990",
-            "repulsion strength": "0.08000000",
             "normal energy": "100.00000000",
-            "min distance": "0.30000001",
-            "max collision distance": "1.29999995",
+            "min distance": "0.10000000",
             "max force": "0.80000001",
             "max force decay probability": "0.20000000",
             "max bonds": "6",

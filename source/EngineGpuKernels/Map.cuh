@@ -133,34 +133,6 @@ public:
         __syncthreads();
     }
 
-    //returns at most 18 cells
-    __device__ __inline__ void get(Cell* cells[], int& numCells, float2 const& pos, int detached) const
-    {
-        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
-        numCells = 0;
-        for (int dx = -1; dx <= 1; ++dx) {
-            for (int dy = -1; dy <= 1; ++dy) {
-                int2 scanPos{posInt.x + dx, posInt.y + dy};
-                correctPosition(scanPos);
-                int slot = scanPos.x + scanPos.y * _size.x;
-                auto slotCell = _map[slot];
-                for (int level = 0; level < 10; ++level) {
-                    if (!slotCell) {
-                        break;
-                    }
-                    if (numCells == 18) {
-                        return;
-                    }
-                    if (detached + slotCell->detached != 1) {
-                        cells[numCells] = slotCell;
-                        ++numCells;
-                    }
-                    slotCell = slotCell->nextCell;
-                }
-            }
-        }
-    }
-
     template<typename MatchFunc>
     __device__ __inline__ void getMatchingCells(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int detached, MatchFunc matchFunc)
         const
@@ -214,7 +186,6 @@ public:
             }
         }
     }
-
 
     __device__ __inline__ Cell* getFirst(float2 const& pos) const
     {
