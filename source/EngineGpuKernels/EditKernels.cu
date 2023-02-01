@@ -151,45 +151,33 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
 {
     auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
 
-    Cell* otherCells[18];
-    int numOtherCells;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = data.objects.cellPointers.at(index);
         if (1 != cell->selected) {
             continue;
         }
-        data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, 1.3f, cell->detached);
-        for (int i = 0; i < numOtherCells; ++i) {
-            Cell* otherCell = otherCells[i];
-
+        data.cellMap.executeForEach(cell->absPos, 1.3f, cell->detached, [&](auto const& otherCell) {
             if (!otherCell || otherCell == cell) {
-                continue;
+                return;
             }
-
             if (1 == otherCell->selected && !considerWithinSelection) {
-                continue;
+                return;
             }
 
             auto posDelta = cell->absPos - otherCell->absPos;
             data.cellMap.correctDirection(posDelta);
 
-            bool alreadyConnected = false;
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const& connectedCell = cell->connections[i].cell;
                 if (connectedCell == otherCell) {
-                    alreadyConnected = true;
-                    break;
+                    return;
                 }
             }
-            if (alreadyConnected) {
-                continue;
-            }
-
             if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections) {
                 CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
                 atomicExch(result, 1);
             }
-        }
+        });
     }
 }
 

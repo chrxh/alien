@@ -50,15 +50,12 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     auto cellMinEnergy =
         SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->absPos);
 
-    Cell* otherCells[18];
-    int numOtherCells;
-    data.cellMap.get(otherCells, 18, numOtherCells, cell->absPos, cudaSimulationParameters.cellFunctionAttackerRadius, cell->detached);
-    for (int i = 0; i < numOtherCells; ++i) {
-        Cell* otherCell = otherCells[i];
+    Cell* someOtherCell = nullptr;
+    data.cellMap.executeForEach(cell->absPos, cudaSimulationParameters.cellFunctionAttackerRadius, cell->detached, [&](auto const& otherCell) {
         if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier && otherCell->livingState != LivingState_UnderConstruction) {
             auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength;
             if (energyToTransfer < 0) {
-                continue;
+                return;
             }
 
             if (!isHomogene(otherCell)) {
@@ -83,35 +80,36 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             energyToTransfer *= SpotCalculator::calcFoodChainColorMatrix(color, otherColor, data, cell->absPos);
 
             if (abs(energyToTransfer) < NEAR_ZERO) {
-                continue;
+                return;
             }
 
             atomicAdd(&otherCell->activity.channels[7], 1.0f);
 
+            someOtherCell = otherCell;
             if (energyToTransfer >= 0) {
                 auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
                 if (origEnergy > cellMinEnergy + energyToTransfer) {
                     energyDelta += energyToTransfer;
                 } else {
-                    atomicAdd(&otherCell->energy, energyToTransfer);    //revert
+                    atomicAdd(&otherCell->energy, energyToTransfer);  //revert
                 }
             } else {
                 auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
                 if (origEnergy >= cellMinEnergy - (energyDelta + energyToTransfer)) {
                     energyDelta += energyToTransfer;
                 } else {
-                    atomicAdd(&otherCell->energy, energyToTransfer);    //revert
+                    atomicAdd(&otherCell->energy, energyToTransfer);  //revert
                 }
             }
         }
-    }
+    });
 
     if (energyDelta > NEAR_ZERO) {
         distributeEnergy(data, cell, energyDelta);
     } else {
         auto origEnergy = atomicAdd(&cell->energy, energyDelta);
         if (origEnergy + energyDelta < 0) {
-            atomicAdd(&otherCells[0]->energy, -energyDelta);    //revert
+            atomicAdd(&someOtherCell->energy, -energyDelta);  //revert
         }
     }
 
