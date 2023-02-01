@@ -205,81 +205,72 @@ __inline__ __device__ void CellProcessor::calcCollisionsAndReconnectCells(Simula
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    Cell* otherCells[18];
-    int numOtherCells;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        data.cellMap.get(otherCells, numOtherCells, cell->absPos, cell->detached);
-        for (int i = 0; i < numOtherCells; ++i) {
-            Cell* otherCell = otherCells[i];
-
-            if (!otherCell || otherCell == cell) {
-                continue;
-            }
-
-            auto posDelta = cell->absPos - otherCell->absPos;
-            data.cellMap.correctDirection(posDelta);
-
-            auto distance = Math::length(posDelta);
-            if (distance >= cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance) {
-                continue;
-            }
-            if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1 && !cell->barrier
-                && cell->livingState != LivingState_UnderConstruction) {
-                CellConnectionProcessor::scheduleDeleteConnections(data, cell);
-            }
-
-            bool alreadyConnected = false;
-            for (int i = 0; i < cell->numConnections; ++i) {
-                auto const& connectedCell = cell->connections[i].cell;
-                if (connectedCell == otherCell) {
-                    alreadyConnected = true;
-                    break;
-                }
-            }
-
-            if (!alreadyConnected) {
-                auto velDelta = cell->vel - otherCell->vel;
-                auto isApproaching = Math::dot(posDelta, velDelta) < 0;
-                auto barrierFactor = cell->barrier ? 2 : 1;
-
-                if (Math::length(cell->vel) > 0.5f && isApproaching) {
-                    auto distanceSquared = distance * distance + 0.25f;
-                    auto force = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared) * barrierFactor;
-                    atomicAdd(&cell->shared1.x, force.x);
-                    atomicAdd(&cell->shared1.y, force.y);
-                    atomicAdd(&otherCell->shared1.x, -force.x);
-                    atomicAdd(&otherCell->shared1.y, -force.y);
-                }
-                else {
-                    auto force = Math::normalized(posDelta)
-                        * (cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance - Math::length(posDelta))
-                        * cudaSimulationParameters.motionData.collisionMotion.cellRepulsionStrength * barrierFactor;
-                    atomicAdd(&cell->shared1.x, force.x);
-                    atomicAdd(&cell->shared1.y, force.y);
-                    atomicAdd(&otherCell->shared1.x, -force.x);
-                    atomicAdd(&otherCell->shared1.y, -force.y);
+        data.cellMap.executeForEach(
+            cell->absPos, cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance, cell->detached, [&](auto const& otherCell) {
+                if (otherCell == cell) {
+                    return;
                 }
 
-                auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
-                    &SimulationParametersSpotValues::cellMaxBindingEnergy,
-                    &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy,
-                    data,
-                    cell->absPos);
+                auto posDelta = cell->absPos - otherCell->absPos;
+                data.cellMap.correctDirection(posDelta);
 
-                if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
-                    && Math::length(velDelta) >= SpotCalculator::calcParameter(
-                           &SimulationParametersSpotValues::cellFusionVelocity,
-                           &SimulationParametersSpotActivatedValues::cellFusionVelocity,
-                           data,
-                           cell->absPos)
-                    && isApproaching && cell->energy <= cellMaxBindingEnergy
-                    && otherCell->energy <= cellMaxBindingEnergy
-                    && !cell->barrier && !otherCell->barrier) {
+                auto distance = Math::length(posDelta);
+                if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1 && !cell->barrier
+                    && cell->livingState != LivingState_UnderConstruction) {
+                    CellConnectionProcessor::scheduleDeleteConnections(data, cell);
+                }
+
+                bool alreadyConnected = false;
+                for (int i = 0; i < cell->numConnections; ++i) {
+                    auto const& connectedCell = cell->connections[i].cell;
+                    if (connectedCell == otherCell) {
+                        alreadyConnected = true;
+                        break;
+                    }
+                }
+
+                if (!alreadyConnected) {
+                    auto velDelta = cell->vel - otherCell->vel;
+                    auto isApproaching = Math::dot(posDelta, velDelta) < 0;
+                    auto barrierFactor = cell->barrier ? 2 : 1;
+
+                    if (Math::length(cell->vel) > 0.5f && isApproaching) {
+                        auto distanceSquared = distance * distance + 0.25f;
+                        auto force = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared) * barrierFactor;
+                        atomicAdd(&cell->shared1.x, force.x);
+                        atomicAdd(&cell->shared1.y, force.y);
+                        atomicAdd(&otherCell->shared1.x, -force.x);
+                        atomicAdd(&otherCell->shared1.y, -force.y);
+                    } else {
+                        auto force = Math::normalized(posDelta)
+                            * (cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance - Math::length(posDelta))
+                            * cudaSimulationParameters.motionData.collisionMotion.cellRepulsionStrength * barrierFactor;
+                        atomicAdd(&cell->shared1.x, force.x);
+                        atomicAdd(&cell->shared1.y, force.y);
+                        atomicAdd(&otherCell->shared1.x, -force.x);
+                        atomicAdd(&otherCell->shared1.y, -force.y);
+                    }
+
+                    auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
+                        &SimulationParametersSpotValues::cellMaxBindingEnergy,
+                        &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy,
+                        data,
+                        cell->absPos);
+
+                    if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
+                        && Math::length(velDelta) >= SpotCalculator::calcParameter(
+                               &SimulationParametersSpotValues::cellFusionVelocity,
+                               &SimulationParametersSpotActivatedValues::cellFusionVelocity,
+                               data,
+                               cell->absPos)
+                        && isApproaching && cell->energy <= cellMaxBindingEnergy && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier
+                        && !otherCell->barrier) {
                         CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
+                    }
                 }
-            }
-        }
+            });
     }
 }
 
