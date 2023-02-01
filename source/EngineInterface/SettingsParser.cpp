@@ -41,6 +41,18 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
             defaultParameters.motionData.fluidMotion.smoothingLength,
             "simulation parameters.fluid.smoothing length",
             parserTask);
+        JsonParser::encodeDecode(
+            tree,
+            parameters.motionData.fluidMotion.pressureForce,
+            defaultParameters.motionData.fluidMotion.pressureForce,
+            "simulation parameters.fluid.pressure force",
+            parserTask);
+        JsonParser::encodeDecode(
+            tree,
+            parameters.motionData.fluidMotion.viscosityForce,
+            defaultParameters.motionData.fluidMotion.viscosityForce,
+            "simulation parameters.fluid.viscosity force",
+            parserTask);
     } else {
         JsonParser::encodeDecode(
             tree,

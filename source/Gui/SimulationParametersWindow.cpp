@@ -244,6 +244,24 @@ void _SimulationParametersWindow::processBase(
                         .defaultValue(origSimParameters.motionData.fluidMotion.smoothingLength)
                         .tooltip(std::string("")),
                     simParameters.motionData.fluidMotion.smoothingLength);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Pressure force")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(0.3f)
+                        .defaultValue(origSimParameters.motionData.fluidMotion.pressureForce)
+                        .tooltip(std::string("")),
+                    simParameters.motionData.fluidMotion.pressureForce);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Viscosity force")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(0.3f)
+                        .defaultValue(origSimParameters.motionData.fluidMotion.viscosityForce)
+                        .tooltip(std::string("")),
+                    simParameters.motionData.fluidMotion.viscosityForce);
             } else {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
