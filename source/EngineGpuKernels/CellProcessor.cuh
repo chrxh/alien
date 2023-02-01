@@ -3,6 +3,8 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
+#include "EngineInterface/CellFunctionEnums.h"
+
 #include "TOs.cuh"
 #include "Base.cuh"
 #include "ObjectFactory.cuh"
@@ -20,11 +22,11 @@ public:
     __inline__ __device__ static void fillDensityMap(SimulationData& data);
 
     __inline__ __device__ static void calcPressure(SimulationData& data);
-    __inline__ __device__ static void calcFluidForce(SimulationData& data);
+    __inline__ __device__ static void calcFluidForceAndReconnectCells(SimulationData& data);
 
-    __inline__ __device__ static void collisions(SimulationData& data);
+    __inline__ __device__ static void calcCollisionsAndReconnectCells(SimulationData& data);
     __inline__ __device__ static void checkForces(SimulationData& data);
-    __inline__ __device__ static void applyForces(SimulationData& data);  //prerequisite: data from collisions
+    __inline__ __device__ static void applyForces(SimulationData& data);  //prerequisite: data from calcCollisionsAndReconnectCells
 
     __inline__ __device__ static void calcConnectionForces(SimulationData& data, bool considerAngles);
     __inline__ __device__ static void checkConnections(SimulationData& data);
@@ -131,7 +133,7 @@ __inline__ __device__ void CellProcessor::calcPressure(SimulationData& data)
     }
 }
 
-__inline__ __device__ void CellProcessor::calcFluidForce(SimulationData& data)
+__inline__ __device__ void CellProcessor::calcFluidForceAndReconnectCells(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -163,6 +165,10 @@ __inline__ __device__ void CellProcessor::calcFluidForce(SimulationData& data)
             auto distance = Math::length(posDelta);
             auto velDelta = cell->vel - otherCell->vel;
 
+            if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1 && !cell->barrier && cell->livingState != LivingState_UnderConstruction) {
+                CellConnectionProcessor::scheduleDeleteConnections(data, cell);
+            }
+
             if (!otherCell->barrier) {
                 auto factor = (cell->pressure / (cell->density * cell->density) + otherCell->pressure / (otherCell->density * otherCell->density));
 
@@ -189,7 +195,7 @@ __inline__ __device__ void CellProcessor::calcFluidForce(SimulationData& data)
     }
 }
 
-__inline__ __device__ void CellProcessor::collisions(SimulationData& data)
+__inline__ __device__ void CellProcessor::calcCollisionsAndReconnectCells(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -212,6 +218,10 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
             auto distance = Math::length(posDelta);
             if (distance >= cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance) {
                 continue;
+            }
+            if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1 && !cell->barrier
+                && cell->livingState != LivingState_UnderConstruction) {
+                CellConnectionProcessor::scheduleDeleteConnections(data, cell);
             }
 
             bool alreadyConnected = false;
