@@ -431,7 +431,7 @@ void _SimulationParametersWindow::processBase(
                     .name("Binding creation velocity")
                     .textWidth(RightColumnWidth)
                     .min(0)
-                    .max(1.0f)
+                    .max(2.0f)
                     .defaultValue(origSimParameters.baseValues.cellFusionVelocity)
                     .tooltip(std::string("Minimum velocity of two colliding cells so that a connection can be established.")),
                 simParameters.baseValues.cellFusionVelocity);
@@ -1057,7 +1057,7 @@ void _SimulationParametersWindow::processSpot(
                     .name("Binding creation velocity")
                     .textWidth(RightColumnWidth)
                     .min(0)
-                    .max(1.0f)
+                    .max(2.0f)
                     .defaultValue(origSpot.values.cellFusionVelocity)
                     .disabledValue(parameters.baseValues.cellFusionVelocity),
                 spot.values.cellFusionVelocity,

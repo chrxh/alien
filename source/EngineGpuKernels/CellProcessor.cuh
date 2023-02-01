@@ -145,7 +145,7 @@ __inline__ __device__ void CellProcessor::calcFluidForce(SimulationData& data)
 
         float2 F_pressure = {0, 0};
         float2 F_viscosity = {0, 0};
-        float2 F_barrier = {0, 0};
+        float2 F_boundary = {0, 0};
         data.cellMap.executeForEach(
             cell->absPos, 2 * smoothingLength, cell->detached, [&](auto const& otherCell) {
             if (cell == otherCell) {
@@ -171,9 +171,9 @@ __inline__ __device__ void CellProcessor::calcFluidForce(SimulationData& data)
                 }
                 float f_derivative = f_d(distance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
                 F_pressure = F_pressure - posDelta / distance * factor * f_derivative;
-                F_viscosity = F_viscosity + velDelta / otherCell->density * distance * f_derivative / (distance * distance + 0.01f);
+                F_viscosity = F_viscosity + velDelta / otherCell->density * distance * f_derivative / (distance * distance + 0.25f);
             } else {
-                F_barrier = F_barrier + posDelta * Math::dot(velDelta, posDelta) / (-distance * distance - 0.5f) * 2;
+                F_boundary = F_boundary + posDelta * Math::dot(velDelta, posDelta) / (-distance * distance - 0.5f) * 2;
             }
 
             auto isApproaching = Math::dot(posDelta, velDelta) < 0;
@@ -185,7 +185,7 @@ __inline__ __device__ void CellProcessor::calcFluidForce(SimulationData& data)
                 CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
             }
         });
-        cell->temp1 = cell->temp1 + (F_pressure + F_viscosity) / 10 + F_barrier;
+        cell->temp1 = cell->temp1 + (F_pressure + F_viscosity) / 10 + F_boundary;
     }
 }
 
@@ -229,7 +229,7 @@ __inline__ __device__ void CellProcessor::collisions(SimulationData& data)
                 auto barrierFactor = cell->barrier ? 2 : 1;
 
                 if (Math::length(cell->vel) > 0.5f && isApproaching) {
-                    auto distanceSquared = distance * distance + 0.25;
+                    auto distanceSquared = distance * distance + 0.25f;
                     auto force = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared) * barrierFactor;
                     atomicAdd(&cell->temp1.x, force.x);
                     atomicAdd(&cell->temp1.y, force.y);

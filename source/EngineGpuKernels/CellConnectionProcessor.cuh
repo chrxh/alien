@@ -30,9 +30,13 @@ public:
     __inline__ __device__ static void deleteConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void deleteConnectionOneWay(Cell* cell1, Cell* cell2);
 
-    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached);
+    __inline__ __device__ static bool isScheduledForDeletion(SimulationData& data, Cell* cell);
+    __inline__ __device__
+        static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached);
 
 private:
+    static int constexpr MaxOperationsPerCell = 30;
+
     __inline__ __device__ static bool scheduleOperation(SimulationData& data, Cell* cell, int operationIndex);
 
     __inline__ __device__ static void lockAndtryAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
@@ -119,7 +123,6 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDeleteCell(Simulatio
     auto operationIndex = data.structuralOperations.tryAddEntry(operation);
     if (operationIndex != -1) {
         scheduleOperation(data, cell, operationIndex);
-        cell->setDeleted();
     }
 }
 
@@ -153,7 +156,7 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteOperations(Simu
         auto scheduledOperationIndex = cell->scheduledOperationIndex;
         if (scheduledOperationIndex != -1) {
             bool scheduleDeleteCell = false;
-            for (int depth = 0; depth < 30; ++depth) {
+            for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
                 auto operation = data.structuralOperations.at(scheduledOperationIndex);
                 switch (operation.type) {
                 case StructuralOperation::Type::DelConnection: {
@@ -242,6 +245,24 @@ CellConnectionProcessor::lockAndtryAddConnections(SimulationData& data, Cell* ce
     }
 }
 
+__device__ __inline__ bool CellConnectionProcessor::isScheduledForDeletion(SimulationData& data, Cell* cell)
+{
+    auto scheduledOperationIndex = cell->scheduledOperationIndex;
+    if (scheduledOperationIndex != -1) {
+        for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
+            auto operation = data.structuralOperations.at(scheduledOperationIndex);
+            if (operation.type == StructuralOperation::Type::DelCell) {
+                return true;
+            }
+            scheduledOperationIndex = operation.nextOperationIndex;
+            if (scheduledOperationIndex == -1) {
+                break;
+            }
+        }
+    }
+    return false;
+}
+
 __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     SimulationData& data,
     Cell* cell1,
@@ -251,7 +272,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     float desiredAngleOnCell1,
     ConstructorAngleAlignment angleAlignment)
 {
-    if (cell1->isDeleted()) {
+    if (isScheduledForDeletion(data, cell1)) {
         return false;
     }
     if (wouldResultInOverlappingConnection(cell1, cell2)) {
@@ -441,7 +462,7 @@ __inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(Sim
 __inline__ __device__ bool CellConnectionProcessor::scheduleOperation(SimulationData& data, Cell* cell, int operationIndex)
 {
     auto origOperationIndex = atomicCAS(&cell->scheduledOperationIndex, -1, operationIndex);
-    for (int depth = 0; depth < 30; ++depth) {
+    for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
         if (origOperationIndex == -1) {
             break;
         }
