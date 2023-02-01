@@ -55,9 +55,8 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
         auto& cell = cells.at(index);
 
         cell->activityFetched = 0;
-        cell->temp1 = {0, 0};
+        cell->shared1 = {0, 0};
         cell->nextCell = nullptr;
-        cell->pressure = 0;
         cell->density = 0;
     }
 }
@@ -129,7 +128,6 @@ __inline__ __device__ void CellProcessor::calcPressure(SimulationData& data)
         });
 
         cell->density = p;
-        cell->pressure = (p - 0.0f) * 1.0f;
     }
 }
 
@@ -165,12 +163,13 @@ __inline__ __device__ void CellProcessor::calcFluidForceAndReconnectCells(Simula
             auto distance = Math::length(posDelta);
             auto velDelta = cell->vel - otherCell->vel;
 
-            if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1 && !cell->barrier && cell->livingState != LivingState_UnderConstruction) {
-                CellConnectionProcessor::scheduleDeleteConnections(data, cell);
-            }
-
+            //calc forces
             if (!otherCell->barrier) {
-                auto factor = (cell->pressure / (cell->density * cell->density) + otherCell->pressure / (otherCell->density * otherCell->density));
+
+                //for simplicity pressure = density
+                auto const& cellPressure = cell->density;
+                auto const& otherCellPressure = otherCell->density;
+                auto factor = (cellPressure / (cell->density * cell->density) + otherCellPressure / (otherCell->density * otherCell->density));
 
                 if (abs(distance) < NEAR_ZERO) {
                     return;
@@ -182,6 +181,12 @@ __inline__ __device__ void CellProcessor::calcFluidForceAndReconnectCells(Simula
                 F_boundary = F_boundary + posDelta * Math::dot(velDelta, posDelta) / (-distance * distance - 0.5f) * 2;
             }
 
+            //reconnecting
+            if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1 && !cell->barrier
+                && cell->livingState != LivingState_UnderConstruction) {
+                CellConnectionProcessor::scheduleDeleteConnections(data, cell);
+            }
+
             auto isApproaching = Math::dot(posDelta, velDelta) < 0;
             if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
                 && Math::length(velDelta) >= SpotCalculator::calcParameter(
@@ -191,7 +196,7 @@ __inline__ __device__ void CellProcessor::calcFluidForceAndReconnectCells(Simula
                 CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
             }
         });
-        cell->temp1 = cell->temp1 + (F_pressure + F_viscosity) / 10 + F_boundary;
+        cell->shared1 = cell->shared1 + (F_pressure + F_viscosity) / 10 + F_boundary;
     }
 }
 
@@ -241,19 +246,19 @@ __inline__ __device__ void CellProcessor::calcCollisionsAndReconnectCells(Simula
                 if (Math::length(cell->vel) > 0.5f && isApproaching) {
                     auto distanceSquared = distance * distance + 0.25f;
                     auto force = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared) * barrierFactor;
-                    atomicAdd(&cell->temp1.x, force.x);
-                    atomicAdd(&cell->temp1.y, force.y);
-                    atomicAdd(&otherCell->temp1.x, -force.x);
-                    atomicAdd(&otherCell->temp1.y, -force.y);
+                    atomicAdd(&cell->shared1.x, force.x);
+                    atomicAdd(&cell->shared1.y, force.y);
+                    atomicAdd(&otherCell->shared1.x, -force.x);
+                    atomicAdd(&otherCell->shared1.y, -force.y);
                 }
                 else {
                     auto force = Math::normalized(posDelta)
                         * (cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance - Math::length(posDelta))
                         * cudaSimulationParameters.motionData.collisionMotion.cellRepulsionStrength * barrierFactor;
-                    atomicAdd(&cell->temp1.x, force.x);
-                    atomicAdd(&cell->temp1.y, force.y);
-                    atomicAdd(&otherCell->temp1.x, -force.x);
-                    atomicAdd(&otherCell->temp1.y, -force.y);
+                    atomicAdd(&cell->shared1.x, force.x);
+                    atomicAdd(&cell->shared1.y, force.y);
+                    atomicAdd(&otherCell->shared1.x, -force.x);
+                    atomicAdd(&otherCell->shared1.y, -force.y);
                 }
 
                 auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
@@ -289,7 +294,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
             continue;
         }
 
-        if (Math::length(cell->temp1) > SpotCalculator::calcParameter(
+        if (Math::length(cell->shared1) > SpotCalculator::calcParameter(
                 &SimulationParametersSpotValues::cellMaxForce, &SimulationParametersSpotActivatedValues::cellMaxForce, data, cell->absPos)) {
             if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 CellConnectionProcessor::scheduleDeleteCellAndConnections(data, cell);
@@ -310,11 +315,11 @@ __inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
             continue;
         }
 
-        cell->vel = cell->vel + cell->temp1 * cudaSimulationParameters.timestepSize;
+        cell->vel = cell->vel + cell->shared1 * cudaSimulationParameters.timestepSize;
         if (Math::length(cell->vel) > cudaSimulationParameters.cellMaxVelocity) {
             cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.cellMaxVelocity;
         }
-        cell->temp1 = {0, 0};
+        cell->shared1 = {0, 0};
     }
 }
 
@@ -380,10 +385,10 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
                             force1 = force1 * (-1);
                             force2 = force2 * (-1);
                         }
-                        atomicAdd(&connectedCell->temp1.x, force1.x);
-                        atomicAdd(&connectedCell->temp1.y, force1.y);
-                        atomicAdd(&cell->connections[lastIndex].cell->temp1.x, force2.x);
-                        atomicAdd(&cell->connections[lastIndex].cell->temp1.y, force2.y);
+                        atomicAdd(&connectedCell->shared1.x, force1.x);
+                        atomicAdd(&connectedCell->shared1.y, force1.y);
+                        atomicAdd(&cell->connections[lastIndex].cell->shared1.x, force2.x);
+                        atomicAdd(&cell->connections[lastIndex].cell->shared1.y, force2.y);
                         force = force - (force1 + force2);
                     }
                 }
@@ -391,8 +396,8 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
 
             prevDisplacement = displacement;
         }
-        atomicAdd(&cell->temp1.x, force.x);
-        atomicAdd(&cell->temp1.y, force.y);
+        atomicAdd(&cell->shared1.x, force.x);
+        atomicAdd(&cell->shared1.y, force.y);
     }
 }
 
@@ -437,10 +442,10 @@ __inline__ __device__ void CellProcessor::verletPositionUpdate(SimulationData& d
         }
 
         cell->absPos = cell->absPos + cell->vel * cudaSimulationParameters.timestepSize
-            + cell->temp1 * cudaSimulationParameters.timestepSize * cudaSimulationParameters.timestepSize / 2;
+            + cell->shared1 * cudaSimulationParameters.timestepSize * cudaSimulationParameters.timestepSize / 2;
         data.cellMap.correctPosition(cell->absPos);
-        cell->temp2 = cell->temp1;  //forces
-        cell->temp1 = {0, 0};
+        cell->shared2 = cell->shared1;  //forces
+        cell->shared1 = {0, 0};
     }
 }
 
@@ -454,7 +459,7 @@ __inline__ __device__ void CellProcessor::verletVelocityUpdate(SimulationData& d
         if (cell->barrier) {
             cell->vel = {0, 0};
         } else {
-            auto acceleration = (cell->temp1 + cell->temp2) / 2;
+            auto acceleration = (cell->shared1 + cell->shared2) / 2;
             cell->vel = cell->vel + acceleration * cudaSimulationParameters.timestepSize;
         }
     }
