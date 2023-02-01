@@ -148,11 +148,10 @@ struct Cell
     int locked;	//0 = unlocked, 1 = locked
     int tag;
     float density;
-    float pressure;
-    float2 temp1;
-    float2 temp2;
     Cell* nextCell; //linked list for finding all overlapping cells
     int scheduledOperationIndex;    // -1 = no operation scheduled
+    float2 shared1; //variable with different meanings depending on context
+    float2 shared2;
 
     //cluster data
     int clusterIndex;
