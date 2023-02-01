@@ -438,25 +438,23 @@ __inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(Sim
         return false;
     }
 
-    Cell* otherCells[18];
-    int numOtherCells;
-    data.cellMap.get(otherCells, 18, numOtherCells, (pos1 + pos2) / 2, distance, detached);
-    for (int i = 0; i < numOtherCells; ++i) {
-        Cell* otherCell = otherCells[i];
+    bool result = false;
+    data.cellMap.executeForEach((pos1 + pos2) / 2, distance, detached, [&](auto const& otherCell) {
         if ((otherCell->absPos.x == pos1.x && otherCell->absPos.y == pos1.y) || (otherCell->absPos.x == pos2.x && otherCell->absPos.y == pos2.y)) {
-            continue;
+            return;
         }
         if (otherCell->tryLock()) {
             for (int i = 0; i < otherCell->numConnections; ++i) {
                 if (Math::crossing(pos1, pos2, otherCell->absPos, otherCell->connections[i].cell->absPos)) {
                     otherCell->releaseLock();
-                    return true;
+                    result = true;
+                    return;
                 }
             }
             otherCell->releaseLock();
         }
-    }
-    return false;
+    });
+    return result;
 }
 
 __inline__ __device__ bool CellConnectionProcessor::scheduleOperation(SimulationData& data, Cell* cell, int operationIndex)
