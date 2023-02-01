@@ -77,6 +77,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO
         connectingCell.distance = cellTO.connections[i].distance;
         connectingCell.angleFromPrevious = cellTO.connections[i].angleFromPrevious;
     }
+    cell->toDelete = false;
     return cell;
 }
 
@@ -236,6 +237,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->barrier = false;
     cell->age = 0;
     cell->activationTime = 0;
+    cell->toDelete = false;
     cell->inputBlocked = _data->numberGen1.randomBool();
     cell->outputBlocked = _data->numberGen1.randomBool();
     for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -331,6 +333,7 @@ __inline__ __device__ Cell* ObjectFactory::createCell()
     cell->age = 0;
     cell->vel = {0, 0};
     cell->activationTime = 0;
+    cell->toDelete = false;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->activity.channels[i] = 0;
     }

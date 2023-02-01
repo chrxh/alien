@@ -65,9 +65,6 @@ CellConnectionProcessor::scheduleAddConnections(SimulationData& data, Cell* cell
 
 __inline__ __device__ void CellConnectionProcessor::scheduleDeleteConnections(SimulationData& data, Cell* cell)
 {
-    if (cell->numConnections == 0) {
-        return;
-    }
     {
         StructuralOperation operation;
         operation.type = StructuralOperation::Type::DelAllConnections;
@@ -122,6 +119,7 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDeleteCell(Simulatio
     auto operationIndex = data.structuralOperations.tryAddEntry(operation);
     if (operationIndex != -1) {
         scheduleOperation(data, cell, operationIndex);
+        cell->setDeleted();
     }
 }
 
@@ -155,7 +153,7 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteOperations(Simu
         auto scheduledOperationIndex = cell->scheduledOperationIndex;
         if (scheduledOperationIndex != -1) {
             bool scheduleDeleteCell = false;
-            for (int depth = 0; depth < 10; ++depth) {
+            for (int depth = 0; depth < 30; ++depth) {
                 auto operation = data.structuralOperations.at(scheduledOperationIndex);
                 switch (operation.type) {
                 case StructuralOperation::Type::DelConnection: {
@@ -253,6 +251,9 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     float desiredAngleOnCell1,
     ConstructorAngleAlignment angleAlignment)
 {
+    if (cell1->isDeleted()) {
+        return false;
+    }
     if (wouldResultInOverlappingConnection(cell1, cell2)) {
         return false;
     }
@@ -440,7 +441,7 @@ __inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(Sim
 __inline__ __device__ bool CellConnectionProcessor::scheduleOperation(SimulationData& data, Cell* cell, int operationIndex)
 {
     auto origOperationIndex = atomicCAS(&cell->scheduledOperationIndex, -1, operationIndex);
-    for (int depth = 0; depth < 10; ++depth) {
+    for (int depth = 0; depth < 30; ++depth) {
         if (origOperationIndex == -1) {
             break;
         }
@@ -452,12 +453,8 @@ __inline__ __device__ bool CellConnectionProcessor::scheduleOperation(Simulation
 
 __inline__ __device__ void CellConnectionProcessor::deleteCell(SimulationData& data, Cell* cell, int cellIndex)
 {
-    if (0 == cell->numConnections && !cell->isDeleted() /* && _data->entities.cellPointers.at(cellIndex) == cell*/) {
-        ObjectFactory factory;
-        factory.init(&data);
-        factory.createParticle(cell->energy, cell->absPos, cell->vel, cell->color);
-        cell->setDeleted();
-
-        data.objects.cellPointers.at(cellIndex) = nullptr;
-    }
+    ObjectFactory factory;
+    factory.init(&data);
+    factory.createParticle(cell->energy, cell->absPos, cell->vel, cell->color);
+    data.objects.cellPointers.at(cellIndex) = nullptr;
 }

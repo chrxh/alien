@@ -112,21 +112,18 @@ namespace
     }
 }
 
-namespace 
-{
-    float constexpr h = 0.5f;
-}
 __inline__ __device__ void CellProcessor::calcPressure(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto const& smoothingLength = cudaSimulationParameters.motionData.fluidMotion.smoothingLength;
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         float p = 0;
-        data.cellMap.executeForEach(cell->absPos, 2 * h, cell->detached, [&](auto const& otherCell) {
+        data.cellMap.executeForEach(cell->absPos, 2 * smoothingLength, cell->detached, [&](auto const& otherCell) {
             auto q = data.cellMap.getDistance(cell->absPos, otherCell->absPos);
-            p += f(q / h) / (h * h);
+            p += f(q / smoothingLength) / (smoothingLength * smoothingLength);
         });
 
         cell->density = p;
@@ -138,6 +135,7 @@ __inline__ __device__ void CellProcessor::calcFluidForce(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto const& smoothingLength = cudaSimulationParameters.motionData.fluidMotion.smoothingLength;
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -148,7 +146,8 @@ __inline__ __device__ void CellProcessor::calcFluidForce(SimulationData& data)
         float2 F_pressure = {0, 0};
         float2 F_viscosity = {0, 0};
         float2 F_barrier = {0, 0};
-        data.cellMap.executeForEach(cell->absPos, 2 * h, cell->detached, [&](auto const& otherCell) {
+        data.cellMap.executeForEach(
+            cell->absPos, 2 * smoothingLength, cell->detached, [&](auto const& otherCell) {
             if (cell == otherCell) {
                 return;
             }
@@ -170,7 +169,7 @@ __inline__ __device__ void CellProcessor::calcFluidForce(SimulationData& data)
                 if (abs(distance) < NEAR_ZERO) {
                     return;
                 }
-                float f_derivative = f_d(distance / h) / (h * h * h);
+                float f_derivative = f_d(distance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
                 F_pressure = F_pressure - posDelta / distance * factor * f_derivative;
                 F_viscosity = F_viscosity + velDelta / otherCell->density * distance * f_derivative / (distance * distance + 0.01f);
             } else {
