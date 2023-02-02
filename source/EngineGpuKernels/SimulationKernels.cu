@@ -23,7 +23,7 @@ __global__ void cudaNextTimestep_physics_init(SimulationData data)
 __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
 {
     CellProcessor::updateMap(data);
-    CellProcessor::radiation(data);  //do not use ParticleProcessor in this kernel
+    CellProcessor::radiation(data);  //do not use ParticleProcessor in this calcKernel
     CellProcessor::clearDensityMap(data);
 }
 
@@ -34,7 +34,7 @@ __global__ void cudaNextTimestep_physics_calcPressure(SimulationData data)
 
 __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
 {
-    CellProcessor::calcFluidForceAndReconnectCells(data);
+    CellProcessor::calcFluidForcesAndReconnectCells(data);
     CellProcessor::fillDensityMap(data);
 
     ParticleProcessor::updateMap(data);
@@ -182,7 +182,7 @@ __global__ void cudaApplyClusterData(SimulationData data)
 }
 
 
-//This is the only kernel that uses dynamic parallelism.
+//This is the only calcKernel that uses dynamic parallelism.
 //When it is removed, performance drops by about 20% for unknown reasons.
 __global__ void nestedDummy() {}
 __global__ void dummy()

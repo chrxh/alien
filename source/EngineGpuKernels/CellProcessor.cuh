@@ -22,7 +22,7 @@ public:
     __inline__ __device__ static void fillDensityMap(SimulationData& data);
 
     __inline__ __device__ static void calcPressure(SimulationData& data);
-    __inline__ __device__ static void calcFluidForceAndReconnectCells(SimulationData& data);
+    __inline__ __device__ static void calcFluidForcesAndReconnectCells(SimulationData& data);
 
     __inline__ __device__ static void calcCollisionsAndReconnectCells(SimulationData& data);
     __inline__ __device__ static void checkForces(SimulationData& data);
@@ -83,7 +83,7 @@ __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
 
 namespace
 {
-    __inline__ __device__ float f(float q)
+    __inline__ __device__ float calcKernel(float q)
     {
         float result;
         if (q < 1) {
@@ -98,7 +98,7 @@ namespace
         return result;
     }
 
-    __inline__ __device__ float f_d(float q)
+    __inline__ __device__ float calcKernel_d(float q)
     {
         float result;
         if (q < 1) {
@@ -124,14 +124,14 @@ __inline__ __device__ void CellProcessor::calcPressure(SimulationData& data)
         float p = 0;
         data.cellMap.executeForEach(cell->absPos, 2 * smoothingLength, cell->detached, [&](auto const& otherCell) {
             auto q = data.cellMap.getDistance(cell->absPos, otherCell->absPos);
-            p += f(q / smoothingLength) / (smoothingLength * smoothingLength);
+            p += calcKernel(q / smoothingLength) / (smoothingLength * smoothingLength);
         });
 
         cell->density = p;
     }
 }
 
-__inline__ __device__ void CellProcessor::calcFluidForceAndReconnectCells(SimulationData& data)
+__inline__ __device__ void CellProcessor::calcFluidForcesAndReconnectCells(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -174,9 +174,9 @@ __inline__ __device__ void CellProcessor::calcFluidForceAndReconnectCells(Simula
                 if (abs(distance) < NEAR_ZERO) {
                     return;
                 }
-                float f_derivative = f_d(distance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
-                F_pressure = F_pressure - posDelta / distance * factor * f_derivative;
-                F_viscosity = F_viscosity + velDelta / otherCell->density * distance * f_derivative / (distance * distance + 0.25f);
+                float kernel_d = calcKernel_d(distance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
+                F_pressure = F_pressure - posDelta / distance * factor * kernel_d;
+                F_viscosity = F_viscosity + velDelta / otherCell->density * distance * kernel_d / (distance * distance + 0.25f);
             } else {
                 F_boundary = F_boundary + posDelta * Math::dot(velDelta, posDelta) / (-distance * distance - 0.5f) * 2;
             }
@@ -196,8 +196,8 @@ __inline__ __device__ void CellProcessor::calcFluidForceAndReconnectCells(Simula
                 CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
             }
         });
-        cell->shared1 = cell->shared1 + F_pressure * cudaSimulationParameters.motionData.fluidMotion.pressureForce
-            + F_viscosity * cudaSimulationParameters.motionData.fluidMotion.viscosityForce + F_boundary;
+        cell->shared1 = cell->shared1 + F_pressure * cudaSimulationParameters.motionData.fluidMotion.pressureStrength
+            + F_viscosity * cudaSimulationParameters.motionData.fluidMotion.viscosityStrength + F_boundary;
     }
 }
 
