@@ -9,12 +9,12 @@
 struct FluidMotion
 {
     float smoothingLength = 0.66f;
-    float viscosityForce = 0.1f;
-    float pressureForce = 0.1f;
+    float viscosityStrength = 0.1f;
+    float pressureStrength = 0.1f;
 
     bool operator==(FluidMotion const& other) const
     {
-        return smoothingLength == other.smoothingLength && viscosityForce == other.viscosityForce && pressureForce == other.pressureForce;
+        return smoothingLength == other.smoothingLength && viscosityStrength == other.viscosityStrength && pressureStrength == other.pressureStrength;
     }
     bool operator!=(FluidMotion const& other) const { return !operator==(other); }
 };

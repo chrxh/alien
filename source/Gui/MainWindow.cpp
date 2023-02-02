@@ -383,12 +383,12 @@ void _MainWindow::processMenubar()
             }
             ImGui::Separator();
             ImGui::BeginDisabled(_simController->isSimulationRunning());
-            if (ImGui::MenuItem("Run", "CTRL+R")) {
+            if (ImGui::MenuItem("Run", "SPACE")) {
                 onRunSimulation();
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!_simController->isSimulationRunning());
-            if (ImGui::MenuItem("Pause", "CTRL+P")) {
+            if (ImGui::MenuItem("Pause", "SPACE")) {
                 onPauseSimulation();
             }
             ImGui::EndDisabled();
@@ -575,11 +575,8 @@ void _MainWindow::processMenubar()
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_S)) {
             _saveSimulationDialog->show();
         }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_R)) {
-            onRunSimulation();
-        }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_P)) {
-            onPauseSimulation();
+        if (ImGui::IsKeyPressed(GLFW_KEY_SPACE)) {
+            _simController->isSimulationRunning() ? onPauseSimulation() : onRunSimulation();
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_W)) {

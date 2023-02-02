@@ -85,7 +85,7 @@ void _CreatorWindow::processIntern()
         if (_mode == CreationMode::CreateCell) {
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(RightColumnWidth), _maxConnections);
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(RightColumnWidth), _ascendingBranchNumbers);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending execution order").textWidth(RightColumnWidth), _ascendingBranchNumbers);
         }
         if (_mode == CreationMode::CreateRectangle) {
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(RightColumnWidth), _rectHorizontalCells);
@@ -103,7 +103,12 @@ void _CreatorWindow::processIntern()
             || _mode == CreationMode::Drawing) {
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(RightColumnWidth), _cellDistance);
+        }
+        if (_mode != CreationMode::CreateParticle) {
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(RightColumnWidth), _makeSticky);
+        }
+        if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc
+            || _mode == CreationMode::Drawing) {
             ImGui::BeginDisabled(!_makeSticky);
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(RightColumnWidth), _maxConnections);
