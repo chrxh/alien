@@ -349,7 +349,10 @@ void _BrowserWindow::onOpenSimulation(std::string const& id)
     }
 
     DeserializedSimulation deserializedSim;
-    Serializer::deserializeSimulationFromStrings(deserializedSim, content, settings, symbolMap);
+    if (!Serializer::deserializeSimulationFromStrings(deserializedSim, content, settings, symbolMap)) {
+        MessageDialog::getInstance().show("Error", "Failed to load simulation. Your program version may not match.");
+        return;
+    }
 
     _simController->closeSimulation();
     _statisticsWindow->reset();
