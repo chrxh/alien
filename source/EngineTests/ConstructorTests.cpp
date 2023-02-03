@@ -543,8 +543,8 @@ TEST_F(ConstructorTests, constructConstructorCell)
 
 TEST_F(ConstructorTests, constructNerveCell)
 {
-    auto nerveGenome = NerveGenomeDescription().setPulseMode(2).setAlternationMode(4);
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(nerveGenome)});
+    auto nerveDesc = NerveGenomeDescription().setPulseMode(2).setAlternationMode(4);
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(nerveDesc)});
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -563,15 +563,15 @@ TEST_F(ConstructorTests, constructNerveCell)
     auto actualNerve = std::get<NerveDescription>(*actualConstructedCell.cellFunction);
 
     EXPECT_EQ(CellFunction_Nerve, actualConstructedCell.getCellFunctionType());
-    EXPECT_EQ(nerveGenome.pulseMode, actualNerve.pulseMode);
-    EXPECT_EQ(nerveGenome.alternationMode, actualNerve.alternationMode);
+    EXPECT_EQ(nerveDesc.pulseMode, actualNerve.pulseMode);
+    EXPECT_EQ(nerveDesc.alternationMode, actualNerve.alternationMode);
 }
 
 TEST_F(ConstructorTests, constructAttackerCell)
 {
-    auto constructedAttacker = AttackerGenomeDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors);
+    auto attackerDesc = AttackerGenomeDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors);
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        {CellGenomeDescription().setCellFunction(constructedAttacker)});
+        {CellGenomeDescription().setCellFunction(attackerDesc)});
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -591,13 +591,13 @@ TEST_F(ConstructorTests, constructAttackerCell)
     EXPECT_EQ(CellFunction_Attacker, actualConstructedCell.getCellFunctionType());
 
     auto actualAttacker = std::get<AttackerDescription>(*actualConstructedCell.cellFunction);
-    EXPECT_EQ(constructedAttacker.mode, actualAttacker.mode);
+    EXPECT_EQ(attackerDesc.mode, actualAttacker.mode);
 }
 
 TEST_F(ConstructorTests, constructTransmitterCell)
 {
-    auto constructedTransmitter = TransmitterGenomeDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors);
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(constructedTransmitter)});
+    auto transmitterDesc = TransmitterGenomeDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors);
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(transmitterDesc)});
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -617,13 +617,13 @@ TEST_F(ConstructorTests, constructTransmitterCell)
     EXPECT_EQ(CellFunction_Transmitter, actualConstructedCell.getCellFunctionType());
 
     auto actualTransmitter = std::get<TransmitterDescription>(*actualConstructedCell.cellFunction);
-    EXPECT_EQ(constructedTransmitter.mode, actualTransmitter.mode);
+    EXPECT_EQ(transmitterDesc.mode, actualTransmitter.mode);
 }
 
 TEST_F(ConstructorTests, constructMuscleCell)
 {
-    auto constructedMuscle = MuscleGenomeDescription().setMode(MuscleMode_ContractionExpansion);
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(constructedMuscle)});
+    auto muscleDesc = MuscleGenomeDescription().setMode(MuscleMode_ContractionExpansion);
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(muscleDesc)});
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -643,13 +643,13 @@ TEST_F(ConstructorTests, constructMuscleCell)
     EXPECT_EQ(CellFunction_Muscle, actualConstructedCell.getCellFunctionType());
 
     auto actualMuscle = std::get<MuscleDescription>(*actualConstructedCell.cellFunction);
-    EXPECT_EQ(constructedMuscle.mode, actualMuscle.mode);
+    EXPECT_EQ(muscleDesc.mode, actualMuscle.mode);
 }
 
 TEST_F(ConstructorTests, constructSensorCell)
 {
-    auto constructedSensor = SensorGenomeDescription().setFixedAngle(90.0f).setColor(2).setMinDensity(0.5f);
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(constructedSensor)});
+    auto sensorDesc = SensorGenomeDescription().setFixedAngle(90.0f).setColor(2).setMinDensity(0.5f);
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(sensorDesc)});
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -669,10 +669,37 @@ TEST_F(ConstructorTests, constructSensorCell)
     EXPECT_EQ(CellFunction_Sensor, actualConstructedCell.getCellFunctionType());
 
     auto actualSensor = std::get<SensorDescription>(*actualConstructedCell.cellFunction);
-    EXPECT_EQ(constructedSensor.fixedAngle.has_value(), actualSensor.fixedAngle.has_value());
-    EXPECT_TRUE(lowPrecisionCompare(*constructedSensor.fixedAngle, *actualSensor.fixedAngle));
-    EXPECT_TRUE(lowPrecisionCompare(constructedSensor.minDensity, actualSensor.minDensity));
-    EXPECT_EQ(constructedSensor.color, actualSensor.color);
+    EXPECT_EQ(sensorDesc.fixedAngle.has_value(), actualSensor.fixedAngle.has_value());
+    EXPECT_TRUE(lowPrecisionCompare(*sensorDesc.fixedAngle, *actualSensor.fixedAngle));
+    EXPECT_TRUE(lowPrecisionCompare(sensorDesc.minDensity, actualSensor.minDensity));
+    EXPECT_EQ(sensorDesc.color, actualSensor.color);
+}
+
+TEST_F(ConstructorTests, constructInjectorCell)
+{
+    auto injectorDesc = InjectorGenomeDescription().setMode(InjectorMode_UnderConstruction).setGenome(createRandomGenome(MAX_GENOME_BYTES / 2));
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(injectorDesc)});
+
+    DataDescription data;
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setGenome(genome)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(2, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, 1);
+
+    EXPECT_EQ(CellFunction_Injector, actualConstructedCell.getCellFunctionType());
+
+    auto actualInjector = std::get<InjectorDescription>(*actualConstructedCell.cellFunction);
+    EXPECT_EQ(injectorDesc.mode, actualInjector.mode);
+    EXPECT_EQ(injectorDesc.getGenomeData(), actualInjector.genome);
 }
 
 TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)

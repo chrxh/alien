@@ -82,6 +82,8 @@ struct AttackerFunction
 
 struct InjectorFunction
 {
+    InjectorMode mode;
+    int counter;
     uint64_t genomeSize;
     uint8_t* genome;
 };

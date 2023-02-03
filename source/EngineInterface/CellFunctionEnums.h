@@ -65,3 +65,11 @@ enum ConstructorAlignment_
     ConstructorAngleAlignment_60 = 5,
     ConstructorAngleAlignment_Count = 6
 };
+
+using InjectorMode = int;
+enum InjectorMode_
+{
+    InjectorMode_UnderConstruction,
+    InjectorMode_All,
+    InjectorMode_Count
+};

@@ -458,6 +458,8 @@ ConstructorProcessor::constructCellIntern(
         result->cellFunctionData.attacker.mode = GenomeDecoder::readByte(constructor) % EnergyDistributionMode_Count;
     } break;
     case CellFunction_Injector: {
+        result->cellFunctionData.injector.mode = GenomeDecoder::readByte(constructor) % InjectorMode_Count;
+        result->cellFunctionData.injector.counter = 0;
         GenomeDecoder::copyGenome(data, constructor, result->cellFunctionData.injector);
     } break;
     case CellFunction_Muscle: {

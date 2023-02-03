@@ -86,6 +86,8 @@ struct AttackerTO
 
 struct InjectorTO
 {
+    InjectorMode mode;
+    int counter;
     uint64_t genomeSize;
     uint64_t genomeDataIndex;
 };

@@ -156,6 +156,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
         } break;
         case CellFunction_Injector: {
             auto const& injector = std::get<InjectorGenomeDescription>(*cell.cellFunction);
+            writeByte(result, injector.mode);
             writeGenome(result, injector.genome);
         } break;
         case CellFunction_Muscle: {
@@ -256,6 +257,7 @@ namespace
             } break;
             case CellFunction_Injector: {
                 InjectorGenomeDescription injector;
+                injector.mode = readByte(data, bytePosition) % InjectorMode_Count;
                 injector.genome = readGenome(data, bytePosition);
                 cell.cellFunction = injector;
             } break;
