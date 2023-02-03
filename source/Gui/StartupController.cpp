@@ -134,10 +134,12 @@ void _StartupController::processWindow()
         {center.x - styleRep.contentScale(165), center.y + styleRep.contentScale(100 + 150)},
         textColor,
         "Artificial Life Environment");
+
+    auto versionString = "Version " + Const::ProgramVersion;
     drawList->AddText(
         styleRep.getMediumFont(),
         styleRep.contentScale(20.0f),
-        {center.x - styleRep.contentScale(50), center.y + styleRep.contentScale(150 + 150)},
+        {center.x - styleRep.contentScale(versionString.size() * 4), center.y + styleRep.contentScale(150 + 150)},
         textColor,
-        ("Version " + Const::ProgramVersion).c_str());
+        versionString.c_str());
 }
