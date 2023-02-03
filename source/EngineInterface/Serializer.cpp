@@ -553,7 +553,7 @@ namespace
         boost::split(versionParts, s, boost::is_any_of("."));
         try {
             for (auto const& versionPart : versionParts) {
-                std::stoi(versionPart);
+                static_cast<void>(std::stoi(versionPart));
             }
         } catch (...) {
             return false;
