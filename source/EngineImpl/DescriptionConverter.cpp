@@ -453,6 +453,8 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     case CellFunction_Injector: {
         InjectorDescription injector;
+        injector.mode = cellTO.cellFunctionData.injector.mode;
+        injector.counter = cellTO.cellFunctionData.injector.counter;
         convert(dataTO, cellTO.cellFunctionData.injector.genomeSize, cellTO.cellFunctionData.injector.genomeDataIndex, injector.genome);
         result.cellFunction = injector;
     } break;
@@ -559,8 +561,11 @@ void DescriptionConverter::addCell(
         cellTO.cellFunctionData.attacker = attackerTO;
     } break;
     case CellFunction_Injector: {
+        auto const& injectorDesc = std::get<InjectorDescription>(*cellDesc.cellFunction);
         InjectorTO injectorTO;
-        convert(dataTO, std::get<InjectorDescription>(*cellDesc.cellFunction).genome, injectorTO.genomeSize, injectorTO.genomeDataIndex);
+        injectorTO.mode = injectorDesc.mode;
+        injectorTO.counter = injectorDesc.counter;
+        convert(dataTO, injectorDesc.genome, injectorTO.genomeSize, injectorTO.genomeDataIndex);
         cellTO.cellFunctionData.injector = injectorTO;
     } break;
     case CellFunction_Muscle: {

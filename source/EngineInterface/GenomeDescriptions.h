@@ -164,9 +164,16 @@ struct AttackerGenomeDescription
 
 struct InjectorGenomeDescription
 {
+    InjectorMode mode = InjectorMode_All;
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
 
     auto operator<=>(InjectorGenomeDescription const&) const = default;
+
+    InjectorGenomeDescription& setMode(InjectorMode value)
+    {
+        mode = value;
+        return *this;
+    }
 
     InjectorGenomeDescription& setGenome(std::vector<uint8_t> const& value)
     {

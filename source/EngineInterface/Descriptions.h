@@ -211,6 +211,8 @@ struct AttackerDescription
 
 struct InjectorDescription
 {
+    InjectorMode mode = InjectorMode_All;
+    int counter = 0;
     std::vector<uint8_t> genome;
 
     auto operator<=>(InjectorDescription const&) const = default;

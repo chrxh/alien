@@ -154,6 +154,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.attacker.mode = cellTO.cellFunctionData.attacker.mode;
     } break;
     case CellFunction_Injector: {
+        cell->cellFunctionData.injector.mode = cellTO.cellFunctionData.injector.mode;
+        cell->cellFunctionData.injector.counter = cellTO.cellFunctionData.injector.counter;
         createAuxiliaryData(
             cellTO.cellFunctionData.injector.genomeSize,
             cellTO.cellFunctionData.injector.genomeDataIndex,
@@ -270,12 +272,13 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.constructor.angleAlignment = _data->numberGen1.random(ConstructorAngleAlignment_Count - 1);
             cell->cellFunctionData.constructor.stiffness = _data->numberGen1.random();
             cell->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
-            cell->cellFunctionData.constructor.genomeSize = _data->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
-            cell->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.constructor.genomeSize);
-            auto& genome = cell->cellFunctionData.constructor.genome;
-            for (int i = 0; i < cell->cellFunctionData.constructor.genomeSize; ++i) {
-                genome[i] = _data->numberGen1.randomByte();
-            }
+            cell->cellFunctionData.constructor.genomeSize = 0;
+            //_data->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
+            //cell->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.constructor.genomeSize);
+            //auto& genome = cell->cellFunctionData.constructor.genome;
+            //for (int i = 0; i < cell->cellFunctionData.constructor.genomeSize; ++i) {
+            //    genome[i] = _data->numberGen1.randomByte();
+            //}
             cell->cellFunctionData.constructor.currentGenomePos = 0;
         } break;
         case CellFunction_Sensor: {
@@ -290,6 +293,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.attacker.mode = _data->numberGen1.random(EnergyDistributionMode_Count - 1);
         } break;
         case CellFunction_Injector: {
+            cell->cellFunctionData.injector.mode = _data->numberGen1.random(InjectorMode_Count - 1);
+            cell->cellFunctionData.injector.counter = 0;
             cell->cellFunctionData.injector.genomeSize = _data->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
             cell->cellFunctionData.injector.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.injector.genomeSize);
             auto& genome = cell->cellFunctionData.injector.genome;

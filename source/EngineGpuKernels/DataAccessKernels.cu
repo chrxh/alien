@@ -107,6 +107,8 @@ namespace
             cellTO.cellFunctionData.attacker.mode = cell->cellFunctionData.attacker.mode;
         } break;
         case CellFunction_Injector: {
+            cellTO.cellFunctionData.injector.mode = cell->cellFunctionData.injector.mode;
+            cellTO.cellFunctionData.injector.counter = cell->cellFunctionData.injector.counter;
             copyAuxiliaryData(
                 cell->cellFunctionData.injector.genomeSize,
                 cell->cellFunctionData.injector.genome,

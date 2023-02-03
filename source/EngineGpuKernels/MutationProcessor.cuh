@@ -47,7 +47,7 @@ private:
     static int constexpr SensorBytes = 4;
     static int constexpr NerveBytes = 2;
     static int constexpr AttackerBytes = 1;
-    static int constexpr InjectorFixedBytes = 0;
+    static int constexpr InjectorFixedBytes = 1;
     static int constexpr MuscleBytes = 1;
     __inline__ __device__ static int getNumGenomeCells(uint8_t* genome, int genomeSize);
     __inline__ __device__ static int getNodeIndex(uint8_t* genome, int genomeSize, int cellIndex);
