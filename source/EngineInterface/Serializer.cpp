@@ -309,14 +309,17 @@ namespace
     {
         std::vector<std::string> versionParts;
         boost::split(versionParts, s, boost::is_any_of("."));
+        if (versionParts.size() < 3) {
+            return false;
+        }
         try {
             for (auto const& versionPart : versionParts) {
-                int result = std::stoi(versionPart);
+                static_cast<void>(std::stoi(versionPart));
             }
         } catch (...) {
             return false;
         }
-        return versionParts.size() == 3;
+        return true;
     }
     struct VersionParts
     {
