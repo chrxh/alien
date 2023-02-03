@@ -59,3 +59,8 @@ struct SensorOperation
 {
     Token* token;
 };
+
+struct NeuralNetOperation
+{
+    Token* token;
+};

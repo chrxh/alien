@@ -14,6 +14,9 @@ The development is driven by the desire to better understand the conditions for 
 An important goal is to make the simulator user-friendly through a modern user interface, visually appealing rendering and a playful approach. 
 </p>
 
+**IMPORTANT:** The current development is taking place on the branch [version4](https://github.com/chrxh/alien/tree/version4).
+
+
 # Main features
 ### Physics and graphics engine
 - Particles for simulating soft body mechanics, heat dissipation, bondings, damages, phase transitions, etc.

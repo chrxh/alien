@@ -551,14 +551,21 @@ namespace
     {
         std::vector<std::string> versionParts;
         boost::split(versionParts, s, boost::is_any_of("."));
+        if (versionParts.size() < 3) {
+            return false;
+        }
         try {
             for (auto const& versionPart : versionParts) {
-                std::stoi(versionPart);
+                static_cast<void>(std::stoi(versionPart));
+            }
+            //simple check: will be improved in future
+            if (std::stoi(versionParts.front()) > 3) {
+                return false;
             }
         } catch (...) {
             return false;
         }
-        return versionParts.size() == 3;
+        return true;
     }
     struct VersionParts
     {
@@ -583,6 +590,7 @@ void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
         throw std::runtime_error("No version detected.");
     }
     auto versionParts = getVersionParts(version);
+
     if (versionParts.major <= 3 && versionParts.minor <= 2) {
         DEPRECATED_ClusteredDataDescription_3_2 oldData;
         archive(oldData);
