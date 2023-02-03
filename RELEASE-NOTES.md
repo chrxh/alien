@@ -1,5 +1,10 @@
 # Release notes
 
+## [3.3.1] - 2023-02-03
+### Added
+- allow comments starting with # in cell code
+- decompiled cell code shows matching symbols in comments
+
 ## [3.3.0] - 2022-10-05
 ### Added
 - extended color semantic for cells: food chain color matrix and cell color transition rules
