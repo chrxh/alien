@@ -344,7 +344,8 @@ void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
         throw std::runtime_error("No version detected.");
     }
     auto versionParts = getVersionParts(version);
-    if (versionParts.major == 4 && versionParts.minor == 0) {
+    auto ownVersionParts = getVersionParts(Const::ProgramVersion);
+    if (versionParts.major >= ownVersionParts.major) {
         archive(data);
     } else {
         throw std::runtime_error("Version not supported.");
