@@ -80,6 +80,18 @@ struct SimulationParameters
     bool cellFunctionConstructorMutationColor = false;
     bool cellFunctionConstructorMutationSelfReplication = false;
 
+    float cellFunctionInjectorRadius = 1.6f;
+    int cellFunctionInjectorDurationColorMatrix[MAX_COLORS][MAX_COLORS] = {
+        {10, 10, 10, 10, 10, 10, 10},
+        {10, 10, 10, 10, 10, 10, 10},
+        {10, 10, 10, 10, 10, 10, 10},
+        {10, 10, 10, 10, 10, 10, 10},
+        {10, 10, 10, 10, 10, 10, 10},
+        {10, 10, 10, 10, 10, 10, 10},
+        {10, 10, 10, 10, 10, 10, 10}
+    };
+    float cellFunctionInjectorActivityThreshold = 0.1f;
+
     float cellFunctionAttackerRadius = 1.6f;
     float cellFunctionAttackerStrength = 0.05f;
     float cellFunctionAttackerEnergyDistributionRadius = 3.6f;

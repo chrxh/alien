@@ -38,6 +38,7 @@ add_library(alien_engine_gpu_kernels_lib
     GenomeDecoder.cuh
     HashMap.cuh
     HashSet.cuh
+    InjectorProcessor.cuh
     List.cuh
     Macros.cuh
     Map.cuh

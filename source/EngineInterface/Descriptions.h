@@ -211,11 +211,21 @@ struct AttackerDescription
 
 struct InjectorDescription
 {
-    InjectorMode mode = InjectorMode_All;
+    InjectorMode mode = InjectorMode_InjectAll;
     int counter = 0;
     std::vector<uint8_t> genome;
 
     auto operator<=>(InjectorDescription const&) const = default;
+    InjectorDescription& setMode(InjectorMode value)
+    {
+        mode = value;
+        return *this;
+    }
+    InjectorDescription& setGenome(std::vector<uint8_t> const& value)
+    {
+        genome = value;
+        return *this;
+    }
 };
 
 struct MuscleDescription
