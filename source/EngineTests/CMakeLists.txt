@@ -5,6 +5,7 @@ PUBLIC
     ConstructorTests.cpp
     DataTransferTests.cpp
     DescriptionHelperTests.cpp
+    InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
     MuscleTests.cpp

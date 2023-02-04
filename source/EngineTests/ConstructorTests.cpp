@@ -677,7 +677,7 @@ TEST_F(ConstructorTests, constructSensorCell)
 
 TEST_F(ConstructorTests, constructInjectorCell)
 {
-    auto injectorDesc = InjectorGenomeDescription().setMode(InjectorMode_UnderConstruction).setGenome(createRandomGenome(MAX_GENOME_BYTES / 2));
+    auto injectorDesc = InjectorGenomeDescription().setMode(InjectorMode_InjectOnlyUnderConstruction).setGenome(createRandomGenome(MAX_GENOME_BYTES / 2));
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(injectorDesc)});
 
     DataDescription data;

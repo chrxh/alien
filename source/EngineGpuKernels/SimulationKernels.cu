@@ -6,6 +6,7 @@
 #include "NeuronProcessor.cuh"
 #include "ConstructorProcessor.cuh"
 #include "AttackerProcessor.cuh"
+#include "InjectorProcessor.cuh"
 #include "TransmitterProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "SensorProcessor.cuh"
@@ -97,6 +98,11 @@ __global__ void cudaNextTimestep_cellFunction_neuron(SimulationData data, Simula
 __global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, SimulationResult result)
 {
     ConstructorProcessor::process(data, result);
+}
+
+__global__ void cudaNextTimestep_cellFunction_injector(SimulationData data, SimulationResult result)
+{
+    InjectorProcessor::process(data, result);
 }
 
 __global__ void cudaNextTimestep_cellFunction_attacker(SimulationData data, SimulationResult result)

@@ -43,6 +43,7 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_cellFunction_nerve, data, result);
     KERNEL_CALL(cudaNextTimestep_cellFunction_neuron, data, result);
     KERNEL_CALL(cudaNextTimestep_cellFunction_constructor, data, result);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_injector, data, result);
     KERNEL_CALL(cudaNextTimestep_cellFunction_attacker, data, result);
     KERNEL_CALL(cudaNextTimestep_cellFunction_transmitter, data, result);
     KERNEL_CALL(cudaNextTimestep_cellFunction_muscle, data, result);
