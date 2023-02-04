@@ -22,7 +22,6 @@ TEST_F(CellConnectionTests, decay)
 
     _simController->setSimulationData(origData);
     _simController->calcSingleTimestep();
-    _simController->calcSingleTimestep();
 
     auto data = _simController->getSimulationData();
     EXPECT_EQ(0, data.cells.size());
