@@ -60,10 +60,12 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             if (otherCell->cellFunction == CellFunction_Constructor) {
                 otherCell->cellFunctionData.constructor.genome = targetGenome;
                 otherCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
+                otherCell->cellFunctionData.constructor.currentGenomePos = 0;
             } else {
                 otherCell->cellFunctionData.injector.genome = targetGenome;
                 otherCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
             }
+
             injection = true;
         });
     } else {    //InjectorMode_InjectOnlyUnderConstruction
@@ -79,6 +81,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                     if (connectedConnectedCell->cellFunction == CellFunction_Constructor) {
                         connectedConnectedCell->cellFunctionData.constructor.genome = targetGenome;
                         connectedConnectedCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
+                        connectedConnectedCell->cellFunctionData.constructor.currentGenomePos = 0;
                     } else {
                         connectedConnectedCell->cellFunctionData.injector.genome = targetGenome;
                         connectedConnectedCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
