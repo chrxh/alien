@@ -133,11 +133,16 @@ void _InspectorWindow::processCell(CellDescription cell)
     if (ImGui::BeginTabBar(
             "##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto origCell = cell;
-        showCellBaseTab(cell);
-        showCellFunctionTab(cell);
-        showCellFunctionPropertiesTab(cell);
-        showCellGenomeTab(cell);
-        showCellMetadataTab(cell);
+        processCellBaseTab(cell);
+        processCellFunctionTab(cell);
+        processCellFunctionPropertiesTab(cell);
+        if (cell.getCellFunctionType() == CellFunction_Constructor) {
+            processCellGenomeTab(std::get<ConstructorDescription>(*cell.cellFunction));
+        }
+        if (cell.getCellFunctionType() == CellFunction_Injector) {
+            processCellGenomeTab(std::get<InjectorDescription>(*cell.cellFunction));
+        }
+        processCellMetadataTab(cell);
         validationAndCorrection(cell);
 
         ImGui::EndTabBar();
@@ -148,7 +153,7 @@ void _InspectorWindow::processCell(CellDescription cell)
     }
 }
 
-void _InspectorWindow::showCellBaseTab(CellDescription& cell)
+void _InspectorWindow::processCellBaseTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Base", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -185,7 +190,7 @@ void _InspectorWindow::showCellBaseTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
+void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Function", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -262,7 +267,7 @@ void _InspectorWindow::showCellFunctionTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::showCellFunctionPropertiesTab(CellDescription& cell)
+void _InspectorWindow::processCellFunctionPropertiesTab(CellDescription& cell)
 {
     if (cell.getCellFunctionType() == CellFunction_None) {
         return;
@@ -273,27 +278,28 @@ void _InspectorWindow::showCellFunctionPropertiesTab(CellDescription& cell)
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             switch (cell.getCellFunctionType()) {
             case CellFunction_Neuron: {
-                showNeuronContent(std::get<NeuronDescription>(*cell.cellFunction));
+                processNeuronContent(std::get<NeuronDescription>(*cell.cellFunction));
             } break;
             case CellFunction_Transmitter: {
-                showTransmitterContent(std::get<TransmitterDescription>(*cell.cellFunction));
+                processTransmitterContent(std::get<TransmitterDescription>(*cell.cellFunction));
             } break;
             case CellFunction_Constructor: {
-                showConstructorContent(std::get<ConstructorDescription>(*cell.cellFunction));
+                processConstructorContent(std::get<ConstructorDescription>(*cell.cellFunction));
             } break;
             case CellFunction_Sensor: {
-                showSensorContent(std::get<SensorDescription>(*cell.cellFunction));
+                processSensorContent(std::get<SensorDescription>(*cell.cellFunction));
             } break;
             case CellFunction_Nerve: {
-                showNerveContent(std::get<NerveDescription>(*cell.cellFunction));
+                processNerveContent(std::get<NerveDescription>(*cell.cellFunction));
             } break;
             case CellFunction_Attacker: {
-                showAttackerContent(std::get<AttackerDescription>(*cell.cellFunction));
+                processAttackerContent(std::get<AttackerDescription>(*cell.cellFunction));
             } break;
             case CellFunction_Injector: {
+                processInjectorContent(std::get<InjectorDescription>(*cell.cellFunction));
             } break;
             case CellFunction_Muscle: {
-                showMuscleContent(std::get<MuscleDescription>(*cell.cellFunction));
+                processMuscleContent(std::get<MuscleDescription>(*cell.cellFunction));
             } break;
             case CellFunction_Placeholder1: {
             } break;
@@ -306,12 +312,9 @@ void _InspectorWindow::showCellFunctionPropertiesTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
+template <typename Description>
+void _InspectorWindow::processCellGenomeTab(Description& desc)
 {
-    if (cell.getCellFunctionType() != CellFunction_Constructor) {
-        return;
-    }
-    auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
     auto const& parameters = _simController->getSimulationParameters();
 
     int flags = ImGuiTabItemFlags_None;
@@ -321,24 +324,28 @@ void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
     }
     if (ImGui::BeginTabItem("Genome", nullptr, flags)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            AlienImGui::Group("Genome: " + std::to_string(constructor.genome.size()) + " bytes");
+            AlienImGui::Group("Genome: " + std::to_string(desc.genome.size()) + " bytes");
             if (AlienImGui::Button("Edit")) {
-                _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters));
+                _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(desc.genome, parameters));
             }
 
             ImGui::SameLine();
             if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Retrieve from editor").textWidth(GenomeTabTextWidth))) {
-                constructor.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
-                constructor.currentGenomePos = 0;
+                desc.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
+                if constexpr (std::is_same<Description, ConstructorDescription>()) {
+                    desc.currentGenomePos = 0;
+                }
             }
 
-            auto entry = GenomeDescriptionConverter::convertByteIndexToCellIndex(constructor.genome, constructor.currentGenomePos);
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Sequence number").textWidth(GenomeTabTextWidth), entry);
-            constructor.currentGenomePos = GenomeDescriptionConverter::convertCellIndexToByteIndex(constructor.genome, entry);
+            if constexpr (std::is_same<Description, ConstructorDescription>()) {
+                auto entry = GenomeDescriptionConverter::convertByteIndexToCellIndex(desc.genome, desc.currentGenomePos);
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Sequence number").textWidth(GenomeTabTextWidth), entry);
+                desc.currentGenomePos = GenomeDescriptionConverter::convertCellIndexToByteIndex(desc.genome, entry);
+            }
 
             AlienImGui::Group("Preview (approximation)");
             if (ImGui::BeginChild("##child", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-                auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(constructor.genome, parameters);
+                auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome, parameters);
                 auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);
                 std::optional<int> selectedNodeDummy;
                 AlienImGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
@@ -350,7 +357,7 @@ void _InspectorWindow::showCellGenomeTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::showCellMetadataTab(CellDescription& cell)
+void _InspectorWindow::processCellMetadataTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Metadata", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -364,7 +371,7 @@ void _InspectorWindow::showCellMetadataTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::showNerveContent(NerveDescription& nerve)
+void _InspectorWindow::processNerveContent(NerveDescription& nerve)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
 
@@ -386,7 +393,7 @@ void _InspectorWindow::showNerveContent(NerveDescription& nerve)
     }
 }
 
-void _InspectorWindow::showNeuronContent(NeuronDescription& neuron)
+void _InspectorWindow::processNeuronContent(NeuronDescription& neuron)
 {
     if (ImGui::TreeNodeEx("Neural network", TreeNodeFlags)) {
         AlienImGui::NeuronSelection(
@@ -402,7 +409,7 @@ void _InspectorWindow::showNeuronContent(NeuronDescription& neuron)
     }
 }
 
-void _InspectorWindow::showConstructorContent(ConstructorDescription& constructor)
+void _InspectorWindow::processConstructorContent(ConstructorDescription& constructor)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         auto parameters = _simController->getSimulationParameters();
@@ -431,7 +438,19 @@ void _InspectorWindow::showConstructorContent(ConstructorDescription& constructo
     }
 }
 
-void _InspectorWindow::showAttackerContent(AttackerDescription& attacker)
+void _InspectorWindow::processInjectorContent(InjectorDescription& injector)
+{
+    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters().name("Mode").textWidth(CellFunctionTextWidth).values({"Cells under construction", "All Cells"}),
+            injector.mode);
+        AlienImGui::InputInt(
+            AlienImGui::InputIntParameters().name("Counter").textWidth(CellFunctionTextWidth), injector.counter);
+        ImGui::TreePop();
+    }
+}
+
+void _InspectorWindow::processAttackerContent(AttackerDescription& attacker)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         AlienImGui::Combo(
@@ -444,7 +463,7 @@ void _InspectorWindow::showAttackerContent(AttackerDescription& attacker)
     }
 }
 
-void _InspectorWindow::showTransmitterContent(TransmitterDescription& transmitter)
+void _InspectorWindow::processTransmitterContent(TransmitterDescription& transmitter)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         AlienImGui::Combo(
@@ -457,7 +476,7 @@ void _InspectorWindow::showTransmitterContent(TransmitterDescription& transmitte
     }
 }
 
-void _InspectorWindow::showMuscleContent(MuscleDescription& muscle)
+void _InspectorWindow::processMuscleContent(MuscleDescription& muscle)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         AlienImGui::Combo(
@@ -467,7 +486,7 @@ void _InspectorWindow::showMuscleContent(MuscleDescription& muscle)
     }
 }
 
-void _InspectorWindow::showSensorContent(SensorDescription& sensor)
+void _InspectorWindow::processSensorContent(SensorDescription& sensor)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         int mode = sensor.getSensorMode();
@@ -489,7 +508,7 @@ void _InspectorWindow::showSensorContent(SensorDescription& sensor)
     }
 }
 
-void _InspectorWindow::showActivityContent(CellDescription& cell)
+void _InspectorWindow::processActivityContent(CellDescription& cell)
 {
 }
 

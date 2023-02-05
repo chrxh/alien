@@ -348,7 +348,7 @@ struct CellDescription
         executionOrderNumber = value;
         return *this;
     }
-    CellDescription& setConstructionState(LivingState value)
+    CellDescription& setLivingState(LivingState value)
     {
         livingState = value;
         return *this;

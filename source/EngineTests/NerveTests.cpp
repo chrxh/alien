@@ -138,7 +138,7 @@ TEST_F(NerveTests, underConstruction1)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
-            .setConstructionState(true)
+            .setLivingState(true)
             .setActivity(activity),
         CellDescription()
             .setId(2)
@@ -180,7 +180,7 @@ TEST_F(NerveTests, underConstruction2)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setConstructionState(true),
+            .setLivingState(true),
     });
     data.addConnection(1, 2);
 

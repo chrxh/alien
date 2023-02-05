@@ -28,6 +28,8 @@ private:
     void processTab(TabData& tab);
     void processGenomeEditTab(TabData& tab);
     void processNodeEdit(TabData& tab, CellGenomeDescription& cell);
+    template<typename Description>
+    void processSubGenomeWidgets(TabData const& tab, Description& desc);
 
     void showPreview(TabData& tab);
 

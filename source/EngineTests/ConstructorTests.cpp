@@ -791,7 +791,7 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
 
@@ -836,7 +836,7 @@ TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
 
@@ -890,7 +890,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
 
@@ -943,7 +943,7 @@ TEST_F(ConstructorTests, constructSecondCell_noFreeConnection)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
 
@@ -980,7 +980,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSpace)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
 
@@ -1019,7 +1019,7 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
 
@@ -1062,7 +1062,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
 
@@ -1110,7 +1110,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
 
@@ -1158,7 +1158,7 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
             .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 9.0f})
@@ -1166,7 +1166,7 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
         CellDescription().setId(4).setPos({10.0f, 9.5f}).setEnergy(_parameters.cellNormalEnergy * 3).setMaxConnections(2).setExecutionOrderNumber(0),
         CellDescription().setId(5).setPos({10.0f, 9.0f}).setEnergy(_parameters.cellNormalEnergy * 3).setMaxConnections(2).setExecutionOrderNumber(0),
     });
@@ -1215,7 +1215,7 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
             .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 11.0f})
@@ -1223,7 +1223,7 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
         CellDescription().setId(4).setPos({10.0f, 10.5f}).setEnergy(_parameters.cellNormalEnergy * 3).setMaxConnections(2).setExecutionOrderNumber(0),
         CellDescription().setId(5).setPos({10.0f, 11.0f}).setEnergy(_parameters.cellNormalEnergy * 3).setMaxConnections(2).setExecutionOrderNumber(0),
     });
@@ -1272,7 +1272,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
 
@@ -1304,7 +1304,7 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
             .setMaxConnections(3)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
             .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 11.0f})
@@ -1312,13 +1312,13 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(4)
             .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance + 1.0f, 11.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setConstructionState(LivingState_UnderConstruction),
+            .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
