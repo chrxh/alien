@@ -542,7 +542,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
             && (cell->energy > cudaSimulationParameters.radiationMinCellEnergy || cell->age > cudaSimulationParameters.radiationMinCellAge)) {
             auto radiationFactor = SpotCalculator::calcParameter(
                 &SimulationParametersSpotValues::radiationFactor, &SimulationParametersSpotActivatedValues::radiationFactor, data, cell->absPos);
-            if (radiationFactor > NEAR_ZERO) {
+            if (radiationFactor > 0) {
 
                 auto pos = cell->absPos;
                 if (cudaSimulationParameters.numParticleSources > 0) {
@@ -555,9 +555,9 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                 float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
                 data.cellMap.correctPosition(particlePos);
 
-                auto cellEnergy = cell->energy;
+                auto const& cellEnergy = cell->energy;
                 particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
-                float radiationEnergy = cellEnergy * radiationFactor;
+                auto radiationEnergy = cellEnergy * radiationFactor;
                 radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProb;
                 radiationEnergy = 2 * radiationEnergy * data.numberGen1.random();
                 if (cellEnergy > 1) {
