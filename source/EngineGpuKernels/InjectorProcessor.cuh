@@ -47,6 +47,9 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             if (otherCell->cellFunction != CellFunction_Constructor && otherCell->cellFunction != CellFunction_Injector) {
                 return;
             }
+            if (otherCell->livingState == LivingState_UnderConstruction) {
+                return;
+            }
             match = true;
             auto injectorDuration = cudaSimulationParameters.cellFunctionInjectorDurationColorMatrix[cell->color][otherCell->color];
             if (injector.counter < injectorDuration) {
@@ -61,6 +64,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                 otherCell->cellFunctionData.constructor.genome = targetGenome;
                 otherCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
                 otherCell->cellFunctionData.constructor.currentGenomePos = 0;
+                otherCell->cellFunctionData.constructor.separateConstruction = true;
             } else {
                 otherCell->cellFunctionData.injector.genome = targetGenome;
                 otherCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
