@@ -39,35 +39,56 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 
     bool match = false;
     bool injection = false;
-    data.cellMap.executeForEach(cell->absPos, cudaSimulationParameters.cellFunctionInjectorRadius, cell->detached, [&](Cell* const& otherCell) {
-        if (cell == otherCell) {
-            return;
-        }
-        if (otherCell->cellFunction != CellFunction_Constructor && otherCell->cellFunction != CellFunction_Injector) {
-            return;
-        }
-        if (injector.mode == InjectorMode_InjectOnlyUnderConstruction && otherCell->livingState != LivingState_UnderConstruction) {
-            return;
-        }
-        match = true;
-        auto injectorDuration = cudaSimulationParameters.cellFunctionInjectorDurationColorMatrix[cell->color][otherCell->color];
-        if (injector.counter < injectorDuration) {
-            return;
-        }
+    if (injector.mode == InjectorMode_InjectAll) {
+        data.cellMap.executeForEach(cell->absPos, cudaSimulationParameters.cellFunctionInjectorRadius, cell->detached, [&](Cell* const& otherCell) {
+            if (cell == otherCell) {
+                return;
+            }
+            if (otherCell->cellFunction != CellFunction_Constructor && otherCell->cellFunction != CellFunction_Injector) {
+                return;
+            }
+            match = true;
+            auto injectorDuration = cudaSimulationParameters.cellFunctionInjectorDurationColorMatrix[cell->color][otherCell->color];
+            if (injector.counter < injectorDuration) {
+                return;
+            }
 
-        auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(injector.genomeSize);
-        for (int i = 0; i < injector.genomeSize; ++i) {
-            targetGenome[i] = injector.genome[i];
+            auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(injector.genomeSize);
+            for (int i = 0; i < injector.genomeSize; ++i) {
+                targetGenome[i] = injector.genome[i];
+            }
+            if (otherCell->cellFunction == CellFunction_Constructor) {
+                otherCell->cellFunctionData.constructor.genome = targetGenome;
+                otherCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
+            } else {
+                otherCell->cellFunctionData.injector.genome = targetGenome;
+                otherCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
+            }
+            injection = true;
+        });
+    } else {    //InjectorMode_InjectOnlyUnderConstruction
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto& connectedCell = cell->connections[i].cell;
+            for (int j = 0; j < connectedCell->numConnections; ++j) {
+                auto connectedConnectedCell = connectedCell->connections[j].cell;
+                if (connectedConnectedCell->livingState == LivingState_UnderConstruction) {
+                    auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(injector.genomeSize);
+                    for (int i = 0; i < injector.genomeSize; ++i) {
+                        targetGenome[i] = injector.genome[i];
+                    }
+                    if (connectedConnectedCell->cellFunction == CellFunction_Constructor) {
+                        connectedConnectedCell->cellFunctionData.constructor.genome = targetGenome;
+                        connectedConnectedCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
+                    } else {
+                        connectedConnectedCell->cellFunctionData.injector.genome = targetGenome;
+                        connectedConnectedCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
+                    }
+                    match = true;
+                    injection = true;
+                }
+            }
         }
-        if (otherCell->cellFunction == CellFunction_Constructor) {
-            otherCell->cellFunctionData.constructor.genome = targetGenome;
-            otherCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
-        } else {
-            otherCell->cellFunctionData.injector.genome = targetGenome;
-            otherCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
-        }
-        injection = true;
-    });
+    }
 
     if (match) {
         if (injection) {

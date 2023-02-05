@@ -149,3 +149,93 @@ TEST_F(InjectorTests, injection)
     EXPECT_EQ(0, actualInjector.counter);
     EXPECT_EQ(origInjector.genome, actualTargetConstructor.genome);
 }
+
+TEST_F(InjectorTests, injectOnlyUnderConstruction_failed)
+{
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectOnlyUnderConstruction).setGenome(genome)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription().setPulseMode(1))
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setGenome({})),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    for (int i = 0; i < 1 + 6 * 3; ++i) {
+        _simController->calcSingleTimestep();
+    }
+
+    auto actualData = _simController->getSimulationData();
+    auto actualCell = getCell(actualData, 1);
+    auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
+    auto actualTargetCell = getCell(actualData, 3);
+    auto actualTargetConstructor = std::get<ConstructorDescription>(*actualTargetCell.cellFunction);
+    auto origTargetCell = getCell(data, 3);
+    auto origTargetConstructor = std::get<ConstructorDescription>(*origTargetCell.cellFunction);
+
+    EXPECT_EQ(3, actualData.cells.size());
+    EXPECT_TRUE(approxCompare(0.0f, actualCell.activity.channels[0]));
+    EXPECT_EQ(0, actualInjector.counter);
+    EXPECT_EQ(origTargetConstructor.genome, actualTargetConstructor.genome);
+}
+
+TEST_F(InjectorTests, injectOnlyUnderConstruction_success)
+{
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectOnlyUnderConstruction).setGenome(genome)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription().setPulseMode(1))
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setGenome({})),
+        CellDescription().setId(4).setPos({7.0f, 10.0f}).setLivingState(LivingState_UnderConstruction).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setGenome({})),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(3, 1);
+    data.addConnection(4, 3);
+
+    _simController->setSimulationData(data);
+    for (int i = 0; i < 1 + 6 * 3; ++i) {
+        _simController->calcSingleTimestep();
+    }
+
+    auto actualData = _simController->getSimulationData();
+    auto actualCell = getCell(actualData, 1);
+    auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
+
+    auto actualTargetConstructor = std::get<ConstructorDescription>(*getCell(actualData, 4).cellFunction);
+
+    auto origOtherConstructor = std::get<ConstructorDescription>(*getCell(data, 3).cellFunction);
+    auto actualOtherConstructor = std::get<ConstructorDescription>(*getCell(actualData, 3).cellFunction);
+
+
+    EXPECT_EQ(4, actualData.cells.size());
+    EXPECT_TRUE(approxCompare(1.0f, actualCell.activity.channels[0]));
+    EXPECT_EQ(0, actualInjector.counter);
+    EXPECT_EQ(actualInjector.genome, actualTargetConstructor.genome);
+    EXPECT_EQ(origOtherConstructor.genome, actualOtherConstructor.genome);
+}

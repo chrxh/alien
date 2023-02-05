@@ -30,21 +30,23 @@ private:
     std::string generateTitle() const;
 
     void processCell(CellDescription cell);
-    void showCellBaseTab(CellDescription& cell);
-    void showCellFunctionTab(CellDescription& cell);
-    void showCellFunctionPropertiesTab(CellDescription& cell);
-    void showCellGenomeTab(CellDescription& cell);
-    void showCellMetadataTab(CellDescription& cell);
+    void processCellBaseTab(CellDescription& cell);
+    void processCellFunctionTab(CellDescription& cell);
+    void processCellFunctionPropertiesTab(CellDescription& cell);
+    template <typename Description>
+    void processCellGenomeTab(Description& desc);
+    void processCellMetadataTab(CellDescription& cell);
 
-    void showNerveContent(NerveDescription& nerve);
-    void showNeuronContent(NeuronDescription& neuron);
-    void showConstructorContent(ConstructorDescription& constructor);
-    void showAttackerContent(AttackerDescription& attacker);
-    void showTransmitterContent(TransmitterDescription& transmitter);
-    void showMuscleContent(MuscleDescription& muscle);
-    void showSensorContent(SensorDescription& sensor);
+    void processNerveContent(NerveDescription& nerve);
+    void processNeuronContent(NeuronDescription& neuron);
+    void processConstructorContent(ConstructorDescription& constructor);
+    void processInjectorContent(InjectorDescription& injector);
+    void processAttackerContent(AttackerDescription& attacker);
+    void processTransmitterContent(TransmitterDescription& transmitter);
+    void processMuscleContent(MuscleDescription& muscle);
+    void processSensorContent(SensorDescription& sensor);
 
-    void showActivityContent(CellDescription& cell);
+    void processActivityContent(CellDescription& cell);
 
     void processParticle(ParticleDescription particle);
 

@@ -313,7 +313,7 @@ namespace
             return false;
         }
         try {
-            for (auto const& versionPart : versionParts) {
+            for (auto const& versionPart : versionParts | boost::adaptors::sliced(0, 3)) {
                 static_cast<void>(std::stoi(versionPart));
             }
         } catch (...) {

@@ -475,6 +475,11 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 attacker.mode);
         } break;
         case CellFunction_Injector: {
+            auto& injector = std::get<InjectorGenomeDescription>(*cell.cellFunction);
+
+            table.next();
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters().name("Mode").textWidth(ContentTextWidth).values({"Cells under construction", "All Cells"}), injector.mode);
         } break;
         case CellFunction_Muscle: {
             auto& muscle = std::get<MuscleGenomeDescription>(*cell.cellFunction);
@@ -518,52 +523,62 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         } break;
         case CellFunction_Constructor: {
             auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
-            std::string content;
-            if (constructor.isMakeGenomeCopy()) {
-                content = "Genome: self-copy";
-            } else {
-                auto size = constructor.getGenomeData().size();
-                if (size > 0) {
-                    content = "Genome: " + std::to_string(size) + " bytes";
-                } else {
-                    content = "Genome: none";
-                }
-            }
-            auto width = ImGui::GetContentRegionAvail().x / 2;
-            if (ImGui::BeginChild("##", ImVec2(width, contentScale(60.0f)), true)) {
-                AlienImGui::MonospaceText(content);
-                if (AlienImGui::Button("Clear")) {
-                    constructor.setGenome({});
-                }
-                ImGui::SameLine();
-                if (AlienImGui::Button("Copy")) {
-                    _copiedGenome =
-                        constructor.isMakeGenomeCopy() ? GenomeDescriptionConverter::convertDescriptionToBytes(tab.genome) : constructor.getGenomeData();
-                }
-                ImGui::SameLine();
-                ImGui::BeginDisabled(!_copiedGenome.has_value());
-                if (AlienImGui::Button("Paste")) {
-                    constructor.genome = *_copiedGenome;
-                }
-                ImGui::EndDisabled();
-                ImGui::SameLine();
-                if (AlienImGui::Button("Edit")) {
-                    auto genomeToOpen = constructor.isMakeGenomeCopy()
-                        ? tab.genome
-                        : GenomeDescriptionConverter::convertBytesToDescription(constructor.getGenomeData(), _simulationController->getSimulationParameters());
-                    openTab(genomeToOpen);
-                }
-                ImGui::SameLine();
-                if (AlienImGui::Button("Set self-copy")) {
-                    constructor.setMakeGenomeCopy();
-                }
-            }
-            ImGui::EndChild();
+            processSubGenomeWidgets(tab, constructor);
+        } break;
+        case CellFunction_Injector: {
+            auto& injector = std::get<InjectorGenomeDescription>(*cell.cellFunction);
+            processSubGenomeWidgets(tab, injector);
         } break;
         }
     }
     validationAndCorrection(cell);
 }
+
+template <typename Description>
+void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Description& desc)
+{
+    std::string content;
+    if (desc.isMakeGenomeCopy()) {
+        content = "Genome: self-copy";
+    } else {
+        auto size = desc.getGenomeData().size();
+        if (size > 0) {
+            content = "Genome: " + std::to_string(size) + " bytes";
+        } else {
+            content = "Genome: none";
+        }
+    }
+    auto width = ImGui::GetContentRegionAvail().x / 2;
+    if (ImGui::BeginChild("##", ImVec2(width, contentScale(60.0f)), true)) {
+        AlienImGui::MonospaceText(content);
+        if (AlienImGui::Button("Clear")) {
+            desc.setGenome({});
+        }
+        ImGui::SameLine();
+        if (AlienImGui::Button("Copy")) {
+            _copiedGenome = desc.isMakeGenomeCopy() ? GenomeDescriptionConverter::convertDescriptionToBytes(tab.genome) : desc.getGenomeData();
+        }
+        ImGui::SameLine();
+        ImGui::BeginDisabled(!_copiedGenome.has_value());
+        if (AlienImGui::Button("Paste")) {
+            desc.genome = *_copiedGenome;
+        }
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        if (AlienImGui::Button("Edit")) {
+            auto genomeToOpen = desc.isMakeGenomeCopy()
+                ? tab.genome
+                : GenomeDescriptionConverter::convertBytesToDescription(desc.getGenomeData(), _simulationController->getSimulationParameters());
+            openTab(genomeToOpen);
+        }
+        ImGui::SameLine();
+        if (AlienImGui::Button("Set self-copy")) {
+            desc.setMakeGenomeCopy();
+        }
+    }
+    ImGui::EndChild();
+}
+
 
 void _GenomeEditorWindow::showPreview(TabData& tab)
 {
