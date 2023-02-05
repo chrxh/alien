@@ -50,6 +50,9 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             if (otherCell->livingState == LivingState_UnderConstruction) {
                 return;
             }
+            if (otherCell->cellFunctionData.constructor.currentGenomePos != 0) {
+                return;
+            }
             match = true;
             auto injectorDuration = cudaSimulationParameters.cellFunctionInjectorDurationColorMatrix[cell->color][otherCell->color];
             if (injector.counter < injectorDuration) {
@@ -63,7 +66,6 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             if (otherCell->cellFunction == CellFunction_Constructor) {
                 otherCell->cellFunctionData.constructor.genome = targetGenome;
                 otherCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
-                otherCell->cellFunctionData.constructor.currentGenomePos = 0;
                 otherCell->cellFunctionData.constructor.separateConstruction = true;
             } else {
                 otherCell->cellFunctionData.injector.genome = targetGenome;
@@ -77,7 +79,8 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             auto& connectedCell = cell->connections[i].cell;
             for (int j = 0; j < connectedCell->numConnections; ++j) {
                 auto connectedConnectedCell = connectedCell->connections[j].cell;
-                if (connectedConnectedCell->livingState == LivingState_UnderConstruction) {
+                if (connectedConnectedCell->livingState == LivingState_UnderConstruction
+                    && connectedConnectedCell->cellFunctionData.constructor.currentGenomePos == 0) {
                     auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(injector.genomeSize);
                     for (int i = 0; i < injector.genomeSize; ++i) {
                         targetGenome[i] = injector.genome[i];
@@ -85,7 +88,6 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                     if (connectedConnectedCell->cellFunction == CellFunction_Constructor) {
                         connectedConnectedCell->cellFunctionData.constructor.genome = targetGenome;
                         connectedConnectedCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
-                        connectedConnectedCell->cellFunctionData.constructor.currentGenomePos = 0;
                     } else {
                         connectedConnectedCell->cellFunctionData.injector.genome = targetGenome;
                         connectedConnectedCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
