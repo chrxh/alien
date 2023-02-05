@@ -32,8 +32,9 @@ union StructureOperationData
 
 struct StructuralOperation
 {
-    enum class Type
+    enum class Type : int
     {
+        None,
         AddConnections,
         DelAllConnections,
         DelConnection,
