@@ -8,7 +8,6 @@
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
 #include "RadiationSourcesWindow.h"
-#include "SimulationParametersChanger.h"
 
 namespace
 {
@@ -50,15 +49,10 @@ _SimulationParametersWindow::_SimulationParametersWindow(SimulationController co
         color.w = 1.0f; //alpha
         _savedPalette[n] = static_cast<ImU32>(ImColor(color));
     }
-
-    auto timestepsPerEpoch = GlobalSettings::getInstance().getIntState("windows.simulation parameters.time steps per epoch", 10000);
-
-    _simulationParametersChanger = std::make_shared<_SimulationParametersChanger>(simController, timestepsPerEpoch);
 }
 
 _SimulationParametersWindow::~_SimulationParametersWindow()
 {
-    GlobalSettings::getInstance().setIntState("windows.simulation parameters.time steps per epoch", _simulationParametersChanger->getTimestepsPerEpoch());
 }
 
 void _SimulationParametersWindow::processIntern()
@@ -67,7 +61,7 @@ void _SimulationParametersWindow::processIntern()
     auto origParameters = _simController->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().contentScale(78)), false)) {
+    if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
 
         if (ImGui::BeginTabBar("##Flow", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
@@ -118,37 +112,9 @@ void _SimulationParametersWindow::processIntern()
     }
     ImGui::EndChild();
 
-    AlienImGui::Separator();
-    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Change automatically"), _changeAutomatically)) {
-        if (_changeAutomatically) {
-            _simulationParametersChanger->activate();
-        } else {
-            _simulationParametersChanger->deactivate();
-        }
-    }
-    ImGui::Spacing();
-    ImGui::Spacing();
-    ImGui::BeginDisabled(!_changeAutomatically);
-    auto timestepsPerEpoch = _simulationParametersChanger->getTimestepsPerEpoch();
-    if (AlienImGui::InputInt(
-            AlienImGui::InputIntParameters()
-                .name("Epoch time steps")
-                .defaultValue(_simulationParametersChanger->getOriginalTimestepsPerEpoch())
-                .textWidth(RightColumnWidth)
-                .tooltip("Duration in time steps after which a change is applied."),
-            timestepsPerEpoch)) {
-        _simulationParametersChanger->setTimestepsPerEpoch(timestepsPerEpoch);
-    }
-    ImGui::EndDisabled();
-
     if (parameters != lastParameters) {
         _simController->setSimulationParameters_async(parameters);
     }
-}
-
-void _SimulationParametersWindow::processBackground()
-{
-    _simulationParametersChanger->process();
 }
 
 SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)

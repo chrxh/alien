@@ -119,12 +119,6 @@ using PatternAnalysisDialog = std::shared_ptr<_PatternAnalysisDialog>;
 class _ExportStatisticsDialog;
 using ExportStatisticsDialog = std::shared_ptr<_ExportStatisticsDialog>;
 
-class _SimulationParametersChanger;
-using SimulationParametersChanger = std::shared_ptr<_SimulationParametersChanger>;
-
-class _SimulationParametersCalculator;
-using SimulationParametersCalculator = std::shared_ptr<_SimulationParametersCalculator>;
-
 class _FpsController;
 using FpsController = std::shared_ptr<_FpsController>;
 

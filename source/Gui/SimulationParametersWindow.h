@@ -13,7 +13,6 @@ public:
 
 private:
     void processIntern() override;
-    void processBackground() override;
 
     SimulationParametersSpot createSpot(SimulationParameters const& simParameters, int index);
     void createDefaultSpotData(SimulationParametersSpot& spot);
@@ -26,9 +25,7 @@ private:
 
     SimulationController _simController;
     RadiationSourcesWindow _radiationSourcesWindow;
-    SimulationParametersChanger _simulationParametersChanger;
 
     uint32_t _savedPalette[32] = {};
     uint32_t _backupColor;
-    bool _changeAutomatically = false;
 };
