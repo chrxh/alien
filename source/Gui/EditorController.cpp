@@ -21,7 +21,7 @@ _EditorController::_EditorController(SimulationController const& simController, 
     , _viewport(viewport)
 {
     _editorModel = std::make_shared<_EditorModel>(_simController);
-    _genomeEditorWindow = std::make_shared<_GenomeEditorWindow>(_editorModel, _simController);
+    _genomeEditorWindow = std::make_shared<_GenomeEditorWindow>(_editorModel, _simController, _viewport);
     _selectionWindow = std::make_shared<_SelectionWindow>(_editorModel);
     _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simController, _viewport, this);
     _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simController, _viewport);

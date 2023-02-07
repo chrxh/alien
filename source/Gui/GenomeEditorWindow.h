@@ -8,7 +8,7 @@
 class _GenomeEditorWindow : public _AlienWindow
 {
 public:
-    _GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController);
+    _GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController, Viewport const& viewport);
     ~_GenomeEditorWindow() override;
 
     void openTab(GenomeDescription const& genome);
@@ -36,9 +36,11 @@ private:
     void validationAndCorrection(CellGenomeDescription& cell) const;
 
     void scheduleAddTab(GenomeDescription const& genome);
+    void onCreateSpore();
 
     EditorModel _editorModel;
-    SimulationController _simulationController;
+    SimulationController _simController;
+    Viewport _viewport;
 
     float _previewHeight = 200.0f;
 
