@@ -39,7 +39,9 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 
     bool match = false;
     bool injection = false;
-    if (injector.mode == InjectorMode_InjectAll) {
+
+    switch (injector.mode) {
+    case InjectorMode_InjectAll: {
         data.cellMap.executeForEach(cell->absPos, cudaSimulationParameters.cellFunctionInjectorRadius, cell->detached, [&](Cell* const& otherCell) {
             if (cell == otherCell) {
                 return;
@@ -47,9 +49,9 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             if (otherCell->cellFunction != CellFunction_Constructor && otherCell->cellFunction != CellFunction_Injector) {
                 return;
             }
-            if (otherCell->livingState == LivingState_UnderConstruction) {
-                return;
-            }
+            //if (otherCell->livingState == LivingState_UnderConstruction) {
+            //    return;
+            //}
             if (otherCell->cellFunctionData.constructor.currentGenomePos != 0) {
                 return;
             }
@@ -63,6 +65,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             for (int i = 0; i < injector.genomeSize; ++i) {
                 targetGenome[i] = injector.genome[i];
             }
+
             if (otherCell->cellFunction == CellFunction_Constructor) {
                 otherCell->cellFunctionData.constructor.genome = targetGenome;
                 otherCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
@@ -72,9 +75,12 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                 otherCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
             }
 
+            atomicAdd(&otherCell->activity.channels[6], 1.0f);
             injection = true;
         });
-    } else {    //InjectorMode_InjectOnlyUnderConstruction
+    } break;
+
+    case InjectorMode_InjectOnlyUnderConstruction: {
         for (int i = 0; i < cell->numConnections; ++i) {
             auto& connectedCell = cell->connections[i].cell;
             for (int j = 0; j < connectedCell->numConnections; ++j) {
@@ -92,11 +98,13 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                         connectedConnectedCell->cellFunctionData.injector.genome = targetGenome;
                         connectedConnectedCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
                     }
+                    atomicAdd(&connectedConnectedCell->activity.channels[6], 1.0f);
                     match = true;
                     injection = true;
                 }
             }
         }
+    } break;
     }
 
     if (match) {

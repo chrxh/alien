@@ -121,10 +121,15 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
             parserTask);
     }
     JsonParser::encodeDecode(
-        tree, parameters.radiationMinCellEnergy, defaultParameters.radiationMinCellEnergy,
-        "simulation parameters.radiation.min cell energy",
+        tree, parameters.highRadiationMinCellEnergy, defaultParameters.highRadiationMinCellEnergy,
+        "simulation parameters.high radiation.min cell energy",
         parserTask);
-    JsonParser::encodeDecode(tree, parameters.radiationMinCellAge, defaultParameters.radiationMinCellAge, "simulation parameters.radiation.min cell age", parserTask);
+    JsonParser::encodeDecode(
+        tree, parameters.highRadiationFactor, defaultParameters.highRadiationFactor,
+        "simulation parameters.high radiation.factor",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree, parameters.radiationMinCellAge, defaultParameters.radiationMinCellAge, "simulation parameters.radiation.min cell age", parserTask);
 
     JsonParser::encodeDecode(tree, parameters.clusterDecay, defaultParameters.clusterDecay, "simulation parameters.cluster.decay", parserTask);
     JsonParser::encodeDecode(tree, parameters.clusterDecayProb, defaultParameters.clusterDecayProb, "simulation parameters.cluster.decay probability", parserTask);
@@ -202,6 +207,22 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
         "simulation parameters.cell.function.constructor.mutation self replication",
         parserTask);
 
+    JsonParser::encodeDecode(
+        tree,
+        parameters.cellFunctionInjectorRadius,
+        defaultParameters.cellFunctionInjectorRadius,
+        "simulation parameters.cell.function.injector.radius",
+        parserTask);
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        for (int j = 0; j < MAX_COLORS; ++j) {
+            JsonParser::encodeDecode(
+                tree,
+                parameters.cellFunctionInjectorDurationColorMatrix[i][j],
+                defaultParameters.cellFunctionInjectorDurationColorMatrix[i][j],
+                "simulation parameters.cell.function.injector.duration[" + std::to_string(i) + ", " + std::to_string(j) + "]",
+                parserTask);
+        }
+    }
 
     JsonParser::encodeDecode(
         tree, parameters.cellFunctionAttackerRadius, defaultParameters.cellFunctionAttackerRadius,

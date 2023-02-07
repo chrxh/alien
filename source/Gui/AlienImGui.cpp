@@ -248,62 +248,25 @@ bool AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
     return result;
 }
 
-void AlienImGui::InputColorMatrix(InputColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS])
+void AlienImGui::InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int(& value)[7][7])
 {
-    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
+    BasicInputColorMatrixParameters<int> basicParameters;
+    basicParameters._name = parameters._name;
+    basicParameters._textWidth = parameters._textWidth;
+    basicParameters._defaultValue = parameters._defaultValue;
+    basicParameters._tooltip = parameters._tooltip;
+    BasicInputColorMatrix<int>(basicParameters, value);
+}
 
-    if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS + 1, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-        for (int row = 0; row < MAX_COLORS + 1; ++row) {
-            ImGui::PushID(row);
-            for (int col = 0; col < MAX_COLORS + 1; ++col) {
-                ImGui::PushID(col);
-                ImGui::TableNextColumn();
-                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-                if (row == 0 && col > 0) {
-                    ImVec2 pos = ImGui::GetCursorScreenPos();
-                    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
-                    ColorField(Const::IndividualCellColors[col - 1], -1);
-                } else if (row > 0 && col == 0) {
-                    ImVec2 pos = ImGui::GetCursorScreenPos();
-                    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
-                    ColorField(Const::IndividualCellColors[row - 1], -1);
-                } else if (row > 0 && col > 0) {
-                    ImGui::InputFloat(("##" + parameters._name).c_str(), &value[row - 1][col - 1], 0, 0, parameters._format.c_str());
-                }
-                ImGui::PopID();
-            }
-            ImGui::TableNextRow();
-            ImGui::PopID();
-        }
-        ImGui::EndTable();
-        ImGui::SameLine();
-        if (parameters._defaultValue) {
-            bool changed = false;
-            for (int row = 0; row < MAX_COLORS; ++row) {
-                for (int col = 0; col < MAX_COLORS; ++col) {
-                    if(value[row][col] != (*parameters._defaultValue)[row][col]) {
-                        changed = true;
-                    }
-                }
-            }
-            ImGui::BeginDisabled(!changed);
-            if (revertButton(parameters._name)) {
-                for (int row = 0; row < MAX_COLORS; ++row) {
-                    for (int col = 0; col < MAX_COLORS; ++col) {
-                        value[row][col] = (*parameters._defaultValue)[row][col];
-                    }
-                }
-            }
-            ImGui::EndDisabled();
-        }
-
-        ImGui::SameLine();
-        ImGui::TextUnformatted(parameters._name.c_str());
-
-        if (parameters._tooltip) {
-            AlienImGui::HelpMarker(*parameters._tooltip);
-        }
-    }
+void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS])
+{
+    BasicInputColorMatrixParameters<float> basicParameters;
+    basicParameters._name = parameters._name; 
+    basicParameters._format = parameters._format;
+    basicParameters._textWidth = parameters._textWidth;
+    basicParameters._defaultValue = parameters._defaultValue;
+    basicParameters._tooltip = parameters._tooltip;
+    BasicInputColorMatrix<float>(basicParameters, value);
 }
 
 void AlienImGui::InputColorVector(InputColorVectorParameters const& parameters, float (&value)[MAX_COLORS])
@@ -1193,3 +1156,66 @@ void AlienImGui::NeuronSelection(
         {inputPos[selectedInput].x, inputPos[selectedInput].y}, {outputPos[selectedOutput].x, outputPos[selectedOutput].y}, ImColor::HSV(0.0f, 0.0f, 1.0f, 0.35f), 8.0f);
 }
 
+template <typename T>
+void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS])
+{
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
+
+    if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS + 1, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
+        for (int row = 0; row < MAX_COLORS + 1; ++row) {
+            ImGui::PushID(row);
+            for (int col = 0; col < MAX_COLORS + 1; ++col) {
+                ImGui::PushID(col);
+                ImGui::TableNextColumn();
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                if (row == 0 && col > 0) {
+                    ImVec2 pos = ImGui::GetCursorScreenPos();
+                    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+                    ColorField(Const::IndividualCellColors[col - 1], -1);
+                } else if (row > 0 && col == 0) {
+                    ImVec2 pos = ImGui::GetCursorScreenPos();
+                    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+                    ColorField(Const::IndividualCellColors[row - 1], -1);
+                } else if (row > 0 && col > 0) {
+                    if constexpr (std::is_same<T, float>()) {
+                        ImGui::InputFloat(("##" + parameters._name).c_str(), &value[row - 1][col - 1], 0, 0, parameters._format.c_str());
+                    }
+                    if constexpr (std::is_same<T, int>()) {
+                        ImGui::InputInt(("##" + parameters._name).c_str(), &value[row - 1][col - 1], 0, 0);
+                    }
+                }
+                ImGui::PopID();
+            }
+            ImGui::TableNextRow();
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+        ImGui::SameLine();
+        if (parameters._defaultValue) {
+            bool changed = false;
+            for (int row = 0; row < MAX_COLORS; ++row) {
+                for (int col = 0; col < MAX_COLORS; ++col) {
+                    if (value[row][col] != (*parameters._defaultValue)[row][col]) {
+                        changed = true;
+                    }
+                }
+            }
+            ImGui::BeginDisabled(!changed);
+            if (revertButton(parameters._name)) {
+                for (int row = 0; row < MAX_COLORS; ++row) {
+                    for (int col = 0; col < MAX_COLORS; ++col) {
+                        value[row][col] = (*parameters._defaultValue)[row][col];
+                    }
+                }
+            }
+            ImGui::EndDisabled();
+        }
+
+        ImGui::SameLine();
+        ImGui::TextUnformatted(parameters._name.c_str());
+
+        if (parameters._tooltip) {
+            AlienImGui::HelpMarker(*parameters._tooltip);
+        }
+    }
+}
