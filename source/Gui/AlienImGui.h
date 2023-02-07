@@ -103,15 +103,24 @@ public:
 
     static bool ColorField(uint32_t cellColor, int width = 0);
 
-    struct InputColorMatrixParameters
+    struct InputIntColorMatrixParameters
     {
-        MEMBER_DECLARATION(InputColorMatrixParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputColorMatrixParameters, std::string, format, "%.2f");
-        MEMBER_DECLARATION(InputColorMatrixParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(InputColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(InputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(InputIntColorMatrixParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputIntColorMatrixParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(InputIntColorMatrixParameters, std::optional<std::vector<std::vector<int>>>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(InputIntColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void InputColorMatrix(InputColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS]);
+    static void InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS]);
+
+    struct InputFloatColorMatrixParameters
+    {
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::string, format, "%.2f");
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static void InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS]);
 
     struct InputColorVectorParameters
     {
@@ -261,5 +270,16 @@ public:
     );
 
 private:
-    static bool ActivationCheckbox(std::string const& idString);
+
+    template<typename T>
+    struct BasicInputColorMatrixParameters
+    {
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::string, format, "%.2f");
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    template <typename T>
+    static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS]);
 };

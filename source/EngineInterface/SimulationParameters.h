@@ -68,8 +68,9 @@ struct SimulationParameters
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
-    float radiationMinCellEnergy = 500;
     int radiationMinCellAge = 500000;
+    float highRadiationMinCellEnergy = 500;
+    float highRadiationFactor = 0.01f;
     bool clusterDecay = false;
     float clusterDecayProb = 0.0001f;
     
@@ -82,13 +83,13 @@ struct SimulationParameters
 
     float cellFunctionInjectorRadius = 2.0f;
     int cellFunctionInjectorDurationColorMatrix[MAX_COLORS][MAX_COLORS] = {
-        {10, 10, 10, 10, 10, 10, 10},
-        {10, 10, 10, 10, 10, 10, 10},
-        {10, 10, 10, 10, 10, 10, 10},
-        {10, 10, 10, 10, 10, 10, 10},
-        {10, 10, 10, 10, 10, 10, 10},
-        {10, 10, 10, 10, 10, 10, 10},
-        {10, 10, 10, 10, 10, 10, 10}
+        {1, 1, 1, 1, 1, 1, 1},
+        {1, 1, 1, 1, 1, 1, 1},
+        {1, 1, 1, 1, 1, 1, 1},
+        {1, 1, 1, 1, 1, 1, 1},
+        {1, 1, 1, 1, 1, 1, 1},
+        {1, 1, 1, 1, 1, 1, 1},
+        {1, 1, 1, 1, 1, 1, 1}
     };
     float cellFunctionInjectorActivityThreshold = 0.1f;
 
@@ -155,6 +156,13 @@ struct SimulationParameters
                 return false;
             }
         }
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            for (int j = 0; j < MAX_COLORS; ++j) {
+                if (cellFunctionInjectorDurationColorMatrix[i][j] != other.cellFunctionInjectorDurationColorMatrix[i][j]) {
+                    return false;
+                }
+            }
+        }
         if (numSpots != other.numSpots) {
             return false;
         }
@@ -191,13 +199,15 @@ struct SimulationParameters
             && particleTransformationRandomCellFunction == other.particleTransformationRandomCellFunction
             && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
             && clusterDecayProb == other.clusterDecayProb
-            && clusterDecay == other.clusterDecay && radiationMinCellAge == other.radiationMinCellAge && radiationMinCellEnergy == other.radiationMinCellEnergy
+            && clusterDecay == other.clusterDecay && radiationMinCellAge == other.radiationMinCellAge
+            && highRadiationMinCellEnergy == other.highRadiationMinCellEnergy && highRadiationFactor == other.highRadiationFactor
             && cellFunctionSensorActivityThreshold == other.cellFunctionSensorActivityThreshold
             && cellFunctionConstructionUnlimitedEnergy == other.cellFunctionConstructionUnlimitedEnergy
             && cellFunctionMuscleBendingAcceleration == other.cellFunctionMuscleBendingAcceleration
             && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
             && cellFunctionConstructorMutationColor == other.cellFunctionConstructorMutationColor
             && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication
+            && cellFunctionInjectorRadius == other.cellFunctionInjectorRadius
         ;
     }
 

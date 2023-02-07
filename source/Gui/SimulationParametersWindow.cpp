@@ -14,12 +14,12 @@ namespace
 {
     auto const RightColumnWidth = 260.0f;
 
-    template <int numRows, int numCols>
-    std::vector<std::vector<float>> toVector(float const v[numRows][numCols])
+    template <int numRows, int numCols, typename T>
+    std::vector<std::vector<T>> toVector(T const v[numRows][numCols])
     {
-        std::vector<std::vector<float>> result;
+        std::vector<std::vector<T>> result;
         for (int row = 0; row < numRows; ++row) {
-            std::vector<float> rowVector;
+            std::vector<T> rowVector;
             for (int col = 0; col < numCols; ++col) {
                 rowVector.emplace_back(v[row][col]);
             }
@@ -355,16 +355,6 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.baseValues.radiationFactor)
                     .tooltip(std::string("Indicates how energetic the emitted particles of cells are.")),
                 simParameters.baseValues.radiationFactor);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Minimum energy")
-                    .textWidth(RightColumnWidth)
-                    .min(0)
-                    .max(100000)
-                    .logarithmic(true)
-                    .defaultValue(origSimParameters.radiationMinCellEnergy)
-                    .tooltip(""),
-                simParameters.radiationMinCellEnergy);
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
                     .name("Minimum age")
@@ -375,6 +365,27 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.radiationMinCellAge)
                     .tooltip(""),
                 simParameters.radiationMinCellAge);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("High radiation strength")
+                    .textWidth(RightColumnWidth)
+                    .min(0)
+                    .max(0.01f)
+                    .logarithmic(true)
+                    .format("%.6f")
+                    .defaultValue(origSimParameters.highRadiationFactor)
+                    .tooltip(""),
+                simParameters.highRadiationFactor);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("High radiation min energy")
+                    .textWidth(RightColumnWidth)
+                    .min(0)
+                    .max(100000)
+                    .logarithmic(true)
+                    .defaultValue(origSimParameters.highRadiationMinCellEnergy)
+                    .tooltip(""),
+                simParameters.highRadiationMinCellEnergy);
             AlienImGui::InputColorVector(
                 AlienImGui::InputColorVectorParameters()
                     .name("Absorption factors")
@@ -384,7 +395,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.radiationAbsorptionByCellColor);
             if (AlienImGui::Button(AlienImGui::ButtonParameters()
                                        .buttonText("Define")
-                                       .name("Particle sources editor")
+                                       .name("Radiation sources editor")
                                        .textWidth(RightColumnWidth)
                                        .tooltip("")
                                        .showDisabledRevertButton(true))) {
@@ -604,12 +615,34 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
+         * Injector
+         */
+        if (ImGui::TreeNodeEx("Cell function: Injector", flags)) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Injection radius")
+                    .textWidth(RightColumnWidth)
+                    .min(0.1f)
+                    .max(3.0f)
+                    .defaultValue(origSimParameters.cellFunctionInjectorRadius),
+                simParameters.cellFunctionInjectorRadius);
+            AlienImGui::InputIntColorMatrix(
+                AlienImGui::InputIntColorMatrixParameters()
+                    .name("Injection time")
+                    .textWidth(RightColumnWidth)
+                    .tooltip("")
+                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionInjectorDurationColorMatrix)),
+                simParameters.cellFunctionInjectorDurationColorMatrix);
+            ImGui::TreePop();
+        }
+
+        /**
          * Attacker
          */
         ImGui::PushID("Attacker");
         if (ImGui::TreeNodeEx("Cell function: Attacker", flags)) {
-            AlienImGui::InputColorMatrix(
-                AlienImGui::InputColorMatrixParameters()
+            AlienImGui::InputFloatColorMatrix(
+                AlienImGui::InputFloatColorMatrixParameters()
                     .name("Food chain color matrix")
                     .textWidth(RightColumnWidth)
                     .tooltip(
@@ -1196,8 +1229,8 @@ void _SimulationParametersWindow::processSpot(
             ImGui::Checkbox("##foodChainColorMatrix", &spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
             ImGui::SameLine();
             ImGui::BeginDisabled(!spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
-            AlienImGui::InputColorMatrix(
-                AlienImGui::InputColorMatrixParameters()
+            AlienImGui::InputFloatColorMatrix(
+                AlienImGui::InputFloatColorMatrixParameters()
                     .name("Food chain color matrix")
                     .textWidth(RightColumnWidth)
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerFoodChainColorMatrix)),
