@@ -207,7 +207,7 @@ void _BrowserWindow::processTable()
                 if (liked) {
                     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeTextColor);
                 }
-                if (ImGui::Button(ICON_FA_THUMBS_UP)) {
+                if (ImGui::Button(ICON_FA_STAR)) {
                     onToggleLike(*item);
                 }
                 AlienImGui::Tooltip("Like");
