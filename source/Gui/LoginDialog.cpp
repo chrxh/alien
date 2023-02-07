@@ -24,8 +24,11 @@ _LoginDialog::_LoginDialog(
     auto& settings = GlobalSettings::getInstance();
     _remember = settings.getBoolState("dialogs.login.remember", true);
     if (_remember) {
-        settings.getStringState("dialogs.login.user name", "");
-        settings.getStringState("dialogs.login.password", "");
+        _userName = settings.getStringState("dialogs.login.user name", "");
+        _password = settings.getStringState("dialogs.login.password", "");
+        if (!_userName.empty()) {
+            _networkController->login(_userName, _password);
+        }
     }
 }
 
