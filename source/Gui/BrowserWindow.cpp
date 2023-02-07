@@ -202,20 +202,22 @@ void _BrowserWindow::processTable()
                 AlienImGui::Tooltip("Download");
 
                 ImGui::SameLine();
-                ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
                 auto liked = isLiked(item->id);
                 if (liked) {
                     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeTextColor);
                 }
                 if (ImGui::Button(ICON_FA_STAR)) {
-                    onToggleLike(*item);
+                    if (_networkController->getLoggedInUserName()) {
+                        onToggleLike(*item);
+                    } else {
+                        _loginDialog.lock()->show();
+                    }
                 }
                 AlienImGui::Tooltip("Like");
 
                 if (liked) {
                     ImGui::PopStyleColor(1);
                 }
-                ImGui::EndDisabled();
                 ImGui::SameLine();
                 ImGui::BeginDisabled(item->userName != _networkController->getLoggedInUserName().value_or(""));
                 if (ImGui::Button(ICON_FA_TRASH)) {
