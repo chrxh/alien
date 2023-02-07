@@ -53,7 +53,7 @@ namespace Const
     ImColor const CompilationErrorColor = ImColor::HSV(0.05, 1.0, 1.0);
 
     ImColor const InfoTextColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
-    ImColor const LikeTextColor = ImColor::HSV(0.43f, 1.0f, 1.0f, 1.0f);
+    ImColor const LikeTextColor = ImColor::HSV(0.16f, 1.0f, 1.0f, 1.0f);
 
     float const WindowAlpha = 0.9f;
     float const SliderBarWidth = 30.0f;
