@@ -85,7 +85,7 @@ void _CreatorWindow::processIntern()
         if (_mode == CreationMode::CreateCell) {
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(RightColumnWidth), _maxConnections);
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending execution order").textWidth(RightColumnWidth), _ascendingBranchNumbers);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending execution order").textWidth(RightColumnWidth), _ascendingExecutionNumbers);
         }
         if (_mode == CreationMode::CreateRectangle) {
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(RightColumnWidth), _rectHorizontalCells);
@@ -115,7 +115,7 @@ void _CreatorWindow::processIntern()
             ImGui::EndDisabled();
         }
         if (_mode == CreationMode::Drawing) {
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(RightColumnWidth), _ascendingBranchNumbers);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(RightColumnWidth), _ascendingExecutionNumbers);
         }
 
         AlienImGui::Separator();
@@ -168,10 +168,10 @@ void _CreatorWindow::onDrawing()
                         .setEnergy(_energy)
                         .setStiffness(_stiffness)
                         .setMaxConnections(maxConnections)
-                        .setExecutionOrderNumber(_lastBranchNumber)
+                        .setExecutionOrderNumber(_lastExecutionNumber)
                         .setColor(_editorModel->getDefaultColorCode());
         _drawing.addCell(cell);
-        incBranchNumber();
+        incExecutionNumber();
     } else {
         auto lastCellPos = _drawing.cells.back().pos;
         auto distance = Math::length(pos - lastCellPos);
@@ -182,10 +182,10 @@ void _CreatorWindow::onDrawing()
                                 .setPos(lastCellPos + (pos - lastCellPos) * l / distance)
                                 .setEnergy(_energy)
                                 .setMaxConnections(maxConnections)
-                                .setExecutionOrderNumber(_lastBranchNumber)
+                                .setExecutionOrderNumber(_lastExecutionNumber)
                                 .setColor(_editorModel->getDefaultColorCode());
                 _drawing.addCell(cell);
-                incBranchNumber();
+                incExecutionNumber();
             }
         }
     }
@@ -215,12 +215,12 @@ void _CreatorWindow::createCell()
                     .setEnergy(_energy)
                     .setStiffness(_stiffness)
                     .setMaxConnections(_maxConnections)
-                    .setExecutionOrderNumber(_lastBranchNumber)
+                    .setExecutionOrderNumber(_lastExecutionNumber)
                     .setColor(_editorModel->getDefaultColorCode())
                     .setBarrier(_barrier);
     auto data = DataDescription().addCell(cell);
     _simController->addAndSelectSimulationData(data);
-    incBranchNumber();
+    incExecutionNumber();
 }
 
 void _CreatorWindow::createParticle()
@@ -361,10 +361,10 @@ RealVector2D _CreatorWindow::getRandomPos() const
     return result;
 }
 
-void _CreatorWindow::incBranchNumber()
+void _CreatorWindow::incExecutionNumber()
 {
-    if (_ascendingBranchNumbers) {
+    if (_ascendingExecutionNumbers) {
         auto parameters = _simController->getSimulationParameters();
-        _lastBranchNumber = (_lastBranchNumber + 1) % parameters.cellMaxExecutionOrderNumbers;
+        _lastExecutionNumber = (_lastExecutionNumber + 1) % parameters.cellMaxExecutionOrderNumbers;
     }
 }

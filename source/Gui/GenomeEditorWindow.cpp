@@ -18,6 +18,7 @@
 #include "CellFunctionStrings.h"
 #include "EditorModel.h"
 #include "StyleRepository.h"
+#include "Viewport.h"
 
 namespace
 {
@@ -27,10 +28,11 @@ namespace
     auto const DynamicTableColumnWidth = 240.0f;
 }
 
-_GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController)
+_GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController, Viewport const& viewport)
     : _AlienWindow("Genome editor", "windows.genome editor", false)
     , _editorModel(editorModel)
-    , _simulationController(simulationController)
+    , _simController(simulationController)
+    , _viewport(viewport)
 {
     _tabDatas = {TabData()};
 }
@@ -199,6 +201,12 @@ void _GenomeEditorWindow::processToolbar()
         _collapseAllNodes = true;
     }
     AlienImGui::Tooltip("Collapse all nodes");
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_SEEDLING)) {
+        onCreateSpore();
+    }
+    AlienImGui::Tooltip("Create a sport with current genome");
 
     AlienImGui::Separator();
 }
@@ -568,7 +576,7 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
         if (AlienImGui::Button("Edit")) {
             auto genomeToOpen = desc.isMakeGenomeCopy()
                 ? tab.genome
-                : GenomeDescriptionConverter::convertBytesToDescription(desc.getGenomeData(), _simulationController->getSimulationParameters());
+                : GenomeDescriptionConverter::convertBytesToDescription(desc.getGenomeData(), _simController->getSimulationParameters());
             openTab(genomeToOpen);
         }
         ImGui::SameLine();
@@ -583,7 +591,7 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
 void _GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
-    auto preview = PreviewDescriptionConverter::convert(genome, tab.selectedNode, _simulationController->getSimulationParameters());
+    auto preview = PreviewDescriptionConverter::convert(genome, tab.selectedNode, _simController->getSimulationParameters());
     if (AlienImGui::ShowPreviewDescription(preview, _genomeZoom, tab.selectedNode)) {
         _nodeIndexToJump = tab.selectedNode;
     }
@@ -591,8 +599,8 @@ void _GenomeEditorWindow::showPreview(TabData& tab)
 
 void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const
 {
-    auto numExecutionOrderNumbers = _simulationController->getSimulationParameters().cellMaxExecutionOrderNumbers;
-    auto maxBonds = _simulationController->getSimulationParameters().cellMaxBonds;
+    auto numExecutionOrderNumbers = _simController->getSimulationParameters().cellMaxExecutionOrderNumbers;
+    auto maxBonds = _simController->getSimulationParameters().cellMaxBonds;
     cell.color = (cell.color + MAX_COLORS) % MAX_COLORS;
     cell.executionOrderNumber = (cell.executionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
     cell.maxConnections = (cell.maxConnections + maxBonds + 1) % (maxBonds + 1);
@@ -624,5 +632,27 @@ void _GenomeEditorWindow::scheduleAddTab(GenomeDescription const& genome)
     newTab.id = ++_tabSequenceNumber;
     newTab.genome = genome;
     _tabToAdd = newTab;
+}
+
+void _GenomeEditorWindow::onCreateSpore()
+{
+    auto pos = _viewport->getCenterInWorldPos();
+    pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
+    pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
+
+    auto genomeDesc = getCurrentGenome();
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+
+    auto parameter = _simController->getSimulationParameters();
+    auto cell = CellDescription()
+                    .setPos(pos)
+                    .setEnergy(parameter.cellNormalEnergy * (genomeDesc.size() * 2 + 1))
+                    .setStiffness(1.0f)
+                    .setMaxConnections(6)
+                    .setExecutionOrderNumber(0)
+                    .setColor(_editorModel->getDefaultColorCode())
+                    .setCellFunction(ConstructorDescription().setGenome(genome));
+    auto data = DataDescription().addCell(cell);
+    _simController->addAndSelectSimulationData(data);
 }
 
