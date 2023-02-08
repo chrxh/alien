@@ -94,7 +94,9 @@ struct MuscleFunction
 };
 
 struct DefenderFunction
-{};
+{
+    DefenderMode mode;
+};
 
 struct PlaceHolderFunction
 {};

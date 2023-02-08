@@ -464,8 +464,9 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         result.cellFunction = muscle;
     } break;
     case CellFunction_Defender: {
-        DefenderDescription placeHolder;
-        result.cellFunction = placeHolder;
+        DefenderDescription defender;
+        defender.mode = cellTO.cellFunctionData.defender.mode;
+        result.cellFunction = defender;
     } break;
     case CellFunction_Placeholder: {
         PlaceHolderDescription placeHolder;
@@ -575,8 +576,10 @@ void DescriptionConverter::addCell(
         cellTO.cellFunctionData.muscle = muscleTO;
     } break;
     case CellFunction_Defender: {
-        DefenderTO placeHolderTO;
-        cellTO.cellFunctionData.defender = placeHolderTO;
+        auto const& defenderDesc = std::get<DefenderDescription>(*cellDesc.cellFunction);
+        DefenderTO defenderTO;
+        defenderTO.mode = defenderDesc.mode;
+        cellTO.cellFunctionData.defender = defenderTO;
     } break;
     case CellFunction_Placeholder: {
         PlaceHolderTO placeHolderTO;

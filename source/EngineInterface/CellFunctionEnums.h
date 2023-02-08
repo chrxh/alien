@@ -48,10 +48,18 @@ enum EnergyDistributionMode_
 using MuscleMode = int;
 enum MuscleMode_
 {
-    MuscleMode_Movement = 0,
-    MuscleMode_ContractionExpansion = 1,
-    MuscleMode_Bending = 2,
-    MuscleMode_Count = 3
+    MuscleMode_Movement,
+    MuscleMode_ContractionExpansion,
+    MuscleMode_Bending,
+    MuscleMode_Count
+};
+
+using DefenderMode = int;
+enum DefenderMode_
+{
+    DefenderMode_DefendAgainstAttacker,
+    DefenderMode_DefendAgainstInjector,
+    DefenderMode_Count
 };
 
 using ConstructorAngleAlignment = int;

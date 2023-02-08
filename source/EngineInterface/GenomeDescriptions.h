@@ -204,7 +204,15 @@ struct MuscleGenomeDescription
 
 struct DefenderGenomeDescription
 {
+    DefenderMode mode = DefenderMode_DefendAgainstAttacker;
+
     auto operator<=>(DefenderGenomeDescription const&) const = default;
+
+    DefenderGenomeDescription& setMode(DefenderMode value)
+    {
+        mode = value;
+        return *this;
+    }
 };
 
 struct PlaceHolderGenomeDescription

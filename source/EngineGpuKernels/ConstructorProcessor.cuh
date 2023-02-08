@@ -466,6 +466,7 @@ ConstructorProcessor::constructCellIntern(
         result->cellFunctionData.muscle.mode = GenomeDecoder::readByte(constructor) % MuscleMode_Count;
     } break;
     case CellFunction_Defender: {
+        result->cellFunctionData.defender.mode = GenomeDecoder::readByte(constructor) % DefenderMode_Count;
     } break;
     case CellFunction_Placeholder: {
     } break;

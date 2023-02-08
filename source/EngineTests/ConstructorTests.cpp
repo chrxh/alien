@@ -594,6 +594,32 @@ TEST_F(ConstructorTests, constructAttackerCell)
     EXPECT_EQ(attackerDesc.mode, actualAttacker.mode);
 }
 
+TEST_F(ConstructorTests, constructDefenderCell)
+{
+    auto defenderDesc = DefenderGenomeDescription().setMode(DefenderMode_DefendAgainstInjector);
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(defenderDesc)});
+
+    DataDescription data;
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setGenome(genome)));
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(2, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, 1);
+
+    EXPECT_EQ(CellFunction_Defender, actualConstructedCell.getCellFunctionType());
+
+    auto actualDefender = std::get<DefenderDescription>(*actualConstructedCell.cellFunction);
+    EXPECT_EQ(defenderDesc.mode, actualDefender.mode);
+}
+
 TEST_F(ConstructorTests, constructTransmitterCell)
 {
     auto transmitterDesc = TransmitterGenomeDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors);

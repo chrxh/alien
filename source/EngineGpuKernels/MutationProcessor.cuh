@@ -49,6 +49,7 @@ private:
     static int constexpr AttackerBytes = 1;
     static int constexpr InjectorFixedBytes = 1;
     static int constexpr MuscleBytes = 1;
+    static int constexpr DefenderBytes = 1;
     __inline__ __device__ static int getNumGenomeCells(uint8_t* genome, int genomeSize);
     __inline__ __device__ static int getNodeIndex(uint8_t* genome, int genomeSize, int cellIndex);
     __inline__ __device__
@@ -683,6 +684,8 @@ __inline__ __device__ int MutationProcessor::getNextCellFunctionDataSize(uint8_t
     }
     case CellFunction_Muscle:
         return MuscleBytes;
+    case CellFunction_Defender:
+        return DefenderBytes;
     default:
         return 0;
     }
@@ -751,6 +754,8 @@ __inline__ __device__ int MutationProcessor::getCellFunctionDataSize(CellFunctio
     }
     case CellFunction_Muscle:
         return MuscleBytes;
+    case CellFunction_Defender:
+        return DefenderBytes;
     default:
         return 0;
     }
