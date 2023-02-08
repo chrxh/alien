@@ -48,8 +48,8 @@ protected:
             CellGenomeDescription().setCellFunction(AttackerGenomeDescription()).setColor(GenomeCellColors[0]),
             CellGenomeDescription().setCellFunction(InjectorGenomeDescription().setGenome(subGenome)).setColor(GenomeCellColors[0]),
             CellGenomeDescription().setCellFunction(MuscleGenomeDescription()).setColor(GenomeCellColors[2]),
-            CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription1()).setColor(GenomeCellColors[2]),
-            CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription2()).setColor(GenomeCellColors[0]),
+            CellGenomeDescription().setCellFunction(DefenderGenomeDescription()).setColor(GenomeCellColors[2]),
+            CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription()).setColor(GenomeCellColors[0]),
         });
     }
 

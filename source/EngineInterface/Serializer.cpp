@@ -101,10 +101,10 @@ namespace cereal
         ar(data.mode);
     }
     template <class Archive>
-    inline void serialize(Archive& ar, PlaceHolderDescription1& data)
+    inline void serialize(Archive& ar, DefenderDescription& data)
     {}
     template <class Archive>
-    inline void serialize(Archive& ar, PlaceHolderDescription2& data)
+    inline void serialize(Archive& ar, PlaceHolderDescription& data)
     {}
 
     template <class Archive>

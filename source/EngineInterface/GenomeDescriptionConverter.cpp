@@ -163,9 +163,9 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             auto const& muscle = std::get<MuscleGenomeDescription>(*cell.cellFunction);
             writeByte(result, muscle.mode);
         } break;
-        case CellFunction_Placeholder1: {
+        case CellFunction_Defender: {
         } break;
-        case CellFunction_Placeholder2: {
+        case CellFunction_Placeholder: {
         } break;
         }
         ++index;
@@ -266,11 +266,11 @@ namespace
                 muscle.mode = readByte(data, bytePosition) % MuscleMode_Count;
                 cell.cellFunction = muscle;
             } break;
-            case CellFunction_Placeholder1: {
-                cell.cellFunction = PlaceHolderGenomeDescription1();
+            case CellFunction_Defender: {
+                cell.cellFunction = DefenderGenomeDescription();
             } break;
-            case CellFunction_Placeholder2: {
-                cell.cellFunction = PlaceHolderGenomeDescription2();
+            case CellFunction_Placeholder: {
+                cell.cellFunction = PlaceHolderGenomeDescription();
             } break;
             }
             result.genome.emplace_back(cell);

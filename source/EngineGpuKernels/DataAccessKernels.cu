@@ -120,9 +120,9 @@ namespace
         case CellFunction_Muscle: {
             cellTO.cellFunctionData.muscle.mode = cell->cellFunctionData.muscle.mode;
         } break;
-        case CellFunction_Placeholder1: {
+        case CellFunction_Defender: {
         } break;
-        case CellFunction_Placeholder2: {
+        case CellFunction_Placeholder: {
         } break;
         }
     }

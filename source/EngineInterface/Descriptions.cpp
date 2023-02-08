@@ -34,11 +34,11 @@ CellFunction CellDescription::getCellFunctionType() const
     if (std::holds_alternative<MuscleDescription>(*cellFunction)) {
         return CellFunction_Muscle;
     }
-    if (std::holds_alternative<PlaceHolderDescription1>(*cellFunction)) {
-        return CellFunction_Placeholder1;
+    if (std::holds_alternative<DefenderDescription>(*cellFunction)) {
+        return CellFunction_Defender;
     }
-    if (std::holds_alternative<PlaceHolderDescription2>(*cellFunction)) {
-        return CellFunction_Placeholder2;
+    if (std::holds_alternative<PlaceHolderDescription>(*cellFunction)) {
+        return CellFunction_Placeholder;
     }
     return CellFunction_None;
 }

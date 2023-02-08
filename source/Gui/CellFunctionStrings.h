@@ -12,7 +12,7 @@ using namespace std::string_literals;
 namespace Const
 {
     std::vector const CellFunctionStrings =
-        {"Neuron"s, "Transmitter"s, "Constructor"s, "Sensor"s, "Nerve"s, "Attacker"s, "Injector"s, "Muscle"s, "Placeholder1"s, "Placeholder2"s, "None"s};
+        {"Neuron"s, "Transmitter"s, "Constructor"s, "Sensor"s, "Nerve"s, "Attacker"s, "Injector"s, "Muscle"s, "Defender"s, "Placeholder"s, "None"s};
 
     std::map<CellFunction, std::string> const CellFunctionToStringMap = {
         {CellFunction_Constructor, "Constructor"},
@@ -23,8 +23,8 @@ namespace Const
         {CellFunction_Neuron, "Neuron"},
         {CellFunction_Sensor, "Sensor"},
         {CellFunction_Transmitter, "Transmitter"},
-        {CellFunction_Placeholder1, "Placeholder1"},
-        {CellFunction_Placeholder2, "Placeholder2"},
+        {CellFunction_Defender, "Defender"},
+        {CellFunction_Placeholder, "Placeholder"},
         {CellFunction_None, "None"},
     };
 }
