@@ -290,11 +290,11 @@ namespace
         case CellFunction_Muscle: {
             cell.cellFunction = MuscleGenomeDescription();
         } break;
-        case CellFunction_Placeholder1: {
-            cell.cellFunction = PlaceHolderGenomeDescription1();
+        case CellFunction_Defender: {
+            cell.cellFunction = DefenderGenomeDescription();
         } break;
-        case CellFunction_Placeholder2: {
-            cell.cellFunction = PlaceHolderGenomeDescription2();
+        case CellFunction_Placeholder: {
+            cell.cellFunction = PlaceHolderGenomeDescription();
         } break;
         case CellFunction_None: {
             cell.cellFunction.reset();
@@ -496,9 +496,9 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 AlienImGui::ComboParameters().name("Mode").values({"Movement", "Contraction and expansion", "Bending"}).textWidth(ContentTextWidth),
                 muscle.mode);
         } break;
-        case CellFunction_Placeholder1: {
+        case CellFunction_Defender: {
         } break;
-        case CellFunction_Placeholder2: {
+        case CellFunction_Placeholder: {
         } break;
         case CellFunction_None: {
         } break;

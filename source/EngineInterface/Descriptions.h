@@ -241,14 +241,14 @@ struct MuscleDescription
     }
 };
 
-struct PlaceHolderDescription1
+struct DefenderDescription
 {
-    auto operator<=>(PlaceHolderDescription1 const&) const = default;
+    auto operator<=>(DefenderDescription const&) const = default;
 };
 
-struct PlaceHolderDescription2
+struct PlaceHolderDescription
 {
-    auto operator<=>(PlaceHolderDescription2 const&) const = default;
+    auto operator<=>(PlaceHolderDescription const&) const = default;
 };
 
 using CellFunctionDescription = std::optional<std::variant<
@@ -260,8 +260,8 @@ using CellFunctionDescription = std::optional<std::variant<
     AttackerDescription,
     InjectorDescription,
     MuscleDescription,
-    PlaceHolderDescription1,
-    PlaceHolderDescription2>>;
+    DefenderDescription,
+    PlaceHolderDescription>>;
 
 struct CellDescription
 {

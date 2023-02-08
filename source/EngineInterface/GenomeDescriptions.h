@@ -202,14 +202,14 @@ struct MuscleGenomeDescription
     }
 };
 
-struct PlaceHolderGenomeDescription1
+struct DefenderGenomeDescription
 {
-    auto operator<=>(PlaceHolderGenomeDescription1 const&) const = default;
+    auto operator<=>(DefenderGenomeDescription const&) const = default;
 };
 
-struct PlaceHolderGenomeDescription2
+struct PlaceHolderGenomeDescription
 {
-    auto operator<=>(PlaceHolderGenomeDescription2 const&) const = default;
+    auto operator<=>(PlaceHolderGenomeDescription const&) const = default;
 };
 
 using CellFunctionGenomeDescription = std::optional<std::variant<
@@ -221,8 +221,8 @@ using CellFunctionGenomeDescription = std::optional<std::variant<
     AttackerGenomeDescription,
     InjectorGenomeDescription,
     MuscleGenomeDescription,
-    PlaceHolderGenomeDescription1,
-    PlaceHolderGenomeDescription2>>;
+    DefenderGenomeDescription,
+    PlaceHolderGenomeDescription>>;
 
 struct CellGenomeDescription
 {
@@ -354,11 +354,11 @@ struct CellGenomeDescription
         if (std::holds_alternative<MuscleGenomeDescription>(*cellFunction)) {
             return CellFunction_Muscle;
         }
-        if (std::holds_alternative<PlaceHolderGenomeDescription1>(*cellFunction)) {
-            return CellFunction_Placeholder1;
+        if (std::holds_alternative<DefenderGenomeDescription>(*cellFunction)) {
+            return CellFunction_Defender;
         }
-        if (std::holds_alternative<PlaceHolderGenomeDescription2>(*cellFunction)) {
-            return CellFunction_Placeholder2;
+        if (std::holds_alternative<PlaceHolderGenomeDescription>(*cellFunction)) {
+            return CellFunction_Placeholder;
         }
         return CellFunction_None;
     }

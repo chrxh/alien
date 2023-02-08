@@ -97,10 +97,10 @@ struct MuscleTO
     MuscleMode mode;
 };
 
-struct PlaceHolderTO1
+struct DefenderTO
 {};
 
-struct PlaceHolderTO2
+struct PlaceHolderTO
 {};
 
 union CellFunctionTO
@@ -113,8 +113,8 @@ union CellFunctionTO
     AttackerTO attacker;
     InjectorTO injector;
     MuscleTO muscle;
-    PlaceHolderTO1 placeHolder1;
-    PlaceHolderTO2 placeHolder2;
+    DefenderTO defender;
+    PlaceHolderTO placeHolder;
 };
 
 struct CellTO

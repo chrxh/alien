@@ -296,9 +296,9 @@ void DescriptionConverter::addAdditionalDataSizeForCell(CellDescription const& c
         break;
     case CellFunction_Muscle:
         break;
-    case CellFunction_Placeholder1:
+    case CellFunction_Defender:
         break;
-    case CellFunction_Placeholder2:
+    case CellFunction_Placeholder:
         break;
     }
 }    
@@ -463,12 +463,12 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         muscle.mode = cellTO.cellFunctionData.muscle.mode;
         result.cellFunction = muscle;
     } break;
-    case CellFunction_Placeholder1: {
-        PlaceHolderDescription1 placeHolder;
+    case CellFunction_Defender: {
+        DefenderDescription placeHolder;
         result.cellFunction = placeHolder;
     } break;
-    case CellFunction_Placeholder2: {
-        PlaceHolderDescription2 placeHolder;
+    case CellFunction_Placeholder: {
+        PlaceHolderDescription placeHolder;
         result.cellFunction = placeHolder;
     } break;
     }
@@ -574,13 +574,13 @@ void DescriptionConverter::addCell(
         muscleTO.mode = muscleDesc.mode;
         cellTO.cellFunctionData.muscle = muscleTO;
     } break;
-    case CellFunction_Placeholder1: {
-        PlaceHolderTO1 placeHolderTO;
-        cellTO.cellFunctionData.placeHolder1 = placeHolderTO;
+    case CellFunction_Defender: {
+        DefenderTO placeHolderTO;
+        cellTO.cellFunctionData.defender = placeHolderTO;
     } break;
-    case CellFunction_Placeholder2: {
-        PlaceHolderTO2 placeHolderTO;
-        cellTO.cellFunctionData.placeHolder2 = placeHolderTO;
+    case CellFunction_Placeholder: {
+        PlaceHolderTO placeHolderTO;
+        cellTO.cellFunctionData.placeHolder = placeHolderTO;
     } break;
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {

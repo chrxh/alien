@@ -223,11 +223,11 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                     case CellFunction_Muscle: {
                         cell.cellFunction = MuscleDescription();
                     } break;
-                    case CellFunction_Placeholder1: {
-                        cell.cellFunction = PlaceHolderDescription1();
+                    case CellFunction_Defender: {
+                        cell.cellFunction = DefenderDescription();
                     } break;
-                    case CellFunction_Placeholder2: {
-                        cell.cellFunction = PlaceHolderDescription2();
+                    case CellFunction_Placeholder: {
+                        cell.cellFunction = PlaceHolderDescription();
                     } break;
                     case CellFunction_None: {
                         cell.cellFunction.reset();
@@ -301,9 +301,9 @@ void _InspectorWindow::processCellFunctionPropertiesTab(CellDescription& cell)
             case CellFunction_Muscle: {
                 processMuscleContent(std::get<MuscleDescription>(*cell.cellFunction));
             } break;
-            case CellFunction_Placeholder1: {
+            case CellFunction_Defender: {
             } break;
-            case CellFunction_Placeholder2: {
+            case CellFunction_Placeholder: {
             } break;
             }
         }

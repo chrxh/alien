@@ -93,10 +93,10 @@ struct MuscleFunction
     MuscleMode mode;
 };
 
-struct PlaceHolderFunction1
+struct DefenderFunction
 {};
 
-struct PlaceHolderFunction2
+struct PlaceHolderFunction
 {};
 
 union CellFunctionData
@@ -109,8 +109,8 @@ union CellFunctionData
     AttackerFunction attacker;
     InjectorFunction injector;
     MuscleFunction muscle;
-    PlaceHolderFunction1 placeHolder1;
-    PlaceHolderFunction2 placeHolder2;
+    DefenderFunction defender;
+    PlaceHolderFunction placeHolder;
 };
 
 struct Cell

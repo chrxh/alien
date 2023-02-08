@@ -11,8 +11,8 @@ enum CellFunction_
     CellFunction_Attacker,
     CellFunction_Injector,
     CellFunction_Muscle,
-    CellFunction_Placeholder1,
-    CellFunction_Placeholder2,
+    CellFunction_Defender,
+    CellFunction_Placeholder,
     CellFunction_WithoutNoneCount,
 
     CellFunction_None = CellFunction_WithoutNoneCount,
