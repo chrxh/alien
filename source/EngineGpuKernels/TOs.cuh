@@ -98,7 +98,9 @@ struct MuscleTO
 };
 
 struct DefenderTO
-{};
+{
+    DefenderMode mode;
+};
 
 struct PlaceHolderTO
 {};

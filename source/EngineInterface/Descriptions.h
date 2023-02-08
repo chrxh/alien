@@ -243,7 +243,15 @@ struct MuscleDescription
 
 struct DefenderDescription
 {
+    DefenderMode mode = DefenderMode_DefendAgainstAttacker;
+
     auto operator<=>(DefenderDescription const&) const = default;
+
+    DefenderDescription& setMode(DefenderMode value)
+    {
+        mode = value;
+        return *this;
+    }
 };
 
 struct PlaceHolderDescription

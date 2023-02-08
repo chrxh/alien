@@ -121,6 +121,7 @@ namespace
             cellTO.cellFunctionData.muscle.mode = cell->cellFunctionData.muscle.mode;
         } break;
         case CellFunction_Defender: {
+            cellTO.cellFunctionData.defender.mode = cell->cellFunctionData.defender.mode;
         } break;
         case CellFunction_Placeholder: {
         } break;
