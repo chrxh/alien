@@ -295,6 +295,19 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
 
     JsonParser::encodeDecode(
         tree,
+        parameters.cellFunctionDefenderAgainstAttackerStrength,
+        defaultParameters.cellFunctionDefenderAgainstAttackerStrength,
+        "simulation parameters.cell.function.defender.against attacker strength",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
+        parameters.cellFunctionDefenderAgainstInjectorStrength,
+        defaultParameters.cellFunctionDefenderAgainstInjectorStrength,
+        "simulation parameters.cell.function.defender.against injector strength",
+        parserTask);
+
+    JsonParser::encodeDecode(
+        tree,
         parameters.cellFunctionTransmitterEnergyDistributionSameColor,
         defaultParameters.cellFunctionTransmitterEnergyDistributionSameColor,
         "simulation parameters.cell.function.transmitter.energy distribution same color",

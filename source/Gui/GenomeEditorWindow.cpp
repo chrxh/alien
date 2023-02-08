@@ -497,6 +497,11 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                 muscle.mode);
         } break;
         case CellFunction_Defender: {
+            auto& defender = std::get<DefenderGenomeDescription>(*cell.cellFunction);
+            table.next();
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters().name("Mode").values({"Anti-attacker", "Anti-injector"}).textWidth(ContentTextWidth),
+                defender.mode);
         } break;
         case CellFunction_Placeholder: {
         } break;
