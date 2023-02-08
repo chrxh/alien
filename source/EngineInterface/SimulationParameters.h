@@ -101,6 +101,9 @@ struct SimulationParameters
     float cellFunctionAttackerColorInhomogeneityFactor = 1.0f;
     float cellFunctionAttackerActivityThreshold = 0.1f;
 
+    float cellFunctionDefenderAgainstAttackerStrength = 1.5f;
+    float cellFunctionDefenderAgainstInjectorStrength = 1.5f;
+
     bool cellFunctionTransmitterEnergyDistributionSameColor = true;
     float cellFunctionTransmitterEnergyDistributionRadius = 3.6f;
     float cellFunctionTransmitterEnergyDistributionValue = 10.0f;
@@ -208,6 +211,8 @@ struct SimulationParameters
             && cellFunctionConstructorMutationColor == other.cellFunctionConstructorMutationColor
             && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication
             && cellFunctionInjectorRadius == other.cellFunctionInjectorRadius
+            && cellFunctionDefenderAgainstAttackerStrength == other.cellFunctionDefenderAgainstAttackerStrength
+            && cellFunctionDefenderAgainstInjectorStrength == other.cellFunctionDefenderAgainstInjectorStrength
         ;
     }
 

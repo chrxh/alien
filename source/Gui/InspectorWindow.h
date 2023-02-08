@@ -42,11 +42,10 @@ private:
     void processConstructorContent(ConstructorDescription& constructor);
     void processInjectorContent(InjectorDescription& injector);
     void processAttackerContent(AttackerDescription& attacker);
+    void processDefenderContent(DefenderDescription& defender);
     void processTransmitterContent(TransmitterDescription& transmitter);
     void processMuscleContent(MuscleDescription& muscle);
     void processSensorContent(SensorDescription& sensor);
-
-    void processActivityContent(CellDescription& cell);
 
     void processParticle(ParticleDescription particle);
 

@@ -23,6 +23,7 @@ private:
 
     __inline__ __device__ static float calcOpenAngle(Cell* cell, float2 direction);
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
+    __inline__ __device__ static int getNumDefenderCells(Cell* cell);
     __inline__ __device__ static bool isHomogene(Cell* cell);
 };
 
@@ -57,6 +58,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (energyToTransfer < 0) {
                 return;
             }
+
+            auto numDefenderCells = getNumDefenderCells(otherCell);
+            float defendStrength = numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.cellFunctionDefenderAgainstAttackerStrength, numDefenderCells);
+            energyToTransfer /= defendStrength;
 
             if (!isHomogene(otherCell)) {
                 energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerColorInhomogeneityFactor;
@@ -310,6 +315,21 @@ __inline__ __device__ bool AttackerProcessor::isConnectedConnected(Cell* cell, C
         }
         if (result) {
             return true;
+        }
+    }
+    return result;
+}
+
+__inline__ __device__ int AttackerProcessor::getNumDefenderCells(Cell* cell)
+{
+    int result = 0;
+    if (cell->cellFunction == CellFunction_Defender && cell->cellFunctionData.defender.mode == DefenderMode_DefendAgainstAttacker) {
+        ++result;
+    }
+    for (int i = 0; i < cell->numConnections; ++i) {
+        auto connectedCell = cell->connections[i].cell;
+        if (connectedCell->cellFunction == CellFunction_Defender && connectedCell->cellFunctionData.defender.mode == DefenderMode_DefendAgainstAttacker) {
+            ++result;
         }
     }
     return result;

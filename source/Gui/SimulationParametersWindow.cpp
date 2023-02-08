@@ -710,6 +710,29 @@ void _SimulationParametersWindow::processBase(
         ImGui::PopID();
 
         /**
+         * Defender
+         */
+        if (ImGui::TreeNodeEx("Cell function: Defender", flags)) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Anti-attacker strength")
+                    .textWidth(RightColumnWidth)
+                    .min(1.0f)
+                    .max(5.0f)
+                    .defaultValue(origSimParameters.cellFunctionDefenderAgainstAttackerStrength),
+                simParameters.cellFunctionDefenderAgainstAttackerStrength);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Anti-injector strength")
+                    .textWidth(RightColumnWidth)
+                    .min(1.0f)
+                    .max(5.0f)
+                    .defaultValue(origSimParameters.cellFunctionDefenderAgainstInjectorStrength),
+                simParameters.cellFunctionDefenderAgainstInjectorStrength);
+            ImGui::TreePop();
+        }
+
+        /**
          * Transmitter
          */
         if (ImGui::TreeNodeEx("Cell function: Transmitter", flags)) {

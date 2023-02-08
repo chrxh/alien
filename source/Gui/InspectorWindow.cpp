@@ -26,6 +26,7 @@ namespace
     auto const ParticleWindowWidth = 280.0f;
     auto const PhysicsTabTextWidth = 150.0f;
     auto const CellFunctionTextWidth = 180.0f;
+    auto const CellFunctionDefenderWidth = 100.0f;
     auto const CellFunctionBaseTabTextWidth = 120.0f;
     auto const ActivityTextWidth = 100.0f;
     auto const GenomeTabTextWidth = 140.0f;
@@ -302,6 +303,7 @@ void _InspectorWindow::processCellFunctionPropertiesTab(CellDescription& cell)
                 processMuscleContent(std::get<MuscleDescription>(*cell.cellFunction));
             } break;
             case CellFunction_Defender: {
+                processDefenderContent(std::get<DefenderDescription>(*cell.cellFunction));
             } break;
             case CellFunction_Placeholder: {
             } break;
@@ -463,6 +465,16 @@ void _InspectorWindow::processAttackerContent(AttackerDescription& attacker)
     }
 }
 
+void _InspectorWindow::processDefenderContent(DefenderDescription& defender)
+{
+    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters().name("Mode").values({"Anti-attacker", "Anti-injector"}).textWidth(CellFunctionDefenderWidth),
+            defender.mode);
+        ImGui::TreePop();
+    }
+}
+
 void _InspectorWindow::processTransmitterContent(TransmitterDescription& transmitter)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
@@ -506,10 +518,6 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
             AlienImGui::InputFloatParameters().name("Min density").format("%.2f").step(0.05f).textWidth(CellFunctionTextWidth), sensor.minDensity);
         ImGui::TreePop();
     }
-}
-
-void _InspectorWindow::processActivityContent(CellDescription& cell)
-{
 }
 
 void _InspectorWindow::processParticle(ParticleDescription particle)
