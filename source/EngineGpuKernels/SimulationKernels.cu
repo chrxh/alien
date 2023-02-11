@@ -81,7 +81,7 @@ __global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData da
 
 __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data)
 {
-    CellProcessor::constructionStateTransition(data);
+    CellProcessor::livingStateTransition(data);
     CellFunctionProcessor::collectCellFunctionOperations(data);
 }
 
@@ -149,10 +149,15 @@ __global__ void cudaNextTimestep_structuralOperations_substep2(SimulationData da
 
 __global__ void cudaNextTimestep_structuralOperations_substep3(SimulationData data)
 {
-    CellConnectionProcessor::processDeleteOperations(data);
+    CellConnectionProcessor::processDeleteCellOperations(data);
 }
 
 __global__ void cudaNextTimestep_structuralOperations_substep4(SimulationData data)
+{
+    CellConnectionProcessor::processDeleteConnectionOperations(data);
+}
+
+__global__ void cudaNextTimestep_structuralOperations_substep5(SimulationData data)
 {
     ParticleProcessor::transformation(data);
 }

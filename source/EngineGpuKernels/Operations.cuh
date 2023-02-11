@@ -3,7 +3,7 @@
 #include "Base.cuh"
 #include "Definitions.cuh"
 
-struct AddConnectionOperation {
+struct AddConnectionPairOperation {
     bool addTokens;
     Cell* cell;
     Cell* otherCell;
@@ -20,11 +20,12 @@ struct DelConnectionOperation
 
 struct DelCellOperation
 {
+    uint64_t cellIndex;
 };
 
 union StructureOperationData
 {
-    AddConnectionOperation addConnection;
+    AddConnectionPairOperation addConnection;
     DelAllConnectionsOperation delAllConnections;
     DelConnectionOperation delConnection;
     DelCellOperation delCell;
@@ -34,8 +35,7 @@ struct StructuralOperation
 {
     enum class Type : int
     {
-        None,
-        AddConnections,
+        AddConnectionPair,
         DelAllConnections,
         DelConnection,
         DelCell,
