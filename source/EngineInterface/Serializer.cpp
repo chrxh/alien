@@ -51,6 +51,15 @@ namespace
     int constexpr Cell_OutputBlocked = 7;
     int constexpr Cell_ActivationTime = 8;
 
+    int constexpr Constructor_ActivationMode = 0;
+    int constexpr Constructor_SingleConstruction = 1;
+    int constexpr Constructor_SeparateConstruction = 2;
+    int constexpr Constructor_AdaptMaxConnections = 3;
+    int constexpr Constructor_AngleAlignment = 4;
+    int constexpr Constructor_Stiffness = 5;
+    int constexpr Constructor_ConstructionActivationTime = 6;
+    int constexpr Constructor_CurrentGenomePos = 7;
+
     int constexpr Defender_Mode = 0;
 
     int constexpr Muscle_Mode = 0;
@@ -398,14 +407,14 @@ namespace cereal
         } else {
             ConstructorDescription defaultObject;
             auto auxiliaries = getLoadSaveMap(task, ar);
-            loadSave<int>(task, auxiliaries, Injector_Mode, data.activationMode, defaultObject.activationMode);
-            loadSave<bool>(task, auxiliaries, Injector_Mode, data.singleConstruction, defaultObject.singleConstruction);
-            loadSave<bool>(task, auxiliaries, Injector_Mode, data.separateConstruction, defaultObject.separateConstruction);
-            loadSave<bool>(task, auxiliaries, Injector_Mode, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
-            loadSave<int>(task, auxiliaries, Injector_Mode, data.angleAlignment, defaultObject.angleAlignment);
-            loadSave<float>(task, auxiliaries, Injector_Mode, data.stiffness, defaultObject.stiffness);
-            loadSave<int>(task, auxiliaries, Injector_Mode, data.constructionActivationTime, defaultObject.constructionActivationTime);
-            loadSave<int>(task, auxiliaries, Injector_Mode, data.currentGenomePos, defaultObject.currentGenomePos);
+            loadSave<int>(task, auxiliaries, Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
+            loadSave<bool>(task, auxiliaries, Constructor_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
+            loadSave<bool>(task, auxiliaries, Constructor_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
+            loadSave<bool>(task, auxiliaries, Constructor_AdaptMaxConnections, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
+            loadSave<int>(task, auxiliaries, Constructor_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
+            loadSave<float>(task, auxiliaries, Constructor_Stiffness, data.stiffness, defaultObject.stiffness);
+            loadSave<int>(task, auxiliaries, Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
+            loadSave<int>(task, auxiliaries, Constructor_CurrentGenomePos, data.currentGenomePos, defaultObject.currentGenomePos);
             setLoadSaveMap(task, ar, auxiliaries);
 
             GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
