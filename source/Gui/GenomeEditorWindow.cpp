@@ -581,7 +581,7 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
         if (AlienImGui::Button("Edit")) {
             auto genomeToOpen = desc.isMakeGenomeCopy()
                 ? tab.genome
-                : GenomeDescriptionConverter::convertBytesToDescription(desc.getGenomeData(), _simController->getSimulationParameters());
+                : GenomeDescriptionConverter::convertBytesToDescription(desc.getGenomeData());
             openTab(genomeToOpen);
         }
         ImGui::SameLine();

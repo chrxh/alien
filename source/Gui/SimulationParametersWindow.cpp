@@ -401,6 +401,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0.0)
                     .max(1.0f)
+                    .logarithmic(true)
                     .format("%.5f")
                     .defaultValue(origSimParameters.clusterDecayProb),
                 simParameters.clusterDecayProb);
@@ -444,15 +445,6 @@ void _SimulationParametersWindow::processBase(
             if (simParameters.baseValues.cellMaxBindingEnergy < simParameters.baseValues.cellMinEnergy + 10.0f) {
                 simParameters.baseValues.cellMaxBindingEnergy = simParameters.baseValues.cellMinEnergy + 10.0f;
             }
-            AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters()
-                    .name("Maximum cell bonds")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.cellMaxBonds)
-                    .min(0)
-                    .max(6)
-                    .tooltip(std::string("Maximum number of connections a cell can establish with others.")),
-                simParameters.cellMaxBonds);
             ImGui::TreePop();
         }
 

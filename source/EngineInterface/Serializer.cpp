@@ -22,127 +22,575 @@
 #include "Descriptions.h"
 #include "SimulationParameters.h"
 #include "SettingsParser.h"
+#include "GenomeDescriptions.h"
+#include "GenomeDescriptionConverter.h"
+
+#define SPLIT_SERIALIZATION(Classname) \
+    template <class Archive> \
+    void save(Archive& ar, Classname const& data) \
+    { \
+        loadSave(SerializationTask::Save, ar, const_cast<Classname&>(data)); \
+    } \
+    template <class Archive> \
+    void load(Archive& ar, Classname& data) \
+    { \
+        loadSave(SerializationTask::Load, ar, data); \
+    }
+
+namespace
+{
+    int constexpr Particle_Color = 0;
+
+    int constexpr Cell_Stiffness = 0;
+    int constexpr Cell_Color = 1;
+    int constexpr Cell_ExecutionOrderNumber = 2;
+    int constexpr Cell_Barrier = 3;
+    int constexpr Cell_Age = 4;
+    int constexpr Cell_LivingState = 5;
+    int constexpr Cell_InputBlocked = 6;
+    int constexpr Cell_OutputBlocked = 7;
+    int constexpr Cell_ActivationTime = 8;
+
+    int constexpr Defender_Mode = 0;
+
+    int constexpr Muscle_Mode = 0;
+
+    int constexpr Injector_Mode = 0;
+    int constexpr Injector_Counter = 1;
+
+    int constexpr Attacker_Mode = 0;
+
+    int constexpr Nerve_PulseMode = 0;
+    int constexpr Nerve_AlternationMode = 1;
+
+    int constexpr Sensor_FixedAngle = 0;
+    int constexpr Sensor_MinDensity = 1;
+    int constexpr Sensor_Color = 2;
+
+    int constexpr Transmitter_Mode = 0;
+
+    int constexpr CellGenome_ReferenceDistance = 0;
+    int constexpr CellGenome_ReferenceAngle = 1;
+    int constexpr CellGenome_Color = 2;
+    int constexpr CellGenome_MaxConnections = 3;
+    int constexpr CellGenome_ExecutionOrderNumber = 4;
+    int constexpr CellGenome_InputBlocked = 5;
+    int constexpr CellGenome_OutputBlocked = 6;
+
+    int constexpr TransmitterGenome_Mode = 0;
+
+    int constexpr ConstructorGenome_Mode = 0;
+    int constexpr ConstructorGenome_SingleConstruction = 1;
+    int constexpr ConstructorGenome_SeparateConstruction = 2;
+    int constexpr ConstructorGenome_AdaptMaxConnections = 3;
+    int constexpr ConstructorGenome_AngleAlignment = 4;
+    int constexpr ConstructorGenome_Stiffness = 5;
+    int constexpr ConstructorGenome_ConstructionActivationTime = 6;
+
+    int constexpr DefenderGenome_Mode = 0;
+
+    int constexpr MuscleGenome_Mode = 0;
+
+    int constexpr InjectorGenome_Mode = 0;
+
+    int constexpr AttackerGenome_Mode = 0;
+
+    int constexpr NerveGenome_PulseMode = 0;
+    int constexpr NerveGenome_AlternationMode = 1;
+
+    int constexpr SensorGenome_FixedAngle = 0;
+    int constexpr SensorGenome_MinDensity = 1;
+    int constexpr SensorGenome_Color = 2;
+
+}
 
 namespace cereal
 {
+    enum class SerializationTask
+    {
+        Load,
+        Save
+    };
+    using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>>;
 
     template <class Archive>
-    inline void serialize(Archive& ar, IntVector2D& data)
+    std::unordered_map<int, VariantData> getLoadSaveMap(SerializationTask task, Archive& ar)
+    {
+        std::unordered_map<int, VariantData> loadSaveMap;
+        if (task == SerializationTask::Load) {
+            ar(loadSaveMap);
+        }
+        return loadSaveMap;
+    }
+    template <typename T>
+    void loadSave(SerializationTask task, std::unordered_map<int, VariantData>& loadSaveMap, int key, T& value, T const& defaultValue)
+    {
+        if (task == SerializationTask::Load) {
+            auto findResult = loadSaveMap.find(key);
+            if (findResult != loadSaveMap.end()) {
+                auto variantData = findResult->second;
+                value = std::get<T>(variantData);
+            } else {
+                value = defaultValue;
+            }
+        } else {
+            loadSaveMap.emplace(key, value);
+        }
+    }
+    template <class Archive>
+    void setLoadSaveMap(SerializationTask task, Archive& ar, std::unordered_map<int, VariantData>& loadSaveMap)
+    {
+        if (task == SerializationTask::Save) {
+            ar(loadSaveMap);
+        }
+    }
+
+    template <class Archive>
+    void serialize(Archive& ar, IntVector2D& data)
     {
         ar(data.x, data.y);
     }
     template <class Archive>
-    inline void serialize(Archive& ar, RealVector2D& data)
+    void serialize(Archive& ar, RealVector2D& data)
     {
         ar(data.x, data.y);
     }
 
     template <class Archive>
-    inline void serialize(Archive& ar, CellMetadataDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, NeuronGenomeDescription& data)
+    {
+        NeuronGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        setLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data.weights, data.biases);
+    }
+    SPLIT_SERIALIZATION(NeuronGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, TransmitterGenomeDescription& data)
+    {
+        TransmitterGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, TransmitterGenome_Mode, data.mode, defaultObject.mode);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(TransmitterGenomeDescription)
+
+    template <class Archive>
+    void serialize(Archive& ar, MakeGenomeCopy& data)
+    {}
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ConstructorGenomeDescription& data)
+    {
+        ConstructorGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, ConstructorGenome_Mode, data.mode, defaultObject.mode);
+        loadSave<bool>(task, auxiliaries, ConstructorGenome_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
+        loadSave<bool>(task, auxiliaries, ConstructorGenome_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
+        loadSave<bool>(task, auxiliaries, ConstructorGenome_AdaptMaxConnections, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
+        loadSave<int>(task, auxiliaries, ConstructorGenome_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
+        loadSave<float>(task, auxiliaries, ConstructorGenome_Stiffness, data.stiffness, defaultObject.stiffness);
+        loadSave<int>(task, auxiliaries, ConstructorGenome_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
+        setLoadSaveMap(task, ar, auxiliaries);
+
+        if (task == SerializationTask::Load) {
+            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+            ar(genomeData);
+            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                data.genome = MakeGenomeCopy();
+            } else {
+                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+            }
+        } else {
+            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+            if (std::holds_alternative<MakeGenomeCopy>(data.genome)) {
+                genomeData = MakeGenomeCopy();
+            } else {
+                genomeData = GenomeDescriptionConverter::convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
+            }
+            ar(genomeData);
+        }
+    }
+    SPLIT_SERIALIZATION(ConstructorGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SensorGenomeDescription& data)
+    {
+        SensorGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<std::optional<float>>(task, auxiliaries, SensorGenome_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
+        loadSave<float>(task, auxiliaries, SensorGenome_MinDensity, data.minDensity, defaultObject.minDensity);
+        loadSave<int>(task, auxiliaries, SensorGenome_Color, data.color, defaultObject.color);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SensorGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, NerveGenomeDescription& data)
+    {
+        NerveGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, NerveGenome_PulseMode, data.pulseMode, defaultObject.pulseMode);
+        loadSave<int>(task, auxiliaries, NerveGenome_AlternationMode, data.alternationMode, defaultObject.alternationMode);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(NerveGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AttackerGenomeDescription& data)
+    {
+        AttackerGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, AttackerGenome_Mode, data.mode, defaultObject.mode);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(AttackerGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, InjectorGenomeDescription& data)
+    {
+        InjectorGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, InjectorGenome_Mode, data.mode, defaultObject.mode);
+        setLoadSaveMap(task, ar, auxiliaries);
+
+        if (task == SerializationTask::Load) {
+            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+            ar(genomeData);
+            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                data.genome = MakeGenomeCopy();
+            } else {
+                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+            }
+        } else {
+            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+            if (std::holds_alternative<MakeGenomeCopy>(data.genome)) {
+                genomeData = MakeGenomeCopy();
+            } else {
+                genomeData = GenomeDescriptionConverter::convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
+            }
+            ar(genomeData);
+        }
+    }
+    SPLIT_SERIALIZATION(InjectorGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, MuscleGenomeDescription& data)
+    {
+        MuscleGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, MuscleGenome_Mode, data.mode, defaultObject.mode);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(MuscleGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DefenderGenomeDescription& data)
+    {
+        DefenderGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, DefenderGenome_Mode, data.mode, defaultObject.mode);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DefenderGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, PlaceHolderGenomeDescription& data)
+    {
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(PlaceHolderGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, CellGenomeDescription& data)
+    {
+        CellGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<float>(task, auxiliaries, CellGenome_ReferenceDistance, data.referenceDistance, defaultObject.referenceDistance);
+        loadSave<float>(task, auxiliaries, CellGenome_ReferenceAngle, data.referenceAngle, defaultObject.referenceAngle);
+        loadSave<int>(task, auxiliaries, CellGenome_Color, data.color, defaultObject.color);
+        loadSave<int>(task, auxiliaries, CellGenome_MaxConnections, data.maxConnections, defaultObject.maxConnections);
+        loadSave<int>(task, auxiliaries, CellGenome_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
+        loadSave<bool>(task, auxiliaries, CellGenome_InputBlocked, data.inputBlocked, defaultObject.inputBlocked);
+        loadSave<bool>(task, auxiliaries, CellGenome_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
+        setLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data.cellFunction);
+    }
+    SPLIT_SERIALIZATION(CellGenomeDescription)
+
+    template <class Archive>
+    void serialize(Archive& ar, CellMetadataDescription& data)
     {
         ar(data.name, data.description);
     }
     template <class Archive>
-    inline void serialize(Archive& ar, ConnectionDescription& data)
+    void serialize(Archive& ar, ConnectionDescription& data)
     {
         ar(data.cellId, data.distance, data.angleFromPrevious);
     }
     template <class Archive>
-    inline void serialize(Archive& ar, ActivityDescription& data)
+    void serialize(Archive& ar, ActivityDescription& data)
     {
         ar(data.channels);
     }
 
     template <class Archive>
-    inline void serialize(Archive& ar, NeuronDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, NeuronDescription& data)
     {
-        ar(data.weights, data.biases);
+        if (task == SerializationTask::Load) {
+            ar(data.weights, data.biases);
+        } else {
+            NeuronDescription defaultObject;
+            auto auxiliaries = getLoadSaveMap(task, ar);
+            setLoadSaveMap(task, ar, auxiliaries);
+
+            ar(data.weights, data.biases);
+        }
     }
-    template <class Archive>
-    inline void serialize(Archive& ar, TransmitterDescription& data)
-    {
-        ar(data.mode);
-    }
-    template <class Archive>
-    inline void serialize(Archive& ar, ConstructorDescription& data)
-    {
-        ar(data.activationMode,
-           data.singleConstruction,
-           data.separateConstruction,
-           data.adaptMaxConnections,
-           data.angleAlignment,
-           data.genome,
-           data.constructionActivationTime,
-           data.currentGenomePos);
-    }
-    template <class Archive>
-    inline void serialize(Archive& ar, SensorDescription& data)
-    {
-        ar(data.fixedAngle, data.minDensity, data.color);
-    }
-    template <class Archive>
-    inline void serialize(Archive& ar, NerveDescription& data)
-    {
-        ar(data.pulseMode, data.alternationMode);
-    }
-    template <class Archive>
-    inline void serialize(Archive& ar, AttackerDescription& data)
-    {
-        ar(data.mode);
-    }
-    template <class Archive>
-    inline void serialize(Archive& ar, InjectorDescription& data)
-    {
-        ar(data.genome);
-    }
-    template <class Archive>
-    inline void serialize(Archive& ar, MuscleDescription& data)
-    {
-        ar(data.mode);
-    }
-    template <class Archive>
-    inline void serialize(Archive& ar, DefenderDescription& data)
-    {
-        ar(data.mode);
-    }
-    template <class Archive>
-    inline void serialize(Archive& ar, PlaceHolderDescription& data)
-    {}
+    SPLIT_SERIALIZATION(NeuronDescription)
 
     template <class Archive>
-    inline void serialize(Archive& ar, CellDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, TransmitterDescription& data)
     {
-        ar(data.id,
-           data.connections,
-           data.pos,
-           data.vel,
-           data.energy,
-           data.stiffness,
-           data.color,
-           data.maxConnections,
-           data.executionOrderNumber,
-           data.barrier,
-           data.age,
-           data.livingState,
-           data.inputBlocked,
-           data.outputBlocked,
-           data.cellFunction,
-           data.activity,
-           data.metadata,
-           data.activationTime);
+        if (task == SerializationTask::Load) {
+            ar(data.mode);
+        } else {
+            TransmitterDescription defaultObject;
+            auto auxiliaries = getLoadSaveMap(task, ar);
+            loadSave<int>(task, auxiliaries, Transmitter_Mode, data.mode, defaultObject.mode);
+            setLoadSaveMap(task, ar, auxiliaries);
+        }
     }
+    SPLIT_SERIALIZATION(TransmitterDescription)
+
     template <class Archive>
-    inline void serialize(Archive& ar, ClusterDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ConstructorDescription& data)
+    {
+        //ConstructorDescription defaultObject;
+        //auto auxiliaries = getLoadSaveMap(task, ar);
+        //loadSave<int>(task, auxiliaries, Injector_Mode, data.activationMode, defaultObject.activationMode);
+        //loadSave<bool>(task, auxiliaries, Injector_Mode, data.singleConstruction, defaultObject.singleConstruction);
+        //loadSave<bool>(task, auxiliaries, Injector_Mode, data.separateConstruction, defaultObject.separateConstruction);
+        //loadSave<bool>(task, auxiliaries, Injector_Mode, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
+        //loadSave<int>(task, auxiliaries, Injector_Mode, data.angleAlignment, defaultObject.angleAlignment);
+        //loadSave<float>(task, auxiliaries, Injector_Mode, data.stiffness, defaultObject.stiffness);
+        //loadSave<int>(task, auxiliaries, Injector_Mode, data.constructionActivationTime, defaultObject.constructionActivationTime);
+        //loadSave<int>(task, auxiliaries, Injector_Mode, data.currentGenomePos, defaultObject.currentGenomePos);
+        //setLoadSaveMap(task, ar, auxiliaries);
+        if (task == SerializationTask::Load) {
+            ar(data.activationMode,
+               data.singleConstruction,
+               data.separateConstruction,
+               data.adaptMaxConnections,
+               data.angleAlignment,
+               data.genome,
+               data.constructionActivationTime,
+               data.currentGenomePos);
+
+            //GenomeDescription genomeDesc;
+            //ar(genomeDesc);
+            //data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+
+        } else {
+            ConstructorDescription defaultObject;
+            auto auxiliaries = getLoadSaveMap(task, ar);
+            loadSave<int>(task, auxiliaries, Injector_Mode, data.activationMode, defaultObject.activationMode);
+            loadSave<bool>(task, auxiliaries, Injector_Mode, data.singleConstruction, defaultObject.singleConstruction);
+            loadSave<bool>(task, auxiliaries, Injector_Mode, data.separateConstruction, defaultObject.separateConstruction);
+            loadSave<bool>(task, auxiliaries, Injector_Mode, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
+            loadSave<int>(task, auxiliaries, Injector_Mode, data.angleAlignment, defaultObject.angleAlignment);
+            loadSave<float>(task, auxiliaries, Injector_Mode, data.stiffness, defaultObject.stiffness);
+            loadSave<int>(task, auxiliaries, Injector_Mode, data.constructionActivationTime, defaultObject.constructionActivationTime);
+            loadSave<int>(task, auxiliaries, Injector_Mode, data.currentGenomePos, defaultObject.currentGenomePos);
+            setLoadSaveMap(task, ar, auxiliaries);
+
+            GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
+            ar(genomeDesc);
+        }
+    }
+    SPLIT_SERIALIZATION(ConstructorDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SensorDescription& data)
+    {
+        if (task == SerializationTask::Load) {
+            ar(data.fixedAngle, data.minDensity, data.color);
+        } else {
+            SensorDescription defaultObject;
+            auto auxiliaries = getLoadSaveMap(task, ar);
+            loadSave<std::optional<float>>(task, auxiliaries, Sensor_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
+            loadSave<float>(task, auxiliaries, Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
+            loadSave<int>(task, auxiliaries, Sensor_Color, data.color, defaultObject.color);
+            setLoadSaveMap(task, ar, auxiliaries);
+        }
+    }
+    SPLIT_SERIALIZATION(SensorDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, NerveDescription& data)
+    {
+        if (task == SerializationTask::Load) {
+            ar(data.pulseMode, data.alternationMode);
+        } else {
+            NerveDescription defaultObject;
+            auto auxiliaries = getLoadSaveMap(task, ar);
+            loadSave<int>(task, auxiliaries, Nerve_PulseMode, data.pulseMode, defaultObject.pulseMode);
+            loadSave<int>(task, auxiliaries, Nerve_AlternationMode, data.alternationMode, defaultObject.alternationMode);
+            setLoadSaveMap(task, ar, auxiliaries);
+        }
+    }
+    SPLIT_SERIALIZATION(NerveDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AttackerDescription& data)
+    {
+        if (task == SerializationTask::Load) {
+            ar(data.mode);
+        } else {
+            AttackerDescription defaultObject;
+            auto auxiliaries = getLoadSaveMap(task, ar);
+            loadSave<int>(task, auxiliaries, Attacker_Mode, data.mode, defaultObject.mode);
+            setLoadSaveMap(task, ar, auxiliaries);
+        }
+    }
+    SPLIT_SERIALIZATION(AttackerDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, InjectorDescription& data)
+    {
+        //InjectorDescription defaultObject;
+        //auto auxiliaries = getLoadSaveMap(task, ar);
+        //loadSave<int>(task, auxiliaries, Injector_Mode, data.mode, defaultObject.mode);
+        //loadSave<int>(task, auxiliaries, Injector_Counter, data.counter, defaultObject.counter);
+        //setLoadSaveMap(task, ar, auxiliaries);
+
+        if (task == SerializationTask::Load) {
+            ar(data.genome);
+            //GenomeDescription genomeDesc;
+            //ar(genomeDesc);
+            //data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+        } else {
+            InjectorDescription defaultObject;
+            auto auxiliaries = getLoadSaveMap(task, ar);
+            loadSave<int>(task, auxiliaries, Injector_Mode, data.mode, defaultObject.mode);
+            loadSave<int>(task, auxiliaries, Injector_Counter, data.counter, defaultObject.counter);
+            setLoadSaveMap(task, ar, auxiliaries);
+
+            GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
+            ar(genomeDesc);
+        }
+    }
+    SPLIT_SERIALIZATION(InjectorDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, MuscleDescription& data)
+    {
+        if (task == SerializationTask::Load) {
+            ar(data.mode);
+        } else {
+            MuscleDescription defaultObject;
+            auto auxiliaries = getLoadSaveMap(task, ar);
+            loadSave<int>(task, auxiliaries, Muscle_Mode, data.mode, defaultObject.mode);
+            setLoadSaveMap(task, ar, auxiliaries);
+        }
+    }
+    SPLIT_SERIALIZATION(MuscleDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DefenderDescription& data)
+    {
+        if (task == SerializationTask::Load) {
+            ar(data.mode);
+        } else {
+            DefenderDescription defaultObject;
+            auto auxiliaries = getLoadSaveMap(task, ar);
+            loadSave<int>(task, auxiliaries, Defender_Mode, data.mode, defaultObject.mode);
+            setLoadSaveMap(task, ar, auxiliaries);
+        }
+    }
+    SPLIT_SERIALIZATION(DefenderDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, PlaceHolderDescription& data)
+    {
+        if (task == SerializationTask::Load) {
+        } else {
+            auto auxiliaries = getLoadSaveMap(task, ar);
+            setLoadSaveMap(task, ar, auxiliaries);
+        }
+    }
+    SPLIT_SERIALIZATION(PlaceHolderDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, CellDescription& data)
+    {
+        if (task == SerializationTask::Load) {
+                ar(data.id,
+                   data.connections,
+                   data.pos,
+                   data.vel,
+                   data.energy,
+                   data.stiffness,
+                   data.color,
+                   data.maxConnections,
+                   data.executionOrderNumber,
+                   data.barrier,
+                   data.age,
+                   data.livingState,
+                   data.inputBlocked,
+                   data.outputBlocked,
+                   data.cellFunction,
+                   data.activity,
+                   data.metadata,
+                   data.activationTime);
+        } else {
+            CellDescription defaultObject;
+            auto auxiliaries = getLoadSaveMap(task, ar);
+            loadSave<float>(task, auxiliaries, Cell_Stiffness, data.stiffness, defaultObject.stiffness);
+            loadSave<int>(task, auxiliaries, Cell_Color, data.color, defaultObject.color);
+            loadSave<int>(task, auxiliaries, Cell_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
+            loadSave<bool>(task, auxiliaries, Cell_Barrier, data.barrier, defaultObject.barrier);
+            loadSave<int>(task, auxiliaries, Cell_Age, data.age, defaultObject.age);
+            loadSave<int>(task, auxiliaries, Cell_LivingState, data.livingState, defaultObject.livingState);
+            loadSave<bool>(task, auxiliaries, Cell_InputBlocked, data.inputBlocked, defaultObject.inputBlocked);
+            loadSave<bool>(task, auxiliaries, Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
+            loadSave<int>(task, auxiliaries, Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
+            setLoadSaveMap(task, ar, auxiliaries);
+
+            ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
+        }
+    }
+    SPLIT_SERIALIZATION(CellDescription)
+
+    template <class Archive>
+    void serialize(Archive& ar, ClusterDescription& data)
     {
         ar(data.id, data.cells);
     }
+
     template <class Archive>
-    inline void serialize(Archive& ar, ParticleDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ParticleDescription& data)
     {
-        ar(data.id, data.pos, data.vel, data.energy, data.color);
+        if (task == SerializationTask::Load) {
+            ar(data.id, data.pos, data.vel, data.energy, data.color);
+        } else {
+            ParticleDescription defaultObject;
+            auto auxiliaries = getLoadSaveMap(task, ar);
+            loadSave<int>(task, auxiliaries, Particle_Color, data.color, defaultObject.color);
+            setLoadSaveMap(task, ar, auxiliaries);
+
+            ar(data.id, data.pos, data.vel, data.energy);
+        }
+
     }
+    SPLIT_SERIALIZATION(ParticleDescription)
+
     template <class Archive>
-    inline void serialize(Archive& ar, ClusteredDataDescription& data)
+    void serialize(Archive& ar, ClusteredDataDescription& data)
     {
         ar(data.clusters, data.particles);
     }
