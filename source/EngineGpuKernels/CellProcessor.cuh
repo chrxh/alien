@@ -289,7 +289,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
         if (Math::length(cell->shared1) > SpotCalculator::calcParameter(
                 &SimulationParametersSpotValues::cellMaxForce, &SimulationParametersSpotActivatedValues::cellMaxForce, data, cell->absPos)) {
             if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
-                CellConnectionProcessor::scheduleDeleteCellAndConnections(data, cell);
+                CellConnectionProcessor::scheduleDeleteCell(data, index);
             }
         }
     }

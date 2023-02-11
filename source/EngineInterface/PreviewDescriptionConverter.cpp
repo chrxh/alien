@@ -194,7 +194,7 @@ namespace
                     ++index;
                     continue;
                 }
-                auto subGenome = GenomeDescriptionConverter::convertBytesToDescription(data, parameters);
+                auto subGenome = GenomeDescriptionConverter::convertBytesToDescription(data);
 
                 //angles of connected cells
                 std::vector<float> angles;

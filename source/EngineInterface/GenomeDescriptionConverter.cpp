@@ -186,10 +186,10 @@ namespace
     ConversionResult
     convertBytesToDescriptionIntern(
         std::vector<uint8_t> const& data,
-        SimulationParameters const& parameters,
         size_t maxBytePosition,
         size_t maxEntries)
     {
+        SimulationParameters parameters;
         ConversionResult result;
         int cellIndex = 0;
         auto& bytePosition = result.lastBytePosition;
@@ -285,19 +285,19 @@ namespace
 
 }
 
-GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vector<uint8_t> const& data, SimulationParameters const& parameters)
+GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vector<uint8_t> const& data)
 {
-    return convertBytesToDescriptionIntern(data, parameters, data.size(), data.size()).genome;
+    return convertBytesToDescriptionIntern(data, data.size(), data.size()).genome;
 }
 
 int GenomeDescriptionConverter::convertByteIndexToCellIndex(std::vector<uint8_t> const& data, int byteIndex)
 {
     //wasteful approach but sufficient for GUI
-    return convertBytesToDescriptionIntern(data, SimulationParameters(), byteIndex, data.size()).genome.size();
+    return convertBytesToDescriptionIntern(data, byteIndex, data.size()).genome.size();
 }
 
 int GenomeDescriptionConverter::convertCellIndexToByteIndex(std::vector<uint8_t> const& data, int cellIndex)
 {
     //wasteful approach but sufficient for GUI
-    return convertBytesToDescriptionIntern(data, SimulationParameters(), data.size(), cellIndex).lastBytePosition;
+    return convertBytesToDescriptionIntern(data, data.size(), cellIndex).lastBytePosition;
 }

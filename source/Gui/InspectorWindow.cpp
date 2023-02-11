@@ -328,7 +328,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             AlienImGui::Group("Genome: " + std::to_string(desc.genome.size()) + " bytes");
             if (AlienImGui::Button("Edit")) {
-                _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(desc.genome, parameters));
+                _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(desc.genome));
             }
 
             ImGui::SameLine();
@@ -347,7 +347,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 
             AlienImGui::Group("Preview (approximation)");
             if (ImGui::BeginChild("##child", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-                auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome, parameters);
+                auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome);
                 auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);
                 std::optional<int> selectedNodeDummy;
                 AlienImGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
