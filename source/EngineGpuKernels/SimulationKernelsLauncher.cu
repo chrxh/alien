@@ -68,6 +68,7 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, data);
     KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, data);
     KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, data);
+    KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, data);
 
     _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);
 }

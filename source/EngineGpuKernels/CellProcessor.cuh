@@ -33,7 +33,7 @@ public:
     __inline__ __device__ static void verletPositionUpdate(SimulationData& data);
     __inline__ __device__ static void verletVelocityUpdate(SimulationData& data);
 
-    __inline__ __device__ static void constructionStateTransition(SimulationData& data);
+    __inline__ __device__ static void livingStateTransition(SimulationData& data);
 
     __inline__ __device__ static void applyInnerFriction(SimulationData& data);
     __inline__ __device__ static void applyFriction(SimulationData& data);
@@ -184,7 +184,7 @@ __inline__ __device__ void CellProcessor::calcFluidForcesAndReconnectCells(Simul
             //reconnecting
             if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1 && !cell->barrier
                 && cell->livingState != LivingState_UnderConstruction) {
-                CellConnectionProcessor::scheduleDeleteConnections(data, cell);
+                CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             }
 
             auto isApproaching = Math::dot(posDelta, velDelta) < 0;
@@ -193,7 +193,7 @@ __inline__ __device__ void CellProcessor::calcFluidForcesAndReconnectCells(Simul
                        &SimulationParametersSpotValues::cellFusionVelocity, &SimulationParametersSpotActivatedValues::cellFusionVelocity, data, cell->absPos)
                 && isApproaching && cell->energy <= cellMaxBindingEnergy && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier
                 && !otherCell->barrier) {
-                CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
+                CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
             }
         });
         cell->shared1 = cell->shared1 + F_pressure * cudaSimulationParameters.motionData.fluidMotion.pressureStrength
@@ -220,7 +220,7 @@ __inline__ __device__ void CellProcessor::calcCollisionsAndReconnectCells(Simula
                 auto distance = Math::length(posDelta);
                 if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1 && !cell->barrier
                     && cell->livingState != LivingState_UnderConstruction) {
-                    CellConnectionProcessor::scheduleDeleteConnections(data, cell);
+                    CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
                 }
 
                 bool alreadyConnected = false;
@@ -268,7 +268,7 @@ __inline__ __device__ void CellProcessor::calcCollisionsAndReconnectCells(Simula
                                cell->absPos)
                         && isApproaching && cell->energy <= cellMaxBindingEnergy && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier
                         && !otherCell->barrier) {
-                        CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
+                        CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
                     }
                 }
             });
@@ -280,7 +280,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
     auto& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (auto index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->barrier) {
             continue;
@@ -416,7 +416,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
             }
         }
         if (scheduleForDestruction) {
-            CellConnectionProcessor::scheduleDeleteConnections(data, cell);
+            CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
         }
     }
 }
@@ -457,21 +457,21 @@ __inline__ __device__ void CellProcessor::verletVelocityUpdate(SimulationData& d
     }
 }
 
-__inline__ __device__ void CellProcessor::constructionStateTransition(SimulationData& data)
+__inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        auto underConstruction = atomicCAS(&cell->livingState, LivingState_JustReady, LivingState_Ready);
-        if (underConstruction == LivingState_JustReady) {
+        auto livingState = atomicCAS(&cell->livingState, LivingState_JustReady, LivingState_Ready);
+        if (livingState == LivingState_JustReady) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectedCell = cell->connections[i].cell;
                 atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_JustReady);
             }
         }
-        if (underConstruction == LivingState_Dying) {
+        if (livingState == LivingState_Dying) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectedCell = cell->connections[i].cell;
                 if (connectedCell->cellFunction != CellFunction_None) {
@@ -587,7 +587,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
     auto partition =
         calcAllThreadsPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (auto index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->barrier) {
             continue;
@@ -601,7 +601,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         bool decay = false;
         if (cell->livingState == LivingState_Dying) {
             if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb) {
-                CellConnectionProcessor::scheduleDeleteCellAndConnections(data, cell);
+                CellConnectionProcessor::scheduleDeleteCell(data, index);
                 decay = true;
             }
         }
@@ -609,11 +609,11 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             if (cudaSimulationParameters.clusterDecay) {
                 cell->livingState = LivingState_Dying;
             } else {
-                CellConnectionProcessor::scheduleDeleteCellAndConnections(data, cell);
+                CellConnectionProcessor::scheduleDeleteCell(data, index);
                 decay = true;
             }
         } else if (cell->energy > cellMaxBindingEnergy) {
-            CellConnectionProcessor::scheduleDeleteConnections(data, cell);
+            CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             decay = true;
         }
 

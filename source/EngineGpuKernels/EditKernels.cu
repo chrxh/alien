@@ -174,7 +174,7 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
                 }
             }
             if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections) {
-                CellConnectionProcessor::scheduleAddConnections(data, cell, otherCell);
+                CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
                 atomicExch(result, 1);
             }
         });
@@ -364,7 +364,7 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
 
                 if (1 != connectedCell->selected
                     && data.cellMap.getDistance(cell->absPos, connectedCell->absPos) > cudaSimulationParameters.cellMaxBindingDistance) {
-                    CellConnectionProcessor::scheduleDeleteConnection(data, cell, connectedCell);
+                    CellConnectionProcessor::scheduleDeleteConnectionPair(data, cell, connectedCell);
                     atomicExch(result, 1);
                 }
             }
@@ -379,7 +379,7 @@ __global__ void cudaPrepareConnectionChanges(SimulationData data)
 
 __global__ void cudaProcessDeleteConnectionChanges(SimulationData data)
 {
-    CellConnectionProcessor::processDeleteOperations(data);
+    CellConnectionProcessor::processDeleteConnectionOperations(data);
 }
 
 __global__ void cudaProcessAddConnectionChanges(SimulationData data)
