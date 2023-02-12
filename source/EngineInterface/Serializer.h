@@ -15,20 +15,20 @@ struct DeserializedSimulation
     ClusteredDataDescription content;
 };
 
+struct SerializedSimulation
+{
+    std::string timestepAndSettings;
+    std::string content;
+};
+
 class Serializer
 {
 public:
     static bool serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data);
     static bool deserializeSimulationFromFiles(DeserializedSimulation& data, std::string const& filename);
 
-    static bool serializeSimulationToStrings(
-        std::string& content,
-        std::string& timestepAndSettings,
-        DeserializedSimulation const& data);
-    static bool deserializeSimulationFromStrings(
-        DeserializedSimulation& data,
-        std::string const& content,
-        std::string const& timestepAndSettings);
+    static bool serializeSimulationToStrings(SerializedSimulation& output, DeserializedSimulation const& input);
+    static bool deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input);
 
     static bool serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content);
     static bool deserializeContentFromFile(ClusteredDataDescription& content, std::string const& filenam);

@@ -527,9 +527,6 @@ bool Serializer::serializeSimulationToFiles(std::string const& filename, Deseria
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
 
-        std::filesystem::path symbolsFilename(filename);
-        symbolsFilename.replace_extension(std::filesystem::path(".symbols.json"));
-
         {
             zstr::ofstream stream(filename, std::ios::binary);
             if (!stream) {
@@ -557,9 +554,6 @@ bool Serializer::deserializeSimulationFromFiles(DeserializedSimulation& data, st
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
 
-        std::filesystem::path symbolsFilename(filename);
-        symbolsFilename.replace_extension(std::filesystem::path(".symbols.json"));
-
         if (!deserializeDataDescription(data.content, filename)) {
             return false;
         }
@@ -577,10 +571,7 @@ bool Serializer::deserializeSimulationFromFiles(DeserializedSimulation& data, st
     }
 }
 
-bool Serializer::serializeSimulationToStrings(
-    std::string& content,
-    std::string& timestepAndSettings,
-    DeserializedSimulation const& data)
+bool Serializer::serializeSimulationToStrings(SerializedSimulation& output, DeserializedSimulation const& input)
 {
     try {
         {
@@ -589,14 +580,14 @@ bool Serializer::serializeSimulationToStrings(
             if (!stream) {
                 return false;
             }
-            serializeDataDescription(data.content, stream);
+            serializeDataDescription(input.content, stream);
             stream.flush();
-            content = stdStream.str();
+            output.content = stdStream.str();
         }
         {
             std::stringstream stream;
-            serializeTimestepAndSettings(data.timestep, data.settings, stream);
-            timestepAndSettings = stream.str();
+            serializeTimestepAndSettings(input.timestep, input.settings, stream);
+            output.timestepAndSettings = stream.str();
         }
         return true;
     } catch (...) {
@@ -604,23 +595,20 @@ bool Serializer::serializeSimulationToStrings(
     }
 }
 
-bool Serializer::deserializeSimulationFromStrings(
-    DeserializedSimulation& data,
-    std::string const& content,
-    std::string const& timestepAndSettings)
+bool Serializer::deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input)
 {
     try {
         {
-            std::stringstream stdStream(content);
+            std::stringstream stdStream(input.content);
             zstr::istream stream(stdStream, std::ios::binary);
             if (!stream) {
                 return false;
             }
-            deserializeDataDescription(data.content, stream);
+            deserializeDataDescription(output.content, stream);
         }
         {
-            std::stringstream stream(timestepAndSettings);
-            deserializeTimestepAndSettings(data.timestep, data.settings, stream);
+            std::stringstream stream(input.timestepAndSettings);
+            deserializeTimestepAndSettings(output.timestep, output.settings, stream);
         }
         return true;
     } catch (...) {
