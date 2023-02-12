@@ -21,6 +21,9 @@ private:
     void processBase(SimulationParameters& simParameters, SimulationParameters const& origSimParameters);
     void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot, SimulationParameters const& parameters);
 
+    void onOpenParameters();
+    void onSaveParameters();
+
     void validationAndCorrection(SimulationParameters& parameters) const;
     void validationAndCorrection(SimulationParametersSpot& spot) const;
 
@@ -29,4 +32,5 @@ private:
 
     uint32_t _savedPalette[32] = {};
     uint32_t _backupColor;
+    std::string _startingPath;
 };
