@@ -57,7 +57,7 @@ protected:
     {
         for (auto const& cell : input) {
             if (auto subGenome = cell.getSubGenome()) {
-                auto subGenomeCells = GenomeDescriptionConverter::convertBytesToDescription(*subGenome, _parameters);
+                auto subGenomeCells = GenomeDescriptionConverter::convertBytesToDescription(*subGenome);
                 rollout(subGenomeCells, result);
                 auto cellClone = cell;
                 cellClone.setSubGenome({});
@@ -73,8 +73,8 @@ protected:
         if (expected.size() != actual.size()) {
             return false;
         }
-        auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected, _parameters);
-        auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual, _parameters);
+        auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
+        auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
         if (expectedGenome.size() != actualGenome.size()) {
             return false;
         }
@@ -119,8 +119,8 @@ protected:
         if (expected.size() != actual.size()) {
             return false;
         }
-        auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected, _parameters);
-        auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual, _parameters);
+        auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
+        auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
         if (expectedGenome.size() != actualGenome.size()) {
             return false;
         }
@@ -167,8 +167,8 @@ protected:
 
     bool compareCellFunctionMutation(std::vector<uint8_t> const& expected, std::vector<uint8_t> const& actual)
     {
-        auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected, _parameters);
-        auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual, _parameters);
+        auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
+        auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
         if (expectedGenome.size() != actualGenome.size()) {
             return false;
         }
@@ -200,8 +200,8 @@ protected:
 
     bool compareInsertMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after)
     {
-        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before, _parameters);
-        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after, _parameters);
+        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
+        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
         std::set<CellGenomeDescription> afterGenomeRollout;
         rollout(afterGenome, afterGenomeRollout);
         for (auto const& cell : afterGenomeRollout) {
@@ -245,8 +245,8 @@ protected:
 
     bool compareDeleteMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after)
     {
-        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before, _parameters);
-        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after, _parameters);
+        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
+        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
         std::set<CellGenomeDescription> afterGenomeRollout;
         rollout(afterGenome, afterGenomeRollout);
         for (auto const& cell : afterGenomeRollout) {
@@ -290,8 +290,8 @@ protected:
 
     bool compareTranslateMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after)
     {
-        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before, _parameters);
-        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after, _parameters);
+        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
+        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
 
         std::set<CellGenomeDescription> beforeGenomeRollout;
         rollout(beforeGenome, beforeGenomeRollout);
@@ -425,7 +425,7 @@ TEST_F(MutationTests, insertMutation_emptyGenome)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
 
-    auto actualGenomeDescription = GenomeDescriptionConverter::convertBytesToDescription(actualConstructor.genome, _parameters);
+    auto actualGenomeDescription = GenomeDescriptionConverter::convertBytesToDescription(actualConstructor.genome);
     EXPECT_EQ(1, actualGenomeDescription.size());
     EXPECT_EQ(cellColor, actualGenomeDescription.front().color);
 }
@@ -486,7 +486,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
     auto actualCellById = getCellById(actualData);
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
-    auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(actualConstructor.genome, _parameters);
+    auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(actualConstructor.genome);
 
     std::set<CellGenomeDescription> afterGenomeRollout;
     rollout(afterGenome, afterGenomeRollout);
