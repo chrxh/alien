@@ -50,6 +50,7 @@ _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, Simula
 
 _GenomeEditorWindow::~_GenomeEditorWindow()
 {
+    GlobalSettings::getInstance().setStringState("windows.genome editor.starting path", _startingPath);
 }
 
 void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
@@ -675,6 +676,28 @@ void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
     _collapseAllNodes = true;
 }
 
+void _GenomeEditorWindow::onCreateSpore()
+{
+    auto pos = _viewport->getCenterInWorldPos();
+    pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
+    pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
+
+    auto genomeDesc = getCurrentGenome();
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+
+    auto parameter = _simController->getSimulationParameters();
+    auto cell = CellDescription()
+                    .setPos(pos)
+                    .setEnergy(parameter.cellNormalEnergy * (genomeDesc.size() * 2 + 1))
+                    .setStiffness(1.0f)
+                    .setMaxConnections(6)
+                    .setExecutionOrderNumber(0)
+                    .setColor(_editorModel->getDefaultColorCode())
+                    .setCellFunction(ConstructorDescription().setGenome(genome));
+    auto data = DataDescription().addCell(cell);
+    _simController->addAndSelectSimulationData(data);
+}
+
 void _GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
@@ -719,27 +742,5 @@ void _GenomeEditorWindow::scheduleAddTab(GenomeDescription const& genome)
     newTab.id = ++_tabSequenceNumber;
     newTab.genome = genome;
     _tabToAdd = newTab;
-}
-
-void _GenomeEditorWindow::onCreateSpore()
-{
-    auto pos = _viewport->getCenterInWorldPos();
-    pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
-    pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
-
-    auto genomeDesc = getCurrentGenome();
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
-
-    auto parameter = _simController->getSimulationParameters();
-    auto cell = CellDescription()
-                    .setPos(pos)
-                    .setEnergy(parameter.cellNormalEnergy * (genomeDesc.size() * 2 + 1))
-                    .setStiffness(1.0f)
-                    .setMaxConnections(6)
-                    .setExecutionOrderNumber(0)
-                    .setColor(_editorModel->getDefaultColorCode())
-                    .setCellFunction(ConstructorDescription().setGenome(genome));
-    auto data = DataDescription().addCell(cell);
-    _simController->addAndSelectSimulationData(data);
 }
 

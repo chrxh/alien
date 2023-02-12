@@ -1,13 +1,17 @@
 #include "SimulationParametersWindow.h"
 
+#include <ImFileDialog.h>
 #include <imgui.h>
 #include <Fonts/IconsFontAwesome5.h>
 
+#include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
+#include "GenericFileDialogs.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
+#include "MessageDialog.h"
 #include "RadiationSourcesWindow.h"
 
 namespace
@@ -50,10 +54,17 @@ _SimulationParametersWindow::_SimulationParametersWindow(SimulationController co
         color.w = 1.0f; //alpha
         _savedPalette[n] = static_cast<ImU32>(ImColor(color));
     }
+
+    auto path = std::filesystem::current_path();
+    if (path.has_parent_path()) {
+        path = path.parent_path();
+    }
+    _startingPath = GlobalSettings::getInstance().getStringState("windows.simulation parameters.starting path", path.string());
 }
 
 _SimulationParametersWindow::~_SimulationParametersWindow()
 {
+    GlobalSettings::getInstance().setStringState("windows.simulation parameters.starting path", _startingPath);
 }
 
 void _SimulationParametersWindow::processIntern()
@@ -153,11 +164,13 @@ void _SimulationParametersWindow::createDefaultSpotData(SimulationParametersSpot
 void _SimulationParametersWindow::processToolbar()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
+        onOpenParameters();
     }
     AlienImGui::Tooltip("Open simulation parameters from file");
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
+        onSaveParameters();
     }
     AlienImGui::Tooltip("Save simulation parameters to file");
 
@@ -1319,6 +1332,38 @@ void _SimulationParametersWindow::processSpot(
     }
     ImGui::EndChild();
     validationAndCorrection(spot);
+}
+
+void _SimulationParametersWindow::onOpenParameters()
+{
+    GenericFileDialogs::getInstance().showOpenFileDialog(
+        "Open simulation parameters", "Simulation parameters (*.json){.json},.*", _startingPath, [&](std::filesystem::path const& path) {
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _startingPath = firstFilenameCopy.remove_filename().string();
+
+        SimulationParameters parameters;
+        if (!Serializer::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
+            MessageDialog::getInstance().show("Open simulation parameters", "The selected file could not be opened.");
+        } else {
+            _simController->setSimulationParameters_async(parameters);
+        }
+    });
+}
+
+void _SimulationParametersWindow::onSaveParameters()
+{
+    GenericFileDialogs::getInstance().showSaveFileDialog(
+        "Save simulation parameters", "Simulation parameters (*.json){.json},.*", _startingPath, [&](std::filesystem::path const& path) {
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _startingPath = firstFilenameCopy.remove_filename().string();
+
+        auto parameters = _simController->getSimulationParameters();
+        if (!Serializer::serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
+            MessageDialog::getInstance().show("Save simulation parameters", "The selected file could not be saved.");
+        }
+    });
 }
 
 void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& parameters) const

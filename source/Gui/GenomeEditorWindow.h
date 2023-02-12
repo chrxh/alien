@@ -36,13 +36,13 @@ private:
     void onDeleteNode();
     void onNodeDecreaseSequenceNumber();
     void onNodeIncreaseSequenceNumber();
+    void onCreateSpore();
 
     void showPreview(TabData& tab);
 
     void validationAndCorrection(CellGenomeDescription& cell) const;
 
     void scheduleAddTab(GenomeDescription const& genome);
-    void onCreateSpore();
 
     EditorModel _editorModel;
     SimulationController _simController;
