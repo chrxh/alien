@@ -6,18 +6,17 @@
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineImpl/SimulationControllerImpl.h"
 
-IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParameters> const& parameters, IntVector2D const& universeSize)
+IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParameters> const& parameters_, IntVector2D const& universeSize)
 {
     _simController = std::make_shared<_SimulationControllerImpl>();
-    Settings settings;
-    settings.generalSettings.worldSizeX = universeSize.x;
-    settings.generalSettings.worldSizeY = universeSize.y;
-    if (parameters) {
-        settings.simulationParameters = *parameters;
+    GeneralSettings generalSettings{universeSize.x, universeSize.y};
+    SimulationParameters parameters;
+    if (parameters_) {
+        parameters = *parameters_;
     } else {
-        settings.simulationParameters.baseValues.radiationFactor = 0;
+        parameters.baseValues.radiationFactor = 0;
     }
-    _simController->newSimulation(0, settings);
+    _simController->newSimulation(0, generalSettings, parameters);
     _parameters = _simController->getSimulationParameters();
 }
 

@@ -89,7 +89,8 @@ void _ColorizeDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& ch
 void _ColorizeDialog::onColorize()
 {
     auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-    auto settings = _simController->getSettings();
+    auto parameters = _simController->getSimulationParameters();
+    auto generalSettings = _simController->getGeneralSettings();
     auto content = _simController->getClusteredSimulationData();
 
     std::vector<int> colorCodes;
@@ -101,6 +102,6 @@ void _ColorizeDialog::onColorize()
     DescriptionHelper::colorize(content, colorCodes);
 
     _simController->closeSimulation();
-    _simController->newSimulation(timestep, settings);
+    _simController->newSimulation(timestep, generalSettings, parameters);
     _simController->setClusteredSimulationData(content);
 }

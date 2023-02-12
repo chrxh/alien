@@ -1,7 +1,6 @@
 #include "AccessDataTOCache.h"
 
-_AccessDataTOCache::_AccessDataTOCache(GpuSettings const& gpuConstants)
-    : _gpuConstants(gpuConstants)
+_AccessDataTOCache::_AccessDataTOCache()
 {}
 
 _AccessDataTOCache::~_AccessDataTOCache()

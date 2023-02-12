@@ -520,52 +520,6 @@ namespace cereal
     }
 }
 
-bool Serializer::serializeGenomeToFile(std::string const& filename, std::vector<uint8_t> const& genome)
-{
-    try {
-        //wrap constructor cell around genome
-        ClusteredDataDescription data;
-        data.addCluster(ClusterDescription().addCell(CellDescription().setCellFunction(ConstructorDescription().setGenome(genome))));
-
-        zstr::ofstream stream(filename, std::ios::binary);
-        if (!stream) {
-            return false;
-        }
-        serializeDataDescription(data, stream);
-
-        return true;
-    } catch (...) {
-        return false;
-    }
-}
-
-bool Serializer::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::string const& filename)
-{
-    try {
-        //constructor cell is wrapped around genome
-        ClusteredDataDescription data;
-        if (!deserializeDataDescription(data, filename)) {
-            return false;
-        }
-        if (data.clusters.size() != 1) {
-            return false;
-        }
-        auto cluster = data.clusters.front();
-        if (cluster.cells.size() != 1) {
-            return false;
-        }
-        auto cell = cluster.cells.front();
-        if (cell.getCellFunctionType() != CellFunction_Constructor) {
-            return false;
-        }
-        genome = std::get<ConstructorDescription>(*cell.cellFunction).genome;
-
-        return true;
-    } catch (...) {
-        return false;
-    }
-}
-
 bool Serializer::serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data)
 {
     try {
@@ -662,6 +616,82 @@ bool Serializer::deserializeSimulationFromStrings(DeserializedSimulation& output
     }
 }
 
+bool Serializer::serializeGenomeToFile(std::string const& filename, std::vector<uint8_t> const& genome)
+{
+    try {
+        //wrap constructor cell around genome
+        ClusteredDataDescription data;
+        data.addCluster(ClusterDescription().addCell(CellDescription().setCellFunction(ConstructorDescription().setGenome(genome))));
+
+        zstr::ofstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        serializeDataDescription(data, stream);
+
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool Serializer::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::string const& filename)
+{
+    try {
+        //constructor cell is wrapped around genome
+        ClusteredDataDescription data;
+        if (!deserializeDataDescription(data, filename)) {
+            return false;
+        }
+        if (data.clusters.size() != 1) {
+            return false;
+        }
+        auto cluster = data.clusters.front();
+        if (cluster.cells.size() != 1) {
+            return false;
+        }
+        auto cell = cluster.cells.front();
+        if (cell.getCellFunctionType() != CellFunction_Constructor) {
+            return false;
+        }
+        genome = std::get<ConstructorDescription>(*cell.cellFunction).genome;
+
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool Serializer::serializeSimulationParametersToFile(std::string const& filename, SimulationParameters const& parameters)
+{
+    try {
+        std::ofstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        serializeSimulationParameters(parameters, stream);
+        stream.close();
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool Serializer::deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::string const& filename)
+{
+    try {
+        std::ifstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        deserializeSimulationParameters(parameters, stream);
+        stream.close();
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
 bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
 {
     try {
@@ -696,11 +726,6 @@ void Serializer::serializeDataDescription(ClusteredDataDescription const& data, 
     archive(data);
 }
 
-void Serializer::serializeAuxiliaryData(AuxiliaryData const& auxiliaryData, std::ostream& stream)
-{
-    boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParser::encode(auxiliaryData));
-}
-
 bool Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::string const& filename)
 {
     zstr::ifstream stream(filename, std::ios::binary);
@@ -710,6 +735,7 @@ bool Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
     deserializeDataDescription(data, stream);
     return true;
 }
+
 
 namespace
 {
@@ -760,10 +786,27 @@ void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
     }
 }
 
+void Serializer::serializeAuxiliaryData(AuxiliaryData const& auxiliaryData, std::ostream& stream)
+{
+    boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParser::encodeAuxiliaryData(auxiliaryData));
+}
+
 void Serializer::deserializeAuxiliaryData(AuxiliaryData& auxiliaryData, std::istream& stream)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    auxiliaryData = AuxiliaryDataParser::decode(tree);
+    auxiliaryData = AuxiliaryDataParser::decodeAuxiliaryData(tree);
+}
+
+void Serializer::serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream)
+{
+    boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParser::encodeSimulationParameters(parameters));
+}
+
+void Serializer::deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream)
+{
+    boost::property_tree::ptree tree;
+    boost::property_tree::read_json(stream, tree);
+    parameters = AuxiliaryDataParser::decodeSimulationParameters(tree);
 }
 

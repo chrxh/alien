@@ -5,8 +5,9 @@
 
 struct AuxiliaryData
 {
-    uint64_t timestep;
-    float zoom;
+    uint64_t timestep = 0;
+    float zoom = 0;
     RealVector2D center;
-    Settings settings;
+    GeneralSettings generalSettings;
+    SimulationParameters simulationParameters;
 };

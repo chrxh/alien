@@ -17,6 +17,7 @@ private:
     SimulationParametersSpot createSpot(SimulationParameters const& simParameters, int index);
     void createDefaultSpotData(SimulationParametersSpot& spot);
 
+    void processToolbar();
     void processBase(SimulationParameters& simParameters, SimulationParameters const& origSimParameters);
     void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot, SimulationParameters const& parameters);
 

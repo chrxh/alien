@@ -1,6 +1,7 @@
 #include "SimulationParametersWindow.h"
 
 #include <imgui.h>
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "EngineInterface/SimulationController.h"
 
@@ -57,6 +58,8 @@ _SimulationParametersWindow::~_SimulationParametersWindow()
 
 void _SimulationParametersWindow::processIntern()
 {
+    processToolbar();
+
     auto parameters = _simController->getSimulationParameters();
     auto origParameters = _simController->getOriginalSimulationParameters();
     auto lastParameters = parameters;
@@ -145,6 +148,25 @@ void _SimulationParametersWindow::createDefaultSpotData(SimulationParametersSpot
         spot.shapeData.rectangularSpot.height = maxRadius / 3;
         spot.shapeData.rectangularSpot.width = maxRadius / 3;
     }
+}
+
+void _SimulationParametersWindow::processToolbar()
+{
+    if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
+    }
+    AlienImGui::Tooltip("Open simulation parameters from file");
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
+    }
+    AlienImGui::Tooltip("Save simulation parameters to file");
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
+    }
+    AlienImGui::Tooltip("Copy simulation parameters");
+
+    AlienImGui::Separator();
 }
 
 void _SimulationParametersWindow::processBase(

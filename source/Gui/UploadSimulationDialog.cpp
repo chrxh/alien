@@ -93,7 +93,8 @@ void _UploadSimulationDialog::onUpload()
     deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
     deserializedSim.auxiliaryData.zoom = _viewport->getZoomFactor();
     deserializedSim.auxiliaryData.center = _viewport->getCenterInWorldPos();
-    deserializedSim.auxiliaryData.settings = _simController->getSettings();
+    deserializedSim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
+    deserializedSim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
     deserializedSim.mainData = _simController->getClusteredSimulationData();
 
     SerializedSimulation serializedSim;
@@ -105,7 +106,7 @@ void _UploadSimulationDialog::onUpload()
     if (!_networkController->uploadSimulation(
             _simName,
             _simDescription,
-            {deserializedSim.auxiliaryData.settings.generalSettings.worldSizeX, deserializedSim.auxiliaryData.settings.generalSettings.worldSizeY},
+            {deserializedSim.auxiliaryData.generalSettings.worldSizeX, deserializedSim.auxiliaryData.generalSettings.worldSizeY},
             deserializedSim.mainData.getNumberOfCellAndParticles(),
             serializedSim.mainData,
             serializedSim.auxiliaryData)) {

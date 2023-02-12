@@ -11,6 +11,7 @@
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "MessageDialog.h"
+#include "GpuSettingsDialog.h"
 
 namespace
 {
@@ -19,7 +20,10 @@ namespace
     std::chrono::milliseconds::rep const FadeInDuration = 500;
 }
 
-_StartupController::_StartupController(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow, Viewport const& viewport)
+_StartupController::_StartupController(
+    SimulationController const& simController,
+    TemporalControlWindow const& temporalControlWindow,
+    Viewport const& viewport)
     : _simController(simController)
     , _temporalControlWindow(temporalControlWindow)
     , _viewport(viewport)
@@ -45,15 +49,16 @@ void _StartupController::process()
         DeserializedSimulation deserializedSim;
         if (!Serializer::deserializeSimulationFromFiles(deserializedSim, Const::AutosaveFile)) {
             MessageDialog::getInstance().show("Error", "The default simulation file could not be read. An empty simulation will be created.");
-            deserializedSim.auxiliaryData.settings.generalSettings.worldSizeX = 1000;
-            deserializedSim.auxiliaryData.settings.generalSettings.worldSizeY = 500;
+            deserializedSim.auxiliaryData.generalSettings.worldSizeX = 1000;
+            deserializedSim.auxiliaryData.generalSettings.worldSizeY = 500;
             deserializedSim.auxiliaryData.timestep = 0;
             deserializedSim.auxiliaryData.zoom = 12.0f;
             deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
             deserializedSim.mainData = ClusteredDataDescription();
         }
 
-        _simController->newSimulation(deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.settings);
+        _simController->newSimulation(
+            deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
         _simController->setClusteredSimulationData(deserializedSim.mainData);
         _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
         _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);

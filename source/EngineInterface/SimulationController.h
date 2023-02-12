@@ -12,7 +12,7 @@ class _SimulationController
 public:
     virtual void initCuda() = 0;
 
-    virtual void newSimulation(uint64_t timestep, Settings const& settings) = 0;
+    virtual void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& simulationParameters) = 0;
     virtual void clear() = 0;
 
     virtual void registerImageResource(void* image) = 0;
@@ -84,7 +84,6 @@ public:
 
     virtual GeneralSettings getGeneralSettings() const = 0;
     virtual IntVector2D getWorldSize() const = 0;
-    virtual Settings getSettings() const = 0;
     virtual MonitorData getStatistics() const = 0;
 
     virtual std::optional<int> getTpsRestriction() const = 0;
