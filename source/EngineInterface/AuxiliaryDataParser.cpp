@@ -1,34 +1,36 @@
-#include "SettingsParser.h"
+#include "AuxiliaryDataParser.h"
 
 #include "GeneralSettings.h"
 #include "Settings.h"
 
-boost::property_tree::ptree SettingsParser::encode(uint64_t timestep, Settings settings)
+boost::property_tree::ptree AuxiliaryDataParser::encode(AuxiliaryData const& data)
 {
     boost::property_tree::ptree tree;
-    encodeDecode(tree, timestep, settings, ParserTask::Encode);
+    encodeDecode(tree, const_cast<AuxiliaryData&>(data), ParserTask::Encode);
     return tree;
 }
 
-std::pair<uint64_t, Settings> SettingsParser::decodeTimestepAndSettings(boost::property_tree::ptree tree)
+AuxiliaryData AuxiliaryDataParser::decode(boost::property_tree::ptree tree)
 {
-    uint64_t timestep;
-    Settings settings;
-    encodeDecode(tree, timestep, settings, ParserTask::Decode);
-    return std::make_pair(timestep, settings);
+    AuxiliaryData result;
+    encodeDecode(tree, result, ParserTask::Decode);
+    return result;
 }
 
-void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, ParserTask parserTask)
+void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, AuxiliaryData& data, ParserTask parserTask)
 {
     Settings defaultSettings;
 
     //general settings
-    JsonParser::encodeDecode(tree, timestep, uint64_t(0), "general.time step", parserTask);
-    JsonParser::encodeDecode(tree, settings.generalSettings.worldSizeX, defaultSettings.generalSettings.worldSizeX, "general.world size.x", parserTask);
-    JsonParser::encodeDecode(tree, settings.generalSettings.worldSizeY, defaultSettings.generalSettings.worldSizeY, "general.world size.y", parserTask);
+    JsonParser::encodeDecode(tree, data.timestep, uint64_t(0), "general.time step", parserTask);
+    JsonParser::encodeDecode(tree, data.zoom, 4.0f, "general.zoom", parserTask);
+    JsonParser::encodeDecode(tree, data.center.x, 0.0f, "general.center.x", parserTask);
+    JsonParser::encodeDecode(tree, data.center.y, 0.0f, "general.center.y", parserTask);
+    JsonParser::encodeDecode(tree, data.settings.generalSettings.worldSizeX, defaultSettings.generalSettings.worldSizeX, "general.world size.x", parserTask);
+    JsonParser::encodeDecode(tree, data.settings.generalSettings.worldSizeY, defaultSettings.generalSettings.worldSizeY, "general.world size.y", parserTask);
 
     //simulation parameters
-    auto& parameters = settings.simulationParameters;
+    auto& parameters = data.settings.simulationParameters;
     auto& defaultParameters = defaultSettings.simulationParameters;
     JsonParser::encodeDecode(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
     JsonParser::encodeDecode(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);
@@ -550,7 +552,7 @@ void SettingsParser::encodeDecode(boost::property_tree::ptree& tree, uint64_t& t
 }
 
 template <typename T>
-void SettingsParser::encodeDecodeSpotProperty(
+void AuxiliaryDataParser::encodeDecodeSpotProperty(
     boost::property_tree::ptree& tree,
     T& parameter,
     bool& isActivated,

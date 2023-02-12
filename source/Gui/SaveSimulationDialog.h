@@ -6,7 +6,7 @@
 class _SaveSimulationDialog
 {
 public:
-    _SaveSimulationDialog(SimulationController const& simController);
+    _SaveSimulationDialog(SimulationController const& simController, Viewport const& viewport);
     ~_SaveSimulationDialog();
 
     void process();
@@ -15,5 +15,6 @@ public:
 
 private:
     SimulationController _simController;
+    Viewport _viewport;
     std::string _startingPath;
 };

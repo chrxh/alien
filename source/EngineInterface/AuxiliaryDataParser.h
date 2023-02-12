@@ -4,17 +4,17 @@
 
 #include "Base/JsonParser.h"
 
+#include "AuxiliaryData.h"
 #include "Definitions.h"
 
-class SettingsParser
+class AuxiliaryDataParser
 {
 public:
-    static boost::property_tree::ptree encode(uint64_t timestep, Settings parameters);
-    static std::pair<uint64_t, Settings> decodeTimestepAndSettings(
-        boost::property_tree::ptree tree);
+    static boost::property_tree::ptree encode(AuxiliaryData const& data);
+    static AuxiliaryData decode(boost::property_tree::ptree tree);
 
 private:
-    static void encodeDecode(boost::property_tree::ptree& tree, uint64_t& timestep, Settings& settings, ParserTask task);
+    static void encodeDecode(boost::property_tree::ptree& tree, AuxiliaryData& data, ParserTask task);
 
     template <typename T>
     static void encodeDecodeSpotProperty(

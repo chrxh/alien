@@ -344,14 +344,14 @@ void _BrowserWindow::sortTable()
 
 void _BrowserWindow::onOpenSimulation(std::string const& id)
 {
-    std::string content, settings;
-    if (!_networkController->downloadSimulation(content, settings, id)) {
+    SerializedSimulation serializedSim;
+    if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, id)) {
         MessageDialog::getInstance().show("Error", "Failed to download simulation.");
         return;
     }
 
     DeserializedSimulation deserializedSim;
-    if (!Serializer::deserializeSimulationFromStrings(deserializedSim, {settings, content})) {
+    if (!Serializer::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
         MessageDialog::getInstance().show("Error", "Failed to load simulation. Your program version may not match.");
         return;
     }
@@ -359,11 +359,10 @@ void _BrowserWindow::onOpenSimulation(std::string const& id)
     _simController->closeSimulation();
     _statisticsWindow->reset();
 
-    _simController->newSimulation(deserializedSim.timestep, deserializedSim.settings);
-    _simController->setClusteredSimulationData(deserializedSim.content);
-    _viewport->setCenterInWorldPos(
-        {toFloat(deserializedSim.settings.generalSettings.worldSizeX) / 2, toFloat(deserializedSim.settings.generalSettings.worldSizeY) / 2});
-    _viewport->setZoomFactor(2.0f);
+    _simController->newSimulation(deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.settings);
+    _simController->setClusteredSimulationData(deserializedSim.mainData);
+    _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+    _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
     _temporalControlWindow->onSnapshot();
 }
 

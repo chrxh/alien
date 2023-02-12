@@ -7,9 +7,11 @@
 #include "EngineInterface/Serializer.h"
 #include "GlobalSettings.h"
 #include "MessageDialog.h"
+#include "Viewport.h"
 
-_SaveSimulationDialog::_SaveSimulationDialog(SimulationController const& simController)
+_SaveSimulationDialog::_SaveSimulationDialog(SimulationController const& simController, Viewport const& viewport)
     : _simController(simController)
+    , _viewport(viewport)
 {
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
@@ -34,9 +36,11 @@ void _SaveSimulationDialog::process()
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         DeserializedSimulation sim;
-        sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-        sim.settings = _simController->getSettings();
-        sim.content = _simController->getClusteredSimulationData();
+        sim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+        sim.auxiliaryData.zoom = _viewport->getZoomFactor();
+        sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
+        sim.auxiliaryData.settings = _simController->getSettings();
+        sim.mainData = _simController->getClusteredSimulationData();
 
         if (!Serializer::serializeSimulationToFiles(firstFilename.string(), sim)) {
             MessageDialog::getInstance().show("Save simulation", "The simulation could not be saved to the specified file.");

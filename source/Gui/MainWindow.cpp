@@ -123,7 +123,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     auto worldSize = _simController->getWorldSize();
     _viewport = std::make_shared<_Viewport>(_windowController);
     _uiController = std::make_shared<_UiController>();
-    _autosaveController = std::make_shared<_AutosaveController>(_simController);
+    _autosaveController = std::make_shared<_AutosaveController>(_simController, _viewport);
 
     _editorController =
         std::make_shared<_EditorController>(_simController, _viewport);
@@ -144,7 +144,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _gettingStartedWindow = std::make_shared<_GettingStartedWindow>();
     _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simController, _temporalControlWindow, _viewport, _statisticsWindow);
     _openSimulationDialog = std::make_shared<_OpenSimulationDialog>(_simController, _temporalControlWindow, _statisticsWindow, _viewport);
-    _saveSimulationDialog = std::make_shared<_SaveSimulationDialog>(_simController);
+    _saveSimulationDialog = std::make_shared<_SaveSimulationDialog>(_simController, _viewport);
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>(_windowController);
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
@@ -154,7 +154,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_browserWindow, _networkController);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog, _networkController);
     _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _resetPasswordDialog, _networkController);
-    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController);
+    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController, _viewport);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_viewport, _simController);
@@ -275,7 +275,7 @@ void _MainWindow::processUninitialized()
 {
     _startupController->process();
 
-    // render content
+    // render mainData
     ImGui::Render();
     int display_w, display_h;
     glfwGetFramebufferSize(_window, &display_w, &display_h);

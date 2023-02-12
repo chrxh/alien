@@ -48,12 +48,10 @@ void _OpenSimulationDialog::process()
             _simController->closeSimulation();
             _statisticsWindow->reset();
 
-            _simController->newSimulation(deserializedData.timestep, deserializedData.settings);
-            _simController->setClusteredSimulationData(deserializedData.content);
-            _viewport->setCenterInWorldPos(
-                {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
-                 toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
-            _viewport->setZoomFactor(12.0f);
+            _simController->newSimulation(deserializedData.auxiliaryData.timestep, deserializedData.auxiliaryData.settings);
+            _simController->setClusteredSimulationData(deserializedData.mainData);
+            _viewport->setCenterInWorldPos(deserializedData.auxiliaryData.center);
+            _viewport->setZoomFactor(deserializedData.auxiliaryData.zoom);
             _temporalControlWindow->onSnapshot();
         } else {
             MessageDialog::getInstance().show("Open simulation", "The selected file could not be opened.");

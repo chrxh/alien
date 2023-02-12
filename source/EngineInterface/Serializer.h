@@ -3,22 +3,19 @@
 #include "Base/Definitions.h"
 
 #include "Definitions.h"
-#include "Settings.h"
-#include "SimulationParameters.h"
-#include "GeneralSettings.h"
+#include "AuxiliaryData.h"
 #include "Descriptions.h"
 
 struct DeserializedSimulation
 {
-    uint64_t timestep;
-    Settings settings;
-    ClusteredDataDescription content;
+    AuxiliaryData auxiliaryData;
+    ClusteredDataDescription mainData;
 };
 
 struct SerializedSimulation
 {
-    std::string timestepAndSettings;
-    std::string content;
+    std::string auxiliaryData;  //JSON
+    std::string mainData;   //binary
 };
 
 class Serializer
@@ -35,9 +32,9 @@ public:
 
 private:
     static void serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream);
-    static void serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings, std::ostream& stream);
+    static void serializeAuxiliaryData(AuxiliaryData const& auxiliaryData, std::ostream& stream);
 
     static bool deserializeDataDescription(ClusteredDataDescription& data, std::string const& filename);
     static void deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream);
-    static void deserializeTimestepAndSettings(uint64_t& timestep, Settings& settings, std::istream& stream);
+    static void deserializeAuxiliaryData(AuxiliaryData& auxiliaryData, std::istream& stream);
 };

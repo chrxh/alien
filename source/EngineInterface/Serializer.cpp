@@ -21,7 +21,7 @@
 #include "Base/Resources.h"
 #include "Descriptions.h"
 #include "SimulationParameters.h"
-#include "SettingsParser.h"
+#include "AuxiliaryDataParser.h"
 #include "GenomeDescriptions.h"
 #include "GenomeDescriptionConverter.h"
 
@@ -532,14 +532,14 @@ bool Serializer::serializeSimulationToFiles(std::string const& filename, Deseria
             if (!stream) {
                 return false;
             }
-            serializeDataDescription(data.content, stream);
+            serializeDataDescription(data.mainData, stream);
         }
         {
             std::ofstream stream(settingsFilename.string(), std::ios::binary);
             if (!stream) {
                 return false;
             }
-            serializeTimestepAndSettings(data.timestep, data.settings, stream);
+            serializeAuxiliaryData(data.auxiliaryData, stream);
             stream.close();
         }
         return true;
@@ -554,7 +554,7 @@ bool Serializer::deserializeSimulationFromFiles(DeserializedSimulation& data, st
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
 
-        if (!deserializeDataDescription(data.content, filename)) {
+        if (!deserializeDataDescription(data.mainData, filename)) {
             return false;
         }
         {
@@ -562,7 +562,7 @@ bool Serializer::deserializeSimulationFromFiles(DeserializedSimulation& data, st
             if (!stream) {
                 return false;
             }
-            deserializeTimestepAndSettings(data.timestep, data.settings, stream);
+            deserializeAuxiliaryData(data.auxiliaryData, stream);
             stream.close();
         }
         return true;
@@ -580,14 +580,14 @@ bool Serializer::serializeSimulationToStrings(SerializedSimulation& output, Dese
             if (!stream) {
                 return false;
             }
-            serializeDataDescription(input.content, stream);
+            serializeDataDescription(input.mainData, stream);
             stream.flush();
-            output.content = stdStream.str();
+            output.mainData = stdStream.str();
         }
         {
             std::stringstream stream;
-            serializeTimestepAndSettings(input.timestep, input.settings, stream);
-            output.timestepAndSettings = stream.str();
+            serializeAuxiliaryData(input.auxiliaryData, stream);
+            output.auxiliaryData = stream.str();
         }
         return true;
     } catch (...) {
@@ -599,16 +599,16 @@ bool Serializer::deserializeSimulationFromStrings(DeserializedSimulation& output
 {
     try {
         {
-            std::stringstream stdStream(input.content);
+            std::stringstream stdStream(input.mainData);
             zstr::istream stream(stdStream, std::ios::binary);
             if (!stream) {
                 return false;
             }
-            deserializeDataDescription(output.content, stream);
+            deserializeDataDescription(output.mainData, stream);
         }
         {
-            std::stringstream stream(input.timestepAndSettings);
-            deserializeTimestepAndSettings(output.timestep, output.settings, stream);
+            std::stringstream stream(input.auxiliaryData);
+            deserializeAuxiliaryData(output.auxiliaryData, stream);
         }
         return true;
     } catch (...) {
@@ -650,9 +650,9 @@ void Serializer::serializeDataDescription(ClusteredDataDescription const& data, 
     archive(data);
 }
 
-void Serializer::serializeTimestepAndSettings(uint64_t timestep, Settings const& generalSettings, std::ostream& stream)
+void Serializer::serializeAuxiliaryData(AuxiliaryData const& auxiliaryData, std::ostream& stream)
 {
-    boost::property_tree::json_parser::write_json(stream, SettingsParser::encode(timestep, generalSettings));
+    boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParser::encode(auxiliaryData));
 }
 
 bool Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::string const& filename)
@@ -714,10 +714,10 @@ void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
     }
 }
 
-void Serializer::deserializeTimestepAndSettings(uint64_t& timestep, Settings& settings, std::istream& stream)
+void Serializer::deserializeAuxiliaryData(AuxiliaryData& auxiliaryData, std::istream& stream)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    std::tie(timestep, settings) = SettingsParser::decodeTimestepAndSettings(tree);
+    auxiliaryData = AuxiliaryDataParser::decode(tree);
 }
 
