@@ -323,6 +323,9 @@ __inline__ __device__ bool AttackerProcessor::isConnectedConnected(Cell* cell, C
 __inline__ __device__ int AttackerProcessor::getNumDefenderCells(Cell* cell)
 {
     int result = 0;
+    if (cell->cellFunction == CellFunction_None) {
+        return result;
+    }
     if (cell->cellFunction == CellFunction_Defender && cell->cellFunctionData.defender.mode == DefenderMode_DefendAgainstAttacker) {
         ++result;
     }

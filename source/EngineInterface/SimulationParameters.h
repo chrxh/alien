@@ -70,7 +70,7 @@ struct SimulationParameters
     float radiationVelocityPerturbation = 0.5f;
     int radiationMinCellAge = 500000;
     float highRadiationMinCellEnergy = 500;
-    float highRadiationFactor = 0.001f;
+    float highRadiationFactor = 0;
     bool clusterDecay = false;
     float clusterDecayProb = 0.0001f;
     
