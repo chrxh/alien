@@ -162,7 +162,7 @@ void _BrowserWindow::processTable()
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.contentScale(120.0f),
             RemoteSimulationDataColumnId_Description);
-        ImGui::TableSetupColumn("Likes", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Likes);
+        ImGui::TableSetupColumn("Stars", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Likes);
         ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_NumDownloads);
         ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Width);
         ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Height);
@@ -213,7 +213,7 @@ void _BrowserWindow::processTable()
                         _loginDialog.lock()->show();
                     }
                 }
-                AlienImGui::Tooltip("Like");
+                AlienImGui::Tooltip("Give a star");
 
                 if (liked) {
                     ImGui::PopStyleColor(1);
