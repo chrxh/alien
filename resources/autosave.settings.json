@@ -10,11 +10,12 @@
         "background color": "5703174",
         "time step size": "1.00000000",
         "motion": {
-            "type": "1",
-            "collision": {
-                "max distance": "1.29999995",
-                "repulsion strength": "0.08000000"
-            }
+            "type": "0"
+        },
+        "fluid": {
+            "smoothing length": "0.66000003",
+            "pressure strength": "0.10000000",
+            "viscosity strength": "0.10000000"
         },
         "friction": "0.00100000",
         "rigidity": "0.00000000",
@@ -62,6 +63,58 @@
                     },
                     "mutation color": "false",
                     "mutation self replication": "false"
+                },
+                "injector": {
+                    "radius": "2.00000000",
+                    "duration[0, 0]": "1",
+                    "duration[0, 1]": "1",
+                    "duration[0, 2]": "1",
+                    "duration[0, 3]": "1",
+                    "duration[0, 4]": "1",
+                    "duration[0, 5]": "1",
+                    "duration[0, 6]": "1",
+                    "duration[1, 0]": "1",
+                    "duration[1, 1]": "1",
+                    "duration[1, 2]": "1",
+                    "duration[1, 3]": "1",
+                    "duration[1, 4]": "1",
+                    "duration[1, 5]": "1",
+                    "duration[1, 6]": "1",
+                    "duration[2, 0]": "1",
+                    "duration[2, 1]": "1",
+                    "duration[2, 2]": "1",
+                    "duration[2, 3]": "1",
+                    "duration[2, 4]": "1",
+                    "duration[2, 5]": "1",
+                    "duration[2, 6]": "1",
+                    "duration[3, 0]": "1",
+                    "duration[3, 1]": "1",
+                    "duration[3, 2]": "1",
+                    "duration[3, 3]": "1",
+                    "duration[3, 4]": "1",
+                    "duration[3, 5]": "1",
+                    "duration[3, 6]": "1",
+                    "duration[4, 0]": "1",
+                    "duration[4, 1]": "1",
+                    "duration[4, 2]": "1",
+                    "duration[4, 3]": "1",
+                    "duration[4, 4]": "1",
+                    "duration[4, 5]": "1",
+                    "duration[4, 6]": "1",
+                    "duration[5, 0]": "1",
+                    "duration[5, 1]": "1",
+                    "duration[5, 2]": "1",
+                    "duration[5, 3]": "1",
+                    "duration[5, 4]": "1",
+                    "duration[5, 5]": "1",
+                    "duration[5, 6]": "1",
+                    "duration[6, 0]": "1",
+                    "duration[6, 1]": "1",
+                    "duration[6, 2]": "1",
+                    "duration[6, 3]": "1",
+                    "duration[6, 4]": "1",
+                    "duration[6, 5]": "1",
+                    "duration[6, 6]": "1"
                 },
                 "attacker": {
                     "radius": "1.60000002",
@@ -124,6 +177,10 @@
                     "food chain color matrix[6, 6]": "0.00000000",
                     "connections mismatch penalty": "0.33000001"
                 },
+                "defender": {
+                    "against attacker strength": "1.50000000",
+                    "against injector strength": "1.50000000"
+                },
                 "transmitter": {
                     "energy distribution same color": "true",
                     "energy distribution radius": "3.59999990",
@@ -131,7 +188,7 @@
                 },
                 "muscle": {
                     "contraction expansion delta": "0.05000000",
-                    "movement acceleration": "0.01500000",
+                    "movement acceleration": "0.00900000",
                     "bending angle": "5.00000000",
                     "bending acceleration": "0.13500001",
                     "bending acceleration threshold": "0.10000000"
@@ -143,7 +200,7 @@
             }
         },
         "radiation": {
-            "factor": "0.00001500",
+            "factor": "0.00003300",
             "probability": "0.03000000",
             "velocity multiplier": "1.00000000",
             "velocity perturbation": "0.50000000",
@@ -154,8 +211,11 @@
             "absorption by cell color[4]": "0.20000000",
             "absorption by cell color[5]": "0.20000000",
             "absorption by cell color[6]": "0.20000000",
+            "min cell age": "150583"
+        },
+        "high radiation": {
             "min cell energy": "500.00000000",
-            "min cell age": "148695"
+            "factor": "0.00100000"
         },
         "cluster": {
             "decay": "true",
@@ -195,7 +255,7 @@
                     "type": "1",
                     "radial": {
                         "orientation": "0",
-                        "strength": "0.00030000"
+                        "strength": "0.00070000"
                     }
                 },
                 "fadeout radius": "49.09999847",
@@ -210,7 +270,7 @@
                 "radiation": {
                     "factor": {
                         "activated": "false",
-                        "value": "0.00001500"
+                        "value": "0.00000500"
                     }
                 },
                 "cell": {
@@ -256,55 +316,55 @@
                             "color matrix": {
                                 "activated": "false"
                             },
-                            "color matrix[0, 0]": "1.00000000",
-                            "color matrix[0, 1]": "1.00000000",
+                            "color matrix[0, 0]": "0.00000000",
+                            "color matrix[0, 1]": "0.00000000",
                             "color matrix[0, 2]": "1.00000000",
-                            "color matrix[0, 3]": "1.00000000",
-                            "color matrix[0, 4]": "1.00000000",
-                            "color matrix[0, 5]": "1.00000000",
-                            "color matrix[0, 6]": "1.00000000",
-                            "color matrix[1, 0]": "1.00000000",
-                            "color matrix[1, 1]": "1.00000000",
+                            "color matrix[0, 3]": "0.20000000",
+                            "color matrix[0, 4]": "0.20000000",
+                            "color matrix[0, 5]": "0.20000000",
+                            "color matrix[0, 6]": "0.20000000",
+                            "color matrix[1, 0]": "0.00000000",
+                            "color matrix[1, 1]": "0.00000000",
                             "color matrix[1, 2]": "1.00000000",
-                            "color matrix[1, 3]": "1.00000000",
-                            "color matrix[1, 4]": "1.00000000",
-                            "color matrix[1, 5]": "1.00000000",
-                            "color matrix[1, 6]": "1.00000000",
-                            "color matrix[2, 0]": "1.00000000",
-                            "color matrix[2, 1]": "1.00000000",
-                            "color matrix[2, 2]": "1.00000000",
-                            "color matrix[2, 3]": "1.00000000",
-                            "color matrix[2, 4]": "1.00000000",
-                            "color matrix[2, 5]": "1.00000000",
-                            "color matrix[2, 6]": "1.00000000",
-                            "color matrix[3, 0]": "1.00000000",
-                            "color matrix[3, 1]": "1.00000000",
-                            "color matrix[3, 2]": "1.00000000",
-                            "color matrix[3, 3]": "1.00000000",
-                            "color matrix[3, 4]": "1.00000000",
-                            "color matrix[3, 5]": "1.00000000",
-                            "color matrix[3, 6]": "1.00000000",
-                            "color matrix[4, 0]": "1.00000000",
-                            "color matrix[4, 1]": "1.00000000",
-                            "color matrix[4, 2]": "1.00000000",
-                            "color matrix[4, 3]": "1.00000000",
-                            "color matrix[4, 4]": "1.00000000",
-                            "color matrix[4, 5]": "1.00000000",
-                            "color matrix[4, 6]": "1.00000000",
-                            "color matrix[5, 0]": "1.00000000",
-                            "color matrix[5, 1]": "1.00000000",
-                            "color matrix[5, 2]": "1.00000000",
-                            "color matrix[5, 3]": "1.00000000",
-                            "color matrix[5, 4]": "1.00000000",
-                            "color matrix[5, 5]": "1.00000000",
-                            "color matrix[5, 6]": "1.00000000",
-                            "color matrix[6, 0]": "1.00000000",
-                            "color matrix[6, 1]": "1.00000000",
-                            "color matrix[6, 2]": "1.00000000",
-                            "color matrix[6, 3]": "1.00000000",
-                            "color matrix[6, 4]": "1.00000000",
-                            "color matrix[6, 5]": "1.00000000",
-                            "color matrix[6, 6]": "1.00000000",
+                            "color matrix[1, 3]": "0.20000000",
+                            "color matrix[1, 4]": "0.20000000",
+                            "color matrix[1, 5]": "0.20000000",
+                            "color matrix[1, 6]": "0.20000000",
+                            "color matrix[2, 0]": "0.00000000",
+                            "color matrix[2, 1]": "0.00000000",
+                            "color matrix[2, 2]": "0.00000000",
+                            "color matrix[2, 3]": "0.00000000",
+                            "color matrix[2, 4]": "0.00000000",
+                            "color matrix[2, 5]": "0.00000000",
+                            "color matrix[2, 6]": "0.00000000",
+                            "color matrix[3, 0]": "0.00000000",
+                            "color matrix[3, 1]": "0.00000000",
+                            "color matrix[3, 2]": "0.00000000",
+                            "color matrix[3, 3]": "0.00000000",
+                            "color matrix[3, 4]": "0.00000000",
+                            "color matrix[3, 5]": "0.00000000",
+                            "color matrix[3, 6]": "0.00000000",
+                            "color matrix[4, 0]": "0.00000000",
+                            "color matrix[4, 1]": "0.00000000",
+                            "color matrix[4, 2]": "0.00000000",
+                            "color matrix[4, 3]": "0.00000000",
+                            "color matrix[4, 4]": "0.00000000",
+                            "color matrix[4, 5]": "0.00000000",
+                            "color matrix[4, 6]": "0.00000000",
+                            "color matrix[5, 0]": "0.00000000",
+                            "color matrix[5, 1]": "0.00000000",
+                            "color matrix[5, 2]": "0.00000000",
+                            "color matrix[5, 3]": "0.00000000",
+                            "color matrix[5, 4]": "0.00000000",
+                            "color matrix[5, 5]": "0.00000000",
+                            "color matrix[5, 6]": "0.00000000",
+                            "color matrix[6, 0]": "0.00000000",
+                            "color matrix[6, 1]": "0.00000000",
+                            "color matrix[6, 2]": "0.00000000",
+                            "color matrix[6, 3]": "0.00000000",
+                            "color matrix[6, 4]": "0.00000000",
+                            "color matrix[6, 5]": "0.00000000",
+                            "color matrix[6, 6]": "0.00000000",
                             "geometry deviation exponent": {
                                 "activated": "false",
                                 "value": "0.00000000"
@@ -318,7 +378,7 @@
                             "mutation probability": {
                                 "neuron data": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "value": "0.00100000"
                                 },
                                 "cell function": {
                                     "activated": "false",

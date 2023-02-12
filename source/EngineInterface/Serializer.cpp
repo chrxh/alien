@@ -50,7 +50,7 @@ namespace
     int constexpr Cell_InputBlocked = 6;
     int constexpr Cell_OutputBlocked = 7;
     int constexpr Cell_ActivationTime = 8;
-
+    
     int constexpr Constructor_ActivationMode = 0;
     int constexpr Constructor_SingleConstruction = 1;
     int constexpr Constructor_SeparateConstruction = 2;
@@ -350,73 +350,44 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NeuronDescription& data)
     {
-        if (task == SerializationTask::Load) {
-            ar(data.weights, data.biases);
-        } else {
-            NeuronDescription defaultObject;
-            auto auxiliaries = getLoadSaveMap(task, ar);
-            setLoadSaveMap(task, ar, auxiliaries);
+        NeuronDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        setLoadSaveMap(task, ar, auxiliaries);
 
-            ar(data.weights, data.biases);
-        }
+        ar(data.weights, data.biases);
     }
     SPLIT_SERIALIZATION(NeuronDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, TransmitterDescription& data)
     {
-        if (task == SerializationTask::Load) {
-            ar(data.mode);
-        } else {
-            TransmitterDescription defaultObject;
-            auto auxiliaries = getLoadSaveMap(task, ar);
-            loadSave<int>(task, auxiliaries, Transmitter_Mode, data.mode, defaultObject.mode);
-            setLoadSaveMap(task, ar, auxiliaries);
-        }
+        TransmitterDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Transmitter_Mode, data.mode, defaultObject.mode);
+        setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(TransmitterDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ConstructorDescription& data)
     {
-        //ConstructorDescription defaultObject;
-        //auto auxiliaries = getLoadSaveMap(task, ar);
-        //loadSave<int>(task, auxiliaries, Injector_Mode, data.activationMode, defaultObject.activationMode);
-        //loadSave<bool>(task, auxiliaries, Injector_Mode, data.singleConstruction, defaultObject.singleConstruction);
-        //loadSave<bool>(task, auxiliaries, Injector_Mode, data.separateConstruction, defaultObject.separateConstruction);
-        //loadSave<bool>(task, auxiliaries, Injector_Mode, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
-        //loadSave<int>(task, auxiliaries, Injector_Mode, data.angleAlignment, defaultObject.angleAlignment);
-        //loadSave<float>(task, auxiliaries, Injector_Mode, data.stiffness, defaultObject.stiffness);
-        //loadSave<int>(task, auxiliaries, Injector_Mode, data.constructionActivationTime, defaultObject.constructionActivationTime);
-        //loadSave<int>(task, auxiliaries, Injector_Mode, data.currentGenomePos, defaultObject.currentGenomePos);
-        //setLoadSaveMap(task, ar, auxiliaries);
+        ConstructorDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
+        loadSave<bool>(task, auxiliaries, Constructor_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
+        loadSave<bool>(task, auxiliaries, Constructor_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
+        loadSave<bool>(task, auxiliaries, Constructor_AdaptMaxConnections, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
+        loadSave<int>(task, auxiliaries, Constructor_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
+        loadSave<float>(task, auxiliaries, Constructor_Stiffness, data.stiffness, defaultObject.stiffness);
+        loadSave<int>(task, auxiliaries, Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
+        loadSave<int>(task, auxiliaries, Constructor_CurrentGenomePos, data.currentGenomePos, defaultObject.currentGenomePos);
+        setLoadSaveMap(task, ar, auxiliaries);
+
         if (task == SerializationTask::Load) {
-            ar(data.activationMode,
-               data.singleConstruction,
-               data.separateConstruction,
-               data.adaptMaxConnections,
-               data.angleAlignment,
-               data.genome,
-               data.constructionActivationTime,
-               data.currentGenomePos);
-
-            //GenomeDescription genomeDesc;
-            //ar(genomeDesc);
-            //data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
-
+            GenomeDescription genomeDesc;
+            ar(genomeDesc);
+            data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
         } else {
-            ConstructorDescription defaultObject;
-            auto auxiliaries = getLoadSaveMap(task, ar);
-            loadSave<int>(task, auxiliaries, Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
-            loadSave<bool>(task, auxiliaries, Constructor_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
-            loadSave<bool>(task, auxiliaries, Constructor_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
-            loadSave<bool>(task, auxiliaries, Constructor_AdaptMaxConnections, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
-            loadSave<int>(task, auxiliaries, Constructor_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
-            loadSave<float>(task, auxiliaries, Constructor_Stiffness, data.stiffness, defaultObject.stiffness);
-            loadSave<int>(task, auxiliaries, Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
-            loadSave<int>(task, auxiliaries, Constructor_CurrentGenomePos, data.currentGenomePos, defaultObject.currentGenomePos);
-            setLoadSaveMap(task, ar, auxiliaries);
-
             GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
             ar(genomeDesc);
         }
@@ -426,69 +397,50 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, SensorDescription& data)
     {
-        if (task == SerializationTask::Load) {
-            ar(data.fixedAngle, data.minDensity, data.color);
-        } else {
-            SensorDescription defaultObject;
-            auto auxiliaries = getLoadSaveMap(task, ar);
-            loadSave<std::optional<float>>(task, auxiliaries, Sensor_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
-            loadSave<float>(task, auxiliaries, Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
-            loadSave<int>(task, auxiliaries, Sensor_Color, data.color, defaultObject.color);
-            setLoadSaveMap(task, ar, auxiliaries);
-        }
+        SensorDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<std::optional<float>>(task, auxiliaries, Sensor_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
+        loadSave<float>(task, auxiliaries, Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
+        loadSave<int>(task, auxiliaries, Sensor_Color, data.color, defaultObject.color);
+        setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SensorDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NerveDescription& data)
     {
-        if (task == SerializationTask::Load) {
-            ar(data.pulseMode, data.alternationMode);
-        } else {
-            NerveDescription defaultObject;
-            auto auxiliaries = getLoadSaveMap(task, ar);
-            loadSave<int>(task, auxiliaries, Nerve_PulseMode, data.pulseMode, defaultObject.pulseMode);
-            loadSave<int>(task, auxiliaries, Nerve_AlternationMode, data.alternationMode, defaultObject.alternationMode);
-            setLoadSaveMap(task, ar, auxiliaries);
-        }
+        NerveDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Nerve_PulseMode, data.pulseMode, defaultObject.pulseMode);
+        loadSave<int>(task, auxiliaries, Nerve_AlternationMode, data.alternationMode, defaultObject.alternationMode);
+        setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(NerveDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackerDescription& data)
     {
-        if (task == SerializationTask::Load) {
-            ar(data.mode);
-        } else {
-            AttackerDescription defaultObject;
-            auto auxiliaries = getLoadSaveMap(task, ar);
-            loadSave<int>(task, auxiliaries, Attacker_Mode, data.mode, defaultObject.mode);
-            setLoadSaveMap(task, ar, auxiliaries);
-        }
+        AttackerDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Attacker_Mode, data.mode, defaultObject.mode);
+        setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackerDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, InjectorDescription& data)
     {
-        //InjectorDescription defaultObject;
-        //auto auxiliaries = getLoadSaveMap(task, ar);
-        //loadSave<int>(task, auxiliaries, Injector_Mode, data.mode, defaultObject.mode);
-        //loadSave<int>(task, auxiliaries, Injector_Counter, data.counter, defaultObject.counter);
-        //setLoadSaveMap(task, ar, auxiliaries);
+        InjectorDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Injector_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Injector_Counter, data.counter, defaultObject.counter);
+        setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            ar(data.genome);
-            //GenomeDescription genomeDesc;
-            //ar(genomeDesc);
-            //data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+            GenomeDescription genomeDesc;
+            ar(genomeDesc);
+            data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
         } else {
-            InjectorDescription defaultObject;
-            auto auxiliaries = getLoadSaveMap(task, ar);
-            loadSave<int>(task, auxiliaries, Injector_Mode, data.mode, defaultObject.mode);
-            loadSave<int>(task, auxiliaries, Injector_Counter, data.counter, defaultObject.counter);
-            setLoadSaveMap(task, ar, auxiliaries);
-
             GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
             ar(genomeDesc);
         }
@@ -498,80 +450,48 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MuscleDescription& data)
     {
-        if (task == SerializationTask::Load) {
-            ar(data.mode);
-        } else {
-            MuscleDescription defaultObject;
-            auto auxiliaries = getLoadSaveMap(task, ar);
-            loadSave<int>(task, auxiliaries, Muscle_Mode, data.mode, defaultObject.mode);
-            setLoadSaveMap(task, ar, auxiliaries);
-        }
+        MuscleDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Muscle_Mode, data.mode, defaultObject.mode);
+        setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(MuscleDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DefenderDescription& data)
     {
-        if (task == SerializationTask::Load) {
-            ar(data.mode);
-        } else {
-            DefenderDescription defaultObject;
-            auto auxiliaries = getLoadSaveMap(task, ar);
-            loadSave<int>(task, auxiliaries, Defender_Mode, data.mode, defaultObject.mode);
-            setLoadSaveMap(task, ar, auxiliaries);
-        }
+        DefenderDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Defender_Mode, data.mode, defaultObject.mode);
+        setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DefenderDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, PlaceHolderDescription& data)
     {
-        if (task == SerializationTask::Load) {
-        } else {
-            auto auxiliaries = getLoadSaveMap(task, ar);
-            setLoadSaveMap(task, ar, auxiliaries);
-        }
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(PlaceHolderDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellDescription& data)
     {
-        if (task == SerializationTask::Load) {
-                ar(data.id,
-                   data.connections,
-                   data.pos,
-                   data.vel,
-                   data.energy,
-                   data.stiffness,
-                   data.color,
-                   data.maxConnections,
-                   data.executionOrderNumber,
-                   data.barrier,
-                   data.age,
-                   data.livingState,
-                   data.inputBlocked,
-                   data.outputBlocked,
-                   data.cellFunction,
-                   data.activity,
-                   data.metadata,
-                   data.activationTime);
-        } else {
-            CellDescription defaultObject;
-            auto auxiliaries = getLoadSaveMap(task, ar);
-            loadSave<float>(task, auxiliaries, Cell_Stiffness, data.stiffness, defaultObject.stiffness);
-            loadSave<int>(task, auxiliaries, Cell_Color, data.color, defaultObject.color);
-            loadSave<int>(task, auxiliaries, Cell_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
-            loadSave<bool>(task, auxiliaries, Cell_Barrier, data.barrier, defaultObject.barrier);
-            loadSave<int>(task, auxiliaries, Cell_Age, data.age, defaultObject.age);
-            loadSave<int>(task, auxiliaries, Cell_LivingState, data.livingState, defaultObject.livingState);
-            loadSave<bool>(task, auxiliaries, Cell_InputBlocked, data.inputBlocked, defaultObject.inputBlocked);
-            loadSave<bool>(task, auxiliaries, Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
-            loadSave<int>(task, auxiliaries, Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
-            setLoadSaveMap(task, ar, auxiliaries);
+        CellDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<float>(task, auxiliaries, Cell_Stiffness, data.stiffness, defaultObject.stiffness);
+        loadSave<int>(task, auxiliaries, Cell_Color, data.color, defaultObject.color);
+        loadSave<int>(task, auxiliaries, Cell_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
+        loadSave<bool>(task, auxiliaries, Cell_Barrier, data.barrier, defaultObject.barrier);
+        loadSave<int>(task, auxiliaries, Cell_Age, data.age, defaultObject.age);
+        loadSave<int>(task, auxiliaries, Cell_LivingState, data.livingState, defaultObject.livingState);
+        loadSave<bool>(task, auxiliaries, Cell_InputBlocked, data.inputBlocked, defaultObject.inputBlocked);
+        loadSave<bool>(task, auxiliaries, Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
+        loadSave<int>(task, auxiliaries, Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
+        setLoadSaveMap(task, ar, auxiliaries);
 
-            ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
-        }
+        ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
     }
     SPLIT_SERIALIZATION(CellDescription)
 
@@ -584,17 +504,12 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ParticleDescription& data)
     {
-        if (task == SerializationTask::Load) {
-            ar(data.id, data.pos, data.vel, data.energy, data.color);
-        } else {
-            ParticleDescription defaultObject;
-            auto auxiliaries = getLoadSaveMap(task, ar);
-            loadSave<int>(task, auxiliaries, Particle_Color, data.color, defaultObject.color);
-            setLoadSaveMap(task, ar, auxiliaries);
+        ParticleDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Particle_Color, data.color, defaultObject.color);
+        setLoadSaveMap(task, ar, auxiliaries);
 
-            ar(data.id, data.pos, data.vel, data.energy);
-        }
-
+        ar(data.id, data.pos, data.vel, data.energy);
     }
     SPLIT_SERIALIZATION(ParticleDescription)
 
