@@ -351,7 +351,7 @@ void _BrowserWindow::onOpenSimulation(std::string const& id)
     }
 
     DeserializedSimulation deserializedSim;
-    if (!Serializer::deserializeSimulationFromStrings(deserializedSim, content, settings)) {
+    if (!Serializer::deserializeSimulationFromStrings(deserializedSim, {settings, content})) {
         MessageDialog::getInstance().show("Error", "Failed to load simulation. Your program version may not match.");
         return;
     }

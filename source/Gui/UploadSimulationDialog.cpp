@@ -91,19 +91,19 @@ void _UploadSimulationDialog::onUpload()
     sim.settings = _simController->getSettings();
     sim.content = _simController->getClusteredSimulationData();
 
-    std::string content, settings;
-    if (!Serializer::serializeSimulationToStrings(content, settings, sim)) {
+    SerializedSimulation serializedSim;
+    if (!Serializer::serializeSimulationToStrings(serializedSim, sim)) {
         MessageDialog::getInstance().show("Save simulation", "The simulation could not be uploaded.");
         return;
     }
 
     if (!_networkController->uploadSimulation(
-        _simName,
-        _simDescription,
-        {sim.settings.generalSettings.worldSizeX, sim.settings.generalSettings.worldSizeY},
-        sim.content.getNumberOfCellAndParticles(),
-        content,
-        settings)) {
+            _simName,
+            _simDescription,
+            {sim.settings.generalSettings.worldSizeX, sim.settings.generalSettings.worldSizeY},
+            sim.content.getNumberOfCellAndParticles(),
+            serializedSim.content,
+            serializedSim.timestepAndSettings)) {
         MessageDialog::getInstance().show("Error", "Failed to upload simulation.");
         return;
     }
