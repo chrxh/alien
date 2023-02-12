@@ -173,17 +173,18 @@ void _SpatialControlWindow::processCenterOnSelection()
 
 void _SpatialControlWindow::onResizing()
 {
-    auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-    auto settings = _simController->getSettings();
+    auto timestep = _simController->getCurrentTimestep();
+    auto generalSettings = _simController->getGeneralSettings();
+    auto parameters = _simController->getSimulationParameters();
     auto content = _simController->getClusteredSimulationData();
 
     _simController->closeSimulation();
 
-    IntVector2D origWorldSize{settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY};
-    settings.generalSettings.worldSizeX = _width;
-    settings.generalSettings.worldSizeY = _height;
+    IntVector2D origWorldSize{generalSettings.worldSizeX, generalSettings.worldSizeY};
+    generalSettings.worldSizeX = _width;
+    generalSettings.worldSizeY = _height;
     
-    _simController->newSimulation(timestep, settings);
+    _simController->newSimulation(timestep, generalSettings, parameters);
 
     DescriptionHelper::correctConnections(content, {_width, _height});
     if (_scaleContent) {

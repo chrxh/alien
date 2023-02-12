@@ -80,13 +80,14 @@ void _NewSimulationDialog::onNewSimulation()
 
     _statisticsWindow->reset();
 
-    Settings settings;
-    settings.generalSettings.worldSizeX = _width;
-    settings.generalSettings.worldSizeY = _height;
+    GeneralSettings generalSettings;
+    generalSettings.worldSizeX = _width;
+    generalSettings.worldSizeY = _height;
+    SimulationParameters parameters;
     if (_adoptSimulationParameters) {
-        settings.simulationParameters = _simController->getSimulationParameters();
+        parameters = _simController->getSimulationParameters();
     }
-    _simController->newSimulation(0, settings);
+    _simController->newSimulation(0, generalSettings, parameters);
     _viewport->setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     _viewport->setZoomFactor(12.0f);
     _temporalControlWindow->onSnapshot();

@@ -39,7 +39,7 @@ class EngineWorker
 public:
     void initCuda();
 
-    void newSimulation(uint64_t timestep, Settings const& settings);
+    void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters);
     void clear();
 
     void registerImageResource(void* image);

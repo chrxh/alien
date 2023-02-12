@@ -18,7 +18,7 @@ public:
 
     void initCuda() override;
 
-    void newSimulation(uint64_t timestep, Settings const& settings) override;
+    void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters) override;
     void clear() override;
 
     void registerImageResource(void* image) override;
@@ -99,7 +99,6 @@ public:
 
     GeneralSettings getGeneralSettings() const override;
     IntVector2D getWorldSize() const override;
-    Settings getSettings() const override;
     MonitorData getStatistics() const override;
 
     std::optional<int> getTpsRestriction() const override;

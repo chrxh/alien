@@ -48,7 +48,8 @@ void _OpenSimulationDialog::process()
             _simController->closeSimulation();
             _statisticsWindow->reset();
 
-            _simController->newSimulation(deserializedData.auxiliaryData.timestep, deserializedData.auxiliaryData.settings);
+            _simController->newSimulation(
+                deserializedData.auxiliaryData.timestep, deserializedData.auxiliaryData.generalSettings, deserializedData.auxiliaryData.simulationParameters);
             _simController->setClusteredSimulationData(deserializedData.mainData);
             _viewport->setCenterInWorldPos(deserializedData.auxiliaryData.center);
             _viewport->setZoomFactor(deserializedData.auxiliaryData.zoom);

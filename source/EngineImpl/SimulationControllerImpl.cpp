@@ -7,11 +7,12 @@ void _SimulationControllerImpl::initCuda()
     _worker.initCuda();
 }
 
-void _SimulationControllerImpl::newSimulation(uint64_t timestep, Settings const& settings)
+void _SimulationControllerImpl::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
 {
-    _settings = settings;
-    _origSettings = settings;
-    _worker.newSimulation(timestep, settings);
+    _settings.simulationParameters = parameters;
+    _settings.generalSettings = generalSettings;
+    _origSettings = _settings;
+    _worker.newSimulation(timestep, generalSettings, parameters);
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 
@@ -310,11 +311,6 @@ GeneralSettings _SimulationControllerImpl::getGeneralSettings() const
 IntVector2D _SimulationControllerImpl::getWorldSize() const
 {
     return {_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
-}
-
-Settings _SimulationControllerImpl::getSettings() const
-{
-    return _settings;
 }
 
 MonitorData _SimulationControllerImpl::getStatistics() const

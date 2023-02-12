@@ -39,7 +39,8 @@ void _SaveSimulationDialog::process()
         sim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
         sim.auxiliaryData.zoom = _viewport->getZoomFactor();
         sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
-        sim.auxiliaryData.settings = _simController->getSettings();
+        sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
+        sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
         sim.mainData = _simController->getClusteredSimulationData();
 
         if (!Serializer::serializeSimulationToFiles(firstFilename.string(), sim)) {

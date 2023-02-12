@@ -18,12 +18,13 @@ void EngineWorker::initCuda()
     _CudaSimulationFacade::initCuda();
 }
 
-void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings)
+void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
 {
     _accessState = 0;
-    _settings = settings;
-    _dataTOCache = std::make_shared<_AccessDataTOCache>(settings.gpuSettings);
-    _cudaSimulation = std::make_shared<_CudaSimulationFacade>(timestep, settings);
+    _settings.generalSettings = generalSettings;
+    _settings.simulationParameters = parameters;
+    _dataTOCache = std::make_shared<_AccessDataTOCache>();
+    _cudaSimulation = std::make_shared<_CudaSimulationFacade>(timestep, _settings);
 
     if (_imageResourceToRegister) {
         _cudaResource = _cudaSimulation->registerImageResource(*_imageResourceToRegister);

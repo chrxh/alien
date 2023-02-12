@@ -359,7 +359,8 @@ void _BrowserWindow::onOpenSimulation(std::string const& id)
     _simController->closeSimulation();
     _statisticsWindow->reset();
 
-    _simController->newSimulation(deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.settings);
+    _simController->newSimulation(
+        deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
     _simController->setClusteredSimulationData(deserializedSim.mainData);
     _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
     _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);

@@ -60,7 +60,8 @@ void _AutosaveController::onSave()
     sim.auxiliaryData.timestep = _simController->getCurrentTimestep();
     sim.auxiliaryData.zoom = _viewport->getZoomFactor();
     sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
-    sim.auxiliaryData.settings = _simController->getSettings();
+    sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
+    sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
     sim.mainData = _simController->getClusteredSimulationData();
     Serializer::serializeSimulationToFiles(Const::AutosaveFile, sim);
 }
