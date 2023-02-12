@@ -39,77 +39,77 @@
 
 namespace
 {
-    int constexpr Particle_Color = 0;
+    auto constexpr Id_Particle_Color = 0;
 
-    int constexpr Cell_Stiffness = 0;
-    int constexpr Cell_Color = 1;
-    int constexpr Cell_ExecutionOrderNumber = 2;
-    int constexpr Cell_Barrier = 3;
-    int constexpr Cell_Age = 4;
-    int constexpr Cell_LivingState = 5;
-    int constexpr Cell_InputBlocked = 6;
-    int constexpr Cell_OutputBlocked = 7;
-    int constexpr Cell_ActivationTime = 8;
+    auto constexpr Id_Cell_Stiffness = 0;
+    auto constexpr Id_Cell_Color = 1;
+    auto constexpr Id_Cell_ExecutionOrderNumber = 2;
+    auto constexpr Id_Cell_Barrier = 3;
+    auto constexpr Id_Cell_Age = 4;
+    auto constexpr Id_Cell_LivingState = 5;
+    auto constexpr Id_Cell_InputBlocked = 6;
+    auto constexpr Id_Cell_OutputBlocked = 7;
+    auto constexpr Id_Cell_ActivationTime = 8;
     
-    int constexpr Constructor_ActivationMode = 0;
-    int constexpr Constructor_SingleConstruction = 1;
-    int constexpr Constructor_SeparateConstruction = 2;
-    int constexpr Constructor_AdaptMaxConnections = 3;
-    int constexpr Constructor_AngleAlignment = 4;
-    int constexpr Constructor_Stiffness = 5;
-    int constexpr Constructor_ConstructionActivationTime = 6;
-    int constexpr Constructor_CurrentGenomePos = 7;
+    auto constexpr Id_Constructor_ActivationMode = 0;
+    auto constexpr Id_Constructor_SingleConstruction = 1;
+    auto constexpr Id_Constructor_SeparateConstruction = 2;
+    auto constexpr Id_Constructor_AdaptMaxConnections = 3;
+    auto constexpr Id_Constructor_AngleAlignment = 4;
+    auto constexpr Id_Constructor_Stiffness = 5;
+    auto constexpr Id_Constructor_ConstructionActivationTime = 6;
+    auto constexpr Id_Constructor_CurrentGenomePos = 7;
 
-    int constexpr Defender_Mode = 0;
+    auto constexpr Id_Defender_Mode = 0;
 
-    int constexpr Muscle_Mode = 0;
+    auto constexpr Id_Muscle_Mode = 0;
 
-    int constexpr Injector_Mode = 0;
-    int constexpr Injector_Counter = 1;
+    auto constexpr Id_Injector_Mode = 0;
+    auto constexpr Id_Injector_Counter = 1;
 
-    int constexpr Attacker_Mode = 0;
+    auto constexpr Id_Attacker_Mode = 0;
 
-    int constexpr Nerve_PulseMode = 0;
-    int constexpr Nerve_AlternationMode = 1;
+    auto constexpr Id_Nerve_PulseMode = 0;
+    auto constexpr Id_Nerve_AlternationMode = 1;
 
-    int constexpr Sensor_FixedAngle = 0;
-    int constexpr Sensor_MinDensity = 1;
-    int constexpr Sensor_Color = 2;
+    auto constexpr Id_Sensor_FixedAngle = 0;
+    auto constexpr Id_Sensor_MinDensity = 1;
+    auto constexpr Id_Sensor_Color = 2;
 
-    int constexpr Transmitter_Mode = 0;
+    auto constexpr Id_Transmitter_Mode = 0;
 
-    int constexpr CellGenome_ReferenceDistance = 0;
-    int constexpr CellGenome_ReferenceAngle = 1;
-    int constexpr CellGenome_Color = 2;
-    int constexpr CellGenome_MaxConnections = 3;
-    int constexpr CellGenome_ExecutionOrderNumber = 4;
-    int constexpr CellGenome_InputBlocked = 5;
-    int constexpr CellGenome_OutputBlocked = 6;
+    auto constexpr Id_CellGenome_ReferenceDistance = 0;
+    auto constexpr Id_CellGenome_ReferenceAngle = 1;
+    auto constexpr Id_CellGenome_Color = 2;
+    auto constexpr Id_CellGenome_MaxConnections = 3;
+    auto constexpr Id_CellGenome_ExecutionOrderNumber = 4;
+    auto constexpr Id_CellGenome_InputBlocked = 5;
+    auto constexpr Id_CellGenome_OutputBlocked = 6;
 
-    int constexpr TransmitterGenome_Mode = 0;
+    auto constexpr Id_TransmitterGenome_Mode = 0;
 
-    int constexpr ConstructorGenome_Mode = 0;
-    int constexpr ConstructorGenome_SingleConstruction = 1;
-    int constexpr ConstructorGenome_SeparateConstruction = 2;
-    int constexpr ConstructorGenome_AdaptMaxConnections = 3;
-    int constexpr ConstructorGenome_AngleAlignment = 4;
-    int constexpr ConstructorGenome_Stiffness = 5;
-    int constexpr ConstructorGenome_ConstructionActivationTime = 6;
+    auto constexpr Id_ConstructorGenome_Mode = 0;
+    auto constexpr Id_ConstructorGenome_SingleConstruction = 1;
+    auto constexpr Id_ConstructorGenome_SeparateConstruction = 2;
+    auto constexpr Id_ConstructorGenome_AdaptMaxConnections = 3;
+    auto constexpr Id_ConstructorGenome_AngleAlignment = 4;
+    auto constexpr Id_ConstructorGenome_Stiffness = 5;
+    auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 6;
 
-    int constexpr DefenderGenome_Mode = 0;
+    auto constexpr Id_DefenderGenome_Mode = 0;
 
-    int constexpr MuscleGenome_Mode = 0;
+    auto constexpr Id_MuscleGenome_Mode = 0;
 
-    int constexpr InjectorGenome_Mode = 0;
+    auto constexpr Id_InjectorGenome_Mode = 0;
 
-    int constexpr AttackerGenome_Mode = 0;
+    auto constexpr Id_AttackerGenome_Mode = 0;
 
-    int constexpr NerveGenome_PulseMode = 0;
-    int constexpr NerveGenome_AlternationMode = 1;
+    auto constexpr Id_NerveGenome_PulseMode = 0;
+    auto constexpr Id_NerveGenome_AlternationMode = 1;
 
-    int constexpr SensorGenome_FixedAngle = 0;
-    int constexpr SensorGenome_MinDensity = 1;
-    int constexpr SensorGenome_Color = 2;
+    auto constexpr Id_SensorGenome_FixedAngle = 0;
+    auto constexpr Id_SensorGenome_MinDensity = 1;
+    auto constexpr Id_SensorGenome_Color = 2;
 
 }
 
@@ -181,7 +181,7 @@ namespace cereal
     {
         TransmitterGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, TransmitterGenome_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Id_TransmitterGenome_Mode, data.mode, defaultObject.mode);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(TransmitterGenomeDescription)
@@ -195,13 +195,13 @@ namespace cereal
     {
         ConstructorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, ConstructorGenome_Mode, data.mode, defaultObject.mode);
-        loadSave<bool>(task, auxiliaries, ConstructorGenome_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
-        loadSave<bool>(task, auxiliaries, ConstructorGenome_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
-        loadSave<bool>(task, auxiliaries, ConstructorGenome_AdaptMaxConnections, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
-        loadSave<int>(task, auxiliaries, ConstructorGenome_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
-        loadSave<float>(task, auxiliaries, ConstructorGenome_Stiffness, data.stiffness, defaultObject.stiffness);
-        loadSave<int>(task, auxiliaries, ConstructorGenome_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
+        loadSave<int>(task, auxiliaries, Id_ConstructorGenome_Mode, data.mode, defaultObject.mode);
+        loadSave<bool>(task, auxiliaries, Id_ConstructorGenome_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
+        loadSave<bool>(task, auxiliaries, Id_ConstructorGenome_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
+        loadSave<bool>(task, auxiliaries, Id_ConstructorGenome_AdaptMaxConnections, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
+        loadSave<int>(task, auxiliaries, Id_ConstructorGenome_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
+        loadSave<float>(task, auxiliaries, Id_ConstructorGenome_Stiffness, data.stiffness, defaultObject.stiffness);
+        loadSave<int>(task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
@@ -229,9 +229,9 @@ namespace cereal
     {
         SensorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<std::optional<float>>(task, auxiliaries, SensorGenome_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
-        loadSave<float>(task, auxiliaries, SensorGenome_MinDensity, data.minDensity, defaultObject.minDensity);
-        loadSave<int>(task, auxiliaries, SensorGenome_Color, data.color, defaultObject.color);
+        loadSave<std::optional<float>>(task, auxiliaries, Id_SensorGenome_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
+        loadSave<float>(task, auxiliaries, Id_SensorGenome_MinDensity, data.minDensity, defaultObject.minDensity);
+        loadSave<int>(task, auxiliaries, Id_SensorGenome_Color, data.color, defaultObject.color);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SensorGenomeDescription)
@@ -241,8 +241,8 @@ namespace cereal
     {
         NerveGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, NerveGenome_PulseMode, data.pulseMode, defaultObject.pulseMode);
-        loadSave<int>(task, auxiliaries, NerveGenome_AlternationMode, data.alternationMode, defaultObject.alternationMode);
+        loadSave<int>(task, auxiliaries, Id_NerveGenome_PulseMode, data.pulseMode, defaultObject.pulseMode);
+        loadSave<int>(task, auxiliaries, Id_NerveGenome_AlternationMode, data.alternationMode, defaultObject.alternationMode);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(NerveGenomeDescription)
@@ -252,7 +252,7 @@ namespace cereal
     {
         AttackerGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, AttackerGenome_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Id_AttackerGenome_Mode, data.mode, defaultObject.mode);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackerGenomeDescription)
@@ -262,7 +262,7 @@ namespace cereal
     {
         InjectorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, InjectorGenome_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Id_InjectorGenome_Mode, data.mode, defaultObject.mode);
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
@@ -290,7 +290,7 @@ namespace cereal
     {
         MuscleGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, MuscleGenome_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Id_MuscleGenome_Mode, data.mode, defaultObject.mode);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(MuscleGenomeDescription)
@@ -300,7 +300,7 @@ namespace cereal
     {
         DefenderGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, DefenderGenome_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Id_DefenderGenome_Mode, data.mode, defaultObject.mode);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DefenderGenomeDescription)
@@ -318,13 +318,13 @@ namespace cereal
     {
         CellGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<float>(task, auxiliaries, CellGenome_ReferenceDistance, data.referenceDistance, defaultObject.referenceDistance);
-        loadSave<float>(task, auxiliaries, CellGenome_ReferenceAngle, data.referenceAngle, defaultObject.referenceAngle);
-        loadSave<int>(task, auxiliaries, CellGenome_Color, data.color, defaultObject.color);
-        loadSave<int>(task, auxiliaries, CellGenome_MaxConnections, data.maxConnections, defaultObject.maxConnections);
-        loadSave<int>(task, auxiliaries, CellGenome_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
-        loadSave<bool>(task, auxiliaries, CellGenome_InputBlocked, data.inputBlocked, defaultObject.inputBlocked);
-        loadSave<bool>(task, auxiliaries, CellGenome_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
+        loadSave<float>(task, auxiliaries, Id_CellGenome_ReferenceDistance, data.referenceDistance, defaultObject.referenceDistance);
+        loadSave<float>(task, auxiliaries, Id_CellGenome_ReferenceAngle, data.referenceAngle, defaultObject.referenceAngle);
+        loadSave<int>(task, auxiliaries, Id_CellGenome_Color, data.color, defaultObject.color);
+        loadSave<int>(task, auxiliaries, Id_CellGenome_MaxConnections, data.maxConnections, defaultObject.maxConnections);
+        loadSave<int>(task, auxiliaries, Id_CellGenome_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
+        loadSave<bool>(task, auxiliaries, Id_CellGenome_InputBlocked, data.inputBlocked, defaultObject.inputBlocked);
+        loadSave<bool>(task, auxiliaries, Id_CellGenome_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         setLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.cellFunction);
@@ -363,7 +363,7 @@ namespace cereal
     {
         TransmitterDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Transmitter_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Id_Transmitter_Mode, data.mode, defaultObject.mode);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(TransmitterDescription)
@@ -373,14 +373,14 @@ namespace cereal
     {
         ConstructorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
-        loadSave<bool>(task, auxiliaries, Constructor_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
-        loadSave<bool>(task, auxiliaries, Constructor_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
-        loadSave<bool>(task, auxiliaries, Constructor_AdaptMaxConnections, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
-        loadSave<int>(task, auxiliaries, Constructor_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
-        loadSave<float>(task, auxiliaries, Constructor_Stiffness, data.stiffness, defaultObject.stiffness);
-        loadSave<int>(task, auxiliaries, Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
-        loadSave<int>(task, auxiliaries, Constructor_CurrentGenomePos, data.currentGenomePos, defaultObject.currentGenomePos);
+        loadSave<int>(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
+        loadSave<bool>(task, auxiliaries, Id_Constructor_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
+        loadSave<bool>(task, auxiliaries, Id_Constructor_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
+        loadSave<bool>(task, auxiliaries, Id_Constructor_AdaptMaxConnections, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
+        loadSave<int>(task, auxiliaries, Id_Constructor_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
+        loadSave<float>(task, auxiliaries, Id_Constructor_Stiffness, data.stiffness, defaultObject.stiffness);
+        loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
+        loadSave<int>(task, auxiliaries, Id_Constructor_CurrentGenomePos, data.currentGenomePos, defaultObject.currentGenomePos);
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
@@ -399,9 +399,9 @@ namespace cereal
     {
         SensorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<std::optional<float>>(task, auxiliaries, Sensor_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
-        loadSave<float>(task, auxiliaries, Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
-        loadSave<int>(task, auxiliaries, Sensor_Color, data.color, defaultObject.color);
+        loadSave<std::optional<float>>(task, auxiliaries, Id_Sensor_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
+        loadSave<float>(task, auxiliaries, Id_Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
+        loadSave<int>(task, auxiliaries, Id_Sensor_Color, data.color, defaultObject.color);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SensorDescription)
@@ -411,8 +411,8 @@ namespace cereal
     {
         NerveDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Nerve_PulseMode, data.pulseMode, defaultObject.pulseMode);
-        loadSave<int>(task, auxiliaries, Nerve_AlternationMode, data.alternationMode, defaultObject.alternationMode);
+        loadSave<int>(task, auxiliaries, Id_Nerve_PulseMode, data.pulseMode, defaultObject.pulseMode);
+        loadSave<int>(task, auxiliaries, Id_Nerve_AlternationMode, data.alternationMode, defaultObject.alternationMode);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(NerveDescription)
@@ -422,7 +422,7 @@ namespace cereal
     {
         AttackerDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Attacker_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Id_Attacker_Mode, data.mode, defaultObject.mode);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackerDescription)
@@ -432,8 +432,8 @@ namespace cereal
     {
         InjectorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Injector_Mode, data.mode, defaultObject.mode);
-        loadSave<int>(task, auxiliaries, Injector_Counter, data.counter, defaultObject.counter);
+        loadSave<int>(task, auxiliaries, Id_Injector_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Id_Injector_Counter, data.counter, defaultObject.counter);
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
@@ -452,7 +452,7 @@ namespace cereal
     {
         MuscleDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Muscle_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Id_Muscle_Mode, data.mode, defaultObject.mode);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(MuscleDescription)
@@ -462,7 +462,7 @@ namespace cereal
     {
         DefenderDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Defender_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Id_Defender_Mode, data.mode, defaultObject.mode);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DefenderDescription)
@@ -480,15 +480,15 @@ namespace cereal
     {
         CellDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<float>(task, auxiliaries, Cell_Stiffness, data.stiffness, defaultObject.stiffness);
-        loadSave<int>(task, auxiliaries, Cell_Color, data.color, defaultObject.color);
-        loadSave<int>(task, auxiliaries, Cell_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
-        loadSave<bool>(task, auxiliaries, Cell_Barrier, data.barrier, defaultObject.barrier);
-        loadSave<int>(task, auxiliaries, Cell_Age, data.age, defaultObject.age);
-        loadSave<int>(task, auxiliaries, Cell_LivingState, data.livingState, defaultObject.livingState);
-        loadSave<bool>(task, auxiliaries, Cell_InputBlocked, data.inputBlocked, defaultObject.inputBlocked);
-        loadSave<bool>(task, auxiliaries, Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
-        loadSave<int>(task, auxiliaries, Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
+        loadSave<float>(task, auxiliaries, Id_Cell_Stiffness, data.stiffness, defaultObject.stiffness);
+        loadSave<int>(task, auxiliaries, Id_Cell_Color, data.color, defaultObject.color);
+        loadSave<int>(task, auxiliaries, Id_Cell_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
+        loadSave<bool>(task, auxiliaries, Id_Cell_Barrier, data.barrier, defaultObject.barrier);
+        loadSave<int>(task, auxiliaries, Id_Cell_Age, data.age, defaultObject.age);
+        loadSave<int>(task, auxiliaries, Id_Cell_LivingState, data.livingState, defaultObject.livingState);
+        loadSave<bool>(task, auxiliaries, Id_Cell_InputBlocked, data.inputBlocked, defaultObject.inputBlocked);
+        loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
+        loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
         setLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
@@ -506,7 +506,7 @@ namespace cereal
     {
         ParticleDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Particle_Color, data.color, defaultObject.color);
+        loadSave<int>(task, auxiliaries, Id_Particle_Color, data.color, defaultObject.color);
         setLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.pos, data.vel, data.energy);
