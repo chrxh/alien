@@ -131,9 +131,6 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 __inline__ __device__ int InjectorProcessor::getNumDefenderCells(Cell* cell)
 {
     int result = 0;
-    if (cell->cellFunction == CellFunction_Defender && cell->cellFunctionData.defender.mode == DefenderMode_DefendAgainstInjector) {
-        ++result;
-    }
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
         if (connectedCell->cellFunction == CellFunction_Defender && connectedCell->cellFunctionData.defender.mode == DefenderMode_DefendAgainstInjector) {

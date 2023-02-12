@@ -4,6 +4,7 @@ PUBLIC
     CellConnectionTests.cpp
     ConstructorTests.cpp
     DataTransferTests.cpp
+    DefenderTests.cpp
     DescriptionHelperTests.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp
