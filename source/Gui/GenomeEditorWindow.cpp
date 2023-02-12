@@ -2,6 +2,7 @@
 
 #include <boost/range/adaptor/indexed.hpp>
 
+#include <ImFileDialog.h>
 #include <imgui.h>
 
 #include "Fonts/IconsFontAwesome5.h"
@@ -13,10 +14,14 @@
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/PreviewDescriptionConverter.h"
+#include "EngineInterface/Serializer.h"
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
 #include "EditorModel.h"
+#include "GenericFileDialogs.h"
+#include "GlobalSettings.h"
+#include "MessageDialog.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
 
@@ -35,6 +40,12 @@ _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, Simula
     , _viewport(viewport)
 {
     _tabDatas = {TabData()};
+
+    auto path = std::filesystem::current_path();
+    if (path.has_parent_path()) {
+        path = path.parent_path();
+    }
+    _startingPath = GlobalSettings::getInstance().getStringState("windows.genome editor.starting path", path.string());
 }
 
 _GenomeEditorWindow::~_GenomeEditorWindow()
@@ -134,67 +145,55 @@ void _GenomeEditorWindow::processToolbar()
     if (_tabDatas.empty()) {
         return;
     }
-    auto& tabData = _tabDatas.at(_selectedTabIndex);
-    if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
-        CellGenomeDescription newNode;
-        if (tabData.selectedNode) {
-            tabData.genome.insert(tabData.genome.begin() + *tabData.selectedNode + 1, newNode);
-            ++(*tabData.selectedNode);
-        } else {
-            tabData.genome.emplace_back(newNode);
-            tabData.selectedNode = toInt(tabData.genome.size() - 1);
-        }
-    }
-    AlienImGui::Tooltip("Add node");
-
-    ImGui::SameLine();
-    ImGui::BeginDisabled(tabData.genome.empty());
-    if (AlienImGui::ToolbarButton(ICON_FA_MINUS)) {
-        if (tabData.selectedNode) {
-            tabData.genome.erase(tabData.genome.begin() + *tabData.selectedNode);
-            if (*tabData.selectedNode == toInt(tabData.genome.size())) {
-                if (--(*tabData.selectedNode) < 0) {
-                    tabData.selectedNode.reset();
-                }
-            }
-        } else {
-            tabData.genome.pop_back();
-            if (!tabData.genome.empty()) {
-                tabData.selectedNode = toInt(tabData.genome.size() - 1);
-            }
-        }
-        _collapseAllNodes = true;
-    }
-    ImGui::EndDisabled();
-    AlienImGui::Tooltip("Delete node");
-
-    ImGui::SameLine();
     auto& selectedTab = _tabDatas.at(_selectedTabIndex);
-    auto& selected = selectedTab.selectedNode;
-    ImGui::BeginDisabled(!(selected && *selected > 0));
-    if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_UP)) {
-        std::swap(selectedTab.genome.at(*selected), selectedTab.genome.at(*selected - 1));
-        --(*selected);
-        _collapseAllNodes = true;
+
+    if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
+        onOpenGenome();
     }
-    ImGui::EndDisabled();
-    AlienImGui::Tooltip("Decrease sequence number of selected node");
+    AlienImGui::Tooltip("Open genome from file");
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!(selected && *selected < selectedTab.genome.size() - 1));
-    if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_DOWN)) {
-        std::swap(selectedTab.genome.at(*selected), selectedTab.genome.at(*selected + 1));
-        ++(*selected);
-        _collapseAllNodes = true;
+    if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
+        onSaveGenome();
     }
-    ImGui::EndDisabled();
-    AlienImGui::Tooltip("Increase sequence number of selected node");
+    AlienImGui::Tooltip("Save genome to file");
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
         _copiedGenome = GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome);
     }
     AlienImGui::Tooltip("Copy genome");
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
+        onAddNode();
+    }
+    AlienImGui::Tooltip("Add node");
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(selectedTab.genome.empty());
+    if (AlienImGui::ToolbarButton(ICON_FA_MINUS)) {
+        onDeleteNode();
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Delete node");
+
+    ImGui::SameLine();
+    auto& selectedNode = selectedTab.selectedNode;
+    ImGui::BeginDisabled(!(selectedNode && *selectedNode > 0));
+    if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_UP)) {
+        onNodeDecreaseSequenceNumber();
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Decrease sequence number of selected node");
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!(selectedNode && *selectedNode < selectedTab.genome.size() - 1));
+    if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_DOWN)) {
+        onNodeIncreaseSequenceNumber();
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Increase sequence number of selected node");
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_MINUS_SQUARE)) {
@@ -592,6 +591,89 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
     ImGui::EndChild();
 }
 
+
+void _GenomeEditorWindow::onOpenGenome()
+{
+    GenericFileDialogs::getInstance().showOpenFileDialog("Open genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _startingPath = firstFilenameCopy.remove_filename().string();
+
+        std::vector<uint8_t> genomeData;
+        if (!Serializer::deserializeGenomeFromFile(genomeData, firstFilename.string())) {
+            MessageDialog::getInstance().show("Open genome", "The selected file could not be opened.");
+        } else {
+            openTab(GenomeDescriptionConverter::convertBytesToDescription(genomeData));
+        }
+    });
+}
+
+void _GenomeEditorWindow::onSaveGenome()
+{
+    GenericFileDialogs::getInstance().showSaveFileDialog(
+        "Save genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _startingPath = firstFilenameCopy.remove_filename().string();
+
+            auto const& selectedTab = _tabDatas.at(_selectedTabIndex);
+            auto genomeData = GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome);
+            if (!Serializer::serializeGenomeToFile(firstFilename.string(), genomeData)) {
+                MessageDialog::getInstance().show("Save genome", "The selected file could not be saved.");
+            }
+        });
+}
+
+void _GenomeEditorWindow::onAddNode()
+{
+    auto& tabData = _tabDatas.at(_selectedTabIndex);
+
+    CellGenomeDescription newNode;
+    if (tabData.TabData::selectedNode) {
+        tabData.TabData::genome.insert(tabData.TabData::genome.begin() + *tabData.TabData::selectedNode + 1, newNode);
+        ++(*tabData.TabData::selectedNode);
+    } else {
+        tabData.TabData::genome.emplace_back(newNode);
+        tabData.TabData::selectedNode = toInt(tabData.TabData::genome.size() - 1);
+    }
+}
+
+void _GenomeEditorWindow::onDeleteNode()
+{
+    auto& tabData = _tabDatas.at(_selectedTabIndex);
+    if (tabData.TabData::selectedNode) {
+        tabData.TabData::genome.erase(tabData.TabData::genome.begin() + *tabData.TabData::selectedNode);
+        if (*tabData.TabData::selectedNode == toInt(tabData.TabData::genome.size())) {
+            if (--(*tabData.TabData::selectedNode) < 0) {
+                tabData.TabData::selectedNode.reset();
+            }
+        }
+    } else {
+        tabData.TabData::genome.pop_back();
+        if (!tabData.TabData::genome.empty()) {
+            tabData.TabData::selectedNode = toInt(tabData.TabData::genome.size() - 1);
+        }
+    }
+    _collapseAllNodes = true;
+}
+
+void _GenomeEditorWindow::onNodeDecreaseSequenceNumber()
+{
+    auto& selectedTab = _tabDatas.at(_selectedTabIndex);
+    auto& selectedNode = selectedTab.selectedNode;
+    std::swap(selectedTab.TabData::genome.at(*selectedNode), selectedTab.TabData::genome.at(*selectedNode - 1));
+    --(*selectedNode);
+    _collapseAllNodes = true;
+}
+
+void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
+{
+    auto& selectedTab = _tabDatas.at(_selectedTabIndex);
+    auto& selectedNode = selectedTab.selectedNode;
+    std::swap(selectedTab.TabData::genome.at(*selectedNode), selectedTab.TabData::genome.at(*selectedNode + 1));
+    ++(*selectedNode);
+    _collapseAllNodes = true;
+}
 
 void _GenomeEditorWindow::showPreview(TabData& tab)
 {

@@ -66,7 +66,7 @@
 #include "ResetPasswordDialog.h"
 #include "NewPasswordDialog.h"
 #include "ImageToPatternDialog.h"
-#include "GenericOpenFileDialog.h"
+#include "GenericFileDialogs.h"
 #include "ShaderWindow.h"
 #include "GenomeEditorWindow.h"
 #include "RadiationSourcesWindow.h"
@@ -705,7 +705,7 @@ void _MainWindow::processDialogs()
     _newPasswordDialog->process();
 
     MessageDialog::getInstance().process();
-    GenericOpenFileDialog::getInstance().process();
+    GenericFileDialogs::getInstance().process();
     processExitDialog();
 }
 

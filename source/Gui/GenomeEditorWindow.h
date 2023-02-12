@@ -16,7 +16,6 @@ public:
 
 private:
     void processIntern() override;
-
     void processToolbar();
 
     struct TabData
@@ -30,6 +29,13 @@ private:
     void processNodeEdit(TabData& tab, CellGenomeDescription& cell);
     template<typename Description>
     void processSubGenomeWidgets(TabData const& tab, Description& desc);
+
+    void onOpenGenome();
+    void onSaveGenome();
+    void onAddNode();
+    void onDeleteNode();
+    void onNodeDecreaseSequenceNumber();
+    void onNodeIncreaseSequenceNumber();
 
     void showPreview(TabData& tab);
 
@@ -51,6 +57,7 @@ private:
     int _selectedOutput = 0;
     float _genomeZoom = 20.0f;
     std::optional<std::vector<uint8_t>> _copiedGenome;
+    std::string _startingPath;
 
     //actions
     std::optional<int> _tabIndexToSelect;
