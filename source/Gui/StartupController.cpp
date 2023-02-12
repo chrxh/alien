@@ -42,21 +42,21 @@ void _StartupController::process()
     }
 
     if (_state == State::RequestLoading) {
-        DeserializedSimulation deserializedData;
-        if (!Serializer::deserializeSimulationFromFiles(deserializedData, Const::AutosaveFile)) {
+        DeserializedSimulation deserializedSim;
+        if (!Serializer::deserializeSimulationFromFiles(deserializedSim, Const::AutosaveFile)) {
             MessageDialog::getInstance().show("Error", "The default simulation file could not be read. An empty simulation will be created.");
-            deserializedData.settings.generalSettings.worldSizeX = 1000;
-            deserializedData.settings.generalSettings.worldSizeY = 500;
-            deserializedData.timestep = 0;
-            deserializedData.content = ClusteredDataDescription();
+            deserializedSim.auxiliaryData.settings.generalSettings.worldSizeX = 1000;
+            deserializedSim.auxiliaryData.settings.generalSettings.worldSizeY = 500;
+            deserializedSim.auxiliaryData.timestep = 0;
+            deserializedSim.auxiliaryData.zoom = 12.0f;
+            deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
+            deserializedSim.mainData = ClusteredDataDescription();
         }
 
-        _simController->newSimulation(deserializedData.timestep, deserializedData.settings);
-        _simController->setClusteredSimulationData(deserializedData.content);
-        _viewport->setCenterInWorldPos(
-            {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
-             toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
-        _viewport->setZoomFactor(12.0f);
+        _simController->newSimulation(deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.settings);
+        _simController->setClusteredSimulationData(deserializedSim.mainData);
+        _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+        _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
         _temporalControlWindow->onSnapshot();
 
         _lastActivationTimepoint = std::chrono::steady_clock::now();

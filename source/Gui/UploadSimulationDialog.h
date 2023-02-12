@@ -6,7 +6,11 @@
 class _UploadSimulationDialog
 {
 public:
-    _UploadSimulationDialog(BrowserWindow const& browserWindow, SimulationController const& simController, NetworkController const& networkController);
+    _UploadSimulationDialog(
+        BrowserWindow const& browserWindow,
+        SimulationController const& simController,
+        NetworkController const& networkController,
+        Viewport const& viewport);
     ~_UploadSimulationDialog();
 
     void process();
@@ -18,6 +22,7 @@ private:
 
     BrowserWindow _browserWindow;
     SimulationController _simController; 
+    Viewport _viewport;
     NetworkController _networkController;
 
     bool _show = false;

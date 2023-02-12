@@ -11,14 +11,17 @@
 #include "NetworkController.h"
 #include "StyleRepository.h"
 #include "BrowserWindow.h"
+#include "Viewport.h"
 
 _UploadSimulationDialog::_UploadSimulationDialog(
     BrowserWindow const& browserWindow,
     SimulationController const& simController,
-    NetworkController const& networkController)
+    NetworkController const& networkController,
+    Viewport const& viewport)
     : _simController(simController)
     , _networkController(networkController)
     , _browserWindow(browserWindow)
+    , _viewport(viewport)
 {
     auto& settings = GlobalSettings::getInstance();
     _simName = settings.getStringState("dialogs.upload.simulation name", "");
@@ -86,13 +89,15 @@ void _UploadSimulationDialog::show()
 
 void _UploadSimulationDialog::onUpload()
 {
-    DeserializedSimulation sim;
-    sim.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-    sim.settings = _simController->getSettings();
-    sim.content = _simController->getClusteredSimulationData();
+    DeserializedSimulation deserializedSim;
+    deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+    deserializedSim.auxiliaryData.zoom = _viewport->getZoomFactor();
+    deserializedSim.auxiliaryData.center = _viewport->getCenterInWorldPos();
+    deserializedSim.auxiliaryData.settings = _simController->getSettings();
+    deserializedSim.mainData = _simController->getClusteredSimulationData();
 
     SerializedSimulation serializedSim;
-    if (!Serializer::serializeSimulationToStrings(serializedSim, sim)) {
+    if (!Serializer::serializeSimulationToStrings(serializedSim, deserializedSim)) {
         MessageDialog::getInstance().show("Save simulation", "The simulation could not be uploaded.");
         return;
     }
@@ -100,10 +105,10 @@ void _UploadSimulationDialog::onUpload()
     if (!_networkController->uploadSimulation(
             _simName,
             _simDescription,
-            {sim.settings.generalSettings.worldSizeX, sim.settings.generalSettings.worldSizeY},
-            sim.content.getNumberOfCellAndParticles(),
-            serializedSim.content,
-            serializedSim.timestepAndSettings)) {
+            {deserializedSim.auxiliaryData.settings.generalSettings.worldSizeX, deserializedSim.auxiliaryData.settings.generalSettings.worldSizeY},
+            deserializedSim.mainData.getNumberOfCellAndParticles(),
+            serializedSim.mainData,
+            serializedSim.auxiliaryData)) {
         MessageDialog::getInstance().show("Error", "Failed to upload simulation.");
         return;
     }

@@ -1,6 +1,9 @@
 
 add_library(alien_engine_interface_lib
     ArraySizes.h
+    AuxiliaryData.h
+    AuxiliaryDataParser.cpp
+    AuxiliaryDataParser.h
     CellFunctionEnums.h
     Colors.h
     Constants.h
@@ -26,8 +29,6 @@ add_library(alien_engine_interface_lib
     Serializer.cpp
     Serializer.h
     Settings.h
-    SettingsParser.cpp
-    SettingsParser.h
     ShallowUpdateSelectionData.h
     SimulationController.h
     SimulationParameters.h
