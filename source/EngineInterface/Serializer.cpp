@@ -520,6 +520,52 @@ namespace cereal
     }
 }
 
+bool Serializer::serializeGenomeToFile(std::string const& filename, std::vector<uint8_t> const& genome)
+{
+    try {
+        //wrap constructor cell around genome
+        ClusteredDataDescription data;
+        data.addCluster(ClusterDescription().addCell(CellDescription().setCellFunction(ConstructorDescription().setGenome(genome))));
+
+        zstr::ofstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        serializeDataDescription(data, stream);
+
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool Serializer::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::string const& filename)
+{
+    try {
+        //constructor cell is wrapped around genome
+        ClusteredDataDescription data;
+        if (!deserializeDataDescription(data, filename)) {
+            return false;
+        }
+        if (data.clusters.size() != 1) {
+            return false;
+        }
+        auto cluster = data.clusters.front();
+        if (cluster.cells.size() != 1) {
+            return false;
+        }
+        auto cell = cluster.cells.front();
+        if (cell.getCellFunctionType() != CellFunction_Constructor) {
+            return false;
+        }
+        genome = std::get<ConstructorDescription>(*cell.cellFunction).genome;
+
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
 bool Serializer::serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data)
 {
     try {

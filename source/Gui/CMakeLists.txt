@@ -35,8 +35,8 @@ PUBLIC
     FileLogger.h
     FpsController.cpp
     FpsController.h
-    GenericOpenFileDialog.cpp
-    GenericOpenFileDialog.h
+    GenericFileDialogs.cpp
+    GenericFileDialogs.h
     GenomeEditorWindow.cpp
     GenomeEditorWindow.h
     GettingStartedWindow.cpp

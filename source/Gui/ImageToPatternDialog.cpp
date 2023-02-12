@@ -13,7 +13,7 @@
 #include "EngineInterface/Colors.h"
 #include "AlienImGui.h"
 #include "Viewport.h"
-#include "GenericOpenFileDialog.h"
+#include "GenericFileDialogs.h"
 #include "GlobalSettings.h"
 
 
@@ -78,7 +78,7 @@ namespace
 
 void _ImageToPatternDialog::show()
 {
-    GenericOpenFileDialog::getInstance().show(
+    GenericFileDialogs::getInstance().showOpenFileDialog(
         "Open image", "Image (*.png){.png},.*", _startingPath, [&](std::filesystem::path const& path) {
 
         auto firstFilename = ifd::FileDialog::Instance().GetResult();

@@ -21,6 +21,9 @@ struct SerializedSimulation
 class Serializer
 {
 public:
+    static bool serializeGenomeToFile(std::string const& filename, std::vector<uint8_t> const& genome);
+    static bool deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::string const& filename);
+
     static bool serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data);
     static bool deserializeSimulationFromFiles(DeserializedSimulation& data, std::string const& filename);
 
