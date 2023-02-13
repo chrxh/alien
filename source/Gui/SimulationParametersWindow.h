@@ -2,6 +2,7 @@
 
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParametersSpot.h"
+#include "EngineInterface/SimulationParameters.h"
 #include "Definitions.h"
 #include "AlienWindow.h"
 
@@ -33,4 +34,5 @@ private:
     uint32_t _savedPalette[32] = {};
     uint32_t _backupColor;
     std::string _startingPath;
+    std::optional<SimulationParameters> _copiedParameters;
 };

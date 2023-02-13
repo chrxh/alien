@@ -176,8 +176,28 @@ void _SimulationParametersWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
+        _copiedParameters = _simController->getSimulationParameters();
     }
     AlienImGui::Tooltip("Copy simulation parameters");
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!_copiedParameters);
+    if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
+        _simController->setSimulationParameters(*_copiedParameters);
+        _simController->setOriginalSimulationParameters(*_copiedParameters);
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Paste simulation parameters");
+
+    ImGui::SameLine();
+    auto origParameters = _simController->getOriginalSimulationParameters();
+    auto parameters = _simController->getSimulationParameters();
+    ImGui::BeginDisabled(origParameters == parameters);
+    if (AlienImGui::ToolbarButton(ICON_FA_UNDO)) {
+        _simController->setSimulationParameters(origParameters);
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Restore original simulation parameters");
 
     AlienImGui::Separator();
 }
