@@ -19,6 +19,8 @@ namespace
     {
         return ImGui::Button((ICON_FA_UNDO "##" + id).c_str());
     }
+
+    auto constexpr HoveredTimer = 0.5f;
 }
 
 void AlienImGui::HelpMarker(std::string const& text)
@@ -812,7 +814,7 @@ bool AlienImGui::Button(ButtonParameters const& parameters)
 
 void AlienImGui::Tooltip(std::string const& text)
 {
-    if (ImGui::IsItemHovered()) {
+    if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > HoveredTimer) {
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
         ImGui::TextUnformatted(text.c_str());
@@ -823,7 +825,7 @@ void AlienImGui::Tooltip(std::string const& text)
 
 void AlienImGui::Tooltip(std::function<std::string()> const& textFunc)
 {
-    if (ImGui::IsItemHovered()) {
+    if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > HoveredTimer) {
         Tooltip(textFunc());
     }
 }
