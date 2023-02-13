@@ -82,6 +82,18 @@ __inline__ __device__ __host__ bool operator==(int2 const& p, int2 const& q)
     return p.x == q.x && p.y == q.y;
 }
 
+__inline__ __device__ __host__ void operator+=(float2& p, float2 const& q)
+{
+    p.x += q.x;
+    p.y += q.y;
+}
+
+__inline__ __device__ __host__ void operator-=(float2& p, float2 const& q)
+{
+    p.x -= q.x;
+    p.y -= q.y;
+}
+
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/

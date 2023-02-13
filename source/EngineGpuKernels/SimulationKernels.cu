@@ -30,12 +30,12 @@ __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
 
 __global__ void cudaNextTimestep_physics_calcPressure(SimulationData data)
 {
-    CellProcessor::calcPressure(data);
+    CellProcessor::calcPressure_correctOverlap(data);
 }
 
 __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
 {
-    CellProcessor::calcFluidForcesAndReconnectCells(data);
+    CellProcessor::calcFluidForces_reconnectCells(data);
     CellProcessor::fillDensityMap(data);
 
     ParticleProcessor::updateMap(data);
@@ -43,7 +43,7 @@ __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
 
 __global__ void cudaNextTimestep_physics_calcCollisionForces(SimulationData data)
 {
-    CellProcessor::calcCollisionsAndReconnectCells(data);
+    CellProcessor::calcCollisions_reconnectCells_correctOverlap(data);
     CellProcessor::fillDensityMap(data);
 
     ParticleProcessor::updateMap(data);

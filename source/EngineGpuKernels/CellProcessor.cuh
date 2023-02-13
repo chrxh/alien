@@ -21,12 +21,13 @@ public:
     __inline__ __device__ static void clearDensityMap(SimulationData& data);
     __inline__ __device__ static void fillDensityMap(SimulationData& data);
 
-    __inline__ __device__ static void calcPressure(SimulationData& data);
-    __inline__ __device__ static void calcFluidForcesAndReconnectCells(SimulationData& data);
+    __inline__ __device__ static void correctOverlap(SimulationData& data);
+    __inline__ __device__ static void calcPressure_correctOverlap(SimulationData& data);
+    __inline__ __device__ static void calcFluidForces_reconnectCells(SimulationData& data);
 
-    __inline__ __device__ static void calcCollisionsAndReconnectCells(SimulationData& data);
+    __inline__ __device__ static void calcCollisions_reconnectCells_correctOverlap(SimulationData& data);
     __inline__ __device__ static void checkForces(SimulationData& data);
-    __inline__ __device__ static void applyForces(SimulationData& data);  //prerequisite: data from calcCollisionsAndReconnectCells
+    __inline__ __device__ static void applyForces(SimulationData& data);  //prerequisite: data from calcCollisions_reconnectCells_correctOverlap
 
     __inline__ __device__ static void calcConnectionForces(SimulationData& data, bool considerAngles);
     __inline__ __device__ static void checkConnections(SimulationData& data);
@@ -113,7 +114,7 @@ namespace
     }
 }
 
-__inline__ __device__ void CellProcessor::calcPressure(SimulationData& data)
+__inline__ __device__ void CellProcessor::calcPressure_correctOverlap(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -121,17 +122,23 @@ __inline__ __device__ void CellProcessor::calcPressure(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        float p = 0;
+        float density = 0;
         data.cellMap.executeForEach(cell->absPos, 2 * smoothingLength, cell->detached, [&](auto const& otherCell) {
-            auto q = data.cellMap.getDistance(cell->absPos, otherCell->absPos);
-            p += calcKernel(q / smoothingLength) / (smoothingLength * smoothingLength);
+            auto delta = data.cellMap.getCorrectedDirection(cell->absPos - otherCell->absPos);
+            auto distance = Math::length(delta);
+            density += calcKernel(distance / smoothingLength) / (smoothingLength * smoothingLength);
+            if (cell != otherCell && !cell->barrier) {
+                if (distance < cudaSimulationParameters.cellMinDistance) {
+                    cell->absPos += delta * cudaSimulationParameters.cellMinDistance / 5;
+                }
+            }
         });
 
-        cell->density = p;
+        cell->density = density;
     }
 }
 
-__inline__ __device__ void CellProcessor::calcFluidForcesAndReconnectCells(SimulationData& data)
+__inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -139,9 +146,6 @@ __inline__ __device__ void CellProcessor::calcFluidForcesAndReconnectCells(Simul
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-
-        auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
-            &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->absPos);
 
         float2 F_pressure = {0, 0};
         float2 F_viscosity = {0, 0};
@@ -181,16 +185,15 @@ __inline__ __device__ void CellProcessor::calcFluidForcesAndReconnectCells(Simul
                 F_boundary = F_boundary + posDelta * Math::dot(velDelta, posDelta) / (-distance * distance - 0.5f) * 2;
             }
 
-            //reconnecting
-            if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1 && !cell->barrier
-                && cell->livingState != LivingState_UnderConstruction) {
-                CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
-            }
+            //fusion
+            auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
+                &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->absPos);
+            auto cellFusionVelocity = SpotCalculator::calcParameter(
+                &SimulationParametersSpotValues::cellFusionVelocity, &SimulationParametersSpotActivatedValues::cellFusionVelocity, data, cell->absPos);
 
             auto isApproaching = Math::dot(posDelta, velDelta) < 0;
             if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
-                && Math::length(velDelta) >= SpotCalculator::calcParameter(
-                       &SimulationParametersSpotValues::cellFusionVelocity, &SimulationParametersSpotActivatedValues::cellFusionVelocity, data, cell->absPos)
+                && Math::length(velDelta) >= cellFusionVelocity
                 && isApproaching && cell->energy <= cellMaxBindingEnergy && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier
                 && !otherCell->barrier) {
                 CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
@@ -201,7 +204,7 @@ __inline__ __device__ void CellProcessor::calcFluidForcesAndReconnectCells(Simul
     }
 }
 
-__inline__ __device__ void CellProcessor::calcCollisionsAndReconnectCells(SimulationData& data)
+__inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctOverlap(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -218,9 +221,12 @@ __inline__ __device__ void CellProcessor::calcCollisionsAndReconnectCells(Simula
                 data.cellMap.correctDirection(posDelta);
 
                 auto distance = Math::length(posDelta);
-                if (distance < cudaSimulationParameters.cellMinDistance && cell->numConnections > 1 && !cell->barrier
-                    && cell->livingState != LivingState_UnderConstruction) {
-                    CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
+
+                //overlap correction
+                if (!cell->barrier) {
+                    if (distance < cudaSimulationParameters.cellMinDistance) {
+                        cell->absPos += posDelta * cudaSimulationParameters.cellMinDistance / 5;
+                    }
                 }
 
                 bool alreadyConnected = false;
@@ -233,6 +239,8 @@ __inline__ __device__ void CellProcessor::calcCollisionsAndReconnectCells(Simula
                 }
 
                 if (!alreadyConnected) {
+
+                    //collision algorithm
                     auto velDelta = cell->vel - otherCell->vel;
                     auto isApproaching = Math::dot(posDelta, velDelta) < 0;
                     auto barrierFactor = cell->barrier ? 2 : 1;
@@ -254,18 +262,21 @@ __inline__ __device__ void CellProcessor::calcCollisionsAndReconnectCells(Simula
                         atomicAdd(&otherCell->shared1.y, -force.y);
                     }
 
+                    //fusion
                     auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
                         &SimulationParametersSpotValues::cellMaxBindingEnergy,
                         &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy,
                         data,
                         cell->absPos);
 
+                    auto cellFusionVelocity = SpotCalculator::calcParameter(
+                        &SimulationParametersSpotValues::cellFusionVelocity,
+                        &SimulationParametersSpotActivatedValues::cellFusionVelocity,
+                        data,
+                        cell->absPos);
+
                     if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
-                        && Math::length(velDelta) >= SpotCalculator::calcParameter(
-                               &SimulationParametersSpotValues::cellFusionVelocity,
-                               &SimulationParametersSpotActivatedValues::cellFusionVelocity,
-                               data,
-                               cell->absPos)
+                        && Math::length(velDelta) >= cellFusionVelocity
                         && isApproaching && cell->energy <= cellMaxBindingEnergy && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier
                         && !otherCell->barrier) {
                         CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
