@@ -64,7 +64,9 @@ public:
     static void removeStickiness(DataDescription& data);
     static void correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize);
 
-    static void colorize(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
+    static void randomizeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
+    static void randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy);
+    static void randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge);
 
     static void generateBranchNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers);
 

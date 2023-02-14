@@ -16,7 +16,7 @@
 
 namespace
 {
-    auto const RightColumnWidth = 260.0f;
+    auto constexpr RightColumnWidth = 260.0f;
 
     template <int numRows, int numCols, typename T>
     std::vector<std::vector<T>> toVector(T const v[numRows][numCols])

@@ -14,8 +14,6 @@ PUBLIC
     BrowserWindow.cpp
     BrowserWindow.h
     CellFunctionStrings.h
-    ColorizeDialog.cpp
-    ColorizeDialog.h
     CreateUserDialog.cpp
     CreateUserDialog.h
     CreatorWindow.cpp
@@ -82,6 +80,8 @@ PUBLIC
     PatternEditorWindow.h
     RadiationSourcesWindow.cpp
     RadiationSourcesWindow.h
+    RandomizeDialog.cpp
+    RandomizeDialog.h
     RemoteSimulationData.cpp
     RemoteSimulationData.h
     RemoteSimulationDataParser.cpp

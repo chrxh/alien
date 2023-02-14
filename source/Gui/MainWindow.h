@@ -49,7 +49,7 @@ private:
     RadiationSourcesWindow _radiationSourcesWindow;
 
     GpuSettingsDialog _gpuSettingsDialog;
-    ColorizeDialog _colorizeDialog;
+    RandomizeDialog _randomizeDialog;
     NewSimulationDialog _newSimulationDialog;
     OpenSimulationDialog _openSimulationDialog; 
     SaveSimulationDialog _saveSimulationDialog; 

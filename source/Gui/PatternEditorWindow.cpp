@@ -245,31 +245,48 @@ void _PatternEditorWindow::processIntern()
         }
         AlienImGui::Group("Further actions");
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
-        if (ImGui::Button("Set uniform velocities")) {
+        if (ImGui::Button(ICON_FA_WIND)) {
             _simController->uniformVelocitiesForSelectedObjects(_editorModel->isRolloutToClusters());
         }
         ImGui::EndDisabled();
+        AlienImGui::Tooltip("Make uniform velocities");
 
+        ImGui::SameLine();
         ImGui::BeginDisabled(_editorModel->isCellSelectionEmpty());
-
-        if (ImGui::Button("Release stresses")) {
+        if (ImGui::Button(ICON_FA_BALANCE_SCALE)) {
             _simController->relaxSelectedObjects(_editorModel->isRolloutToClusters());
         }
-        if (ImGui::Button("Generate execution order")) {
+        AlienImGui::Tooltip("Release stresses");
+
+        ImGui::SameLine();
+        if (ImGui::Button(ICON_FA_SORT_NUMERIC_DOWN)) {
             onGenerateExecutionOrderNumbers();
         }
-        if (ImGui::Button("Make sticky")) {
+        AlienImGui::Tooltip("Generate ascending execution order numbers");
+
+        ImGui::SameLine();
+        if (ImGui::Button(ICON_FA_TINT)) {
             onMakeSticky();
         }
-        if (ImGui::Button("Make unsticky")) {
+        AlienImGui::Tooltip("Make sticky");
+
+        ImGui::SameLine();
+        if (ImGui::Button(ICON_FA_TINT_SLASH)) {
             onRemoveStickiness();
         }
-        if (ImGui::Button("Attach to background")) {
+        AlienImGui::Tooltip("Make unsticky");
+
+        ImGui::SameLine();
+        if (ImGui::Button(ICON_FA_LINK)) {
             onSetBarrier(true);
         }
-        if (ImGui::Button("Detach from background")) {
+        AlienImGui::Tooltip("Attach to background");
+
+        ImGui::SameLine();
+        if (ImGui::Button(ICON_FA_UNLINK)) {
             onSetBarrier(false);
         }
+        AlienImGui::Tooltip("Detach from background");
         ImGui::EndDisabled();
 
         _lastSelection = selection;

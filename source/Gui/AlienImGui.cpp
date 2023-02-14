@@ -121,9 +121,18 @@ void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, 
     ImGui::TextUnformatted(parameters._name.c_str());
 }
 
-bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
+bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool* enabled)
 {
     auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
+
+    if (enabled) {
+        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
+        if (!(*enabled) && parameters._disabledValue) {
+            value = *parameters._disabledValue;
+        }
+        ImGui::BeginDisabled(!(*enabled));
+        ImGui::SameLine();
+    }
 
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
     auto result = ImGui::InputInt(("##" + parameters._name).c_str(), &value);
