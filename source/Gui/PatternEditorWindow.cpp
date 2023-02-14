@@ -41,7 +41,6 @@ _PatternEditorWindow::_PatternEditorWindow(
 
 void _PatternEditorWindow::processIntern()
 {
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0});
 
     auto selection = _editorModel->getSelectionShallowData();
     if (hasSelectionChanged(selection)) {
@@ -243,7 +242,7 @@ void _PatternEditorWindow::processIntern()
             _simController->colorSelectedObjects(6, _editorModel->isRolloutToClusters());
             _editorModel->setDefaultColorCode(6);
         }
-        AlienImGui::Group("Further actions");
+        AlienImGui::Group("Tools");
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
         if (ImGui::Button(ICON_FA_WIND)) {
             _simController->uniformVelocitiesForSelectedObjects(_editorModel->isRolloutToClusters());
@@ -292,7 +291,6 @@ void _PatternEditorWindow::processIntern()
         _lastSelection = selection;
     }
     ImGui::EndChild();
-    ImGui::PopStyleVar();
 
     AlienImGui::Separator();
     auto rolloutToClusters = _editorModel->isRolloutToClusters();
