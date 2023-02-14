@@ -767,17 +767,22 @@ void AlienImGui::Group(std::string const& text)
 
 bool AlienImGui::ToolbarButton(std::string const& text)
 {
+    auto id = std::to_string(ImGui::GetID(text.c_str()));
+
     ImGui::PushFont(StyleRepository::getInstance().getIconFont());
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
-    auto color = Const::ToolbarButtonColor;
+    auto color = Const::ToolbarButtonTextColor;
     float h, s, v;
     ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.6f, v * 0.3f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.4f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 0.6f));
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::ToolbarButtonColor);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>( ImColor::HSV(h, s, v * 0.3f)));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4> (ImColor::HSV(h, s, v * 0.45f)));
+
+    ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4> (Const::ToolbarButtonTextColor));
     auto buttonSize = StyleRepository::getInstance().contentScale(40.0f);
     auto result = ImGui::Button(text.c_str(), {buttonSize, buttonSize});
+
     ImGui::PopStyleColor(4);
     ImGui::PopStyleVar();
     ImGui::PopFont();
