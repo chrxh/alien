@@ -262,12 +262,30 @@ void DescriptionHelper::correctConnections(ClusteredDataDescription& data, IntVe
     }
 }
 
-void DescriptionHelper::colorize(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
+void DescriptionHelper::randomizeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
 {
     for (auto& cluster : data.clusters) {
         auto color = colorCodes[NumberGenerator::getInstance().getRandomInt(toInt(colorCodes.size()))];
         for (auto& cell : cluster.cells) {
             cell.color = color;
+        }
+    }
+}
+
+void DescriptionHelper::randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy)
+{
+    for (auto& cluster : data.clusters) {
+        for (auto& cell : cluster.cells) {
+            cell.energy = NumberGenerator::getInstance().getRandomReal(minEnergy, maxEnergy);
+        }
+    }
+}
+
+void DescriptionHelper::randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge)
+{
+    for (auto& cluster : data.clusters) {
+        for (auto& cell : cluster.cells) {
+            cell.age = NumberGenerator::getInstance().getRandomInt(minAge, maxAge);
         }
     }
 }

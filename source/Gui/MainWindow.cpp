@@ -37,7 +37,7 @@
 #include "StartupController.h"
 #include "AlienImGui.h"
 #include "AboutDialog.h"
-#include "ColorizeDialog.h"
+#include "RandomizeDialog.h"
 #include "LogWindow.h"
 #include "SimpleLogger.h"
 #include "UiController.h"
@@ -139,7 +139,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
     _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow, _viewport);
     _aboutDialog = std::make_shared<_AboutDialog>();
-    _colorizeDialog = std::make_shared<_ColorizeDialog>(_simController);
+    _randomizeDialog = std::make_shared<_RandomizeDialog>(_simController);
     _logWindow = std::make_shared<_LogWindow>(_logger);
     _gettingStartedWindow = std::make_shared<_GettingStartedWindow>();
     _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simController, _temporalControlWindow, _viewport, _statisticsWindow);
@@ -519,8 +519,8 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_TOOLS "  Tools ", _toolsMenuToggled, "Tools")) {
-            if (ImGui::MenuItem("Colorize", "ALT+H")) {
-                _colorizeDialog->show();
+            if (ImGui::MenuItem("Randomize", "ALT+H")) {
+                _randomizeDialog->show();
                 _toolsMenuToggled = false;
             }
             if (ImGui::MenuItem("Pattern analysis", "ALT+P")) {
@@ -674,7 +674,7 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_H)) {
-            _colorizeDialog->show();
+            _randomizeDialog->show();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_P)) {
             _patternAnalysisDialog->show();
@@ -691,7 +691,7 @@ void _MainWindow::processDialogs()
     _saveSimulationDialog->process();
     _newSimulationDialog->process();
     _aboutDialog->process();
-    _colorizeDialog->process();
+    _randomizeDialog->process();
     _gpuSettingsDialog->process();
     _displaySettingsDialog->process(); 
     _patternAnalysisDialog->process();
