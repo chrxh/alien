@@ -140,6 +140,11 @@ public:
         return _map[posInt.x + posInt.y * _size.x];
     }
 
+    __device__ __inline__ Cell* getFirst(int2 const& pos) const
+    {
+        return _map[pos.x + pos.y * _size.x];
+    }
+
     template <typename MatchFunc>
     __device__ __inline__ void getMatchingCells(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int detached, MatchFunc matchFunc)
         const
@@ -175,8 +180,8 @@ public:
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         int radiusInt = ceilf(radius);
-        for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
-            for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
+        for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
+            for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
                 correctPosition(scanPos);
                 int slot = scanPos.x + scanPos.y * _size.x;
