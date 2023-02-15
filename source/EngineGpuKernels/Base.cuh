@@ -127,16 +127,16 @@ private:
     }
 };
 
-__device__ __inline__ PartitionData calcPartition(int numEntities, int division, int numDivisions)
+__device__ __inline__ PartitionData calcPartition(int numEntities, int index, int numIndices)
 {
     PartitionData result;
-    int entitiesByDivisions = numEntities / numDivisions;
-    int remainder = numEntities % numDivisions;
+    int entitiesByDivisions = numEntities / numIndices;
+    int remainder = numEntities % numIndices;
 
-    int length = division < remainder ? entitiesByDivisions + 1 : entitiesByDivisions;
-    result.startIndex = division < remainder
-        ? (entitiesByDivisions + 1) * division
-        : (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (division - remainder);
+    int length = index < remainder ? entitiesByDivisions + 1 : entitiesByDivisions;
+    result.startIndex = index < remainder
+        ? (entitiesByDivisions + 1) * index
+        : (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (index - remainder);
     result.endIndex = result.startIndex + length - 1;
     return result;
 }

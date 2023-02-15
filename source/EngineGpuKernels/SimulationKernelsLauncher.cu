@@ -10,6 +10,15 @@ _SimulationKernelsLauncher::_SimulationKernelsLauncher()
     _garbageCollector = std::make_shared<_GarbageCollectorKernelsLauncher>();
 }
 
+namespace 
+{
+    int calcOptimalThreadsForFluidKernel(SimulationParameters const& parameters)
+    {
+        auto scanRectLength = std::ceilf(parameters.motionData.fluidMotion.smoothingLength * 2) * 2 + 1;
+        return scanRectLength * scanRectLength;
+    }
+}
+
 void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, SimulationData const& data, SimulationResult const& result)
 {
     auto const gpuSettings = settings.gpuSettings;
@@ -26,8 +35,8 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_physics_init, data);
     KERNEL_CALL(cudaNextTimestep_physics_fillMaps, data);
     if (settings.simulationParameters.motionType == MotionType_Fluid) {
-        KERNEL_CALL(cudaNextTimestep_physics_calcPressure, data);
-        KERNEL_CALL(cudaNextTimestep_physics_calcFluidForces, data);
+        auto threads = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
+        cudaNextTimestep_physics_calcFluidForces<<<gpuSettings.numBlocks, threads>>>(data);
     } else {
         KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, data);
     }
