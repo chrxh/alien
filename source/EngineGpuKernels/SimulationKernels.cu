@@ -28,11 +28,6 @@ __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
     CellProcessor::clearDensityMap(data);
 }
 
-__global__ void cudaNextTimestep_physics_calcPressure(SimulationData data)
-{
-    CellProcessor::calcPressure_correctOverlap(data);
-}
-
 __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
 {
     CellProcessor::calcFluidForces_reconnectCells_correctOverlap(data);
