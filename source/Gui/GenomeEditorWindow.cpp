@@ -206,7 +206,7 @@ void _GenomeEditorWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_SEEDLING)) {
         onCreateSpore();
     }
-    AlienImGui::Tooltip("Create a sport with current genome");
+    AlienImGui::Tooltip("Create a spore with current genome");
 
     AlienImGui::Separator();
 }
