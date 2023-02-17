@@ -44,6 +44,8 @@ private:
     bool isLiked(std::string const& id);
     std::string getUserLikes(std::string const& id);
 
+    void pushTextColor(RemoteSimulationData const& entry);
+
     bool _scheduleRefresh = false;
     bool _scheduleSort = false;
     std::string _filter;

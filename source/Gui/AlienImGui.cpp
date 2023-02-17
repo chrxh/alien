@@ -826,9 +826,9 @@ bool AlienImGui::Button(ButtonParameters const& parameters)
     return result;
 }
 
-void AlienImGui::Tooltip(std::string const& text)
+void AlienImGui::Tooltip(std::string const& text, bool delay)
 {
-    if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > HoveredTimer) {
+    if (ImGui::IsItemHovered() && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
         ImGui::TextUnformatted(text.c_str());
@@ -837,9 +837,9 @@ void AlienImGui::Tooltip(std::string const& text)
     }
 }
 
-void AlienImGui::Tooltip(std::function<std::string()> const& textFunc)
+void AlienImGui::Tooltip(std::function<std::string()> const& textFunc, bool delay)
 {
-    if (ImGui::IsItemHovered() && GImGui->HoveredIdTimer > HoveredTimer) {
+    if (ImGui::IsItemHovered() && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
         Tooltip(textFunc());
     }
 }
