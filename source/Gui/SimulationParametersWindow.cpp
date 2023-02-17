@@ -1031,7 +1031,11 @@ void _SimulationParametersWindow::processSpot(
             ImGui::BeginDisabled(!isForceFieldActive);
             auto posX = ImGui::GetCursorPos().x;
             if (AlienImGui::Combo(
-                    AlienImGui::ComboParameters().name("Type").values({"Radial", "Central"}).textWidth(RightColumnWidth).defaultValue(origForceFieldTypeIntern),
+                    AlienImGui::ComboParameters()
+                        .name("Type")
+                        .values({"Radial", "Central", "Linear"})
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origForceFieldTypeIntern),
                     forceFieldTypeIntern)) {
                 spot.flowType = forceFieldTypeIntern + 1;
                 if (spot.flowType == FlowType_Radial) {
@@ -1039,6 +1043,9 @@ void _SimulationParametersWindow::processSpot(
                 }
                 if (spot.flowType == FlowType_Central) {
                     spot.flowData.centralFlow = CentralFlow();
+                }
+                if (spot.flowType == FlowType_Linear) {
+                    spot.flowData.linearFlow = LinearFlow();
                 }
             }
             if (spot.flowType == FlowType_Radial) {
@@ -1074,6 +1081,29 @@ void _SimulationParametersWindow::processSpot(
                         .format("%.5f")
                         .defaultValue(origSpot.flowData.centralFlow.strength),
                     spot.flowData.centralFlow.strength);
+            }
+            if (spot.flowType == FlowType_Linear) {
+                ImGui::SetCursorPosX(posX);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Angle")
+                        .textWidth(RightColumnWidth)
+                        .min(-180.0f)
+                        .max(180.0f)
+                        .format("%.1f")
+                        .defaultValue(origSpot.flowData.linearFlow.angle),
+                    spot.flowData.linearFlow.angle);
+                ImGui::SetCursorPosX(posX);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Strength")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(0.5f)
+                        .logarithmic(true)
+                        .format("%.5f")
+                        .defaultValue(origSpot.flowData.linearFlow.strength),
+                    spot.flowData.linearFlow.strength);
             }
             ImGui::EndDisabled();
             ImGui::TreePop();
