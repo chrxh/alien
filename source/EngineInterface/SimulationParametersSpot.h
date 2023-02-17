@@ -16,7 +16,8 @@ using FlowType = int;
 enum FlowType_
 {
     FlowType_None,
-    FlowType_Radial
+    FlowType_Radial,
+    FlowType_Central,
 };
 
 using Orientation = int;
@@ -35,9 +36,18 @@ struct RadialFlow
     bool operator!=(RadialFlow const& other) const { return !operator==(other); }
 };
 
+struct CentralFlow
+{
+    float strength = 0.05f;
+
+    bool operator==(CentralFlow const& other) const { return strength == other.strength; }
+    bool operator!=(CentralFlow const& other) const { return !operator==(other); }
+};
+
 union FlowData
 {
     RadialFlow radialFlow;
+    CentralFlow centralFlow;
 };
 
 
@@ -88,6 +98,11 @@ struct SimulationParametersSpot
         }
         if (flowType == FlowType_Radial) {
             if (flowData.radialFlow != other.flowData.radialFlow) {
+                return false;
+            }
+        }
+        if (flowType == FlowType_Central) {
+            if (flowData.centralFlow != other.flowData.centralFlow) {
                 return false;
             }
         }

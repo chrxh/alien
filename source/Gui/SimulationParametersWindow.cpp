@@ -1021,8 +1021,9 @@ void _SimulationParametersWindow::processSpot(
          */
         if (ImGui::TreeNodeEx("Force field", flags)) {
             auto isForceFieldActive = spot.flowType != FlowType_None;
-            auto forceFieldTypeIntern = spot.flowType == FlowType_None ? 0 : spot.flowType - 1;
-            auto origForceFieldTypeIntern = origSpot.flowType == FlowType_None ? 0 : origSpot.flowType - 1;
+
+            auto forceFieldTypeIntern = std::max(0, spot.flowType - 1); //FlowType_None should not be selectable in ComboBox
+            auto origForceFieldTypeIntern = std::max(0, origSpot.flowType - 1);
             if (ImGui::Checkbox("##forceField", &isForceFieldActive)) {
                 spot.flowType = isForceFieldActive ? FlowType_Radial : FlowType_None;
             }
@@ -1030,11 +1031,17 @@ void _SimulationParametersWindow::processSpot(
             ImGui::BeginDisabled(!isForceFieldActive);
             auto posX = ImGui::GetCursorPos().x;
             if (AlienImGui::Combo(
-                    AlienImGui::ComboParameters().name("Type").values({"Radial"}).textWidth(RightColumnWidth).defaultValue(origForceFieldTypeIntern),
+                    AlienImGui::ComboParameters().name("Type").values({"Radial", "Central"}).textWidth(RightColumnWidth).defaultValue(origForceFieldTypeIntern),
                     forceFieldTypeIntern)) {
-                spot.flowType = origForceFieldTypeIntern + 1;
+                spot.flowType = forceFieldTypeIntern + 1;
+                if (spot.flowType == FlowType_Radial) {
+                    spot.flowData.radialFlow = RadialFlow();
+                }
+                if (spot.flowType == FlowType_Central) {
+                    spot.flowData.centralFlow = CentralFlow();
+                }
             }
-            if (forceFieldTypeIntern + 1 == FlowType_Radial) {
+            if (spot.flowType == FlowType_Radial) {
                 ImGui::SetCursorPosX(posX);
                 AlienImGui::Combo(
                     AlienImGui::ComboParameters()
@@ -1054,6 +1061,19 @@ void _SimulationParametersWindow::processSpot(
                         .format("%.5f")
                         .defaultValue(origSpot.flowData.radialFlow.strength),
                     spot.flowData.radialFlow.strength);
+            }
+            if (spot.flowType == FlowType_Central) {
+                ImGui::SetCursorPosX(posX);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Strength")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(0.5f)
+                        .logarithmic(true)
+                        .format("%.5f")
+                        .defaultValue(origSpot.flowData.centralFlow.strength),
+                    spot.flowData.centralFlow.strength);
             }
             ImGui::EndDisabled();
             ImGui::TreePop();

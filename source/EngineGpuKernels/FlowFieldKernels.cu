@@ -7,9 +7,15 @@
 
 namespace
 {
-    __device__ float getHeight(BaseMap const& map, float2 const& pos, int const& spotIndex)
+    //__device__ __inline__ float getDiameter(SimulationParametersSpot const& spot)
+    //{
+    //    switch (spot.shapeType) {
+    //        case ShapeType_Circular
+    //    }
+    //}
+
+    __device__ float getHeight(BaseMap const& map, float2 const& pos, SimulationParametersSpot const& spot)
     {
-        auto const& spot = cudaSimulationParameters.spots[spotIndex];
         auto dist = map.getDistance(pos, float2{spot.posX, spot.posY});
         if (Orientation_Clockwise == spot.flowData.radialFlow.orientation) {
             return sqrtf(dist) * spot.flowData.radialFlow.strength;
@@ -20,15 +26,24 @@ namespace
 
     __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, int const& spotIndex)
     {
-        if (cudaSimulationParameters.spots[spotIndex].flowType == FlowType_None) {
+        auto const& spot = cudaSimulationParameters.spots[spotIndex];
+        switch (spot.flowType) {
+        case FlowType_Radial: {
+            auto baseValue = getHeight(map, pos, spot);
+            auto downValue = getHeight(map, pos + float2{0, 1}, spot);
+            auto rightValue = getHeight(map, pos + float2{1, 0}, spot);
+            float2 result{rightValue - baseValue, downValue - baseValue};
+            Math::rotateQuarterClockwise(result);
+            return result;
+        }
+        case FlowType_Central: {
+            auto centerDirection = map.getCorrectedDirection(float2{spot.posX, spot.posY} - pos);
+            return centerDirection * spot.flowData.centralFlow.strength / (Math::lengthSquared(centerDirection) + 50.0f);
+        }
+        default:
             return {0, 0};
         }
-        auto baseValue = getHeight(map, pos, spotIndex);
-        auto downValue = getHeight(map, pos + float2{0, 1}, spotIndex);
-        auto rightValue = getHeight(map, pos + float2{1, 0}, spotIndex);
-        float2 result{rightValue - baseValue, downValue - baseValue};
-        Math::rotateQuarterClockwise(result);
-        return result;
+
     }
 
 }
