@@ -10,8 +10,6 @@
 _ModeController::_ModeController(EditorController const& editorController)
     : _editorController(editorController)
 {
-    _navigationOn = OpenGLHelper::loadTexture(Const::NavigationOnFilename);
-    _navigationOff = OpenGLHelper::loadTexture(Const::NavigationOffFilename);
     _actionOn = OpenGLHelper::loadTexture(Const::ActionOnFilename);
     _actionOff = OpenGLHelper::loadTexture(Const::ActionOffFilename);
 }
@@ -30,16 +28,10 @@ void _ModeController::process()
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor());
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor());
 
-    auto navTexture = Mode::Navigation == _mode ? _navigationOn.textureId : _navigationOff.textureId;
-    if (ImGui::ImageButton((void*)(intptr_t)navTexture, {48.0f, 48.0f}, {0, 0}, {1.0f, 1.0f})) {
-        _mode = Mode::Navigation;
-        _editorController->setOn(false);
-    }
-    ImGui::SameLine();
     auto actionTexture = Mode::Action == _mode ? _actionOn.textureId : _actionOff.textureId;
     if (ImGui::ImageButton((void*)(intptr_t)actionTexture, {48.0f, 48.0f}, {0, 0}, {1.0f, 1.0f})) {
-        _mode = Mode::Action;
-        _editorController->setOn(true);
+        _mode = _mode == Mode::Action ? Mode::Navigation : Mode::Action;
+        _editorController->setOn(!_editorController->isOn());
     }
 
     ImGui::PopStyleColor(3);

@@ -1,10 +1,10 @@
 {
     "general": {
         "time step": "0",
-        "zoom": "8.00000000",
+        "zoom": "1.51258922",
         "center": {
-            "x": "505.50000000",
-            "y": "250.25000000"
+            "x": "624.97985840",
+            "y": "240.88583374"
         },
         "world size": {
             "x": "1000",
@@ -12,29 +12,29 @@
         }
     },
     "simulation parameters": {
-        "background color": "5703174",
+        "background color": "1184274",
         "time step size": "1.00000000",
         "motion": {
             "type": "0"
         },
         "fluid": {
-            "smoothing length": "0.66000003",
+            "smoothing length": "0.95200002",
             "pressure strength": "0.10000000",
             "viscosity strength": "0.10000000"
         },
-        "friction": "0.00100000",
+        "friction": "0.00000000",
         "rigidity": "0.00000000",
         "cell": {
-            "max velocity": "2.00000000",
+            "max velocity": "2.28600001",
             "max binding distance": "3.59999990",
             "normal energy": "100.00000000",
-            "min distance": "0.10000000",
-            "max force": "0.80000001",
+            "min distance": "0.30000001",
+            "max force": "9.00000000",
             "max force decay probability": "0.20000000",
             "max bonds": "6",
             "max execution order number": "6",
             "min energy": "50.00000000",
-            "fusion velocity": "0.82400000",
+            "fusion velocity": "5.00000000",
             "max binding energy": "500000.00000000",
             "color transition rules": {
                 "duration[0]": "0",
@@ -59,12 +59,12 @@
                     "activity threshold": "0.25000000",
                     "mutation probability": {
                         "neuron data": "0.00100000",
-                        "data": "0.00000000",
-                        "cell function": "0.00000000",
-                        "insertion": "0.00000000",
-                        "deletion": "0.00000000",
+                        "data": "0.00002900",
+                        "cell function": "0.00002500",
+                        "insertion": "0.00000700",
+                        "deletion": "0.00000100",
                         "translation": "0.00000000",
-                        "duplication": "0.00000000"
+                        "duplication": "0.00000700"
                     },
                     "mutation color": "false",
                     "mutation self replication": "false"
@@ -193,9 +193,9 @@
                 },
                 "muscle": {
                     "contraction expansion delta": "0.05000000",
-                    "movement acceleration": "0.00900000",
+                    "movement acceleration": "0.00200000",
                     "bending angle": "5.00000000",
-                    "bending acceleration": "0.13500001",
+                    "bending acceleration": "0.19200000",
                     "bending acceleration threshold": "0.10000000"
                 },
                 "sensor": {
@@ -205,7 +205,7 @@
             }
         },
         "radiation": {
-            "factor": "0.00003300",
+            "factor": "0.00000000",
             "probability": "0.03000000",
             "velocity multiplier": "1.00000000",
             "velocity perturbation": "0.50000000",
@@ -216,7 +216,7 @@
             "absorption by cell color[4]": "0.20000000",
             "absorption by cell color[5]": "0.20000000",
             "absorption by cell color[6]": "0.20000000",
-            "min cell age": "150583"
+            "min cell age": "148695"
         },
         "high radiation": {
             "min cell energy": "500.00000000",
@@ -234,39 +234,33 @@
             }
         },
         "particle sources": {
-            "num sources": "1",
-            "0": {
-                "pos": {
-                    "x": "257.00000000",
-                    "y": "102.00000000"
-                }
-            }
+            "num sources": "0"
         },
         "spots": {
-            "num spots": "1",
+            "num spots": "4",
             "0": {
-                "color": "4279895813",
+                "color": "4278190080",
                 "pos": {
-                    "x": "0.00000000",
-                    "y": "125.00000000"
+                    "x": "504.79998779",
+                    "y": "434.89999390"
                 },
                 "shape": {
                     "type": "0",
                     "circular": {
-                        "core radius": "500.00000000"
+                        "core radius": "141.30000305"
                     }
                 },
                 "flow": {
                     "type": "1",
                     "radial": {
                         "orientation": "0",
-                        "strength": "0.00070000"
+                        "strength": "0.00346000"
                     }
                 },
                 "fadeout radius": "49.09999847",
                 "friction": {
                     "activated": "false",
-                    "value": "0.00100000"
+                    "value": "0.00000000"
                 },
                 "rigidity": {
                     "activated": "false",
@@ -275,13 +269,13 @@
                 "radiation": {
                     "factor": {
                         "activated": "false",
-                        "value": "0.00000500"
+                        "value": "0.00000000"
                     }
                 },
                 "cell": {
                     "max force": {
                         "activated": "false",
-                        "value": "0.80000001"
+                        "value": "9.00000000"
                     },
                     "min energy": {
                         "activated": "false",
@@ -289,7 +283,7 @@
                     },
                     "fusion velocity": {
                         "activated": "false",
-                        "value": "0.82400000"
+                        "value": "5.00000000"
                     },
                     "max binding energy": {
                         "activated": "false",
@@ -387,15 +381,15 @@
                                 },
                                 "cell function": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "value": "0.00002500"
                                 },
                                 "insertion": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "value": "0.00000700"
                                 },
                                 "deletion": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "value": "0.00000100"
                                 }
                             }
                         }
@@ -407,7 +401,517 @@
                             "mutation probability": {
                                 "data ": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "value": "0.00002900"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "1": {
+                "color": "4279965456",
+                "pos": {
+                    "x": "609.50000000",
+                    "y": "166.69999695"
+                },
+                "shape": {
+                    "type": "0",
+                    "circular": {
+                        "core radius": "83.33333588"
+                    }
+                },
+                "flow": {
+                    "type": "1",
+                    "radial": {
+                        "orientation": "0",
+                        "strength": "0.01123000"
+                    }
+                },
+                "fadeout radius": "83.33333588",
+                "friction": {
+                    "activated": "false",
+                    "value": "0.00000000"
+                },
+                "rigidity": {
+                    "activated": "false",
+                    "value": "0.00000000"
+                },
+                "radiation": {
+                    "factor": {
+                        "activated": "false",
+                        "value": "0.00000000"
+                    }
+                },
+                "cell": {
+                    "max force": {
+                        "activated": "false",
+                        "value": "9.00000000"
+                    },
+                    "min energy": {
+                        "activated": "false",
+                        "value": "50.00000000"
+                    },
+                    "fusion velocity": {
+                        "activated": "false",
+                        "value": "5.00000000"
+                    },
+                    "max binding energy": {
+                        "activated": "false",
+                        "value": "500000.00000000"
+                    },
+                    "color transition rules": {
+                        "activated": "false",
+                        "duration[0]": "0",
+                        "target color[0]": "0",
+                        "duration[1]": "0",
+                        "target color[1]": "1",
+                        "duration[2]": "0",
+                        "target color[2]": "2",
+                        "duration[3]": "0",
+                        "target color[3]": "3",
+                        "duration[4]": "0",
+                        "target color[4]": "4",
+                        "duration[5]": "0",
+                        "target color[5]": "5",
+                        "duration[6]": "0",
+                        "target color[6]": "6"
+                    },
+                    "function": {
+                        "attacker": {
+                            "energy cost": {
+                                "activated": "false",
+                                "value": "0.00000000"
+                            },
+                            "color matrix": {
+                                "activated": "false"
+                            },
+                            "color matrix[0, 0]": "0.00000000",
+                            "color matrix[0, 1]": "0.00000000",
+                            "color matrix[0, 2]": "1.00000000",
+                            "color matrix[0, 3]": "0.20000000",
+                            "color matrix[0, 4]": "0.20000000",
+                            "color matrix[0, 5]": "0.20000000",
+                            "color matrix[0, 6]": "0.20000000",
+                            "color matrix[1, 0]": "0.00000000",
+                            "color matrix[1, 1]": "0.00000000",
+                            "color matrix[1, 2]": "1.00000000",
+                            "color matrix[1, 3]": "0.20000000",
+                            "color matrix[1, 4]": "0.20000000",
+                            "color matrix[1, 5]": "0.20000000",
+                            "color matrix[1, 6]": "0.20000000",
+                            "color matrix[2, 0]": "0.00000000",
+                            "color matrix[2, 1]": "0.00000000",
+                            "color matrix[2, 2]": "0.00000000",
+                            "color matrix[2, 3]": "0.00000000",
+                            "color matrix[2, 4]": "0.00000000",
+                            "color matrix[2, 5]": "0.00000000",
+                            "color matrix[2, 6]": "0.00000000",
+                            "color matrix[3, 0]": "0.00000000",
+                            "color matrix[3, 1]": "0.00000000",
+                            "color matrix[3, 2]": "0.00000000",
+                            "color matrix[3, 3]": "0.00000000",
+                            "color matrix[3, 4]": "0.00000000",
+                            "color matrix[3, 5]": "0.00000000",
+                            "color matrix[3, 6]": "0.00000000",
+                            "color matrix[4, 0]": "0.00000000",
+                            "color matrix[4, 1]": "0.00000000",
+                            "color matrix[4, 2]": "0.00000000",
+                            "color matrix[4, 3]": "0.00000000",
+                            "color matrix[4, 4]": "0.00000000",
+                            "color matrix[4, 5]": "0.00000000",
+                            "color matrix[4, 6]": "0.00000000",
+                            "color matrix[5, 0]": "0.00000000",
+                            "color matrix[5, 1]": "0.00000000",
+                            "color matrix[5, 2]": "0.00000000",
+                            "color matrix[5, 3]": "0.00000000",
+                            "color matrix[5, 4]": "0.00000000",
+                            "color matrix[5, 5]": "0.00000000",
+                            "color matrix[5, 6]": "0.00000000",
+                            "color matrix[6, 0]": "0.00000000",
+                            "color matrix[6, 1]": "0.00000000",
+                            "color matrix[6, 2]": "0.00000000",
+                            "color matrix[6, 3]": "0.00000000",
+                            "color matrix[6, 4]": "0.00000000",
+                            "color matrix[6, 5]": "0.00000000",
+                            "color matrix[6, 6]": "0.00000000",
+                            "geometry deviation exponent": {
+                                "activated": "false",
+                                "value": "0.00000000"
+                            },
+                            "connections mismatch penalty": {
+                                "activated": "false",
+                                "value": "0.33000001"
+                            }
+                        },
+                        "constructor": {
+                            "mutation probability": {
+                                "neuron data": {
+                                    "activated": "false",
+                                    "value": "0.00100000"
+                                },
+                                "cell function": {
+                                    "activated": "false",
+                                    "value": "0.00002500"
+                                },
+                                "insertion": {
+                                    "activated": "false",
+                                    "value": "0.00000700"
+                                },
+                                "deletion": {
+                                    "activated": "false",
+                                    "value": "0.00000100"
+                                }
+                            }
+                        }
+                    }
+                },
+                " cell": {
+                    "function": {
+                        "constructor": {
+                            "mutation probability": {
+                                "data ": {
+                                    "activated": "false",
+                                    "value": "0.00002900"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "2": {
+                "color": "4280224263",
+                "pos": {
+                    "x": "149.19999695",
+                    "y": "250.00000000"
+                },
+                "shape": {
+                    "type": "0",
+                    "circular": {
+                        "core radius": "83.33333588"
+                    }
+                },
+                "flow": {
+                    "type": "1",
+                    "radial": {
+                        "orientation": "0",
+                        "strength": "0.01081000"
+                    }
+                },
+                "fadeout radius": "83.33333588",
+                "friction": {
+                    "activated": "false",
+                    "value": "0.00000000"
+                },
+                "rigidity": {
+                    "activated": "false",
+                    "value": "0.00000000"
+                },
+                "radiation": {
+                    "factor": {
+                        "activated": "false",
+                        "value": "0.00000000"
+                    }
+                },
+                "cell": {
+                    "max force": {
+                        "activated": "false",
+                        "value": "9.00000000"
+                    },
+                    "min energy": {
+                        "activated": "false",
+                        "value": "50.00000000"
+                    },
+                    "fusion velocity": {
+                        "activated": "false",
+                        "value": "5.00000000"
+                    },
+                    "max binding energy": {
+                        "activated": "false",
+                        "value": "500000.00000000"
+                    },
+                    "color transition rules": {
+                        "activated": "false",
+                        "duration[0]": "0",
+                        "target color[0]": "0",
+                        "duration[1]": "0",
+                        "target color[1]": "1",
+                        "duration[2]": "0",
+                        "target color[2]": "2",
+                        "duration[3]": "0",
+                        "target color[3]": "3",
+                        "duration[4]": "0",
+                        "target color[4]": "4",
+                        "duration[5]": "0",
+                        "target color[5]": "5",
+                        "duration[6]": "0",
+                        "target color[6]": "6"
+                    },
+                    "function": {
+                        "attacker": {
+                            "energy cost": {
+                                "activated": "false",
+                                "value": "0.00000000"
+                            },
+                            "color matrix": {
+                                "activated": "false"
+                            },
+                            "color matrix[0, 0]": "0.00000000",
+                            "color matrix[0, 1]": "0.00000000",
+                            "color matrix[0, 2]": "1.00000000",
+                            "color matrix[0, 3]": "0.20000000",
+                            "color matrix[0, 4]": "0.20000000",
+                            "color matrix[0, 5]": "0.20000000",
+                            "color matrix[0, 6]": "0.20000000",
+                            "color matrix[1, 0]": "0.00000000",
+                            "color matrix[1, 1]": "0.00000000",
+                            "color matrix[1, 2]": "1.00000000",
+                            "color matrix[1, 3]": "0.20000000",
+                            "color matrix[1, 4]": "0.20000000",
+                            "color matrix[1, 5]": "0.20000000",
+                            "color matrix[1, 6]": "0.20000000",
+                            "color matrix[2, 0]": "0.00000000",
+                            "color matrix[2, 1]": "0.00000000",
+                            "color matrix[2, 2]": "0.00000000",
+                            "color matrix[2, 3]": "0.00000000",
+                            "color matrix[2, 4]": "0.00000000",
+                            "color matrix[2, 5]": "0.00000000",
+                            "color matrix[2, 6]": "0.00000000",
+                            "color matrix[3, 0]": "0.00000000",
+                            "color matrix[3, 1]": "0.00000000",
+                            "color matrix[3, 2]": "0.00000000",
+                            "color matrix[3, 3]": "0.00000000",
+                            "color matrix[3, 4]": "0.00000000",
+                            "color matrix[3, 5]": "0.00000000",
+                            "color matrix[3, 6]": "0.00000000",
+                            "color matrix[4, 0]": "0.00000000",
+                            "color matrix[4, 1]": "0.00000000",
+                            "color matrix[4, 2]": "0.00000000",
+                            "color matrix[4, 3]": "0.00000000",
+                            "color matrix[4, 4]": "0.00000000",
+                            "color matrix[4, 5]": "0.00000000",
+                            "color matrix[4, 6]": "0.00000000",
+                            "color matrix[5, 0]": "0.00000000",
+                            "color matrix[5, 1]": "0.00000000",
+                            "color matrix[5, 2]": "0.00000000",
+                            "color matrix[5, 3]": "0.00000000",
+                            "color matrix[5, 4]": "0.00000000",
+                            "color matrix[5, 5]": "0.00000000",
+                            "color matrix[5, 6]": "0.00000000",
+                            "color matrix[6, 0]": "0.00000000",
+                            "color matrix[6, 1]": "0.00000000",
+                            "color matrix[6, 2]": "0.00000000",
+                            "color matrix[6, 3]": "0.00000000",
+                            "color matrix[6, 4]": "0.00000000",
+                            "color matrix[6, 5]": "0.00000000",
+                            "color matrix[6, 6]": "0.00000000",
+                            "geometry deviation exponent": {
+                                "activated": "false",
+                                "value": "0.00000000"
+                            },
+                            "connections mismatch penalty": {
+                                "activated": "false",
+                                "value": "0.33000001"
+                            }
+                        },
+                        "constructor": {
+                            "mutation probability": {
+                                "neuron data": {
+                                    "activated": "false",
+                                    "value": "0.00100000"
+                                },
+                                "cell function": {
+                                    "activated": "false",
+                                    "value": "0.00002500"
+                                },
+                                "insertion": {
+                                    "activated": "false",
+                                    "value": "0.00000700"
+                                },
+                                "deletion": {
+                                    "activated": "false",
+                                    "value": "0.00000100"
+                                }
+                            }
+                        }
+                    }
+                },
+                " cell": {
+                    "function": {
+                        "constructor": {
+                            "mutation probability": {
+                                "data ": {
+                                    "activated": "false",
+                                    "value": "0.00002900"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "3": {
+                "color": "4280947727",
+                "pos": {
+                    "x": "809.50000000",
+                    "y": "401.60000610"
+                },
+                "shape": {
+                    "type": "0",
+                    "circular": {
+                        "core radius": "83.33333588"
+                    }
+                },
+                "flow": {
+                    "type": "1",
+                    "radial": {
+                        "orientation": "0",
+                        "strength": "0.03012000"
+                    }
+                },
+                "fadeout radius": "83.33333588",
+                "friction": {
+                    "activated": "false",
+                    "value": "0.00000000"
+                },
+                "rigidity": {
+                    "activated": "false",
+                    "value": "0.00000000"
+                },
+                "radiation": {
+                    "factor": {
+                        "activated": "false",
+                        "value": "0.00000000"
+                    }
+                },
+                "cell": {
+                    "max force": {
+                        "activated": "false",
+                        "value": "9.00000000"
+                    },
+                    "min energy": {
+                        "activated": "false",
+                        "value": "50.00000000"
+                    },
+                    "fusion velocity": {
+                        "activated": "false",
+                        "value": "5.00000000"
+                    },
+                    "max binding energy": {
+                        "activated": "false",
+                        "value": "500000.00000000"
+                    },
+                    "color transition rules": {
+                        "activated": "false",
+                        "duration[0]": "0",
+                        "target color[0]": "0",
+                        "duration[1]": "0",
+                        "target color[1]": "1",
+                        "duration[2]": "0",
+                        "target color[2]": "2",
+                        "duration[3]": "0",
+                        "target color[3]": "3",
+                        "duration[4]": "0",
+                        "target color[4]": "4",
+                        "duration[5]": "0",
+                        "target color[5]": "5",
+                        "duration[6]": "0",
+                        "target color[6]": "6"
+                    },
+                    "function": {
+                        "attacker": {
+                            "energy cost": {
+                                "activated": "false",
+                                "value": "0.00000000"
+                            },
+                            "color matrix": {
+                                "activated": "false"
+                            },
+                            "color matrix[0, 0]": "0.00000000",
+                            "color matrix[0, 1]": "0.00000000",
+                            "color matrix[0, 2]": "1.00000000",
+                            "color matrix[0, 3]": "0.20000000",
+                            "color matrix[0, 4]": "0.20000000",
+                            "color matrix[0, 5]": "0.20000000",
+                            "color matrix[0, 6]": "0.20000000",
+                            "color matrix[1, 0]": "0.00000000",
+                            "color matrix[1, 1]": "0.00000000",
+                            "color matrix[1, 2]": "1.00000000",
+                            "color matrix[1, 3]": "0.20000000",
+                            "color matrix[1, 4]": "0.20000000",
+                            "color matrix[1, 5]": "0.20000000",
+                            "color matrix[1, 6]": "0.20000000",
+                            "color matrix[2, 0]": "0.00000000",
+                            "color matrix[2, 1]": "0.00000000",
+                            "color matrix[2, 2]": "0.00000000",
+                            "color matrix[2, 3]": "0.00000000",
+                            "color matrix[2, 4]": "0.00000000",
+                            "color matrix[2, 5]": "0.00000000",
+                            "color matrix[2, 6]": "0.00000000",
+                            "color matrix[3, 0]": "0.00000000",
+                            "color matrix[3, 1]": "0.00000000",
+                            "color matrix[3, 2]": "0.00000000",
+                            "color matrix[3, 3]": "0.00000000",
+                            "color matrix[3, 4]": "0.00000000",
+                            "color matrix[3, 5]": "0.00000000",
+                            "color matrix[3, 6]": "0.00000000",
+                            "color matrix[4, 0]": "0.00000000",
+                            "color matrix[4, 1]": "0.00000000",
+                            "color matrix[4, 2]": "0.00000000",
+                            "color matrix[4, 3]": "0.00000000",
+                            "color matrix[4, 4]": "0.00000000",
+                            "color matrix[4, 5]": "0.00000000",
+                            "color matrix[4, 6]": "0.00000000",
+                            "color matrix[5, 0]": "0.00000000",
+                            "color matrix[5, 1]": "0.00000000",
+                            "color matrix[5, 2]": "0.00000000",
+                            "color matrix[5, 3]": "0.00000000",
+                            "color matrix[5, 4]": "0.00000000",
+                            "color matrix[5, 5]": "0.00000000",
+                            "color matrix[5, 6]": "0.00000000",
+                            "color matrix[6, 0]": "0.00000000",
+                            "color matrix[6, 1]": "0.00000000",
+                            "color matrix[6, 2]": "0.00000000",
+                            "color matrix[6, 3]": "0.00000000",
+                            "color matrix[6, 4]": "0.00000000",
+                            "color matrix[6, 5]": "0.00000000",
+                            "color matrix[6, 6]": "0.00000000",
+                            "geometry deviation exponent": {
+                                "activated": "false",
+                                "value": "0.00000000"
+                            },
+                            "connections mismatch penalty": {
+                                "activated": "false",
+                                "value": "0.33000001"
+                            }
+                        },
+                        "constructor": {
+                            "mutation probability": {
+                                "neuron data": {
+                                    "activated": "false",
+                                    "value": "0.00100000"
+                                },
+                                "cell function": {
+                                    "activated": "false",
+                                    "value": "0.00002500"
+                                },
+                                "insertion": {
+                                    "activated": "false",
+                                    "value": "0.00000700"
+                                },
+                                "deletion": {
+                                    "activated": "false",
+                                    "value": "0.00000100"
+                                }
+                            }
+                        }
+                    }
+                },
+                " cell": {
+                    "function": {
+                        "constructor": {
+                            "mutation probability": {
+                                "data ": {
+                                    "activated": "false",
+                                    "value": "0.00002900"
                                 }
                             }
                         }
@@ -426,7 +930,7 @@
                     },
                     "duplication": {
                         "activated": "false",
-                        "value": "0.00000000"
+                        "value": "0.00000700"
                     }
                 }
             }

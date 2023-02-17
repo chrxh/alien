@@ -20,8 +20,6 @@ public:
 private:
     EditorController _editorController;
 
-    TextureData _navigationOn;
-    TextureData _navigationOff;
     TextureData _actionOn;
     TextureData _actionOff;
     
