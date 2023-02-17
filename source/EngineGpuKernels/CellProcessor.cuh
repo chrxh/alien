@@ -22,7 +22,6 @@ public:
     __inline__ __device__ static void fillDensityMap(SimulationData& data);
 
     __inline__ __device__ static void correctOverlap(SimulationData& data);
-    __inline__ __device__ static void calcPressure_correctOverlap(SimulationData& data);
     __inline__ __device__ static void calcFluidForces_reconnectCells_correctOverlap(SimulationData& data);
 
     __inline__ __device__ static void calcCollisions_reconnectCells_correctOverlap(SimulationData& data);
@@ -110,30 +109,6 @@ namespace
         }
         result *= 3.0f / (2.0f * Const::PI);
         return result;
-    }
-}
-
-__inline__ __device__ void CellProcessor::calcPressure_correctOverlap(SimulationData& data)
-{
-    auto& cells = data.objects.cellPointers;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto const& smoothingLength = cudaSimulationParameters.motionData.fluidMotion.smoothingLength;
-
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
-        float density = 0;
-        data.cellMap.executeForEach(cell->absPos, 2 * smoothingLength, cell->detached, [&](auto const& otherCell) {
-            auto delta = data.cellMap.getCorrectedDirection(cell->absPos - otherCell->absPos);
-            auto distance = Math::length(delta);
-            density += calcKernel(distance / smoothingLength) / (smoothingLength * smoothingLength);
-            if (cell != otherCell && !cell->barrier) {
-                if (distance < cudaSimulationParameters.cellMinDistance) {
-                    cell->absPos += delta * cudaSimulationParameters.cellMinDistance / 5;
-                }
-            }
-        });
-
-        cell->density = density;
     }
 }
 
