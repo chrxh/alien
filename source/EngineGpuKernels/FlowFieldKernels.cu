@@ -40,6 +40,10 @@ namespace
             auto centerDirection = map.getCorrectedDirection(float2{spot.posX, spot.posY} - pos);
             return centerDirection * spot.flowData.centralFlow.strength / (Math::lengthSquared(centerDirection) + 50.0f);
         }
+        case FlowType_Linear: {
+            auto centerDirection = Math::unitVectorOfAngle(spot.flowData.linearFlow.angle);
+            return centerDirection * spot.flowData.linearFlow.strength;
+        }
         default:
             return {0, 0};
         }

@@ -445,6 +445,11 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
             JsonParser::encodeDecode(
                 tree, spot.flowData.centralFlow.strength, defaultSpot.flowData.centralFlow.strength, base + "flow.central.strength", parserTask);
         }
+        if (spot.flowType == FlowType_Linear) {
+            JsonParser::encodeDecode(tree, spot.flowData.linearFlow.angle, defaultSpot.flowData.linearFlow.angle, base + "flow.linear.angle", parserTask);
+            JsonParser::encodeDecode(
+                tree, spot.flowData.linearFlow.strength, defaultSpot.flowData.linearFlow.strength, base + "flow.linear.strength", parserTask);
+        }
         JsonParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", parserTask);
 
         encodeDecodeSpotProperty(tree, spot.values.friction, spot.activatedValues.friction, defaultSpot.values.friction, base + "friction", parserTask);

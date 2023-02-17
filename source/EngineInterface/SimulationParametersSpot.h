@@ -18,6 +18,7 @@ enum FlowType_
     FlowType_None,
     FlowType_Radial,
     FlowType_Central,
+    FlowType_Linear
 };
 
 using Orientation = int;
@@ -44,10 +45,20 @@ struct CentralFlow
     bool operator!=(CentralFlow const& other) const { return !operator==(other); }
 };
 
+struct LinearFlow
+{
+    float angle = 0;
+    float strength = 0.01f;
+
+    bool operator==(LinearFlow const& other) const { return angle == other.angle && strength == other.strength; }
+    bool operator!=(LinearFlow const& other) const { return !operator==(other); }
+};
+
 union FlowData
 {
     RadialFlow radialFlow;
     CentralFlow centralFlow;
+    LinearFlow linearFlow;
 };
 
 
@@ -103,6 +114,11 @@ struct SimulationParametersSpot
         }
         if (flowType == FlowType_Central) {
             if (flowData.centralFlow != other.flowData.centralFlow) {
+                return false;
+            }
+        }
+        if (flowType == FlowType_Linear) {
+            if (flowData.linearFlow != other.flowData.linearFlow) {
                 return false;
             }
         }
