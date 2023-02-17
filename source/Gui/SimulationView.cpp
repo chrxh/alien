@@ -275,14 +275,6 @@ void _SimulationView::draw()
 
 void _SimulationView::processControls()
 {
-    auto worldRect = _viewport->getVisibleWorldRect();
-    auto visibleWorldSize = worldRect.bottomRight - worldRect.topLeft;
-    auto worldSize = _simController->getWorldSize();
-
-    ImGuiStyle& style = ImGui::GetStyle();
-    float childHeight = 1 + style.ScrollbarSize + style.WindowPadding.y * 2.0f;
-    float childWidth = 1 + style.ScrollbarSize + style.WindowPadding.x * 2.0f;
-
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     auto mainMenubarHeight = StyleRepository::getInstance().contentScale(22);
     auto scrollbarThickness = 17;   //fixed
