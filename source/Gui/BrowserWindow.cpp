@@ -5,6 +5,7 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
+#include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
@@ -188,9 +189,8 @@ void _BrowserWindow::processTable()
         clipper.Begin(_filteredRemoteSimulationDatas.size());
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                RemoteSimulationData* item = &_filteredRemoteSimulationDatas[row];
 
-//                auto isItemSelected = _selectionIds.find(item->id) != _selectionIds.end();
+                RemoteSimulationData* item = &_filteredRemoteSimulationDatas[row];
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow();
@@ -228,12 +228,8 @@ void _BrowserWindow::processTable()
 
                 ImGui::TableNextColumn();
 
-/*
-                ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
-                if (ImGui::Selectable(item->timestamp.c_str(), isItemSelected, selectableFlags, ImVec2(0, 0.0f))) {
-                    _selectionIds = {item->id};
-                }
-*/
+                pushTextColor(*item);
+
                 AlienImGui::Text(item->timestamp);
                 ImGui::TableNextColumn();
                 processShortenedText(item->userName);
@@ -246,7 +242,7 @@ void _BrowserWindow::processTable()
                 if(item->likes > 0) {
                     ImGui::SameLine();
                     processDetailButton();
-                    AlienImGui::Tooltip([&] { return getUserLikes(item->id); });
+                    AlienImGui::Tooltip([&] { return getUserLikes(item->id); }, false);
                 }
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->numDownloads));
@@ -261,6 +257,8 @@ void _BrowserWindow::processTable()
                 ImGui::TableNextColumn();
                 AlienImGui::Text(item->version);
                 ImGui::PopID();
+
+                ImGui::PopStyleColor();
             }
         ImGui::EndTable();
     }
@@ -316,7 +314,7 @@ void _BrowserWindow::processShortenedText(std::string const& text) {
         ImGui::SetCursorPosX(cursorPos);
 
         processDetailButton();
-        AlienImGui::Tooltip(text.c_str());
+        AlienImGui::Tooltip(text.c_str(), false);
     }
 }
 
@@ -409,4 +407,28 @@ std::string _BrowserWindow::getUserLikes(std::string const& id)
     }
 
     return boost::algorithm::join(userLikes, ", ");
+}
+
+void _BrowserWindow::pushTextColor(RemoteSimulationData const& entry)
+{
+    bool versionCompatible = true;
+
+    std::vector<std::string> versionParts;
+    boost::split(versionParts, entry.version, boost::is_any_of("."));
+
+    auto majorVersion = std::stoi(versionParts.at(0));
+    if (majorVersion < 4) {
+        versionCompatible = false;
+    } else if (versionParts.size() == 5 && versionParts.at(3) == "alpha") {
+        auto alphaVersion = std::stoi(versionParts.at(4));
+        if (alphaVersion < 2) {
+            versionCompatible = false;
+        }
+    }
+
+    if (versionCompatible) {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 0.0f, 1.0f));
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.6f));
+    }
 }

@@ -235,8 +235,8 @@ public:
     };
     static bool Button(ButtonParameters const& parameters);
 
-    static void Tooltip(std::string const& text);
-    static void Tooltip(std::function<std::string()> const& textFunc);
+    static void Tooltip(std::string const& text, bool delay = true);
+    static void Tooltip(std::function<std::string()> const& textFunc, bool delay = true);
 
     static void ConvertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v);
 
