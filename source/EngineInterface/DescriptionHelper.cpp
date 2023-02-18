@@ -275,8 +275,9 @@ void DescriptionHelper::randomizeColors(ClusteredDataDescription& data, std::vec
 void DescriptionHelper::randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy)
 {
     for (auto& cluster : data.clusters) {
+        auto energy = NumberGenerator::getInstance().getRandomReal(minEnergy, maxEnergy);
         for (auto& cell : cluster.cells) {
-            cell.energy = NumberGenerator::getInstance().getRandomReal(minEnergy, maxEnergy);
+            cell.energy = energy;
         }
     }
 }
@@ -284,8 +285,9 @@ void DescriptionHelper::randomizeEnergies(ClusteredDataDescription& data, float 
 void DescriptionHelper::randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge)
 {
     for (auto& cluster : data.clusters) {
+        auto age = NumberGenerator::getInstance().getRandomReal(minAge, maxAge);
         for (auto& cell : cluster.cells) {
-            cell.age = NumberGenerator::getInstance().getRandomInt(minAge, maxAge);
+            cell.age = age;
         }
     }
 }

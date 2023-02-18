@@ -67,6 +67,11 @@ void _RandomizeDialog::process()
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Maximum age").textWidth(RightColumnWidth), _maxAge);
         ImGui::EndDisabled();
 
+        AlienImGui::Group("Option");
+        ImGui::Checkbox("##restrictToSelectedClusters", &_restrictToSelectedClusters);
+        ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
+        AlienImGui::Text("Restrict to selected clusters");
+
         AlienImGui::Separator();
 
         ImGui::BeginDisabled(!isOkEnabled());
@@ -112,7 +117,13 @@ void _RandomizeDialog::onRandomize()
     auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
     auto parameters = _simController->getSimulationParameters();
     auto generalSettings = _simController->getGeneralSettings();
-    auto content = _simController->getClusteredSimulationData();
+    auto content = [&] {
+        if (_restrictToSelectedClusters) {
+            return _simController->getSelectedClusteredSimulationData(true);
+        } else {
+            return _simController->getClusteredSimulationData();
+        }
+    }();
 
     std::vector<int> colorCodes;
     for (int i = 0; i < 7; ++i) {
@@ -130,9 +141,14 @@ void _RandomizeDialog::onRandomize()
         DescriptionHelper::randomizeAges(content, _minAge, _maxAge);
     }
 
-    _simController->closeSimulation();
-    _simController->newSimulation(timestep, generalSettings, parameters);
-    _simController->setClusteredSimulationData(content);
+    if (_restrictToSelectedClusters) {
+        _simController->removeSelectedObjects(true);
+        _simController->addAndSelectSimulationData(DataDescription(content));
+    } else {
+        _simController->closeSimulation();
+        _simController->newSimulation(timestep, generalSettings, parameters);
+        _simController->setClusteredSimulationData(content);       
+    }
 }
 
 bool _RandomizeDialog::isOkEnabled()
