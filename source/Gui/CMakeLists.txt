@@ -54,6 +54,8 @@ PUBLIC
     Main.cpp
     MainWindow.cpp
     MainWindow.h
+    MassOperationsDialog.cpp
+    MassOperationsDialog.h
     MessageDialog.cpp
     MessageDialog.h
     ModeController.cpp
@@ -80,8 +82,6 @@ PUBLIC
     PatternEditorWindow.h
     RadiationSourcesWindow.cpp
     RadiationSourcesWindow.h
-    RandomizeDialog.cpp
-    RandomizeDialog.h
     RemoteSimulationData.cpp
     RemoteSimulationData.h
     RemoteSimulationDataParser.cpp

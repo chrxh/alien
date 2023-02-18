@@ -49,8 +49,8 @@ using StartupController = std::shared_ptr<_StartupController>;
 class _AboutDialog;
 using AboutDialog = std::shared_ptr<_AboutDialog>;
 
-class _RandomizeDialog;
-using RandomizeDialog = std::shared_ptr<_RandomizeDialog>;
+class _MassOperationsDialog;
+using MassOperationsDialog = std::shared_ptr<_MassOperationsDialog>;
 
 class _LogWindow;
 using LogWindow = std::shared_ptr<_LogWindow>;

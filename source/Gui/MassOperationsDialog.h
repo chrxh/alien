@@ -3,10 +3,10 @@
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
 
-class _RandomizeDialog
+class _MassOperationsDialog
 {
 public:
-    _RandomizeDialog(SimulationController const& simController);
+    _MassOperationsDialog(SimulationController const& simController);
 
     void process();
 
@@ -15,7 +15,7 @@ public:
 private:
     void colorCheckbox(std::string id, uint32_t cellColor, bool& check);
 
-    void onRandomize();
+    void onExecute();
     bool isOkEnabled();
     void validationAndCorrection();
 

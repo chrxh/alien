@@ -1,4 +1,4 @@
-#include "RandomizeDialog.h"
+#include "MassOperationsDialog.h"
 
 #include <imgui.h>
 
@@ -14,16 +14,16 @@ namespace
 {
     auto constexpr RightColumnWidth = 120.0f;
 }
-_RandomizeDialog::_RandomizeDialog(SimulationController const& simController)
+_MassOperationsDialog::_MassOperationsDialog(SimulationController const& simController)
     : _simController(simController)
 {}
 
-void _RandomizeDialog::process()
+void _MassOperationsDialog::process()
 {
     if (!_show) {
         return;
     }
-    auto name = "Randomize";
+    auto name = "Mass operations";
     ImGui::OpenPopup(name);
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal(name, NULL)) {
@@ -67,7 +67,7 @@ void _RandomizeDialog::process()
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Maximum age").textWidth(RightColumnWidth), _maxAge);
         ImGui::EndDisabled();
 
-        AlienImGui::Group("Option");
+        AlienImGui::Group("Options");
         ImGui::Checkbox("##restrictToSelectedClusters", &_restrictToSelectedClusters);
         ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
         AlienImGui::Text("Restrict to selected clusters");
@@ -76,7 +76,7 @@ void _RandomizeDialog::process()
 
         ImGui::BeginDisabled(!isOkEnabled());
         if (AlienImGui::Button("OK")) {
-            onRandomize();
+            onExecute();
             ImGui::CloseCurrentPopup();
             _show = false;
         }
@@ -95,12 +95,12 @@ void _RandomizeDialog::process()
     }
 }
 
-void _RandomizeDialog::show()
+void _MassOperationsDialog::show()
 {
     _show = true;
 }
 
-void _RandomizeDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
+void _MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
 {
     float h, s, v;
     AlienImGui::ConvertRGBtoHSV(cellColor, h, s, v);
@@ -112,7 +112,7 @@ void _RandomizeDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& c
     ImGui::PopStyleColor(4);
 }
 
-void _RandomizeDialog::onRandomize()
+void _MassOperationsDialog::onExecute()
 {
     auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
     auto parameters = _simController->getSimulationParameters();
@@ -151,7 +151,7 @@ void _RandomizeDialog::onRandomize()
     }
 }
 
-bool _RandomizeDialog::isOkEnabled()
+bool _MassOperationsDialog::isOkEnabled()
 {
     bool result = false;
     if (_randomizeColors) {
@@ -168,7 +168,7 @@ bool _RandomizeDialog::isOkEnabled()
     return result;
 }
 
-void _RandomizeDialog::validationAndCorrection()
+void _MassOperationsDialog::validationAndCorrection()
 {
     if (_minAge > _maxAge) {
         _maxAge = _minAge;
