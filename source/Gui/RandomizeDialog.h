@@ -33,4 +33,6 @@ private:
     bool _randomizeAges = false;
     int _minAge = 0;
     int _maxAge = 0;
+
+    bool _restrictToSelectedClusters = false;
 };
