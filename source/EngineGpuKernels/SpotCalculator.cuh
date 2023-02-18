@@ -105,43 +105,25 @@ public:
             &SimulationParametersSpotActivatedValues::cellFunctionAttackerFoodChainColorMatrix);
     }
 
+    //return -1 for base
     __device__ __inline__ static int
-    calcColorTransitionDuration(int color, SimulationData const& data, float2 const& worldPos)
+    getFirstMatchingSpotOrBase(SimulationData const& data, float2 const& worldPos, bool SimulationParametersSpotActivatedValues::*valueActivated)
     {
-        float spotValues[MAX_SPOTS];
-        int numValues = 0;
-        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            if (cudaSimulationParameters.spots[i].activatedValues.cellColorTransition) {
-                spotValues[numValues++] = toFloat(cudaSimulationParameters.spots[i].values.cellColorTransitionDuration[color]);
+        if (0 == cudaSimulationParameters.numSpots) {
+            return -1;
+        } else {
+            auto const& map = data.cellMap;
+            for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+                if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                    float2 spotPos = {cudaSimulationParameters.spots[i].posX, cudaSimulationParameters.spots[i].posY};
+                    auto delta = map.getCorrectedDirection(spotPos - worldPos);
+                    if(calcWeight(delta, i) < NEAR_ZERO) {
+                        return i;
+                    }
+                }
             }
+            return -1;
         }
-
-        return toInt(calcResultingValue(
-            data.cellMap,
-            worldPos,
-            toFloat(cudaSimulationParameters.baseValues.cellColorTransitionDuration[color]),
-            spotValues,
-            &SimulationParametersSpotActivatedValues::cellColorTransition));
-    }
-
-    __device__ __inline__ static int calcColorTransitionTargetColor(int color, SimulationData const& data, float2 const& worldPos)
-    {
-        float spotValues[MAX_SPOTS];
-        int numValues = 0;
-        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            if (cudaSimulationParameters.spots[i].activatedValues.cellColorTransition) {
-                spotValues[numValues++] = toFloat(cudaSimulationParameters.spots[i].values.cellColorTransitionTargetColor[color]);
-            }
-        }
-
-        return toInt(
-            calcResultingValue(
-                data.cellMap,
-                worldPos,
-                toFloat(cudaSimulationParameters.baseValues.cellColorTransitionTargetColor[color]),
-                spotValues,
-                &SimulationParametersSpotActivatedValues::cellColorTransition)
-            + 0.5f);
     }
 
 private:

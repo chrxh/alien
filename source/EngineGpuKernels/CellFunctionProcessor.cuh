@@ -11,7 +11,6 @@ class CellFunctionProcessor
 public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
     __inline__ __device__ static void resetFetchedActivities(SimulationData& data);
-    __inline__ __device__ static void aging(SimulationData& data);
 
     __inline__ __device__ static Activity calcInputActivity(Cell* cell, int& inputExecutionOrderNumber);
     __inline__ __device__ static void setActivity(Cell* cell, Activity const& newActivity);
@@ -58,29 +57,6 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->activity.channels[i] = 0;
             }
-        }
-    }
-}
-
-__inline__ __device__ void CellFunctionProcessor::aging(SimulationData& data)
-{
-    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = data.objects.cellPointers.at(index);
-        if (cell->barrier) {
-            continue;
-        }
-
-        auto color = calcMod(cell->color, 7);
-        auto transitionDuration = SpotCalculator::calcColorTransitionDuration(color, data, cell->absPos);
-        ++cell->age;
-        if (transitionDuration > 0 && cell->age > transitionDuration) {
-            auto targetColor = SpotCalculator::calcColorTransitionTargetColor(color, data, cell->absPos);
-            cell->color = targetColor;
-            cell->age = 0;
-        }
-        if (cell->livingState == LivingState_Ready && cell->activationTime > 0) {
-            --cell->activationTime;
         }
     }
 }

@@ -33,6 +33,7 @@ public:
     __inline__ __device__ static void verletPositionUpdate(SimulationData& data);
     __inline__ __device__ static void verletVelocityUpdate(SimulationData& data);
 
+    __inline__ __device__ static void aging(SimulationData& data);
     __inline__ __device__ static void livingStateTransition(SimulationData& data);
 
     __inline__ __device__ static void applyInnerFriction(SimulationData& data);
@@ -496,6 +497,38 @@ __inline__ __device__ void CellProcessor::verletVelocityUpdate(SimulationData& d
         }
     }
 }
+
+__inline__ __device__ void CellProcessor::aging(SimulationData& data)
+{
+    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = data.objects.cellPointers.at(index);
+        if (cell->barrier) {
+            continue;
+        }
+
+        int transitionDuration;
+        int targetColor;
+        auto color = calcMod(cell->color, MAX_COLORS);
+        auto spotIndex = SpotCalculator::getFirstMatchingSpotOrBase(data, cell->absPos, &SimulationParametersSpotActivatedValues::cellColorTransition);
+        if (spotIndex == -1) {
+            transitionDuration = cudaSimulationParameters.baseValues.cellColorTransitionDuration[color];
+            targetColor = cudaSimulationParameters.baseValues.cellColorTransitionTargetColor[color];
+        } else {
+            transitionDuration = cudaSimulationParameters.spots[spotIndex].values.cellColorTransitionDuration[color];
+            targetColor = cudaSimulationParameters.spots[spotIndex].values.cellColorTransitionTargetColor[color];
+        }
+        ++cell->age;
+        if (transitionDuration > 0 && cell->age > transitionDuration) {
+            cell->color = targetColor;
+            cell->age = 0;
+        }
+        if (cell->livingState == LivingState_Ready && cell->activationTime > 0) {
+            --cell->activationTime;
+        }
+    }
+}
+
 
 __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& data)
 {
