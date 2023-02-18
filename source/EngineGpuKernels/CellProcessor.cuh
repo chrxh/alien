@@ -348,7 +348,7 @@ __inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
             continue;
         }
 
-        cell->vel = cell->vel + cell->shared1 * cudaSimulationParameters.timestepSize;
+        cell->vel = cell->vel + cell->shared1;
         if (Math::length(cell->vel) > cudaSimulationParameters.cellMaxVelocity) {
             cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.cellMaxVelocity;
         }
