@@ -232,7 +232,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnections(
     if (!tryAddConnectionOneWay(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1, angleAlignment)) {
         return false;
     }
-    if(!tryAddConnectionOneWay(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2, angleAlignment)) {
+    if (!tryAddConnectionOneWay(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2, angleAlignment)) {
         cell1->numConnections = origNumConnection;
         for (int i = 0; i < origNumConnection; ++i) {
             cell1->connections[i] = origConnections[i];
@@ -343,7 +343,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     CellConnection newConnection;
     newConnection.cell = cell2;
     newConnection.distance = desiredDistance;
-    newConnection.angleFromPrevious = 0;
+    newConnection.angleFromPrevious = 0;    //#TODO als lokale Variable und dann später setzen
     auto refAngle = cell1->connections[index].angleFromPrevious;
     if (Math::isAngleInBetween(prevAngle, nextAngle, newAngle)) {
         auto angleDiff1 = Math::subtractAngle(newAngle, prevAngle);
@@ -355,7 +355,19 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
             newConnection.angleFromPrevious = desiredAngleOnCell1;
         }
         newConnection.angleFromPrevious = min(newConnection.angleFromPrevious, refAngle);
-        newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment % ConstructorAngleAlignment_Count);
+
+        newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment);
+
+        //#TODO in Math auslagern
+        if (angleAlignment != ConstructorAngleAlignment_None) {
+            auto angleUnit = 360.0f / (angleAlignment + 1);
+            if (newConnection.angleFromPrevious < NEAR_ZERO && angleUnit < refAngle - NEAR_ZERO) {
+                newConnection.angleFromPrevious = angleUnit;
+            }
+            if (newConnection.angleFromPrevious > refAngle - NEAR_ZERO && refAngle - angleUnit > NEAR_ZERO) {
+                newConnection.angleFromPrevious = refAngle - angleUnit;
+            }
+        }
     }
     if (newConnection.angleFromPrevious < NEAR_ZERO) {
         return false;
@@ -363,7 +375,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
 
     //adjust reference angle of next connection
     auto nextAngleFromPrevious = refAngle - newConnection.angleFromPrevious;
-    auto nextAngleFromPreviousAligned = Math::alignAngle(nextAngleFromPrevious, angleAlignment % ConstructorAngleAlignment_Count);
+    auto nextAngleFromPreviousAligned = Math::alignAngle(nextAngleFromPrevious, angleAlignment);
     auto angleDiff = nextAngleFromPreviousAligned - nextAngleFromPrevious;
 
     auto nextIndex = index % cell1->numConnections;
