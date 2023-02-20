@@ -95,7 +95,7 @@ struct TransmitterDescription
 
 struct ConstructorDescription
 {
-    int activationMode = 10;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    int activationMode = 13;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     bool singleConstruction = false;
     bool separateConstruction = true;
     bool adaptMaxConnections = true;

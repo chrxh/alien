@@ -24,7 +24,7 @@ namespace
 {
     auto const CellWindowWidth = 350.0f;
     auto const ParticleWindowWidth = 280.0f;
-    auto const PhysicsTabTextWidth = 150.0f;
+    auto const BaseTabTextWidth = 150.0f;
     auto const CellFunctionTextWidth = 180.0f;
     auto const CellFunctionDefenderWidth = 100.0f;
     auto const CellFunctionBaseTabTextWidth = 120.0f;
@@ -159,15 +159,16 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
     if (ImGui::BeginTabItem("Base", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             if (ImGui::TreeNodeEx("Properties##Base", TreeNodeFlags)) {
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(PhysicsTabTextWidth), cell.energy);
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position X").format("%.2f").textWidth(PhysicsTabTextWidth), cell.pos.x);
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(PhysicsTabTextWidth), cell.pos.y);
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity X").format("%.2f").textWidth(PhysicsTabTextWidth), cell.vel.x);
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity Y").format("%.2f").textWidth(PhysicsTabTextWidth), cell.vel.y);
+                AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(BaseTabTextWidth), cell.color);
+                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(BaseTabTextWidth), cell.energy);
+                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position X").format("%.2f").textWidth(BaseTabTextWidth), cell.pos.x);
+                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(BaseTabTextWidth), cell.pos.y);
+                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity X").format("%.2f").textWidth(BaseTabTextWidth), cell.vel.x);
+                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity Y").format("%.2f").textWidth(BaseTabTextWidth), cell.vel.y);
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(PhysicsTabTextWidth), cell.stiffness);
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(PhysicsTabTextWidth), cell.maxConnections);
-                AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(PhysicsTabTextWidth), cell.barrier);
+                    AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(BaseTabTextWidth), cell.stiffness);
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(BaseTabTextWidth), cell.maxConnections);
+                AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(BaseTabTextWidth), cell.barrier);
                 ImGui::TreePop();
             }
 
@@ -175,10 +176,10 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
                 for (auto const& [index, connection] : cell.connections | boost::adaptors::indexed(0)) {
                     if (ImGui::TreeNodeEx(("Connection [" + std::to_string(index) + "]").c_str(), ImGuiTreeNodeFlags_None)) {
                         AlienImGui::InputFloat(
-                            AlienImGui::InputFloatParameters().name("Reference distance").format("%.2f").textWidth(PhysicsTabTextWidth).readOnly(true),
+                            AlienImGui::InputFloatParameters().name("Reference distance").format("%.2f").textWidth(BaseTabTextWidth).readOnly(true),
                             connection.distance);
                         AlienImGui::InputFloat(
-                            AlienImGui::InputFloatParameters().name("Reference angle").format("%.2f").textWidth(PhysicsTabTextWidth).readOnly(true),
+                            AlienImGui::InputFloatParameters().name("Reference angle").format("%.2f").textWidth(BaseTabTextWidth).readOnly(true),
                             connection.angleFromPrevious);
                         ImGui::TreePop();
                     }
@@ -236,7 +237,6 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                     }
                 }
 
-                AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(CellFunctionBaseTabTextWidth), cell.color);
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Age").textWidth(CellFunctionBaseTabTextWidth), cell.age);
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Activation time").textWidth(CellFunctionBaseTabTextWidth), cell.activationTime);
                 AlienImGui::InputInt(
