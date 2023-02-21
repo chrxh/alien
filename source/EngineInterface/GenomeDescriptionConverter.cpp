@@ -70,7 +70,7 @@ namespace
     //between -180 and 180
     float readAngle(std::vector<uint8_t> const& data, int& pos)
     {
-        return readFloat(data, pos) * 180;
+        return static_cast<float>(static_cast<int8_t>(readByte(data, pos))) / 120 * 180;
     }
     //between 36 and 1060
     float readEnergy(std::vector<uint8_t> const& data, int& pos)
