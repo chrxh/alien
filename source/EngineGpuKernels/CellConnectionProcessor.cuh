@@ -310,18 +310,16 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
             angleDiff = desiredAngleOnCell1;
         }
         angleDiff = Math::alignAngle(angleDiff, angleAlignment);
+        if (angleDiff < 0) {
+            angleDiff += 360.0;
+        }
         angleDiff = Math::avoidAngleBoundaries(angleDiff, 360.0f, angleAlignment);
         if (abs(angleDiff) < NEAR_ZERO || abs(angleDiff - 360.0f) < NEAR_ZERO || abs(angleDiff + 360.0f) < NEAR_ZERO) {
             return false;
         }
 
-        if (angleDiff >= 0) {
-            cell1->connections[1].angleFromPrevious = angleDiff;
-            cell1->connections[0].angleFromPrevious = 360.0f - angleDiff;
-        } else {
-            cell1->connections[1].angleFromPrevious = 360.0f + angleDiff;
-            cell1->connections[0].angleFromPrevious = -angleDiff;
-        }
+        cell1->connections[1].angleFromPrevious = angleDiff;
+        cell1->connections[0].angleFromPrevious = 360.0f - angleDiff;
 
         cell1->numConnections++;
         cell1->connections[1].cell = cell2;

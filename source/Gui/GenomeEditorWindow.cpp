@@ -82,7 +82,8 @@ namespace
     std::string generateShortDescription(int index, CellGenomeDescription const& cell)
     {
         return "No. " + std::to_string(index + 1) + ", Type: " + Const::CellFunctionToStringMap.at(cell.getCellFunctionType())
-            + ", Color: " + std::to_string(cell.color) + ", Angle: " + StringHelper::format(cell.referenceAngle, 1);
+            + ", Color: " + std::to_string(cell.color) + ", Angle: " + StringHelper::format(cell.referenceAngle, 1)
+            + ", Energy: " + StringHelper::format(cell.energy, 1);
     }
 }
 
