@@ -3,8 +3,8 @@
         "time step": "0",
         "zoom": "3.66056848",
         "center": {
-            "x": "417.75186157",
-            "y": "251.62554932"
+            "x": "477.03250122",
+            "y": "345.87304688"
         },
         "world size": {
             "x": "1000",
@@ -122,7 +122,7 @@
                     "duration[6, 6]": "1"
                 },
                 "attacker": {
-                    "radius": "1.60000002",
+                    "radius": "1.69799995",
                     "strength": "0.05000000",
                     "energy distribution radius": "3.59999990",
                     "energy distribution same color": "true",

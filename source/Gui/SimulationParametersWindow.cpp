@@ -814,7 +814,7 @@ void _SimulationParametersWindow::processBase(
         if (ImGui::TreeNodeEx("Cell function: Muscle", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Contraction and expansion size")
+                    .name("Contraction and expansion delta")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.1f)
@@ -822,7 +822,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.cellFunctionMuscleContractionExpansionDelta);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Movement acceleration")
+                    .name("Forward/backward acceleration")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.15f)
@@ -1407,7 +1407,7 @@ void _SimulationParametersWindow::processSpot(
 void _SimulationParametersWindow::onOpenParameters()
 {
     GenericFileDialogs::getInstance().showOpenFileDialog(
-        "Open simulation parameters", "Simulation parameters (*.json){.json},.*", _startingPath, [&](std::filesystem::path const& path) {
+        "Open simulation parameters", "Simulation parameters (*.parameters.json){.parameters.json},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
@@ -1424,7 +1424,7 @@ void _SimulationParametersWindow::onOpenParameters()
 void _SimulationParametersWindow::onSaveParameters()
 {
     GenericFileDialogs::getInstance().showSaveFileDialog(
-        "Save simulation parameters", "Simulation parameters (*.json){.json},.*", _startingPath, [&](std::filesystem::path const& path) {
+        "Save simulation parameters", "Simulation parameters (*.parameters.json){.parameters.json},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
