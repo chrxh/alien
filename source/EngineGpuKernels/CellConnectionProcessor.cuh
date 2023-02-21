@@ -287,6 +287,8 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         return false;
     }
 
+    angleAlignment %= ConstructorAngleAlignment_Count;
+
     auto newAngle = Math::angleOfVector(posDelta);
     if (desiredDistance == 0) {
         desiredDistance = Math::length(posDelta);
@@ -307,7 +309,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         if (0 != desiredAngleOnCell1) {
             angleDiff = desiredAngleOnCell1;
         }
-        angleDiff = Math::alignAngle(angleDiff, angleAlignment % ConstructorAngleAlignment_Count);
+        angleDiff = Math::alignAngle(angleDiff, angleAlignment);
         angleDiff = Math::avoidAngleBoundaries(angleDiff, 360.0f, angleAlignment);
         if (abs(angleDiff) < NEAR_ZERO || abs(angleDiff - 360.0f) < NEAR_ZERO || abs(angleDiff + 360.0f) < NEAR_ZERO) {
             return false;
