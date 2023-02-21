@@ -308,6 +308,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
             angleDiff = desiredAngleOnCell1;
         }
         angleDiff = Math::alignAngle(angleDiff, angleAlignment % ConstructorAngleAlignment_Count);
+        angleDiff = Math::avoidAngleBoundaries(angleDiff, 360.0f, angleAlignment);
         if (abs(angleDiff) < NEAR_ZERO || abs(angleDiff - 360.0f) < NEAR_ZERO || abs(angleDiff + 360.0f) < NEAR_ZERO) {
             return false;
         }
@@ -343,38 +344,29 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     CellConnection newConnection;
     newConnection.cell = cell2;
     newConnection.distance = desiredDistance;
-    newConnection.angleFromPrevious = 0;    //#TODO als lokale Variable und dann später setzen
+    auto angleFromPrevious = 0.0f;
     auto refAngle = cell1->connections[index].angleFromPrevious;
     if (Math::isAngleInBetween(prevAngle, nextAngle, newAngle)) {
         auto angleDiff1 = Math::subtractAngle(newAngle, prevAngle);
         auto angleDiff2 = Math::subtractAngle(nextAngle, prevAngle);
         auto factor = angleDiff2 != 0 ? angleDiff1 / angleDiff2 : 0.5f;
         if (0 == desiredAngleOnCell1) {
-            newConnection.angleFromPrevious = refAngle * factor;
+            angleFromPrevious = refAngle * factor;
         } else {
-            newConnection.angleFromPrevious = desiredAngleOnCell1;
+            angleFromPrevious = desiredAngleOnCell1;
         }
-        newConnection.angleFromPrevious = min(newConnection.angleFromPrevious, refAngle);
+        angleFromPrevious = min(angleFromPrevious, refAngle);
 
-        newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment);
-
-        //#TODO in Math auslagern
-        if (angleAlignment != ConstructorAngleAlignment_None) {
-            auto angleUnit = 360.0f / (angleAlignment + 1);
-            if (newConnection.angleFromPrevious < NEAR_ZERO && angleUnit < refAngle - NEAR_ZERO) {
-                newConnection.angleFromPrevious = angleUnit;
-            }
-            if (newConnection.angleFromPrevious > refAngle - NEAR_ZERO && refAngle - angleUnit > NEAR_ZERO) {
-                newConnection.angleFromPrevious = refAngle - angleUnit;
-            }
-        }
+        angleFromPrevious = Math::alignAngle(angleFromPrevious, angleAlignment);
+        angleFromPrevious = Math::avoidAngleBoundaries(angleFromPrevious, refAngle, angleAlignment);
     }
-    if (newConnection.angleFromPrevious < NEAR_ZERO) {
+    if (angleFromPrevious < NEAR_ZERO) {
         return false;
     }
+    newConnection.angleFromPrevious = angleFromPrevious;
 
     //adjust reference angle of next connection
-    auto nextAngleFromPrevious = refAngle - newConnection.angleFromPrevious;
+    auto nextAngleFromPrevious = refAngle - angleFromPrevious;
     auto nextAngleFromPreviousAligned = Math::alignAngle(nextAngleFromPrevious, angleAlignment);
     auto angleDiff = nextAngleFromPreviousAligned - nextAngleFromPrevious;
 
