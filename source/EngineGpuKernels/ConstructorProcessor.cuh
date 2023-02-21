@@ -23,7 +23,6 @@ private:
     struct ConstructionData
     {
         float angle;
-        float distance;
         int maxConnections;
         int executionOrderNumber;
         int color;
@@ -124,7 +123,6 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     ConstructionData result;
     result.cellFunction = GenomeDecoder::readByte(constructor) % CellFunction_Count;
     result.angle = GenomeDecoder::readAngle(constructor);
-    result.distance = max(GenomeDecoder::readFloat(constructor) + 1.0f, cudaSimulationParameters.cellMinDistance);
     result.maxConnections = GenomeDecoder::readByte(constructor) % (cudaSimulationParameters.cellMaxBonds + 1);
     result.executionOrderNumber = GenomeDecoder::readByte(constructor) % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     result.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
@@ -203,7 +201,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
     if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
         auto const& constructor = hostCell->cellFunctionData.constructor;
         auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
-            ? constructionData.distance
+            ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
         CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
     }
@@ -231,7 +229,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     auto posDelta = underConstructionCell->absPos - hostCell->absPos;
     data.cellMap.correctDirection(posDelta);
 
-    auto desiredDistance = constructionData.distance;
+    auto desiredDistance = 1.0f;
     auto constructionSiteDistance = data.cellMap.getDistance(hostCell->absPos, underConstructionCell->absPos);
     posDelta = Math::normalized(posDelta) * (constructionSiteDistance - desiredDistance);
 
@@ -275,7 +273,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     bool adaptReferenceAngle = false;
     if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
         auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
-            ? constructionData.distance
+            ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
         if (CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, /*angleFromPreviousForCell*/ 0, 0, distance)) {
             adaptReferenceAngle = true;

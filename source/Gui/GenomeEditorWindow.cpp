@@ -82,8 +82,7 @@ namespace
     std::string generateShortDescription(int index, CellGenomeDescription const& cell)
     {
         return "No. " + std::to_string(index + 1) + ", Type: " + Const::CellFunctionToStringMap.at(cell.getCellFunctionType())
-            + ", Color: " + std::to_string(cell.color) + ", Angle: " + StringHelper::format(cell.referenceAngle, 1)
-            + ", Distance: " + StringHelper::format(cell.referenceDistance, 2);
+            + ", Color: " + std::to_string(cell.color) + ", Angle: " + StringHelper::format(cell.referenceAngle, 1);
     }
 }
 
@@ -367,9 +366,6 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         table.next();
 
         AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(ContentTextWidth), cell.color);
-        table.next();
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Distance").textWidth(ContentTextWidth).format("%.2f").step(0.1f), cell.referenceDistance);
         table.next();
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f"), cell.referenceAngle);
         table.next();
@@ -714,7 +710,6 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
     cell.color = (cell.color + MAX_COLORS) % MAX_COLORS;
     cell.executionOrderNumber = (cell.executionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
     cell.maxConnections = (cell.maxConnections + maxBonds + 1) % (maxBonds + 1);
-    cell.referenceDistance = std::max(0.0f, cell.referenceDistance);
 
     switch (cell.getCellFunctionType()) {
     case CellFunction_Constructor: {

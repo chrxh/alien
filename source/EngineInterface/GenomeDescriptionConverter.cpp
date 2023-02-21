@@ -105,7 +105,6 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
     for (auto const& cell : genome) {
         writeByte(result, cell.getCellFunctionType());
         writeAngle(result, cell.referenceAngle);
-        writeDistance(result, cell.referenceDistance);
         writeByte(result, cell.maxConnections);
         writeByte(result, cell.executionOrderNumber);
         writeByte(result, cell.color);
@@ -198,7 +197,6 @@ namespace
 
             CellGenomeDescription cell;
             cell.referenceAngle = readAngle(data, bytePosition);
-            cell.referenceDistance = std::max(readDistance(data, bytePosition), parameters.cellMinDistance);
             cell.maxConnections = readByte(data, bytePosition) % (parameters.cellMaxBonds + 1);
             cell.executionOrderNumber = readByte(data, bytePosition) % parameters.cellMaxExecutionOrderNumbers;
             cell.color = readByte(data, bytePosition) % 7;

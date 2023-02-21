@@ -173,9 +173,6 @@ protected:
             return false;
         }
         for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome, actualGenome)) {
-            if (std::abs(expectedCell.referenceDistance - actualCell.referenceDistance) > NEAR_ZERO) {
-                return false;
-            }
             if (std::abs(expectedCell.referenceAngle - actualCell.referenceAngle) > NEAR_ZERO) {
                 return false;
             }

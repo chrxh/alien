@@ -234,7 +234,6 @@ using CellFunctionGenomeDescription = std::optional<std::variant<
 
 struct CellGenomeDescription
 {
-    float referenceDistance = 1.0f;
     float referenceAngle = 0;
     int color = 0;
     int maxConnections = 2;
@@ -247,11 +246,6 @@ struct CellGenomeDescription
     CellGenomeDescription() = default;
     auto operator<=>(CellGenomeDescription const&) const = default;
 
-    CellGenomeDescription& setReferenceDistance(float value)
-    {
-        referenceDistance = value;
-        return *this;
-    }
     CellGenomeDescription& setReferenceAngle(float value)
     {
         referenceAngle = value;
