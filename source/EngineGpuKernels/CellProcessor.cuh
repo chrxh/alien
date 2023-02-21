@@ -371,7 +371,8 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
         data.cellMap.correctDirection(prevDisplacement);
         auto cellStiffnessSquared = cell->stiffness * cell->stiffness;
 
-        for (int i = 0; i < cell->numConnections; ++i) {
+        auto numConnections = cell->numConnections;
+        for (int i = 0; i < numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
             auto connectedCellStiffnessSquared = connectedCell->stiffness * connectedCell->stiffness;
 
@@ -383,9 +384,9 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
             auto deviation = actualDistance - bondDistance;
             force = force + Math::normalized(displacement) * deviation * (cellStiffnessSquared + connectedCellStiffnessSquared) / 4;
 
-            if (considerAngles && cell->numConnections >= 2) {
+            if (considerAngles && (numConnections > 2 || (numConnections == 2 && i == 0))) {
 
-                auto lastIndex = (i + cell->numConnections - 1) % cell->numConnections;
+                auto lastIndex = (i + numConnections - 1) % numConnections;
                 auto lastConnectedCell = cell->connections[lastIndex].cell;
 
                 //check if there is a triangular connection
