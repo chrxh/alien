@@ -40,7 +40,7 @@ private:
     
     //internal constants
     static int constexpr CellFunctionMutationMaxGenomeSize = 200;
-    static int constexpr CellBasicBytes = 8;
+    static int constexpr CellBasicBytes = 7;
     static int constexpr NeuronBytes = 72;
     static int constexpr TransmitterBytes = 1;
     static int constexpr ConstructorFixedBytes = 8;
