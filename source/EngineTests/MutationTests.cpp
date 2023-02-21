@@ -176,6 +176,9 @@ protected:
             if (std::abs(expectedCell.referenceAngle - actualCell.referenceAngle) > NEAR_ZERO) {
                 return false;
             }
+            if (std::abs(expectedCell.energy- actualCell.energy) > NEAR_ZERO) {
+                return false;
+            }
             if (expectedCell.color != actualCell.color) {
                 return false;
             }

@@ -79,6 +79,7 @@ namespace
     auto constexpr Id_Transmitter_Mode = 0;
 
     auto constexpr Id_CellGenome_ReferenceAngle = 1;
+    auto constexpr Id_CellGenome_Energy = 7;
     auto constexpr Id_CellGenome_Color = 2;
     auto constexpr Id_CellGenome_MaxConnections = 3;
     auto constexpr Id_CellGenome_ExecutionOrderNumber = 4;
@@ -318,6 +319,7 @@ namespace cereal
         CellGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<float>(task, auxiliaries, Id_CellGenome_ReferenceAngle, data.referenceAngle, defaultObject.referenceAngle);
+        loadSave<float>(task, auxiliaries, Id_CellGenome_Energy, data.energy, defaultObject.energy);
         loadSave<int>(task, auxiliaries, Id_CellGenome_Color, data.color, defaultObject.color);
         loadSave<int>(task, auxiliaries, Id_CellGenome_MaxConnections, data.maxConnections, defaultObject.maxConnections);
         loadSave<int>(task, auxiliaries, Id_CellGenome_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);

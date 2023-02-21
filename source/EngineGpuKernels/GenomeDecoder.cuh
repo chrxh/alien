@@ -11,6 +11,7 @@ public:
     __inline__ __device__ static uint8_t readByte(ConstructorFunction& constructor);
     __inline__ __device__ static int readWord(ConstructorFunction& constructor);
     __inline__ __device__ static float readFloat(ConstructorFunction& constructor);  //return values from -1 to 1
+    __inline__ __device__ static float readEnergy(ConstructorFunction& constructor);  //return values from 36 to 1060
     __inline__ __device__ static float readAngle(ConstructorFunction& constructor);
     template <typename GenomeHolderSource, typename GenomeHolderTarget>
     __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target);
@@ -51,7 +52,12 @@ __inline__ __device__ int GenomeDecoder::readWord(ConstructorFunction& construct
 
 __inline__ __device__ float GenomeDecoder::readFloat(ConstructorFunction& constructor)
 {
-    return static_cast<float>(static_cast<int8_t>(readByte(constructor))) / 128.0f;
+    return static_cast<float>(static_cast<int8_t>(readByte(constructor))) / 128;
+}
+
+__inline__ __device__ float GenomeDecoder::readEnergy(ConstructorFunction& constructor)
+{
+    return static_cast<float>(static_cast<int8_t>(readByte(constructor))) / 128 * 512 + 548;
 }
 
 __inline__ __device__ float GenomeDecoder::readAngle(ConstructorFunction& constructor)
