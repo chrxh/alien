@@ -235,6 +235,7 @@ using CellFunctionGenomeDescription = std::optional<std::variant<
 struct CellGenomeDescription
 {
     float referenceAngle = 0;
+    float energy = 100.0f;
     int color = 0;
     int maxConnections = 2;
     int executionOrderNumber = 0;
@@ -249,6 +250,11 @@ struct CellGenomeDescription
     CellGenomeDescription& setReferenceAngle(float value)
     {
         referenceAngle = value;
+        return *this;
+    }
+    CellGenomeDescription& setEnergy(float value)
+    {
+        energy = value;
         return *this;
     }
     CellGenomeDescription& setColor(unsigned char value)

@@ -28,9 +28,9 @@ namespace
     {
         data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>((value * 2 - 1) * 128)));
     }
-    void writeDistance(std::vector<uint8_t>& data, float value)
+    void writeEnergy(std::vector<uint8_t>& data, float value)
     {
-        writeFloat(data, value - 1.0f);
+        writeFloat(data, (value - 548.0f) / 512);
     }
     void writeNeuronProperty(std::vector<uint8_t>& data, float value)
     {
@@ -62,9 +62,26 @@ namespace
     {
         return static_cast<int>(readByte(data, pos)) | (static_cast<int>(readByte(data, pos) << 8));
     }
-    float readFloat(std::vector<uint8_t> const& data, int& pos) { return static_cast<float>(static_cast<int8_t>(readByte(data, pos))) / 128.0f; }
-    float readAngle(std::vector<uint8_t> const& data, int& pos) { return static_cast<float>(static_cast<int8_t>(readByte(data, pos))) / 120 * 180; }
-    float readDensity(std::vector<uint8_t> const& data, int& pos) { return (readFloat(data, pos) + 1.0f) / 2; }
+    //between -1 and 1
+    float readFloat(std::vector<uint8_t> const& data, int& pos)
+    {
+        return static_cast<float>(static_cast<int8_t>(readByte(data, pos))) / 128;
+    }
+    //between -180 and 180
+    float readAngle(std::vector<uint8_t> const& data, int& pos)
+    {
+        return readFloat(data, pos) * 180;
+    }
+    //between 36 and 1060
+    float readEnergy(std::vector<uint8_t> const& data, int& pos)
+    {
+        return readFloat(data, pos) * 512 + 548.0f; 
+    }
+    //between 0 and 1
+    float readDensity(std::vector<uint8_t> const& data, int& pos)
+    {
+        return (readFloat(data, pos) + 1.0f) / 2;
+    }
     float readNeuronProperty(std::vector<uint8_t> const& data, int& pos) { return readFloat(data, pos) * 4; }
     float readDistance(std::vector<uint8_t> const& data, int& pos)
     {
@@ -105,6 +122,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
     for (auto const& cell : genome) {
         writeByte(result, cell.getCellFunctionType());
         writeAngle(result, cell.referenceAngle);
+        writeEnergy(result, cell.energy);
         writeByte(result, cell.maxConnections);
         writeByte(result, cell.executionOrderNumber);
         writeByte(result, cell.color);
@@ -197,6 +215,7 @@ namespace
 
             CellGenomeDescription cell;
             cell.referenceAngle = readAngle(data, bytePosition);
+            cell.energy = readEnergy(data, bytePosition);
             cell.maxConnections = readByte(data, bytePosition) % (parameters.cellMaxBonds + 1);
             cell.executionOrderNumber = readByte(data, bytePosition) % parameters.cellMaxExecutionOrderNumbers;
             cell.color = readByte(data, bytePosition) % 7;

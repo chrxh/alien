@@ -30,7 +30,7 @@ namespace
     auto const ContentTextWidth = 165.0f;
     auto const WeightsAndBiasTextWidth = 100.0f;
     auto const WeightsAndBiasSelectionTextWidth = 400.0f;
-    auto const DynamicTableColumnWidth = 240.0f;
+    auto const DynamicTableColumnWidth = 255.0f;
 }
 
 _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController, Viewport const& viewport)
@@ -368,6 +368,8 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(ContentTextWidth), cell.color);
         table.next();
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f"), cell.referenceAngle);
+        table.next();
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").textWidth(ContentTextWidth).format("%.1f"), cell.energy);
         table.next();
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(ContentTextWidth), cell.maxConnections);
         table.next();
@@ -710,6 +712,7 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
     cell.color = (cell.color + MAX_COLORS) % MAX_COLORS;
     cell.executionOrderNumber = (cell.executionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
     cell.maxConnections = (cell.maxConnections + maxBonds + 1) % (maxBonds + 1);
+    cell.energy = std::min(std::max(cell.energy, 50.0f), 1050.0f);
 
     switch (cell.getCellFunctionType()) {
     case CellFunction_Constructor: {
