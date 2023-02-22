@@ -76,7 +76,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
 
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked || connectedCell->livingState || connectedCell->cellFunction == CellFunction_None) {
+        if (connectedCell->outputBlocked || connectedCell->livingState != LivingState_Ready || connectedCell->cellFunction == CellFunction_None) {
             continue;
         }
         if (connectedCell->executionOrderNumber == inputExecutionOrderNumber) {

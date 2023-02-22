@@ -299,12 +299,12 @@ namespace
                     ConnectionPreviewDescription connection;
                     connection.cell1 = cell.pos;
                     connection.cell2 = otherCell.pos;
-                    connection.arrowToCell1 = inputExecutionOrder == otherCell.executionOrderNumber;
+                    connection.arrowToCell1 = inputExecutionOrder == otherCell.executionOrderNumber && !otherCell.outputBlocked;
                     result.connections.emplace_back(connection);
                     cellIndicesToCreatedConnectionIndex.emplace(std::pair(connectionIndex, index), toInt(result.connections.size() - 1));
                 } else {
                     auto connectionIndex = findResult->second;
-                    result.connections.at(connectionIndex).arrowToCell2 = inputExecutionOrder == otherCell.executionOrderNumber;
+                    result.connections.at(connectionIndex).arrowToCell2 = inputExecutionOrder == otherCell.executionOrderNumber && !otherCell.outputBlocked;
                 }
             }
             ++index;
