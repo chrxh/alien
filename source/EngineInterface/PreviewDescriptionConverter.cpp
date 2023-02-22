@@ -13,6 +13,7 @@ namespace
         int nodeIndex = 0;
         int executionOrderNumber = 0;
         bool inputBlocked = false;
+        int inputExecutionOrderNumber = 0;
         bool outputBlocked = false;
         int color = 0;
         std::set<int> connectionIndices;
@@ -110,6 +111,7 @@ namespace
             CellPreviewDescriptionIntern cellIntern;
             cellIntern.color = node.color;
             cellIntern.inputBlocked = node.inputBlocked;
+            cellIntern.inputExecutionOrderNumber = node.inputExecutionOrderNumber;
             cellIntern.outputBlocked = node.outputBlocked;
             cellIntern.executionOrderNumber = node.executionOrderNumber;
             cellIntern.nodeIndex = nodeIndex ? *nodeIndex : index;
@@ -259,28 +261,7 @@ namespace
         if (cell.inputBlocked) {
             return -1;
         }
-        int result = -parameters.cellMaxExecutionOrderNumbers;
-        for (auto const& connectionIndex : cell.connectionIndices) {
-            auto connectedCell = cells.at(connectionIndex);
-            if (connectedCell.outputBlocked) {
-                continue;
-            }
-            auto otherExecutionOrderNumber = connectedCell.executionOrderNumber;
-            if (otherExecutionOrderNumber > cell.executionOrderNumber) {
-                otherExecutionOrderNumber -= parameters.cellMaxExecutionOrderNumbers;
-            }
-            if (otherExecutionOrderNumber > result && otherExecutionOrderNumber != cell.executionOrderNumber) {
-                result = otherExecutionOrderNumber;
-            }
-        }
-
-        if (result == -parameters.cellMaxExecutionOrderNumbers) {
-            return -1;
-        }
-        if (result < 0) {
-            result += parameters.cellMaxExecutionOrderNumbers;
-        }
-        return result;
+        return cell.inputExecutionOrderNumber;
     }
 
     PreviewDescription createPreviewDescription(std::vector<CellPreviewDescriptionIntern> const& cells, SimulationParameters const& parameters)

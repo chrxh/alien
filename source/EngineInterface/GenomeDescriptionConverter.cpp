@@ -127,6 +127,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
         writeByte(result, cell.executionOrderNumber);
         writeByte(result, cell.color);
         writeBool(result, cell.inputBlocked);
+        writeByte(result, cell.inputExecutionOrderNumber);
         writeBool(result, cell.outputBlocked);
         switch (cell.getCellFunctionType()) {
         case CellFunction_Neuron: {
@@ -220,6 +221,7 @@ namespace
             cell.executionOrderNumber = readByte(data, bytePosition) % parameters.cellMaxExecutionOrderNumbers;
             cell.color = readByte(data, bytePosition) % 7;
             cell.inputBlocked = readBool(data, bytePosition);
+            cell.inputExecutionOrderNumber = readByte(data, bytePosition) % parameters.cellMaxExecutionOrderNumbers;
             cell.outputBlocked = readBool(data, bytePosition);
 
             switch (cellFunction) {

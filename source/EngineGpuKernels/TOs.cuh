@@ -139,6 +139,7 @@ struct CellTO
     LivingState livingState;
     int executionOrderNumber;
     bool inputBlocked;
+    int inputExecutionOrderNumber;
     bool outputBlocked;
     CellFunction cellFunction;
     CellFunctionTO cellFunctionData;

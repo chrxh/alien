@@ -24,7 +24,7 @@ public:
 
     __inline__ __device__ static float2 calcSignalDirection(SimulationData& data, Cell* cell, int inputExecutionOrderNumber);
 
-    __inline__ __device__ static int calcInputExecutionOrder(Cell* cell);   //returns -1 if no input has been found
+    __inline__ __device__ static int calcInputExecutionOrderNumber(Cell* cell);   //returns -1 if input blocked
 };
 
 /************************************************************************/
@@ -69,7 +69,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         result.channels[i] = 0;
     }
 
-    inputExecutionOrderNumber = calcInputExecutionOrder(cell);
+    inputExecutionOrderNumber = calcInputExecutionOrderNumber(cell);
     if (inputExecutionOrderNumber == -1) {
         return result;
     }
@@ -145,31 +145,10 @@ __inline__ __device__ float2 CellFunctionProcessor::calcSignalDirection(Simulati
     return Math::normalized(result);
 }
 
-__inline__ __device__ int CellFunctionProcessor::calcInputExecutionOrder(Cell* cell)
+__inline__ __device__ int CellFunctionProcessor::calcInputExecutionOrderNumber(Cell* cell)
 {
-    if (cell->inputBlocked || cell->livingState) {
+    if (cell->inputBlocked || cell->livingState != LivingState_Ready) {
         return -1;
     }
-    int result = -cudaSimulationParameters.cellMaxExecutionOrderNumbers;
-    for (int i = 0; i < cell->numConnections; ++i) {
-        auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked || connectedCell->livingState) {
-            continue;
-        }
-        auto otherExecutionOrderNumber = connectedCell->executionOrderNumber;
-        if (otherExecutionOrderNumber > cell->executionOrderNumber) {
-            otherExecutionOrderNumber -= cudaSimulationParameters.cellMaxExecutionOrderNumbers;
-        }
-        if (otherExecutionOrderNumber > result && otherExecutionOrderNumber != cell->executionOrderNumber) {
-            result = otherExecutionOrderNumber;
-        }
-    }
-
-    if (result == -cudaSimulationParameters.cellMaxExecutionOrderNumbers) {
-        return -1;
-    }
-    if (result < 0) {
-        result += cudaSimulationParameters.cellMaxExecutionOrderNumbers;
-    }
-    return result;
+    return cell->inputExecutionOrderNumber;
 }
