@@ -88,7 +88,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 return;
             }
 
-            atomicAdd(&otherCell->activity.channels[7], 1.0f);
+            //notify attacked cell
+            if (otherCell->cellFunction != CellFunction_None) {
+                atomicAdd(&otherCell->activity.channels[7], 1.0f);
+            }
 
             someOtherCell = otherCell;
             if (energyToTransfer >= 0) {

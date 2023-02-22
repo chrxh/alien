@@ -44,7 +44,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     }
     __syncthreads();
 
-    if (activity.channels[0] > cudaSimulationParameters.cellFunctionSensorActivityThreshold) {
+    if (abs(activity.channels[0]) > cudaSimulationParameters.cellFunctionSensorActivityThreshold) {
         switch (cell->cellFunctionData.sensor.mode) {
         case SensorMode_Neighborhood: {
             searchNeighborhood(data, result, cell, inputExecutionOrderNumber, activity);
