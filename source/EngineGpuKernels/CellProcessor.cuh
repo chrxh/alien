@@ -414,17 +414,15 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
                         Math::normalized(prevDisplacement) / max(Math::length(prevDisplacement), cudaSimulationParameters.cellMinDistance) * strength;
                     Math::rotateQuarterCounterClockwise(force2);
 
-                    if (abs(referenceAngleFromPrevious - actualAngleFromPrevious) < 180) {
-                        if (referenceAngleFromPrevious < actualAngleFromPrevious) {
-                            force1 = force1 * (-1);
-                            force2 = force2 * (-1);
-                        }
-                        atomicAdd(&connectedCell->shared1.x, force1.x);
-                        atomicAdd(&connectedCell->shared1.y, force1.y);
-                        atomicAdd(&cell->connections[lastIndex].cell->shared1.x, force2.x);
-                        atomicAdd(&cell->connections[lastIndex].cell->shared1.y, force2.y);
-                        force = force - (force1 + force2);
+                    if (referenceAngleFromPrevious < actualAngleFromPrevious) {
+                        force1 = force1 * (-1);
+                        force2 = force2 * (-1);
                     }
+                    atomicAdd(&connectedCell->shared1.x, force1.x);
+                    atomicAdd(&connectedCell->shared1.y, force1.y);
+                    atomicAdd(&cell->connections[lastIndex].cell->shared1.x, force2.x);
+                    atomicAdd(&cell->connections[lastIndex].cell->shared1.y, force2.y);
+                    force = force - (force1 + force2);
                 }
             }
 
