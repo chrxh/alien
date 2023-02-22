@@ -23,7 +23,7 @@ private:
     bending(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity const& activity);
 
     __inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
-    __inline__ __device__ static float getIntensity(Activity const& activity);
+    __inline__ __device__ static float getIntensity(Activity const& activity, int channel = 0);
 };
 
 /************************************************************************/
@@ -124,8 +124,6 @@ MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* c
     if (!cell->tryLock()) {
         return;
     }
-    float2 acceleration{0, 0};
-    int numMatchingCells;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connection = cell->connections[i];
         if (connection.cell->executionOrderNumber == inputExecutionOrderNumber) {
@@ -144,15 +142,14 @@ MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* c
             if (cell->numConnections <= 2 && abs(activity.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold) {
                 auto delta = Math::normalized(data.cellMap.getCorrectedDirection(connection.cell->absPos - cell->absPos));
                 Math::rotateQuarterCounterClockwise(delta);
-                delta = delta * intensity * cudaSimulationParameters.cellFunctionMuscleBendingAcceleration;
-                acceleration = acceleration + delta;
-                ++numMatchingCells;
+                auto intensityChannel1 = getIntensity(activity, 1);
+                if ((intensity < -NEAR_ZERO && intensityChannel1 < -NEAR_ZERO) || (intensity > NEAR_ZERO && intensityChannel1 > NEAR_ZERO)) {
+                    auto acceleration = delta * (intensity) * cudaSimulationParameters.cellFunctionMuscleBendingAcceleration;
+                    atomicAdd(&connection.cell->vel.x, acceleration.x);
+                    atomicAdd(&connection.cell->vel.y, acceleration.y);
+                }
             }
         }
-    }
-    if (numMatchingCells > 0) {
-        atomicAdd(&cell->vel.x, acceleration.x / numMatchingCells);
-        atomicAdd(&cell->vel.y, acceleration.y / numMatchingCells);
     }
     cell->releaseLock();
     result.incMuscleActivity();
@@ -168,7 +165,7 @@ __inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* 
     return 0;
 }
 
-__inline__ __device__ float MuscleProcessor::getIntensity(Activity const& activity)
+__inline__ __device__ float MuscleProcessor::getIntensity(Activity const& activity, int channel)
 {
-    return max(-1.0f, min(1.0f, activity.channels[0]));
+    return max(-1.0f, min(1.0f, activity.channels[channel]));
 }
