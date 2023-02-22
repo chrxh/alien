@@ -47,7 +47,6 @@ namespace
     auto constexpr Id_Cell_Barrier = 3;
     auto constexpr Id_Cell_Age = 4;
     auto constexpr Id_Cell_LivingState = 5;
-    auto constexpr Id_Cell_InputBlocked = 6;
     auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
     auto constexpr Id_Cell_OutputBlocked = 7;
     auto constexpr Id_Cell_ActivationTime = 8;
@@ -84,7 +83,7 @@ namespace
     auto constexpr Id_CellGenome_Color = 2;
     auto constexpr Id_CellGenome_MaxConnections = 3;
     auto constexpr Id_CellGenome_ExecutionOrderNumber = 4;
-    auto constexpr Id_CellGenome_InputBlocked = 5;
+    auto constexpr Id_CellGenome_InputExecutionOrderNumber = 8;
     auto constexpr Id_CellGenome_OutputBlocked = 6;
 
     auto constexpr Id_TransmitterGenome_Mode = 0;
@@ -121,7 +120,7 @@ namespace cereal
         Load,
         Save
     };
-    using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>>;
+    using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>, std::optional<int>>;
 
     template <class Archive>
     std::unordered_map<int, VariantData> getLoadSaveMap(SerializationTask task, Archive& ar)
@@ -324,7 +323,7 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_CellGenome_Color, data.color, defaultObject.color);
         loadSave<int>(task, auxiliaries, Id_CellGenome_MaxConnections, data.maxConnections, defaultObject.maxConnections);
         loadSave<int>(task, auxiliaries, Id_CellGenome_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
-        loadSave<bool>(task, auxiliaries, Id_CellGenome_InputBlocked, data.inputBlocked, defaultObject.inputBlocked);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_CellGenome_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_CellGenome_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         setLoadSaveMap(task, ar, auxiliaries);
 
@@ -487,8 +486,8 @@ namespace cereal
         loadSave<bool>(task, auxiliaries, Id_Cell_Barrier, data.barrier, defaultObject.barrier);
         loadSave<int>(task, auxiliaries, Id_Cell_Age, data.age, defaultObject.age);
         loadSave<int>(task, auxiliaries, Id_Cell_LivingState, data.livingState, defaultObject.livingState);
-        loadSave<bool>(task, auxiliaries, Id_Cell_InputBlocked, data.inputBlocked, defaultObject.inputBlocked);
-        loadSave<int>(task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
+        loadSave<std::optional<int>>(
+            task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
         setLoadSaveMap(task, ar, auxiliaries);

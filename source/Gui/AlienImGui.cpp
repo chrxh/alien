@@ -156,6 +156,15 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
     return result;
 }
 
+bool AlienImGui::InputInt(InputIntParameters const& parameters, std::optional<int>& optValue)
+{
+    auto enabled = optValue.has_value();
+    auto value = optValue.value_or(parameters._defaultValue.value_or(0));
+    auto result = InputInt(parameters, value, &enabled);
+    optValue = enabled ? std::make_optional(value) : std::nullopt;
+    return result;
+}
+
 void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value)
 {
     auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);

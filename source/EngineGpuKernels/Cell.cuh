@@ -134,7 +134,6 @@ struct Cell
     //cell function
     LivingState livingState;
     int executionOrderNumber;
-    bool inputBlocked;
     int inputExecutionOrderNumber;
     bool outputBlocked;
     CellFunction cellFunction;

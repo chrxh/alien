@@ -7,7 +7,14 @@
 namespace
 {
     void writeByte(std::vector<uint8_t>& data, int value) {data.emplace_back(static_cast<uint8_t>(value)); }
-    void writeBool(std::vector<uint8_t>& data, bool value) { data.emplace_back(value ? 1 : 0); }
+    void writeOptionalByte(std::vector<uint8_t>& data, std::optional<int> value)
+    {
+        data.emplace_back(static_cast<uint8_t>(value.value_or(-1)));
+    }
+    void writeBool(std::vector<uint8_t>& data, bool value)
+    {
+        data.emplace_back(value ? 1 : 0);
+    }
     void writeFloat(std::vector<uint8_t>& data, float value) { data.emplace_back(static_cast<uint8_t>(static_cast<int8_t>(value * 128))); }
     void writeWord(std::vector<uint8_t>& data, int value)
     {
@@ -57,7 +64,15 @@ namespace
         uint8_t result = data[pos++];
         return result;
     }
-    bool readBool(std::vector<uint8_t> const& data, int& pos) { return static_cast<int8_t>(readByte(data, pos)) > 0; }
+    std::optional<int> readOptionalByte(std::vector<uint8_t> const& data, int& pos)
+    {
+        auto value = readByte(data, pos);
+        return value != 255 ? std::make_optional(value) : std::nullopt;
+    }
+    bool readBool(std::vector<uint8_t> const& data, int& pos)
+    {
+        return static_cast<int8_t>(readByte(data, pos)) > 0;
+    }
     int readWord(std::vector<uint8_t> const& data, int& pos)
     {
         return static_cast<int>(readByte(data, pos)) | (static_cast<int>(readByte(data, pos) << 8));
@@ -126,8 +141,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
         writeByte(result, cell.maxConnections);
         writeByte(result, cell.executionOrderNumber);
         writeByte(result, cell.color);
-        writeBool(result, cell.inputBlocked);
-        writeByte(result, cell.inputExecutionOrderNumber);
+        writeOptionalByte(result, cell.inputExecutionOrderNumber);
         writeBool(result, cell.outputBlocked);
         switch (cell.getCellFunctionType()) {
         case CellFunction_Neuron: {
@@ -220,8 +234,10 @@ namespace
             cell.maxConnections = readByte(data, bytePosition) % (parameters.cellMaxBonds + 1);
             cell.executionOrderNumber = readByte(data, bytePosition) % parameters.cellMaxExecutionOrderNumbers;
             cell.color = readByte(data, bytePosition) % 7;
-            cell.inputBlocked = readBool(data, bytePosition);
-            cell.inputExecutionOrderNumber = readByte(data, bytePosition) % parameters.cellMaxExecutionOrderNumbers;
+            cell.inputExecutionOrderNumber = readOptionalByte(data, bytePosition);
+            if (cell.inputExecutionOrderNumber) {
+                *cell.inputExecutionOrderNumber %= parameters.cellMaxExecutionOrderNumbers;
+            }
             cell.outputBlocked = readBool(data, bytePosition);
 
             switch (cellFunction) {

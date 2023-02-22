@@ -240,8 +240,7 @@ struct CellGenomeDescription
     int maxConnections = 2;
     int executionOrderNumber = 0;
 
-    bool inputBlocked = true;
-    int inputExecutionOrderNumber = 0;
+    std::optional<int> inputExecutionOrderNumber;
     bool outputBlocked = false;
     CellFunctionGenomeDescription cellFunction;
 
@@ -271,11 +270,6 @@ struct CellGenomeDescription
     CellGenomeDescription& setExecutionOrderNumber(int value)
     {
         executionOrderNumber = value;
-        return *this;
-    }
-    CellGenomeDescription& setInputBlocked(bool value)
-    {
-        inputBlocked = value;
         return *this;
     }
     CellGenomeDescription& setInputExecutionOrderNumber(int value)

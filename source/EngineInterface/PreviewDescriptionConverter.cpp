@@ -12,8 +12,7 @@ namespace
         RealVector2D pos;
         int nodeIndex = 0;
         int executionOrderNumber = 0;
-        bool inputBlocked = false;
-        int inputExecutionOrderNumber = 0;
+        std::optional<int> inputExecutionOrderNumber;
         bool outputBlocked = false;
         int color = 0;
         std::set<int> connectionIndices;
@@ -97,8 +96,6 @@ namespace
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
         int index = 0;
         for (auto const& node : genome) {
-            RealVector2D prevPos = pos;
-
             if (index > 0) {
                 pos += result.direction;
             }
@@ -110,7 +107,6 @@ namespace
             //create cell description intern
             CellPreviewDescriptionIntern cellIntern;
             cellIntern.color = node.color;
-            cellIntern.inputBlocked = node.inputBlocked;
             cellIntern.inputExecutionOrderNumber = node.inputExecutionOrderNumber;
             cellIntern.outputBlocked = node.outputBlocked;
             cellIntern.executionOrderNumber = node.executionOrderNumber;
@@ -253,17 +249,6 @@ namespace
         return result;
     }
 
-    int calcInputExecutionOrder(
-        std::vector<CellPreviewDescriptionIntern> const& cells,
-        CellPreviewDescriptionIntern const& cell,
-        SimulationParameters const& parameters)
-    {
-        if (cell.inputBlocked) {
-            return -1;
-        }
-        return cell.inputExecutionOrderNumber;
-    }
-
     PreviewDescription createPreviewDescription(std::vector<CellPreviewDescriptionIntern> const& cells, SimulationParameters const& parameters)
     {
         PreviewDescription result;
@@ -272,7 +257,6 @@ namespace
         for (auto const& cell : cells) {
             CellPreviewDescription cellPreview{.pos = cell.pos, .executionOrderNumber = cell.executionOrderNumber, .color = cell.color, .nodeIndex = cell.nodeIndex};
             result.cells.emplace_back(cellPreview);
-            auto inputExecutionOrder = calcInputExecutionOrder(cells, cell, parameters);
             for (auto const& connectionIndex : cell.connectionIndices) {
                 auto const& otherCell = cells.at(connectionIndex);
                 auto findResult = cellIndicesToCreatedConnectionIndex.find(std::pair(index, connectionIndex));
@@ -280,12 +264,13 @@ namespace
                     ConnectionPreviewDescription connection;
                     connection.cell1 = cell.pos;
                     connection.cell2 = otherCell.pos;
-                    connection.arrowToCell1 = inputExecutionOrder == otherCell.executionOrderNumber && !otherCell.outputBlocked;
+                    connection.arrowToCell1 = cell.inputExecutionOrderNumber.value_or(-1) == otherCell.executionOrderNumber && !otherCell.outputBlocked;
                     result.connections.emplace_back(connection);
                     cellIndicesToCreatedConnectionIndex.emplace(std::pair(connectionIndex, index), toInt(result.connections.size() - 1));
                 } else {
                     auto connectionIndex = findResult->second;
-                    result.connections.at(connectionIndex).arrowToCell2 = inputExecutionOrder == otherCell.executionOrderNumber && !otherCell.outputBlocked;
+                    result.connections.at(connectionIndex).arrowToCell2 =
+                        cell.inputExecutionOrderNumber.value_or(-1) == otherCell.executionOrderNumber && !otherCell.outputBlocked;
                 }
             }
             ++index;

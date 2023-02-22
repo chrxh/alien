@@ -34,8 +34,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __shared__ Activity outputActivity;
     __shared__ Activity inputActivity;
     if (0 == threadIdx.x) {
-        int inputExecutionOrderNumber;
-        inputActivity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
+        inputActivity = CellFunctionProcessor::calcInputActivity(cell);
     }
     __syncthreads();
 

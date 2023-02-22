@@ -30,7 +30,7 @@ namespace
     auto const ContentTextWidth = 165.0f;
     auto const WeightsAndBiasTextWidth = 100.0f;
     auto const WeightsAndBiasSelectionTextWidth = 400.0f;
-    auto const DynamicTableColumnWidth = 255.0f;
+    auto const DynamicTableColumnWidth = 265.0f;
 }
 
 _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController, Viewport const& viewport)
@@ -376,9 +376,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         table.next();
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution order").textWidth(ContentTextWidth), cell.executionOrderNumber);
         table.next();
-        auto inputEnabled = !cell.inputBlocked;
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Input").textWidth(ContentTextWidth), cell.inputExecutionOrderNumber, &inputEnabled);
-        cell.inputBlocked = !inputEnabled;
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Input").textWidth(ContentTextWidth), cell.inputExecutionOrderNumber);
         table.next();
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(ContentTextWidth), cell.outputBlocked);
 
@@ -714,7 +712,9 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
     auto maxBonds = _simController->getSimulationParameters().cellMaxBonds;
     cell.color = (cell.color + MAX_COLORS) % MAX_COLORS;
     cell.executionOrderNumber = (cell.executionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
-    cell.inputExecutionOrderNumber = (cell.inputExecutionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
+    if (cell.inputExecutionOrderNumber) {
+        cell.inputExecutionOrderNumber = (*cell.inputExecutionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
+    }
     cell.maxConnections = (cell.maxConnections + maxBonds + 1) % (maxBonds + 1);
     cell.energy = std::min(std::max(cell.energy, 50.0f), 1050.0f);
 

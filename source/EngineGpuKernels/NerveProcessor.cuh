@@ -26,8 +26,7 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;
 
-        int inputExecutionOrderNumber;
-        auto activity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
+        auto activity = CellFunctionProcessor::calcInputActivity(cell);
 
         auto const& nerve = cell->cellFunctionData.nerve;
         if (nerve.pulseMode > 0 && (data.timestep % (cudaSimulationParameters.cellMaxExecutionOrderNumbers * nerve.pulseMode) == cell->executionOrderNumber)) {

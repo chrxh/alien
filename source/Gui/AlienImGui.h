@@ -56,9 +56,10 @@ public:
         MEMBER_DECLARATION(InputIntParameters, int, textWidth, 100);
         MEMBER_DECLARATION(InputIntParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(InputIntParameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER_DECLARATION(InputIntParameters, std::optional<float>, disabledValue, std::nullopt);
+        MEMBER_DECLARATION(InputIntParameters, std::optional<int>, disabledValue, std::nullopt);
     };
     static bool InputInt(InputIntParameters const& parameters, int& value, bool* enabled = nullptr);
+    static bool InputInt(InputIntParameters const& parameters, std::optional<int>& value);
 
     struct InputFloatParameters
     {

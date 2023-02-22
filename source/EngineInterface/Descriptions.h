@@ -289,8 +289,7 @@ struct CellDescription
     //cell function
     LivingState livingState = LivingState_Ready;
     int executionOrderNumber = 0;
-    bool inputBlocked = true;
-    int inputExecutionOrderNumber = 0;
+    std::optional<int> inputExecutionOrderNumber;
     bool outputBlocked = false;
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
@@ -362,9 +361,9 @@ struct CellDescription
         livingState = value;
         return *this;
     }
-    CellDescription& setInputBlocked(bool value)
+    CellDescription& setInputExecutionOrderNumber(int value)
     {
-        inputBlocked = value;
+        inputExecutionOrderNumber = value;
         return *this;
     }
     CellDescription& setOutputBlocked(bool value)

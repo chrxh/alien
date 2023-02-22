@@ -12,7 +12,7 @@ public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
     __inline__ __device__ static void resetFetchedActivities(SimulationData& data);
 
-    __inline__ __device__ static Activity calcInputActivity(Cell* cell, int& inputExecutionOrderNumber);
+    __inline__ __device__ static Activity calcInputActivity(Cell* cell);
     __inline__ __device__ static void setActivity(Cell* cell, Activity const& newActivity);
 
     struct ReferenceAndActualAngle
@@ -22,9 +22,7 @@ public:
     };
     __inline__ __device__ static ReferenceAndActualAngle calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation);
 
-    __inline__ __device__ static float2 calcSignalDirection(SimulationData& data, Cell* cell, int inputExecutionOrderNumber);
-
-    __inline__ __device__ static int calcInputExecutionOrderNumber(Cell* cell);   //returns -1 if input blocked
+    __inline__ __device__ static float2 calcSignalDirection(SimulationData& data, Cell* cell);
 };
 
 /************************************************************************/
@@ -61,7 +59,7 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
     }
 }
 
-__inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* cell, int& inputExecutionOrderNumber)
+__inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* cell)
 {
     Activity result;
 
@@ -69,8 +67,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         result.channels[i] = 0;
     }
 
-    inputExecutionOrderNumber = calcInputExecutionOrderNumber(cell);
-    if (inputExecutionOrderNumber == -1) {
+    if (cell->inputExecutionOrderNumber == -1) {
         return result;
     }
 
@@ -79,7 +76,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         if (connectedCell->outputBlocked || connectedCell->livingState != LivingState_Ready || connectedCell->cellFunction == CellFunction_None) {
             continue;
         }
-        if (connectedCell->executionOrderNumber == inputExecutionOrderNumber) {
+        if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 result.channels[i] += connectedCell->activity.channels[i];
                 atomicExch(&connectedCell->activityFetched, 1);
@@ -131,24 +128,16 @@ CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& dat
     return ReferenceAndActualAngle{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
 }
 
-__inline__ __device__ float2 CellFunctionProcessor::calcSignalDirection(SimulationData& data, Cell* cell, int inputExecutionOrderNumber)
+__inline__ __device__ float2 CellFunctionProcessor::calcSignalDirection(SimulationData& data, Cell* cell)
 {
     float2 result{0, 0};
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connectedCell = cell->connections[i].cell;
-        if (connectedCell->executionOrderNumber == inputExecutionOrderNumber && !connectedCell->outputBlocked) {
+        if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber && !connectedCell->outputBlocked) {
             auto directionDelta = cell->absPos - connectedCell->absPos;
             data.cellMap.correctDirection(directionDelta);
             result = result + Math::normalized(directionDelta);
         }
     }
     return Math::normalized(result);
-}
-
-__inline__ __device__ int CellFunctionProcessor::calcInputExecutionOrderNumber(Cell* cell)
-{
-    if (cell->inputBlocked || cell->livingState != LivingState_Ready) {
-        return -1;
-    }
-    return cell->inputExecutionOrderNumber;
 }

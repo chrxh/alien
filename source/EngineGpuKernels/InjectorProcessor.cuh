@@ -29,8 +29,7 @@ __device__ __inline__ void InjectorProcessor::process(SimulationData& data, Simu
 
 __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
 {
-    int inputExecutionOrderNumber;
-    auto activity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
+    auto activity = CellFunctionProcessor::calcInputActivity(cell);
 
     if (abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionInjectorActivityThreshold) {
         return;

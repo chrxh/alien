@@ -15,9 +15,9 @@ private:
 
     __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
     __inline__ __device__ static void
-    searchNeighborhood(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity& activity);
+    searchNeighborhood(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity);
     __inline__ __device__ static void
-    searchByAngle(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity& activity);
+    searchByAngle(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity);
 
     __inline__ __device__ static uint8_t convertAngleToData(float angle);
 };
@@ -38,19 +38,18 @@ __inline__ __device__ void SensorProcessor::process(SimulationData& data, Simula
 __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
 {
     __shared__ Activity activity;
-    __shared__ int inputExecutionOrderNumber;
     if (threadIdx.x == 0) {
-        activity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
+        activity = CellFunctionProcessor::calcInputActivity(cell);
     }
     __syncthreads();
 
     if (abs(activity.channels[0]) > cudaSimulationParameters.cellFunctionSensorActivityThreshold) {
         switch (cell->cellFunctionData.sensor.mode) {
         case SensorMode_Neighborhood: {
-            searchNeighborhood(data, result, cell, inputExecutionOrderNumber, activity);
+            searchNeighborhood(data, result, cell, activity);
         } break;
         case SensorMode_FixedAngle: {
-            searchByAngle(data, result, cell, inputExecutionOrderNumber, activity);
+            searchByAngle(data, result, cell, activity);
         } break;
         }
     }
@@ -62,7 +61,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 }
 
 __inline__ __device__ void
-SensorProcessor::searchNeighborhood(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity& activity)
+SensorProcessor::searchNeighborhood(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity)
 {
     __shared__ int minDensity;
     __shared__ int color;
@@ -70,7 +69,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationResult& resu
     __shared__ uint32_t lookupResult;
 
     if (threadIdx.x == 0) {
-        refScanAngle = Math::angleOfVector(CellFunctionProcessor::calcSignalDirection(data, cell, inputExecutionOrderNumber));
+        refScanAngle = Math::angleOfVector(CellFunctionProcessor::calcSignalDirection(data, cell));
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 100);
         color = cell->cellFunctionData.sensor.color;
 
@@ -111,7 +110,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationResult& resu
 }
 
 __inline__ __device__ void
-SensorProcessor::searchByAngle(SimulationData& data, SimulationResult& result, Cell* cell, int const& inputExecutionOrderNumber, Activity& activity)
+SensorProcessor::searchByAngle(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity)
 {
     __shared__ int minDensity;
     __shared__ int color;
@@ -122,7 +121,7 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationResult& result, C
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 255);
         color = cell->cellFunctionData.sensor.color;
 
-        searchDelta = CellFunctionProcessor::calcSignalDirection(data, cell, inputExecutionOrderNumber);
+        searchDelta = CellFunctionProcessor::calcSignalDirection(data, cell);
         searchDelta = Math::rotateClockwise(searchDelta, cell->cellFunctionData.sensor.angle);
 
         lookupResult = 0xffffffff;
