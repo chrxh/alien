@@ -67,13 +67,13 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         result.channels[i] = 0;
     }
 
-    if (cell->inputExecutionOrderNumber == -1) {
+    if (cell->inputExecutionOrderNumber == -1 || cell->inputExecutionOrderNumber == cell->executionOrderNumber) {
         return result;
     }
 
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked || connectedCell->livingState != LivingState_Ready || connectedCell->cellFunction == CellFunction_None) {
+        if (connectedCell->outputBlocked || connectedCell->livingState != LivingState_Ready ) {
             continue;
         }
         if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber) {

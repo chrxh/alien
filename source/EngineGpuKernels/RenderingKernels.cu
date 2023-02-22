@@ -236,11 +236,11 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
 
             //draw arrows
             if (zoom >= ZoomLevelForArrows) {
-                auto inputExecution = cell->inputExecutionOrderNumber;
-                if (inputExecution != -1) {
+                auto inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
+                if (inputExecutionOrderNumber != -1 && inputExecutionOrderNumber != cell->executionOrderNumber) {
                     for (int i = 0; i < cell->numConnections; ++i) {
                         auto const& otherCell = cell->connections[i].cell;
-                        if (otherCell->executionOrderNumber == inputExecution && !otherCell->outputBlocked) {
+                        if (otherCell->executionOrderNumber == inputExecutionOrderNumber && !otherCell->outputBlocked) {
                             auto const otherCellPos = otherCell->absPos;
                             auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                             if (Math::lengthSquared(topologyCorrection) > NEAR_ZERO) {

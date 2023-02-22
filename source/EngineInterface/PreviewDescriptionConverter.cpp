@@ -260,17 +260,19 @@ namespace
             for (auto const& connectionIndex : cell.connectionIndices) {
                 auto const& otherCell = cells.at(connectionIndex);
                 auto findResult = cellIndicesToCreatedConnectionIndex.find(std::pair(index, connectionIndex));
+                auto inputExecutionOrderNumber = cell.inputExecutionOrderNumber.value_or(-1);
                 if (findResult == cellIndicesToCreatedConnectionIndex.end()) {
                     ConnectionPreviewDescription connection;
                     connection.cell1 = cell.pos;
                     connection.cell2 = otherCell.pos;
-                    connection.arrowToCell1 = cell.inputExecutionOrderNumber.value_or(-1) == otherCell.executionOrderNumber && !otherCell.outputBlocked;
+                    connection.arrowToCell1 =
+                        inputExecutionOrderNumber == otherCell.executionOrderNumber && !otherCell.outputBlocked && inputExecutionOrderNumber != cell.executionOrderNumber;
                     result.connections.emplace_back(connection);
                     cellIndicesToCreatedConnectionIndex.emplace(std::pair(connectionIndex, index), toInt(result.connections.size() - 1));
                 } else {
                     auto connectionIndex = findResult->second;
-                    result.connections.at(connectionIndex).arrowToCell2 =
-                        cell.inputExecutionOrderNumber.value_or(-1) == otherCell.executionOrderNumber && !otherCell.outputBlocked;
+                    result.connections.at(connectionIndex).arrowToCell2 = inputExecutionOrderNumber == otherCell.executionOrderNumber
+                        && !otherCell.outputBlocked && inputExecutionOrderNumber != cell.executionOrderNumber;
                 }
             }
             ++index;
