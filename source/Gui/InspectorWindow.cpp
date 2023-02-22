@@ -241,10 +241,8 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Activation time").textWidth(CellFunctionBaseTabTextWidth), cell.activationTime);
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Execution order").textWidth(CellFunctionBaseTabTextWidth), cell.executionOrderNumber);
-                auto inputEnabled = !cell.inputBlocked;
                 AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Input").textWidth(CellFunctionBaseTabTextWidth), cell.inputExecutionOrderNumber, &inputEnabled);
-                cell.inputBlocked = !inputEnabled;
+                    AlienImGui::InputIntParameters().name("Input").textWidth(CellFunctionBaseTabTextWidth), cell.inputExecutionOrderNumber);
                 AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block Output").textWidth(CellFunctionBaseTabTextWidth), cell.outputBlocked);
                 AlienImGui::Combo(
                     AlienImGui::ComboParameters()
@@ -550,7 +548,9 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
 
     cell.maxConnections = (cell.maxConnections + parameters.cellMaxBonds + 1) % (parameters.cellMaxBonds + 1);
     cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
-    cell.inputExecutionOrderNumber = (cell.inputExecutionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
+    if (cell.inputExecutionOrderNumber) {
+        cell.inputExecutionOrderNumber = (*cell.inputExecutionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
+    }
     cell.stiffness = std::max(0.0f, std::min(1.0f, cell.stiffness));
     cell.energy = std::max(0.0f, cell.energy);
     switch (cell.getCellFunctionType()) {

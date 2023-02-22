@@ -23,7 +23,7 @@ private:
         int maxConnections;
         int executionOrderNumber;
         int color;
-        bool inputBlocked;
+        int inputExecutionOrderNumber;
         bool outputBlocked;
         CellFunction cellFunction;
     };
@@ -70,8 +70,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 {
     MutationProcessor::applyRandomMutation(data, cell);
 
-    int inputExecutionOrderNumber;
-    auto activity = CellFunctionProcessor::calcInputActivity(cell, inputExecutionOrderNumber);
+    auto activity = CellFunctionProcessor::calcInputActivity(cell);
     if (!isConstructionFinished(cell)) {
         auto origGenomePos = cell->cellFunctionData.constructor.currentGenomePos;
         auto constructionData = readConstructionData(cell);
@@ -129,7 +128,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.maxConnections = GenomeDecoder::readByte(constructor) % (cudaSimulationParameters.cellMaxBonds + 1);
     result.executionOrderNumber = GenomeDecoder::readByte(constructor) % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     result.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
-    result.inputBlocked = GenomeDecoder::readBool(constructor);
+    result.inputExecutionOrderNumber = GenomeDecoder::readByte(constructor);
+    result.inputExecutionOrderNumber =
+        result.inputExecutionOrderNumber == 255 ? -1 : result.inputExecutionOrderNumber % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     result.outputBlocked = GenomeDecoder::readBool(constructor);
     return result;
 }
@@ -416,7 +417,7 @@ ConstructorProcessor::constructCellIntern(
     result->livingState = true;
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
-    result->inputBlocked = constructionData.inputBlocked;
+    result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;
     result->outputBlocked = constructionData.outputBlocked;
 
     result->activationTime = constructor.constructionActivationTime;

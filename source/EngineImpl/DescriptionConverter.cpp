@@ -383,8 +383,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     }
     result.connections = connections;
     result.livingState = cellTO.livingState;
-    result.inputBlocked = cellTO.inputBlocked;
-    result.inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber;
+    result.inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber != -1 ? std::make_optional(cellTO.inputExecutionOrderNumber) : std::nullopt;
     result.outputBlocked = cellTO.outputBlocked;
     result.executionOrderNumber = cellTO.executionOrderNumber;
     result.barrier = cellTO.barrier;
@@ -507,8 +506,7 @@ void DescriptionConverter::addCell(
     cellTO.maxConnections = cellDesc.maxConnections;
     cellTO.executionOrderNumber = cellDesc.executionOrderNumber;
     cellTO.livingState = cellDesc.livingState;
-    cellTO.inputBlocked = cellDesc.inputBlocked;
-    cellTO.inputExecutionOrderNumber = cellDesc.inputExecutionOrderNumber;
+    cellTO.inputExecutionOrderNumber = cellDesc.inputExecutionOrderNumber.value_or(-1);
     cellTO.outputBlocked = cellDesc.outputBlocked;
     cellTO.cellFunction = cellDesc.getCellFunctionType();
     switch (cellDesc.getCellFunctionType()) {

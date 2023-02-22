@@ -123,7 +123,7 @@ auto _PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& cl
             result.maxConnections = cell.maxConnections;
             result.numConnections = cell.connections.size();
             result.constructionState = cell.livingState;
-            result.inputBlocked = cell.inputBlocked;
+            result.inputExecutionOrderNumber = cell.inputExecutionOrderNumber;
             result.outputBlocked = cell.outputBlocked;
             result.executionOrderNumber = cell.executionOrderNumber;
             result.color = cell.color;

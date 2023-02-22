@@ -20,7 +20,7 @@ private:
         int maxConnections;
         int numConnections;
         bool constructionState;
-        bool inputBlocked;
+        std::optional<int> inputExecutionOrderNumber;
         bool outputBlocked;
         int executionOrderNumber;
         int color;
@@ -29,7 +29,7 @@ private:
         bool operator==(CellAnalysisDescription const& other) const
         {
             return maxConnections == other.maxConnections && numConnections == other.numConnections && constructionState == other.constructionState
-                && inputBlocked == other.inputBlocked && outputBlocked == other.outputBlocked && executionOrderNumber == other.executionOrderNumber
+                && inputExecutionOrderNumber == other.inputExecutionOrderNumber && outputBlocked == other.outputBlocked && executionOrderNumber == other.executionOrderNumber
                 && cellFunction == other.cellFunction
                 && color == other.color;
         }
@@ -47,8 +47,8 @@ private:
             if (constructionState != other.constructionState) {
                 return constructionState < other.constructionState;
             }
-            if (inputBlocked != other.inputBlocked) {
-                return inputBlocked < other.inputBlocked;
+            if (inputExecutionOrderNumber != other.inputExecutionOrderNumber) {
+                return inputExecutionOrderNumber < other.inputExecutionOrderNumber;
             }
             if (outputBlocked != other.outputBlocked) {
                 return outputBlocked < other.outputBlocked;

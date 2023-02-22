@@ -89,7 +89,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->vel = cellTO.vel;
     cell->executionOrderNumber = cellTO.executionOrderNumber;
     cell->livingState = cellTO.livingState;
-    cell->inputBlocked = cellTO.inputBlocked;
     cell->inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber;
     cell->outputBlocked = cellTO.outputBlocked;
     cell->maxConnections = cellTO.maxConnections;
@@ -241,7 +240,6 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->barrier = false;
     cell->age = 0;
     cell->activationTime = 0;
-    cell->inputBlocked = _data->numberGen1.randomBool();
     cell->inputExecutionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumbers - 1);
     cell->outputBlocked = _data->numberGen1.randomBool();
     for (int i = 0; i < MAX_CHANNELS; ++i) {
