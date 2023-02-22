@@ -384,6 +384,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.connections = connections;
     result.livingState = cellTO.livingState;
     result.inputBlocked = cellTO.inputBlocked;
+    result.inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber;
     result.outputBlocked = cellTO.outputBlocked;
     result.executionOrderNumber = cellTO.executionOrderNumber;
     result.barrier = cellTO.barrier;
@@ -507,6 +508,7 @@ void DescriptionConverter::addCell(
     cellTO.executionOrderNumber = cellDesc.executionOrderNumber;
     cellTO.livingState = cellDesc.livingState;
     cellTO.inputBlocked = cellDesc.inputBlocked;
+    cellTO.inputExecutionOrderNumber = cellDesc.inputExecutionOrderNumber;
     cellTO.outputBlocked = cellDesc.outputBlocked;
     cellTO.cellFunction = cellDesc.getCellFunctionType();
     switch (cellDesc.getCellFunctionType()) {

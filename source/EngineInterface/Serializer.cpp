@@ -48,6 +48,7 @@ namespace
     auto constexpr Id_Cell_Age = 4;
     auto constexpr Id_Cell_LivingState = 5;
     auto constexpr Id_Cell_InputBlocked = 6;
+    auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
     auto constexpr Id_Cell_OutputBlocked = 7;
     auto constexpr Id_Cell_ActivationTime = 8;
     
@@ -487,6 +488,7 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Cell_Age, data.age, defaultObject.age);
         loadSave<int>(task, auxiliaries, Id_Cell_LivingState, data.livingState, defaultObject.livingState);
         loadSave<bool>(task, auxiliaries, Id_Cell_InputBlocked, data.inputBlocked, defaultObject.inputBlocked);
+        loadSave<int>(task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
         setLoadSaveMap(task, ar, auxiliaries);

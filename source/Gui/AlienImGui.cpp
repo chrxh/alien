@@ -147,7 +147,9 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
     }
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
-
+    if (enabled) {
+        ImGui::EndDisabled();
+    }
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }

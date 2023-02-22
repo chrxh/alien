@@ -376,7 +376,9 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         table.next();
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution order").textWidth(ContentTextWidth), cell.executionOrderNumber);
         table.next();
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block input").textWidth(ContentTextWidth), cell.inputBlocked);
+        auto inputEnabled = !cell.inputBlocked;
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Input").textWidth(ContentTextWidth), cell.inputExecutionOrderNumber, &inputEnabled);
+        cell.inputBlocked = !inputEnabled;
         table.next();
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(ContentTextWidth), cell.outputBlocked);
 
@@ -712,6 +714,7 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
     auto maxBonds = _simController->getSimulationParameters().cellMaxBonds;
     cell.color = (cell.color + MAX_COLORS) % MAX_COLORS;
     cell.executionOrderNumber = (cell.executionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
+    cell.inputExecutionOrderNumber = (cell.inputExecutionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
     cell.maxConnections = (cell.maxConnections + maxBonds + 1) % (maxBonds + 1);
     cell.energy = std::min(std::max(cell.energy, 50.0f), 1050.0f);
 

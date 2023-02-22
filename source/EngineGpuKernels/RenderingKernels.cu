@@ -236,7 +236,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
 
             //draw arrows
             if (zoom >= ZoomLevelForArrows) {
-                auto inputExecution = CellFunctionProcessor::calcInputExecutionOrder(cell);
+                auto inputExecution = CellFunctionProcessor::calcInputExecutionOrderNumber(cell);
                 if (inputExecution != -1) {
                     for (int i = 0; i < cell->numConnections; ++i) {
                         auto const& otherCell = cell->connections[i].cell;

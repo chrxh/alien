@@ -289,7 +289,8 @@ struct CellDescription
     //cell function
     LivingState livingState = LivingState_Ready;
     int executionOrderNumber = 0;
-    bool inputBlocked = false;
+    bool inputBlocked = true;
+    int inputExecutionOrderNumber = 0;
     bool outputBlocked = false;
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
