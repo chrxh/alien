@@ -10,6 +10,8 @@
 #include "TransmitterProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "SensorProcessor.cuh"
+#include "CellProcessor.cuh"
+#include "ParticleProcessor.cuh"
 
 __global__ void cudaNextTimestep_prepare(SimulationData data, SimulationResult result)
 {

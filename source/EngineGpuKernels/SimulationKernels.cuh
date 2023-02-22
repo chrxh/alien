@@ -1,18 +1,6 @@
 #pragma once
 
-#include <cooperative_groups.h>
-#include "cuda_runtime_api.h"
-#include "sm_60_atomic_functions.h"
-
-#include "TOs.cuh"
-#include "Base.cuh"
-#include "Map.cuh"
-#include "CellProcessor.cuh"
-#include "ParticleProcessor.cuh"
-#include "GarbageCollectorKernels.cuh"
-#include "Operations.cuh"
-#include "DebugKernels.cuh"
-#include "SimulationResult.cuh" 
+#include "SimulationData.cuh"
 
 __global__ void cudaNextTimestep_prepare(SimulationData data, SimulationResult result);
 __global__ void cudaNextTimestep_physics_init(SimulationData data);

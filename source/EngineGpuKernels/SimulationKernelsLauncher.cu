@@ -4,6 +4,7 @@
 #include "FlowFieldKernels.cuh"
 #include "GarbageCollectorKernelsLauncher.cuh"
 #include "DebugKernels.cuh"
+#include "SimulationResult.cuh"
 
 _SimulationKernelsLauncher::_SimulationKernelsLauncher()
 {
