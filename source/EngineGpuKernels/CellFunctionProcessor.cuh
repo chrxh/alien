@@ -71,7 +71,9 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
                 }
             }
         }
-        if (maxOtherExecutionOrderNumber == -1 || maxOtherExecutionOrderNumber == executionOrderNumber) {
+        if ((maxOtherExecutionOrderNumber == -1
+             && executionOrderNumber == (cell->executionOrderNumber + 1) % cudaSimulationParameters.cellMaxExecutionOrderNumbers)
+            || (maxOtherExecutionOrderNumber != -1 && maxOtherExecutionOrderNumber == executionOrderNumber)) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->activity.channels[i] = 0;
             }
