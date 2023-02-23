@@ -31,11 +31,11 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
         auto const& nerve = cell->cellFunctionData.nerve;
         if (nerve.pulseMode > 0 && (data.timestep % (cudaSimulationParameters.cellMaxExecutionOrderNumbers * nerve.pulseMode) == cell->executionOrderNumber)) {
             if (nerve.alternationMode == 0) {
-                activity.channels[0] += 1;
+                activity.channels[0] += 1.0f;
             } else {
                 auto evenPulse = data.timestep % (cudaSimulationParameters.cellMaxExecutionOrderNumbers * nerve.pulseMode * nerve.alternationMode * 2)
                     < cell->executionOrderNumber + cudaSimulationParameters.cellMaxExecutionOrderNumbers * nerve.pulseMode * nerve.alternationMode;
-                activity.channels[0] += evenPulse ? 1 : -1;
+                activity.channels[0] += evenPulse ? 1.0f : -1.0f;
             }
         }
         CellFunctionProcessor::setActivity(cell, activity);
