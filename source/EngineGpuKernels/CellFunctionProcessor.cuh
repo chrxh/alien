@@ -34,8 +34,7 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    auto maxExecutionOrderNumber = cudaSimulationParameters.cellMaxExecutionOrderNumbers;
-    auto executionOrderNumber = data.timestep % maxExecutionOrderNumber;
+    auto executionOrderNumber = data.timestep % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->cellFunction != CellFunction_None && cell->executionOrderNumber == executionOrderNumber && cell->activationTime == 0) {
@@ -48,10 +47,31 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto executionOrderNumber = data.timestep % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->activityFetched == 1) {
+        if (cell->outputBlocked || cell->cellFunction == CellFunction_None) {
+            continue;
+        }
+        int maxOtherExecutionOrderNumber = -1;
+        for (int i = 0, j = cell->numConnections; i < j; ++i) {
+            auto otherExecutionOrderNumber = cell->connections[i].cell->executionOrderNumber;
+            auto otherInputExecutionOrderNumber = cell->connections[i].cell->inputExecutionOrderNumber;
+            if (otherInputExecutionOrderNumber == cell->executionOrderNumber && !cell->connections[i].cell->outputBlocked) {
+                if (maxOtherExecutionOrderNumber == -1) {
+                    maxOtherExecutionOrderNumber = otherExecutionOrderNumber;
+                } else {
+                    if ((maxOtherExecutionOrderNumber > cell->executionOrderNumber
+                         && (otherExecutionOrderNumber > maxOtherExecutionOrderNumber || otherExecutionOrderNumber < cell->executionOrderNumber))
+                        || (maxOtherExecutionOrderNumber < cell->executionOrderNumber && otherExecutionOrderNumber > maxOtherExecutionOrderNumber
+                            && otherExecutionOrderNumber < cell->executionOrderNumber)) {
+                        maxOtherExecutionOrderNumber = otherExecutionOrderNumber;
+                    }
+                }
+            }
+        }
+        if (maxOtherExecutionOrderNumber == -1 || maxOtherExecutionOrderNumber == executionOrderNumber) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->activity.channels[i] = 0;
             }
@@ -88,12 +108,9 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
 
 __inline__ __device__ void CellFunctionProcessor::setActivity(Cell* cell, Activity const& newActivity)
 {
-    auto changes = 0.0f;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        changes += abs(newActivity.channels[i] - cell->activity.channels[i]);
         cell->activity.channels[i] = newActivity.channels[i];
     }
-    cell->activity = newActivity;
 }
 
 __inline__ __device__ CellFunctionProcessor::ReferenceAndActualAngle
