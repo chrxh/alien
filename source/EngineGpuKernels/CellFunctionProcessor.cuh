@@ -51,22 +51,24 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->outputBlocked || cell->cellFunction == CellFunction_None) {
+        if (cell->cellFunction == CellFunction_None) {
             continue;
         }
         int maxOtherExecutionOrderNumber = -1;
-        for (int i = 0, j = cell->numConnections; i < j; ++i) {
-            auto otherExecutionOrderNumber = cell->connections[i].cell->executionOrderNumber;
-            auto otherInputExecutionOrderNumber = cell->connections[i].cell->inputExecutionOrderNumber;
-            if (otherInputExecutionOrderNumber == cell->executionOrderNumber && !cell->connections[i].cell->outputBlocked) {
-                if (maxOtherExecutionOrderNumber == -1) {
-                    maxOtherExecutionOrderNumber = otherExecutionOrderNumber;
-                } else {
-                    if ((maxOtherExecutionOrderNumber > cell->executionOrderNumber
-                         && (otherExecutionOrderNumber > maxOtherExecutionOrderNumber || otherExecutionOrderNumber < cell->executionOrderNumber))
-                        || (maxOtherExecutionOrderNumber < cell->executionOrderNumber && otherExecutionOrderNumber > maxOtherExecutionOrderNumber
-                            && otherExecutionOrderNumber < cell->executionOrderNumber)) {
+        if (!cell->outputBlocked) {
+            for (int i = 0, j = cell->numConnections; i < j; ++i) {
+                auto otherExecutionOrderNumber = cell->connections[i].cell->executionOrderNumber;
+                auto otherInputExecutionOrderNumber = cell->connections[i].cell->inputExecutionOrderNumber;
+                if (otherInputExecutionOrderNumber == cell->executionOrderNumber) {
+                    if (maxOtherExecutionOrderNumber == -1) {
                         maxOtherExecutionOrderNumber = otherExecutionOrderNumber;
+                    } else {
+                        if ((maxOtherExecutionOrderNumber > cell->executionOrderNumber
+                             && (otherExecutionOrderNumber > maxOtherExecutionOrderNumber || otherExecutionOrderNumber < cell->executionOrderNumber))
+                            || (maxOtherExecutionOrderNumber < cell->executionOrderNumber && otherExecutionOrderNumber > maxOtherExecutionOrderNumber
+                                && otherExecutionOrderNumber < cell->executionOrderNumber)) {
+                            maxOtherExecutionOrderNumber = otherExecutionOrderNumber;
+                        }
                     }
                 }
             }
