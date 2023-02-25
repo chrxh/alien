@@ -130,9 +130,10 @@ struct Cell
     int color;
     bool barrier;
     int age;
+    LivingState livingState;
+    int constructionId;
 
     //cell function
-    LivingState livingState;
     int executionOrderNumber;
     int inputExecutionOrderNumber;
     bool outputBlocked;

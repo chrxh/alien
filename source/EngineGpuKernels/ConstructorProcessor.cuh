@@ -193,6 +193,8 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
     if (CellConnectionProcessor::existCrossingConnections(data, hostCell->absPos, newCellPos, hostCell->detached)) {
         return false;
     }
+
+    hostCell->constructionId = data.numberGen1.random(65535);
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);
     if (!cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
         hostCell->energy -= constructionData.energy;
@@ -305,7 +307,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance,
         hostCell->detached,
         [&](Cell* const& otherCell) {
-            if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != LivingState_UnderConstruction) {
+            if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != LivingState_UnderConstruction || otherCell->constructionId != hostCell->constructionId) {
                 return false;
             }
             return true;
@@ -415,6 +417,7 @@ ConstructorProcessor::constructCellIntern(
     result->numConnections = 0;
     result->executionOrderNumber = constructionData.executionOrderNumber;
     result->livingState = true;
+    result->constructionId = hostCell->constructionId;
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
     result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;

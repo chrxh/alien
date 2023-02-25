@@ -89,6 +89,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->vel = cellTO.vel;
     cell->executionOrderNumber = cellTO.executionOrderNumber;
     cell->livingState = cellTO.livingState;
+    cell->constructionId = cellTO.constructionId;
     cell->inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber;
     cell->outputBlocked = cellTO.outputBlocked;
     cell->maxConnections = cellTO.maxConnections;
@@ -229,7 +230,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
     cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumbers - 1);
     cell->numConnections = 0;
-    cell->livingState = false;
+    cell->livingState = LivingState_Ready;
+    cell->constructionId = 0;
     cell->locked = 0;
     cell->selected = 0;
     cell->detached = 0;

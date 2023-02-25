@@ -134,9 +134,10 @@ struct CellTO
 	int numConnections;
     bool barrier;
     int age;
+    LivingState livingState;
+    int constructionId;
 
     //cell function
-    LivingState livingState;
     int executionOrderNumber;
     int inputExecutionOrderNumber;
     bool outputBlocked;
