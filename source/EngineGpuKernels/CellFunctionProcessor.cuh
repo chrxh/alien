@@ -103,7 +103,6 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 result.channels[i] += connectedCell->activity.channels[i];
-                atomicExch(&connectedCell->activityFetched, 1);
             }
         }
     }
