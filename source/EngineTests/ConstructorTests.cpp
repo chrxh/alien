@@ -195,7 +195,7 @@ TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
 
 TEST_F(ConstructorTests, constructFirstCell_noSeparation)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setColor(2).setExecutionOrderNumber(4).setInputBlocked(true).setOutputBlocked(true)});
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setColor(2).setExecutionOrderNumber(4).setInputExecutionOrderNumber(5).setOutputBlocked(true)});
 
     DataDescription data;
     data.addCell(
@@ -225,7 +225,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_EQ(2, actualConstructedCell.maxConnections);
     EXPECT_EQ(2, actualConstructedCell.color);
     EXPECT_EQ(4, actualConstructedCell.executionOrderNumber);
-    EXPECT_TRUE(actualConstructedCell.inputBlocked);
+    EXPECT_EQ(4, actualConstructedCell.inputExecutionOrderNumber);
     EXPECT_TRUE(actualConstructedCell.outputBlocked);
     EXPECT_EQ(CellFunction_None, actualConstructedCell.getCellFunctionType());
     EXPECT_EQ(123, actualConstructedCell.activationTime);
