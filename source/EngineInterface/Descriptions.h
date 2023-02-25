@@ -285,9 +285,10 @@ struct CellDescription
     int maxConnections = 0;
     bool barrier = false;
     int age = 0;
+    LivingState livingState = LivingState_Ready;
+    int constructionId = 0;
 
     //cell function
-    LivingState livingState = LivingState_Ready;
     int executionOrderNumber = 0;
     std::optional<int> inputExecutionOrderNumber;
     bool outputBlocked = false;
