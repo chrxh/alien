@@ -188,7 +188,7 @@ protected:
             if (expectedCell.executionOrderNumber != actualCell.executionOrderNumber) {
                 return false;
             }
-            if (expectedCell.inputBlocked != actualCell.inputBlocked) {
+            if (expectedCell.inputExecutionOrderNumber != actualCell.inputExecutionOrderNumber) {
                 return false;
             }
             if (expectedCell.outputBlocked != actualCell.outputBlocked) {
