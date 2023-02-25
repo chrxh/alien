@@ -55,7 +55,6 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        cell->activityFetched = 0;
         cell->shared1 = {0, 0};
         cell->nextCell = nullptr;
     }

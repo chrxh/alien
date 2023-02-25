@@ -148,7 +148,6 @@ struct Cell
     int detached;  //0 = no, 1 = yes
 
     //internal algorithm data
-    int activityFetched; //0 = no, 1 = yes
     int locked;	//0 = unlocked, 1 = locked
     int tag;
     float density;
