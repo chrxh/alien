@@ -29,6 +29,7 @@ namespace
         cellTO.numConnections = cell->numConnections;
         cellTO.executionOrderNumber = cell->executionOrderNumber;
         cellTO.livingState = cell->livingState;
+        cellTO.constructionId = cell->constructionId;
         cellTO.inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
         cellTO.outputBlocked = cell->outputBlocked;
         cellTO.cellFunction = cell->cellFunction;

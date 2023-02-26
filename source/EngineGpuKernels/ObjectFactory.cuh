@@ -231,7 +231,6 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumbers - 1);
     cell->numConnections = 0;
     cell->livingState = LivingState_Ready;
-    cell->constructionId = 0;
     cell->locked = 0;
     cell->selected = 0;
     cell->detached = 0;
