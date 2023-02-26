@@ -83,6 +83,7 @@ namespace
     auto constexpr Id_CellGenome_Energy = 7;
     auto constexpr Id_CellGenome_Color = 2;
     auto constexpr Id_CellGenome_MaxConnections = 3;
+    auto constexpr Id_CellGenome_NumRequiredAdditionalConnections = 9;
     auto constexpr Id_CellGenome_ExecutionOrderNumber = 4;
     auto constexpr Id_CellGenome_InputExecutionOrderNumber = 8;
     auto constexpr Id_CellGenome_OutputBlocked = 6;
@@ -323,6 +324,7 @@ namespace cereal
         loadSave<float>(task, auxiliaries, Id_CellGenome_Energy, data.energy, defaultObject.energy);
         loadSave<int>(task, auxiliaries, Id_CellGenome_Color, data.color, defaultObject.color);
         loadSave<int>(task, auxiliaries, Id_CellGenome_MaxConnections, data.maxConnections, defaultObject.maxConnections);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_CellGenome_NumRequiredAdditionalConnections, data.numRequiredAdditionalConnections, defaultObject.numRequiredAdditionalConnections);
         loadSave<int>(task, auxiliaries, Id_CellGenome_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
         loadSave<std::optional<int>>(task, auxiliaries, Id_CellGenome_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_CellGenome_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);

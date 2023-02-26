@@ -59,7 +59,7 @@ public:
         MEMBER_DECLARATION(InputIntParameters, std::optional<int>, disabledValue, std::nullopt);
     };
     static bool InputInt(InputIntParameters const& parameters, int& value, bool* enabled = nullptr);
-    static bool InputInt(InputIntParameters const& parameters, std::optional<int>& value);
+    static bool InputOptionalInt(InputIntParameters const& parameters, std::optional<int>& value);
 
     struct InputFloatParameters
     {

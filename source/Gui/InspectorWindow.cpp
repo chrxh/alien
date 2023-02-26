@@ -241,7 +241,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Activation time").textWidth(CellFunctionBaseTabTextWidth), cell.activationTime);
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Execution order").textWidth(CellFunctionBaseTabTextWidth), cell.executionOrderNumber);
-                AlienImGui::InputInt(
+                AlienImGui::InputOptionalInt(
                     AlienImGui::InputIntParameters().name("Input").textWidth(CellFunctionBaseTabTextWidth), cell.inputExecutionOrderNumber);
                 AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block Output").textWidth(CellFunctionBaseTabTextWidth), cell.outputBlocked);
                 AlienImGui::Combo(

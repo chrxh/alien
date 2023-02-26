@@ -238,7 +238,7 @@ struct CellGenomeDescription
     float energy = 100.0f;
     int color = 0;
     int maxConnections = 2;
-    bool autoConnectWithPreviousCells = true;
+    std::optional<int> numRequiredAdditionalConnections;
     int executionOrderNumber = 0;
 
     std::optional<int> inputExecutionOrderNumber;
