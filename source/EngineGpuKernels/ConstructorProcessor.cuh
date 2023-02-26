@@ -21,7 +21,7 @@ private:
         float angle;
         float energy;
         int maxConnections;
-        bool autoConnectWithPreviousCells;
+        int numRequiredAdditionalConnections;
         int executionOrderNumber;
         int color;
         int inputExecutionOrderNumber;
@@ -127,13 +127,15 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.angle = GenomeDecoder::readAngle(constructor);
     result.energy = GenomeDecoder::readEnergy(constructor);
     result.maxConnections = GenomeDecoder::readByte(constructor) % (cudaSimulationParameters.cellMaxBonds + 1);
-    result.autoConnectWithPreviousCells = GenomeDecoder::readBool(constructor);
+    result.numRequiredAdditionalConnections = GenomeDecoder::readByte(constructor);
+    result.numRequiredAdditionalConnections = result.numRequiredAdditionalConnections == 255 ? -1 : result.numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
     result.executionOrderNumber = GenomeDecoder::readByte(constructor) % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     result.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
     result.inputExecutionOrderNumber = GenomeDecoder::readByte(constructor);
     result.inputExecutionOrderNumber =
         result.inputExecutionOrderNumber == 255 ? -1 : result.inputExecutionOrderNumber % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     result.outputBlocked = GenomeDecoder::readBool(constructor);
+
     return result;
 }
 
@@ -253,33 +255,42 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     auto newCellPos = hostCell->absPos + posDelta;
 
     //get surrounding cells
-    Cell* otherCells[18];
+    Cell* otherCellCandidates[MAX_CELL_BONDS * 2];
+    int numOtherCellCandidates = 0;
+    data.cellMap.getMatchingCells(
+        otherCellCandidates,
+        MAX_CELL_BONDS * 2,
+        numOtherCellCandidates,
+        newCellPos,
+        cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance,
+        hostCell->detached,
+        [&](Cell* const& otherCell) {
+            if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != LivingState_UnderConstruction
+                || otherCell->constructionId != hostCell->constructionId) {
+                return false;
+            }
+            return true;
+        });
+
+    //connect surrounding cells if possible
+    Cell* otherCells[MAX_CELL_BONDS];
     int numOtherCells = 0;
-    if (constructionData.autoConnectWithPreviousCells) {
-        data.cellMap.getMatchingCells(
-            otherCells,
-            18,
-            numOtherCells,
-            newCellPos,
-            cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance,
-            hostCell->detached,
-            [&](Cell* const& otherCell) {
-                if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != LivingState_UnderConstruction
-                    || otherCell->constructionId != hostCell->constructionId) {
-                    return false;
-                }
-                //#TODO remove
-                if (hostCell->cellFunctionData.constructor.currentGenomePos == 414 && otherCell->executionOrderNumber != 1) {
-                    return false;
-                }
-                if (hostCell->cellFunctionData.constructor.currentGenomePos < 414) {
-                    return false;
-                }
-                return true;
-            });
+    for (int i = 0; i < numOtherCellCandidates; ++i) {
+        Cell* otherCell = otherCellCandidates[i];
+        if (otherCell->tryLock()) {
+            if (!CellConnectionProcessor::wouldResultInOverlappingConnection(otherCell, newCellPos)) {
+                otherCells[numOtherCells++] = otherCell;
+            }
+            otherCell->releaseLock();
+        }
+        if (numOtherCells == MAX_CELL_BONDS) {
+            break;
+        }
     }
-    if (hostCell->cellFunctionData.constructor.currentGenomePos == 414 && numOtherCells == 0) {
-        return false;
+    if (constructionData.numRequiredAdditionalConnections != -1) {
+        if (numOtherCells != constructionData.numRequiredAdditionalConnections) {
+            return false;
+        }
     }
 
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, constructionData);

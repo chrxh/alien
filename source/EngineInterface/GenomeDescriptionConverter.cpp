@@ -139,7 +139,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
         writeAngle(result, cell.referenceAngle);
         writeEnergy(result, cell.energy);
         writeByte(result, cell.maxConnections);
-        writeBool(result, cell.autoConnectWithPreviousCells);
+        writeOptionalByte(result, cell.numRequiredAdditionalConnections);
         writeByte(result, cell.executionOrderNumber);
         writeByte(result, cell.color);
         writeOptionalByte(result, cell.inputExecutionOrderNumber);
@@ -233,7 +233,10 @@ namespace
             cell.referenceAngle = readAngle(data, bytePosition);
             cell.energy = readEnergy(data, bytePosition);
             cell.maxConnections = readByte(data, bytePosition) % (parameters.cellMaxBonds + 1);
-            cell.autoConnectWithPreviousCells = readBool(data, bytePosition);
+            cell.numRequiredAdditionalConnections = readOptionalByte(data, bytePosition);
+            if (cell.numRequiredAdditionalConnections) {
+                *cell.numRequiredAdditionalConnections %= (MAX_CELL_BONDS + 1);
+            }
             cell.executionOrderNumber = readByte(data, bytePosition) % parameters.cellMaxExecutionOrderNumbers;
             cell.color = readByte(data, bytePosition) % 7;
             cell.inputExecutionOrderNumber = readOptionalByte(data, bytePosition);

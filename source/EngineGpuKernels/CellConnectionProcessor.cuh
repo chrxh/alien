@@ -30,8 +30,8 @@ public:
     __inline__ __device__ static void deleteConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void deleteConnectionOneWay(Cell* cell1, Cell* cell2);
 
-    __inline__ __device__
-        static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached);
+    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached);
+    __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos);
 
 private:
     static int constexpr MaxOperationsPerCell = 30;
@@ -47,7 +47,6 @@ private:
         float desiredDistance,
         float desiredAngleOnCell1 = 0,
         ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_None);
-    __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, Cell* cell2);
 };
 
 /************************************************************************/
@@ -283,7 +282,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     float desiredAngleOnCell1,
     ConstructorAngleAlignment angleAlignment)
 {
-    if (wouldResultInOverlappingConnection(cell1, cell2)) {
+    if (wouldResultInOverlappingConnection(cell1, cell2->absPos)) {
         return false;
     }
 
@@ -396,32 +395,6 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     return true;
 }
 
-__inline__ __device__ bool CellConnectionProcessor::wouldResultInOverlappingConnection(Cell* cell1, Cell* cell2)
-{
-    auto const& n = cell1->numConnections;
-    if (n < 2) {
-        return false;
-    }
-    for (int i = 0; i < n; ++i) {
-        auto connectedCell = cell1->connections[i].cell;
-        auto nextConnectedCell = cell1->connections[(i + 1) % n].cell;
-        bool bothConnected = false;
-        for (int j = 0; j < connectedCell->numConnections; ++j) {
-            if (connectedCell->connections[j].cell == nextConnectedCell) {
-                bothConnected = true;
-                break;
-            }
-        }
-        if (!bothConnected) {
-            continue;
-        }
-        if (Math::crossing(cell1->absPos, cell2->absPos, connectedCell->absPos, nextConnectedCell->absPos)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 __inline__ __device__ void CellConnectionProcessor::deleteConnectionOneWay(Cell* cell1, Cell* cell2)
 {
     for (int i = 0; i < cell1->numConnections; ++i) {
@@ -467,6 +440,32 @@ __inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(Sim
         }
     });
     return result;
+}
+
+__inline__ __device__ bool CellConnectionProcessor::wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos)
+{
+    auto const& n = cell1->numConnections;
+    if (n < 2) {
+        return false;
+    }
+    for (int i = 0; i < n; ++i) {
+        auto connectedCell = cell1->connections[i].cell;
+        auto nextConnectedCell = cell1->connections[(i + 1) % n].cell;
+        bool bothConnected = false;
+        for (int j = 0; j < connectedCell->numConnections; ++j) {
+            if (connectedCell->connections[j].cell == nextConnectedCell) {
+                bothConnected = true;
+                break;
+            }
+        }
+        if (!bothConnected) {
+            continue;
+        }
+        if (Math::crossing(cell1->absPos, otherCellPos, connectedCell->absPos, nextConnectedCell->absPos)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 __inline__ __device__ bool CellConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex)
