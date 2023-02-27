@@ -292,6 +292,12 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         parserTask);
     JsonParser::encodeDecode(
         tree,
+        parameters.cellFunctionAttackerVelocityPenalty,
+        defaultParameters.cellFunctionAttackerVelocityPenalty,
+        "simulation parameters.cell.function.attacker.velocity penalty",
+        parserTask);
+    JsonParser::encodeDecode(
+        tree,
         parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent,
         defaultParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent,
         "simulation parameters.cell.function.attacker.geometry deviation exponent",

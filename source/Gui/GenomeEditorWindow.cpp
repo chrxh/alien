@@ -374,7 +374,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         table.next();
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(ContentTextWidth), cell.maxConnections);
         table.next();
-        AlienImGui::InputOptionalInt(AlienImGui::InputIntParameters().name("Required add. connections").textWidth(ContentTextWidth), cell.numRequiredAdditionalConnections);
+        AlienImGui::InputOptionalInt(AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth), cell.numRequiredAdditionalConnections);
         table.next();
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution number").textWidth(ContentTextWidth), cell.executionOrderNumber);
         table.next();
