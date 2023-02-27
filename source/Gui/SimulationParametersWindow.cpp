@@ -681,6 +681,15 @@ void _SimulationParametersWindow::processBase(
                 simParameters.baseValues.cellFunctionAttackerEnergyCost);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
+                    .name("Velocity penalty")
+                    .textWidth(RightColumnWidth)
+                    .min(0)
+                    .max(5.0f)
+                    .defaultValue(origSimParameters.cellFunctionAttackerVelocityPenalty)
+                    .tooltip(std::string("")),
+                simParameters.cellFunctionAttackerVelocityPenalty);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
                     .name("Geometry penalty")
                     .textWidth(RightColumnWidth)
                     .min(0)
@@ -783,12 +792,6 @@ void _SimulationParametersWindow::processBase(
          * Transmitter
          */
         if (ImGui::TreeNodeEx("Cell function: Transmitter", flags)) {
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Same color energy distribution")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionSameColor),
-                simParameters.cellFunctionTransmitterEnergyDistributionSameColor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy distribution radius")
@@ -805,6 +808,12 @@ void _SimulationParametersWindow::processBase(
                     .max(20.0f)
                     .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionValue),
                 simParameters.cellFunctionTransmitterEnergyDistributionValue);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Same color energy distribution")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionSameColor),
+                simParameters.cellFunctionTransmitterEnergyDistributionSameColor);
             ImGui::TreePop();
         }
 
@@ -1407,7 +1416,7 @@ void _SimulationParametersWindow::processSpot(
 void _SimulationParametersWindow::onOpenParameters()
 {
     GenericFileDialogs::getInstance().showOpenFileDialog(
-        "Open simulation parameters", "Simulation parameters (*.parameters.json){.parameters.json},.*", _startingPath, [&](std::filesystem::path const& path) {
+        "Open simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
@@ -1424,7 +1433,7 @@ void _SimulationParametersWindow::onOpenParameters()
 void _SimulationParametersWindow::onSaveParameters()
 {
     GenericFileDialogs::getInstance().showSaveFileDialog(
-        "Save simulation parameters", "Simulation parameters (*.parameters.json){.parameters.json},.*", _startingPath, [&](std::filesystem::path const& path) {
+        "Save simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();

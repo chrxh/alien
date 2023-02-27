@@ -99,6 +99,7 @@ struct SimulationParameters
     bool cellFunctionAttackerEnergyDistributionSameColor = true;
     float cellFunctionAttackerEnergyDistributionValue = 10.0f;
     float cellFunctionAttackerColorInhomogeneityFactor = 1.0f;
+    float cellFunctionAttackerVelocityPenalty = 0.0f;
     float cellFunctionAttackerActivityThreshold = 0.1f;
 
     float cellFunctionDefenderAgainstAttackerStrength = 1.5f;
@@ -213,6 +214,7 @@ struct SimulationParameters
             && cellFunctionInjectorRadius == other.cellFunctionInjectorRadius
             && cellFunctionDefenderAgainstAttackerStrength == other.cellFunctionDefenderAgainstAttackerStrength
             && cellFunctionDefenderAgainstInjectorStrength == other.cellFunctionDefenderAgainstInjectorStrength
+            && cellFunctionAttackerVelocityPenalty == other.cellFunctionAttackerVelocityPenalty
         ;
     }
 
