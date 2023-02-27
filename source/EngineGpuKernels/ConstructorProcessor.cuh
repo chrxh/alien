@@ -128,12 +128,12 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.energy = GenomeDecoder::readEnergy(constructor);
     result.maxConnections = GenomeDecoder::readByte(constructor) % (cudaSimulationParameters.cellMaxBonds + 1);
     result.numRequiredAdditionalConnections = GenomeDecoder::readByte(constructor);
-    result.numRequiredAdditionalConnections = result.numRequiredAdditionalConnections == 255 ? -1 : result.numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
+    result.numRequiredAdditionalConnections = result.numRequiredAdditionalConnections > 127 ? -1 : result.numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
     result.executionOrderNumber = GenomeDecoder::readByte(constructor) % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     result.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
     result.inputExecutionOrderNumber = GenomeDecoder::readByte(constructor);
     result.inputExecutionOrderNumber =
-        result.inputExecutionOrderNumber == 255 ? -1 : result.inputExecutionOrderNumber % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
+        result.inputExecutionOrderNumber > 127 ? -1 : result.inputExecutionOrderNumber % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     result.outputBlocked = GenomeDecoder::readBool(constructor);
 
     return result;

@@ -66,8 +66,8 @@ namespace
     }
     std::optional<int> readOptionalByte(std::vector<uint8_t> const& data, int& pos)
     {
-        auto value = readByte(data, pos);
-        return value != 255 ? std::make_optional(value) : std::nullopt;
+        auto value = static_cast<int>(readByte(data, pos));
+        return value > 127 ? std::nullopt : std::make_optional(value);
     }
     bool readBool(std::vector<uint8_t> const& data, int& pos)
     {
