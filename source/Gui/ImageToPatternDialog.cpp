@@ -88,9 +88,6 @@ void _ImageToPatternDialog::show()
         int width, height, nrChannels;
         unsigned char* dataImage = stbi_load(firstFilename.string().c_str(), &width, &height, &nrChannels, 0);
 
-        auto parameters = _simController->getSimulationParameters();
-        auto maxConnections = parameters.cellMaxBonds;
-
         DataDescription dataDesc;
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; ++y) {
@@ -107,7 +104,7 @@ void _ImageToPatternDialog::show()
                                          .setId(NumberGenerator::getInstance().getId())
                                          .setEnergy(matchedCellIntensity * 200)
                                          .setPos({toFloat(x) + xOffset, toFloat(y)})
-                                         .setMaxConnections(maxConnections)
+                                         .setMaxConnections(MAX_CELL_BONDS)
                                          .setColor(matchedCellColor)
                                          .setBarrier(false));
                 }

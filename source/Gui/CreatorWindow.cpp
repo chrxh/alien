@@ -83,8 +83,7 @@ void _CreatorWindow::processIntern()
         }
         
         if (_mode == CreationMode::CreateCell) {
-            AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(RightColumnWidth), _maxConnections);
+            AlienImGui::SliderInt(AlienImGui::SliderIntParameters().name("Max connections").max(MAX_CELL_BONDS).textWidth(RightColumnWidth), _maxConnections);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending execution order").textWidth(RightColumnWidth), _ascendingExecutionNumbers);
         }
         if (_mode == CreationMode::CreateRectangle) {
@@ -110,8 +109,7 @@ void _CreatorWindow::processIntern()
         if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc
             || _mode == CreationMode::Drawing) {
             ImGui::BeginDisabled(!_makeSticky);
-            AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters().name("Max connections").max(parameters.cellMaxBonds).textWidth(RightColumnWidth), _maxConnections);
+            AlienImGui::SliderInt(AlienImGui::SliderIntParameters().name("Max connections").max(MAX_CELL_BONDS).textWidth(RightColumnWidth), _maxConnections);
             ImGui::EndDisabled();
         }
         if (_mode == CreationMode::Drawing) {
@@ -159,7 +157,7 @@ void _CreatorWindow::onDrawing()
     }
 
     auto parameters = _simController->getSimulationParameters();
-    auto maxConnections = !_makeSticky ? parameters.cellMaxBonds : _maxConnections;
+    auto maxConnections = !_makeSticky ? MAX_CELL_BONDS : _maxConnections;
 
     if (_drawing.isEmpty()) {
         auto cell = CellDescription()
@@ -244,7 +242,7 @@ void _CreatorWindow::createRectangle()
                                                   .energy(_energy)
                                                   .stiffness(_stiffness)
                                                   .removeStickiness(!_makeSticky)
-                                                  .maxConnection(!_makeSticky ? parameters.cellMaxBonds : _maxConnections)
+                                                  .maxConnection(!_makeSticky ? MAX_CELL_BONDS : _maxConnections)
                                                   .color(_editorModel->getDefaultColorCode())
                                                   .center(getRandomPos())
                                                   .barrier(_barrier));
@@ -260,7 +258,7 @@ void _CreatorWindow::createHexagon()
 
     DataDescription data;
     auto parameters = _simController->getSimulationParameters();
-    auto maxConnections = !_makeSticky ? parameters.cellMaxBonds : _maxConnections;
+    auto maxConnections = !_makeSticky ? MAX_CELL_BONDS : _maxConnections;
 
     auto incY = sqrt(3.0) * _cellDistance / 2.0;
     for (int j = 0; j < _layers; ++j) {
@@ -307,7 +305,7 @@ void _CreatorWindow::createDisc()
 
     DataDescription data;
     auto parameters = _simController->getSimulationParameters();
-    auto maxConnections = !_makeSticky ? parameters.cellMaxBonds : _maxConnections;
+    auto maxConnections = !_makeSticky ? MAX_CELL_BONDS : _maxConnections;
     auto constexpr SmallValue = 0.01f;
     for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _cellDistance) {
         float angleInc =
@@ -365,6 +363,6 @@ void _CreatorWindow::incExecutionNumber()
 {
     if (_ascendingExecutionNumbers) {
         auto parameters = _simController->getSimulationParameters();
-        _lastExecutionNumber = (_lastExecutionNumber + 1) % parameters.cellMaxExecutionOrderNumbers;
+        _lastExecutionNumber = (_lastExecutionNumber + 1) % parameters.cellNumExecutionOrderNumbers;
     }
 }

@@ -53,7 +53,7 @@ struct ConstructorTO
     int activationMode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     bool singleConstruction;
     bool separateConstruction;
-    bool adaptMaxConnections;
+    int maxConnections;
     ConstructorAngleAlignment angleAlignment;
     float stiffness;
     int constructionActivationTime;

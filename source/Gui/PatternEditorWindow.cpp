@@ -361,7 +361,7 @@ void _PatternEditorWindow::onGenerateExecutionOrderNumbers()
     std::unordered_set<uint64_t> cellIds = dataWithoutClusters.getCellIds();
 
     auto parameters = _simController->getSimulationParameters();
-    DescriptionHelper::generateBranchNumbers(dataWithClusters, cellIds, parameters.cellMaxExecutionOrderNumbers);
+    DescriptionHelper::generateBranchNumbers(dataWithClusters, cellIds, parameters.cellNumExecutionOrderNumbers);
 
     _simController->removeSelectedObjects(true);
     _simController->addAndSelectSimulationData(dataWithClusters);

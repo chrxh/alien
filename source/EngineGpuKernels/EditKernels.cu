@@ -325,7 +325,7 @@ __global__ void cudaMakeSticky(SimulationData data, bool includeClusters)
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cellPointers.at(index);
         if (isSelected(cell, includeClusters)) {
-            cell->maxConnections = cudaSimulationParameters.cellMaxBonds;
+            cell->maxConnections = MAX_CELL_BONDS;
         }
     }
 }

@@ -384,7 +384,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.connections = connections;
     result.livingState = cellTO.livingState;
     result.constructionId = cellTO.constructionId;
-    result.inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber != -1 ? std::make_optional(cellTO.inputExecutionOrderNumber) : std::nullopt;
+    result.inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber >= 0 ? std::make_optional(cellTO.inputExecutionOrderNumber) : std::nullopt;
     result.outputBlocked = cellTO.outputBlocked;
     result.executionOrderNumber = cellTO.executionOrderNumber;
     result.barrier = cellTO.barrier;
@@ -422,7 +422,8 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         constructor.singleConstruction = cellTO.cellFunctionData.constructor.singleConstruction;
         constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
-        constructor.adaptMaxConnections = cellTO.cellFunctionData.constructor.adaptMaxConnections;
+        constructor.maxConnections =
+            cellTO.cellFunctionData.constructor.maxConnections >= 0 ? std::make_optional(cellTO.cellFunctionData.constructor.maxConnections) : std::nullopt;
         constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
         constructor.stiffness = cellTO.cellFunctionData.constructor.stiffness;
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
@@ -434,8 +435,6 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         SensorDescription sensor;
         if (cellTO.cellFunctionData.sensor.mode == SensorMode_FixedAngle) {
             sensor.fixedAngle = cellTO.cellFunctionData.sensor.angle;
-        } else {
-            sensor.fixedAngle.reset();
         }
         sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         sensor.color = cellTO.cellFunctionData.sensor.color;
@@ -533,7 +532,7 @@ void DescriptionConverter::addCell(
         constructorTO.activationMode = constructorDesc.activationMode;
         constructorTO.singleConstruction = constructorDesc.singleConstruction;
         constructorTO.separateConstruction = constructorDesc.separateConstruction;
-        constructorTO.adaptMaxConnections = constructorDesc.adaptMaxConnections;
+        constructorTO.maxConnections = constructorDesc.maxConnections.value_or(-1);
         constructorTO.angleAlignment = constructorDesc.angleAlignment;
         constructorTO.stiffness = constructorDesc.stiffness;
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;

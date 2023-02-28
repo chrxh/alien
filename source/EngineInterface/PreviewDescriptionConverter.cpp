@@ -129,8 +129,7 @@ namespace
                         for (auto const& otherCellIndex : findResult->second) {
                             auto& otherCell = result.cellsIntern.at(otherCellIndex);
                             if (otherCellIndex != index && Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance) {
-                                if (otherCell.connectionIndices.size() < parameters.cellMaxBonds
-                                    && cellIntern.connectionIndices.size() < parameters.cellMaxBonds) {
+                                if (otherCell.connectionIndices.size() < MAX_CELL_BONDS && cellIntern.connectionIndices.size() < MAX_CELL_BONDS) {
                                     nearbyCellIndices.emplace_back(otherCellIndex);
                                 }
                             }

@@ -372,15 +372,14 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         table.next();
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").textWidth(ContentTextWidth).format("%.1f"), cell.energy);
         table.next();
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(ContentTextWidth), cell.maxConnections);
-        table.next();
-        AlienImGui::InputOptionalInt(AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth), cell.numRequiredAdditionalConnections);
-        table.next();
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution number").textWidth(ContentTextWidth), cell.executionOrderNumber);
         table.next();
         AlienImGui::InputOptionalInt(AlienImGui::InputIntParameters().name("Input execution number").textWidth(ContentTextWidth), cell.inputExecutionOrderNumber);
         table.next();
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(ContentTextWidth), cell.outputBlocked);
+        table.next();
+        AlienImGui::InputOptionalInt(
+            AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth), cell.numRequiredAdditionalConnections);
 
         switch (type) {
         case CellFunction_Neuron: {
@@ -405,7 +404,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters().name("Separate construction").textWidth(ContentTextWidth), constructor.separateConstruction);
             table.next();
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Adapt max connections").textWidth(ContentTextWidth), constructor.adaptMaxConnections);
+            AlienImGui::InputOptionalInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(ContentTextWidth), constructor.maxConnections);
             int constructorMode = constructor.mode == 0 ? 0 : 1;
             table.next();
             if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Activation mode").textWidth(ContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
@@ -710,8 +709,7 @@ void _GenomeEditorWindow::showPreview(TabData& tab)
 
 void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const
 {
-    auto numExecutionOrderNumbers = _simController->getSimulationParameters().cellMaxExecutionOrderNumbers;
-    auto maxBonds = _simController->getSimulationParameters().cellMaxBonds;
+    auto numExecutionOrderNumbers = _simController->getSimulationParameters().cellNumExecutionOrderNumbers;
     cell.color = (cell.color + MAX_COLORS) % MAX_COLORS;
     cell.executionOrderNumber = (cell.executionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
     if (cell.inputExecutionOrderNumber) {
@@ -720,7 +718,6 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
     if (cell.numRequiredAdditionalConnections) {
         cell.numRequiredAdditionalConnections = (*cell.numRequiredAdditionalConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
     }
-    cell.maxConnections = (cell.maxConnections + maxBonds + 1) % (maxBonds + 1);
     cell.energy = std::min(std::max(cell.energy, 50.0f), 1050.0f);
 
     switch (cell.getCellFunctionType()) {
@@ -728,6 +725,9 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
         auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
         if (constructor.mode < 0) {
             constructor.mode = 0;
+        }
+        if (constructor.maxConnections) {
+            constructor.maxConnections = (*constructor.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
         }
         constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
     } break;

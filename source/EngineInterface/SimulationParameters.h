@@ -61,8 +61,7 @@ struct SimulationParameters
     float cellNormalEnergy = 100.0f;
     float cellMinDistance = 0.3f;         
     float cellMaxForceDecayProb = 0.2f;
-    int cellMaxBonds = 6;
-    int cellMaxExecutionOrderNumbers = 6;
+    int cellNumExecutionOrderNumbers = 6;
 
     float radiationAbsorptionByCellColor[MAX_COLORS] = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     float radiationProb = 0.03f;
@@ -179,7 +178,7 @@ struct SimulationParameters
         return backgroundColor == other.backgroundColor && baseValues == other.baseValues && timestepSize == other.timestepSize
             && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
             && cellMaxForceDecayProb == other.cellMaxForceDecayProb
-            && cellMaxBonds == other.cellMaxBonds && cellMaxExecutionOrderNumbers == other.cellMaxExecutionOrderNumbers
+            && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers
             && cellFunctionAttackerStrength == other.cellFunctionAttackerStrength && cellFunctionSensorRange == other.cellFunctionSensorRange
             && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
             && radiationVelocityPerturbation == other.radiationVelocityPerturbation

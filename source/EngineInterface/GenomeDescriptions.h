@@ -43,7 +43,7 @@ struct ConstructorGenomeDescription
     int mode = 13;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     bool singleConstruction = false;
     bool separateConstruction = true;
-    bool adaptMaxConnections = true;
+    std::optional<int> maxConnections;
     ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
     float stiffness = 1.0f;
     int constructionActivationTime = 100;
@@ -67,9 +67,9 @@ struct ConstructorGenomeDescription
         separateConstruction = value;
         return *this;
     }
-    ConstructorGenomeDescription& setMakeSticky(bool value)
+    ConstructorGenomeDescription& setMaxConnection(std::optional<int> value)
     {
-        adaptMaxConnections = value;
+        maxConnections = value;
         return *this;
     }
     ConstructorGenomeDescription& setAngleAlignment(ConstructorAngleAlignment value)
@@ -237,7 +237,6 @@ struct CellGenomeDescription
     float referenceAngle = 0;
     float energy = 100.0f;
     int color = 0;
-    int maxConnections = 2;
     std::optional<int> numRequiredAdditionalConnections;
     int executionOrderNumber = 0;
 
@@ -261,11 +260,6 @@ struct CellGenomeDescription
     CellGenomeDescription& setColor(unsigned char value)
     {
         color = value;
-        return *this;
-    }
-    CellGenomeDescription& setMaxConnections(int value)
-    {
-        maxConnections = value;
         return *this;
     }
     CellGenomeDescription& setExecutionOrderNumber(int value)

@@ -55,7 +55,7 @@ namespace
     auto constexpr Id_Constructor_ActivationMode = 0;
     auto constexpr Id_Constructor_SingleConstruction = 1;
     auto constexpr Id_Constructor_SeparateConstruction = 2;
-    auto constexpr Id_Constructor_AdaptMaxConnections = 3;
+    auto constexpr Id_Constructor_MaxConnections = 8;
     auto constexpr Id_Constructor_AngleAlignment = 4;
     auto constexpr Id_Constructor_Stiffness = 5;
     auto constexpr Id_Constructor_ConstructionActivationTime = 6;
@@ -82,7 +82,6 @@ namespace
     auto constexpr Id_CellGenome_ReferenceAngle = 1;
     auto constexpr Id_CellGenome_Energy = 7;
     auto constexpr Id_CellGenome_Color = 2;
-    auto constexpr Id_CellGenome_MaxConnections = 3;
     auto constexpr Id_CellGenome_NumRequiredAdditionalConnections = 9;
     auto constexpr Id_CellGenome_ExecutionOrderNumber = 4;
     auto constexpr Id_CellGenome_InputExecutionOrderNumber = 8;
@@ -93,7 +92,7 @@ namespace
     auto constexpr Id_ConstructorGenome_Mode = 0;
     auto constexpr Id_ConstructorGenome_SingleConstruction = 1;
     auto constexpr Id_ConstructorGenome_SeparateConstruction = 2;
-    auto constexpr Id_ConstructorGenome_AdaptMaxConnections = 3;
+    auto constexpr Id_ConstructorGenome_MaxConnections = 7;
     auto constexpr Id_ConstructorGenome_AngleAlignment = 4;
     auto constexpr Id_ConstructorGenome_Stiffness = 5;
     auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 6;
@@ -200,7 +199,7 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_ConstructorGenome_Mode, data.mode, defaultObject.mode);
         loadSave<bool>(task, auxiliaries, Id_ConstructorGenome_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
         loadSave<bool>(task, auxiliaries, Id_ConstructorGenome_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
-        loadSave<bool>(task, auxiliaries, Id_ConstructorGenome_AdaptMaxConnections, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_ConstructorGenome_MaxConnections, data.maxConnections, defaultObject.maxConnections);
         loadSave<int>(task, auxiliaries, Id_ConstructorGenome_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
         loadSave<float>(task, auxiliaries, Id_ConstructorGenome_Stiffness, data.stiffness, defaultObject.stiffness);
         loadSave<int>(task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
@@ -323,7 +322,6 @@ namespace cereal
         loadSave<float>(task, auxiliaries, Id_CellGenome_ReferenceAngle, data.referenceAngle, defaultObject.referenceAngle);
         loadSave<float>(task, auxiliaries, Id_CellGenome_Energy, data.energy, defaultObject.energy);
         loadSave<int>(task, auxiliaries, Id_CellGenome_Color, data.color, defaultObject.color);
-        loadSave<int>(task, auxiliaries, Id_CellGenome_MaxConnections, data.maxConnections, defaultObject.maxConnections);
         loadSave<std::optional<int>>(task, auxiliaries, Id_CellGenome_NumRequiredAdditionalConnections, data.numRequiredAdditionalConnections, defaultObject.numRequiredAdditionalConnections);
         loadSave<int>(task, auxiliaries, Id_CellGenome_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
         loadSave<std::optional<int>>(task, auxiliaries, Id_CellGenome_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
@@ -379,7 +377,7 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
         loadSave<bool>(task, auxiliaries, Id_Constructor_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
         loadSave<bool>(task, auxiliaries, Id_Constructor_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
-        loadSave<bool>(task, auxiliaries, Id_Constructor_AdaptMaxConnections, data.adaptMaxConnections, defaultObject.adaptMaxConnections);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_Constructor_MaxConnections, data.maxConnections, defaultObject.maxConnections);
         loadSave<int>(task, auxiliaries, Id_Constructor_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
         loadSave<float>(task, auxiliaries, Id_Constructor_Stiffness, data.stiffness, defaultObject.stiffness);
         loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);

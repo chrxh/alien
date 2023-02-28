@@ -64,10 +64,10 @@ namespace
         uint8_t result = data[pos++];
         return result;
     }
-    std::optional<int> readOptionalByte(std::vector<uint8_t> const& data, int& pos)
+    std::optional<int> readOptionalByte(std::vector<uint8_t> const& data, int& pos, int moduloValue)
     {
         auto value = static_cast<int>(readByte(data, pos));
-        return value > 127 ? std::nullopt : std::make_optional(value);
+        return value > 127 ? std::nullopt : std::make_optional(value % moduloValue);
     }
     bool readBool(std::vector<uint8_t> const& data, int& pos)
     {
@@ -138,7 +138,6 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
         writeByte(result, cell.getCellFunctionType());
         writeAngle(result, cell.referenceAngle);
         writeEnergy(result, cell.energy);
-        writeByte(result, cell.maxConnections);
         writeOptionalByte(result, cell.numRequiredAdditionalConnections);
         writeByte(result, cell.executionOrderNumber);
         writeByte(result, cell.color);
@@ -165,7 +164,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             writeByte(result, constructor.mode);
             writeBool(result, constructor.singleConstruction);
             writeBool(result, constructor.separateConstruction);
-            writeBool(result, constructor.adaptMaxConnections);
+            writeOptionalByte(result, constructor.maxConnections);
             writeByte(result, constructor.angleAlignment);
             writeStiffness(result, constructor.stiffness);
             writeWord(result, constructor.constructionActivationTime);
@@ -232,17 +231,10 @@ namespace
             CellGenomeDescription cell;
             cell.referenceAngle = readAngle(data, bytePosition);
             cell.energy = readEnergy(data, bytePosition);
-            cell.maxConnections = readByte(data, bytePosition) % (parameters.cellMaxBonds + 1);
-            cell.numRequiredAdditionalConnections = readOptionalByte(data, bytePosition);
-            if (cell.numRequiredAdditionalConnections) {
-                *cell.numRequiredAdditionalConnections %= (MAX_CELL_BONDS + 1);
-            }
-            cell.executionOrderNumber = readByte(data, bytePosition) % parameters.cellMaxExecutionOrderNumbers;
+            cell.numRequiredAdditionalConnections = readOptionalByte(data, bytePosition, MAX_CELL_BONDS + 1);
+            cell.executionOrderNumber = readByte(data, bytePosition) % parameters.cellNumExecutionOrderNumbers;
             cell.color = readByte(data, bytePosition) % MAX_COLORS;
-            cell.inputExecutionOrderNumber = readOptionalByte(data, bytePosition);
-            if (cell.inputExecutionOrderNumber) {
-                *cell.inputExecutionOrderNumber %= parameters.cellMaxExecutionOrderNumbers;
-            }
+            cell.inputExecutionOrderNumber = readOptionalByte(data, bytePosition, parameters.cellNumExecutionOrderNumbers);
             cell.outputBlocked = readBool(data, bytePosition);
 
             switch (cellFunction) {
@@ -268,7 +260,7 @@ namespace
                 constructor.mode = readByte(data, bytePosition);
                 constructor.singleConstruction = readBool(data, bytePosition);
                 constructor.separateConstruction = readBool(data, bytePosition);
-                constructor.adaptMaxConnections = readBool(data, bytePosition);
+                constructor.maxConnections = readOptionalByte(data, bytePosition, MAX_CELL_BONDS + 1);
                 constructor.angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;
                 constructor.stiffness = readStiffness(data, bytePosition);
                 constructor.constructionActivationTime = readWord(data, bytePosition);
