@@ -659,6 +659,13 @@ void _MainWindow::processMenubar()
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_V)) {
             _displaySettingsDialog->show();
         }
+        if (ImGui::IsKeyPressed(GLFW_KEY_F7)) {
+            if (_windowController->isDesktopMode()) {
+                _windowController->setWindowedMode();
+            } else {
+                _windowController->setDesktopMode();
+            }
+        }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_K)) {
             _networkSettingsDialog->show();
         }
