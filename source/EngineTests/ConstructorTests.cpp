@@ -225,7 +225,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_EQ(2, actualConstructedCell.maxConnections);
     EXPECT_EQ(2, actualConstructedCell.color);
     EXPECT_EQ(4, actualConstructedCell.executionOrderNumber);
-    EXPECT_EQ(4, actualConstructedCell.inputExecutionOrderNumber);
+    EXPECT_EQ(5, actualConstructedCell.inputExecutionOrderNumber);
     EXPECT_TRUE(actualConstructedCell.outputBlocked);
     EXPECT_EQ(CellFunction_None, actualConstructedCell.getCellFunctionType());
     EXPECT_EQ(123, actualConstructedCell.activationTime);

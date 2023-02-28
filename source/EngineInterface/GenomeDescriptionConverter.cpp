@@ -238,7 +238,7 @@ namespace
                 *cell.numRequiredAdditionalConnections %= (MAX_CELL_BONDS + 1);
             }
             cell.executionOrderNumber = readByte(data, bytePosition) % parameters.cellMaxExecutionOrderNumbers;
-            cell.color = readByte(data, bytePosition) % 7;
+            cell.color = readByte(data, bytePosition) % MAX_COLORS;
             cell.inputExecutionOrderNumber = readOptionalByte(data, bytePosition);
             if (cell.inputExecutionOrderNumber) {
                 *cell.inputExecutionOrderNumber %= parameters.cellMaxExecutionOrderNumbers;
