@@ -9,6 +9,7 @@ public:
     __inline__ __device__ static bool isFinished(ConstructorFunction const& constructor);
     __inline__ __device__ static bool readBool(ConstructorFunction& constructor);
     __inline__ __device__ static uint8_t readByte(ConstructorFunction& constructor);
+    __inline__ __device__ static int readOptionalByte(ConstructorFunction& constructor, int moduloValue);
     __inline__ __device__ static int readWord(ConstructorFunction& constructor);
     __inline__ __device__ static float readFloat(ConstructorFunction& constructor);  //return values from -1 to 1
     __inline__ __device__ static float readEnergy(ConstructorFunction& constructor);  //return values from 36 to 1060
@@ -40,6 +41,13 @@ __inline__ __device__ uint8_t GenomeDecoder::readByte(ConstructorFunction& const
         return 0;
     }
     uint8_t result = constructor.genome[constructor.currentGenomePos++];
+    return result;
+}
+
+__inline__ __device__ int GenomeDecoder::readOptionalByte(ConstructorFunction& constructor, int moduloValue)
+{
+    auto result = static_cast<int>(readByte(constructor));
+    result = result > 127 ? -1 : result % moduloValue;
     return result;
 }
 

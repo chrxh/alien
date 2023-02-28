@@ -130,7 +130,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         cell->cellFunctionData.constructor.singleConstruction = cellTO.cellFunctionData.constructor.singleConstruction;
         cell->cellFunctionData.constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
-        cell->cellFunctionData.constructor.adaptMaxConnections = cellTO.cellFunctionData.constructor.adaptMaxConnections;
+        cell->cellFunctionData.constructor.maxConnections = cellTO.cellFunctionData.constructor.maxConnections;
         cell->cellFunctionData.constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
         cell->cellFunctionData.constructor.stiffness = cellTO.cellFunctionData.constructor.stiffness;
         cell->cellFunctionData.constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
@@ -228,7 +228,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->energy = energy;
     cell->stiffness = _data->numberGen1.random();
     cell->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
-    cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumbers - 1);
+    cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellNumExecutionOrderNumbers - 1);
     cell->numConnections = 0;
     cell->livingState = LivingState_Ready;
     cell->locked = 0;
@@ -241,7 +241,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->barrier = false;
     cell->age = 0;
     cell->activationTime = 0;
-    cell->inputExecutionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellMaxExecutionOrderNumbers - 1);
+    cell->inputExecutionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellNumExecutionOrderNumbers - 1);
     cell->outputBlocked = _data->numberGen1.randomBool();
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->activity.channels[i] = 0;
@@ -272,7 +272,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             }
             cell->cellFunctionData.constructor.singleConstruction = _data->numberGen1.randomBool();
             cell->cellFunctionData.constructor.separateConstruction = _data->numberGen1.randomBool();
-            cell->cellFunctionData.constructor.adaptMaxConnections = _data->numberGen1.randomBool();
+            cell->cellFunctionData.constructor.maxConnections = _data->numberGen1.random(MAX_CELL_BONDS + 1) - 1;
             cell->cellFunctionData.constructor.angleAlignment = _data->numberGen1.random(ConstructorAngleAlignment_Count - 1);
             cell->cellFunctionData.constructor.stiffness = _data->numberGen1.random();
             cell->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);

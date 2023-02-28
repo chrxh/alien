@@ -420,8 +420,8 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(CellFunctionTextWidth), constructor.singleConstruction);
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters().name("Separate construction").textWidth(CellFunctionTextWidth), constructor.separateConstruction);
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Adapt max connections").textWidth(CellFunctionTextWidth), constructor.adaptMaxConnections);
+        AlienImGui::InputOptionalInt(
+            AlienImGui::InputIntParameters().name("Max connections").textWidth(CellFunctionTextWidth), constructor.maxConnections);
         int constructorMode = constructor.activationMode == 0 ? 0 : 1;
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters().name("Activation mode").textWidth(CellFunctionTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
@@ -546,10 +546,10 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
 {
     auto const& parameters = _simController->getSimulationParameters();
 
-    cell.maxConnections = (cell.maxConnections + parameters.cellMaxBonds + 1) % (parameters.cellMaxBonds + 1);
-    cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
+    cell.maxConnections = (cell.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
+    cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellNumExecutionOrderNumbers) % parameters.cellNumExecutionOrderNumbers;
     if (cell.inputExecutionOrderNumber) {
-        cell.inputExecutionOrderNumber = (*cell.inputExecutionOrderNumber + parameters.cellMaxExecutionOrderNumbers) % parameters.cellMaxExecutionOrderNumbers;
+        cell.inputExecutionOrderNumber = (*cell.inputExecutionOrderNumber + parameters.cellNumExecutionOrderNumbers) % parameters.cellNumExecutionOrderNumbers;
     }
     cell.stiffness = std::max(0.0f, std::min(1.0f, cell.stiffness));
     cell.energy = std::max(0.0f, cell.energy);
@@ -564,6 +564,9 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
         }
         if (constructor.activationMode < 0) {
             constructor.activationMode = 0;
+        }
+        if (constructor.maxConnections) {
+            constructor.maxConnections = (*constructor.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
         }
         constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
     } break;

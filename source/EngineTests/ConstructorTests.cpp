@@ -162,7 +162,7 @@ TEST_F(ConstructorTests, constructFirstCell_correctCycle)
                      .setCellFunction(ConstructorDescription().setActivationMode(3).setGenome(genome)));
 
     _simController->setSimulationData(data);
-    for (int i = 0; i < _parameters.cellMaxExecutionOrderNumbers * 3; ++i) {
+    for (int i = 0; i < _parameters.cellNumExecutionOrderNumbers * 3; ++i) {
         _simController->calcSingleTimestep();
     }
     auto actualData = _simController->getSimulationData();
@@ -185,7 +185,7 @@ TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
                      .setCellFunction(ConstructorDescription().setActivationMode(3).setGenome(genome)));
 
     _simController->setSimulationData(data);
-    for (int i = 0; i < _parameters.cellMaxExecutionOrderNumbers * 3 - 1; ++i) {
+    for (int i = 0; i < _parameters.cellNumExecutionOrderNumbers * 3 - 1; ++i) {
         _simController->calcSingleTimestep();
     }
     auto actualData = _simController->getSimulationData();
@@ -222,7 +222,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
 
     EXPECT_EQ(1, actualConstructedCell.connections.size());
-    EXPECT_EQ(2, actualConstructedCell.maxConnections);
+    EXPECT_EQ(1, actualConstructedCell.maxConnections);
     EXPECT_EQ(2, actualConstructedCell.color);
     EXPECT_EQ(4, actualConstructedCell.executionOrderNumber);
     EXPECT_EQ(5, actualConstructedCell.inputExecutionOrderNumber);
@@ -288,13 +288,13 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
     EXPECT_EQ(1, actualHostCell.maxConnections);
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
-    EXPECT_EQ(2, actualConstructedCell.maxConnections);
+    EXPECT_EQ(0, actualConstructedCell.maxConnections);
     EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
 }
 
 TEST_F(ConstructorTests, constructFirstCell_noAdaptConnections)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setMaxConnections(3)});
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -302,7 +302,7 @@ TEST_F(ConstructorTests, constructFirstCell_noAdaptConnections)
                      .setEnergy(_parameters.cellNormalEnergy * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
-                     .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(true).setAdaptConnections(false)));
+                     .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(true).setMaxConnections(3)));
 
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
@@ -507,7 +507,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
                                       .setMode(0)
                                       .setSingleConstruction(true)
                                       .setSeparateConstruction(false)
-                                      .setMakeSticky(true)
+                                      .setMaxConnection(3)
                                       .setAngleAlignment(2)
                                       .setStiffness(0.35f)
                                       .setConstructionActivationTime(123)
@@ -537,7 +537,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
     EXPECT_EQ(constructorGenome.mode, actualConstructor.activationMode);
     EXPECT_EQ(constructorGenome.singleConstruction, actualConstructor.singleConstruction);
     EXPECT_EQ(constructorGenome.separateConstruction, actualConstructor.separateConstruction);
-    EXPECT_EQ(constructorGenome.adaptMaxConnections, actualConstructor.adaptMaxConnections);
+    EXPECT_EQ(std::make_optional(3), actualConstructor.maxConnections);
     EXPECT_EQ(constructorGenome.angleAlignment, actualConstructor.angleAlignment);
     EXPECT_TRUE(approxCompare(constructorGenome.stiffness, actualConstructor.stiffness, 0.05f));
     EXPECT_EQ(constructorGenome.constructionActivationTime, actualConstructor.constructionActivationTime);
@@ -737,7 +737,7 @@ TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
                            .setMode(0)
                            .setSingleConstruction(true)
                            .setSeparateConstruction(false)
-                           .setMakeSticky(true)
+                           .setMaxConnection(3)
                            .setAngleAlignment(2)
                            .setGenome(createRandomGenome(MAX_GENOME_BYTES));
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setCellFunction(constructedConstructor)});
@@ -773,7 +773,7 @@ TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
                                       .setMode(0)
                                       .setSingleConstruction(true)
                                       .setSeparateConstruction(false)
-                                      .setMakeSticky(true)
+                                      .setMaxConnection(MAX_CELL_BONDS)
                                       .setAngleAlignment(2)
                                       .setMakeGenomeCopy();
 
@@ -954,7 +954,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
 
 TEST_F(ConstructorTests, constructSecondCell_noFreeConnection)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription().setMaxConnections(1)});
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
 
     DataDescription data;
     data.addCells({
@@ -964,7 +964,7 @@ TEST_F(ConstructorTests, constructSecondCell_noFreeConnection)
             .setEnergy(_parameters.cellNormalEnergy * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false).setAdaptConnections(false)),
+            .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false).setMaxConnections(1)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})

@@ -34,7 +34,7 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    auto executionOrderNumber = data.timestep % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
+    auto executionOrderNumber = data.timestep % cudaSimulationParameters.cellNumExecutionOrderNumbers;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->cellFunction != CellFunction_None && cell->executionOrderNumber == executionOrderNumber && cell->activationTime == 0
@@ -48,7 +48,7 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto executionOrderNumber = data.timestep % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
+    auto executionOrderNumber = data.timestep % cudaSimulationParameters.cellNumExecutionOrderNumbers;
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -75,7 +75,7 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
             }
         }
         if ((maxOtherExecutionOrderNumber == -1
-             && executionOrderNumber == (cell->executionOrderNumber + 1) % cudaSimulationParameters.cellMaxExecutionOrderNumbers)
+             && executionOrderNumber == (cell->executionOrderNumber + 1) % cudaSimulationParameters.cellNumExecutionOrderNumbers)
             || (maxOtherExecutionOrderNumber != -1 && maxOtherExecutionOrderNumber == executionOrderNumber)) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->activity.channels[i] = 0;

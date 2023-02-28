@@ -182,7 +182,7 @@ protected:
             if (expectedCell.color != actualCell.color) {
                 return false;
             }
-            if (expectedCell.maxConnections != actualCell.maxConnections) {
+            if (expectedCell.numRequiredAdditionalConnections != actualCell.numRequiredAdditionalConnections) {
                 return false;
             }
             if (expectedCell.executionOrderNumber != actualCell.executionOrderNumber) {

@@ -99,9 +99,8 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
     JsonParser::encodeDecode(tree, parameters.baseValues.cellMaxForce, defaultParameters.baseValues.cellMaxForce, "simulation parameters.cell.max force", parserTask);
     JsonParser::encodeDecode(
         tree, parameters.cellMaxForceDecayProb, defaultParameters.cellMaxForceDecayProb, "simulation parameters.cell.max force decay probability", parserTask);
-    JsonParser::encodeDecode(tree, parameters.cellMaxBonds, defaultParameters.cellMaxBonds, "simulation parameters.cell.max bonds", parserTask);
     JsonParser::encodeDecode(
-        tree, parameters.cellMaxExecutionOrderNumbers, defaultParameters.cellMaxExecutionOrderNumbers, "simulation parameters.cell.max execution order number", parserTask);
+        tree, parameters.cellNumExecutionOrderNumbers, defaultParameters.cellNumExecutionOrderNumbers, "simulation parameters.cell.max execution order number", parserTask);
     JsonParser::encodeDecode(tree, parameters.baseValues.cellMinEnergy, defaultParameters.baseValues.cellMinEnergy, "simulation parameters.cell.min energy", parserTask);
     JsonParser::encodeDecode(
         tree, parameters.baseValues.cellFusionVelocity, defaultParameters.baseValues.cellFusionVelocity, "simulation parameters.cell.fusion velocity", parserTask);
