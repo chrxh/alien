@@ -109,7 +109,13 @@ TEST_F(NerveTests, outputBlocked)
             .setExecutionOrderNumber(5)
             .setOutputBlocked(true)
             .setActivity(activity),
-        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(NerveDescription()).setMaxConnections(2).setExecutionOrderNumber(0),
+        CellDescription()
+            .setId(2)
+            .setPos({2.0f, 1.0f})
+            .setCellFunction(NerveDescription())
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5),
     });
     data.addConnection(1, 2);
 
@@ -144,7 +150,8 @@ TEST_F(NerveTests, underConstruction1)
             .setPos({2.0f, 1.0f})
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0),
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5),
     });
     data.addConnection(1, 2);
 
@@ -179,6 +186,7 @@ TEST_F(NerveTests, underConstruction2)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
             .setLivingState(true),
     });
     data.addConnection(1, 2);
@@ -207,6 +215,7 @@ TEST_F(NerveTests, transfer)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
+            .setInputExecutionOrderNumber(0)
             .setActivity(activity),
         CellDescription()
             .setId(2)
@@ -278,15 +287,34 @@ TEST_F(NerveTests, cycle)
     activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setPos({1.0f, 1.0f}).setCellFunction(NerveDescription()).setMaxConnections(2).setExecutionOrderNumber(0),
-         CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(NerveDescription()).setMaxConnections(2).setExecutionOrderNumber(1),
-         CellDescription().setId(3).setPos({2.0f, 2.0f}).setCellFunction(NerveDescription()).setMaxConnections(2).setExecutionOrderNumber(2),
+        {CellDescription()
+             .setId(1)
+             .setPos({1.0f, 1.0f})
+             .setCellFunction(NerveDescription())
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(3),
+         CellDescription()
+             .setId(2)
+             .setPos({2.0f, 1.0f})
+             .setCellFunction(NerveDescription())
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(1)
+             .setInputExecutionOrderNumber(0),
+         CellDescription()
+             .setId(3)
+             .setPos({2.0f, 2.0f})
+             .setCellFunction(NerveDescription())
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(2)
+             .setInputExecutionOrderNumber(1),
          CellDescription()
              .setId(4)
              .setPos({1.0f, 2.0f})
              .setCellFunction(NerveDescription())
              .setMaxConnections(2)
              .setExecutionOrderNumber(3)
+             .setInputExecutionOrderNumber(2)
              .setActivity(activity)});
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -364,7 +392,8 @@ TEST_F(NerveTests, fork)
             .setPos({1.0f, 1.0f})
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0),
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5),
         CellDescription()
             .setId(2)
             .setPos({2.0f, 1.0f})
@@ -377,7 +406,8 @@ TEST_F(NerveTests, fork)
             .setPos({3.0f, 1.0f})
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0),
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -409,7 +439,13 @@ TEST_F(NerveTests, noFork)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setActivity(activity),
-        CellDescription().setId(3).setPos({3.0f, 1.0f}).setCellFunction(NerveDescription()).setMaxConnections(2).setExecutionOrderNumber(0),
+        CellDescription()
+            .setId(3)
+            .setPos({3.0f, 1.0f})
+            .setCellFunction(NerveDescription())
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -447,7 +483,8 @@ TEST_F(NerveTests, merge)
             .setPos({2.0f, 1.0f})
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0),
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5),
         CellDescription()
             .setId(3)
             .setPos({3.0f, 1.0f})
@@ -485,7 +522,13 @@ TEST_F(NerveTests, sameExecutionOrderNumber)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setActivity(activity),
-        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(NerveDescription()).setMaxConnections(2).setExecutionOrderNumber(0),
+        CellDescription()
+            .setId(2)
+            .setPos({2.0f, 1.0f})
+            .setCellFunction(NerveDescription())
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(0),
     });
     data.addConnection(1, 2);
 
@@ -510,7 +553,14 @@ TEST_F(NerveTests, constantPulse)
             .setCellFunction(NerveDescription().setPulseMode(3).setAlternationMode(0))
             .setMaxConnections(2)
             .setExecutionOrderNumber(0),
-         CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(NerveDescription()).setMaxConnections(2).setExecutionOrderNumber(1).setOutputBlocked(true)
+         CellDescription()
+             .setId(2)
+             .setPos({2.0f, 1.0f})
+             .setCellFunction(NerveDescription())
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(1)
+             .setInputExecutionOrderNumber(0)
+             .setOutputBlocked(true)
     });
     data.addConnection(1, 2);
 
@@ -545,6 +595,7 @@ TEST_F(NerveTests, alternatingPulse)
              .setCellFunction(NerveDescription())
              .setMaxConnections(2)
              .setExecutionOrderNumber(1)
+             .setInputExecutionOrderNumber(0)
              .setOutputBlocked(true)});
     data.addConnection(1, 2);
 

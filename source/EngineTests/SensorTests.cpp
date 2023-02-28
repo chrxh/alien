@@ -27,7 +27,13 @@ TEST_F(SensorTests, scanNeighborhood_noActivity)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
+        {CellDescription()
+             .setId(1)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
@@ -51,7 +57,13 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
+        {CellDescription()
+             .setId(1)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
@@ -74,7 +86,13 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
+        {CellDescription()
+             .setId(1)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
@@ -99,7 +117,13 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription().setColor(1)),
+        {CellDescription()
+             .setId(1)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription().setColor(1)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
@@ -124,7 +148,13 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
+        {CellDescription()
+             .setId(1)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
@@ -154,7 +184,13 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
+        {CellDescription()
+             .setId(1)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
@@ -184,7 +220,13 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
+        {CellDescription()
+             .setId(1)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
@@ -214,7 +256,13 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
+        {CellDescription()
+             .setId(1)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
@@ -244,7 +292,13 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(SensorDescription()),
+        {CellDescription()
+             .setId(1)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
@@ -280,6 +334,7 @@ TEST_F(SensorTests, scanByAngle_found)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setFixedAngle(-90.0f)),
          CellDescription()
              .setId(2)
@@ -313,6 +368,7 @@ TEST_F(SensorTests, scanByAngle_wrongAngle)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setFixedAngle(90.0f)),
          CellDescription()
              .setId(2)

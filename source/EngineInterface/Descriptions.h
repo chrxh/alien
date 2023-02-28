@@ -362,6 +362,11 @@ struct CellDescription
         livingState = value;
         return *this;
     }
+    CellDescription& setConstructionId(int value)
+    {
+        constructionId = value;
+        return *this;
+    }
     CellDescription& setInputExecutionOrderNumber(int value)
     {
         inputExecutionOrderNumber = value;
