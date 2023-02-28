@@ -12,7 +12,7 @@ public:
     enum class Mode
     {
         Navigation,
-        Action
+        Editor
     };
     Mode getMode() const;
     void setMode(Mode value);
@@ -20,8 +20,8 @@ public:
 private:
     EditorController _editorController;
 
-    TextureData _actionOn;
-    TextureData _actionOff;
+    TextureData _editorOn;
+    TextureData _editorOff;
     
     Mode _mode = Mode::Navigation;
 };
