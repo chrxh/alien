@@ -40,6 +40,7 @@ private:
     
     //internal constants
     static int constexpr CellFunctionMutationMaxGenomeSize = 200;
+    static int constexpr CellColorPos = 6;
     static int constexpr CellBasicBytes = 9;
     static int constexpr NeuronBytes = 72;
     static int constexpr TransmitterBytes = 1;
@@ -154,7 +155,7 @@ __inline__ __device__ void MutationProcessor::changeDataMutation(SimulationData&
         if (randomDelta == 0) { //no cell function type change
             return;
         }
-        if (!cudaSimulationParameters.cellFunctionConstructorMutationColor && randomDelta == 5) {   //no color change
+        if (!cudaSimulationParameters.cellFunctionConstructorMutationColor && randomDelta == CellColorPos) {  //no color change
             return;
         }
         genome[nodeIndex + randomDelta] = data.numberGen1.randomByte();
@@ -709,7 +710,7 @@ __inline__ __device__ bool MutationProcessor::isNextCellSelfCopy(uint8_t* genome
 
 __inline__ __device__ int MutationProcessor::getNextCellColor(uint8_t* genome, int nodeIndex)
 {
-    return genome[nodeIndex + 5] % MAX_COLORS;
+    return genome[nodeIndex + CellColorPos] % MAX_COLORS;
 }
 
 __inline__ __device__ void MutationProcessor::setNextCellFunctionType(uint8_t* genome, int nodeIndex, CellFunction cellFunction)
@@ -719,7 +720,7 @@ __inline__ __device__ void MutationProcessor::setNextCellFunctionType(uint8_t* g
 
 __inline__ __device__ void MutationProcessor::setNextCellColor(uint8_t* genome, int nodeIndex, int color)
 {
-    genome[nodeIndex + 5] = color;
+    genome[nodeIndex + CellColorPos] = color;
 }
 
 __inline__ __device__ int MutationProcessor::getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeIndex)

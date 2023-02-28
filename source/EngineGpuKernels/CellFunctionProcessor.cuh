@@ -37,7 +37,8 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
     auto executionOrderNumber = data.timestep % cudaSimulationParameters.cellMaxExecutionOrderNumbers;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->cellFunction != CellFunction_None && cell->executionOrderNumber == executionOrderNumber && cell->activationTime == 0) {
+        if (cell->cellFunction != CellFunction_None && cell->executionOrderNumber == executionOrderNumber && cell->activationTime == 0
+            && cell->livingState == LivingState_Ready) {
             data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
         }
     }
@@ -95,7 +96,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         return result;
     }
 
-    for (int i = 0; i < cell->numConnections; ++i) {
+    for (int i = 0, j = cell->numConnections; i < j; ++i) {
         auto connectedCell = cell->connections[i].cell;
         if (connectedCell->outputBlocked || connectedCell->livingState != LivingState_Ready ) {
             continue;
