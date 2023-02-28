@@ -396,7 +396,7 @@ void _SimulationView::updateMotionBlur()
 
 void _SimulationView::drawActionCursor()
 {
-    if (_modeWindow->getMode() == _ModeController::Mode::Action) {
+    if (_modeWindow->getMode() == _ModeController::Mode::Editor) {
         auto mousePos = ImGui::GetMousePos();
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         drawList->AddCircleFilled(mousePos, ActionCursorRadius, ImColor(1.0f, 1.0f, 1.0f, 0.4f));

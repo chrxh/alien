@@ -452,10 +452,10 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuToggled, "Editor")) {
-            if (ImGui::MenuItem("Activate", "ALT+E", _modeController->getMode() == _ModeController::Mode::Action)) {
+            if (ImGui::MenuItem("Activate", "ALT+E", _modeController->getMode() == _ModeController::Mode::Editor)) {
                 _modeController->setMode(
-                    _modeController->getMode() == _ModeController::Mode::Action ? _ModeController::Mode::Navigation
-                                                                        : _ModeController::Mode::Action);
+                    _modeController->getMode() == _ModeController::Mode::Editor ? _ModeController::Mode::Navigation
+                                                                        : _ModeController::Mode::Editor);
             }
             ImGui::Separator();
             ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode());
@@ -620,7 +620,7 @@ void _MainWindow::processMenubar()
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
             _modeController->setMode(
-                _modeController->getMode() == _ModeController::Mode::Action ? _ModeController::Mode::Navigation : _ModeController::Mode::Action);
+                _modeController->getMode() == _ModeController::Mode::Editor ? _ModeController::Mode::Navigation : _ModeController::Mode::Editor);
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_S)) {
             selectionWindow->setOn(!selectionWindow->isOn());

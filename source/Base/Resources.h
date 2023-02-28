@@ -13,8 +13,8 @@ namespace Const
     auto const SimulationFragmentShader = BasePath + "shader.fs";
     auto const SimulationVertexShader = BasePath + "shader.vs";
 
-    auto const ActionOnFilename = BasePath + "action on.png";
-    auto const ActionOffFilename = BasePath + "action off.png";
+    auto const EditorOnFilename = BasePath + "editor on.png";
+    auto const EditorOffFilename = BasePath + "editor off.png";
 
     auto const RunFilename = BasePath + "run.png";
     auto const PauseFilename = BasePath + "pause.png";
