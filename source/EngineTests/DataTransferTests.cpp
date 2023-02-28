@@ -33,6 +33,7 @@ TEST_F(DataTransferTests, singleCell)
                      .setBarrier(true)
                      .setLivingState(false)
                      .setInputExecutionOrderNumber(4)
+                     .setConstructionId(3534)
                      .setOutputBlocked(false)
                      .setCellFunction(neuron)
                      .setActivity({1, 0, -1, 0, 0, 0, 0, 0}));

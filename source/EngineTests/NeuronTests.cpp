@@ -53,7 +53,7 @@ TEST_F(NeuronTests, weight)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setActivity(activity),
-        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0),
+        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0).setInputExecutionOrderNumber(5),
     });
     data.addConnection(1, 2);
 
