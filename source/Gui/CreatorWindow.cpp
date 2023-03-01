@@ -73,11 +73,12 @@ void _CreatorWindow::processIntern()
     }
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-        auto parameters = _simController->getSimulationParameters();
-
         AlienImGui::Group(ModeText.at(_mode));
+        if (_mode == CreationMode::Drawing) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters().name("Pencil width").min(0.5f).max(8.0f).textWidth(RightColumnWidth).format("%.1f"), _drawingWidth);
+        }
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth), _energy);
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(RightColumnWidth), _barrier);
         if (_mode != CreationMode::CreateParticle) {
             AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth), _stiffness);
         }
@@ -97,24 +98,14 @@ void _CreatorWindow::processIntern()
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Outer radius").textWidth(RightColumnWidth).format("%.2f"), _outerRadius);
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.2f"), _innerRadius);
         }
-
-        if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc
-            || _mode == CreationMode::Drawing) {
+        if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc) {
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(RightColumnWidth), _cellDistance);
         }
         if (_mode != CreationMode::CreateParticle & _mode != CreationMode::CreateCell) {
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(RightColumnWidth), _makeSticky);
         }
-        if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc
-            || _mode == CreationMode::Drawing) {
-            ImGui::BeginDisabled(!_makeSticky);
-            AlienImGui::SliderInt(AlienImGui::SliderIntParameters().name("Max connections").max(MAX_CELL_BONDS).textWidth(RightColumnWidth), _maxConnections);
-            ImGui::EndDisabled();
-        }
-        if (_mode == CreationMode::Drawing) {
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending branch number").textWidth(RightColumnWidth), _ascendingExecutionNumbers);
-        }
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(RightColumnWidth), _barrier);
 
         AlienImGui::Separator();
 
@@ -156,38 +147,38 @@ void _CreatorWindow::onDrawing()
         _simController->removeSelectedObjects(false);
     }
 
-    auto parameters = _simController->getSimulationParameters();
-    auto maxConnections = !_makeSticky ? MAX_CELL_BONDS : _maxConnections;
+    auto createAlignedCircle = [&](auto pos) {
+        if (_drawingWidth >= 1) {
+            pos.x = toFloat(toInt(pos.x));
+            pos.y = toFloat(toInt(pos.y));
+        }
+        return DescriptionHelper::createUnconnectedCircle(DescriptionHelper::CreateUnconnectedCircleParameters()
+                                                              .center(pos)
+                                                              .radius(_drawingWidth)
+                                                              .energy(_energy)
+                                                              .stiffness(_stiffness)
+                                                              .cellDistance(1.0f)
+                                                              .maxConnections(MAX_CELL_BONDS)
+                                                              .color(_editorModel->getDefaultColorCode())
+                                                              .barrier(_barrier));
+    };
 
     if (_drawing.isEmpty()) {
-        auto cell = CellDescription()
-                        .setId(NumberGenerator::getInstance().getId())
-                        .setPos(pos)
-                        .setEnergy(_energy)
-                        .setStiffness(_stiffness)
-                        .setMaxConnections(maxConnections)
-                        .setExecutionOrderNumber(_lastExecutionNumber)
-                        .setColor(_editorModel->getDefaultColorCode());
-        _drawing.addCell(cell);
-        incExecutionNumber();
+        DescriptionHelper::addIfSpaceAvailable(_drawing, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simController->getWorldSize());
+        _lastDrawPos = pos;
     } else {
-        auto lastCellPos = _drawing.cells.back().pos;
-        auto distance = Math::length(pos - lastCellPos);
-        if (Math::length(pos - lastCellPos) >= _cellDistance) {
-            for (float l = _cellDistance; l <= distance; l += _cellDistance) {
-                auto cell = CellDescription()
-                                .setId(NumberGenerator::getInstance().getId())
-                                .setPos(lastCellPos + (pos - lastCellPos) * l / distance)
-                                .setEnergy(_energy)
-                                .setMaxConnections(maxConnections)
-                                .setExecutionOrderNumber(_lastExecutionNumber)
-                                .setColor(_editorModel->getDefaultColorCode());
-                _drawing.addCell(cell);
-                incExecutionNumber();
+        auto posDelta = Math::length(pos - _lastDrawPos);
+        if (posDelta > 0) {
+            auto lastDrawPos = _lastDrawPos;
+            for (float interDelta = 0; interDelta < posDelta; interDelta += 1.0f) {
+                auto drawPos = lastDrawPos + (pos - lastDrawPos) * interDelta / posDelta;
+                auto toAdd = createAlignedCircle(drawPos);
+                DescriptionHelper::addIfSpaceAvailable(_drawing, _drawingOccupancy, toAdd, 0.5f, _simController->getWorldSize());
+                _lastDrawPos = drawPos;
             }
         }
     }
-    DescriptionHelper::reconnectCells(_drawing, _cellDistance * 1.1f);
+    DescriptionHelper::reconnectCells(_drawing, 1.5f);
     if (!_makeSticky) {
         auto origDrawing = _drawing;
         DescriptionHelper::removeStickiness(_drawing);
@@ -204,6 +195,7 @@ void _CreatorWindow::onDrawing()
 void _CreatorWindow::finishDrawing()
 {
     _drawing.clear();
+    _drawingOccupancy.clear();
 }
 
 void _CreatorWindow::createCell()
@@ -242,7 +234,7 @@ void _CreatorWindow::createRectangle()
                                                   .energy(_energy)
                                                   .stiffness(_stiffness)
                                                   .removeStickiness(!_makeSticky)
-                                                  .maxConnection(!_makeSticky ? MAX_CELL_BONDS : _maxConnections)
+                                                  .maxConnections(MAX_CELL_BONDS)
                                                   .color(_editorModel->getDefaultColorCode())
                                                   .center(getRandomPos())
                                                   .barrier(_barrier));
@@ -255,45 +247,16 @@ void _CreatorWindow::createHexagon()
     if (_layers <= 0) {
         return;
     }
-
-    DataDescription data;
-    auto parameters = _simController->getSimulationParameters();
-    auto maxConnections = !_makeSticky ? MAX_CELL_BONDS : _maxConnections;
-
-    auto incY = sqrt(3.0) * _cellDistance / 2.0;
-    for (int j = 0; j < _layers; ++j) {
-        for (int i = -(_layers - 1); i < _layers - j; ++i) {
-
-            //create cell: upper layer
-            data.addCell(CellDescription()
-                             .setId(NumberGenerator::getInstance().getId())
-                             .setEnergy(_energy)
-                             .setStiffness(_stiffness)
-                             .setPos({toFloat(i * _cellDistance + j * _cellDistance / 2.0), toFloat(-j * incY)})
-                             .setMaxConnections(maxConnections)
-                             .setColor(_editorModel->getDefaultColorCode())
-                             .setBarrier(_barrier));
-
-            //create cell: under layer (except for 0-layer)
-            if (j > 0) {
-                data.addCell(CellDescription()
-                                 .setId(NumberGenerator::getInstance().getId())
-                                 .setEnergy(_energy)
-                                 .setStiffness(_stiffness)
-                                 .setPos({toFloat(i * _cellDistance + j * _cellDistance / 2.0), toFloat(j * incY)})
-                                 .setMaxConnections(maxConnections)
-                                 .setColor(_editorModel->getDefaultColorCode())
-                                 .setBarrier(_barrier));
-
-            }
-        }
-    }
-
-    DescriptionHelper::reconnectCells(data, _cellDistance * 1.5f);
-    if (!_makeSticky) {
-        DescriptionHelper::removeStickiness(data);
-    }
-    data.setCenter(getRandomPos());
+    DataDescription data = DescriptionHelper::createHex(DescriptionHelper::CreateHexParameters()
+                                                            .layers(_layers)
+                                                            .cellDistance(_cellDistance)
+                                                            .energy(_energy)
+                                                            .stiffness(_stiffness)
+                                                            .removeStickiness(!_makeSticky)
+                                                            .maxConnections(MAX_CELL_BONDS)
+                                                            .color(_editorModel->getDefaultColorCode())
+                                                            .center(getRandomPos())
+                                                            .barrier(_barrier));
     _simController->addAndSelectSimulationData(data);
 }
 
@@ -304,8 +267,6 @@ void _CreatorWindow::createDisc()
     }
 
     DataDescription data;
-    auto parameters = _simController->getSimulationParameters();
-    auto maxConnections = !_makeSticky ? MAX_CELL_BONDS : _maxConnections;
     auto constexpr SmallValue = 0.01f;
     for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _cellDistance) {
         float angleInc =
@@ -325,7 +286,7 @@ void _CreatorWindow::createDisc()
                              .setEnergy(_energy)
                              .setStiffness(_stiffness)
                              .setPos(relPos)
-                             .setMaxConnections(maxConnections)
+                             .setMaxConnections(MAX_CELL_BONDS)
                              .setColor(_editorModel->getDefaultColorCode())
                              .setBarrier(_barrier));
         }

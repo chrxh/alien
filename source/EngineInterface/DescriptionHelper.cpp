@@ -17,7 +17,7 @@ DataDescription DescriptionHelper::createRect(CreateRectParameters const& parame
                                .setPos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
                                .setEnergy(parameters._energy)
                                .setStiffness(parameters._stiffness)
-                               .setMaxConnections(parameters._maxConnection)
+                               .setMaxConnections(parameters._maxConnections)
                                .setColor(parameters._color)
                                .setBarrier(parameters._barrier));
         }
@@ -27,6 +27,89 @@ DataDescription DescriptionHelper::createRect(CreateRectParameters const& parame
         removeStickiness(result);
     }
     result.setCenter(parameters._center);
+    return result;
+}
+
+DataDescription DescriptionHelper::createHex(CreateHexParameters const& parameters)
+{
+    DataDescription result;
+    auto incY = sqrt(3.0) * parameters._cellDistance / 2.0;
+    for (int j = 0; j < parameters._layers; ++j) {
+        for (int i = -(parameters._layers - 1); i < parameters._layers - j; ++i) {
+
+            //create cell: upper layer
+            result.addCell(CellDescription()
+                               .setId(NumberGenerator::getInstance().getId())
+                               .setEnergy(parameters._energy)
+                               .setStiffness(parameters._stiffness)
+                               .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
+                               .setMaxConnections(parameters._maxConnections)
+                               .setColor(parameters._color)
+                               .setBarrier(parameters._barrier));
+
+            //create cell: under layer (except for 0-layer)
+            if (j > 0) {
+                result.addCell(CellDescription()
+                                 .setId(NumberGenerator::getInstance().getId())
+                                   .setEnergy(parameters._energy)
+                                   .setStiffness(parameters._stiffness)
+                                   .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
+                                   .setMaxConnections(parameters._maxConnections)
+                                   .setColor(parameters._color)
+                                   .setBarrier(parameters._barrier));
+            }
+        }
+    }
+
+    reconnectCells(result, parameters._cellDistance * 1.5f);
+    if (parameters._removeStickiness) {
+        removeStickiness(result);
+    }
+    result.setCenter(parameters._center);
+
+    return result;
+}
+
+DataDescription DescriptionHelper::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters)
+{
+    DataDescription result;
+
+    if (parameters._radius < 1) {
+        result.addCell(CellDescription()
+                           .setId(NumberGenerator::getInstance().getId())
+                           .setPos(parameters._center)
+                           .setEnergy(parameters._energy)
+                           .setStiffness(parameters._stiffness)
+                           .setMaxConnections(parameters._maxConnections)
+                           .setColor(parameters._color)
+                           .setBarrier(parameters._barrier));
+        return result;
+    }
+
+    auto centerRow = toInt(parameters._center.y / parameters._cellDistance);
+    auto radiusRow = toInt(parameters._radius / parameters._cellDistance);
+
+    auto startYRow = centerRow - radiusRow;
+    auto radiusRounded = radiusRow * parameters._cellDistance;
+    for (float dx = -radiusRounded; dx <= radiusRounded + NEAR_ZERO; dx += parameters._cellDistance) {
+        int row = 0;
+        for (float dy = -radiusRounded; dy <= radiusRounded + NEAR_ZERO; dy += parameters._cellDistance, ++row) {
+            float evenRowIncrement = (startYRow + row) % 2 == 0 ? parameters._cellDistance / 2 : 0.0f;
+            auto dxMod = dx + evenRowIncrement;
+            if (dxMod * dxMod + dy * dy > radiusRounded * radiusRounded + NEAR_ZERO) {
+                continue;
+            }
+            result.addCell(CellDescription()
+                               .setId(NumberGenerator::getInstance().getId())
+                               .setEnergy(parameters._energy)
+                               .setStiffness(parameters._stiffness)
+                               .setPos({parameters._center.x + dxMod, parameters._center.y + dy})
+                               .setMaxConnections(parameters._maxConnections)
+                               .setColor(parameters._color)
+                               .setBarrier(parameters._barrier));
+
+        }
+    }
     return result;
 }
 
@@ -134,14 +217,14 @@ DataDescription DescriptionHelper::randomMultiply(
 {
     overlappingCheckSuccessful = true;
     SpaceCalculator spaceCalculator(worldSize);
-    std::unordered_map<IntVector2D, std::vector<int>> cellIndicesByPos;
+    std::unordered_map<IntVector2D, std::vector<RealVector2D>> cellPosBySlot;
 
     //create map for overlapping check
     if (parameters._overlappingCheck) {
         int index = 0;
         for (auto const& cell : existentData.cells) {
             auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell.pos));
-            cellIndicesByPos[intPos].emplace_back(index);
+            cellPosBySlot[intPos].emplace_back(cell.pos);
             ++index;
         }
     }
@@ -169,7 +252,7 @@ DataDescription DescriptionHelper::randomMultiply(
             if (parameters._overlappingCheck) {
                 for (auto const& cell : copy.cells) {
                     auto pos = spaceCalculator.getCorrectedPosition(cell.pos);
-                    if (isCellPresent(existentData, cellIndicesByPos, spaceCalculator, pos)) {
+                    if (isCellPresent(cellPosBySlot, spaceCalculator, pos, 2.0f)) {
                         overlapping = true;
                     }
                 }
@@ -189,12 +272,29 @@ DataDescription DescriptionHelper::randomMultiply(
                 auto index = toInt(existentData.cells.size());
                 existentData.cells.emplace_back(cell);
                 auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell.pos));
-                cellIndicesByPos[intPos].emplace_back(index);
+                cellPosBySlot[intPos].emplace_back(cell.pos);
             }
         }
     }
 
     return result;
+}
+
+void DescriptionHelper::addIfSpaceAvailable(
+    DataDescription& result,
+    Occupancy& cellOccupancy,
+    DataDescription const& toAdd,
+    float distance,
+    IntVector2D const& worldSize)
+{
+    SpaceCalculator space(worldSize);
+
+    for (auto const& cell : toAdd.cells) {
+        if (!isCellPresent(cellOccupancy, space, cell.pos, distance)) {
+            result.addCell(cell);
+            cellOccupancy[toIntVector2D(cell.pos)].emplace_back(cell.pos);
+        }
+    }
 }
 
 void DescriptionHelper::reconnectCells(DataDescription& data, float maxDistance)
@@ -292,7 +392,7 @@ void DescriptionHelper::randomizeAges(ClusteredDataDescription& data, int minAge
     }
 }
 
-void DescriptionHelper::generateBranchNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers)
+void DescriptionHelper::generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers)
 {
     std::unordered_map<uint64_t, int> idToIndexMap;
     for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {
@@ -391,35 +491,32 @@ void DescriptionHelper::removeMetadata(CellDescription& cell)
     cell.metadata.name.clear();
 }
 
-bool DescriptionHelper::isCellPresent(
-    DataDescription const& data,
-    std::unordered_map<IntVector2D, std::vector<int>> const& cellIndicesByPos,
-    SpaceCalculator const& spaceCalculator,
-    RealVector2D const& posToCheck)
+bool DescriptionHelper::isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance)
 {
     auto intPos = toIntVector2D(posToCheck);
 
-    auto getMatchingCellIndices = [&cellIndicesByPos](IntVector2D const& intPos) {
-        auto findResult = cellIndicesByPos.find(intPos);
-        if (findResult != cellIndicesByPos.end()) {
+    auto getMatchingSlots = [&cellPosBySlot](IntVector2D const& intPos) {
+        auto findResult = cellPosBySlot.find(intPos);
+        if (findResult != cellPosBySlot.end()) {
             return findResult->second;
         }
-        return std::vector<int>{};
+        return std::vector<RealVector2D>{};
     };
 
-    auto checkCells = [&](std::vector<int> const& cellIndices) {
-        for (auto const& cellIndex : cellIndices) {
-            auto otherPos = spaceCalculator.getCorrectedPosition(data.cells.at(cellIndex).pos);
-            if (Math::length(posToCheck - otherPos) < 2.0f) {
+    auto isOccupied = [&](std::vector<RealVector2D> const& cellPositions) {
+        for (auto const& cellPos : cellPositions) {
+            auto otherPos = spaceCalculator.getCorrectedPosition(cellPos);
+            if (Math::length(posToCheck - otherPos) < distance) {
                 return true;
             }
         }
         return false;
     };
 
-    for (int dx = -1; dx <= 1; ++dx) {
-        for (int dy = -1; dy <= 1; ++dy) {
-            if (checkCells(getMatchingCellIndices({intPos.x + dx, intPos.y + dy}))) {
+    auto distanceInt = toInt(std::ceilf(distance));
+    for (int dx = -distanceInt; dx <= distanceInt; ++dx) {
+        for (int dy = -distanceInt; dy <= distanceInt; ++dy) {
+            if (isOccupied(getMatchingSlots({intPos.x + dx, intPos.y + dy}))) {
                 return true;
             }
         }

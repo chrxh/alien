@@ -15,11 +15,38 @@ public:
         MEMBER_DECLARATION(CreateRectParameters, float, stiffness, 1.0f);
         MEMBER_DECLARATION(CreateRectParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER_DECLARATION(CreateRectParameters, bool, removeStickiness, false);
-        MEMBER_DECLARATION(CreateRectParameters, int, maxConnection, 6);
+        MEMBER_DECLARATION(CreateRectParameters, int, maxConnections, 6);
         MEMBER_DECLARATION(CreateRectParameters, int, color, 0);
         MEMBER_DECLARATION(CreateRectParameters, bool, barrier, false);
     };
     static DataDescription createRect(CreateRectParameters const& parameters);
+
+    struct CreateHexParameters
+    {
+        MEMBER_DECLARATION(CreateHexParameters, int, layers, 10);
+        MEMBER_DECLARATION(CreateHexParameters, float, cellDistance, 1.0f);
+        MEMBER_DECLARATION(CreateHexParameters, float, energy, 100.0f);
+        MEMBER_DECLARATION(CreateHexParameters, float, stiffness, 1.0f);
+        MEMBER_DECLARATION(CreateHexParameters, RealVector2D, center, RealVector2D({0, 0}));
+        MEMBER_DECLARATION(CreateHexParameters, bool, removeStickiness, false);
+        MEMBER_DECLARATION(CreateHexParameters, int, maxConnections, 6);
+        MEMBER_DECLARATION(CreateHexParameters, int, color, 0);
+        MEMBER_DECLARATION(CreateHexParameters, bool, barrier, false);
+    };
+    static DataDescription createHex(CreateHexParameters const& parameters);
+
+    struct CreateUnconnectedCircleParameters
+    {
+        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, radius, 3.0f);
+        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, cellDistance, 1.0f);
+        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, energy, 100.0f);
+        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, stiffness, 1.0f);
+        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, RealVector2D, center, RealVector2D({0, 0}));
+        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, int, maxConnections, 6);
+        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, int, color, 0);
+        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, bool, barrier, false);
+    };
+    static DataDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters);
 
     static void duplicate(ClusteredDataDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize);
 
@@ -60,7 +87,11 @@ public:
         DataDescription&& existentData,
         bool& overlappingCheckSuccessful);
 
-    static void reconnectCells(DataDescription& data, float maxdistance);
+    using Occupancy = std::unordered_map<IntVector2D, std::vector<RealVector2D>>;
+    static void
+    addIfSpaceAvailable(DataDescription& result, Occupancy& cellOccupancy, DataDescription const& toAdd, float distance, IntVector2D const& worldSize);
+
+    static void reconnectCells(DataDescription& data, float maxDistance);
     static void removeStickiness(DataDescription& data);
     static void correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize);
 
@@ -68,7 +99,7 @@ public:
     static void randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy);
     static void randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge);
 
-    static void generateBranchNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers);
+    static void generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers);
 
     static uint64_t getId(CellOrParticleDescription const& entity);
     static RealVector2D getPos(CellOrParticleDescription const& entity);
@@ -81,9 +112,5 @@ private:
     static void makeValid(DataDescription& data);
     static void makeValid(ClusterDescription& cluster);
     static void removeMetadata(CellDescription& cell);
-    static bool isCellPresent(
-        DataDescription const& data,
-        std::unordered_map<IntVector2D, std::vector<int>> const& cellIndicesByPos,
-        SpaceCalculator const& spaceCalculator,
-        RealVector2D const& posToCheck);
+    static bool isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance);
 };

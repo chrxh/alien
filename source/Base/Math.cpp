@@ -9,8 +9,12 @@ float Math::length(RealVector2D const& v)
 
 float Math::angleOfVector(RealVector2D const& v)
 {
-    float angle = 0.0;
-    auto angleSin = asinf(-v.y / length(v)) * Const::RadToDeg;
+    auto vLength = length(v);
+    if (vLength < NEAR_ZERO) {
+        return 0;
+    }
+    float angle;
+    auto angleSin = asinf(-v.y / vLength) * Const::RadToDeg;
     if (v.x >= 0.0) {
         angle = 90.0 - angleSin;
     } else {
