@@ -32,8 +32,9 @@ struct RadialFlow
 {
     Orientation orientation = Orientation_Clockwise;
     float strength = 0.001f;
+    float driftAngle = 0.0f;
 
-    bool operator==(RadialFlow const& other) const { return orientation == other.orientation && strength == other.strength; }
+    bool operator==(RadialFlow const& other) const { return orientation == other.orientation && strength == other.strength && driftAngle == other.driftAngle; }
     bool operator!=(RadialFlow const& other) const { return !operator==(other); }
 };
 

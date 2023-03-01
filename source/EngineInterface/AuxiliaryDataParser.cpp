@@ -445,6 +445,8 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
                 tree, spot.flowData.radialFlow.orientation, defaultSpot.flowData.radialFlow.orientation, base + "flow.radial.orientation", parserTask);
             JsonParser::encodeDecode(
                 tree, spot.flowData.radialFlow.strength, defaultSpot.flowData.radialFlow.strength, base + "flow.radial.strength", parserTask);
+            JsonParser::encodeDecode(
+                tree, spot.flowData.radialFlow.driftAngle, defaultSpot.flowData.radialFlow.driftAngle, base + "flow.radial.drift angle", parserTask);
         }
         if (spot.flowType == FlowType_Central) {
             JsonParser::encodeDecode(

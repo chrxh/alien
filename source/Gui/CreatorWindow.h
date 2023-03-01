@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineInterface/SimulationController.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/DescriptionHelper.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
@@ -20,7 +20,6 @@ class _CreatorWindow : public _AlienWindow
 {
 public:
     _CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport);
-
 
     void onDrawing();
     void finishDrawing();
@@ -58,8 +57,11 @@ private:
     float _outerRadius = 10.0f;
     float _innerRadius = 5.0f;
 
-    //paint
+    //drawing
+    float _drawingWidth = 0.5f;
     DataDescription _drawing;
+    DescriptionHelper::Occupancy _drawingOccupancy;
+    RealVector2D _lastDrawPos;
 
     CreationMode _mode = CreationMode::CreateCell;
 

@@ -1077,6 +1077,16 @@ void _SimulationParametersWindow::processSpot(
                         .format("%.5f")
                         .defaultValue(origSpot.flowData.radialFlow.strength),
                     spot.flowData.radialFlow.strength);
+                ImGui::SetCursorPosX(posX);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Drift angle")
+                        .textWidth(RightColumnWidth)
+                        .min(-180.0f)
+                        .max(180.0f)
+                        .format("%.1f")
+                        .defaultValue(origSpot.flowData.radialFlow.driftAngle),
+                    spot.flowData.radialFlow.driftAngle);
             }
             if (spot.flowType == FlowType_Central) {
                 ImGui::SetCursorPosX(posX);

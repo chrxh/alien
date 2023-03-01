@@ -7,13 +7,6 @@
 
 namespace
 {
-    //__device__ __inline__ float getDiameter(SimulationParametersSpot const& spot)
-    //{
-    //    switch (spot.shapeType) {
-    //        case ShapeType_Circular
-    //    }
-    //}
-
     __device__ float getHeight(BaseMap const& map, float2 const& pos, SimulationParametersSpot const& spot)
     {
         auto dist = map.getDistance(pos, float2{spot.posX, spot.posY});
@@ -33,7 +26,7 @@ namespace
             auto downValue = getHeight(map, pos + float2{0, 1}, spot);
             auto rightValue = getHeight(map, pos + float2{1, 0}, spot);
             float2 result{rightValue - baseValue, downValue - baseValue};
-            Math::rotateQuarterClockwise(result);
+            result = Math::rotateClockwise(result, 90.0f + spot.flowData.radialFlow.driftAngle);
             return result;
         }
         case FlowType_Central: {
