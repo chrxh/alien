@@ -58,7 +58,6 @@ private:
     float _innerRadius = 5.0f;
 
     //drawing
-    float _drawingWidth = 0.5f;
     DataDescription _drawing;
     DescriptionHelper::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;

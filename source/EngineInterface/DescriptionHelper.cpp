@@ -74,7 +74,7 @@ DataDescription DescriptionHelper::createUnconnectedCircle(CreateUnconnectedCirc
 {
     DataDescription result;
 
-    if (parameters._radius < 1) {
+    if (parameters._radius <= 1 + NEAR_ZERO) {
         result.addCell(CellDescription()
                            .setId(NumberGenerator::getInstance().getId())
                            .setPos(parameters._center)

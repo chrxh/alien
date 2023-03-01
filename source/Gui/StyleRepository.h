@@ -57,6 +57,9 @@ namespace Const
     ImColor const InfoTextColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
     ImColor const LikeTextColor = ImColor::HSV(0.16f, 1.0f, 1.0f, 1.0f);
 
+    ImColor const NavigationCursorColor = ImColor::HSV(0, 0.0f, 1.0f, 0.4f);
+    ImColor const EditCursorColor = ImColor::HSV(0.6, 0.6f, 1.0f, 0.7f);
+
     float const WindowAlpha = 0.9f;
     float const SliderBarWidth = 30.0f;
 }

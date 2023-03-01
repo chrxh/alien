@@ -73,6 +73,16 @@ bool _EditorModel::isDrawMode() const
     return _drawMode;
 }
 
+void _EditorModel::setPencilWidth(float value)
+{
+    _pencilWidth = value;
+}
+
+float _EditorModel::getPencilWidth() const
+{
+    return _pencilWidth;
+}
+
 void _EditorModel::setDefaultColorCode(int value)
 {
     _defaultColorCode = value;

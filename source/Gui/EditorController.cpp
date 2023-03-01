@@ -86,6 +86,11 @@ GenomeEditorWindow _EditorController::getGenomeEditorWindow() const
     return _genomeEditorWindow;
 }
 
+EditorModel _EditorController::getEditorModel() const
+{
+    return _editorModel;
+}
+
 bool _EditorController::areInspectionWindowsActive() const
 {
     return !_inspectorWindows.empty();

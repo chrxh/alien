@@ -20,6 +20,7 @@ public:
     CreatorWindow getCreatorWindow() const;
     MultiplierWindow getMultiplierWindow() const;
     GenomeEditorWindow getGenomeEditorWindow() const;
+    EditorModel getEditorModel() const;
 
     bool areInspectionWindowsActive() const;
     void onCloseAllInspectorWindows();

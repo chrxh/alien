@@ -75,8 +75,10 @@ void _CreatorWindow::processIntern()
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         AlienImGui::Group(ModeText.at(_mode));
         if (_mode == CreationMode::Drawing) {
+            auto pencilWidth = _editorModel->getPencilWidth();
             AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters().name("Pencil width").min(0.5f).max(8.0f).textWidth(RightColumnWidth).format("%.1f"), _drawingWidth);
+                AlienImGui::SliderFloatParameters().name("Pencil width").min(1.0f).max(8.0f).textWidth(RightColumnWidth).format("%.1f"), pencilWidth);
+            _editorModel->setPencilWidth(pencilWidth);
         }
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth), _energy);
         if (_mode != CreationMode::CreateParticle) {
@@ -148,13 +150,13 @@ void _CreatorWindow::onDrawing()
     }
 
     auto createAlignedCircle = [&](auto pos) {
-        if (_drawingWidth >= 1) {
+        if (_editorModel->getPencilWidth() > 1 + NEAR_ZERO) {
             pos.x = toFloat(toInt(pos.x));
             pos.y = toFloat(toInt(pos.y));
         }
         return DescriptionHelper::createUnconnectedCircle(DescriptionHelper::CreateUnconnectedCircleParameters()
                                                               .center(pos)
-                                                              .radius(_drawingWidth)
+                                                              .radius(_editorModel->getPencilWidth())
                                                               .energy(_energy)
                                                               .stiffness(_stiffness)
                                                               .cellDistance(1.0f)
