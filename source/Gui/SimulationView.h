@@ -11,7 +11,8 @@ public:
     _SimulationView(
         SimulationController const& simController,
         ModeController const& modeWindow,
-        Viewport const& viewport);
+        Viewport const& viewport,
+        EditorModel const& editorModel);
     ~_SimulationView();
 
     void resize(IntVector2D const& viewportSize);
@@ -44,7 +45,7 @@ private:
     void updateImageFromSimulation();
     void updateMotionBlur();
 
-    void drawActionCursor();
+    void drawEditCursor();
 
     //widgets
     SimulationScrollbar _scrollbarX;
@@ -76,4 +77,5 @@ private:
     Viewport _viewport;
     ModeController _modeWindow;
     SimulationController _simController;
+    EditorModel _editorModel;
 };

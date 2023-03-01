@@ -13,20 +13,23 @@
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
 #include "CellFunctionStrings.h"
+#include "EditorModel.h"
 
 namespace
 {
     auto constexpr MotionBlurStatic = 0.8f;
     auto constexpr MotionBlurMoving = 0.5f;
     auto constexpr ZoomFactorForOverlay = 12.0f;
-    auto constexpr ActionCursorRadius = 10.0f;
+    auto constexpr EditCursorRadius = 10.0f;
 }
 
 _SimulationView::_SimulationView(
     SimulationController const& simController,
     ModeController const& modeWindow,
-    Viewport const& viewport)
+    Viewport const& viewport,
+    EditorModel const& editorModel)
     : _viewport(viewport)
+    , _editorModel(editorModel)
 {
     _isCellDetailOverlayActive = GlobalSettings::getInstance().getBoolState("settings.simulation view.overlay", _isCellDetailOverlayActive);
     _modeWindow = modeWindow;
@@ -232,7 +235,7 @@ void _SimulationView::processEvents()
             middleMouseButtonReleased();
         }
 
-        drawActionCursor();
+        drawEditCursor();
 
         _prevMousePosInt = mousePosInt;
     }
@@ -394,12 +397,17 @@ void _SimulationView::updateMotionBlur()
     _shader->setFloat("motionBlurFactor", motionBlur);
 }
 
-void _SimulationView::drawActionCursor()
+void _SimulationView::drawEditCursor()
 {
     if (_modeWindow->getMode() == _ModeController::Mode::Editor) {
         auto mousePos = ImGui::GetMousePos();
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        drawList->AddCircleFilled(mousePos, ActionCursorRadius, ImColor(1.0f, 1.0f, 1.0f, 0.4f));
+        if (!_editorModel->isDrawMode()) {
+            drawList->AddCircleFilled(mousePos, EditCursorRadius, Const::NavigationCursorColor);
+        } else {
+            auto radius = _editorModel->getPencilWidth() * _viewport->getZoomFactor();
+            drawList->AddCircleFilled(mousePos, radius, Const::EditCursorColor);
+        }
     }
 }
 

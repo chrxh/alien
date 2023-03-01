@@ -129,7 +129,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
         std::make_shared<_EditorController>(_simController, _viewport);
     _modeController = std::make_shared<_ModeController>(_editorController);
     _networkController = std::make_shared<_NetworkController>();
-    _simulationView = std::make_shared<_SimulationView>(_simController, _modeController, _viewport);
+    _simulationView = std::make_shared<_SimulationView>(_simController, _modeController, _viewport, _editorController->getEditorModel());
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simController);
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
