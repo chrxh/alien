@@ -142,6 +142,7 @@ void _CreatorWindow::processIntern()
             _editorModel->update();
         }
     }
+    validationAndCorrection();
 }
 
 void _CreatorWindow::onDrawing()
@@ -305,16 +306,16 @@ void _CreatorWindow::createDisc()
     _simController->addAndSelectSimulationData(data);
 }
 
-void _CreatorWindow::drawing()
+void _CreatorWindow::validationAndCorrection()
 {
-    if (!ImGui::GetIO().WantCaptureMouse) {
-        if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            onDrawing();
-        }
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-            finishDrawing();
-        }
-    }
+    _energy = std::max(0.0f, _energy);
+    _stiffness = std::min(1.0f, std::max(0.0f, _stiffness));
+    _cellDistance = std::min(10.0f, std::max(0.1f, _cellDistance));
+    _rectHorizontalCells = std::max(1, _rectHorizontalCells);
+    _rectVerticalCells = std::max(1, _rectVerticalCells);
+    _layers = std::max(1, _layers);
+    _outerRadius = std::max(_innerRadius, _outerRadius);
+    _innerRadius = std::max(1.0f, _innerRadius);
 }
 
 RealVector2D _CreatorWindow::getRandomPos() const

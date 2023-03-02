@@ -71,6 +71,8 @@ void _MultiplierWindow::processIntern()
         onUndo();
     }
     ImGui::EndDisabled();
+
+    validationAndCorrection();
 }
 
 void _MultiplierWindow::processGridPanel()
@@ -131,6 +133,20 @@ void _MultiplierWindow::processRandomPanel()
         AlienImGui::InputFloatParameters().name("Max angular velocity").textWidth(RightColumnWidth).format("%.1f").step(0.1f),
         _randomParameters._maxAngularVel);
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Overlapping check").textWidth(RightColumnWidth), _randomParameters._overlappingCheck);
+}
+
+void _MultiplierWindow::validationAndCorrection()
+{
+    _gridParameters._horizontalNumber = std::max(1, _gridParameters._horizontalNumber);
+    _gridParameters._horizontalDistance = std::max(0.0f, _gridParameters._horizontalDistance);
+    _gridParameters._verticalNumber = std::max(1, _gridParameters._verticalNumber);
+    _gridParameters._verticalDistance = std::max(0.0f, _gridParameters._verticalDistance);
+
+    _randomParameters._number = std::max(1, _randomParameters._number);
+    _randomParameters._maxAngle = std::max(_randomParameters._minAngle, _randomParameters._maxAngle);
+    _randomParameters._maxVelX = std::max(_randomParameters._minVelX, _randomParameters._maxVelX);
+    _randomParameters._maxVelY = std::max(_randomParameters._minVelY, _randomParameters._maxVelY);
+    _randomParameters._maxAngularVel = std::max(_randomParameters._minAngularVel, _randomParameters._maxAngularVel);
 }
 
 void _MultiplierWindow::onBuild()

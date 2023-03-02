@@ -23,6 +23,8 @@ private:
     void processGridPanel();
     void processRandomPanel();
 
+    void validationAndCorrection();
+
     void onBuild();
     void onUndo();
 

@@ -32,7 +32,8 @@ private:
     void createRectangle();
     void createHexagon();
     void createDisc();
-    void drawing();
+
+    void validationAndCorrection();
 
     RealVector2D getRandomPos() const;
     void incExecutionNumber();
