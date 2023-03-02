@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <imgui.h>
 
+#include "AlienImGui.h"
 #include "Base/Resources.h"
 #include "EngineInterface/SimulationController.h"
 
@@ -14,6 +15,7 @@
 #include "GlobalSettings.h"
 #include "CellFunctionStrings.h"
 #include "EditorModel.h"
+#include "EngineInterface/Colors.h"
 
 namespace
 {
@@ -402,11 +404,14 @@ void _SimulationView::drawEditCursor()
     if (_modeWindow->getMode() == _ModeController::Mode::Editor) {
         auto mousePos = ImGui::GetMousePos();
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        if (!_editorModel->isDrawMode()) {
+        if (!_editorModel->isDrawMode() || _simController->isSimulationRunning()) {
             drawList->AddCircleFilled(mousePos, EditCursorRadius, Const::NavigationCursorColor);
         } else {
             auto radius = _editorModel->getPencilWidth() * _viewport->getZoomFactor();
-            drawList->AddCircleFilled(mousePos, radius, Const::EditCursorColor);
+            auto color = Const::IndividualCellColors[_editorModel->getDefaultColorCode()];
+            float h, s, v;
+            AlienImGui::ConvertRGBtoHSV(color, h, s, v);
+            drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));
         }
     }
 }
