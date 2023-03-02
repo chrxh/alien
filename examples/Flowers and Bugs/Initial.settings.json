@@ -1,10 +1,10 @@
 {
     "general": {
         "time step": "0",
-        "zoom": "5.46383286",
+        "zoom": "1.50000811",
         "center": {
-            "x": "434.48156738",
-            "y": "193.81571960"
+            "x": "515.78051758",
+            "y": "224.98805237"
         },
         "world size": {
             "x": "1000",
@@ -31,7 +31,6 @@
             "min distance": "0.10000000",
             "max force": "0.80000001",
             "max force decay probability": "0.20000000",
-            "max bonds": "6",
             "max execution order number": "6",
             "min energy": "50.00000000",
             "fusion velocity": "0.82400000",
@@ -130,6 +129,7 @@
                     "color inhomogeneity factor": "1.00000000",
                     "activity threshold": "0.11100000",
                     "energy cost": "0.00000000",
+                    "velocity penalty": "0.00000000",
                     "geometry deviation exponent": "0.00000000",
                     "food chain color matrix[0, 0]": "0.00000000",
                     "food chain color matrix[0, 1]": "0.00000000",
@@ -219,8 +219,8 @@
             "min cell age": "150583"
         },
         "high radiation": {
-            "min cell energy": "500.00000000",
-            "factor": "0.00100000"
+            "min cell energy": "1483.98205566",
+            "factor": "0.00047800"
         },
         "cluster": {
             "decay": "true",
@@ -237,7 +237,7 @@
             "num sources": "1",
             "0": {
                 "pos": {
-                    "x": "257.00000000",
+                    "x": "294.00000000",
                     "y": "102.00000000"
                 }
             }
@@ -253,14 +253,15 @@
                 "shape": {
                     "type": "0",
                     "circular": {
-                        "core radius": "500.00000000"
+                        "core radius": "490.50000000"
                     }
                 },
                 "flow": {
                     "type": "1",
                     "radial": {
                         "orientation": "0",
-                        "strength": "0.00070000"
+                        "strength": "0.00070000",
+                        "drift angle": "0.00000000"
                     }
                 },
                 "fadeout radius": "49.09999847",
@@ -275,7 +276,7 @@
                 "radiation": {
                     "factor": {
                         "activated": "false",
-                        "value": "0.00000500"
+                        "value": "0.00003300"
                     }
                 },
                 "cell": {
