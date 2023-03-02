@@ -45,7 +45,7 @@ private:
     std::unordered_map<uint64_t, CellOrParticleDescription> _inspectedEntityById;
 
     bool _drawMode = false;
-    float _pencilWidth = 1.0f;
+    float _pencilWidth = 3.0f;
     int _defaultColorCode = 0;
     bool _rolloutToClusters = true;
     bool _forceNoRollout = false;;
