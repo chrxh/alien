@@ -630,29 +630,33 @@ void _GenomeEditorWindow::onAddNode()
     auto& tabData = _tabDatas.at(_selectedTabIndex);
 
     CellGenomeDescription newNode;
-    if (tabData.TabData::selectedNode) {
-        tabData.TabData::genome.insert(tabData.TabData::genome.begin() + *tabData.TabData::selectedNode + 1, newNode);
-        ++(*tabData.TabData::selectedNode);
+    if (tabData.selectedNode) {
+        newNode.color = tabData.genome.at(*tabData.selectedNode).color;
+        tabData.genome.insert(tabData.genome.begin() + *tabData.selectedNode + 1, newNode);
+        ++(*tabData.selectedNode);
     } else {
-        tabData.TabData::genome.emplace_back(newNode);
-        tabData.TabData::selectedNode = toInt(tabData.TabData::genome.size() - 1);
+        if (!tabData.genome.empty()) {
+            newNode.color = tabData.genome.back().color;
+        }
+        tabData.genome.emplace_back(newNode);
+        tabData.selectedNode = toInt(tabData.genome.size() - 1);
     }
 }
 
 void _GenomeEditorWindow::onDeleteNode()
 {
     auto& tabData = _tabDatas.at(_selectedTabIndex);
-    if (tabData.TabData::selectedNode) {
-        tabData.TabData::genome.erase(tabData.TabData::genome.begin() + *tabData.TabData::selectedNode);
-        if (*tabData.TabData::selectedNode == toInt(tabData.TabData::genome.size())) {
-            if (--(*tabData.TabData::selectedNode) < 0) {
-                tabData.TabData::selectedNode.reset();
+    if (tabData.selectedNode) {
+        tabData.genome.erase(tabData.genome.begin() + *tabData.selectedNode);
+        if (*tabData.selectedNode == toInt(tabData.genome.size())) {
+            if (--(*tabData.selectedNode) < 0) {
+                tabData.selectedNode.reset();
             }
         }
     } else {
-        tabData.TabData::genome.pop_back();
-        if (!tabData.TabData::genome.empty()) {
-            tabData.TabData::selectedNode = toInt(tabData.TabData::genome.size() - 1);
+        tabData.genome.pop_back();
+        if (!tabData.genome.empty()) {
+            tabData.selectedNode = toInt(tabData.genome.size() - 1);
         }
     }
     _collapseAllNodes = true;
@@ -662,7 +666,7 @@ void _GenomeEditorWindow::onNodeDecreaseSequenceNumber()
 {
     auto& selectedTab = _tabDatas.at(_selectedTabIndex);
     auto& selectedNode = selectedTab.selectedNode;
-    std::swap(selectedTab.TabData::genome.at(*selectedNode), selectedTab.TabData::genome.at(*selectedNode - 1));
+    std::swap(selectedTab.genome.at(*selectedNode), selectedTab.genome.at(*selectedNode - 1));
     --(*selectedNode);
     _collapseAllNodes = true;
 }
@@ -671,7 +675,7 @@ void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
 {
     auto& selectedTab = _tabDatas.at(_selectedTabIndex);
     auto& selectedNode = selectedTab.selectedNode;
-    std::swap(selectedTab.TabData::genome.at(*selectedNode), selectedTab.TabData::genome.at(*selectedNode + 1));
+    std::swap(selectedTab.genome.at(*selectedNode), selectedTab.genome.at(*selectedNode + 1));
     ++(*selectedNode);
     _collapseAllNodes = true;
 }
