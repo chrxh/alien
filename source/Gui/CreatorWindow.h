@@ -62,7 +62,7 @@ private:
     DescriptionHelper::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
 
-    CreationMode _mode = CreationMode::CreateCell;
+    CreationMode _mode = CreationMode::Drawing;
 
     EditorModel _editorModel;
     SimulationController _simController;

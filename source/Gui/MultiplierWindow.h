@@ -23,6 +23,9 @@ private:
     void processGridPanel();
     void processRandomPanel();
 
+    void onBuild();
+    void onUndo();
+
     EditorModel _editorModel; 
     SimulationController _simController;
     Viewport _viewport;

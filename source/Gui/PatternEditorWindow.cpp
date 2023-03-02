@@ -103,7 +103,7 @@ void _PatternEditorWindow::processIntern()
 
     if (ImGui::BeginChild(
         "##",
-        ImVec2(0, ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().contentScale(50.0f)),
+        ImVec2(0, ImGui::GetContentRegionAvail().y - contentScale(50.0f)),
         false,
         ImGuiWindowFlags_HorizontalScrollbar)) {
 
