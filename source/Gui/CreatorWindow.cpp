@@ -72,7 +72,7 @@ void _CreatorWindow::processIntern()
         _mode = CreationMode::Drawing;
     }
 
-    if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - contentScale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         AlienImGui::Group(ModeText.at(_mode));
         if (_mode == CreationMode::Drawing) {
             auto pencilWidth = _editorModel->getPencilWidth();
@@ -108,37 +108,36 @@ void _CreatorWindow::processIntern()
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(RightColumnWidth), _makeSticky);
         }
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(RightColumnWidth), _barrier);
-
-        AlienImGui::Separator();
-
-        if (_mode == CreationMode::Drawing) {
-            auto text = _editorModel->isDrawMode() ? "End drawing" : "Start drawing";
-            if (AlienImGui::Button(text)) {
-                _editorModel->setDrawMode(!_editorModel->isDrawMode());
-            }
-        } else {
-            _editorModel->setDrawMode(false);
-            if (AlienImGui::Button("Build")) {
-                if (_mode == CreationMode::CreateCell) {
-                    createCell();
-                }
-                if (_mode == CreationMode::CreateParticle) {
-                    createParticle();
-                }
-                if (_mode == CreationMode::CreateRectangle) {
-                    createRectangle();
-                }
-                if (_mode == CreationMode::CreateHexagon) {
-                    createHexagon();
-                }
-                if (_mode == CreationMode::CreateDisc) {
-                    createDisc();
-                }
-                _editorModel->update();
-            }
-        }
     }
     ImGui::EndChild();
+
+    AlienImGui::Separator();
+    if (_mode == CreationMode::Drawing) {
+        auto text = _editorModel->isDrawMode() ? "End drawing" : "Start drawing";
+        if (AlienImGui::Button(text)) {
+            _editorModel->setDrawMode(!_editorModel->isDrawMode());
+        }
+    } else {
+        _editorModel->setDrawMode(false);
+        if (AlienImGui::Button("Build")) {
+            if (_mode == CreationMode::CreateCell) {
+                createCell();
+            }
+            if (_mode == CreationMode::CreateParticle) {
+                createParticle();
+            }
+            if (_mode == CreationMode::CreateRectangle) {
+                createRectangle();
+            }
+            if (_mode == CreationMode::CreateHexagon) {
+                createHexagon();
+            }
+            if (_mode == CreationMode::CreateDisc) {
+                createDisc();
+            }
+            _editorModel->update();
+        }
+    }
 }
 
 void _CreatorWindow::onDrawing()
