@@ -74,6 +74,10 @@ void _CreatorWindow::processIntern()
 
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - contentScale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         AlienImGui::Group(ModeText.at(_mode));
+
+        auto color = _editorModel->getDefaultColorCode();
+        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(RightColumnWidth), color);
+        _editorModel->setDefaultColorCode(color);
         if (_mode == CreationMode::Drawing) {
             auto pencilWidth = _editorModel->getPencilWidth();
             AlienImGui::SliderFloat(
