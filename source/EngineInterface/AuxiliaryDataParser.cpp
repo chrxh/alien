@@ -507,14 +507,14 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
             base + "cell.function.attacker.energy cost",
             parserTask);
         JsonParser::encodeDecode(
-            tree, spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix, false, base + "cell.function.attacker.color matrix.activated", parserTask);
+            tree, spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix, false, base + "cell.function.attacker.food chain color matrix.activated", parserTask);
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {
                 JsonParser::encodeDecode(
                     tree,
                     spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j],
                     defaultSpot.values.cellFunctionAttackerFoodChainColorMatrix[i][j],
-                    base + "cell.function.attacker.color matrix[" + std::to_string(i) + ", " + std::to_string(j) + "]",
+                    base + "cell.function.attacker.food chain color matrix[" + std::to_string(i) + ", " + std::to_string(j) + "]",
                     parserTask);
             }
         }
