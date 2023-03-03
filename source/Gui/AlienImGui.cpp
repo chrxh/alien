@@ -40,8 +40,6 @@ void AlienImGui::HelpMarker(std::string const& text)
 
 bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& value, bool* enabled)
 {
-    auto width = StyleRepository::getInstance().contentScale(parameters._textWidth);
-
     if (enabled) {
         ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
         if (!(*enabled)) {
@@ -50,7 +48,19 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& val
         ImGui::BeginDisabled(!(*enabled));
         ImGui::SameLine();
     }
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
+    if (parameters._showColor) {
+        {
+            ImVec2 pos = ImGui::GetCursorScreenPos();
+            ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+        }
+        ColorField(Const::IndividualCellColors[*parameters._showColor], 0);
+        ImGui::SameLine();
+        {
+            ImVec2 pos = ImGui::GetCursorScreenPos();
+            ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y - ImGui::GetStyle().FramePadding.y));
+        }
+    }
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
     auto result = ImGui::SliderFloat(
         ("##" + parameters._name).c_str(),
         &value,
@@ -80,8 +90,19 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& val
 
 bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
 {
-    auto width = StyleRepository::getInstance().contentScale(parameters._textWidth);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
+    if (parameters._showColor) {
+        {
+            ImVec2 pos = ImGui::GetCursorScreenPos();
+            ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+        }
+        ColorField(Const::IndividualCellColors[*parameters._showColor], 0);
+        ImGui::SameLine();
+        {
+            ImVec2 pos = ImGui::GetCursorScreenPos();
+            ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y - ImGui::GetStyle().FramePadding.y));
+        }
+    }
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
     auto result = ImGui::SliderInt(
         ("##" + parameters._name).c_str(), &value, parameters._min, parameters._max, parameters._format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
     if (parameters._defaultValue) {
@@ -264,7 +285,7 @@ bool AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
     ImVec2 pos = ImGui::GetCursorScreenPos();
     ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
 */
-    auto result = ImGui::Button("##", ImVec2(width, ImGui::GetTextLineHeight()));
+    auto result = ImGui::Button("##button", ImVec2(width, ImGui::GetTextLineHeight()));
     ImGui::PopStyleColor(3);
 
     return result;

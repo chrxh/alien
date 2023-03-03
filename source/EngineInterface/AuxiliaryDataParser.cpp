@@ -147,8 +147,14 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         tree, parameters.highRadiationFactor, defaultParameters.highRadiationFactor,
         "simulation parameters.high radiation.factor",
         parserTask);
-    JsonParser::encodeDecode(
-        tree, parameters.radiationMinCellAge, defaultParameters.radiationMinCellAge, "simulation parameters.radiation.min cell age", parserTask);
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        JsonParser::encodeDecode(
+            tree,
+            parameters.radiationMinCellAgeByCellColor[i],
+            defaultParameters.radiationMinCellAgeByCellColor[i],
+            "simulation parameters.radiation.min cell age by color[" + std::to_string(i) + "]",
+            parserTask);
+    }
 
     JsonParser::encodeDecode(tree, parameters.clusterDecay, defaultParameters.clusterDecay, "simulation parameters.cluster.decay", parserTask);
     JsonParser::encodeDecode(tree, parameters.clusterDecayProb, defaultParameters.clusterDecayProb, "simulation parameters.cluster.decay probability", parserTask);

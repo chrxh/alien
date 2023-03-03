@@ -20,6 +20,7 @@ public:
         MEMBER_DECLARATION(SliderFloatParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(SliderFloatParameters, std::string, format, "%.3f");
         MEMBER_DECLARATION(SliderFloatParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(SliderFloatParameters, std::optional<int>, showColor, std::nullopt);
         MEMBER_DECLARATION(SliderFloatParameters, std::optional<float>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SliderFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER_DECLARATION(SliderFloatParameters, std::optional<float>, disabledValue, std::nullopt);
@@ -34,6 +35,7 @@ public:
         MEMBER_DECLARATION(SliderIntParameters, std::string, format, "%d");
         MEMBER_DECLARATION(SliderIntParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(SliderIntParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(SliderIntParameters, std::optional<int>, showColor, std::nullopt);
         MEMBER_DECLARATION(SliderIntParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SliderIntParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
