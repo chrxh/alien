@@ -133,8 +133,8 @@
                     "geometry deviation exponent": "0.00000000",
                     "food chain color matrix[0, 0]": "0.00000000",
                     "food chain color matrix[0, 1]": "1.00000000",
-                    "food chain color matrix[0, 2]": "0.05000000",
-                    "food chain color matrix[0, 3]": "0.10000000",
+                    "food chain color matrix[0, 2]": "0.30000001",
+                    "food chain color matrix[0, 3]": "0.05000000",
                     "food chain color matrix[0, 4]": "0.00000000",
                     "food chain color matrix[0, 5]": "0.00000000",
                     "food chain color matrix[0, 6]": "0.00000000",
@@ -152,9 +152,9 @@
                     "food chain color matrix[2, 4]": "1.00000000",
                     "food chain color matrix[2, 5]": "1.00000000",
                     "food chain color matrix[2, 6]": "1.00000000",
-                    "food chain color matrix[3, 0]": "0.10000000",
+                    "food chain color matrix[3, 0]": "0.05000000",
                     "food chain color matrix[3, 1]": "1.00000000",
-                    "food chain color matrix[3, 2]": "0.05000000",
+                    "food chain color matrix[3, 2]": "0.30000001",
                     "food chain color matrix[3, 3]": "0.00000000",
                     "food chain color matrix[3, 4]": "0.00000000",
                     "food chain color matrix[3, 5]": "0.00000000",
@@ -209,14 +209,14 @@
             "probability": "0.03000000",
             "velocity multiplier": "1.00000000",
             "velocity perturbation": "0.50000000",
-            "absorption by cell color[0]": "0.05000000",
+            "absorption by cell color[0]": "0.00000000",
             "absorption by cell color[1]": "0.50000000",
             "absorption by cell color[2]": "0.50000000",
-            "absorption by cell color[3]": "0.05000000",
+            "absorption by cell color[3]": "0.00000000",
             "absorption by cell color[4]": "0.00000000",
             "absorption by cell color[5]": "0.00000000",
             "absorption by cell color[6]": "0.00000000",
-            "min cell age": "46415"
+            "min cell age": "56958"
         },
         "high radiation": {
             "min cell energy": "500.00000000",
@@ -251,7 +251,7 @@
         "spots": {
             "num spots": "4",
             "0": {
-                "color": "4279246086",
+                "color": "4280095494",
                 "pos": {
                     "x": "500.00000000",
                     "y": "246.00000000"
@@ -288,7 +288,7 @@
                 "cell": {
                     "max force": {
                         "activated": "false",
-                        "value": "0.22900000"
+                        "value": "0.48600000"
                     },
                     "min energy": {
                         "activated": "false",
@@ -330,8 +330,8 @@
                             },
                             "color matrix[0, 0]": "0.00000000",
                             "color matrix[0, 1]": "1.00000000",
-                            "color matrix[0, 2]": "0.20000000",
-                            "color matrix[0, 3]": "0.20000000",
+                            "color matrix[0, 2]": "0.05000000",
+                            "color matrix[0, 3]": "0.10000000",
                             "color matrix[0, 4]": "0.00000000",
                             "color matrix[0, 5]": "0.00000000",
                             "color matrix[0, 6]": "0.00000000",
@@ -349,9 +349,9 @@
                             "color matrix[2, 4]": "1.00000000",
                             "color matrix[2, 5]": "1.00000000",
                             "color matrix[2, 6]": "1.00000000",
-                            "color matrix[3, 0]": "0.20000000",
+                            "color matrix[3, 0]": "0.10000000",
                             "color matrix[3, 1]": "1.00000000",
-                            "color matrix[3, 2]": "0.20000000",
+                            "color matrix[3, 2]": "0.05000000",
                             "color matrix[3, 3]": "0.00000000",
                             "color matrix[3, 4]": "0.00000000",
                             "color matrix[3, 5]": "0.00000000",
@@ -459,7 +459,7 @@
                 "cell": {
                     "max force": {
                         "activated": "false",
-                        "value": "0.22900000"
+                        "value": "0.48600000"
                     },
                     "min energy": {
                         "activated": "false",
@@ -501,8 +501,8 @@
                             },
                             "color matrix[0, 0]": "0.00000000",
                             "color matrix[0, 1]": "1.00000000",
-                            "color matrix[0, 2]": "0.20000000",
-                            "color matrix[0, 3]": "0.20000000",
+                            "color matrix[0, 2]": "0.05000000",
+                            "color matrix[0, 3]": "0.10000000",
                             "color matrix[0, 4]": "0.00000000",
                             "color matrix[0, 5]": "0.00000000",
                             "color matrix[0, 6]": "0.00000000",
@@ -520,9 +520,9 @@
                             "color matrix[2, 4]": "1.00000000",
                             "color matrix[2, 5]": "1.00000000",
                             "color matrix[2, 6]": "1.00000000",
-                            "color matrix[3, 0]": "0.20000000",
+                            "color matrix[3, 0]": "0.10000000",
                             "color matrix[3, 1]": "1.00000000",
-                            "color matrix[3, 2]": "0.20000000",
+                            "color matrix[3, 2]": "0.05000000",
                             "color matrix[3, 3]": "0.00000000",
                             "color matrix[3, 4]": "0.00000000",
                             "color matrix[3, 5]": "0.00000000",
