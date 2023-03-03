@@ -67,7 +67,7 @@ struct SimulationParameters
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
-    int radiationMinCellAge = 500000;
+    int radiationMinCellAgeByCellColor[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
     float highRadiationMinCellEnergy = 500;
     float highRadiationFactor = 0;
     bool clusterDecay = false;
@@ -151,6 +151,11 @@ struct SimulationParameters
                 return false;
             }
         }
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            if (radiationMinCellAgeByCellColor[i] != other.radiationMinCellAgeByCellColor[i]) {
+                return false;
+            }
+        }
         if (numParticleSources != other.numParticleSources) {
             return false;
         }
@@ -202,7 +207,7 @@ struct SimulationParameters
             && particleTransformationRandomCellFunction == other.particleTransformationRandomCellFunction
             && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
             && clusterDecayProb == other.clusterDecayProb
-            && clusterDecay == other.clusterDecay && radiationMinCellAge == other.radiationMinCellAge
+            && clusterDecay == other.clusterDecay
             && highRadiationMinCellEnergy == other.highRadiationMinCellEnergy && highRadiationFactor == other.highRadiationFactor
             && cellFunctionSensorActivityThreshold == other.cellFunctionSensorActivityThreshold
             && cellFunctionConstructionUnlimitedEnergy == other.cellFunctionConstructionUnlimitedEnergy
