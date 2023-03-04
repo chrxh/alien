@@ -189,16 +189,6 @@ void _SimulationParametersWindow::processToolbar()
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Paste simulation parameters");
 
-    ImGui::SameLine();
-    auto origParameters = _simController->getOriginalSimulationParameters();
-    auto parameters = _simController->getSimulationParameters();
-    ImGui::BeginDisabled(origParameters == parameters);
-    if (AlienImGui::ToolbarButton(ICON_FA_UNDO)) {
-        _simController->setSimulationParameters(origParameters);
-    }
-    ImGui::EndDisabled();
-    AlienImGui::Tooltip("Restore original simulation parameters");
-
     AlienImGui::Separator();
 }
 
