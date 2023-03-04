@@ -204,26 +204,26 @@
                 }
             }
         },
-        "radiation": {
-            "factor": "0.00012100",
-            "probability": "0.03000000",
-            "velocity multiplier": "1.00000000",
-            "velocity perturbation": "0.50000000",
-            "absorption by cell color[0]": "0.00000000",
-            "absorption by cell color[1]": "0.50000000",
-            "absorption by cell color[2]": "0.50000000",
-            "absorption by cell color[3]": "0.00000000",
-            "absorption by cell color[4]": "0.00000000",
-            "absorption by cell color[5]": "0.00000000",
-            "absorption by cell color[6]": "0.00000000",
-            "min cell age by color[0]": "81913",
-            "min cell age by color[1]": "15153",
-            "min cell age by color[2]": "15153",
-            "min cell age by color[3]": "81913",
-            "min cell age by color[4]": "500000",
-            "min cell age by color[5]": "500000",
-            "min cell age by color[6]": "500000"
-        },
+      "radiation": {
+        "factor": "0.00012100",
+        "probability": "0.03000000",
+        "velocity multiplier": "1.00000000",
+        "velocity perturbation": "0.50000000",
+        "absorption by cell color[0]": "0.00000000",
+        "absorption by cell color[1]": "0.50000000",
+        "absorption by cell color[2]": "0.50000000",
+        "absorption by cell color[3]": "0.00000000",
+        "absorption by cell color[4]": "0.00000000",
+        "absorption by cell color[5]": "0.00000000",
+        "absorption by cell color[6]": "0.00000000",
+        "min cell age by color[0]": "138000",
+        "min cell age by color[1]": "15153",
+        "min cell age by color[2]": "15153",
+        "min cell age by color[3]": "138000",
+        "min cell age by color[4]": "500000",
+        "min cell age by color[5]": "500000",
+        "min cell age by color[6]": "500000"
+      },
         "high radiation": {
             "min cell energy": "500.00000000",
             "factor": "0.00015700"
