@@ -41,6 +41,20 @@ public:
     };
     static bool SliderInt(SliderIntParameters const& parameters, int& value);
 
+    struct SliderIntParameters2
+    {
+        MEMBER_DECLARATION(SliderIntParameters2, std::string, name, "");
+        MEMBER_DECLARATION(SliderIntParameters2, int, min, 0);
+        MEMBER_DECLARATION(SliderIntParameters2, int, max, 0);
+        MEMBER_DECLARATION(SliderIntParameters2, std::string, format, "%d");
+        MEMBER_DECLARATION(SliderIntParameters2, bool, logarithmic, false);
+        MEMBER_DECLARATION(SliderIntParameters2, int, textWidth, 100);
+        MEMBER_DECLARATION(SliderIntParameters2, bool, colorDependent, false);
+        MEMBER_DECLARATION(SliderIntParameters2, std::optional<int const*>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(SliderIntParameters2, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static bool SliderInt2(SliderIntParameters2 const& parameters, int* value, bool* colorDependence = nullptr);
+
     struct SliderInputFloatParameters
     {
         MEMBER_DECLARATION(SliderInputFloatParameters, std::string, name, "");

@@ -366,22 +366,35 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.baseValues.radiationFactor)
                     .tooltip(std::string("Indicates how energetic the emitted particles of cells are.")),
                 simParameters.baseValues.radiationFactor);
-            for (int color = 0; color < MAX_COLORS; ++color) {
-                ImGui::PushID(color);
-                auto sliderParameters = AlienImGui::SliderIntParameters()
-                                            .textWidth(RightColumnWidth)
-                                            .showColor(color)
-                                            .min(0)
-                                            .max(1000000)
-                                            .logarithmic(true)
-                                            .defaultValue(origSimParameters.radiationMinCellAgeByCellColor[color]);
-                                            
-                if (color == 0) {
-                    sliderParameters.name("Minimum age").tooltip("");
-                }
-                AlienImGui::SliderInt(sliderParameters, simParameters.radiationMinCellAgeByCellColor[color]);
-                ImGui::PopID();
-            }
+            //for (int color = 0; color < MAX_COLORS; ++color) {
+            //    ImGui::PushID(color);
+            //    auto sliderParameters = AlienImGui::SliderIntParameters()
+            //                                .textWidth(RightColumnWidth)
+            //                                .showColor(color)
+            //                                .min(0)
+            //                                .max(1000000)
+            //                                .logarithmic(true)
+            //                                .defaultValue(origSimParameters.radiationMinCellAgeByCellColor[color]);
+            //                                
+            //    if (color == 0) {
+            //        sliderParameters.name("Minimum age").tooltip("");
+            //    }
+            //    AlienImGui::SliderInt(sliderParameters, simParameters.radiationMinCellAgeByCellColor[color]);
+            //    ImGui::PopID();
+            //}
+            AlienImGui::SliderInt2(
+                AlienImGui::SliderIntParameters2()
+                    .name("Minimum age")
+                    .tooltip("")
+                    .textWidth(RightColumnWidth)
+                    .colorDependent(true)
+                    .min(0)
+                    .max(1000000)
+                    .logarithmic(true)
+                    .defaultValue(origSimParameters.radiationMinCellAgeByCellColor),
+                simParameters.radiationMinCellAgeByCellColor,
+                &simParameters.radiationMinCellAgeColorDependent);
+
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("High radiation strength")

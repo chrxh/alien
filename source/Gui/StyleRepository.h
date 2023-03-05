@@ -24,8 +24,8 @@ namespace Const
     ImColor const ShutdownButtonActiveColor = ImColor::HSV(0.0f, 1.0f, 1.0f);
 
     ImColor const NeuronChannelButtonColor = ImColor::HSV(0.0f, 0.0f, 0.2f);
-    ImColor const NeuronChannelHoveredColor = ImColor::HSV(0.08, 0.5, 0.5);
-    ImColor const NeuronChannelActiveColor = ImColor::HSV(0.08, 0.5, 0.7);
+    ImColor const NeuronChannelHoveredColor = ImColor::HSV(0.14, 0.8, 0.5);
+    ImColor const NeuronChannelActiveColor = ImColor::HSV(0.14, 0.8, 0.7);
 
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 
