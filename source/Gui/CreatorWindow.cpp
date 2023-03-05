@@ -90,7 +90,7 @@ void _CreatorWindow::processIntern()
         }
         
         if (_mode == CreationMode::CreateCell) {
-            AlienImGui::SliderInt(AlienImGui::SliderIntParameters().name("Max connections").max(MAX_CELL_BONDS).textWidth(RightColumnWidth), _maxConnections);
+            AlienImGui::SliderInt(AlienImGui::SliderIntParameters().name("Max connections").max(MAX_CELL_BONDS).textWidth(RightColumnWidth), &_maxConnections);
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Ascending execution order").textWidth(RightColumnWidth), _ascendingExecutionNumbers);
         }
         if (_mode == CreationMode::CreateRectangle) {

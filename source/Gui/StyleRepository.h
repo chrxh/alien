@@ -23,9 +23,9 @@ namespace Const
     ImColor const ShutdownButtonHoveredColor = ImColor::HSV(0.0f, 1.0f, 1.0f);
     ImColor const ShutdownButtonActiveColor = ImColor::HSV(0.0f, 1.0f, 1.0f);
 
-    ImColor const NeuronChannelButtonColor = ImColor::HSV(0.0f, 0.0f, 0.2f);
-    ImColor const NeuronChannelHoveredColor = ImColor::HSV(0.14, 0.8, 0.5);
-    ImColor const NeuronChannelActiveColor = ImColor::HSV(0.14, 0.8, 0.7);
+    ImColor const ToggleButtonColor = ImColor::HSV(0.0f, 0.0f, 0.2f);
+    ImColor const ToggleButtonHoveredColor = ImColor::HSV(0.14, 0.8, 0.5);
+    ImColor const ToggleButtonActiveColor = ImColor::HSV(0.14, 0.8, 0.7);
 
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 
@@ -45,7 +45,7 @@ namespace Const
     ImColor const ToolbarButtonBackgroundColor = ImColor::HSV(0, 0, 0.06f, 0);
 
     ImColor const ButtonColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
-    ImColor const ToggleButtonColor = ImColor::HSV(0.58f, 0.83f, 1.0f, 1.0f);
+    ImColor const ToggleColor = ImColor::HSV(0.58f, 0.83f, 1.0f, 1.0f);
     ImColor const DetailButtonColor = ImColor::HSV(0, 0, 1.0f);
 
     ImColor const InspectorLineColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);

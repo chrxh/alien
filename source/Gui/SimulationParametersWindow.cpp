@@ -366,24 +366,8 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.baseValues.radiationFactor)
                     .tooltip(std::string("Indicates how energetic the emitted particles of cells are.")),
                 simParameters.baseValues.radiationFactor);
-            //for (int color = 0; color < MAX_COLORS; ++color) {
-            //    ImGui::PushID(color);
-            //    auto sliderParameters = AlienImGui::SliderIntParameters()
-            //                                .textWidth(RightColumnWidth)
-            //                                .showColor(color)
-            //                                .min(0)
-            //                                .max(1000000)
-            //                                .logarithmic(true)
-            //                                .defaultValue(origSimParameters.radiationMinCellAgeByCellColor[color]);
-            //                                
-            //    if (color == 0) {
-            //        sliderParameters.name("Minimum age").tooltip("");
-            //    }
-            //    AlienImGui::SliderInt(sliderParameters, simParameters.radiationMinCellAgeByCellColor[color]);
-            //    ImGui::PopID();
-            //}
-            AlienImGui::SliderInt2(
-                AlienImGui::SliderIntParameters2()
+            AlienImGui::SliderInt(
+                AlienImGui::SliderIntParameters()
                     .name("Minimum age")
                     .tooltip("")
                     .textWidth(RightColumnWidth)
@@ -393,7 +377,7 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .defaultValue(origSimParameters.radiationMinCellAgeByCellColor),
                 simParameters.radiationMinCellAgeByCellColor,
-                &simParameters.radiationMinCellAgeColorDependent);
+                &simParameters.radiationMinCellAgeColorDependence);
 
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -416,13 +400,20 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.highRadiationMinCellEnergy)
                     .tooltip(""),
                 simParameters.highRadiationMinCellEnergy);
-            AlienImGui::InputColorVector(
-                AlienImGui::InputColorVectorParameters()
+
+            AlienImGui::SliderFloat2(
+                AlienImGui::SliderFloatParameters2()
                     .name("Absorption factors")
+                    .tooltip("")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(toVector<MAX_COLORS>(origSimParameters.radiationAbsorptionByCellColor))
-                    .tooltip(""),
-                simParameters.radiationAbsorptionByCellColor);
+                    .colorDependent(true)
+                    .min(0)
+                    .max(1.0)
+                    .format("%.2f")
+                    .defaultValue(origSimParameters.radiationAbsorptionByCellColor),
+                simParameters.radiationAbsorptionByCellColor,
+                &simParameters.radiationAbsorptionColorDependence);
+
             if (AlienImGui::Button(AlienImGui::ButtonParameters()
                                        .buttonText("Define")
                                        .name("Radiation sources editor")
