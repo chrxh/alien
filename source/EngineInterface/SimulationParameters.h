@@ -67,6 +67,7 @@ struct SimulationParameters
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
+    bool radiationMinCellAgeColorDependent = false;
     int radiationMinCellAgeByCellColor[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
     float highRadiationMinCellEnergy = 500;
     float highRadiationFactor = 0;
@@ -219,6 +220,7 @@ struct SimulationParameters
             && cellFunctionDefenderAgainstAttackerStrength == other.cellFunctionDefenderAgainstAttackerStrength
             && cellFunctionDefenderAgainstInjectorStrength == other.cellFunctionDefenderAgainstInjectorStrength
             && cellFunctionAttackerVelocityPenalty == other.cellFunctionAttackerVelocityPenalty
+            && radiationMinCellAgeColorDependent == other.radiationMinCellAgeColorDependent
         ;
     }
 

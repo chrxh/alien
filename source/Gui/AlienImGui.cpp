@@ -125,6 +125,118 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
     return result;
 }
 
+bool AlienImGui::SliderInt2(SliderIntParameters2 const& parameters, int* value, bool* colorDependence)
+{
+    //color dependent button
+    if (parameters._colorDependent) {
+        if (*colorDependence) {
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::NeuronChannelActiveColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::NeuronChannelActiveColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::NeuronChannelActiveColor);
+        }
+        auto buttonResult = Button(ICON_FA_SITEMAP);
+        if (*colorDependence) {
+            ImGui::PopStyleColor(3);
+        }
+        if (buttonResult) {
+            *colorDependence = !(*colorDependence);
+        }
+        ImGui::SameLine();
+    }
+
+    bool result = false;
+    float sliderPosX;
+    for (int color = 0; color < MAX_COLORS; ++color) {
+        if (color > 0) {
+            if (!parameters._colorDependent) {
+                break;
+            }
+            if (parameters._colorDependent && *colorDependence == false) {
+                for (int color = 1; color < MAX_COLORS; ++color) {
+                    value[color] = value[0];
+                }
+                break;
+            }
+        }
+        if (color == 0) {
+            sliderPosX = ImGui::GetCursorPosX();
+        } else {
+            ImGui::SetCursorPosX(sliderPosX);
+        }
+
+        //color field
+        ImGui::PushID(color);
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
+        if (parameters._colorDependent && *colorDependence) {
+            {
+                ImVec2 pos = ImGui::GetCursorPos();
+                ImGui::SetCursorPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+            }
+            ColorField(Const::IndividualCellColors[color], 0);
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
+            {
+                ImVec2 pos = ImGui::GetCursorPos();
+                ImGui::SetCursorPos(ImVec2(pos.x, pos.y - ImGui::GetStyle().FramePadding.y));
+            }
+        }
+
+        //slider
+        result |= ImGui::SliderInt(
+            ("##" + parameters._name).c_str(),
+            &value[color],
+            parameters._min,
+            parameters._max,
+            parameters._format.c_str(),
+            parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+
+        ImGui::PopID();
+
+        //revert button
+        if (color == 0) {
+            if (parameters._defaultValue) {
+                ImGui::SameLine();
+
+                auto equal = true;
+                auto numRows = parameters._colorDependent ? MAX_COLORS : 1;
+                for (int row = 0; row < numRows; ++row) {
+                    if (value[row] != (*parameters._defaultValue)[row]) {
+                        equal = false;
+                        break;
+                    }
+                }
+                ImGui::BeginDisabled(equal);
+                if (revertButton(parameters._name)) {
+                    bool isHomogene = true;
+                    for (int row = 0; row < numRows; ++row) {
+                        value[row] = (*parameters._defaultValue)[row];
+                        if (value[0] != value[row]) {
+                            isHomogene = false;
+                        }
+                    }
+                    result = true;
+                    if (!isHomogene) {
+                        *colorDependence = true;
+                    }
+                }
+                ImGui::EndDisabled();
+            }
+
+            //text
+            if (!parameters._name.empty()) {
+                ImGui::SameLine();
+                ImGui::TextUnformatted(parameters._name.c_str());
+            }
+
+            //tooltip
+            if (parameters._tooltip) {
+                HelpMarker(*parameters._tooltip);
+            }
+        }
+    }
+    return result;
+}
+
 void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)
 {
     auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
