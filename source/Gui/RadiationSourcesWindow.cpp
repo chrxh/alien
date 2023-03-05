@@ -59,8 +59,8 @@ void _RadiationSourcesWindow::processIntern()
                         .min(0)
                         .max(toFloat(worldSize.x))
                         .format("%.0f")
-                        .defaultValue(origFlowCenter.posX),
-                    flowCenter.posX);
+                        .defaultValue(&origFlowCenter.posX),
+                    &flowCenter.posX);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Position Y")
@@ -68,8 +68,8 @@ void _RadiationSourcesWindow::processIntern()
                         .min(0)
                         .max(toFloat(worldSize.y))
                         .format("%.0f")
-                        .defaultValue(origFlowCenter.posY),
-                    flowCenter.posY);
+                        .defaultValue(&origFlowCenter.posY),
+                    &flowCenter.posY);
 
                 ImGui::EndTabItem();
             }
