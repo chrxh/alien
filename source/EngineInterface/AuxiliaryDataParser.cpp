@@ -131,14 +131,13 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         defaultParameters.radiationVelocityPerturbation,
         "simulation parameters.radiation.velocity perturbation",
         parserTask);
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        JsonParser::encodeDecode(
-            tree,
-            parameters.radiationAbsorptionByCellColor[i],
-            defaultParameters.radiationAbsorptionByCellColor[i],
-            "simulation parameters.radiation.absorption by cell color[" + std::to_string(i) + "]",
-            parserTask);
-    }
+    encodeDecodeColorDependentProperty(
+        tree,
+        parameters.radiationAbsorptionByCellColor,
+        parameters.radiationAbsorptionColorDependence,
+        defaultParameters.radiationAbsorptionByCellColor,
+        "simulation parameters.radiation.absorption",
+        parserTask);
     JsonParser::encodeDecode(
         tree, parameters.highRadiationMinCellEnergy, defaultParameters.highRadiationMinCellEnergy,
         "simulation parameters.high radiation.min cell energy",
@@ -150,7 +149,7 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
     encodeDecodeColorDependentProperty(
         tree,
         parameters.radiationMinCellAgeByCellColor,
-        parameters.radiationMinCellAgeColorDependent,
+        parameters.radiationMinCellAgeColorDependence,
         defaultParameters.radiationMinCellAgeByCellColor,
         "simulation parameters.radiation.min cell age",
         parserTask);
@@ -613,7 +612,7 @@ void AuxiliaryDataParser::encodeDecodeColorDependentProperty(
     ParserTask task)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
-        JsonParser::encodeDecode(tree, parameter[i], defaultValue[i], "simulation parameters.radiation.absorption.color[" + std::to_string(i) + "]", task);
+        JsonParser::encodeDecode(tree, parameter[i], defaultValue[i], node + ".color[" + std::to_string(i) + "]", task);
     }
     if (task == ParserTask::Decode) {
         isColorDependent = false;

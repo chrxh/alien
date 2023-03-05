@@ -88,51 +88,143 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& val
     return result;
 }
 
-bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
+bool AlienImGui::SliderFloat2(SliderFloatParameters2 const& parameters, float* value, bool* colorDependence, bool* enabled)
 {
-    if (parameters._showColor) {
-        {
-            ImVec2 pos = ImGui::GetCursorScreenPos();
-            ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+    //enable button
+    if (enabled) {
+
+        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
+        if (!(*enabled)) {
+            auto numRows = parameters._colorDependent ? MAX_COLORS : 1;
+            for (int row = 0; row < numRows; ++row) {
+                value[row] = parameters._disabledValue[row];
+            }
         }
-        ColorField(Const::IndividualCellColors[*parameters._showColor], 0);
+        ImGui::BeginDisabled(!(*enabled));
         ImGui::SameLine();
-        {
-            ImVec2 pos = ImGui::GetCursorScreenPos();
-            ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y - ImGui::GetStyle().FramePadding.y));
-        }
-    }
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
-    auto result = ImGui::SliderInt(
-        ("##" + parameters._name).c_str(), &value, parameters._min, parameters._max, parameters._format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
-    if (parameters._defaultValue) {
-        ImGui::SameLine();
-        ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (revertButton(parameters._name)) {
-            value = *parameters._defaultValue;
-            result = true;
-        }
-        ImGui::EndDisabled();
-    }
-    if (!parameters._name.empty()) {
-        ImGui::SameLine();
-        ImGui::TextUnformatted(parameters._name.c_str());
     }
 
-    if (parameters._tooltip) {
-        AlienImGui::HelpMarker(*parameters._tooltip);
+    //color dependent button
+    if (parameters._colorDependent) {
+        if (*colorDependence) {
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonActiveColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
+        }
+        auto buttonResult = Button(ICON_FA_SITEMAP "##toggle");
+        if (*colorDependence) {
+            ImGui::PopStyleColor(3);
+        }
+        if (buttonResult) {
+            *colorDependence = !(*colorDependence);
+        }
+        ImGui::SameLine();
+    }
+
+    bool result = false;
+    float sliderPosX;
+    for (int color = 0; color < MAX_COLORS; ++color) {
+        if (color > 0) {
+            if (!parameters._colorDependent) {
+                break;
+            }
+            if (parameters._colorDependent && *colorDependence == false) {
+                for (int color = 1; color < MAX_COLORS; ++color) {
+                    value[color] = value[0];
+                }
+                break;
+            }
+        }
+        if (color == 0) {
+            sliderPosX = ImGui::GetCursorPosX();
+        } else {
+            ImGui::SetCursorPosX(sliderPosX);
+        }
+
+        //color field
+        ImGui::PushID(color);
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
+        if (parameters._colorDependent && *colorDependence) {
+            {
+                ImVec2 pos = ImGui::GetCursorPos();
+                ImGui::SetCursorPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+            }
+            ColorField(Const::IndividualCellColors[color], 0);
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
+            {
+                ImVec2 pos = ImGui::GetCursorPos();
+                ImGui::SetCursorPos(ImVec2(pos.x, pos.y - ImGui::GetStyle().FramePadding.y));
+            }
+        }
+
+        //slider
+        result |= ImGui::SliderFloat(
+            ("##" + parameters._name).c_str(),
+            &value[color],
+            parameters._min,
+            parameters._max,
+            parameters._format.c_str(),
+            parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+
+        ImGui::PopID();
+
+        //revert button
+        if (color == 0) {
+            if (parameters._defaultValue) {
+                ImGui::SameLine();
+
+                auto equal = true;
+                auto numRows = parameters._colorDependent ? MAX_COLORS : 1;
+                for (int row = 0; row < numRows; ++row) {
+                    if (value[row] != parameters._defaultValue[row]) {
+                        equal = false;
+                        break;
+                    }
+                }
+                ImGui::BeginDisabled(equal);
+                if (revertButton(parameters._name)) {
+                    bool isHomogene = true;
+                    for (int row = 0; row < numRows; ++row) {
+                        value[row] = parameters._defaultValue[row];
+                        if (value[0] != value[row]) {
+                            isHomogene = false;
+                        }
+                    }
+                    result = true;
+                    if (!isHomogene) {
+                        *colorDependence = true;
+                    }
+                }
+                ImGui::EndDisabled();
+            }
+
+            //text
+            if (!parameters._name.empty()) {
+                ImGui::SameLine();
+                ImGui::TextUnformatted(parameters._name.c_str());
+            }
+
+            //tooltip
+            if (parameters._tooltip) {
+                HelpMarker(*parameters._tooltip);
+            }
+        }
+    }
+    if (enabled) {
+        ImGui::EndDisabled();
     }
     return result;
 }
 
-bool AlienImGui::SliderInt2(SliderIntParameters2 const& parameters, int* value, bool* colorDependence)
+bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bool* colorDependence)
 {
     //color dependent button
     if (parameters._colorDependent) {
         if (*colorDependence) {
-            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::NeuronChannelActiveColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::NeuronChannelActiveColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::NeuronChannelActiveColor);
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonActiveColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
         }
         auto buttonResult = Button(ICON_FA_SITEMAP);
         if (*colorDependence) {
@@ -200,7 +292,7 @@ bool AlienImGui::SliderInt2(SliderIntParameters2 const& parameters, int* value, 
                 auto equal = true;
                 auto numRows = parameters._colorDependent ? MAX_COLORS : 1;
                 for (int row = 0; row < numRows; ++row) {
-                    if (value[row] != (*parameters._defaultValue)[row]) {
+                    if (value[row] != parameters._defaultValue[row]) {
                         equal = false;
                         break;
                     }
@@ -209,7 +301,7 @@ bool AlienImGui::SliderInt2(SliderIntParameters2 const& parameters, int* value, 
                 if (revertButton(parameters._name)) {
                     bool isHomogene = true;
                     for (int row = 0; row < numRows; ++row) {
-                        value[row] = (*parameters._defaultValue)[row];
+                        value[row] = parameters._defaultValue[row];
                         if (value[0] != value[row]) {
                             isHomogene = false;
                         }
@@ -422,56 +514,6 @@ void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& pa
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
     BasicInputColorMatrix<float>(basicParameters, value);
-}
-
-void AlienImGui::InputColorVector(InputColorVectorParameters const& parameters, float (&value)[MAX_COLORS])
-{
-    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
-
-    if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-        for (int row = 0; row < 2; ++row) {
-            ImGui::PushID(row);
-            for (int col = 0; col < MAX_COLORS; ++col) {
-                ImGui::PushID(col);
-                ImGui::TableNextColumn();
-                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-                if (row == 0) {
-                    ImVec2 pos = ImGui::GetCursorScreenPos();
-                    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
-                    ColorField(Const::IndividualCellColors[col], -1);
-                } else {
-                    ImGui::InputFloat(("##" + parameters._name).c_str(), &value[col], 0, 0, parameters._format.c_str());
-                }
-                ImGui::PopID();
-            }
-            ImGui::TableNextRow();
-            ImGui::PopID();
-        }
-        ImGui::EndTable();
-        ImGui::SameLine();
-        if (parameters._defaultValue) {
-            bool changed = false;
-            for (int col = 0; col < MAX_COLORS; ++col) {
-                if (value[col] != (*parameters._defaultValue)[col]) {
-                    changed = true;
-                }
-            }
-            ImGui::BeginDisabled(!changed);
-            if (revertButton(parameters._name)) {
-                for (int col = 0; col < MAX_COLORS; ++col) {
-                    value[col] = (*parameters._defaultValue)[col];
-                }
-            }
-            ImGui::EndDisabled();
-        }
-
-        ImGui::SameLine();
-        ImGui::TextUnformatted(parameters._name.c_str());
-
-        if (parameters._tooltip) {
-            AlienImGui::HelpMarker(*parameters._tooltip);
-        }
-    }
 }
 
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
@@ -1011,7 +1053,7 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
         value = !value;
     }
 
-    auto color = Const::ToggleButtonColor;
+    auto color = Const::ToggleColor;
     float h, s, v;
     ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
 
@@ -1197,14 +1239,14 @@ void AlienImGui::NeuronSelection(
     int& selectedOutput)
 {
     auto setDefaultColors = [] {
-        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::NeuronChannelButtonColor);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::NeuronChannelHoveredColor);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::NeuronChannelHoveredColor);
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonHoveredColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonHoveredColor);
     };
     auto setHightlightingColors = [] {
-        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::NeuronChannelActiveColor);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::NeuronChannelActiveColor);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::NeuronChannelActiveColor);
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonActiveColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
     };
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     auto windowPos = ImGui::GetWindowPos();

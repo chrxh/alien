@@ -27,6 +27,21 @@ public:
     };
     static bool SliderFloat(SliderFloatParameters const& parameters, float& value, bool* enabled = nullptr);
 
+    struct SliderFloatParameters2
+    {
+        MEMBER_DECLARATION(SliderFloatParameters2, std::string, name, "");
+        MEMBER_DECLARATION(SliderFloatParameters2, float, min, 0);
+        MEMBER_DECLARATION(SliderFloatParameters2, float, max, 0);
+        MEMBER_DECLARATION(SliderFloatParameters2, bool, logarithmic, false);
+        MEMBER_DECLARATION(SliderFloatParameters2, std::string, format, "%.3f");
+        MEMBER_DECLARATION(SliderFloatParameters2, int, textWidth, 100);
+        MEMBER_DECLARATION(SliderFloatParameters2, bool, colorDependent, false);
+        MEMBER_DECLARATION(SliderFloatParameters2, float const*, defaultValue, nullptr);
+        MEMBER_DECLARATION(SliderFloatParameters2, float const*, disabledValue, nullptr);
+        MEMBER_DECLARATION(SliderFloatParameters2, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static bool SliderFloat2(SliderFloatParameters2 const& parameters, float* value, bool* colorDependence = nullptr, bool* enabled = nullptr);
+
     struct SliderIntParameters
     {
         MEMBER_DECLARATION(SliderIntParameters, std::string, name, "");
@@ -35,25 +50,11 @@ public:
         MEMBER_DECLARATION(SliderIntParameters, std::string, format, "%d");
         MEMBER_DECLARATION(SliderIntParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(SliderIntParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(SliderIntParameters, std::optional<int>, showColor, std::nullopt);
-        MEMBER_DECLARATION(SliderIntParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(SliderIntParameters, bool, colorDependent, false);
+        MEMBER_DECLARATION(SliderIntParameters, int const*, defaultValue, nullptr);
         MEMBER_DECLARATION(SliderIntParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool SliderInt(SliderIntParameters const& parameters, int& value);
-
-    struct SliderIntParameters2
-    {
-        MEMBER_DECLARATION(SliderIntParameters2, std::string, name, "");
-        MEMBER_DECLARATION(SliderIntParameters2, int, min, 0);
-        MEMBER_DECLARATION(SliderIntParameters2, int, max, 0);
-        MEMBER_DECLARATION(SliderIntParameters2, std::string, format, "%d");
-        MEMBER_DECLARATION(SliderIntParameters2, bool, logarithmic, false);
-        MEMBER_DECLARATION(SliderIntParameters2, int, textWidth, 100);
-        MEMBER_DECLARATION(SliderIntParameters2, bool, colorDependent, false);
-        MEMBER_DECLARATION(SliderIntParameters2, std::optional<int const*>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(SliderIntParameters2, std::optional<std::string>, tooltip, std::nullopt);
-    };
-    static bool SliderInt2(SliderIntParameters2 const& parameters, int* value, bool* colorDependence = nullptr);
+    static bool SliderInt(SliderIntParameters const& parameters, int* value, bool* colorDependence = nullptr);
 
     struct SliderInputFloatParameters
     {
@@ -139,16 +140,6 @@ public:
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS]);
-
-    struct InputColorVectorParameters
-    {
-        MEMBER_DECLARATION(InputColorVectorParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputColorVectorParameters, std::string, format, "%.2f");
-        MEMBER_DECLARATION(InputColorVectorParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(InputColorVectorParameters, std::optional<std::vector<float>>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(InputColorVectorParameters, std::optional<std::string>, tooltip, std::nullopt);
-    };
-    static void InputColorVector(InputColorVectorParameters const& parameters, float (&value)[MAX_COLORS]);
 
     struct InputTextParameters
     {

@@ -67,11 +67,11 @@ void _DisplaySettingsDialog::process()
                 AlienImGui::SliderIntParameters()
                     .name("Frames per second")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(_origFps)
+                    .defaultValue(&_origFps)
                     .min(20)
                     .max(100)
                     .tooltip("A high frame rate leads to a greater GPU workload for rendering and thus lowers the simulation speed (time steps per second)."),
-                fps)) {
+                &fps)) {
             _windowController->setFps(fps);
         }
 
