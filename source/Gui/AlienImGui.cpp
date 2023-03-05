@@ -40,12 +40,14 @@ void AlienImGui::HelpMarker(std::string const& text)
 
 bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* value, bool* colorDependence, bool* enabled)
 {
+    ImGui::PushID(parameters._name.c_str());
+
     //enable button
     if (enabled) {
 
-        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
+        ImGui::Checkbox("##checkbox", enabled);
         if (!(*enabled)) {
-            auto numRows = parameters._colorDependent ? MAX_COLORS : 1;
+            auto numRows = parameters._colorDependence ? MAX_COLORS : 1;
             for (int row = 0; row < numRows; ++row) {
                 value[row] = parameters._disabledValue[row];
             }
@@ -55,7 +57,7 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
     }
 
     //color dependent button
-    if (parameters._colorDependent) {
+    if (parameters._colorDependence) {
         if (*colorDependence) {
             ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonActiveColor);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
@@ -75,10 +77,10 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
     float sliderPosX;
     for (int color = 0; color < MAX_COLORS; ++color) {
         if (color > 0) {
-            if (!parameters._colorDependent) {
+            if (!parameters._colorDependence) {
                 break;
             }
-            if (parameters._colorDependent && *colorDependence == false) {
+            if (parameters._colorDependence && *colorDependence == false) {
                 for (int color = 1; color < MAX_COLORS; ++color) {
                     value[color] = value[0];
                 }
@@ -94,7 +96,7 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
         //color field
         ImGui::PushID(color);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
-        if (parameters._colorDependent && *colorDependence) {
+        if (parameters._colorDependence && *colorDependence) {
             {
                 ImVec2 pos = ImGui::GetCursorPos();
                 ImGui::SetCursorPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
@@ -110,7 +112,7 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
 
         //slider
         result |= ImGui::SliderFloat(
-            ("##" + parameters._name).c_str(),
+            "##slider",
             &value[color],
             parameters._min,
             parameters._max,
@@ -125,7 +127,7 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
                 ImGui::SameLine();
 
                 auto equal = true;
-                auto numRows = parameters._colorDependent ? MAX_COLORS : 1;
+                auto numRows = parameters._colorDependence ? MAX_COLORS : 1;
                 for (int row = 0; row < numRows; ++row) {
                     if (value[row] != parameters._defaultValue[row]) {
                         equal = false;
@@ -164,13 +166,16 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
     if (enabled) {
         ImGui::EndDisabled();
     }
+    ImGui::PopID();
     return result;
 }
 
 bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bool* colorDependence)
 {
+    ImGui::PushID(parameters._name.c_str());
+
     //color dependent button
-    if (parameters._colorDependent) {
+    if (parameters._colorDependence) {
         if (*colorDependence) {
             ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonActiveColor);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
@@ -190,10 +195,10 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bo
     float sliderPosX;
     for (int color = 0; color < MAX_COLORS; ++color) {
         if (color > 0) {
-            if (!parameters._colorDependent) {
+            if (!parameters._colorDependence) {
                 break;
             }
-            if (parameters._colorDependent && *colorDependence == false) {
+            if (parameters._colorDependence && *colorDependence == false) {
                 for (int color = 1; color < MAX_COLORS; ++color) {
                     value[color] = value[0];
                 }
@@ -209,7 +214,7 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bo
         //color field
         ImGui::PushID(color);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
-        if (parameters._colorDependent && *colorDependence) {
+        if (parameters._colorDependence && *colorDependence) {
             {
                 ImVec2 pos = ImGui::GetCursorPos();
                 ImGui::SetCursorPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
@@ -225,7 +230,7 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bo
 
         //slider
         result |= ImGui::SliderInt(
-            ("##" + parameters._name).c_str(),
+            "##slider",
             &value[color],
             parameters._min,
             parameters._max,
@@ -240,7 +245,7 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bo
                 ImGui::SameLine();
 
                 auto equal = true;
-                auto numRows = parameters._colorDependent ? MAX_COLORS : 1;
+                auto numRows = parameters._colorDependence ? MAX_COLORS : 1;
                 for (int row = 0; row < numRows; ++row) {
                     if (value[row] != parameters._defaultValue[row]) {
                         equal = false;
@@ -276,6 +281,8 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bo
             }
         }
     }
+
+    ImGui::PopID();
     return result;
 }
 

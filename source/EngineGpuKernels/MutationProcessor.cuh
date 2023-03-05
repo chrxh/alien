@@ -84,37 +84,44 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         &SimulationParametersSpotValues::cellFunctionConstructorMutationNeuronDataProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationNeuronDataProbability,
         data,
-        cell->absPos);
+        cell->absPos,
+        cell->color);
     auto cellFunctionConstructorMutationDataProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationDataProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDataProbability,
         data,
-        cell->absPos);
+        cell->absPos,
+        cell->color);
     auto cellFunctionConstructorMutationCellFunctionProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationCellFunctionProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCellFunctionProbability,
         data,
-        cell->absPos);
+        cell->absPos,
+        cell->color);
     auto cellFunctionConstructorMutationInsertionProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationInsertionProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationInsertionProbability,
         data,
-        cell->absPos);
+        cell->absPos,
+        cell->color);
     auto cellFunctionConstructorMutationDeletionProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationDeletionProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDeletionProbability,
         data,
-        cell->absPos);
+        cell->absPos,
+        cell->color);
     auto cellFunctionConstructorMutationTranslationProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationTranslationProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationTranslationProbability,
         data,
-        cell->absPos);
+        cell->absPos,
+        cell->color);
     auto cellFunctionConstructorMutationDuplicationProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationDuplicationProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDuplicationProbability,
         data,
-        cell->absPos);
+        cell->absPos,
+        cell->color);
 
     if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
         changeNeuronDataMutation(data, cell);

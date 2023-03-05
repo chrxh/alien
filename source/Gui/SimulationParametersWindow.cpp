@@ -371,12 +371,12 @@ void _SimulationParametersWindow::processBase(
                     .name("Minimum age")
                     .tooltip("")
                     .textWidth(RightColumnWidth)
-                    .colorDependent(true)
+                    .colorDependence(true)
                     .min(0)
                     .max(1000000)
                     .logarithmic(true)
-                    .defaultValue(origSimParameters.radiationMinCellAgeByCellColor),
-                simParameters.radiationMinCellAgeByCellColor,
+                    .defaultValue(origSimParameters.radiationMinCellAge),
+                simParameters.radiationMinCellAge,
                 &simParameters.radiationMinCellAgeColorDependence);
 
             AlienImGui::SliderFloat(
@@ -406,12 +406,12 @@ void _SimulationParametersWindow::processBase(
                     .name("Absorption factors")
                     .tooltip("")
                     .textWidth(RightColumnWidth)
-                    .colorDependent(true)
+                    .colorDependence(true)
                     .min(0)
                     .max(1.0)
                     .format("%.2f")
-                    .defaultValue(origSimParameters.radiationAbsorptionByCellColor),
-                simParameters.radiationAbsorptionByCellColor,
+                    .defaultValue(origSimParameters.radiationAbsorption),
+                simParameters.radiationAbsorption,
                 &simParameters.radiationAbsorptionColorDependence);
 
             if (AlienImGui::Button(AlienImGui::ButtonParameters()
@@ -515,8 +515,10 @@ void _SimulationParametersWindow::processBase(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSimParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability),
-                &simParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability);
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability,
+                &simParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbabilityColorDependence);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell properties")
@@ -525,8 +527,10 @@ void _SimulationParametersWindow::processBase(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSimParameters.baseValues.cellFunctionConstructorMutationDataProbability),
-                &simParameters.baseValues.cellFunctionConstructorMutationDataProbability);
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDataProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationDataProbability,
+                &simParameters.baseValues.cellFunctionConstructorMutationDataProbabilityColorDependence);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell function type")
@@ -535,8 +539,10 @@ void _SimulationParametersWindow::processBase(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSimParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability),
-                &simParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability);
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability,
+                &simParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbabilityColorDependence);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Insertion")
@@ -545,8 +551,10 @@ void _SimulationParametersWindow::processBase(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSimParameters.baseValues.cellFunctionConstructorMutationInsertionProbability),
-                &simParameters.baseValues.cellFunctionConstructorMutationInsertionProbability);
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationInsertionProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationInsertionProbability,
+                &simParameters.baseValues.cellFunctionConstructorMutationInsertionProbabilityColorDependence);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Deletion")
@@ -555,8 +563,10 @@ void _SimulationParametersWindow::processBase(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSimParameters.baseValues.cellFunctionConstructorMutationDeletionProbability),
-                &simParameters.baseValues.cellFunctionConstructorMutationDeletionProbability);
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDeletionProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationDeletionProbability,
+                &simParameters.baseValues.cellFunctionConstructorMutationDeletionProbabilityColorDependence);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Translation")
@@ -565,8 +575,10 @@ void _SimulationParametersWindow::processBase(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSimParameters.baseValues.cellFunctionConstructorMutationTranslationProbability),
-                &simParameters.baseValues.cellFunctionConstructorMutationTranslationProbability);
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationTranslationProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationTranslationProbability,
+                &simParameters.baseValues.cellFunctionConstructorMutationTranslationProbabilityColorDependence);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Duplication")
@@ -575,8 +587,10 @@ void _SimulationParametersWindow::processBase(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSimParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability),
-                &simParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability);
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability,
+                &simParameters.baseValues.cellFunctionConstructorMutationDuplicationProbabilityColorDependence);
             auto preserveColor = !simParameters.cellFunctionConstructorMutationColor;
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
@@ -1254,11 +1268,12 @@ void _SimulationParametersWindow::processSpot(
                     .min(0.0f)
                     .max(0.1f)
                     .format("%.6f")
+                    .colorDependence(true)
                     .logarithmic(true)
-                    .defaultValue(&origSpot.values.cellFunctionConstructorMutationNeuronDataProbability)
-                    .disabledValue(&parameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability),
-                &spot.values.cellFunctionConstructorMutationNeuronDataProbability,
-                nullptr,
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationNeuronDataProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability),
+                spot.values.cellFunctionConstructorMutationNeuronDataProbability,
+                &spot.values.cellFunctionConstructorMutationNeuronDataProbabilityColorDependence,
                 &spot.activatedValues.cellFunctionConstructorMutationNeuronDataProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -1268,10 +1283,11 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSpot.values.cellFunctionConstructorMutationDataProbability)
-                    .disabledValue(&parameters.baseValues.cellFunctionConstructorMutationDataProbability),
-                &spot.values.cellFunctionConstructorMutationDataProbability,
-                nullptr,
+                    .colorDependence(true)
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationDataProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationDataProbability),
+                spot.values.cellFunctionConstructorMutationDataProbability,
+                &spot.values.cellFunctionConstructorMutationDataProbabilityColorDependence,
                 &spot.activatedValues.cellFunctionConstructorMutationDataProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -1281,10 +1297,11 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSpot.values.cellFunctionConstructorMutationCellFunctionProbability)
-                    .disabledValue(&parameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability),
-                &spot.values.cellFunctionConstructorMutationCellFunctionProbability,
-                nullptr,
+                    .colorDependence(true)
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationCellFunctionProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability),
+                spot.values.cellFunctionConstructorMutationCellFunctionProbability,
+                &spot.values.cellFunctionConstructorMutationCellFunctionProbabilityColorDependence,
                 &spot.activatedValues.cellFunctionConstructorMutationCellFunctionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -1294,10 +1311,11 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSpot.values.cellFunctionConstructorMutationInsertionProbability)
-                    .disabledValue(&parameters.baseValues.cellFunctionConstructorMutationInsertionProbability),
-                &spot.values.cellFunctionConstructorMutationInsertionProbability,
-                nullptr,
+                    .colorDependence(true)
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationInsertionProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationInsertionProbability),
+                spot.values.cellFunctionConstructorMutationInsertionProbability,
+                &spot.values.cellFunctionConstructorMutationInsertionProbabilityColorDependence,
                 &spot.activatedValues.cellFunctionConstructorMutationInsertionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -1307,10 +1325,11 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSpot.values.cellFunctionConstructorMutationDeletionProbability)
-                    .disabledValue(&parameters.baseValues.cellFunctionConstructorMutationDeletionProbability),
-                &spot.values.cellFunctionConstructorMutationDeletionProbability,
-                nullptr,
+                    .colorDependence(true)
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationDeletionProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationDeletionProbability),
+                spot.values.cellFunctionConstructorMutationDeletionProbability,
+                &spot.values.cellFunctionConstructorMutationDeletionProbabilityColorDependence,
                 &spot.activatedValues.cellFunctionConstructorMutationDeletionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -1320,10 +1339,11 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSpot.values.cellFunctionConstructorMutationTranslationProbability)
-                    .disabledValue(&parameters.baseValues.cellFunctionConstructorMutationTranslationProbability),
-                &spot.values.cellFunctionConstructorMutationTranslationProbability,
-                nullptr,
+                    .colorDependence(true)
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationTranslationProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationTranslationProbability),
+                spot.values.cellFunctionConstructorMutationTranslationProbability,
+                &spot.values.cellFunctionConstructorMutationTranslationProbabilityColorDependence,
                 &spot.activatedValues.cellFunctionConstructorMutationTranslationProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -1333,10 +1353,11 @@ void _SimulationParametersWindow::processSpot(
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(&origSpot.values.cellFunctionConstructorMutationDuplicationProbability)
-                    .disabledValue(&parameters.baseValues.cellFunctionConstructorMutationDuplicationProbability),
-                &spot.values.cellFunctionConstructorMutationDuplicationProbability,
-                nullptr,
+                    .colorDependence(true)
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationDuplicationProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationDuplicationProbability),
+                spot.values.cellFunctionConstructorMutationDuplicationProbability,
+                &spot.values.cellFunctionConstructorMutationDuplicationProbabilityColorDependence,
                 &spot.activatedValues.cellFunctionConstructorMutationDuplicationProbability);
             ImGui::TreePop();
         }
@@ -1479,7 +1500,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
         }
-        parameters.radiationAbsorptionByCellColor[i] = std::max(0.0f, std::min(1.0f, parameters.radiationAbsorptionByCellColor[i]));
+        parameters.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.radiationAbsorption[i]));
     }
 }
 

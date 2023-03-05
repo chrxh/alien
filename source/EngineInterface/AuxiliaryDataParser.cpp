@@ -133,9 +133,9 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         parserTask);
     encodeDecodeColorDependentProperty(
         tree,
-        parameters.radiationAbsorptionByCellColor,
+        parameters.radiationAbsorption,
         parameters.radiationAbsorptionColorDependence,
-        defaultParameters.radiationAbsorptionByCellColor,
+        defaultParameters.radiationAbsorption,
         "simulation parameters.radiation.absorption",
         parserTask);
     JsonParser::encodeDecode(
@@ -148,9 +148,9 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         parserTask);
     encodeDecodeColorDependentProperty(
         tree,
-        parameters.radiationMinCellAgeByCellColor,
+        parameters.radiationMinCellAge,
         parameters.radiationMinCellAgeColorDependence,
-        defaultParameters.radiationMinCellAgeByCellColor,
+        defaultParameters.radiationMinCellAge,
         "simulation parameters.radiation.min cell age",
         parserTask);
 
@@ -175,45 +175,52 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         defaultParameters.cellFunctionConstructorActivityThreshold,
         "simulation parameters.cell.function.constructor.activity threshold",
         parserTask);
-    JsonParser::encodeDecode(
+    encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability,
+        parameters.baseValues.cellFunctionConstructorMutationNeuronDataProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability,
         "simulation parameters.cell.function.constructor.mutation probability.neuron data",
         parserTask);
-    JsonParser::encodeDecode(
+    encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationDataProbability,
+        parameters.baseValues.cellFunctionConstructorMutationDataProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationDataProbability,
         "simulation parameters.cell.function.constructor.mutation probability.data",
         parserTask);
-    JsonParser::encodeDecode(
+    encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability,
+        parameters.baseValues.cellFunctionConstructorMutationCellFunctionProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability,
         "simulation parameters.cell.function.constructor.mutation probability.cell function",
         parserTask);
-    JsonParser::encodeDecode(
+    encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationInsertionProbability,
+        parameters.baseValues.cellFunctionConstructorMutationInsertionProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationInsertionProbability,
         "simulation parameters.cell.function.constructor.mutation probability.insertion",
         parserTask);
-    JsonParser::encodeDecode(
+    encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationDeletionProbability,
+        parameters.baseValues.cellFunctionConstructorMutationDeletionProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationDeletionProbability,
         "simulation parameters.cell.function.constructor.mutation probability.deletion",
         parserTask);
-    JsonParser::encodeDecode(
+    encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationTranslationProbability,
+        parameters.baseValues.cellFunctionConstructorMutationTranslationProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationTranslationProbability,
         "simulation parameters.cell.function.constructor.mutation probability.translation",
         parserTask);
-    JsonParser::encodeDecode(
+    encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationDuplicationProbability,
+        parameters.baseValues.cellFunctionConstructorMutationDuplicationProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability,
         "simulation parameters.cell.function.constructor.mutation probability.duplication",
         parserTask);
@@ -537,51 +544,58 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
             base + "cell.function.attacker.connections mismatch penalty",
             parserTask);
 
-        encodeDecodeSpotProperty(
+        encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationNeuronDataProbability,
+            spot.values.cellFunctionConstructorMutationNeuronDataProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationNeuronDataProbability,
             defaultSpot.values.cellFunctionConstructorMutationNeuronDataProbability,
             base + "cell.function.constructor.mutation probability.neuron data",
             parserTask);
-        encodeDecodeSpotProperty(
+        encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationDataProbability,
+            spot.values.cellFunctionConstructorMutationDataProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationDataProbability,
             defaultSpot.values.cellFunctionConstructorMutationDataProbability,
             base + " cell.function.constructor.mutation probability.data ",
             parserTask);
-        encodeDecodeSpotProperty(
+        encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationCellFunctionProbability,
+            spot.values.cellFunctionConstructorMutationCellFunctionProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationCellFunctionProbability,
             defaultSpot.values.cellFunctionConstructorMutationCellFunctionProbability,
             base + "cell.function.constructor.mutation probability.cell function",
             parserTask);
-        encodeDecodeSpotProperty(
+        encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationInsertionProbability,
+            spot.values.cellFunctionConstructorMutationInsertionProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationInsertionProbability,
             defaultSpot.values.cellFunctionConstructorMutationInsertionProbability,
             base + "cell.function.constructor.mutation probability.insertion",
             parserTask);
-        encodeDecodeSpotProperty(
+        encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationDeletionProbability,
+            spot.values.cellFunctionConstructorMutationDeletionProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationDeletionProbability,
             defaultSpot.values.cellFunctionConstructorMutationDeletionProbability,
             base + "cell.function.constructor.mutation probability.deletion",
             parserTask);
-        encodeDecodeSpotProperty(
+        encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationTranslationProbability,
+            spot.values.cellFunctionConstructorMutationTranslationProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationTranslationProbability,
             defaultSpot.values.cellFunctionConstructorMutationTranslationProbability,
             "cell.function.constructor.mutation probability.translation",
             parserTask);
-        encodeDecodeSpotProperty(
+        encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationDuplicationProbability,
+            spot.values.cellFunctionConstructorMutationDuplicationProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationDuplicationProbability,
             defaultSpot.values.cellFunctionConstructorMutationDuplicationProbability,
             "cell.function.constructor.mutation probability.duplication",
@@ -600,6 +614,20 @@ void AuxiliaryDataParser::encodeDecodeSpotProperty(
 {
     JsonParser::encodeDecode(tree, isActivated, false, node + ".activated", task);
     JsonParser::encodeDecode(tree, parameter, defaultValue, node + ".value", task);
+}
+
+template <typename T>
+void AuxiliaryDataParser::encodeDecodeColorDependentSportProperty(
+    boost::property_tree::ptree& tree,
+    T& parameter,
+    bool& isActivated,
+    bool& isColorDependent,
+    T const& defaultValue,
+    std::string const& node,
+    ParserTask task)
+{
+    JsonParser::encodeDecode(tree, isActivated, false, node + ".activated", task);
+    encodeDecodeColorDependentProperty(tree, parameter, isColorDependent, defaultValue, node, task);
 }
 
 template <typename T>

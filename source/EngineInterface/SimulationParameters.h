@@ -64,12 +64,12 @@ struct SimulationParameters
     int cellNumExecutionOrderNumbers = 6;
 
     bool radiationAbsorptionColorDependence = false;
-    float radiationAbsorptionByCellColor[MAX_COLORS] = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    float radiationAbsorption[MAX_COLORS] = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
     bool radiationMinCellAgeColorDependence = false;
-    int radiationMinCellAgeByCellColor[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
+    int radiationMinCellAge[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
     float highRadiationMinCellEnergy = 500;
     float highRadiationFactor = 0;
     bool clusterDecay = false;
@@ -149,12 +149,12 @@ struct SimulationParameters
         }
 
         for (int i = 0; i < MAX_COLORS; ++i) {
-            if (radiationAbsorptionByCellColor[i] != other.radiationAbsorptionByCellColor[i]) {
+            if (radiationAbsorption[i] != other.radiationAbsorption[i]) {
                 return false;
             }
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
-            if (radiationMinCellAgeByCellColor[i] != other.radiationMinCellAgeByCellColor[i]) {
+            if (radiationMinCellAge[i] != other.radiationMinCellAge[i]) {
                 return false;
             }
         }
