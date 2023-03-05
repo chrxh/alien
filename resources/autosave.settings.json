@@ -1,6 +1,6 @@
 {
     "general": {
-        "time step": "33264",
+        "time step": "41299",
         "zoom": "2.26891708",
         "center": {
             "x": "529.84362793",
@@ -57,13 +57,69 @@
                     "connecting cell max distance": "1.51800001",
                     "activity threshold": "0.10000000",
                     "mutation probability": {
-                        "neuron data": "0.00000000",
-                        "data": "0.00026800",
-                        "cell function": "0.00000000",
-                        "insertion": "0.00000000",
-                        "deletion": "0.00000000",
-                        "translation": "0.00000000",
-                        "duplication": "0.00000000"
+                        "neuron data": {
+                            "color[0]": "0.00000000",
+                            "color[1]": "0.00000000",
+                            "color[2]": "0.00000000",
+                            "color[3]": "0.00000000",
+                            "color[4]": "0.00000000",
+                            "color[5]": "0.00000000",
+                            "color[6]": "0.00000000"
+                        },
+                        "data": {
+                            "color[0]": "0.00028100",
+                            "color[1]": "0.00000000",
+                            "color[2]": "0.00000000",
+                            "color[3]": "0.00026800",
+                            "color[4]": "0.00000000",
+                            "color[5]": "0.00000000",
+                            "color[6]": "0.00000000"
+                        },
+                        "cell function": {
+                            "color[0]": "0.00002300",
+                            "color[1]": "0.00000000",
+                            "color[2]": "0.00000000",
+                            "color[3]": "0.00002700",
+                            "color[4]": "0.00000000",
+                            "color[5]": "0.00000000",
+                            "color[6]": "0.00000000"
+                        },
+                        "insertion": {
+                            "color[0]": "0.00000000",
+                            "color[1]": "0.00000000",
+                            "color[2]": "0.00000000",
+                            "color[3]": "0.00000000",
+                            "color[4]": "0.00000000",
+                            "color[5]": "0.00000000",
+                            "color[6]": "0.00000000"
+                        },
+                        "deletion": {
+                            "color[0]": "0.00000000",
+                            "color[1]": "0.00000000",
+                            "color[2]": "0.00000000",
+                            "color[3]": "0.00000000",
+                            "color[4]": "0.00000000",
+                            "color[5]": "0.00000000",
+                            "color[6]": "0.00000000"
+                        },
+                        "translation": {
+                            "color[0]": "0.00000700",
+                            "color[1]": "0.00000000",
+                            "color[2]": "0.00000000",
+                            "color[3]": "0.00000800",
+                            "color[4]": "0.00000000",
+                            "color[5]": "0.00000000",
+                            "color[6]": "0.00000000"
+                        },
+                        "duplication": {
+                            "color[0]": "0.00001100",
+                            "color[1]": "0.00000000",
+                            "color[2]": "0.00000000",
+                            "color[3]": "0.00000900",
+                            "color[4]": "0.00000000",
+                            "color[5]": "0.00000000",
+                            "color[6]": "0.00000000"
+                        }
                     },
                     "mutation color": "false",
                     "mutation self replication": "false"
@@ -204,26 +260,30 @@
                 }
             }
         },
-      "radiation": {
-        "factor": "0.00012100",
-        "probability": "0.03000000",
-        "velocity multiplier": "1.00000000",
-        "velocity perturbation": "0.50000000",
-        "absorption by cell color[0]": "0.00000000",
-        "absorption by cell color[1]": "0.50000000",
-        "absorption by cell color[2]": "0.50000000",
-        "absorption by cell color[3]": "0.00000000",
-        "absorption by cell color[4]": "0.00000000",
-        "absorption by cell color[5]": "0.00000000",
-        "absorption by cell color[6]": "0.00000000",
-        "min cell age by color[0]": "138000",
-        "min cell age by color[1]": "15153",
-        "min cell age by color[2]": "15153",
-        "min cell age by color[3]": "138000",
-        "min cell age by color[4]": "500000",
-        "min cell age by color[5]": "500000",
-        "min cell age by color[6]": "500000"
-      },
+        "radiation": {
+            "factor": "0.00012100",
+            "probability": "0.03000000",
+            "velocity multiplier": "1.00000000",
+            "velocity perturbation": "0.50000000",
+            "absorption": {
+                "color[0]": "0.00000000",
+                "color[1]": "0.50000000",
+                "color[2]": "0.50000000",
+                "color[3]": "0.00000000",
+                "color[4]": "0.00000000",
+                "color[5]": "0.00000000",
+                "color[6]": "0.00000000"
+            },
+            "min cell age": {
+                "color[0]": "138000",
+                "color[1]": "15153",
+                "color[2]": "15153",
+                "color[3]": "138000",
+                "color[4]": "15153",
+                "color[5]": "15153",
+                "color[6]": "15153"
+            }
+        },
         "high radiation": {
             "min cell energy": "500.00000000",
             "factor": "0.00015700"
@@ -396,19 +456,43 @@
                             "mutation probability": {
                                 "neuron data": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 },
                                 "cell function": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 },
                                 "insertion": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 },
                                 "deletion": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 }
                             }
                         }
@@ -420,7 +504,13 @@
                             "mutation probability": {
                                 "data ": {
                                     "activated": "false",
-                                    "value": "0.00013400"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 }
                             }
                         }
@@ -567,19 +657,43 @@
                             "mutation probability": {
                                 "neuron data": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 },
                                 "cell function": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 },
                                 "insertion": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 },
                                 "deletion": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 }
                             }
                         }
@@ -591,7 +705,13 @@
                             "mutation probability": {
                                 "data ": {
                                     "activated": "false",
-                                    "value": "0.00013400"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 }
                             }
                         }
@@ -738,19 +858,43 @@
                             "mutation probability": {
                                 "neuron data": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 },
                                 "cell function": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 },
                                 "insertion": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 },
                                 "deletion": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 }
                             }
                         }
@@ -762,7 +906,13 @@
                             "mutation probability": {
                                 "data ": {
                                     "activated": "false",
-                                    "value": "0.00013400"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 }
                             }
                         }
@@ -909,19 +1059,43 @@
                             "mutation probability": {
                                 "neuron data": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 },
                                 "cell function": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 },
                                 "insertion": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 },
                                 "deletion": {
                                     "activated": "false",
-                                    "value": "0.00000000"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 }
                             }
                         }
@@ -933,7 +1107,13 @@
                             "mutation probability": {
                                 "data ": {
                                     "activated": "false",
-                                    "value": "0.00013400"
+                                    "color[0]": "0.00000000",
+                                    "color[1]": "0.00000000",
+                                    "color[2]": "0.00000000",
+                                    "color[3]": "0.00000000",
+                                    "color[4]": "0.00000000",
+                                    "color[5]": "0.00000000",
+                                    "color[6]": "0.00000000"
                                 }
                             }
                         }
@@ -948,11 +1128,23 @@
                 "mutation probability": {
                     "translation": {
                         "activated": "false",
-                        "value": "0.00000000"
+                        "color[0]": "0.00000000",
+                        "color[1]": "0.00000000",
+                        "color[2]": "0.00000000",
+                        "color[3]": "0.00000000",
+                        "color[4]": "0.00000000",
+                        "color[5]": "0.00000000",
+                        "color[6]": "0.00000000"
                     },
                     "duplication": {
                         "activated": "false",
-                        "value": "0.00000000"
+                        "color[0]": "0.00000000",
+                        "color[1]": "0.00000000",
+                        "color[2]": "0.00000000",
+                        "color[3]": "0.00000000",
+                        "color[4]": "0.00000000",
+                        "color[5]": "0.00000000",
+                        "color[6]": "0.00000000"
                     }
                 }
             }

@@ -26,6 +26,7 @@ namespace Const
     ImColor const ToggleButtonColor = ImColor::HSV(0.0f, 0.0f, 0.2f);
     ImColor const ToggleButtonHoveredColor = ImColor::HSV(0.14, 0.8, 0.5);
     ImColor const ToggleButtonActiveColor = ImColor::HSV(0.14, 0.8, 0.7);
+    ImColor const ToggleButtonActiveHoveredColor = ImColor::HSV(0.14, 0.8, 0.8);
 
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 

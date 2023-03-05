@@ -60,8 +60,8 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
     if (parameters._colorDependence) {
         if (*colorDependence) {
             ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonActiveColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveHoveredColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveHoveredColor);
         }
         auto buttonResult = Button(ICON_FA_SITEMAP "##toggle");
         if (*colorDependence) {
@@ -178,8 +178,8 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bo
     if (parameters._colorDependence) {
         if (*colorDependence) {
             ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonActiveColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveHoveredColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveHoveredColor);
         }
         auto buttonResult = Button(ICON_FA_SITEMAP);
         if (*colorDependence) {
