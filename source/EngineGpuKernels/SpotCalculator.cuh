@@ -66,6 +66,25 @@ public:
         return calcResultingValue(data.cellMap, worldPos, cudaSimulationParameters.baseValues.*value, spotValues, valueActivated);
     }
 
+    using FloatByColor = float[MAX_COLORS];
+    __device__ __inline__ static float calcParameter(
+        FloatByColor SimulationParametersSpotValues::*value,
+        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        SimulationData const& data,
+        float2 const& worldPos,
+        int color)
+    {
+        float spotValues[MAX_SPOTS];
+        int numValues = 0;
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                spotValues[numValues++] = (cudaSimulationParameters.spots[i].values.*value)[color];
+            }
+        }
+
+        return calcResultingValue(data.cellMap, worldPos, (cudaSimulationParameters.baseValues.*value)[color], spotValues, valueActivated);
+    }
+
     __device__ __inline__ static int calcParameter(
         int SimulationParametersSpotValues::*value,
         bool SimulationParametersSpotActivatedValues::*valueActivated,

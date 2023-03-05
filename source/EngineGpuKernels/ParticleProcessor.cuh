@@ -74,7 +74,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                 if (cell->barrier) {
                     continue;
                 }
-                if (cudaSimulationParameters.radiationAbsorptionByCellColor[cell->color] < NEAR_ZERO) {
+                if (cudaSimulationParameters.radiationAbsorption[cell->color] < NEAR_ZERO) {
                     continue;
                 }
                 if (!cell->tryLock()) {
@@ -82,7 +82,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                 }
                 if (particle->tryLock()) {
 
-                    auto energyToTransfer = particle->energy * cudaSimulationParameters.radiationAbsorptionByCellColor[cell->color];
+                    auto energyToTransfer = particle->energy * cudaSimulationParameters.radiationAbsorption[cell->color];
                     if (particle->energy < 5) {
                         energyToTransfer = particle->energy;
                     }
@@ -112,7 +112,7 @@ __inline__ __device__ void ParticleProcessor::transformation(SimulationData& dat
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.objects.particlePointers.at(particleIndex)) {
             
-            if (particle->energy >= cudaSimulationParameters.cellNormalEnergy && cudaSimulationParameters.radiationAbsorptionByCellColor[particle->color] > NEAR_ZERO) {
+            if (particle->energy >= cudaSimulationParameters.cellNormalEnergy && cudaSimulationParameters.radiationAbsorption[particle->color] > NEAR_ZERO) {
                 ObjectFactory factory;
                 factory.init(&data);
                 auto cell = factory.createRandomCell(particle->energy, particle->absPos, particle->vel);
