@@ -38,57 +38,7 @@ void AlienImGui::HelpMarker(std::string const& text)
     }
 }
 
-bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& value, bool* enabled)
-{
-    if (enabled) {
-        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
-        if (!(*enabled)) {
-            value = *parameters._disabledValue;
-        }
-        ImGui::BeginDisabled(!(*enabled));
-        ImGui::SameLine();
-    }
-    if (parameters._showColor) {
-        {
-            ImVec2 pos = ImGui::GetCursorScreenPos();
-            ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
-        }
-        ColorField(Const::IndividualCellColors[*parameters._showColor], 0);
-        ImGui::SameLine();
-        {
-            ImVec2 pos = ImGui::GetCursorScreenPos();
-            ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y - ImGui::GetStyle().FramePadding.y));
-        }
-    }
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
-    auto result = ImGui::SliderFloat(
-        ("##" + parameters._name).c_str(),
-        &value,
-        parameters._min,
-        parameters._max,
-        parameters._format.c_str(),
-        parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
-    if (parameters._defaultValue) {
-        ImGui::SameLine();
-        ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (revertButton(parameters._name)) {
-            value = *parameters._defaultValue;
-            result = true;
-        }
-        ImGui::EndDisabled();
-    }
-    ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
-    if (parameters._tooltip) {
-        AlienImGui::HelpMarker(*parameters._tooltip);
-    }
-    if (enabled) {
-        ImGui::EndDisabled();
-    }
-    return result;
-}
-
-bool AlienImGui::SliderFloat2(SliderFloatParameters2 const& parameters, float* value, bool* colorDependence, bool* enabled)
+bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* value, bool* colorDependence, bool* enabled)
 {
     //enable button
     if (enabled) {

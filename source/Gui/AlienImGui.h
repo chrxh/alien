@@ -20,27 +20,12 @@ public:
         MEMBER_DECLARATION(SliderFloatParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(SliderFloatParameters, std::string, format, "%.3f");
         MEMBER_DECLARATION(SliderFloatParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(SliderFloatParameters, std::optional<int>, showColor, std::nullopt);
-        MEMBER_DECLARATION(SliderFloatParameters, std::optional<float>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(SliderFloatParameters, bool, colorDependent, false);
+        MEMBER_DECLARATION(SliderFloatParameters, float const*, defaultValue, nullptr);
+        MEMBER_DECLARATION(SliderFloatParameters, float const*, disabledValue, nullptr);
         MEMBER_DECLARATION(SliderFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER_DECLARATION(SliderFloatParameters, std::optional<float>, disabledValue, std::nullopt);
     };
-    static bool SliderFloat(SliderFloatParameters const& parameters, float& value, bool* enabled = nullptr);
-
-    struct SliderFloatParameters2
-    {
-        MEMBER_DECLARATION(SliderFloatParameters2, std::string, name, "");
-        MEMBER_DECLARATION(SliderFloatParameters2, float, min, 0);
-        MEMBER_DECLARATION(SliderFloatParameters2, float, max, 0);
-        MEMBER_DECLARATION(SliderFloatParameters2, bool, logarithmic, false);
-        MEMBER_DECLARATION(SliderFloatParameters2, std::string, format, "%.3f");
-        MEMBER_DECLARATION(SliderFloatParameters2, int, textWidth, 100);
-        MEMBER_DECLARATION(SliderFloatParameters2, bool, colorDependent, false);
-        MEMBER_DECLARATION(SliderFloatParameters2, float const*, defaultValue, nullptr);
-        MEMBER_DECLARATION(SliderFloatParameters2, float const*, disabledValue, nullptr);
-        MEMBER_DECLARATION(SliderFloatParameters2, std::optional<std::string>, tooltip, std::nullopt);
-    };
-    static bool SliderFloat2(SliderFloatParameters2 const& parameters, float* value, bool* colorDependence = nullptr, bool* enabled = nullptr);
+    static bool SliderFloat(SliderFloatParameters const& parameters, float* value, bool* colorDependence = nullptr, bool* enabled = nullptr);
 
     struct SliderIntParameters
     {

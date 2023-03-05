@@ -81,12 +81,12 @@ void _CreatorWindow::processIntern()
         if (_mode == CreationMode::Drawing) {
             auto pencilWidth = _editorModel->getPencilWidth();
             AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters().name("Pencil width").min(1.0f).max(8.0f).textWidth(RightColumnWidth).format("%.1f"), pencilWidth);
+                AlienImGui::SliderFloatParameters().name("Pencil width").min(1.0f).max(8.0f).textWidth(RightColumnWidth).format("%.1f"), &pencilWidth);
             _editorModel->setPencilWidth(pencilWidth);
         }
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth), _energy);
         if (_mode != CreationMode::CreateParticle) {
-            AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth), _stiffness);
+            AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth), &_stiffness);
         }
         
         if (_mode == CreationMode::CreateCell) {
