@@ -134,7 +134,6 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
     encodeDecodeColorDependentProperty(
         tree,
         parameters.radiationAbsorption,
-        parameters.radiationAbsorptionColorDependence,
         defaultParameters.radiationAbsorption,
         "simulation parameters.radiation.absorption",
         parserTask);
@@ -149,7 +148,6 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
     encodeDecodeColorDependentProperty(
         tree,
         parameters.radiationMinCellAge,
-        parameters.radiationMinCellAgeColorDependence,
         defaultParameters.radiationMinCellAge,
         "simulation parameters.radiation.min cell age",
         parserTask);
@@ -178,49 +176,42 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
     encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability,
-        parameters.baseValues.cellFunctionConstructorMutationNeuronDataProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability,
         "simulation parameters.cell.function.constructor.mutation probability.neuron data",
         parserTask);
     encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationDataProbability,
-        parameters.baseValues.cellFunctionConstructorMutationDataProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationDataProbability,
         "simulation parameters.cell.function.constructor.mutation probability.data",
         parserTask);
     encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability,
-        parameters.baseValues.cellFunctionConstructorMutationCellFunctionProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability,
         "simulation parameters.cell.function.constructor.mutation probability.cell function",
         parserTask);
     encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationInsertionProbability,
-        parameters.baseValues.cellFunctionConstructorMutationInsertionProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationInsertionProbability,
         "simulation parameters.cell.function.constructor.mutation probability.insertion",
         parserTask);
     encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationDeletionProbability,
-        parameters.baseValues.cellFunctionConstructorMutationDeletionProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationDeletionProbability,
         "simulation parameters.cell.function.constructor.mutation probability.deletion",
         parserTask);
     encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationTranslationProbability,
-        parameters.baseValues.cellFunctionConstructorMutationTranslationProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationTranslationProbability,
         "simulation parameters.cell.function.constructor.mutation probability.translation",
         parserTask);
     encodeDecodeColorDependentProperty(
         tree,
         parameters.baseValues.cellFunctionConstructorMutationDuplicationProbability,
-        parameters.baseValues.cellFunctionConstructorMutationDuplicationProbabilityColorDependence,
         defaultParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability,
         "simulation parameters.cell.function.constructor.mutation probability.duplication",
         parserTask);
@@ -547,7 +538,6 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationNeuronDataProbability,
-            spot.values.cellFunctionConstructorMutationNeuronDataProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationNeuronDataProbability,
             defaultSpot.values.cellFunctionConstructorMutationNeuronDataProbability,
             base + "cell.function.constructor.mutation probability.neuron data",
@@ -555,7 +545,6 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationDataProbability,
-            spot.values.cellFunctionConstructorMutationDataProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationDataProbability,
             defaultSpot.values.cellFunctionConstructorMutationDataProbability,
             base + " cell.function.constructor.mutation probability.data ",
@@ -563,7 +552,6 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationCellFunctionProbability,
-            spot.values.cellFunctionConstructorMutationCellFunctionProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationCellFunctionProbability,
             defaultSpot.values.cellFunctionConstructorMutationCellFunctionProbability,
             base + "cell.function.constructor.mutation probability.cell function",
@@ -571,7 +559,6 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationInsertionProbability,
-            spot.values.cellFunctionConstructorMutationInsertionProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationInsertionProbability,
             defaultSpot.values.cellFunctionConstructorMutationInsertionProbability,
             base + "cell.function.constructor.mutation probability.insertion",
@@ -579,7 +566,6 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationDeletionProbability,
-            spot.values.cellFunctionConstructorMutationDeletionProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationDeletionProbability,
             defaultSpot.values.cellFunctionConstructorMutationDeletionProbability,
             base + "cell.function.constructor.mutation probability.deletion",
@@ -587,7 +573,6 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationTranslationProbability,
-            spot.values.cellFunctionConstructorMutationTranslationProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationTranslationProbability,
             defaultSpot.values.cellFunctionConstructorMutationTranslationProbability,
             "cell.function.constructor.mutation probability.translation",
@@ -595,7 +580,6 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         encodeDecodeColorDependentSportProperty(
             tree,
             spot.values.cellFunctionConstructorMutationDuplicationProbability,
-            spot.values.cellFunctionConstructorMutationDuplicationProbabilityColorDependence,
             spot.activatedValues.cellFunctionConstructorMutationDuplicationProbability,
             defaultSpot.values.cellFunctionConstructorMutationDuplicationProbability,
             "cell.function.constructor.mutation probability.duplication",
@@ -621,33 +605,23 @@ void AuxiliaryDataParser::encodeDecodeColorDependentSportProperty(
     boost::property_tree::ptree& tree,
     T& parameter,
     bool& isActivated,
-    bool& isColorDependent,
     T const& defaultValue,
     std::string const& node,
     ParserTask task)
 {
     JsonParser::encodeDecode(tree, isActivated, false, node + ".activated", task);
-    encodeDecodeColorDependentProperty(tree, parameter, isColorDependent, defaultValue, node, task);
+    encodeDecodeColorDependentProperty(tree, parameter, defaultValue, node, task);
 }
 
 template <typename T>
 void AuxiliaryDataParser::encodeDecodeColorDependentProperty(
     boost::property_tree::ptree& tree,
     T& parameter,
-    bool& isColorDependent,
     T const& defaultValue,
     std::string const& node,
     ParserTask task)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         JsonParser::encodeDecode(tree, parameter[i], defaultValue[i], node + ".color[" + std::to_string(i) + "]", task);
-    }
-    if (task == ParserTask::Decode) {
-        isColorDependent = false;
-        for (int i = 1; i < MAX_COLORS; ++i) {
-            if (parameter[i] != parameter[0]) {
-                isColorDependent = true;
-            }
-        }
     }
 }

@@ -3,6 +3,8 @@
 #include "Constants.h"
 
 //NOTE: header is also included in CUDA code
+using FloatByColor = float[MAX_COLORS];
+using IntByColor = int[MAX_COLORS];
 struct SimulationParametersSpotValues
 {
     float friction = 0.001f;
@@ -12,8 +14,8 @@ struct SimulationParametersSpotValues
     float cellMinEnergy = 50.0f;
     float cellFusionVelocity = 0.4f;
     float cellMaxBindingEnergy = 500000.0f;
-    int cellColorTransitionDuration[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
-    int cellColorTransitionTargetColor[MAX_COLORS] = {0, 1, 2, 3, 4, 5, 6};
+    IntByColor cellColorTransitionDuration = {0, 0, 0, 0, 0, 0, 0};
+    IntByColor cellColorTransitionTargetColor = {0, 1, 2, 3, 4, 5, 6};
     float cellFunctionAttackerEnergyCost = 0.0f;
     float cellFunctionAttackerFoodChainColorMatrix[MAX_COLORS][MAX_COLORS] = {
         {1, 1, 1, 1, 1, 1, 1},
@@ -27,20 +29,13 @@ struct SimulationParametersSpotValues
     float cellFunctionAttackerGeometryDeviationExponent = 0.0f;
     float cellFunctionAttackerConnectionsMismatchPenalty = 0.33f;
 
-    bool cellFunctionConstructorMutationNeuronDataProbabilityColorDependence = false;
-    float cellFunctionConstructorMutationNeuronDataProbability[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
-    bool cellFunctionConstructorMutationDataProbabilityColorDependence = false;
-    float cellFunctionConstructorMutationDataProbability[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
-    bool cellFunctionConstructorMutationCellFunctionProbabilityColorDependence = false;
-    float cellFunctionConstructorMutationCellFunctionProbability[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
-    bool cellFunctionConstructorMutationInsertionProbabilityColorDependence = false;
-    float cellFunctionConstructorMutationInsertionProbability[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
-    bool cellFunctionConstructorMutationDeletionProbabilityColorDependence = false;
-    float cellFunctionConstructorMutationDeletionProbability[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
-    bool cellFunctionConstructorMutationTranslationProbabilityColorDependence = false;
-    float cellFunctionConstructorMutationTranslationProbability[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
-    bool cellFunctionConstructorMutationDuplicationProbabilityColorDependence = false;
-    float cellFunctionConstructorMutationDuplicationProbability[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
+    FloatByColor cellFunctionConstructorMutationNeuronDataProbability = {0, 0, 0, 0, 0, 0, 0};
+    FloatByColor cellFunctionConstructorMutationDataProbability = {0, 0, 0, 0, 0, 0, 0};
+    FloatByColor cellFunctionConstructorMutationCellFunctionProbability = {0, 0, 0, 0, 0, 0, 0};
+    FloatByColor cellFunctionConstructorMutationInsertionProbability = {0, 0, 0, 0, 0, 0, 0};
+    FloatByColor cellFunctionConstructorMutationDeletionProbability = {0, 0, 0, 0, 0, 0, 0};
+    FloatByColor cellFunctionConstructorMutationTranslationProbability = {0, 0, 0, 0, 0, 0, 0};
+    FloatByColor cellFunctionConstructorMutationDuplicationProbability = {0, 0, 0, 0, 0, 0, 0};
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {
@@ -86,13 +81,6 @@ struct SimulationParametersSpotValues
             && cellFunctionAttackerGeometryDeviationExponent == other.cellFunctionAttackerGeometryDeviationExponent
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy
             && cellFunctionAttackerConnectionsMismatchPenalty == other.cellFunctionAttackerConnectionsMismatchPenalty
-            && cellFunctionConstructorMutationNeuronDataProbabilityColorDependence == other.cellFunctionConstructorMutationNeuronDataProbabilityColorDependence
-            && cellFunctionConstructorMutationDataProbabilityColorDependence == other.cellFunctionConstructorMutationDataProbabilityColorDependence
-            && cellFunctionConstructorMutationCellFunctionProbabilityColorDependence == other.cellFunctionConstructorMutationCellFunctionProbabilityColorDependence
-            && cellFunctionConstructorMutationInsertionProbabilityColorDependence == other.cellFunctionConstructorMutationInsertionProbabilityColorDependence
-            && cellFunctionConstructorMutationDeletionProbabilityColorDependence == other.cellFunctionConstructorMutationDeletionProbabilityColorDependence
-            && cellFunctionConstructorMutationTranslationProbabilityColorDependence == other.cellFunctionConstructorMutationTranslationProbabilityColorDependence
-            && cellFunctionConstructorMutationDuplicationProbabilityColorDependence == other.cellFunctionConstructorMutationDuplicationProbabilityColorDependence
         ;
     }
 };

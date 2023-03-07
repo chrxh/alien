@@ -1,5 +1,6 @@
 #include "AlienImGui.h"
 
+#include <boost/algorithm/string.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -23,6 +24,8 @@ namespace
     auto constexpr HoveredTimer = 0.5f;
 }
 
+std::unordered_set<unsigned int> AlienImGui::_isExpanded;
+
 void AlienImGui::HelpMarker(std::string const& text)
 {
     ImGui::SameLine();
@@ -38,7 +41,23 @@ void AlienImGui::HelpMarker(std::string const& text)
     }
 }
 
-bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* value, bool* colorDependence, bool* enabled)
+template<typename T>
+struct BasicSliderParameters
+{
+    MEMBER_DECLARATION(BasicSliderParameters, std::string, name, "");
+    MEMBER_DECLARATION(BasicSliderParameters, float, min, 0);
+    MEMBER_DECLARATION(BasicSliderParameters, float, max, 0);
+    MEMBER_DECLARATION(BasicSliderParameters, std::string, format, "%.3f");
+    MEMBER_DECLARATION(BasicSliderParameters, bool, logarithmic, false);
+    MEMBER_DECLARATION(BasicSliderParameters, int, textWidth, 100);
+    MEMBER_DECLARATION(BasicSliderParameters, bool, colorDependence, false);
+    MEMBER_DECLARATION(BasicSliderParameters, T const*, defaultValue, nullptr);
+    MEMBER_DECLARATION(BasicSliderParameters, T const*, disabledValue, nullptr);
+    MEMBER_DECLARATION(BasicSliderParameters, std::optional<std::string>, tooltip, std::nullopt);
+};
+
+template <typename T>
+bool AlienImGui::BasicSlider(BasicSliderParameters<T> const& parameters, T* value, bool* enabled)
 {
     ImGui::PushID(parameters._name.c_str());
 
@@ -57,18 +76,16 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
     }
 
     //color dependent button
+    auto toggleButtonId = ImGui::GetID("expanded");
+    auto isExpanded = _isExpanded.contains(toggleButtonId);
     if (parameters._colorDependence) {
-        if (*colorDependence) {
-            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonActiveColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveHoveredColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveHoveredColor);
-        }
-        auto buttonResult = Button(ICON_FA_SITEMAP "##toggle");
-        if (*colorDependence) {
-            ImGui::PopStyleColor(3);
-        }
+        auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
         if (buttonResult) {
-            *colorDependence = !(*colorDependence);
+            if (isExpanded) {
+                _isExpanded.erase(toggleButtonId);
+            } else {
+                _isExpanded.insert(toggleButtonId);
+            }
         }
         ImGui::SameLine();
     }
@@ -80,10 +97,7 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
             if (!parameters._colorDependence) {
                 break;
             }
-            if (parameters._colorDependence && *colorDependence == false) {
-                for (int color = 1; color < MAX_COLORS; ++color) {
-                    value[color] = value[0];
-                }
+            if (parameters._colorDependence && isExpanded == false) {
                 break;
             }
         }
@@ -96,12 +110,12 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
         //color field
         ImGui::PushID(color);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
-        if (parameters._colorDependence && *colorDependence) {
+        if (parameters._colorDependence && isExpanded) {
             {
                 ImVec2 pos = ImGui::GetCursorPos();
                 ImGui::SetCursorPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
             }
-            ColorField(Const::IndividualCellColors[color], 0);
+            AlienImGui::ColorField(Const::IndividualCellColors[color], 0);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
             {
@@ -111,13 +125,32 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
         }
 
         //slider
-        result |= ImGui::SliderFloat(
-            "##slider",
-            &value[color],
-            parameters._min,
-            parameters._max,
-            parameters._format.c_str(),
-            parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+        auto format = parameters._format.c_str();
+        if (parameters._colorDependence && !isExpanded) {
+            bool uniform = true;
+            for (int color = 0; color < MAX_COLORS; ++color) {
+                if (value[color] != value[0]) {
+                    uniform = false;
+                    break;
+                }
+            }
+            if (!uniform) {
+                format = "< color dependent >";
+            }
+        }
+        if constexpr (std::is_same<T, float>()) {
+            result |= ImGui::SliderFloat(
+                "##slider", &value[color], parameters._min, parameters._max, format, parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+        }
+        if constexpr (std::is_same<T, int>()) {
+            result |= ImGui::SliderInt(
+                "##slider", &value[color], parameters._min, parameters._max, format, parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+        }
+        if (parameters._colorDependence && !isExpanded && result) {
+            for (int color = 1; color < MAX_COLORS; ++color) {
+                value[color] = value[0];
+            }
+        }
 
         ImGui::PopID();
 
@@ -136,17 +169,10 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
                 }
                 ImGui::BeginDisabled(equal);
                 if (revertButton(parameters._name)) {
-                    bool isHomogene = true;
                     for (int row = 0; row < numRows; ++row) {
                         value[row] = parameters._defaultValue[row];
-                        if (value[0] != value[row]) {
-                            isHomogene = false;
-                        }
                     }
                     result = true;
-                    if (!isHomogene) {
-                        *colorDependence = true;
-                    }
                 }
                 ImGui::EndDisabled();
             }
@@ -159,7 +185,7 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
 
             //tooltip
             if (parameters._tooltip) {
-                HelpMarker(*parameters._tooltip);
+                AlienImGui::HelpMarker(*parameters._tooltip);
             }
         }
     }
@@ -170,120 +196,36 @@ bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* val
     return result;
 }
 
-bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bool* colorDependence)
+bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled)
 {
-    ImGui::PushID(parameters._name.c_str());
+    BasicSliderParameters<float> basicParameters;
+    basicParameters._name = parameters._name;
+    basicParameters._min = parameters._min;
+    basicParameters._max = parameters._max;
+    basicParameters._format = parameters._format;
+    basicParameters._logarithmic = parameters._logarithmic;
+    basicParameters._textWidth = parameters._textWidth;
+    basicParameters._colorDependence = parameters._colorDependence;
+    basicParameters._defaultValue = parameters._defaultValue;
+    basicParameters._disabledValue = parameters._disabledValue;
 
-    //color dependent button
-    if (parameters._colorDependence) {
-        if (*colorDependence) {
-            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonActiveColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveHoveredColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveHoveredColor);
-        }
-        auto buttonResult = Button(ICON_FA_SITEMAP);
-        if (*colorDependence) {
-            ImGui::PopStyleColor(3);
-        }
-        if (buttonResult) {
-            *colorDependence = !(*colorDependence);
-        }
-        ImGui::SameLine();
-    }
+    return BasicSlider<float>(basicParameters, value, enabled);
+}
 
-    bool result = false;
-    float sliderPosX;
-    for (int color = 0; color < MAX_COLORS; ++color) {
-        if (color > 0) {
-            if (!parameters._colorDependence) {
-                break;
-            }
-            if (parameters._colorDependence && *colorDependence == false) {
-                for (int color = 1; color < MAX_COLORS; ++color) {
-                    value[color] = value[0];
-                }
-                break;
-            }
-        }
-        if (color == 0) {
-            sliderPosX = ImGui::GetCursorPosX();
-        } else {
-            ImGui::SetCursorPosX(sliderPosX);
-        }
+bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled)
+{
+    BasicSliderParameters<int> basicParameters;
+    basicParameters._name = parameters._name;
+    basicParameters._min = parameters._min;
+    basicParameters._max = parameters._max;
+    basicParameters._format = parameters._format;
+    basicParameters._logarithmic = parameters._logarithmic;
+    basicParameters._textWidth = parameters._textWidth;
+    basicParameters._colorDependence = parameters._colorDependence;
+    basicParameters._defaultValue = parameters._defaultValue;
+    basicParameters._disabledValue = parameters._disabledValue;
 
-        //color field
-        ImGui::PushID(color);
-        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
-        if (parameters._colorDependence && *colorDependence) {
-            {
-                ImVec2 pos = ImGui::GetCursorPos();
-                ImGui::SetCursorPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
-            }
-            ColorField(Const::IndividualCellColors[color], 0);
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
-            {
-                ImVec2 pos = ImGui::GetCursorPos();
-                ImGui::SetCursorPos(ImVec2(pos.x, pos.y - ImGui::GetStyle().FramePadding.y));
-            }
-        }
-
-        //slider
-        result |= ImGui::SliderInt(
-            "##slider",
-            &value[color],
-            parameters._min,
-            parameters._max,
-            parameters._format.c_str(),
-            parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
-
-        ImGui::PopID();
-
-        //revert button
-        if (color == 0) {
-            if (parameters._defaultValue) {
-                ImGui::SameLine();
-
-                auto equal = true;
-                auto numRows = parameters._colorDependence ? MAX_COLORS : 1;
-                for (int row = 0; row < numRows; ++row) {
-                    if (value[row] != parameters._defaultValue[row]) {
-                        equal = false;
-                        break;
-                    }
-                }
-                ImGui::BeginDisabled(equal);
-                if (revertButton(parameters._name)) {
-                    bool isHomogene = true;
-                    for (int row = 0; row < numRows; ++row) {
-                        value[row] = parameters._defaultValue[row];
-                        if (value[0] != value[row]) {
-                            isHomogene = false;
-                        }
-                    }
-                    result = true;
-                    if (!isHomogene) {
-                        *colorDependence = true;
-                    }
-                }
-                ImGui::EndDisabled();
-            }
-
-            //text
-            if (!parameters._name.empty()) {
-                ImGui::SameLine();
-                ImGui::TextUnformatted(parameters._name.c_str());
-            }
-
-            //tooltip
-            if (parameters._tooltip) {
-                HelpMarker(*parameters._tooltip);
-            }
-        }
-    }
-
-    ImGui::PopID();
-    return result;
+    return BasicSlider<int>(basicParameters, value,  enabled);
 }
 
 void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)

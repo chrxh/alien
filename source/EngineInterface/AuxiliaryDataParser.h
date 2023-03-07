@@ -34,7 +34,6 @@ private:
         boost::property_tree::ptree& tree,
         T& parameter,
         bool& isActivated,
-        bool& isColorDependent,
         T const& defaultValue,
         std::string const& node,
         ParserTask task);
@@ -43,7 +42,6 @@ private:
     static void encodeDecodeColorDependentProperty(
         boost::property_tree::ptree& tree,
         T& parameter,
-        bool& isColorDependent,
         T const& defaultValue,
         std::string const& node,
         ParserTask task);
