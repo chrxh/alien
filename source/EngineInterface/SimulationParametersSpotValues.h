@@ -9,9 +9,9 @@ struct SimulationParametersSpotValues
 {
     float friction = 0.001f;
     float rigidity = 0.0f;
-    float radiationFactor = 0.0002f;
+    FloatByColor radiationCellAgeStrength = {0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f};
     float cellMaxForce = 0.8f;
-    float cellMinEnergy = 50.0f;
+    FloatByColor cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
     float cellFusionVelocity = 0.4f;
     float cellMaxBindingEnergy = 500000.0f;
     IntByColor cellColorTransitionDuration = {0, 0, 0, 0, 0, 0, 0};
@@ -53,6 +53,12 @@ struct SimulationParametersSpotValues
             }
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (cellMinEnergy[i] != other.cellMinEnergy[i]) {
+                return false;
+            }
+            if (radiationCellAgeStrength[i] != other.radiationCellAgeStrength[i]) {
+                return false;
+            }
             if (cellFunctionConstructorMutationNeuronDataProbability[i] != other.cellFunctionConstructorMutationNeuronDataProbability[i]) {
                 return false;
             }
@@ -75,8 +81,8 @@ struct SimulationParametersSpotValues
                 return false;
             }
         }
-        return friction == other.friction && rigidity == other.rigidity && radiationFactor == other.radiationFactor && cellMaxForce == other.cellMaxForce
-            && cellMinEnergy == other.cellMinEnergy && cellFusionVelocity == other.cellFusionVelocity
+        return friction == other.friction && rigidity == other.rigidity && cellMaxForce == other.cellMaxForce
+            && cellFusionVelocity == other.cellFusionVelocity
             && cellFunctionAttackerEnergyCost == other.cellFunctionAttackerEnergyCost
             && cellFunctionAttackerGeometryDeviationExponent == other.cellFunctionAttackerGeometryDeviationExponent
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy

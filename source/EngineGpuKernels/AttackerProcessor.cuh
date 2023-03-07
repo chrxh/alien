@@ -48,7 +48,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     }
     float energyDelta = 0;
     auto cellMinEnergy =
-        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->absPos);
+        SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->absPos, cell->color);
 
     Cell* someOtherCell = nullptr;
     data.cellMap.executeForEach(cell->absPos, cudaSimulationParameters.cellFunctionAttackerRadius, cell->detached, [&](auto const& otherCell) {
@@ -152,7 +152,7 @@ __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell
         auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);
         auto origEnergy = atomicAdd(&cell->energy, -radiationEnergy);
         auto cellMinEnergy = SpotCalculator::calcParameter(
-            &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->absPos);
+            &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->absPos, cell->color);
         if (origEnergy < 1.0f) {
             atomicAdd(&cell->energy, radiationEnergy);  //revert
             return;
@@ -175,7 +175,7 @@ __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell
 __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& data, Cell* cell, float energyDelta)
 {
     auto origEnergy = atomicAdd(&cell->energy, -cudaSimulationParameters.cellFunctionAttackerEnergyDistributionValue);
-    if (origEnergy > cudaSimulationParameters.cellNormalEnergy) {
+    if (origEnergy > cudaSimulationParameters.cellNormalEnergy[cell->color]) {
         energyDelta += cudaSimulationParameters.cellFunctionAttackerEnergyDistributionValue;
     } else {
         atomicAdd(&cell->energy, cudaSimulationParameters.cellFunctionAttackerEnergyDistributionValue);    //revert

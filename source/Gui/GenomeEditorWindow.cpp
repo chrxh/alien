@@ -692,7 +692,7 @@ void _GenomeEditorWindow::onCreateSpore()
     auto parameter = _simController->getSimulationParameters();
     auto cell = CellDescription()
                     .setPos(pos)
-                    .setEnergy(parameter.cellNormalEnergy * (genomeDesc.size() * 2 + 1))
+                    .setEnergy(parameter.cellNormalEnergy[_editorModel->getDefaultColorCode()] * (genomeDesc.size() * 2 + 1))
                     .setStiffness(1.0f)
                     .setMaxConnections(6)
                     .setExecutionOrderNumber(0)

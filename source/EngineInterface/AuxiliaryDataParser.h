@@ -3,6 +3,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "Base/JsonParser.h"
+#include "EngineInterface/SimulationParametersSpotValues.h"
 
 #include "AuxiliaryData.h"
 #include "Definitions.h"
@@ -21,6 +22,23 @@ private:
     static void encodeDecode(boost::property_tree::ptree& tree, SimulationParameters& parameters, ParserTask task);
 
     template <typename T>
+    static void encodeDecodeProperty(boost::property_tree::ptree& tree, T& parameter, T const& defaultValue, std::string const& node, ParserTask task);
+    template <>
+    static void encodeDecodeProperty(
+        boost::property_tree::ptree& tree,
+        FloatByColor& parameter,
+        FloatByColor const& defaultValue,
+        std::string const& node,
+        ParserTask task);
+    template <>
+    static void encodeDecodeProperty(
+        boost::property_tree::ptree& tree,
+        IntByColor& parameter,
+        IntByColor const& defaultValue,
+        std::string const& node,
+        ParserTask task);
+
+    template <typename T>
     static void encodeDecodeSpotProperty(
         boost::property_tree::ptree& tree,
         T& parameter,
@@ -28,21 +46,20 @@ private:
         T const& defaultValue,
         std::string const& node,
         ParserTask task);
-
-    template <typename T>
-    static void encodeDecodeColorDependentSportProperty(
+    template <>
+    static void encodeDecodeSpotProperty(
         boost::property_tree::ptree& tree,
-        T& parameter,
+        FloatByColor& parameter,
         bool& isActivated,
-        T const& defaultValue,
+        FloatByColor const& defaultValue,
         std::string const& node,
         ParserTask task);
-
-    template <typename T>
-    static void encodeDecodeColorDependentProperty(
+    template <>
+    static void encodeDecodeSpotProperty(
         boost::property_tree::ptree& tree,
-        T& parameter,
-        T const& defaultValue,
+        IntByColor& parameter,
+        bool& isActivated,
+        IntByColor const& defaultValue,
         std::string const& node,
         ParserTask task);
 };

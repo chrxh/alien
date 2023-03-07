@@ -128,7 +128,8 @@ namespace
                     if (findResult != cellInternIndicesBySlot.end()) {
                         for (auto const& otherCellIndex : findResult->second) {
                             auto& otherCell = result.cellsIntern.at(otherCellIndex);
-                            if (otherCellIndex != index && Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance) {
+                            if (otherCellIndex != index
+                                && Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance[node.color]) {
                                 if (otherCell.connectionIndices.size() < MAX_CELL_BONDS && cellIntern.connectionIndices.size() < MAX_CELL_BONDS) {
                                     nearbyCellIndices.emplace_back(otherCellIndex);
                                 }

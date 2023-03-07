@@ -6,7 +6,7 @@ struct SimulationParametersSpotActivatedValues
 {
     bool friction = false;
     bool rigidity = false;
-    bool radiationFactor = false;
+    bool radiationCellAgeStrength = false;
     bool cellMaxForce = false;
     bool cellMinEnergy = false;
     bool cellFusionVelocity = false;
@@ -27,7 +27,7 @@ struct SimulationParametersSpotActivatedValues
 
     bool operator==(SimulationParametersSpotActivatedValues const& other) const
     {
-        return friction == other.friction && rigidity == other.rigidity && radiationFactor == other.radiationFactor && cellMaxForce == other.cellMaxForce
+        return friction == other.friction && rigidity == other.rigidity && radiationCellAgeStrength == other.radiationCellAgeStrength && cellMaxForce == other.cellMaxForce
             && cellMinEnergy == other.cellMinEnergy && cellFusionVelocity == other.cellFusionVelocity
             && cellFunctionAttackerEnergyCost == other.cellFunctionAttackerEnergyCost && cellColorTransition == other.cellColorTransition
             && cellFunctionAttackerFoodChainColorMatrix == other.cellFunctionAttackerFoodChainColorMatrix

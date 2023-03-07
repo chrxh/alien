@@ -14,7 +14,7 @@ IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParam
     if (parameters_) {
         parameters = *parameters_;
     } else {
-        parameters.baseValues.radiationFactor = 0;
+        parameters.baseValues.radiationCellAgeStrength = 0;
     }
     _simController->newSimulation(0, generalSettings, parameters);
     _parameters = _simController->getSimulationParameters();
