@@ -257,7 +257,7 @@ void _SimulationParametersWindow::processBase(
                     &simParameters.motionData.fluidMotion.smoothingLength);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
-                        .name("Pressure strength")
+                        .name("Pressure")
                         .textWidth(RightColumnWidth)
                         .min(0)
                         .max(0.3f)
@@ -266,7 +266,7 @@ void _SimulationParametersWindow::processBase(
                     &simParameters.motionData.fluidMotion.pressureStrength);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
-                        .name("Viscosity strength")
+                        .name("Viscosity")
                         .textWidth(RightColumnWidth)
                         .min(0)
                         .max(0.3f)
@@ -355,9 +355,30 @@ void _SimulationParametersWindow::processBase(
          * Physics: Radiation
          */
         if (ImGui::TreeNodeEx("Physics: Radiation", flags)) {
+            if (AlienImGui::Button(AlienImGui::ButtonParameters()
+                                       .buttonText("Define")
+                                       .name("Radiation sources")
+                                       .textWidth(RightColumnWidth)
+                                       .tooltip("")
+                                       .showDisabledRevertButton(true))) {
+                _radiationSourcesWindow->setOn(true);
+            }
+
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Radiation strength")
+                    .name("Absorption factors")
+                    .tooltip("")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(1.0)
+                    .format("%.2f")
+                    .defaultValue(origSimParameters.radiationAbsorption),
+                simParameters.radiationAbsorption);
+
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Cell age radiation")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.01f)
@@ -380,7 +401,7 @@ void _SimulationParametersWindow::processBase(
 
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("High radiation strength")
+                    .name("High energy radiation")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.01f)
@@ -391,7 +412,7 @@ void _SimulationParametersWindow::processBase(
                 &simParameters.highRadiationFactor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("High radiation min energy")
+                    .name("High energy radiation threshold")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(100000)
@@ -400,26 +421,6 @@ void _SimulationParametersWindow::processBase(
                     .tooltip(""),
                 &simParameters.highRadiationMinCellEnergy);
 
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Absorption factors")
-                    .tooltip("")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(1.0)
-                    .format("%.2f")
-                    .defaultValue(origSimParameters.radiationAbsorption),
-                simParameters.radiationAbsorption);
-
-            if (AlienImGui::Button(AlienImGui::ButtonParameters()
-                                       .buttonText("Define")
-                                       .name("Radiation sources editor")
-                                       .textWidth(RightColumnWidth)
-                                       .tooltip("")
-                                       .showDisabledRevertButton(true))) {
-                _radiationSourcesWindow->setOn(true);
-            }
             ImGui::TreePop();
         }
 
