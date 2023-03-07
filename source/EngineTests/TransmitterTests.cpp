@@ -14,7 +14,7 @@ public:
         result.cellFunctionTransmitterEnergyDistributionSameColor = true;
         result.innerFriction = 0;
         result.baseValues.friction = 0;
-        result.baseValues.radiationFactor = 0;
+        result.baseValues.radiationCellAgeStrength = 0;
         return result;
     }
 

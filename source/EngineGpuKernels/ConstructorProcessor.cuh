@@ -100,11 +100,12 @@ __inline__ __device__ bool ConstructorProcessor::isConstructionFinished(Cell* ce
 __inline__ __device__ bool
 ConstructorProcessor::isConstructionPossible(SimulationData const& data, Cell* cell, ConstructionData const& constructionData, Activity const& activity)
 {
-    if (cell->energy < (cudaSimulationParameters.cellNormalEnergy + constructionData.energy) && !cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
+    if (cell->energy < (cudaSimulationParameters.cellNormalEnergy[cell->color] + constructionData.energy)
+        && !cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
         return false;
     }
     if (cell->cellFunctionData.constructor.activationMode == 0
-        && abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionConstructorActivityThreshold) {
+        && abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionConstructorActivityThreshold[cell->color]) {
         return false;
     }
     if (cell->cellFunctionData.constructor.activationMode > 0
@@ -184,7 +185,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
 
     auto anglesForNewConnection = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
 
-    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle) * cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
+    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle) * cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
     if (CellConnectionProcessor::existCrossingConnections(data, hostCell->absPos, newCellPos, hostCell->detached)) {
@@ -205,7 +206,7 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
         auto const& constructor = hostCell->cellFunctionData.constructor;
         auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
             ? 1.0f
-            : cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
+            : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
         CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
     }
     if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
@@ -255,7 +256,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         MAX_CELL_BONDS * 2,
         numOtherCellCandidates,
         newCellPos,
-        cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance,
+        cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance[hostCell->color],
         hostCell->detached,
         [&](Cell* const& otherCell) {
             if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != LivingState_UnderConstruction
@@ -316,7 +317,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
         auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
             ? 1.0f
-            : cudaSimulationParameters.cellFunctionConstructorOffspringDistance;
+            : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
         if (CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, /*angleFromPreviousForCell*/ 0, 0, distance)) {
             adaptReferenceAngle = true;
         }

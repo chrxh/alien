@@ -58,7 +58,7 @@ struct SimulationParameters
     float cellMaxVelocity = 2.0f;              
     float cellMaxBindingDistance = 3.6f;
 
-    float cellNormalEnergy = 100.0f;
+    FloatByColor cellNormalEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
     float cellMinDistance = 0.3f;         
     float cellMaxForceDecayProb = 0.2f;
     int cellNumExecutionOrderNumbers = 6;
@@ -68,15 +68,16 @@ struct SimulationParameters
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
     IntByColor radiationMinCellAge = {0, 0, 0, 0, 0, 0, 0};
-    float highRadiationMinCellEnergy = 500;
-    float highRadiationFactor = 0;
+    FloatByColor highRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
+    FloatByColor highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
     bool clusterDecay = false;
-    float clusterDecayProb = 0.0001f;
+    FloatByColor clusterDecayProb = {0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f};
     
     bool cellFunctionConstructionUnlimitedEnergy = false;
-    float cellFunctionConstructorOffspringDistance = 2.0f;
-    float cellFunctionConstructorConnectingCellMaxDistance = 1.5f;
-    float cellFunctionConstructorActivityThreshold = 0.1f;
+    FloatByColor cellFunctionConstructorOffspringDistance = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
+    FloatByColor cellFunctionConstructorConnectingCellMaxDistance = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
+    FloatByColor cellFunctionConstructorActivityThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+
     bool cellFunctionConstructorMutationColor = false;
     bool cellFunctionConstructorMutationSelfReplication = false;
 
@@ -147,11 +148,30 @@ struct SimulationParameters
         }
 
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (cellFunctionConstructorActivityThreshold[i] != other.cellFunctionConstructorActivityThreshold[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorConnectingCellMaxDistance[i] != other.cellFunctionConstructorConnectingCellMaxDistance[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorOffspringDistance[i] != other.cellFunctionConstructorOffspringDistance[i]) {
+                return false;
+            }
+            if (clusterDecayProb[i] != other.clusterDecayProb[i]) {
+                return false;
+            }
+            if (cellNormalEnergy[i] != other.cellNormalEnergy[i]) {
+                return false;
+            }
             if (radiationAbsorption[i] != other.radiationAbsorption[i]) {
                 return false;
             }
-        }
-        for (int i = 0; i < MAX_COLORS; ++i) {
+            if (highRadiationFactor[i] != other.highRadiationFactor[i]) {
+                return false;
+            }
+            if (highRadiationMinCellEnergy[i] != other.highRadiationMinCellEnergy[i]) {
+                return false;
+            }
             if (radiationMinCellAge[i] != other.radiationMinCellAge[i]) {
                 return false;
             }
@@ -187,7 +207,7 @@ struct SimulationParameters
             && cellFunctionAttackerStrength == other.cellFunctionAttackerStrength && cellFunctionSensorRange == other.cellFunctionSensorRange
             && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
             && radiationVelocityPerturbation == other.radiationVelocityPerturbation
-            && cellNormalEnergy == other.cellNormalEnergy && cellFunctionAttackerColorInhomogeneityFactor == other.cellFunctionAttackerColorInhomogeneityFactor
+            && cellFunctionAttackerColorInhomogeneityFactor == other.cellFunctionAttackerColorInhomogeneityFactor
             && cellFunctionAttackerRadius == other.cellFunctionAttackerRadius
             && cellFunctionAttackerEnergyDistributionRadius == other.cellFunctionAttackerEnergyDistributionRadius
             && cellFunctionAttackerEnergyDistributionValue == cellFunctionAttackerEnergyDistributionValue
@@ -196,9 +216,6 @@ struct SimulationParameters
             && cellFunctionMuscleMovementAcceleration == other.cellFunctionMuscleMovementAcceleration
             && cellFunctionMuscleBendingAngle == other.cellFunctionMuscleBendingAngle && innerFriction == other.innerFriction
             && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
-            && cellFunctionConstructorOffspringDistance == other.cellFunctionConstructorOffspringDistance
-            && cellFunctionConstructorConnectingCellMaxDistance == other.cellFunctionConstructorConnectingCellMaxDistance
-            && cellFunctionConstructorActivityThreshold == other.cellFunctionConstructorActivityThreshold
             && cellFunctionTransmitterEnergyDistributionRadius == other.cellFunctionTransmitterEnergyDistributionRadius
             && cellFunctionTransmitterEnergyDistributionValue == other.cellFunctionTransmitterEnergyDistributionValue
             && cellFunctionAttackerEnergyDistributionSameColor == other.cellFunctionAttackerEnergyDistributionSameColor
@@ -206,9 +223,7 @@ struct SimulationParameters
             && particleTransformationAllowed == other.particleTransformationAllowed
             && particleTransformationRandomCellFunction == other.particleTransformationRandomCellFunction
             && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
-            && clusterDecayProb == other.clusterDecayProb
             && clusterDecay == other.clusterDecay
-            && highRadiationMinCellEnergy == other.highRadiationMinCellEnergy && highRadiationFactor == other.highRadiationFactor
             && cellFunctionSensorActivityThreshold == other.cellFunctionSensorActivityThreshold
             && cellFunctionConstructionUnlimitedEnergy == other.cellFunctionConstructionUnlimitedEnergy
             && cellFunctionMuscleBendingAcceleration == other.cellFunctionMuscleBendingAcceleration

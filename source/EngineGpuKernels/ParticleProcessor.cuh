@@ -112,7 +112,7 @@ __inline__ __device__ void ParticleProcessor::transformation(SimulationData& dat
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.objects.particlePointers.at(particleIndex)) {
             
-            if (particle->energy >= cudaSimulationParameters.cellNormalEnergy && cudaSimulationParameters.radiationAbsorption[particle->color] > NEAR_ZERO) {
+            if (particle->energy >= cudaSimulationParameters.cellNormalEnergy[particle->color] && cudaSimulationParameters.radiationAbsorption[particle->color] > NEAR_ZERO) {
                 ObjectFactory factory;
                 factory.init(&data);
                 auto cell = factory.createRandomCell(particle->energy, particle->absPos, particle->vel);

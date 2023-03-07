@@ -611,13 +611,13 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         }
         auto radiationMinAge = cudaSimulationParameters.radiationMinCellAge[cell->color];
         if (data.numberGen1.random() < cudaSimulationParameters.radiationProb
-            && (cell->energy > cudaSimulationParameters.highRadiationMinCellEnergy || cell->age > radiationMinAge)) {
+            && (cell->energy > cudaSimulationParameters.highRadiationMinCellEnergy[cell->color] || cell->age > radiationMinAge)) {
             auto radiationFactor = [&] {
-                if (cell->energy < cudaSimulationParameters.highRadiationMinCellEnergy) {
+                if (cell->energy < cudaSimulationParameters.highRadiationMinCellEnergy[cell->color]) {
                     return SpotCalculator::calcParameter(
-                        &SimulationParametersSpotValues::radiationFactor, &SimulationParametersSpotActivatedValues::radiationFactor, data, cell->absPos);
+                        &SimulationParametersSpotValues::radiationCellAgeStrength, &SimulationParametersSpotActivatedValues::radiationCellAgeStrength, data, cell->absPos, cell->color);
                 } else {
-                    return cudaSimulationParameters.highRadiationFactor;
+                    return cudaSimulationParameters.highRadiationFactor[cell->color];
                 }
             }();
             if (radiationFactor > 0) {
@@ -666,13 +666,13 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         auto cellMinEnergy = SpotCalculator::calcParameter(
-            &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->absPos);
+            &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->absPos, cell->color);
         auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
             &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->absPos);
 
         bool decay = false;
         if (cell->livingState == LivingState_Dying) {
-            if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb) {
+            if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb[cell->color]) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
                 decay = true;
             }

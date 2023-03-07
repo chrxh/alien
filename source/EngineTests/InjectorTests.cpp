@@ -16,9 +16,9 @@ public:
         result.cellFunctionAttackerEnergyDistributionSameColor = true;
         result.innerFriction = 0;
         result.baseValues.friction = 1;
-        result.baseValues.radiationFactor = 0;
-        result.highRadiationFactor = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
+            result.baseValues.radiationCellAgeStrength[i] = 0;
+            result.highRadiationFactor[i] = 0;
             for (int j = 0; j < MAX_COLORS; ++j) {
                 result.cellFunctionInjectorDurationColorMatrix[i][j] = 3;
             }

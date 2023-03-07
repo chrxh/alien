@@ -56,6 +56,18 @@ struct BasicSliderParameters
     MEMBER_DECLARATION(BasicSliderParameters, std::optional<std::string>, tooltip, std::nullopt);
 };
 
+namespace 
+{
+    template<typename T>
+    std::string toString(T const& value, std::string const& format)
+    {
+        std::string s(16, '\0');
+        auto written = std::snprintf(&s[0], s.size(), format.c_str(), value);
+        s.resize(written);
+        return s;
+    }
+}
+
 template <typename T>
 bool AlienImGui::BasicSlider(BasicSliderParameters<T> const& parameters, T* value, bool* enabled)
 {
@@ -127,15 +139,13 @@ bool AlienImGui::BasicSlider(BasicSliderParameters<T> const& parameters, T* valu
         //slider
         auto format = parameters._format.c_str();
         if (parameters._colorDependence && !isExpanded) {
-            bool uniform = true;
-            for (int color = 0; color < MAX_COLORS; ++color) {
-                if (value[color] != value[0]) {
-                    uniform = false;
-                    break;
-                }
+            T minValue = value[0], maxValue = value[0];
+            for (int color = 1; color < MAX_COLORS; ++color) {
+                maxValue = std::max(maxValue, value[color]);
+                minValue = std::min(minValue, value[color]);
             }
-            if (!uniform) {
-                format = "< color dependent >";
+            if (minValue != maxValue) {
+                format = (toString(minValue, parameters._format) + " ... " + toString(maxValue, parameters._format)).c_str();
             }
         }
         if constexpr (std::is_same<T, float>()) {
