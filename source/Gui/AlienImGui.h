@@ -17,15 +17,15 @@ public:
         MEMBER_DECLARATION(SliderFloatParameters, std::string, name, "");
         MEMBER_DECLARATION(SliderFloatParameters, float, min, 0);
         MEMBER_DECLARATION(SliderFloatParameters, float, max, 0);
-        MEMBER_DECLARATION(SliderFloatParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(SliderFloatParameters, std::string, format, "%.3f");
+        MEMBER_DECLARATION(SliderFloatParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(SliderFloatParameters, int, textWidth, 100);
         MEMBER_DECLARATION(SliderFloatParameters, bool, colorDependence, false);
         MEMBER_DECLARATION(SliderFloatParameters, float const*, defaultValue, nullptr);
         MEMBER_DECLARATION(SliderFloatParameters, float const*, disabledValue, nullptr);
         MEMBER_DECLARATION(SliderFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool SliderFloat(SliderFloatParameters const& parameters, float* value, bool* colorDependence = nullptr, bool* enabled = nullptr);
+    static bool SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled = nullptr);
 
     struct SliderIntParameters
     {
@@ -37,9 +37,10 @@ public:
         MEMBER_DECLARATION(SliderIntParameters, int, textWidth, 100);
         MEMBER_DECLARATION(SliderIntParameters, bool, colorDependence, false);
         MEMBER_DECLARATION(SliderIntParameters, int const*, defaultValue, nullptr);
+        MEMBER_DECLARATION(SliderIntParameters, int const*, disabledValue, nullptr);
         MEMBER_DECLARATION(SliderIntParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool SliderInt(SliderIntParameters const& parameters, int* value, bool* colorDependence = nullptr);
+    static bool SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled = nullptr);
 
     struct SliderInputFloatParameters
     {
@@ -265,6 +266,24 @@ public:
 
 private:
 
+    template <typename T>
+    struct BasicSliderParameters
+    {
+        MEMBER_DECLARATION(BasicSliderParameters, std::string, name, "");
+        MEMBER_DECLARATION(BasicSliderParameters, float, min, 0);
+        MEMBER_DECLARATION(BasicSliderParameters, float, max, 0);
+        MEMBER_DECLARATION(BasicSliderParameters, std::string, format, "%.3f");
+        MEMBER_DECLARATION(BasicSliderParameters, bool, logarithmic, false);
+        MEMBER_DECLARATION(BasicSliderParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(BasicSliderParameters, bool, colorDependence, false);
+        MEMBER_DECLARATION(BasicSliderParameters, T const*, defaultValue, nullptr);
+        MEMBER_DECLARATION(BasicSliderParameters, T const*, disabledValue, nullptr);
+        MEMBER_DECLARATION(BasicSliderParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    template <typename T>
+    static bool BasicSlider(BasicSliderParameters<T> const& parameters, T* value, bool* enabled);
+
+
     template<typename T>
     struct BasicInputColorMatrixParameters
     {
@@ -276,4 +295,6 @@ private:
     };
     template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS]);
+
+    static std::unordered_set<unsigned int> _isExpanded;
 };

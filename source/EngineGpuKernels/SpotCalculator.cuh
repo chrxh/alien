@@ -66,7 +66,6 @@ public:
         return calcResultingValue(data.cellMap, worldPos, cudaSimulationParameters.baseValues.*value, spotValues, valueActivated);
     }
 
-    using FloatByColor = float[MAX_COLORS];
     __device__ __inline__ static float calcParameter(
         FloatByColor SimulationParametersSpotValues::*value,
         bool SimulationParametersSpotActivatedValues::*valueActivated,

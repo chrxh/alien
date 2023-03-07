@@ -80,7 +80,7 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Cells");
-        auto text = _showCellsByColor ? ICON_FA_MINUS : ICON_FA_PLUS;
+        auto text = _showCellsByColor ? ICON_FA_MINUS_SQUARE : ICON_FA_PLUS_SQUARE;
         if (AlienImGui::Button(text)) {
             _showCellsByColor = !_showCellsByColor;
         }
