@@ -81,7 +81,7 @@ struct SimulationParameters
     bool cellFunctionConstructorMutationColor = false;
     bool cellFunctionConstructorMutationSelfReplication = false;
 
-    float cellFunctionInjectorRadius = 2.0f;
+    FloatByColor cellFunctionInjectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
     int cellFunctionInjectorDurationColorMatrix[MAX_COLORS][MAX_COLORS] = {
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
@@ -93,29 +93,29 @@ struct SimulationParameters
     };
     float cellFunctionInjectorActivityThreshold = 0.1f;
 
-    float cellFunctionAttackerRadius = 1.6f;
-    float cellFunctionAttackerStrength = 0.05f;
-    float cellFunctionAttackerEnergyDistributionRadius = 3.6f;
+    FloatByColor cellFunctionAttackerRadius = {1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f};
+    FloatByColor cellFunctionAttackerStrength = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
+    FloatByColor cellFunctionAttackerEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
     bool cellFunctionAttackerEnergyDistributionSameColor = true;
-    float cellFunctionAttackerEnergyDistributionValue = 10.0f;
-    float cellFunctionAttackerColorInhomogeneityFactor = 1.0f;
-    float cellFunctionAttackerVelocityPenalty = 0.0f;
+    FloatByColor cellFunctionAttackerEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
+    FloatByColor cellFunctionAttackerColorInhomogeneityFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    FloatByColor cellFunctionAttackerVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     float cellFunctionAttackerActivityThreshold = 0.1f;
 
-    float cellFunctionDefenderAgainstAttackerStrength = 1.5f;
-    float cellFunctionDefenderAgainstInjectorStrength = 1.5f;
+    FloatByColor cellFunctionDefenderAgainstAttackerStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
+    FloatByColor cellFunctionDefenderAgainstInjectorStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
 
     bool cellFunctionTransmitterEnergyDistributionSameColor = true;
-    float cellFunctionTransmitterEnergyDistributionRadius = 3.6f;
-    float cellFunctionTransmitterEnergyDistributionValue = 10.0f;
+    FloatByColor cellFunctionTransmitterEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
+    FloatByColor cellFunctionTransmitterEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
 
-    float cellFunctionMuscleContractionExpansionDelta = 0.05f;
-    float cellFunctionMuscleMovementAcceleration = 0.02f;
-    float cellFunctionMuscleBendingAngle = 5.0f;
-    float cellFunctionMuscleBendingAcceleration = 0.08f;
+    FloatByColor cellFunctionMuscleContractionExpansionDelta = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
+    FloatByColor cellFunctionMuscleMovementAcceleration = {0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f};
+    FloatByColor cellFunctionMuscleBendingAngle = {5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f};
+    FloatByColor cellFunctionMuscleBendingAcceleration = {0.08f, 0.08f, 0.08f, 0.08f, 0.08f, 0.08f, 0.08f};
     float cellFunctionMuscleBendingAccelerationThreshold = 0.1f;
 
-    float cellFunctionSensorRange = 255.0f;
+    FloatByColor cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
     float cellFunctionSensorActivityThreshold = 0.1f;
 
     bool particleTransformationAllowed = false;
@@ -148,6 +148,63 @@ struct SimulationParameters
         }
 
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (cellFunctionAttackerVelocityPenalty[i] != other.cellFunctionAttackerVelocityPenalty[i]) {
+                return false;
+            }
+            if (cellFunctionInjectorRadius[i] != other.cellFunctionInjectorRadius[i]) {
+                return false;
+            }
+            if (cellFunctionDefenderAgainstAttackerStrength[i] != other.cellFunctionDefenderAgainstAttackerStrength[i]) {
+                return false;
+            }
+            if (cellFunctionDefenderAgainstInjectorStrength[i] != other.cellFunctionDefenderAgainstInjectorStrength[i]) {
+                return false;
+            }
+            if (cellFunctionTransmitterEnergyDistributionRadius[i] != other.cellFunctionTransmitterEnergyDistributionRadius[i]) {
+                return false;
+            }
+            if (cellFunctionTransmitterEnergyDistributionValue[i] != other.cellFunctionTransmitterEnergyDistributionValue[i]) {
+                return false;
+            }
+            if (cellFunctionMuscleBendingAcceleration[i] != other.cellFunctionMuscleBendingAcceleration[i]) {
+                return false;
+            }
+            if (cellFunctionMuscleContractionExpansionDelta[i] != other.cellFunctionMuscleContractionExpansionDelta[i]) {
+                return false;
+            }
+            if (cellFunctionMuscleMovementAcceleration[i] != other.cellFunctionMuscleMovementAcceleration[i]) {
+                return false;
+            }
+            if (cellFunctionMuscleBendingAngle[i] != other.cellFunctionMuscleBendingAngle[i]) {
+                return false;
+            }
+            if (cellFunctionMuscleContractionExpansionDelta[i] != other.cellFunctionMuscleContractionExpansionDelta[i]) {
+                return false;
+            }
+            if (cellFunctionMuscleMovementAcceleration[i] != other.cellFunctionMuscleMovementAcceleration[i]) {
+                return false;
+            }
+            if (cellFunctionMuscleBendingAngle[i] != other.cellFunctionMuscleBendingAngle[i]) {
+                return false;
+            }
+            if (cellFunctionAttackerRadius[i] != other.cellFunctionAttackerRadius[i]) {
+                return false;
+            }
+            if (cellFunctionAttackerEnergyDistributionRadius[i] != other.cellFunctionAttackerEnergyDistributionRadius[i]) {
+                return false;
+            }
+            if (cellFunctionAttackerEnergyDistributionValue[i] != other.cellFunctionAttackerEnergyDistributionValue[i]) {
+                return false;
+            }
+            if (cellFunctionAttackerStrength[i] != other.cellFunctionAttackerStrength[i]) {
+                return false;
+            }
+            if (cellFunctionSensorRange[i] != other.cellFunctionSensorRange[i]) {
+                return false;
+            }
+            if (cellFunctionAttackerColorInhomogeneityFactor[i] != other.cellFunctionAttackerColorInhomogeneityFactor[i]) {
+                return false;
+            }
             if (cellFunctionConstructorActivityThreshold[i] != other.cellFunctionConstructorActivityThreshold[i]) {
                 return false;
             }
@@ -204,20 +261,10 @@ struct SimulationParameters
             && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
             && cellMaxForceDecayProb == other.cellMaxForceDecayProb
             && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers
-            && cellFunctionAttackerStrength == other.cellFunctionAttackerStrength && cellFunctionSensorRange == other.cellFunctionSensorRange
             && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
             && radiationVelocityPerturbation == other.radiationVelocityPerturbation
-            && cellFunctionAttackerColorInhomogeneityFactor == other.cellFunctionAttackerColorInhomogeneityFactor
-            && cellFunctionAttackerRadius == other.cellFunctionAttackerRadius
-            && cellFunctionAttackerEnergyDistributionRadius == other.cellFunctionAttackerEnergyDistributionRadius
-            && cellFunctionAttackerEnergyDistributionValue == cellFunctionAttackerEnergyDistributionValue
             && cellFunctionAttackerActivityThreshold == other.cellFunctionAttackerActivityThreshold
-            && cellFunctionMuscleContractionExpansionDelta == other.cellFunctionMuscleContractionExpansionDelta
-            && cellFunctionMuscleMovementAcceleration == other.cellFunctionMuscleMovementAcceleration
-            && cellFunctionMuscleBendingAngle == other.cellFunctionMuscleBendingAngle && innerFriction == other.innerFriction
             && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
-            && cellFunctionTransmitterEnergyDistributionRadius == other.cellFunctionTransmitterEnergyDistributionRadius
-            && cellFunctionTransmitterEnergyDistributionValue == other.cellFunctionTransmitterEnergyDistributionValue
             && cellFunctionAttackerEnergyDistributionSameColor == other.cellFunctionAttackerEnergyDistributionSameColor
             && cellFunctionTransmitterEnergyDistributionSameColor == other.cellFunctionTransmitterEnergyDistributionSameColor
             && particleTransformationAllowed == other.particleTransformationAllowed
@@ -226,14 +273,9 @@ struct SimulationParameters
             && clusterDecay == other.clusterDecay
             && cellFunctionSensorActivityThreshold == other.cellFunctionSensorActivityThreshold
             && cellFunctionConstructionUnlimitedEnergy == other.cellFunctionConstructionUnlimitedEnergy
-            && cellFunctionMuscleBendingAcceleration == other.cellFunctionMuscleBendingAcceleration
             && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
             && cellFunctionConstructorMutationColor == other.cellFunctionConstructorMutationColor
             && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication
-            && cellFunctionInjectorRadius == other.cellFunctionInjectorRadius
-            && cellFunctionDefenderAgainstAttackerStrength == other.cellFunctionDefenderAgainstAttackerStrength
-            && cellFunctionDefenderAgainstInjectorStrength == other.cellFunctionDefenderAgainstInjectorStrength
-            && cellFunctionAttackerVelocityPenalty == other.cellFunctionAttackerVelocityPenalty
         ;
     }
 

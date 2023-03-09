@@ -78,7 +78,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationResult& resu
     __syncthreads();
 
     auto const partition = calcPartition(NumScanAngles, threadIdx.x, blockDim.x);
-    for (float radius = 14.0f; radius <= cudaSimulationParameters.cellFunctionSensorRange; radius += 8.0f) {
+    for (float radius = 14.0f; radius <= cudaSimulationParameters.cellFunctionSensorRange[cell->color]; radius += 8.0f) {
         for (int angleIndex = partition.startIndex; angleIndex <= partition.endIndex; ++angleIndex) {
             float angle = 360.0f / NumScanAngles * angleIndex;
 
@@ -130,7 +130,7 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationResult& result, C
 
     auto const partition = calcPartition(NumScanPoints, threadIdx.x, blockDim.x);
     for (int distanceIndex = partition.startIndex; distanceIndex <= partition.endIndex; ++distanceIndex) {
-        auto distance = 14.0f + cudaSimulationParameters.cellFunctionSensorRange / NumScanPoints * distanceIndex;
+        auto distance = 14.0f + cudaSimulationParameters.cellFunctionSensorRange[cell->color] / NumScanPoints * distanceIndex;
         auto scanPos = cell->absPos + searchDelta * distance;
         data.cellMap.correctPosition(scanPos);
         auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getDensity(scanPos, color));

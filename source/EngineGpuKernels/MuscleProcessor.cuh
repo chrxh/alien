@@ -68,7 +68,7 @@ MuscleProcessor::movement(SimulationData& data, SimulationResult& result, Cell* 
     }
     float2 direction = CellFunctionProcessor::calcSignalDirection(data, cell);
     if (direction.x != 0 || direction.y != 0) {
-        cell->vel += Math::normalized(direction) * cudaSimulationParameters.cellFunctionMuscleMovementAcceleration * getTruncatedValue(activity);
+        cell->vel += Math::normalized(direction) * cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color] * getTruncatedValue(activity);
     }
     cell->releaseLock();
     result.incMuscleActivity();
@@ -92,7 +92,8 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(
             if (!connection.cell->tryLock()) {
                 continue;
             }
-            auto newDistance = connection.distance + cudaSimulationParameters.cellFunctionMuscleContractionExpansionDelta * getTruncatedValue(activity);
+            auto newDistance =
+                connection.distance + cudaSimulationParameters.cellFunctionMuscleContractionExpansionDelta[cell->color] * getTruncatedValue(activity);
             if (activity.channels[0] > 0 && newDistance >= cudaSimulationParameters.cellMaxBindingDistance * 0.8f) {
                 continue;
             }
@@ -126,7 +127,7 @@ MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* c
         auto& connection = cell->connections[i];
         if (connection.cell->executionOrderNumber == cell->inputExecutionOrderNumber) {
             auto intensity = getTruncatedValue(activity);
-            auto bendingAngle = cudaSimulationParameters.cellFunctionMuscleBendingAngle * intensity;
+            auto bendingAngle = cudaSimulationParameters.cellFunctionMuscleBendingAngle[cell->color] * intensity;
 
             if (bendingAngle < 0 && connection.angleFromPrevious <= -bendingAngle) {
                 continue;
@@ -142,7 +143,7 @@ MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* c
                 Math::rotateQuarterCounterClockwise(delta);
                 auto intensityChannel1 = getTruncatedValue(activity, 1);
                 if ((intensity < -NEAR_ZERO && intensityChannel1 < -NEAR_ZERO) || (intensity > NEAR_ZERO && intensityChannel1 > NEAR_ZERO)) {
-                    auto acceleration = delta * (intensity) * cudaSimulationParameters.cellFunctionMuscleBendingAcceleration;
+                    auto acceleration = delta * intensity * cudaSimulationParameters.cellFunctionMuscleBendingAcceleration[cell->color];
                     atomicAdd(&connection.cell->vel.x, acceleration.x);
                     atomicAdd(&connection.cell->vel.y, acceleration.y);
                 }

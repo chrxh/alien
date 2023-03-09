@@ -16,7 +16,9 @@ public:
         SimulationParameters result;
         result.innerFriction = 0;
         result.baseValues.friction = 0;
-        result.baseValues.radiationCellAgeStrength = 0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            result.baseValues.radiationCellAgeStrength[i] = 0;
+        }
         return result;
     }
 
@@ -48,7 +50,7 @@ TEST_F(ConstructorTests, noEnergy)
     data.addCell(
         CellDescription()
             .setId(1)
-            .setEnergy(_parameters.cellNormalEnergy * 2 - 1.0f)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2 - 1.0f)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)));
@@ -62,7 +64,7 @@ TEST_F(ConstructorTests, noEnergy)
 
     EXPECT_EQ(0, actualHostCell.connections.size());
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentGenomePos);
-    EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy * 2 - 1.0f, actualHostCell.energy));
+    EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0] * 2 - 1.0f, actualHostCell.energy));
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
 }
 
@@ -78,7 +80,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     data.addCell(
         CellDescription()
             .setId(1)
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
             .setCellFunction(constructor));
@@ -104,7 +106,7 @@ TEST_F(ConstructorTests, notActivated)
 
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(constructor)
@@ -128,7 +130,7 @@ TEST_F(ConstructorTests, manualConstruction_noInputActivity)
     data.addCell(
         CellDescription()
             .setId(1)
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
                      .setCellFunction(
@@ -143,7 +145,7 @@ TEST_F(ConstructorTests, manualConstruction_noInputActivity)
 
     EXPECT_EQ(0, actualHostCell.connections.size());
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentGenomePos);
-    EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy * 3, actualHostCell.energy));
+    EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0] * 3, actualHostCell.energy));
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
 }
 
@@ -156,7 +158,7 @@ TEST_F(ConstructorTests, constructFirstCell_correctCycle)
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setActivationMode(3).setGenome(genome)));
@@ -179,7 +181,7 @@ TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setActivationMode(3).setGenome(genome)));
@@ -202,7 +204,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false).setConstructionActivationTime(123).setStiffness(0.35f)));
@@ -217,7 +219,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
 
     EXPECT_EQ(1, actualHostCell.connections.size());
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentGenomePos);
-    EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy * 2, actualHostCell.energy));
+    EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0] * 2, actualHostCell.energy));
     EXPECT_TRUE(approxCompare(1.0f, actualHostCell.activity.channels[0]));
     EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
 
@@ -230,8 +232,8 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_EQ(CellFunction_None, actualConstructedCell.getCellFunctionType());
     EXPECT_EQ(123, actualConstructedCell.activationTime);
     EXPECT_EQ(0.35f, actualConstructedCell.stiffness);
-    EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy, actualConstructedCell.energy));
-    EXPECT_TRUE(approxCompare(_parameters.cellFunctionConstructorOffspringDistance, Math::length(actualHostCell.pos - actualConstructedCell.pos)));
+    EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0], actualConstructedCell.energy));
+    EXPECT_TRUE(approxCompare(_parameters.cellFunctionConstructorOffspringDistance[0], Math::length(actualHostCell.pos - actualConstructedCell.pos)));
 }
 
 TEST_F(ConstructorTests, constructFirstCell_notFinished)
@@ -242,7 +244,7 @@ TEST_F(ConstructorTests, constructFirstCell_notFinished)
     data.addCell(CellDescription()
                      .setId(1)
                      .setPos({10.0f, 10.0f})
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)));
@@ -269,7 +271,7 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription()
@@ -299,7 +301,7 @@ TEST_F(ConstructorTests, constructFirstCell_noAdaptConnections)
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(true).setMaxConnections(3)));
@@ -328,7 +330,7 @@ TEST_F(ConstructorTests, constructFirstCell_singleConstruction)
     data.addCell(
         CellDescription()
             .setId(1)
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(true).setSingleConstruction(true)));
@@ -358,7 +360,7 @@ TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
        CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
@@ -387,7 +389,7 @@ TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
     EXPECT_EQ(0, actualConstructedCell.connections.size());
     EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
 
-    EXPECT_TRUE(approxCompare(10.0f - _parameters.cellFunctionConstructorOffspringDistance, actualConstructedCell.pos.x));
+    EXPECT_TRUE(approxCompare(10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], actualConstructedCell.pos.x));
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.y));
 }
 
@@ -400,7 +402,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle1)
         CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setEnergy(_parameters.cellNormalEnergy * 3)
+             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
@@ -424,7 +426,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle1)
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.x));
-    EXPECT_TRUE(approxCompare(10.0f - _parameters.cellFunctionConstructorOffspringDistance, actualConstructedCell.pos.y));
+    EXPECT_TRUE(approxCompare(10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], actualConstructedCell.pos.y));
 }
 
 TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
@@ -436,7 +438,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
         {CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setEnergy(_parameters.cellNormalEnergy * 3)
+             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
@@ -460,7 +462,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.x));
-    EXPECT_TRUE(approxCompare(10.0f + _parameters.cellFunctionConstructorOffspringDistance, actualConstructedCell.pos.y));
+    EXPECT_TRUE(approxCompare(10.0f + _parameters.cellFunctionConstructorOffspringDistance[0], actualConstructedCell.pos.y));
 }
 
 TEST_F(ConstructorTests, constructNeuronCell)
@@ -476,7 +478,7 @@ TEST_F(ConstructorTests, constructNeuronCell)
     data.addCell(
         CellDescription()
             .setId(1)
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
@@ -519,7 +521,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
 
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
@@ -552,7 +554,7 @@ TEST_F(ConstructorTests, constructNerveCell)
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
@@ -579,7 +581,7 @@ TEST_F(ConstructorTests, constructAttackerCell)
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
@@ -605,7 +607,7 @@ TEST_F(ConstructorTests, constructDefenderCell)
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
@@ -631,7 +633,7 @@ TEST_F(ConstructorTests, constructTransmitterCell)
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
@@ -657,7 +659,7 @@ TEST_F(ConstructorTests, constructMuscleCell)
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
@@ -683,7 +685,7 @@ TEST_F(ConstructorTests, constructSensorCell)
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
@@ -712,7 +714,7 @@ TEST_F(ConstructorTests, constructInjectorCell)
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
@@ -746,7 +748,7 @@ TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
 
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
@@ -782,7 +784,7 @@ TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
     DataDescription data;
     data.addCell(CellDescription()
                      .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy * 3)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
@@ -809,13 +811,13 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(true)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -854,13 +856,13 @@ TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(true)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -908,13 +910,13 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -942,7 +944,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
     for (auto const& connection : actualConstructedCell.connections) {
         connectionById.emplace(connection.cellId, connection);
     }
-    EXPECT_TRUE(lowPrecisionCompare(_parameters.cellFunctionConstructorOffspringDistance, connectionById.at(1).distance));
+    EXPECT_TRUE(lowPrecisionCompare(_parameters.cellFunctionConstructorOffspringDistance[0], connectionById.at(1).distance));
     EXPECT_TRUE(approxCompare(180.0f, connectionById.at(1).angleFromPrevious));
     EXPECT_TRUE(lowPrecisionCompare(1.0f, connectionById.at(2).distance));
     EXPECT_TRUE(approxCompare(180.0f, connectionById.at(2).angleFromPrevious));
@@ -961,13 +963,13 @@ TEST_F(ConstructorTests, constructSecondCell_noFreeConnection)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false).setMaxConnections(1)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -998,7 +1000,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSpace)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
@@ -1037,13 +1039,13 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -1080,13 +1082,13 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -1111,7 +1113,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
     for (auto const& connection : actualConstructedCell.connections) {
         connectionById.emplace(connection.cellId, connection);
     }
-    EXPECT_TRUE(lowPrecisionCompare(_parameters.cellFunctionConstructorOffspringDistance, connectionById.at(1).distance));
+    EXPECT_TRUE(lowPrecisionCompare(_parameters.cellFunctionConstructorOffspringDistance[0], connectionById.at(1).distance));
     EXPECT_TRUE(lowPrecisionCompare(270.0f, connectionById.at(1).angleFromPrevious));
     EXPECT_TRUE(lowPrecisionCompare(1.0f, connectionById.at(2).distance));
     EXPECT_TRUE(lowPrecisionCompare(90.0f, connectionById.at(2).angleFromPrevious));
@@ -1128,13 +1130,13 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -1159,7 +1161,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
     for (auto const& connection : actualConstructedCell.connections) {
         connectionById.emplace(connection.cellId, connection);
     }
-    EXPECT_TRUE(lowPrecisionCompare(_parameters.cellFunctionConstructorOffspringDistance, connectionById.at(1).distance));
+    EXPECT_TRUE(lowPrecisionCompare(_parameters.cellFunctionConstructorOffspringDistance[0], connectionById.at(1).distance));
     EXPECT_TRUE(lowPrecisionCompare(90.0f, connectionById.at(1).angleFromPrevious));
     EXPECT_TRUE(lowPrecisionCompare(1.0f, connectionById.at(2).distance));
     EXPECT_TRUE(lowPrecisionCompare(270.0f, connectionById.at(2).angleFromPrevious));
@@ -1176,13 +1178,13 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
             .setEnergy(100)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
@@ -1190,14 +1192,14 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 9.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 9.0f})
             .setEnergy(100)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
-        CellDescription().setId(4).setPos({10.0f, 9.5f}).setEnergy(_parameters.cellNormalEnergy * 3).setMaxConnections(2).setExecutionOrderNumber(0),
-        CellDescription().setId(5).setPos({10.0f, 9.0f}).setEnergy(_parameters.cellNormalEnergy * 3).setMaxConnections(2).setExecutionOrderNumber(0),
+        CellDescription().setId(4).setPos({10.0f, 9.5f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2).setExecutionOrderNumber(0),
+        CellDescription().setId(5).setPos({10.0f, 9.0f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2).setExecutionOrderNumber(0),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -1233,13 +1235,13 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
             .setEnergy(100)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
@@ -1247,14 +1249,14 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 11.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 11.0f})
             .setEnergy(100)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
-        CellDescription().setId(4).setPos({10.0f, 10.5f}).setEnergy(_parameters.cellNormalEnergy * 3).setMaxConnections(2).setExecutionOrderNumber(0),
-        CellDescription().setId(5).setPos({10.0f, 11.0f}).setEnergy(_parameters.cellNormalEnergy * 3).setMaxConnections(2).setExecutionOrderNumber(0),
+        CellDescription().setId(4).setPos({10.0f, 10.5f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2).setExecutionOrderNumber(0),
+        CellDescription().setId(5).setPos({10.0f, 11.0f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2).setExecutionOrderNumber(0),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -1290,13 +1292,13 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false).setSingleConstruction(true)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
@@ -1322,13 +1324,13 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setEnergy(_parameters.cellNormalEnergy * 3)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setSeparateConstruction(false)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 10.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
             .setEnergy(100)
             .setMaxConnections(3)
             .setExecutionOrderNumber(5)
@@ -1336,7 +1338,7 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance, 11.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 11.0f})
             .setEnergy(100)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
@@ -1344,7 +1346,7 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(4)
-            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance + 1.0f, 11.0f})
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0] + 1.0f, 11.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setLivingState(LivingState_UnderConstruction),

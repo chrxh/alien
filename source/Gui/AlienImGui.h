@@ -88,29 +88,23 @@ public:
     };
     static void InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2);
 
-    struct InputFloatVectorParameters
-    {
-        MEMBER_DECLARATION(InputFloatVectorParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputFloatVectorParameters, float, step, 1.0f);
-        MEMBER_DECLARATION(InputFloatVectorParameters, std::string, format, "%.2f");
-        MEMBER_DECLARATION(InputFloatVectorParameters, int, textWidth, 100);
-    };
-    static void InputFloatVector(InputFloatVectorParameters const& parameters, std::vector<float>& value);
-
-    struct InputFloatMatrixParameters
-    {
-        MEMBER_DECLARATION(InputFloatMatrixParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputFloatMatrixParameters, float, step, 1.0f);
-        MEMBER_DECLARATION(InputFloatMatrixParameters, std::string, format, "%.2f");
-        MEMBER_DECLARATION(InputFloatMatrixParameters, int, textWidth, 100);
-    };
-    static void InputFloatMatrix(InputFloatMatrixParameters const& parameters, std::vector<std::vector<float>>& value);
-
     static bool ColorField(uint32_t cellColor, int width = 0);
+
+    struct CheckboxColorMatrixParameters
+    {
+        MEMBER_DECLARATION(CheckboxColorMatrixParameters, std::string, name, "");
+        MEMBER_DECLARATION(CheckboxColorMatrixParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(CheckboxColorMatrixParameters, std::optional<std::vector<std::vector<bool>>>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(CheckboxColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static void CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS]);
 
     struct InputIntColorMatrixParameters
     {
         MEMBER_DECLARATION(InputIntColorMatrixParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputIntColorMatrixParameters, int, min, 0);
+        MEMBER_DECLARATION(InputIntColorMatrixParameters, int, max, 0);
+        MEMBER_DECLARATION(InputIntColorMatrixParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(InputIntColorMatrixParameters, int, textWidth, 100);
         MEMBER_DECLARATION(InputIntColorMatrixParameters, std::optional<std::vector<std::vector<int>>>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(InputIntColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
@@ -120,6 +114,9 @@ public:
     struct InputFloatColorMatrixParameters
     {
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, float, min, 0);
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, float, max, 0);
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::string, format, "%.2f");
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, int, textWidth, 100);
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, defaultValue, std::nullopt);
@@ -272,8 +269,8 @@ private:
         MEMBER_DECLARATION(BasicSliderParameters, std::string, name, "");
         MEMBER_DECLARATION(BasicSliderParameters, float, min, 0);
         MEMBER_DECLARATION(BasicSliderParameters, float, max, 0);
-        MEMBER_DECLARATION(BasicSliderParameters, std::string, format, "%.3f");
         MEMBER_DECLARATION(BasicSliderParameters, bool, logarithmic, false);
+        MEMBER_DECLARATION(BasicSliderParameters, std::string, format, "%.3f");
         MEMBER_DECLARATION(BasicSliderParameters, int, textWidth, 100);
         MEMBER_DECLARATION(BasicSliderParameters, bool, colorDependence, false);
         MEMBER_DECLARATION(BasicSliderParameters, T const*, defaultValue, nullptr);
@@ -288,6 +285,9 @@ private:
     struct BasicInputColorMatrixParameters
     {
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::string, name, "");
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, T, min, static_cast<T>(0));
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, T, max, static_cast<T>(0));
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::string, format, "%.2f");
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, int, textWidth, 100);
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
