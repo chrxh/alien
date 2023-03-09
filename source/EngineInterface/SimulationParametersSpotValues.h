@@ -16,7 +16,7 @@ struct SimulationParametersSpotValues
     float cellMaxBindingEnergy = 500000.0f;
     IntByColor cellColorTransitionDuration = {0, 0, 0, 0, 0, 0, 0};
     IntByColor cellColorTransitionTargetColor = {0, 1, 2, 3, 4, 5, 6};
-    float cellFunctionAttackerEnergyCost = 0.0f;
+    FloatByColor cellFunctionAttackerEnergyCost = {0, 0, 0, 0, 0, 0, 0};
     float cellFunctionAttackerFoodChainColorMatrix[MAX_COLORS][MAX_COLORS] = {
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
@@ -26,8 +26,8 @@ struct SimulationParametersSpotValues
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1}};
 
-    float cellFunctionAttackerGeometryDeviationExponent = 0.0f;
-    float cellFunctionAttackerConnectionsMismatchPenalty = 0.33f;
+    FloatByColor cellFunctionAttackerGeometryDeviationExponent = {0, 0, 0, 0, 0, 0, 0};
+    FloatByColor cellFunctionAttackerConnectionsMismatchPenalty = {0, 0, 0, 0, 0, 0, 0};
 
     FloatByColor cellFunctionConstructorMutationNeuronDataProbability = {0, 0, 0, 0, 0, 0, 0};
     FloatByColor cellFunctionConstructorMutationDataProbability = {0, 0, 0, 0, 0, 0, 0};
@@ -36,12 +36,24 @@ struct SimulationParametersSpotValues
     FloatByColor cellFunctionConstructorMutationDeletionProbability = {0, 0, 0, 0, 0, 0, 0};
     FloatByColor cellFunctionConstructorMutationTranslationProbability = {0, 0, 0, 0, 0, 0, 0};
     FloatByColor cellFunctionConstructorMutationDuplicationProbability = {0, 0, 0, 0, 0, 0, 0};
+    bool cellFunctionConstructorMutationColorTransitions[MAX_COLORS][MAX_COLORS] = {
+        {true, true, true, true, true, true, true},
+        {true, true, true, true, true, true, true},
+        {true, true, true, true, true, true, true},
+        {true, true, true, true, true, true, true},
+        {true, true, true, true, true, true, true},
+        {true, true, true, true, true, true, true},
+        {true, true, true, true, true, true, true}
+    };
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {
                 if (cellFunctionAttackerFoodChainColorMatrix[i][j] != other.cellFunctionAttackerFoodChainColorMatrix[i][j]) {
+                    return false;
+                }
+                if (cellFunctionConstructorMutationColorTransitions[i][j] != other.cellFunctionConstructorMutationColorTransitions[i][j]) {
                     return false;
                 }
             }
@@ -53,6 +65,15 @@ struct SimulationParametersSpotValues
             }
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (cellFunctionAttackerEnergyCost[i] != other.cellFunctionAttackerEnergyCost[i]) {
+                return false;
+            }
+            if (cellFunctionAttackerGeometryDeviationExponent[i] != other.cellFunctionAttackerGeometryDeviationExponent[i]) {
+                return false;
+            }
+            if (cellFunctionAttackerConnectionsMismatchPenalty[i] != other.cellFunctionAttackerConnectionsMismatchPenalty[i]) {
+                return false;
+            }
             if (cellMinEnergy[i] != other.cellMinEnergy[i]) {
                 return false;
             }
@@ -83,10 +104,7 @@ struct SimulationParametersSpotValues
         }
         return friction == other.friction && rigidity == other.rigidity && cellMaxForce == other.cellMaxForce
             && cellFusionVelocity == other.cellFusionVelocity
-            && cellFunctionAttackerEnergyCost == other.cellFunctionAttackerEnergyCost
-            && cellFunctionAttackerGeometryDeviationExponent == other.cellFunctionAttackerGeometryDeviationExponent
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy
-            && cellFunctionAttackerConnectionsMismatchPenalty == other.cellFunctionAttackerConnectionsMismatchPenalty
         ;
     }
 };

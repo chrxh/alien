@@ -14,7 +14,9 @@ public:
         result.cellFunctionTransmitterEnergyDistributionSameColor = true;
         result.innerFriction = 0;
         result.baseValues.friction = 0;
-        result.baseValues.radiationCellAgeStrength = 0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            result.baseValues.radiationCellAgeStrength[i] = 0;
+        }
         return result;
     }
 
@@ -36,7 +38,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
             .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
-            .setEnergy(_parameters.cellNormalEnergy * 2),
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -83,7 +85,7 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardActivity)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
             .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
-            .setEnergy(_parameters.cellNormalEnergy * 2),
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -130,7 +132,7 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
             .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_ConnectedCells))
-            .setEnergy(_parameters.cellNormalEnergy * 2),
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -173,7 +175,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
             .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
-            .setEnergy(_parameters.cellNormalEnergy * 2),
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(ConstructorDescription()),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
     });
@@ -211,7 +213,7 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
             .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
-            .setEnergy(_parameters.cellNormalEnergy * 2),
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(ConstructorDescription().setSingleConstruction(true)),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
     });
@@ -249,7 +251,7 @@ TEST_F(TransmitterTests, distributeOnlyToTransmittersWithSameColor)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
             .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
-            .setEnergy(_parameters.cellNormalEnergy * 2),
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(TransmitterDescription()).setColor(1),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
     });

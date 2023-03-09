@@ -18,7 +18,8 @@ public:
 
 TEST_F(CellConnectionTests, decay)
 {
-    auto origData = DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().width(10).height(10).energy(_parameters.baseValues.cellMinEnergy / 2));
+    auto origData =
+        DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().width(10).height(10).energy(_parameters.baseValues.cellMinEnergy[0] / 2));
 
     _simController->setSimulationData(origData);
     _simController->calcSingleTimestep();

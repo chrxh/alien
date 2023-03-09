@@ -42,7 +42,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 
     switch (injector.mode) {
     case InjectorMode_InjectAll: {
-        data.cellMap.executeForEach(cell->absPos, cudaSimulationParameters.cellFunctionInjectorRadius, cell->detached, [&](Cell* const& otherCell) {
+        data.cellMap.executeForEach(cell->absPos, cudaSimulationParameters.cellFunctionInjectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
             if (cell == otherCell) {
                 return;
             }
@@ -59,7 +59,8 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             auto injectorDuration = cudaSimulationParameters.cellFunctionInjectorDurationColorMatrix[cell->color][otherCell->color];
 
             auto numDefenderCells = getNumDefenderCells(otherCell);
-            float defendStrength = numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.cellFunctionDefenderAgainstInjectorStrength, numDefenderCells);
+            float defendStrength =
+                numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.cellFunctionDefenderAgainstInjectorStrength[cell->color], numDefenderCells);
             injectorDuration = toInt(toFloat(injectorDuration) * defendStrength);
 
             if (injector.counter < injectorDuration) {

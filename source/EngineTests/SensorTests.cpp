@@ -13,7 +13,9 @@ public:
         SimulationParameters result;
         result.innerFriction = 0;
         result.baseValues.friction = 0;
-        result.baseValues.radiationCellAgeStrength = 0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            result.baseValues.radiationCellAgeStrength[i] = 0;
+        }
         return result;
     }
     SensorTests()
