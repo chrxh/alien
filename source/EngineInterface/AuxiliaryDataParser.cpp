@@ -214,6 +214,12 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         parserTask);
     encodeDecodeProperty(
         tree,
+        parameters.baseValues.cellFunctionConstructorMutationColorProbability,
+        defaultParameters.baseValues.cellFunctionConstructorMutationColorProbability,
+        "simulation parameters.cell.function.constructor.mutation probability.color",
+        parserTask);
+    encodeDecodeProperty(
+        tree,
         parameters.cellFunctionConstructorMutationColorTransitions,
         defaultParameters.cellFunctionConstructorMutationColorTransitions,
         "simulation parameters.cell.function.constructor.mutation color transition",
@@ -564,14 +570,21 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
             spot.values.cellFunctionConstructorMutationTranslationProbability,
             spot.activatedValues.cellFunctionConstructorMutationTranslationProbability,
             defaultSpot.values.cellFunctionConstructorMutationTranslationProbability,
-            "cell.function.constructor.mutation probability.translation",
+            base + "cell.function.constructor.mutation probability.translation",
             parserTask);
         encodeDecodeSpotProperty(
             tree,
             spot.values.cellFunctionConstructorMutationDuplicationProbability,
             spot.activatedValues.cellFunctionConstructorMutationDuplicationProbability,
             defaultSpot.values.cellFunctionConstructorMutationDuplicationProbability,
-            "cell.function.constructor.mutation probability.duplication",
+            base + "cell.function.constructor.mutation probability.duplication",
+            parserTask);
+        encodeDecodeSpotProperty(
+            tree,
+            spot.values.cellFunctionConstructorMutationColorProbability,
+            spot.activatedValues.cellFunctionConstructorMutationColorProbability,
+            defaultSpot.values.cellFunctionConstructorMutationColorProbability,
+            base + "cell.function.constructor.mutation probability.color",
             parserTask);
     }
 }
