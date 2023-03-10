@@ -226,12 +226,6 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         parserTask);
     encodeDecodeProperty(
         tree,
-        parameters.cellFunctionConstructorMutationColor,
-        defaultParameters.cellFunctionConstructorMutationColor,
-        "simulation parameters.cell.function.constructor.mutation color",
-        parserTask);
-    encodeDecodeProperty(
-        tree,
         parameters.cellFunctionConstructorMutationSelfReplication,
         defaultParameters.cellFunctionConstructorMutationSelfReplication,
         "simulation parameters.cell.function.constructor.mutation self replication",
