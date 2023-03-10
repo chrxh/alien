@@ -590,22 +590,8 @@ void AuxiliaryDataParser::encodeDecodeProperty(
     std::string const& node,
     ParserTask task)
 {
-    if (ParserTask::Decode == task) {
-        if (tree.get_optional<float>(node)) {
-            JsonParser::encodeDecode(tree, parameter[0], defaultValue[0], node, task);
-            for (int i = 1; i < MAX_COLORS; ++i) {
-                parameter[i] = parameter[0];
-            }
-
-        } else {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + ".color[" + std::to_string(i) + "]", task);
-            }
-        }
-    } else {
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
-        }
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
     }
 }
 
@@ -617,22 +603,8 @@ void AuxiliaryDataParser::encodeDecodeProperty(
     std::string const& node,
     ParserTask task)
 {
-    if (ParserTask::Decode == task) {
-        if (tree.get_optional<float>(node)) {
-            JsonParser::encodeDecode(tree, parameter[0], defaultValue[0], node, task);
-            for (int i = 1; i < MAX_COLORS; ++i) {
-                parameter[i] = parameter[0];
-            }
-
-        } else {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + ".color[" + std::to_string(i) + "]", task);
-            }
-        }
-    } else {
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
-        }
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
     }
 }
 

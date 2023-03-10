@@ -559,8 +559,27 @@ __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data
     }
 
     auto origColor = getNextCellColor(genome, nodeIndex);
-    //cudaSimulationParameters.
-    int newColor = origColor;
+    int numAllowedColors = 0;
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        if (cudaSimulationParameters.cellFunctionConstructorMutationColorTransitions[origColor][i]) {
+            ++numAllowedColors;
+        }
+    }
+    if (numAllowedColors == 0) {
+        return;
+    }
+    int randomAllowedColorIndex = data.numberGen1.random(numAllowedColors - 1);
+    int allowedColorIndex = 0;
+    int newColor;
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        if (cudaSimulationParameters.cellFunctionConstructorMutationColorTransitions[origColor][i]) {
+            if (allowedColorIndex == randomAllowedColorIndex) {
+                newColor = i;
+                break;
+            }
+            ++allowedColorIndex;
+        }
+    }
 
     for (int dummy = 0; nodeIndex < genomeSize && dummy < subgenomeSize; ++dummy) {
         setNextCellColor(genome, nodeIndex, newColor);
