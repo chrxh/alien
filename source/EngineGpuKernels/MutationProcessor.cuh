@@ -17,6 +17,7 @@ public:
     __inline__ __device__ static void deleteMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void translateMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void duplicateMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void colorMutation(SimulationData& data, Cell* cell);
 
 private:
     static auto constexpr MAX_SUBGENOME_RECURSION_DEPTH = 20;
@@ -535,6 +536,36 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
+}
+
+__inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    auto& genome = constructor.genome;
+    auto genomeSize = toInt(constructor.genomeSize);
+    if (genomeSize == 0) {
+        return;
+    }
+
+    int subGenomesSizeIndices[MAX_SUBGENOME_RECURSION_DEPTH];
+    int numSubGenomesSizeIndices;
+    getRandomGenomeNodeIndex(data, genome, genomeSize, false, subGenomesSizeIndices, &numSubGenomesSizeIndices);  //return value will be discarded
+
+    int nodeIndex = 0;
+    int subgenomeSize = genomeSize;
+    if (numSubGenomesSizeIndices > 0) {
+        nodeIndex = subGenomesSizeIndices[numSubGenomesSizeIndices - 1] + 2;   //+2 because 2 bytes encode the sub-genome length
+        subgenomeSize = readWord(genome, subGenomesSizeIndices[numSubGenomesSizeIndices - 1]);
+    }
+
+    auto origColor = getNextCellColor(genome, nodeIndex);
+    //cudaSimulationParameters.
+    int newColor = origColor;
+
+    for (int dummy = 0; nodeIndex < genomeSize && dummy < subgenomeSize; ++dummy) {
+        setNextCellColor(genome, nodeIndex, newColor);
+        nodeIndex += CellBasicBytes + getNextCellFunctionDataSize(genome, subgenomeSize, nodeIndex);
+    }
 }
 
 __inline__ __device__ bool MutationProcessor::isRandomEvent(SimulationData& data, float probability)

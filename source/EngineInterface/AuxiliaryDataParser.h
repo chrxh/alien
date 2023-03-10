@@ -26,15 +26,36 @@ private:
     template <>
     static void encodeDecodeProperty(
         boost::property_tree::ptree& tree,
-        FloatByColor& parameter,
-        FloatByColor const& defaultValue,
+        FloatColorVector& parameter,
+        FloatColorVector const& defaultValue,
         std::string const& node,
         ParserTask task);
     template <>
     static void encodeDecodeProperty(
         boost::property_tree::ptree& tree,
-        IntByColor& parameter,
-        IntByColor const& defaultValue,
+        IntColorVector& parameter,
+        IntColorVector const& defaultValue,
+        std::string const& node,
+        ParserTask task);
+    template <>
+    static void encodeDecodeProperty(
+        boost::property_tree::ptree& tree,
+        FloatColorMatrix& parameter,
+        FloatColorMatrix const& defaultValue,
+        std::string const& node,
+        ParserTask task);
+    template <>
+    static void encodeDecodeProperty(
+        boost::property_tree::ptree& tree,
+        IntColorMatrix& parameter,
+        IntColorMatrix const& defaultValue,
+        std::string const& node,
+        ParserTask task);
+    template <>
+    static void encodeDecodeProperty(
+        boost::property_tree::ptree& tree,
+        BoolColorMatrix& parameter,
+        BoolColorMatrix const& defaultValue,
         std::string const& node,
         ParserTask task);
 
@@ -49,17 +70,17 @@ private:
     template <>
     static void encodeDecodeSpotProperty(
         boost::property_tree::ptree& tree,
-        FloatByColor& parameter,
+        FloatColorVector& parameter,
         bool& isActivated,
-        FloatByColor const& defaultValue,
+        FloatColorVector const& defaultValue,
         std::string const& node,
         ParserTask task);
     template <>
     static void encodeDecodeSpotProperty(
         boost::property_tree::ptree& tree,
-        IntByColor& parameter,
+        IntColorVector& parameter,
         bool& isActivated,
-        IntByColor const& defaultValue,
+        IntColorVector const& defaultValue,
         std::string const& node,
         ParserTask task);
 };
