@@ -123,6 +123,12 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         data,
         cell->absPos,
         cell->color);
+    auto cellFunctionConstructorMutationColorProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationColorProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationColorProbability,
+        data,
+        cell->absPos,
+        cell->color);
 
     if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
         changeNeuronDataMutation(data, cell);
@@ -145,6 +151,9 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
     if (isRandomEvent(data, cellFunctionConstructorMutationDuplicationProbability)) {
         duplicateMutation(data, cell);
     }
+    if (isRandomEvent(data, cellFunctionConstructorMutationColorProbability)) {
+        colorMutation(data, cell);
+    }
 }
 
 __inline__ __device__ void MutationProcessor::changeDataMutation(SimulationData& data, Cell* cell)
@@ -163,7 +172,7 @@ __inline__ __device__ void MutationProcessor::changeDataMutation(SimulationData&
         if (randomDelta == 0) { //no cell function type change
             return;
         }
-        if (!cudaSimulationParameters.cellFunctionConstructorMutationColor && randomDelta == CellColorPos) {  //no color change
+        if (randomDelta == CellColorPos) {  //no color change
             return;
         }
         genome[nodeIndex + randomDelta] = data.numberGen1.randomByte();
@@ -268,12 +277,8 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     auto nodeIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, true, subGenomesSizeIndices, &numSubGenomesSizeIndices);
 
     auto newColor = cell->color;
-    if (cudaSimulationParameters.cellFunctionConstructorMutationColor) {
-        newColor = data.numberGen1.random(MAX_COLORS - 1);
-    } else {
-        if (nodeIndex < genomeSize) {
-            newColor = getNextCellColor(genome, nodeIndex);
-        }
+    if (nodeIndex < genomeSize) {
+        newColor = getNextCellColor(genome, nodeIndex);
     }
     auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
     auto makeSelfCopy = cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication ? data.numberGen1.randomBool() : false;

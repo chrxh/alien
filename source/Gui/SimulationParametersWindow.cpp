@@ -586,20 +586,23 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability),
                 simParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Color")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationColorProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationColorProbability);
             AlienImGui::CheckboxColorMatrix(
                 AlienImGui::CheckboxColorMatrixParameters()
                     .name("Color transitions")
                     .textWidth(RightColumnWidth)
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionConstructorMutationColorTransitions)),
                 simParameters.cellFunctionConstructorMutationColorTransitions);
-            auto preserveColor = !simParameters.cellFunctionConstructorMutationColor;
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Preserve color")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(!origSimParameters.cellFunctionConstructorMutationColor),
-                preserveColor);
-            simParameters.cellFunctionConstructorMutationColor = !preserveColor;
             auto preserveSelfReplication = !simParameters.cellFunctionConstructorMutationSelfReplication;
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
@@ -1344,6 +1347,19 @@ void _SimulationParametersWindow::processSpot(
                     .disabledValue(parameters.baseValues.cellFunctionConstructorMutationDuplicationProbability),
                 spot.values.cellFunctionConstructorMutationDuplicationProbability,
                 &spot.activatedValues.cellFunctionConstructorMutationDuplicationProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Color")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .colorDependence(true)
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationColorProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationColorProbability),
+                spot.values.cellFunctionConstructorMutationColorProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationColorProbability);
             ImGui::TreePop();
         }
 

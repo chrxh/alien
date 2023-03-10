@@ -86,7 +86,6 @@ struct SimulationParameters
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true}};
-    bool cellFunctionConstructorMutationColor = false;
     bool cellFunctionConstructorMutationSelfReplication = false;
 
     FloatColorVector cellFunctionInjectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
@@ -285,7 +284,6 @@ struct SimulationParameters
             && cellFunctionSensorActivityThreshold == other.cellFunctionSensorActivityThreshold
             && cellFunctionConstructionUnlimitedEnergy == other.cellFunctionConstructionUnlimitedEnergy
             && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
-            && cellFunctionConstructorMutationColor == other.cellFunctionConstructorMutationColor
             && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication
         ;
     }

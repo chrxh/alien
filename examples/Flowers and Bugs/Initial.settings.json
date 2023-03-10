@@ -135,7 +135,14 @@
                         "duplication[3]": "0.00000000",
                         "duplication[4]": "0.00000000",
                         "duplication[5]": "0.00000000",
-                        "duplication[6]": "0.00000000"
+                        "duplication[6]": "0.00000000",
+                        "color[0]": "0.00000000",
+                        "color[1]": "0.00000000",
+                        "color[2]": "0.00000000",
+                        "color[3]": "0.00000000",
+                        "color[4]": "0.00000000",
+                        "color[5]": "0.00000000",
+                        "color[6]": "0.00000000"
                     },
                     "mutation color transition[0, 0]": "true",
                     "mutation color transition[0, 1]": "true",
@@ -186,7 +193,6 @@
                     "mutation color transition[6, 4]": "true",
                     "mutation color transition[6, 5]": "true",
                     "mutation color transition[6, 6]": "true",
-                    "mutation color": "false",
                     "mutation self replication": "false"
                 },
                 "injector": {
@@ -450,20 +456,20 @@
             "probability": "0.03000000",
             "velocity multiplier": "1.00000000",
             "velocity perturbation": "0.50000000",
-            "absorption[0]": "1.00000000",
-            "absorption[1]": "1.00000000",
-            "absorption[2]": "1.00000000",
-            "absorption[3]": "1.00000000",
-            "absorption[4]": "1.00000000",
-            "absorption[5]": "1.00000000",
-            "absorption[6]": "1.00000000",
-            "min cell age[0]": "0",
-            "min cell age[1]": "0",
-            "min cell age[2]": "0",
-            "min cell age[3]": "0",
-            "min cell age[4]": "0",
-            "min cell age[5]": "0",
-            "min cell age[6]": "0"
+            "absorption[0]": "0.00000000",
+            "absorption[1]": "0.00000000",
+            "absorption[2]": "0.23000000",
+            "absorption[3]": "0.23000000",
+            "absorption[4]": "0.23000000",
+            "absorption[5]": "0.23000000",
+            "absorption[6]": "0.23000000",
+            "min cell age[0]": "150583",
+            "min cell age[1]": "150583",
+            "min cell age[2]": "150583",
+            "min cell age[3]": "150583",
+            "min cell age[4]": "150583",
+            "min cell age[5]": "150583",
+            "min cell age[6]": "150583"
         },
         "high radiation": {
             "min cell energy[0]": "1483.98205566",
@@ -716,7 +722,37 @@
                                 "deletion[3]": "0.00000000",
                                 "deletion[4]": "0.00000000",
                                 "deletion[5]": "0.00000000",
-                                "deletion[6]": "0.00000000"
+                                "deletion[6]": "0.00000000",
+                                "translation": {
+                                    "activated": "false"
+                                },
+                                "translation[0]": "0.00000000",
+                                "translation[1]": "0.00000000",
+                                "translation[2]": "0.00000000",
+                                "translation[3]": "0.00000000",
+                                "translation[4]": "0.00000000",
+                                "translation[5]": "0.00000000",
+                                "translation[6]": "0.00000000",
+                                "duplication": {
+                                    "activated": "false"
+                                },
+                                "duplication[0]": "0.00000000",
+                                "duplication[1]": "0.00000000",
+                                "duplication[2]": "0.00000000",
+                                "duplication[3]": "0.00000000",
+                                "duplication[4]": "0.00000000",
+                                "duplication[5]": "0.00000000",
+                                "duplication[6]": "0.00000000",
+                                "color": {
+                                    "activated": "false"
+                                },
+                                "color[0]": "0.00000000",
+                                "color[1]": "0.00000000",
+                                "color[2]": "0.00000000",
+                                "color[3]": "0.00000000",
+                                "color[4]": "0.00000000",
+                                "color[5]": "0.00000000",
+                                "color[6]": "0.00000000"
                             }
                         }
                     }
@@ -738,34 +774,6 @@
                             }
                         }
                     }
-                }
-            }
-        }
-    },
-    "cell": {
-        "function": {
-            "constructor": {
-                "mutation probability": {
-                    "translation": {
-                        "activated": "false"
-                    },
-                    "translation[0]": "0.00000000",
-                    "translation[1]": "0.00000000",
-                    "translation[2]": "0.00000000",
-                    "translation[3]": "0.00000000",
-                    "translation[4]": "0.00000000",
-                    "translation[5]": "0.00000000",
-                    "translation[6]": "0.00000000",
-                    "duplication": {
-                        "activated": "false"
-                    },
-                    "duplication[0]": "0.00000000",
-                    "duplication[1]": "0.00000000",
-                    "duplication[2]": "0.00000000",
-                    "duplication[3]": "0.00000000",
-                    "duplication[4]": "0.00000000",
-                    "duplication[5]": "0.00000000",
-                    "duplication[6]": "0.00000000"
                 }
             }
         }
