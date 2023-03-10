@@ -39,6 +39,7 @@ struct SimulationParametersSpotValues
     FloatColorVector cellFunctionConstructorMutationDeletionProbability = {0, 0, 0, 0, 0, 0, 0};
     FloatColorVector cellFunctionConstructorMutationTranslationProbability = {0, 0, 0, 0, 0, 0, 0};
     FloatColorVector cellFunctionConstructorMutationDuplicationProbability = {0, 0, 0, 0, 0, 0, 0};
+    FloatColorVector cellFunctionConstructorMutationColorProbability = {0, 0, 0, 0, 0, 0, 0};
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {
@@ -90,6 +91,9 @@ struct SimulationParametersSpotValues
                 return false;
             }
             if (cellFunctionConstructorMutationDuplicationProbability[i] != other.cellFunctionConstructorMutationDuplicationProbability[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorMutationColorProbability[i] != other.cellFunctionConstructorMutationColorProbability[i]) {
                 return false;
             }
         }
