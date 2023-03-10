@@ -590,8 +590,8 @@ void _SimulationParametersWindow::processBase(
                 AlienImGui::CheckboxColorMatrixParameters()
                     .name("Color transitions")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.baseValues.cellFunctionConstructorMutationColorTransitions)),
-                simParameters.baseValues.cellFunctionConstructorMutationColorTransitions);
+                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionConstructorMutationColorTransitions)),
+                simParameters.cellFunctionConstructorMutationColorTransitions);
             auto preserveColor = !simParameters.cellFunctionConstructorMutationColor;
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
