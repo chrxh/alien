@@ -99,7 +99,13 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             auto color = calcMod(cell->color, MAX_COLORS);
             auto otherColor = calcMod(otherCell->color, MAX_COLORS);
-            energyToTransfer *= SpotCalculator::calcFoodChainColorMatrix(color, otherColor, data, cell->absPos);
+            energyToTransfer *= SpotCalculator::calcParameter(
+                &SimulationParametersSpotValues::cellFunctionAttackerFoodChainColorMatrix,
+                &SimulationParametersSpotActivatedValues::cellFunctionAttackerFoodChainColorMatrix,
+                data,
+                cell->absPos,
+                color,
+                otherColor);
 
             if (abs(energyToTransfer) < NEAR_ZERO) {
                 return;

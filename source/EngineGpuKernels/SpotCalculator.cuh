@@ -67,7 +67,7 @@ public:
     }
 
     __device__ __inline__ static float calcParameter(
-        FloatByColor SimulationParametersSpotValues::*value,
+        FloatColorVector SimulationParametersSpotValues::*value,
         bool SimulationParametersSpotActivatedValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos,
@@ -101,26 +101,23 @@ public:
         return toInt(calcResultingValue(data.cellMap, worldPos, toFloat(cudaSimulationParameters.baseValues.*value), spotValues, valueActivated));
     }
 
-    __device__ __inline__ static float calcFoodChainColorMatrix(
-        int color,
-        int otherColor,
+    __device__ __inline__ static float calcParameter(
+        FloatColorMatrix SimulationParametersSpotValues::*value,
+        bool SimulationParametersSpotActivatedValues::*valueActivated,
         SimulationData const& data,
-        float2 const& worldPos)
+        float2 const& worldPos,
+        int color1,
+        int color2)
     {
         float spotValues[MAX_SPOTS];
         int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            if (cudaSimulationParameters.spots[i].activatedValues.cellFunctionAttackerFoodChainColorMatrix) {
-                spotValues[numValues++] = cudaSimulationParameters.spots[i].values.cellFunctionAttackerFoodChainColorMatrix[color][otherColor];
+            if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                spotValues[numValues++] = (cudaSimulationParameters.spots[i].values.*value)[color1][color2];
             }
         }
 
-        return calcResultingValue(
-            data.cellMap,
-            worldPos,
-            cudaSimulationParameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[color][otherColor],
-            spotValues,
-            &SimulationParametersSpotActivatedValues::cellFunctionAttackerFoodChainColorMatrix);
+        return calcResultingValue(data.cellMap, worldPos, (cudaSimulationParameters.baseValues.*value)[color1][color2], spotValues, valueActivated);
     }
 
     //return -1 for base

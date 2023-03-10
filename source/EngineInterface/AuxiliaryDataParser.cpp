@@ -108,20 +108,18 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         tree, parameters.baseValues.cellFusionVelocity, defaultParameters.baseValues.cellFusionVelocity, "simulation parameters.cell.fusion velocity", parserTask);
     encodeDecodeProperty(
         tree, parameters.baseValues.cellMaxBindingEnergy, parameters.baseValues.cellMaxBindingEnergy, "simulation parameters.cell.max binding energy", parserTask);
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        encodeDecodeProperty(
-            tree,
-            parameters.baseValues.cellColorTransitionDuration[i],
-            defaultParameters.baseValues.cellColorTransitionDuration[i],
-            "simulation parameters.cell.color transition rules.duration[" + std::to_string(i) + "]",
-            parserTask);
-        encodeDecodeProperty(
-            tree,
-            parameters.baseValues.cellColorTransitionTargetColor[i],
-            defaultParameters.baseValues.cellColorTransitionTargetColor[i],
-            "simulation parameters.cell.color transition rules.target color[" + std::to_string(i) + "]",
-            parserTask);
-    }
+    encodeDecodeProperty(
+        tree,
+        parameters.baseValues.cellColorTransitionDuration,
+        defaultParameters.baseValues.cellColorTransitionDuration,
+        "simulation parameters.cell.color transition rules.duration",
+        parserTask);
+    encodeDecodeProperty(
+        tree,
+        parameters.baseValues.cellColorTransitionTargetColor,
+        defaultParameters.baseValues.cellColorTransitionTargetColor,
+        "simulation parameters.cell.color transition rules.target color",
+        parserTask);
     encodeDecodeProperty(
         tree, parameters.baseValues.radiationCellAgeStrength, defaultParameters.baseValues.radiationCellAgeStrength, "simulation parameters.radiation.factor", parserTask);
     encodeDecodeProperty(tree, parameters.radiationProb, defaultParameters.radiationProb, "simulation parameters.radiation.probability", parserTask);
@@ -216,6 +214,12 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         parserTask);
     encodeDecodeProperty(
         tree,
+        parameters.cellFunctionConstructorMutationColorTransitions,
+        defaultParameters.cellFunctionConstructorMutationColorTransitions,
+        "simulation parameters.cell.function.constructor.mutation color transition",
+        parserTask);
+    encodeDecodeProperty(
+        tree,
         parameters.cellFunctionConstructorMutationColor,
         defaultParameters.cellFunctionConstructorMutationColor,
         "simulation parameters.cell.function.constructor.mutation color",
@@ -233,16 +237,12 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         defaultParameters.cellFunctionInjectorRadius,
         "simulation parameters.cell.function.injector.radius",
         parserTask);
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        for (int j = 0; j < MAX_COLORS; ++j) {
-            encodeDecodeProperty(
-                tree,
-                parameters.cellFunctionInjectorDurationColorMatrix[i][j],
-                defaultParameters.cellFunctionInjectorDurationColorMatrix[i][j],
-                "simulation parameters.cell.function.injector.duration[" + std::to_string(i) + ", " + std::to_string(j) + "]",
-                parserTask);
-        }
-    }
+    encodeDecodeProperty(
+        tree,
+        parameters.cellFunctionInjectorDurationColorMatrix,
+        defaultParameters.cellFunctionInjectorDurationColorMatrix,
+        "simulation parameters.cell.function.injector.duration",
+        parserTask);
 
     encodeDecodeProperty(
         tree, parameters.cellFunctionAttackerRadius, defaultParameters.cellFunctionAttackerRadius,
@@ -302,16 +302,12 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         defaultParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent,
         "simulation parameters.cell.function.attacker.geometry deviation exponent",
         parserTask);
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        for (int j = 0; j < MAX_COLORS; ++j) {
-            encodeDecodeProperty(
-                tree,
-                parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j],
-                defaultParameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j],
-                "simulation parameters.cell.function.attacker.food chain color matrix[" + std::to_string(i) + ", " + std::to_string(j) + "]",
-                parserTask);
-        }
-    }
+    encodeDecodeProperty(
+        tree,
+        parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix,
+        defaultParameters.baseValues.cellFunctionAttackerFoodChainColorMatrix,
+        "simulation parameters.cell.function.attacker.food chain color matrix",
+        parserTask);
     encodeDecodeProperty(
         tree,
         parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty,
@@ -485,20 +481,18 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
             parserTask);
 
         encodeDecodeProperty(tree, spot.activatedValues.cellColorTransition, false, base + "cell.color transition rules.activated", parserTask);
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            encodeDecodeProperty(
-                tree,
-                spot.values.cellColorTransitionDuration[i],
-                defaultSpot.values.cellColorTransitionDuration[i],
-                base + "cell.color transition rules.duration[" + std::to_string(i) + "]",
-                parserTask);
-            encodeDecodeProperty(
-                tree,
-                spot.values.cellColorTransitionTargetColor[i],
-                defaultSpot.values.cellColorTransitionTargetColor[i],
-                base + "cell.color transition rules.target color[" + std::to_string(i) + "]",
-                parserTask);
-        }
+        encodeDecodeProperty(
+            tree,
+            spot.values.cellColorTransitionDuration,
+            defaultSpot.values.cellColorTransitionDuration,
+            base + "cell.color transition rules.duration",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            spot.values.cellColorTransitionTargetColor,
+            defaultSpot.values.cellColorTransitionTargetColor,
+            base + "cell.color transition rules.target color",
+            parserTask);
 
         encodeDecodeSpotProperty(
             tree,
@@ -509,16 +503,12 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
             parserTask);
         encodeDecodeProperty(
             tree, spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix, false, base + "cell.function.attacker.food chain color matrix.activated", parserTask);
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            for (int j = 0; j < MAX_COLORS; ++j) {
-                encodeDecodeProperty(
-                    tree,
-                    spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j],
-                    defaultSpot.values.cellFunctionAttackerFoodChainColorMatrix[i][j],
-                    base + "cell.function.attacker.food chain color matrix[" + std::to_string(i) + ", " + std::to_string(j) + "]",
-                    parserTask);
-            }
-        }
+        encodeDecodeProperty(
+            tree,
+            spot.values.cellFunctionAttackerFoodChainColorMatrix,
+            defaultSpot.values.cellFunctionAttackerFoodChainColorMatrix,
+            base + "cell.function.attacker.food chain color matrix",
+            parserTask);
         encodeDecodeSpotProperty(
             tree,
             spot.values.cellFunctionAttackerGeometryDeviationExponent,
@@ -595,8 +585,8 @@ void AuxiliaryDataParser::encodeDecodeProperty(boost::property_tree::ptree& tree
 template <>
 void AuxiliaryDataParser::encodeDecodeProperty(
     boost::property_tree::ptree& tree,
-    FloatByColor& parameter,
-    FloatByColor const& defaultValue,
+    FloatColorVector& parameter,
+    FloatColorVector const& defaultValue,
     std::string const& node,
     ParserTask task)
 {
@@ -614,7 +604,7 @@ void AuxiliaryDataParser::encodeDecodeProperty(
         }
     } else {
         for (int i = 0; i < MAX_COLORS; ++i) {
-            encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + ".color[" + std::to_string(i) + "]", task);
+            encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
         }
     }
 }
@@ -622,8 +612,8 @@ void AuxiliaryDataParser::encodeDecodeProperty(
 template <>
 void AuxiliaryDataParser::encodeDecodeProperty(
     boost::property_tree::ptree& tree,
-    IntByColor& parameter,
-    IntByColor const& defaultValue,
+    IntColorVector& parameter,
+    IntColorVector const& defaultValue,
     std::string const& node,
     ParserTask task)
 {
@@ -641,7 +631,52 @@ void AuxiliaryDataParser::encodeDecodeProperty(
         }
     } else {
         for (int i = 0; i < MAX_COLORS; ++i) {
-            encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + ".color[" + std::to_string(i) + "]", task);
+            encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
+        }
+    }
+}
+
+template <>
+void AuxiliaryDataParser::encodeDecodeProperty<FloatColorMatrix>(
+    boost::property_tree::ptree& tree,
+    FloatColorMatrix& parameter,
+    FloatColorMatrix const& defaultValue,
+    std::string const& node,
+    ParserTask task)
+{
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        for (int j = 0; j < MAX_COLORS; ++j) {
+            encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
+        }
+    }
+}
+
+template <>
+void AuxiliaryDataParser::encodeDecodeProperty<IntColorMatrix>(
+    boost::property_tree::ptree& tree,
+    IntColorMatrix& parameter,
+    IntColorMatrix const& defaultValue,
+    std::string const& node,
+    ParserTask task)
+{
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        for (int j = 0; j < MAX_COLORS; ++j) {
+            encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
+        }
+    }
+}
+
+template <>
+void AuxiliaryDataParser::encodeDecodeProperty<BoolColorMatrix>(
+    boost::property_tree::ptree& tree,
+    BoolColorMatrix& parameter,
+    BoolColorMatrix const& defaultValue,
+    std::string const& node,
+    ParserTask task)
+{
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        for (int j = 0; j < MAX_COLORS; ++j) {
+            encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
         }
     }
 }
@@ -662,9 +697,9 @@ void AuxiliaryDataParser::encodeDecodeSpotProperty(
 template <>
 void AuxiliaryDataParser::encodeDecodeSpotProperty(
     boost::property_tree::ptree& tree,
-    FloatByColor& parameter,
+    FloatColorVector& parameter,
     bool& isActivated,
-    FloatByColor const& defaultValue,
+    FloatColorVector const& defaultValue,
     std::string const& node,
     ParserTask task)
 {
@@ -675,9 +710,9 @@ void AuxiliaryDataParser::encodeDecodeSpotProperty(
 template <>
 void AuxiliaryDataParser::encodeDecodeSpotProperty(
     boost::property_tree::ptree& tree,
-    IntByColor& parameter,
+    IntColorVector& parameter,
     bool& isActivated,
-    IntByColor const& defaultValue,
+    IntColorVector const& defaultValue,
     std::string const& node,
     ParserTask task)
 {

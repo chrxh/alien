@@ -58,31 +58,39 @@ struct SimulationParameters
     float cellMaxVelocity = 2.0f;              
     float cellMaxBindingDistance = 3.6f;
 
-    FloatByColor cellNormalEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
+    FloatColorVector cellNormalEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
     float cellMinDistance = 0.3f;         
     float cellMaxForceDecayProb = 0.2f;
     int cellNumExecutionOrderNumbers = 6;
 
-    FloatByColor radiationAbsorption = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    FloatColorVector radiationAbsorption = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
-    IntByColor radiationMinCellAge = {0, 0, 0, 0, 0, 0, 0};
-    FloatByColor highRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
-    FloatByColor highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
+    IntColorVector radiationMinCellAge = {0, 0, 0, 0, 0, 0, 0};
+    FloatColorVector highRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
+    FloatColorVector highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
     bool clusterDecay = false;
-    FloatByColor clusterDecayProb = {0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f};
+    FloatColorVector clusterDecayProb = {0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f};
     
     bool cellFunctionConstructionUnlimitedEnergy = false;
-    FloatByColor cellFunctionConstructorOffspringDistance = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
-    FloatByColor cellFunctionConstructorConnectingCellMaxDistance = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
-    FloatByColor cellFunctionConstructorActivityThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+    FloatColorVector cellFunctionConstructorOffspringDistance = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
+    FloatColorVector cellFunctionConstructorConnectingCellMaxDistance = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
+    FloatColorVector cellFunctionConstructorActivityThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
 
+    BoolColorMatrix cellFunctionConstructorMutationColorTransitions = {
+        {true, true, true, true, true, true, true},
+        {true, true, true, true, true, true, true},
+        {true, true, true, true, true, true, true},
+        {true, true, true, true, true, true, true},
+        {true, true, true, true, true, true, true},
+        {true, true, true, true, true, true, true},
+        {true, true, true, true, true, true, true}};
     bool cellFunctionConstructorMutationColor = false;
     bool cellFunctionConstructorMutationSelfReplication = false;
 
-    FloatByColor cellFunctionInjectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
-    int cellFunctionInjectorDurationColorMatrix[MAX_COLORS][MAX_COLORS] = {
+    FloatColorVector cellFunctionInjectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
+    IntColorMatrix cellFunctionInjectorDurationColorMatrix = {
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
@@ -93,29 +101,29 @@ struct SimulationParameters
     };
     float cellFunctionInjectorActivityThreshold = 0.1f;
 
-    FloatByColor cellFunctionAttackerRadius = {1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f};
-    FloatByColor cellFunctionAttackerStrength = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
-    FloatByColor cellFunctionAttackerEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
+    FloatColorVector cellFunctionAttackerRadius = {1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f};
+    FloatColorVector cellFunctionAttackerStrength = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
+    FloatColorVector cellFunctionAttackerEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
     bool cellFunctionAttackerEnergyDistributionSameColor = true;
-    FloatByColor cellFunctionAttackerEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
-    FloatByColor cellFunctionAttackerColorInhomogeneityFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    FloatByColor cellFunctionAttackerVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    FloatColorVector cellFunctionAttackerEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
+    FloatColorVector cellFunctionAttackerColorInhomogeneityFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    FloatColorVector cellFunctionAttackerVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     float cellFunctionAttackerActivityThreshold = 0.1f;
 
-    FloatByColor cellFunctionDefenderAgainstAttackerStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
-    FloatByColor cellFunctionDefenderAgainstInjectorStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
+    FloatColorVector cellFunctionDefenderAgainstAttackerStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
+    FloatColorVector cellFunctionDefenderAgainstInjectorStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
 
     bool cellFunctionTransmitterEnergyDistributionSameColor = true;
-    FloatByColor cellFunctionTransmitterEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
-    FloatByColor cellFunctionTransmitterEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
+    FloatColorVector cellFunctionTransmitterEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
+    FloatColorVector cellFunctionTransmitterEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
 
-    FloatByColor cellFunctionMuscleContractionExpansionDelta = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
-    FloatByColor cellFunctionMuscleMovementAcceleration = {0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f};
-    FloatByColor cellFunctionMuscleBendingAngle = {5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f};
-    FloatByColor cellFunctionMuscleBendingAcceleration = {0.08f, 0.08f, 0.08f, 0.08f, 0.08f, 0.08f, 0.08f};
+    FloatColorVector cellFunctionMuscleContractionExpansionDelta = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
+    FloatColorVector cellFunctionMuscleMovementAcceleration = {0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f};
+    FloatColorVector cellFunctionMuscleBendingAngle = {5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f};
+    FloatColorVector cellFunctionMuscleBendingAcceleration = {0.08f, 0.08f, 0.08f, 0.08f, 0.08f, 0.08f, 0.08f};
     float cellFunctionMuscleBendingAccelerationThreshold = 0.1f;
 
-    FloatByColor cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
+    FloatColorVector cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
     float cellFunctionSensorActivityThreshold = 0.1f;
 
     bool particleTransformationAllowed = false;
@@ -243,6 +251,9 @@ struct SimulationParameters
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {
+                if (cellFunctionConstructorMutationColorTransitions[i][j] != other.cellFunctionConstructorMutationColorTransitions[i][j]) {
+                    return false;
+                }
                 if (cellFunctionInjectorDurationColorMatrix[i][j] != other.cellFunctionInjectorDurationColorMatrix[i][j]) {
                     return false;
                 }
