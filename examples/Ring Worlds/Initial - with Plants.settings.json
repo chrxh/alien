@@ -1,10 +1,10 @@
 {
     "general": {
         "time step": "0",
-        "zoom": "8.98242474",
+        "zoom": "1.12280309",
         "center": {
-            "x": "1386.91992188",
-            "y": "168.12994385"
+            "x": "1040.02026367",
+            "y": "245.61457825"
         },
         "world size": {
             "x": "2000",
@@ -135,7 +135,14 @@
                         "duplication[3]": "0.00000000",
                         "duplication[4]": "0.00000000",
                         "duplication[5]": "0.00000000",
-                        "duplication[6]": "0.00000000"
+                        "duplication[6]": "0.00000000",
+                        "color[0]": "0.00000000",
+                        "color[1]": "0.00000000",
+                        "color[2]": "0.00000000",
+                        "color[3]": "0.00000000",
+                        "color[4]": "0.00000000",
+                        "color[5]": "0.00000000",
+                        "color[6]": "0.00000000"
                     },
                     "mutation color transition[0, 0]": "true",
                     "mutation color transition[0, 1]": "true",
@@ -186,7 +193,6 @@
                     "mutation color transition[6, 4]": "true",
                     "mutation color transition[6, 5]": "true",
                     "mutation color transition[6, 6]": "true",
-                    "mutation color": "false",
                     "mutation self replication": "false"
                 },
                 "injector": {
@@ -722,7 +728,37 @@
                                 "deletion[3]": "0.00000000",
                                 "deletion[4]": "0.00000000",
                                 "deletion[5]": "0.00000000",
-                                "deletion[6]": "0.00000000"
+                                "deletion[6]": "0.00000000",
+                                "translation": {
+                                    "activated": "false"
+                                },
+                                "translation[0]": "0.00000000",
+                                "translation[1]": "0.00000000",
+                                "translation[2]": "0.00000000",
+                                "translation[3]": "0.00000000",
+                                "translation[4]": "0.00000000",
+                                "translation[5]": "0.00000000",
+                                "translation[6]": "0.00000000",
+                                "duplication": {
+                                    "activated": "false"
+                                },
+                                "duplication[0]": "0.00000000",
+                                "duplication[1]": "0.00000000",
+                                "duplication[2]": "0.00000000",
+                                "duplication[3]": "0.00000000",
+                                "duplication[4]": "0.00000000",
+                                "duplication[5]": "0.00000000",
+                                "duplication[6]": "0.00000000",
+                                "color": {
+                                    "activated": "false"
+                                },
+                                "color[0]": "0.00000000",
+                                "color[1]": "0.00000000",
+                                "color[2]": "0.00000000",
+                                "color[3]": "0.00000000",
+                                "color[4]": "0.00000000",
+                                "color[5]": "0.00000000",
+                                "color[6]": "0.00000000"
                             }
                         }
                     }
@@ -953,7 +989,37 @@
                                 "deletion[3]": "0.00000000",
                                 "deletion[4]": "0.00000000",
                                 "deletion[5]": "0.00000000",
-                                "deletion[6]": "0.00000000"
+                                "deletion[6]": "0.00000000",
+                                "translation": {
+                                    "activated": "false"
+                                },
+                                "translation[0]": "0.00000000",
+                                "translation[1]": "0.00000000",
+                                "translation[2]": "0.00000000",
+                                "translation[3]": "0.00000000",
+                                "translation[4]": "0.00000000",
+                                "translation[5]": "0.00000000",
+                                "translation[6]": "0.00000000",
+                                "duplication": {
+                                    "activated": "false"
+                                },
+                                "duplication[0]": "0.00000000",
+                                "duplication[1]": "0.00000000",
+                                "duplication[2]": "0.00000000",
+                                "duplication[3]": "0.00000000",
+                                "duplication[4]": "0.00000000",
+                                "duplication[5]": "0.00000000",
+                                "duplication[6]": "0.00000000",
+                                "color": {
+                                    "activated": "false"
+                                },
+                                "color[0]": "0.00000000",
+                                "color[1]": "0.00000000",
+                                "color[2]": "0.00000000",
+                                "color[3]": "0.00000000",
+                                "color[4]": "0.00000000",
+                                "color[5]": "0.00000000",
+                                "color[6]": "0.00000000"
                             }
                         }
                     }
@@ -1184,7 +1250,37 @@
                                 "deletion[3]": "0.00000000",
                                 "deletion[4]": "0.00000000",
                                 "deletion[5]": "0.00000000",
-                                "deletion[6]": "0.00000000"
+                                "deletion[6]": "0.00000000",
+                                "translation": {
+                                    "activated": "false"
+                                },
+                                "translation[0]": "0.00000000",
+                                "translation[1]": "0.00000000",
+                                "translation[2]": "0.00000000",
+                                "translation[3]": "0.00000000",
+                                "translation[4]": "0.00000000",
+                                "translation[5]": "0.00000000",
+                                "translation[6]": "0.00000000",
+                                "duplication": {
+                                    "activated": "false"
+                                },
+                                "duplication[0]": "0.00000000",
+                                "duplication[1]": "0.00000000",
+                                "duplication[2]": "0.00000000",
+                                "duplication[3]": "0.00000000",
+                                "duplication[4]": "0.00000000",
+                                "duplication[5]": "0.00000000",
+                                "duplication[6]": "0.00000000",
+                                "color": {
+                                    "activated": "false"
+                                },
+                                "color[0]": "0.00000000",
+                                "color[1]": "0.00000000",
+                                "color[2]": "0.00000000",
+                                "color[3]": "0.00000000",
+                                "color[4]": "0.00000000",
+                                "color[5]": "0.00000000",
+                                "color[6]": "0.00000000"
                             }
                         }
                     }
@@ -1415,7 +1511,37 @@
                                 "deletion[3]": "0.00000000",
                                 "deletion[4]": "0.00000000",
                                 "deletion[5]": "0.00000000",
-                                "deletion[6]": "0.00000000"
+                                "deletion[6]": "0.00000000",
+                                "translation": {
+                                    "activated": "false"
+                                },
+                                "translation[0]": "0.00000000",
+                                "translation[1]": "0.00000000",
+                                "translation[2]": "0.00000000",
+                                "translation[3]": "0.00000000",
+                                "translation[4]": "0.00000000",
+                                "translation[5]": "0.00000000",
+                                "translation[6]": "0.00000000",
+                                "duplication": {
+                                    "activated": "false"
+                                },
+                                "duplication[0]": "0.00000000",
+                                "duplication[1]": "0.00000000",
+                                "duplication[2]": "0.00000000",
+                                "duplication[3]": "0.00000000",
+                                "duplication[4]": "0.00000000",
+                                "duplication[5]": "0.00000000",
+                                "duplication[6]": "0.00000000",
+                                "color": {
+                                    "activated": "false"
+                                },
+                                "color[0]": "0.00000000",
+                                "color[1]": "0.00000000",
+                                "color[2]": "0.00000000",
+                                "color[3]": "0.00000000",
+                                "color[4]": "0.00000000",
+                                "color[5]": "0.00000000",
+                                "color[6]": "0.00000000"
                             }
                         }
                     }
@@ -1437,34 +1563,6 @@
                             }
                         }
                     }
-                }
-            }
-        }
-    },
-    "cell": {
-        "function": {
-            "constructor": {
-                "mutation probability": {
-                    "translation": {
-                        "activated": "false"
-                    },
-                    "translation[0]": "0.00000000",
-                    "translation[1]": "0.00000000",
-                    "translation[2]": "0.00000000",
-                    "translation[3]": "0.00000000",
-                    "translation[4]": "0.00000000",
-                    "translation[5]": "0.00000000",
-                    "translation[6]": "0.00000000",
-                    "duplication": {
-                        "activated": "false"
-                    },
-                    "duplication[0]": "0.00000000",
-                    "duplication[1]": "0.00000000",
-                    "duplication[2]": "0.00000000",
-                    "duplication[3]": "0.00000000",
-                    "duplication[4]": "0.00000000",
-                    "duplication[5]": "0.00000000",
-                    "duplication[6]": "0.00000000"
                 }
             }
         }
