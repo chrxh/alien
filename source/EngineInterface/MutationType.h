@@ -2,5 +2,5 @@
 
 enum class MutationType
 {
-    Data, NeuronData, CellFunction, Insertion, Deletion, Translation, Duplication
+    Data, NeuronData, CellFunction, Insertion, Deletion, Translation, Duplication, Color
 };
