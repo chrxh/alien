@@ -81,12 +81,12 @@ namespace
 
     __device__ __inline__ float3 calcColor(Particle* particle, bool selected)
     {
-        auto intensity = max(min((toInt(particle->energy) + 10) * 5, 150), 20) / 266.0f;
+        auto intensity = max(min((toInt(particle->energy) + 10.0f) * 5, 450.0f), 20.0f) / 1000.0f;
         if (selected) {
             intensity *= 2.5f;
         }
 
-        return {intensity, 0, 0.08f};
+        return {intensity, intensity, 0.08f};
     }
 
     __device__ __inline__ void drawDot(uint64_t* imageData, int2 const& imageSize, float2 const& pos, float3 const& colorToAdd)

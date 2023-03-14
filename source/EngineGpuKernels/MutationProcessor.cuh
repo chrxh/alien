@@ -575,7 +575,7 @@ __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data
     }
     int randomAllowedColorIndex = data.numberGen1.random(numAllowedColors - 1);
     int allowedColorIndex = 0;
-    int newColor;
+    int newColor = 0;
     for (int i = 0; i < MAX_COLORS; ++i) {
         if (cudaSimulationParameters.cellFunctionConstructorMutationColorTransitions[origColor][i]) {
             if (allowedColorIndex == randomAllowedColorIndex) {
