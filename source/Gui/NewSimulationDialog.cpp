@@ -89,6 +89,6 @@ void _NewSimulationDialog::onNewSimulation()
     }
     _simController->newSimulation(0, generalSettings, parameters);
     _viewport->setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
-    _viewport->setZoomFactor(12.0f);
+    _viewport->setZoomFactor(4.0f);
     _temporalControlWindow->onSnapshot();
 }

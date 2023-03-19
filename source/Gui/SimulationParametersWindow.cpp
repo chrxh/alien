@@ -16,7 +16,7 @@
 
 namespace
 {
-    auto constexpr RightColumnWidth = 260.0f;
+    auto constexpr RightColumnWidth = 270.0f;
 
     template <int numRows, int numCols, typename T>
     std::vector<std::vector<T>> toVector(T const v[numRows][numCols])
@@ -464,10 +464,21 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
-         * Physics: Particle transformation
+         * Cell life cycle
          */
         ImGui::PushID("Transformation");
-        if (ImGui::TreeNodeEx("Physics: Particle transformation", flags)) {
+        if (ImGui::TreeNodeEx("Cell life cycle", flags)) {
+            AlienImGui::SliderInt(
+                AlienImGui::SliderIntParameters()
+                    .name("Maximum age")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .logarithmic(true)
+                    .infinity(true)
+                    .min(1)
+                    .max(1000000)
+                    .defaultValue(origSimParameters.cellMaxAge),
+                simParameters.cellMaxAge);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum energy")
@@ -488,19 +499,14 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.cellNormalEnergy),
                 simParameters.cellNormalEnergy);
             AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Energy to cell transformation")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.particleTransformationAllowed),
+                simParameters.particleTransformationAllowed);
+            AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters().name("Cell cluster decay").textWidth(RightColumnWidth).defaultValue(origSimParameters.clusterDecay),
                 simParameters.clusterDecay);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Cell cluster decay probability")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.0)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .defaultValue(origSimParameters.clusterDecayProb),
-                simParameters.clusterDecayProb);
             ImGui::TreePop();
         }
         ImGui::PopID();
@@ -1235,9 +1241,9 @@ void _SimulationParametersWindow::processSpot(
         }
 
         /**
-         * Physics: Particle transformation
+         * Cell life cycle
          */
-        if (ImGui::TreeNodeEx("Physics: Particle transformation", flags)) {
+        if (ImGui::TreeNodeEx("Cell life cycle", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum energy")

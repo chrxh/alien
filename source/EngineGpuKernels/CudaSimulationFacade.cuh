@@ -6,9 +6,10 @@
 #include <optional>
 
 #if defined(_WIN32)
-#define NOMINMAX
 #include <windows.h>
 #endif
+
+#include <vector_types.h>
 #include <GL/gl.h>
 
 #include "EngineInterface/MonitorData.h"

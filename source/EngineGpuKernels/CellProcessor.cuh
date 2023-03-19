@@ -697,6 +697,13 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 }
             }
         }
+
+        auto cellMaxAge = cudaSimulationParameters.cellMaxAge[cell->color];
+        if (cellMaxAge > 0 && cell->age > cellMaxAge) {
+            if (data.timestep % 20 == index % 20) { //slow down destruction process to avoid too many deletion jobs
+                CellConnectionProcessor::scheduleDeleteCell(data, index);
+            }
+        }
     }
 }
 

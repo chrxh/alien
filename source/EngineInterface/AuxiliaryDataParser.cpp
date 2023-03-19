@@ -108,6 +108,7 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         tree, parameters.baseValues.cellFusionVelocity, defaultParameters.baseValues.cellFusionVelocity, "simulation parameters.cell.fusion velocity", parserTask);
     encodeDecodeProperty(
         tree, parameters.baseValues.cellMaxBindingEnergy, parameters.baseValues.cellMaxBindingEnergy, "simulation parameters.cell.max binding energy", parserTask);
+    encodeDecodeProperty(tree, parameters.cellMaxAge, defaultParameters.cellMaxAge, "simulation parameters.cell.max age", parserTask);
     encodeDecodeProperty(
         tree,
         parameters.baseValues.cellColorTransitionDuration,

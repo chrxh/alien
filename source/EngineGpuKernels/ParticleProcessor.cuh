@@ -104,11 +104,10 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
 
 __inline__ __device__ void ParticleProcessor::transformation(SimulationData& data)
 {
-    auto const partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());
-
     if (!cudaSimulationParameters.particleTransformationAllowed) {
         return;
     }
+    auto const partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.objects.particlePointers.at(particleIndex)) {
             
