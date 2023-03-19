@@ -232,6 +232,9 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
     if (cell->cellFunctionData.attacker.mode == EnergyDistributionMode_TransmittersAndConstructors) {
 
         auto matchActiveConstructorFunc = [&](Cell* const& otherCell) {
+            if (otherCell->livingState != LivingState_Ready) {
+                return false;
+            }
             auto const& constructor = otherCell->cellFunctionData.constructor;
             auto isFinished = constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize;
             if (otherCell->cellFunction == CellFunction_Constructor && !isFinished) {

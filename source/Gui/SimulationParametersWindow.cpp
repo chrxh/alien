@@ -406,10 +406,11 @@ void _SimulationParametersWindow::processBase(
                     .name("Absorption factor")
                     .tooltip("")
                     .textWidth(RightColumnWidth)
+                    .logarithmic(true)
                     .colorDependence(true)
                     .min(0)
                     .max(1.0)
-                    .format("%.2f")
+                    .format("%.4f")
                     .defaultValue(origSimParameters.radiationAbsorption),
                 simParameters.radiationAbsorption);
 
