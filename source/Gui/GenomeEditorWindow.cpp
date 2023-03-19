@@ -700,6 +700,7 @@ void _GenomeEditorWindow::onCreateSpore()
                     .setCellFunction(ConstructorDescription().setGenome(genome));
     auto data = DataDescription().addCell(cell);
     _simController->addAndSelectSimulationData(data);
+    _editorModel->update();
 }
 
 void _GenomeEditorWindow::showPreview(TabData& tab)
