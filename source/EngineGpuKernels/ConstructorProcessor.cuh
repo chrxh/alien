@@ -315,7 +315,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     //possibly connect newCell to hostCell
     bool adaptReferenceAngle = false;
     if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
-        auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
+        auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction
             ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
         if (CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, /*angleFromPreviousForCell*/ 0, 0, distance)) {

@@ -233,8 +233,8 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
 
         auto matchActiveConstructorFunc = [&](Cell* const& otherCell) {
             auto const& constructor = otherCell->cellFunctionData.constructor;
-            auto const isActive = !(constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize);
-            if (otherCell->cellFunction == CellFunction_Constructor && isActive) {
+            auto isFinished = constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize;
+            if (otherCell->cellFunction == CellFunction_Constructor && !isFinished) {
                 if (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color) {
                     return true;
                 }
@@ -250,12 +250,12 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
             return false;
         };
 
-        Cell* receiverCells[10];
+        Cell* receiverCells[20];
         int numReceivers;
         auto radius = cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius[cell->color];
-        data.cellMap.getMatchingCells(receiverCells, 10, numReceivers, cell->absPos, radius, cell->detached, matchActiveConstructorFunc);
+        data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->absPos, radius, cell->detached, matchActiveConstructorFunc);
         if (numReceivers == 0) {
-            data.cellMap.getMatchingCells(receiverCells, 10, numReceivers, cell->absPos, radius, cell->detached, matchTransmitterFunc);
+            data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->absPos, radius, cell->detached, matchTransmitterFunc);
         }
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 

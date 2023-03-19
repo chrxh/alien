@@ -773,12 +773,6 @@ void _SimulationParametersWindow::processBase(
                     .max(20.0f)
                     .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionValue),
                 simParameters.cellFunctionAttackerEnergyDistributionValue);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Same color energy distribution")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionSameColor),
-                simParameters.cellFunctionAttackerEnergyDistributionSameColor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Color inhomogeneity factor")
@@ -788,6 +782,12 @@ void _SimulationParametersWindow::processBase(
                     .max(1.0f)
                     .defaultValue(origSimParameters.cellFunctionAttackerColorInhomogeneityFactor),
                 simParameters.cellFunctionAttackerColorInhomogeneityFactor);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Same color energy distribution")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionSameColor),
+                simParameters.cellFunctionAttackerEnergyDistributionSameColor);
             ImGui::TreePop();
         }
         ImGui::PopID();
