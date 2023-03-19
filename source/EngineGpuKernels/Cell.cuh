@@ -56,6 +56,7 @@ struct ConstructorFunction
     //genome
     uint64_t genomeSize;
     uint8_t* genome;
+    int genomeGeneration;
 
     //process data
     uint64_t currentGenomePos;
@@ -86,6 +87,7 @@ struct InjectorFunction
     int counter;
     uint64_t genomeSize;
     uint8_t* genome;
+    int genomeGeneration;
 };
 
 struct MuscleFunction

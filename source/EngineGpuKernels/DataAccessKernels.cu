@@ -93,6 +93,7 @@ namespace
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
             cellTO.cellFunctionData.constructor.currentGenomePos = cell->cellFunctionData.constructor.currentGenomePos;
+            cellTO.cellFunctionData.constructor.genomeGeneration = cell->cellFunctionData.constructor.genomeGeneration;
         } break;
         case CellFunction_Sensor: {
             cellTO.cellFunctionData.sensor.mode = cell->cellFunctionData.sensor.mode;
@@ -117,6 +118,7 @@ namespace
                 cellTO.cellFunctionData.injector.genomeDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
+            cellTO.cellFunctionData.injector.genomeGeneration = cell->cellFunctionData.injector.genomeGeneration;
         } break;
         case CellFunction_Muscle: {
             cellTO.cellFunctionData.muscle.mode = cell->cellFunctionData.muscle.mode;

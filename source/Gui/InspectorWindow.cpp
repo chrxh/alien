@@ -345,6 +345,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Sequence number").textWidth(GenomeTabTextWidth), entry);
                 desc.currentGenomePos = GenomeDescriptionConverter::convertCellIndexToByteIndex(desc.genome, entry);
             }
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth), desc.genomeGeneration);
 
             AlienImGui::Group("Preview (approximation)");
             if (ImGui::BeginChild("##child", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -569,6 +570,7 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
             constructor.maxConnections = (*constructor.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
         }
         constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
+        constructor.genomeGeneration = std::max(0, constructor.genomeGeneration);
     } break;
     case CellFunction_Sensor: {
         auto& sensor = std::get<SensorDescription>(*cell.cellFunction);

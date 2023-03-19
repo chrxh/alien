@@ -103,6 +103,7 @@ struct ConstructorDescription
     float stiffness = 1.0f;
     int constructionActivationTime = 100;
     std::vector<uint8_t> genome;
+    int genomeGeneration = 0;
 
     //process data
     int currentGenomePos = 0;
@@ -152,6 +153,11 @@ struct ConstructorDescription
     ConstructorDescription& setCurrentGenomePos(int value)
     {
         currentGenomePos = value;
+        return *this;
+    }
+    ConstructorDescription& setGenomeGeneration(int value)
+    {
+        genomeGeneration = value;
         return *this;
     }
 };
@@ -214,6 +220,7 @@ struct InjectorDescription
     InjectorMode mode = InjectorMode_InjectAll;
     int counter = 0;
     std::vector<uint8_t> genome;
+    int genomeGeneration = 0;
 
     auto operator<=>(InjectorDescription const&) const = default;
     InjectorDescription& setMode(InjectorMode value)
@@ -224,6 +231,11 @@ struct InjectorDescription
     InjectorDescription& setGenome(std::vector<uint8_t> const& value)
     {
         genome = value;
+        return *this;
+    }
+    InjectorDescription& setGenomeGeneration(int value)
+    {
+        genomeGeneration = value;
         return *this;
     }
 };

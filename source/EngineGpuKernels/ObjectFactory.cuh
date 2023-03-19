@@ -141,6 +141,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cell->cellFunctionData.constructor.genomeSize,
             cell->cellFunctionData.constructor.genome);
         cell->cellFunctionData.constructor.currentGenomePos = cellTO.cellFunctionData.constructor.currentGenomePos;
+        cell->cellFunctionData.constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
     } break;
     case CellFunction_Sensor: {
         cell->cellFunctionData.sensor.mode = cellTO.cellFunctionData.sensor.mode;
@@ -164,6 +165,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             dataTO.auxiliaryData,
             cell->cellFunctionData.injector.genomeSize,
             cell->cellFunctionData.injector.genome);
+        cell->cellFunctionData.injector.genomeGeneration = cellTO.cellFunctionData.injector.genomeGeneration;
     } break;
     case CellFunction_Muscle: {
         cell->cellFunctionData.muscle.mode = cellTO.cellFunctionData.muscle.mode;
@@ -284,6 +286,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             //    genome[i] = _data->numberGen1.randomByte();
             //}
             cell->cellFunctionData.constructor.currentGenomePos = 0;
+            cell->cellFunctionData.constructor.genomeGeneration = 0;
         } break;
         case CellFunction_Sensor: {
             cell->cellFunctionData.sensor.mode = _data->numberGen1.random(SensorMode_Count - 1);
@@ -305,6 +308,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             for (int i = 0; i < cell->cellFunctionData.injector.genomeSize; ++i) {
                 genome[i] = _data->numberGen1.randomByte();
             }
+            cell->cellFunctionData.injector.genomeGeneration = 0;
         } break;
         case CellFunction_Muscle: {
             cell->cellFunctionData.muscle.mode = _data->numberGen1.random(MuscleMode_Count - 1);

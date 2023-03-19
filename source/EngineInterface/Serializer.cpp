@@ -60,6 +60,7 @@ namespace
     auto constexpr Id_Constructor_Stiffness = 5;
     auto constexpr Id_Constructor_ConstructionActivationTime = 6;
     auto constexpr Id_Constructor_CurrentGenomePos = 7;
+    auto constexpr Id_Constructor_GenomeGeneration = 9;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -382,6 +383,7 @@ namespace cereal
         loadSave<float>(task, auxiliaries, Id_Constructor_Stiffness, data.stiffness, defaultObject.stiffness);
         loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
         loadSave<int>(task, auxiliaries, Id_Constructor_CurrentGenomePos, data.currentGenomePos, defaultObject.currentGenomePos);
+        loadSave<int>(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
