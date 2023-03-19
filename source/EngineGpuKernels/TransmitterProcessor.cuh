@@ -96,12 +96,12 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
         }
     }
 
-    if (cell->cellFunctionData.attacker.mode == EnergyDistributionMode_TransmittersAndConstructors) {
+    if (cell->cellFunctionData.transmitter.mode == EnergyDistributionMode_TransmittersAndConstructors) {
         auto matchActiveConstructorFunc = [&](Cell* const& otherCell) {
             auto const& constructor = otherCell->cellFunctionData.constructor;
             auto isFinished = constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize;
             if (otherCell->cellFunction == CellFunction_Constructor && !isFinished) {
-                if (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color) {
+                if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameColor || otherCell->color == cell->color) {
                     return true;
                 }
             }
@@ -109,19 +109,19 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
         };
         auto matchTransmitterFunc = [&](Cell* const& otherCell) {
             if (otherCell->cellFunction == CellFunction_Transmitter) {
-                if (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color) {
+                if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameColor || otherCell->color == cell->color) {
                     return true;
                 }
             }
             return false;
         };
 
-        Cell* receiverCells[10];
+        Cell* receiverCells[20];
         int numReceivers;
-        auto const& radius = cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius[cell->color];
-        data.cellMap.getMatchingCells(receiverCells, 10, numReceivers, cell->absPos, radius, cell->detached, matchActiveConstructorFunc);
+        auto const& radius = cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionRadius[cell->color];
+        data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->absPos, radius, cell->detached, matchActiveConstructorFunc);
         if (numReceivers == 0) {
-            data.cellMap.getMatchingCells(receiverCells, 10, numReceivers, cell->absPos, radius, cell->detached, matchTransmitterFunc);
+            data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->absPos, radius, cell->detached, matchTransmitterFunc);
         }
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 
