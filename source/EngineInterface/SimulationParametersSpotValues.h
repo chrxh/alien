@@ -4,12 +4,15 @@
 
 #include "Constants.h"
 
-//NOTE: header is also included in CUDA code
-using FloatColorVector = float[MAX_COLORS];
-using FloatColorMatrix = float[MAX_COLORS][MAX_COLORS];
-using IntColorVector = int[MAX_COLORS];
-using IntColorMatrix = int[MAX_COLORS][MAX_COLORS];
-using BoolColorMatrix = bool[MAX_COLORS][MAX_COLORS];
+/**
+ * NOTE: header is also included in kernel code
+ */
+
+template <typename T>
+using ColorVector = T[MAX_COLORS];
+
+template <typename T>
+using ColorMatrix = T[MAX_COLORS][MAX_COLORS];
 
 template <typename T>
 struct Infinity
@@ -21,15 +24,22 @@ struct SimulationParametersSpotValues
 {
     float friction = 0.001f;
     float rigidity = 0.0f;
-    FloatColorVector radiationCellAgeStrength = {0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f};
+    ColorVector<float> radiationCellAgeStrength = {0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f};
     float cellMaxForce = 0.8f;
-    FloatColorVector cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
+    ColorVector<float> cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
     float cellFusionVelocity = 0.4f;
     float cellMaxBindingEnergy = 500000.0f;
-    IntColorVector cellColorTransitionDuration = {0, 0, 0, 0, 0, 0, 0};
-    IntColorVector cellColorTransitionTargetColor = {0, 1, 2, 3, 4, 5, 6};
-    FloatColorVector cellFunctionAttackerEnergyCost = {0, 0, 0, 0, 0, 0, 0};
-    FloatColorMatrix cellFunctionAttackerFoodChainColorMatrix = {
+    ColorVector<int> cellColorTransitionDuration = {
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value};
+    ColorVector<int> cellColorTransitionTargetColor = {0, 1, 2, 3, 4, 5, 6};
+    ColorVector<float> cellFunctionAttackerEnergyCost = {0, 0, 0, 0, 0, 0, 0};
+    ColorMatrix<float> cellFunctionAttackerFoodChainColorMatrix = {
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
@@ -38,17 +48,17 @@ struct SimulationParametersSpotValues
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1}};
 
-    FloatColorVector cellFunctionAttackerGeometryDeviationExponent = {0, 0, 0, 0, 0, 0, 0};
-    FloatColorVector cellFunctionAttackerConnectionsMismatchPenalty = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionAttackerGeometryDeviationExponent = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionAttackerConnectionsMismatchPenalty = {0, 0, 0, 0, 0, 0, 0};
 
-    FloatColorVector cellFunctionConstructorMutationNeuronDataProbability = {0, 0, 0, 0, 0, 0, 0};
-    FloatColorVector cellFunctionConstructorMutationDataProbability = {0, 0, 0, 0, 0, 0, 0};
-    FloatColorVector cellFunctionConstructorMutationCellFunctionProbability = {0, 0, 0, 0, 0, 0, 0};
-    FloatColorVector cellFunctionConstructorMutationInsertionProbability = {0, 0, 0, 0, 0, 0, 0};
-    FloatColorVector cellFunctionConstructorMutationDeletionProbability = {0, 0, 0, 0, 0, 0, 0};
-    FloatColorVector cellFunctionConstructorMutationTranslationProbability = {0, 0, 0, 0, 0, 0, 0};
-    FloatColorVector cellFunctionConstructorMutationDuplicationProbability = {0, 0, 0, 0, 0, 0, 0};
-    FloatColorVector cellFunctionConstructorMutationColorProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationNeuronDataProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationDataProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationCellFunctionProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationInsertionProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationDeletionProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationTranslationProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationDuplicationProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationColorProbability = {0, 0, 0, 0, 0, 0, 0};
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {

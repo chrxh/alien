@@ -205,7 +205,7 @@ void AlienImGui::InputIntColorMatrix(InputIntColorMatrixParameters const& parame
     basicParameters._textWidth = parameters._textWidth;
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
-    BasicInputColorMatrix<int>(basicParameters, value);
+    BasicInputColorMatrix(basicParameters, value);
 }
 
 void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS])
@@ -219,7 +219,7 @@ void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& pa
     basicParameters._textWidth = parameters._textWidth;
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
-    BasicInputColorMatrix<float>(basicParameters, value);
+    BasicInputColorMatrix(basicParameters, value);
 }
 
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
@@ -418,8 +418,22 @@ void AlienImGui::InputColorTransition(InputColorTransitionParameters const& para
     auto width = StyleRepository::getInstance().contentScale(parameters._textWidth);
 
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
+    std::string format = "%d";
+    if (parameters._infinity && transitionAge == Infinity<int>::value) {
+        format = "infinity";
+        transitionAge = parameters._max;
+    }
     ImGui::SliderInt(
-        ("##" + parameters._name).c_str(), &transitionAge, parameters._min, parameters._max, "%d", parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+        ("##" + parameters._name).c_str(),
+        &transitionAge,
+        parameters._min,
+        parameters._max,
+        format.c_str(),
+        parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+    if (parameters._infinity && transitionAge == parameters._max) {
+        format = "infinity";
+        transitionAge = Infinity<int>::value;
+    }
     if (parameters._defaultTransitionAge && parameters._defaultTargetColor) {
         ImGui::SameLine();
         ImGui::BeginDisabled(transitionAge == *parameters._defaultTransitionAge && targetColor == *parameters._defaultTargetColor);

@@ -430,6 +430,7 @@ void _SimulationParametersWindow::processBase(
                     .tooltip("")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
+                    .infinity(true)
                     .min(0)
                     .max(1000000)
                     .logarithmic(true)
@@ -453,9 +454,11 @@ void _SimulationParametersWindow::processBase(
                     .name("High energy radiation threshold")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
+                    .infinity(true)
                     .min(0)
                     .max(100000)
                     .logarithmic(true)
+                    .format("%.1f")
                     .defaultValue(origSimParameters.highRadiationMinCellEnergy)
                     .tooltip(""),
                 simParameters.highRadiationMinCellEnergy);
@@ -916,7 +919,8 @@ void _SimulationParametersWindow::processBase(
                                       .color(color)
                                       .defaultTargetColor(origSimParameters.baseValues.cellColorTransitionTargetColor[color])
                                       .defaultTransitionAge(origSimParameters.baseValues.cellColorTransitionDuration[color])
-                                      .logarithmic(true);
+                                      .logarithmic(true)
+                                      .infinity(true);
                 if (0 == color) {
                     parameters.name("Target color and duration")
                         .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent color can "

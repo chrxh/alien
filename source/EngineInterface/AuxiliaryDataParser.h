@@ -26,36 +26,36 @@ private:
     template <>
     static void encodeDecodeProperty(
         boost::property_tree::ptree& tree,
-        FloatColorVector& parameter,
-        FloatColorVector const& defaultValue,
+        ColorVector<float>& parameter,
+        ColorVector<float> const& defaultValue,
         std::string const& node,
         ParserTask task);
     template <>
     static void encodeDecodeProperty(
         boost::property_tree::ptree& tree,
-        IntColorVector& parameter,
-        IntColorVector const& defaultValue,
+        ColorVector<int>& parameter,
+        ColorVector<int> const& defaultValue,
         std::string const& node,
         ParserTask task);
     template <>
     static void encodeDecodeProperty(
         boost::property_tree::ptree& tree,
-        FloatColorMatrix& parameter,
-        FloatColorMatrix const& defaultValue,
+        ColorMatrix<float>& parameter,
+        ColorMatrix<float> const& defaultValue,
         std::string const& node,
         ParserTask task);
     template <>
     static void encodeDecodeProperty(
         boost::property_tree::ptree& tree,
-        IntColorMatrix& parameter,
-        IntColorMatrix const& defaultValue,
+        ColorMatrix<int>& parameter,
+        ColorMatrix<int> const& defaultValue,
         std::string const& node,
         ParserTask task);
     template <>
     static void encodeDecodeProperty(
         boost::property_tree::ptree& tree,
-        BoolColorMatrix& parameter,
-        BoolColorMatrix const& defaultValue,
+        ColorMatrix<bool>& parameter,
+        ColorMatrix<bool> const& defaultValue,
         std::string const& node,
         ParserTask task);
 
@@ -70,17 +70,17 @@ private:
     template <>
     static void encodeDecodeSpotProperty(
         boost::property_tree::ptree& tree,
-        FloatColorVector& parameter,
+        ColorVector<float>& parameter,
         bool& isActivated,
-        FloatColorVector const& defaultValue,
+        ColorVector<float> const& defaultValue,
         std::string const& node,
         ParserTask task);
     template <>
     static void encodeDecodeSpotProperty(
         boost::property_tree::ptree& tree,
-        IntColorVector& parameter,
+        ColorVector<int>& parameter,
         bool& isActivated,
-        IntColorVector const& defaultValue,
+        ColorVector<int> const& defaultValue,
         std::string const& node,
         ParserTask task);
 };

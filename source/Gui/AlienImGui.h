@@ -174,6 +174,7 @@ public:
         MEMBER_DECLARATION(InputColorTransitionParameters, int, min, 0);
         MEMBER_DECLARATION(InputColorTransitionParameters, int, max, 1000000);
         MEMBER_DECLARATION(InputColorTransitionParameters, bool, logarithmic, false);
+        MEMBER_DECLARATION(InputColorTransitionParameters, bool, infinity, false);
         MEMBER_DECLARATION(InputColorTransitionParameters, std::optional<int>, defaultTargetColor, std::nullopt);
         MEMBER_DECLARATION(InputColorTransitionParameters, std::optional<int>, defaultTransitionAge, std::nullopt);
         MEMBER_DECLARATION(InputColorTransitionParameters, std::optional<std::string>, tooltip, std::nullopt);
