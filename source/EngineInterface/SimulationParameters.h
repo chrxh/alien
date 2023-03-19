@@ -72,6 +72,17 @@ struct SimulationParameters
     FloatColorVector highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
     bool clusterDecay = false;
     FloatColorVector clusterDecayProb = {0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f};
+    IntColorVector cellMaxAge = {
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value};
+    bool particleTransformationAllowed = false;
+    bool particleTransformationRandomCellFunction = false;
+    int particleTransformationMaxGenomeSize = 300;
     
     bool cellFunctionConstructionUnlimitedEnergy = false;
     FloatColorVector cellFunctionConstructorOffspringDistance = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
@@ -125,10 +136,6 @@ struct SimulationParameters
     FloatColorVector cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
     float cellFunctionSensorActivityThreshold = 0.1f;
 
-    bool particleTransformationAllowed = false;
-    bool particleTransformationRandomCellFunction = false;
-    int particleTransformationMaxGenomeSize = 300;
-
     //particle sources
     int numParticleSources = 0;
     RadiationSource particleSources[MAX_PARTICLE_SOURCES];
@@ -155,6 +162,9 @@ struct SimulationParameters
         }
 
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (cellMaxAge[i] != other.cellMaxAge[i]) {
+                return false;
+            }
             if (cellFunctionAttackerVelocityPenalty[i] != other.cellFunctionAttackerVelocityPenalty[i]) {
                 return false;
             }

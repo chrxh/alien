@@ -124,7 +124,6 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDeleteCell(Simulatio
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::DelCell;
     operation.data.delCell.cellIndex = cellIndex;
-    data.structuralOperations.tryAddEntry(operation);
     auto operationIndex = data.structuralOperations.tryAddEntry(operation);
     if (operationIndex == -1) {
         CUDA_THROW_NOT_IMPLEMENTED();

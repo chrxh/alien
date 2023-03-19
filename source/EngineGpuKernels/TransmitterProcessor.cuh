@@ -53,8 +53,15 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
     }
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->cellFunction == CellFunction_Constructor || connectedCell->cellFunction == CellFunction_Transmitter) {
+        if (connectedCell->cellFunction == CellFunction_Transmitter) {
             continue;
+        }
+        if (connectedCell->cellFunction == CellFunction_Constructor) {
+            auto constructor = connectedCell->cellFunctionData.constructor;
+            auto isFinished = constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize;
+            if (!isFinished) {
+                continue;
+            }
         }
         auto origEnergy = atomicAdd(&connectedCell->energy, -energyDistribution);
         if (origEnergy > cudaSimulationParameters.cellNormalEnergy[cell->color]) {
@@ -92,8 +99,8 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
     if (cell->cellFunctionData.attacker.mode == EnergyDistributionMode_TransmittersAndConstructors) {
         auto matchActiveConstructorFunc = [&](Cell* const& otherCell) {
             auto const& constructor = otherCell->cellFunctionData.constructor;
-            auto const isActive = !(constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize);
-            if (otherCell->cellFunction == CellFunction_Constructor && isActive) {
+            auto isFinished = constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize;
+            if (otherCell->cellFunction == CellFunction_Constructor && !isFinished) {
                 if (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color) {
                     return true;
                 }

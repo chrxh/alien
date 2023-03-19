@@ -19,6 +19,7 @@ public:
         MEMBER_DECLARATION(SliderFloatParameters, float, max, 0);
         MEMBER_DECLARATION(SliderFloatParameters, std::string, format, "%.3f");
         MEMBER_DECLARATION(SliderFloatParameters, bool, logarithmic, false);
+        MEMBER_DECLARATION(SliderFloatParameters, bool, infinity, false);
         MEMBER_DECLARATION(SliderFloatParameters, int, textWidth, 100);
         MEMBER_DECLARATION(SliderFloatParameters, bool, colorDependence, false);
         MEMBER_DECLARATION(SliderFloatParameters, float const*, defaultValue, nullptr);
@@ -34,6 +35,7 @@ public:
         MEMBER_DECLARATION(SliderIntParameters, int, max, 0);
         MEMBER_DECLARATION(SliderIntParameters, std::string, format, "%d");
         MEMBER_DECLARATION(SliderIntParameters, bool, logarithmic, false);
+        MEMBER_DECLARATION(SliderIntParameters, bool, infinity, false);
         MEMBER_DECLARATION(SliderIntParameters, int, textWidth, 100);
         MEMBER_DECLARATION(SliderIntParameters, bool, colorDependence, false);
         MEMBER_DECLARATION(SliderIntParameters, int const*, defaultValue, nullptr);
@@ -263,22 +265,8 @@ public:
 
 private:
 
-    template <typename T>
-    struct BasicSliderParameters
-    {
-        MEMBER_DECLARATION(BasicSliderParameters, std::string, name, "");
-        MEMBER_DECLARATION(BasicSliderParameters, float, min, 0);
-        MEMBER_DECLARATION(BasicSliderParameters, float, max, 0);
-        MEMBER_DECLARATION(BasicSliderParameters, bool, logarithmic, false);
-        MEMBER_DECLARATION(BasicSliderParameters, std::string, format, "%.3f");
-        MEMBER_DECLARATION(BasicSliderParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(BasicSliderParameters, bool, colorDependence, false);
-        MEMBER_DECLARATION(BasicSliderParameters, T const*, defaultValue, nullptr);
-        MEMBER_DECLARATION(BasicSliderParameters, T const*, disabledValue, nullptr);
-        MEMBER_DECLARATION(BasicSliderParameters, std::optional<std::string>, tooltip, std::nullopt);
-    };
-    template <typename T>
-    static bool BasicSlider(BasicSliderParameters<T> const& parameters, T* value, bool* enabled);
+    template <typename Parameter, typename T>
+    static bool BasicSlider(Parameter const& parameters, T* value, bool* enabled);
 
 
     template<typename T>

@@ -10,6 +10,7 @@
 #include "Base/Math.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/Constants.h"
+#include "EngineInterface/SimulationParameters.h"
 
 #include "CellFunctionStrings.h"
 #include "StyleRepository.h"
@@ -43,34 +44,12 @@ void AlienImGui::HelpMarker(std::string const& text)
 
 bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled)
 {
-    BasicSliderParameters<float> basicParameters;
-    basicParameters._name = parameters._name;
-    basicParameters._min = parameters._min;
-    basicParameters._max = parameters._max;
-    basicParameters._format = parameters._format;
-    basicParameters._logarithmic = parameters._logarithmic;
-    basicParameters._textWidth = parameters._textWidth;
-    basicParameters._colorDependence = parameters._colorDependence;
-    basicParameters._defaultValue = parameters._defaultValue;
-    basicParameters._disabledValue = parameters._disabledValue;
-
-    return BasicSlider<float>(basicParameters, value, enabled);
+    return BasicSlider(parameters, value, enabled);
 }
 
 bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled)
 {
-    BasicSliderParameters<int> basicParameters;
-    basicParameters._name = parameters._name;
-    basicParameters._min = parameters._min;
-    basicParameters._max = parameters._max;
-    basicParameters._format = parameters._format;
-    basicParameters._logarithmic = parameters._logarithmic;
-    basicParameters._textWidth = parameters._textWidth;
-    basicParameters._colorDependence = parameters._colorDependence;
-    basicParameters._defaultValue = parameters._defaultValue;
-    basicParameters._disabledValue = parameters._disabledValue;
-
-    return BasicSlider<int>(basicParameters, value,  enabled);
+    return BasicSlider(parameters, value, enabled);
 }
 
 void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)
@@ -1088,16 +1067,19 @@ void AlienImGui::NeuronSelection(
 namespace
 {
     template <typename T>
-    std::string toString(T const& value, std::string const& format)
+    std::string toString(T const& value, std::string const& format, bool infinity)
     {
+        if (infinity && value == Infinity<T>::value) {
+            return "infinity";
+        }
         char result[16];
         snprintf(result, sizeof(result), format.c_str(), value);
         return std::string(result);
     }
 }
 
-template <typename T>
-bool AlienImGui::BasicSlider(BasicSliderParameters<T> const& parameters, T* value, bool* enabled)
+template <typename Parameter, typename T>
+bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled)
 {
     ImGui::PushID(parameters._name.c_str());
 
@@ -1164,7 +1146,7 @@ bool AlienImGui::BasicSlider(BasicSliderParameters<T> const& parameters, T* valu
         }
 
         //slider
-        auto format = parameters._format;
+        auto format = toString(value[color], parameters._format, parameters._infinity);
         if (parameters._colorDependence && !isExpanded) {
             T minValue = value[0], maxValue = value[0];
             for (int color = 1; color < MAX_COLORS; ++color) {
@@ -1172,8 +1154,11 @@ bool AlienImGui::BasicSlider(BasicSliderParameters<T> const& parameters, T* valu
                 minValue = std::min(minValue, value[color]);
             }
             if (minValue != maxValue) {
-                format = toString(minValue, parameters._format) + " ... " + toString(maxValue, parameters._format);
+                format = toString(minValue, parameters._format, parameters._infinity) + " ... " + toString(maxValue, parameters._format, parameters._infinity);
             }
+        }
+        if (parameters._infinity && value[color] == Infinity<T>::value) {
+            value[color] = parameters._max;
         }
         if constexpr (std::is_same<T, float>()) {
             result |= ImGui::SliderFloat(
@@ -1182,6 +1167,9 @@ bool AlienImGui::BasicSlider(BasicSliderParameters<T> const& parameters, T* valu
         if constexpr (std::is_same<T, int>()) {
             result |= ImGui::SliderInt(
                 "##slider", &value[color], parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+        }
+        if (parameters._infinity && value[color] == parameters._max) {
+            value[color] = Infinity<T>::value;
         }
         if (parameters._colorDependence && !isExpanded && result) {
             for (int color = 1; color < MAX_COLORS; ++color) {
@@ -1314,7 +1302,7 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
                     }
                 }
                 if (minValue != maxValue) {
-                    format = toString(minValue, parameters._format) + " ... " + toString(maxValue, parameters._format);
+                    format = toString(minValue, parameters._format, false) + " ... " + toString(maxValue, parameters._format, false);
                 }
                 auto sliderMoved = false;
                 if constexpr (std::is_same<T, float>()) {

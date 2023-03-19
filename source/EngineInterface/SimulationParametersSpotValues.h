@@ -1,5 +1,7 @@
 #pragma once
 
+#include <limits>
+
 #include "Constants.h"
 
 //NOTE: header is also included in CUDA code
@@ -8,6 +10,13 @@ using FloatColorMatrix = float[MAX_COLORS][MAX_COLORS];
 using IntColorVector = int[MAX_COLORS];
 using IntColorMatrix = int[MAX_COLORS][MAX_COLORS];
 using BoolColorMatrix = bool[MAX_COLORS][MAX_COLORS];
+
+template <typename T>
+struct Infinity
+{
+    static auto constexpr value = std::numeric_limits<T>::max();
+};
+
 struct SimulationParametersSpotValues
 {
     float friction = 0.001f;
