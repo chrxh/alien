@@ -474,6 +474,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor);
         newConstructor.currentGenomePos = 0;
         GenomeDecoder::copyGenome(data, constructor, newConstructor);
+        newConstructor.genomeGeneration = constructor.genomeGeneration + 1;
     } break;
     case CellFunction_Sensor: {
         result->cellFunctionData.sensor.mode = GenomeDecoder::readByte(constructor) % SensorMode_Count;
@@ -492,6 +493,7 @@ ConstructorProcessor::constructCellIntern(
         result->cellFunctionData.injector.mode = GenomeDecoder::readByte(constructor) % InjectorMode_Count;
         result->cellFunctionData.injector.counter = 0;
         GenomeDecoder::copyGenome(data, constructor, result->cellFunctionData.injector);
+        result->cellFunctionData.injector.genomeGeneration = constructor.genomeGeneration + 1;
     } break;
     case CellFunction_Muscle: {
         result->cellFunctionData.muscle.mode = GenomeDecoder::readByte(constructor) % MuscleMode_Count;

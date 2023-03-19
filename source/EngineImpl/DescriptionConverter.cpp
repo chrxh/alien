@@ -429,6 +429,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
         constructor.currentGenomePos = toInt(cellTO.cellFunctionData.constructor.currentGenomePos);
+        constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
         result.cellFunction = constructor;
     } break;
     case CellFunction_Sensor: {
@@ -456,6 +457,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         injector.mode = cellTO.cellFunctionData.injector.mode;
         injector.counter = cellTO.cellFunctionData.injector.counter;
         convert(dataTO, cellTO.cellFunctionData.injector.genomeSize, cellTO.cellFunctionData.injector.genomeDataIndex, injector.genome);
+        injector.genomeGeneration = cellTO.cellFunctionData.injector.genomeGeneration;
         result.cellFunction = injector;
     } break;
     case CellFunction_Muscle: {
@@ -538,6 +540,7 @@ void DescriptionConverter::addCell(
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
         constructorTO.currentGenomePos = constructorDesc.currentGenomePos;
+        constructorTO.genomeGeneration = constructorDesc.genomeGeneration;
         cellTO.cellFunctionData.constructor = constructorTO;
     } break;
     case CellFunction_Sensor: {
@@ -568,6 +571,7 @@ void DescriptionConverter::addCell(
         injectorTO.mode = injectorDesc.mode;
         injectorTO.counter = injectorDesc.counter;
         convert(dataTO, injectorDesc.genome, injectorTO.genomeSize, injectorTO.genomeDataIndex);
+        injectorTO.genomeGeneration = injectorDesc.genomeGeneration;
         cellTO.cellFunctionData.injector = injectorTO;
     } break;
     case CellFunction_Muscle: {

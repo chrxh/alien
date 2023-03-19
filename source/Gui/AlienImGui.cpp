@@ -1081,10 +1081,13 @@ void AlienImGui::NeuronSelection(
 namespace
 {
     template <typename T>
-    std::string toString(T const& value, std::string const& format, bool infinity)
+    std::string toString(T const& value, std::string const& format, bool allowInfinity = false, bool tryMaintainFormat = false)
     {
-        if (infinity && value == Infinity<T>::value) {
+        if (allowInfinity && value == Infinity<T>::value) {
             return "infinity";
+        }
+        if (tryMaintainFormat) {
+            return format;
         }
         char result[16];
         snprintf(result, sizeof(result), format.c_str(), value);
@@ -1160,7 +1163,7 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
         }
 
         //slider
-        auto format = toString(value[color], parameters._format, parameters._infinity);
+        auto format = toString(value[color], parameters._format, parameters._infinity, true);
         if (parameters._colorDependence && !isExpanded) {
             T minValue = value[0], maxValue = value[0];
             for (int color = 1; color < MAX_COLORS; ++color) {
@@ -1168,7 +1171,8 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
                 minValue = std::min(minValue, value[color]);
             }
             if (minValue != maxValue) {
-                format = toString(minValue, parameters._format, parameters._infinity) + " ... " + toString(maxValue, parameters._format, parameters._infinity);
+                format = toString(minValue, parameters._format, parameters._infinity, false) + " ... "
+                    + toString(maxValue, parameters._format, parameters._infinity, false);
             }
         }
         if (parameters._infinity && value[color] == Infinity<T>::value) {
@@ -1316,7 +1320,7 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
                     }
                 }
                 if (minValue != maxValue) {
-                    format = toString(minValue, parameters._format, false) + " ... " + toString(maxValue, parameters._format, false);
+                    format = toString(minValue, parameters._format) + " ... " + toString(maxValue, parameters._format);
                 }
                 auto sliderMoved = false;
                 if constexpr (std::is_same<T, float>()) {

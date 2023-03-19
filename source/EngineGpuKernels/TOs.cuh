@@ -60,6 +60,7 @@ struct ConstructorTO
 
     uint64_t genomeSize;
     uint64_t genomeDataIndex;
+    int genomeGeneration;
 
     //process data
     uint64_t currentGenomePos;
@@ -90,6 +91,7 @@ struct InjectorTO
     int counter;
     uint64_t genomeSize;
     uint64_t genomeDataIndex;
+    int genomeGeneration;
 };
 
 struct MuscleTO

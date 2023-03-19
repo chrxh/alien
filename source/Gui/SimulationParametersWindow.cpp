@@ -380,6 +380,7 @@ void _SimulationParametersWindow::processBase(
                     .min(50.0f)
                     .max(1000000.0f)
                     .logarithmic(true)
+                    .infinity(true)
                     .format("%.0f")
                     .defaultValue(&origSimParameters.baseValues.cellMaxBindingEnergy)
                     .tooltip(std::string("Maximum energy of a cell at which they can maintain a connection.")),
@@ -1211,11 +1212,12 @@ void _SimulationParametersWindow::processSpot(
                 &spot.activatedValues.cellFusionVelocity);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Binding max energy")
+                    .name("Maximum energy")
                     .textWidth(RightColumnWidth)
                     .min(50.0f)
                     .max(1000000.0f)
                     .logarithmic(true)
+                    .infinity(true)
                     .format("%.0f")
                     .defaultValue(&origSpot.values.cellMaxBindingEnergy)
                     .disabledValue(&parameters.baseValues.cellMaxBindingEnergy),
