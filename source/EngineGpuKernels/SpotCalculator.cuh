@@ -67,7 +67,7 @@ public:
     }
 
     __device__ __inline__ static float calcParameter(
-        FloatColorVector SimulationParametersSpotValues::*value,
+        ColorVector<float> SimulationParametersSpotValues::*value,
         bool SimulationParametersSpotActivatedValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos,
@@ -102,7 +102,7 @@ public:
     }
 
     __device__ __inline__ static float calcParameter(
-        FloatColorMatrix SimulationParametersSpotValues::*value,
+        ColorMatrix<float> SimulationParametersSpotValues::*value,
         bool SimulationParametersSpotActivatedValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos,
