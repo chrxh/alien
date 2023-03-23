@@ -11,6 +11,7 @@
 #include "Map.cuh"
 #include "Physics.cuh"
 #include "CellConnectionProcessor.cuh"
+#include "ParticleProcessor.cuh"
 #include "SpotCalculator.cuh"
 
 class CellProcessor
@@ -622,12 +623,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
             }();
             if (radiationFactor > 0) {
 
-                auto pos = cell->absPos;
-                if (cudaSimulationParameters.numParticleSources > 0) {
-                    auto sourceIndex = data.numberGen1.random(cudaSimulationParameters.numParticleSources - 1);
-                    pos.x = cudaSimulationParameters.particleSources[sourceIndex].posX;
-                    pos.y = cudaSimulationParameters.particleSources[sourceIndex].posY;
-                }
+                auto pos = ParticleProcessor::getRadiationPos(data, cell->absPos);
                 float2 particleVel = cell->vel * cudaSimulationParameters.radiationVelocityMultiplier
                     + Math::unitVectorOfAngle(data.numberGen1.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
                 float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
@@ -706,4 +702,3 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
     }
 }
-

@@ -378,7 +378,7 @@ void _SimulationParametersWindow::processBase(
                     .name("Maximum energy")
                     .textWidth(RightColumnWidth)
                     .min(50.0f)
-                    .max(1000000.0f)
+                    .max(10000000.0f)
                     .logarithmic(true)
                     .infinity(true)
                     .format("%.0f")
@@ -434,7 +434,7 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .infinity(true)
                     .min(0)
-                    .max(1000000)
+                    .max(10000000)
                     .logarithmic(true)
                     .defaultValue(origSimParameters.radiationMinCellAge),
                 simParameters.radiationMinCellAge);
@@ -481,7 +481,7 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .infinity(true)
                     .min(1)
-                    .max(1000000)
+                    .max(10000000)
                     .defaultValue(origSimParameters.cellMaxAge),
                 simParameters.cellMaxAge);
             AlienImGui::SliderFloat(
@@ -1216,7 +1216,7 @@ void _SimulationParametersWindow::processSpot(
                     .name("Maximum energy")
                     .textWidth(RightColumnWidth)
                     .min(50.0f)
-                    .max(1000000.0f)
+                    .max(10000000.0f)
                     .logarithmic(true)
                     .infinity(true)
                     .format("%.0f")
