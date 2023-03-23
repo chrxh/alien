@@ -6,6 +6,7 @@
 #include "ConstantMemory.cuh"
 #include "SpotCalculator.cuh"
 #include "ObjectFactory.cuh"
+#include "ParticleProcessor.cuh"
 
 class CellConnectionProcessor
 {
@@ -159,7 +160,8 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(
             if (origCell) {
                 ObjectFactory factory;
                 factory.init(&data);
-                factory.createParticle(origCell->energy, origCell->absPos, origCell->vel, origCell->color);
+                auto pos = ParticleProcessor::getRadiationPos(data, origCell->absPos);
+                factory.createParticle(origCell->energy, pos, origCell->vel, origCell->color);
 
                 for (int i = 0; i < origCell->numConnections; ++i) {
                     StructuralOperation operation;
