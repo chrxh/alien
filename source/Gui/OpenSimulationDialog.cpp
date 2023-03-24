@@ -10,6 +10,7 @@
 #include "TemporalControlWindow.h"
 #include "GlobalSettings.h"
 #include "MessageDialog.h"
+#include "OverlayMessageController.h"
 
 _OpenSimulationDialog::_OpenSimulationDialog(
     SimulationController const& simController,
@@ -54,6 +55,7 @@ void _OpenSimulationDialog::process()
             _viewport->setCenterInWorldPos(deserializedData.auxiliaryData.center);
             _viewport->setZoomFactor(deserializedData.auxiliaryData.zoom);
             _temporalControlWindow->onSnapshot();
+            printOverlayMessage(firstFilename.filename().string());
         } else {
             MessageDialog::getInstance().show("Open simulation", "The selected file could not be opened.");
         }

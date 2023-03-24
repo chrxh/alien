@@ -12,6 +12,7 @@
 #include "StatisticsWindow.h"
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
+#include "OverlayMessageController.h"
 
 namespace
 {
@@ -32,6 +33,7 @@ void _TemporalControlWindow::onSnapshot()
     newSnapshot.timestep = _simController->getCurrentTimestep();
     newSnapshot.data = _simController->getSimulationData();
     _snapshot = newSnapshot;
+    printOverlayMessage("Snapshot taken");
 }
 
 void _TemporalControlWindow::processIntern()
@@ -172,6 +174,7 @@ void _TemporalControlWindow::processRestoreButton()
         _simController->setSimulationData(_snapshot->data);
         _simController->removeSelection();
         _history.clear();
+        printOverlayMessage("Snapshot restored");   //flashback?
     }
     ImGui::EndDisabled();
 }

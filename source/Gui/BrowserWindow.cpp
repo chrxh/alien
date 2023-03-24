@@ -21,6 +21,8 @@
 #include "MessageDialog.h"
 #include "LoginDialog.h"
 #include "UploadSimulationDialog.h"
+#include "DelayedExecutionController.h"
+#include "OverlayMessageController.h"
 
 _BrowserWindow::_BrowserWindow(
     SimulationController const& simController,
@@ -197,7 +199,7 @@ void _BrowserWindow::processTable()
 
                 ImGui::TableNextColumn();
                 if (ImGui::Button(ICON_FA_DOWNLOAD)) {
-                    onOpenSimulation(item->id);
+                    onDownloadSimulation(item);
                 }
                 AlienImGui::Tooltip("Download");
 
@@ -221,7 +223,7 @@ void _BrowserWindow::processTable()
                 ImGui::SameLine();
                 ImGui::BeginDisabled(item->userName != _networkController->getLoggedInUserName().value_or(""));
                 if (ImGui::Button(ICON_FA_TRASH)) {
-                    onDeleteSimulation(item->id);
+                    onDeleteSimulation(item);
                 }
                 ImGui::EndDisabled();
                 AlienImGui::Tooltip("Delete");
@@ -340,38 +342,46 @@ void _BrowserWindow::sortTable()
     _scheduleSort = true;
 }
 
-void _BrowserWindow::onOpenSimulation(std::string const& id)
+void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
 {
-    SerializedSimulation serializedSim;
-    if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, id)) {
-        MessageDialog::getInstance().show("Error", "Failed to download simulation.");
-        return;
-    }
+    printOverlayMessage("Downloading '" + remoteData->simName + "' ...");
 
-    DeserializedSimulation deserializedSim;
-    if (!Serializer::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
-        MessageDialog::getInstance().show("Error", "Failed to load simulation. Your program version may not match.");
-        return;
-    }
+    delayedExecution([=] {
+        SerializedSimulation serializedSim;
+        if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, remoteData->id)) {
+            MessageDialog::getInstance().show("Error", "Failed to download simulation.");
+            return;
+        }
 
-    _simController->closeSimulation();
-    _statisticsWindow->reset();
+        DeserializedSimulation deserializedSim;
+        if (!Serializer::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
+            MessageDialog::getInstance().show("Error", "Failed to load simulation. Your program version may not match.");
+            return;
+        }
 
-    _simController->newSimulation(
-        deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
-    _simController->setClusteredSimulationData(deserializedSim.mainData);
-    _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
-    _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
-    _temporalControlWindow->onSnapshot();
+        _simController->closeSimulation();
+        _statisticsWindow->reset();
+
+        _simController->newSimulation(
+            deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+        _simController->setClusteredSimulationData(deserializedSim.mainData);
+        _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+        _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
+        _temporalControlWindow->onSnapshot();
+    });
 }
 
-void _BrowserWindow::onDeleteSimulation(std::string const& id)
+void _BrowserWindow::onDeleteSimulation(RemoteSimulationData* remoteData)
 {
-    if (!_networkController->deleteSimulation(id)) {
-        MessageDialog::getInstance().show("Error", "Failed to delete simulation.");
-        return;
-    }
-    _scheduleRefresh = true;
+    printOverlayMessage("Deleting '" + remoteData->simName + "' ...");
+
+    delayedExecution([remoteData = remoteData, this] {
+        if (!_networkController->deleteSimulation(remoteData->id)) {
+            MessageDialog::getInstance().show("Error", "Failed to delete simulation.");
+            return;
+        }
+        _scheduleRefresh = true;
+    });
 }
 
 void _BrowserWindow::onToggleLike(RemoteSimulationData& entry)

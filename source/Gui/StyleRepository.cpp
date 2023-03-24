@@ -69,9 +69,15 @@ void StyleRepository::init()
         FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 28.0f * _contentScaleFactor, &configMerge, rangesIcons2);
     io.Fonts->Build();
 
-    //monospace font
-    _monospaceFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 14.0f * _contentScaleFactor);
-    if (_monospaceFont == nullptr) {
+    //monospace medium font
+    _monospaceMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 14.0f * _contentScaleFactor);
+    if (_monospaceMediumFont == nullptr) {
+        throw std::runtime_error("Could not load font.");
+    }
+
+    //monospace large font
+    _monospaceLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 128.0f * _contentScaleFactor);
+    if (_monospaceLargeFont == nullptr) {
         throw std::runtime_error("Could not load font.");
     }
 
@@ -93,9 +99,14 @@ ImFont* StyleRepository::getLargeFont() const
     return _largeFont;
 }
 
-ImFont* StyleRepository::getMonospaceFont() const
+ImFont* StyleRepository::getMonospaceMediumFont() const
 {
-    return _monospaceFont;
+    return _monospaceMediumFont;
+}
+
+ImFont* StyleRepository::getMonospaceLargeFont() const
+{
+    return _monospaceLargeFont;
 }
 
 float StyleRepository::contentScale(float value) const
