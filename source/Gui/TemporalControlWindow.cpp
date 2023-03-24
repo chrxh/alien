@@ -33,7 +33,6 @@ void _TemporalControlWindow::onSnapshot()
     newSnapshot.timestep = _simController->getCurrentTimestep();
     newSnapshot.data = _simController->getSimulationData();
     _snapshot = newSnapshot;
-    printOverlayMessage("Snapshot taken");
 }
 
 void _TemporalControlWindow::processIntern()
@@ -162,6 +161,7 @@ void _TemporalControlWindow::processSnapshotButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_CAMERA)) {
         onSnapshot();
+        printOverlayMessage("Snapshot taken");
     }
 }
 
