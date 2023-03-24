@@ -61,6 +61,7 @@
 #include "UploadSimulationDialog.h"
 #include "CreateUserDialog.h"
 #include "ActivateUserDialog.h"
+#include "DelayedExecutionController.h"
 #include "DeleteUserDialog.h"
 #include "NetworkSettingsDialog.h"
 #include "ResetPasswordDialog.h"
@@ -70,6 +71,7 @@
 #include "ShaderWindow.h"
 #include "GenomeEditorWindow.h"
 #include "RadiationSourcesWindow.h"
+#include "OverlayMessageController.h"
 
 namespace
 {
@@ -576,7 +578,14 @@ void _MainWindow::processMenubar()
             _saveSimulationDialog->show();
         }
         if (ImGui::IsKeyPressed(GLFW_KEY_SPACE)) {
-            _simController->isSimulationRunning() ? onPauseSimulation() : onRunSimulation();
+            if (_simController->isSimulationRunning()) {
+                onPauseSimulation();
+                printOverlayMessage("Pause");
+            } else {
+                onRunSimulation();
+                printOverlayMessage("Run");
+            }
+            
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_W)) {
@@ -648,9 +657,11 @@ void _MainWindow::processMenubar()
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_C) && _editorController->isCopyingPossible()) {
             _editorController->onCopy();
+            printOverlayMessage("Selection copied");
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_V) && _editorController->isPastingPossible()) {
             _editorController->onPaste();
+            printOverlayMessage("Selection pasted");
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {
@@ -734,6 +745,8 @@ void _MainWindow::processControllers()
 {
     _autosaveController->process();
     _editorController->process();
+    OverlayMessageController::getInstance().process();
+    DelayedExecutionController::getInstance().process();
 }
 
 void _MainWindow::onRunSimulation()

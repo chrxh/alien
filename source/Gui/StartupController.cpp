@@ -11,7 +11,7 @@
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "MessageDialog.h"
-#include "GpuSettingsDialog.h"
+#include "OverlayMessageController.h"
 
 namespace
 {
@@ -100,6 +100,7 @@ void _StartupController::process()
     }
 
     if (_state == State::FinishedLoading) {
+        printOverlayMessage(Const::AutosaveFileWithoutPath);
         return;
     }
 }

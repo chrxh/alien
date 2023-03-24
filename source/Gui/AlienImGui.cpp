@@ -227,7 +227,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
     if (parameters._monospaceFont) {
-        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+        ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
     }
     ImGuiInputTextFlags flags = 0;
     if (parameters._readOnly) {
@@ -486,7 +486,7 @@ void AlienImGui::Text(std::string const& text)
 
 void AlienImGui::MonospaceText(std::string const& text)
 {
-    ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+    ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
     ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
     Text(text);
     ImGui::PopStyleColor();

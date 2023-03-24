@@ -118,7 +118,7 @@ void _GettingStartedWindow::processIntern()
 
         //ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
-        //ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+        //ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
         //auto windowWidth = ImGui::GetWindowSize().x;
         //auto weblink = "https://alien-project.gitbook.io/docs";
         //auto textWidth = ImGui::CalcTextSize(weblink).x;

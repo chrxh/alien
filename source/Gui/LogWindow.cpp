@@ -26,7 +26,7 @@ void _LogWindow::processIntern()
     auto styleRepository = StyleRepository::getInstance();
     if (ImGui::BeginChild(
             "##", ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.contentScale(40.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+        ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
 
         for (auto const& logMessage : _logger->getMessages(_verbose ? Priority::Unimportant : Priority::Important) | boost::adaptors::reversed) {

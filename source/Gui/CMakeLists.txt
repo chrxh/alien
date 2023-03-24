@@ -19,6 +19,8 @@ PUBLIC
     CreatorWindow.cpp
     CreatorWindow.h
     Definitions.h
+    DelayedExecutionController.cpp
+    DelayedExecutionController.h
     DeleteUserDialog.cpp
     DeleteUserDialog.h
     DisplaySettingsDialog.cpp
@@ -76,6 +78,8 @@ PUBLIC
     OpenPatternDialog.h
     OpenSimulationDialog.cpp
     OpenSimulationDialog.h
+    OverlayMessageController.cpp
+    OverlayMessageController.h
     PatternAnalysisDialog.cpp
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp

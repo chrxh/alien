@@ -75,7 +75,8 @@ public:
     ImFont* getIconFont() const;
     ImFont* getMediumFont() const;
     ImFont* getLargeFont() const;
-    ImFont* getMonospaceFont() const;
+    ImFont* getMonospaceMediumFont() const;
+    ImFont* getMonospaceLargeFont() const;
 
     float contentScale(float value) const;
     float contentInverseScale(float value) const;
@@ -87,7 +88,8 @@ private:
     ImFont* _iconFont = nullptr;
     ImFont* _mediumFont = nullptr;
     ImFont* _largeFont = nullptr;
-    ImFont* _monospaceFont = nullptr;
+    ImFont* _monospaceMediumFont = nullptr;
+    ImFont* _monospaceLargeFont = nullptr;
 };
 
 inline float contentScale(float value)

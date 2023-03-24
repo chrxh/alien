@@ -37,8 +37,8 @@ private:
 
     void sortTable();
 
-    void onOpenSimulation(std::string const& id);
-    void onDeleteSimulation(std::string const& id);
+    void onDownloadSimulation(RemoteSimulationData* remoteData);
+    void onDeleteSimulation(RemoteSimulationData* remoteData);
     void onToggleLike(RemoteSimulationData& entry);
 
     bool isLiked(std::string const& id);
