@@ -91,7 +91,7 @@ void _UploadSimulationDialog::show()
 
 void _UploadSimulationDialog::onUpload()
 {
-    printOverlayMessage("Uploading '" + _simName + "' ...");
+    printOverlayMessage("Uploading ...");
 
     delayedExecution([=] {
         DeserializedSimulation deserializedSim;
