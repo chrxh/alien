@@ -344,7 +344,7 @@ void _BrowserWindow::sortTable()
 
 void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
 {
-    printOverlayMessage("Downloading '" + remoteData->simName + "' ...");
+    printOverlayMessage("Downloading ...");
 
     delayedExecution([=] {
         SerializedSimulation serializedSim;
@@ -373,7 +373,7 @@ void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
 
 void _BrowserWindow::onDeleteSimulation(RemoteSimulationData* remoteData)
 {
-    printOverlayMessage("Deleting '" + remoteData->simName + "' ...");
+    printOverlayMessage("Deleting ...");
 
     delayedExecution([remoteData = remoteData, this] {
         if (!_networkController->deleteSimulation(remoteData->id)) {

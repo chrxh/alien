@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <ImFileDialog.h>
 
+#include "DelayedExecutionController.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 #include "StatisticsWindow.h"
@@ -46,18 +47,23 @@ void _OpenSimulationDialog::process()
 
         DeserializedSimulation deserializedData;
         if (Serializer::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
-            _simController->closeSimulation();
-            _statisticsWindow->reset();
+            printOverlayMessage("Loading ...");
+            delayedExecution([=] {
+                _simController->closeSimulation();
+                _statisticsWindow->reset();
 
-            _simController->newSimulation(
-                deserializedData.auxiliaryData.timestep, deserializedData.auxiliaryData.generalSettings, deserializedData.auxiliaryData.simulationParameters);
-            _simController->setClusteredSimulationData(deserializedData.mainData);
-            _viewport->setCenterInWorldPos(deserializedData.auxiliaryData.center);
-            _viewport->setZoomFactor(deserializedData.auxiliaryData.zoom);
-            _temporalControlWindow->onSnapshot();
-            printOverlayMessage(firstFilename.filename().string());
+                _simController->newSimulation(
+                    deserializedData.auxiliaryData.timestep,
+                    deserializedData.auxiliaryData.generalSettings,
+                    deserializedData.auxiliaryData.simulationParameters);
+                _simController->setClusteredSimulationData(deserializedData.mainData);
+                _viewport->setCenterInWorldPos(deserializedData.auxiliaryData.center);
+                _viewport->setZoomFactor(deserializedData.auxiliaryData.zoom);
+                _temporalControlWindow->onSnapshot();
+                printOverlayMessage(firstFilename.filename().string());
+            });
         } else {
-            MessageDialog::getInstance().show("Open simulation", "The selected file could not be opened.");
+            printMessage("Open simulation", "The selected file could not be opened.");
         }
     }
     ifd::FileDialog::Instance().Close();

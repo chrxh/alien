@@ -6,6 +6,8 @@
 #include "EngineInterface/Serializer.h"
 #include "GlobalSettings.h"
 #include "Viewport.h"
+#include "DelayedExecutionController.h"
+#include "OverlayMessageController.h"
 
 _AutosaveController::_AutosaveController(SimulationController const& simController, Viewport const& viewport)
     : _simController(simController)
@@ -56,12 +58,15 @@ void _AutosaveController::process()
 
 void _AutosaveController::onSave()
 {
-    DeserializedSimulation sim;
-    sim.auxiliaryData.timestep = _simController->getCurrentTimestep();
-    sim.auxiliaryData.zoom = _viewport->getZoomFactor();
-    sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
-    sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
-    sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
-    sim.mainData = _simController->getClusteredSimulationData();
-    Serializer::serializeSimulationToFiles(Const::AutosaveFile, sim);
+    printOverlayMessage("Auto saving ...");
+    delayedExecution([=] {
+        DeserializedSimulation sim;
+        sim.auxiliaryData.timestep = _simController->getCurrentTimestep();
+        sim.auxiliaryData.zoom = _viewport->getZoomFactor();
+        sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
+        sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
+        sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
+        sim.mainData = _simController->getClusteredSimulationData();
+        Serializer::serializeSimulationToFiles(Const::AutosaveFile, sim);
+    });
 }
