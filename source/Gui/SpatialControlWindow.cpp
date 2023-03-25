@@ -26,6 +26,8 @@ void _SpatialControlWindow::processIntern()
     ImGui::SameLine();
     processZoomOutButton();
     ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+    ImGui::SameLine();
     processResizeButton();
 
     ImGui::Spacing();

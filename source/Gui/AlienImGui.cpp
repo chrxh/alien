@@ -686,13 +686,22 @@ bool AlienImGui::ToolbarButton(std::string const& text)
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4> (ImColor::HSV(h, s, v * 0.45f)));
 
     ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4> (Const::ToolbarButtonTextColor));
-    auto buttonSize = StyleRepository::getInstance().contentScale(40.0f);
+    auto buttonSize = contentScale(40.0f);
     auto result = ImGui::Button(text.c_str(), {buttonSize, buttonSize});
 
     ImGui::PopStyleColor(4);
     ImGui::PopStyleVar();
     ImGui::PopFont();
     return result;
+}
+
+void AlienImGui::ToolbarSeparator()
+{
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    auto cursorPos = ImGui::GetCursorScreenPos();
+    drawList->AddLine(
+        ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x, cursorPos.y + contentScale(40.0f)), ImColor(ImGui::GetStyle().Colors[ImGuiCol_Border]), 2.0f);
+    ImGui::Dummy(ImVec2(ImGui::GetStyle().FramePadding.x * 2, 1));
 }
 
 bool AlienImGui::Button(std::string const& text)
@@ -761,7 +770,7 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
     auto origValue = value;
     ImVec4* colors = ImGui::GetStyle().Colors;
     ImVec2 p = ImGui::GetCursorScreenPos();
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
 
     float height = ImGui::GetFrameHeight();
     float width = height * 1.55f;
@@ -778,20 +787,20 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
     ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
 
     if (ImGui::IsItemHovered()) {
-        draw_list->AddRectFilled(
+        drawList->AddRectFilled(
             p,
             ImVec2(p.x + width, p.y + height),
             ImGui::GetColorU32(value ? (ImU32)ImColor::HSV(h, s * 0.9f, v * 0.8f) : (ImU32)ImColor::HSV(h, s * 0.9f, v * 0.4f)),
             height * 0.5f);
     } else {
-        draw_list->AddRectFilled(
+        drawList->AddRectFilled(
             p,
             ImVec2(p.x + width, p.y + height),
             ImGui::GetColorU32(value ? (ImU32)ImColor::HSV(h, s * 0.6f, v * 0.7f) : (ImU32)ImColor::HSV(h, s * 0.6f, v * 0.3f)),
             height * 0.50f);
     }
-    draw_list->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(20, 20, 20, 255));
-    draw_list->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 2.5f, IM_COL32(255, 255, 255, 255));
+    drawList->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(20, 20, 20, 255));
+    drawList->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 2.5f, IM_COL32(255, 255, 255, 255));
 
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());

@@ -125,6 +125,9 @@ void _BrowserWindow::processToolbar()
     AlienImGui::Tooltip("Logout");
 
     ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
     ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
     if (AlienImGui::ToolbarButton(ICON_FA_UPLOAD)) {
         if (auto uploadSimulationDialog = _uploadSimulationDialog.lock()) {

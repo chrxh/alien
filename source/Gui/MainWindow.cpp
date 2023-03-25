@@ -198,7 +198,7 @@ void _MainWindow::mainLoop()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        //ImGui::ShowDemoWindow(NULL);
+     //   ImGui::ShowDemoWindow(NULL);
 
         switch (_startupController->getState()) {
         case _StartupController::State::Unintialized:
