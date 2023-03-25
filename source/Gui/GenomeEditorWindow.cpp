@@ -160,10 +160,16 @@ void _GenomeEditorWindow::processToolbar()
     AlienImGui::Tooltip("Save genome to file");
 
     ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
         _copiedGenome = GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome);
     }
     AlienImGui::Tooltip("Copy genome");
+
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
@@ -201,6 +207,9 @@ void _GenomeEditorWindow::processToolbar()
         _collapseAllNodes = true;
     }
     AlienImGui::Tooltip("Collapse all nodes");
+
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_SEEDLING)) {

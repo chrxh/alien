@@ -61,6 +61,9 @@ void _PatternEditorWindow::processIntern()
     }
     ImGui::EndDisabled();
 
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
     //copy button
     ImGui::SameLine();
     ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
@@ -84,6 +87,9 @@ void _PatternEditorWindow::processIntern()
         onDelete();
     }
     ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
 
     //inspect objects button
     ImGui::SameLine();

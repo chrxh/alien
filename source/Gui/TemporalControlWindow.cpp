@@ -41,9 +41,13 @@ void _TemporalControlWindow::processIntern()
     ImGui::SameLine();
     processPauseButton();
     ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+    ImGui::SameLine();
     processStepBackwardButton();
     ImGui::SameLine();
     processStepForwardButton();
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
     ImGui::SameLine();
     processSnapshotButton();
     ImGui::SameLine();

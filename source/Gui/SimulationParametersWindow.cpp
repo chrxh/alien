@@ -175,6 +175,9 @@ void _SimulationParametersWindow::processToolbar()
     AlienImGui::Tooltip("Save simulation parameters to file");
 
     ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
         _copiedParameters = _simController->getSimulationParameters();
     }
