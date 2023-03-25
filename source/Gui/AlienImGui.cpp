@@ -995,21 +995,21 @@ void AlienImGui::NeuronSelection(
         }
         ImGui::PopStyleColor(3);
         if (i == 0) {
-            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT
+            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT
                     " Constructor: 0 = construction failed, 1 = construction successful\n" ICON_FA_CARET_RIGHT " Sensor: 0 = nothing found, 1 = region found");
         }
         if (i == 1) {
-            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT " Sensor: cell density of found region");
+            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT " Sensor: cell density of found region");
         }
         if (i == 2) {
-            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT " Sensor: distance to found region");
+            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT " Sensor: distance to found region");
         }
         if (i == 3) {
-            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT
-                    " Sensor: relative angle of found region (when 'scan specific direction' is activated)");
+            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT
+                    " Sensor: relative angle of found region (when 'Scan vicinity' is activated)");
         }
         if (i > 3) {
-            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell");
+            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell");
         }
 
         auto buttonSize = ImGui::GetItemRectSize();

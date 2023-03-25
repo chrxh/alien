@@ -5,7 +5,7 @@
 
 namespace
 {
-    auto constexpr ZoomLevelForActivity = 0.3f;
+    auto constexpr ZoomLevelForActivity = 2.0f;
     auto constexpr ZoomLevelForConnections = 1.0f;
     auto constexpr ZoomLevelForShadedCells = 10.0f;
     auto constexpr ZoomLevelForArrows = 15.0f;

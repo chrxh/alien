@@ -871,7 +871,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0)
-                    .max(0.15f)
+                    .max(0.4f)
                     .logarithmic(true)
                     .defaultValue(origSimParameters.cellFunctionMuscleMovementAcceleration),
                 simParameters.cellFunctionMuscleMovementAcceleration);
