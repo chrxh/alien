@@ -22,6 +22,7 @@
 #include "GenericFileDialogs.h"
 #include "GlobalSettings.h"
 #include "MessageDialog.h"
+#include "OverlayMessageController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
 
@@ -710,13 +711,15 @@ void _GenomeEditorWindow::onCreateSpore()
     auto data = DataDescription().addCell(cell);
     _simController->addAndSelectSimulationData(data);
     _editorModel->update();
+
+    printOverlayMessage("Spore created");
 }
 
 void _GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
     auto preview = PreviewDescriptionConverter::convert(genome, tab.selectedNode, _simController->getSimulationParameters());
-    if (AlienImGui::ShowPreviewDescription(preview, _genomeZoom, tab.selectedNode)) {
+    if (AlienImGui::ShowPreviewDescription(preview, _previewZoom, tab.selectedNode)) {
         _nodeIndexToJump = tab.selectedNode;
     }
 }
