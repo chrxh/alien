@@ -29,11 +29,15 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
         auto activity = CellFunctionProcessor::calcInputActivity(cell);
 
         auto const& nerve = cell->cellFunctionData.nerve;
-        if (nerve.pulseMode > 0 && (data.timestep % (cudaSimulationParameters.cellNumExecutionOrderNumbers * nerve.pulseMode) == cell->executionOrderNumber)) {
+        auto counter = (cell->age / cudaSimulationParameters.cellNumExecutionOrderNumbers) * cudaSimulationParameters.cellNumExecutionOrderNumbers
+            + cell->executionOrderNumber % cudaSimulationParameters.cellNumExecutionOrderNumbers;
+        if (nerve.pulseMode > 0 && (counter % (cudaSimulationParameters.cellNumExecutionOrderNumbers * nerve.pulseMode)
+                == cell->executionOrderNumber)) {
             if (nerve.alternationMode == 0) {
                 activity.channels[0] += 1.0f;
             } else {
-                auto evenPulse = data.timestep % (cudaSimulationParameters.cellNumExecutionOrderNumbers * nerve.pulseMode * nerve.alternationMode * 2)
+                auto evenPulse = counter
+                        % (cudaSimulationParameters.cellNumExecutionOrderNumbers * nerve.pulseMode * nerve.alternationMode * 2)
                     < cell->executionOrderNumber + cudaSimulationParameters.cellNumExecutionOrderNumbers * nerve.pulseMode * nerve.alternationMode;
                 activity.channels[0] += evenPulse ? 1.0f : -1.0f;
             }

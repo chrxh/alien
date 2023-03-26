@@ -1,10 +1,10 @@
 {
     "general": {
         "time step": "0",
-        "zoom": "1.61467922",
+        "zoom": "1.72321749",
         "center": {
-            "x": "645.86279297",
-            "y": "314.78182983"
+            "x": "627.05810547",
+            "y": "292.63464355"
         },
         "world size": {
             "x": "1250",
@@ -563,7 +563,7 @@
                     "type": "3",
                     "linear": {
                         "angle": "180.00000000",
-                        "strength": "0.00022000"
+                        "strength": "0.00026000"
                     }
                 },
                 "fadeout radius": "36.09999847",
@@ -823,7 +823,7 @@
                     "type": "3",
                     "linear": {
                         "angle": "0.00000000",
-                        "strength": "0.00022000"
+                        "strength": "0.00026000"
                     }
                 },
                 "fadeout radius": "83.33333588",
@@ -1083,7 +1083,7 @@
                     "type": "3",
                     "linear": {
                         "angle": "0.00000000",
-                        "strength": "0.00022000"
+                        "strength": "0.00026000"
                     }
                 },
                 "fadeout radius": "83.33333588",
@@ -1343,8 +1343,8 @@
                     "type": "1",
                     "radial": {
                         "orientation": "0",
-                        "strength": "0.00085000",
-                        "drift angle": "56.90000153"
+                        "strength": "0.00195000",
+                        "drift angle": "63.50000000"
                     }
                 },
                 "fadeout radius": "37.70000076",
@@ -1865,7 +1865,7 @@
                     "type": "3",
                     "linear": {
                         "angle": "0.00000000",
-                        "strength": "0.00022000"
+                        "strength": "0.00026000"
                     }
                 },
                 "fadeout radius": "83.33333588",
