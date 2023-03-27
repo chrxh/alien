@@ -463,6 +463,8 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     case CellFunction_Muscle: {
         MuscleDescription muscle;
         muscle.mode = cellTO.cellFunctionData.muscle.mode;
+        muscle.lastBendingDirection = cellTO.cellFunctionData.muscle.lastBendingDirection;
+        muscle.numConsecutiveBendings = cellTO.cellFunctionData.muscle.numConsecutiveBendings;
         result.cellFunction = muscle;
     } break;
     case CellFunction_Defender: {
@@ -578,6 +580,8 @@ void DescriptionConverter::addCell(
         auto const& muscleDesc = std::get<MuscleDescription>(*cellDesc.cellFunction);
         MuscleTO muscleTO;
         muscleTO.mode = muscleDesc.mode;
+        muscleTO.lastBendingDirection = muscleDesc.lastBendingDirection;
+        muscleTO.numConsecutiveBendings = muscleDesc.numConsecutiveBendings;
         cellTO.cellFunctionData.muscle = muscleTO;
     } break;
     case CellFunction_Defender: {

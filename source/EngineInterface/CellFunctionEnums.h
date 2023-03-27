@@ -54,6 +54,14 @@ enum MuscleMode_
     MuscleMode_Count
 };
 
+using MuscleBendingDirection = int;
+enum MuscleBendingDirection_
+{
+    MuscleBendingDirection_None,
+    MuscleBendingDirection_Positive,
+    MuscleBendingDirection_Negative
+};
+
 using DefenderMode = int;
 enum DefenderMode_
 {
