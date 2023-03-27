@@ -97,6 +97,8 @@ struct InjectorTO
 struct MuscleTO
 {
     MuscleMode mode;
+    MuscleBendingDirection lastBendingDirection;
+    int numConsecutiveBendings;
 };
 
 struct DefenderTO

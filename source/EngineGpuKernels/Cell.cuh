@@ -93,6 +93,8 @@ struct InjectorFunction
 struct MuscleFunction
 {
     MuscleMode mode;
+    MuscleBendingDirection lastBendingDirection;
+    int numConsecutiveBendings;
 };
 
 struct DefenderFunction

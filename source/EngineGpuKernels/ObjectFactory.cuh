@@ -169,6 +169,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     } break;
     case CellFunction_Muscle: {
         cell->cellFunctionData.muscle.mode = cellTO.cellFunctionData.muscle.mode;
+        cell->cellFunctionData.muscle.lastBendingDirection = cellTO.cellFunctionData.muscle.lastBendingDirection;
+        cell->cellFunctionData.muscle.numConsecutiveBendings = cellTO.cellFunctionData.muscle.numConsecutiveBendings;
     } break;
     case CellFunction_Defender: {
         cell->cellFunctionData.defender.mode = cellTO.cellFunctionData.defender.mode;
@@ -312,6 +314,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
         } break;
         case CellFunction_Muscle: {
             cell->cellFunctionData.muscle.mode = _data->numberGen1.random(MuscleMode_Count - 1);
+            cell->cellFunctionData.muscle.lastBendingDirection = MuscleBendingDirection_None;
+            cell->cellFunctionData.muscle.numConsecutiveBendings = 0;
         } break;
         case CellFunction_Defender: {
             cell->cellFunctionData.defender.mode = _data->numberGen1.random(DefenderMode_Count - 1);

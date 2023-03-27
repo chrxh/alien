@@ -65,6 +65,8 @@ namespace
     auto constexpr Id_Defender_Mode = 0;
 
     auto constexpr Id_Muscle_Mode = 0;
+    auto constexpr Id_Muscle_LastBendingDirection = 1;
+    auto constexpr Id_Muscle_NumConsecutiveBendings = 2;
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
@@ -456,6 +458,8 @@ namespace cereal
         MuscleDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_Muscle_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Id_Muscle_LastBendingDirection, data.lastBendingDirection, defaultObject.lastBendingDirection);
+        loadSave<int>(task, auxiliaries, Id_Muscle_NumConsecutiveBendings, data.numConsecutiveBendings, defaultObject.numConsecutiveBendings);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(MuscleDescription)
