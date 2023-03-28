@@ -1457,7 +1457,8 @@ void _SimulationParametersWindow::processSpot(
                                       .color(color)
                                       .defaultTargetColor(origSpot.values.cellColorTransitionTargetColor[color])
                                       .defaultTransitionAge(origSpot.values.cellColorTransitionDuration[color])
-                                      .logarithmic(true);
+                                      .logarithmic(true)
+                                      .infinity(true);
                 if (0 == color) {
                     parameters.name("Target color and duration");
                 }

@@ -464,7 +464,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         MuscleDescription muscle;
         muscle.mode = cellTO.cellFunctionData.muscle.mode;
         muscle.lastBendingDirection = cellTO.cellFunctionData.muscle.lastBendingDirection;
-        muscle.numConsecutiveBendings = cellTO.cellFunctionData.muscle.numConsecutiveBendings;
+        muscle.consecutiveBendingAngle = cellTO.cellFunctionData.muscle.consecutiveBendingAngle;
         result.cellFunction = muscle;
     } break;
     case CellFunction_Defender: {
@@ -581,7 +581,7 @@ void DescriptionConverter::addCell(
         MuscleTO muscleTO;
         muscleTO.mode = muscleDesc.mode;
         muscleTO.lastBendingDirection = muscleDesc.lastBendingDirection;
-        muscleTO.numConsecutiveBendings = muscleDesc.numConsecutiveBendings;
+        muscleTO.consecutiveBendingAngle = muscleDesc.consecutiveBendingAngle;
         cellTO.cellFunctionData.muscle = muscleTO;
     } break;
     case CellFunction_Defender: {

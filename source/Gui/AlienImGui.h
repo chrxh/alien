@@ -171,8 +171,8 @@ public:
         MEMBER_DECLARATION(InputColorTransitionParameters, std::string, name, "");
         MEMBER_DECLARATION(InputColorTransitionParameters, int, color, 0);
         MEMBER_DECLARATION(InputColorTransitionParameters, int, textWidth, 100);
-        MEMBER_DECLARATION(InputColorTransitionParameters, int, min, 0);
-        MEMBER_DECLARATION(InputColorTransitionParameters, int, max, 1000000);
+        MEMBER_DECLARATION(InputColorTransitionParameters, int, min, 1);
+        MEMBER_DECLARATION(InputColorTransitionParameters, int, max, 10000000);
         MEMBER_DECLARATION(InputColorTransitionParameters, bool, logarithmic, false);
         MEMBER_DECLARATION(InputColorTransitionParameters, bool, infinity, false);
         MEMBER_DECLARATION(InputColorTransitionParameters, std::optional<int>, defaultTargetColor, std::nullopt);

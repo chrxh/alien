@@ -153,14 +153,13 @@ MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* c
                         }
                     }();
                     if (cell->cellFunctionData.muscle.lastBendingDirection == bendingDirection) {
-                        ++cell->cellFunctionData.muscle.numConsecutiveBendings;
+                        cell->cellFunctionData.muscle.consecutiveBendingAngle += abs(bendingAngle);
                     } else {
-                        cell->cellFunctionData.muscle.numConsecutiveBendings = 0;
+                        cell->cellFunctionData.muscle.consecutiveBendingAngle = 0;
                     }
                     cell->cellFunctionData.muscle.lastBendingDirection = bendingDirection;
                     auto acceleration = delta * intensityChannel0 * cudaSimulationParameters.cellFunctionMuscleBendingAcceleration[cell->color]
-                        * sqrtf(toFloat(cell->cellFunctionData.muscle.numConsecutiveBendings + 1)) / 20;
-
+                        * sqrtf(toFloat(cell->cellFunctionData.muscle.consecutiveBendingAngle + 1)) / 80;
                     atomicAdd(&connection.cell->vel.x, acceleration.x);
                     atomicAdd(&connection.cell->vel.y, acceleration.y);
                 }

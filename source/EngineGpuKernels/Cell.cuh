@@ -94,7 +94,7 @@ struct MuscleFunction
 {
     MuscleMode mode;
     MuscleBendingDirection lastBendingDirection;
-    int numConsecutiveBendings;
+    float consecutiveBendingAngle;
 };
 
 struct DefenderFunction
