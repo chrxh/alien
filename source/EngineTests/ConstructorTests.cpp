@@ -675,6 +675,8 @@ TEST_F(ConstructorTests, constructMuscleCell)
 
     auto actualMuscle = std::get<MuscleDescription>(*actualConstructedCell.cellFunction);
     EXPECT_EQ(muscleDesc.mode, actualMuscle.mode);
+    EXPECT_EQ(0, actualMuscle.lastBendingDirection);
+    EXPECT_EQ(0.0f, actualMuscle.consecutiveBendingAngle);
 }
 
 TEST_F(ConstructorTests, constructSensorCell)

@@ -244,7 +244,7 @@ struct MuscleDescription
 {
     MuscleMode mode = MuscleMode_Movement;
     MuscleBendingDirection lastBendingDirection = MuscleBendingDirection_None;
-    int numConsecutiveBendings = 0;
+    float consecutiveBendingAngle = 0;
 
     auto operator<=>(MuscleDescription const&) const = default;
 
