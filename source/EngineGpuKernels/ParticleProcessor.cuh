@@ -3,12 +3,11 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "TOs.cuh"
 #include "Base.cuh"
-#include "Physics.cuh"
 #include "Map.cuh"
 #include "ConstantMemory.cuh"
 #include "ObjectFactory.cuh"
+#include "SpotCalculator.cuh"
 
 class ParticleProcessor
 {
@@ -75,7 +74,14 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                 if (cell->barrier) {
                     continue;
                 }
-                if (cudaSimulationParameters.radiationAbsorption[cell->color] < NEAR_ZERO) {
+                auto radiationAbsorption = SpotCalculator::calcParameter(
+                    &SimulationParametersSpotValues::radiationAbsorption,
+                    &SimulationParametersSpotActivatedValues::radiationAbsorption,
+                    data,
+                    cell->absPos,
+                    cell->color);
+
+                if (radiationAbsorption < NEAR_ZERO) {
                     continue;
                 }
                 if (!cell->tryLock()) {
@@ -83,8 +89,8 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                 }
                 if (particle->tryLock()) {
 
-                    auto energyToTransfer = particle->energy * cudaSimulationParameters.radiationAbsorption[cell->color];
-                    if (particle->energy < 5) {
+                    auto energyToTransfer = particle->energy * radiationAbsorption;
+                    if (particle->energy < 1) {
                         energyToTransfer = particle->energy;
                     }
                     cell->energy += energyToTransfer;
@@ -112,7 +118,7 @@ __inline__ __device__ void ParticleProcessor::transformation(SimulationData& dat
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.objects.particlePointers.at(particleIndex)) {
             
-            if (particle->energy >= cudaSimulationParameters.cellNormalEnergy[particle->color] && cudaSimulationParameters.radiationAbsorption[particle->color] > NEAR_ZERO) {
+            if (particle->energy >= cudaSimulationParameters.cellNormalEnergy[particle->color]) {
                 ObjectFactory factory;
                 factory.init(&data);
                 auto cell = factory.createRandomCell(particle->energy, particle->absPos, particle->vel);

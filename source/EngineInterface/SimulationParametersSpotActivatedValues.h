@@ -6,6 +6,7 @@ struct SimulationParametersSpotActivatedValues
 {
     bool friction = false;
     bool rigidity = false;
+    bool radiationAbsorption = false;
     bool radiationCellAgeStrength = false;
     bool cellMaxForce = false;
     bool cellMinEnergy = false;
@@ -43,6 +44,7 @@ struct SimulationParametersSpotActivatedValues
             && cellFunctionConstructorMutationTranslationProbability == other.cellFunctionConstructorMutationTranslationProbability
             && cellFunctionConstructorMutationDuplicationProbability == other.cellFunctionConstructorMutationDuplicationProbability
             && cellFunctionConstructorMutationColorProbability == other.cellFunctionConstructorMutationColorProbability
+            && radiationAbsorption == other.radiationAbsorption
         ;
     }
 };

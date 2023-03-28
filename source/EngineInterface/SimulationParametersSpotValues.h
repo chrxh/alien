@@ -24,6 +24,7 @@ struct SimulationParametersSpotValues
 {
     float friction = 0.001f;
     float rigidity = 0.0f;
+    ColorVector<float> radiationAbsorption = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorVector<float> radiationCellAgeStrength = {0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f};
     float cellMaxForce = 0.8f;
     ColorVector<float> cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
@@ -76,6 +77,9 @@ struct SimulationParametersSpotValues
             }
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (radiationAbsorption[i] != other.radiationAbsorption[i]) {
+                return false;
+            }
             if (cellFunctionAttackerEnergyCost[i] != other.cellFunctionAttackerEnergyCost[i]) {
                 return false;
             }
