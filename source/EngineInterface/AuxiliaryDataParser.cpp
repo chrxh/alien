@@ -133,9 +133,8 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
         "simulation parameters.radiation.velocity perturbation",
         parserTask);
     encodeDecodeProperty(
-        tree,
-        parameters.radiationAbsorption,
-        defaultParameters.radiationAbsorption,
+        tree, parameters.baseValues.radiationAbsorption,
+        defaultParameters.baseValues.radiationAbsorption,
         "simulation parameters.radiation.absorption",
         parserTask);
     encodeDecodeProperty(
@@ -459,6 +458,13 @@ void AuxiliaryDataParser::encodeDecode(boost::property_tree::ptree& tree, Simula
 
         encodeDecodeSpotProperty(tree, spot.values.friction, spot.activatedValues.friction, defaultSpot.values.friction, base + "friction", parserTask);
         encodeDecodeSpotProperty(tree, spot.values.rigidity, spot.activatedValues.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
+        encodeDecodeSpotProperty(
+            tree,
+            spot.values.radiationAbsorption,
+            spot.activatedValues.radiationAbsorption,
+            defaultSpot.values.radiationAbsorption,
+            base + "radiation.absorption",
+            parserTask);
         encodeDecodeSpotProperty(
             tree, spot.values.radiationCellAgeStrength, spot.activatedValues.radiationCellAgeStrength, defaultSpot.values.radiationCellAgeStrength, base + "radiation.factor", parserTask);
         encodeDecodeSpotProperty(

@@ -414,8 +414,8 @@ void _SimulationParametersWindow::processBase(
                     .min(0)
                     .max(1.0)
                     .format("%.4f")
-                    .defaultValue(origSimParameters.radiationAbsorption),
-                simParameters.radiationAbsorption);
+                    .defaultValue(origSimParameters.baseValues.radiationAbsorption),
+                simParameters.baseValues.radiationAbsorption);
 
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -1236,6 +1236,21 @@ void _SimulationParametersWindow::processSpot(
         if (ImGui::TreeNodeEx("Physics: Radiation", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
+                    .name("Absorption factor")
+                    .tooltip("")
+                    .textWidth(RightColumnWidth)
+                    .logarithmic(true)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(1.0)
+                    .format("%.4f")
+                    .defaultValue(origSpot.values.radiationAbsorption)
+                    .disabledValue(parameters.baseValues.radiationAbsorption),
+                spot.values.radiationAbsorption,
+                &spot.activatedValues.radiationAbsorption);
+
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
                     .name("Radiation strength")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
@@ -1519,7 +1534,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
         }
-        parameters.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.radiationAbsorption[i]));
+        parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
 }
@@ -1531,6 +1546,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSp
             spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j]));
         }
+        spot.values.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorption[i]));
     }
     spot.values.cellMaxBindingEnergy = std::max(10.0f, spot.values.cellMaxBindingEnergy);
 }

@@ -67,7 +67,6 @@ struct SimulationParameters
     float cellMaxForceDecayProb = 0.2f;
     int cellNumExecutionOrderNumbers = 6;
 
-    ColorVector<float> radiationAbsorption = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
@@ -239,9 +238,6 @@ struct SimulationParameters
                 return false;
             }
             if (cellNormalEnergy[i] != other.cellNormalEnergy[i]) {
-                return false;
-            }
-            if (radiationAbsorption[i] != other.radiationAbsorption[i]) {
                 return false;
             }
             if (highRadiationFactor[i] != other.highRadiationFactor[i]) {
