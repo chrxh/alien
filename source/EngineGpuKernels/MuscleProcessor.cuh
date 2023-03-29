@@ -138,28 +138,30 @@ MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* c
             }
             connection.angleFromPrevious += bendingAngle;
             nextConnection.angleFromPrevious -= bendingAngle;
+
+            MuscleBendingDirection bendingDirection = [&] {
+                if (intensityChannel0 > NEAR_ZERO) {
+                    return MuscleBendingDirection_Positive;
+                } else if (intensityChannel0 < -NEAR_ZERO) {
+                    return MuscleBendingDirection_Negative;
+                } else {
+                    return MuscleBendingDirection_None;
+                }
+            }();
+            if (cell->cellFunctionData.muscle.lastBendingDirection == bendingDirection) {
+                cell->cellFunctionData.muscle.consecutiveBendingAngle += abs(bendingAngle);
+            } else {
+                cell->cellFunctionData.muscle.consecutiveBendingAngle = 0;
+            }
+            cell->cellFunctionData.muscle.lastBendingDirection = bendingDirection;
+
             if (cell->numConnections <= 2 && abs(activity.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold) {
                 auto delta = Math::normalized(data.cellMap.getCorrectedDirection(connection.cell->absPos - cell->absPos));
                 Math::rotateQuarterCounterClockwise(delta);
                 auto intensityChannel1 = getTruncatedValue(activity, 1);
                 if ((intensityChannel0 < -NEAR_ZERO && intensityChannel1 < -NEAR_ZERO) || (intensityChannel0 > NEAR_ZERO && intensityChannel1 > NEAR_ZERO)) {
-                    MuscleBendingDirection bendingDirection = [&] {
-                        if (intensityChannel0 > NEAR_ZERO) {
-                            return MuscleBendingDirection_Positive;
-                        } else if (intensityChannel0 < -NEAR_ZERO) {
-                            return MuscleBendingDirection_Negative;
-                        } else {
-                            return MuscleBendingDirection_None;
-                        }
-                    }();
-                    if (cell->cellFunctionData.muscle.lastBendingDirection == bendingDirection) {
-                        cell->cellFunctionData.muscle.consecutiveBendingAngle += abs(bendingAngle);
-                    } else {
-                        cell->cellFunctionData.muscle.consecutiveBendingAngle = 0;
-                    }
-                    cell->cellFunctionData.muscle.lastBendingDirection = bendingDirection;
                     auto acceleration = delta * intensityChannel0 * cudaSimulationParameters.cellFunctionMuscleBendingAcceleration[cell->color]
-                        * sqrtf(toFloat(cell->cellFunctionData.muscle.consecutiveBendingAngle + 1)) / 80;
+                        * sqrtf(cell->cellFunctionData.muscle.consecutiveBendingAngle + 1.0f) / 20 /*abs(bendingAngle) / 10*/;
                     atomicAdd(&connection.cell->vel.x, acceleration.x);
                     atomicAdd(&connection.cell->vel.y, acceleration.y);
                 }

@@ -133,7 +133,7 @@ struct SimulationParameters
     ColorVector<float> cellFunctionMuscleContractionExpansionDelta = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
     ColorVector<float> cellFunctionMuscleMovementAcceleration = {0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f};
     ColorVector<float> cellFunctionMuscleBendingAngle = {5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f};
-    ColorVector<float> cellFunctionMuscleBendingAcceleration = {0.08f, 0.08f, 0.08f, 0.08f, 0.08f, 0.08f, 0.08f};
+    ColorVector<float> cellFunctionMuscleBendingAcceleration = {0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
     float cellFunctionMuscleBendingAccelerationThreshold = 0.1f;
 
     ColorVector<float> cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
