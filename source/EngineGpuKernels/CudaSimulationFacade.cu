@@ -23,7 +23,7 @@
 #include "GarbageCollectorKernels.cuh"
 #include "ConstantMemory.cuh"
 #include "CudaMemoryManager.cuh"
-#include "CudaMonitorData.cuh"
+#include "CudaMonitor.cuh"
 #include "Objects.cuh"
 #include "Map.cuh"
 #include "MonitorKernels.cuh"
@@ -128,7 +128,7 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
     _cudaSimulationResult = std::make_shared<SimulationResult>();
     _cudaSelectionResult = std::make_shared<SelectionResult>();
     _cudaAccessTO = std::make_shared<DataTO>();
-    _cudaMonitorData = std::make_shared<CudaMonitorData>();
+    _cudaMonitorData = std::make_shared<CudaMonitor>();
 
     _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY}, timestep);
     _cudaRenderingData->init();
@@ -421,13 +421,13 @@ MonitorData _CudaSimulationFacade::getMonitorData()
     
     MonitorData result;
     auto monitorData = _cudaMonitorData->getMonitorData(getCurrentTimestep());
-    result.timestep = monitorData.timeStep;
-    for (int i = 0; i < 7; ++i) {
+    result.timestep = _cudaSimulationData->timestep;
+    for (int i = 0; i < MAX_COLORS; ++i) {
         result.numCellsByColor[i] = monitorData.numCellsByColor[i];
     }
     result.numConnections = monitorData.numConnections;
     result.numParticles = monitorData.numParticles;
-    result.totalInternalEnergy = monitorData.totalInternalEnergy;
+    result.totalInternalEnergy = monitorData.internalEnergy;
 
     auto processStatistics = _cudaSimulationResult->getAndResetProcessMonitorData();
     result.numCreatedCells = processStatistics.createdCells;

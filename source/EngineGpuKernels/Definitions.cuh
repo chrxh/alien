@@ -18,7 +18,7 @@ struct ClusterAccessTO;
 struct DataTO;
 struct SimulationParameters;
 struct GpuSettings;
-class CudaMonitorData;
+class CudaMonitor;
 
 class _SimulationKernelsLauncher;
 using SimulationKernelsLauncher = std::shared_ptr<_SimulationKernelsLauncher>;

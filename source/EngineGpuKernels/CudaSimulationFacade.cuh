@@ -93,7 +93,7 @@ private:
     std::shared_ptr<SimulationResult> _cudaSimulationResult;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     std::shared_ptr<DataTO> _cudaAccessTO;
-    std::shared_ptr<CudaMonitorData> _cudaMonitorData;
+    std::shared_ptr<CudaMonitor> _cudaMonitorData;
 
     mutable std::mutex _mutex;
 
