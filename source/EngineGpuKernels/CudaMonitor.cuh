@@ -5,23 +5,14 @@
 #include "Base.cuh"
 #include "Definitions.cuh"
 
-using NumCellsByColor = int[MAX_COLORS];
-struct CudaMonitorData
-{
-    NumCellsByColor numCellsByColor;
-    int numConnections = 0;
-    int numParticles = 0;
-    double internalEnergy = 0.0;
-};
-
 class CudaMonitor
 {
 public:
 
     __host__ void init()
     {
-        CudaMemoryManager::getInstance().acquireMemory<CudaMonitorData>(1, _data);
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_data, 0, sizeof(CudaMonitorData)));
+        CudaMemoryManager::getInstance().acquireMemory<TimestepMonitorData>(1, _data);
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_data, 0, sizeof(TimestepMonitorData)));
     }
 
     __host__ void free()
@@ -29,17 +20,20 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_data);
     }
 
-    __host__ CudaMonitorData getMonitorData(uint64_t timeStep)
+    __host__ TimestepMonitorData getTimestepMonitorData(uint64_t timeStep)
     {
-        CudaMonitorData result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _data, sizeof(CudaMonitorData), cudaMemcpyDeviceToHost));
+        TimestepMonitorData result;
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _data, sizeof(TimestepMonitorData), cudaMemcpyDeviceToHost));
         return result;
     }
 
     __inline__ __device__ void reset()
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
-            (_data->numCellsByColor)[i] = 0;
+            _data->numCellsByColor[i] = 0;
+            for (int j = 0; j < MAX_AGE_INTERVALS; ++j) {
+                _data->numCellsByAgeByColor[j][i] = 0;
+            }
         }
         _data->numConnections = 0;
         _data->numParticles = 0;
@@ -53,6 +47,6 @@ public:
 
 
 private:
-    CudaMonitorData* _data;
+    TimestepMonitorData* _data;
 };
 

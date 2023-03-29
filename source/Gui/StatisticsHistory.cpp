@@ -22,18 +22,18 @@ void LiveStatistics::add(MonitorData const& newStatistics)
     timepointsHistory.emplace_back(timepoint);
     int numCells = 0;
     for (int i = 0; i < 7; ++i) {
-        numCells += newStatistics.numCellsByColor[i];
+        numCells += newStatistics.timestepData.numCellsByColor[i];
     }
     datas[0].emplace_back(toFloat(numCells));
     for (int i = 0; i < 7; ++i) {
-        datas[1 + i].emplace_back(toFloat(newStatistics.numCellsByColor[i]));
+        datas[1 + i].emplace_back(toFloat(newStatistics.timestepData.numCellsByColor[i]));
     }
-    datas[8].emplace_back(toFloat(newStatistics.numConnections));
-    datas[9].emplace_back(toFloat(newStatistics.numParticles));
-    datas[10].emplace_back(newStatistics.numCreatedCells);
-    datas[11].emplace_back(newStatistics.numSuccessfulAttacks);
-    datas[12].emplace_back(newStatistics.numFailedAttacks);
-    datas[13].emplace_back(newStatistics.numMuscleActivities);
+    datas[8].emplace_back(toFloat(newStatistics.timestepData.numConnections));
+    datas[9].emplace_back(toFloat(newStatistics.timestepData.numParticles));
+    datas[10].emplace_back(newStatistics.timeIntervalData.numCreatedCells);
+    datas[11].emplace_back(newStatistics.timeIntervalData.numSuccessfulAttacks);
+    datas[12].emplace_back(newStatistics.timeIntervalData.numFailedAttacks);
+    datas[13].emplace_back(newStatistics.timeIntervalData.numMuscleActivities);
 }
 
 void LongtermStatistics::add(MonitorData const& newStatistics)
@@ -42,14 +42,14 @@ void LongtermStatistics::add(MonitorData const& newStatistics)
         timestepHistory.emplace_back(toFloat(newStatistics.timestep));
         int numCells = 0;
         for (int i = 0; i < 7; ++i) {
-            numCells += newStatistics.numCellsByColor[i];
+            numCells += newStatistics.timestepData.numCellsByColor[i];
         }
         datas[0].emplace_back(toFloat(numCells));
         for (int i = 0; i < 7; ++i) {
-            datas[1 + i].emplace_back(toFloat(newStatistics.numCellsByColor[i]));
+            datas[1 + i].emplace_back(toFloat(newStatistics.timestepData.numCellsByColor[i]));
         }
-        datas[8].emplace_back(toFloat(newStatistics.numConnections));
-        datas[9].emplace_back(toFloat(newStatistics.numParticles));
+        datas[8].emplace_back(toFloat(newStatistics.timestepData.numConnections));
+        datas[9].emplace_back(toFloat(newStatistics.timestepData.numParticles));
 
         datas[10].emplace_back(accumulatedCreatedCells / numberOfAccumulation);
         datas[11].emplace_back(accumulatedSuccessfulAttacks / numberOfAccumulation);
@@ -61,10 +61,10 @@ void LongtermStatistics::add(MonitorData const& newStatistics)
         accumulatedMuscleActivities = 0;
         numberOfAccumulation = 1;
     } else {
-        accumulatedCreatedCells += newStatistics.numCreatedCells;
-        accumulatedSuccessfulAttacks += newStatistics.numSuccessfulAttacks;
-        accumulatedFailedAttack += newStatistics.numFailedAttacks;
-        accumulatedMuscleActivities += newStatistics.numMuscleActivities;
+        accumulatedCreatedCells += newStatistics.timeIntervalData.numCreatedCells;
+        accumulatedSuccessfulAttacks += newStatistics.timeIntervalData.numSuccessfulAttacks;
+        accumulatedFailedAttack += newStatistics.timeIntervalData.numFailedAttacks;
+        accumulatedMuscleActivities += newStatistics.timeIntervalData.numMuscleActivities;
         ++numberOfAccumulation;
     }
 }

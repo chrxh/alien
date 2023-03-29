@@ -6,3 +6,4 @@
 #define MAX_COLORS 7
 #define MAX_PARTICLE_SOURCES 20
 #define MAX_SPOTS 20
+#define MAX_AGE_INTERVALS 30
