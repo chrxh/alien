@@ -7,10 +7,10 @@
 class InjectorProcessor
 {
 public:
-    __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static int getNumDefenderCells(Cell* cell);
 };
 
@@ -18,16 +18,16 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__device__ __inline__ void InjectorProcessor::process(SimulationData& data, SimulationResult& result)
+__device__ __inline__ void InjectorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
     auto& operations = data.cellFunctionOperations[CellFunction_Injector];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        processCell(data, result, operations.at(i).cell);
+        processCell(data, statistics, operations.at(i).cell);
     }
 }
 
-__inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
+__inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
 

@@ -59,7 +59,7 @@ void _AutosaveController::process()
 void _AutosaveController::onSave()
 {
     printOverlayMessage("Auto saving ...");
-    delayedExecution([=] {
+    delayedExecution([=, this] {
         DeserializedSimulation sim;
         sim.auxiliaryData.timestep = _simController->getCurrentTimestep();
         sim.auxiliaryData.zoom = _viewport->getZoomFactor();

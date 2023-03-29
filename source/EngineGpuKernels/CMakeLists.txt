@@ -13,7 +13,7 @@ add_library(alien_engine_gpu_kernels_lib
     ConstantMemory.cuh
     ConstructorProcessor.cuh
     CudaMemoryManager.cuh
-    CudaMonitor.cuh
+    CudaNumberGenerator.cuh
     CudaSimulationFacade.cu
     CudaSimulationFacade.cuh
     DataAccessKernels.cu
@@ -44,10 +44,6 @@ add_library(alien_engine_gpu_kernels_lib
     Map.cuh
     MapSectionCollector.cuh
     Math.cuh
-    MonitorKernelsLauncher.cu
-    MonitorKernelsLauncher.cuh
-    MonitorKernels.cu
-    MonitorKernels.cuh
     MuscleProcessor.cuh
     MutationProcessor.cuh
     NerveProcessor.cuh
@@ -75,8 +71,12 @@ add_library(alien_engine_gpu_kernels_lib
     SimulationKernels.cuh
     SimulationKernelsLauncher.cu
     SimulationKernelsLauncher.cuh
-    SimulationResult.cuh
+    SimulationStatistics.cuh
     SpotCalculator.cuh
+    StatisticsKernelsLauncher.cu
+    StatisticsKernelsLauncher.cuh
+    StatisticsKernels.cu
+    StatisticsKernels.cuh
     Swap.cuh
     TestKernels.cu
     TestKernels.cuh

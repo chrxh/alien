@@ -7,7 +7,7 @@ namespace
     {
         targetSize = sourceSize;
         if (sourceSize > 0) {
-            targetIndex = atomicAdd(&auxiliaryDataSize, sourceSize);
+            targetIndex = alienAtomicAdd64(&auxiliaryDataSize, sourceSize);
             for (int i = 0; i < sourceSize; ++i) {
                 auxiliaryData[targetIndex + i] = source[i];
             }
@@ -16,7 +16,7 @@ namespace
 
     __device__ void createCellTO(Cell* cell, DataTO& dataTO, Cell* cellArrayStart)
     {
-        auto cellTOIndex = atomicAdd(dataTO.numCells, 1);
+        auto cellTOIndex = alienAtomicAdd64(dataTO.numCells, uint64_t(1));
         auto& cellTO = dataTO.cells[cellTOIndex];
 
         cellTO.id = cell->id;
@@ -135,7 +135,7 @@ namespace
 
     __device__ void createParticleTO(Particle* particle, DataTO& dataTO)
     {
-        int particleTOIndex = atomicAdd(dataTO.numParticles, 1);
+        int particleTOIndex = alienAtomicAdd64(dataTO.numParticles, uint64_t(1));
         ParticleTO& particleTO = dataTO.particles[particleTOIndex];
 
         particleTO.id = particle->id;
@@ -243,7 +243,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
             }
-            auto cellTOIndex = atomicAdd(dataTO.numCells, 1);
+            auto cellTOIndex = alienAtomicAdd64(dataTO.numCells, uint64_t(1));
             auto& cellTO = dataTO.cells[cellTOIndex];
 
             cellTO.id = cell->id;
@@ -265,7 +265,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
             }
-            auto particleTOIndex = atomicAdd(dataTO.numParticles, 1);
+            auto particleTOIndex = alienAtomicAdd64(dataTO.numParticles, uint64_t(1));
             auto& particleTO = dataTO.particles[particleTOIndex];
 
             particleTO.id = particle->id;

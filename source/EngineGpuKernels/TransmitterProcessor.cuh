@@ -6,15 +6,15 @@
 #include "CellFunctionProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
-#include "SimulationResult.cuh"
+#include "SimulationStatistics.cuh"
 
 class TransmitterProcessor
 {
 public:
-    __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void distributeEnergy(SimulationData& data, Cell* cell);
 };
 
@@ -22,17 +22,17 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__device__ __inline__ void TransmitterProcessor::process(SimulationData& data, SimulationResult& result)
+__device__ __inline__ void TransmitterProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
     auto& operations = data.cellFunctionOperations[CellFunction_Transmitter];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto const& cell = operations.at(i).cell;
-        processCell(data, result, cell);
+        processCell(data, statistics, cell);
     }
 }
 
-__device__ __inline__ void TransmitterProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
+__device__ __inline__ void TransmitterProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
 

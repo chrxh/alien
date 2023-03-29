@@ -1,14 +1,14 @@
 {
     "general": {
-        "time step": "191563",
-        "zoom": "2.06110525",
+        "time step": "589",
+        "zoom": "1.53401530",
         "center": {
-            "x": "546.01818848",
-            "y": "724.90545654"
+            "x": "467.32644653",
+            "y": "1536.19787598"
         },
         "world size": {
-            "x": "1250",
-            "y": "1000"
+            "x": "1000",
+            "y": "2000"
         }
     },
     "simulation parameters": {
@@ -18,14 +18,14 @@
             "type": "0"
         },
         "fluid": {
-            "smoothing length": "0.81599998",
+            "smoothing length": "0.66000003",
             "pressure strength": "0.10000000",
             "viscosity strength": "0.10000000"
         },
-        "friction": "0.00070000",
-        "rigidity": "0.00000000",
+        "friction": "0.00000000",
+        "rigidity": "1.00000000",
         "cell": {
-            "max velocity": "2.00000000",
+            "max velocity": "3.22600007",
             "max binding distance": "5.00000000",
             "normal energy[0]": "100.00000000",
             "normal energy[1]": "100.00000000",
@@ -35,7 +35,7 @@
             "normal energy[5]": "100.00000000",
             "normal energy[6]": "100.00000000",
             "min distance": "0.30000001",
-            "max force": "1.51499999",
+            "max force": "0.30500001",
             "max force decay probability": "0.20000000",
             "max execution order number": "6",
             "min energy[0]": "50.00000000",
@@ -45,7 +45,7 @@
             "min energy[4]": "50.00000000",
             "min energy[5]": "50.00000000",
             "min energy[6]": "50.00000000",
-            "fusion velocity": "1.13699996",
+            "fusion velocity": "5.00000000",
             "max binding energy": "500000.00000000",
             "max age[0]": "354071",
             "max age[1]": "354071",
@@ -327,7 +327,7 @@
                     "food chain color matrix[0, 5]": "0.00000000",
                     "food chain color matrix[0, 6]": "0.00000000",
                     "food chain color matrix[1, 0]": "1.00000000",
-                    "food chain color matrix[1, 1]": "1.00000000",
+                    "food chain color matrix[1, 1]": "0.00000000",
                     "food chain color matrix[1, 2]": "1.00000000",
                     "food chain color matrix[1, 3]": "1.00000000",
                     "food chain color matrix[1, 4]": "1.00000000",
@@ -431,13 +431,13 @@
                     "bending angle[4]": "8.83600044",
                     "bending angle[5]": "8.83600044",
                     "bending angle[6]": "8.83600044",
-                    "bending acceleration[0]": "0.03600000",
-                    "bending acceleration[1]": "0.03600000",
-                    "bending acceleration[2]": "0.03600000",
-                    "bending acceleration[3]": "0.03600000",
-                    "bending acceleration[4]": "0.03600000",
-                    "bending acceleration[5]": "0.03600000",
-                    "bending acceleration[6]": "0.03600000",
+                    "bending acceleration[0]": "0.10000000",
+                    "bending acceleration[1]": "0.10000000",
+                    "bending acceleration[2]": "0.10000000",
+                    "bending acceleration[3]": "0.10000000",
+                    "bending acceleration[4]": "0.10000000",
+                    "bending acceleration[5]": "0.10000000",
+                    "bending acceleration[6]": "0.10000000",
                     "bending acceleration threshold": "0.10000000"
                 },
                 "sensor": {
@@ -465,7 +465,7 @@
             "velocity perturbation": "0.50000000",
             "absorption[0]": "0.05000000",
             "absorption[1]": "0.00000000",
-            "absorption[2]": "0.00500000",
+            "absorption[2]": "0.02500000",
             "absorption[3]": "0.05000000",
             "absorption[4]": "0.05000000",
             "absorption[5]": "0.05000000",
@@ -479,13 +479,13 @@
             "min cell age[6]": "168056"
         },
         "high radiation": {
-            "min cell energy[0]": "229.10000610",
-            "min cell energy[1]": "229.10000610",
-            "min cell energy[2]": "229.10000610",
-            "min cell energy[3]": "229.10000610",
-            "min cell energy[4]": "229.10000610",
-            "min cell energy[5]": "229.10000610",
-            "min cell energy[6]": "229.10000610",
+            "min cell energy[0]": "398.10000610",
+            "min cell energy[1]": "398.10000610",
+            "min cell energy[2]": "398.10000610",
+            "min cell energy[3]": "398.10000610",
+            "min cell energy[4]": "398.10000610",
+            "min cell energy[5]": "398.10000610",
+            "min cell energy[6]": "398.10000610",
             "factor[0]": "0.00015700",
             "factor[1]": "0.00015700",
             "factor[2]": "0.00015700",
@@ -512,76 +512,46 @@
             }
         },
         "particle sources": {
-            "num sources": "5",
-            "0": {
-                "pos": {
-                    "x": "239.00000000",
-                    "y": "218.00000000"
-                }
-            },
-            "1": {
-                "pos": {
-                    "x": "635.00000000",
-                    "y": "218.00000000"
-                }
-            },
-            "2": {
-                "pos": {
-                    "x": "1040.00000000",
-                    "y": "218.00000000"
-                }
-            },
-            "3": {
-                "pos": {
-                    "x": "414.00000000",
-                    "y": "669.00000000"
-                }
-            },
-            "4": {
-                "pos": {
-                    "x": "859.00000000",
-                    "y": "669.00000000"
-                }
-            }
+            "num sources": "0"
         },
         "spots": {
-            "num spots": "7",
+            "num spots": "4",
             "0": {
-                "color": "4279897863",
+                "color": "4279571463",
                 "pos": {
-                    "x": "750.00000000",
-                    "y": "259.00000000"
+                    "x": "647.50000000",
+                    "y": "500.00000000"
                 },
                 "shape": {
                     "type": "1",
                     "rectangular": {
-                        "core width": "1500.00000000",
-                        "core height": "511.50000000"
+                        "core width": "1000.00000000",
+                        "core height": "2000.00000000"
                     }
                 },
                 "flow": {
                     "type": "3",
                     "linear": {
                         "angle": "180.00000000",
-                        "strength": "0.00026000"
+                        "strength": "0.00100000"
                     }
                 },
-                "fadeout radius": "36.09999847",
+                "fadeout radius": "0.00000000",
                 "friction": {
-                    "activated": "false",
-                    "value": "0.00070000"
-                },
-                "rigidity": {
                     "activated": "false",
                     "value": "0.00000000"
                 },
+                "rigidity": {
+                    "activated": "false",
+                    "value": "1.00000000"
+                },
                 "radiation": {
                     "absorption": {
-                        "activated": "true"
+                        "activated": "false"
                     },
                     "absorption[0]": "0.05000000",
-                    "absorption[1]": "0.05000000",
-                    "absorption[2]": "0.00500000",
+                    "absorption[1]": "0.00000000",
+                    "absorption[2]": "0.02500000",
                     "absorption[3]": "0.05000000",
                     "absorption[4]": "0.05000000",
                     "absorption[5]": "0.05000000",
@@ -600,7 +570,7 @@
                 "cell": {
                     "max force": {
                         "activated": "false",
-                        "value": "1.51499999"
+                        "value": "0.26600000"
                     },
                     "min energy": {
                         "activated": "false"
@@ -614,7 +584,7 @@
                     "min energy[6]": "50.00000000",
                     "fusion velocity": {
                         "activated": "false",
-                        "value": "1.13699996"
+                        "value": "5.00000000"
                     },
                     "max binding energy": {
                         "activated": "false",
@@ -659,13 +629,13 @@
                             "food chain color matrix[0, 4]": "0.00000000",
                             "food chain color matrix[0, 5]": "0.00000000",
                             "food chain color matrix[0, 6]": "0.00000000",
-                            "food chain color matrix[1, 0]": "0.00000000",
+                            "food chain color matrix[1, 0]": "1.00000000",
                             "food chain color matrix[1, 1]": "0.00000000",
-                            "food chain color matrix[1, 2]": "0.00000000",
-                            "food chain color matrix[1, 3]": "0.00000000",
-                            "food chain color matrix[1, 4]": "0.00000000",
-                            "food chain color matrix[1, 5]": "0.00000000",
-                            "food chain color matrix[1, 6]": "0.00000000",
+                            "food chain color matrix[1, 2]": "1.00000000",
+                            "food chain color matrix[1, 3]": "1.00000000",
+                            "food chain color matrix[1, 4]": "1.00000000",
+                            "food chain color matrix[1, 5]": "1.00000000",
+                            "food chain color matrix[1, 6]": "1.00000000",
                             "food chain color matrix[2, 0]": "0.00000000",
                             "food chain color matrix[2, 1]": "0.00000000",
                             "food chain color matrix[2, 2]": "0.00000000",
@@ -680,13 +650,13 @@
                             "food chain color matrix[3, 4]": "0.00000000",
                             "food chain color matrix[3, 5]": "0.00000000",
                             "food chain color matrix[3, 6]": "0.00000000",
-                            "food chain color matrix[4, 0]": "1.00000000",
-                            "food chain color matrix[4, 1]": "1.00000000",
-                            "food chain color matrix[4, 2]": "1.00000000",
-                            "food chain color matrix[4, 3]": "1.00000000",
+                            "food chain color matrix[4, 0]": "0.00000000",
+                            "food chain color matrix[4, 1]": "0.00000000",
+                            "food chain color matrix[4, 2]": "0.00000000",
+                            "food chain color matrix[4, 3]": "0.00000000",
                             "food chain color matrix[4, 4]": "0.00000000",
-                            "food chain color matrix[4, 5]": "1.00000000",
-                            "food chain color matrix[4, 6]": "1.00000000",
+                            "food chain color matrix[4, 5]": "0.00000000",
+                            "food chain color matrix[4, 6]": "0.00000000",
                             "food chain color matrix[5, 0]": "0.00000000",
                             "food chain color matrix[5, 1]": "0.00000000",
                             "food chain color matrix[5, 2]": "0.00000000",
@@ -725,37 +695,37 @@
                         "constructor": {
                             "mutation probability": {
                                 "neuron data": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "neuron data[0]": "0.00000000",
-                                "neuron data[1]": "0.00000000",
-                                "neuron data[2]": "0.00000000",
-                                "neuron data[3]": "0.00000000",
-                                "neuron data[4]": "0.00000000",
-                                "neuron data[5]": "0.00000000",
-                                "neuron data[6]": "0.00000000",
+                                "neuron data[0]": "0.00019500",
+                                "neuron data[1]": "0.00019500",
+                                "neuron data[2]": "0.00019500",
+                                "neuron data[3]": "0.00019500",
+                                "neuron data[4]": "0.00019500",
+                                "neuron data[5]": "0.00019500",
+                                "neuron data[6]": "0.00019500",
                                 "cell function": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "cell function[0]": "0.00000000",
-                                "cell function[1]": "0.00000000",
-                                "cell function[2]": "0.00000000",
-                                "cell function[3]": "0.00000000",
-                                "cell function[4]": "0.00000000",
-                                "cell function[5]": "0.00000000",
-                                "cell function[6]": "0.00000000",
+                                "cell function[0]": "0.00001000",
+                                "cell function[1]": "0.00001000",
+                                "cell function[2]": "0.00001000",
+                                "cell function[3]": "0.00001000",
+                                "cell function[4]": "0.00001000",
+                                "cell function[5]": "0.00001000",
+                                "cell function[6]": "0.00001000",
                                 "insertion": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "insertion[0]": "0.00000000",
-                                "insertion[1]": "0.00000000",
-                                "insertion[2]": "0.00000000",
-                                "insertion[3]": "0.00000000",
-                                "insertion[4]": "0.00000000",
-                                "insertion[5]": "0.00000000",
-                                "insertion[6]": "0.00000000",
+                                "insertion[0]": "0.00000800",
+                                "insertion[1]": "0.00000800",
+                                "insertion[2]": "0.00000800",
+                                "insertion[3]": "0.00000800",
+                                "insertion[4]": "0.00000800",
+                                "insertion[5]": "0.00000800",
+                                "insertion[6]": "0.00000800",
                                 "deletion": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
                                 "deletion[0]": "0.00000000",
                                 "deletion[1]": "0.00000000",
@@ -765,7 +735,7 @@
                                 "deletion[5]": "0.00000000",
                                 "deletion[6]": "0.00000000",
                                 "translation": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
                                 "translation[0]": "0.00000000",
                                 "translation[1]": "0.00000000",
@@ -775,17 +745,17 @@
                                 "translation[5]": "0.00000000",
                                 "translation[6]": "0.00000000",
                                 "duplication": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "duplication[0]": "0.00000000",
-                                "duplication[1]": "0.00000000",
-                                "duplication[2]": "0.00000000",
-                                "duplication[3]": "0.00000000",
-                                "duplication[4]": "0.00000000",
-                                "duplication[5]": "0.00000000",
-                                "duplication[6]": "0.00000000",
+                                "duplication[0]": "0.00000600",
+                                "duplication[1]": "0.00000600",
+                                "duplication[2]": "0.00000600",
+                                "duplication[3]": "0.00000600",
+                                "duplication[4]": "0.00000600",
+                                "duplication[5]": "0.00000600",
+                                "duplication[6]": "0.00000600",
                                 "color": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
                                 "color[0]": "0.00000000",
                                 "color[1]": "0.00000000",
@@ -803,55 +773,56 @@
                         "constructor": {
                             "mutation probability": {
                                 "data ": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "data [0]": "0.00000000",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00000000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
+                                "data [0]": "0.00001300",
+                                "data [1]": "0.00001300",
+                                "data [2]": "0.00001300",
+                                "data [3]": "0.00001300",
+                                "data [4]": "0.00001300",
+                                "data [5]": "0.00001300",
+                                "data [6]": "0.00001300"
                             }
                         }
                     }
                 }
             },
             "1": {
-                "color": "4281535013",
+                "color": "4279571463",
                 "pos": {
-                    "x": "241.00000000",
-                    "y": "162.30000305"
+                    "x": "95.09999847",
+                    "y": "1766.80004883"
                 },
                 "shape": {
-                    "type": "0",
-                    "circular": {
-                        "core radius": "83.33333588"
+                    "type": "1",
+                    "rectangular": {
+                        "core width": "245.89999390",
+                        "core height": "40.00000000"
                     }
                 },
                 "flow": {
                     "type": "3",
                     "linear": {
-                        "angle": "0.00000000",
-                        "strength": "0.00026000"
+                        "angle": "72.69999695",
+                        "strength": "0.03875000"
                     }
                 },
-                "fadeout radius": "83.33333588",
+                "fadeout radius": "0.00000000",
                 "friction": {
                     "activated": "false",
-                    "value": "0.00070000"
+                    "value": "0.00030000"
                 },
                 "rigidity": {
                     "activated": "false",
-                    "value": "0.00000000"
+                    "value": "1.00000000"
                 },
                 "radiation": {
                     "absorption": {
-                        "activated": "true"
+                        "activated": "false"
                     },
                     "absorption[0]": "0.05000000",
-                    "absorption[1]": "0.05000000",
-                    "absorption[2]": "0.00500000",
+                    "absorption[1]": "0.00000000",
+                    "absorption[2]": "0.02500000",
                     "absorption[3]": "0.05000000",
                     "absorption[4]": "0.05000000",
                     "absorption[5]": "0.05000000",
@@ -870,7 +841,7 @@
                 "cell": {
                     "max force": {
                         "activated": "false",
-                        "value": "1.51499999"
+                        "value": "0.26600000"
                     },
                     "min energy": {
                         "activated": "false"
@@ -884,22 +855,22 @@
                     "min energy[6]": "50.00000000",
                     "fusion velocity": {
                         "activated": "false",
-                        "value": "1.13699996"
+                        "value": "5.00000000"
                     },
                     "max binding energy": {
                         "activated": "false",
                         "value": "500000.00000000"
                     },
                     "color transition rules": {
-                        "activated": "false",
-                        "duration[0]": "0",
+                        "activated": "true",
+                        "duration[0]": "1",
                         "duration[1]": "0",
                         "duration[2]": "0",
                         "duration[3]": "0",
-                        "duration[4]": "0",
+                        "duration[4]": "1",
                         "duration[5]": "0",
                         "duration[6]": "0",
-                        "target color[0]": "0",
+                        "target color[0]": "2",
                         "target color[1]": "1",
                         "target color[2]": "2",
                         "target color[3]": "3",
@@ -929,13 +900,13 @@
                             "food chain color matrix[0, 4]": "0.00000000",
                             "food chain color matrix[0, 5]": "0.00000000",
                             "food chain color matrix[0, 6]": "0.00000000",
-                            "food chain color matrix[1, 0]": "0.00000000",
+                            "food chain color matrix[1, 0]": "1.00000000",
                             "food chain color matrix[1, 1]": "0.00000000",
-                            "food chain color matrix[1, 2]": "0.00000000",
-                            "food chain color matrix[1, 3]": "0.00000000",
-                            "food chain color matrix[1, 4]": "0.00000000",
-                            "food chain color matrix[1, 5]": "0.00000000",
-                            "food chain color matrix[1, 6]": "0.00000000",
+                            "food chain color matrix[1, 2]": "1.00000000",
+                            "food chain color matrix[1, 3]": "1.00000000",
+                            "food chain color matrix[1, 4]": "1.00000000",
+                            "food chain color matrix[1, 5]": "1.00000000",
+                            "food chain color matrix[1, 6]": "1.00000000",
                             "food chain color matrix[2, 0]": "0.00000000",
                             "food chain color matrix[2, 1]": "0.00000000",
                             "food chain color matrix[2, 2]": "0.00000000",
@@ -950,13 +921,13 @@
                             "food chain color matrix[3, 4]": "0.00000000",
                             "food chain color matrix[3, 5]": "0.00000000",
                             "food chain color matrix[3, 6]": "0.00000000",
-                            "food chain color matrix[4, 0]": "1.00000000",
-                            "food chain color matrix[4, 1]": "1.00000000",
-                            "food chain color matrix[4, 2]": "1.00000000",
-                            "food chain color matrix[4, 3]": "1.00000000",
+                            "food chain color matrix[4, 0]": "0.00000000",
+                            "food chain color matrix[4, 1]": "0.00000000",
+                            "food chain color matrix[4, 2]": "0.00000000",
+                            "food chain color matrix[4, 3]": "0.00000000",
                             "food chain color matrix[4, 4]": "0.00000000",
-                            "food chain color matrix[4, 5]": "1.00000000",
-                            "food chain color matrix[4, 6]": "1.00000000",
+                            "food chain color matrix[4, 5]": "0.00000000",
+                            "food chain color matrix[4, 6]": "0.00000000",
                             "food chain color matrix[5, 0]": "0.00000000",
                             "food chain color matrix[5, 1]": "0.00000000",
                             "food chain color matrix[5, 2]": "0.00000000",
@@ -995,37 +966,37 @@
                         "constructor": {
                             "mutation probability": {
                                 "neuron data": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "neuron data[0]": "0.00000000",
-                                "neuron data[1]": "0.00000000",
-                                "neuron data[2]": "0.00000000",
-                                "neuron data[3]": "0.00000000",
-                                "neuron data[4]": "0.00000000",
-                                "neuron data[5]": "0.00000000",
-                                "neuron data[6]": "0.00000000",
+                                "neuron data[0]": "0.00019500",
+                                "neuron data[1]": "0.00019500",
+                                "neuron data[2]": "0.00019500",
+                                "neuron data[3]": "0.00019500",
+                                "neuron data[4]": "0.00019500",
+                                "neuron data[5]": "0.00019500",
+                                "neuron data[6]": "0.00019500",
                                 "cell function": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "cell function[0]": "0.00000000",
-                                "cell function[1]": "0.00000000",
-                                "cell function[2]": "0.00000000",
-                                "cell function[3]": "0.00000000",
-                                "cell function[4]": "0.00000000",
-                                "cell function[5]": "0.00000000",
-                                "cell function[6]": "0.00000000",
+                                "cell function[0]": "0.00001000",
+                                "cell function[1]": "0.00001000",
+                                "cell function[2]": "0.00001000",
+                                "cell function[3]": "0.00001000",
+                                "cell function[4]": "0.00001000",
+                                "cell function[5]": "0.00001000",
+                                "cell function[6]": "0.00001000",
                                 "insertion": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "insertion[0]": "0.00000000",
-                                "insertion[1]": "0.00000000",
-                                "insertion[2]": "0.00000000",
-                                "insertion[3]": "0.00000000",
-                                "insertion[4]": "0.00000000",
-                                "insertion[5]": "0.00000000",
-                                "insertion[6]": "0.00000000",
+                                "insertion[0]": "0.00000800",
+                                "insertion[1]": "0.00000800",
+                                "insertion[2]": "0.00000800",
+                                "insertion[3]": "0.00000800",
+                                "insertion[4]": "0.00000800",
+                                "insertion[5]": "0.00000800",
+                                "insertion[6]": "0.00000800",
                                 "deletion": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
                                 "deletion[0]": "0.00000000",
                                 "deletion[1]": "0.00000000",
@@ -1035,7 +1006,7 @@
                                 "deletion[5]": "0.00000000",
                                 "deletion[6]": "0.00000000",
                                 "translation": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
                                 "translation[0]": "0.00000000",
                                 "translation[1]": "0.00000000",
@@ -1045,17 +1016,17 @@
                                 "translation[5]": "0.00000000",
                                 "translation[6]": "0.00000000",
                                 "duplication": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "duplication[0]": "0.00000000",
-                                "duplication[1]": "0.00000000",
-                                "duplication[2]": "0.00000000",
-                                "duplication[3]": "0.00000000",
-                                "duplication[4]": "0.00000000",
-                                "duplication[5]": "0.00000000",
-                                "duplication[6]": "0.00000000",
+                                "duplication[0]": "0.00000600",
+                                "duplication[1]": "0.00000600",
+                                "duplication[2]": "0.00000600",
+                                "duplication[3]": "0.00000600",
+                                "duplication[4]": "0.00000600",
+                                "duplication[5]": "0.00000600",
+                                "duplication[6]": "0.00000600",
                                 "color": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
                                 "color[0]": "0.00000000",
                                 "color[1]": "0.00000000",
@@ -1073,55 +1044,56 @@
                         "constructor": {
                             "mutation probability": {
                                 "data ": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "data [0]": "0.00000000",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00000000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
+                                "data [0]": "0.00001300",
+                                "data [1]": "0.00001300",
+                                "data [2]": "0.00001300",
+                                "data [3]": "0.00001300",
+                                "data [4]": "0.00001300",
+                                "data [5]": "0.00001300",
+                                "data [6]": "0.00001300"
                             }
                         }
                     }
                 }
             },
             "2": {
-                "color": "4281537034",
+                "color": "4279571463",
                 "pos": {
-                    "x": "644.29998779",
-                    "y": "170.50000000"
+                    "x": "134.39999390",
+                    "y": "1872.90002441"
                 },
                 "shape": {
-                    "type": "0",
-                    "circular": {
-                        "core radius": "83.33333588"
+                    "type": "1",
+                    "rectangular": {
+                        "core width": "269.00000000",
+                        "core height": "36.09999847"
                     }
                 },
                 "flow": {
                     "type": "3",
                     "linear": {
-                        "angle": "0.00000000",
-                        "strength": "0.00026000"
+                        "angle": "-72.00000000",
+                        "strength": "0.00660000"
                     }
                 },
-                "fadeout radius": "83.33333588",
+                "fadeout radius": "0.00000000",
                 "friction": {
                     "activated": "false",
-                    "value": "0.00070000"
+                    "value": "0.00080000"
                 },
                 "rigidity": {
                     "activated": "false",
-                    "value": "0.00000000"
+                    "value": "1.00000000"
                 },
                 "radiation": {
                     "absorption": {
-                        "activated": "true"
+                        "activated": "false"
                     },
                     "absorption[0]": "0.05000000",
-                    "absorption[1]": "0.05000000",
-                    "absorption[2]": "0.00500000",
+                    "absorption[1]": "0.00000000",
+                    "absorption[2]": "0.02500000",
                     "absorption[3]": "0.05000000",
                     "absorption[4]": "0.05000000",
                     "absorption[5]": "0.05000000",
@@ -1140,7 +1112,7 @@
                 "cell": {
                     "max force": {
                         "activated": "false",
-                        "value": "1.51499999"
+                        "value": "0.29499999"
                     },
                     "min energy": {
                         "activated": "false"
@@ -1154,7 +1126,7 @@
                     "min energy[6]": "50.00000000",
                     "fusion velocity": {
                         "activated": "false",
-                        "value": "1.13699996"
+                        "value": "5.00000000"
                     },
                     "max binding energy": {
                         "activated": "false",
@@ -1199,13 +1171,13 @@
                             "food chain color matrix[0, 4]": "0.00000000",
                             "food chain color matrix[0, 5]": "0.00000000",
                             "food chain color matrix[0, 6]": "0.00000000",
-                            "food chain color matrix[1, 0]": "0.00000000",
+                            "food chain color matrix[1, 0]": "1.00000000",
                             "food chain color matrix[1, 1]": "0.00000000",
-                            "food chain color matrix[1, 2]": "0.00000000",
-                            "food chain color matrix[1, 3]": "0.00000000",
-                            "food chain color matrix[1, 4]": "0.00000000",
-                            "food chain color matrix[1, 5]": "0.00000000",
-                            "food chain color matrix[1, 6]": "0.00000000",
+                            "food chain color matrix[1, 2]": "1.00000000",
+                            "food chain color matrix[1, 3]": "1.00000000",
+                            "food chain color matrix[1, 4]": "1.00000000",
+                            "food chain color matrix[1, 5]": "1.00000000",
+                            "food chain color matrix[1, 6]": "1.00000000",
                             "food chain color matrix[2, 0]": "0.00000000",
                             "food chain color matrix[2, 1]": "0.00000000",
                             "food chain color matrix[2, 2]": "0.00000000",
@@ -1220,13 +1192,13 @@
                             "food chain color matrix[3, 4]": "0.00000000",
                             "food chain color matrix[3, 5]": "0.00000000",
                             "food chain color matrix[3, 6]": "0.00000000",
-                            "food chain color matrix[4, 0]": "1.00000000",
-                            "food chain color matrix[4, 1]": "1.00000000",
-                            "food chain color matrix[4, 2]": "1.00000000",
-                            "food chain color matrix[4, 3]": "1.00000000",
+                            "food chain color matrix[4, 0]": "0.00000000",
+                            "food chain color matrix[4, 1]": "0.00000000",
+                            "food chain color matrix[4, 2]": "0.00000000",
+                            "food chain color matrix[4, 3]": "0.00000000",
                             "food chain color matrix[4, 4]": "0.00000000",
-                            "food chain color matrix[4, 5]": "1.00000000",
-                            "food chain color matrix[4, 6]": "1.00000000",
+                            "food chain color matrix[4, 5]": "0.00000000",
+                            "food chain color matrix[4, 6]": "0.00000000",
                             "food chain color matrix[5, 0]": "0.00000000",
                             "food chain color matrix[5, 1]": "0.00000000",
                             "food chain color matrix[5, 2]": "0.00000000",
@@ -1265,37 +1237,37 @@
                         "constructor": {
                             "mutation probability": {
                                 "neuron data": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "neuron data[0]": "0.00000000",
-                                "neuron data[1]": "0.00000000",
-                                "neuron data[2]": "0.00000000",
-                                "neuron data[3]": "0.00000000",
-                                "neuron data[4]": "0.00000000",
-                                "neuron data[5]": "0.00000000",
-                                "neuron data[6]": "0.00000000",
+                                "neuron data[0]": "0.00019500",
+                                "neuron data[1]": "0.00019500",
+                                "neuron data[2]": "0.00019500",
+                                "neuron data[3]": "0.00019500",
+                                "neuron data[4]": "0.00019500",
+                                "neuron data[5]": "0.00019500",
+                                "neuron data[6]": "0.00019500",
                                 "cell function": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "cell function[0]": "0.00000000",
-                                "cell function[1]": "0.00000000",
-                                "cell function[2]": "0.00000000",
-                                "cell function[3]": "0.00000000",
-                                "cell function[4]": "0.00000000",
-                                "cell function[5]": "0.00000000",
-                                "cell function[6]": "0.00000000",
+                                "cell function[0]": "0.00001000",
+                                "cell function[1]": "0.00001000",
+                                "cell function[2]": "0.00001000",
+                                "cell function[3]": "0.00001000",
+                                "cell function[4]": "0.00001000",
+                                "cell function[5]": "0.00001000",
+                                "cell function[6]": "0.00001000",
                                 "insertion": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "insertion[0]": "0.00000000",
-                                "insertion[1]": "0.00000000",
-                                "insertion[2]": "0.00000000",
-                                "insertion[3]": "0.00000000",
-                                "insertion[4]": "0.00000000",
-                                "insertion[5]": "0.00000000",
-                                "insertion[6]": "0.00000000",
+                                "insertion[0]": "0.00000800",
+                                "insertion[1]": "0.00000800",
+                                "insertion[2]": "0.00000800",
+                                "insertion[3]": "0.00000800",
+                                "insertion[4]": "0.00000800",
+                                "insertion[5]": "0.00000800",
+                                "insertion[6]": "0.00000800",
                                 "deletion": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
                                 "deletion[0]": "0.00000000",
                                 "deletion[1]": "0.00000000",
@@ -1305,7 +1277,7 @@
                                 "deletion[5]": "0.00000000",
                                 "deletion[6]": "0.00000000",
                                 "translation": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
                                 "translation[0]": "0.00000000",
                                 "translation[1]": "0.00000000",
@@ -1315,17 +1287,17 @@
                                 "translation[5]": "0.00000000",
                                 "translation[6]": "0.00000000",
                                 "duplication": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "duplication[0]": "0.00000000",
-                                "duplication[1]": "0.00000000",
-                                "duplication[2]": "0.00000000",
-                                "duplication[3]": "0.00000000",
-                                "duplication[4]": "0.00000000",
-                                "duplication[5]": "0.00000000",
-                                "duplication[6]": "0.00000000",
+                                "duplication[0]": "0.00000600",
+                                "duplication[1]": "0.00000600",
+                                "duplication[2]": "0.00000600",
+                                "duplication[3]": "0.00000600",
+                                "duplication[4]": "0.00000600",
+                                "duplication[5]": "0.00000600",
+                                "duplication[6]": "0.00000600",
                                 "color": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
                                 "color[0]": "0.00000000",
                                 "color[1]": "0.00000000",
@@ -1343,56 +1315,51 @@
                         "constructor": {
                             "mutation probability": {
                                 "data ": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "data [0]": "0.00000000",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00000000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
+                                "data [0]": "0.00001300",
+                                "data [1]": "0.00001300",
+                                "data [2]": "0.00001300",
+                                "data [3]": "0.00001300",
+                                "data [4]": "0.00001300",
+                                "data [5]": "0.00001300",
+                                "data [6]": "0.00001300"
                             }
                         }
                     }
                 }
             },
             "3": {
-                "color": "4278190080",
+                "color": "4278858525",
                 "pos": {
-                    "x": "241.00000000",
-                    "y": "183.60000610"
+                    "x": "500.00000000",
+                    "y": "1000.00000000"
                 },
                 "shape": {
                     "type": "0",
                     "circular": {
-                        "core radius": "113.09999847"
+                        "core radius": "98.40000153"
                     }
                 },
                 "flow": {
-                    "type": "1",
-                    "radial": {
-                        "orientation": "0",
-                        "strength": "0.00195000",
-                        "drift angle": "63.50000000"
-                    }
+                    "type": "0"
                 },
-                "fadeout radius": "37.70000076",
+                "fadeout radius": "416.39999390",
                 "friction": {
-                    "activated": "false",
-                    "value": "0.00070000"
-                },
-                "rigidity": {
                     "activated": "false",
                     "value": "0.00000000"
                 },
+                "rigidity": {
+                    "activated": "false",
+                    "value": "1.00000000"
+                },
                 "radiation": {
                     "absorption": {
-                        "activated": "true"
+                        "activated": "false"
                     },
                     "absorption[0]": "0.05000000",
-                    "absorption[1]": "0.05000000",
-                    "absorption[2]": "0.00500000",
+                    "absorption[1]": "0.00000000",
+                    "absorption[2]": "0.02500000",
                     "absorption[3]": "0.05000000",
                     "absorption[4]": "0.05000000",
                     "absorption[5]": "0.05000000",
@@ -1411,7 +1378,7 @@
                 "cell": {
                     "max force": {
                         "activated": "false",
-                        "value": "1.51499999"
+                        "value": "0.26600000"
                     },
                     "min energy": {
                         "activated": "false"
@@ -1425,7 +1392,7 @@
                     "min energy[6]": "50.00000000",
                     "fusion velocity": {
                         "activated": "false",
-                        "value": "1.13699996"
+                        "value": "5.00000000"
                     },
                     "max binding energy": {
                         "activated": "false",
@@ -1470,13 +1437,13 @@
                             "food chain color matrix[0, 4]": "0.00000000",
                             "food chain color matrix[0, 5]": "0.00000000",
                             "food chain color matrix[0, 6]": "0.00000000",
-                            "food chain color matrix[1, 0]": "0.00000000",
+                            "food chain color matrix[1, 0]": "1.00000000",
                             "food chain color matrix[1, 1]": "0.00000000",
-                            "food chain color matrix[1, 2]": "0.00000000",
-                            "food chain color matrix[1, 3]": "0.00000000",
-                            "food chain color matrix[1, 4]": "0.00000000",
-                            "food chain color matrix[1, 5]": "0.00000000",
-                            "food chain color matrix[1, 6]": "0.00000000",
+                            "food chain color matrix[1, 2]": "1.00000000",
+                            "food chain color matrix[1, 3]": "1.00000000",
+                            "food chain color matrix[1, 4]": "1.00000000",
+                            "food chain color matrix[1, 5]": "1.00000000",
+                            "food chain color matrix[1, 6]": "1.00000000",
                             "food chain color matrix[2, 0]": "0.00000000",
                             "food chain color matrix[2, 1]": "0.00000000",
                             "food chain color matrix[2, 2]": "0.00000000",
@@ -1491,13 +1458,13 @@
                             "food chain color matrix[3, 4]": "0.00000000",
                             "food chain color matrix[3, 5]": "0.00000000",
                             "food chain color matrix[3, 6]": "0.00000000",
-                            "food chain color matrix[4, 0]": "1.00000000",
-                            "food chain color matrix[4, 1]": "1.00000000",
-                            "food chain color matrix[4, 2]": "1.00000000",
-                            "food chain color matrix[4, 3]": "1.00000000",
+                            "food chain color matrix[4, 0]": "0.00000000",
+                            "food chain color matrix[4, 1]": "0.00000000",
+                            "food chain color matrix[4, 2]": "0.00000000",
+                            "food chain color matrix[4, 3]": "0.00000000",
                             "food chain color matrix[4, 4]": "0.00000000",
-                            "food chain color matrix[4, 5]": "1.00000000",
-                            "food chain color matrix[4, 6]": "1.00000000",
+                            "food chain color matrix[4, 5]": "0.00000000",
+                            "food chain color matrix[4, 6]": "0.00000000",
                             "food chain color matrix[5, 0]": "0.00000000",
                             "food chain color matrix[5, 1]": "0.00000000",
                             "food chain color matrix[5, 2]": "0.00000000",
@@ -1536,37 +1503,37 @@
                         "constructor": {
                             "mutation probability": {
                                 "neuron data": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "neuron data[0]": "0.00000000",
-                                "neuron data[1]": "0.00000000",
-                                "neuron data[2]": "0.00000000",
-                                "neuron data[3]": "0.00000000",
-                                "neuron data[4]": "0.00000000",
-                                "neuron data[5]": "0.00000000",
-                                "neuron data[6]": "0.00000000",
+                                "neuron data[0]": "0.00019500",
+                                "neuron data[1]": "0.00019500",
+                                "neuron data[2]": "0.00019500",
+                                "neuron data[3]": "0.00019500",
+                                "neuron data[4]": "0.00019500",
+                                "neuron data[5]": "0.00019500",
+                                "neuron data[6]": "0.00019500",
                                 "cell function": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "cell function[0]": "0.00000000",
-                                "cell function[1]": "0.00000000",
-                                "cell function[2]": "0.00000000",
-                                "cell function[3]": "0.00000000",
-                                "cell function[4]": "0.00000000",
-                                "cell function[5]": "0.00000000",
-                                "cell function[6]": "0.00000000",
+                                "cell function[0]": "0.00001000",
+                                "cell function[1]": "0.00001000",
+                                "cell function[2]": "0.00001000",
+                                "cell function[3]": "0.00001000",
+                                "cell function[4]": "0.00001000",
+                                "cell function[5]": "0.00001000",
+                                "cell function[6]": "0.00001000",
                                 "insertion": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "insertion[0]": "0.00000000",
-                                "insertion[1]": "0.00000000",
-                                "insertion[2]": "0.00000000",
-                                "insertion[3]": "0.00000000",
-                                "insertion[4]": "0.00000000",
-                                "insertion[5]": "0.00000000",
-                                "insertion[6]": "0.00000000",
+                                "insertion[0]": "0.00000800",
+                                "insertion[1]": "0.00000800",
+                                "insertion[2]": "0.00000800",
+                                "insertion[3]": "0.00000800",
+                                "insertion[4]": "0.00000800",
+                                "insertion[5]": "0.00000800",
+                                "insertion[6]": "0.00000800",
                                 "deletion": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
                                 "deletion[0]": "0.00000000",
                                 "deletion[1]": "0.00000000",
@@ -1576,7 +1543,7 @@
                                 "deletion[5]": "0.00000000",
                                 "deletion[6]": "0.00000000",
                                 "translation": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
                                 "translation[0]": "0.00000000",
                                 "translation[1]": "0.00000000",
@@ -1586,17 +1553,17 @@
                                 "translation[5]": "0.00000000",
                                 "translation[6]": "0.00000000",
                                 "duplication": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "duplication[0]": "0.00000000",
-                                "duplication[1]": "0.00000000",
-                                "duplication[2]": "0.00000000",
-                                "duplication[3]": "0.00000000",
-                                "duplication[4]": "0.00000000",
-                                "duplication[5]": "0.00000000",
-                                "duplication[6]": "0.00000000",
+                                "duplication[0]": "0.00000600",
+                                "duplication[1]": "0.00000600",
+                                "duplication[2]": "0.00000600",
+                                "duplication[3]": "0.00000600",
+                                "duplication[4]": "0.00000600",
+                                "duplication[5]": "0.00000600",
+                                "duplication[6]": "0.00000600",
                                 "color": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
                                 "color[0]": "0.00000000",
                                 "color[1]": "0.00000000",
@@ -1614,827 +1581,15 @@
                         "constructor": {
                             "mutation probability": {
                                 "data ": {
-                                    "activated": "true"
+                                    "activated": "false"
                                 },
-                                "data [0]": "0.00000000",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00000000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
-                            }
-                        }
-                    }
-                }
-            },
-            "4": {
-                "color": "4278190080",
-                "pos": {
-                    "x": "631.09997559",
-                    "y": "183.60000610"
-                },
-                "shape": {
-                    "type": "0",
-                    "circular": {
-                        "core radius": "113.09999847"
-                    }
-                },
-                "flow": {
-                    "type": "1",
-                    "radial": {
-                        "orientation": "1",
-                        "strength": "0.00085000",
-                        "drift angle": "-42.50000000"
-                    }
-                },
-                "fadeout radius": "37.70000076",
-                "friction": {
-                    "activated": "false",
-                    "value": "0.00070000"
-                },
-                "rigidity": {
-                    "activated": "false",
-                    "value": "0.00000000"
-                },
-                "radiation": {
-                    "absorption": {
-                        "activated": "true"
-                    },
-                    "absorption[0]": "0.05000000",
-                    "absorption[1]": "0.05000000",
-                    "absorption[2]": "0.00500000",
-                    "absorption[3]": "0.05000000",
-                    "absorption[4]": "0.05000000",
-                    "absorption[5]": "0.05000000",
-                    "absorption[6]": "0.05000000",
-                    "factor": {
-                        "activated": "false"
-                    },
-                    "factor[0]": "0.00005000",
-                    "factor[1]": "0.00005000",
-                    "factor[2]": "0.00005000",
-                    "factor[3]": "0.00005000",
-                    "factor[4]": "0.00005000",
-                    "factor[5]": "0.00005000",
-                    "factor[6]": "0.00005000"
-                },
-                "cell": {
-                    "max force": {
-                        "activated": "false",
-                        "value": "1.51499999"
-                    },
-                    "min energy": {
-                        "activated": "false"
-                    },
-                    "min energy[0]": "50.00000000",
-                    "min energy[1]": "50.00000000",
-                    "min energy[2]": "50.00000000",
-                    "min energy[3]": "50.00000000",
-                    "min energy[4]": "50.00000000",
-                    "min energy[5]": "50.00000000",
-                    "min energy[6]": "50.00000000",
-                    "fusion velocity": {
-                        "activated": "false",
-                        "value": "1.13699996"
-                    },
-                    "max binding energy": {
-                        "activated": "false",
-                        "value": "500000.00000000"
-                    },
-                    "color transition rules": {
-                        "activated": "false",
-                        "duration[0]": "0",
-                        "duration[1]": "0",
-                        "duration[2]": "0",
-                        "duration[3]": "0",
-                        "duration[4]": "0",
-                        "duration[5]": "0",
-                        "duration[6]": "0",
-                        "target color[0]": "0",
-                        "target color[1]": "1",
-                        "target color[2]": "2",
-                        "target color[3]": "3",
-                        "target color[4]": "4",
-                        "target color[5]": "5",
-                        "target color[6]": "6"
-                    },
-                    "function": {
-                        "attacker": {
-                            "energy cost": {
-                                "activated": "false"
-                            },
-                            "energy cost[0]": "0.00000000",
-                            "energy cost[1]": "0.00000000",
-                            "energy cost[2]": "0.00000000",
-                            "energy cost[3]": "0.00000000",
-                            "energy cost[4]": "0.00000000",
-                            "energy cost[5]": "0.00000000",
-                            "energy cost[6]": "0.00000000",
-                            "food chain color matrix": {
-                                "activated": "false"
-                            },
-                            "food chain color matrix[0, 0]": "0.00000000",
-                            "food chain color matrix[0, 1]": "0.00000000",
-                            "food chain color matrix[0, 2]": "0.00000000",
-                            "food chain color matrix[0, 3]": "0.00000000",
-                            "food chain color matrix[0, 4]": "0.00000000",
-                            "food chain color matrix[0, 5]": "0.00000000",
-                            "food chain color matrix[0, 6]": "0.00000000",
-                            "food chain color matrix[1, 0]": "0.00000000",
-                            "food chain color matrix[1, 1]": "0.00000000",
-                            "food chain color matrix[1, 2]": "0.00000000",
-                            "food chain color matrix[1, 3]": "0.00000000",
-                            "food chain color matrix[1, 4]": "0.00000000",
-                            "food chain color matrix[1, 5]": "0.00000000",
-                            "food chain color matrix[1, 6]": "0.00000000",
-                            "food chain color matrix[2, 0]": "0.00000000",
-                            "food chain color matrix[2, 1]": "0.00000000",
-                            "food chain color matrix[2, 2]": "0.00000000",
-                            "food chain color matrix[2, 3]": "0.00000000",
-                            "food chain color matrix[2, 4]": "0.00000000",
-                            "food chain color matrix[2, 5]": "0.00000000",
-                            "food chain color matrix[2, 6]": "0.00000000",
-                            "food chain color matrix[3, 0]": "0.00000000",
-                            "food chain color matrix[3, 1]": "0.00000000",
-                            "food chain color matrix[3, 2]": "0.00000000",
-                            "food chain color matrix[3, 3]": "0.00000000",
-                            "food chain color matrix[3, 4]": "0.00000000",
-                            "food chain color matrix[3, 5]": "0.00000000",
-                            "food chain color matrix[3, 6]": "0.00000000",
-                            "food chain color matrix[4, 0]": "1.00000000",
-                            "food chain color matrix[4, 1]": "1.00000000",
-                            "food chain color matrix[4, 2]": "1.00000000",
-                            "food chain color matrix[4, 3]": "1.00000000",
-                            "food chain color matrix[4, 4]": "0.00000000",
-                            "food chain color matrix[4, 5]": "1.00000000",
-                            "food chain color matrix[4, 6]": "1.00000000",
-                            "food chain color matrix[5, 0]": "0.00000000",
-                            "food chain color matrix[5, 1]": "0.00000000",
-                            "food chain color matrix[5, 2]": "0.00000000",
-                            "food chain color matrix[5, 3]": "0.00000000",
-                            "food chain color matrix[5, 4]": "0.00000000",
-                            "food chain color matrix[5, 5]": "0.00000000",
-                            "food chain color matrix[5, 6]": "0.00000000",
-                            "food chain color matrix[6, 0]": "0.00000000",
-                            "food chain color matrix[6, 1]": "0.00000000",
-                            "food chain color matrix[6, 2]": "0.00000000",
-                            "food chain color matrix[6, 3]": "0.00000000",
-                            "food chain color matrix[6, 4]": "0.00000000",
-                            "food chain color matrix[6, 5]": "0.00000000",
-                            "food chain color matrix[6, 6]": "0.00000000",
-                            "geometry deviation exponent": {
-                                "activated": "false"
-                            },
-                            "geometry deviation exponent[0]": "0.00000000",
-                            "geometry deviation exponent[1]": "0.00000000",
-                            "geometry deviation exponent[2]": "0.00000000",
-                            "geometry deviation exponent[3]": "0.00000000",
-                            "geometry deviation exponent[4]": "0.00000000",
-                            "geometry deviation exponent[5]": "0.00000000",
-                            "geometry deviation exponent[6]": "0.00000000",
-                            "connections mismatch penalty": {
-                                "activated": "false"
-                            },
-                            "connections mismatch penalty[0]": "0.33000001",
-                            "connections mismatch penalty[1]": "0.33000001",
-                            "connections mismatch penalty[2]": "0.33000001",
-                            "connections mismatch penalty[3]": "0.33000001",
-                            "connections mismatch penalty[4]": "0.33000001",
-                            "connections mismatch penalty[5]": "0.33000001",
-                            "connections mismatch penalty[6]": "0.33000001"
-                        },
-                        "constructor": {
-                            "mutation probability": {
-                                "neuron data": {
-                                    "activated": "true"
-                                },
-                                "neuron data[0]": "0.00000000",
-                                "neuron data[1]": "0.00000000",
-                                "neuron data[2]": "0.00000000",
-                                "neuron data[3]": "0.00000000",
-                                "neuron data[4]": "0.00000000",
-                                "neuron data[5]": "0.00000000",
-                                "neuron data[6]": "0.00000000",
-                                "cell function": {
-                                    "activated": "true"
-                                },
-                                "cell function[0]": "0.00000000",
-                                "cell function[1]": "0.00000000",
-                                "cell function[2]": "0.00000000",
-                                "cell function[3]": "0.00000000",
-                                "cell function[4]": "0.00000000",
-                                "cell function[5]": "0.00000000",
-                                "cell function[6]": "0.00000000",
-                                "insertion": {
-                                    "activated": "true"
-                                },
-                                "insertion[0]": "0.00000000",
-                                "insertion[1]": "0.00000000",
-                                "insertion[2]": "0.00000000",
-                                "insertion[3]": "0.00000000",
-                                "insertion[4]": "0.00000000",
-                                "insertion[5]": "0.00000000",
-                                "insertion[6]": "0.00000000",
-                                "deletion": {
-                                    "activated": "true"
-                                },
-                                "deletion[0]": "0.00000000",
-                                "deletion[1]": "0.00000000",
-                                "deletion[2]": "0.00000000",
-                                "deletion[3]": "0.00000000",
-                                "deletion[4]": "0.00000000",
-                                "deletion[5]": "0.00000000",
-                                "deletion[6]": "0.00000000",
-                                "translation": {
-                                    "activated": "true"
-                                },
-                                "translation[0]": "0.00000000",
-                                "translation[1]": "0.00000000",
-                                "translation[2]": "0.00000000",
-                                "translation[3]": "0.00000000",
-                                "translation[4]": "0.00000000",
-                                "translation[5]": "0.00000000",
-                                "translation[6]": "0.00000000",
-                                "duplication": {
-                                    "activated": "true"
-                                },
-                                "duplication[0]": "0.00000000",
-                                "duplication[1]": "0.00000000",
-                                "duplication[2]": "0.00000000",
-                                "duplication[3]": "0.00000000",
-                                "duplication[4]": "0.00000000",
-                                "duplication[5]": "0.00000000",
-                                "duplication[6]": "0.00000000",
-                                "color": {
-                                    "activated": "true"
-                                },
-                                "color[0]": "0.00000000",
-                                "color[1]": "0.00000000",
-                                "color[2]": "0.00000000",
-                                "color[3]": "0.00000000",
-                                "color[4]": "0.00000000",
-                                "color[5]": "0.00000000",
-                                "color[6]": "0.00000000"
-                            }
-                        }
-                    }
-                },
-                " cell": {
-                    "function": {
-                        "constructor": {
-                            "mutation probability": {
-                                "data ": {
-                                    "activated": "true"
-                                },
-                                "data [0]": "0.00000000",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00000000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
-                            }
-                        }
-                    }
-                }
-            },
-            "5": {
-                "color": "4281535013",
-                "pos": {
-                    "x": "1049.19995117",
-                    "y": "183.60000610"
-                },
-                "shape": {
-                    "type": "0",
-                    "circular": {
-                        "core radius": "83.33333588"
-                    }
-                },
-                "flow": {
-                    "type": "3",
-                    "linear": {
-                        "angle": "0.00000000",
-                        "strength": "0.00026000"
-                    }
-                },
-                "fadeout radius": "83.33333588",
-                "friction": {
-                    "activated": "false",
-                    "value": "0.00070000"
-                },
-                "rigidity": {
-                    "activated": "false",
-                    "value": "0.00000000"
-                },
-                "radiation": {
-                    "absorption": {
-                        "activated": "true"
-                    },
-                    "absorption[0]": "0.05000000",
-                    "absorption[1]": "0.05000000",
-                    "absorption[2]": "0.00500000",
-                    "absorption[3]": "0.05000000",
-                    "absorption[4]": "0.05000000",
-                    "absorption[5]": "0.05000000",
-                    "absorption[6]": "0.05000000",
-                    "factor": {
-                        "activated": "false"
-                    },
-                    "factor[0]": "0.00005000",
-                    "factor[1]": "0.00005000",
-                    "factor[2]": "0.00005000",
-                    "factor[3]": "0.00005000",
-                    "factor[4]": "0.00005000",
-                    "factor[5]": "0.00005000",
-                    "factor[6]": "0.00005000"
-                },
-                "cell": {
-                    "max force": {
-                        "activated": "false",
-                        "value": "1.51499999"
-                    },
-                    "min energy": {
-                        "activated": "false"
-                    },
-                    "min energy[0]": "50.00000000",
-                    "min energy[1]": "50.00000000",
-                    "min energy[2]": "50.00000000",
-                    "min energy[3]": "50.00000000",
-                    "min energy[4]": "50.00000000",
-                    "min energy[5]": "50.00000000",
-                    "min energy[6]": "50.00000000",
-                    "fusion velocity": {
-                        "activated": "false",
-                        "value": "1.13699996"
-                    },
-                    "max binding energy": {
-                        "activated": "false",
-                        "value": "500000.00000000"
-                    },
-                    "color transition rules": {
-                        "activated": "false",
-                        "duration[0]": "0",
-                        "duration[1]": "0",
-                        "duration[2]": "0",
-                        "duration[3]": "0",
-                        "duration[4]": "0",
-                        "duration[5]": "0",
-                        "duration[6]": "0",
-                        "target color[0]": "0",
-                        "target color[1]": "1",
-                        "target color[2]": "2",
-                        "target color[3]": "3",
-                        "target color[4]": "4",
-                        "target color[5]": "5",
-                        "target color[6]": "6"
-                    },
-                    "function": {
-                        "attacker": {
-                            "energy cost": {
-                                "activated": "false"
-                            },
-                            "energy cost[0]": "0.00000000",
-                            "energy cost[1]": "0.00000000",
-                            "energy cost[2]": "0.00000000",
-                            "energy cost[3]": "0.00000000",
-                            "energy cost[4]": "0.00000000",
-                            "energy cost[5]": "0.00000000",
-                            "energy cost[6]": "0.00000000",
-                            "food chain color matrix": {
-                                "activated": "false"
-                            },
-                            "food chain color matrix[0, 0]": "0.00000000",
-                            "food chain color matrix[0, 1]": "0.00000000",
-                            "food chain color matrix[0, 2]": "0.00000000",
-                            "food chain color matrix[0, 3]": "0.00000000",
-                            "food chain color matrix[0, 4]": "0.00000000",
-                            "food chain color matrix[0, 5]": "0.00000000",
-                            "food chain color matrix[0, 6]": "0.00000000",
-                            "food chain color matrix[1, 0]": "0.00000000",
-                            "food chain color matrix[1, 1]": "0.00000000",
-                            "food chain color matrix[1, 2]": "0.00000000",
-                            "food chain color matrix[1, 3]": "0.00000000",
-                            "food chain color matrix[1, 4]": "0.00000000",
-                            "food chain color matrix[1, 5]": "0.00000000",
-                            "food chain color matrix[1, 6]": "0.00000000",
-                            "food chain color matrix[2, 0]": "0.00000000",
-                            "food chain color matrix[2, 1]": "0.00000000",
-                            "food chain color matrix[2, 2]": "0.00000000",
-                            "food chain color matrix[2, 3]": "0.00000000",
-                            "food chain color matrix[2, 4]": "0.00000000",
-                            "food chain color matrix[2, 5]": "0.00000000",
-                            "food chain color matrix[2, 6]": "0.00000000",
-                            "food chain color matrix[3, 0]": "0.00000000",
-                            "food chain color matrix[3, 1]": "0.00000000",
-                            "food chain color matrix[3, 2]": "0.00000000",
-                            "food chain color matrix[3, 3]": "0.00000000",
-                            "food chain color matrix[3, 4]": "0.00000000",
-                            "food chain color matrix[3, 5]": "0.00000000",
-                            "food chain color matrix[3, 6]": "0.00000000",
-                            "food chain color matrix[4, 0]": "1.00000000",
-                            "food chain color matrix[4, 1]": "1.00000000",
-                            "food chain color matrix[4, 2]": "1.00000000",
-                            "food chain color matrix[4, 3]": "1.00000000",
-                            "food chain color matrix[4, 4]": "0.00000000",
-                            "food chain color matrix[4, 5]": "1.00000000",
-                            "food chain color matrix[4, 6]": "1.00000000",
-                            "food chain color matrix[5, 0]": "0.00000000",
-                            "food chain color matrix[5, 1]": "0.00000000",
-                            "food chain color matrix[5, 2]": "0.00000000",
-                            "food chain color matrix[5, 3]": "0.00000000",
-                            "food chain color matrix[5, 4]": "0.00000000",
-                            "food chain color matrix[5, 5]": "0.00000000",
-                            "food chain color matrix[5, 6]": "0.00000000",
-                            "food chain color matrix[6, 0]": "0.00000000",
-                            "food chain color matrix[6, 1]": "0.00000000",
-                            "food chain color matrix[6, 2]": "0.00000000",
-                            "food chain color matrix[6, 3]": "0.00000000",
-                            "food chain color matrix[6, 4]": "0.00000000",
-                            "food chain color matrix[6, 5]": "0.00000000",
-                            "food chain color matrix[6, 6]": "0.00000000",
-                            "geometry deviation exponent": {
-                                "activated": "false"
-                            },
-                            "geometry deviation exponent[0]": "0.00000000",
-                            "geometry deviation exponent[1]": "0.00000000",
-                            "geometry deviation exponent[2]": "0.00000000",
-                            "geometry deviation exponent[3]": "0.00000000",
-                            "geometry deviation exponent[4]": "0.00000000",
-                            "geometry deviation exponent[5]": "0.00000000",
-                            "geometry deviation exponent[6]": "0.00000000",
-                            "connections mismatch penalty": {
-                                "activated": "false"
-                            },
-                            "connections mismatch penalty[0]": "0.33000001",
-                            "connections mismatch penalty[1]": "0.33000001",
-                            "connections mismatch penalty[2]": "0.33000001",
-                            "connections mismatch penalty[3]": "0.33000001",
-                            "connections mismatch penalty[4]": "0.33000001",
-                            "connections mismatch penalty[5]": "0.33000001",
-                            "connections mismatch penalty[6]": "0.33000001"
-                        },
-                        "constructor": {
-                            "mutation probability": {
-                                "neuron data": {
-                                    "activated": "true"
-                                },
-                                "neuron data[0]": "0.00000000",
-                                "neuron data[1]": "0.00000000",
-                                "neuron data[2]": "0.00000000",
-                                "neuron data[3]": "0.00000000",
-                                "neuron data[4]": "0.00000000",
-                                "neuron data[5]": "0.00000000",
-                                "neuron data[6]": "0.00000000",
-                                "cell function": {
-                                    "activated": "true"
-                                },
-                                "cell function[0]": "0.00000000",
-                                "cell function[1]": "0.00000000",
-                                "cell function[2]": "0.00000000",
-                                "cell function[3]": "0.00000000",
-                                "cell function[4]": "0.00000000",
-                                "cell function[5]": "0.00000000",
-                                "cell function[6]": "0.00000000",
-                                "insertion": {
-                                    "activated": "true"
-                                },
-                                "insertion[0]": "0.00000000",
-                                "insertion[1]": "0.00000000",
-                                "insertion[2]": "0.00000000",
-                                "insertion[3]": "0.00000000",
-                                "insertion[4]": "0.00000000",
-                                "insertion[5]": "0.00000000",
-                                "insertion[6]": "0.00000000",
-                                "deletion": {
-                                    "activated": "true"
-                                },
-                                "deletion[0]": "0.00000000",
-                                "deletion[1]": "0.00000000",
-                                "deletion[2]": "0.00000000",
-                                "deletion[3]": "0.00000000",
-                                "deletion[4]": "0.00000000",
-                                "deletion[5]": "0.00000000",
-                                "deletion[6]": "0.00000000",
-                                "translation": {
-                                    "activated": "true"
-                                },
-                                "translation[0]": "0.00000000",
-                                "translation[1]": "0.00000000",
-                                "translation[2]": "0.00000000",
-                                "translation[3]": "0.00000000",
-                                "translation[4]": "0.00000000",
-                                "translation[5]": "0.00000000",
-                                "translation[6]": "0.00000000",
-                                "duplication": {
-                                    "activated": "true"
-                                },
-                                "duplication[0]": "0.00000000",
-                                "duplication[1]": "0.00000000",
-                                "duplication[2]": "0.00000000",
-                                "duplication[3]": "0.00000000",
-                                "duplication[4]": "0.00000000",
-                                "duplication[5]": "0.00000000",
-                                "duplication[6]": "0.00000000",
-                                "color": {
-                                    "activated": "true"
-                                },
-                                "color[0]": "0.00000000",
-                                "color[1]": "0.00000000",
-                                "color[2]": "0.00000000",
-                                "color[3]": "0.00000000",
-                                "color[4]": "0.00000000",
-                                "color[5]": "0.00000000",
-                                "color[6]": "0.00000000"
-                            }
-                        }
-                    }
-                },
-                " cell": {
-                    "function": {
-                        "constructor": {
-                            "mutation probability": {
-                                "data ": {
-                                    "activated": "true"
-                                },
-                                "data [0]": "0.00000000",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00000000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
-                            }
-                        }
-                    }
-                }
-            },
-            "6": {
-                "color": "4278190080",
-                "pos": {
-                    "x": "1032.80004883",
-                    "y": "183.60000610"
-                },
-                "shape": {
-                    "type": "0",
-                    "circular": {
-                        "core radius": "113.09999847"
-                    }
-                },
-                "flow": {
-                    "type": "1",
-                    "radial": {
-                        "orientation": "1",
-                        "strength": "0.00352000",
-                        "drift angle": "-68.69999695"
-                    }
-                },
-                "fadeout radius": "37.70000076",
-                "friction": {
-                    "activated": "false",
-                    "value": "0.00070000"
-                },
-                "rigidity": {
-                    "activated": "false",
-                    "value": "0.00000000"
-                },
-                "radiation": {
-                    "absorption": {
-                        "activated": "true"
-                    },
-                    "absorption[0]": "0.05000000",
-                    "absorption[1]": "0.05000000",
-                    "absorption[2]": "0.00500000",
-                    "absorption[3]": "0.05000000",
-                    "absorption[4]": "0.05000000",
-                    "absorption[5]": "0.05000000",
-                    "absorption[6]": "0.05000000",
-                    "factor": {
-                        "activated": "false"
-                    },
-                    "factor[0]": "0.00005000",
-                    "factor[1]": "0.00005000",
-                    "factor[2]": "0.00005000",
-                    "factor[3]": "0.00005000",
-                    "factor[4]": "0.00005000",
-                    "factor[5]": "0.00005000",
-                    "factor[6]": "0.00005000"
-                },
-                "cell": {
-                    "max force": {
-                        "activated": "false",
-                        "value": "1.51499999"
-                    },
-                    "min energy": {
-                        "activated": "false"
-                    },
-                    "min energy[0]": "50.00000000",
-                    "min energy[1]": "50.00000000",
-                    "min energy[2]": "50.00000000",
-                    "min energy[3]": "50.00000000",
-                    "min energy[4]": "50.00000000",
-                    "min energy[5]": "50.00000000",
-                    "min energy[6]": "50.00000000",
-                    "fusion velocity": {
-                        "activated": "false",
-                        "value": "1.13699996"
-                    },
-                    "max binding energy": {
-                        "activated": "false",
-                        "value": "500000.00000000"
-                    },
-                    "color transition rules": {
-                        "activated": "false",
-                        "duration[0]": "0",
-                        "duration[1]": "0",
-                        "duration[2]": "0",
-                        "duration[3]": "0",
-                        "duration[4]": "0",
-                        "duration[5]": "0",
-                        "duration[6]": "0",
-                        "target color[0]": "0",
-                        "target color[1]": "1",
-                        "target color[2]": "2",
-                        "target color[3]": "3",
-                        "target color[4]": "4",
-                        "target color[5]": "5",
-                        "target color[6]": "6"
-                    },
-                    "function": {
-                        "attacker": {
-                            "energy cost": {
-                                "activated": "false"
-                            },
-                            "energy cost[0]": "0.00000000",
-                            "energy cost[1]": "0.00000000",
-                            "energy cost[2]": "0.00000000",
-                            "energy cost[3]": "0.00000000",
-                            "energy cost[4]": "0.00000000",
-                            "energy cost[5]": "0.00000000",
-                            "energy cost[6]": "0.00000000",
-                            "food chain color matrix": {
-                                "activated": "false"
-                            },
-                            "food chain color matrix[0, 0]": "0.00000000",
-                            "food chain color matrix[0, 1]": "0.00000000",
-                            "food chain color matrix[0, 2]": "0.00000000",
-                            "food chain color matrix[0, 3]": "0.00000000",
-                            "food chain color matrix[0, 4]": "0.00000000",
-                            "food chain color matrix[0, 5]": "0.00000000",
-                            "food chain color matrix[0, 6]": "0.00000000",
-                            "food chain color matrix[1, 0]": "0.00000000",
-                            "food chain color matrix[1, 1]": "0.00000000",
-                            "food chain color matrix[1, 2]": "0.00000000",
-                            "food chain color matrix[1, 3]": "0.00000000",
-                            "food chain color matrix[1, 4]": "0.00000000",
-                            "food chain color matrix[1, 5]": "0.00000000",
-                            "food chain color matrix[1, 6]": "0.00000000",
-                            "food chain color matrix[2, 0]": "0.00000000",
-                            "food chain color matrix[2, 1]": "0.00000000",
-                            "food chain color matrix[2, 2]": "0.00000000",
-                            "food chain color matrix[2, 3]": "0.00000000",
-                            "food chain color matrix[2, 4]": "0.00000000",
-                            "food chain color matrix[2, 5]": "0.00000000",
-                            "food chain color matrix[2, 6]": "0.00000000",
-                            "food chain color matrix[3, 0]": "0.00000000",
-                            "food chain color matrix[3, 1]": "0.00000000",
-                            "food chain color matrix[3, 2]": "0.00000000",
-                            "food chain color matrix[3, 3]": "0.00000000",
-                            "food chain color matrix[3, 4]": "0.00000000",
-                            "food chain color matrix[3, 5]": "0.00000000",
-                            "food chain color matrix[3, 6]": "0.00000000",
-                            "food chain color matrix[4, 0]": "1.00000000",
-                            "food chain color matrix[4, 1]": "1.00000000",
-                            "food chain color matrix[4, 2]": "1.00000000",
-                            "food chain color matrix[4, 3]": "1.00000000",
-                            "food chain color matrix[4, 4]": "0.00000000",
-                            "food chain color matrix[4, 5]": "1.00000000",
-                            "food chain color matrix[4, 6]": "1.00000000",
-                            "food chain color matrix[5, 0]": "0.00000000",
-                            "food chain color matrix[5, 1]": "0.00000000",
-                            "food chain color matrix[5, 2]": "0.00000000",
-                            "food chain color matrix[5, 3]": "0.00000000",
-                            "food chain color matrix[5, 4]": "0.00000000",
-                            "food chain color matrix[5, 5]": "0.00000000",
-                            "food chain color matrix[5, 6]": "0.00000000",
-                            "food chain color matrix[6, 0]": "0.00000000",
-                            "food chain color matrix[6, 1]": "0.00000000",
-                            "food chain color matrix[6, 2]": "0.00000000",
-                            "food chain color matrix[6, 3]": "0.00000000",
-                            "food chain color matrix[6, 4]": "0.00000000",
-                            "food chain color matrix[6, 5]": "0.00000000",
-                            "food chain color matrix[6, 6]": "0.00000000",
-                            "geometry deviation exponent": {
-                                "activated": "false"
-                            },
-                            "geometry deviation exponent[0]": "0.00000000",
-                            "geometry deviation exponent[1]": "0.00000000",
-                            "geometry deviation exponent[2]": "0.00000000",
-                            "geometry deviation exponent[3]": "0.00000000",
-                            "geometry deviation exponent[4]": "0.00000000",
-                            "geometry deviation exponent[5]": "0.00000000",
-                            "geometry deviation exponent[6]": "0.00000000",
-                            "connections mismatch penalty": {
-                                "activated": "false"
-                            },
-                            "connections mismatch penalty[0]": "0.33000001",
-                            "connections mismatch penalty[1]": "0.33000001",
-                            "connections mismatch penalty[2]": "0.33000001",
-                            "connections mismatch penalty[3]": "0.33000001",
-                            "connections mismatch penalty[4]": "0.33000001",
-                            "connections mismatch penalty[5]": "0.33000001",
-                            "connections mismatch penalty[6]": "0.33000001"
-                        },
-                        "constructor": {
-                            "mutation probability": {
-                                "neuron data": {
-                                    "activated": "true"
-                                },
-                                "neuron data[0]": "0.00000000",
-                                "neuron data[1]": "0.00000000",
-                                "neuron data[2]": "0.00000000",
-                                "neuron data[3]": "0.00000000",
-                                "neuron data[4]": "0.00000000",
-                                "neuron data[5]": "0.00000000",
-                                "neuron data[6]": "0.00000000",
-                                "cell function": {
-                                    "activated": "true"
-                                },
-                                "cell function[0]": "0.00000000",
-                                "cell function[1]": "0.00000000",
-                                "cell function[2]": "0.00000000",
-                                "cell function[3]": "0.00000000",
-                                "cell function[4]": "0.00000000",
-                                "cell function[5]": "0.00000000",
-                                "cell function[6]": "0.00000000",
-                                "insertion": {
-                                    "activated": "true"
-                                },
-                                "insertion[0]": "0.00000000",
-                                "insertion[1]": "0.00000000",
-                                "insertion[2]": "0.00000000",
-                                "insertion[3]": "0.00000000",
-                                "insertion[4]": "0.00000000",
-                                "insertion[5]": "0.00000000",
-                                "insertion[6]": "0.00000000",
-                                "deletion": {
-                                    "activated": "true"
-                                },
-                                "deletion[0]": "0.00000000",
-                                "deletion[1]": "0.00000000",
-                                "deletion[2]": "0.00000000",
-                                "deletion[3]": "0.00000000",
-                                "deletion[4]": "0.00000000",
-                                "deletion[5]": "0.00000000",
-                                "deletion[6]": "0.00000000",
-                                "translation": {
-                                    "activated": "true"
-                                },
-                                "translation[0]": "0.00000000",
-                                "translation[1]": "0.00000000",
-                                "translation[2]": "0.00000000",
-                                "translation[3]": "0.00000000",
-                                "translation[4]": "0.00000000",
-                                "translation[5]": "0.00000000",
-                                "translation[6]": "0.00000000",
-                                "duplication": {
-                                    "activated": "true"
-                                },
-                                "duplication[0]": "0.00000000",
-                                "duplication[1]": "0.00000000",
-                                "duplication[2]": "0.00000000",
-                                "duplication[3]": "0.00000000",
-                                "duplication[4]": "0.00000000",
-                                "duplication[5]": "0.00000000",
-                                "duplication[6]": "0.00000000",
-                                "color": {
-                                    "activated": "true"
-                                },
-                                "color[0]": "0.00000000",
-                                "color[1]": "0.00000000",
-                                "color[2]": "0.00000000",
-                                "color[3]": "0.00000000",
-                                "color[4]": "0.00000000",
-                                "color[5]": "0.00000000",
-                                "color[6]": "0.00000000"
-                            }
-                        }
-                    }
-                },
-                " cell": {
-                    "function": {
-                        "constructor": {
-                            "mutation probability": {
-                                "data ": {
-                                    "activated": "true"
-                                },
-                                "data [0]": "0.00000000",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00000000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
+                                "data [0]": "0.00001300",
+                                "data [1]": "0.00001300",
+                                "data [2]": "0.00001300",
+                                "data [3]": "0.00001300",
+                                "data [4]": "0.00001300",
+                                "data [5]": "0.00001300",
+                                "data [6]": "0.00001300"
                             }
                         }
                     }

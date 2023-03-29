@@ -2,9 +2,9 @@ name: CMake
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ master ]
   pull_request:
-    branches: [ develop ]
+    branches: [ master ]
 
 env:
   BUILD_TYPE: Release
@@ -28,10 +28,10 @@ jobs:
         sudo apt-get update -qq
         sudo apt-get install -y --no-install-recommends libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
         
-    - uses: Jimver/cuda-toolkit@v0.2.5
+    - uses: Jimver/cuda-toolkit@v0.2.10
       id: cuda-toolkit
       with:
-        cuda: '11.5.1'
+        cuda: '11.7.1'
           
     - name: Run vcpkg
       uses: lukka/run-vcpkg@v6

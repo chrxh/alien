@@ -10,7 +10,7 @@ class _SimulationKernelsLauncher
 public:
     _SimulationKernelsLauncher();
 
-    void calcTimestep(Settings const& settings, SimulationData const& simulationData, SimulationResult const& result);
+    void calcTimestep(Settings const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
 
 private:
     bool isRigidityUpdateEnabled(Settings const& settings) const;

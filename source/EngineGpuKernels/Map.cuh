@@ -1,10 +1,12 @@
 #pragma once
 
+#include "cuda_runtime_api.h"
+
 #include "Base.cuh"
 #include "Cell.cuh"
 #include "Particle.cuh"
 #include "Math.cuh"
-#include "cuda_runtime_api.h"
+#include "Array.cuh"
 
 class BaseMap
 {

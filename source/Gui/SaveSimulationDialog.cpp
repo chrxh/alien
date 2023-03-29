@@ -34,7 +34,7 @@ void _SaveSimulationDialog::process()
     }
     if (ifd::FileDialog::Instance().HasResult()) {
         printOverlayMessage("Saving ...");
-        delayedExecution([=] {
+        delayedExecution([=, this] {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();

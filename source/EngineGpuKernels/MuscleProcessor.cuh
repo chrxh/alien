@@ -5,60 +5,56 @@
 #include "Cell.cuh"
 #include "SimulationData.cuh"
 #include "CellFunctionProcessor.cuh"
-#include "SimulationResult.cuh"
+#include "SimulationStatistics.cuh"
 
 class MuscleProcessor
 {
 public:
-    __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static void
-    movement(SimulationData& data, SimulationResult& result, Cell* cell, Activity const& activity);
-    __inline__ __device__ static void
-    contractionExpansion(SimulationData& data, SimulationResult& result, Cell* cell, Activity const& activity);
-    __inline__ __device__ static void
-    bending(SimulationData& data, SimulationResult& result, Cell* cell, Activity const& activity);
+    __inline__ __device__ static void movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity);
+    __inline__ __device__ static void contractionExpansion(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity);
+    __inline__ __device__ static void bending(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity);
 
     __inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
-    __inline__ __device__ static float getTruncatedValue(Activity const& activity, int channel = 0);
+    __inline__ __device__ static float getTruncatedUnitValue(Activity const& activity, int channel = 0);
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__device__ __inline__ void MuscleProcessor::process(SimulationData& data, SimulationResult& result)
+__device__ __inline__ void MuscleProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
     auto& operations = data.cellFunctionOperations[CellFunction_Muscle];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        processCell(data, result, operations.at(i).cell);
+        processCell(data, statistics, operations.at(i).cell);
     }
 }
 
-__device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
+__device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
 
     switch (cell->cellFunctionData.muscle.mode) {
     case MuscleMode_Movement: {
-        movement(data, result, cell, activity);
+        movement(data, statistics, cell, activity);
     } break;
     case MuscleMode_ContractionExpansion: {
-        contractionExpansion(data, result, cell, activity);
+        contractionExpansion(data, statistics, cell, activity);
     } break;
     case MuscleMode_Bending: {
-        bending(data, result, cell, activity);
+        bending(data, statistics, cell, activity);
     } break;
     }
 
     CellFunctionProcessor::setActivity(cell, activity);
 }
 
-__device__ __inline__ void
-MuscleProcessor::movement(SimulationData& data, SimulationResult& result, Cell* cell, Activity const& activity)
+__device__ __inline__ void MuscleProcessor::movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity)
 {
     if (abs(activity.channels[0]) < NEAR_ZERO) {
         return;
@@ -68,17 +64,13 @@ MuscleProcessor::movement(SimulationData& data, SimulationResult& result, Cell* 
     }
     float2 direction = CellFunctionProcessor::calcSignalDirection(data, cell);
     if (direction.x != 0 || direction.y != 0) {
-        cell->vel += Math::normalized(direction) * cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color] * getTruncatedValue(activity);
+        cell->vel += Math::normalized(direction) * cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color] * getTruncatedUnitValue(activity);
     }
     cell->releaseLock();
-    result.incMuscleActivity();
+    statistics.incMuscleActivity();
 }
 
-__device__ __inline__ void MuscleProcessor::contractionExpansion(
-    SimulationData& data,
-    SimulationResult& result,
-    Cell* cell,
-    Activity const& activity)
+__device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity)
 {
     if (abs(activity.channels[0]) < NEAR_ZERO) {
         return;
@@ -93,7 +85,7 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(
                 continue;
             }
             auto newDistance =
-                connection.distance + cudaSimulationParameters.cellFunctionMuscleContractionExpansionDelta[cell->color] * getTruncatedValue(activity);
+                connection.distance + cudaSimulationParameters.cellFunctionMuscleContractionExpansionDelta[cell->color] * getTruncatedUnitValue(activity);
             if (activity.channels[0] > 0 && newDistance >= cudaSimulationParameters.cellMaxBindingDistance * 0.8f) {
                 continue;
             }
@@ -108,11 +100,10 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(
         }
     }
     cell->releaseLock();
-    result.incMuscleActivity();
+    statistics.incMuscleActivity();
 }
 
-__inline__ __device__ void
-MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* cell, Activity const& activity)
+__inline__ __device__ void MuscleProcessor::bending(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity)
 {
     if (abs(activity.channels[0]) < NEAR_ZERO) {
         return;
@@ -126,7 +117,7 @@ MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* c
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connection = cell->connections[i];
         if (connection.cell->executionOrderNumber == cell->inputExecutionOrderNumber) {
-            auto intensityChannel0 = getTruncatedValue(activity);
+            auto intensityChannel0 = getTruncatedUnitValue(activity);
             auto bendingAngle = cudaSimulationParameters.cellFunctionMuscleBendingAngle[cell->color] * intensityChannel0;
 
             if (bendingAngle < 0 && connection.angleFromPrevious <= -bendingAngle) {
@@ -158,7 +149,7 @@ MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* c
             if (cell->numConnections <= 2 && abs(activity.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold) {
                 auto delta = Math::normalized(data.cellMap.getCorrectedDirection(connection.cell->absPos - cell->absPos));
                 Math::rotateQuarterCounterClockwise(delta);
-                auto intensityChannel1 = getTruncatedValue(activity, 1);
+                auto intensityChannel1 = getTruncatedUnitValue(activity, 1);
                 if ((intensityChannel0 < -NEAR_ZERO && intensityChannel1 < -NEAR_ZERO) || (intensityChannel0 > NEAR_ZERO && intensityChannel1 > NEAR_ZERO)) {
                     auto acceleration = delta * intensityChannel0 * cudaSimulationParameters.cellFunctionMuscleBendingAcceleration[cell->color]
                         * sqrtf(cell->cellFunctionData.muscle.consecutiveBendingAngle + 1.0f) / 20 /*abs(bendingAngle) / 10*/;
@@ -169,7 +160,7 @@ MuscleProcessor::bending(SimulationData& data, SimulationResult& result, Cell* c
         }
     }
     cell->releaseLock();
-    result.incMuscleActivity();
+    statistics.incMuscleActivity();
 }
 
 __inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* otherCell)
@@ -182,7 +173,7 @@ __inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* 
     return 0;
 }
 
-__inline__ __device__ float MuscleProcessor::getTruncatedValue(Activity const& activity, int channel)
+__inline__ __device__ float MuscleProcessor::getTruncatedUnitValue(Activity const& activity, int channel)
 {
-    return max(-1.0f, min(1.0f, activity.channels[channel]));
+    return max(-0.3f, min(0.3f, activity.channels[channel])) / 0.3f;
 }

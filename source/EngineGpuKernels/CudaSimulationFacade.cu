@@ -23,10 +23,10 @@
 #include "GarbageCollectorKernels.cuh"
 #include "ConstantMemory.cuh"
 #include "CudaMemoryManager.cuh"
-#include "CudaMonitor.cuh"
+#include "SimulationStatistics.cuh"
 #include "Objects.cuh"
 #include "Map.cuh"
-#include "MonitorKernels.cuh"
+#include "StatisticsKernels.cuh"
 #include "EditKernels.cuh"
 #include "RenderingKernels.cuh"
 #include "SimulationData.cuh"
@@ -34,8 +34,7 @@
 #include "DataAccessKernelsLauncher.cuh"
 #include "RenderingKernelsLauncher.cuh"
 #include "EditKernelsLauncher.cuh"
-#include "MonitorKernelsLauncher.cuh"
-#include "SimulationResult.cuh"
+#include "StatisticsKernelsLauncher.cuh"
 #include "SelectionResult.cuh"
 #include "RenderingData.cuh"
 #include "TestKernelsLauncher.cuh"
@@ -122,18 +121,15 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
 
     log(Priority::Important, "initialize simulation");
 
-    _timestepOfLastMonitorData = timestep;
     _cudaSimulationData = std::make_shared<SimulationData>();
     _cudaRenderingData = std::make_shared<RenderingData>();
-    _cudaSimulationResult = std::make_shared<SimulationResult>();
     _cudaSelectionResult = std::make_shared<SelectionResult>();
     _cudaAccessTO = std::make_shared<DataTO>();
-    _cudaMonitor = std::make_shared<CudaMonitor>();
+    _simulationStatistics = std::make_shared<SimulationStatistics>();
 
     _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY}, timestep);
     _cudaRenderingData->init();
-    _cudaMonitor->init();
-    _cudaSimulationResult->init();
+    _simulationStatistics->init();
     _cudaSelectionResult->init();
 
     _simulationKernels = std::make_shared<_SimulationKernelsLauncher>();
@@ -141,7 +137,7 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
     _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsLauncher>();
     _renderingKernels = std::make_shared<_RenderingKernelsLauncher>();
     _editKernels = std::make_shared<_EditKernelsLauncher>();
-    _monitorKernels = std::make_shared<_MonitorKernelsLauncher>();
+    _statisticsKernels = std::make_shared<_StatisticsKernelsLauncher>();
 
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numParticles);
@@ -155,8 +151,7 @@ _CudaSimulationFacade::~_CudaSimulationFacade()
 {
     _cudaSimulationData->free();
     _cudaRenderingData->free();
-    _cudaMonitor->free();
-    _cudaSimulationResult->free();
+    _simulationStatistics->free();
     _cudaSelectionResult->free();
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
@@ -181,7 +176,7 @@ void* _CudaSimulationFacade::registerImageResource(GLuint image)
 
 void _CudaSimulationFacade::calcTimestep()
 {
-    _simulationKernels->calcTimestep(_settings, getSimulationDataIntern(), *_cudaSimulationResult);
+    _simulationKernels->calcTimestep(_settings, getSimulationDataIntern(), *_simulationStatistics);
     syncAndCheck();
 
     automaticResizeArrays();
@@ -414,35 +409,17 @@ auto _CudaSimulationFacade::getArraySizes() const -> ArraySizes
     };
 }
 
-MonitorData _CudaSimulationFacade::getMonitorData()
+StatisticsData _CudaSimulationFacade::getStatistics()
 {
-    _monitorKernels->getMonitorData(_settings.gpuSettings, getSimulationDataIntern(), *_cudaMonitor);
+    _statisticsKernels->updateStatistics(_settings.gpuSettings, getSimulationDataIntern(), *_simulationStatistics);
     syncAndCheck();
     
-    MonitorData result;
-    auto timestepData = _cudaMonitor->getTimestepMonitorData(getCurrentTimestep());
-
-    result.timestep = _cudaSimulationData->timestep;
-    result.timestepData = timestepData;
-
-    auto timeIntervalData = _cudaSimulationResult->getAndResetTimeIntervalMonitorData();
-    result.timeIntervalData = timeIntervalData;
-
-    auto deltaTime = static_cast<int64_t>(result.timestep) - static_cast<int64_t>(_timestepOfLastMonitorData);
-    auto divisor = deltaTime > 0 ? deltaTime : 1;
-    result.timeIntervalData.numCreatedCells /= divisor;
-    result.timeIntervalData.numSuccessfulAttacks /= divisor;
-    result.timeIntervalData.numFailedAttacks /= divisor;
-    result.timeIntervalData.numMuscleActivities /= divisor;
-    if (deltaTime != 0) {
-        _timestepOfLastMonitorData = result.timestep;
-    }
-    return result;
+    return _simulationStatistics->getStatistics();
 }
 
-void _CudaSimulationFacade::resetProcessMonitorData()
+void _CudaSimulationFacade::resetTimeIntervalStatistics()
 {
-    _cudaSimulationResult->getAndResetTimeIntervalMonitorData();
+    _simulationStatistics->resetAccumulatedStatistics();
 }
 
 uint64_t _CudaSimulationFacade::getCurrentTimestep() const

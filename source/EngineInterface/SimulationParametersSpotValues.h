@@ -1,24 +1,11 @@
 #pragma once
 
-#include <limits>
-
 #include "Constants.h"
+#include "Colors.h"
 
 /**
  * NOTE: header is also included in kernel code
  */
-
-template <typename T>
-using ColorVector = T[MAX_COLORS];
-
-template <typename T>
-using ColorMatrix = T[MAX_COLORS][MAX_COLORS];
-
-template <typename T>
-struct Infinity
-{
-    static auto constexpr value = std::numeric_limits<T>::max();
-};
 
 struct SimulationParametersSpotValues
 {

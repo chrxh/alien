@@ -7,17 +7,16 @@
 class SensorProcessor
 {
 public:
-    __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
     static int constexpr NumScanAngles = 32;
     static int constexpr NumScanPoints = 64;
 
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity);
     __inline__ __device__ static void
-    searchNeighborhood(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity);
-    __inline__ __device__ static void
-    searchByAngle(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity);
+    searchByAngle(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity);
 
     __inline__ __device__ static uint8_t convertAngleToData(float angle);
 };
@@ -26,16 +25,16 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void SensorProcessor::process(SimulationData& data, SimulationResult& result)
+__inline__ __device__ void SensorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
     auto& operations = data.cellFunctionOperations[CellFunction_Sensor];
     auto partition = calcBlockPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        processCell(data, result, operations.at(i).cell);
+        processCell(data, statistics, operations.at(i).cell);
     }
 }
 
-__inline__ __device__ void SensorProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
+__inline__ __device__ void SensorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     __shared__ Activity activity;
     if (threadIdx.x == 0) {
@@ -46,10 +45,10 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     if (abs(activity.channels[0]) > cudaSimulationParameters.cellFunctionSensorActivityThreshold) {
         switch (cell->cellFunctionData.sensor.mode) {
         case SensorMode_Neighborhood: {
-            searchNeighborhood(data, result, cell, activity);
+            searchNeighborhood(data, statistics, cell, activity);
         } break;
         case SensorMode_FixedAngle: {
-            searchByAngle(data, result, cell, activity);
+            searchByAngle(data, statistics, cell, activity);
         } break;
         }
     }
@@ -61,7 +60,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 }
 
 __inline__ __device__ void
-SensorProcessor::searchNeighborhood(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity)
+SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
 {
     __shared__ int minDensity;
     __shared__ int color;
@@ -110,7 +109,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationResult& resu
 }
 
 __inline__ __device__ void
-SensorProcessor::searchByAngle(SimulationData& data, SimulationResult& result, Cell* cell, Activity& activity)
+SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
 {
     __shared__ int minDensity;
     __shared__ int color;

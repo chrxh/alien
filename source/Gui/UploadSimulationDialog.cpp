@@ -93,7 +93,7 @@ void _UploadSimulationDialog::onUpload()
 {
     printOverlayMessage("Uploading ...");
 
-    delayedExecution([=] {
+    delayedExecution([=, this] {
         DeserializedSimulation deserializedSim;
         deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
         deserializedSim.auxiliaryData.zoom = _viewport->getZoomFactor();

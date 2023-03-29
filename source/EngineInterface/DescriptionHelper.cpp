@@ -1,5 +1,6 @@
 #include "DescriptionHelper.h"
 
+#include <cmath>
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
 
@@ -513,7 +514,7 @@ bool DescriptionHelper::isCellPresent(Occupancy const& cellPosBySlot, SpaceCalcu
         return false;
     };
 
-    auto distanceInt = toInt(std::ceilf(distance));
+    auto distanceInt = toInt(ceilf(distance));
     for (int dx = -distanceInt; dx <= distanceInt; ++dx) {
         for (int dy = -distanceInt; dy <= distanceInt; ++dy) {
             if (isOccupied(getMatchingSlots({intPos.x + dx, intPos.y + dy}))) {

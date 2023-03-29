@@ -11,14 +11,13 @@ struct Objects;
 
 struct SimulationData;
 struct RenderingData;
-class SimulationResult;
 class SelectionResult;
 struct CellTO;
 struct ClusterAccessTO;
 struct DataTO;
 struct SimulationParameters;
 struct GpuSettings;
-class CudaMonitor;
+class SimulationStatistics;
 
 class _SimulationKernelsLauncher;
 using SimulationKernelsLauncher = std::shared_ptr<_SimulationKernelsLauncher>;
@@ -35,8 +34,8 @@ using RenderingKernelsLauncher = std::shared_ptr<_RenderingKernelsLauncher>;
 class _EditKernelsLauncher;
 using EditKernelsLauncher = std::shared_ptr<_EditKernelsLauncher>;
 
-class _MonitorKernelsLauncher;
-using MonitorKernelsLauncher = std::shared_ptr<_MonitorKernelsLauncher>;
+class _StatisticsKernelsLauncher;
+using StatisticsKernelsLauncher = std::shared_ptr<_StatisticsKernelsLauncher>;
 
 class _TestKernelsLauncher;
 using TestKernelsLauncher = std::shared_ptr<_TestKernelsLauncher>;

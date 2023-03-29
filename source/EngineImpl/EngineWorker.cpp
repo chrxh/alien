@@ -10,7 +10,7 @@
 namespace
 {
     std::chrono::milliseconds const FrameTimeout(500);
-    std::chrono::milliseconds const MonitorUpdate(30);
+    std::chrono::milliseconds const StatisticsUpdate(30);
 }
 
 void EngineWorker::initCuda()
@@ -30,7 +30,7 @@ void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& gener
         _cudaResource = _cudaSimulation->registerImageResource(*_imageResourceToRegister);
         _imageResourceToRegister = std::nullopt;
     }
-    updateMonitorDataIntern();
+    updateStatistics();
 }
 
 void EngineWorker::clear()
@@ -197,7 +197,7 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> o
     return result;
 }
 
-MonitorData EngineWorker::getMonitorData() const
+StatisticsData EngineWorker::getStatistics() const
 {
     std::lock_guard guard(_mutexForStatistics);
 
@@ -219,7 +219,7 @@ void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdat
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
     _cudaSimulation->addAndSelectSimulationData(dataTO);
-    updateMonitorDataIntern();
+    updateStatistics();
 }
 
 void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate)
@@ -235,7 +235,7 @@ void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& da
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
     _cudaSimulation->setSimulationData(dataTO);
-    updateMonitorDataIntern();
+    updateStatistics();
 }
 
 void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
@@ -250,7 +250,7 @@ void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
     _cudaSimulation->setSimulationData(dataTO);
-    updateMonitorDataIntern();
+    updateStatistics();
 }
 
 void EngineWorker::removeSelectedObjects(bool includeClusters)
@@ -258,7 +258,7 @@ void EngineWorker::removeSelectedObjects(bool includeClusters)
     EngineWorkerGuard access(this);
 
     _cudaSimulation->removeSelectedObjects(includeClusters);
-    updateMonitorDataIntern();
+    updateStatistics();
 }
 
 void EngineWorker::relaxSelectedObjects(bool includeClusters)
@@ -325,7 +325,7 @@ void EngineWorker::calcSingleTimestep()
     EngineWorkerGuard access(this);
 
     _cudaSimulation->calcTimestep();
-    updateMonitorDataIntern();
+    updateStatistics();
 }
 
 void EngineWorker::beginShutdown()
@@ -365,7 +365,7 @@ void EngineWorker::setCurrentTimestep(uint64_t value)
 {
     EngineWorkerGuard access(this);
     _cudaSimulation->setCurrentTimestep(value);
-    resetProcessMonitorData();
+    resetTimeIntervalStatistics();
 }
 
 void EngineWorker::setSimulationParameters(SimulationParameters const& parameters)
@@ -425,7 +425,7 @@ void EngineWorker::removeSelection()
     EngineWorkerGuard access(this);
     _cudaSimulation->removeSelection();
 
-    updateMonitorDataIntern();
+    updateStatistics();
 }
 
 void EngineWorker::updateSelection()
@@ -439,7 +439,7 @@ void EngineWorker::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const
     EngineWorkerGuard access(this);
     _cudaSimulation->shallowUpdateSelectedObjects(updateData);
 
-    updateMonitorDataIntern();
+    updateStatistics();
 }
 
 void EngineWorker::colorSelectedObjects(unsigned char color, bool includeClusters)
@@ -447,7 +447,7 @@ void EngineWorker::colorSelectedObjects(unsigned char color, bool includeCluster
     EngineWorkerGuard access(this);
     _cudaSimulation->colorSelectedObjects(color, includeClusters);
 
-    updateMonitorDataIntern();
+    updateStatistics();
 }
 
 void EngineWorker::reconnectSelectedObjects()
@@ -474,9 +474,9 @@ void EngineWorker::runThreadLoop()
                 if (_isSimulationRunning.load()) {
                     _cudaSimulation->calcTimestep();
 
-                    if (++_monitorCounter == 3) {  //for performance reasons...
-                        updateMonitorDataIntern(true);
-                        _monitorCounter = 0;
+                    if (++_statisticsCounter == 3) {  //for performance reasons...
+                        updateStatistics(true);
+                        _statisticsCounter = 0;
                     }
                 }
                 measureTPS();
@@ -522,20 +522,20 @@ DataTO EngineWorker::provideTO()
     return _dataTOCache->getDataTO(_cudaSimulation->getArraySizes());
 }
 
-void EngineWorker::resetProcessMonitorData()
+void EngineWorker::resetTimeIntervalStatistics()
 {
     std::lock_guard guard(_mutexForStatistics);
-    _cudaSimulation->resetProcessMonitorData();
+    _cudaSimulation->resetTimeIntervalStatistics();
 }
 
-void EngineWorker::updateMonitorDataIntern(bool afterMinDuration)
+void EngineWorker::updateStatistics(bool afterMinDuration)
 {
     auto now = std::chrono::steady_clock::now();
-    if (!afterMinDuration  || !_lastMonitorUpdate || now - *_lastMonitorUpdate > MonitorUpdate) {
+    if (!afterMinDuration  || !_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
 
         std::lock_guard guard(_mutexForStatistics);
-        _lastStatistics = _cudaSimulation->getMonitorData();
-        _lastMonitorUpdate = now;
+        _lastStatistics = _cudaSimulation->getStatistics();
+        _lastStatisticsUpdateTime = now;
     }
 }
 

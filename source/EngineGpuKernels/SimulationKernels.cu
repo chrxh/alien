@@ -13,7 +13,7 @@
 #include "CellProcessor.cuh"
 #include "ParticleProcessor.cuh"
 
-__global__ void cudaNextTimestep_prepare(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_prepare(SimulationData data, SimulationStatistics statistics)
 {
     data.prepareForNextTimestep();
 }
@@ -82,44 +82,44 @@ __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData da
     CellFunctionProcessor::collectCellFunctionOperations(data);
 }
 
-__global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationStatistics statistics)
 {
-    NerveProcessor::process(data, result);
+    NerveProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_neuron(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_cellFunction_neuron(SimulationData data, SimulationStatistics statistics)
 {
-    NeuronProcessor::process(data, result);
+    NeuronProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, SimulationStatistics statistics)
 {
-    ConstructorProcessor::process(data, result);
+    ConstructorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_injector(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_cellFunction_injector(SimulationData data, SimulationStatistics statistics)
 {
-    InjectorProcessor::process(data, result);
+    InjectorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_attacker(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_cellFunction_attacker(SimulationData data, SimulationStatistics statistics)
 {
-    AttackerProcessor::process(data, result);
+    AttackerProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_transmitter(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_cellFunction_transmitter(SimulationData data, SimulationStatistics statistics)
 {
-    TransmitterProcessor::process(data, result);
+    TransmitterProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_muscle(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_cellFunction_muscle(SimulationData data, SimulationStatistics statistics)
 {
-    MuscleProcessor::process(data, result);
+    MuscleProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_sensor(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_cellFunction_sensor(SimulationData data, SimulationStatistics statistics)
 {
-    SensorProcessor::process(data, result);
+    SensorProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_physics_substep7_innerFriction(SimulationData data)

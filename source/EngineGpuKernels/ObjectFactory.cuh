@@ -281,11 +281,11 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.constructor.stiffness = _data->numberGen1.random();
             cell->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
             cell->cellFunctionData.constructor.genomeSize = 0;
-            //_data->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
-            //cell->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.constructor.genomeSize);
+            //_timestepData->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
+            //cell->cellFunctionData.constructor.genome = _timestepData->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.constructor.genomeSize);
             //auto& genome = cell->cellFunctionData.constructor.genome;
             //for (int i = 0; i < cell->cellFunctionData.constructor.genomeSize; ++i) {
-            //    genome[i] = _data->numberGen1.randomByte();
+            //    genome[i] = _timestepData->numberGen1.randomByte();
             //}
             cell->cellFunctionData.constructor.currentGenomePos = 0;
             cell->cellFunctionData.constructor.genomeGeneration = 0;

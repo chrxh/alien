@@ -38,7 +38,7 @@ void _ExportStatisticsDialog::process()
     ifd::FileDialog::Instance().Close();
 }
 
-void _ExportStatisticsDialog::show(LongtermStatistics const& longtermStatistics)
+void _ExportStatisticsDialog::show(TimelineLongtermStatistics const& longtermStatistics)
 {
     _statistics = longtermStatistics;
     ifd::FileDialog::Instance().Save("ExportStatisticsDialog", "Export statistics", "Comma-separated values (*.csv){.csv},.*", _startingPath);
@@ -46,26 +46,26 @@ void _ExportStatisticsDialog::show(LongtermStatistics const& longtermStatistics)
 
 void _ExportStatisticsDialog::onSaveStatistics(std::string const& filename)
 {
-    for (auto const& data : _statistics.datas) {
-        CHECK(_statistics.timestepHistory.size() == _statistics.datas[0].size());
-    }
+    //for (auto const& data : _statistics.dataPoints) {
+    //    CHECK(_statistics.timestepHistory.size() == _statistics.dataPoints[0].size());
+    //}
 
-    std::ofstream file;
-    file.open(filename, std::ios_base::out);
-    if (!file) {
-        MessageDialog::getInstance().show("Export statistics", "The statistics could not be saved to the specified file.");
-        return;
-    }
+    //std::ofstream file;
+    //file.open(filename, std::ios_base::out);
+    //if (!file) {
+    //    MessageDialog::getInstance().show("Export statistics", "The statistics could not be saved to the specified file.");
+    //    return;
+    //}
 
-    file << "time step, cells, cells (color 0), cells (color 1), cells (color 2), cells (color 3), cells (color 4), cells (color 5), cells (color 6), "
-         << "cell connections, particles, created cells, successful attacks, failed attacks, muscle activities"
-         << std::endl;
-    for (int i = 0; i < _statistics.timestepHistory.size(); ++i) {
-        file << static_cast<uint64_t>(_statistics.timestepHistory.at(i));
-        for (int j = 0; j <= 13; ++j) {
-            file << ", " << static_cast<uint64_t>(_statistics.datas[j].at(i));
-        }
-        file << std::endl;
-    }
-    file.close();
+    //file << "time step, cells, cells (color 0), cells (color 1), cells (color 2), cells (color 3), cells (color 4), cells (color 5), cells (color 6), "
+    //     << "cell connections, particles, created cells, successful attacks, failed attacks, muscle activities"
+    //     << std::endl;
+    //for (int i = 0; i < _statistics.timestepHistory.size(); ++i) {
+    //    file << static_cast<uint64_t>(_statistics.timestepHistory.at(i));
+    //    for (int j = 0; j <= 13; ++j) {
+    //        file << ", " << static_cast<uint64_t>(_statistics.dataPoints[j].at(i));
+    //    }
+    //    file << std::endl;
+    //}
+    //file.close();
 }

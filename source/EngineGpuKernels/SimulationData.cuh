@@ -6,6 +6,7 @@
 #include "EngineInterface/GpuSettings.h"
 
 #include "Base.cuh"
+#include "CudaNumberGenerator.cuh"
 #include "ProprocessedCellFunctionData.cuh"
 #include "Definitions.cuh"
 #include "Objects.cuh"

@@ -1,10 +1,10 @@
 {
     "general": {
-        "time step": "713467",
-        "zoom": "1.62620544",
+        "time step": "291978",
+        "zoom": "1.94176567",
         "center": {
-            "x": "764.60430908",
-            "y": "269.81530762"
+            "x": "791.49456787",
+            "y": "249.87910461"
         },
         "world size": {
             "x": "1500",
@@ -22,7 +22,7 @@
             "pressure strength": "0.10000000",
             "viscosity strength": "0.10000000"
         },
-        "friction": "0.00070000",
+        "friction": "0.00200000",
         "rigidity": "0.00000000",
         "cell": {
             "max velocity": "2.00000000",
@@ -48,11 +48,11 @@
             "fusion velocity": "1.13699996",
             "max binding energy": "500000.00000000",
             "max age[0]": "2147483647",
-            "max age[1]": "72570",
+            "max age[1]": "2147483647",
             "max age[2]": "2147483647",
             "max age[3]": "2147483647",
             "max age[4]": "2147483647",
-            "max age[5]": "72570",
+            "max age[5]": "2147483647",
             "max age[6]": "2147483647",
             "color transition rules": {
                 "duration[0]": "0",
@@ -453,39 +453,39 @@
             }
         },
         "radiation": {
-            "factor[0]": "0.00001100",
-            "factor[1]": "0.00001100",
-            "factor[2]": "0.00001100",
-            "factor[3]": "0.00001100",
-            "factor[4]": "0.00001100",
-            "factor[5]": "0.00001100",
-            "factor[6]": "0.00001100",
+            "factor[0]": "0.00000700",
+            "factor[1]": "0.00000700",
+            "factor[2]": "0.00000700",
+            "factor[3]": "0.00000700",
+            "factor[4]": "0.00000700",
+            "factor[5]": "0.00000700",
+            "factor[6]": "0.00000700",
             "probability": "0.03000000",
             "velocity multiplier": "1.00000000",
             "velocity perturbation": "0.50000000",
-            "absorption[0]": "0.04000000",
-            "absorption[1]": "0.00450000",
-            "absorption[2]": "0.20000000",
-            "absorption[3]": "0.04000000",
-            "absorption[4]": "0.04000000",
-            "absorption[5]": "0.00450000",
-            "absorption[6]": "0.04000000",
+            "absorption[0]": "0.00000000",
+            "absorption[1]": "0.00780000",
+            "absorption[2]": "0.06090000",
+            "absorption[3]": "0.22840001",
+            "absorption[4]": "0.05020000",
+            "absorption[5]": "0.00780000",
+            "absorption[6]": "0.22840001",
             "min cell age[0]": "0",
             "min cell age[1]": "0",
-            "min cell age[2]": "294004",
+            "min cell age[2]": "0",
             "min cell age[3]": "0",
             "min cell age[4]": "0",
             "min cell age[5]": "0",
             "min cell age[6]": "0"
         },
         "high radiation": {
-            "min cell energy[0]": "229.10000610",
-            "min cell energy[1]": "229.10000610",
-            "min cell energy[2]": "229.10000610",
-            "min cell energy[3]": "229.10000610",
-            "min cell energy[4]": "229.10000610",
-            "min cell energy[5]": "229.10000610",
-            "min cell energy[6]": "229.10000610",
+            "min cell energy[0]": "294.50000000",
+            "min cell energy[1]": "294.50000000",
+            "min cell energy[2]": "294.50000000",
+            "min cell energy[3]": "294.50000000",
+            "min cell energy[4]": "294.50000000",
+            "min cell energy[5]": "294.50000000",
+            "min cell energy[6]": "294.50000000",
             "factor[0]": "0.00015700",
             "factor[1]": "0.00015700",
             "factor[2]": "0.00015700",
@@ -515,13 +515,13 @@
             "num sources": "3",
             "0": {
                 "pos": {
-                    "x": "239.00000000",
+                    "x": "488.00000000",
                     "y": "248.00000000"
                 }
             },
             "1": {
                 "pos": {
-                    "x": "1279.00000000",
+                    "x": "1003.00000000",
                     "y": "250.00000000"
                 }
             },
@@ -557,23 +557,33 @@
                 "fadeout radius": "198.39999390",
                 "friction": {
                     "activated": "false",
-                    "value": "0.00070000"
+                    "value": "0.00200000"
                 },
                 "rigidity": {
                     "activated": "false",
                     "value": "0.00000000"
                 },
                 "radiation": {
+                    "absorption": {
+                        "activated": "false"
+                    },
+                    "absorption[0]": "0.00000000",
+                    "absorption[1]": "0.00780000",
+                    "absorption[2]": "0.06090000",
+                    "absorption[3]": "0.22840001",
+                    "absorption[4]": "0.05020000",
+                    "absorption[5]": "0.00780000",
+                    "absorption[6]": "0.22840001",
                     "factor": {
                         "activated": "false"
                     },
-                    "factor[0]": "0.00001100",
-                    "factor[1]": "0.00001100",
-                    "factor[2]": "0.00001100",
-                    "factor[3]": "0.00001100",
-                    "factor[4]": "0.00001100",
-                    "factor[5]": "0.00001100",
-                    "factor[6]": "0.00001100"
+                    "factor[0]": "0.00000700",
+                    "factor[1]": "0.00000700",
+                    "factor[2]": "0.00000700",
+                    "factor[3]": "0.00000700",
+                    "factor[4]": "0.00000700",
+                    "factor[5]": "0.00000700",
+                    "factor[6]": "0.00000700"
                 },
                 "cell": {
                     "max force": {
@@ -825,16 +835,26 @@
                     "value": "0.00000000"
                 },
                 "radiation": {
+                    "absorption": {
+                        "activated": "false"
+                    },
+                    "absorption[0]": "0.00000000",
+                    "absorption[1]": "0.00780000",
+                    "absorption[2]": "0.06090000",
+                    "absorption[3]": "0.22840001",
+                    "absorption[4]": "0.05020000",
+                    "absorption[5]": "0.00780000",
+                    "absorption[6]": "0.22840001",
                     "factor": {
                         "activated": "false"
                     },
-                    "factor[0]": "0.00001200",
-                    "factor[1]": "0.00001200",
-                    "factor[2]": "0.00001200",
-                    "factor[3]": "0.00001200",
-                    "factor[4]": "0.00001200",
-                    "factor[5]": "0.00001200",
-                    "factor[6]": "0.00001200"
+                    "factor[0]": "0.00000700",
+                    "factor[1]": "0.00000700",
+                    "factor[2]": "0.00000700",
+                    "factor[3]": "0.00000700",
+                    "factor[4]": "0.00000700",
+                    "factor[5]": "0.00000700",
+                    "factor[6]": "0.00000700"
                 },
                 "cell": {
                     "max force": {
@@ -1086,16 +1106,26 @@
                     "value": "0.00000000"
                 },
                 "radiation": {
+                    "absorption": {
+                        "activated": "false"
+                    },
+                    "absorption[0]": "0.00000000",
+                    "absorption[1]": "0.00780000",
+                    "absorption[2]": "0.06090000",
+                    "absorption[3]": "0.22840001",
+                    "absorption[4]": "0.05020000",
+                    "absorption[5]": "0.00780000",
+                    "absorption[6]": "0.22840001",
                     "factor": {
                         "activated": "false"
                     },
-                    "factor[0]": "0.00001200",
-                    "factor[1]": "0.00001200",
-                    "factor[2]": "0.00001200",
-                    "factor[3]": "0.00001200",
-                    "factor[4]": "0.00001200",
-                    "factor[5]": "0.00001200",
-                    "factor[6]": "0.00001200"
+                    "factor[0]": "0.00000700",
+                    "factor[1]": "0.00000700",
+                    "factor[2]": "0.00000700",
+                    "factor[3]": "0.00000700",
+                    "factor[4]": "0.00000700",
+                    "factor[5]": "0.00000700",
+                    "factor[6]": "0.00000700"
                 },
                 "cell": {
                     "max force": {
@@ -1318,7 +1348,7 @@
                 }
             },
             "3": {
-                "color": "4278720015",
+                "color": "4278591250",
                 "pos": {
                     "x": "750.00000000",
                     "y": "250.00000000"
@@ -1333,30 +1363,40 @@
                     "type": "1",
                     "radial": {
                         "orientation": "0",
-                        "strength": "0.00067000",
-                        "drift angle": "9.80000019"
+                        "strength": "0.00092000",
+                        "drift angle": "0.69999999"
                     }
                 },
-                "fadeout radius": "83.33333588",
+                "fadeout radius": "109.80000305",
                 "friction": {
                     "activated": "false",
-                    "value": "0.00070000"
+                    "value": "0.00200000"
                 },
                 "rigidity": {
                     "activated": "false",
                     "value": "0.00000000"
                 },
                 "radiation": {
+                    "absorption": {
+                        "activated": "false"
+                    },
+                    "absorption[0]": "0.00000000",
+                    "absorption[1]": "0.00780000",
+                    "absorption[2]": "0.06090000",
+                    "absorption[3]": "0.22840001",
+                    "absorption[4]": "0.05020000",
+                    "absorption[5]": "0.00780000",
+                    "absorption[6]": "0.22840001",
                     "factor": {
                         "activated": "false"
                     },
-                    "factor[0]": "0.00001100",
-                    "factor[1]": "0.00001100",
-                    "factor[2]": "0.00001100",
-                    "factor[3]": "0.00001100",
-                    "factor[4]": "0.00001100",
-                    "factor[5]": "0.00001100",
-                    "factor[6]": "0.00001100"
+                    "factor[0]": "0.00000700",
+                    "factor[1]": "0.00000700",
+                    "factor[2]": "0.00000700",
+                    "factor[3]": "0.00000700",
+                    "factor[4]": "0.00000700",
+                    "factor[5]": "0.00000700",
+                    "factor[6]": "0.00000700"
                 },
                 "cell": {
                     "max force": {
