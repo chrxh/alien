@@ -9,7 +9,7 @@
 class _MonitorKernelsLauncher
 {
 public:
-    void getMonitorData(GpuSettings const& gpuSettings, SimulationData const& data, CudaMonitorData const& monitorData);
+    void getMonitorData(GpuSettings const& gpuSettings, SimulationData const& data, CudaMonitor const& monitorData);
 
 private:
 };

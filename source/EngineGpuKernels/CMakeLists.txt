@@ -13,7 +13,7 @@ add_library(alien_engine_gpu_kernels_lib
     ConstantMemory.cuh
     ConstructorProcessor.cuh
     CudaMemoryManager.cuh
-    CudaMonitorData.cuh
+    CudaMonitor.cuh
     CudaSimulationFacade.cu
     CudaSimulationFacade.cuh
     DataAccessKernels.cu

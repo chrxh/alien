@@ -3,7 +3,7 @@
 namespace
 {
 /*
-    __global__ void getEnergyForMonitorData(SimulationData data, CudaMonitorData monitorData)
+    __global__ void getEnergyForMonitorData(SimulationData data, CudaMonitor monitorData)
     {
         {
             auto& cells = data.entities.cellPointers;
@@ -36,7 +36,7 @@ namespace
 */
 }
 
-__global__ void cudaGetCudaMonitorData_substep1(SimulationData data, CudaMonitorData monitorData)
+__global__ void cudaGetCudaMonitorData_substep1(SimulationData data, CudaMonitor monitorData)
 {
     monitorData.reset();
 
@@ -45,7 +45,7 @@ __global__ void cudaGetCudaMonitorData_substep1(SimulationData data, CudaMonitor
     //    KERNEL_CALL(getEnergyForMonitorData, data, monitorData);
 }
 
-__global__ void cudaGetCudaMonitorData_substep2(SimulationData data, CudaMonitorData monitorData)
+__global__ void cudaGetCudaMonitorData_substep2(SimulationData data, CudaMonitor monitorData)
 {
     auto& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -57,7 +57,7 @@ __global__ void cudaGetCudaMonitorData_substep2(SimulationData data, CudaMonitor
     }
 }
 
-__global__ void cudaGetCudaMonitorData_substep3(SimulationData data, CudaMonitorData monitorData)
+__global__ void cudaGetCudaMonitorData_substep3(SimulationData data, CudaMonitor monitorData)
 {
     monitorData.halveNumConnections();
 }
