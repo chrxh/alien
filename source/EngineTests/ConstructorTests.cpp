@@ -946,7 +946,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
     for (auto const& connection : actualConstructedCell.connections) {
         connectionById.emplace(connection.cellId, connection);
     }
-    EXPECT_TRUE(lowPrecisionCompare(_parameters.cellFunctionConstructorOffspringDistance[0], connectionById.at(1).distance));
+    EXPECT_TRUE(lowPrecisionCompare(1.0f, connectionById.at(1).distance));
     EXPECT_TRUE(approxCompare(180.0f, connectionById.at(1).angleFromPrevious));
     EXPECT_TRUE(lowPrecisionCompare(1.0f, connectionById.at(2).distance));
     EXPECT_TRUE(approxCompare(180.0f, connectionById.at(2).angleFromPrevious));
@@ -1115,7 +1115,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
     for (auto const& connection : actualConstructedCell.connections) {
         connectionById.emplace(connection.cellId, connection);
     }
-    EXPECT_TRUE(lowPrecisionCompare(_parameters.cellFunctionConstructorOffspringDistance[0], connectionById.at(1).distance));
+    EXPECT_TRUE(lowPrecisionCompare(1.0f, connectionById.at(1).distance));
     EXPECT_TRUE(lowPrecisionCompare(270.0f, connectionById.at(1).angleFromPrevious));
     EXPECT_TRUE(lowPrecisionCompare(1.0f, connectionById.at(2).distance));
     EXPECT_TRUE(lowPrecisionCompare(90.0f, connectionById.at(2).angleFromPrevious));
@@ -1163,7 +1163,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
     for (auto const& connection : actualConstructedCell.connections) {
         connectionById.emplace(connection.cellId, connection);
     }
-    EXPECT_TRUE(lowPrecisionCompare(_parameters.cellFunctionConstructorOffspringDistance[0], connectionById.at(1).distance));
+    EXPECT_TRUE(lowPrecisionCompare(1.0f, connectionById.at(1).distance));
     EXPECT_TRUE(lowPrecisionCompare(90.0f, connectionById.at(1).angleFromPrevious));
     EXPECT_TRUE(lowPrecisionCompare(1.0f, connectionById.at(2).distance));
     EXPECT_TRUE(lowPrecisionCompare(270.0f, connectionById.at(2).angleFromPrevious));

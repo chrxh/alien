@@ -5,7 +5,7 @@
 #include "QuantityConverter.cuh"
 #include "CellFunctionProcessor.cuh"
 #include "CudaSimulationFacade.cuh"
-#include "SimulationResult.cuh"
+#include "SimulationStatistics.cuh"
 #include "CellConnectionProcessor.cuh"
 #include "MutationProcessor.cuh"
 #include "GenomeDecoder.cuh"
@@ -13,7 +13,7 @@
 class ConstructorProcessor
 {
 public:
-    __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
     struct ConstructionData
@@ -28,20 +28,18 @@ private:
         CellFunction cellFunction;
     };
 
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static bool isConstructionFinished(Cell* cell);
     __inline__ __device__ static bool
     isConstructionPossible(SimulationData const& data, Cell* cell, ConstructionData const& constructionData, Activity const& activity);
     __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
 
-    __inline__ __device__ static bool
-    tryConstructCell(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static bool tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static Cell* getFirstCellOfConstructionSite(Cell* hostCell);
+    __inline__ __device__ static bool startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
     __inline__ __device__ static bool
-    startNewConstruction(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData);
-    __inline__ __device__ static bool
-    continueConstruction(SimulationData& data, SimulationResult& result, Cell* hostCell, Cell* firstConstructedCell,
+    continueConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, Cell* firstConstructedCell,
         ConstructionData const& constructionData);
 
     __inline__ __device__ static bool isConnectable(int numConnections, int maxConnections, bool adaptMaxConnections);
@@ -54,16 +52,16 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationResult& result)
+__inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
     auto& operations = data.cellFunctionOperations[CellFunction_Constructor];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        processCell(data, result, operations.at(i).cell);
+        processCell(data, statistics, operations.at(i).cell);
     }
 }
 
-__inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
+__inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     MutationProcessor::applyRandomMutation(data, cell);
 
@@ -72,7 +70,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         auto origGenomePos = cell->cellFunctionData.constructor.currentGenomePos;
         auto constructionData = readConstructionData(cell);
         if (isConstructionPossible(data, cell, constructionData, activity)) {
-           if (tryConstructCell(data, result, cell, constructionData)) {
+           if (tryConstructCell(data, statistics, cell, constructionData)) {
                 activity.channels[0] = 1;
             } else {
                 activity.channels[0] = 0;
@@ -134,7 +132,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 }
 
 __inline__ __device__ bool
-ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationResult& result, Cell* hostCell, ConstructionData const& constructionData)
+ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData)
 {
     if (!hostCell->tryLock()) {
         return false;
@@ -146,13 +144,13 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationResult& r
             return false;
         }
 
-        auto success = continueConstruction(data, result, hostCell, underConstructionCell, constructionData);
+        auto success = continueConstruction(data, statistics, hostCell, underConstructionCell, constructionData);
 
         underConstructionCell->releaseLock();
         hostCell->releaseLock();
         return success;
     } else {
-        auto success = startNewConstruction(data, result, hostCell, constructionData);
+        auto success = startNewConstruction(data, statistics, hostCell, constructionData);
 
         hostCell->releaseLock();
         return success;
@@ -171,11 +169,8 @@ __inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite
     return result;
 }
 
-__inline__ __device__ bool ConstructorProcessor::startNewConstruction(
-    SimulationData& data,
-    SimulationResult& result,
-    Cell* hostCell,
-    ConstructionData const& constructionData)
+__inline__ __device__ bool
+ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData)
 {
     auto maxConnections = hostCell->cellFunctionData.constructor.maxConnections;
 
@@ -219,13 +214,13 @@ __inline__ __device__ bool ConstructorProcessor::startNewConstruction(
 
     newCell->releaseLock();
 
-    result.incCreatedCell();
+    statistics.incCreatedCell();
     return true;
 }
 
 __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     SimulationData& data,
-    SimulationResult& result,
+    SimulationStatistics& statistics,
     Cell* hostCell,
     Cell* underConstructionCell,
     ConstructionData const& constructionData)
@@ -402,7 +397,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
     newCell->releaseLock();
 
-    result.incCreatedCell();
+    statistics.incCreatedCell();
     return true;
 }
 

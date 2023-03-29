@@ -12,7 +12,7 @@
 #include <vector_types.h>
 #include <GL/gl.h>
 
-#include "EngineInterface/MonitorData.h"
+#include "EngineInterface/StatisticsData.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
@@ -64,8 +64,8 @@ public:
 
     ArraySizes getArraySizes() const;
 
-    MonitorData getMonitorData();
-    void resetProcessMonitorData();
+    StatisticsData getStatistics();
+    void resetTimeIntervalStatistics();
     uint64_t getCurrentTimestep() const;
     void setCurrentTimestep(uint64_t timestep);
 
@@ -85,15 +85,13 @@ private:
 
     SimulationData getSimulationDataIntern() const;
 
-    uint64_t _timestepOfLastMonitorData = 0llu;
     Settings _settings;
 
     std::shared_ptr<SimulationData> _cudaSimulationData;
     std::shared_ptr<RenderingData> _cudaRenderingData;
-    std::shared_ptr<SimulationResult> _cudaSimulationResult;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     std::shared_ptr<DataTO> _cudaAccessTO;
-    std::shared_ptr<CudaMonitor> _cudaMonitor;
+    std::shared_ptr<SimulationStatistics> _simulationStatistics;
 
     mutable std::mutex _mutex;
 
@@ -102,6 +100,6 @@ private:
     GarbageCollectorKernelsLauncher _garbageCollectorKernels;
     RenderingKernelsLauncher _renderingKernels;
     EditKernelsLauncher _editKernels;
-    MonitorKernelsLauncher _monitorKernels;
+    StatisticsKernelsLauncher _statisticsKernels;
     TestKernelsLauncher _testKernels;
 };

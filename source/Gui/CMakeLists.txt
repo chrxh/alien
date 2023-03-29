@@ -14,6 +14,8 @@ PUBLIC
     BrowserWindow.cpp
     BrowserWindow.h
     CellFunctionStrings.h
+    CollectedStatisticsData.cpp
+    CollectedStatisticsData.h
     CreateUserDialog.cpp
     CreateUserDialog.h
     CreatorWindow.cpp
@@ -114,8 +116,6 @@ PUBLIC
     SpatialControlWindow.h
     StartupController.cpp
     StartupController.h
-    StatisticsHistory.cpp
-    StatisticsHistory.h
     StatisticsWindow.cpp
     StatisticsWindow.h
     StyleRepository.cpp
@@ -147,3 +147,7 @@ target_link_libraries(alien implot::implot)
 target_link_libraries(alien glfw)
 target_link_libraries(alien glad::glad)
 target_link_libraries(alien OpenSSL::SSL OpenSSL::Crypto)
+
+if (MSVC)
+    target_compile_options(alien PRIVATE "/MP")
+endif()

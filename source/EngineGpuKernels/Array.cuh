@@ -6,6 +6,7 @@
 
 #include "CudaMemoryManager.cuh"
 #include "Swap.cuh"
+#include "Base.cuh"
 
 namespace Const
 {
@@ -132,9 +133,9 @@ public:
 
     __device__ __inline__ T* getSubArray(uint64_t size)
     {
-        uint64_t oldIndex = atomicAdd(_numEntries, static_cast<uint64_t>(size));
+        uint64_t oldIndex = alienAtomicAdd64(_numEntries, static_cast<uint64_t>(size));
         if (oldIndex + size - 1 >= *_size) {
-            atomicAdd(_numEntries, -size);
+            alienAtomicAdd64(_numEntries, -size);
             printf("Not enough fixed memory! Acquired size: %llu, total size: %llu\n", size, oldIndex + size - 1);
             ABORT();
         }
@@ -143,9 +144,9 @@ public:
 
     __device__ __inline__ T* getNewElement()
     {
-        uint64_t oldIndex = atomicAdd(_numEntries, 1);
+        uint64_t oldIndex = alienAtomicAdd64(_numEntries, uint64_t(1));
         if (oldIndex >= *_size) {
-            atomicAdd(_numEntries, (unsigned long long int)(-1LL));
+            alienAtomicAdd64(_numEntries, uint64_t(-1));
             printf("Not enough fixed memory!\n");
             ABORT();
         }
@@ -155,7 +156,7 @@ public:
     __device__ __inline__ T& at(uint64_t index) { return (*_data)[index]; }
     __device__ __inline__ T const& at(uint64_t index) const { return (*_data)[index]; }
 
-    __device__ __inline__ uint64_t decNumEntriesAndReturnOrigSize() { return atomicSub(_numEntries, 1); }
+    __device__ __inline__ uint64_t decNumEntriesAndReturnOrigSize() { return alienAtomicAdd64(_numEntries, uint64_t(-1)); }
 
     __device__ __inline__ bool shouldResize(uint64_t arraySizeInc) const
     {

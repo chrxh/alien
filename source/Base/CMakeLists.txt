@@ -17,3 +17,7 @@ add_library(alien_base_lib
     StringHelper.h)
 
 target_link_libraries(alien_base_lib Boost::boost)
+
+if (MSVC)
+    target_compile_options(alien_base_lib PRIVATE "/MP")
+endif()

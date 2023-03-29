@@ -7,7 +7,6 @@
 
 #include "Base/StringHelper.h"
 #include "EngineInterface/Colors.h"
-#include "EngineInterface/MonitorData.h"
 #include "EngineInterface/SimulationController.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
@@ -26,13 +25,11 @@ namespace
     auto const HeadColWidth = 150.0f;
 
     template<typename T>
-    T getMax(std::vector<T> const& range)
+    T getMax(T const* data, int count)
     {
         T result = static_cast<T>(0);
-        for (auto const& element : range) {
-            if (element > result) {
-                result = element;
-            }
+        for (int i = 0; i < count; ++i) {
+            result = std::max(result, *reinterpret_cast<T const*>(reinterpret_cast<DataPoint const*>(data) + i));
         }
         return result;
     }
@@ -40,20 +37,45 @@ namespace
 
 void _StatisticsWindow::reset()
 {
-    _liveStatistics = LiveStatistics();
-    _longtermStatistics = LongtermStatistics();
+    _liveStatistics = TimelineLiveStatistics();
+    _longtermStatistics = TimelineLongtermStatistics();
 }
 
 void _StatisticsWindow::processIntern()
 {
     _exportStatisticsDialog->process();
 
+    if (ImGui::BeginTabBar("##Statistics", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+
+        if (ImGui::BeginTabItem("Timelines")) {
+            if (ImGui::BeginChild("##timelines", ImVec2(0, 0), false)) {
+                processTimelines();
+            }
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Histograms")) {
+            if (ImGui::BeginChild("##histograms", ImVec2(0, 0), false)) {
+                processHistograms();
+            }
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
+
+        ImGui::EndTabBar();
+    }
+}
+
+void _StatisticsWindow::processTimelines()
+{
+    ImGui::Spacing();
     AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Real time"), _live);
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().contentScale(60));
-    ImGui::SliderFloat("", &_liveStatistics.history, 1, LiveStatistics::MaxLiveHistory, "%.1f s");
+    ImGui::SliderFloat("", &_liveStatistics.history, 1, TimelineLiveStatistics::MaxLiveHistory, "%.1f s");
     ImGui::EndDisabled();
 
     ImGui::SameLine();
@@ -75,6 +97,7 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().contentScale(HeadColWidth));
         ImGui::TableSetupColumn("##");
         ImGui::TableHeadersRow();
+
         ImPlot::PushColormap(ImPlotColormap_Cool);
 
         ImGui::TableNextRow();
@@ -86,22 +109,22 @@ void _StatisticsWindow::processLiveStatistics()
         }
 
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(0, _liveStatistics.datas[0]);
+        processLivePlot(0, &_liveStatistics.dataPoints[0].numCells);
         if (_showCellsByColor) {
-            processLivePlotForCellsByColor(1);
+            processLivePlotForCellsByColor(1, &_liveStatistics.dataPoints[0].numCellsByColor);
         }
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Cell connections");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(2, _liveStatistics.datas[8]);
+        processLivePlot(2, &_liveStatistics.dataPoints[0].numConnections);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Energy particles");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(3, _liveStatistics.datas[9]);
+        processLivePlot(3, &_liveStatistics.dataPoints[0].numParticles);
 
         ImPlot::PopColormap();
 
@@ -119,25 +142,25 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(4, _liveStatistics.datas[10], 2);
+        processLivePlot(4, &_liveStatistics.dataPoints[0].numCreatedCells, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(5, _liveStatistics.datas[11], 2);
+        processLivePlot(5, &_liveStatistics.dataPoints[0].numSuccessfulAttacks, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(6, _liveStatistics.datas[12], 2);
+        processLivePlot(6, &_liveStatistics.dataPoints[0].numFailedAttacks, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(7, _liveStatistics.datas[13], 2);
+        processLivePlot(7, &_liveStatistics.dataPoints[0].numMuscleActivities, 2);
 
         ImPlot::PopColormap();
         ImGui::EndTable();
@@ -166,22 +189,22 @@ void _StatisticsWindow::processLongtermStatistics()
         }
 
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(0, _longtermStatistics.datas[0]);
+        processLongtermPlot(0, &_longtermStatistics.dataPoints[0].numCells);
         if (_showCellsByColor) {
-            processLongtermPlotForCellsByColor(1);
+            processLongtermPlotForCellsByColor(1, &_longtermStatistics.dataPoints[0].numCellsByColor);
         }
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Cell connections");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(2, _longtermStatistics.datas[8]);
+        processLongtermPlot(2, &_longtermStatistics.dataPoints[0].numConnections);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Energy particles");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(3, _longtermStatistics.datas[9]);
+        processLongtermPlot(3, &_longtermStatistics.dataPoints[0].numParticles);
 
         ImPlot::PopColormap();
         ImGui::EndTable();
@@ -202,217 +225,220 @@ void _StatisticsWindow::processLongtermStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(4, _longtermStatistics.datas[10], 2);
+        processLongtermPlot(4, &_longtermStatistics.dataPoints[0].numCreatedCells, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Successful attacks");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(5, _longtermStatistics.datas[11], 2);
+        processLongtermPlot(5, &_longtermStatistics.dataPoints[0].numSuccessfulAttacks, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Failed attacks");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(6, _longtermStatistics.datas[12], 2);
+        processLongtermPlot(6, &_longtermStatistics.dataPoints[0].numFailedAttacks, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(7, _longtermStatistics.datas[13], 2);
+        processLongtermPlot(7, &_longtermStatistics.dataPoints[0].numMuscleActivities, 2);
 
         ImPlot::PopColormap();
         ImGui::EndTable();
     }
 }
 
-void _StatisticsWindow::processLivePlot(int row, std::vector<float> const& valueHistory, int fracPartDecimals)
+void _StatisticsWindow::processHistograms()
 {
-    auto maxValue = getMax(valueHistory);
-    
-    ImGui::PushID(row);
-    ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
-    ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
-    ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
+    if (!_lastStatisticsData) {
+        return;
+    }
+    ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha * 0.5 * Const::WindowAlpha));
+    ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha * 0.5 * Const::WindowAlpha));
 
-    ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
-    ImPlot::SetNextPlotLimits(
-        _liveStatistics.timepointsHistory.back() - _liveStatistics.history,
-        _liveStatistics.timepointsHistory.back(),
-        0,
-        maxValue * 1.5,
-        ImGuiCond_Always);
-    if (ImPlot::BeginPlot(
-            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().contentScale(80.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        auto color = ImPlot::GetColormapColor(row + 2);
-
-        if (ImGui::GetStyle().Alpha == 1.0f) {
-            ImPlot::AnnotateClamped(
-                _liveStatistics.timepointsHistory.back(),
-                valueHistory.back(),
-                ImVec2(-10.0f, 10.0f),
-                color,
-                "%s",
-                StringHelper::format(valueHistory.back(), fracPartDecimals).c_str());
+    auto maxNumObjects = 0;
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        for (int j = 0; j < MAX_HISTOGRAM_SLOTS; ++j) {
+            auto value = _lastStatisticsData->histogram.numCellsByColorBySlot[i][j];
+            maxNumObjects = std::max(maxNumObjects, value);
         }
+    }
 
+    //round maxNumObjects
+    if (!_histogramUpperBound || toFloat(maxNumObjects) > *_histogramUpperBound * 0.9f || toFloat(maxNumObjects) < *_histogramUpperBound * 0.5f) {
+        _histogramUpperBound = toFloat(maxNumObjects) * 1.3f;
+    }
 
-        ImPlot::PushStyleColor(ImPlotCol_Line, color);
+    ImPlot::SetNextPlotLimitsX(0, toFloat(MAX_HISTOGRAM_SLOTS), ImGuiCond_Always);
+    ImPlot::SetNextPlotLimitsY(0, *_histogramUpperBound, ImGuiCond_Always);
 
-        ImPlot::PlotLine("##", _liveStatistics.timepointsHistory.data(), valueHistory.data(), toInt(valueHistory.size()));
+    auto getLabelString = [](int value) {
+        if (value >= 1000) {
+            return std::to_string(value / 1000) + "K";
+        } else {
+            return std::to_string(value);
+        }
+    };
 
-        ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f * ImGui::GetStyle().Alpha);
-        ImPlot::PlotShaded("##", _liveStatistics.timepointsHistory.data(), valueHistory.data(), toInt(valueHistory.size()));
-        ImPlot::PopStyleVar();
+    //y-ticks
+    char const* labelsY[6];
+    double positionsY[6];
+    for (int i = 0; i < 5; ++i) {
+        labelsY[i] = "";
+        positionsY[i] = *_histogramUpperBound / 5 * i;
+    }
+    auto temp = getLabelString(maxNumObjects);
+    labelsY[5] = temp.c_str();
+    positionsY[5] = toFloat(maxNumObjects);
+    ImPlot::SetNextPlotTicksY(positionsY, 6, labelsY);
 
-        ImPlot::PopStyleColor();
+    //x-ticks
+    char const* labelsX[5];
+    std::string labelsX_temp[5];
+    double positionsX[5];
 
+    auto slotAge = _lastStatisticsData->histogram.maxValue / MAX_HISTOGRAM_SLOTS;
+    for (int i = 0; i < 5; ++i) {
+        labelsX_temp[i] = getLabelString(slotAge * ((MAX_HISTOGRAM_SLOTS - 1) / 4) * i);
+        labelsX[i] = labelsX_temp[i].c_str();
+        positionsX[i] = toFloat(((MAX_HISTOGRAM_SLOTS - 1) / 4) * i);
+    }
+    ImPlot::SetNextPlotTicksX(positionsX, 5, labelsX);
+    ImPlot::SetNextPlotFormatX("");
+
+    //plot histogram
+    if (ImPlot::BeginPlot("##Histograms", "Age", "Number of objects", ImVec2(-1, -1))) {
+
+        auto const width = 1.0f / MAX_COLORS;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            float h, s, v;
+            AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[i], h, s, v);
+            ImPlot::PushStyleColor(ImPlotCol_Fill, (ImVec4)ImColor::HSV(h, s /** 3 / 4*/, v /** 3 / 4*/, ImGui::GetStyle().Alpha));
+            ImPlot::PlotBars(
+                (" ##" + std::to_string(i)).c_str(), _lastStatisticsData->histogram.numCellsByColorBySlot[i], MAX_HISTOGRAM_SLOTS, width, width * i);
+            ImPlot::PopStyleColor(1);
+        }
         ImPlot::EndPlot();
     }
-    ImPlot::PopStyleVar();
-    ImPlot::PopStyleColor(3);
-    ImGui::PopID();
+    ImPlot::PopStyleColor(2);
+
 }
 
-void _StatisticsWindow::processLivePlotForCellsByColor(int row)
+void _StatisticsWindow::processLivePlot(int colorIndex, double const* data, int fracPartDecimals)
 {
-    auto maxValue = 0.0f;
-    for (int i = 0; i < 7; ++i) {
-        maxValue = std::max(maxValue, getMax(_liveStatistics.datas[1 + i]));
-    }
-
-    ImGui::PushID(row);
-    ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
-    ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
-    ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
-
-    ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
-    ImPlot::SetNextPlotLimits(
-        _liveStatistics.timepointsHistory.back() - _liveStatistics.history, _liveStatistics.timepointsHistory.back(), 0, maxValue * 1.5, ImGuiCond_Always);
-    if (ImPlot::BeginPlot(
-            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().contentScale(160)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        for (int i = 0; i < 7; ++i) {
-            ImGui::PushID(i);
-            auto colorRaw = getCellColor(i);
-            ImColor color(toInt((colorRaw >> 16) & 0xff), toInt((colorRaw >> 8) & 0xff), toInt(colorRaw & 0xff));
-
-            ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
-            auto s = std::to_string(toInt(_liveStatistics.datas[1 + i].back()));
-            ImPlot::PlotLine(
-                s.c_str(), _liveStatistics.timepointsHistory.data(), _liveStatistics.datas[1 + i].data(), toInt(_liveStatistics.datas[1 + i].size()));
-            ImPlot::PopStyleColor();
-            ImGui::PopID();
-        }
-        ImPlot::EndPlot();
-    }
-    ImPlot::PopStyleVar();
-    ImPlot::PopStyleColor(3);
-    ImGui::PopID();
+    auto count = toInt(_liveStatistics.dataPoints.size());
+    auto endTime = _liveStatistics.dataPoints.back().time;
+    plotIntern(colorIndex, data, &_liveStatistics.dataPoints[0].time, count, endTime - toDouble(_liveStatistics.history), endTime, fracPartDecimals);
 }
 
-void _StatisticsWindow::processLongtermPlot(int row, std::vector<float> const& valueHistory, int fracPartDecimals)
+void _StatisticsWindow::processLivePlotForCellsByColor(int colorIndex, ColorVector<double> const* data)
 {
-    auto maxValue = getMax(valueHistory);
-
-    ImGui::PushID(row);
-    ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
-    ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
-    ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
-    ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
-    ImPlot::SetNextPlotLimits(
-        _longtermStatistics.timestepHistory.front(),
-        _longtermStatistics.timestepHistory.back(),
-        0,
-        maxValue * 1.5,
-        ImGuiCond_Always);  
-    if (ImPlot::BeginPlot(
-            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().contentScale(80.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        auto color = ImPlot::GetColormapColor(row + 2);
-        if (ImGui::GetStyle().Alpha == 1.0f) {
-            ImPlot::AnnotateClamped(
-                _longtermStatistics.timestepHistory.back(),
-                valueHistory.back(),
-                ImVec2(-10.0f, 10.0f),
-                ImPlot::GetLastItemColor(),
-                "%s",
-                StringHelper::format(valueHistory.back(), fracPartDecimals).c_str());
-        }
-        ImPlot::PushStyleColor(ImPlotCol_Line, color);
-        ImPlot::PlotLine(
-            "##", _longtermStatistics.timestepHistory.data(), valueHistory.data(), toInt(valueHistory.size()));
-        ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f);
-        ImPlot::PlotShaded(
-            "##", _longtermStatistics.timestepHistory.data(), valueHistory.data(), toInt(valueHistory.size()));
-        ImPlot::PopStyleVar();
-        ImPlot::PopStyleColor();
-        ImPlot::EndPlot();
-    }
-    ImPlot::PopStyleVar();
-    ImPlot::PopStyleColor(3);
-    ImGui::PopID();
+    auto count = toInt(_liveStatistics.dataPoints.size());
+    auto startTime = _liveStatistics.dataPoints.back().time - toDouble(_liveStatistics.history);
+    auto endTime = _liveStatistics.dataPoints.back().time;
+    plotByColorIntern(colorIndex, data, &_liveStatistics.dataPoints[0].time, count, startTime, endTime);
 }
 
-void _StatisticsWindow::processLongtermPlotForCellsByColor(int row)
+
+void _StatisticsWindow::processLongtermPlot(int colorIndex, double const* data, int fracPartDecimals)
 {
-    auto maxValue = 0.0f;
-    for (int i = 0; i < 7; ++i) {
-        maxValue = std::max(maxValue, getMax(_longtermStatistics.datas[1 + i]));
-    }
+    auto count = toInt(_longtermStatistics.dataPoints.size());
+    auto startTime = _longtermStatistics.dataPoints.front().time;
+    auto endTime = _longtermStatistics.dataPoints.back().time;
+    plotIntern(colorIndex, data, &_longtermStatistics.dataPoints[0].time, count, startTime, endTime, fracPartDecimals);
+}
 
-    ImGui::PushID(row);
-    ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
-    ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
-    ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
-    ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
-    ImPlot::SetNextPlotLimits(_longtermStatistics.timestepHistory.front(), _longtermStatistics.timestepHistory.back(), 0, maxValue * 1.5, ImGuiCond_Always);
-    if (ImPlot::BeginPlot(
-            "##", 0, 0, ImVec2(-1, StyleRepository::getInstance().contentScale(160.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        for (int i = 0; i < 7; ++i) {
-            ImGui::PushID(i);
-            auto colorRaw = getCellColor(i);
-            ImColor color(toInt((colorRaw >> 16) & 0xff), toInt((colorRaw >> 8) & 0xff), toInt(colorRaw & 0xff));
-
-            ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
-            auto s = std::to_string(toInt(_longtermStatistics.datas[1 + i].back()));
-            ImPlot::PlotLine(
-                s.c_str(), _longtermStatistics.timestepHistory.data(), _longtermStatistics.datas[1 + i].data(), toInt(_longtermStatistics.datas[1 + i].size()));
-            ImPlot::PopStyleColor();
-            ImGui::PopID();
-        }
-
-        ImPlot::EndPlot();
-    }
-    ImPlot::PopStyleVar();
-    ImPlot::PopStyleColor(3);
-    ImGui::PopID();
+void _StatisticsWindow::processLongtermPlotForCellsByColor(int colorIndex, ColorVector<double> const* data)
+{
+    auto count = toInt(_longtermStatistics.dataPoints.size());
+    auto startTime = _longtermStatistics.dataPoints.front().time;
+    auto endTime = _longtermStatistics.dataPoints.back().time;
+    plotByColorIntern(colorIndex, data, &_longtermStatistics.dataPoints[0].time, count, startTime, endTime);
 }
 
 void _StatisticsWindow::processBackground()
 {
-    auto newStatistics = _simController->getStatistics();
-    _liveStatistics.add(newStatistics);
+    auto timestep = _simController->getCurrentTimestep();
 
-    _longtermStatistics.add(newStatistics);
+    _lastStatisticsData = _simController->getStatistics();
+    _liveStatistics.add(_lastStatisticsData->timeline, timestep);
+    _longtermStatistics.add(_lastStatisticsData->timeline, timestep);
 }
 
-uint32_t _StatisticsWindow::getCellColor(int i) const
+void _StatisticsWindow::plotIntern(
+    int colorIndex,
+    double const* data,
+    double const* timePoints,
+    int count,
+    double startTime,
+    double endTime,
+    int fracPartDecimals)
 {
-    switch(i) {
-    case 0:
-        return Const::IndividualCellColor1;
-    case 1:
-        return Const::IndividualCellColor2;
-    case 2:
-        return Const::IndividualCellColor3;
-    case 3:
-        return Const::IndividualCellColor4;
-    case 4:
-        return Const::IndividualCellColor5;
-    case 5:
-        return Const::IndividualCellColor6;
-    case 6:
-        return Const::IndividualCellColor7;
-    };
-    return 0;
+    auto upperBound = getMax(data, count) * 1.5;
+    auto endValue = count > 0 ? *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(data) + (count - 1)) : 0.0;
+
+    ImGui::PushID(colorIndex);
+    ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
+    ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
+    ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
+    ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
+    ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
+    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, contentScale(80.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+        auto color = ImPlot::GetColormapColor(colorIndex + 2);
+        if (ImGui::GetStyle().Alpha == 1.0f) {
+            ImPlot::AnnotateClamped(
+                endTime, endValue, ImVec2(-10.0f, 10.0f), ImPlot::GetLastItemColor(), "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
+        }
+        if (count > 0) {
+            ImPlot::PushStyleColor(ImPlotCol_Line, color);
+            ImPlot::PlotLine("##", timePoints, data, count, 0, sizeof(DataPoint));
+            ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f * ImGui::GetStyle().Alpha);
+            ImPlot::PlotShaded("##", timePoints, data, count, 0, 0, sizeof(DataPoint));
+            ImPlot::PopStyleVar();
+            ImPlot::PopStyleColor();
+        }
+        ImPlot::EndPlot();
+    }
+    ImPlot::PopStyleVar();
+    ImPlot::PopStyleColor(3);
+    ImGui::PopID();
 }
+
+void _StatisticsWindow::plotByColorIntern(int colorIndex, ColorVector<double> const* data, double const* timePoints, int count, double startTime, double endTime)
+{
+    auto upperBound = 0.0;
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        upperBound = std::max(upperBound, getMax(reinterpret_cast<double const*>(data) + i, count));
+    }
+    upperBound *= 1.5;
+
+    ImGui::PushID(colorIndex);
+    ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
+    ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
+    ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
+    ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
+    ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 2.0f);
+    ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
+    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, contentScale(160.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            ImGui::PushID(i);
+            auto colorRaw = Const::IndividualCellColors[i];
+            ImColor color(toInt((colorRaw >> 16) & 0xff), toInt((colorRaw >> 8) & 0xff), toInt(colorRaw & 0xff));
+
+            ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
+            auto endValue = count > 0 ? *(reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(data) + (count - 1)) + i) : 0.0f;
+            auto labelId = std::to_string(toInt(endValue));
+            ImPlot::PlotLine(labelId.c_str(), timePoints, reinterpret_cast<double const*>(data) + i, count, 0, sizeof(DataPoint));
+            ImPlot::PopStyleColor();
+            ImGui::PopID();
+        }
+
+        ImPlot::EndPlot();
+    }
+    ImPlot::PopStyleVar(2);
+    ImPlot::PopStyleColor(3);
+    ImGui::PopID();
+}
+

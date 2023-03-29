@@ -14,7 +14,7 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
-#include "EngineInterface/MonitorData.h"
+#include "EngineInterface/StatisticsData.h"
 #include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
@@ -57,7 +57,7 @@ public:
     ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters);
     DataDescription getSelectedSimulationData(bool includeClusters);
     DataDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
-    MonitorData getMonitorData() const;
+    StatisticsData getStatistics() const;
 
     void addAndSelectSimulationData(DataDescription const& dataToUpdate);
     void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate);
@@ -110,8 +110,8 @@ public:
 
 private:
     DataTO provideTO(); 
-    void resetProcessMonitorData();
-    void updateMonitorDataIntern(bool afterMinDuration = false);
+    void resetTimeIntervalStatistics();
+    void updateStatistics(bool afterMinDuration = false);
     void processJobs();
 
     void syncSimulationWithRenderingIfDesired();
@@ -156,10 +156,10 @@ private:
     std::optional<std::chrono::microseconds> _slowDownOvershot;
   
     //statistics data
-    std::optional<std::chrono::steady_clock::time_point> _lastMonitorUpdate;
+    std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
     mutable std::mutex _mutexForStatistics;
-    MonitorData _lastStatistics;
-    int _monitorCounter = 0;
+    StatisticsData _lastStatistics;
+    int _statisticsCounter = 0;
 
     //internals
     void* _cudaResource;

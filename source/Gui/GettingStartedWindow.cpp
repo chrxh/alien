@@ -99,9 +99,9 @@ void _GettingStartedWindow::processIntern()
 
         AlienImGui::Separator();
 
-        ImGui::Text("");
+        ImGui::Text(" ");
         ImGui::Text("[to be added]");
-        ImGui::Text("");
+        ImGui::Text(" ");
         AlienImGui::Separator();
 
         ImGui::Text(

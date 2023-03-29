@@ -1,10 +1,13 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
+#include "EngineInterface/StatisticsData.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
-#include "StatisticsHistory.h"
+#include "CollectedStatisticsData.h"
+
+struct ImPlotPoint;
 
 class _StatisticsWindow : public _AlienWindow
 {
@@ -15,17 +18,21 @@ public:
 
 private:
     void processIntern();
+    void processTimelines();
     void processLiveStatistics();
     void processLongtermStatistics();
 
-    void processLivePlot(int row, std::vector<float> const& valueHistory, int fracPartDecimals = 0);
-    void processLivePlotForCellsByColor(int row);
-    void processLongtermPlot(int row, std::vector<float> const& valueHistory, int fracPartDecimals = 0);
-    void processLongtermPlotForCellsByColor(int row);
+    void processHistograms();
+
+    void processLivePlot(int colorIndex, double const* data, int fracPartDecimals = 0);
+    void processLivePlotForCellsByColor(int colorIndex, ColorVector<double> const* data);
+    void processLongtermPlot(int colorIndex, double const* data, int fracPartDecimals = 0);
+    void processLongtermPlotForCellsByColor(int colorIndex, ColorVector<double> const* data);
 
     void processBackground() override;
 
-    uint32_t getCellColor(int i) const;
+    void plotIntern(int colorIndex, double const* data, double const* timePoints, int count, double startTime, double endTime, int fracPartDecimals);
+    void plotByColorIntern(int colorIndex, ColorVector<double> const* data, double const* timePoints, int count, double startTime, double endTime);
 
     SimulationController _simController;
     ExportStatisticsDialog _exportStatisticsDialog;
@@ -33,6 +40,9 @@ private:
     bool _live = true;
     bool _showCellsByColor = false;
 
-    LiveStatistics _liveStatistics;
-    LongtermStatistics _longtermStatistics;
+    std::optional<StatisticsData> _lastStatisticsData;
+    std::optional<float> _histogramUpperBound;
+
+    TimelineLiveStatistics _liveStatistics;
+    TimelineLongtermStatistics _longtermStatistics;
 };

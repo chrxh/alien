@@ -48,7 +48,7 @@ void _OpenSimulationDialog::process()
         DeserializedSimulation deserializedData;
         if (Serializer::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
             printOverlayMessage("Loading ...");
-            delayedExecution([=] {
+            delayedExecution([=, this] {
                 _simController->closeSimulation();
                 _statisticsWindow->reset();
 

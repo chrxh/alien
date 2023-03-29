@@ -16,3 +16,6 @@ target_link_libraries(alien_engine_impl_lib alien_engine_gpu_kernels_lib)
 target_link_libraries(alien_engine_impl_lib CUDA::cudart_static)
 target_link_libraries(alien_engine_impl_lib Boost::boost)
 
+if (MSVC)
+    target_compile_options(alien_engine_impl_lib PRIVATE "/MP")
+endif()

@@ -11,14 +11,14 @@
 class NerveProcessor
 {
 public:
-    __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void NerveProcessor::process(SimulationData& data, SimulationResult& result)
+__inline__ __device__ void NerveProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
     auto& operations = data.cellFunctionOperations[CellFunction_Nerve];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
@@ -29,7 +29,8 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
         auto activity = CellFunctionProcessor::calcInputActivity(cell);
 
         auto const& nerve = cell->cellFunctionData.nerve;
-        auto counter = data.timestep;
+        auto counter = (cell->age / cudaSimulationParameters.cellNumExecutionOrderNumbers) * cudaSimulationParameters.cellNumExecutionOrderNumbers
+            + cell->executionOrderNumber % cudaSimulationParameters.cellNumExecutionOrderNumbers;
         if (nerve.pulseMode > 0 && (counter % (cudaSimulationParameters.cellNumExecutionOrderNumbers * nerve.pulseMode) == cell->executionOrderNumber)) {
             if (nerve.alternationMode == 0) {
                 activity.channels[0] += 1.0f;

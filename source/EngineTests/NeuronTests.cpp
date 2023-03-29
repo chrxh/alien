@@ -16,7 +16,7 @@ public:
     ~NeuronTests() = default;
 
 protected:
-    float scaledSigmoid(float value) const { return 2.0f / (1.0f + std::expf(-value)) - 1.0f; }
+    float scaledSigmoid(float value) const { return 2.0f / (1.0f + std::exp(-value)) - 1.0f; }
 };
 
 TEST_F(NeuronTests, bias)

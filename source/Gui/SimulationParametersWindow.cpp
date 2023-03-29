@@ -77,7 +77,7 @@ void _SimulationParametersWindow::processIntern()
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
 
-        if (ImGui::BeginTabBar("##Flow", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+        if (ImGui::BeginTabBar("##Parameters", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
             //add spot
             if (parameters.numSpots < MAX_SPOTS) {
@@ -693,9 +693,7 @@ void _SimulationParametersWindow::processBase(
                         "header "
                         "column while the color of the attacked cell is shown in the header row. A value of 0 means that the attacked cell cannot be digested, "
                         "i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process.\n\nExample: If a "
-                        "0 "
-                        "is "
-                        "entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells.")
+                        "zero is entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells.")
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.baseValues.cellFunctionAttackerFoodChainColorMatrix)),
                 simParameters.baseValues.cellFunctionAttackerFoodChainColorMatrix);
             AlienImGui::SliderFloat(

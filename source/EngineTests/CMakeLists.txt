@@ -30,3 +30,7 @@ target_link_libraries(tests GLEW::GLEW)
 target_link_libraries(tests glfw)
 target_link_libraries(tests glad::glad)
 target_link_libraries(tests GTest::GTest GTest::Main)
+
+if (MSVC)
+    target_compile_options(tests PRIVATE "/MP")
+endif()

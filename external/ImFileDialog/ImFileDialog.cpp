@@ -6,6 +6,7 @@
 #include <string>
 #include <fstream>
 #include <algorithm>
+#include <cstring>
 #include <sys/stat.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
@@ -762,10 +763,10 @@ namespace ifd {
 
 		return m_icons[pathU8];
 #else
-		if (m_icons.count(path.string()) > 0)
-			return m_icons[path.string()];
+		if (m_icons.count(path.u8string()) > 0)
+			return m_icons[path.u8string()];
 
-		std::string pathU8 = path.string();
+		auto pathU8 = path.u8string();
 
 		m_icons[pathU8] = nullptr;
 
@@ -777,7 +778,7 @@ namespace ifd {
 		// check if icon is already loaded
 		auto itr = std::find(m_iconIndices.begin(), m_iconIndices.end(), iconID);
 		if (itr != m_iconIndices.end()) {
-			const std::string& existingIconFilepath = m_iconFilepaths[itr - m_iconIndices.begin()];
+			auto const& existingIconFilepath = m_iconFilepaths[itr - m_iconIndices.begin()];
 			m_icons[pathU8] = m_icons[existingIconFilepath];
 			return m_icons[pathU8];
 		}

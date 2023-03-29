@@ -6,7 +6,7 @@
 <img src="img/alien.png" width=100%>
 </h1>
 <p>
-<b><i>A</i></b>rtificial <b><i>LI</i></b>fe <b><i>EN</i></b>vironment <b>(ALIEN)</b> is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluid-like media. Each simulated body consists of a network of particles that can be enriched with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, muscles, weapons, constructors, etc.) whose executions are orchestrated by a signaling system. The bodies can be thought of as agents or digital organisms operating in a common environment.
+<b><i>A</i></b>rtificial <b><i>LI</i></b>fe <b><i>EN</i></b>vironment <b>(ALIEN)</b> is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluids. Each simulated body consists of a network of particles that can be upgraded with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, muscles, weapons, constructors, etc.) whose executions are orchestrated by neural networks. The bodies can be thought of as agents or digital organisms operating in a common environment. Their blueprints can be stored in genomes and passed on to offspring.
 </p>
 <p>
 The simulation code is written entirely in CUDA and optimized for large-scale real-time simulations with millions of particles.
@@ -14,24 +14,29 @@ The development is driven by the desire to better understand the conditions for 
 An important goal is to make the simulator user-friendly through a modern user interface, visually appealing rendering and a playful approach. 
 </p>
 
-**IMPORTANT:** This branch contains the ongoing development for the next major upgrade.
-
 # Main features
 ### Physics and graphics engine
-- Particles for simulating soft body mechanics, heat dissipation, bondings, damages, phase transitions, etc.
+- Particles for simulating soft and rigid body mechanics, fluids, heat dissipation, damage, adhesion etc.
 - Real-time user interactions with running simulations
 - Simulation runs entirely on GPU via CUDA
 - Rendering and post-processing via OpenGL using CUDA-OpenGL interoperability
 
-### Artificial Life extensions
-- Dynamically programmable matter approach for simulating digital organisms and studying evolution
-- Information and energy transportation layer between connected particles
-- Spatiotemporally varying simulation parameters
+https://user-images.githubusercontent.com/73127001/229868357-131fa71f-d03d-45db-ac76-9d192f5464af.mp4
+
+### Artificial Life engine extensions
+- Multi-cellular organisms are simulated as particle networks
+- Genetic code and cell by cell construction of offspring
+- Neural networks for controlling higher-level functions (e.g. sensors and muscles)
+- Various colors may be used to customize cell types according to own specifications
+- Spatially varying simulation parameters
+
+https://user-images.githubusercontent.com/73127001/229569056-0db6562b-0147-43c8-a977-5f12c1b6277b.mp4
 
 ### Extensive editing tools
-- Built-in graph editor
-- Built-in programming environment for designing customized machines and worlds
-- Mass-operations and (up/down) scaling functions for simulations
+- Graph editor for manipulating every particle and connection
+- Freehand and geometric drawing tools
+- Genetic editor for designing customized organisms
+- Mass-operations and (up/down) scaling functions
 
 ### Networking
 - Built-in simulation browser
@@ -54,7 +59,7 @@ Further information and artwork:
 * [Discord](https://discord.gg/7bjyZdXXQ2)
 
 # Minimal system requirements
-An Nvidia graphics card with compute capability 5.2 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
+An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 # Installer
 An installer for 64-bit binaries is provided for Windows: will be provided in the future
@@ -112,8 +117,23 @@ A short architectural overview of the source code can be found in the [documenta
 - [vcpkg](https://vcpkg.io/en/index.html)
 
 # Screenshots
+#### Different plant-like populations around a radiation source
+![Screenshot1](https://user-images.githubusercontent.com/73127001/229311601-839649a6-c60c-4723-99b3-26086e3e4340.jpg)
 
-They will be provided here when version 4 is ready.
+<h1 align="center"></h1>
+
+#### Close-up of different types of organisms so that their cell networks can be seen
+![Screenshot2](https://user-images.githubusercontent.com/73127001/229311604-3ee433d4-7dd8-46e2-b3e6-489eaffbda7b.jpg)
+
+<h1 align="center"></h1>
+
+#### Different swarms attacking an ecosystem
+![Screenshot3](https://user-images.githubusercontent.com/73127001/229311606-2f590bfb-71a8-4f71-8ff7-7013de9d7496.jpg)
+
+<h1 align="center"></h1>
+
+#### Genome editor
+![Screenshot3b](https://user-images.githubusercontent.com/73127001/229313813-c9ce70e2-d61f-4745-b64f-ada0b6758901.jpg)
 
 # License
 ALIEN is licensed under the [GPLv3](LICENSE).

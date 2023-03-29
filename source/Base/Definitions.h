@@ -10,6 +10,7 @@
 #include <vector>
 #include <optional>
 #include <memory>
+#include <initializer_list>
 
 #include "Exceptions.h"
 
@@ -24,6 +25,12 @@ template <typename T>
 inline float toFloat(T const& value)
 {
     return static_cast<float>(value);
+}
+
+template <typename T>
+inline double toDouble(T const& value)
+{
+    return static_cast<double>(value);
 }
 
 template<typename T>

@@ -1,10 +1,11 @@
-﻿#include "SimulationKernelsLauncher.cuh"
+﻿#include <cmath>
+#include "SimulationKernelsLauncher.cuh"
 
 #include "SimulationKernels.cuh"
 #include "FlowFieldKernels.cuh"
 #include "GarbageCollectorKernelsLauncher.cuh"
 #include "DebugKernels.cuh"
-#include "SimulationResult.cuh"
+#include "SimulationStatistics.cuh"
 
 _SimulationKernelsLauncher::_SimulationKernelsLauncher()
 {
@@ -15,15 +16,15 @@ namespace
 {
     int calcOptimalThreadsForFluidKernel(SimulationParameters const& parameters)
     {
-        auto scanRectLength = std::ceilf(parameters.motionData.fluidMotion.smoothingLength * 2) * 2 + 1;
+        auto scanRectLength = ceilf(parameters.motionData.fluidMotion.smoothingLength * 2) * 2 + 1;
         return scanRectLength * scanRectLength;
     }
 }
 
-void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, SimulationData const& data, SimulationResult const& result)
+void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, SimulationData const& data, SimulationStatistics const& statistics)
 {
     auto const gpuSettings = settings.gpuSettings;
-    KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, result);
+    KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, statistics);
     if (settings.simulationParameters.numSpots > 0) {
         KERNEL_CALL(cudaApplyFlowFieldSettings, data);
     }
@@ -50,14 +51,14 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     //cell functions
     KERNEL_CALL(cudaNextTimestep_cellFunction_prepare_substep1, data);
     KERNEL_CALL(cudaNextTimestep_cellFunction_prepare_substep2, data);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_nerve, data, result);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_neuron, data, result);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_constructor, data, result);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_injector, data, result);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_attacker, data, result);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_transmitter, data, result);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_muscle, data, result);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_sensor, data, result);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_nerve, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_neuron, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_constructor, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_injector, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_attacker, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_transmitter, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_muscle, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_sensor, data, statistics);
 
     if (considerInnerFriction) {
         KERNEL_CALL(cudaNextTimestep_physics_substep7_innerFriction, data);

@@ -37,7 +37,7 @@ _BrowserWindow::_BrowserWindow(
     , _viewport(viewport)
     , _temporalControlWindow(temporalControlWindow)
 {
-    refreshIntern(true);
+     refreshIntern(true);
 }
 
 _BrowserWindow::~_BrowserWindow()
@@ -349,7 +349,7 @@ void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
 {
     printOverlayMessage("Downloading ...");
 
-    delayedExecution([=] {
+    delayedExecution([=, this] {
         SerializedSimulation serializedSim;
         if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, remoteData->id)) {
             MessageDialog::getInstance().show("Error", "Failed to download simulation.");

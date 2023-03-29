@@ -8,16 +8,16 @@
 #include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
 #include "SpotCalculator.cuh"
-#include "SimulationResult.cuh"
+#include "SimulationStatistics.cuh"
 #include "ObjectFactory.cuh"
 
 class AttackerProcessor
 {
 public:
-    __inline__ __device__ static void process(SimulationData& data, SimulationResult& result);
+    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationResult& result, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void radiate(SimulationData& data, Cell* cell);
     __inline__ __device__ static void distributeEnergy(SimulationData& data, Cell* cell, float energyDelta);
 
@@ -31,7 +31,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__device__ __inline__ void AttackerProcessor::process(SimulationData& data, SimulationResult& result)
+__device__ __inline__ void AttackerProcessor::process(SimulationData& data, SimulationStatistics& result)
 {
     auto& operations = data.cellFunctionOperations[CellFunction_Attacker];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
@@ -40,7 +40,7 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
     }
 }
 
-__device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationResult& result, Cell* cell)
+__device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
     if (abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionAttackerActivityThreshold) {
@@ -150,11 +150,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     activity.channels[0] = energyDelta / 10;
 
     if (energyDelta > NEAR_ZERO) {
-        result.incSuccessfulAttack();
+        statistics.incSuccessfulAttack();
     } else if (energyDelta < -NEAR_ZERO) {
-        result.incFailedAttack();
+        statistics.incFailedAttack();
     } else {
-        result.incFailedAttack();
+        statistics.incFailedAttack();
     }
 
     CellFunctionProcessor::setActivity(cell, activity);

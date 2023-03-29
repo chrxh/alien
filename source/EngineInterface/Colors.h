@@ -1,6 +1,9 @@
 #pragma once
 
 #include <stdint.h>
+#include <limits>
+
+#include "Constants.h"
 
 namespace Const
 {
@@ -12,7 +15,7 @@ namespace Const
     uint32_t const IndividualCellColor6 = 0x50ffef;
     uint32_t const IndividualCellColor7 = 0xbfbfbf;
 
-    uint32_t const IndividualCellColors[7] = {  //array for convenience
+    uint32_t const IndividualCellColors[MAX_COLORS] = {  //array for convenience
         IndividualCellColor1,
         IndividualCellColor2,
         IndividualCellColor3,
@@ -26,3 +29,16 @@ namespace Const
 
     uint32_t const NothingnessColor = 0x000000;
 }
+
+template <typename T>
+using ColorVector = T[MAX_COLORS];
+
+template <typename T>
+using ColorMatrix = T[MAX_COLORS][MAX_COLORS];
+
+template <typename T>
+struct Infinity
+{
+    static auto constexpr value = std::numeric_limits<T>::max();
+};
+
