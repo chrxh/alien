@@ -128,11 +128,11 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
     _cudaSimulationResult = std::make_shared<SimulationResult>();
     _cudaSelectionResult = std::make_shared<SelectionResult>();
     _cudaAccessTO = std::make_shared<DataTO>();
-    _cudaMonitorData = std::make_shared<CudaMonitor>();
+    _cudaMonitor = std::make_shared<CudaMonitor>();
 
     _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY}, timestep);
     _cudaRenderingData->init();
-    _cudaMonitorData->init();
+    _cudaMonitor->init();
     _cudaSimulationResult->init();
     _cudaSelectionResult->init();
 
@@ -155,7 +155,7 @@ _CudaSimulationFacade::~_CudaSimulationFacade()
 {
     _cudaSimulationData->free();
     _cudaRenderingData->free();
-    _cudaMonitorData->free();
+    _cudaMonitor->free();
     _cudaSimulationResult->free();
     _cudaSelectionResult->free();
 
@@ -416,31 +416,24 @@ auto _CudaSimulationFacade::getArraySizes() const -> ArraySizes
 
 MonitorData _CudaSimulationFacade::getMonitorData()
 {
-    _monitorKernels->getMonitorData(_settings.gpuSettings, getSimulationDataIntern(), *_cudaMonitorData);
+    _monitorKernels->getMonitorData(_settings.gpuSettings, getSimulationDataIntern(), *_cudaMonitor);
     syncAndCheck();
     
     MonitorData result;
-    auto monitorData = _cudaMonitorData->getMonitorData(getCurrentTimestep());
-    result.timestep = _cudaSimulationData->timestep;
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        result.numCellsByColor[i] = monitorData.numCellsByColor[i];
-    }
-    result.numConnections = monitorData.numConnections;
-    result.numParticles = monitorData.numParticles;
-    result.totalInternalEnergy = monitorData.internalEnergy;
+    auto timestepData = _cudaMonitor->getTimestepMonitorData(getCurrentTimestep());
 
-    auto processStatistics = _cudaSimulationResult->getAndResetProcessMonitorData();
-    result.numCreatedCells = processStatistics.createdCells;
-    result.numSuccessfulAttacks = processStatistics.sucessfulAttacks;
-    result.numFailedAttacks = processStatistics.failedAttacks;
-    result.numMuscleActivities = processStatistics.muscleActivities;
+    result.timestep = _cudaSimulationData->timestep;
+    result.timestepData = timestepData;
+
+    auto timeIntervalData = _cudaSimulationResult->getAndResetTimeIntervalMonitorData();
+    result.timeIntervalData = timeIntervalData;
 
     auto deltaTime = static_cast<int64_t>(result.timestep) - static_cast<int64_t>(_timestepOfLastMonitorData);
     auto divisor = deltaTime > 0 ? deltaTime : 1;
-    result.numCreatedCells /= divisor;
-    result.numSuccessfulAttacks /= divisor;
-    result.numFailedAttacks /= divisor;
-    result.numMuscleActivities /= divisor;
+    result.timeIntervalData.numCreatedCells /= divisor;
+    result.timeIntervalData.numSuccessfulAttacks /= divisor;
+    result.timeIntervalData.numFailedAttacks /= divisor;
+    result.timeIntervalData.numMuscleActivities /= divisor;
     if (deltaTime != 0) {
         _timestepOfLastMonitorData = result.timestep;
     }
@@ -449,7 +442,7 @@ MonitorData _CudaSimulationFacade::getMonitorData()
 
 void _CudaSimulationFacade::resetProcessMonitorData()
 {
-    _cudaSimulationResult->getAndResetProcessMonitorData();
+    _cudaSimulationResult->getAndResetTimeIntervalMonitorData();
 }
 
 uint64_t _CudaSimulationFacade::getCurrentTimestep() const
