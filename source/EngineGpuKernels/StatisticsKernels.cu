@@ -40,20 +40,29 @@ __global__ void cudaUpdateTimestepStatistics_substep1(SimulationData data, Simul
 {
     statistics.resetTimestepData();
 
-    statistics.setNumParticles(data.objects.particlePointers.getNumEntries());
-
     //    KERNEL_CALL(getEnergyForMonitorData, data, statistics);
 }
 
 __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, SimulationStatistics statistics)
 {
-    auto& cells = data.objects.cellPointers;
-    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+    {
+        auto& cells = data.objects.cellPointers;
+        auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
-        statistics.incNumCell(cell->color);
-        statistics.incNumConnections(cell->numConnections);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& cell = cells.at(index);
+            statistics.incNumCells(cell->color);
+            statistics.incNumConnections(cell->color, cell->numConnections);
+        }
+    }
+    {
+        auto& particles = data.objects.particlePointers;
+        auto const partition = calcAllThreadsPartition(particles.getNumEntries());
+
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& particle = particles.at(index);
+            statistics.incNumParticles(particle->color);
+        }
     }
 }
 
@@ -93,6 +102,6 @@ __global__ void cudaUpdateHistogramData_substep3(SimulationData data, Simulation
             continue;
         }
         auto slot = cell->age * MAX_HISTOGRAM_SLOTS / (maxAge + 1);
-        statistics.incNumCell(cell->color, slot);
+        statistics.incNumCells(cell->color, slot);
     }
 }

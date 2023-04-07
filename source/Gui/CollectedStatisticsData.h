@@ -10,15 +10,18 @@ struct DataPoint
 {
     double time; //could be a time step or real time
 
-    ColorVector<double> numCellsByColor = {0, 0, 0, 0, 0, 0, 0};
-
-    double numCells = 0;
-    double numConnections = 0;
-    double numParticles = 0;
-    double numCreatedCells = 0;
-    double numSuccessfulAttacks = 0;
-    double numFailedAttacks = 0;
-    double numMuscleActivities = 0;
+    ColorVector<double> numCells = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numConnections = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numParticles = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numCreatedCells = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numAttacks = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numMuscleActivities = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numDefenderActivities = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numTransmitterActivities = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numInjections = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numCompletedInjections = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numNervePulses = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numNeuronActivities = {0, 0, 0, 0, 0, 0, 0};
 
     DataPoint operator+(DataPoint const& other) const;
     DataPoint operator/(double divisor) const;

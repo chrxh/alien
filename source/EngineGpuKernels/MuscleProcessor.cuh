@@ -67,7 +67,7 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
         cell->vel += Math::normalized(direction) * cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color] * getTruncatedUnitValue(activity);
     }
     cell->releaseLock();
-    statistics.incMuscleActivity();
+    statistics.incNumMuscleActivities(cell->color);
 }
 
 __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity)
@@ -100,7 +100,7 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData&
         }
     }
     cell->releaseLock();
-    statistics.incMuscleActivity();
+    statistics.incNumMuscleActivities(cell->color);
 }
 
 __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity)
@@ -160,7 +160,7 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
         }
     }
     cell->releaseLock();
-    statistics.incMuscleActivity();
+    statistics.incNumMuscleActivities(cell->color);
 }
 
 __inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* otherCell)

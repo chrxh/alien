@@ -15,7 +15,7 @@ public:
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static void distributeEnergy(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void distributeEnergy(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 };
 
 /************************************************************************/
@@ -36,12 +36,12 @@ __device__ __inline__ void TransmitterProcessor::processCell(SimulationData& dat
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
 
-    distributeEnergy(data, cell);
+    distributeEnergy(data, statistics, cell);
 
     CellFunctionProcessor::setActivity(cell, activity);
 }
 
-__device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData& data, Cell* cell)
+__device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     float energyDelta = 0;
     auto const& energyDistribution = cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionValue[cell->color];
@@ -71,6 +71,10 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
         }
     }
 
+    if (energyDelta > NEAR_ZERO) {
+        statistics.incNumTransmitterActivities(cell->color);
+    }
+
     if (cell->cellFunctionData.transmitter.mode == EnergyDistributionMode_ConnectedCells) {
         int numReceivers = cell->numConnections;
         for (int i = 0; i < cell->numConnections; ++i) {
@@ -84,6 +88,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
                 continue;
             }
             atomicAdd(&connectedCell->energy, energyPerReceiver);
+
             energyDelta -= energyPerReceiver;
             for (int i = 0; i < connectedCell->numConnections; ++i) {
                 auto connectedConnectedCell = connectedCell->connections[i].cell;
@@ -135,5 +140,6 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             energyDelta -= energyPerReceiver;
         }
     }
+
     atomicAdd(&cell->energy, energyDelta);
 }
