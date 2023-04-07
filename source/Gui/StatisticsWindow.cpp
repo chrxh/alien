@@ -260,7 +260,7 @@ void _StatisticsWindow::processHistograms()
     ImPlot::SetNextPlotFormatX("");
 
     //plot histogram
-    if (ImPlot::BeginPlot("##Histograms", "Age", "Number of objects", ImVec2(-1, -1))) {
+    if (ImPlot::BeginPlot("##Histograms", "Age", "Cells count", ImVec2(-1, -1))) {
 
         auto const width = 1.0f / MAX_COLORS;
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -340,7 +340,7 @@ void _StatisticsWindow::plotSumColorsIntern(
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
     if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, contentScale(80.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        auto color = ImPlot::GetColormapColor(row);
+        auto color = ImPlot::GetColormapColor(std::min(10, row));
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::AnnotateClamped(
                 endTime, endValue, ImVec2(-10.0f, 10.0f), ImPlot::GetLastItemColor(), "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
@@ -424,7 +424,7 @@ void _StatisticsWindow::plotForColorIntern(
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
     if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, contentScale(80.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        auto color = ImPlot::GetColormapColor(row);
+        auto color = ImPlot::GetColormapColor(std::min(10, row));
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::AnnotateClamped(
                 endTime, endValue, ImVec2(-10.0f, 10.0f), ImPlot::GetLastItemColor(), "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
