@@ -18,7 +18,7 @@ struct DataPoint
     ColorVector<double> numMuscleActivities = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numDefenderActivities = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numTransmitterActivities = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<double> numInjections = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numInjectionActivities = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numCompletedInjections = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numNervePulses = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numNeuronActivities = {0, 0, 0, 0, 0, 0, 0};
