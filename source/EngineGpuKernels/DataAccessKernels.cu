@@ -142,6 +142,7 @@ namespace
         particleTO.pos = particle->absPos;
         particleTO.vel = particle->vel;
         particleTO.energy = particle->energy;
+        particleTO.color = particle->color;
     }
 
 }

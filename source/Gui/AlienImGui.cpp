@@ -341,6 +341,32 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     return result;
 }
 
+void AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
+{
+    auto numValues = toInt(parameters._values.size());
+    static auto constexpr buttonWidth = 30;
+
+    if (ImGui::Button(ICON_FA_CARET_LEFT, ImVec2(contentScale(buttonWidth), 0))) {
+        value = (value + numValues - 1) % numValues;
+    }
+    ImGui::SameLine();
+    std::string text = parameters._values[value];
+
+    static char buffer[1024];
+    StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
+
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth + buttonWidth) - ImGui::GetStyle().FramePadding.x * 2);
+    ImGui::InputText(("##" + parameters._name).c_str(), buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
+
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_CARET_RIGHT, ImVec2(contentScale(buttonWidth), 0))) {
+        value = (value + 1) % numValues;
+    }
+
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
+}
+
 bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
 {
     auto& styleRep = StyleRepository::getInstance();
@@ -706,7 +732,7 @@ void AlienImGui::ToolbarSeparator()
     ImGui::Dummy(ImVec2(ImGui::GetStyle().FramePadding.x * 2, 1));
 }
 
-bool AlienImGui::Button(std::string const& text)
+bool AlienImGui::Button(std::string const& text, float size)
 {
 /*
     auto color = Const::ButtonColor;
@@ -717,8 +743,8 @@ bool AlienImGui::Button(std::string const& text)
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 0.6f));
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::ButtonColor);
 */
-    auto result = ImGui::Button(text.c_str());
-/*
+    auto result = ImGui::Button(text.c_str(), ImVec2(contentScale(size), 0));
+    /*
     ImGui::PopStyleColor(4);
 */
     return result;

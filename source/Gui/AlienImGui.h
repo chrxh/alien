@@ -158,6 +158,15 @@ public:
     };
     static bool Combo(ComboParameters& parameters, int& value);
 
+    struct SwitcherParameters
+    {
+        MEMBER_DECLARATION(SwitcherParameters, std::string, name, "");
+        MEMBER_DECLARATION(SwitcherParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
+    };
+    static void Switcher(SwitcherParameters& parameters, int& value);
+
     struct ComboColorParameters
     {
         MEMBER_DECLARATION(ComboColorParameters, std::string, name, "");
@@ -218,7 +227,7 @@ public:
 
     static bool ToolbarButton(std::string const& text);
     static void ToolbarSeparator();
-    static bool Button(std::string const& text);
+    static bool Button(std::string const& text, float size = 0);
 
     struct ButtonParameters
     {
