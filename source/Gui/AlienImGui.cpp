@@ -344,19 +344,20 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
 void AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
 {
     auto numValues = toInt(parameters._values.size());
-    static auto constexpr buttonWidth = 30;
+    static auto constexpr buttonWidth = 20;
 
-    if (ImGui::Button(ICON_FA_CARET_LEFT, ImVec2(contentScale(buttonWidth), 0))) {
-        value = (value + numValues - 1) % numValues;
-    }
-    ImGui::SameLine();
     std::string text = parameters._values[value];
 
     static char buffer[1024];
     StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
 
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth + buttonWidth) - ImGui::GetStyle().FramePadding.x * 2);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth + buttonWidth * 2) - ImGui::GetStyle().FramePadding.x * 4);
     ImGui::InputText(("##" + parameters._name).c_str(), buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
+
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_CARET_LEFT, ImVec2(contentScale(buttonWidth), 0))) {
+        value = (value + numValues - 1) % numValues;
+    }
 
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_CARET_RIGHT, ImVec2(contentScale(buttonWidth), 0))) {
