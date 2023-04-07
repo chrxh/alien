@@ -80,9 +80,10 @@ void _StatisticsWindow::processTimelines()
     if (AlienImGui::Button("Export")) {
         _exportStatisticsDialog->show(_longtermStatistics);
     }
+    AlienImGui::Separator();
 
-    AlienImGui::Combo(
-        AlienImGui::ComboParameters()
+    AlienImGui::Switcher(
+        AlienImGui::SwitcherParameters()
             .name("Plot type")
             .textWidth(HeadColWidth)
             .values(
