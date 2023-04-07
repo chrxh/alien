@@ -11,7 +11,7 @@ public:
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static int getNumDefenderCells(Cell* cell);
+    __inline__ __device__ static int countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell);
 };
 
 /************************************************************************/
@@ -58,7 +58,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             match = true;
             auto injectorDuration = cudaSimulationParameters.cellFunctionInjectorDurationColorMatrix[cell->color][otherCell->color];
 
-            auto numDefenderCells = getNumDefenderCells(otherCell);
+            auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);
             float defendStrength =
                 numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.cellFunctionDefenderAgainstInjectorStrength[cell->color], numDefenderCells);
             injectorDuration = toInt(toFloat(injectorDuration) * defendStrength);
@@ -114,7 +114,9 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
     }
 
     if (match) {
+        statistics.incNumInjectionActivities(cell->color);
         if (injection) {
+            statistics.incNumCompletedInjections(cell->color);
             injector.counter = 0;
         } else {
             ++injector.counter;
@@ -128,12 +130,13 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
     CellFunctionProcessor::setActivity(cell, activity);
 }
 
-__inline__ __device__ int InjectorProcessor::getNumDefenderCells(Cell* cell)
+__inline__ __device__ int InjectorProcessor::countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell)
 {
     int result = 0;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
         if (connectedCell->cellFunction == CellFunction_Defender && connectedCell->cellFunctionData.defender.mode == DefenderMode_DefendAgainstInjector) {
+            statistics.incNumDefenderActivities(connectedCell->color);
             ++result;
         }
     }

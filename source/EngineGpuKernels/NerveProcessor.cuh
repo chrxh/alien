@@ -7,6 +7,7 @@
 #include "Base.cuh"
 #include "CellConnectionProcessor.cuh"
 #include "CellFunctionProcessor.cuh"
+#include "SimulationStatistics.cuh"
 
 class NerveProcessor
 {
@@ -32,6 +33,7 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
         auto counter = (cell->age / cudaSimulationParameters.cellNumExecutionOrderNumbers) * cudaSimulationParameters.cellNumExecutionOrderNumbers
             + cell->executionOrderNumber % cudaSimulationParameters.cellNumExecutionOrderNumbers;
         if (nerve.pulseMode > 0 && (counter % (cudaSimulationParameters.cellNumExecutionOrderNumbers * nerve.pulseMode) == cell->executionOrderNumber)) {
+            statistics.incNumNervePulses(cell->color);
             if (nerve.alternationMode == 0) {
                 activity.channels[0] += 1.0f;
             } else {

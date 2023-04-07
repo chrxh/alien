@@ -18,7 +18,7 @@ DataPoint DataPoint::operator+(DataPoint const& other) const
         result.numMuscleActivities[i] = numMuscleActivities[i] + other.numMuscleActivities[i];
         result.numDefenderActivities[i] = numDefenderActivities[i] + other.numDefenderActivities[i];
         result.numTransmitterActivities[i] = numTransmitterActivities[i] + other.numTransmitterActivities[i];
-        result.numInjections[i] = numInjections[i] + other.numInjections[i];
+        result.numInjectionActivities[i] = numInjectionActivities[i] + other.numInjectionActivities[i];
         result.numCompletedInjections[i] = numCompletedInjections[i] + other.numCompletedInjections[i];
         result.numNervePulses[i] = numNervePulses[i] + other.numNervePulses[i];
         result.numNeuronActivities[i] = numNeuronActivities[i] + other.numNeuronActivities[i];
@@ -39,7 +39,7 @@ DataPoint DataPoint::operator/(double divisor) const
         result.numMuscleActivities[i] = numMuscleActivities[i] / divisor;
         result.numDefenderActivities[i] = numDefenderActivities[i] / divisor;
         result.numTransmitterActivities[i] = numTransmitterActivities[i] / divisor;
-        result.numInjections[i] = numInjections[i] / divisor;
+        result.numInjectionActivities[i] = numInjectionActivities[i] / divisor;
         result.numCompletedInjections[i] = numCompletedInjections[i] / divisor;
         result.numNervePulses[i] = numNervePulses[i] / divisor;
         result.numNeuronActivities[i] = numNeuronActivities[i] / divisor;
@@ -83,7 +83,7 @@ namespace
                     toDouble(data.accumulated.numDefenderActivities[i] - lastData->accumulated.numDefenderActivities[i]) / deltaTimesteps;
                 result.numTransmitterActivities[i] =
                     toDouble(data.accumulated.numTransmitterActivities[i] - lastData->accumulated.numTransmitterActivities[i]) / deltaTimesteps;
-                result.numInjections[i] = toDouble(data.accumulated.numInjections[i] - lastData->accumulated.numInjections[i]) / deltaTimesteps;
+                result.numInjectionActivities[i] = toDouble(data.accumulated.numInjectionActivities[i] - lastData->accumulated.numInjectionActivities[i]) / deltaTimesteps;
                 result.numCompletedInjections[i] =
                     toDouble(data.accumulated.numCompletedInjections[i] - lastData->accumulated.numCompletedInjections[i]) / deltaTimesteps;
                 result.numNervePulses[i] = toDouble(data.accumulated.numNervePulses[i] - lastData->accumulated.numNervePulses[i]) / deltaTimesteps;
@@ -97,7 +97,7 @@ namespace
                 result.numMuscleActivities[i] = toDouble(data.accumulated.numMuscleActivities[i]);
                 result.numDefenderActivities[i] = toDouble(data.accumulated.numDefenderActivities[i]);
                 result.numTransmitterActivities[i] = toDouble(data.accumulated.numTransmitterActivities[i]);
-                result.numInjections[i] = toDouble(data.accumulated.numInjections[i]);
+                result.numInjectionActivities[i] = toDouble(data.accumulated.numInjectionActivities[i]);
                 result.numCompletedInjections[i] = toDouble(data.accumulated.numCompletedInjections[i]);
                 result.numNervePulses[i] = toDouble(data.accumulated.numNervePulses[i]);
                 result.numNeuronActivities[i] = toDouble(data.accumulated.numNeuronActivities[i]);

@@ -57,7 +57,7 @@ public:
     __device__ void incNumMuscleActivities(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numMuscleActivities[color], uint64_t(1)); }
     __device__ void incNumDefenderActivities(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numDefenderActivities[color], uint64_t(1)); }
     __device__ void incNumTransmitterActivities(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numTransmitterActivities[color], uint64_t(1)); }
-    __device__ void incNumInjections(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numInjections[color], uint64_t(1)); }
+    __device__ void incNumInjectionActivities(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numInjectionActivities[color], uint64_t(1)); }
     __device__ void incNumCompletedInjections(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numCompletedInjections[color], uint64_t(1)); }
     __device__ void incNumNervePulses(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numNervePulses[color], uint64_t(1)); }
     __device__ void incNumNeuronActivities(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numNeuronActivities[color], uint64_t(1)); }

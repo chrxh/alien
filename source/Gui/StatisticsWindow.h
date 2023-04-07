@@ -23,13 +23,35 @@ private:
 
     void processHistograms();
 
-    void processPlot(int colorIndex, ColorVector<double> DataPoint::*valuesPtr, int fracPartDecimals = 0);
+    void processPlot(int row, ColorVector<double> DataPoint::*valuesPtr, int fracPartDecimals = 0);
 
     void processBackground() override;
 
-    void
-    plotIntern(int colorIndex, ColorVector<double> const* values, double const* timePoints, int count, double startTime, double endTime, int fracPartDecimals);
-    void plotByColorIntern(int colorIndex, ColorVector<double> const* values, double const* timePoints, int count, double startTime, double endTime);
+    void plotSumColorsIntern(
+        int row,
+        ColorVector<double> const* values,
+        double const* timePoints,
+        int count,
+        double startTime,
+        double endTime,
+        int fracPartDecimals);
+    void plotByColorIntern(
+        int row,
+        ColorVector<double> const* values,
+        double const* timePoints,
+        int count,
+        double startTime,
+        double endTime,
+        int fracPartDecimals);
+    void plotForColorIntern(
+        int row,
+        ColorVector<double> const* values,
+        int colorIndex,
+        double const* timePoints,
+        int count,
+        double startTime,
+        double endTime,
+        int fracPartDecimals);
 
     SimulationController _simController;
     ExportStatisticsDialog _exportStatisticsDialog;
