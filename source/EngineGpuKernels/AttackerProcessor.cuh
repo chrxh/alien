@@ -150,11 +150,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     activity.channels[0] = energyDelta / 10;
 
     if (energyDelta > NEAR_ZERO) {
-        statistics.incSuccessfulAttack();
-    } else if (energyDelta < -NEAR_ZERO) {
-        statistics.incFailedAttack();
-    } else {
-        statistics.incFailedAttack();
+        statistics.incNumAttacks(cell->color);
     }
 
     CellFunctionProcessor::setActivity(cell, activity);

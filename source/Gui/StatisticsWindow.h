@@ -19,29 +19,27 @@ public:
 private:
     void processIntern();
     void processTimelines();
-    void processLiveStatistics();
-    void processLongtermStatistics();
+    void processTimelineStatistics();
 
     void processHistograms();
 
-    void processLivePlot(int colorIndex, double const* data, int fracPartDecimals = 0);
-    void processLivePlotForCellsByColor(int colorIndex, ColorVector<double> const* data);
-    void processLongtermPlot(int colorIndex, double const* data, int fracPartDecimals = 0);
-    void processLongtermPlotForCellsByColor(int colorIndex, ColorVector<double> const* data);
+    void processPlot(int colorIndex, ColorVector<double> DataPoint::*data, int fracPartDecimals = 0);
 
     void processBackground() override;
 
-    void plotIntern(int colorIndex, double const* data, double const* timePoints, int count, double startTime, double endTime, int fracPartDecimals);
+    void
+    plotIntern(int colorIndex, ColorVector<double> const* data, double const* timePoints, int count, double startTime, double endTime, int fracPartDecimals);
     void plotByColorIntern(int colorIndex, ColorVector<double> const* data, double const* timePoints, int count, double startTime, double endTime);
 
     SimulationController _simController;
     ExportStatisticsDialog _exportStatisticsDialog;
 
     bool _live = true;
-    bool _showCellsByColor = false;
+    int _plotType = 0;
 
     std::optional<StatisticsData> _lastStatisticsData;
     std::optional<float> _histogramUpperBound;
+    std::map<int, std::vector<double>> _cachedTimelines;
 
     TimelineLiveStatistics _liveStatistics;
     TimelineLongtermStatistics _longtermStatistics;

@@ -24,12 +24,11 @@ namespace
 {
     auto const HeadColWidth = 150.0f;
 
-    template<typename T>
-    T getMax(T const* data, int count)
+    double getMax(double const* data, int count)
     {
-        T result = static_cast<T>(0);
+        double result = 0;
         for (int i = 0; i < count; ++i) {
-            result = std::max(result, *reinterpret_cast<T const*>(reinterpret_cast<DataPoint const*>(data) + i));
+            result = std::max(result, *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(data) + i));
         }
         return result;
     }
@@ -71,10 +70,9 @@ void _StatisticsWindow::processTimelines()
 {
     ImGui::Spacing();
     AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Real time"), _live);
-
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().contentScale(60));
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(100));
     ImGui::SliderFloat("", &_liveStatistics.history, 1, TimelineLiveStatistics::MaxLiveHistory, "%.1f s");
     ImGui::EndDisabled();
 
@@ -83,14 +81,16 @@ void _StatisticsWindow::processTimelines()
         _exportStatisticsDialog->show(_longtermStatistics);
     }
 
-    if (_live) {
-        processLiveStatistics();
-    } else {
-        processLongtermStatistics();
-    }
+//    AlienImGui::Separator();
+    AlienImGui::Combo(
+        AlienImGui::ComboParameters().name("Plot type").textWidth(100).values(
+            {"Accumulated", "Separated", "Color #0", "Color #1", "Color #2", "Color #3", "Color #4", "Color #5", "Color #6"}),
+        _plotType);
+
+    processTimelineStatistics();
 }
 
-void _StatisticsWindow::processLiveStatistics()
+void _StatisticsWindow::processTimelineStatistics()
 {
     ImGui::Spacing();
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter, ImVec2(-1, 0))) {
@@ -103,28 +103,21 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Cells");
-        auto text = _showCellsByColor ? ICON_FA_MINUS_SQUARE : ICON_FA_PLUS_SQUARE;
-        if (AlienImGui::Button(text)) {
-            _showCellsByColor = !_showCellsByColor;
-        }
 
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(0, &_liveStatistics.dataPoints[0].numCells);
-        if (_showCellsByColor) {
-            processLivePlotForCellsByColor(1, &_liveStatistics.dataPoints[0].numCellsByColor);
-        }
+        processPlot(0, &DataPoint::numCells);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Cell connections");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(2, &_liveStatistics.dataPoints[0].numConnections);
+        processPlot(2, &DataPoint::numConnections);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Energy particles");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(3, &_liveStatistics.dataPoints[0].numParticles);
+        processPlot(3, &DataPoint::numParticles);
 
         ImPlot::PopColormap();
 
@@ -142,108 +135,55 @@ void _StatisticsWindow::processLiveStatistics()
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Created cells");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(4, &_liveStatistics.dataPoints[0].numCreatedCells, 2);
+        processPlot(4, &DataPoint::numCreatedCells, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Successful attacks");
+        AlienImGui::Text("Attacks");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(5, &_liveStatistics.dataPoints[0].numSuccessfulAttacks, 2);
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Failed attacks");
-        ImGui::TableSetColumnIndex(1);
-        processLivePlot(6, &_liveStatistics.dataPoints[0].numFailedAttacks, 2);
+        processPlot(5, &DataPoint::numAttacks, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         AlienImGui::Text("Muscle activities");
         ImGui::TableSetColumnIndex(1);
-        processLivePlot(7, &_liveStatistics.dataPoints[0].numMuscleActivities, 2);
-
-        ImPlot::PopColormap();
-        ImGui::EndTable();
-    }
-}
-
-void _StatisticsWindow::processLongtermStatistics()
-{
-    ImGui::Spacing();
-    if (ImGui::BeginTable(
-            "##",
-            2,
-            /*ImGuiTableFlags_BordersV | */ ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter,
-            ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().contentScale(HeadColWidth));
-        ImGui::TableSetupColumn("##");
-        ImGui::TableHeadersRow();
-        ImPlot::PushColormap(ImPlotColormap_Cool);
+        processPlot(6, &DataPoint::numMuscleActivities, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Cells");
-        auto text = _showCellsByColor ? ICON_FA_MINUS_SQUARE : ICON_FA_PLUS_SQUARE;
-        if (AlienImGui::Button(text)) {
-            _showCellsByColor = !_showCellsByColor;
-        }
-
+        AlienImGui::Text("Defender activities");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(0, &_longtermStatistics.dataPoints[0].numCells);
-        if (_showCellsByColor) {
-            processLongtermPlotForCellsByColor(1, &_longtermStatistics.dataPoints[0].numCellsByColor);
-        }
+        processPlot(7, &DataPoint::numDefenderActivities, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Cell connections");
+        AlienImGui::Text("Transmitter activities");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(2, &_longtermStatistics.dataPoints[0].numConnections);
+        processPlot(8, &DataPoint::numTransmitterActivities, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Energy particles");
+        AlienImGui::Text("Injections");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(3, &_longtermStatistics.dataPoints[0].numParticles);
-
-        ImPlot::PopColormap();
-        ImGui::EndTable();
-    }
-
-    ImGui::Spacing();
-    if (ImGui::BeginTable(
-            "##",
-            2,
-            /*ImGuiTableFlags_BordersV | */ ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter,
-            ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("Processes per time step", ImGuiTableColumnFlags_WidthFixed, StyleRepository::getInstance().contentScale(HeadColWidth));
-        ImGui::TableSetupColumn("##");
-        ImGui::TableHeadersRow();
-        ImPlot::PushColormap(ImPlotColormap_Cool);
+        processPlot(9, &DataPoint::numInjections, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Created cells");
+        AlienImGui::Text("Completed injections");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(4, &_longtermStatistics.dataPoints[0].numCreatedCells, 2);
+        processPlot(10, &DataPoint::numCompletedInjections, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Successful attacks");
+        AlienImGui::Text("Nerve pulses");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(5, &_longtermStatistics.dataPoints[0].numSuccessfulAttacks, 2);
+        processPlot(11, &DataPoint::numNervePulses, 2);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Failed attacks");
+        AlienImGui::Text("Neuron activities");
         ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(6, &_longtermStatistics.dataPoints[0].numFailedAttacks, 2);
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text("Muscle activities");
-        ImGui::TableSetColumnIndex(1);
-        processLongtermPlot(7, &_longtermStatistics.dataPoints[0].numMuscleActivities, 2);
+        processPlot(12, &DataPoint::numNeuronActivities, 2);
 
         ImPlot::PopColormap();
         ImGui::EndTable();
@@ -326,36 +266,35 @@ void _StatisticsWindow::processHistograms()
 
 }
 
-void _StatisticsWindow::processLivePlot(int colorIndex, double const* data, int fracPartDecimals)
+void _StatisticsWindow::processPlot(int colorIndex, ColorVector<double> DataPoint::*data, int fracPartDecimals)
 {
-    auto count = toInt(_liveStatistics.dataPoints.size());
-    auto endTime = _liveStatistics.dataPoints.back().time;
-    plotIntern(colorIndex, data, &_liveStatistics.dataPoints[0].time, count, endTime - toDouble(_liveStatistics.history), endTime, fracPartDecimals);
-}
-
-void _StatisticsWindow::processLivePlotForCellsByColor(int colorIndex, ColorVector<double> const* data)
-{
-    auto count = toInt(_liveStatistics.dataPoints.size());
-    auto startTime = _liveStatistics.dataPoints.back().time - toDouble(_liveStatistics.history);
-    auto endTime = _liveStatistics.dataPoints.back().time;
-    plotByColorIntern(colorIndex, data, &_liveStatistics.dataPoints[0].time, count, startTime, endTime);
-}
-
-
-void _StatisticsWindow::processLongtermPlot(int colorIndex, double const* data, int fracPartDecimals)
-{
-    auto count = toInt(_longtermStatistics.dataPoints.size());
-    auto startTime = _longtermStatistics.dataPoints.front().time;
-    auto endTime = _longtermStatistics.dataPoints.back().time;
-    plotIntern(colorIndex, data, &_longtermStatistics.dataPoints[0].time, count, startTime, endTime, fracPartDecimals);
-}
-
-void _StatisticsWindow::processLongtermPlotForCellsByColor(int colorIndex, ColorVector<double> const* data)
-{
-    auto count = toInt(_longtermStatistics.dataPoints.size());
-    auto startTime = _longtermStatistics.dataPoints.front().time;
-    auto endTime = _longtermStatistics.dataPoints.back().time;
-    plotByColorIntern(colorIndex, data, &_longtermStatistics.dataPoints[0].time, count, startTime, endTime);
+    if (_plotType == 0) {
+        if (_live) {
+            auto count = toInt(_liveStatistics.dataPoints.size());
+            auto startTime = _liveStatistics.dataPoints.back().time - toDouble(_liveStatistics.history);
+            auto endTime = _liveStatistics.dataPoints.back().time;
+            plotIntern(
+                colorIndex, &(_liveStatistics.dataPoints[0].*data), &_liveStatistics.dataPoints[0].time, count, startTime, endTime, fracPartDecimals);
+        } else {
+            auto count = toInt(_longtermStatistics.dataPoints.size());
+            auto startTime = _longtermStatistics.dataPoints.front().time;
+            auto endTime = _longtermStatistics.dataPoints.back().time;
+            plotIntern(
+                colorIndex, &(_longtermStatistics.dataPoints[0].*data), &_longtermStatistics.dataPoints[0].time, count, startTime, endTime, fracPartDecimals);
+        }
+    } else {
+        if (_live) {
+            auto count = toInt(_liveStatistics.dataPoints.size());
+            auto startTime = _liveStatistics.dataPoints.back().time - toDouble(_liveStatistics.history);
+            auto endTime = _liveStatistics.dataPoints.back().time;
+            plotByColorIntern(colorIndex, &(_liveStatistics.dataPoints[0].*data), &_liveStatistics.dataPoints[0].time, count, startTime, endTime);
+        } else {
+            auto count = toInt(_longtermStatistics.dataPoints.size());
+            auto startTime = _longtermStatistics.dataPoints.front().time;
+            auto endTime = _longtermStatistics.dataPoints.back().time;
+            plotByColorIntern(colorIndex, &(_longtermStatistics.dataPoints[0].*data), &_longtermStatistics.dataPoints[0].time, count, startTime, endTime);
+        }
+    }
 }
 
 void _StatisticsWindow::processBackground()
@@ -369,16 +308,30 @@ void _StatisticsWindow::processBackground()
 
 void _StatisticsWindow::plotIntern(
     int colorIndex,
-    double const* data,
+    ColorVector<double> const* data,
     double const* timePoints,
     int count,
     double startTime,
     double endTime,
     int fracPartDecimals)
 {
-    auto upperBound = getMax(data, count) * 1.5;
-    auto endValue = count > 0 ? *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(data) + (count - 1)) : 0.0;
-
+    auto& accumulatedData = _cachedTimelines[0];
+    auto& rearragedtimePoints = _cachedTimelines[1];
+    accumulatedData.resize(count);
+    rearragedtimePoints.resize(count);
+    double upperBound = 0;
+    for (int i = 0; i < count; ++i) {
+        double sum = 0;
+        auto ptr = reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(data) + i); 
+        for (int color = 0; color < MAX_COLORS; ++color) {
+            sum += *(ptr + color);
+        }
+        accumulatedData[i] = sum;
+        upperBound = std::max(upperBound, sum);
+        rearragedtimePoints[i] = *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(timePoints) + i); 
+    }
+    auto endValue = count > 0 ? accumulatedData.back() : 0.0;
+    upperBound *= 1.5f;
     ImGui::PushID(colorIndex);
     ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
@@ -393,9 +346,9 @@ void _StatisticsWindow::plotIntern(
         }
         if (count > 0) {
             ImPlot::PushStyleColor(ImPlotCol_Line, color);
-            ImPlot::PlotLine("##", timePoints, data, count, 0, sizeof(DataPoint));
-            ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f * ImGui::GetStyle().Alpha);
-            ImPlot::PlotShaded("##", timePoints, data, count, 0, 0, sizeof(DataPoint));
+            ImPlot::PlotLine("##", rearragedtimePoints.data(), accumulatedData.data(), count);  //, 0, sizeof(DataPoint));
+            ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.5f * ImGui::GetStyle().Alpha);
+            ImPlot::PlotShaded("##", rearragedtimePoints.data(), accumulatedData.data(), count);  //, 0, sizeof(DataPoint));
             ImPlot::PopStyleVar();
             ImPlot::PopStyleColor();
         }

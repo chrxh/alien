@@ -6,17 +6,22 @@
 
 struct TimestepStatistics
 {
-    ColorVector<int> numCellsByColor = {0, 0, 0, 0, 0, 0, 0};
-    int numConnections = 0;
-    int numParticles = 0;
+    ColorVector<int> numCells = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<int> numConnections = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<int> numParticles = {0, 0, 0, 0, 0, 0, 0};
 };
 
 struct AccumulatedStatistics
 {
-    uint64_t numCreatedCells = 0;
-    uint64_t numSuccessfulAttacks = 0;
-    uint64_t numFailedAttacks = 0;
-    uint64_t numMuscleActivities = 0;
+    ColorVector<uint64_t> numCreatedCells = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numAttacks = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numMuscleActivities = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numDefenderActivities = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numTransmitterActivities = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numInjections = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numCompletedInjections = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numNervePulses = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numNeuronActivities = {0, 0, 0, 0, 0, 0, 0};
 };
 
 struct TimelineStatistics

@@ -214,7 +214,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
 
     newCell->releaseLock();
 
-    statistics.incCreatedCell();
+    statistics.incNumCreatedCells(hostCell->color);
     return true;
 }
 
@@ -397,7 +397,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
     newCell->releaseLock();
 
-    statistics.incCreatedCell();
+    statistics.incNumCreatedCells(hostCell->color);
     return true;
 }
 

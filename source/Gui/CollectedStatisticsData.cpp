@@ -9,16 +9,20 @@ DataPoint DataPoint::operator+(DataPoint const& other) const
 {
     DataPoint result;
     result.time = time + other.time;
-    result.numCells = numCells + other.numCells;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        result.numCellsByColor[i] = numCellsByColor[i] + other.numCellsByColor[i];
+        result.numCells[i] = numCells[i] + other.numCells[i];
+        result.numConnections[i] = numConnections[i] + other.numConnections[i];
+        result.numParticles[i] = numParticles[i] + other.numParticles[i];
+        result.numCreatedCells[i] = numCreatedCells[i] + other.numCreatedCells[i];
+        result.numAttacks[i] = numAttacks[i] + other.numAttacks[i];
+        result.numMuscleActivities[i] = numMuscleActivities[i] + other.numMuscleActivities[i];
+        result.numDefenderActivities[i] = numDefenderActivities[i] + other.numDefenderActivities[i];
+        result.numTransmitterActivities[i] = numTransmitterActivities[i] + other.numTransmitterActivities[i];
+        result.numInjections[i] = numInjections[i] + other.numInjections[i];
+        result.numCompletedInjections[i] = numCompletedInjections[i] + other.numCompletedInjections[i];
+        result.numNervePulses[i] = numNervePulses[i] + other.numNervePulses[i];
+        result.numNeuronActivities[i] = numNeuronActivities[i] + other.numNeuronActivities[i];
     }
-    result.numConnections = numConnections + other.numConnections;
-    result.numParticles = numParticles + other.numParticles;
-    result.numCreatedCells = numCreatedCells + other.numCreatedCells;
-    result.numSuccessfulAttacks = numSuccessfulAttacks + other.numSuccessfulAttacks;
-    result.numFailedAttacks = numFailedAttacks + other.numFailedAttacks;
-    result.numMuscleActivities = numMuscleActivities + other.numMuscleActivities;
     return result;
 }
 
@@ -26,16 +30,20 @@ DataPoint DataPoint::operator/(double divisor) const
 {
     DataPoint result;
     result.time = time / divisor;
-    result.numCells = numCells / divisor;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        result.numCellsByColor[i] = numCellsByColor[i] / divisor;
+        result.numCells[i] = numCells[i] / divisor;
+        result.numConnections[i] = numConnections[i] / divisor;
+        result.numParticles[i] = numParticles[i] / divisor;
+        result.numCreatedCells[i] = numCreatedCells[i] / divisor;
+        result.numAttacks[i] = numAttacks[i] / divisor;
+        result.numMuscleActivities[i] = numMuscleActivities[i] / divisor;
+        result.numDefenderActivities[i] = numDefenderActivities[i] / divisor;
+        result.numTransmitterActivities[i] = numTransmitterActivities[i] / divisor;
+        result.numInjections[i] = numInjections[i] / divisor;
+        result.numCompletedInjections[i] = numCompletedInjections[i] / divisor;
+        result.numNervePulses[i] = numNervePulses[i] / divisor;
+        result.numNeuronActivities[i] = numNeuronActivities[i] / divisor;
     }
-    result.numConnections = numConnections / divisor;
-    result.numParticles = numParticles / divisor;
-    result.numCreatedCells = numCreatedCells / divisor;
-    result.numSuccessfulAttacks = numSuccessfulAttacks / divisor;
-    result.numFailedAttacks = numFailedAttacks / divisor;
-    result.numMuscleActivities = numMuscleActivities / divisor;
     return result;
 }
 
@@ -57,22 +65,43 @@ namespace
     {
         DataPoint result;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            result.numCellsByColor[i] = toDouble(data.timestep.numCellsByColor[i]);
-            result.numCells += toDouble(data.timestep.numCellsByColor[i]);
+            result.numCells[i] = toDouble(data.timestep.numCells[i]);
+            result.numConnections[i] = toDouble(data.timestep.numConnections[i]);
+            result.numParticles[i] = toDouble(data.timestep.numParticles[i]);
         }
-        result.numConnections = toDouble(data.timestep.numConnections);
-        result.numParticles = toDouble(data.timestep.numParticles);
         if (lastData) {
             auto deltaTimesteps = toDouble(timestep) - toDouble(*lastTimestep);
-            result.numCreatedCells = toDouble(data.accumulated.numCreatedCells - lastData->accumulated.numCreatedCells) / deltaTimesteps;
-            result.numSuccessfulAttacks = toDouble(data.accumulated.numSuccessfulAttacks - lastData->accumulated.numSuccessfulAttacks) / deltaTimesteps;
-            result.numFailedAttacks = toDouble(data.accumulated.numFailedAttacks - lastData->accumulated.numFailedAttacks) / deltaTimesteps;
-            result.numMuscleActivities = toDouble(data.accumulated.numMuscleActivities - lastData->accumulated.numMuscleActivities) / deltaTimesteps;
+            if (deltaTimesteps < NEAR_ZERO) {
+                deltaTimesteps = 1.0;
+             }
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                result.numCreatedCells[i] = toDouble(data.accumulated.numCreatedCells[i] - lastData->accumulated.numCreatedCells[i]) / deltaTimesteps;
+                result.numAttacks[i] = toDouble(data.accumulated.numAttacks[i] - lastData->accumulated.numAttacks[i]) / deltaTimesteps;
+                result.numMuscleActivities[i] =
+                    toDouble(data.accumulated.numMuscleActivities[i] - lastData->accumulated.numMuscleActivities[i]) / deltaTimesteps;
+                result.numDefenderActivities[i] =
+                    toDouble(data.accumulated.numDefenderActivities[i] - lastData->accumulated.numDefenderActivities[i]) / deltaTimesteps;
+                result.numTransmitterActivities[i] =
+                    toDouble(data.accumulated.numTransmitterActivities[i] - lastData->accumulated.numTransmitterActivities[i]) / deltaTimesteps;
+                result.numInjections[i] = toDouble(data.accumulated.numInjections[i] - lastData->accumulated.numInjections[i]) / deltaTimesteps;
+                result.numCompletedInjections[i] =
+                    toDouble(data.accumulated.numCompletedInjections[i] - lastData->accumulated.numCompletedInjections[i]) / deltaTimesteps;
+                result.numNervePulses[i] = toDouble(data.accumulated.numNervePulses[i] - lastData->accumulated.numNervePulses[i]) / deltaTimesteps;
+                result.numNeuronActivities[i] =
+                    toDouble(data.accumulated.numNeuronActivities[i] - lastData->accumulated.numNeuronActivities[i]) / deltaTimesteps;
+            }
         } else {
-            result.numCreatedCells = toDouble(data.accumulated.numCreatedCells);
-            result.numSuccessfulAttacks = toDouble(data.accumulated.numSuccessfulAttacks);
-            result.numFailedAttacks = toDouble(data.accumulated.numFailedAttacks);
-            result.numMuscleActivities = toDouble(data.accumulated.numMuscleActivities);
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                result.numCreatedCells[i] = toDouble(data.accumulated.numCreatedCells[i]);
+                result.numAttacks[i] = toDouble(data.accumulated.numAttacks[i]);
+                result.numMuscleActivities[i] = toDouble(data.accumulated.numMuscleActivities[i]);
+                result.numDefenderActivities[i] = toDouble(data.accumulated.numDefenderActivities[i]);
+                result.numTransmitterActivities[i] = toDouble(data.accumulated.numTransmitterActivities[i]);
+                result.numInjections[i] = toDouble(data.accumulated.numInjections[i]);
+                result.numCompletedInjections[i] = toDouble(data.accumulated.numCompletedInjections[i]);
+                result.numNervePulses[i] = toDouble(data.accumulated.numNervePulses[i]);
+                result.numNeuronActivities[i] = toDouble(data.accumulated.numNeuronActivities[i]);
+            }
         }
         return result;
     }
