@@ -266,34 +266,18 @@ void _StatisticsWindow::processHistograms()
 
 }
 
-void _StatisticsWindow::processPlot(int colorIndex, ColorVector<double> DataPoint::*data, int fracPartDecimals)
+void _StatisticsWindow::processPlot(int colorIndex, ColorVector<double> DataPoint::*valuesPtr, int fracPartDecimals)
 {
+    auto count = _live ? toInt(_liveStatistics.dataPoints.size()) : toInt(_longtermStatistics.dataPoints.size());
+    auto startTime = _live ? _liveStatistics.dataPoints.back().time - toDouble(_liveStatistics.history) : _longtermStatistics.dataPoints.front().time;
+    auto endTime = _live ? _liveStatistics.dataPoints.back().time : _longtermStatistics.dataPoints.back().time;
+    auto values = _live ? &(_liveStatistics.dataPoints[0].*valuesPtr) : &(_longtermStatistics.dataPoints[0].*valuesPtr);
+    auto timePoints = _live ? &_liveStatistics.dataPoints[0].time : &_longtermStatistics.dataPoints[0].time;
+
     if (_plotType == 0) {
-        if (_live) {
-            auto count = toInt(_liveStatistics.dataPoints.size());
-            auto startTime = _liveStatistics.dataPoints.back().time - toDouble(_liveStatistics.history);
-            auto endTime = _liveStatistics.dataPoints.back().time;
-            plotIntern(
-                colorIndex, &(_liveStatistics.dataPoints[0].*data), &_liveStatistics.dataPoints[0].time, count, startTime, endTime, fracPartDecimals);
-        } else {
-            auto count = toInt(_longtermStatistics.dataPoints.size());
-            auto startTime = _longtermStatistics.dataPoints.front().time;
-            auto endTime = _longtermStatistics.dataPoints.back().time;
-            plotIntern(
-                colorIndex, &(_longtermStatistics.dataPoints[0].*data), &_longtermStatistics.dataPoints[0].time, count, startTime, endTime, fracPartDecimals);
-        }
+        plotIntern(colorIndex, values, timePoints, count, startTime, endTime, fracPartDecimals);
     } else {
-        if (_live) {
-            auto count = toInt(_liveStatistics.dataPoints.size());
-            auto startTime = _liveStatistics.dataPoints.back().time - toDouble(_liveStatistics.history);
-            auto endTime = _liveStatistics.dataPoints.back().time;
-            plotByColorIntern(colorIndex, &(_liveStatistics.dataPoints[0].*data), &_liveStatistics.dataPoints[0].time, count, startTime, endTime);
-        } else {
-            auto count = toInt(_longtermStatistics.dataPoints.size());
-            auto startTime = _longtermStatistics.dataPoints.front().time;
-            auto endTime = _longtermStatistics.dataPoints.back().time;
-            plotByColorIntern(colorIndex, &(_longtermStatistics.dataPoints[0].*data), &_longtermStatistics.dataPoints[0].time, count, startTime, endTime);
-        }
+        plotByColorIntern(colorIndex, values, timePoints, count, startTime, endTime);
     }
 }
 
@@ -308,7 +292,7 @@ void _StatisticsWindow::processBackground()
 
 void _StatisticsWindow::plotIntern(
     int colorIndex,
-    ColorVector<double> const* data,
+    ColorVector<double> const* values,
     double const* timePoints,
     int count,
     double startTime,
@@ -322,7 +306,7 @@ void _StatisticsWindow::plotIntern(
     double upperBound = 0;
     for (int i = 0; i < count; ++i) {
         double sum = 0;
-        auto ptr = reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(data) + i); 
+        auto ptr = reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(values) + i); 
         for (int color = 0; color < MAX_COLORS; ++color) {
             sum += *(ptr + color);
         }
@@ -359,11 +343,17 @@ void _StatisticsWindow::plotIntern(
     ImGui::PopID();
 }
 
-void _StatisticsWindow::plotByColorIntern(int colorIndex, ColorVector<double> const* data, double const* timePoints, int count, double startTime, double endTime)
+void _StatisticsWindow::plotByColorIntern(
+    int colorIndex,
+    ColorVector<double> const* values,
+    double const* timePoints,
+    int count,
+    double startTime,
+    double endTime)
 {
     auto upperBound = 0.0;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        upperBound = std::max(upperBound, getMax(reinterpret_cast<double const*>(data) + i, count));
+        upperBound = std::max(upperBound, getMax(reinterpret_cast<double const*>(values) + i, count));
     }
     upperBound *= 1.5;
 
@@ -381,9 +371,9 @@ void _StatisticsWindow::plotByColorIntern(int colorIndex, ColorVector<double> co
             ImColor color(toInt((colorRaw >> 16) & 0xff), toInt((colorRaw >> 8) & 0xff), toInt(colorRaw & 0xff));
 
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
-            auto endValue = count > 0 ? *(reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(data) + (count - 1)) + i) : 0.0f;
+            auto endValue = count > 0 ? *(reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(values) + (count - 1)) + i) : 0.0f;
             auto labelId = std::to_string(toInt(endValue));
-            ImPlot::PlotLine(labelId.c_str(), timePoints, reinterpret_cast<double const*>(data) + i, count, 0, sizeof(DataPoint));
+            ImPlot::PlotLine(labelId.c_str(), timePoints, reinterpret_cast<double const*>(values) + i, count, 0, sizeof(DataPoint));
             ImPlot::PopStyleColor();
             ImGui::PopID();
         }
@@ -394,4 +384,3 @@ void _StatisticsWindow::plotByColorIntern(int colorIndex, ColorVector<double> co
     ImPlot::PopStyleColor(3);
     ImGui::PopID();
 }
-
