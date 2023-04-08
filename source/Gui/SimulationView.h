@@ -11,12 +11,13 @@ public:
     _SimulationView(
         SimulationController const& simController,
         ModeController const& modeWindow,
-        Viewport const& viewport);
+        Viewport const& viewport,
+        EditorModel const& editorModel);
     ~_SimulationView();
 
     void resize(IntVector2D const& viewportSize);
 
-    void processContent();
+    void draw();
     void processControls();
 
     bool isOverlayActive() const;
@@ -44,12 +45,14 @@ private:
     void updateImageFromSimulation();
     void updateMotionBlur();
 
+    void drawEditCursor();
+
     //widgets
     SimulationScrollbar _scrollbarX;
     SimulationScrollbar _scrollbarY;
 
     //overlay
-    bool _isOverlayActive = false;
+    bool _isCellDetailOverlayActive = false;
     float _motionBlurFactor = 1.0f;
     enum class NavigationState {
         Static, Moving
@@ -59,12 +62,13 @@ private:
     
     //shader data
     unsigned int _vao, _vbo, _ebo;
-    unsigned int _fbo;
+    unsigned int _fbo1, _fbo2;
     Shader _shader;
 
     bool _areTexturesInitialized = false;
-    unsigned int _textureId = 0;
-    unsigned int _textureFramebufferId = 0;
+    unsigned int _textureSimulationId = 0;
+    unsigned int _textureFramebufferId1 = 0;
+    unsigned int _textureFramebufferId2 = 0;
 
     //navigation
     std::optional<RealVector2D> _worldPosForMovement;
@@ -73,4 +77,5 @@ private:
     Viewport _viewport;
     ModeController _modeWindow;
     SimulationController _simController;
+    EditorModel _editorModel;
 };

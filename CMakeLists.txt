@@ -12,10 +12,10 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 # Default CUDA target architectures
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-  set(CMAKE_CUDA_ARCHITECTURES 52)
+  set(CMAKE_CUDA_ARCHITECTURES 60)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
@@ -37,6 +37,7 @@ else()
     # Treat warnings as errors
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Werror>)
 endif()
+add_compile_definitions($<$<COMPILE_LANGUAGE:CXX>:NOMINMAX>)
 
 # Treat all NVCC (CUDA) warnings as errors
 add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:--Werror=all-warnings>)

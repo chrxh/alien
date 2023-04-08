@@ -84,3 +84,8 @@ RealRect _Viewport::getVisibleWorldRect() const
     auto bottomRight = mapViewToWorldPosition(RealVector2D{toFloat(_viewSize.x - 1), toFloat(_viewSize.y - 1)});
     return {topLeft, bottomRight};
 }
+
+bool _Viewport::isVisible(RealVector2D const& viewPos) const
+{
+    return viewPos.x >= 0 && viewPos.y >= 0 && viewPos.x < _viewSize.x && viewPos.y < _viewSize.y;
+}

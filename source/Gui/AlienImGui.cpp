@@ -1,13 +1,31 @@
 #include "AlienImGui.h"
 
+#include <boost/algorithm/string.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
+
 #include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/StringHelper.h"
+#include "Base/Math.h"
 #include "EngineInterface/Colors.h"
+#include "EngineInterface/Constants.h"
+#include "EngineInterface/SimulationParameters.h"
 
+#include "CellFunctionStrings.h"
 #include "StyleRepository.h"
+
+namespace
+{
+    bool revertButton(std::string const& id)
+    {
+        return ImGui::Button((ICON_FA_UNDO "##" + id).c_str());
+    }
+
+    auto constexpr HoveredTimer = 0.5f;
+}
+
+std::unordered_set<unsigned int> AlienImGui::_isExpanded;
 
 void AlienImGui::HelpMarker(std::string const& text)
 {
@@ -24,62 +42,20 @@ void AlienImGui::HelpMarker(std::string const& text)
     }
 }
 
-bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float& value)
+bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled)
 {
-    auto width = StyleRepository::getInstance().scaleContent(parameters._textWidth);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
-    auto result = ImGui::SliderFloat(
-        ("##" + parameters._name).c_str(),
-        &value,
-        parameters._min,
-        parameters._max,
-        parameters._format.c_str(),
-        parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
-    if (parameters._defaultValue) {
-        ImGui::SameLine();
-        ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
-            value = *parameters._defaultValue;
-            result = true;
-        }
-        ImGui::EndDisabled();
-    }
-    ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
-    if (parameters._tooltip) {
-        AlienImGui::HelpMarker(*parameters._tooltip);
-    }
-    return result;
+    return BasicSlider(parameters, value, enabled);
 }
 
-bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int& value)
+bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled)
 {
-    auto width = StyleRepository::getInstance().scaleContent(parameters._textWidth);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
-    auto result = ImGui::SliderInt(
-        ("##" + parameters._name).c_str(), &value, parameters._min, parameters._max, "%d", parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
-    if (parameters._defaultValue) {
-        ImGui::SameLine();
-        ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
-            value = *parameters._defaultValue;
-            result = true;
-        }
-        ImGui::EndDisabled();
-    }
-    ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
-
-    if (parameters._tooltip) {
-        AlienImGui::HelpMarker(*parameters._tooltip);
-    }
-    return result;
+    return BasicSlider(parameters, value, enabled);
 }
 
 void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
-    auto inputWidth = StyleRepository::getInstance().scaleContent(parameters._inputWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
+    auto inputWidth = StyleRepository::getInstance().contentScale(parameters._inputWidth);
 
     ImGui::SetNextItemWidth(
         ImGui::GetContentRegionAvail().x - textWidth - inputWidth
@@ -93,16 +69,25 @@ void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, 
     ImGui::TextUnformatted(parameters._name.c_str());
 }
 
-bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
+bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool* enabled)
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
+
+    if (enabled) {
+        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
+        if (!(*enabled) && parameters._disabledValue) {
+            value = *parameters._disabledValue;
+        }
+        ImGui::BeginDisabled(!(*enabled));
+        ImGui::SameLine();
+    }
 
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
     auto result = ImGui::InputInt(("##" + parameters._name).c_str(), &value);
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -110,23 +95,35 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value)
     }
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
-
+    if (enabled) {
+        ImGui::EndDisabled();
+    }
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
     return result;
 }
 
+bool AlienImGui::InputOptionalInt(InputIntParameters const& parameters, std::optional<int>& optValue)
+{
+    auto enabled = optValue.has_value();
+    auto value = optValue.value_or(parameters._defaultValue.value_or(0));
+    auto result = InputInt(parameters, value, &enabled);
+    optValue = enabled ? std::make_optional(value) : std::nullopt;
+    return result;
+}
+
 void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value)
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
 
+    ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
-    ImGui::InputFloat(("##" + parameters._name).c_str(), &value, parameters._step, 0, parameters._format.c_str());
+    ImGui::InputFloat(("##" + parameters._name).c_str(), &value, parameters._step, 0, parameters._format.c_str(), flags);
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             value = *parameters._defaultValue;
         }
         ImGui::EndDisabled();
@@ -135,17 +132,46 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     ImGui::TextUnformatted(parameters._name.c_str());
 
     if (parameters._tooltip) {
-        AlienImGui::HelpMarker(*parameters._tooltip);
+        HelpMarker(*parameters._tooltip);
     }
 }
 
-void AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
+void AlienImGui::InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2)
+{
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
+
+    ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
+    float value[2];
+    value[0] = value1;
+    value[1] = value2;
+    ImGui::InputFloat2(("##" + parameters._name).c_str(), value, parameters._format.c_str(), flags);
+    value1 = value[0];
+    value2 = value[1];
+    ImGui::SameLine();
+    if (parameters._defaultValue1 && parameters._defaultValue2) {
+        ImGui::BeginDisabled(value1 == *parameters._defaultValue1 && value2 == *parameters._defaultValue2);
+        if (revertButton(parameters._name)) {
+            value1 = *parameters._defaultValue1;
+            value2 = *parameters._defaultValue2;
+        }
+        ImGui::EndDisabled();
+    }
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
+
+    if (parameters._tooltip) {
+        HelpMarker(*parameters._tooltip);
+    }
+}
+
+bool AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
 {
     if (width == 0) {
-        width = StyleRepository::getInstance().scaleContent(30);
+        width = StyleRepository::getInstance().contentScale(30);
     }
     float h, s, v;
-    AlienImGui::convertRGBtoHSV(cellColor, h, s, v);
+    AlienImGui::ConvertRGBtoHSV(cellColor, h, s, v);
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
@@ -153,74 +179,55 @@ void AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
     ImVec2 pos = ImGui::GetCursorScreenPos();
     ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
 */
-    ImGui::Button("##", ImVec2(width, ImGui::GetTextLineHeight()));
+    auto result = ImGui::Button("##button", ImVec2(width, ImGui::GetTextLineHeight()));
     ImGui::PopStyleColor(3);
+
+    return result;
 }
 
-void AlienImGui::InputColorMatrix(InputMatrixParameters const& parameters, float (&value)[7][7])
+void AlienImGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS])
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    BasicInputColorMatrixParameters<bool> basicParameters;
+    basicParameters._name = parameters._name;
+    basicParameters._textWidth = parameters._textWidth;
+    basicParameters._defaultValue = parameters._defaultValue;
+    basicParameters._tooltip = parameters._tooltip;
+    BasicInputColorMatrix<bool>(basicParameters, value);
+}
 
-    if (ImGui::BeginTable(("##" + parameters._name).c_str(), 8, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-        for (int row = 0; row < 8; ++row) {
-            ImGui::PushID(row);
-            for (int col = 0; col < 8; ++col) {
-                ImGui::PushID(std::to_string(col).c_str());
-                ImGui::TableNextColumn();
-                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-                if (row == 0 && col > 0) {
-                    ImVec2 pos = ImGui::GetCursorScreenPos();
-                    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
-                    ColorField(Const::IndividualCellColors[col - 1], -1);
-                } else if (row > 0 && col == 0) {
-                    ImVec2 pos = ImGui::GetCursorScreenPos();
-                    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
-                    ColorField(Const::IndividualCellColors[row - 1], -1);
-                } else if (row > 0 && col > 0) {
-                    ImGui::InputFloat(("##" + parameters._name).c_str(), &value[row - 1][col - 1], 0, 0, parameters._format.c_str());
-                }
-                ImGui::PopID();
-            }
-            ImGui::TableNextRow();
-            ImGui::PopID();
-        }
-        ImGui::EndTable();
-        ImGui::SameLine();
-        if (parameters._defaultValue) {
-            bool changed = false;
-            for (int row = 0; row < 7; ++row) {
-                for (int col = 0; col < 7; ++col) {
-                    if(value[row][col] != (*parameters._defaultValue)[row][col]) {
-                        changed = true;
-                    }
-                }
-            }
-            ImGui::BeginDisabled(!changed);
-            if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
-                for (int row = 0; row < 7; ++row) {
-                    for (int col = 0; col < 7; ++col) {
-                        value[row][col] = (*parameters._defaultValue)[row][col];
-                    }
-                }
-            }
-            ImGui::EndDisabled();
-        }
+void AlienImGui::InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS])
+{
+    BasicInputColorMatrixParameters<int> basicParameters;
+    basicParameters._name = parameters._name;
+    basicParameters._min = parameters._min;
+    basicParameters._max = parameters._max;
+    basicParameters._logarithmic = parameters._logarithmic;
+    basicParameters._textWidth = parameters._textWidth;
+    basicParameters._defaultValue = parameters._defaultValue;
+    basicParameters._tooltip = parameters._tooltip;
+    BasicInputColorMatrix(basicParameters, value);
+}
 
-        ImGui::SameLine();
-        ImGui::TextUnformatted(parameters._name.c_str());
-
-        if (parameters._tooltip) {
-            AlienImGui::HelpMarker(*parameters._tooltip);
-        }
-    }
+void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS])
+{
+    BasicInputColorMatrixParameters<float> basicParameters;
+    basicParameters._name = parameters._name; 
+    basicParameters._min = parameters._min;
+    basicParameters._max = parameters._max;
+    basicParameters._logarithmic = parameters._logarithmic;
+    basicParameters._format = parameters._format;
+    basicParameters._textWidth = parameters._textWidth;
+    basicParameters._defaultValue = parameters._defaultValue;
+    basicParameters._tooltip = parameters._tooltip;
+    BasicInputColorMatrix(basicParameters, value);
 }
 
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
     if (parameters._monospaceFont) {
-        ImGui::PushFont(StyleRepository::getInstance().getMonospaceFont());
+        ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
     }
     ImGuiInputTextFlags flags = 0;
     if (parameters._readOnly) {
@@ -241,7 +248,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(std::string(buffer) == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             StringHelper::copy(buffer, bufferSize, *parameters._defaultValue);
         }
         ImGui::EndDisabled();
@@ -270,10 +277,10 @@ void AlienImGui::InputTextMultiline(InputTextMultilineParameters const& paramete
     static char buffer[1024*16];
     StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
 
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
     auto height = parameters._height == 0
         ? ImGui::GetContentRegionAvail().y
-        : StyleRepository::getInstance().scaleContent(parameters._height);
+        : StyleRepository::getInstance().contentScale(parameters._height);
     auto id = parameters._hint.empty() ? ("##" + parameters._name).c_str() : ("##" + parameters._hint).c_str();
     ImGui::InputTextEx(
         ("##" + parameters._name).c_str(),
@@ -298,11 +305,12 @@ namespace
         *outText = vector.at(idx).c_str();
         return true;
     };
+
 }
 
 bool AlienImGui::Combo(ComboParameters& parameters, int& value)
 {
-    auto textWidth = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
 
     const char** items = new const char*[parameters._values.size()];
     for (int i = 0; i < parameters._values.size(); ++i) {
@@ -321,7 +329,7 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -330,42 +338,78 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
     delete[] items;
-
     return result;
+}
+
+void AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
+{
+    auto numValues = toInt(parameters._values.size());
+    static auto constexpr buttonWidth = 20;
+
+    std::string text = parameters._values[value];
+
+    static char buffer[1024];
+    StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
+
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth + buttonWidth * 2) - ImGui::GetStyle().FramePadding.x * 4);
+    ImGui::InputText(("##" + parameters._name).c_str(), buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
+
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_CARET_LEFT, ImVec2(contentScale(buttonWidth), 0))) {
+        value = (value + numValues - 1) % numValues;
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_CARET_RIGHT, ImVec2(contentScale(buttonWidth), 0))) {
+        value = (value + 1) % numValues;
+    }
+
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
 }
 
 bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
 {
+    auto& styleRep = StyleRepository::getInstance();
+    auto textWidth = styleRep.contentScale(parameters._textWidth);
+    auto comboWidth = !parameters._name.empty() ? ImGui::GetContentRegionAvail().x - textWidth : styleRep.contentScale(70);
+    auto colorFieldWidth1 = comboWidth - styleRep.contentScale(40);
+    auto colorFieldWidth2 = comboWidth - styleRep.contentScale(30);
+
     const char* items[] = { "##1", "##2", "##3", "##4", "##5", "##6", "##7" };
-    auto styleRep = StyleRepository::getInstance();
 
     ImVec2 comboPos = ImGui::GetCursorPos();
-    ImGui::SetNextItemWidth(styleRep.scaleContent(70));
+
+    ImGui::SetNextItemWidth(comboWidth);
     if (ImGui::BeginCombo(("##" + parameters._name).c_str(), "")) {
-        for (int n = 0; n < 7; ++n) {
-            bool isSelected = (value == n);  // You can store your selection however you want, outside or inside your objects
+        for (int n = 0; n < MAX_COLORS; ++n) {
+            bool isSelected = (value == n);
 
             if (ImGui::Selectable(items[n], isSelected)) {
                 value = n;
             }
             ImGui::SameLine();
-            ColorField(Const::IndividualCellColors[n], styleRep.scaleContent(30));
+            ColorField(Const::IndividualCellColors[n], colorFieldWidth1);
             ImGui::SameLine();
             ImGui::TextUnformatted(" ");
             if (isSelected) {
-                ImGui::SetItemDefaultFocus();  // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                ImGui::SetItemDefaultFocus();
             }
         }
         ImGui::EndCombo();
     }
     ImGui::SameLine();
     ImVec2 backupPos = ImGui::GetCursorPos();
+
     ImGuiStyle& style = ImGui::GetStyle();
     ImGui::SetCursorPos(ImVec2(comboPos.x + style.FramePadding.x, comboPos.y + style.FramePadding.y));
-    ColorField(Const::IndividualCellColors[value], styleRep.scaleContent(30));
-    ImGui::SetCursorPos(backupPos);
+    ColorField(Const::IndividualCellColors[value], colorFieldWidth2);
 
-    ImGui::Dummy(ImVec2(0,0));
+    ImGui::SetCursorPos({backupPos.x, backupPos.y + style.FramePadding.y});
+
+    AlienImGui::Text(parameters._name);
+    ImGui::SameLine();
+    ImGui::Dummy(ImVec2(0, ImGui::GetTextLineHeight() + style.FramePadding.y));
 
     return true;
 }
@@ -393,18 +437,34 @@ void AlienImGui::InputColorTransition(InputColorTransitionParameters const& para
     ImGui::PopID();
 
     ImGui::SameLine();
+    ImVec2 pos = ImGui::GetCursorPos();
+    ImGui::SetCursorPos({pos.x, pos.y - ImGui::GetStyle().FramePadding.y});
 
     //slider for transition age
     ImGui::PushID(2);
-    auto width = StyleRepository::getInstance().scaleContent(parameters._textWidth);
+    auto width = StyleRepository::getInstance().contentScale(parameters._textWidth);
 
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
+    std::string format = "%d";
+    if (parameters._infinity && transitionAge == Infinity<int>::value) {
+        format = "infinity";
+        transitionAge = parameters._max;
+    }
     ImGui::SliderInt(
-        ("##" + parameters._name).c_str(), &transitionAge, parameters._min, parameters._max, "%d", parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+        ("##" + parameters._name).c_str(),
+        &transitionAge,
+        parameters._min,
+        parameters._max,
+        format.c_str(),
+        parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+    if (parameters._infinity && transitionAge == parameters._max) {
+        format = "infinity";
+        transitionAge = Infinity<int>::value;
+    }
     if (parameters._defaultTransitionAge && parameters._defaultTargetColor) {
         ImGui::SameLine();
         ImGui::BeginDisabled(transitionAge == *parameters._defaultTransitionAge && targetColor == *parameters._defaultTargetColor);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             transitionAge = *parameters._defaultTransitionAge;
             targetColor = *parameters._defaultTargetColor;
         }
@@ -431,7 +491,7 @@ bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (AlienImGui::Button((ICON_FA_UNDO "##" + parameters._name).c_str())) {
+        if (revertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -449,6 +509,15 @@ bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
 void AlienImGui::Text(std::string const& text)
 {
     ImGui::TextUnformatted(text.c_str());
+}
+
+void AlienImGui::MonospaceText(std::string const& text)
+{
+    ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
+    Text(text);
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
 }
 
 bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup, float focus)
@@ -532,12 +601,7 @@ bool AlienImGui::ShutdownButton()
     return result;
 }
 
-void AlienImGui::ColorButtonWithPicker(
-    std::string const& text,
-    uint32_t& color,
-    uint32_t& backupColor,
-    uint32_t (&savedPalette)[32],
-    RealVector2D const& size)
+void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color, uint32_t& backupColor, uint32_t(& savedPalette)[32])
 {
     ImVec4 imGuiColor = ImColor(color);
     ImVec4 imGuiBackupColor = ImColor(backupColor);
@@ -546,7 +610,11 @@ void AlienImGui::ColorButtonWithPicker(
         imGuiSavedPalette[i] = ImColor(savedPalette[i]);
     }
 
-    bool openColorPicker = ImGui::ColorButton(text.c_str(), imGuiColor, ImGuiColorEditFlags_NoBorder, {size.x, size.y});
+    bool openColorPicker = ImGui::ColorButton(
+        ("##" + parameters._name).c_str(),
+        imGuiColor,
+        ImGuiColorEditFlags_NoBorder,
+        {ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().contentScale(parameters._textWidth), 0});
     if (openColorPicker) {
         ImGui::OpenPopup("colorpicker");
         imGuiBackupColor = imGuiColor;
@@ -554,23 +622,14 @@ void AlienImGui::ColorButtonWithPicker(
     if (ImGui::BeginPopup("colorpicker")) {
         ImGui::Text("Please choose a color");
         ImGui::Separator();
-        ImGui::ColorPicker4(
-            "##picker", (float*)&imGuiColor, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
+        ImGui::ColorPicker4("##picker", (float*)&imGuiColor, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
         ImGui::SameLine();
 
         ImGui::BeginGroup();  // Lock X position
         ImGui::Text("Current");
-        ImGui::ColorButton(
-            "##current",
-            imGuiColor,
-            ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf,
-            ImVec2(60, 40));
+        ImGui::ColorButton("##current", imGuiColor, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40));
         ImGui::Text("Previous");
-        if (ImGui::ColorButton(
-                "##previous",
-                imGuiBackupColor,
-                ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf,
-                ImVec2(60, 40))) {
+        if (ImGui::ColorButton("##previous", imGuiBackupColor, ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_AlphaPreviewHalf, ImVec2(60, 40))) {
             imGuiColor = imGuiBackupColor;
         }
         ImGui::Separator();
@@ -580,14 +639,10 @@ void AlienImGui::ColorButtonWithPicker(
             if ((n % 8) != 0)
                 ImGui::SameLine(0.0f, ImGui::GetStyle().ItemSpacing.y);
 
-            ImGuiColorEditFlags paletteButtonFlags =
-                ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
+            ImGuiColorEditFlags paletteButtonFlags = ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoTooltip;
             if (ImGui::ColorButton("##palette", imGuiSavedPalette[n], paletteButtonFlags, ImVec2(20, 20)))
-                imGuiColor = ImVec4(
-                    imGuiSavedPalette[n].x,
-                    imGuiSavedPalette[n].y,
-                    imGuiSavedPalette[n].z,
-                    imGuiColor.w);  // Preserve alpha!
+                imGuiColor = ImVec4(imGuiSavedPalette[n].x, imGuiSavedPalette[n].y, imGuiSavedPalette[n].z,
+                                    imGuiColor.w);  // Preserve alpha!
 
             // Allow user to drop colors into each palette entry. Note that ColorButton() is already a
             // drag source by default, unless specifying the ImGuiColorEditFlags_NoDragDrop flag.
@@ -608,6 +663,20 @@ void AlienImGui::ColorButtonWithPicker(
     backupColor = static_cast<ImU32>(ImColor(imGuiBackupColor));
     for (int i = 0; i < 32; ++i) {
         savedPalette[i] = static_cast<ImU32>(ImColor(imGuiSavedPalette[i]));
+    }
+
+    ImGui::SameLine();
+    if (parameters._defaultValue) {
+        ImGui::BeginDisabled(color == *parameters._defaultValue);
+        if (revertButton(parameters._name)) {
+            color = *parameters._defaultValue;
+        }
+        ImGui::EndDisabled();
+    }
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
     }
 }
 
@@ -631,24 +700,40 @@ void AlienImGui::Group(std::string const& text)
 
 bool AlienImGui::ToolbarButton(std::string const& text)
 {
+    auto id = std::to_string(ImGui::GetID(text.c_str()));
+
     ImGui::PushFont(StyleRepository::getInstance().getIconFont());
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
-    auto color = Const::ToolbarButtonColor;
+    auto color = Const::ToolbarButtonTextColor;
     float h, s, v;
     ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.6f, v * 0.3f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.4f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 0.6f));
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::ToolbarButtonColor);
-    auto buttonSize = StyleRepository::getInstance().scaleContent(40.0f);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>( ImColor::HSV(h, s, v * 0.3f)));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4> (ImColor::HSV(h, s, v * 0.45f)));
+
+    ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4> (Const::ToolbarButtonTextColor));
+    auto buttonSize = contentScale(40.0f);
     auto result = ImGui::Button(text.c_str(), {buttonSize, buttonSize});
+
     ImGui::PopStyleColor(4);
     ImGui::PopStyleVar();
     ImGui::PopFont();
     return result;
 }
 
-bool AlienImGui::Button(std::string const& text)
+void AlienImGui::ToolbarSeparator()
+{
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    auto cursorPos = ImGui::GetCursorScreenPos();
+    auto color = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Border]); 
+    color.Value.w *= ImGui::GetStyle().Alpha;
+    drawList->AddLine(
+        ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x, cursorPos.y + contentScale(40.0f)), color, 2.0f);
+    ImGui::Dummy(ImVec2(ImGui::GetStyle().FramePadding.x * 2, 1));
+}
+
+bool AlienImGui::Button(std::string const& text, float size)
 {
 /*
     auto color = Const::ButtonColor;
@@ -659,16 +744,35 @@ bool AlienImGui::Button(std::string const& text)
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 0.6f));
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::ButtonColor);
 */
-    auto result = ImGui::Button(text.c_str());
-/*
+    auto result = ImGui::Button(text.c_str(), ImVec2(contentScale(size), 0));
+    /*
     ImGui::PopStyleColor(4);
 */
     return result;
 }
 
-void AlienImGui::Tooltip(std::string const& text)
+bool AlienImGui::Button(ButtonParameters const& parameters)
 {
-    if (ImGui::IsItemHovered()) {
+    auto width = ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().contentScale(parameters._textWidth);
+    auto result = ImGui::Button(parameters._buttonText.c_str(), {width, 0});
+    ImGui::SameLine();
+
+    if (parameters._showDisabledRevertButton) {
+        ImGui::BeginDisabled(true);
+        revertButton(parameters._name);
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+    }
+    ImGui::TextUnformatted(parameters._name.c_str());
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
+    return result;
+}
+
+void AlienImGui::Tooltip(std::string const& text, bool delay)
+{
+    if (ImGui::IsItemHovered() && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
         ImGui::TextUnformatted(text.c_str());
@@ -677,14 +781,14 @@ void AlienImGui::Tooltip(std::string const& text)
     }
 }
 
-void AlienImGui::Tooltip(std::function<std::string()> const& textFunc)
+void AlienImGui::Tooltip(std::function<std::string()> const& textFunc, bool delay)
 {
-    if (ImGui::IsItemHovered()) {
+    if (ImGui::IsItemHovered() && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
         Tooltip(textFunc());
     }
 }
 
-void AlienImGui::convertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v)
+void AlienImGui::ConvertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v)
 {
     return ImGui::ColorConvertRGBtoHSV(
         toFloat((rgb >> 16) & 0xff) / 255, toFloat((rgb >> 8) & 0xff) / 255, toFloat((rgb & 0xff)) / 255, h, s, v);
@@ -695,7 +799,7 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
     auto origValue = value;
     ImVec4* colors = ImGui::GetStyle().Colors;
     ImVec2 p = ImGui::GetCursorScreenPos();
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
 
     float height = ImGui::GetFrameHeight();
     float width = height * 1.55f;
@@ -707,25 +811,25 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
         value = !value;
     }
 
-    auto color = Const::ToggleButtonColor;
+    auto color = Const::ToggleColor;
     float h, s, v;
     ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
 
     if (ImGui::IsItemHovered()) {
-        draw_list->AddRectFilled(
+        drawList->AddRectFilled(
             p,
             ImVec2(p.x + width, p.y + height),
             ImGui::GetColorU32(value ? (ImU32)ImColor::HSV(h, s * 0.9f, v * 0.8f) : (ImU32)ImColor::HSV(h, s * 0.9f, v * 0.4f)),
             height * 0.5f);
     } else {
-        draw_list->AddRectFilled(
+        drawList->AddRectFilled(
             p,
             ImVec2(p.x + width, p.y + height),
             ImGui::GetColorU32(value ? (ImU32)ImColor::HSV(h, s * 0.6f, v * 0.7f) : (ImU32)ImColor::HSV(h, s * 0.6f, v * 0.3f)),
             height * 0.50f);
     }
-    draw_list->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(20, 20, 20, 255));
-    draw_list->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 2.5f, IM_COL32(255, 255, 255, 255));
+    drawList->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(20, 20, 20, 255));
+    drawList->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 2.5f, IM_COL32(255, 255, 255, 255));
 
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
@@ -734,4 +838,572 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
     }
 
     return value != origValue;
+}
+
+bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode)
+{
+    auto result = false;
+
+    auto color = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
+    auto windowSize = ImGui::GetWindowSize();
+
+    auto const cellSize = contentScale(zoom);
+
+    RealVector2D upperLeft;
+    RealVector2D lowerRight;
+    for (auto const& cell : desc.cells) {
+        if (cell.pos.x < upperLeft.x) {
+            upperLeft.x = cell.pos.x;
+        }
+        if (cell.pos.y < upperLeft.y) {
+            upperLeft.y = cell.pos.y;
+        }
+        if (cell.pos.x > lowerRight.x) {
+            lowerRight.x = cell.pos.x;
+        }
+        if (cell.pos.y > lowerRight.y) {
+            lowerRight.y = cell.pos.y;
+        }
+    }
+    RealVector2D previewSize = (lowerRight - upperLeft) * cellSize + RealVector2D(cellSize, cellSize) * 2;
+
+    ImGui::SetCursorPos({std::max(0.0f, windowSize.x - previewSize.x) / 2, std::max(0.0f, windowSize.y - previewSize.y) / 2});
+    if (ImGui::BeginChild("##genome", ImVec2(previewSize.x, previewSize.y), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        auto windowPos = ImGui::GetWindowPos();
+        RealVector2D offset{windowPos.x + cellSize, windowPos.y + cellSize};
+
+        ImGui::SetCursorPos({previewSize.x - 1, previewSize.y - 1});
+        for (auto const& cell : desc.cells) {
+            auto cellPos = (cell.pos - upperLeft) * cellSize + offset;
+            float h, s, v;
+            AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize / 4, ImColor::HSV(h, s * 0.7f, v * 0.7f));
+
+            RealVector2D textPos(cellPos.x - cellSize / 8, cellPos.y - cellSize / 4);
+            drawList->AddText(
+                StyleRepository::getInstance().getLargeFont(),
+                cellSize / 2,
+                {textPos.x, textPos.y},
+                Const::BranchNumberOverlayShadowColor,
+                std::to_string(cell.executionOrderNumber).c_str());
+            drawList->AddText(
+                StyleRepository::getInstance().getLargeFont(),
+                cellSize / 2,
+                {textPos.x + 1, textPos.y + 1},
+                Const::BranchNumberOverlayColor,
+                std::to_string(cell.executionOrderNumber).c_str());
+
+            if (selectedNode && cell.nodeIndex == *selectedNode) {
+                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
+            }
+
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                auto mousePos = ImGui::GetMousePos();
+                if (mousePos.x >= cellPos.x - cellSize / 3 && mousePos.y >= cellPos.y - cellSize / 3 && mousePos.x <= cellPos.x + cellSize / 3
+                    && mousePos.y <= cellPos.y + cellSize / 3) {
+                    selectedNode = cell.nodeIndex;
+                    result = true;
+                }
+            }
+
+        }
+
+        for (auto const& connection : desc.connections) {
+            auto cellPos1 = (connection.cell1 - upperLeft) * cellSize + offset;
+            auto cellPos2 = (connection.cell2 - upperLeft) * cellSize + offset;
+
+            auto direction = cellPos1 - cellPos2;
+
+            Math::normalize(direction);
+            auto connectionStartPos = cellPos1 - direction * cellSize / 4;
+            auto connectionEndPos = cellPos2 + direction * cellSize / 4;
+            drawList->AddLine({connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+
+            if (connection.arrowToCell1) {
+                auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
+                auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8;
+                drawList->AddLine({arrowPartStart1.x, arrowPartStart1.y}, {connectionStartPos.x, connectionStartPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+
+                auto arrowPartDirection2 = RealVector2D{-direction.x - direction.y, direction.x - direction.y};
+                auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 8;
+                drawList->AddLine({arrowPartStart2.x, arrowPartStart2.y}, {connectionStartPos.x, connectionStartPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+            }
+
+            if (connection.arrowToCell2) {
+                auto arrowPartDirection1 = RealVector2D{direction.x - direction.y, direction.x + direction.y};
+                auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 8;
+                drawList->AddLine({arrowPartStart1.x, arrowPartStart1.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+
+                auto arrowPartDirection2 = RealVector2D{direction.x + direction.y, -direction.x + direction.y};
+                auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * cellSize / 8;
+                drawList->AddLine({arrowPartStart2.x, arrowPartStart2.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+            }
+        }
+    }
+    ImGui::EndChild();
+
+    //zoom buttons
+    ImGui::SetCursorPos({ImGui::GetScrollX() + contentScale(10), ImGui::GetScrollY() + windowSize.y - contentScale(40)});
+    if (ImGui::BeginChild("##buttons", ImVec2(100, 30), false)) {
+        ImGui::SetCursorPos({0, 0});
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
+        ImGui::PushID(1);
+        if (ImGui::Button(ICON_FA_SEARCH_PLUS)) {
+            zoom *= 1.5f;
+        }
+        ImGui::PopID();
+        ImGui::SameLine();
+        ImGui::PushID(2);
+        if (ImGui::Button(ICON_FA_SEARCH_MINUS)) {
+            zoom /= 1.5f;
+        }
+        ImGui::PopID();
+        ImGui::PopStyleColor(3);
+    }
+    ImGui::EndChild();
+
+    return result;
+}
+
+bool AlienImGui::CellFunctionCombo(CellFunctionComboParameters& parameters, int& value)
+{
+    auto modCellFunctionStrings = Const::CellFunctionStrings;
+    auto noneString = modCellFunctionStrings.back();
+    modCellFunctionStrings.pop_back();
+    modCellFunctionStrings.insert(modCellFunctionStrings.begin(), noneString);
+
+    value = (value + 1) % CellFunction_Count;
+    auto result =
+        AlienImGui::Combo(AlienImGui::ComboParameters().name(parameters._name).values(modCellFunctionStrings).textWidth(parameters._textWidth), value);
+    value = (value + CellFunction_Count - 1) % CellFunction_Count;
+    return result;
+}
+
+bool AlienImGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, int& value)
+{
+    std::vector const AngleAlignmentStrings = {"None"s, "Align to 180 deg"s, "Align to 120 deg"s, "Align to 90 deg"s, "Align to 72 deg"s, "Align to 60 deg"s};
+    return AlienImGui::Combo(AlienImGui::ComboParameters().name(parameters._name).values(AngleAlignmentStrings).textWidth(parameters._textWidth), value);
+}
+
+void AlienImGui::NeuronSelection(
+    NeuronSelectionParameters const& parameters,
+    std::vector<std::vector<float>> const& weights,
+    std::vector<float> const& biases,
+    int& selectedInput,
+    int& selectedOutput)
+{
+    auto setDefaultColors = [] {
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonHoveredColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonHoveredColor);
+    };
+    auto setHightlightingColors = [] {
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonActiveColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
+    };
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    auto windowPos = ImGui::GetWindowPos();
+    auto outputButtonPositionFromRight = StyleRepository::getInstance().contentScale(parameters._outputButtonPositionFromRight);
+    RealVector2D inputPos[MAX_CHANNELS];
+    RealVector2D outputPos[MAX_CHANNELS];
+    auto biasFieldWidth = ImGui::GetStyle().FramePadding.x * 2;
+
+    //draw buttons and save positions to visualize weights
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+
+        auto startButtonPos = ImGui::GetCursorPos();
+
+        i == selectedInput ? setHightlightingColors() : setDefaultColors();
+        if (ImGui::Button(("Input #" + std::to_string(i)).c_str())) {
+            selectedInput = i;
+        }
+        ImGui::PopStyleColor(3);
+        if (i == 0) {
+            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT
+                    " Constructor: 0 = construction failed, 1 = construction successful\n" ICON_FA_CARET_RIGHT " Sensor: 0 = nothing found, 1 = region found");
+        }
+        if (i == 1) {
+            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT " Sensor: cell density of found region");
+        }
+        if (i == 2) {
+            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT " Sensor: distance to found region");
+        }
+        if (i == 3) {
+            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT
+                    " Sensor: relative angle of found region (when 'Scan vicinity' is activated)");
+        }
+        if (i > 3) {
+            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell");
+        }
+
+        auto buttonSize = ImGui::GetItemRectSize();
+        inputPos[i] = RealVector2D(
+            windowPos.x - ImGui::GetScrollX() + startButtonPos.x + buttonSize.x, windowPos.y - ImGui::GetScrollY() + startButtonPos.y + buttonSize.y / 2);
+
+        ImGui::SameLine(0, ImGui::GetContentRegionAvail().x - buttonSize.x - outputButtonPositionFromRight + ImGui::GetStyle().FramePadding.x);
+        startButtonPos = ImGui::GetCursorPos();
+        outputPos[i] = RealVector2D(
+            windowPos.x - ImGui::GetScrollX() + startButtonPos.x - biasFieldWidth, windowPos.y - ImGui::GetScrollY() + startButtonPos.y + buttonSize.y / 2);
+
+        i == selectedOutput ? setHightlightingColors() : setDefaultColors();
+        if (ImGui::Button(("Output #" + std::to_string(i)).c_str())) {
+            selectedOutput = i;
+        }
+        ImGui::PopStyleColor(3);
+        if (i == 0) {
+            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell\n" ICON_FA_CARET_RIGHT
+                    " Constructor: = 0 means do nothing, abs(*) > threshold triggers cell construction\n" ICON_FA_CARET_RIGHT
+                    " Attacker: = 0 means do nothing, abs(*) > threshold triggers attacking of nearby cells\n" ICON_FA_CARET_RIGHT
+                    " Sensor: = 0 means do nothing, abs(*) > threshold triggers scanning for cells\n" ICON_FA_CARET_RIGHT
+                    " Injector: = 0 means do nothing, abs(*) > threshold triggers injection of a genome to other constructors\n" ICON_FA_CARET_RIGHT
+                    " Muscle: abs(*) intensity of muscle process and sign(*) direction of muscle process");
+        }
+        if (i == 1) {
+            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell\n" ICON_FA_CARET_RIGHT
+                    " Muscle: abs(*) > threshold triggers tangential movement during bending");
+        }
+        if (i > 1) {
+            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell");
+        }
+    }
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int j = 0; j < MAX_CHANNELS; ++j) {
+            if (std::abs(weights[j][i]) > NEAR_ZERO) {
+                continue;
+            }
+            drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, ImColor::HSV(0.0f, 0.0f, 0.1f), 2.0f);
+        }
+    }
+    auto calcColor = [](float value) {
+        auto factor = std::min(1.0f, std::abs(value));
+        if (value > NEAR_ZERO) {
+            return ImColor::HSV(0.61f, 0.5f, 0.8f * factor);
+        } else if (value < -NEAR_ZERO) {
+            return ImColor::HSV(0.0f, 0.5f, 0.8f * factor);
+        } else {
+            return ImColor::HSV(0.0f, 0.0f, 0.1f);
+        }
+    };
+
+    //visualize weights
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int j = 0; j < MAX_CHANNELS; ++j) {
+            if (std::abs(weights[j][i]) <= NEAR_ZERO) {
+                continue;
+            }
+            auto thickness = std::min(4.0f, std::abs(weights[j][i]));
+            drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, calcColor(weights[j][i]), thickness);
+        }
+    }
+
+    //visualize biases
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        drawList->AddRectFilled(
+            {outputPos[i].x, outputPos[i].y - biasFieldWidth}, {outputPos[i].x + biasFieldWidth, outputPos[i].y + biasFieldWidth}, calcColor(biases[i]));
+    }
+
+    //draw selection
+    drawList->AddRectFilled(
+        {outputPos[selectedOutput].x, outputPos[selectedOutput].y - biasFieldWidth},
+        {outputPos[selectedOutput].x + biasFieldWidth, outputPos[selectedOutput].y + biasFieldWidth},
+        ImColor::HSV(0.0f, 0.0f, 1.0f, 0.35f));
+    drawList->AddLine(
+        {inputPos[selectedInput].x, inputPos[selectedInput].y}, {outputPos[selectedOutput].x, outputPos[selectedOutput].y}, ImColor::HSV(0.0f, 0.0f, 1.0f, 0.35f), 8.0f);
+}
+
+namespace
+{
+    template <typename T>
+    std::string toString(T const& value, std::string const& format, bool allowInfinity = false, bool tryMaintainFormat = false)
+    {
+        if (allowInfinity && value == Infinity<T>::value) {
+            return "infinity";
+        }
+        if (tryMaintainFormat) {
+            return format;
+        }
+        char result[16];
+        snprintf(result, sizeof(result), format.c_str(), value);
+        return std::string(result);
+    }
+}
+
+template <typename Parameter, typename T>
+bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled)
+{
+    ImGui::PushID(parameters._name.c_str());
+
+    //enable button
+    if (enabled) {
+        ImGui::Checkbox("##checkbox", enabled);
+        if (!(*enabled)) {
+            auto numRows = parameters._colorDependence ? MAX_COLORS : 1;
+            for (int row = 0; row < numRows; ++row) {
+                value[row] = parameters._disabledValue[row];
+            }
+        }
+        ImGui::BeginDisabled(!(*enabled));
+        ImGui::SameLine();
+    }
+
+    //color dependent button
+    auto toggleButtonId = ImGui::GetID("expanded");
+    auto isExpanded = _isExpanded.contains(toggleButtonId);
+    if (parameters._colorDependence) {
+        auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
+        if (buttonResult) {
+            if (isExpanded) {
+                _isExpanded.erase(toggleButtonId);
+            } else {
+                _isExpanded.insert(toggleButtonId);
+            }
+        }
+        ImGui::SameLine();
+    }
+
+    bool result = false;
+    float sliderPosX;
+    for (int color = 0; color < MAX_COLORS; ++color) {
+        if (color > 0) {
+            if (!parameters._colorDependence) {
+                break;
+            }
+            if (parameters._colorDependence && isExpanded == false) {
+                break;
+            }
+        }
+        if (color == 0) {
+            sliderPosX = ImGui::GetCursorPosX();
+        } else {
+            ImGui::SetCursorPosX(sliderPosX);
+        }
+
+        //color field
+        ImGui::PushID(color);
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
+        if (parameters._colorDependence && isExpanded) {
+            {
+                ImVec2 pos = ImGui::GetCursorPos();
+                ImGui::SetCursorPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+            }
+            AlienImGui::ColorField(Const::IndividualCellColors[color], 0);
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(parameters._textWidth));
+            {
+                ImVec2 pos = ImGui::GetCursorPos();
+                ImGui::SetCursorPos(ImVec2(pos.x, pos.y - ImGui::GetStyle().FramePadding.y));
+            }
+        }
+
+        //slider
+        auto format = toString(value[color], parameters._format, parameters._infinity, true);
+        if (parameters._colorDependence && !isExpanded) {
+            T minValue = value[0], maxValue = value[0];
+            for (int color = 1; color < MAX_COLORS; ++color) {
+                maxValue = std::max(maxValue, value[color]);
+                minValue = std::min(minValue, value[color]);
+            }
+            if (minValue != maxValue) {
+                format = toString(minValue, parameters._format, parameters._infinity, false) + " ... "
+                    + toString(maxValue, parameters._format, parameters._infinity, false);
+            }
+        }
+        if (parameters._infinity && value[color] == Infinity<T>::value) {
+            value[color] = parameters._max;
+        }
+        if constexpr (std::is_same<T, float>()) {
+            result |= ImGui::SliderFloat(
+                "##slider", &value[color], parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+        }
+        if constexpr (std::is_same<T, int>()) {
+            result |= ImGui::SliderInt(
+                "##slider", &value[color], parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+        }
+        if (parameters._infinity && value[color] == parameters._max) {
+            value[color] = Infinity<T>::value;
+        }
+        if (parameters._colorDependence && !isExpanded && result) {
+            for (int color = 1; color < MAX_COLORS; ++color) {
+                value[color] = value[0];
+            }
+        }
+
+        ImGui::PopID();
+
+        //revert button
+        if (color == 0) {
+            if (parameters._defaultValue) {
+                ImGui::SameLine();
+
+                auto equal = true;
+                auto numRows = parameters._colorDependence ? MAX_COLORS : 1;
+                for (int row = 0; row < numRows; ++row) {
+                    if (value[row] != parameters._defaultValue[row]) {
+                        equal = false;
+                        break;
+                    }
+                }
+                ImGui::BeginDisabled(equal);
+                if (revertButton(parameters._name)) {
+                    for (int row = 0; row < numRows; ++row) {
+                        value[row] = parameters._defaultValue[row];
+                    }
+                    result = true;
+                }
+                ImGui::EndDisabled();
+            }
+
+            //text
+            if (!parameters._name.empty()) {
+                ImGui::SameLine();
+                ImGui::TextUnformatted(parameters._name.c_str());
+            }
+
+            //tooltip
+            if (parameters._tooltip) {
+                AlienImGui::HelpMarker(*parameters._tooltip);
+            }
+        }
+    }
+    if (enabled) {
+        ImGui::EndDisabled();
+    }
+    ImGui::PopID();
+    return result;
+}
+
+template <typename T>
+void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS])
+{
+    auto toggleButtonId = ImGui::GetID("expanded");
+    auto isExpanded = _isExpanded.contains(toggleButtonId);
+    auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
+    if (buttonResult) {
+        if (isExpanded) {
+            _isExpanded.erase(toggleButtonId);
+        } else {
+            _isExpanded.insert(toggleButtonId);
+        }
+    }
+    auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
+
+    ImGui::SameLine();
+    auto startPosX = ImGui::GetCursorPosX();
+
+    if (isExpanded) {
+
+        //color matrix
+        if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS + 1, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
+            for (int row = 0; row < MAX_COLORS + 1; ++row) {
+                ImGui::PushID(row);
+                ImGui::SetCursorPosX(startPosX);
+                for (int col = 0; col < MAX_COLORS + 1; ++col) {
+                    ImGui::PushID(col);
+                    ImGui::TableNextColumn();
+                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                    if (row == 0 && col > 0) {
+                        ImVec2 pos = ImGui::GetCursorScreenPos();
+                        ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+                        ColorField(Const::IndividualCellColors[col - 1], -1);
+                    } else if (row > 0 && col == 0) {
+                        ImVec2 pos = ImGui::GetCursorScreenPos();
+                        ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
+                        ColorField(Const::IndividualCellColors[row - 1], -1);
+                    } else if (row > 0 && col > 0) {
+                        if constexpr (std::is_same<T, float>()) {
+                            ImGui::InputFloat(("##" + parameters._name).c_str(), &value[row - 1][col - 1], 0, 0, parameters._format.c_str());
+                        }
+                        if constexpr (std::is_same<T, int>()) {
+                            ImGui::InputInt(("##" + parameters._name).c_str(), &value[row - 1][col - 1], 0, 0);
+                        }
+                        if constexpr (std::is_same<T, bool>()) {
+                            ImGui::Checkbox(("##" + parameters._name).c_str(), &value[row - 1][col - 1]);
+                        }
+                    }
+                    ImGui::PopID();
+                }
+                ImGui::TableNextRow();
+                ImGui::PopID();
+            }
+        }
+        ImGui::EndTable();
+    } else {
+
+        //collapsed view
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
+        if constexpr (std::is_same<T, bool>()) {
+            static bool test = false;
+            ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
+            if (ImGui::Button("Define matrix", ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
+                if (isExpanded) {
+                    _isExpanded.erase(toggleButtonId);
+                } else {
+                    _isExpanded.insert(toggleButtonId);
+                }
+            }
+            ImGui::PopStyleVar();
+        } else {
+            auto format = parameters._format;
+            if (!isExpanded) {
+                T minValue = value[0][0], maxValue = value[0][0];
+                for (int i = 1; i < MAX_COLORS; ++i) {
+                    for (int j = 1; j < MAX_COLORS; ++j) {
+                        maxValue = std::max(maxValue, value[i][j]);
+                        minValue = std::min(minValue, value[i][j]);
+                    }
+                }
+                if (minValue != maxValue) {
+                    format = toString(minValue, parameters._format) + " ... " + toString(maxValue, parameters._format);
+                }
+                auto sliderMoved = false;
+                if constexpr (std::is_same<T, float>()) {
+                    sliderMoved |= ImGui::SliderFloat(
+                        "##slider", &value[0][0], parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+                }
+                if constexpr (std::is_same<T, int>()) {
+                    sliderMoved |= ImGui::SliderInt(
+                        "##slider", &value[0][0], parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+                }
+                if (sliderMoved) {
+                    for (int i = 0; i < MAX_COLORS; ++i) {
+                        for (int j = 0; j < MAX_COLORS; ++j) {
+                            value[i][j] = value[0][0];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    ImGui::SameLine();
+    if (parameters._defaultValue) {
+        bool changed = false;
+        for (int row = 0; row < MAX_COLORS; ++row) {
+            for (int col = 0; col < MAX_COLORS; ++col) {
+                if (value[row][col] != (*parameters._defaultValue)[row][col]) {
+                    changed = true;
+                }
+            }
+        }
+        ImGui::BeginDisabled(!changed);
+        if (revertButton(parameters._name)) {
+            for (int row = 0; row < MAX_COLORS; ++row) {
+                for (int col = 0; col < MAX_COLORS; ++col) {
+                    value[row][col] = (*parameters._defaultValue)[row][col];
+                }
+            }
+        }
+        ImGui::EndDisabled();
+    }
+
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
+
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
 }

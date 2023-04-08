@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RawMemory.cuh"
+#include "Array.cuh"
 
 template <typename Value>
 class List

@@ -4,10 +4,10 @@
 
 namespace Const
 {
-    auto constexpr MaxInspectedEntities = 20;
+    auto constexpr MaxInspectedObjects = 20;
 }
 
 struct InspectedEntityIds
 {
-    uint64_t values[Const::MaxInspectedEntities];
+    uint64_t values[Const::MaxInspectedObjects];
 };

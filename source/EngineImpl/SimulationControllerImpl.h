@@ -3,7 +3,6 @@
 #include <thread>
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/SymbolMap.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
@@ -19,7 +18,7 @@ public:
 
     void initCuda() override;
 
-    void newSimulation(uint64_t timestep, Settings const& settings, SymbolMap const& symbolMap) override;
+    void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters) override;
     void clear() override;
 
     void registerImageResource(void* image) override;
@@ -40,23 +39,29 @@ public:
         IntVector2D const& imageSize,
         double zoom) override;
 
+    bool isSyncSimulationWithRendering() const override;
+    void setSyncSimulationWithRendering(bool value) override;
+    int getSyncSimulationWithRenderingRatio() const override;
+    void setSyncSimulationWithRenderingRatio(int value) override;
+
     ClusteredDataDescription getClusteredSimulationData() override;
     DataDescription getSimulationData() override;
     ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters) override;
     DataDescription getSelectedSimulationData(bool includeClusters) override;
-    DataDescription getInspectedSimulationData(std::vector<uint64_t> entityIds) override;
+    DataDescription getInspectedSimulationData(std::vector<uint64_t> objectIds) override;
 
     void addAndSelectSimulationData(DataDescription const& dataToAdd) override;
     void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate) override;
     void setSimulationData(DataDescription const& dataToUpdate) override;
-    void removeSelectedEntities(bool includeClusters) override;
-    void relaxSelectedEntities(bool includeClusters) override;
-    void uniformVelocitiesForSelectedEntities(bool includeClusters) override;
+    void removeSelectedObjects(bool includeClusters) override;
+    void relaxSelectedObjects(bool includeClusters) override;
+    void uniformVelocitiesForSelectedObjects(bool includeClusters) override;
     void makeSticky(bool includeClusters) override;
     void removeStickiness(bool includeClusters) override;
     void setBarrier(bool value, bool includeClusters) override;
-    void colorSelectedEntities(unsigned char color, bool includeClusters) override;
-    void reconnectSelectedEntities() override;
+    void colorSelectedObjects(unsigned char color, bool includeClusters) override;
+    void reconnectSelectedObjects() override;
+    void setDetached(bool value) override;
     void changeCell(CellDescription const& changedCell) override;
     void changeParticle(ParticleDescription const& changedParticle) override;
 
@@ -73,21 +78,13 @@ public:
 
     SimulationParameters const& getSimulationParameters() const override;
     SimulationParameters getOriginalSimulationParameters() const override;
+    void setSimulationParameters(SimulationParameters const& parameters) override;
+    void setOriginalSimulationParameters(SimulationParameters const& parameters) override;
     void setSimulationParameters_async(SimulationParameters const& parameters) override;
-
-    SimulationParametersSpots getSimulationParametersSpots() const override;
-    SimulationParametersSpots getOriginalSimulationParametersSpots() const override;
-    void setOriginalSimulationParametersSpot(SimulationParametersSpot const& value, int index) override;
-    void setSimulationParametersSpots_async(SimulationParametersSpots const& value) override;
 
     GpuSettings getGpuSettings() const override;
     GpuSettings getOriginalGpuSettings() const override;
     void setGpuSettings_async(GpuSettings const& gpuSettings) override;
-
-    FlowFieldSettings getFlowFieldSettings() const override;
-    FlowFieldSettings getOriginalFlowFieldSettings() const override;
-    void setOriginalFlowFieldCenter(FlowCenter const& value, int index) override;
-    void setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings) override;
 
     void
     applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) override;
@@ -95,31 +92,28 @@ public:
     void switchSelection(RealVector2D const& pos, float radius) override;
     void swapSelection(RealVector2D const& pos, float radius) override;
     SelectionShallowData getSelectionShallowData() override;
-    void shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData) override;
+    void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData) override;
     void setSelection(RealVector2D const& startPos, RealVector2D const& endPos) override;
     void removeSelection() override;
     bool updateSelectionIfNecessary() override;
 
     GeneralSettings getGeneralSettings() const override;
     IntVector2D getWorldSize() const override;
-    Settings getSettings() const override;
-    SymbolMap const& getSymbolMap() const override;
-    SymbolMap const& getOriginalSymbolMap() const override;
-    void setSymbolMap(SymbolMap const& symbolMap) override;
-    MonitorData getStatistics() const override;
+    StatisticsData getStatistics() const override;
 
     std::optional<int> getTpsRestriction() const override;
     void setTpsRestriction(std::optional<int> const& value) override;
 
     float getTps() const override;
 
+    //for tests
+    void testOnly_mutate(uint64_t cellId, MutationType mutationType) override;
+
 private:
     bool _selectionNeedsUpdate = false;
 
     Settings _origSettings;
     Settings _settings;
-    SymbolMap _symbolMap;
-    SymbolMap _origSymbolMap;
 
     EngineWorker _worker;
     std::thread* _thread = nullptr;

@@ -2,20 +2,21 @@
 
 namespace
 {
-    __device__ void copyString(int& targetLen, int& targetStringIndex, int sourceLen, char* sourceString, int& numStringBytes, char*& stringBytes)
+    __device__ void
+    copyAuxiliaryData(uint64_t sourceSize, uint8_t* source, uint64_t& targetSize, uint64_t& targetIndex, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
     {
-        targetLen = sourceLen;
-        if (sourceLen > 0) {
-            targetStringIndex = atomicAdd(&numStringBytes, sourceLen);
-            for (int i = 0; i < sourceLen; ++i) {
-                stringBytes[targetStringIndex + i] = sourceString[i];
+        targetSize = sourceSize;
+        if (sourceSize > 0) {
+            targetIndex = alienAtomicAdd64(&auxiliaryDataSize, sourceSize);
+            for (int i = 0; i < sourceSize; ++i) {
+                auxiliaryData[targetIndex + i] = source[i];
             }
         }
     }
 
-    __device__ void createCellTO(Cell* cell, DataAccessTO& dataTO, Cell* cellArrayStart)
+    __device__ void createCellTO(Cell* cell, DataTO& dataTO, Cell* cellArrayStart)
     {
-        auto cellTOIndex = atomicAdd(dataTO.numCells, 1);
+        auto cellTOIndex = alienAtomicAdd64(dataTO.numCells, uint64_t(1));
         auto& cellTO = dataTO.cells[cellTOIndex];
 
         cellTO.id = cell->id;
@@ -23,32 +24,36 @@ namespace
         cellTO.vel = cell->vel;
         cellTO.barrier = cell->barrier;
         cellTO.energy = cell->energy;
+        cellTO.stiffness = cell->stiffness;
         cellTO.maxConnections = cell->maxConnections;
         cellTO.numConnections = cell->numConnections;
-        cellTO.branchNumber = cell->branchNumber;
-        cellTO.tokenBlocked = cell->tokenBlocked;
-        cellTO.cellFunctionType = cell->cellFunctionType;
-        cellTO.numStaticBytes = cell->numStaticBytes;
-        cellTO.cellFunctionInvocations = cell->cellFunctionInvocations;
-        cellTO.metadata.color = cell->metadata.color;
+        cellTO.executionOrderNumber = cell->executionOrderNumber;
+        cellTO.livingState = cell->livingState;
+        cellTO.constructionId = cell->constructionId;
+        cellTO.inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
+        cellTO.outputBlocked = cell->outputBlocked;
+        cellTO.cellFunction = cell->cellFunction;
+        cellTO.color = cell->color;
         cellTO.age = cell->age;
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            cellTO.activity.channels[i] = cell->activity.channels[i];
+        }
+        cellTO.activationTime = cell->activationTime;
 
-        copyString(
-            cellTO.metadata.nameLen, cellTO.metadata.nameStringIndex, cell->metadata.nameLen, cell->metadata.name, *dataTO.numStringBytes, dataTO.stringBytes);
-        copyString(
-            cellTO.metadata.descriptionLen,
-            cellTO.metadata.descriptionStringIndex,
-            cell->metadata.descriptionLen,
+        copyAuxiliaryData(
+            cell->metadata.nameSize,
+            cell->metadata.name,
+            cellTO.metadata.nameSize,
+            cellTO.metadata.nameDataIndex,
+            *dataTO.numAuxiliaryData,
+            dataTO.auxiliaryData);
+        copyAuxiliaryData(
+            cell->metadata.descriptionSize,
             cell->metadata.description,
-            *dataTO.numStringBytes,
-            dataTO.stringBytes);
-        copyString(
-            cellTO.metadata.sourceCodeLen,
-            cellTO.metadata.sourceCodeStringIndex,
-            cell->metadata.sourceCodeLen,
-            cell->metadata.sourceCode,
-            *dataTO.numStringBytes,
-            dataTO.stringBytes);
+            cellTO.metadata.descriptionSize,
+            cellTO.metadata.descriptionDataIndex,
+            *dataTO.numAuxiliaryData,
+            dataTO.auxiliaryData);
 
         cell->tag = cellTOIndex;
         for (int i = 0; i < cell->numConnections; ++i) {
@@ -57,24 +62,87 @@ namespace
             cellTO.connections[i].distance = cell->connections[i].distance;
             cellTO.connections[i].angleFromPrevious = cell->connections[i].angleFromPrevious;
         }
-        for (int i = 0; i < MAX_CELL_STATIC_BYTES; ++i) {
-            cellTO.staticData[i] = cell->staticData[i];
-        }
-        cellTO.numMutableBytes = cell->numMutableBytes;
-        for (int i = 0; i < MAX_CELL_MUTABLE_BYTES; ++i) {
-            cellTO.mutableData[i] = cell->mutableData[i];
+
+        switch (cell->cellFunction) {
+        case CellFunction_Neuron: {
+            uint64_t targetSize;    //not used
+            copyAuxiliaryData(
+                sizeof(NeuronFunction::NeuronState),
+                reinterpret_cast<uint8_t*>(cell->cellFunctionData.neuron.neuronState),
+                targetSize,
+                cellTO.cellFunctionData.neuron.weightsAndBiasesDataIndex,
+                *dataTO.numAuxiliaryData,
+                dataTO.auxiliaryData);
+        } break;
+        case CellFunction_Transmitter: {
+            cellTO.cellFunctionData.transmitter.mode = cell->cellFunctionData.transmitter.mode;
+        } break;
+        case CellFunction_Constructor: {
+            cellTO.cellFunctionData.constructor.activationMode = cell->cellFunctionData.constructor.activationMode;
+            cellTO.cellFunctionData.constructor.singleConstruction = cell->cellFunctionData.constructor.singleConstruction;
+            cellTO.cellFunctionData.constructor.separateConstruction = cell->cellFunctionData.constructor.separateConstruction;
+            cellTO.cellFunctionData.constructor.maxConnections = cell->cellFunctionData.constructor.maxConnections;
+            cellTO.cellFunctionData.constructor.angleAlignment = cell->cellFunctionData.constructor.angleAlignment;
+            cellTO.cellFunctionData.constructor.stiffness = cell->cellFunctionData.constructor.stiffness;
+            cellTO.cellFunctionData.constructor.constructionActivationTime = cell->cellFunctionData.constructor.constructionActivationTime;
+            copyAuxiliaryData(
+                cell->cellFunctionData.constructor.genomeSize,
+                cell->cellFunctionData.constructor.genome,
+                cellTO.cellFunctionData.constructor.genomeSize,
+                cellTO.cellFunctionData.constructor.genomeDataIndex,
+                *dataTO.numAuxiliaryData,
+                dataTO.auxiliaryData);
+            cellTO.cellFunctionData.constructor.currentGenomePos = cell->cellFunctionData.constructor.currentGenomePos;
+            cellTO.cellFunctionData.constructor.genomeGeneration = cell->cellFunctionData.constructor.genomeGeneration;
+        } break;
+        case CellFunction_Sensor: {
+            cellTO.cellFunctionData.sensor.mode = cell->cellFunctionData.sensor.mode;
+            cellTO.cellFunctionData.sensor.angle = cell->cellFunctionData.sensor.angle;
+            cellTO.cellFunctionData.sensor.minDensity = cell->cellFunctionData.sensor.minDensity;
+            cellTO.cellFunctionData.sensor.color = cell->cellFunctionData.sensor.color;
+        } break;
+        case CellFunction_Nerve: {
+            cellTO.cellFunctionData.nerve.pulseMode = cell->cellFunctionData.nerve.pulseMode;
+            cellTO.cellFunctionData.nerve.alternationMode = cell->cellFunctionData.nerve.alternationMode;
+        } break;
+        case CellFunction_Attacker: {
+            cellTO.cellFunctionData.attacker.mode = cell->cellFunctionData.attacker.mode;
+        } break;
+        case CellFunction_Injector: {
+            cellTO.cellFunctionData.injector.mode = cell->cellFunctionData.injector.mode;
+            cellTO.cellFunctionData.injector.counter = cell->cellFunctionData.injector.counter;
+            copyAuxiliaryData(
+                cell->cellFunctionData.injector.genomeSize,
+                cell->cellFunctionData.injector.genome,
+                cellTO.cellFunctionData.injector.genomeSize,
+                cellTO.cellFunctionData.injector.genomeDataIndex,
+                *dataTO.numAuxiliaryData,
+                dataTO.auxiliaryData);
+            cellTO.cellFunctionData.injector.genomeGeneration = cell->cellFunctionData.injector.genomeGeneration;
+        } break;
+        case CellFunction_Muscle: {
+            cellTO.cellFunctionData.muscle.mode = cell->cellFunctionData.muscle.mode;
+            cellTO.cellFunctionData.muscle.lastBendingDirection = cell->cellFunctionData.muscle.lastBendingDirection;
+            cellTO.cellFunctionData.muscle.consecutiveBendingAngle = cell->cellFunctionData.muscle.consecutiveBendingAngle;
+        } break;
+        case CellFunction_Defender: {
+            cellTO.cellFunctionData.defender.mode = cell->cellFunctionData.defender.mode;
+        } break;
+        case CellFunction_Placeholder: {
+        } break;
         }
     }
 
-    __device__ void createParticleTO(Particle* particle, DataAccessTO& dataTO)
+    __device__ void createParticleTO(Particle* particle, DataTO& dataTO)
     {
-        int particleTOIndex = atomicAdd(dataTO.numParticles, 1);
-        ParticleAccessTO& particleTO = dataTO.particles[particleTOIndex];
+        int particleTOIndex = alienAtomicAdd64(dataTO.numParticles, uint64_t(1));
+        ParticleTO& particleTO = dataTO.particles[particleTOIndex];
 
         particleTO.id = particle->id;
         particleTO.pos = particle->absPos;
         particleTO.vel = particle->vel;
         particleTO.energy = particle->energy;
+        particleTO.color = particle->color;
     }
 
 }
@@ -82,11 +150,11 @@ namespace
 /************************************************************************/
 /* Main                                                                 */
 /************************************************************************/
-__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, DataAccessTO dataTO)
+__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, DataTO dataTO)
 {
-    auto const& cells = data.entities.cellPointers;
+    auto const& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto const cellArrayStart = data.entities.cells.getArray();
+    auto const cellArrayStart = data.objects.cells.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -98,12 +166,12 @@ __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, b
     }
 }
 
-__global__ void cudaGetSelectedParticleData(SimulationData data, DataAccessTO access)
+__global__ void cudaGetSelectedParticleData(SimulationData data, DataTO access)
 {
-    PartitionData particleBlock = calcPartition(data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    PartitionData particleBlock = calcPartition(data.objects.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-        auto const& particle = data.entities.particlePointers.at(particleIndex);
+        auto const& particle = data.objects.particlePointers.at(particleIndex);
         if (particle->selected == 0) {
             continue;
         }
@@ -112,17 +180,17 @@ __global__ void cudaGetSelectedParticleData(SimulationData data, DataAccessTO ac
     }
 }
 
-__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, DataAccessTO dataTO)
+__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, DataTO dataTO)
 {
-    auto const& cells = data.entities.cellPointers;
+    auto const& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto const cellArrayStart = data.entities.cells.getArray();
+    auto const cellArrayStart = data.objects.cells.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
         bool found = false;
-        for (int i = 0; i < Const::MaxInspectedEntities; ++i) {
+        for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
             if (ids.values[i] == 0) {
                 break;
             }
@@ -139,14 +207,14 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
     }
 }
 
-__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, DataAccessTO access)
+__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, DataTO access)
 {
-    PartitionData particleBlock = calcAllThreadsPartition(data.entities.particlePointers.getNumEntries());
+    PartitionData particleBlock = calcAllThreadsPartition(data.objects.particlePointers.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-        auto const& particle = data.entities.particlePointers.at(particleIndex);
+        auto const& particle = data.objects.particlePointers.at(particleIndex);
         bool found = false;
-        for (int i = 0; i < Const::MaxInspectedEntities; ++i) {
+        for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
             if (ids.values[i] == 0) {
                 break;
             }
@@ -162,10 +230,10 @@ __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationD
     }
 }
 
-__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO)
+__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO dataTO)
 {
     {
-        auto const& cells = data.entities.cellPointers;
+        auto const& cells = data.objects.cellPointers;
         auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -176,18 +244,18 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
             }
-            auto cellTOIndex = atomicAdd(dataTO.numCells, 1);
+            auto cellTOIndex = alienAtomicAdd64(dataTO.numCells, uint64_t(1));
             auto& cellTO = dataTO.cells[cellTOIndex];
 
             cellTO.id = cell->id;
             cellTO.pos = cell->absPos;
-            cellTO.cellFunctionType = cell->cellFunctionType;
+            cellTO.cellFunction = cell->cellFunction;
             cellTO.selected = cell->selected;
-            cellTO.branchNumber = cell->branchNumber;
+            cellTO.executionOrderNumber = cell->executionOrderNumber;
         }
     }
     {
-        auto const& particles = data.entities.particlePointers;
+        auto const& particles = data.objects.particlePointers;
         auto const partition = calcAllThreadsPartition(particles.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -198,7 +266,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
             }
-            auto particleTOIndex = atomicAdd(dataTO.numParticles, 1);
+            auto particleTOIndex = alienAtomicAdd64(dataTO.numParticles, uint64_t(1));
             auto& particleTO = dataTO.particles[particleTOIndex];
 
             particleTO.id = particle->id;
@@ -209,11 +277,11 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
 }
 
 //tags cell with cellTO index and tags cellTO connections with cell index
-__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO dataTO)
+__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO dataTO)
 {
-    auto const& cells = data.entities.cellPointers;
+    auto const& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto const cellArrayStart = data.entities.cells.getArray();
+    auto const cellArrayStart = data.objects.cells.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -229,51 +297,27 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
     }
 }
 
-__global__ void cudaResolveConnections(SimulationData data, DataAccessTO dataTO)
+__global__ void cudaResolveConnections(SimulationData data, DataTO dataTO)
 {
     auto const partition = calcAllThreadsPartition(*dataTO.numCells);
-    auto const firstCell = data.entities.cells.getArray();
+    auto const firstCell = data.objects.cells.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cellTO = dataTO.cells[index];
 
         for (int i = 0; i < cellTO.numConnections; ++i) {
             auto const cellIndex = cellTO.connections[i].cellIndex;
-            cellTO.connections[i].cellIndex = data.entities.cells.at(cellIndex).tag;
+            cellTO.connections[i].cellIndex = data.objects.cells.at(cellIndex).tag;
         }
     }
 }
 
-__global__ void cudaGetTokenData(SimulationData data, DataAccessTO dataTO)
+__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO access)
 {
-    auto const& tokens = data.entities.tokenPointers;
-
-    auto partition = calcPartition(tokens.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (auto tokenIndex = partition.startIndex; tokenIndex <= partition.endIndex; ++tokenIndex) {
-        auto token = tokens.at(tokenIndex);
-
-        if (token->cell->tag == -1) {
-            continue;
-        }
-
-        auto tokenTOIndex = atomicAdd(dataTO.numTokens, 1);
-        auto& tokenTO = dataTO.tokens[tokenTOIndex];
-
-        tokenTO.energy = token->energy;
-        for (int i = 0; i < cudaSimulationParameters.tokenMemorySize; ++i) {
-            tokenTO.memory[i] = token->memory[i];
-        }
-        tokenTO.cellIndex = token->cell->tag;
-        tokenTO.sequenceNumber = tokenIndex;
-    }
-}
-
-__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataAccessTO access)
-{
-    PartitionData particleBlock = calcPartition(data.entities.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    PartitionData particleBlock = calcPartition(data.objects.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-        auto const& particle = data.entities.particlePointers.at(particleIndex);
+        auto const& particle = data.objects.particlePointers.at(particleIndex);
         auto pos = particle->absPos;
         data.particleMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
@@ -284,9 +328,9 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
     }
 }
 
-__global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, bool selectNewData, bool createIds)
+__global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, bool selectNewData, bool createIds)
 {
-    __shared__ EntityFactory factory;
+    __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
         factory.init(&data);
     }
@@ -301,21 +345,16 @@ __global__ void cudaCreateDataFromTO(SimulationData data, DataAccessTO dataTO, b
     }
 
     auto cellPartition = calcPartition(*dataTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    auto cellTargetArray = data.entities.cells.getArray() + data.entities.cells.getNumOrigEntries();
+    auto cellTargetArray = data.objects.cells.getArray() + data.objects.cells.getNumOrigEntries();
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto cell = factory.createCellFromTO(index, dataTO.cells[index], cellTargetArray, &dataTO, createIds);
+        auto cell = factory.createCellFromTO(dataTO, index, dataTO.cells[index], cellTargetArray, createIds);
         if (selectNewData) {
             cell->selected = 1;
         }
     }
-
-    auto tokenPartition = calcPartition(*dataTO.numTokens, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (int index = tokenPartition.startIndex; index <= tokenPartition.endIndex; ++index) {
-        factory.createTokenFromTO(dataTO.tokens[index], cellTargetArray);
-    }
 }
 
-__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataAccessTO dataTO)
+__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataTO dataTO)
 {
     {
         auto const partition = calcPartition(*dataTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
@@ -335,26 +374,23 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataAcce
     }
 }
 
-__global__ void cudaClearDataTO(DataAccessTO dataTO)
+__global__ void cudaClearDataTO(DataTO dataTO)
 {
     *dataTO.numCells = 0;
     *dataTO.numParticles = 0;
-    *dataTO.numTokens = 0;
-    *dataTO.numStringBytes = 0;
+    *dataTO.numAuxiliaryData = 0;
 }
 
 __global__ void cudaClearData(SimulationData data)
 {
-    data.entities.cellPointers.reset();
-    data.entities.tokenPointers.reset();
-    data.entities.particlePointers.reset();
-    data.entities.cells.reset();
-    data.entities.tokens.reset();
-    data.entities.particles.reset();
-    data.entities.stringBytes.reset();
+    data.objects.cellPointers.reset();
+    data.objects.particlePointers.reset();
+    data.objects.cells.reset();
+    data.objects.particles.reset();
+    data.objects.auxiliaryData.reset();
 }
 
 __global__ void cudaSaveNumEntries(SimulationData data)
 {
-    data.entities.saveNumEntries();
+    data.objects.saveNumEntries();
 }

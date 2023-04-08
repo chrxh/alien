@@ -7,13 +7,12 @@ void _SimulationControllerImpl::initCuda()
     _worker.initCuda();
 }
 
-void _SimulationControllerImpl::newSimulation(uint64_t timestep, Settings const& settings, SymbolMap const& symbolMap)
+void _SimulationControllerImpl::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
 {
-    _settings = settings;
-    _origSettings = settings;
-    _symbolMap = symbolMap;
-    _origSymbolMap = symbolMap;
-    _worker.newSimulation(timestep, settings);
+    _settings.simulationParameters = parameters;
+    _settings.generalSettings = generalSettings;
+    _origSettings = _settings;
+    _worker.newSimulation(timestep, generalSettings, parameters);
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 
@@ -50,6 +49,26 @@ std::optional<OverlayDescription> _SimulationControllerImpl::tryDrawVectorGraphi
     return _worker.tryDrawVectorGraphicsAndReturnOverlay(rectUpperLeft, rectLowerRight, imageSize, zoom);
 }
 
+bool _SimulationControllerImpl::isSyncSimulationWithRendering() const
+{
+    return _worker.isSyncSimulationWithRendering();
+}
+
+void _SimulationControllerImpl::setSyncSimulationWithRendering(bool value)
+{
+    _worker.setSyncSimulationWithRendering(value);
+}
+
+int _SimulationControllerImpl::getSyncSimulationWithRenderingRatio() const
+{
+    return _worker.getSyncSimulationWithRenderingRatio();
+}
+
+void _SimulationControllerImpl::setSyncSimulationWithRenderingRatio(int value)
+{
+    _worker.setSyncSimulationWithRenderingRatio(value);
+}
+
 ClusteredDataDescription _SimulationControllerImpl::getClusteredSimulationData()
 {
     auto size = getWorldSize();
@@ -72,9 +91,9 @@ DataDescription _SimulationControllerImpl::getSelectedSimulationData(bool includ
     return _worker.getSelectedSimulationData(includeClusters);
 }
 
-DataDescription _SimulationControllerImpl::getInspectedSimulationData(std::vector<uint64_t> entityIds)
+DataDescription _SimulationControllerImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
 {
-    return _worker.getInspectedSimulationData(entityIds);
+    return _worker.getInspectedSimulationData(objectIds);
 }
 
 void _SimulationControllerImpl::addAndSelectSimulationData(DataDescription const& dataToAdd)
@@ -94,20 +113,20 @@ void _SimulationControllerImpl::setSimulationData(DataDescription const& dataToU
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationControllerImpl::removeSelectedEntities(bool includeClusters)
+void _SimulationControllerImpl::removeSelectedObjects(bool includeClusters)
 {
-    _worker.removeSelectedEntities(includeClusters);
+    _worker.removeSelectedObjects(includeClusters);
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationControllerImpl::relaxSelectedEntities(bool includeClusters)
+void _SimulationControllerImpl::relaxSelectedObjects(bool includeClusters)
 {
-    _worker.relaxSelectedEntities(includeClusters);
+    _worker.relaxSelectedObjects(includeClusters);
 }
 
-void _SimulationControllerImpl::uniformVelocitiesForSelectedEntities(bool includeClusters)
+void _SimulationControllerImpl::uniformVelocitiesForSelectedObjects(bool includeClusters)
 {
-    _worker.uniformVelocitiesForSelectedEntities(includeClusters);
+    _worker.uniformVelocitiesForSelectedObjects(includeClusters);
 }
 
 void _SimulationControllerImpl::makeSticky(bool includeClusters)
@@ -125,14 +144,19 @@ void _SimulationControllerImpl::setBarrier(bool value, bool includeClusters)
     _worker.setBarrier(value, includeClusters);
 }
 
-void _SimulationControllerImpl::colorSelectedEntities(unsigned char color, bool includeClusters)
+void _SimulationControllerImpl::colorSelectedObjects(unsigned char color, bool includeClusters)
 {
-    _worker.colorSelectedEntities(color, includeClusters);
+    _worker.colorSelectedObjects(color, includeClusters);
 }
 
-void _SimulationControllerImpl::reconnectSelectedEntities()
+void _SimulationControllerImpl::reconnectSelectedObjects()
 {
-    _worker.reconnectSelectedEntities();
+    _worker.reconnectSelectedObjects();
+}
+
+void _SimulationControllerImpl::setDetached(bool value)
+{
+    _worker.setDetached(value);
 }
 
 void _SimulationControllerImpl::changeCell(CellDescription const& changedCell)
@@ -196,32 +220,22 @@ SimulationParameters _SimulationControllerImpl::getOriginalSimulationParameters(
     return _origSettings.simulationParameters;
 }
 
+void _SimulationControllerImpl::setSimulationParameters(SimulationParameters const& parameters)
+{
+    _settings.simulationParameters = parameters;
+    _worker.setSimulationParameters(parameters);
+}
+
+void _SimulationControllerImpl::setOriginalSimulationParameters(SimulationParameters const& parameters)
+{
+    _origSettings.simulationParameters = parameters;
+}
+
 void _SimulationControllerImpl::setSimulationParameters_async(
     SimulationParameters const& parameters)
 {
     _settings.simulationParameters = parameters;
     _worker.setSimulationParameters_async(parameters);
-}
-
-SimulationParametersSpots _SimulationControllerImpl::getSimulationParametersSpots() const
-{
-    return _settings.simulationParametersSpots;
-}
-
-SimulationParametersSpots _SimulationControllerImpl::getOriginalSimulationParametersSpots() const
-{
-    return _origSettings.simulationParametersSpots;
-}
-
-void _SimulationControllerImpl::setOriginalSimulationParametersSpot(SimulationParametersSpot const& value, int index)
-{
-    _origSettings.simulationParametersSpots.spots[index] = value;
-}
-
-void _SimulationControllerImpl::setSimulationParametersSpots_async(SimulationParametersSpots const& value)
-{
-    _settings.simulationParametersSpots = value;
-    _worker.setSimulationParametersSpots_async(value);
 }
 
 GpuSettings _SimulationControllerImpl::getGpuSettings() const
@@ -238,27 +252,6 @@ void _SimulationControllerImpl::setGpuSettings_async(GpuSettings const& gpuSetti
 {
     _settings.gpuSettings = gpuSettings;
     _worker.setGpuSettings_async(gpuSettings);
-}
-
-FlowFieldSettings _SimulationControllerImpl::getFlowFieldSettings() const
-{
-    return _settings.flowFieldSettings;
-}
-
-FlowFieldSettings _SimulationControllerImpl::getOriginalFlowFieldSettings() const
-{
-    return _origSettings.flowFieldSettings;
-}
-
-void _SimulationControllerImpl::setOriginalFlowFieldCenter(FlowCenter const& value, int index)
-{
-    _origSettings.flowFieldSettings.centers[index] = value;
-}
-
-void _SimulationControllerImpl::setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings)
-{
-    _settings.flowFieldSettings = flowFieldSettings;
-    _worker.setFlowFieldSettings_async(flowFieldSettings);
 }
 
 void _SimulationControllerImpl::applyForce_async(
@@ -285,9 +278,9 @@ SelectionShallowData _SimulationControllerImpl::getSelectionShallowData()
     return _worker.getSelectionShallowData();
 }
 
-void _SimulationControllerImpl::shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData)
+void _SimulationControllerImpl::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData)
 {
-    _worker.shallowUpdateSelectedEntities(updateData);
+    _worker.shallowUpdateSelectedObjects(updateData);
 }
 
 void _SimulationControllerImpl::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)
@@ -320,29 +313,9 @@ IntVector2D _SimulationControllerImpl::getWorldSize() const
     return {_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
 }
 
-Settings _SimulationControllerImpl::getSettings() const
+StatisticsData _SimulationControllerImpl::getStatistics() const
 {
-    return _settings;
-}
-
-SymbolMap const& _SimulationControllerImpl::getSymbolMap() const
-{
-    return _symbolMap;
-}
-
-SymbolMap const& _SimulationControllerImpl::getOriginalSymbolMap() const
-{
-    return _origSymbolMap;
-}
-
-void _SimulationControllerImpl::setSymbolMap(SymbolMap const& symbolMap)
-{
-    _symbolMap = symbolMap;
-}
-
-MonitorData _SimulationControllerImpl::getStatistics() const
-{
-    return _worker.getMonitorData();
+    return _worker.getStatistics();
 }
 
 std::optional<int> _SimulationControllerImpl::getTpsRestriction() const
@@ -359,4 +332,9 @@ void _SimulationControllerImpl::setTpsRestriction(std::optional<int> const& valu
 float _SimulationControllerImpl::getTps() const
 {
     return _worker.getTps();
+}
+
+void _SimulationControllerImpl::testOnly_mutate(uint64_t cellId, MutationType mutationType)
+{
+    _worker.testOnly_mutate(cellId, mutationType);
 }

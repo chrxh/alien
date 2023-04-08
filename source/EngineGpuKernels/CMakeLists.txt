@@ -1,19 +1,19 @@
 
 add_library(alien_engine_gpu_kernels_lib
-    AccessTOs.cuh
     Array.cuh
+    AttackerProcessor.cuh
     Base.cuh
-    CellConnectionProcessor.cuh
     Cell.cuh
     CellComputationProcessor.cuh
-    CellFunctionData.cuh
+    CellConnectionProcessor.cuh
+    CellFunctionProcessor.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
     ConstantMemory.cu
     ConstantMemory.cuh
-    ConstructionProcessor.cuh
+    ConstructorProcessor.cuh
     CudaMemoryManager.cuh
-    CudaMonitorData.cuh
+    CudaNumberGenerator.cuh
     CudaSimulationFacade.cu
     CudaSimulationFacade.cuh
     DataAccessKernels.cu
@@ -25,47 +25,44 @@ add_library(alien_engine_gpu_kernels_lib
     Definitions.cuh
     Definitions.h
     DensityMap.cuh
-    DigestionProcessor.cuh
     EditKernels.cu
     EditKernels.cuh
     EditKernelsLauncher.cu
     EditKernelsLauncher.cuh
-    EnergyGuidance.cuh
-    Entities.cu
-    Entities.cuh
-    EntityFactory.cuh
     FlowFieldKernels.cu
     FlowFieldKernels.cuh
     GarbageCollectorKernels.cu
     GarbageCollectorKernels.cuh
     GarbageCollectorKernelsLauncher.cu
     GarbageCollectorKernelsLauncher.cuh
+    GenomeDecoder.cuh
     HashMap.cuh
     HashSet.cuh
+    InjectorProcessor.cuh
     List.cuh
     Macros.cuh
     Map.cuh
     MapSectionCollector.cuh
     Math.cuh
-    MonitorKernelsLauncher.cu
-    MonitorKernelsLauncher.cuh
-    MonitorKernels.cu
-    MonitorKernels.cuh
     MuscleProcessor.cuh
-    NeuralNetProcessor.cuh
+    MutationProcessor.cuh
+    NerveProcessor.cuh
+    NeuronProcessor.cuh
+    Objects.cu
+    Objects.cuh
+    ObjectFactory.cuh
     Operations.cuh
     Particle.cuh
     ParticleProcessor.cuh
     Physics.cuh
+    ProprocessedCellFunctionData.cuh
     QuantityConverter.cuh
-    RawMemory.cuh
     RenderingData.cu
     RenderingData.cuh
     RenderingKernels.cu
     RenderingKernels.cuh
     RenderingKernelsLauncher.cu
     RenderingKernelsLauncher.cuh
-    ScannerProcessor.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
     SimulationData.cu
@@ -74,11 +71,19 @@ add_library(alien_engine_gpu_kernels_lib
     SimulationKernels.cuh
     SimulationKernelsLauncher.cu
     SimulationKernelsLauncher.cuh
-    SimulationResult.cuh
+    SimulationStatistics.cuh
     SpotCalculator.cuh
+    StatisticsKernelsLauncher.cu
+    StatisticsKernelsLauncher.cuh
+    StatisticsKernels.cu
+    StatisticsKernels.cuh
     Swap.cuh
-    Token.cuh
-    TokenProcessor.cuh)
+    TestKernels.cu
+    TestKernels.cuh
+    TestKernelsLauncher.cu
+    TestKernelsLauncher.cuh
+    TransmitterProcessor.cuh
+    TOs.cuh)
 
 target_link_libraries(alien_engine_gpu_kernels_lib alien_base_lib)
 

@@ -1,10 +1,21 @@
 target_sources(tests
 PUBLIC
-    CellComputationTests.cpp
+    AttackerTests.cpp
+    CellConnectionTests.cpp
+    ConstructorTests.cpp
+    DataTransferTests.cpp
+    DefenderTests.cpp
+    DescriptionHelperTests.cpp
+    InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
+    MuscleTests.cpp
+    MutationTests.cpp
+    NerveTests.cpp
+    NeuronTests.cpp
     SensorTests.cpp
-    Testsuite.cpp)
+    Testsuite.cpp
+    TransmitterTests.cpp)
 
 target_link_libraries(tests alien_base_lib)
 target_link_libraries(tests alien_engine_gpu_kernels_lib)
@@ -19,3 +30,7 @@ target_link_libraries(tests GLEW::GLEW)
 target_link_libraries(tests glfw)
 target_link_libraries(tests glad::glad)
 target_link_libraries(tests GTest::GTest GTest::Main)
+
+if (MSVC)
+    target_compile_options(tests PRIVATE "/MP")
+endif()

@@ -2,7 +2,7 @@
 
 #include "EngineInterface/Definitions.h"
 
-#include "StatisticsHistory.h"
+#include "CollectedStatisticsData.h"
 #include "Definitions.h"
 
 class _ExportStatisticsDialog
@@ -13,11 +13,11 @@ public:
 
     void process();
 
-    void show(LongtermStatistics const& longtermStatistics);
+    void show(TimelineLongtermStatistics const& longtermStatistics);
 
 private:
     void onSaveStatistics(std::string const& filename);
 
     std::string _startingPath;
-    LongtermStatistics _statistics;
+    TimelineLongtermStatistics _statistics;
 };

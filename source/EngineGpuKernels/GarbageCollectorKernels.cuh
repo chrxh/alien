@@ -5,7 +5,6 @@
 
 #include "SimulationData.cuh"
 #include "Cell.cuh"
-#include "Token.cuh"
 
 __global__ void cudaPreparePointerArraysForCleanup(SimulationData data);
 __global__ void cudaPrepareArraysForCleanup(SimulationData data);
@@ -32,7 +31,7 @@ __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity>
     __shared__ Entity* newEntities;
     if (0 == threadIdx.x) {
         if (numEntities > 0) {
-            newEntities = newEntityArray.getNewSubarray(numEntities);
+            newEntities = newEntityArray.getSubArray(numEntities);
         }
         numEntities = 0;
     }
@@ -50,9 +49,8 @@ __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity>
 
 __global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Array<Particle> particles);
 __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Array<Cell> cells);
-__global__ void cudaCleanupCellsStep2(Array<Token*> tokenPointers, Array<Cell> cells);
-__global__ void cudaCleanupTokens(Array<Token*> tokenPointers, Array<Token> newToken);
-__global__ void cudaCleanupStringBytes(Array<Cell*> cellPointers, RawMemory stringBytes);
+__global__ void cudaCleanupCellsStep2(Array<Cell> cells);
+__global__ void cudaCleanupAuxiliaryData(Array<Cell*> cellPointers, RawMemory stringBytes);
 __global__ void cudaCleanupCellMap(SimulationData data);
 __global__ void cudaCleanupParticleMap(SimulationData data);
 __global__ void cudaSwapPointerArrays(SimulationData data);

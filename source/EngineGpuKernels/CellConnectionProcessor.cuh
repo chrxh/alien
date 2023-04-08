@@ -5,165 +5,252 @@
 #include "SimulationData.cuh"
 #include "ConstantMemory.cuh"
 #include "SpotCalculator.cuh"
+#include "ObjectFactory.cuh"
+#include "ParticleProcessor.cuh"
 
 class CellConnectionProcessor
 {
 public:
-    __inline__ __device__ static void scheduleAddConnections(SimulationData& data, Cell* cell1, Cell* cell2, bool addTokens);
-    __inline__ __device__ static void scheduleDelConnections(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void scheduleDelConnection(SimulationData& data, Cell* cell1, Cell* cell2);
-    __inline__ __device__ static void scheduleDelCell(SimulationData& data, Cell* cell, int cellIndex);
-    __inline__ __device__ static void scheduleDelCellAndConnections(SimulationData& data, Cell* cell, int cellIndex);
+    __inline__ __device__ static void scheduleAddConnectionPair(SimulationData& data, Cell* cell1, Cell* cell2);
+    __inline__ __device__ static void scheduleDeleteAllConnections(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void scheduleDeleteConnectionPair(SimulationData& data, Cell* cell1, Cell* cell2);
+    __inline__ __device__ static void scheduleDeleteCell(SimulationData& data, uint64_t const& cellIndex);
 
-    __inline__ __device__ static void processConnectionsOperations(SimulationData& data);
-    __inline__ __device__ static void processDelCellOperations(SimulationData& data);
+    __inline__ __device__ static void processAddOperations(SimulationData& data);
+    __inline__ __device__ static void processDeleteCellOperations(SimulationData& data);
+    __inline__ __device__ static void processDeleteConnectionOperations(SimulationData& data);
 
-    __inline__ __device__ static void addConnections(
+    __inline__ __device__ static bool tryAddConnections(
         SimulationData& data,
         Cell* cell1,
         Cell* cell2,
         float desiredAngleOnCell1,
         float desiredAngleOnCell2,
         float desiredDistance,
-        int angleAlignment = 0);
-    __inline__ __device__ static void delConnections(Cell* cell1, Cell* cell2);
-    __inline__ __device__ static void delConnectionOneWay(Cell* cell1, Cell* cell2);
+        ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_None);
+    __inline__ __device__ static void deleteConnections(Cell* cell1, Cell* cell2);
+    __inline__ __device__ static void deleteConnectionOneWay(Cell* cell1, Cell* cell2);
+
+    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached);
+    __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos);
 
 private:
-    __inline__ __device__ static void addConnectionsIntern(SimulationData& data, Cell* cell1, Cell* cell2, bool addTokens);
-    __inline__ __device__ static void addConnectionIntern(
+    static int constexpr MaxOperationsPerCell = 30;
+
+    __inline__ __device__ static bool scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex);
+
+    __inline__ __device__ static void lockAndtryAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
+    __inline__ __device__ static bool tryAddConnectionOneWay(
         SimulationData& data,
         Cell* cell1,
         Cell* cell2,
         float2 const& posDelta,
         float desiredDistance,
         float desiredAngleOnCell1 = 0,
-        int angleAlignment = 0);
-
-    __inline__ __device__ static void delConnectionsIntern(Cell* cell);
-    __inline__ __device__ static void delConnectionIntern(Cell* cell1, Cell* cell2);
-
-    __inline__ __device__ static void delCell(SimulationData& data, Cell* cell, int cellIndex);
+        ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_None);
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
 __inline__ __device__ void
-CellConnectionProcessor::scheduleAddConnections(SimulationData& data, Cell* cell1, Cell* cell2, bool addTokens)
+CellConnectionProcessor::scheduleAddConnectionPair(SimulationData& data, Cell* cell1, Cell* cell2)
 {
     StructuralOperation operation;
-    operation.type = StructuralOperation::Type::AddConnections;
-    operation.data.addConnectionOperation.cell = cell1;
-    operation.data.addConnectionOperation.otherCell = cell2;
-    operation.data.addConnectionOperation.addTokens = addTokens;
+    operation.type = StructuralOperation::Type::AddConnectionPair;
+    operation.data.addConnection.cell = cell1;
+    operation.data.addConnection.otherCell = cell2;
     data.structuralOperations.tryAddEntry(operation);
 }
 
-
-__inline__ __device__ void CellConnectionProcessor::scheduleDelConnections(SimulationData& data, Cell* cell)
+__inline__ __device__ void CellConnectionProcessor::scheduleDeleteAllConnections(SimulationData& data, Cell* cell)
 {
-    StructuralOperation operation;
-    operation.type = StructuralOperation::Type::DelConnections;
-    operation.data.delConnectionsOperation.cell = cell;
-    data.structuralOperations.tryAddEntry(operation);
+    for (int i = 0; i < cell->numConnections; ++i) {
+        auto const& connectedCell = cell->connections[i].cell;
+        {
+            StructuralOperation operation;
+            operation.type = StructuralOperation::Type::DelConnection;
+            operation.data.delConnection.connectedCell = cell;
+            operation.nextOperationIndex = -1;
+            auto operationIndex = data.structuralOperations.tryAddEntry(operation);
+            if (operationIndex != -1) {
+                scheduleOperationOnCell(data, connectedCell, operationIndex);
+            } else {
+                CUDA_THROW_NOT_IMPLEMENTED();
+            }
+        }
+        {
+            StructuralOperation operation;
+            operation.type = StructuralOperation::Type::DelConnection;
+            operation.data.delConnection.connectedCell = connectedCell;
+            operation.nextOperationIndex = -1;
+            auto operationIndex = data.structuralOperations.tryAddEntry(operation);
+            if (operationIndex != -1) {
+                scheduleOperationOnCell(data, cell, operationIndex);
+            } else {
+                CUDA_THROW_NOT_IMPLEMENTED();
+            }
+        }
+    }
 }
 
 __inline__ __device__ void
-CellConnectionProcessor::scheduleDelConnection(SimulationData& data, Cell* cell1, Cell* cell2)
+CellConnectionProcessor::scheduleDeleteConnectionPair(SimulationData& data, Cell* cell1, Cell* cell2)
 {
-    StructuralOperation operation;
-    operation.type = StructuralOperation::Type::DelConnection;
-    operation.data.delConnectionOperation.cell1 = cell1;
-    operation.data.delConnectionOperation.cell2 = cell2;
-    data.structuralOperations.tryAddEntry(operation);
+    StructuralOperation operation1;
+    operation1.type = StructuralOperation::Type::DelConnection;
+    operation1.data.delConnection.connectedCell = cell2;
+    operation1.nextOperationIndex = -1;
+    auto operationIndex1 = data.structuralOperations.tryAddEntry(operation1);
+    if (operationIndex1 != -1) {
+        scheduleOperationOnCell(data, cell1, operationIndex1);
+    } else {
+        CUDA_THROW_NOT_IMPLEMENTED();
+    }
+
+    StructuralOperation operation2;
+    operation2.type = StructuralOperation::Type::DelConnection;
+    operation2.data.delConnection.connectedCell = cell1;
+    operation2.nextOperationIndex = -1;
+    auto operationIndex2 = data.structuralOperations.tryAddEntry(operation2);
+    if (operationIndex2 != -1) {
+        scheduleOperationOnCell(data, cell2, operationIndex2);
+    } else {
+        CUDA_THROW_NOT_IMPLEMENTED();
+    }
 }
 
-__inline__ __device__ void CellConnectionProcessor::scheduleDelCell(SimulationData& data, Cell* cell, int cellIndex)
+__inline__ __device__ void CellConnectionProcessor::scheduleDeleteCell(SimulationData& data, uint64_t const& cellIndex)
 {
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::DelCell;
-    operation.data.delCellOperation.cell = cell;
-    operation.data.delCellOperation.cellIndex = cellIndex;
-    data.structuralOperations.tryAddEntry(operation);
+    operation.data.delCell.cellIndex = cellIndex;
+    auto operationIndex = data.structuralOperations.tryAddEntry(operation);
+    if (operationIndex == -1) {
+        CUDA_THROW_NOT_IMPLEMENTED();
+    }
 }
 
-__inline__ __device__ void
-CellConnectionProcessor::scheduleDelCellAndConnections(SimulationData& data, Cell* cell, int cellIndex)
-{
-    StructuralOperation operation;
-    operation.type = StructuralOperation::Type::DelCellAndConnections;
-    operation.data.delCellAndConnectionOperation.cell = cell;
-    operation.data.delCellAndConnectionOperation.cellIndex = cellIndex;
-    data.structuralOperations.tryAddEntry(operation);
-}
-
-__inline__ __device__ void CellConnectionProcessor::processConnectionsOperations(SimulationData& data)
+__inline__ __device__ void CellConnectionProcessor::processAddOperations(SimulationData& data)
 {
     auto partition = calcAllThreadsPartition(data.structuralOperations.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& operation = data.structuralOperations.at(index);
-        if (StructuralOperation::Type::DelConnection == operation.type) {
-            delConnectionIntern(operation.data.delConnectionOperation.cell1, operation.data.delConnectionOperation.cell2);
-        }
-        if (StructuralOperation::Type::DelConnections == operation.type) {
-            delConnectionsIntern(operation.data.delConnectionsOperation.cell);
-        }
-        if (StructuralOperation::Type::DelCellAndConnections == operation.type) {
-            delConnectionsIntern(operation.data.delConnectionsOperation.cell);
-
-            scheduleDelCell(
+        if (StructuralOperation::Type::AddConnectionPair == operation.type) {
+            lockAndtryAddConnections(
                 data,
-                operation.data.delCellAndConnectionOperation.cell,
-                operation.data.delCellAndConnectionOperation.cellIndex);
-        }
-        if (StructuralOperation::Type::AddConnections == operation.type) {
-            addConnectionsIntern(
-                data,
-                operation.data.addConnectionOperation.cell,
-                operation.data.addConnectionOperation.otherCell,
-                operation.data.addConnectionOperation.addTokens);
+                operation.data.addConnection.cell,
+                operation.data.addConnection.otherCell);
         }
     }
 }
 
-__inline__ __device__ void CellConnectionProcessor::processDelCellOperations(SimulationData& data)
+__inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.structuralOperations.getNumEntries());
+    auto partition = calcAllThreadsPartition(data.structuralOperations.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& operation = data.structuralOperations.at(index);
         if (StructuralOperation::Type::DelCell == operation.type) {
-            delCell(data, operation.data.delCellOperation.cell, operation.data.delCellOperation.cellIndex);
+            auto cellIndex = operation.data.delCell.cellIndex;
+
+            Cell* empty = nullptr;
+            auto origCell = alienAtomicExch(&data.objects.cellPointers.at(cellIndex), empty);
+            if (origCell) {
+                ObjectFactory factory;
+                factory.init(&data);
+                auto pos = ParticleProcessor::getRadiationPos(data, origCell->absPos);
+                factory.createParticle(origCell->energy, pos, origCell->vel, origCell->color);
+
+                for (int i = 0; i < origCell->numConnections; ++i) {
+                    StructuralOperation operation;
+                    operation.type = StructuralOperation::Type::DelConnection;
+                    operation.data.delConnection.connectedCell = origCell;
+                    operation.nextOperationIndex = -1;
+                    auto operationIndex = data.structuralOperations.tryAddEntry(operation);
+                    if (operationIndex != -1) {
+                        scheduleOperationOnCell(data, origCell->connections[i].cell, operationIndex);
+                    } else {
+                        CUDA_THROW_NOT_IMPLEMENTED();
+                    }
+                }
+            }
         }
     }
 }
 
-__inline__ __device__ void CellConnectionProcessor::addConnections(
+__inline__ __device__ void CellConnectionProcessor::processDeleteConnectionOperations(SimulationData& data)
+{
+    auto partition = calcAllThreadsPartition(data.objects.cellPointers.getNumOrigEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = data.objects.cellPointers.at(index);
+        if (!cell) {
+            continue;
+        }
+        auto scheduledOperationIndex = cell->scheduledOperationIndex;
+        if (scheduledOperationIndex != -1) {
+            for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
+                auto operation = data.structuralOperations.at(scheduledOperationIndex);
+                switch (operation.type) {
+                case StructuralOperation::Type::DelConnection: {
+                    deleteConnectionOneWay(cell, operation.data.delConnection.connectedCell);
+                } break;
+                case StructuralOperation::Type::DelAllConnections: {
+                    cell->numConnections = 0;
+                } break;
+                }
+                scheduledOperationIndex = operation.nextOperationIndex;
+                if (scheduledOperationIndex == -1) {
+                    break;
+                }
+            }
+            cell->scheduledOperationIndex = -1;
+        }
+    }
+}
+
+__inline__ __device__ bool CellConnectionProcessor::tryAddConnections(
     SimulationData& data,
     Cell* cell1,
     Cell* cell2,
     float desiredAngleOnCell1,
     float desiredAngleOnCell2,
     float desiredDistance,
-    int angleAlignment)
+    ConstructorAngleAlignment angleAlignment)
 {
     auto posDelta = cell2->absPos - cell1->absPos;
     data.cellMap.correctDirection(posDelta);
-    addConnectionIntern(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1, angleAlignment);
-    addConnectionIntern(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2, angleAlignment);
+
+    CellConnection origConnections[MAX_CELL_BONDS];
+    int origNumConnection = cell1->numConnections;
+    for (int i = 0; i < origNumConnection; ++i) {
+        origConnections[i] = cell1->connections[i];
+    }
+
+    if (!tryAddConnectionOneWay(data, cell1, cell2, posDelta, desiredDistance, desiredAngleOnCell1, angleAlignment)) {
+        return false;
+    }
+    if (!tryAddConnectionOneWay(data, cell2, cell1, posDelta * (-1), desiredDistance, desiredAngleOnCell2, angleAlignment)) {
+        cell1->numConnections = origNumConnection;
+        for (int i = 0; i < origNumConnection; ++i) {
+            cell1->connections[i] = origConnections[i];
+        }
+        return false;
+    }
+    return true;
 }
 
 __inline__ __device__ void
-CellConnectionProcessor::delConnections(Cell* cell1, Cell* cell2)
+CellConnectionProcessor::deleteConnections(Cell* cell1, Cell* cell2)
 {
-    delConnectionOneWay(cell1, cell2);
-    delConnectionOneWay(cell2, cell1);
+    deleteConnectionOneWay(cell1, cell2);
+    deleteConnectionOneWay(cell2, cell1);
 }
 
 __inline__ __device__ void
-CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1, Cell* cell2, bool addTokens)
+CellConnectionProcessor::lockAndtryAddConnections(SimulationData& data, Cell* cell1, Cell* cell2)
 {
     SystemDoubleLock lock;
     lock.init(&cell1->locked, &cell2->locked);
@@ -179,64 +266,42 @@ CellConnectionProcessor::addConnectionsIntern(SimulationData& data, Cell* cell1,
 
         if (!alreadyConnected && cell1->numConnections < cell1->maxConnections
             && cell2->numConnections < cell2->maxConnections) {
-            auto posDelta = cell2->absPos - cell1->absPos;
-            data.cellMap.correctDirection(posDelta);
-            addConnectionIntern(data, cell1, cell2, posDelta, Math::length(posDelta));
-            addConnectionIntern(data, cell2, cell1, posDelta * (-1), Math::length(posDelta));
 
-/*
-            //align connections
-            addConnectionIntern(data, cell1, cell2, posDelta, 1, 0, 6);
-            addConnectionIntern(data, cell2, cell1, posDelta * (-1), 1, 0, 6);
-*/
-
-            if (addTokens) {
-                EntityFactory factory;
-                factory.init(&data);
-
-                auto cellMinEnergy =
-                    SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, data, cell1->absPos);
-                auto newTokenEnergy = cudaSimulationParameters.tokenMinEnergy * 1.5f;
-                if (cell1->energy > cellMinEnergy + newTokenEnergy) {
-                    auto token = factory.createToken(cell1, cell2);
-                    token->energy = newTokenEnergy;
-                    cell1->energy -= newTokenEnergy;
-                }
-                if (cell2->energy > cellMinEnergy + newTokenEnergy) {
-                    auto token = factory.createToken(cell2, cell1);
-                    token->energy = newTokenEnergy;
-                    cell2->energy -= newTokenEnergy;
-                }
-            }
+            tryAddConnections(data, cell1, cell2, 0, 0, 0);
         }
 
         lock.releaseLock();
     }
 }
 
-__inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
+__inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     SimulationData& data,
     Cell* cell1,
     Cell* cell2,
     float2 const& posDelta,
     float desiredDistance,
     float desiredAngleOnCell1,
-    int angleAlignment)
+    ConstructorAngleAlignment angleAlignment)
 {
+    if (wouldResultInOverlappingConnection(cell1, cell2->absPos)) {
+        return false;
+    }
+
+    angleAlignment %= ConstructorAngleAlignment_Count;
+
     auto newAngle = Math::angleOfVector(posDelta);
+    if (desiredDistance == 0) {
+        desiredDistance = Math::length(posDelta);
+    }
 
     if (0 == cell1->numConnections) {
         cell1->numConnections++;
         cell1->connections[0].cell = cell2;
         cell1->connections[0].distance = desiredDistance;
         cell1->connections[0].angleFromPrevious = 360.0f;
-        return;
+        return true;
     }
     if (1 == cell1->numConnections) {
-        cell1->numConnections++;
-        cell1->connections[1].cell = cell2;
-        cell1->connections[1].distance = desiredDistance;
-
         auto connectedCellDelta = cell1->connections[0].cell->absPos - cell1->absPos;
         data.cellMap.correctDirection(connectedCellDelta);
         auto prevAngle = Math::angleOfVector(connectedCellDelta);
@@ -244,15 +309,22 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
         if (0 != desiredAngleOnCell1) {
             angleDiff = desiredAngleOnCell1;
         }
-        angleDiff = Math::alignAngle(angleDiff, angleAlignment % 7);
-        if (angleDiff >= 0) {
-            cell1->connections[1].angleFromPrevious = angleDiff;
-            cell1->connections[0].angleFromPrevious = 360.0f - angleDiff;
-        } else {
-            cell1->connections[1].angleFromPrevious = 360.0f + angleDiff;
-            cell1->connections[0].angleFromPrevious = -angleDiff;
+        angleDiff = Math::alignAngle(angleDiff, angleAlignment);
+        if (angleDiff < 0) {
+            angleDiff += 360.0;
         }
-        return;
+        angleDiff = Math::avoidAngleBoundaries(angleDiff, 360.0f, angleAlignment);
+        if (abs(angleDiff) < NEAR_ZERO || abs(angleDiff - 360.0f) < NEAR_ZERO || abs(angleDiff + 360.0f) < NEAR_ZERO) {
+            return false;
+        }
+
+        cell1->connections[1].angleFromPrevious = angleDiff;
+        cell1->connections[0].angleFromPrevious = 360.0f - angleDiff;
+
+        cell1->numConnections++;
+        cell1->connections[1].cell = cell2;
+        cell1->connections[1].distance = desiredDistance;
+        return true;
     }
 
     //find appropriate index for new connection
@@ -272,19 +344,46 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
     CellConnection newConnection;
     newConnection.cell = cell2;
     newConnection.distance = desiredDistance;
-    newConnection.angleFromPrevious = 0;
+    auto angleFromPrevious = 0.0f;
     auto refAngle = cell1->connections[index].angleFromPrevious;
     if (Math::isAngleInBetween(prevAngle, nextAngle, newAngle)) {
         auto angleDiff1 = Math::subtractAngle(newAngle, prevAngle);
         auto angleDiff2 = Math::subtractAngle(nextAngle, prevAngle);
         auto factor = angleDiff2 != 0 ? angleDiff1 / angleDiff2 : 0.5f;
         if (0 == desiredAngleOnCell1) {
-            newConnection.angleFromPrevious = refAngle * factor;
+            angleFromPrevious = refAngle * factor;
         } else {
-            newConnection.angleFromPrevious = desiredAngleOnCell1;
+            angleFromPrevious = desiredAngleOnCell1;
         }
-        newConnection.angleFromPrevious = min(newConnection.angleFromPrevious, refAngle);
-        newConnection.angleFromPrevious = Math::alignAngle(newConnection.angleFromPrevious, angleAlignment % 7);
+        angleFromPrevious = min(angleFromPrevious, refAngle);
+
+        angleFromPrevious = Math::alignAngle(angleFromPrevious, angleAlignment);
+        angleFromPrevious = Math::avoidAngleBoundaries(angleFromPrevious, refAngle, angleAlignment);
+    }
+    if (angleFromPrevious < NEAR_ZERO) {
+        return false;
+    }
+    newConnection.angleFromPrevious = angleFromPrevious;
+
+    //adjust reference angle of next connection
+    auto nextAngleFromPrevious = refAngle - angleFromPrevious;
+    auto nextAngleFromPreviousAligned = Math::alignAngle(nextAngleFromPrevious, angleAlignment);
+    auto angleDiff = nextAngleFromPreviousAligned - nextAngleFromPrevious;
+
+    auto nextIndex = index % cell1->numConnections;
+    auto nextNextIndex = (index + 1) % cell1->numConnections;
+    auto nextNextAngleFromPrevious = cell1->connections[nextNextIndex].angleFromPrevious;
+    if (nextNextAngleFromPrevious - angleDiff >= 0.0f && nextNextAngleFromPrevious - angleDiff <= 360.0f) {
+        if (nextAngleFromPreviousAligned < NEAR_ZERO || nextNextAngleFromPrevious - angleDiff < NEAR_ZERO) {
+            return false;
+        }
+        cell1->connections[nextIndex].angleFromPrevious = nextAngleFromPreviousAligned;
+        cell1->connections[nextNextIndex].angleFromPrevious = nextNextAngleFromPrevious - angleDiff;
+    } else {
+        if (nextAngleFromPrevious < NEAR_ZERO) {
+            return false;
+        }
+        cell1->connections[nextIndex].angleFromPrevious = nextAngleFromPrevious;
     }
 
     //add connection
@@ -294,54 +393,10 @@ __inline__ __device__ void CellConnectionProcessor::addConnectionIntern(
     cell1->connections[index] = newConnection;
     ++cell1->numConnections;
 
-
-    //adjust reference angle of next connection
-    auto nextAngleFromPrevious = refAngle - newConnection.angleFromPrevious;
-    auto nextAngleFromPreviousAligned = Math::alignAngle(nextAngleFromPrevious, angleAlignment % 7);
-    auto angleDiff = nextAngleFromPreviousAligned - nextAngleFromPrevious;
-
-    auto nextIndex = (index + 1) % cell1->numConnections;
-    auto nextNextIndex = (index + 2) % cell1->numConnections;
-    auto nextNextAngleFromPrevious = cell1->connections[nextNextIndex].angleFromPrevious;
-    if (nextNextAngleFromPrevious - angleDiff >= 0.0f && nextNextAngleFromPrevious - angleDiff <= 360.0f) {
-        cell1->connections[nextIndex].angleFromPrevious = nextAngleFromPreviousAligned;
-        cell1->connections[nextNextIndex].angleFromPrevious = nextNextAngleFromPrevious - angleDiff;
-    } else {
-        cell1->connections[nextIndex].angleFromPrevious = nextAngleFromPrevious;
-    }
-
+    return true;
 }
 
-__inline__ __device__ void CellConnectionProcessor::delConnectionsIntern(Cell* cell)
-{
-    for (int i = cell->numConnections - 1; i >= 0; --i) {
-        auto connectedCell = cell->connections[0].cell;
-        SystemDoubleLock lock;
-        lock.init(&cell->locked, &connectedCell->locked);
-        if (lock.tryLock()) {
-
-            if (cell->numConnections > 0) {
-                delConnectionOneWay(cell, connectedCell);
-                delConnectionOneWay(connectedCell, cell);
-            }
-
-            lock.releaseLock();
-        }
-    }
-}
-
-__inline__ __device__ void CellConnectionProcessor::delConnectionIntern(Cell* cell1, Cell* cell2)
-{
-    SystemDoubleLock lock;
-    lock.init(&cell1->locked, &cell2->locked);
-    if (lock.tryLock()) {
-        delConnectionOneWay(cell1, cell2);
-        delConnectionOneWay(cell2, cell1);
-        lock.releaseLock();
-    }
-}
-
-__inline__ __device__ void CellConnectionProcessor::delConnectionOneWay(Cell* cell1, Cell* cell2)
+__inline__ __device__ void CellConnectionProcessor::deleteConnectionOneWay(Cell* cell1, Cell* cell2)
 {
     for (int i = 0; i < cell1->numConnections; ++i) {
         if (cell1->connections[i].cell == cell2) {
@@ -362,19 +417,67 @@ __inline__ __device__ void CellConnectionProcessor::delConnectionOneWay(Cell* ce
     }
 }
 
-__inline__ __device__ void CellConnectionProcessor::delCell(SimulationData& data, Cell* cell, int cellIndex)
+__inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached)
 {
-    if (cell->tryLock()) {
+    auto distance = Math::length(pos1 - pos2);
+    if (distance > cudaSimulationParameters.cellMaxBindingDistance) {
+        return false;
+    }
 
-        if (0 == cell->numConnections && cell->energy != 0 /* && _data->entities.cellPointers.at(cellIndex) == cell*/) {
-            EntityFactory factory;
-            factory.init(&data);
-            factory.createParticle(cell->energy, cell->absPos, cell->vel, {cell->metadata.color});
-            cell->setDeleted();
-
-            data.entities.cellPointers.at(cellIndex) = nullptr;
+    bool result = false;
+    data.cellMap.executeForEach((pos1 + pos2) / 2, distance, detached, [&](auto const& otherCell) {
+        if ((otherCell->absPos.x == pos1.x && otherCell->absPos.y == pos1.y) || (otherCell->absPos.x == pos2.x && otherCell->absPos.y == pos2.y)) {
+            return;
         }
+        if (otherCell->tryLock()) {
+            for (int i = 0; i < otherCell->numConnections; ++i) {
+                if (Math::crossing(pos1, pos2, otherCell->absPos, otherCell->connections[i].cell->absPos)) {
+                    otherCell->releaseLock();
+                    result = true;
+                    return;
+                }
+            }
+            otherCell->releaseLock();
+        }
+    });
+    return result;
+}
 
-        cell->releaseLock();
+__inline__ __device__ bool CellConnectionProcessor::wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos)
+{
+    auto const& n = cell1->numConnections;
+    if (n < 2) {
+        return false;
+    }
+    for (int i = 0; i < n; ++i) {
+        auto connectedCell = cell1->connections[i].cell;
+        auto nextConnectedCell = cell1->connections[(i + 1) % n].cell;
+        bool bothConnected = false;
+        for (int j = 0; j < connectedCell->numConnections; ++j) {
+            if (connectedCell->connections[j].cell == nextConnectedCell) {
+                bothConnected = true;
+                break;
+            }
+        }
+        if (!bothConnected) {
+            continue;
+        }
+        if (Math::crossing(cell1->absPos, otherCellPos, connectedCell->absPos, nextConnectedCell->absPos)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+__inline__ __device__ bool CellConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex)
+{
+    auto origOperationIndex = atomicCAS(&cell->scheduledOperationIndex, -1, operationIndex);
+    for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
+        if (origOperationIndex == -1) {
+            break;
+        }
+        auto& origOperation = data.structuralOperations.at(origOperationIndex);
+        origOperationIndex = atomicCAS(&origOperation.nextOperationIndex, -1, operationIndex);
     }
 }
+

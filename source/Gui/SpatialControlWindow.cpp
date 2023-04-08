@@ -26,6 +26,8 @@ void _SpatialControlWindow::processIntern()
     ImGui::SameLine();
     processZoomOutButton();
     ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+    ImGui::SameLine();
     processResizeButton();
 
     ImGui::Spacing();
@@ -66,7 +68,7 @@ void _SpatialControlWindow::processIntern()
         ImGui::Spacing();
         ImGui::Spacing();
         float sensitivity = _viewport->getZoomSensitivity();
-        if (AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Zoom sensitivity").min(1.0f).max(1.05f).textWidth(130).format(""), sensitivity)) {
+        if (AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Zoom sensitivity").min(1.0f).max(1.05f).textWidth(130).format(""), &sensitivity)) {
             _viewport->setZoomSensitivity(sensitivity);
         }
     }
@@ -173,18 +175,18 @@ void _SpatialControlWindow::processCenterOnSelection()
 
 void _SpatialControlWindow::onResizing()
 {
-    auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-    auto settings = _simController->getSettings();
-    auto symbolMap = _simController->getSymbolMap();
+    auto timestep = _simController->getCurrentTimestep();
+    auto generalSettings = _simController->getGeneralSettings();
+    auto parameters = _simController->getSimulationParameters();
     auto content = _simController->getClusteredSimulationData();
 
     _simController->closeSimulation();
 
-    IntVector2D origWorldSize{settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY};
-    settings.generalSettings.worldSizeX = _width;
-    settings.generalSettings.worldSizeY = _height;
+    IntVector2D origWorldSize{generalSettings.worldSizeX, generalSettings.worldSizeY};
+    generalSettings.worldSizeX = _width;
+    generalSettings.worldSizeY = _height;
     
-    _simController->newSimulation(timestep, settings, symbolMap);
+    _simController->newSimulation(timestep, generalSettings, parameters);
 
     DescriptionHelper::correctConnections(content, {_width, _height});
     if (_scaleContent) {

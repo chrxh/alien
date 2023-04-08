@@ -37,12 +37,14 @@ private:
 
     void sortTable();
 
-    void onOpenSimulation(std::string const& id);
-    void onDeleteSimulation(std::string const& id);
+    void onDownloadSimulation(RemoteSimulationData* remoteData);
+    void onDeleteSimulation(RemoteSimulationData* remoteData);
     void onToggleLike(RemoteSimulationData& entry);
 
     bool isLiked(std::string const& id);
     std::string getUserLikes(std::string const& id);
+
+    void pushTextColor(RemoteSimulationData const& entry);
 
     bool _scheduleRefresh = false;
     bool _scheduleSort = false;

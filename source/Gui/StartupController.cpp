@@ -11,6 +11,7 @@
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "MessageDialog.h"
+#include "OverlayMessageController.h"
 
 namespace
 {
@@ -19,7 +20,10 @@ namespace
     std::chrono::milliseconds::rep const FadeInDuration = 500;
 }
 
-_StartupController::_StartupController(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow, Viewport const& viewport)
+_StartupController::_StartupController(
+    SimulationController const& simController,
+    TemporalControlWindow const& temporalControlWindow,
+    Viewport const& viewport)
     : _simController(simController)
     , _temporalControlWindow(temporalControlWindow)
     , _viewport(viewport)
@@ -42,19 +46,22 @@ void _StartupController::process()
     }
 
     if (_state == State::RequestLoading) {
-        DeserializedSimulation deserializedData;
-        if (!Serializer::deserializeSimulationFromFiles(deserializedData, Const::AutosaveFile)) {
+        DeserializedSimulation deserializedSim;
+        if (!Serializer::deserializeSimulationFromFiles(deserializedSim, Const::AutosaveFile)) {
             MessageDialog::getInstance().show("Error", "The default simulation file could not be read. An empty simulation will be created.");
-            deserializedData.settings.generalSettings.worldSizeX = 1000;
-            deserializedData.settings.generalSettings.worldSizeY = 500;
+            deserializedSim.auxiliaryData.generalSettings.worldSizeX = 1000;
+            deserializedSim.auxiliaryData.generalSettings.worldSizeY = 500;
+            deserializedSim.auxiliaryData.timestep = 0;
+            deserializedSim.auxiliaryData.zoom = 12.0f;
+            deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
+            deserializedSim.mainData = ClusteredDataDescription();
         }
 
-        _simController->newSimulation(deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
-        _simController->setClusteredSimulationData(deserializedData.content);
-        _viewport->setCenterInWorldPos(
-            {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
-             toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
-        _viewport->setZoomFactor(2.0f);
+        _simController->newSimulation(
+            deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+        _simController->setClusteredSimulationData(deserializedSim.mainData);
+        _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+        _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
         _temporalControlWindow->onSnapshot();
 
         _lastActivationTimepoint = std::chrono::steady_clock::now();
@@ -93,6 +100,7 @@ void _StartupController::process()
     }
 
     if (_state == State::FinishedLoading) {
+        printOverlayMessage(Const::AutosaveFileWithoutPath);
         return;
     }
 }
@@ -112,7 +120,7 @@ void _StartupController::processWindow()
     auto styleRep = StyleRepository::getInstance();
     auto center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    auto imageScale = styleRep.scaleContent(2.0f);
+    auto imageScale = styleRep.contentScale(1.0f);
     ImGui::SetNextWindowSize(ImVec2(_logo.width * imageScale + 30.0f, _logo.height * imageScale + 30.0f));
 
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
@@ -128,14 +136,16 @@ void _StartupController::processWindow()
 
     drawList->AddText(
         styleRep.getLargeFont(),
-        styleRep.scaleContent(48.0f),
-        {center.x - styleRep.scaleContent(250), center.y + styleRep.scaleContent(160)},
+        styleRep.contentScale(32.0f),
+        {center.x - styleRep.contentScale(165), center.y + styleRep.contentScale(100 + 150)},
         textColor,
         "Artificial Life Environment");
+
+    auto versionString = "Version " + Const::ProgramVersion;
     drawList->AddText(
         styleRep.getMediumFont(),
-        styleRep.scaleContent(20.0f),
-        {center.x - styleRep.scaleContent(50), center.y + styleRep.scaleContent(220)},
+        styleRep.contentScale(20.0f),
+        {center.x - styleRep.contentScale(versionString.size() * 4), center.y + styleRep.contentScale(150 + 150)},
         textColor,
-        ("Version " + Const::ProgramVersion).c_str());
+        versionString.c_str());
 }

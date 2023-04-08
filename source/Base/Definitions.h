@@ -10,6 +10,7 @@
 #include <vector>
 #include <optional>
 #include <memory>
+#include <initializer_list>
 
 #include "Exceptions.h"
 
@@ -18,14 +19,18 @@ using std::int64_t;
 using std::uint32_t;
 using std::uint64_t;
 
-const double FLOATINGPOINT_HIGH_PRECISION = 1.0e-7;
-const double FLOATINGPOINT_MEDIUM_PRECISION = 1.0e-4;
-const double FLOATINGPOINT_LOW_PRECISION = 1.0e-1;
+constexpr float NEAR_ZERO = 1.0e-4f;
 
 template <typename T>
 inline float toFloat(T const& value)
 {
     return static_cast<float>(value);
+}
+
+template <typename T>
+inline double toDouble(T const& value)
+{
+    return static_cast<double>(value);
 }
 
 template<typename T>
@@ -38,7 +43,7 @@ inline int toInt(T const& value)
 
 #define CHECK(expression) \
     if (!(expression)) { \
-        throw BugReportException("check failed"); \
+        throw std::runtime_error("check failed"); \
     }
 
 #define MEMBER_DECLARATION(className, type, name, initialValue) \
@@ -92,15 +97,14 @@ struct RealVector2D
     RealVector2D() = default;
     RealVector2D(float x_, float y_);
     RealVector2D(std::initializer_list<float> l);
-    bool operator==(RealVector2D const& vec) const;
-    bool operator!=(RealVector2D const& vec) const { return !operator==(vec); }
+    auto operator<=>(RealVector2D const&) const = default;
     void operator+=(RealVector2D const& vec);
     void operator-=(RealVector2D const& vec);
     template <typename T>
-    void operator*=(T divisor)
+    void operator*=(T factor)
     {
-        x *= divisor;
-        y *= divisor;
+        x *= factor;
+        y *= factor;
     }
     template <typename T>
     void operator/=(T divisor)
@@ -115,6 +119,8 @@ struct RealVector2D
     }
     RealVector2D operator+(RealVector2D const& other) const;
     RealVector2D operator-(RealVector2D const& other) const;
+    RealVector2D operator-() const;
+    RealVector2D operator*(float factor) const;
     RealVector2D operator/(float divisor) const;
 };
 
