@@ -25,7 +25,7 @@ https://user-images.githubusercontent.com/73127001/229868357-131fa71f-d03d-45db-
 
 ### Artificial Life engine extensions
 - Multi-cellular organisms are simulated as particle networks
-- Genetic code and cell by cell construction of offspring
+- Genetic system and cell by cell construction of offspring
 - Neural networks for controlling higher-level functions (e.g. sensors and muscles)
 - Various colors may be used to customize cell types according to own specifications
 - Spatially varying simulation parameters
