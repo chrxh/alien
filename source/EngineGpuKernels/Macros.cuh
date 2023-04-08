@@ -28,7 +28,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
             std::stringstream stream;
             stream << "CUDA error at " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "("
                    << _cudaGetErrorEnum(result) << ") \"" << func << "\"";
-            throw BugReportException(stream.str().c_str());
+            throw SpecificCudaException(stream.str().c_str());
         }
     }
 }
@@ -40,13 +40,23 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 
 #define ABORT() *((int*)nullptr) = 1;
 
-#define FP_PRECISION 0.00001
+#define NEAR_ZERO 0.00001f
 
 #define CUDA_THROW_NOT_IMPLEMENTED() \
-    printf("not implemented"); \
+    printf("not implemented\n"); \
     asm("trap;");
 
-#define KERNEL_CALL_1_1(func, ...) func<<<1, 1>>>(__VA_ARGS__);
+#define KERNEL_CALL_1_1(func, ...) func<<<1, 1>>>(__VA_ARGS__); \
+    cudaDeviceSynchronize(); \
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+#define KERNEL_CALL(func, ...) func<<<gpuSettings.numBlocks, gpuSettings.numThreadsPerBlock>>>(__VA_ARGS__); \
+    cudaDeviceSynchronize(); \
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
-#define KERNEL_CALL(func, ...) \
-    func<<<gpuSettings.numBlocks, gpuSettings.numThreadsPerBlock>>>(__VA_ARGS__);
+#define KERNEL_CALL_1_1_DEBUG(func, ...) \
+    func<<<1, 1>>>(__VA_ARGS__); \
+    cudaDeviceSynchronize(); \
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+#define KERNEL_CALL_DEBUG(func, ...) func<<<gpuSettings.numBlocks, gpuSettings.numThreadsPerBlock>>>(__VA_ARGS__); \
+    cudaDeviceSynchronize(); \
+    CHECK_FOR_CUDA_ERROR(cudaGetLastError());

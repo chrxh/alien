@@ -1,125 +1,162 @@
 ﻿#include "SimulationKernels.cuh"
 #include "FlowFieldKernels.cuh"
 #include "ClusterProcessor.cuh"
+#include "CellFunctionProcessor.cuh"
+#include "NerveProcessor.cuh"
+#include "NeuronProcessor.cuh"
+#include "ConstructorProcessor.cuh"
+#include "AttackerProcessor.cuh"
+#include "InjectorProcessor.cuh"
+#include "TransmitterProcessor.cuh"
+#include "MuscleProcessor.cuh"
+#include "SensorProcessor.cuh"
+#include "CellProcessor.cuh"
+#include "ParticleProcessor.cuh"
 
-__global__ void cudaPrepareNextTimestep(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_prepare(SimulationData data, SimulationStatistics statistics)
 {
     data.prepareForNextTimestep();
-    result.setArrayResizeNeeded(data.shouldResize());
 }
 
-__global__ void cudaNextTimestep_substep1(SimulationData data)
+__global__ void cudaNextTimestep_physics_init(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.init(data);
-    cellProcessor.clearTag(data);
-    cellProcessor.updateMap(data);
-    cellProcessor.radiation(data);  //do not use ParticleProcessor in this kernel
-    cellProcessor.clearDensityMap(data);
+    CellProcessor::init(data);
 }
 
-__global__ void cudaNextTimestep_substep2(SimulationData data)
+__global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.collisions(data);
-    cellProcessor.fillDensityMap(data);
-
-    ParticleProcessor particleProcessor;
-    particleProcessor.updateMap(data);
+    CellProcessor::updateMap(data);
+    CellProcessor::radiation(data);  //do not use ParticleProcessor in this calcKernel
+    CellProcessor::clearDensityMap(data);
 }
 
-__global__ void cudaNextTimestep_substep3(SimulationData data)
+__global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.checkForces(data);
-    cellProcessor.updateVelocities(data);
-    cellProcessor.clearTag(data);
-    cellProcessor.applyMutation(data);
+    CellProcessor::calcFluidForces_reconnectCells_correctOverlap(data);
+    CellProcessor::fillDensityMap(data);
 
-    ParticleProcessor particleProcessor;
-    particleProcessor.movement(data);
-    particleProcessor.collision(data);
-
-    TokenProcessor tokenProcessor;
-    tokenProcessor.applyMutation(data);
+    ParticleProcessor::updateMap(data);
 }
 
-__global__ void cudaNextTimestep_substep4(SimulationData data)
+__global__ void cudaNextTimestep_physics_calcCollisionForces(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.calcConnectionForces(data);
+    CellProcessor::calcCollisions_reconnectCells_correctOverlap(data);
+    CellProcessor::fillDensityMap(data);
 
-    TokenProcessor tokenProcessor;
-    tokenProcessor.movement(data);
+    ParticleProcessor::updateMap(data);
 }
 
-__global__ void cudaNextTimestep_substep5(SimulationData data)
+__global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.verletUpdatePositions(data);
-    cellProcessor.checkConnections(data);
+    CellProcessor::checkForces(data);
+    CellProcessor::applyForces(data);
 
-    data.entities.tokenPointers.saveNumEntries();
+    ParticleProcessor::movement(data);
+    ParticleProcessor::collision(data);
 }
 
-__global__ void cudaNextTimestep_substep6(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.calcConnectionForces(data);
-
-    TokenProcessor tokenProcessor;
-    tokenProcessor.executeReadonlyCellFunctions(data, result);
+    CellProcessor::verletPositionUpdate(data);
+    CellProcessor::checkConnections(data);
 }
 
-__global__ void cudaNextTimestep_substep7(SimulationData data)
+__global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData data, bool considerAngles)
 {
-    SensorProcessor::processScheduledOperation(data);
-
-    CellProcessor cellProcessor;
-    cellProcessor.verletUpdateVelocities(data);
+    CellProcessor::calcConnectionForces(data, considerAngles);
 }
 
-__global__ void cudaNextTimestep_substep8(SimulationData data, SimulationResult result)
+__global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData data)
 {
-    TokenProcessor tokenProcessor;
-    tokenProcessor.executeModifyingCellFunctions(data, result);
+    CellProcessor::verletVelocityUpdate(data);
 }
 
-__global__ void cudaNextTimestep_substep9(SimulationData data)
+__global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.applyInnerFriction(data);
+    CellProcessor::aging(data);
 }
 
-__global__ void cudaNextTimestep_substep10(SimulationData data)
+__global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data)
 {
-    CellProcessor cellProcessor;
-    cellProcessor.applyFriction(data);
-    cellProcessor.decay(data);
+    CellProcessor::livingStateTransition(data);
+    CellFunctionProcessor::collectCellFunctionOperations(data);
 }
 
-__global__ void cudaNextTimestep_substep11(SimulationData data)
+__global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationStatistics statistics)
+{
+    NerveProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellFunction_neuron(SimulationData data, SimulationStatistics statistics)
+{
+    NeuronProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, SimulationStatistics statistics)
+{
+    ConstructorProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellFunction_injector(SimulationData data, SimulationStatistics statistics)
+{
+    InjectorProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellFunction_attacker(SimulationData data, SimulationStatistics statistics)
+{
+    AttackerProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellFunction_transmitter(SimulationData data, SimulationStatistics statistics)
+{
+    TransmitterProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellFunction_muscle(SimulationData data, SimulationStatistics statistics)
+{
+    MuscleProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellFunction_sensor(SimulationData data, SimulationStatistics statistics)
+{
+    SensorProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_physics_substep7_innerFriction(SimulationData data)
+{
+    CellProcessor::applyInnerFriction(data);
+}
+
+__global__ void cudaNextTimestep_physics_substep8(SimulationData data)
+{
+    CellFunctionProcessor::resetFetchedActivities(data);
+    CellProcessor::applyFriction(data);
+    CellProcessor::decay(data);
+}
+
+__global__ void cudaNextTimestep_structuralOperations_substep1(SimulationData data)
 {
     data.structuralOperations.saveNumEntries();
 }
 
-__global__ void cudaNextTimestep_substep12(SimulationData data)
+__global__ void cudaNextTimestep_structuralOperations_substep2(SimulationData data)
 {
-    CellConnectionProcessor::processConnectionsOperations(data);
+    CellConnectionProcessor::processAddOperations(data);
 }
 
-__global__ void cudaNextTimestep_substep13(SimulationData data)
+__global__ void cudaNextTimestep_structuralOperations_substep3(SimulationData data)
 {
-    ParticleProcessor particleProcessor;
-    particleProcessor.transformation(data);
-
-    CellConnectionProcessor::processDelCellOperations(data);
+    CellConnectionProcessor::processDeleteCellOperations(data);
 }
 
-__global__ void cudaNextTimestep_substep14(SimulationData data)
+__global__ void cudaNextTimestep_structuralOperations_substep4(SimulationData data)
 {
-    TokenProcessor tokenProcessor;
-    tokenProcessor.deleteTokenIfCellDeleted(data);
+    CellConnectionProcessor::processDeleteConnectionOperations(data);
+}
+
+__global__ void cudaNextTimestep_structuralOperations_substep5(SimulationData data)
+{
+    ParticleProcessor::transformation(data);
 }
 
 __global__ void cudaInitClusterData(SimulationData data)
@@ -153,7 +190,7 @@ __global__ void cudaApplyClusterData(SimulationData data)
 }
 
 
-//This is the only kernel that uses dynamic parallelism.
+//This is the only calcKernel that uses dynamic parallelism.
 //When it is removed, performance drops by about 20% for unknown reasons.
 __global__ void nestedDummy() {}
 __global__ void dummy()

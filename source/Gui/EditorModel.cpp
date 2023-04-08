@@ -35,18 +35,6 @@ void _EditorModel::clear()
     _selectionShallowData = SelectionShallowData();
 }
 
-std::vector<CellOrParticleDescription> _EditorModel::fetchEntitiesToInspect()
-{
-    auto result = _entitiesToInspect;
-    _entitiesToInspect = {};
-    return result;
-}
-
-void _EditorModel::inspectEntities(std::vector<CellOrParticleDescription> const& entities)
-{
-    _entitiesToInspect = entities;
-}
-
 bool _EditorModel::existsInspectedEntity(uint64_t id) const
 {
     return _inspectedEntityById.find(id) != _inspectedEntityById.end();
@@ -83,6 +71,16 @@ void _EditorModel::setDrawMode(bool value)
 bool _EditorModel::isDrawMode() const
 {
     return _drawMode;
+}
+
+void _EditorModel::setPencilWidth(float value)
+{
+    _pencilWidth = value;
+}
+
+float _EditorModel::getPencilWidth() const
+{
+    return _pencilWidth;
 }
 
 void _EditorModel::setDefaultColorCode(int value)

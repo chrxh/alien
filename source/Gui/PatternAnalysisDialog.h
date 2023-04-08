@@ -15,34 +15,23 @@ public:
 private:
     void saveRepetitiveActiveClustersToFiles(std::string const& filename);
 
-    struct CellFeatureAnalysisDescription
-    {
-        int cellFunction;
-
-        bool operator<(CellFeatureAnalysisDescription const& other) const
-        {
-            if (cellFunction != other.cellFunction) {
-                return cellFunction < other.cellFunction;
-            }
-            return false;
-        }
-        bool operator==(CellFeatureAnalysisDescription const& other) const { return cellFunction == other.cellFunction; }
-        bool operator!=(CellFeatureAnalysisDescription const& other) const { return !operator==(other); }
-    };
     struct CellAnalysisDescription
     {
         int maxConnections;
         int numConnections;
-        bool tokenBlocked;
-        int tokenBranchNumber;
+        bool constructionState;
+        std::optional<int> inputExecutionOrderNumber;
+        bool outputBlocked;
+        int executionOrderNumber;
         int color;
-        CellFeatureAnalysisDescription feature;
+        int cellFunction;
 
         bool operator==(CellAnalysisDescription const& other) const
         {
-            return maxConnections == other.maxConnections && numConnections == other.numConnections && tokenBlocked == other.tokenBlocked
-                && tokenBranchNumber == other.tokenBranchNumber && feature == other.feature
-                /*&& color == other.color*/;
+            return maxConnections == other.maxConnections && numConnections == other.numConnections && constructionState == other.constructionState
+                && inputExecutionOrderNumber == other.inputExecutionOrderNumber && outputBlocked == other.outputBlocked && executionOrderNumber == other.executionOrderNumber
+                && cellFunction == other.cellFunction
+                && color == other.color;
         }
 
         bool operator!=(CellAnalysisDescription const& other) const { return !operator==(other); }
@@ -55,33 +44,33 @@ private:
             if (numConnections != other.numConnections) {
                 return numConnections < other.numConnections;
             }
-            if (tokenBlocked != other.tokenBlocked) {
-                return tokenBlocked < other.tokenBlocked;
+            if (constructionState != other.constructionState) {
+                return constructionState < other.constructionState;
             }
-            if (tokenBranchNumber != other.tokenBranchNumber) {
-                return tokenBranchNumber < other.tokenBranchNumber;
+            if (inputExecutionOrderNumber != other.inputExecutionOrderNumber) {
+                return inputExecutionOrderNumber < other.inputExecutionOrderNumber;
             }
-            if (feature != other.feature) {
-                return feature < other.feature;
+            if (outputBlocked != other.outputBlocked) {
+                return outputBlocked < other.outputBlocked;
             }
-            /*
+            if (executionOrderNumber != other.executionOrderNumber) {
+                return executionOrderNumber < other.executionOrderNumber;
+            }
+            if (cellFunction != other.cellFunction) {
+                return cellFunction < other.cellFunction;
+            }
             if (color != other.color) {
                 return color < other.color;
             }
-*/
             return false;
         }
     };
     struct ClusterAnalysisDescription
     {
-        bool hasToken;
         std::set<std::set<CellAnalysisDescription>> connectedCells;
 
         bool operator<(ClusterAnalysisDescription const& other) const
         {
-            if (hasToken != other.hasToken) {
-                return hasToken < other.hasToken;
-            }
             if (connectedCells != other.connectedCells) {
                 return connectedCells < other.connectedCells;
             }

@@ -5,9 +5,13 @@
 #include "Base/Resources.h"
 #include "EngineInterface/Serializer.h"
 #include "GlobalSettings.h"
+#include "Viewport.h"
+#include "DelayedExecutionController.h"
+#include "OverlayMessageController.h"
 
-_AutosaveController::_AutosaveController(SimulationController const& simController)
+_AutosaveController::_AutosaveController(SimulationController const& simController, Viewport const& viewport)
     : _simController(simController)
+    , _viewport(viewport)
 {
     _startTimePoint = std::chrono::steady_clock::now();
     _on = GlobalSettings::getInstance().getBoolState("controllers.auto save.active", true);
@@ -54,10 +58,15 @@ void _AutosaveController::process()
 
 void _AutosaveController::onSave()
 {
-    DeserializedSimulation sim;
-    sim.timestep = _simController->getCurrentTimestep();
-    sim.settings = _simController->getSettings();
-    sim.symbolMap = _simController->getSymbolMap();
-    sim.content = _simController->getClusteredSimulationData();
-    Serializer::serializeSimulationToFiles(Const::AutosaveFile, sim);
+    printOverlayMessage("Auto saving ...");
+    delayedExecution([=, this] {
+        DeserializedSimulation sim;
+        sim.auxiliaryData.timestep = _simController->getCurrentTimestep();
+        sim.auxiliaryData.zoom = _viewport->getZoomFactor();
+        sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
+        sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
+        sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
+        sim.mainData = _simController->getClusteredSimulationData();
+        Serializer::serializeSimulationToFiles(Const::AutosaveFile, sim);
+    });
 }

@@ -2,21 +2,22 @@
 
 #include <memory>
 
+#include "EngineInterface/ArraySizes.h"
+
 struct Cell;
 struct Token;
 struct Particle;
-struct Entities;
+struct Objects;
 
 struct SimulationData;
 struct RenderingData;
-class SimulationResult;
 class SelectionResult;
-struct CellAccessTO;
+struct CellTO;
 struct ClusterAccessTO;
-struct DataAccessTO;
+struct DataTO;
 struct SimulationParameters;
 struct GpuSettings;
-class CudaMonitorData;
+class SimulationStatistics;
 
 class _SimulationKernelsLauncher;
 using SimulationKernelsLauncher = std::shared_ptr<_SimulationKernelsLauncher>;
@@ -33,8 +34,11 @@ using RenderingKernelsLauncher = std::shared_ptr<_RenderingKernelsLauncher>;
 class _EditKernelsLauncher;
 using EditKernelsLauncher = std::shared_ptr<_EditKernelsLauncher>;
 
-class _MonitorKernelsLauncher;
-using MonitorKernelsLauncher = std::shared_ptr<_MonitorKernelsLauncher>;
+class _StatisticsKernelsLauncher;
+using StatisticsKernelsLauncher = std::shared_ptr<_StatisticsKernelsLauncher>;
+
+class _TestKernelsLauncher;
+using TestKernelsLauncher = std::shared_ptr<_TestKernelsLauncher>;
 
 struct ApplyForceData
 {
@@ -55,11 +59,4 @@ struct AreaSelectionData
 {
     float2 startPos;
     float2 endPos;
-};
-
-struct ArraySizes
-{
-    int cellArraySize;
-    int particleArraySize;
-    int tokenArraySize;
 };

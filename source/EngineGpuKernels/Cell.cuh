@@ -1,24 +1,17 @@
 #pragma once
 
-#include "EngineInterface/Enums.h"
+#include "EngineInterface/Constants.h"
+#include "EngineInterface/CellFunctionEnums.h"
 
 #include "Base.cuh"
-#include "Definitions.cuh"
-#include "AccessTOs.cuh"
-#include "ConstantMemory.cuh"
 
-struct CellMetadata
+struct CellMetadataDescription
 {
-    unsigned char color;
+    uint64_t nameSize;
+    uint8_t* name;
 
-    int nameLen;
-    char* name;
-
-    int descriptionLen;
-    char* description;
-
-    int sourceCodeLen;
-    char* sourceCode;
+    uint64_t descriptionSize;
+    uint8_t* description;
 };
 
 struct CellConnection
@@ -28,37 +21,145 @@ struct CellConnection
     float angleFromPrevious;
 };
 
+struct Activity
+{
+    float channels[MAX_CHANNELS];
+};
+
+struct NeuronFunction
+{
+    struct NeuronState
+    {
+        float weights[MAX_CHANNELS * MAX_CHANNELS];
+        float biases[MAX_CHANNELS];
+    };
+
+    NeuronState* neuronState;
+};
+
+struct TransmitterFunction
+{
+    EnergyDistributionMode mode;
+};
+
+struct ConstructorFunction
+{
+    //settings
+    int activationMode; //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    bool singleConstruction;
+    bool separateConstruction;
+    int maxConnections; //-1 adapt maxConnections
+    ConstructorAngleAlignment angleAlignment;
+    float stiffness;
+    int constructionActivationTime;
+
+    //genome
+    uint64_t genomeSize;
+    uint8_t* genome;
+    int genomeGeneration;
+
+    //process data
+    uint64_t currentGenomePos;
+};
+
+struct SensorFunction
+{
+    SensorMode mode;
+    float angle;
+    float minDensity;
+    int color;
+};
+
+struct NerveFunction
+{
+    int pulseMode;        //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    int alternationMode;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+};
+
+struct AttackerFunction
+{
+    EnergyDistributionMode mode;
+};
+
+struct InjectorFunction
+{
+    InjectorMode mode;
+    int counter;
+    uint64_t genomeSize;
+    uint8_t* genome;
+    int genomeGeneration;
+};
+
+struct MuscleFunction
+{
+    MuscleMode mode;
+    MuscleBendingDirection lastBendingDirection;
+    float consecutiveBendingAngle;
+};
+
+struct DefenderFunction
+{
+    DefenderMode mode;
+};
+
+struct PlaceHolderFunction
+{};
+
+union CellFunctionData
+{
+    NeuronFunction neuron;
+    TransmitterFunction transmitter;
+    ConstructorFunction constructor;
+    SensorFunction sensor;
+    NerveFunction nerve;
+    AttackerFunction attacker;
+    InjectorFunction injector;
+    MuscleFunction muscle;
+    DefenderFunction defender;
+    PlaceHolderFunction placeHolder;
+};
+
 struct Cell
 {
     uint64_t id;
+
+    //general
+    CellConnection connections[MAX_CELL_BONDS];
     float2 absPos;
     float2 vel;
-
-    int branchNumber;
-    bool tokenBlocked;
     int maxConnections;
     int numConnections;
-    CellConnection connections[MAX_CELL_BONDS];
-    unsigned char numStaticBytes;
-    char staticData[MAX_CELL_STATIC_BYTES];
-    unsigned char numMutableBytes;
-    char mutableData[MAX_CELL_MUTABLE_BYTES];
-    int cellFunctionInvocations;
-    CellMetadata metadata;
     float energy;
-    int cellFunctionType;
+    float stiffness;
+    int color;
     bool barrier;
     int age;
+    LivingState livingState;
+    int constructionId;
+
+    //cell function
+    int executionOrderNumber;
+    int inputExecutionOrderNumber;
+    bool outputBlocked;
+    CellFunction cellFunction;
+    CellFunctionData cellFunctionData;
+    Activity activity;
+    int activationTime;
+
+    CellMetadataDescription metadata;
 
     //editing data
     int selected;   //0 = no, 1 = selected, 2 = cluster selected
+    int detached;  //0 = no, 1 = yes
 
-    //temporary data
+    //internal algorithm data
     int locked;	//0 = unlocked, 1 = locked
     int tag;
-    float2 temp1;
-    float2 temp2;
-    float2 temp3;
+    float density;
+    Cell* nextCell; //linked list for finding all overlapping cells
+    int scheduledOperationIndex;    // -1 = no operation scheduled
+    float2 shared1; //variable with different meanings depending on context
+    float2 shared2;
 
     //cluster data
     int clusterIndex;
@@ -69,11 +170,14 @@ struct Cell
     float clusterAngularMass;
     int numCellsInCluster;
 
-    __device__ __inline__ bool isDeleted() const { return energy == 0; }
-
-    __device__ __inline__ void setDeleted()
+    __device__ __inline__ bool isActive()
     {
-        energy = 0;
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            if (abs(activity.channels[i]) > NEAR_ZERO) {
+                return true;
+            }
+        }
+        return false;
     }
 
     __device__ __inline__ void getLock()
@@ -94,29 +198,6 @@ struct Cell
     {
         __threadfence();
         atomicExch(&locked, 0);
-    }
-
-    __inline__ __device__ Enums::CellFunction getCellFunctionType() const
-    {
-        return calcMod (cellFunctionType, Enums::CellFunction_Count);
-    }
-
-    __inline__ __device__ void initMemorySizes()
-    {
-        switch (getCellFunctionType()) {
-        case Enums::CellFunction_Computation: {
-            numStaticBytes = cudaSimulationParameters.cellFunctionComputerMaxInstructions * 3;
-            numMutableBytes = cudaSimulationParameters.cellFunctionComputerCellMemorySize;
-        } break;
-        case Enums::CellFunction_Sensor: {
-            numStaticBytes = 0;
-            numMutableBytes = 5;
-        } break;
-        default: {
-            numStaticBytes = 0;
-            numMutableBytes = 0;
-        }
-        }
     }
 };
 

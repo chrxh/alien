@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <imgui.h>
 
+#include "AlienImGui.h"
 #include "Base/Resources.h"
 #include "EngineInterface/SimulationController.h"
 
@@ -12,31 +13,27 @@
 #include "ModeController.h"
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
+#include "CellFunctionStrings.h"
+#include "EditorModel.h"
+#include "EngineInterface/Colors.h"
 
 namespace
 {
-    auto const MotionBlurStatic = 0.8f;
-    auto const MotionBlurMoving = 0.5f;
-    auto const ZoomFactorForOverlay = 16.0f;
-
-    std::unordered_map<Enums::CellFunction, std::string> cellFunctionToStringMap = {
-        {Enums::CellFunction_Computation, "Computation"},
-        {Enums::CellFunction_NeuralNet, "Neural Net"},
-        {Enums::CellFunction_Scanner, "Scanner"},
-        {Enums::CellFunction_Digestion, "Digestion"},
-        {Enums::CellFunction_Constructor, "Construction"},
-        {Enums::CellFunction_Sensor, "Sensor"},
-        {Enums::CellFunction_Muscle, "Muscle"},
-    };
+    auto constexpr MotionBlurStatic = 0.8f;
+    auto constexpr MotionBlurMoving = 0.5f;
+    auto constexpr ZoomFactorForOverlay = 12.0f;
+    auto constexpr EditCursorRadius = 10.0f;
 }
 
 _SimulationView::_SimulationView(
     SimulationController const& simController,
     ModeController const& modeWindow,
-    Viewport const& viewport)
+    Viewport const& viewport,
+    EditorModel const& editorModel)
     : _viewport(viewport)
+    , _editorModel(editorModel)
 {
-    _isOverlayActive = GlobalSettings::getInstance().getBoolState("settings.simulation view.overlay", _isOverlayActive);
+    _isCellDetailOverlayActive = GlobalSettings::getInstance().getBoolState("settings.simulation view.overlay", _isCellDetailOverlayActive);
     _modeWindow = modeWindow;
 
     _simController = simController;
@@ -89,6 +86,7 @@ _SimulationView::_SimulationView(
     _shader->use();
     _shader->setInt("texture1", 0);
     _shader->setInt("texture2", 1);
+    _shader->setInt("texture3", 2);
     _shader->setBool("glowEffect", true);
     _shader->setBool("motionEffect", true);
     updateMotionBlur();
@@ -98,37 +96,52 @@ _SimulationView::_SimulationView(
 
 _SimulationView::~_SimulationView()
 {
-    GlobalSettings::getInstance().setBoolState("settings.simulation view.overlay", _isOverlayActive);
+    GlobalSettings::getInstance().setBoolState("settings.simulation view.overlay", _isCellDetailOverlayActive);
 }
 
 void _SimulationView::resize(IntVector2D const& size)
 {
     if (_areTexturesInitialized) {
-        glDeleteFramebuffers(1, &_fbo);
-        glDeleteTextures(1, &_textureId);
-        glDeleteTextures(1, &_textureFramebufferId);
+        glDeleteFramebuffers(1, &_fbo1);
+        glDeleteFramebuffers(1, &_fbo2);
+        glDeleteTextures(1, &_textureSimulationId);
+        glDeleteTextures(1, &_textureFramebufferId1);
+        glDeleteTextures(1, &_textureFramebufferId2);
         _areTexturesInitialized = true;
     }
-    glGenTextures(1, &_textureId);
-    glBindTexture(GL_TEXTURE_2D, _textureId);
+    glGenTextures(1, &_textureSimulationId);
+    glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
-    _simController->registerImageResource(reinterpret_cast<void*>(uintptr_t(_textureId)));
+    _simController->registerImageResource(reinterpret_cast<void*>(uintptr_t(_textureSimulationId)));
 
-    glGenTextures(1, &_textureFramebufferId);
-    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId);
+    glGenTextures(1, &_textureFramebufferId1);
+    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
 
-    glGenFramebuffers(1, &_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);  
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId, 0);
+    glGenTextures(1, &_textureFramebufferId2);
+    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
+
+    glGenFramebuffers(1, &_fbo1);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);  
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId1, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);  
+
+    glGenFramebuffers(1, &_fbo2);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId2, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);  
 
     _viewport->setViewSize(size);
@@ -223,11 +236,14 @@ void _SimulationView::processEvents()
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
             middleMouseButtonReleased();
         }
+
+        drawEditCursor();
+
         _prevMousePosInt = mousePosInt;
     }
 }
 
-void _SimulationView::processContent()
+void _SimulationView::draw()
 {
     processEvents();
 
@@ -238,34 +254,34 @@ void _SimulationView::processContent()
     GLint currentFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
     _shader->setInt("phase", 0);
     glBindVertexArray(_vao);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _textureId);
+    glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
+    _shader->setInt("phase", 1);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId);
+    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-    _shader->setInt("phase", 1);
+    _shader->setInt("phase", 2);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId);
+    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void _SimulationView::processControls()
 {
-    auto worldRect = _viewport->getVisibleWorldRect();
-    auto visibleWorldSize = worldRect.bottomRight - worldRect.topLeft;
-    auto worldSize = _simController->getWorldSize();
-
-    ImGuiStyle& style = ImGui::GetStyle();
-    float childHeight = 1 + style.ScrollbarSize + style.WindowPadding.y * 2.0f;
-    float childWidth = 1 + style.ScrollbarSize + style.WindowPadding.x * 2.0f;
-
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    auto mainMenubarHeight = StyleRepository::getInstance().scaleContent(22);
+    auto mainMenubarHeight = StyleRepository::getInstance().contentScale(22);
     auto scrollbarThickness = 17;   //fixed
     _scrollbarX->process(
         {{viewport->Pos.x, viewport->Size.y - scrollbarThickness}, {viewport->Size.x - 1 - scrollbarThickness, 1}});
@@ -276,12 +292,12 @@ void _SimulationView::processControls()
 
 bool _SimulationView::isOverlayActive() const
 {
-    return _isOverlayActive;
+    return _isCellDetailOverlayActive;
 }
 
 void _SimulationView::setOverlayActive(bool active)
 {
-    _isOverlayActive = active;
+    _isCellDetailOverlayActive = active;
 }
 
 void _SimulationView::setBrightness(float value)
@@ -306,7 +322,7 @@ void _SimulationView::updateImageFromSimulation()
     auto viewSize = _viewport->getViewSize();
     auto zoomFactor = _viewport->getZoomFactor();
 
-    if (_isOverlayActive && zoomFactor >= ZoomFactorForOverlay) {
+    if (zoomFactor >= ZoomFactorForOverlay) {
         auto overlay = _simController->tryDrawVectorGraphicsAndReturnOverlay(
             worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
         if (overlay) {
@@ -321,26 +337,28 @@ void _SimulationView::updateImageFromSimulation()
         _overlay = std::nullopt;
     }
 
-    if(_overlay) {
+    if (_overlay) {
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         for (auto const& overlayElement : _overlay->elements) {
-            if (overlayElement.cell) {
+            if (_isCellDetailOverlayActive && overlayElement.cell) {
                 {
                     auto fontSize = std::min(40.0f, _viewport->getZoomFactor()) / 2;
                     auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
-                    auto text = cellFunctionToStringMap.at(overlayElement.cellType);
-                    drawList->AddText(
-                        StyleRepository::getInstance().getMediumFont(),
-                        fontSize,
-                        {viewPos.x - 2 * fontSize, viewPos.y},
-                        Const::CellFunctionOverlayShadowColor,
-                        text.c_str());
-                    drawList->AddText(
-                        StyleRepository::getInstance().getMediumFont(),
-                        fontSize,
-                        {viewPos.x - 2 * fontSize + 1, viewPos.y + 1},
-                        Const::CellFunctionOverlayColor,
-                        text.c_str());
+                    if (overlayElement.cellType != CellFunction_None) {
+                        auto text = Const::CellFunctionToStringMap.at(overlayElement.cellType);
+                        drawList->AddText(
+                            StyleRepository::getInstance().getMediumFont(),
+                            fontSize,
+                            {viewPos.x - 2 * fontSize, viewPos.y},
+                            Const::CellFunctionOverlayShadowColor,
+                            text.c_str());
+                        drawList->AddText(
+                            StyleRepository::getInstance().getMediumFont(),
+                            fontSize,
+                            {viewPos.x - 2 * fontSize + 1, viewPos.y + 1},
+                            Const::CellFunctionOverlayColor,
+                            text.c_str());
+                    }
                 }
                 {
                     auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f});
@@ -350,20 +368,21 @@ void _SimulationView::updateImageFromSimulation()
                         fontSize,
                         {viewPos.x, viewPos.y},
                         Const::BranchNumberOverlayShadowColor,
-                        std::to_string(overlayElement.branchNumber).c_str());
+                        std::to_string(overlayElement.executionOrderNumber).c_str());
                     drawList->AddText(
                         StyleRepository::getInstance().getLargeFont(),
                         fontSize,
                         {viewPos.x + 1, viewPos.y + 1},
                         Const::BranchNumberOverlayColor,
-                        std::to_string(overlayElement.branchNumber).c_str());
+                        std::to_string(overlayElement.executionOrderNumber).c_str());
                 }
             }
 
             if (overlayElement.selected == 1) {
-                auto center = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y});
-                drawList->AddCircle(
-                    {center.x, center.y}, _viewport->getZoomFactor() * 0.65f, Const::SelectedCellOverlayColor, 0, 2.0f);
+                auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y});
+                if (_viewport->isVisible(viewPos)) {
+                    drawList->AddCircle({viewPos.x, viewPos.y}, _viewport->getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
+                }
             }
         }
     }
@@ -378,5 +397,22 @@ void _SimulationView::updateMotionBlur()
         motionBlur = std::min(1.0f, motionBlur / _motionBlurFactor);
     }
     _shader->setFloat("motionBlurFactor", motionBlur);
+}
+
+void _SimulationView::drawEditCursor()
+{
+    if (_modeWindow->getMode() == _ModeController::Mode::Editor) {
+        auto mousePos = ImGui::GetMousePos();
+        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+        if (!_editorModel->isDrawMode() || _simController->isSimulationRunning()) {
+            drawList->AddCircleFilled(mousePos, EditCursorRadius, Const::NavigationCursorColor);
+        } else {
+            auto radius = _editorModel->getPencilWidth() * _viewport->getZoomFactor();
+            auto color = Const::IndividualCellColors[_editorModel->getDefaultColorCode()];
+            float h, s, v;
+            AlienImGui::ConvertRGBtoHSV(color, h, s, v);
+            drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));
+        }
+    }
 }
 

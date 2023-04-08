@@ -12,10 +12,11 @@ public:
     _PatternEditorWindow(
         EditorModel const& editorModel,
         SimulationController const& simController,
-        Viewport const& viewport);
+        Viewport const& viewport,
+        EditorControllerWeakPtr const& editorController);
 
-    bool isInspectionPossible() const;
-    void onInspectEntities();
+    bool isObjectInspectionPossible() const;
+    bool isGenomeInspectionPossible() const;
 
     bool isCopyingPossible() const;
     void onCopy();
@@ -27,7 +28,7 @@ public:
 private:
     void processIntern() override;
 
-    void onGenerateBranchNumbers();
+    void onGenerateExecutionOrderNumbers();
     void onMakeSticky();
     void onRemoveStickiness();
     void onSetBarrier(bool value);
@@ -39,6 +40,7 @@ private:
     Viewport _viewport;
     OpenPatternDialog _openPatternDialog;
     SavePatternDialog _savePatternDialog;
+    EditorControllerWeakPtr _editorController;
 
     float _angle = 0;
     float _angularVel = 0;

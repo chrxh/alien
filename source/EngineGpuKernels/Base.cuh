@@ -8,7 +8,6 @@
 
 #include "EngineInterface/GpuSettings.h"
 
-#include "Array.cuh"
 #include "CudaMemoryManager.cuh"
 #include "Definitions.cuh"
 #include "HashSet.cuh"
@@ -40,86 +39,16 @@ struct PartitionData
     __inline__ __device__ int numElements() const { return endIndex - startIndex + 1; }
 };
 
-class CudaNumberGenerator
-{
-private:
-    unsigned int* _currentIndex;
-    int* _array;
-    int _size;
-
-    unsigned long long int* _currentId;
-
-public:
-    void init(int size)
-    {
-        _size = size;
-
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, _currentIndex);
-        CudaMemoryManager::getInstance().acquireMemory<int>(size, _array);
-        CudaMemoryManager::getInstance().acquireMemory<unsigned long long int>(1, _currentId);
-
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_currentIndex, 0, sizeof(unsigned int)));
-        unsigned long long int hostCurrentId = 1;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_currentId, &hostCurrentId, sizeof(_currentId), cudaMemcpyHostToDevice));
-
-        std::vector<int> randomNumbers(size);
-        for (int i = 0; i < size; ++i) {
-            randomNumbers[i] = rand();
-        }
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_array, randomNumbers.data(), sizeof(int) * size, cudaMemcpyHostToDevice));
-    }
-
-
-    __device__ __inline__ int random(int maxVal)
-    {
-        int number = getRandomNumber();
-        return number % (maxVal + 1);
-    }
-
-    __device__ __inline__ float random(float maxVal)
-    {
-        int number = getRandomNumber();
-        return maxVal * static_cast<float>(number) / RAND_MAX;
-    }
-
-    __device__ __inline__ float random()
-    {
-        int number = getRandomNumber();
-        return static_cast<float>(number) / RAND_MAX;
-    }
-
-    __device__ __inline__ unsigned long long int createNewId_kernel() { return atomicAdd(_currentId, 1); }
-
-    __device__ __inline__ void adaptMaxId(unsigned long long int id)
-    {
-        atomicMax(_currentId, id + 1);
-    }
-
-    void free()
-    {
-        CudaMemoryManager::getInstance().freeMemory(_currentIndex);
-        CudaMemoryManager::getInstance().freeMemory(_array);
-        CudaMemoryManager::getInstance().freeMemory(_currentId);
-    }
-
-private:
-    __device__ __inline__ int getRandomNumber()
-    {
-        int index = atomicInc(_currentIndex, _size - 1);
-        return _array[index];
-    }
-};
-
-__device__ __inline__ PartitionData calcPartition(int numEntities, int division, int numDivisions)
+__device__ __inline__ PartitionData calcPartition(int numEntities, int index, int numIndices)
 {
     PartitionData result;
-    int entitiesByDivisions = numEntities / numDivisions;
-    int remainder = numEntities % numDivisions;
+    int entitiesByDivisions = numEntities / numIndices;
+    int remainder = numEntities % numIndices;
 
-    int length = division < remainder ? entitiesByDivisions + 1 : entitiesByDivisions;
-    result.startIndex = division < remainder
-        ? (entitiesByDivisions + 1) * division
-        : (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (division - remainder);
+    int length = index < remainder ? entitiesByDivisions + 1 : entitiesByDivisions;
+    result.startIndex = index < remainder
+        ? (entitiesByDivisions + 1) * index
+        : (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (index - remainder);
     result.endIndex = result.startIndex + length - 1;
     return result;
 }
@@ -128,6 +57,11 @@ __device__ __inline__ PartitionData calcAllThreadsPartition(int numEntities)
 {
     return calcPartition(
         numEntities, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+}
+
+__device__ __inline__ PartitionData calcBlockPartition(int numEntities)
+{
+    return calcPartition(numEntities, blockIdx.x, gridDim.x);
 }
 
 __host__ __device__ __inline__ int2 toInt2(float2 const& p)
@@ -186,15 +120,15 @@ __device__ __inline__ T alienAtomicRead(T* const& address)
 }
 
 template <typename T>
-__device__ __inline__ void alienAtomicAdd(T* address, T const& value)
+__device__ __inline__ T alienAtomicAdd64(T* address, T const& value)
 {
     // CUDA headers use "unsigned long long" for 64bit types, which
-    // may not be struturally equivalent to std::uint64_t
+    // may not be structurally equivalent to std::uint64_t
     //
     // Due to this, we need an ugly type casting workaround here
     //
     static_assert(sizeof(unsigned long long) == sizeof(T));
-    atomicAdd(reinterpret_cast<unsigned long long*>(address), value);
+    return atomicAdd(reinterpret_cast<unsigned long long*>(address), static_cast<unsigned long long>(value));
 }
 
 class SystemLock
@@ -222,6 +156,17 @@ public:
     __device__ __inline__ void init(int* lock1, int* lock2)
     {
         if (lock1 <= lock2) {
+            _lock1 = lock1;
+            _lock2 = lock2;
+        } else {
+            _lock1 = lock2;
+            _lock2 = lock1;
+        }
+    }
+
+    __device__ __inline__ void init(int* lock1, int* lock2, bool reverse)
+    {
+        if (!reverse) {
             _lock1 = lock1;
             _lock2 = lock2;
         } else {
@@ -296,4 +241,25 @@ void setValueToDevice(T* target, T const& value)
 __device__ __inline__ int calcMod(char value, int count)
 {
     return static_cast<unsigned char>(value) % count;
+}
+
+template<typename Container, typename LessFunc>
+__device__ __inline__ void bubbleSort(Container& container, int size, LessFunc lessFunc)
+{
+    bool newRound = true;
+    for (int i = size - 1; i >= 1; --i) {
+        if (newRound) {
+            newRound = false;
+            for (int j = 0; j <= i - 1; ++j) {
+                if (lessFunc(container[j + 1],container[j])) {
+                    auto temp = container[j];
+                    container[j] = container[j + 1];
+                    container[j + 1] = temp;
+                    newRound = true;
+                }
+            }
+        } else {
+            break;
+        }
+    }
 }

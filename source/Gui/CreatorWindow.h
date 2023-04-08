@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineInterface/SimulationController.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/DescriptionHelper.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
@@ -21,7 +21,6 @@ class _CreatorWindow : public _AlienWindow
 public:
     _CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport);
 
-
     void onDrawing();
     void finishDrawing();
 
@@ -33,18 +32,20 @@ private:
     void createRectangle();
     void createHexagon();
     void createDisc();
-    void drawing();
+
+    void validationAndCorrection();
 
     RealVector2D getRandomPos() const;
-    void incBranchNumber();
+    void incExecutionNumber();
 
     float _energy = 100.0f;
+    float _stiffness = 1.0f;
     bool _barrier = false;
     float _cellDistance = 1.0f;
     bool _makeSticky = false;
     int _maxConnections = 6;
-    bool _ascendingBranchNumbers = true;
-    int _lastBranchNumber = 0;
+    bool _ascendingExecutionNumbers = true;
+    int _lastExecutionNumber = 0;
 
     //rectangle
     int _rectHorizontalCells = 10;
@@ -57,10 +58,12 @@ private:
     float _outerRadius = 10.0f;
     float _innerRadius = 5.0f;
 
-    //paint
+    //drawing
     DataDescription _drawing;
+    DescriptionHelper::Occupancy _drawingOccupancy;
+    RealVector2D _lastDrawPos;
 
-    CreationMode _mode = CreationMode::CreateCell;
+    CreationMode _mode = CreationMode::Drawing;
 
     EditorModel _editorModel;
     SimulationController _simController;

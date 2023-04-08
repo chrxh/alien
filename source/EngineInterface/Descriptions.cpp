@@ -5,31 +5,47 @@
 #include "Base/Math.h"
 #include "Base/Physics.h"
 
-CellDescription& CellDescription::addToken(TokenDescription const& value)
+CellFunction CellDescription::getCellFunctionType() const
 {
-    tokens.emplace_back(value);
-    return *this;
-}
-
-CellDescription& CellDescription::addToken(int index, TokenDescription const& value)
-{
-    tokens.insert(tokens.begin() + index, value);
-    return *this;
-}
-
-CellDescription& CellDescription::delToken(int index)
-{
-    tokens.erase(tokens.begin() + index);
-    return *this;
+    if (!cellFunction) {
+        return CellFunction_None;
+    }
+    if (std::holds_alternative<NeuronDescription>(*cellFunction)) {
+        return CellFunction_Neuron;
+    }
+    if (std::holds_alternative<TransmitterDescription>(*cellFunction)) {
+        return CellFunction_Transmitter;
+    }
+    if (std::holds_alternative<ConstructorDescription>(*cellFunction)) {
+        return CellFunction_Constructor;
+    }
+    if (std::holds_alternative<SensorDescription>(*cellFunction)) {
+        return CellFunction_Sensor;
+    }
+    if (std::holds_alternative<NerveDescription>(*cellFunction)) {
+        return CellFunction_Nerve;
+    }
+    if (std::holds_alternative<AttackerDescription>(*cellFunction)) {
+        return CellFunction_Attacker;
+    }
+    if (std::holds_alternative<InjectorDescription>(*cellFunction)) {
+        return CellFunction_Injector;
+    }
+    if (std::holds_alternative<MuscleDescription>(*cellFunction)) {
+        return CellFunction_Muscle;
+    }
+    if (std::holds_alternative<DefenderDescription>(*cellFunction)) {
+        return CellFunction_Defender;
+    }
+    if (std::holds_alternative<PlaceHolderDescription>(*cellFunction)) {
+        return CellFunction_Placeholder;
+    }
+    return CellFunction_None;
 }
 
 bool CellDescription::isConnectedTo(uint64_t id) const
 {
-    return std::find_if(
-               connections.begin(),
-               connections.end(),
-               [&id](auto const& connection) { return connection.cellId == id; })
-        != connections.end();
+    return std::find_if(connections.begin(), connections.end(), [&id](auto const& connection) { return connection.cellId == id; }) != connections.end();
 }
 
 RealVector2D ClusterDescription::getClusterPosFromCells() const
@@ -219,7 +235,7 @@ std::unordered_set<uint64_t> DataDescription::getCellIds() const
 }
 
 DataDescription&
-DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache)
+DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache)
 {
     auto& cell1 = getCellRef(cellId1, cache);
     auto& cell2 = getCellRef(cellId2, cache);
@@ -304,16 +320,20 @@ DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2,
     return *this;
 }
 
-CellDescription& DataDescription::getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache)
+CellDescription& DataDescription::getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>* cache)
 {
-    auto findResult = cache.find(cellId);
-    if (findResult != cache.end()) {
-        return cells.at(findResult->second);
+    if (cache) {
+        auto findResult = cache->find(cellId);
+        if (findResult != cache->end()) {
+            return cells.at(findResult->second);
+        }
     }
     for (int i = 0; i < cells.size(); ++i) {
         auto& cell = cells.at(i);
         if (cell.id == cellId) {
-            cache.emplace(cellId, i);
+            if (cache) {
+                cache->emplace(cellId, i);
+            }
             return cell;
         }
     }

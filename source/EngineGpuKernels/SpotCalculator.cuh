@@ -4,149 +4,238 @@
 
 #include "EngineInterface/SimulationParametersSpotValues.h"
 #include "ConstantMemory.cuh"
+#include "Swap.cuh"
 
 class SpotCalculator
 {
 public:
-    __device__ __inline__ static float calcParameter(float SimulationParametersSpotValues::*value, SimulationData const& data, float2 const& worldPos)
+    template <typename T>
+    __device__ __inline__ static T calcResultingValue(
+        BaseMap const& map,
+        float2 const& worldPos,
+        T const& baseValue,
+        T (&spotValues)[MAX_SPOTS],
+        bool SimulationParametersSpotActivatedValues::*valueActivated)
     {
-        return calcResultingValue(
-            data.cellMap,
-            worldPos,
-            cudaSimulationParameters.spotValues.*value,
-            cudaSimulationParametersSpots.spots[0].values.*value,
-            cudaSimulationParametersSpots.spots[1].values.*value);
+        if (0 == cudaSimulationParameters.numSpots) {
+            return baseValue;
+        } else {
+            float spotWeights[MAX_SPOTS];
+            int numValues = 0;
+            for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+                if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                    float2 spotPos = {cudaSimulationParameters.spots[i].posX, cudaSimulationParameters.spots[i].posY};
+                    auto delta = map.getCorrectedDirection(spotPos - worldPos);
+                    spotWeights[numValues++] = calcWeight(delta, i);
+                }
+            }
+            return mix(baseValue, spotValues, spotWeights, numValues);
+        }
     }
 
-    __device__ __inline__ static int calcParameter(int SimulationParametersSpotValues::*value, SimulationData const& data, float2 const& worldPos)
+    template <typename T>
+    __device__ __inline__ static T calcResultingValue(BaseMap const& map, float2 const& worldPos, T const& baseValue, T (&spotValues)[MAX_SPOTS])
     {
-        return toInt(calcResultingValue(
-            data.cellMap,
-            worldPos,
-            toFloat(cudaSimulationParameters.spotValues.*value),
-            toFloat(cudaSimulationParametersSpots.spots[0].values.*value),
-            toFloat(cudaSimulationParametersSpots.spots[1].values.*value)));
+        if (0 == cudaSimulationParameters.numSpots) {
+            return baseValue;
+        } else {
+            float spotWeights[MAX_SPOTS];
+            for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+                float2 spotPos = {cudaSimulationParameters.spots[i].posX, cudaSimulationParameters.spots[i].posY};
+                auto delta = map.getCorrectedDirection(spotPos - worldPos);
+                spotWeights[i] = calcWeight(delta, i);
+            }
+            return mix(baseValue, spotValues, spotWeights);
+        }
     }
 
-    __device__ __inline__ static float calcColorMatrix(int color, int otherColor, SimulationData const& data, float2 const& worldPos)
+    __device__ __inline__ static float calcParameter(
+        float SimulationParametersSpotValues::*value,
+        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        SimulationData const& data,
+        float2 const& worldPos)
     {
-        return calcResultingValue(
-            data.cellMap,
-            worldPos,
-            cudaSimulationParameters.spotValues.cellFunctionWeaponFoodChainColorMatrix[color][otherColor],
-            cudaSimulationParametersSpots.spots[0].values.cellFunctionWeaponFoodChainColorMatrix[color][otherColor],
-            cudaSimulationParametersSpots.spots[1].values.cellFunctionWeaponFoodChainColorMatrix[color][otherColor]);
+        float spotValues[MAX_SPOTS];
+        int numValues = 0;
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                spotValues[numValues++] = cudaSimulationParameters.spots[i].values.*value;
+            }
+        }
+
+        return calcResultingValue(data.cellMap, worldPos, cudaSimulationParameters.baseValues.*value, spotValues, valueActivated);
     }
 
-    __device__ __inline__ static int calcColorTransitionDuration(int color, SimulationData const& data, float2 const& worldPos)
+    __device__ __inline__ static float calcParameter(
+        ColorVector<float> SimulationParametersSpotValues::*value,
+        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        SimulationData const& data,
+        float2 const& worldPos,
+        int color)
     {
-        return toInt(calcResultingValue(
-            data.cellMap,
-            worldPos,
-            toFloat(cudaSimulationParameters.spotValues.cellColorTransitionDuration[color]),
-            toFloat(cudaSimulationParametersSpots.spots[0].values.cellColorTransitionDuration[color]),
-            toFloat(cudaSimulationParametersSpots.spots[1].values.cellColorTransitionDuration[color])));
+        float spotValues[MAX_SPOTS];
+        int numValues = 0;
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                spotValues[numValues++] = (cudaSimulationParameters.spots[i].values.*value)[color];
+            }
+        }
+
+        return calcResultingValue(data.cellMap, worldPos, (cudaSimulationParameters.baseValues.*value)[color], spotValues, valueActivated);
     }
 
-    __device__ __inline__ static int calcColorTransitionTargetColor(int color, SimulationData const& data, float2 const& worldPos)
+    __device__ __inline__ static int calcParameter(
+        int SimulationParametersSpotValues::*value,
+        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        SimulationData const& data,
+        float2 const& worldPos)
     {
-        return toInt(calcResultingValue(
-            data.cellMap,
-            worldPos,
-            toFloat(cudaSimulationParameters.spotValues.cellColorTransitionTargetColor[color]),
-            toFloat(cudaSimulationParametersSpots.spots[0].values.cellColorTransitionTargetColor[color]),
-            toFloat(cudaSimulationParametersSpots.spots[1].values.cellColorTransitionTargetColor[color])) + 0.5f);
+        float spotValues[MAX_SPOTS];
+        int numValues = 0;
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                spotValues[numValues++] = toFloat(cudaSimulationParameters.spots[i].values.*value);
+            }
+        }
+
+        return toInt(calcResultingValue(data.cellMap, worldPos, toFloat(cudaSimulationParameters.baseValues.*value), spotValues, valueActivated));
     }
 
-    __device__ __inline__ static float3
-    calcColor(BaseMap const& map, float2 const& worldPos, float3 const& baseColor, float3 const& spotColor1, float3 const& spotColor2)
+    __device__ __inline__ static float calcParameter(
+        ColorMatrix<float> SimulationParametersSpotValues::*value,
+        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        SimulationData const& data,
+        float2 const& worldPos,
+        int color1,
+        int color2)
     {
-        return calcResultingValue(map, worldPos, baseColor, spotColor1, spotColor2);
+        float spotValues[MAX_SPOTS];
+        int numValues = 0;
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                spotValues[numValues++] = (cudaSimulationParameters.spots[i].values.*value)[color1][color2];
+            }
+        }
+
+        return calcResultingValue(data.cellMap, worldPos, (cudaSimulationParameters.baseValues.*value)[color1][color2], spotValues, valueActivated);
+    }
+
+    //return -1 for base
+    __device__ __inline__ static int
+    getFirstMatchingSpotOrBase(SimulationData const& data, float2 const& worldPos, bool SimulationParametersSpotActivatedValues::*valueActivated)
+    {
+        if (0 == cudaSimulationParameters.numSpots) {
+            return -1;
+        } else {
+            auto const& map = data.cellMap;
+            for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+                if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                    float2 spotPos = {cudaSimulationParameters.spots[i].posX, cudaSimulationParameters.spots[i].posY};
+                    auto delta = map.getCorrectedDirection(spotPos - worldPos);
+                    if(calcWeight(delta, i) < NEAR_ZERO) {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
     }
 
 private:
-    template<typename T>
-    __device__ __inline__ static T calcResultingValue(BaseMap const& map, float2 const& worldPos, T const& baseValue, T const& spotValue1, T const& spotValue2)
-    {
-        if (1 == cudaSimulationParametersSpots.numSpots) {
-            float2 spotPos = {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY};
-            auto delta = spotPos - worldPos;
-            map.correctDirection(delta);
-            auto weight = calcWeight(delta, 0);
-            return mix(baseValue, spotValue1, weight);
-        } else if (2 == cudaSimulationParametersSpots.numSpots) {
-            float2 spotPos1 = {cudaSimulationParametersSpots.spots[0].posX, cudaSimulationParametersSpots.spots[0].posY};
-            float2 spotPos2 = {cudaSimulationParametersSpots.spots[1].posX, cudaSimulationParametersSpots.spots[1].posY};
-
-            auto delta1 = spotPos1 - worldPos;
-            map.correctDirection(delta1);
-            auto delta2 = spotPos2 - worldPos;
-            map.correctDirection(delta2);
-
-            auto weight1 = calcWeight(delta1, 0);
-            auto weight2 = calcWeight(delta2, 1);
-
-            return mix(baseValue, spotValue1, spotValue2, weight1, weight2);
-        }
-        return baseValue;
-    }
 
     __device__ __inline__ static float calcWeight(float2 const& delta, int const& spotIndex)
     {
-        if (cudaSimulationParametersSpots.spots[spotIndex].shape == SpotShape::Rectangular) {
+        if (cudaSimulationParameters.spots[spotIndex].shapeType == ShapeType_Rectangular) {
             return calcWeightForRectSpot(delta, spotIndex);
+        } else {
+            return calcWeightForCircularSpot(delta, spotIndex);
         }
-        return calcWeightForCircularSpot(delta, spotIndex);
     }
 
     __device__ __inline__ static float calcWeightForCircularSpot(float2 const& delta, int const& spotIndex)
     {
         auto distance = Math::length(delta);
-        auto coreRadius = cudaSimulationParametersSpots.spots[spotIndex].coreRadius;
-        auto fadeoutRadius = cudaSimulationParametersSpots.spots[spotIndex].fadeoutRadius + 1;
+        auto coreRadius = cudaSimulationParameters.spots[spotIndex].shapeData.circularSpot.coreRadius;
+        auto fadeoutRadius = cudaSimulationParameters.spots[spotIndex].fadeoutRadius + 1;
         return distance < coreRadius ? 0.0f : min(1.0f, (distance - coreRadius) / fadeoutRadius);
     }
 
     __device__ __inline__ static float calcWeightForRectSpot(float2 const& delta, int const& spotIndex)
     {
-        auto const& spot = cudaSimulationParametersSpots.spots[spotIndex];
+        auto const& spot = cudaSimulationParameters.spots[spotIndex];
         float result = 0;
-        if (abs(delta.x) > spot.width / 2 || abs(delta.y) > spot.height / 2) {
-            float2 distanceFromRect = {max(0.0f, abs(delta.x) - spot.width / 2), max(0.0f, abs(delta.y) - spot.height / 2)};
+        if (abs(delta.x) > spot.shapeData.rectangularSpot.width / 2 || abs(delta.y) > spot.shapeData.rectangularSpot.height / 2) {
+            float2 distanceFromRect = {
+                max(0.0f, abs(delta.x) - spot.shapeData.rectangularSpot.width / 2), max(0.0f, abs(delta.y) - spot.shapeData.rectangularSpot.height / 2)};
             result = min(1.0f, Math::length(distanceFromRect) / (spot.fadeoutRadius + 1));
         }
         return result;
     }
 
-    __device__ __inline__ static float mix(float const& a, float const& b, float factor) { return a * factor + b * (1 - factor); }
-
-    __device__ __inline__ static float3 mix(float3 const& a, float3 const& b, float factor)
+    __device__ __inline__ static float mix(float const& baseValue, float (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS], int numValues)
     {
-        return float3{a.x * factor + b.x * (1 - factor), a.y * factor + b.y * (1 - factor), a.z * factor + b.z * (1 - factor)};
+        float baseFactor = 1;
+        float sum = 0;
+        for (int i = 0; i < numValues; ++i) {
+            baseFactor *= spotWeights[i];
+            sum += 1 - spotWeights[i];
+        }
+        sum += baseFactor;
+        float result = baseValue * baseFactor;
+        for (int i = 0; i < numValues; ++i) {
+            result += spotValues[i] * (1 - spotWeights[i]) / sum;
+        }
+        return result;
     }
 
-    __device__ __inline__ static float mix(float const& a, float const& b, float const& c, float factor1, float factor2)
+    __device__ __inline__ static float mix(float const& baseValue, float (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS])
     {
-        float weight1 = factor1 * factor2;
-        float weight2 = 1 - factor1;
-        float weight3 = 1 - factor2;
-        float sum = weight1 + weight2 + weight3;
-        weight1 /= sum;
-        weight2 /= sum;
-        weight3 /= sum;
-        return a * weight1 + b * weight2 + c * weight3;
+        float baseFactor = 1;
+        float sum = 0;
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            baseFactor *= spotWeights[i];
+            sum += 1 - spotWeights[i];
+        }
+        sum += baseFactor;
+        float result = baseValue * baseFactor;
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            result += spotValues[i] * (1 - spotWeights[i]) / sum;
+        }
+        return result;
     }
 
-    __device__ __inline__ static float3 mix(float3 const& a, float3 const& b, float3 const& c, float factor1, float factor2)
+    __device__ __inline__ static float2 mix(float2 const& baseValue, float2 (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS])
     {
-        float weight1 = factor1 * factor2;
-        float weight2 = 1 - factor1;
-        float weight3 = 1 - factor2;
-        float sum = weight1 + weight2 + weight3;
-        weight1 /= sum;
-        weight2 /= sum;
-        weight3 /= sum;
-        return float3{
-            a.x * weight1 + b.x * weight2 + c.x * weight3, a.y * weight1 + b.y * weight2 + c.y * weight3, a.z * weight1 + b.z * weight2 + c.z * weight3};
+        float baseFactor = 1;
+        float sum = 0;
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            baseFactor *= spotWeights[i];
+            sum += 1 - spotWeights[i];
+        }
+        sum += baseFactor;
+        float2 result = {baseValue.x * baseFactor, baseValue.y * baseFactor};
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            result.x += spotValues[i].x * (1 - spotWeights[i]) / sum;
+            result.y += spotValues[i].y * (1 - spotWeights[i]) / sum;
+        }
+        return result;
+    }
+
+    __device__ __inline__ static float3 mix(float3 const& baseValue, float3 (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS])
+    {
+        float baseFactor = 1;
+        float sum = 0;
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            baseFactor *= spotWeights[i];
+            sum += 1 - spotWeights[i];
+        }
+        sum += baseFactor;
+        float3 result = {baseValue.x * baseFactor, baseValue.y * baseFactor, baseValue.z * baseFactor};
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            result.x += spotValues[i].x * (1 - spotWeights[i]) / sum;
+            result.y += spotValues[i].y * (1 - spotWeights[i]) / sum;
+            result.z += spotValues[i].z * (1 - spotWeights[i]) / sum;
+        }
+        return result;
     }
 };

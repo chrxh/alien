@@ -25,13 +25,11 @@ _NewSimulationDialog::_NewSimulationDialog(
     , _statisticsWindow(statisticsWindow)
 {
     _adoptSimulationParameters = GlobalSettings::getInstance().getBoolState("dialogs.new simulation.adopt simulation parameters", true);
-    _adoptSymbols = GlobalSettings::getInstance().getBoolState("dialogs.new simulation.adopt symbols", true);
 }
 
 _NewSimulationDialog::~_NewSimulationDialog()
 {
     GlobalSettings::getInstance().setBoolState("dialogs.new simulation.adopt simulation parameters", _adoptSimulationParameters);
-    GlobalSettings::getInstance().setBoolState("dialogs.new simulation.adopt symbols", _adoptSymbols);
 }
 
 void _NewSimulationDialog::process()
@@ -47,7 +45,6 @@ void _NewSimulationDialog::process()
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters().name("Adopt simulation parameters").textWidth(0), _adoptSimulationParameters);
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Adopt symbols").textWidth(0), _adoptSymbols);
 
         AlienImGui::Separator();
         if (AlienImGui::Button("OK")) {
@@ -83,23 +80,14 @@ void _NewSimulationDialog::onNewSimulation()
 
     _statisticsWindow->reset();
 
-    SymbolMap symbolMap;
-    if (_adoptSymbols) {
-        symbolMap = _simController->getSymbolMap();
-    } else {
-        symbolMap = SymbolMapHelper::getDefaultSymbolMap();
-    }
-
-    Settings settings;
-    settings.generalSettings.worldSizeX = _width;
-    settings.generalSettings.worldSizeY = _height;
+    GeneralSettings generalSettings;
+    generalSettings.worldSizeX = _width;
+    generalSettings.worldSizeY = _height;
+    SimulationParameters parameters;
     if (_adoptSimulationParameters) {
-        settings.simulationParameters = _simController->getSimulationParameters();
+        parameters = _simController->getSimulationParameters();
     }
-    settings.flowFieldSettings.centers[0].posX = toFloat(_width) / 2;
-    settings.flowFieldSettings.centers[0].posY = toFloat(_height) / 2;
-
-    _simController->newSimulation(0, settings, symbolMap);
+    _simController->newSimulation(0, generalSettings, parameters);
     _viewport->setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     _viewport->setZoomFactor(4.0f);
     _temporalControlWindow->onSnapshot();

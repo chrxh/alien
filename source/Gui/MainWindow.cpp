@@ -35,14 +35,12 @@
 #include "Viewport.h"
 #include "NewSimulationDialog.h"
 #include "StartupController.h"
-#include "FlowGeneratorWindow.h"
 #include "AlienImGui.h"
 #include "AboutDialog.h"
-#include "ColorizeDialog.h"
+#include "MassOperationsDialog.h"
 #include "LogWindow.h"
 #include "SimpleLogger.h"
 #include "UiController.h"
-#include "GlobalSettings.h"
 #include "AutosaveController.h"
 #include "GettingStartedWindow.h"
 #include "OpenSimulationDialog.h"
@@ -54,7 +52,6 @@
 #include "WindowController.h"
 #include "CreatorWindow.h"
 #include "MultiplierWindow.h"
-#include "SymbolsWindow.h"
 #include "PatternAnalysisDialog.h"
 #include "MessageDialog.h"
 #include "FpsController.h"
@@ -64,13 +61,17 @@
 #include "UploadSimulationDialog.h"
 #include "CreateUserDialog.h"
 #include "ActivateUserDialog.h"
+#include "DelayedExecutionController.h"
 #include "DeleteUserDialog.h"
 #include "NetworkSettingsDialog.h"
 #include "ResetPasswordDialog.h"
 #include "NewPasswordDialog.h"
 #include "ImageToPatternDialog.h"
-#include "GenericOpenFileDialog.h"
+#include "GenericFileDialogs.h"
 #include "ShaderWindow.h"
+#include "GenomeEditorWindow.h"
+#include "RadiationSourcesWindow.h"
+#include "OverlayMessageController.h"
 
 namespace
 {
@@ -124,28 +125,28 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     auto worldSize = _simController->getWorldSize();
     _viewport = std::make_shared<_Viewport>(_windowController);
     _uiController = std::make_shared<_UiController>();
-    _autosaveController = std::make_shared<_AutosaveController>(_simController);
+    _autosaveController = std::make_shared<_AutosaveController>(_simController, _viewport);
 
     _editorController =
         std::make_shared<_EditorController>(_simController, _viewport);
     _modeController = std::make_shared<_ModeController>(_editorController);
     _networkController = std::make_shared<_NetworkController>();
-    _simulationView = std::make_shared<_SimulationView>(_simController, _modeController, _viewport);
+    _simulationView = std::make_shared<_SimulationView>(_simController, _modeController, _viewport, _editorController->getEditorModel());
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simController);
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _viewport);
-    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController);
+    _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController);
+    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
     _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow, _viewport);
-    _flowGeneratorWindow = std::make_shared<_FlowGeneratorWindow>(_simController);
     _aboutDialog = std::make_shared<_AboutDialog>();
-    _colorizeDialog = std::make_shared<_ColorizeDialog>(_simController);
+    _massOperationsDialog = std::make_shared<_MassOperationsDialog>(_simController);
     _logWindow = std::make_shared<_LogWindow>(_logger);
     _gettingStartedWindow = std::make_shared<_GettingStartedWindow>();
     _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simController, _temporalControlWindow, _viewport, _statisticsWindow);
     _openSimulationDialog = std::make_shared<_OpenSimulationDialog>(_simController, _temporalControlWindow, _statisticsWindow, _viewport);
-    _saveSimulationDialog = std::make_shared<_SaveSimulationDialog>(_simController);
+    _saveSimulationDialog = std::make_shared<_SaveSimulationDialog>(_simController, _viewport);
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>(_windowController);
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
@@ -155,7 +156,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_browserWindow, _networkController);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog, _networkController);
     _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _resetPasswordDialog, _networkController);
-    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController);
+    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController, _viewport);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_viewport, _simController);
@@ -197,7 +198,7 @@ void _MainWindow::mainLoop()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-//        ImGui::ShowDemoWindow(NULL);
+     //   ImGui::ShowDemoWindow(NULL);
 
         switch (_startupController->getState()) {
         case _StartupController::State::Unintialized:
@@ -276,7 +277,7 @@ void _MainWindow::processUninitialized()
 {
     _startupController->process();
 
-    // render content
+    // render mainData
     ImGui::Render();
     int display_w, display_h;
     glfwGetFramebufferSize(_window, &display_w, &display_h);
@@ -343,7 +344,7 @@ void _MainWindow::renderSimulation()
     glfwGetFramebufferSize(_window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
     if (_renderSimulation) {
-        _simulationView->processContent();
+        _simulationView->draw();
     } else {
         glClearColor(0, 0, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -362,7 +363,7 @@ void _MainWindow::processMenubar()
     auto patternEditorWindow = _editorController->getPatternEditorWindow();
     auto creatorWindow = _editorController->getCreatorWindow();
     auto multiplierWindow = _editorController->getMultiplierWindow();
-    auto symbolsWindow = _editorController->getSymbolsWindow();
+    auto genomeEditorWindow = _editorController->getGenomeEditorWindow();
 
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
@@ -384,12 +385,12 @@ void _MainWindow::processMenubar()
             }
             ImGui::Separator();
             ImGui::BeginDisabled(_simController->isSimulationRunning());
-            if (ImGui::MenuItem("Run", "CTRL+R")) {
+            if (ImGui::MenuItem("Run", "SPACE")) {
                 onRunSimulation();
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!_simController->isSimulationRunning());
-            if (ImGui::MenuItem("Pause", "CTRL+P")) {
+            if (ImGui::MenuItem("Pause", "SPACE")) {
                 onPauseSimulation();
             }
             ImGui::EndDisabled();
@@ -440,8 +441,8 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Simulation parameters", "ALT+4", _simulationParametersWindow->isOn())) {
                 _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
             }
-            if (ImGui::MenuItem("Flow generator", "ALT+5", _flowGeneratorWindow->isOn())) {
-                _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
+            if (ImGui::MenuItem("Radiation sources", "ALT+5", _radiationSourcesWindow->isOn())) {
+                _radiationSourcesWindow->setOn(!_radiationSourcesWindow->isOn());
             }
             if (ImGui::MenuItem("Shader parameters", "ALT+6", _shaderWindow->isOn())) {
                 _shaderWindow->setOn(!_shaderWindow->isOn());
@@ -453,10 +454,10 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuToggled, "Editor")) {
-            if (ImGui::MenuItem("Activate", "ALT+E", _modeController->getMode() == _ModeController::Mode::Action)) {
+            if (ImGui::MenuItem("Activate", "ALT+E", _modeController->getMode() == _ModeController::Mode::Editor)) {
                 _modeController->setMode(
-                    _modeController->getMode() == _ModeController::Mode::Action ? _ModeController::Mode::Navigation
-                                                                        : _ModeController::Mode::Action);
+                    _modeController->getMode() == _ModeController::Mode::Editor ? _ModeController::Mode::Navigation
+                                                                        : _ModeController::Mode::Editor);
             }
             ImGui::Separator();
             ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode());
@@ -469,25 +470,27 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Pattern editor", "ALT+M", patternEditorWindow->isOn())) {
                 patternEditorWindow->setOn(!patternEditorWindow->isOn());
             }
+            if (ImGui::MenuItem("Genome editor", "ALT+B", genomeEditorWindow->isOn())) {
+                genomeEditorWindow->setOn(!genomeEditorWindow->isOn());
+            }
             if (ImGui::MenuItem("Multiplier", "ALT+A", multiplierWindow->isOn())) {
                 multiplierWindow->setOn(!multiplierWindow->isOn());
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isInspectionPossible());
-            if (ImGui::MenuItem("Inspect entities", "ALT+N")) {
-                _editorController->onInspectEntities();
+            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isObjectInspectionPossible());
+            if (ImGui::MenuItem("Inspect objects", "ALT+N")) {
+                _editorController->onInspectSelectedObjects();
+            }
+            ImGui::EndDisabled();
+            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->isGenomeInspectionPossible());
+            if (ImGui::MenuItem("Inspect principal genome", "ALT+F")) {
+                _editorController->onInspectSelectedGenomes();
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode() || !_editorController->areInspectionWindowsActive());
             if (ImGui::MenuItem("Close inspections", "ESC")) {
                 _editorController->onCloseAllInspectorWindows();
-            }
-            ImGui::EndDisabled();
-            ImGui::Separator();
-            ImGui::BeginDisabled(_ModeController::Mode::Navigation == _modeController->getMode());
-            if (ImGui::MenuItem("Symbols", "ALT+B", symbolsWindow->isOn())) {
-                symbolsWindow->setOn(!symbolsWindow->isOn());
             }
             ImGui::EndDisabled();
             ImGui::Separator();
@@ -518,8 +521,8 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_TOOLS "  Tools ", _toolsMenuToggled, "Tools")) {
-            if (ImGui::MenuItem("Colorize", "ALT+H")) {
-                _colorizeDialog->show();
+            if (ImGui::MenuItem("Mass operations", "ALT+H")) {
+                _massOperationsDialog->show();
                 _toolsMenuToggled = false;
             }
             if (ImGui::MenuItem("Pattern analysis", "ALT+P")) {
@@ -574,11 +577,15 @@ void _MainWindow::processMenubar()
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_S)) {
             _saveSimulationDialog->show();
         }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_R)) {
-            onRunSimulation();
-        }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_P)) {
-            onPauseSimulation();
+        if (ImGui::IsKeyPressed(GLFW_KEY_SPACE)) {
+            if (_simController->isSimulationRunning()) {
+                onPauseSimulation();
+                printOverlayMessage("Pause");
+            } else {
+                onRunSimulation();
+                printOverlayMessage("Run");
+            }
+            
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_W)) {
@@ -611,7 +618,7 @@ void _MainWindow::processMenubar()
             _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_5)) {
-            _flowGeneratorWindow->setOn(!_flowGeneratorWindow->isOn());
+            _radiationSourcesWindow->setOn(!_radiationSourcesWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_6)) {
             _shaderWindow->setOn(!_shaderWindow->isOn());
@@ -622,7 +629,7 @@ void _MainWindow::processMenubar()
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
             _modeController->setMode(
-                _modeController->getMode() == _ModeController::Mode::Action ? _ModeController::Mode::Navigation : _ModeController::Mode::Action);
+                _modeController->getMode() == _ModeController::Mode::Editor ? _ModeController::Mode::Navigation : _ModeController::Mode::Editor);
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_S)) {
             selectionWindow->setOn(!selectionWindow->isOn());
@@ -630,26 +637,31 @@ void _MainWindow::processMenubar()
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_M)) {
             patternEditorWindow->setOn(!patternEditorWindow->isOn());
         }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_B)) {
+            genomeEditorWindow->setOn(!genomeEditorWindow->isOn());
+        }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_R)) {
             creatorWindow->setOn(!creatorWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
             multiplierWindow->setOn(!multiplierWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_N) && _editorController->isInspectionPossible()) {
-            _editorController->onInspectEntities();
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_N) && _editorController->isObjectInspectionPossible()) {
+            _editorController->onInspectSelectedObjects();
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_F) && _editorController->isGenomeInspectionPossible()) {
+            _editorController->onInspectSelectedGenomes();
         }
         if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) {
             _editorController->onCloseAllInspectorWindows();
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_B)) {
-            symbolsWindow->setOn(!symbolsWindow->isOn());
-        }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_C) && _editorController->isCopyingPossible()) {
             _editorController->onCopy();
+            printOverlayMessage("Selection copied");
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_V) && _editorController->isPastingPossible()) {
             _editorController->onPaste();
+            printOverlayMessage("Selection pasted");
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {
@@ -657,6 +669,13 @@ void _MainWindow::processMenubar()
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_V)) {
             _displaySettingsDialog->show();
+        }
+        if (ImGui::IsKeyPressed(GLFW_KEY_F7)) {
+            if (_windowController->isDesktopMode()) {
+                _windowController->setWindowedMode();
+            } else {
+                _windowController->setDesktopMode();
+            }
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_K)) {
             _networkSettingsDialog->show();
@@ -673,7 +692,7 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_H)) {
-            _colorizeDialog->show();
+            _massOperationsDialog->show();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_P)) {
             _patternAnalysisDialog->show();
@@ -690,7 +709,7 @@ void _MainWindow::processDialogs()
     _saveSimulationDialog->process();
     _newSimulationDialog->process();
     _aboutDialog->process();
-    _colorizeDialog->process();
+    _massOperationsDialog->process();
     _gpuSettingsDialog->process();
     _displaySettingsDialog->process(); 
     _patternAnalysisDialog->process();
@@ -704,7 +723,7 @@ void _MainWindow::processDialogs()
     _newPasswordDialog->process();
 
     MessageDialog::getInstance().process();
-    GenericOpenFileDialog::getInstance().process();
+    GenericFileDialogs::getInstance().process();
     processExitDialog();
 }
 
@@ -715,17 +734,19 @@ void _MainWindow::processWindows()
     _modeController->process();
     _statisticsWindow->process();
     _simulationParametersWindow->process();
-    _flowGeneratorWindow->process();
     _logWindow->process();
     _browserWindow->process();
     _gettingStartedWindow->process();
     _shaderWindow->process();
+    _radiationSourcesWindow->process();
 }
 
 void _MainWindow::processControllers()
 {
     _autosaveController->process();
     _editorController->process();
+    OverlayMessageController::getInstance().process();
+    DelayedExecutionController::getInstance().process();
 }
 
 void _MainWindow::onRunSimulation()

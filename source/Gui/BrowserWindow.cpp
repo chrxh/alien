@@ -5,6 +5,7 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
+#include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
@@ -20,6 +21,8 @@
 #include "MessageDialog.h"
 #include "LoginDialog.h"
 #include "UploadSimulationDialog.h"
+#include "DelayedExecutionController.h"
+#include "OverlayMessageController.h"
 
 _BrowserWindow::_BrowserWindow(
     SimulationController const& simController,
@@ -34,7 +37,7 @@ _BrowserWindow::_BrowserWindow(
     , _viewport(viewport)
     , _temporalControlWindow(temporalControlWindow)
 {
-    refreshIntern(true);
+     refreshIntern(true);
 }
 
 _BrowserWindow::~_BrowserWindow()
@@ -56,7 +59,7 @@ void _BrowserWindow::onRefresh()
 void _BrowserWindow::refreshIntern(bool firstTimeStartup)
 {
     try {
-        if (!_networkController->getRemoteSimulationDataList(_remoteSimulationDatas, !firstTimeStartup)) {
+        if (!_networkController->getSimulationDataList(_remoteSimulationDatas, !firstTimeStartup)) {
             if (!firstTimeStartup) {
                 MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
             }
@@ -122,6 +125,9 @@ void _BrowserWindow::processToolbar()
     AlienImGui::Tooltip("Logout");
 
     ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
     ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
     if (AlienImGui::ToolbarButton(ICON_FA_UPLOAD)) {
         if (auto uploadSimulationDialog = _uploadSimulationDialog.lock()) {
@@ -139,7 +145,7 @@ void _BrowserWindow::processTable()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY;
-    if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scaleContent(63.0f)), 0.0f)) {
+    if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.contentScale(63.0f)), 0.0f)) {
         ImGui::TableSetupColumn(
             "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Actions);
         ImGui::TableSetupColumn(
@@ -150,19 +156,19 @@ void _BrowserWindow::processTable()
         ImGui::TableSetupColumn(
             "User name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scaleContent(120.0f),
+            styleRepository.contentScale(120.0f),
             RemoteSimulationDataColumnId_UserName);
         ImGui::TableSetupColumn(
             "Simulation name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scaleContent(135.0f),
+            styleRepository.contentScale(135.0f),
             RemoteSimulationDataColumnId_SimulationName);
         ImGui::TableSetupColumn(
             "Description",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scaleContent(120.0f),
+            styleRepository.contentScale(120.0f),
             RemoteSimulationDataColumnId_Description);
-        ImGui::TableSetupColumn("Likes", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Likes);
+        ImGui::TableSetupColumn("Stars", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Likes);
         ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_NumDownloads);
         ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Width);
         ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Height);
@@ -188,50 +194,47 @@ void _BrowserWindow::processTable()
         clipper.Begin(_filteredRemoteSimulationDatas.size());
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                RemoteSimulationData* item = &_filteredRemoteSimulationDatas[row];
 
-//                auto isItemSelected = _selectionIds.find(item->id) != _selectionIds.end();
+                RemoteSimulationData* item = &_filteredRemoteSimulationDatas[row];
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow();
 
                 ImGui::TableNextColumn();
                 if (ImGui::Button(ICON_FA_DOWNLOAD)) {
-                    onOpenSimulation(item->id);
+                    onDownloadSimulation(item);
                 }
                 AlienImGui::Tooltip("Download");
 
                 ImGui::SameLine();
-                ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
                 auto liked = isLiked(item->id);
                 if (liked) {
                     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeTextColor);
                 }
-                if (ImGui::Button(ICON_FA_THUMBS_UP)) {
-                    onToggleLike(*item);
+                if (ImGui::Button(ICON_FA_STAR)) {
+                    if (_networkController->getLoggedInUserName()) {
+                        onToggleLike(*item);
+                    } else {
+                        _loginDialog.lock()->show();
+                    }
                 }
-                AlienImGui::Tooltip("Like");
+                AlienImGui::Tooltip("Give a star");
 
                 if (liked) {
                     ImGui::PopStyleColor(1);
                 }
-                ImGui::EndDisabled();
                 ImGui::SameLine();
                 ImGui::BeginDisabled(item->userName != _networkController->getLoggedInUserName().value_or(""));
                 if (ImGui::Button(ICON_FA_TRASH)) {
-                    onDeleteSimulation(item->id);
+                    onDeleteSimulation(item);
                 }
                 ImGui::EndDisabled();
                 AlienImGui::Tooltip("Delete");
 
                 ImGui::TableNextColumn();
 
-/*
-                ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
-                if (ImGui::Selectable(item->timestamp.c_str(), isItemSelected, selectableFlags, ImVec2(0, 0.0f))) {
-                    _selectionIds = {item->id};
-                }
-*/
+                pushTextColor(*item);
+
                 AlienImGui::Text(item->timestamp);
                 ImGui::TableNextColumn();
                 processShortenedText(item->userName);
@@ -244,7 +247,7 @@ void _BrowserWindow::processTable()
                 if(item->likes > 0) {
                     ImGui::SameLine();
                     processDetailButton();
-                    AlienImGui::Tooltip([&] { return getUserLikes(item->id); });
+                    AlienImGui::Tooltip([&] { return getUserLikes(item->id); }, false);
                 }
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->numDownloads));
@@ -259,6 +262,8 @@ void _BrowserWindow::processTable()
                 ImGui::TableNextColumn();
                 AlienImGui::Text(item->version);
                 ImGui::PopID();
+
+                ImGui::PopStyleColor();
             }
         ImGui::EndTable();
     }
@@ -268,8 +273,8 @@ void _BrowserWindow::processStatus()
 {
     auto styleRepository = StyleRepository::getInstance();
 
-    if (ImGui::BeginChild("##", ImVec2(0, styleRepository.scaleContent(33.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::LogMessageColor);
+    if (ImGui::BeginChild("##", ImVec2(0, styleRepository.contentScale(33.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
         std::string statusText;
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
         statusText += std::to_string(_remoteSimulationDatas.size()) + " simulations found";
@@ -307,14 +312,14 @@ void _BrowserWindow::processShortenedText(std::string const& text) {
     auto styleRepository = StyleRepository::getInstance();
     auto textSize = ImGui::CalcTextSize(text.c_str());
     auto needDetailButton = textSize.x > ImGui::GetContentRegionAvailWidth();
-    auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - styleRepository.scaleContent(15.0f);
+    auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - styleRepository.contentScale(15.0f);
     AlienImGui::Text(text);
     if (needDetailButton) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(cursorPos);
 
         processDetailButton();
-        AlienImGui::Tooltip(text.c_str());
+        AlienImGui::Tooltip(text.c_str(), false);
     }
 }
 
@@ -340,38 +345,46 @@ void _BrowserWindow::sortTable()
     _scheduleSort = true;
 }
 
-void _BrowserWindow::onOpenSimulation(std::string const& id)
+void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
 {
-    std::string content, settings, symbolMap;
-    if (!_networkController->downloadSimulation(content, settings, symbolMap, id)) {
-        MessageDialog::getInstance().show("Error", "Failed to download simulation.");
-        return;
-    }
+    printOverlayMessage("Downloading ...");
 
-    DeserializedSimulation deserializedSim;
-    if (!Serializer::deserializeSimulationFromStrings(deserializedSim, content, settings, symbolMap)) {
-        MessageDialog::getInstance().show("Error", "Failed to load simulation. Your program version may not match.");
-        return;
-    }
+    delayedExecution([=, this] {
+        SerializedSimulation serializedSim;
+        if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, remoteData->id)) {
+            MessageDialog::getInstance().show("Error", "Failed to download simulation.");
+            return;
+        }
 
-    _simController->closeSimulation();
-    _statisticsWindow->reset();
+        DeserializedSimulation deserializedSim;
+        if (!Serializer::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
+            MessageDialog::getInstance().show("Error", "Failed to load simulation. Your program version may not match.");
+            return;
+        }
 
-    _simController->newSimulation(deserializedSim.timestep, deserializedSim.settings, deserializedSim.symbolMap);
-    _simController->setClusteredSimulationData(deserializedSim.content);
-    _viewport->setCenterInWorldPos(
-        {toFloat(deserializedSim.settings.generalSettings.worldSizeX) / 2, toFloat(deserializedSim.settings.generalSettings.worldSizeY) / 2});
-    _viewport->setZoomFactor(2.0f);
-    _temporalControlWindow->onSnapshot();
+        _simController->closeSimulation();
+        _statisticsWindow->reset();
+
+        _simController->newSimulation(
+            deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+        _simController->setClusteredSimulationData(deserializedSim.mainData);
+        _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+        _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
+        _temporalControlWindow->onSnapshot();
+    });
 }
 
-void _BrowserWindow::onDeleteSimulation(std::string const& id)
+void _BrowserWindow::onDeleteSimulation(RemoteSimulationData* remoteData)
 {
-    if (!_networkController->deleteSimulation(id)) {
-        MessageDialog::getInstance().show("Error", "Failed to delete simulation.");
-        return;
-    }
-    _scheduleRefresh = true;
+    printOverlayMessage("Deleting ...");
+
+    delayedExecution([remoteData = remoteData, this] {
+        if (!_networkController->deleteSimulation(remoteData->id)) {
+            MessageDialog::getInstance().show("Error", "Failed to delete simulation.");
+            return;
+        }
+        _scheduleRefresh = true;
+    });
 }
 
 void _BrowserWindow::onToggleLike(RemoteSimulationData& entry)
@@ -407,4 +420,28 @@ std::string _BrowserWindow::getUserLikes(std::string const& id)
     }
 
     return boost::algorithm::join(userLikes, ", ");
+}
+
+void _BrowserWindow::pushTextColor(RemoteSimulationData const& entry)
+{
+    bool versionCompatible = true;
+
+    std::vector<std::string> versionParts;
+    boost::split(versionParts, entry.version, boost::is_any_of("."));
+
+    auto majorVersion = std::stoi(versionParts.at(0));
+    if (majorVersion < 4) {
+        versionCompatible = false;
+    } else if (versionParts.size() == 5 && versionParts.at(3) == "alpha") {
+        auto alphaVersion = std::stoi(versionParts.at(4));
+        if (alphaVersion < 2) {
+            versionCompatible = false;
+        }
+    }
+
+    if (versionCompatible) {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 0.0f, 1.0f));
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.6f));
+    }
 }

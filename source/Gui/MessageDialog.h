@@ -17,3 +17,8 @@ private:
     std::string _title;
     std::string _message;
 };
+
+inline void printMessage(std::string const& title, std::string const& message)
+{
+    MessageDialog::getInstance().show(title, message);
+}

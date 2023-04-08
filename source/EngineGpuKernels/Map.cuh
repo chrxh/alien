@@ -1,10 +1,12 @@
 #pragma once
 
+#include "cuda_runtime_api.h"
+
 #include "Base.cuh"
 #include "Cell.cuh"
 #include "Particle.cuh"
 #include "Math.cuh"
-#include "cuda_runtime_api.h"
+#include "Array.cuh"
 
 class BaseMap
 {
@@ -78,14 +80,15 @@ public:
     __host__ __inline__ void init(int2 const& size)
     {
         BaseMap::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y * 2, _map);
+        CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y, _map);
         _mapEntries.init();
 
-        std::vector<Cell*> hostMap(size.x * size.y * 2, 0);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_map, hostMap.data(), sizeof(Cell*) * size.x * size.y * 2, cudaMemcpyHostToDevice));
+        std::vector<Cell*> hostMap(size.x * size.y, 0);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_map, hostMap.data(), sizeof(Cell*) * size.x * size.y, cudaMemcpyHostToDevice));
     }
 
     __host__ __inline__ void resize(int maxEntries) { _mapEntries.resize(maxEntries); }
+
 
     __device__ __inline__ void reset() { _mapEntries.reset(); }
 
@@ -95,7 +98,7 @@ public:
         _mapEntries.free();
     }
 
-    __device__ __inline__ void set_block(int numEntities, Cell** entities)
+    __device__ __inline__ void set_block(int numEntities, Cell** cells)
     {
         if (0 == numEntities) {
             return;
@@ -103,50 +106,50 @@ public:
 
         __shared__ int* entrySubarray;
         if (0 == threadIdx.x) {
-            entrySubarray = _mapEntries.getNewSubarray(numEntities);
+            entrySubarray = _mapEntries.getSubArray(numEntities);
         }
         __syncthreads();
 
         auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& entity = entities[index];
-            int2 posInt = {floorInt(entity->absPos.x), floorInt(entity->absPos.y)};
+            auto const& cell = cells[index];
+            int2 posInt = {floorInt(cell->absPos.x), floorInt(cell->absPos.y)};
             correctPosition(posInt);
-            auto mapEntry = (posInt.x + posInt.y * _size.x) * 2;
-            auto old = reinterpret_cast<Cell*>(atomicCAS(
-                reinterpret_cast<unsigned long long int*>(&_map[mapEntry]),
+            auto slot = posInt.x + posInt.y * _size.x;
+            Cell* slotCell = reinterpret_cast<Cell*>(atomicCAS(
+                reinterpret_cast<unsigned long long int*>(&_map[slot]),
                 reinterpret_cast<unsigned long long int>(nullptr),
-                reinterpret_cast<unsigned long long int>(entity)));
-            if (old != nullptr) {
-                alienAtomicExch(&_map[mapEntry + 1], entity);
+                reinterpret_cast<unsigned long long int>(cell)));
+            for (int level = 0; level < 10; ++level) {
+                if (!slotCell) {
+                    break;
+                }
+                slotCell = reinterpret_cast<Cell*>(atomicCAS(
+                    reinterpret_cast<unsigned long long int*>(&slotCell->nextCell),
+                    reinterpret_cast<unsigned long long int>(nullptr),
+                    reinterpret_cast<unsigned long long int>(cell)));
             }
-            entrySubarray[index] = mapEntry;
+
+            entrySubarray[index] = slot;
         }
         __syncthreads();
     }
 
-    //returns at most 18 cells
-    __device__ __inline__ void get(Cell* cells[], int& numCells, float2 const& pos) const
+    __device__ __inline__ Cell* getFirst(float2 const& pos) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
-        numCells = 0;
-        for (int dx = -1; dx <= 1; ++dx) {
-            for (int dy = -1; dy <= 1; ++dy) {
-                int2 scanPos{posInt.x + dx, posInt.y + dy};
-                correctPosition(scanPos);
-
-                auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
-                if (cells[numCells] = _map[mapEntry]) {
-                    ++numCells;
-                    if (cells[numCells] = _map[mapEntry + 1]) {
-                        ++numCells;
-                    }
-                }
-            }
-        }
+        correctPosition(posInt);
+        return _map[posInt.x + posInt.y * _size.x];
     }
 
-    __device__ __inline__ void get(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius) const
+    __device__ __inline__ Cell* getFirst(int2 const& pos) const
+    {
+        return _map[pos.x + pos.y * _size.x];
+    }
+
+    template <typename MatchFunc>
+    __device__ __inline__ void getMatchingCells(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int detached, MatchFunc matchFunc)
+        const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numCells = 0;
@@ -155,29 +158,47 @@ public:
             for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
                 correctPosition(scanPos);
-
-                auto mapEntry = (scanPos.x + scanPos.y * _size.x) * 2;
-                auto cell1 = _map[mapEntry];
-                if (cell1 && Math::length(cell1->absPos - pos) <= radius && numCells < arraySize) {
-                    cells[numCells] = cell1;
-                    ++numCells;
-
-                    auto cell2 = _map[mapEntry + 1];
-                    if (cell2 && Math::length(cell2->absPos - pos) <= radius && numCells < arraySize) {
-                        cells[numCells] = cell2;
+                int slot = scanPos.x + scanPos.y * _size.x;
+                auto slotCell = _map[slot];
+                for (int level = 0; level < 10; ++level) {
+                    if (numCells == arraySize) {
+                        return;
+                    }
+                    if (!slotCell) {
+                        break;
+                    }
+                    if (Math::length(slotCell->absPos - pos) <= radius && detached + slotCell->detached != 1 && matchFunc(slotCell)) {
+                        cells[numCells] = slotCell;
                         ++numCells;
                     }
+                    slotCell = slotCell->nextCell;
                 }
             }
         }
     }
 
-    __device__ __inline__ Cell* getFirst(float2 const& pos) const
+    template <typename ExecFunc>
+    __device__ __inline__ void executeForEach(float2 const& pos, float radius, int detached, ExecFunc const& execFunc) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
-        correctPosition(posInt);
-        auto mapEntry = (posInt.x + posInt.y * _size.x) * 2;
-        return _map[mapEntry];
+        int radiusInt = ceilf(radius);
+        for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
+            for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
+                int2 scanPos{posInt.x + dx, posInt.y + dy};
+                correctPosition(scanPos);
+                int slot = scanPos.x + scanPos.y * _size.x;
+                auto slotCell = _map[slot];
+                for (int level = 0; level < 10; ++level) {
+                    if (!slotCell) {
+                        break;
+                    }
+                    if (Math::length(slotCell->absPos - pos) <= radius && detached + slotCell->detached != 1) {
+                        execFunc(slotCell);
+                    }
+                    slotCell = slotCell->nextCell;
+                }
+            }
+        }
     }
 
     __device__ __inline__ void cleanup_system()
@@ -187,7 +208,6 @@ public:
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& mapEntry = _mapEntries.at(index);
             _map[mapEntry] = nullptr;
-            _map[mapEntry + 1] = nullptr;
         }
     }
 
@@ -227,7 +247,7 @@ public:
 
         __shared__ int* entrySubarray;
         if (0 == threadIdx.x) {
-            entrySubarray = _mapEntries.getNewSubarray(numEntities);
+            entrySubarray = _mapEntries.getSubArray(numEntities);
         }
         __syncthreads();
 
@@ -245,7 +265,7 @@ public:
 
     __device__ __inline__ Particle* get(float2 const& pos) const
     {
-        int2 posInt = { floorInt(pos.x), floorInt(pos.y) };
+        int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         correctPosition(posInt);
         auto mapEntry = posInt.x + posInt.y * _size.x;
         return _map[mapEntry];
@@ -253,8 +273,7 @@ public:
 
     __device__ __inline__ void cleanup_system()
     {
-        auto partition =
-            calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        auto partition = calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& mapEntry = _mapEntries.at(index);
             _map[mapEntry] = nullptr;

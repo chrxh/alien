@@ -3,97 +3,318 @@
 #include <variant>
 
 #include "Base/Definitions.h"
+#include "EngineInterface/Constants.h"
 
 #include "Definitions.h"
-#include "Metadata.h"
 
-struct CellFeatureDescription
+struct CellMetadataDescription
 {
-	std::string volatileData;
-    std::string constData;
+    std::string name;
+    std::string description;
 
-    Enums::CellFunction getType() const
+    auto operator<=>(CellMetadataDescription const&) const = default;
+
+    CellMetadataDescription& setName(std::string const& value)
     {
-        return _type % Enums::CellFunction_Count;
-    }
-	CellFeatureDescription& setType(Enums::CellFunction value) { _type = value; return *this; }
-    CellFeatureDescription& setVolatileData(std::string const& value)
-    {
-        volatileData = value;
+        name = value;
         return *this;
     }
-    CellFeatureDescription& setConstData(std::string const& value)
+    CellMetadataDescription& setDescription(std::string const& value)
     {
-        constData = value;
+        description = value;
         return *this;
     }
-	bool operator==(CellFeatureDescription const& other) const {
-		return _type == other._type
-			&& volatileData == other.volatileData
-			&& constData == other.constData;
-	}
-	bool operator!=(CellFeatureDescription const& other) const { return !operator==(other); }
-
-private:
-    Enums::CellFunction _type = Enums::CellFunction_Computation;
-};
-
-struct TokenDescription
-{
-    double energy = 0;
-    std::string data;
-
-    //only for temporary use
-    int sequenceNumber = 0;
-
-    TokenDescription& setEnergy(double value)
-    {
-        energy = value;
-        return *this;
-    }
-    TokenDescription& setData(std::string const& value)
-    {
-        data = value;
-        return *this;
-    }
-    TokenDescription& setSequenceNumber(int value)
-    {
-        sequenceNumber = value;
-        return *this;
-    }
-    bool operator==(TokenDescription const& other) const
-    {
-        return energy == other.energy && data == other.data && sequenceNumber == other.sequenceNumber;
-    }
-    bool operator!=(TokenDescription const& other) const { return !operator==(other); }
 };
 
 struct ConnectionDescription
 {
-    uint64_t cellId;    //value of 0 means cell not present in DataDescription
+    uint64_t cellId = 0;    //value of 0 means cell not present in DataDescription
     float distance = 0;
     float angleFromPrevious = 0;
+
+    auto operator<=>(ConnectionDescription const&) const = default;
+
+    ConnectionDescription& setCellId(uint64_t const& value)
+    {
+        cellId = value;
+        return *this;
+    }
+    ConnectionDescription& setDistance(float const& value)
+    {
+        distance = value;
+        return *this;
+    }
+    ConnectionDescription& setAngleFromPrevious(float const& value)
+    {
+        angleFromPrevious = value;
+        return *this;
+    }
 };
+
+struct ActivityDescription
+{
+    std::vector<float> channels;
+
+    ActivityDescription() { channels.resize(MAX_CHANNELS, 0); }
+    auto operator<=>(ActivityDescription const&) const = default;
+
+    ActivityDescription& setChannels(std::vector<float> const& value)
+    {
+        CHECK(value.size() == MAX_CHANNELS);
+        channels = value;
+        return *this;
+    }
+};
+
+
+struct NeuronDescription
+{
+    std::vector<std::vector<float>> weights;
+    std::vector<float> biases;
+
+    NeuronDescription()
+    {
+        weights.resize(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
+        biases.resize(MAX_CHANNELS, 0);
+    }
+    auto operator<=>(NeuronDescription const&) const = default;
+};
+
+struct TransmitterDescription
+{
+    EnergyDistributionMode mode = EnergyDistributionMode_TransmittersAndConstructors;
+
+    auto operator<=>(TransmitterDescription const&) const = default;
+
+    TransmitterDescription& setMode(EnergyDistributionMode value)
+    {
+        mode = value;
+        return *this;
+    }
+};
+
+struct ConstructorDescription
+{
+    int activationMode = 13;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    bool singleConstruction = false;
+    bool separateConstruction = true;
+    std::optional<int> maxConnections;
+    ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
+    float stiffness = 1.0f;
+    int constructionActivationTime = 100;
+    std::vector<uint8_t> genome;
+    int genomeGeneration = 0;
+
+    //process data
+    int currentGenomePos = 0;
+
+    auto operator<=>(ConstructorDescription const&) const = default;
+
+    ConstructorDescription& setActivationMode(int value)
+    {
+        activationMode = value;
+        return *this;
+    }
+    ConstructorDescription& setSingleConstruction(bool value)
+    {
+        singleConstruction = value;
+        return *this;
+    }
+    ConstructorDescription& setSeparateConstruction(bool value)
+    {
+        separateConstruction = value;
+        return *this;
+    }
+    ConstructorDescription& setMaxConnections(std::optional<int> value)
+    {
+        maxConnections = value;
+        return *this;
+    }
+    ConstructorDescription& setAngleAlignment(ConstructorAngleAlignment value)
+    {
+        angleAlignment = value;
+        return *this;
+    }
+    ConstructorDescription& setStiffness(float value)
+    {
+        stiffness = value;
+        return *this;
+    }
+    ConstructorDescription& setConstructionActivationTime(int value)
+    {
+        constructionActivationTime = value;
+        return *this;
+    }
+    ConstructorDescription& setGenome(std::vector<uint8_t> const& value)
+    {
+        genome = value;
+        return *this;
+    }
+    ConstructorDescription& setCurrentGenomePos(int value)
+    {
+        currentGenomePos = value;
+        return *this;
+    }
+    ConstructorDescription& setGenomeGeneration(int value)
+    {
+        genomeGeneration = value;
+        return *this;
+    }
+};
+
+struct SensorDescription
+{
+    std::optional<float> fixedAngle;  //nullopt = entire neighborhood
+    float minDensity = 0.3f;
+    int color = 0;
+
+    auto operator<=>(SensorDescription const&) const = default;
+
+    SensorMode getSensorMode() const { return fixedAngle.has_value() ? SensorMode_FixedAngle : SensorMode_Neighborhood; }
+    SensorDescription& setFixedAngle(float value)
+    {
+        fixedAngle = value;
+        return *this;
+    }
+    SensorDescription& setColor(int value)
+    {
+        color = value;
+        return *this;
+    }
+};
+
+struct NerveDescription
+{
+    int pulseMode = 0;          //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    int alternationMode = 0;    //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+
+    auto operator<=>(NerveDescription const&) const = default;
+
+    NerveDescription& setPulseMode(int value)
+    {
+        pulseMode = value;
+        return *this;
+    }
+    NerveDescription& setAlternationMode(int value)
+    {
+        alternationMode = value;
+        return *this;
+    }
+};
+
+struct AttackerDescription
+{
+    EnergyDistributionMode mode = EnergyDistributionMode_TransmittersAndConstructors;
+
+    auto operator<=>(AttackerDescription const&) const = default;
+
+    AttackerDescription& setMode(EnergyDistributionMode value)
+    {
+        mode = value;
+        return *this;
+    }
+};
+
+struct InjectorDescription
+{
+    InjectorMode mode = InjectorMode_InjectAll;
+    int counter = 0;
+    std::vector<uint8_t> genome;
+    int genomeGeneration = 0;
+
+    auto operator<=>(InjectorDescription const&) const = default;
+    InjectorDescription& setMode(InjectorMode value)
+    {
+        mode = value;
+        return *this;
+    }
+    InjectorDescription& setGenome(std::vector<uint8_t> const& value)
+    {
+        genome = value;
+        return *this;
+    }
+    InjectorDescription& setGenomeGeneration(int value)
+    {
+        genomeGeneration = value;
+        return *this;
+    }
+};
+
+struct MuscleDescription
+{
+    MuscleMode mode = MuscleMode_Movement;
+    MuscleBendingDirection lastBendingDirection = MuscleBendingDirection_None;
+    float consecutiveBendingAngle = 0;
+
+    auto operator<=>(MuscleDescription const&) const = default;
+
+    MuscleDescription& setMode(MuscleMode value)
+    {
+        mode = value;
+        return *this;
+    }
+};
+
+struct DefenderDescription
+{
+    DefenderMode mode = DefenderMode_DefendAgainstAttacker;
+
+    auto operator<=>(DefenderDescription const&) const = default;
+
+    DefenderDescription& setMode(DefenderMode value)
+    {
+        mode = value;
+        return *this;
+    }
+};
+
+struct PlaceHolderDescription
+{
+    auto operator<=>(PlaceHolderDescription const&) const = default;
+};
+
+using CellFunctionDescription = std::optional<std::variant<
+    NeuronDescription,
+    TransmitterDescription,
+    ConstructorDescription,
+    SensorDescription,
+    NerveDescription,
+    AttackerDescription,
+    InjectorDescription,
+    MuscleDescription,
+    DefenderDescription,
+    PlaceHolderDescription>>;
 
 struct CellDescription
 {
     uint64_t id = 0;
 
+    //general
+    std::vector<ConnectionDescription> connections;
     RealVector2D pos;
     RealVector2D vel;
-    double energy;
-    int maxConnections;
-    std::vector<ConnectionDescription> connections;
-    bool tokenBlocked;
-    int tokenBranchNumber;
-    CellMetadata metadata;
-    CellFeatureDescription cellFeature;
-    std::vector<TokenDescription> tokens;
-    int cellFunctionInvocations;
-    bool barrier;
-    int age;
+    float energy = 100.0f;
+    float stiffness = 1.0f;
+    int color = 0;
+    int maxConnections = 0;
+    bool barrier = false;
+    int age = 0;
+    LivingState livingState = LivingState_Ready;
+    int constructionId = 0;
+
+    //cell function
+    int executionOrderNumber = 0;
+    std::optional<int> inputExecutionOrderNumber;
+    bool outputBlocked = false;
+    CellFunctionDescription cellFunction;
+    ActivityDescription activity;
+    int activationTime = 0;
+
+    CellMetadataDescription metadata;
 
     CellDescription() = default;
+    auto operator<=>(CellDescription const&) const = default;
+
     CellDescription& setId(uint64_t value)
     {
         id = value;
@@ -109,9 +330,19 @@ struct CellDescription
         vel = value;
         return *this;
     }
-    CellDescription& setEnergy(double value)
+    CellDescription& setEnergy(float value)
     {
         energy = value;
+        return *this;
+    }
+    CellDescription& setStiffness(float value)
+    {
+        stiffness = value;
+        return *this;
+    }
+    CellDescription& setColor(unsigned char value)
+    {
+        color = value;
         return *this;
     }
     CellDescription& setBarrier(bool value)
@@ -119,6 +350,12 @@ struct CellDescription
         barrier = value;
         return *this;
     }
+    CellDescription& setAge(int value)
+    {
+        age = value;
+        return *this;
+    }
+
     CellDescription& setMaxConnections(int value)
     {
         maxConnections = value;
@@ -129,39 +366,63 @@ struct CellDescription
         connections = value;
         return *this;
     }
-    CellDescription& setFlagTokenBlocked(bool value)
+    CellDescription& setExecutionOrderNumber(int value)
     {
-        tokenBlocked = value;
+        executionOrderNumber = value;
         return *this;
     }
-    CellDescription& setTokenBranchNumber(int value)
+    CellDescription& setLivingState(LivingState value)
     {
-        tokenBranchNumber = value;
+        livingState = value;
         return *this;
     }
-    CellDescription& setMetadata(CellMetadata const& value)
+    CellDescription& setConstructionId(int value)
+    {
+        constructionId = value;
+        return *this;
+    }
+    CellDescription& setInputExecutionOrderNumber(int value)
+    {
+        inputExecutionOrderNumber = value;
+        return *this;
+    }
+    CellDescription& setOutputBlocked(bool value)
+    {
+        outputBlocked = value;
+        return *this;
+    }
+    CellFunction getCellFunctionType() const;
+    template <typename CellFunctionDesc>
+    CellDescription& setCellFunction(CellFunctionDesc const& value)
+    {
+        cellFunction = value;
+        return *this;
+    }
+    CellDescription& setMetadata(CellMetadataDescription const& value)
     {
         metadata = value;
         return *this;
     }
-    CellDescription& setCellFeature(CellFeatureDescription const& value)
+    CellDescription& setActivity(ActivityDescription const& value)
     {
-        cellFeature = value;
+        activity = value;
         return *this;
     }
-    CellDescription& setTokens(std::vector<TokenDescription> const& value)
+    CellDescription& setActivity(std::vector<float> const& value)
     {
-        tokens = value;
+        CHECK(value.size() == MAX_CHANNELS);
+
+        ActivityDescription newActivity;
+        newActivity.channels = value;
+        activity = newActivity;
         return *this;
     }
-    CellDescription& addToken(TokenDescription const& value);
-    CellDescription& addToken(int index, TokenDescription const& value);
-    CellDescription& delToken(int index);
-    CellDescription& setTokenUsages(int value)
+    CellDescription& setActivationTime(int value)
     {
-        cellFunctionInvocations = value;
+        activationTime = value;
         return *this;
     }
+
     bool isConnectedTo(uint64_t id) const;
 };
 
@@ -172,6 +433,7 @@ struct ClusterDescription
     std::vector<CellDescription> cells;
 
     ClusterDescription() = default;
+    auto operator<=>(ClusterDescription const&) const = default;
 
     ClusterDescription& setId(uint64_t value)
     {
@@ -198,10 +460,11 @@ struct ParticleDescription
 
     RealVector2D pos;
     RealVector2D vel;
-    double energy;
-    ParticleMetadata metadata;
+    float energy = 0;
+    int color = 0;
 
     ParticleDescription() = default;
+    auto operator<=>(ParticleDescription const&) const = default;
     ParticleDescription& setId(uint64_t value)
     {
         id = value;
@@ -217,14 +480,14 @@ struct ParticleDescription
         vel = value;
         return *this;
     }
-    ParticleDescription& setEnergy(double value)
+    ParticleDescription& setEnergy(float value)
     {
         energy = value;
         return *this;
     }
-    ParticleDescription& setMetadata(ParticleMetadata const& value)
+    ParticleDescription& setColor(int value)
     {
-        metadata = value;
+        color = value;
         return *this;
     }
 };
@@ -235,6 +498,8 @@ struct ClusteredDataDescription
     std::vector<ParticleDescription> particles;
 
     ClusteredDataDescription() = default;
+    auto operator<=>(ClusteredDataDescription const&) const = default;
+
     ClusteredDataDescription& addClusters(std::vector<ClusterDescription> const& value)
     {
         clusters.insert(clusters.end(), value.begin(), value.end());
@@ -284,8 +549,8 @@ struct DataDescription
     std::vector<ParticleDescription> particles;
 
     DataDescription() = default;
-
     explicit DataDescription(ClusteredDataDescription const& clusteredData);
+    auto operator<=>(DataDescription const&) const = default;
 
     DataDescription& add(DataDescription const& other);
     DataDescription& addCells(std::vector<CellDescription> const& value);
@@ -304,10 +569,10 @@ struct DataDescription
 
     std::unordered_set<uint64_t> getCellIds() const;
 
-    DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>& cache);
+    DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache = nullptr);
 
 private:
-    CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>& cache);
+    CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>* cache = nullptr);
 };
 
 using CellOrParticleDescription = std::variant<CellDescription, ParticleDescription>;
