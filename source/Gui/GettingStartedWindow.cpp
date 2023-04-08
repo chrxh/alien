@@ -39,12 +39,12 @@ void _GettingStartedWindow::processIntern()
         ImGui::PopStyleColor();
 
         ImGui::Text("ALIEN is an artificial life and physics simulation tool based on a specialized 2D particle engine written in CUDA for soft bodies and fluids.");
-        ImGui::Text("Each particle can be equipped with higher-level functions including sensors, muscles, neurons, constructors, etc. and allows to "
+        ImGui::Text("Each particle can be equipped with higher-level functions including sensors, muscles, neurons, constructors, etc. that allow to "
                     "mimic the functionality of (a group of) biological cells or of robotic components. Multi-cellular organisms are simulated as networks of "
                     "particles that exchange energy and information over their connections. The engine encompasses a genetic system capable of encoding the "
                     "blueprints of organisms in genomes which are stored in individual particles. This approach allows to simulate entire ecosystems inhabited "
-                    "by different populations where every object (regardless of whether it is a plant, a herbivore or a pure physical structure) consists of "
-                    "particles with possibly a specific function.");
+                    "by different populations where every object (regardless of whether it is a plant, a herbivore or a pure physical structure) is composed of "
+                    "interacting particles with specific functions.");
 
         AlienImGui::Separator();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
