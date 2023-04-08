@@ -43,6 +43,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 
     if (abs(activity.channels[0]) > cudaSimulationParameters.cellFunctionSensorActivityThreshold) {
+        statistics.incNumSensorActivities(cell->color);
         switch (cell->cellFunctionData.sensor.mode) {
         case SensorMode_Neighborhood: {
             searchNeighborhood(data, statistics, cell, activity);
@@ -101,6 +102,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             activity.channels[1] = static_cast<float>((lookupResult >> 8) & 0xff) / 256;  //density
             activity.channels[2] = static_cast<float>(lookupResult >> 16) / 256;  //distance
             activity.channels[3] = static_cast<float>(static_cast<int8_t>(lookupResult & 0xff)) / 256;  //angle
+            statistics.incNumSensorMatches(cell->color);
         } else {
             activity.channels[0] = 0;  //nothing found
         }
@@ -142,9 +144,10 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffff) {
-            activity.channels[0] = 1;  //something found
+            activity.channels[0] = 1;                                                     //something found
             activity.channels[1] = static_cast<float>(lookupResult & 0xff) / 256;  //density
             activity.channels[2] = static_cast<float>((lookupResult >> 8) & 0xff) / 256;  //distance
+            statistics.incNumSensorMatches(cell->color);
         } else {
             activity.channels[0] = 0;  //nothing found
         }
