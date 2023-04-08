@@ -53,7 +53,9 @@ https://user-images.githubusercontent.com/73127001/229569056-0db6562b-0147-43c8-
 - A more academic answer: A tool to tackle fundamental questions of how complexity or life-like structure may arise from simple components. How do entire ecosystems adapt to environmental changes and find a new equilibrium? How to find conditions that allow open-ended evolution?
 
 # Documentation
-A documentation, which introduces the reader to the simulator with tutorial-like articles can be found at [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs).
+A documentation for the previous major version, which introduces the reader to the simulator with tutorial-like articles, can be found at [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs). Please notice that many of the information therein are no longer up to date.
+
+A new documentation is currently under construction. However a lot of useful information is provided in the program itself via help windows and tooltips.
 
 Further information and artwork:
 * [Website](https://alien-project.org)
