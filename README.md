@@ -14,6 +14,10 @@ The development is driven by the desire to better understand the conditions for 
 An important goal is to make the simulator user-friendly through a modern user interface, visually appealing rendering and a playful approach. 
 </p>
 
+<p>
+  Please join our <a href="https://discord.gg/7bjyZdXXQ2" target="_blank">Discord server</a> as a place for discussions, new developments and feedback around ALIEN and artificial life in general.
+</p>
+
 # Main features
 ### Physics and graphics engine
 - Particles for simulating soft and rigid body mechanics, fluids, heat dissipation, damage, adhesion etc.
@@ -41,7 +45,7 @@ https://user-images.githubusercontent.com/73127001/229569056-0db6562b-0147-43c8-
 ### Networking
 - Built-in simulation browser
 - Download and upload simulation files
-- Rate simulations by likes
+- Rate simulations by giving stars
 
 # But for what is this useful?
 - A first attempt to answer: Feed your curiosity by watching evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
