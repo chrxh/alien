@@ -196,6 +196,18 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Neuron activities");
 
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(12, &DataPoint::numSensorActivities, 2);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Sensor activities");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(13, &DataPoint::numSensorMatches, 2);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Sensor matches");
+
         ImPlot::PopColormap();
         ImGui::EndTable();
     }

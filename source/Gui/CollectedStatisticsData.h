@@ -22,6 +22,8 @@ struct DataPoint
     ColorVector<double> numCompletedInjections = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numNervePulses = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numNeuronActivities = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numSensorActivities = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numSensorMatches = {0, 0, 0, 0, 0, 0, 0};
 
     DataPoint operator+(DataPoint const& other) const;
     DataPoint operator/(double divisor) const;

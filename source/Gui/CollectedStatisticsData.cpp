@@ -22,6 +22,8 @@ DataPoint DataPoint::operator+(DataPoint const& other) const
         result.numCompletedInjections[i] = numCompletedInjections[i] + other.numCompletedInjections[i];
         result.numNervePulses[i] = numNervePulses[i] + other.numNervePulses[i];
         result.numNeuronActivities[i] = numNeuronActivities[i] + other.numNeuronActivities[i];
+        result.numSensorActivities[i] = numSensorActivities[i] + other.numSensorActivities[i];
+        result.numSensorMatches[i] = numSensorMatches[i] + other.numSensorMatches[i];
     }
     return result;
 }
@@ -43,6 +45,8 @@ DataPoint DataPoint::operator/(double divisor) const
         result.numCompletedInjections[i] = numCompletedInjections[i] / divisor;
         result.numNervePulses[i] = numNervePulses[i] / divisor;
         result.numNeuronActivities[i] = numNeuronActivities[i] / divisor;
+        result.numSensorActivities[i] = numSensorActivities[i] / divisor;
+        result.numSensorMatches[i] = numSensorMatches[i] / divisor;
     }
     return result;
 }
@@ -89,6 +93,9 @@ namespace
                 result.numNervePulses[i] = toDouble(data.accumulated.numNervePulses[i] - lastData->accumulated.numNervePulses[i]) / deltaTimesteps;
                 result.numNeuronActivities[i] =
                     toDouble(data.accumulated.numNeuronActivities[i] - lastData->accumulated.numNeuronActivities[i]) / deltaTimesteps;
+                result.numSensorActivities[i] =
+                    toDouble(data.accumulated.numSensorActivities[i] - lastData->accumulated.numSensorActivities[i]) / deltaTimesteps;
+                result.numSensorMatches[i] = toDouble(data.accumulated.numSensorMatches[i] - lastData->accumulated.numSensorMatches[i]) / deltaTimesteps;
             }
         } else {
             for (int i = 0; i < MAX_COLORS; ++i) {
@@ -101,6 +108,8 @@ namespace
                 result.numCompletedInjections[i] = toDouble(data.accumulated.numCompletedInjections[i]);
                 result.numNervePulses[i] = toDouble(data.accumulated.numNervePulses[i]);
                 result.numNeuronActivities[i] = toDouble(data.accumulated.numNeuronActivities[i]);
+                result.numSensorActivities[i] = toDouble(data.accumulated.numSensorActivities[i]);
+                result.numSensorMatches[i] = toDouble(data.accumulated.numSensorMatches[i]);
             }
         }
         return result;
