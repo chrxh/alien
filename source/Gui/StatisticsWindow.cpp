@@ -135,7 +135,7 @@ void _StatisticsWindow::processTimelineStatistics()
     ImGui::PopID();
 
     ImGui::Spacing();
-    AlienImGui::Group("Processes per time step");
+    AlienImGui::Group("Processes per time step and cell");
     ImGui::PushID(2);
     if (ImGui::BeginTable("##", 2, 0, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");
@@ -144,67 +144,67 @@ void _StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(3, &DataPoint::numCreatedCells, 2);
+        processPlot(3, &DataPoint::numCreatedCells, 5);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Created cells");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(4, &DataPoint::numAttacks, 2);
+        processPlot(4, &DataPoint::numAttacks, 5);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Attacks");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(5, &DataPoint::numMuscleActivities, 2);
+        processPlot(5, &DataPoint::numMuscleActivities, 5);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Muscle activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(6, &DataPoint::numTransmitterActivities, 2);
+        processPlot(6, &DataPoint::numTransmitterActivities, 5);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Transmitter activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(7, &DataPoint::numDefenderActivities, 2);
+        processPlot(7, &DataPoint::numDefenderActivities, 5);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Defender activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(8, &DataPoint::numInjectionActivities, 2);
+        processPlot(8, &DataPoint::numInjectionActivities, 5);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Injection activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(9, &DataPoint::numCompletedInjections, 2);
+        processPlot(9, &DataPoint::numCompletedInjections, 5);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Completed injections");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(10, &DataPoint::numNervePulses, 2);
+        processPlot(10, &DataPoint::numNervePulses, 5);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Nerve pulses");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(11, &DataPoint::numNeuronActivities, 2);
+        processPlot(11, &DataPoint::numNeuronActivities, 5);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Neuron activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(12, &DataPoint::numSensorActivities, 2);
+        processPlot(12, &DataPoint::numSensorActivities, 5);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Sensor activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(13, &DataPoint::numSensorMatches, 2);
+        processPlot(13, &DataPoint::numSensorMatches, 5);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Sensor matches");
 

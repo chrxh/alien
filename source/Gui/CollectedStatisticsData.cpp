@@ -73,44 +73,35 @@ namespace
             result.numConnections[i] = toDouble(data.timestep.numConnections[i]);
             result.numParticles[i] = toDouble(data.timestep.numParticles[i]);
         }
-        if (lastData) {
-            auto deltaTimesteps = toDouble(timestep) - toDouble(*lastTimestep);
-            if (deltaTimesteps < NEAR_ZERO) {
-                deltaTimesteps = 1.0;
-             }
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                result.numCreatedCells[i] = toDouble(data.accumulated.numCreatedCells[i] - lastData->accumulated.numCreatedCells[i]) / deltaTimesteps;
-                result.numAttacks[i] = toDouble(data.accumulated.numAttacks[i] - lastData->accumulated.numAttacks[i]) / deltaTimesteps;
-                result.numMuscleActivities[i] =
-                    toDouble(data.accumulated.numMuscleActivities[i] - lastData->accumulated.numMuscleActivities[i]) / deltaTimesteps;
-                result.numDefenderActivities[i] =
-                    toDouble(data.accumulated.numDefenderActivities[i] - lastData->accumulated.numDefenderActivities[i]) / deltaTimesteps;
-                result.numTransmitterActivities[i] =
-                    toDouble(data.accumulated.numTransmitterActivities[i] - lastData->accumulated.numTransmitterActivities[i]) / deltaTimesteps;
-                result.numInjectionActivities[i] = toDouble(data.accumulated.numInjectionActivities[i] - lastData->accumulated.numInjectionActivities[i]) / deltaTimesteps;
-                result.numCompletedInjections[i] =
-                    toDouble(data.accumulated.numCompletedInjections[i] - lastData->accumulated.numCompletedInjections[i]) / deltaTimesteps;
-                result.numNervePulses[i] = toDouble(data.accumulated.numNervePulses[i] - lastData->accumulated.numNervePulses[i]) / deltaTimesteps;
-                result.numNeuronActivities[i] =
-                    toDouble(data.accumulated.numNeuronActivities[i] - lastData->accumulated.numNeuronActivities[i]) / deltaTimesteps;
-                result.numSensorActivities[i] =
-                    toDouble(data.accumulated.numSensorActivities[i] - lastData->accumulated.numSensorActivities[i]) / deltaTimesteps;
-                result.numSensorMatches[i] = toDouble(data.accumulated.numSensorMatches[i] - lastData->accumulated.numSensorMatches[i]) / deltaTimesteps;
-            }
-        } else {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                result.numCreatedCells[i] = toDouble(data.accumulated.numCreatedCells[i]);
-                result.numAttacks[i] = toDouble(data.accumulated.numAttacks[i]);
-                result.numMuscleActivities[i] = toDouble(data.accumulated.numMuscleActivities[i]);
-                result.numDefenderActivities[i] = toDouble(data.accumulated.numDefenderActivities[i]);
-                result.numTransmitterActivities[i] = toDouble(data.accumulated.numTransmitterActivities[i]);
-                result.numInjectionActivities[i] = toDouble(data.accumulated.numInjectionActivities[i]);
-                result.numCompletedInjections[i] = toDouble(data.accumulated.numCompletedInjections[i]);
-                result.numNervePulses[i] = toDouble(data.accumulated.numNervePulses[i]);
-                result.numNeuronActivities[i] = toDouble(data.accumulated.numNeuronActivities[i]);
-                result.numSensorActivities[i] = toDouble(data.accumulated.numSensorActivities[i]);
-                result.numSensorMatches[i] = toDouble(data.accumulated.numSensorMatches[i]);
-            }
+
+        auto deltaTimesteps = lastTimestep ? toDouble(timestep) - toDouble(*lastTimestep) : 1.0;
+        if (deltaTimesteps < NEAR_ZERO) {
+            deltaTimesteps = 1.0;
+        }
+
+        auto lastDataValue = lastData.value_or(data);
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            auto numCells = std::max(result.numCells[i], 1.0);
+            result.numCreatedCells[i] =
+                toDouble(data.accumulated.numCreatedCells[i] - lastDataValue.accumulated.numCreatedCells[i]) / deltaTimesteps / numCells;
+            result.numAttacks[i] = toDouble(data.accumulated.numAttacks[i] - lastDataValue.accumulated.numAttacks[i]) / deltaTimesteps / numCells;
+            result.numMuscleActivities[i] =
+                toDouble(data.accumulated.numMuscleActivities[i] - lastDataValue.accumulated.numMuscleActivities[i]) / deltaTimesteps / numCells;
+            result.numDefenderActivities[i] =
+                toDouble(data.accumulated.numDefenderActivities[i] - lastDataValue.accumulated.numDefenderActivities[i]) / deltaTimesteps / numCells;
+            result.numTransmitterActivities[i] =
+                toDouble(data.accumulated.numTransmitterActivities[i] - lastDataValue.accumulated.numTransmitterActivities[i]) / deltaTimesteps / numCells;
+            result.numInjectionActivities[i] =
+                toDouble(data.accumulated.numInjectionActivities[i] - lastDataValue.accumulated.numInjectionActivities[i]) / deltaTimesteps / numCells;
+            result.numCompletedInjections[i] =
+                toDouble(data.accumulated.numCompletedInjections[i] - lastDataValue.accumulated.numCompletedInjections[i]) / deltaTimesteps / numCells;
+            result.numNervePulses[i] = toDouble(data.accumulated.numNervePulses[i] - lastDataValue.accumulated.numNervePulses[i]) / deltaTimesteps / numCells;
+            result.numNeuronActivities[i] =
+                toDouble(data.accumulated.numNeuronActivities[i] - lastDataValue.accumulated.numNeuronActivities[i]) / deltaTimesteps / numCells;
+            result.numSensorActivities[i] =
+                toDouble(data.accumulated.numSensorActivities[i] - lastDataValue.accumulated.numSensorActivities[i]) / deltaTimesteps / numCells;
+            result.numSensorMatches[i] =
+                toDouble(data.accumulated.numSensorMatches[i] - lastDataValue.accumulated.numSensorMatches[i]) / deltaTimesteps / numCells;
         }
         return result;
     }
