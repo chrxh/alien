@@ -27,7 +27,7 @@ namespace
     double getMax(double const* data, int count)
     {
         double result = 0;
-        for (int i = 0; i < count; ++i) {
+        for (int i = count / 20; i < count; ++i) {
             result = std::max(result, *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(data) + i));
         }
         return result;
@@ -144,67 +144,67 @@ void _StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(3, &DataPoint::numCreatedCells, 5);
+        processPlot(3, &DataPoint::numCreatedCells, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Created cells");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(4, &DataPoint::numAttacks, 5);
+        processPlot(4, &DataPoint::numAttacks, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Attacks");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(5, &DataPoint::numMuscleActivities, 5);
+        processPlot(5, &DataPoint::numMuscleActivities, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Muscle activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(6, &DataPoint::numTransmitterActivities, 5);
+        processPlot(6, &DataPoint::numTransmitterActivities, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Transmitter activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(7, &DataPoint::numDefenderActivities, 5);
+        processPlot(7, &DataPoint::numDefenderActivities, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Defender activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(8, &DataPoint::numInjectionActivities, 5);
+        processPlot(8, &DataPoint::numInjectionActivities, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Injection activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(9, &DataPoint::numCompletedInjections, 5);
+        processPlot(9, &DataPoint::numCompletedInjections, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Completed injections");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(10, &DataPoint::numNervePulses, 5);
+        processPlot(10, &DataPoint::numNervePulses, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Nerve pulses");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(11, &DataPoint::numNeuronActivities, 5);
+        processPlot(11, &DataPoint::numNeuronActivities, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Neuron activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(12, &DataPoint::numSensorActivities, 5);
+        processPlot(12, &DataPoint::numSensorActivities, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Sensor activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(13, &DataPoint::numSensorMatches, 5);
+        processPlot(13, &DataPoint::numSensorMatches, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Sensor matches");
 
@@ -341,7 +341,9 @@ void _StatisticsWindow::plotSumColorsIntern(
             sum += *(ptr + color);
         }
         accumulatedData[i] = sum;
-        upperBound = std::max(upperBound, sum);
+        if (i >= count / 20) {
+            upperBound = std::max(upperBound, sum);
+        }
         rearragedtimePoints[i] = *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(timePoints) + i); 
     }
     auto endValue = count > 0 ? accumulatedData.back() : 0.0;
