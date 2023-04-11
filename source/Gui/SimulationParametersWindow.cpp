@@ -634,6 +634,26 @@ void _SimulationParametersWindow::processBase(
         if (ImGui::TreeNodeEx("Cell function: Constructor", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
+                    .name("Pump energy")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0.00f)
+                    .max(1.0f)
+                    .defaultValue(origSimParameters.cellFunctionConstructorPumpEnergyFactor),
+                simParameters.cellFunctionConstructorPumpEnergyFactor);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Energy from radiation")
+                    .tooltip("")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(1.0)
+                    .format("%.4f")
+                    .defaultValue(origSimParameters.cellFunctionConstructorEnergyFromRadiationFactor),
+                simParameters.cellFunctionConstructorEnergyFromRadiationFactor);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
                     .name("Offspring distance")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
@@ -1533,6 +1553,9 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
                 std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
         }
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
+        parameters.cellFunctionConstructorPumpEnergyFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorPumpEnergyFactor[i]));
+        parameters.cellFunctionConstructorEnergyFromRadiationFactor[i] =
+            std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorEnergyFromRadiationFactor[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
 }

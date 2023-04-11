@@ -1,6 +1,6 @@
 {
     "general": {
-        "time step": "175944",
+        "time step": "196572",
         "zoom": "3.28795266",
         "center": {
             "x": "385.62478638",
@@ -47,6 +47,13 @@
             "min energy[6]": "50.00000000",
             "fusion velocity": "0.82400000",
             "max binding energy": "500000.00000000",
+            "max age[0]": "2147483647",
+            "max age[1]": "2147483647",
+            "max age[2]": "2147483647",
+            "max age[3]": "2147483647",
+            "max age[4]": "2147483647",
+            "max age[5]": "2147483647",
+            "max age[6]": "2147483647",
             "color transition rules": {
                 "duration[0]": "0",
                 "duration[1]": "0",
@@ -65,6 +72,20 @@
             },
             "function": {
                 "constructor": {
+                    "pump energy factor[0]": "0.00000000",
+                    "pump energy factor[1]": "0.00000000",
+                    "pump energy factor[2]": "0.00000000",
+                    "pump energy factor[3]": "0.00000000",
+                    "pump energy factor[4]": "0.00000000",
+                    "pump energy factor[5]": "0.00000000",
+                    "pump energy factor[6]": "0.00000000",
+                    "energy from radiation factor[0]": "0.00000000",
+                    "energy from radiation factor[1]": "0.00000000",
+                    "energy from radiation factor[2]": "0.00000000",
+                    "energy from radiation factor[3]": "0.00000000",
+                    "energy from radiation factor[4]": "0.00000000",
+                    "energy from radiation factor[5]": "0.00000000",
+                    "energy from radiation factor[6]": "0.00000000",
                     "offspring distance[0]": "2.00000000",
                     "offspring distance[1]": "2.00000000",
                     "offspring distance[2]": "2.00000000",
@@ -545,6 +566,16 @@
                     "value": "0.00000000"
                 },
                 "radiation": {
+                    "absorption": {
+                        "activated": "false"
+                    },
+                    "absorption[0]": "1.00000000",
+                    "absorption[1]": "1.00000000",
+                    "absorption[2]": "1.00000000",
+                    "absorption[3]": "1.00000000",
+                    "absorption[4]": "1.00000000",
+                    "absorption[5]": "1.00000000",
+                    "absorption[6]": "1.00000000",
                     "factor": {
                         "activated": "false"
                     },

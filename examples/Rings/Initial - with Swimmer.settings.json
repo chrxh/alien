@@ -1,10 +1,10 @@
 {
     "general": {
-        "time step": "48796",
-        "zoom": "2.38236380",
+        "time step": "0",
+        "zoom": "1.04438663",
         "center": {
-            "x": "554.42956543",
-            "y": "254.62966919"
+            "x": "1002.52606201",
+            "y": "229.52946472"
         },
         "world size": {
             "x": "2000",
@@ -72,6 +72,20 @@
             },
             "function": {
                 "constructor": {
+                    "pump energy factor[0]": "0.89999998",
+                    "pump energy factor[1]": "0.89999998",
+                    "pump energy factor[2]": "0.89999998",
+                    "pump energy factor[3]": "0.89999998",
+                    "pump energy factor[4]": "0.89999998",
+                    "pump energy factor[5]": "0.89999998",
+                    "pump energy factor[6]": "0.89999998",
+                    "energy from radiation factor[0]": "0.69999999",
+                    "energy from radiation factor[1]": "0.69999999",
+                    "energy from radiation factor[2]": "0.69999999",
+                    "energy from radiation factor[3]": "0.69999999",
+                    "energy from radiation factor[4]": "0.69999999",
+                    "energy from radiation factor[5]": "0.69999999",
+                    "energy from radiation factor[6]": "0.69999999",
                     "offspring distance[0]": "2.00000000",
                     "offspring distance[1]": "2.00000000",
                     "offspring distance[2]": "2.00000000",
@@ -94,24 +108,24 @@
                     "activity threshold[5]": "0.10000000",
                     "activity threshold[6]": "0.10000000",
                     "mutation probability": {
-                        "neuron data[0]": "0.00023200",
+                        "neuron data[0]": "0.00043400",
                         "neuron data[1]": "0.00000000",
                         "neuron data[2]": "0.00000000",
-                        "neuron data[3]": "0.00025500",
+                        "neuron data[3]": "0.00045500",
                         "neuron data[4]": "0.00000000",
                         "neuron data[5]": "0.00000000",
                         "neuron data[6]": "0.00000000",
-                        "data[0]": "0.00000000",
+                        "data[0]": "0.00014200",
                         "data[1]": "0.00000000",
                         "data[2]": "0.00000000",
-                        "data[3]": "0.00000000",
+                        "data[3]": "0.00014900",
                         "data[4]": "0.00000000",
                         "data[5]": "0.00000000",
                         "data[6]": "0.00000000",
-                        "cell function[0]": "0.00000000",
+                        "cell function[0]": "0.00002400",
                         "cell function[1]": "0.00000000",
                         "cell function[2]": "0.00000000",
-                        "cell function[3]": "0.00000000",
+                        "cell function[3]": "0.00002400",
                         "cell function[4]": "0.00000000",
                         "cell function[5]": "0.00000000",
                         "cell function[6]": "0.00000000",
@@ -417,13 +431,13 @@
                     "contraction expansion delta[4]": "0.05000000",
                     "contraction expansion delta[5]": "0.05000000",
                     "contraction expansion delta[6]": "0.05000000",
-                    "movement acceleration[0]": "0.04500000",
-                    "movement acceleration[1]": "0.04500000",
-                    "movement acceleration[2]": "0.04500000",
-                    "movement acceleration[3]": "0.04500000",
-                    "movement acceleration[4]": "0.04500000",
-                    "movement acceleration[5]": "0.04500000",
-                    "movement acceleration[6]": "0.04500000",
+                    "movement acceleration[0]": "0.00000000",
+                    "movement acceleration[1]": "0.00000000",
+                    "movement acceleration[2]": "0.00000000",
+                    "movement acceleration[3]": "0.00000000",
+                    "movement acceleration[4]": "0.00000000",
+                    "movement acceleration[5]": "0.00000000",
+                    "movement acceleration[6]": "0.00000000",
                     "bending angle[0]": "5.00000000",
                     "bending angle[1]": "5.00000000",
                     "bending angle[2]": "5.00000000",
@@ -470,13 +484,13 @@
             "absorption[4]": "0.00000000",
             "absorption[5]": "0.00000000",
             "absorption[6]": "0.00000000",
-            "min cell age[0]": "214758",
-            "min cell age[1]": "15153",
-            "min cell age[2]": "15153",
-            "min cell age[3]": "214758",
-            "min cell age[4]": "15153",
-            "min cell age[5]": "15153",
-            "min cell age[6]": "15153"
+            "min cell age[0]": "69129",
+            "min cell age[1]": "37121",
+            "min cell age[2]": "10000",
+            "min cell age[3]": "69129",
+            "min cell age[4]": "10000",
+            "min cell age[5]": "10000",
+            "min cell age[6]": "10000"
         },
         "high radiation": {
             "min cell energy[0]": "500.00000000",
@@ -529,7 +543,7 @@
         "spots": {
             "num spots": "4",
             "0": {
-                "color": "4280291072",
+                "color": "4280095494",
                 "pos": {
                     "x": "500.00000000",
                     "y": "246.00000000"
@@ -544,7 +558,7 @@
                     "type": "1",
                     "radial": {
                         "orientation": "0",
-                        "strength": "0.00065000",
+                        "strength": "0.00076000",
                         "drift angle": "-28.39999962"
                     }
                 },
@@ -709,20 +723,20 @@
                                 "neuron data": {
                                     "activated": "false"
                                 },
-                                "neuron data[0]": "0.00023200",
+                                "neuron data[0]": "0.00043400",
                                 "neuron data[1]": "0.00000000",
                                 "neuron data[2]": "0.00000000",
-                                "neuron data[3]": "0.00025500",
+                                "neuron data[3]": "0.00045500",
                                 "neuron data[4]": "0.00000000",
                                 "neuron data[5]": "0.00000000",
                                 "neuron data[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
-                                "cell function[0]": "0.00000000",
+                                "cell function[0]": "0.00002400",
                                 "cell function[1]": "0.00000000",
                                 "cell function[2]": "0.00000000",
-                                "cell function[3]": "0.00000000",
+                                "cell function[3]": "0.00002400",
                                 "cell function[4]": "0.00000000",
                                 "cell function[5]": "0.00000000",
                                 "cell function[6]": "0.00000000",
@@ -787,10 +801,10 @@
                                 "data ": {
                                     "activated": "false"
                                 },
-                                "data [0]": "0.00000000",
+                                "data [0]": "0.00014200",
                                 "data [1]": "0.00000000",
                                 "data [2]": "0.00000000",
-                                "data [3]": "0.00000000",
+                                "data [3]": "0.00014900",
                                 "data [4]": "0.00000000",
                                 "data [5]": "0.00000000",
                                 "data [6]": "0.00000000"
@@ -815,7 +829,7 @@
                     "type": "1",
                     "radial": {
                         "orientation": "0",
-                        "strength": "0.00063000",
+                        "strength": "0.00076000",
                         "drift angle": "-29.70000076"
                     }
                 },
@@ -980,17 +994,17 @@
                                 "neuron data": {
                                     "activated": "false"
                                 },
-                                "neuron data[0]": "0.00023200",
+                                "neuron data[0]": "0.00043400",
                                 "neuron data[1]": "0.00000000",
                                 "neuron data[2]": "0.00000000",
-                                "neuron data[3]": "0.00025500",
+                                "neuron data[3]": "0.00000000",
                                 "neuron data[4]": "0.00000000",
                                 "neuron data[5]": "0.00000000",
                                 "neuron data[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
-                                "cell function[0]": "0.00000000",
+                                "cell function[0]": "0.00002400",
                                 "cell function[1]": "0.00000000",
                                 "cell function[2]": "0.00000000",
                                 "cell function[3]": "0.00000000",
@@ -1058,7 +1072,7 @@
                                 "data ": {
                                     "activated": "false"
                                 },
-                                "data [0]": "0.00000000",
+                                "data [0]": "0.00006500",
                                 "data [1]": "0.00000000",
                                 "data [2]": "0.00000000",
                                 "data [3]": "0.00000000",
@@ -1251,17 +1265,17 @@
                                 "neuron data": {
                                     "activated": "false"
                                 },
-                                "neuron data[0]": "0.00023200",
+                                "neuron data[0]": "0.00043400",
                                 "neuron data[1]": "0.00000000",
                                 "neuron data[2]": "0.00000000",
-                                "neuron data[3]": "0.00025500",
+                                "neuron data[3]": "0.00000000",
                                 "neuron data[4]": "0.00000000",
                                 "neuron data[5]": "0.00000000",
                                 "neuron data[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
-                                "cell function[0]": "0.00000000",
+                                "cell function[0]": "0.00002400",
                                 "cell function[1]": "0.00000000",
                                 "cell function[2]": "0.00000000",
                                 "cell function[3]": "0.00000000",
@@ -1329,7 +1343,7 @@
                                 "data ": {
                                     "activated": "false"
                                 },
-                                "data [0]": "0.00000000",
+                                "data [0]": "0.00006500",
                                 "data [1]": "0.00000000",
                                 "data [2]": "0.00000000",
                                 "data [3]": "0.00000000",
@@ -1522,17 +1536,17 @@
                                 "neuron data": {
                                     "activated": "false"
                                 },
-                                "neuron data[0]": "0.00023200",
+                                "neuron data[0]": "0.00043400",
                                 "neuron data[1]": "0.00000000",
                                 "neuron data[2]": "0.00000000",
-                                "neuron data[3]": "0.00025500",
+                                "neuron data[3]": "0.00000000",
                                 "neuron data[4]": "0.00000000",
                                 "neuron data[5]": "0.00000000",
                                 "neuron data[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
-                                "cell function[0]": "0.00000000",
+                                "cell function[0]": "0.00002400",
                                 "cell function[1]": "0.00000000",
                                 "cell function[2]": "0.00000000",
                                 "cell function[3]": "0.00000000",
@@ -1600,7 +1614,7 @@
                                 "data ": {
                                     "activated": "false"
                                 },
-                                "data [0]": "0.00000000",
+                                "data [0]": "0.00006500",
                                 "data [1]": "0.00000000",
                                 "data [2]": "0.00000000",
                                 "data [3]": "0.00000000",

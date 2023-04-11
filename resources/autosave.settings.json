@@ -1,6 +1,6 @@
 {
     "general": {
-        "time step": "48796",
+        "time step": "50821",
         "zoom": "2.38236380",
         "center": {
             "x": "554.42956543",
@@ -72,6 +72,20 @@
             },
             "function": {
                 "constructor": {
+                    "pump energy factor[0]": "0.00000000",
+                    "pump energy factor[1]": "0.00000000",
+                    "pump energy factor[2]": "0.00000000",
+                    "pump energy factor[3]": "0.00000000",
+                    "pump energy factor[4]": "0.00000000",
+                    "pump energy factor[5]": "0.00000000",
+                    "pump energy factor[6]": "0.00000000",
+                    "energy from radiation factor[0]": "0.00000000",
+                    "energy from radiation factor[1]": "0.00000000",
+                    "energy from radiation factor[2]": "0.00000000",
+                    "energy from radiation factor[3]": "0.00000000",
+                    "energy from radiation factor[4]": "0.00000000",
+                    "energy from radiation factor[5]": "0.00000000",
+                    "energy from radiation factor[6]": "0.00000000",
                     "offspring distance[0]": "2.00000000",
                     "offspring distance[1]": "2.00000000",
                     "offspring distance[2]": "2.00000000",

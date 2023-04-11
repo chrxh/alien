@@ -254,6 +254,18 @@ namespace
 
         encodeDecodeProperty(
             tree,
+            parameters.cellFunctionConstructorPumpEnergyFactor,
+            defaultParameters.cellFunctionConstructorPumpEnergyFactor,
+            "simulation parameters.cell.function.constructor.pump energy factor",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionConstructorEnergyFromRadiationFactor,
+            defaultParameters.cellFunctionConstructorEnergyFromRadiationFactor,
+            "simulation parameters.cell.function.constructor.energy from radiation factor",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.cellFunctionConstructorOffspringDistance,
             defaultParameters.cellFunctionConstructorOffspringDistance,
             "simulation parameters.cell.function.constructor.offspring distance",
