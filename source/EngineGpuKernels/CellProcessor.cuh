@@ -623,26 +623,35 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
             }();
             if (radiationFactor > 0) {
 
-                auto pos = ParticleProcessor::getRadiationPos(data, cell->absPos);
-                float2 particleVel = cell->vel * cudaSimulationParameters.radiationVelocityMultiplier
-                    + Math::unitVectorOfAngle(data.numberGen1.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
-                float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
-                data.cellMap.correctPosition(particlePos);
-
                 auto const& cellEnergy = cell->energy;
-                particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
-                auto radiationEnergy = cellEnergy * radiationFactor;
-                radiationEnergy = radiationEnergy / cudaSimulationParameters.radiationProb;
-                radiationEnergy = 2 * radiationEnergy * data.numberGen1.random();
+                auto energyLoss = cellEnergy * radiationFactor;
+                energyLoss = energyLoss / cudaSimulationParameters.radiationProb;
+                energyLoss = 2 * energyLoss * data.numberGen1.random();
                 if (cellEnergy > 1) {
-                    if (radiationEnergy > cellEnergy - 1) {
-                        radiationEnergy = cellEnergy - 1;
-                    }
-                    cell->energy -= radiationEnergy;
+                    auto pos = ParticleProcessor::getRadiationPos(data, cell->absPos);
+                    float2 particleVel = cell->vel * cudaSimulationParameters.radiationVelocityMultiplier
+                        + Math::unitVectorOfAngle(data.numberGen1.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
+                    float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
+                    data.cellMap.correctPosition(particlePos);
+                    particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
 
+                    if (energyLoss > cellEnergy - 1) {
+                        energyLoss = cellEnergy - 1;
+                    }
+
+                    cell->energy -= energyLoss;
+
+                    auto particleEnergy = energyLoss * (1.0f - cudaSimulationParameters.cellFunctionConstructorEnergyFromRadiationFactor[cell->color]);
+                    if (particleEnergy > NEAR_ZERO) {
                     ObjectFactory factory;
                     factory.init(&data);
-                    factory.createParticle(radiationEnergy, particlePos, particleVel, cell->color);
+                    factory.createParticle(particleEnergy,
+                        particlePos,
+                        particleVel,
+                        cell->color);
+                    }
+
+                    atomicAdd(data.storedEnergy, energyLoss * cudaSimulationParameters.cellFunctionConstructorEnergyFromRadiationFactor[cell->color]);
                 }
             }
         }

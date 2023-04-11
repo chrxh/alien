@@ -31,7 +31,7 @@ private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static bool isConstructionFinished(Cell* cell);
     __inline__ __device__ static bool
-    isConstructionPossible(SimulationData const& data, Cell* cell, ConstructionData const& constructionData, Activity const& activity);
+    isConstructionTriggered(SimulationData const& data, Cell* cell, ConstructionData const& constructionData, Activity const& activity);
     __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
 
     __inline__ __device__ static bool tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
@@ -46,6 +46,8 @@ private:
 
     __inline__ __device__ static Cell*
     constructCellIntern(SimulationData& data, Cell* hostCell, float2 const& newCellPos, int maxConnections, ConstructionData const& constructionData);
+
+    __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
 };
 
 /************************************************************************/
@@ -69,7 +71,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     if (!isConstructionFinished(cell)) {
         auto origGenomePos = cell->cellFunctionData.constructor.currentGenomePos;
         auto constructionData = readConstructionData(cell);
-        if (isConstructionPossible(data, cell, constructionData, activity)) {
+        if (isConstructionTriggered(data, cell, constructionData, activity)) {
            if (tryConstructCell(data, statistics, cell, constructionData)) {
                 activity.channels[0] = 1;
             } else {
@@ -96,12 +98,8 @@ __inline__ __device__ bool ConstructorProcessor::isConstructionFinished(Cell* ce
 }
 
 __inline__ __device__ bool
-ConstructorProcessor::isConstructionPossible(SimulationData const& data, Cell* cell, ConstructionData const& constructionData, Activity const& activity)
+ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* cell, ConstructionData const& constructionData, Activity const& activity)
 {
-    if (cell->energy < (cudaSimulationParameters.cellNormalEnergy[cell->color] + constructionData.energy)
-        && !cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
-        return false;
-    }
     if (cell->cellFunctionData.constructor.activationMode == 0
         && abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionConstructorActivityThreshold[cell->color]) {
         return false;
@@ -187,11 +185,12 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         return false;
     }
 
+    if (!checkAndReduceHostEnergy(data, hostCell, constructionData)) {
+        return false;
+    }
+
     hostCell->constructionId = data.numberGen1.random(65535);
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, max(0, maxConnections), constructionData);
-    if (!cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
-        hostCell->energy -= constructionData.energy;
-    }
 
     if (!newCell->tryLock()) {
         return false;
@@ -282,10 +281,11 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         }
     }
 
-    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, max(0, maxConnections), constructionData);
-    if (!cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
-        hostCell->energy -= constructionData.energy;
+
+    if (!checkAndReduceHostEnergy(data, hostCell, constructionData)) {
+        return false;
     }
+    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, max(0, maxConnections), constructionData);
 
     if (!newCell->tryLock()) {
         return false;
@@ -503,4 +503,29 @@ ConstructorProcessor::constructCellIntern(
     }
 
     return result;
+}
+
+__inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
+{
+    if (!cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
+        auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.cellNormalEnergy[hostCell->color])
+            + min(constructionData.energy, cudaSimulationParameters.cellNormalEnergy[hostCell->color])
+                * (1.0f - cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[hostCell->color]);
+
+        if (hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + energyNeededFromHost) {
+            return false;
+        }
+        auto energyNeededFromRadiation = constructionData.energy - energyNeededFromHost;
+        auto orig = atomicAdd(data.storedEnergy, -energyNeededFromRadiation);
+        if (orig < energyNeededFromRadiation) {
+            atomicAdd(data.storedEnergy, energyNeededFromRadiation);
+            if (hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + constructionData.energy) {
+                return false;
+            }
+            hostCell->energy -= constructionData.energy;
+        } else {
+            hostCell->energy -= energyNeededFromHost;
+        }
+    }
+    return true;
 }
