@@ -123,6 +123,7 @@ namespace
         case CellFunction_Muscle: {
             cellTO.cellFunctionData.muscle.mode = cell->cellFunctionData.muscle.mode;
             cellTO.cellFunctionData.muscle.lastBendingDirection = cell->cellFunctionData.muscle.lastBendingDirection;
+            cellTO.cellFunctionData.muscle.lastBendingSourceIndex = cell->cellFunctionData.muscle.lastBendingSourceIndex;
             cellTO.cellFunctionData.muscle.consecutiveBendingAngle = cell->cellFunctionData.muscle.consecutiveBendingAngle;
         } break;
         case CellFunction_Defender: {
