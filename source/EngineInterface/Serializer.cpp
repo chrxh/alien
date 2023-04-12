@@ -66,6 +66,7 @@ namespace
 
     auto constexpr Id_Muscle_Mode = 0;
     auto constexpr Id_Muscle_LastBendingDirection = 1;
+    auto constexpr Id_Muscle_LastBendingSourceIndex = 4;
     auto constexpr Id_Muscle_ConsecutiveBendingAngle = 3;
 
     auto constexpr Id_Injector_Mode = 0;
@@ -459,6 +460,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_Muscle_Mode, data.mode, defaultObject.mode);
         loadSave<int>(task, auxiliaries, Id_Muscle_LastBendingDirection, data.lastBendingDirection, defaultObject.lastBendingDirection);
+        loadSave<int>(task, auxiliaries, Id_Muscle_LastBendingSourceIndex, data.lastBendingSourceIndex, defaultObject.lastBendingSourceIndex);
         loadSave<float>(task, auxiliaries, Id_Muscle_ConsecutiveBendingAngle, data.consecutiveBendingAngle, defaultObject.consecutiveBendingAngle);
         setLoadSaveMap(task, ar, auxiliaries);
     }

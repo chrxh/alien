@@ -98,6 +98,7 @@ struct MuscleTO
 {
     MuscleMode mode;
     MuscleBendingDirection lastBendingDirection;
+    int lastBendingSourceIndex;
     float consecutiveBendingAngle;
 };
 

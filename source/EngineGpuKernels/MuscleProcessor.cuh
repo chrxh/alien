@@ -78,6 +78,8 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData&
     if (!cell->tryLock()) {
         return;
     }
+    auto const minDistance = cudaSimulationParameters.cellMinDistance * 1.2f;
+    auto const maxDistance = max(cudaSimulationParameters.cellMaxBindingDistance * 0.5f, minDistance);
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connection = cell->connections[i];
         if (connection.cell->executionOrderNumber == cell->inputExecutionOrderNumber) {
@@ -86,10 +88,10 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData&
             }
             auto newDistance =
                 connection.distance + cudaSimulationParameters.cellFunctionMuscleContractionExpansionDelta[cell->color] * getTruncatedUnitValue(activity);
-            if (activity.channels[0] > 0 && newDistance >= cudaSimulationParameters.cellMaxBindingDistance * 0.8f) {
+            if (activity.channels[0] > 0 && newDistance >= maxDistance) {
                 continue;
             }
-            if (activity.channels[0] < 0 && newDistance <= cudaSimulationParameters.cellMinDistance * 1.2f) {
+            if (activity.channels[0] < 0 && newDistance <= minDistance) {
                 continue;
             }
             connection.distance = newDistance;
@@ -139,12 +141,13 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
                     return MuscleBendingDirection_None;
                 }
             }();
-            if (cell->cellFunctionData.muscle.lastBendingDirection == bendingDirection) {
+            if (cell->cellFunctionData.muscle.lastBendingDirection == bendingDirection && cell->cellFunctionData.muscle.lastBendingSourceIndex == i) {
                 cell->cellFunctionData.muscle.consecutiveBendingAngle += abs(bendingAngle);
             } else {
                 cell->cellFunctionData.muscle.consecutiveBendingAngle = 0;
             }
             cell->cellFunctionData.muscle.lastBendingDirection = bendingDirection;
+            cell->cellFunctionData.muscle.lastBendingSourceIndex = i;
 
             if (cell->numConnections <= 2 && abs(activity.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold) {
                 auto delta = Math::normalized(data.cellMap.getCorrectedDirection(connection.cell->absPos - cell->absPos));
