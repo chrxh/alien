@@ -48,7 +48,8 @@ void _AutosaveController::process()
 
     auto durationSinceStart = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - *_startTimePoint).count();
     if (durationSinceStart > 0 && durationSinceStart % 20 == 0 && !_alreadySaved) {
-        onSave();
+        printOverlayMessage("Auto saving ...");
+        delayedExecution([=, this] { onSave(); });
         _alreadySaved = true;
     }
     if (durationSinceStart > 0 && durationSinceStart % 20 == 1 && _alreadySaved) {
@@ -58,15 +59,12 @@ void _AutosaveController::process()
 
 void _AutosaveController::onSave()
 {
-    printOverlayMessage("Auto saving ...");
-    delayedExecution([=, this] {
-        DeserializedSimulation sim;
-        sim.auxiliaryData.timestep = _simController->getCurrentTimestep();
-        sim.auxiliaryData.zoom = _viewport->getZoomFactor();
-        sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
-        sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
-        sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
-        sim.mainData = _simController->getClusteredSimulationData();
-        Serializer::serializeSimulationToFiles(Const::AutosaveFile, sim);
-    });
+    DeserializedSimulation sim;
+    sim.auxiliaryData.timestep = _simController->getCurrentTimestep();
+    sim.auxiliaryData.zoom = _viewport->getZoomFactor();
+    sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
+    sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
+    sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
+    sim.mainData = _simController->getClusteredSimulationData();
+    Serializer::serializeSimulationToFiles(Const::AutosaveFile, sim);
 }
