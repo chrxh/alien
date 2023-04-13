@@ -37,7 +37,7 @@ _BrowserWindow::_BrowserWindow(
     , _viewport(viewport)
     , _temporalControlWindow(temporalControlWindow)
 {
-     refreshIntern(true);
+    refreshIntern(true);
 }
 
 _BrowserWindow::~_BrowserWindow()

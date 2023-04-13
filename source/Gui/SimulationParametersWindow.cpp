@@ -225,8 +225,8 @@ void _SimulationParametersWindow::processBase(
                     .min(0)
                     .max(1.0f)
                     .defaultValue(&origSimParameters.timestepSize)
-                    .tooltip(std::string("Time duration calculated in a single step. Smaller values increase the accuracy "
-                                         "of the simulation.")),
+                    .tooltip(std::string("The time duration calculated in a single simulation step. Smaller values increase the accuracy of the simulation "
+                                         "while larger values can lead to numerical instabilities.")),
                 &simParameters.timestepSize);
             ImGui::TreePop();
         }
@@ -240,7 +240,11 @@ void _SimulationParametersWindow::processBase(
                         .name("Motion type")
                         .textWidth(RightColumnWidth)
                         .defaultValue(origSimParameters.motionType)
-                        .values({"Fluid dynamics", "Collision-based"}),
+                        .values({"Fluid dynamics", "Collision-based"})
+                        .tooltip(std::string(
+                            "The algorithm for the particle motions is defined here. If 'Fluid dynamics' is selected, an SPH fluid solver is used for the "
+                            "calculation of the forces. The particles then behave like (compressible) liquids or gases. The other option 'Collision-based' "
+                            "calculates the forces based on particle collisions and should be preferred for mechanical simulation with solids.")),
                     simParameters.motionType)) {
                 if (simParameters.motionType == MotionType_Fluid) {
                     simParameters.motionData.fluidMotion = FluidMotion();
@@ -256,7 +260,9 @@ void _SimulationParametersWindow::processBase(
                         .min(0)
                         .max(3.0f)
                         .defaultValue(&origSimParameters.motionData.fluidMotion.smoothingLength)
-                        .tooltip(std::string("")),
+                        .tooltip(std::string("The smoothing length determines the region of influence of the neighboring particles for the calculation of "
+                                             "density, pressure and viscosity. Values that are too small lead to numerical instabilities, while values that "
+                                             "are too large cause the particles to drift apart.")),
                     &simParameters.motionData.fluidMotion.smoothingLength);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -265,7 +271,7 @@ void _SimulationParametersWindow::processBase(
                         .min(0)
                         .max(0.3f)
                         .defaultValue(&origSimParameters.motionData.fluidMotion.pressureStrength)
-                        .tooltip(std::string("")),
+                        .tooltip(std::string("This parameter allows to control the strength of the pressure.")),
                     &simParameters.motionData.fluidMotion.pressureStrength);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -274,7 +280,7 @@ void _SimulationParametersWindow::processBase(
                         .min(0)
                         .max(0.3f)
                         .defaultValue(&origSimParameters.motionData.fluidMotion.viscosityStrength)
-                        .tooltip(std::string("")),
+                        .tooltip(std::string("This parameter be used to control the strength of the viscosity. Larger values lead to a smoother movement.")),
                     &simParameters.motionData.fluidMotion.viscosityStrength);
             } else {
                 AlienImGui::SliderFloat(
@@ -284,7 +290,7 @@ void _SimulationParametersWindow::processBase(
                         .min(0)
                         .max(0.3f)
                         .defaultValue(&origSimParameters.motionData.collisionMotion.cellRepulsionStrength)
-                        .tooltip(std::string("The strength of the repulsive forces, between two cells that do not connect.")),
+                        .tooltip(std::string("The strength of the repulsive forces, between two cells that are not connected.")),
                     &simParameters.motionData.collisionMotion.cellRepulsionStrength);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -305,7 +311,7 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .format("%.4f")
                     .defaultValue(&origSimParameters.baseValues.friction)
-                    .tooltip(std::string("Specifies how much the movements are slowed down per time step.")),
+                    .tooltip(std::string("This specifies the fraction of the velocity that is slowed down per time step.")),
                 &simParameters.baseValues.friction);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -315,7 +321,8 @@ void _SimulationParametersWindow::processBase(
                     .max(1.0f)
                     .format("%.2f")
                     .defaultValue(&origSimParameters.baseValues.rigidity)
-                    .tooltip(std::string("Controls the rigidity of connected cells.\nA higher value will cause connected cells to move more uniformly.")),
+                    .tooltip(std::string(
+                        "Controls the rigidity of connected cells.\nA higher value will cause connected cells to move more uniformly as a rigid body.")),
                 &simParameters.baseValues.rigidity);
             ImGui::TreePop();
         }
@@ -349,7 +356,7 @@ void _SimulationParametersWindow::processBase(
                     .min(0)
                     .max(1.0f)
                     .defaultValue(&origSimParameters.cellMinDistance)
-                    .tooltip(std::string("Minimum distance between two cells without them annihilating each other.")),
+                    .tooltip(std::string("Minimum distance between two cells.")),
                 &simParameters.cellMinDistance);
             ImGui::TreePop();
         }
@@ -374,7 +381,7 @@ void _SimulationParametersWindow::processBase(
                     .min(0)
                     .max(2.0f)
                     .defaultValue(&origSimParameters.baseValues.cellFusionVelocity)
-                    .tooltip(std::string("Minimum velocity of two colliding cells so that a connection can be established.")),
+                    .tooltip(std::string("Minimum relative velocity of two colliding cells so that a connection can be established.")),
                 &simParameters.baseValues.cellFusionVelocity);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -386,7 +393,7 @@ void _SimulationParametersWindow::processBase(
                     .infinity(true)
                     .format("%.0f")
                     .defaultValue(&origSimParameters.baseValues.cellMaxBindingEnergy)
-                    .tooltip(std::string("Maximum energy of a cell at which they can maintain a connection.")),
+                    .tooltip(std::string("Maximum energy of a cell at which it does not disintegrate.")),
                 &simParameters.baseValues.cellMaxBindingEnergy);
             ImGui::TreePop();
         }
@@ -399,8 +406,9 @@ void _SimulationParametersWindow::processBase(
                                        .buttonText("Open editor")
                                        .name("Radiation sources")
                                        .textWidth(RightColumnWidth)
-                                       .tooltip("")
-                                       .showDisabledRevertButton(true))) {
+                                       .showDisabledRevertButton(true)
+                        .tooltip("If no radiation source is specified, the cells emit energy particles at their respective positions. If, on the other hand, "
+                                 "one or more radiation sources are defined, the energy particles emitted by cells are created at these sources."))) {
                 _radiationSourcesWindow->setOn(true);
             }
 
@@ -414,9 +422,23 @@ void _SimulationParametersWindow::processBase(
                     .min(0)
                     .max(1.0)
                     .format("%.4f")
-                    .defaultValue(origSimParameters.baseValues.radiationAbsorption),
+                    .defaultValue(origSimParameters.baseValues.radiationAbsorption)
+                    .tooltip("The fraction of energy that a cell can absorb from an incoming energy particle can be specified here."),
                 simParameters.baseValues.radiationAbsorption);
 
+            AlienImGui::SliderInt(
+                AlienImGui::SliderIntParameters()
+                    .name("Minimum age for radiation")
+                    .tooltip("")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .infinity(true)
+                    .min(0)
+                    .max(10000000)
+                    .logarithmic(true)
+                    .defaultValue(origSimParameters.radiationMinCellAge)
+                    .tooltip("The minimum age of a cell can be defined here, from which it emits energy particles."),
+                simParameters.radiationMinCellAge);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell age radiation strength")
@@ -427,33 +449,9 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .format("%.6f")
                     .defaultValue(origSimParameters.baseValues.radiationCellAgeStrength)
-                    .tooltip(std::string("Indicates how energetic the emitted particles of cells are.")),
+                    .tooltip("Indicates how energetic the emitted particles of aged cells are."),
                 simParameters.baseValues.radiationCellAgeStrength);
-            AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters()
-                    .name("Minimum age")
-                    .tooltip("")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .infinity(true)
-                    .min(0)
-                    .max(10000000)
-                    .logarithmic(true)
-                    .defaultValue(origSimParameters.radiationMinCellAge),
-                simParameters.radiationMinCellAge);
 
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("High energy radiation")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(0.01f)
-                    .logarithmic(true)
-                    .format("%.6f")
-                    .defaultValue(origSimParameters.highRadiationFactor)
-                    .tooltip(""),
-                simParameters.highRadiationFactor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("High energy radiation threshold")
@@ -465,8 +463,20 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .format("%.1f")
                     .defaultValue(origSimParameters.highRadiationMinCellEnergy)
-                    .tooltip(""),
+                    .tooltip("The minimum energy of a cell can be defined here, from which it emits energy particles."),
                 simParameters.highRadiationMinCellEnergy);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("High energy radiation strength")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(0.01f)
+                    .logarithmic(true)
+                    .format("%.6f")
+                    .defaultValue(origSimParameters.highRadiationFactor)
+                    .tooltip("Indicates how energetic the emitted particles of high energy cells are."),
+                simParameters.highRadiationFactor);
 
             ImGui::TreePop();
         }
@@ -485,7 +495,8 @@ void _SimulationParametersWindow::processBase(
                     .infinity(true)
                     .min(1)
                     .max(10000000)
-                    .defaultValue(origSimParameters.cellMaxAge),
+                    .defaultValue(origSimParameters.cellMaxAge)
+                    .tooltip("Defines the maximum age of a cell. If a cell exceeds this age it will be transformed to an energy particle."),
                 simParameters.cellMaxAge);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -495,7 +506,7 @@ void _SimulationParametersWindow::processBase(
                     .min(10.0f)
                     .max(200.0f)
                     .defaultValue(origSimParameters.baseValues.cellMinEnergy)
-                    .tooltip(std::string("Minimum energy a cell needs to exist.")),
+                    .tooltip("Minimum energy a cell needs to exist."),
                 simParameters.baseValues.cellMinEnergy);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -504,16 +515,29 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(10.0f)
                     .max(200.0f)
-                    .defaultValue(origSimParameters.cellNormalEnergy),
+                    .defaultValue(origSimParameters.cellNormalEnergy)
+                    .tooltip("The normal energy value of a cell is defined here. This is used as a reference value in various contexts: \n"
+                             ICON_FA_CARET_RIGHT" Attacker and Transmitter cells: When the energy of these cells is above the normal value, some of their energy is distributed to "
+                             "surrounding cells.\n"
+                             ICON_FA_CARET_RIGHT" Constructor cells: Creating new cells costs energy. The creation of new cells is executed only when the "
+                             "residual energy of the constructor cell does not fall below the normal value.\n"
+                             ICON_FA_CARET_RIGHT" If the transformation of energy particles to "
+                             "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
                 simParameters.cellNormalEnergy);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Energy to cell transformation")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.particleTransformationAllowed),
+                    .defaultValue(origSimParameters.particleTransformationAllowed)
+                    .tooltip("If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
                 simParameters.particleTransformationAllowed);
             AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Cell cluster decay").textWidth(RightColumnWidth).defaultValue(origSimParameters.clusterDecay),
+                AlienImGui::CheckboxParameters()
+                    .name("Cell cluster decay")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.clusterDecay)
+                    .tooltip("If enabled, entire cell clusters will disintegrate when one of their cells is dying because of insufficient energy. This option "
+                             "is useful to minimize the presence of cell corpses."),
                 simParameters.clusterDecay);
             ImGui::TreePop();
         }
@@ -1558,6 +1582,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorEnergyFromRadiationFactor[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
+    parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
 }
 
 void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot) const

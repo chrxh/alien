@@ -155,6 +155,7 @@ public:
         MEMBER_DECLARATION(ComboParameters, int, textWidth, 100);
         MEMBER_DECLARATION(ComboParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
+        MEMBER_DECLARATION(ComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Combo(ComboParameters& parameters, int& value);
 
