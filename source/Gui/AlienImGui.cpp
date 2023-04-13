@@ -337,6 +337,10 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     }
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
+
     delete[] items;
     return result;
 }
