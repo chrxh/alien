@@ -64,7 +64,7 @@ void _BrowserWindow::refreshIntern(bool firstTimeStartup)
                 MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
             }
         }
-        _filteredRemoteSimulationDatas = _remoteSimulationDatas;
+        calcFilteredSimulationDatas();
 
         if (_networkController->getLoggedInUserName()) {
             std::vector<std::string> likedIds;
@@ -145,13 +145,16 @@ void _BrowserWindow::processTable()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY;
-    if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.contentScale(63.0f)), 0.0f)) {
+    if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - contentScale(68.0f)), 0.0f)) {
         ImGui::TableSetupColumn(
-            "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Actions);
+            "Actions",
+            ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed,
+            contentScale(90.0f),
+            RemoteSimulationDataColumnId_Actions);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
-            0.0f,
+            contentScale(135.0f),
             RemoteSimulationDataColumnId_Timestamp);
         ImGui::TableSetupColumn(
             "User name",
@@ -298,13 +301,13 @@ void _BrowserWindow::processStatus()
 
 void _BrowserWindow::processFilter()
 {
+    ImGui::Spacing();
+    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Show community simulations"), _showCommunitySimulations)) {
+        calcFilteredSimulationDatas();
+    }
+    ImGui::SameLine();
     if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter"), _filter)) {
-        _filteredRemoteSimulationDatas.clear();
-        for (auto const& entry : _remoteSimulationDatas) {
-            if (entry.matchWithFilter(_filter)) {
-                _filteredRemoteSimulationDatas.emplace_back(entry);
-            }
-        }
+        calcFilteredSimulationDatas();
     }
 }
 
@@ -424,24 +427,43 @@ std::string _BrowserWindow::getUserLikes(std::string const& id)
 
 void _BrowserWindow::pushTextColor(RemoteSimulationData const& entry)
 {
-    bool versionCompatible = true;
-
-    std::vector<std::string> versionParts;
-    boost::split(versionParts, entry.version, boost::is_any_of("."));
-
-    auto majorVersion = std::stoi(versionParts.at(0));
-    if (majorVersion < 4) {
-        versionCompatible = false;
-    } else if (versionParts.size() == 5 && versionParts.at(3) == "alpha") {
-        auto alphaVersion = std::stoi(versionParts.at(4));
-        if (alphaVersion < 2) {
-            versionCompatible = false;
-        }
-    }
-
-    if (versionCompatible) {
+    if (isVersionCompatible(entry)) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 0.0f, 1.0f));
     } else {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.6f));
+    }
+}
+
+bool _BrowserWindow::isVersionCompatible(RemoteSimulationData const& entry) const
+{
+    bool result = true;
+
+    std::vector<std::string> remoteVersionParts;
+    boost::split(remoteVersionParts, entry.version, boost::is_any_of("."));
+
+    std::vector<std::string> ownVersionParts;
+    boost::split(ownVersionParts, Const::ProgramVersion, boost::is_any_of("."));
+
+    auto remoteMajorVersion = std::stoi(remoteVersionParts.at(0));
+    auto ownMajorVersion = std::stoi(ownVersionParts.at(0));
+    if (remoteMajorVersion < ownMajorVersion) {
+        result = false;
+    } else if (remoteVersionParts.size() == 5 && remoteVersionParts.at(3) == "alpha") {
+        auto remoteAlphaVersion = std::stoi(remoteVersionParts.at(4));
+        if (remoteAlphaVersion < 2) {
+            result = false;
+        }
+    }
+    return result;
+}
+
+void _BrowserWindow::calcFilteredSimulationDatas()
+{
+    _filteredRemoteSimulationDatas.clear();
+    _filteredRemoteSimulationDatas.reserve(_remoteSimulationDatas.size());
+    for (auto const& simData : _remoteSimulationDatas) {
+        if (simData.matchWithFilter(_filter) && (_showCommunitySimulations || (!_showCommunitySimulations && simData.fromRelease)) && isVersionCompatible(simData)) {
+            _filteredRemoteSimulationDatas.emplace_back(simData);
+        }
     }
 }
