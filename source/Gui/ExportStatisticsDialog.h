@@ -1,7 +1,5 @@
 #pragma once
 
-#include "EngineInterface/Definitions.h"
-
 #include "CollectedStatisticsData.h"
 #include "Definitions.h"
 
