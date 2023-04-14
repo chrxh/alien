@@ -2,7 +2,7 @@
 
 namespace Const
 {
-    std::string const ProgramVersion = "4.0.0.beta.1";
+    std::string const ProgramVersion = "4.0.0.beta.2";
 
     std::string const BasePath = "resources/";
 

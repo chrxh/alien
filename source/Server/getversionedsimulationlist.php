@@ -21,7 +21,8 @@
             sim.VERSION as version, 
             sim.TIMESTAMP as timestamp,
             sim.NUM_DOWNLOADS as numDownloads,
-            OCTET_LENGTH(sim.content) as contentSize
+            OCTET_LENGTH(sim.content) as contentSize,
+            sim.FROM_RELEASE as fromRelease
         FROM simulation sim
         LEFT JOIN
             user u
@@ -44,7 +45,8 @@
             "timestamp" => $obj->timestamp,
             "contentSize" => $obj->contentSize,
             "likes" => $likes,
-            "numDownloads" => (int)$obj->numDownloads
+            "numDownloads" => (int)$obj->numDownloads,
+            "fromRelease" => (int)$obj->fromRelease
         ];
     }
 

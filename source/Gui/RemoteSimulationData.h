@@ -35,6 +35,7 @@ public:
     uint64_t contentSize;
     std::string description;
     std::string version;
+    bool fromRelease;
 
     static int compare(void const* left, void const* right, ImGuiTableSortSpecs const* specs);
     bool matchWithFilter(std::string const& filter) const;
