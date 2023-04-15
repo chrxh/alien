@@ -556,7 +556,8 @@ void _SimulationParametersWindow::processBase(
                     .format("%.6f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability),
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability)
+                    .tooltip("This type of mutation only changes the weights and biases of neural networks."),
                 simParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -567,7 +568,10 @@ void _SimulationParametersWindow::processBase(
                     .format("%.6f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationPropertiesProbability),
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationPropertiesProbability)
+                    .tooltip("This type of mutation changes a random property (e.g. (input) execution order number, required energy, block output or "
+                             "function-specific properties such as minimum density for sensors, etc.). The spatial structure, color, cell function type and "
+                             "self-replication capabilities are not changed."),
                 simParameters.baseValues.cellFunctionConstructorMutationPropertiesProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()

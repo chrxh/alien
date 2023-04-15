@@ -43,6 +43,7 @@ private:
     //internal constants
     static int constexpr CellFunctionMutationMaxGenomeSize = 200;
     static int constexpr CellAnglePos = 1;
+    static int constexpr CellRequiredConnectionsPos = 3;
     static int constexpr CellColorPos = 5;
     static int constexpr CellBasicBytes = 8;
     static int constexpr NeuronBytes = 72;
@@ -65,6 +66,7 @@ private:
     __inline__ __device__ static void setNextCellFunctionType(uint8_t* genome, int nodeIndex, CellFunction cellFunction);
     __inline__ __device__ static void setNextCellColor(uint8_t* genome, int nodeIndex, int color);
     __inline__ __device__ static void setNextAngle(uint8_t* genome, int nodeIndex, uint8_t angle);
+    __inline__ __device__ static void setNextRequiredConnections(uint8_t* genome, int nodeIndex, uint8_t angle);
     __inline__ __device__
         static int getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeIndex);  //prerequisites: (constructor or injector) and !makeSelfCopy
     __inline__ __device__
@@ -204,7 +206,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
         if (randomDelta == CellColorPos) {  //no color change
             return;
         }
-        if (randomDelta == CellAnglePos) {  //no structure change
+        if (randomDelta == CellAnglePos || randomDelta == CellRequiredConnectionsPos) {  //no structure change
             return;
         }
         genome[nodeIndex + randomDelta] = data.numberGen1.randomByte();
@@ -234,7 +236,11 @@ __inline__ __device__ void MutationProcessor::structureMutation(SimulationData& 
     }
     auto nodeIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, false);
 
-    setNextAngle(genome, nodeIndex, data.numberGen1.randomByte());
+    if (data.numberGen1.randomBool()) {
+        setNextAngle(genome, nodeIndex, data.numberGen1.randomByte());
+    } else {
+        setNextRequiredConnections(genome, nodeIndex, data.numberGen1.randomByte());
+    }
 }
 
 __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationData& data, Cell* cell)
@@ -816,6 +822,11 @@ __inline__ __device__ void MutationProcessor::setNextCellColor(uint8_t* genome, 
 __inline__ __device__ void MutationProcessor::setNextAngle(uint8_t* genome, int nodeIndex, uint8_t angle)
 {
     genome[nodeIndex + CellAnglePos] = angle;
+}
+
+__inline__ __device__ void MutationProcessor::setNextRequiredConnections(uint8_t* genome, int nodeIndex, uint8_t angle)
+{
+    genome[nodeIndex + CellRequiredConnectionsPos] = angle;
 }
 
 __inline__ __device__ int MutationProcessor::getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeIndex)
