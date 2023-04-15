@@ -95,7 +95,7 @@ If everything goes well, the ALIEN executable can be found under the build direc
 
 # Contributing to the project
 Contributions to the project are very welcome. The most convenient way is to communicate via [GitHub Issues](https://github.com/chrxh/alien/issues), [Pull requests](https://github.com/chrxh/alien/pulls) or the [Discussion forum](https://github.com/chrxh/alien/discussions) depending on the subject. For example, it could be
-- Providing new content (simulation or pattern files)
+- Providing new content (simulation or genome files)
 - Producing or sharing media files
 - Reporting of bugs, wanted features, questions or feedback via GitHub Issues or in the Discussion forum.
 - Pull requests for bug fixes, code cleanings, optimizations or minor tweaks. If you want to implement new features, refactorings or other major changes, please use the [Discussion forum](https://github.com/chrxh/alien/discussions) for consultation and coordination in advance.
