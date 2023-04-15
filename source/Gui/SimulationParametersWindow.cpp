@@ -569,9 +569,9 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationPropertiesProbability)
-                    .tooltip("This type of mutation changes a random property (e.g. (input) execution order number, required energy, block output or "
-                             "function-specific properties such as minimum density for sensors, etc.). The spatial structure, color, cell function type and "
-                             "self-replication capabilities are not changed."),
+                    .tooltip("This type of mutation changes a random property (e.g. (input) execution order number, required energy, block output and "
+                             "function-specific properties such as minimum density for sensors, neural net weights etc.). The spatial structure, color, cell "
+                             "function type and self-replication capabilities are not changed."),
                 simParameters.baseValues.cellFunctionConstructorMutationPropertiesProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -582,7 +582,8 @@ void _SimulationParametersWindow::processBase(
                     .format("%.6f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationStructureProbability),
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationStructureProbability)
+                    .tooltip("This type of mutation only changes angles and required connections."),
                 simParameters.baseValues.cellFunctionConstructorMutationStructureProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -593,7 +594,10 @@ void _SimulationParametersWindow::processBase(
                     .format("%.6f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability),
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability)
+                    .tooltip("This type of mutation changes the type of cell function. The changed cell function will have random properties. If the "
+                             "flag 'Preserve self-replication' is disabled it can also alter self-replication capabilities by changing a constructor to "
+                             "something else or vice versa."),
                 simParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -604,7 +608,8 @@ void _SimulationParametersWindow::processBase(
                     .format("%.6f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationInsertionProbability),
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationInsertionProbability)
+                    .tooltip("This type of mutation inserts a new cell description to the genome at a random position."),
                 simParameters.baseValues.cellFunctionConstructorMutationInsertionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -615,7 +620,8 @@ void _SimulationParametersWindow::processBase(
                     .format("%.6f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDeletionProbability),
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDeletionProbability)
+                    .tooltip("This type of mutation deletes a cell description from the genome at a random position."),
                 simParameters.baseValues.cellFunctionConstructorMutationDeletionProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -626,7 +632,8 @@ void _SimulationParametersWindow::processBase(
                     .format("%.6f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationTranslationProbability),
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationTranslationProbability)
+                    .tooltip("This type of mutation moves a block of cell descriptions from the genome at a random position to a new random position."),
                 simParameters.baseValues.cellFunctionConstructorMutationTranslationProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -637,7 +644,8 @@ void _SimulationParametersWindow::processBase(
                     .format("%.6f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability),
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability)
+                    .tooltip("This type of mutation copies a block of cell descriptions from the genome at a random position to a new random position."),
                 simParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -648,13 +656,16 @@ void _SimulationParametersWindow::processBase(
                     .format("%.6f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationColorProbability),
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationColorProbability)
+                    .tooltip("This type of mutation alters the color of all cell descriptions in a genome or sub-genome by using the specified color transitions."),
                 simParameters.baseValues.cellFunctionConstructorMutationColorProbability);
             AlienImGui::CheckboxColorMatrix(
                 AlienImGui::CheckboxColorMatrixParameters()
                     .name("Color transitions")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionConstructorMutationColorTransitions)),
+                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionConstructorMutationColorTransitions))
+                    .tooltip(
+                        "The color transitions are used for color mutations. The row index indicates the source color and the column index the target color."),
                 simParameters.cellFunctionConstructorMutationColorTransitions);
             auto preserveSelfReplication = !simParameters.cellFunctionConstructorMutationSelfReplication;
             AlienImGui::Checkbox(
