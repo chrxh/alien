@@ -120,6 +120,9 @@ protected:
             if (expectedCell.referenceAngle != actualCell.referenceAngle) {
                 return false;
             }
+            if (expectedCell.numRequiredAdditionalConnections != actualCell.numRequiredAdditionalConnections) {
+                return false;
+            }
             if (expectedCell.getCellFunctionType() == CellFunction_Constructor) {
                 auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellFunction);
                 auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellFunction);
@@ -213,6 +216,7 @@ protected:
         auto createCompareClone = [](CellGenomeDescription const& cell) {
             auto clone = cell;
             clone.referenceAngle = 0;
+            clone.numRequiredAdditionalConnections = 0;
             if (clone.getCellFunctionType() == CellFunction_Constructor) {
                 auto& constructor = std::get<ConstructorGenomeDescription>(*clone.cellFunction);
                 if (!constructor.isMakeGenomeCopy()) {
