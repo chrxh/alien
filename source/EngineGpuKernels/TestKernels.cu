@@ -11,14 +11,17 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationTyp
         auto& cell = cells.at(index);
         if (cell->id == cellId) {
             switch (mutationType) {
-            case MutationType::Data:
-                MutationProcessor::changeDataMutation(data, cell);
+            case MutationType::Properties:
+                MutationProcessor::propertiesMutation(data, cell);
                 break;
             case MutationType::NeuronData:
-                MutationProcessor::changeNeuronDataMutation(data, cell);
+                MutationProcessor::neuronDataMutation(data, cell);
+                break;
+            case MutationType::Structure:
+                MutationProcessor::structureMutation(data, cell);
                 break;
             case MutationType::CellFunction:
-                MutationProcessor::changeCellFunctionMutation(data, cell);
+                MutationProcessor::cellFunctionMutation(data, cell);
                 break;
             case MutationType::Insertion:
                 MutationProcessor::insertMutation(data, cell);

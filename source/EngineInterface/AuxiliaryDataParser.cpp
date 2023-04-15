@@ -290,9 +290,15 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationDataProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationDataProbability,
+            parameters.baseValues.cellFunctionConstructorMutationPropertiesProbability,
+            defaultParameters.baseValues.cellFunctionConstructorMutationPropertiesProbability,
             "simulation parameters.cell.function.constructor.mutation probability.data",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.baseValues.cellFunctionConstructorMutationStructureProbability,
+            defaultParameters.baseValues.cellFunctionConstructorMutationStructureProbability,
+            "simulation parameters.cell.function.constructor.mutation probability.structure",
             parserTask);
         encodeDecodeProperty(
             tree,
@@ -677,9 +683,9 @@ namespace
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationDataProbability,
-                spot.activatedValues.cellFunctionConstructorMutationDataProbability,
-                defaultSpot.values.cellFunctionConstructorMutationDataProbability,
+                spot.values.cellFunctionConstructorMutationPropertiesProbability,
+                spot.activatedValues.cellFunctionConstructorMutationPropertiesProbability,
+                defaultSpot.values.cellFunctionConstructorMutationPropertiesProbability,
                 base + " cell.function.constructor.mutation probability.data ",
                 parserTask);
             encodeDecodeSpotProperty(

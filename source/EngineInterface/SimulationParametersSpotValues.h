@@ -40,8 +40,9 @@ struct SimulationParametersSpotValues
     ColorVector<float> cellFunctionAttackerConnectionsMismatchPenalty = {0, 0, 0, 0, 0, 0, 0};
 
     ColorVector<float> cellFunctionConstructorMutationNeuronDataProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationDataProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationPropertiesProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationCellFunctionProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationStructureProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationInsertionProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationDeletionProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationTranslationProbability = {0, 0, 0, 0, 0, 0, 0};
@@ -64,6 +65,9 @@ struct SimulationParametersSpotValues
             }
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (cellFunctionConstructorMutationStructureProbability[i] != other.cellFunctionConstructorMutationStructureProbability[i]) {
+                return false;
+            }
             if (radiationAbsorption[i] != other.radiationAbsorption[i]) {
                 return false;
             }
@@ -85,7 +89,7 @@ struct SimulationParametersSpotValues
             if (cellFunctionConstructorMutationNeuronDataProbability[i] != other.cellFunctionConstructorMutationNeuronDataProbability[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationDataProbability[i] != other.cellFunctionConstructorMutationDataProbability[i]) {
+            if (cellFunctionConstructorMutationPropertiesProbability[i] != other.cellFunctionConstructorMutationPropertiesProbability[i]) {
                 return false;
             }
             if (cellFunctionConstructorMutationCellFunctionProbability[i] != other.cellFunctionConstructorMutationCellFunctionProbability[i]) {

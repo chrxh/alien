@@ -20,6 +20,7 @@ private:
     __inline__ __device__ static void bending(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity);
 
     __inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
+    __inline__ __device__ static bool hasTriangularConnection(Cell* cell, Cell* otherCell);
     __inline__ __device__ static float getTruncatedUnitValue(Activity const& activity, int channel = 0);
 };
 
@@ -149,7 +150,8 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
             cell->cellFunctionData.muscle.lastBendingDirection = bendingDirection;
             cell->cellFunctionData.muscle.lastBendingSourceIndex = i;
 
-            if (cell->numConnections <= 2 && abs(activity.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold) {
+            if (cell->numConnections <= 2 && abs(activity.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold
+                && !hasTriangularConnection(cell, connection.cell)) {
                 auto delta = Math::normalized(data.cellMap.getCorrectedDirection(connection.cell->absPos - cell->absPos));
                 Math::rotateQuarterCounterClockwise(delta);
                 auto intensityChannel1 = getTruncatedUnitValue(activity, 1);
@@ -174,6 +176,23 @@ __inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* 
         }
     }
     return 0;
+}
+
+__inline__ __device__ bool MuscleProcessor::hasTriangularConnection(Cell* cell, Cell* otherCell)
+{
+    for (int i = 0; i < cell->numConnections; ++i) {
+        auto connectedCell = cell->connections[i].cell;
+        if (connectedCell == otherCell) {
+            continue;
+        }
+        for (int j = 0; j < connectedCell->numConnections; ++j) {
+            auto connectedConnectedCell = connectedCell->connections[j].cell;
+            if (connectedConnectedCell == otherCell) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 __inline__ __device__ float MuscleProcessor::getTruncatedUnitValue(Activity const& activity, int channel)

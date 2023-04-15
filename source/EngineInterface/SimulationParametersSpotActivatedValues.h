@@ -19,8 +19,9 @@ struct SimulationParametersSpotActivatedValues
     bool cellFunctionAttackerConnectionsMismatchPenalty = false;
 
     bool cellFunctionConstructorMutationNeuronDataProbability = false;
-    bool cellFunctionConstructorMutationDataProbability = false;
+    bool cellFunctionConstructorMutationPropertiesProbability = false;
     bool cellFunctionConstructorMutationCellFunctionProbability = false;
+    bool cellFunctionConstructorMutationStructureProbability = false; 
     bool cellFunctionConstructorMutationInsertionProbability = false;
     bool cellFunctionConstructorMutationDeletionProbability = false;
     bool cellFunctionConstructorMutationTranslationProbability = false;
@@ -37,7 +38,7 @@ struct SimulationParametersSpotActivatedValues
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy
             && cellFunctionAttackerConnectionsMismatchPenalty == other.cellFunctionAttackerConnectionsMismatchPenalty
             && cellFunctionConstructorMutationNeuronDataProbability == other.cellFunctionConstructorMutationNeuronDataProbability
-            && cellFunctionConstructorMutationDataProbability == other.cellFunctionConstructorMutationDataProbability
+            && cellFunctionConstructorMutationPropertiesProbability == other.cellFunctionConstructorMutationPropertiesProbability
             && cellFunctionConstructorMutationCellFunctionProbability == other.cellFunctionConstructorMutationCellFunctionProbability
             && cellFunctionConstructorMutationInsertionProbability == other.cellFunctionConstructorMutationInsertionProbability
             && cellFunctionConstructorMutationDeletionProbability == other.cellFunctionConstructorMutationDeletionProbability
@@ -45,6 +46,7 @@ struct SimulationParametersSpotActivatedValues
             && cellFunctionConstructorMutationDuplicationProbability == other.cellFunctionConstructorMutationDuplicationProbability
             && cellFunctionConstructorMutationColorProbability == other.cellFunctionConstructorMutationColorProbability
             && radiationAbsorption == other.radiationAbsorption
+            && cellFunctionConstructorMutationStructureProbability == other.cellFunctionConstructorMutationStructureProbability
         ;
     }
 };
