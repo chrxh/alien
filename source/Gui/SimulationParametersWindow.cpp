@@ -567,8 +567,19 @@ void _SimulationParametersWindow::processBase(
                     .format("%.6f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDataProbability),
-                simParameters.baseValues.cellFunctionConstructorMutationDataProbability);
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationPropertiesProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationPropertiesProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Structure")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationStructureProbability),
+                simParameters.baseValues.cellFunctionConstructorMutationStructureProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell function type")
@@ -1351,10 +1362,23 @@ void _SimulationParametersWindow::processSpot(
                     .format("%.6f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellFunctionConstructorMutationDataProbability)
-                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationDataProbability),
-                spot.values.cellFunctionConstructorMutationDataProbability,
-                &spot.activatedValues.cellFunctionConstructorMutationDataProbability);
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationPropertiesProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationPropertiesProbability),
+                spot.values.cellFunctionConstructorMutationPropertiesProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationPropertiesProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Structure")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .colorDependence(true)
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationStructureProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationStructureProbability),
+                spot.values.cellFunctionConstructorMutationStructureProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationStructureProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell function type")

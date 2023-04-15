@@ -10,9 +10,10 @@ class MutationProcessor
 public:
     __inline__ __device__ static void applyRandomMutation(SimulationData& data, Cell* cell);
 
-    __inline__ __device__ static void changeDataMutation(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void changeNeuronDataMutation(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void changeCellFunctionMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void neuronDataMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void propertiesMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void structureMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void cellFunctionMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void insertMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void deleteMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void translateMutation(SimulationData& data, Cell* cell);
@@ -41,6 +42,7 @@ private:
     
     //internal constants
     static int constexpr CellFunctionMutationMaxGenomeSize = 200;
+    static int constexpr CellAnglePos = 1;
     static int constexpr CellColorPos = 5;
     static int constexpr CellBasicBytes = 8;
     static int constexpr NeuronBytes = 72;
@@ -62,6 +64,7 @@ private:
     __inline__ __device__ static int getNextCellColor(uint8_t* genome, int nodeIndex);
     __inline__ __device__ static void setNextCellFunctionType(uint8_t* genome, int nodeIndex, CellFunction cellFunction);
     __inline__ __device__ static void setNextCellColor(uint8_t* genome, int nodeIndex, int color);
+    __inline__ __device__ static void setNextAngle(uint8_t* genome, int nodeIndex, uint8_t angle);
     __inline__ __device__
         static int getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeIndex);  //prerequisites: (constructor or injector) and !makeSelfCopy
     __inline__ __device__
@@ -88,8 +91,14 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         cell->absPos,
         cell->color);
     auto cellFunctionConstructorMutationDataProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationDataProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDataProbability,
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationPropertiesProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationPropertiesProbability,
+        data,
+        cell->absPos,
+        cell->color);
+    auto cellFunctionConstructorMutationStructureProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationStructureProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationStructureProbability,
         data,
         cell->absPos,
         cell->color);
@@ -131,13 +140,16 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         cell->color);
 
     if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
-        changeNeuronDataMutation(data, cell);
+        neuronDataMutation(data, cell);
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationDataProbability)) {
-        changeDataMutation(data, cell);
+        propertiesMutation(data, cell);
+    }
+    if (isRandomEvent(data, cellFunctionConstructorMutationStructureProbability)) {
+        structureMutation(data, cell);
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationCellFunctionProbability)) {
-        changeCellFunctionMutation(data, cell);
+        cellFunctionMutation(data, cell);
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationInsertionProbability)) {
         insertMutation(data, cell);
@@ -156,7 +168,24 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
     }
 }
 
-__inline__ __device__ void MutationProcessor::changeDataMutation(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::neuronDataMutation(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    auto& genome = constructor.genome;
+    auto genomeSize = toInt(constructor.genomeSize);
+    if (genomeSize == 0) {
+        return;
+    }
+    auto nodeIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, false);
+
+    auto type = getNextCellFunctionType(genome, nodeIndex);
+    if (type == CellFunction_Neuron) {
+        auto delta = data.numberGen1.random(NeuronBytes - 1);
+        genome[nodeIndex + CellBasicBytes + delta] = data.numberGen1.randomByte();
+    }
+}
+
+__inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
@@ -169,10 +198,13 @@ __inline__ __device__ void MutationProcessor::changeDataMutation(SimulationData&
     //basic property mutation
     if (data.numberGen1.randomBool()) {
         auto randomDelta = data.numberGen1.random(CellBasicBytes - 1);
-        if (randomDelta == 0) { //no cell function type change
+        if (randomDelta == 0) {  //no cell function type change
             return;
         }
         if (randomDelta == CellColorPos) {  //no color change
+            return;
+        }
+        if (randomDelta == CellAnglePos) {  //no structure change
             return;
         }
         genome[nodeIndex + randomDelta] = data.numberGen1.randomByte();
@@ -192,7 +224,7 @@ __inline__ __device__ void MutationProcessor::changeDataMutation(SimulationData&
     }
 }
 
-__inline__ __device__ void MutationProcessor::changeNeuronDataMutation(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::structureMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
@@ -202,14 +234,10 @@ __inline__ __device__ void MutationProcessor::changeNeuronDataMutation(Simulatio
     }
     auto nodeIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, false);
 
-    auto type = getNextCellFunctionType(genome, nodeIndex);
-    if (type == CellFunction_Neuron) {
-        auto delta = data.numberGen1.random(NeuronBytes - 1);
-        genome[nodeIndex + CellBasicBytes + delta] = data.numberGen1.randomByte();
-    }
+    setNextAngle(genome, nodeIndex, data.numberGen1.randomByte());
 }
 
-__inline__ __device__ void MutationProcessor::changeCellFunctionMutation(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
@@ -783,6 +811,11 @@ __inline__ __device__ void MutationProcessor::setNextCellFunctionType(uint8_t* g
 __inline__ __device__ void MutationProcessor::setNextCellColor(uint8_t* genome, int nodeIndex, int color)
 {
     genome[nodeIndex + CellColorPos] = color;
+}
+
+__inline__ __device__ void MutationProcessor::setNextAngle(uint8_t* genome, int nodeIndex, uint8_t angle)
+{
+    genome[nodeIndex + CellAnglePos] = angle;
 }
 
 __inline__ __device__ int MutationProcessor::getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeIndex)
