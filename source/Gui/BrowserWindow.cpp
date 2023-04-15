@@ -1,6 +1,7 @@
 #include "BrowserWindow.h"
 
 #include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/regex.hpp>
 #include <imgui.h>
 
 #include "Fonts/IconsFontAwesome5.h"
@@ -264,9 +265,9 @@ void _BrowserWindow::processTable()
                 AlienImGui::Text(StringHelper::format(item->contentSize / 1024) + " KB");
                 ImGui::TableNextColumn();
                 AlienImGui::Text(item->version);
-                ImGui::PopID();
 
                 ImGui::PopStyleColor();
+                ImGui::PopID();
             }
         ImGui::EndTable();
     }
@@ -302,7 +303,7 @@ void _BrowserWindow::processStatus()
 void _BrowserWindow::processFilter()
 {
     ImGui::Spacing();
-    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Show community simulations"), _showCommunitySimulations)) {
+    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("From community"), _showCommunitySimulations)) {
         calcFilteredSimulationDatas();
     }
     ImGui::SameLine();
@@ -311,12 +312,26 @@ void _BrowserWindow::processFilter()
     }
 }
 
+namespace
+{
+    std::vector<std::string> splitString(const std::string& str)
+    {
+        std::vector<std::string> tokens;
+        boost::algorithm::split_regex(tokens, str, boost::regex("(\r\n)+"));
+        return tokens;
+    }
+}
+
 void _BrowserWindow::processShortenedText(std::string const& text) {
+    auto substrings = splitString(text);
+    if (substrings.empty()) {
+        return;
+    }
     auto styleRepository = StyleRepository::getInstance();
-    auto textSize = ImGui::CalcTextSize(text.c_str());
-    auto needDetailButton = textSize.x > ImGui::GetContentRegionAvailWidth();
+    auto textSize = ImGui::CalcTextSize(substrings.at(0).c_str());
+    auto needDetailButton = textSize.x > ImGui::GetContentRegionAvailWidth() || substrings.size() > 1;
     auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - styleRepository.contentScale(15.0f);
-    AlienImGui::Text(text);
+    AlienImGui::Text(substrings.at(0));
     if (needDetailButton) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(cursorPos);
@@ -462,7 +477,7 @@ void _BrowserWindow::calcFilteredSimulationDatas()
     _filteredRemoteSimulationDatas.clear();
     _filteredRemoteSimulationDatas.reserve(_remoteSimulationDatas.size());
     for (auto const& simData : _remoteSimulationDatas) {
-        if (simData.matchWithFilter(_filter) && (_showCommunitySimulations || (!_showCommunitySimulations && simData.fromRelease)) && isVersionCompatible(simData)) {
+        if (simData.matchWithFilter(_filter) &&_showCommunitySimulations != simData.fromRelease/* && isVersionCompatible(simData)*/) {
             _filteredRemoteSimulationDatas.emplace_back(simData);
         }
     }
