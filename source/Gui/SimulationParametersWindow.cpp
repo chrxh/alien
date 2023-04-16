@@ -689,19 +689,10 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(0.00f)
                     .max(1.0f)
-                    .defaultValue(origSimParameters.cellFunctionConstructorPumpEnergyFactor),
+                    .defaultValue(origSimParameters.cellFunctionConstructorPumpEnergyFactor)
+                    .tooltip("This parameter controls the energy pump system. It describes the fraction of energy cost for the offspring which a constructor "
+                             "can get for free. The additional energy is obtain from radiation."),
                 simParameters.cellFunctionConstructorPumpEnergyFactor);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Energy from radiation")
-                    .tooltip("")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(1.0)
-                    .format("%.4f")
-                    .defaultValue(origSimParameters.cellFunctionConstructorEnergyFromRadiationFactor),
-                simParameters.cellFunctionConstructorEnergyFromRadiationFactor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Offspring distance")
@@ -1617,8 +1608,6 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         }
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
         parameters.cellFunctionConstructorPumpEnergyFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorPumpEnergyFactor[i]));
-        parameters.cellFunctionConstructorEnergyFromRadiationFactor[i] =
-            std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorEnergyFromRadiationFactor[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
