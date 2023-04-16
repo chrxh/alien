@@ -143,7 +143,6 @@ struct SimulationParameters
     int numParticleSources = 0;
     RadiationSource particleSources[MAX_PARTICLE_SOURCES];
     ColorVector<float> cellFunctionConstructorPumpEnergyFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> cellFunctionConstructorEnergyFromRadiationFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
     //spots
     int numSpots = 0;
@@ -167,9 +166,6 @@ struct SimulationParameters
         }
 
         for (int i = 0; i < MAX_COLORS; ++i) {
-            if (cellFunctionConstructorEnergyFromRadiationFactor[i] != other.cellFunctionConstructorEnergyFromRadiationFactor[i]) {
-                return false;
-            }
             if (cellFunctionConstructorPumpEnergyFactor[i] != other.cellFunctionConstructorPumpEnergyFactor[i]) {
                 return false;
             }

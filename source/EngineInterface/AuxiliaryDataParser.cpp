@@ -260,12 +260,6 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.cellFunctionConstructorEnergyFromRadiationFactor,
-            defaultParameters.cellFunctionConstructorEnergyFromRadiationFactor,
-            "simulation parameters.cell.function.constructor.energy from radiation factor",
-            parserTask);
-        encodeDecodeProperty(
-            tree,
             parameters.cellFunctionConstructorOffspringDistance,
             defaultParameters.cellFunctionConstructorOffspringDistance,
             "simulation parameters.cell.function.constructor.offspring distance",
