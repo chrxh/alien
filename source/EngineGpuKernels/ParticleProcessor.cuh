@@ -16,7 +16,7 @@ public:
     __inline__ __device__ static void movement(SimulationData& data);
     __inline__ __device__ static void collision(SimulationData& data);
     __inline__ __device__ static void transformation(SimulationData& data);
-    __inline__ __device__ static float2 getRadiationPos(SimulationData& data, float2 const& cellPos);
+    __inline__ __device__ static void radiate(SimulationData& data, float2 pos, float2 const& vel, int color, float energy);  //return needed energy
 };
 
 
@@ -130,13 +130,22 @@ __inline__ __device__ void ParticleProcessor::transformation(SimulationData& dat
     }
 }
 
-__inline__ __device__ float2 ParticleProcessor::getRadiationPos(SimulationData& data, float2 const& cellPos)
+__inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, float2 pos, float2 const& vel, int color, float energy)
 {
-    auto result = cellPos;
     if (cudaSimulationParameters.numParticleSources > 0) {
         auto sourceIndex = data.numberGen1.random(cudaSimulationParameters.numParticleSources - 1);
-        result.x = cudaSimulationParameters.particleSources[sourceIndex].posX;
-        result.y = cudaSimulationParameters.particleSources[sourceIndex].posY;
+        pos.x = cudaSimulationParameters.particleSources[sourceIndex].posX;
+        pos.y = cudaSimulationParameters.particleSources[sourceIndex].posY;
     }
-    return result;
+
+    data.cellMap.correctPosition(pos);
+
+    auto particleEnergy = energy * (1.0f - cudaSimulationParameters.cellFunctionConstructorEnergyFromRadiationFactor[color]);
+    if (particleEnergy > NEAR_ZERO) {
+        ObjectFactory factory;
+        factory.init(&data);
+        factory.createParticle(particleEnergy, pos, vel, color);
+    }
+
+    atomicAdd(data.residualEnergy, energy * cudaSimulationParameters.cellFunctionConstructorEnergyFromRadiationFactor[color]);
 }

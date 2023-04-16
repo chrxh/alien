@@ -10,6 +10,7 @@
 #include "SpotCalculator.cuh"
 #include "SimulationStatistics.cuh"
 #include "ObjectFactory.cuh"
+#include "ParticleProcessor.cuh"
 
 class AttackerProcessor
 {
@@ -169,24 +170,19 @@ __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell
 
         auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);
         auto origEnergy = atomicAdd(&cell->energy, -radiationEnergy);
-        auto cellMinEnergy = SpotCalculator::calcParameter(
-            &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->absPos, cell->color);
         if (origEnergy < 1.0f) {
             atomicAdd(&cell->energy, radiationEnergy);  //revert
             return;
         }
-        auto& pos = cell->absPos;
+
         float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
             + float2{
                 (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
                 (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
-        float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
+        float2 particlePos = cell->absPos + Math::normalized(particleVel) * 1.5f - particleVel;
         data.cellMap.correctPosition(particlePos);
 
-        particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
-        ObjectFactory factory;
-        factory.init(&data);
-        factory.createParticle(radiationEnergy, particlePos, particleVel, {cell->color});
+        ParticleProcessor::radiate(data, particlePos, particleVel, cell->color, radiationEnergy);
     }
 }
 

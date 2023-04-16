@@ -628,30 +628,17 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                 energyLoss = energyLoss / cudaSimulationParameters.radiationProb;
                 energyLoss = 2 * energyLoss * data.numberGen1.random();
                 if (cellEnergy > 1) {
-                    auto pos = ParticleProcessor::getRadiationPos(data, cell->absPos);
+
                     float2 particleVel = cell->vel * cudaSimulationParameters.radiationVelocityMultiplier
                         + Math::unitVectorOfAngle(data.numberGen1.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
-                    float2 particlePos = pos + Math::normalized(particleVel) * 1.5f;
+                    float2 particlePos = cell->absPos + Math::normalized(particleVel) * 1.5f
+                        - particleVel;  //"- particleVel" because particle will still be moved in current time step
                     data.cellMap.correctPosition(particlePos);
-                    particlePos = particlePos - particleVel;  //because particle will still be moved in current time step
-
                     if (energyLoss > cellEnergy - 1) {
                         energyLoss = cellEnergy - 1;
                     }
-
+                    ParticleProcessor::radiate(data, particlePos, particleVel, cell->color, energyLoss);
                     cell->energy -= energyLoss;
-
-                    auto particleEnergy = energyLoss * (1.0f - cudaSimulationParameters.cellFunctionConstructorEnergyFromRadiationFactor[cell->color]);
-                    if (particleEnergy > NEAR_ZERO) {
-                    ObjectFactory factory;
-                    factory.init(&data);
-                    factory.createParticle(particleEnergy,
-                        particlePos,
-                        particleVel,
-                        cell->color);
-                    }
-
-                    atomicAdd(data.storedEnergy, energyLoss * cudaSimulationParameters.cellFunctionConstructorEnergyFromRadiationFactor[cell->color]);
                 }
             }
         }
