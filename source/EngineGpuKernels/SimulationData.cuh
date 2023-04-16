@@ -26,7 +26,7 @@ struct SimulationData
     Objects tempObjects;
 
     //additional data for cell functions
-    double* storedEnergy;
+    double* residualEnergy;
     RawMemory processMemory;
     PreprocessedCellFunctionData preprocessedCellFunctionData;
 

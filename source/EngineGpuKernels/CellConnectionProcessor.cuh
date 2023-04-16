@@ -158,10 +158,7 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(
             Cell* empty = nullptr;
             auto origCell = alienAtomicExch(&data.objects.cellPointers.at(cellIndex), empty);
             if (origCell) {
-                ObjectFactory factory;
-                factory.init(&data);
-                auto pos = ParticleProcessor::getRadiationPos(data, origCell->absPos);
-                factory.createParticle(origCell->energy, pos, origCell->vel, origCell->color);
+                ParticleProcessor::radiate(data, origCell->absPos, origCell->vel, origCell->color, origCell->energy);
 
                 for (int i = 0; i < origCell->numConnections; ++i) {
                     StructuralOperation operation;

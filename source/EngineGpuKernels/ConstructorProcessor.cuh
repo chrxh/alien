@@ -516,9 +516,9 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
             return false;
         }
         auto energyNeededFromRadiation = constructionData.energy - energyNeededFromHost;
-        auto orig = atomicAdd(data.storedEnergy, -energyNeededFromRadiation);
+        auto orig = atomicAdd(data.residualEnergy, -energyNeededFromRadiation);
         if (orig < energyNeededFromRadiation) {
-            atomicAdd(data.storedEnergy, energyNeededFromRadiation);
+            atomicAdd(data.residualEnergy, energyNeededFromRadiation);
             if (hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + constructionData.energy) {
                 return false;
             }

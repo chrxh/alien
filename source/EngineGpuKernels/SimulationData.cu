@@ -13,8 +13,8 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     cellMap.init(worldSize);
     particleMap.init(worldSize);
 
-    CudaMemoryManager::getInstance().acquireMemory<double>(1, storedEnergy);
-    CHECK_FOR_CUDA_ERROR(cudaMemset(storedEnergy, 0, sizeof(double)));
+    CudaMemoryManager::getInstance().acquireMemory<double>(1, residualEnergy);
+    CHECK_FOR_CUDA_ERROR(cudaMemset(residualEnergy, 0, sizeof(double)));
  
     processMemory.init();
     numberGen1.init(40312357);   //some array size for random numbers (~ 40 MB)
@@ -97,7 +97,7 @@ void SimulationData::free()
     numberGen1.free();
     numberGen2.free();
     processMemory.free();
-    CudaMemoryManager::getInstance().freeMemory(storedEnergy);
+    CudaMemoryManager::getInstance().freeMemory(residualEnergy);
 
     structuralOperations.free();
     for (int i = 0; i < CellFunction_WithoutNoneCount; ++i) {
