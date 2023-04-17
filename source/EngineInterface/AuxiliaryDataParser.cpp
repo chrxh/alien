@@ -680,7 +680,14 @@ namespace
                 spot.values.cellFunctionConstructorMutationPropertiesProbability,
                 spot.activatedValues.cellFunctionConstructorMutationPropertiesProbability,
                 defaultSpot.values.cellFunctionConstructorMutationPropertiesProbability,
-                base + " cell.function.constructor.mutation probability.data ",
+                base + "cell.function.constructor.mutation probability.data ",
+                parserTask);
+            encodeDecodeSpotProperty(
+                tree,
+                spot.values.cellFunctionConstructorMutationStructureProbability,
+                spot.activatedValues.cellFunctionConstructorMutationStructureProbability,
+                defaultSpot.values.cellFunctionConstructorMutationStructureProbability,
+                base + "cell.function.constructor.mutation probability.structure",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,

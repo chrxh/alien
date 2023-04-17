@@ -690,7 +690,7 @@ void _SimulationParametersWindow::processBase(
                     .min(0.00f)
                     .max(1.0f)
                     .defaultValue(origSimParameters.cellFunctionConstructorPumpEnergyFactor)
-                    .tooltip("This parameter controls the energy pump system. It describes the fraction of energy cost for the offspring which a constructor "
+                    .tooltip("This parameter controls the energy pump system. It describes the fraction of the energy cost for a offspring which a constructor "
                              "can get for free. The additional energy is obtain from radiation."),
                 simParameters.cellFunctionConstructorPumpEnergyFactor);
             AlienImGui::SliderFloat(
