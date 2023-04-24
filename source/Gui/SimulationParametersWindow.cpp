@@ -691,7 +691,7 @@ void _SimulationParametersWindow::processBase(
                     .max(1.0f)
                     .defaultValue(origSimParameters.cellFunctionConstructorPumpEnergyFactor)
                     .tooltip("This parameter controls the energy pump system. It describes the fraction of the energy cost for a offspring which a constructor "
-                             "can get for free. The additional energy is obtain from radiation."),
+                             "can get for free. This additional energy is obtain from radiation of other cells."),
                 simParameters.cellFunctionConstructorPumpEnergyFactor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -700,7 +700,8 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(0.1f)
                     .max(3.0f)
-                    .defaultValue(origSimParameters.cellFunctionConstructorOffspringDistance),
+                    .defaultValue(origSimParameters.cellFunctionConstructorOffspringDistance)
+                    .tooltip("The distance of the constructed cell from the constructor cell."),
                 simParameters.cellFunctionConstructorOffspringDistance);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -709,7 +710,8 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(0.1f)
                     .max(3.0f)
-                    .defaultValue(origSimParameters.cellFunctionConstructorConnectingCellMaxDistance),
+                    .defaultValue(origSimParameters.cellFunctionConstructorConnectingCellMaxDistance)
+                    .tooltip("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
                 simParameters.cellFunctionConstructorConnectingCellMaxDistance);
             ImGui::TreePop();
         }
@@ -725,7 +727,8 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(0.1f)
                     .max(3.0f)
-                    .defaultValue(origSimParameters.cellFunctionInjectorRadius),
+                    .defaultValue(origSimParameters.cellFunctionInjectorRadius)
+                    .tooltip("The maximum distance over which an injector cell can infect another cell."),
                 simParameters.cellFunctionInjectorRadius);
             AlienImGui::InputIntColorMatrix(
                 AlienImGui::InputIntColorMatrixParameters()
@@ -734,7 +737,9 @@ void _SimulationParametersWindow::processBase(
                     .max(100000)
                     .textWidth(RightColumnWidth)
                     .tooltip("")
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionInjectorDurationColorMatrix)),
+                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionInjectorDurationColorMatrix))
+                    .tooltip("The number of activations an injector cell requires to infect another cell. One activation usually takes 6 time steps. The row "
+                             "number determines the color of the injector cell, while the column number corresponds to the color of the infected cell."),
                 simParameters.cellFunctionInjectorDurationColorMatrix);
             ImGui::TreePop();
         }
@@ -750,9 +755,8 @@ void _SimulationParametersWindow::processBase(
                     .max(1)
                     .textWidth(RightColumnWidth)
                     .tooltip(
-                        "This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell is shown in the "
-                        "header "
-                        "column while the color of the attacked cell is shown in the header row. A value of 0 means that the attacked cell cannot be digested, "
+                        "This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell correspond to the row "
+                        "number and the color of the attacked cell to the column number. A value of 0 means that the attacked cell cannot be digested, "
                         "i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process.\n\nExample: If a "
                         "zero is entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells.")
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.baseValues.cellFunctionAttackerFoodChainColorMatrix)),
@@ -767,7 +771,7 @@ void _SimulationParametersWindow::processBase(
                     .format("%.5f")
                     .logarithmic(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionAttackerEnergyCost)
-                    .tooltip(std::string("Amount of energy lost by an attempted attack of a cell in the form of emitted energy particles.")),
+                    .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
                 simParameters.baseValues.cellFunctionAttackerEnergyCost);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -786,7 +790,8 @@ void _SimulationParametersWindow::processBase(
                     .min(0)
                     .max(5.0f)
                     .defaultValue(origSimParameters.cellFunctionAttackerVelocityPenalty)
-                    .tooltip(std::string("")),
+                    .tooltip("This parameter reduces the captured energy during an attack when the attacker cell is moving. The faster the cell moves or the "
+                             "higher this parameter is, the less energy is captured."),
                 simParameters.cellFunctionAttackerVelocityPenalty);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -796,8 +801,8 @@ void _SimulationParametersWindow::processBase(
                     .min(0)
                     .max(5.0f)
                     .defaultValue(origSimParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent)
-                    .tooltip(std::string("The larger this value is, the less energy a cell can gain from an attack if the local "
-                                         "geometry of the attacked cell does not match the attacking cell.")),
+                    .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local "
+                                         "geometry of the attacked cell does not match the attacking cell."),
                 simParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -807,7 +812,7 @@ void _SimulationParametersWindow::processBase(
                     .min(0)
                     .max(1.0f)
                     .defaultValue(origSimParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty)
-                    .tooltip(std::string("The larger this parameter is, the more difficult it is to digest cells that contain more connections.")),
+                    .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
                 simParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -816,7 +821,8 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(0)
                     .max(2.5f)
-                    .defaultValue(origSimParameters.cellFunctionAttackerRadius),
+                    .defaultValue(origSimParameters.cellFunctionAttackerRadius)
+                    .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                 simParameters.cellFunctionAttackerRadius);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -825,7 +831,9 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(0)
                     .max(5.0f)
-                    .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionRadius),
+                    .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionRadius)
+                    .tooltip("The maximum distance over which an attacker cell transfers its energy captured during an attack to nearby transmitter or "
+                             "constructor cells."),
                 simParameters.cellFunctionAttackerEnergyDistributionRadius);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -834,7 +842,8 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(0)
                     .max(20.0f)
-                    .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionValue),
+                    .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionValue)
+                    .tooltip("The amount of energy which a attacker cell can transfer to nearby transmitter or constructor cells or to connected cells."),
                 simParameters.cellFunctionAttackerEnergyDistributionValue);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -842,14 +851,16 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0)
-                    .max(1.0f)
-                    .defaultValue(origSimParameters.cellFunctionAttackerColorInhomogeneityFactor),
+                    .max(2.0f)
+                    .defaultValue(origSimParameters.cellFunctionAttackerColorInhomogeneityFactor)
+                    .tooltip("If the attacked cell is connected to cells with different colors, this factor affects the energy of the captured energy."),
                 simParameters.cellFunctionAttackerColorInhomogeneityFactor);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Same color energy distribution")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionSameColor),
+                    .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionSameColor)
+                    .tooltip("If activated, the captured energy after an attack is only transferred to nearby cells with the same color."),
                 simParameters.cellFunctionAttackerEnergyDistributionSameColor);
             ImGui::TreePop();
         }
@@ -866,7 +877,8 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(1.0f)
                     .max(5.0f)
-                    .defaultValue(origSimParameters.cellFunctionDefenderAgainstAttackerStrength),
+                    .defaultValue(origSimParameters.cellFunctionDefenderAgainstAttackerStrength)
+                    .tooltip("If an attacked cell is connected to defender cells or itself a defender cell the attack strength is reduced by this factor."),
                 simParameters.cellFunctionDefenderAgainstAttackerStrength);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -875,7 +887,8 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(1.0f)
                     .max(5.0f)
-                    .defaultValue(origSimParameters.cellFunctionDefenderAgainstInjectorStrength),
+                    .defaultValue(origSimParameters.cellFunctionDefenderAgainstInjectorStrength)
+                    .tooltip("If a constructor cell is attacked by an injector and connected to defender cells, the injection duration is increased by this factor."),
                 simParameters.cellFunctionDefenderAgainstInjectorStrength);
             ImGui::TreePop();
         }
@@ -891,7 +904,8 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(0)
                     .max(5.0f)
-                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionRadius),
+                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionRadius)
+                    .tooltip("The maximum distance over which a transmitter cell transfers its additional energy to nearby transmitter or constructor cells."),
                 simParameters.cellFunctionTransmitterEnergyDistributionRadius);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -900,13 +914,15 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(0)
                     .max(20.0f)
-                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionValue),
+                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionValue)
+                    .tooltip("The amount of energy which a transmitter cell can transfer to nearby transmitter or constructor cells or to connected cells."),
                 simParameters.cellFunctionTransmitterEnergyDistributionValue);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Same color energy distribution")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionSameColor),
+                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionSameColor)
+                    .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells with the same color."),
                 simParameters.cellFunctionTransmitterEnergyDistributionSameColor);
             ImGui::TreePop();
         }
@@ -922,7 +938,9 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(0)
                     .max(0.1f)
-                    .defaultValue(origSimParameters.cellFunctionMuscleContractionExpansionDelta),
+                    .defaultValue(origSimParameters.cellFunctionMuscleContractionExpansionDelta)
+                    .tooltip("The maximum length that a muscle cell can shorten or lengthen a cell connection. This parameter applies only to muscle cells "
+                             "which are in contraction/expansion mode."),
                 simParameters.cellFunctionMuscleContractionExpansionDelta);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -932,7 +950,9 @@ void _SimulationParametersWindow::processBase(
                     .min(0)
                     .max(0.4f)
                     .logarithmic(true)
-                    .defaultValue(origSimParameters.cellFunctionMuscleMovementAcceleration),
+                    .defaultValue(origSimParameters.cellFunctionMuscleMovementAcceleration)
+                    .tooltip("The maximum value by which a muscle cell can modify its velocity during activation. This parameter applies only to muscle cells "
+                             "which are in movement mode."),
                 simParameters.cellFunctionMuscleMovementAcceleration);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -941,7 +961,9 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(0)
                     .max(10.0f)
-                    .defaultValue(origSimParameters.cellFunctionMuscleBendingAngle),
+                    .defaultValue(origSimParameters.cellFunctionMuscleBendingAngle)
+                    .tooltip("The maximum value by which a muscle cell can increase/decrease the angle between two cell connections. This parameter applies "
+                             "only to muscle cells which are in bending mode."),
                 simParameters.cellFunctionMuscleBendingAngle);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -950,7 +972,9 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .min(0)
                     .max(0.5f)
-                    .defaultValue(origSimParameters.cellFunctionMuscleBendingAcceleration),
+                    .defaultValue(origSimParameters.cellFunctionMuscleBendingAcceleration)
+                    .tooltip("The maximum value by which a muscle cell can modify its velocity during a bending action. This parameter applies "
+                             "only to muscle cells which are in bending mode."),
                 simParameters.cellFunctionMuscleBendingAcceleration);
             ImGui::TreePop();
         }
@@ -967,7 +991,7 @@ void _SimulationParametersWindow::processBase(
                     .min(10.0f)
                     .max(512.0f)
                     .defaultValue(origSimParameters.cellFunctionSensorRange)
-                    .tooltip(std::string("The maximum radius in which a sensor can detect mass concentrations.")),
+                    .tooltip("The maximum radius in which a sensor cell can detect mass concentrations."),
                 simParameters.cellFunctionSensorRange);
             ImGui::TreePop();
         }
@@ -1009,7 +1033,9 @@ void _SimulationParametersWindow::processBase(
                 AlienImGui::CheckboxParameters()
                     .name("Unlimited energy for constructors")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.cellFunctionConstructionUnlimitedEnergy),
+                    .defaultValue(origSimParameters.cellFunctionConstructionUnlimitedEnergy)
+                    .tooltip("If activated, all constructor cells receive energy for free to construct offspring. The number of cells can increase rapidly. "
+                             "This parameter should only be activated for a short time."),
                 simParameters.cellFunctionConstructionUnlimitedEnergy);
             ImGui::TreePop();
         }

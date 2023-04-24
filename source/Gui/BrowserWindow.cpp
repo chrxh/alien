@@ -303,7 +303,7 @@ void _BrowserWindow::processStatus()
 void _BrowserWindow::processFilter()
 {
     ImGui::Spacing();
-    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("From community"), _showCommunitySimulations)) {
+    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Community creations"), _showCommunitySimulations)) {
         calcFilteredSimulationDatas();
     }
     ImGui::SameLine();
@@ -477,7 +477,7 @@ void _BrowserWindow::calcFilteredSimulationDatas()
     _filteredRemoteSimulationDatas.clear();
     _filteredRemoteSimulationDatas.reserve(_remoteSimulationDatas.size());
     for (auto const& simData : _remoteSimulationDatas) {
-        if (simData.matchWithFilter(_filter) &&_showCommunitySimulations != simData.fromRelease/* && isVersionCompatible(simData)*/) {
+        if (simData.matchWithFilter(_filter) &&_showCommunitySimulations != simData.fromRelease) {
             _filteredRemoteSimulationDatas.emplace_back(simData);
         }
     }
