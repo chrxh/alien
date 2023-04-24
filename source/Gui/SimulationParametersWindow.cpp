@@ -672,7 +672,9 @@ void _SimulationParametersWindow::processBase(
                 AlienImGui::CheckboxParameters()
                     .name("Preserve self-replication")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(!origSimParameters.cellFunctionConstructorMutationSelfReplication),
+                    .defaultValue(!origSimParameters.cellFunctionConstructorMutationSelfReplication)
+                    .tooltip("If deactivated, a mutation can also alter self-replication capabilities in the genome by changing a constructor cell to "
+                             "something else or vice versa."),
                 preserveSelfReplication);
             simParameters.cellFunctionConstructorMutationSelfReplication = !preserveSelfReplication;
             ImGui::TreePop();
