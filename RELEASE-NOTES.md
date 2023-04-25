@@ -29,7 +29,7 @@
 - various examples
 
 ### Changed
-- cell functions obtain input from and provide output to neural activities instead from/to token memory
+- cell functions obtain input from and provide output to neural activities instead from/to token memories
 - constructor cells contain a construction sequence for an entire cell cluster (encoded in a genome) instead of performing a single cell construction
 - 'token branch number' to 'execution order number' changed
 
