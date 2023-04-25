@@ -54,7 +54,7 @@ void _GettingStartedWindow::processIntern()
         ImGui::Text("The easiest way to get to know the ALIEN simulator is to load and run an existing simulation file.");
         ImGui::Text(ICON_FA_CARET_RIGHT);
         ImGui::SameLine();
-        ImGui::Text("You find various demos in ./examples/simulations/* demonstrating capabilities of the "
+        ImGui::Text("You find various demos in ./examples/* demonstrating capabilities of the "
                     "engine ranging from physics examples, self-deploying structures, replicators to small "
                     "ecosystems. To this end, please invoke Simulation " ICON_FA_ARROW_RIGHT
                     " Open in the menu and select a file.");
