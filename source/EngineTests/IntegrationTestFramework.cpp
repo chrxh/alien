@@ -1,17 +1,25 @@
 #include "IntegrationTestFramework.h"
 
-#include "Base/NumberGenerator.h"
+#include <boost/range/combine.hpp>
+
+#include "Base/Math.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineImpl/SimulationControllerImpl.h"
 
-IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSize)
+IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParameters> const& parameters_, IntVector2D const& universeSize)
 {
     _simController = std::make_shared<_SimulationControllerImpl>();
-    Settings settings;
-    settings.generalSettings.worldSizeX = universeSize.x;
-    settings.generalSettings.worldSizeY = universeSize.y;
-    SymbolMap symbolMap;
-    _simController->newSimulation(0, settings, symbolMap);
+    GeneralSettings generalSettings{universeSize.x, universeSize.y};
+    SimulationParameters parameters;
+    if (parameters_) {
+        parameters = *parameters_;
+    } else {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            parameters.baseValues.radiationCellAgeStrength[i] = 0;
+        }
+    }
+    _simController->newSimulation(0, generalSettings, parameters);
+    _parameters = _simController->getSimulationParameters();
 }
 
 IntegrationTestFramework::~IntegrationTestFramework()
@@ -19,11 +27,16 @@ IntegrationTestFramework::~IntegrationTestFramework()
     _simController->closeSimulation();
 }
 
-TokenDescription IntegrationTestFramework::createSimpleToken() const
+double IntegrationTestFramework::getEnergy(DataDescription const& data) const
 {
-    auto parameters = _simController->getSimulationParameters();
-    auto tokenEnergy = parameters.tokenMinEnergy * 2.0;
-    return TokenDescription().setEnergy(tokenEnergy).setData(std::string(parameters.tokenMemorySize, 0));
+    double result = 0;
+    for (auto const& cell : data.cells) {
+        result += cell.energy;
+    }
+    for (auto const& particle : data.particles) {
+        result += particle.energy;
+    }
+    return result;
 }
 
 std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellById(DataDescription const& data) const
@@ -33,4 +46,111 @@ std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellB
         result.emplace(cell.id, cell);
     }
     return result;
+}
+
+CellDescription IntegrationTestFramework::getCell(DataDescription const& data, uint64_t id) const
+{
+    for (auto const& cell : data.cells) {
+        if (cell.id == id) {
+            return cell;
+        }
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+ConnectionDescription IntegrationTestFramework::getConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const
+{
+    auto cell = getCell(data, id);
+    for (auto const& connection : cell.connections) {
+        if (connection.cellId == otherId) {
+            return connection;
+        }
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+bool IntegrationTestFramework::hasConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const
+{
+    auto cell = getCell(data, id);
+    for (auto const& connection : cell.connections) {
+        if (connection.cellId == otherId) {
+            return true;
+        }
+    }
+    return false;
+}
+
+CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& data, uint64_t id) const
+{
+    for (auto const& cell : data.cells) {
+        if (cell.id != id) {
+            return cell;
+        }
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& data, std::set<uint64_t> ids) const
+{
+    for (auto const& cell : data.cells) {
+        if (!ids.contains(cell.id)) {
+            return cell;
+        }
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+bool IntegrationTestFramework::approxCompare(double expected, double actual, float precision) const
+{
+    return approxCompare(toFloat(expected), toFloat(actual));
+}
+
+bool IntegrationTestFramework::approxCompare(float expected, float actual, float precision) const
+{
+    auto absNorm = std::abs(expected) + std::abs(actual);
+    if (absNorm < precision) {
+        return true;
+    }
+    return std::abs(expected - actual) / absNorm < precision;
+}
+
+bool IntegrationTestFramework::approxCompare(RealVector2D const& expected, RealVector2D const& actual) const
+{
+    return approxCompare(expected.x, expected.x) && approxCompare(expected.y, expected.y);
+}
+
+bool IntegrationTestFramework::approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const
+{
+    if (expected.size() != actual.size()) {
+        return false;
+    }
+    for (auto const& [expectedElement, actualElement] : boost::combine(expected, actual)) {
+        if (!approxCompare(expectedElement, actualElement)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool IntegrationTestFramework::compare(DataDescription left, DataDescription right) const
+{
+    std::sort(left.cells.begin(), left.cells.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+    std::sort(right.cells.begin(), right.cells.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+    std::sort(left.particles.begin(), left.particles.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+    std::sort(right.particles.begin(), right.particles.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+    return left == right;
+}
+
+bool IntegrationTestFramework::compare(CellDescription left, CellDescription right) const
+{
+    left.id = 0;
+    right.id = 0;
+    return left == right;
+}
+
+bool IntegrationTestFramework::compare(ParticleDescription left, ParticleDescription right) const
+{
+    left.id = 0;
+    right.id = 0;
+    return left == right;
 }

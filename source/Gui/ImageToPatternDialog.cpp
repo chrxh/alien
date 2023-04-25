@@ -13,7 +13,7 @@
 #include "EngineInterface/Colors.h"
 #include "AlienImGui.h"
 #include "Viewport.h"
-#include "GenericOpenFileDialog.h"
+#include "GenericFileDialogs.h"
 #include "GlobalSettings.h"
 
 
@@ -41,7 +41,7 @@ namespace
         static std::vector<Color> cellColors;
         auto toHsv = [](uint32_t color) {
             float h, s, v;
-            AlienImGui::convertRGBtoHSV(color, h, s, v);
+            AlienImGui::ConvertRGBtoHSV(color, h, s, v);
             return Color{h, s, v}; 
         };
         if (cellColors.empty()) {
@@ -78,7 +78,7 @@ namespace
 
 void _ImageToPatternDialog::show()
 {
-    GenericOpenFileDialog::getInstance().show(
+    GenericFileDialogs::getInstance().showOpenFileDialog(
         "Open image", "Image (*.png){.png},.*", _startingPath, [&](std::filesystem::path const& path) {
 
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
@@ -87,9 +87,6 @@ void _ImageToPatternDialog::show()
 
         int width, height, nrChannels;
         unsigned char* dataImage = stbi_load(firstFilename.string().c_str(), &width, &height, &nrChannels, 0);
-
-        auto parameters = _simController->getSimulationParameters();
-        auto maxConnections = parameters.cellMaxBonds;
 
         DataDescription dataDesc;
         for (int x = 0; x < width; ++x) {
@@ -107,8 +104,8 @@ void _ImageToPatternDialog::show()
                                          .setId(NumberGenerator::getInstance().getId())
                                          .setEnergy(matchedCellIntensity * 200)
                                          .setPos({toFloat(x) + xOffset, toFloat(y)})
-                                         .setMaxConnections(maxConnections)
-                                         .setMetadata(CellMetadata().setColor(matchedCellColor))
+                                         .setMaxConnections(MAX_CELL_BONDS)
+                                         .setColor(matchedCellColor)
                                          .setBarrier(false));
                 }
             }

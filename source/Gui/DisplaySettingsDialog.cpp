@@ -14,7 +14,7 @@
 
 namespace
 {
-    auto const MaxContentTextWidth = 185.0f;
+    auto const RightColumnWidth = 185.0f;
 }
 
 _DisplaySettingsDialog::_DisplaySettingsDialog(WindowController const& windowController)
@@ -53,7 +53,7 @@ void _DisplaySettingsDialog::process()
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Resolution")
-                    .textWidth(MaxContentTextWidth)
+                    .textWidth(RightColumnWidth)
                     .defaultValue(_origSelectionIndex)
                     .values(_videoModeStrings),
                 _selectionIndex)) {
@@ -66,12 +66,12 @@ void _DisplaySettingsDialog::process()
         if (AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
                     .name("Frames per second")
-                    .textWidth(MaxContentTextWidth)
-                    .defaultValue(_origFps)
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(&_origFps)
                     .min(20)
                     .max(100)
                     .tooltip("A high frame rate leads to a greater GPU workload for rendering and thus lowers the simulation speed (time steps per second)."),
-                fps)) {
+                &fps)) {
             _windowController->setFps(fps);
         }
 

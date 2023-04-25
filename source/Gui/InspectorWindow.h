@@ -14,8 +14,10 @@ public:
         SimulationController const& simController,
         Viewport const& viewport,
         EditorModel const& editorModel,
+        GenomeEditorWindow const& genomeEditorWindow,
         uint64_t entityId,
-        RealVector2D const& initialPos);
+        RealVector2D const& initialPos,
+        bool selectGenomeTab);
     ~_InspectorWindow();
 
     void process();
@@ -28,45 +30,43 @@ private:
     std::string generateTitle() const;
 
     void processCell(CellDescription cell);
-    void showCellGeneralTab(CellDescription& cell);
-    void showCellCodeTab(CellDescription& cell);
-    void showCellMemoryTab(CellDescription& cell);
-    void showCellInOutChannelTab(CellDescription& cell);
-    void showTokenTab(CellDescription& cell, int tokenIndex);
-    void showTokenMemorySection(
-        int address,
-        int numBytes,
-        int& currentMemoryEditIndex,
-        std::vector<std::string> const& symbols = {});
-    void showCompilationResult(CompilationResult const& compilationResult);
+    void processCellBaseTab(CellDescription& cell);
+    void processCellFunctionTab(CellDescription& cell);
+    void processCellFunctionPropertiesTab(CellDescription& cell);
+    template <typename Description>
+    void processCellGenomeTab(Description& desc);
+    void processCellMetadataTab(CellDescription& cell);
+
+    void processNerveContent(NerveDescription& nerve);
+    void processNeuronContent(NeuronDescription& neuron);
+    void processConstructorContent(ConstructorDescription& constructor);
+    void processInjectorContent(InjectorDescription& injector);
+    void processAttackerContent(AttackerDescription& attacker);
+    void processDefenderContent(DefenderDescription& defender);
+    void processTransmitterContent(TransmitterDescription& transmitter);
+    void processMuscleContent(MuscleDescription& muscle);
+    void processSensorContent(SensorDescription& sensor);
 
     void processParticle(ParticleDescription particle);
 
-    void showScannerTableContent();
-    void showNeuralNetTableContent();
-    void showDigestionTableContent();
-    void showConstructionTableContent();
-    void showMuscleTableContent();
-    void showSensorTableContent();
-
     float calcWindowWidth() const;
-    void addToken(CellDescription& cell);
-    void delToken(CellDescription& cell, int index);
+
+    void validationAndCorrection(CellDescription& cell) const;
 
 private:
-    std::shared_ptr<MemoryEditor> _cellDataMemoryEdit;
-    std::shared_ptr<MemoryEditor> _cellInstructionMemoryEdit;
-    std::vector<std::shared_ptr<MemoryEditor>> _tokenMemoryEdits;
-
-    std::shared_ptr<CompilationResult> _lastCompilationResult;
     SimulationController _simController;
     Viewport _viewport; 
     EditorModel _editorModel;
+    GenomeEditorWindow _genomeEditorWindow;
+
     RealVector2D _initialPos;
 
     bool _on = true;
     uint64_t _entityId = 0;
     char _cellCode[1024 * 16];
-    char _cellMemory[256];
     char _tokenMemory[256];
+    int _selectedInput = 0;
+    int _selectedOutput = 0;
+    float _genomeZoom = 20.0f;
+    bool _selectGenomeTab = false;
 };

@@ -2,21 +2,20 @@
 
 namespace Const
 {
-    std::string const ProgramVersion = "3.3.1";
+    std::string const ProgramVersion = "4.0.0.beta.3";
 
     std::string const BasePath = "resources/";
 
     auto const LogFilename = "log.txt";
-    auto const AutosaveFile = BasePath + "autosave.sim";
+    auto const AutosaveFileWithoutPath = "autosave.sim";
+    auto const AutosaveFile = BasePath + AutosaveFileWithoutPath;
     auto const SettingsFilename = BasePath + "settings.json";
 
     auto const SimulationFragmentShader = BasePath + "shader.fs";
     auto const SimulationVertexShader = BasePath + "shader.vs";
 
-    auto const NavigationOnFilename = BasePath + "navigation on.png";
-    auto const NavigationOffFilename = BasePath + "navigation off.png";
-    auto const ActionOnFilename = BasePath + "action on.png";
-    auto const ActionOffFilename = BasePath + "action off.png";
+    auto const EditorOnFilename = BasePath + "editor on.png";
+    auto const EditorOffFilename = BasePath + "editor off.png";
 
     auto const RunFilename = BasePath + "run.png";
     auto const PauseFilename = BasePath + "pause.png";

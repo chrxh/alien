@@ -1,14 +1,20 @@
 #pragma once
 
+#include "EngineInterface/CellFunctionEnums.h"
+
 #include "Base.cuh"
 
-#define PI 3.1415926535897932384626433832795
-#define DEG_TO_RAD PI/180.0
-#define RAD_TO_DEG 180.0/PI
+namespace Const
+{
+    static float constexpr PI = 3.1415926535897932384626433832795f;
+    static float constexpr DEG_TO_RAD = PI / 180.0f;
+    static float constexpr RAD_TO_DEG = 180.0f / PI;
+}
 
 class Math
 {
 public:
+
     using Matrix = float[2][2];
 
     __inline__ __device__ static void rotationMatrix(float angle, Matrix& rotMatrix);
@@ -31,7 +37,10 @@ public:
     __inline__ __device__ static float2 rotateClockwise(float2 const& v, float angle);
     __inline__ __device__ static float subtractAngle(float angleMinuend, float angleSubtrahend);
     __inline__ __device__ static float calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, float boundary = 0);
-    __inline__ __device__ static float alignAngle(float angle, int alignment);
+    __inline__ __device__ static float alignAngle(float angle, ConstructorAngleAlignment alignment);
+    __inline__ __device__ static float avoidAngleBoundaries(float angle, float maxAngle, ConstructorAngleAlignment alignment);
+    __inline__ __device__ static bool
+    crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd);
 };
 
 __inline__ __device__ __host__ float2 operator+(float2 const& p, float2 const& q)
@@ -74,25 +83,37 @@ __inline__ __device__ __host__ bool operator==(int2 const& p, int2 const& q)
     return p.x == q.x && p.y == q.y;
 }
 
+__inline__ __device__ __host__ void operator+=(float2& p, float2 const& q)
+{
+    p.x += q.x;
+    p.y += q.y;
+}
+
+__inline__ __device__ __host__ void operator-=(float2& p, float2 const& q)
+{
+    p.x -= q.x;
+    p.y -= q.y;
+}
+
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
 
 __inline__ __device__ float2 Math::unitVectorOfAngle(float angle)
 {
-    angle *= DEG_TO_RAD;
+    angle *= Const::DEG_TO_RAD;
     return{ sinf(angle), -cosf(angle) };
 }
 
 __inline__ __device__ float Math::angleOfVector(float2 const & v)
 {
-    if (length(v) < FP_PRECISION) {
+    if (length(v) < NEAR_ZERO) {
         return 0;
     }
 
     auto normalizedVy = -v.y / length(v);
     normalizedVy = max(-1.0f, min(1.0f, normalizedVy));
-    float angleSin = asinf(normalizedVy) * RAD_TO_DEG;
+    float angleSin = asinf(normalizedVy) * Const::RAD_TO_DEG;
     if (v.x >= 0.0f) {
         return 90.0f - angleSin;
     }
@@ -117,8 +138,8 @@ __device__ __inline__ void Math::rotateQuarterCounterClockwise(float2 &v)
 
 __inline__ __device__ void Math::rotationMatrix(float angle, Matrix& rotMatrix)
 {
-    float sinAngle = __sinf(angle*DEG_TO_RAD);
-    float cosAngle = __cosf(angle*DEG_TO_RAD);
+    float sinAngle = __sinf(angle*Const::DEG_TO_RAD);
+    float cosAngle = __cosf(angle*Const::DEG_TO_RAD);
     rotMatrix[0][0] = cosAngle;
     rotMatrix[0][1] = -sinAngle;
     rotMatrix[1][0] = sinAngle;
@@ -127,8 +148,8 @@ __inline__ __device__ void Math::rotationMatrix(float angle, Matrix& rotMatrix)
 
 __inline__ __device__ void Math::inverseRotationMatrix(float angle, Matrix& rotMatrix)
 {
-    float sinAngle = __sinf(angle*DEG_TO_RAD);
-    float cosAngle = __cosf(angle*DEG_TO_RAD);
+    float sinAngle = __sinf(angle*Const::DEG_TO_RAD);
+    float cosAngle = __cosf(angle*Const::DEG_TO_RAD);
     rotMatrix[0][0] = cosAngle;
     rotMatrix[0][1] = sinAngle;
     rotMatrix[1][0] = -sinAngle;
@@ -171,11 +192,11 @@ __inline__ __device__ void Math::angleCorrection(float &angle)
 __device__ __inline__ void Math::normalize(float2 &vec)
 {
     float length = sqrt(vec.x*vec.x + vec.y*vec.y);
-    if (length > FP_PRECISION) {
+    if (length > NEAR_ZERO) {
         vec = { vec.x / length, vec.y / length };
     }
     else {
-        vec = { 1.0, 0.0 };
+        vec = { 1.0f, 0.0f };
     }
 }
 
@@ -221,10 +242,10 @@ __inline__ __device__ float Math::subtractAngle(float angleMinuend, float angleS
 {
     auto angleDiff = angleMinuend - angleSubtrahend;
     if (angleDiff > 360.0f) {
-        angleDiff -= 360.0;
+        angleDiff -= 360.0f;
     }
     if (angleDiff < 0.0) {
-        angleDiff += 360.0;
+        angleDiff += 360.0f;
     }
     return angleDiff;
 }
@@ -234,7 +255,7 @@ Math::calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSeg
 {
     auto const relPos = pos - startSegment;
     auto segmentDirection = endSegment - startSegment;
-    if (length(segmentDirection) < FP_PRECISION) {
+    if (length(segmentDirection) < NEAR_ZERO) {
         return boundary + 1.0f;
     }
 
@@ -255,13 +276,55 @@ Math::calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSeg
     return abs(signedDistanceFromLine);
 }
 
-__inline__ __device__ float Math::alignAngle(float angle, int alignment)
+__inline__ __device__ float Math::alignAngle(float angle, ConstructorAngleAlignment alignment)
 {
-    if (0 == alignment) {
+    if (ConstructorAngleAlignment_None == alignment) {
         return angle;
     }
-    float unitAngle = 360.0f / alignment;
+    float unitAngle = 360.0f / (alignment + 1);
     float factor = angle / unitAngle + 0.5f;
     factor = floorf(factor);
     return factor * unitAngle;
+}
+
+__inline__ __device__ float Math::avoidAngleBoundaries(float angle, float maxAngle, ConstructorAngleAlignment alignment)
+{
+    if (alignment != ConstructorAngleAlignment_None) {
+        auto angleUnit = 360.0f / (alignment + 1);
+        if (angle < NEAR_ZERO && angleUnit < maxAngle - NEAR_ZERO) {
+            angle = angleUnit;
+        }
+        if (angle > maxAngle - NEAR_ZERO && maxAngle - angleUnit > NEAR_ZERO) {
+            angle = maxAngle - angleUnit;
+        }
+    }
+    return angle;
+}
+
+__inline__ __device__ bool Math::crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd)
+{
+    auto const& p1 = segmentStart;
+    auto v1 = segmentEnd - segmentStart;
+    auto const& p2 = otherSegmentStart;
+    auto v2 = otherSegmentEnd - otherSegmentStart;
+
+    auto divisor = v2.x * v1.y - v2.y * v1.x;
+    if (abs(divisor) < NEAR_ZERO) {
+        return false;
+    }
+    auto mue = (v1.x * (p2.y - p1.y) - v1.y * (p2.x - p1.x)) / divisor;
+    if (mue < -NEAR_ZERO || mue > 1 + NEAR_ZERO) {
+        return false;
+    }
+
+    float lambda;
+    if (abs(v1.x) > NEAR_ZERO) {
+        lambda = (p2.x - p1.x + mue * v2.x) / v1.x;
+    } else if (abs(v1.y) > NEAR_ZERO) {
+        lambda = (p2.y - p1.y + mue * v2.y) / v1.y;
+    } else {
+        return false;
+    }
+
+    return lambda >= NEAR_ZERO && lambda <= 1 - NEAR_ZERO;
 }

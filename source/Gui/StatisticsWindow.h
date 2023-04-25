@@ -1,10 +1,13 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
+#include "EngineInterface/StatisticsData.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
-#include "StatisticsHistory.h"
+#include "CollectedStatisticsData.h"
+
+struct ImPlotPoint;
 
 class _StatisticsWindow : public _AlienWindow
 {
@@ -15,24 +18,51 @@ public:
 
 private:
     void processIntern();
-    void processLiveStatistics();
-    void processLongtermStatistics();
+    void processTimelines();
+    void processTimelineStatistics();
 
-    void processLivePlot(int row, std::vector<float> const& valueHistory, int fracPartDecimals = 0);
-    void processLivePlotForCellsByColor(int row);
-    void processLongtermPlot(int row, std::vector<float> const& valueHistory, int fracPartDecimals = 0);
-    void processLongtermPlotForCellsByColor(int row);
+    void processHistograms();
+
+    void processPlot(int row, ColorVector<double> DataPoint::*valuesPtr, int fracPartDecimals = 0);
 
     void processBackground() override;
 
-    uint32_t getCellColor(int i) const;
+    void plotSumColorsIntern(
+        int row,
+        ColorVector<double> const* values,
+        double const* timePoints,
+        int count,
+        double startTime,
+        double endTime,
+        int fracPartDecimals);
+    void plotByColorIntern(
+        int row,
+        ColorVector<double> const* values,
+        double const* timePoints,
+        int count,
+        double startTime,
+        double endTime,
+        int fracPartDecimals);
+    void plotForColorIntern(
+        int row,
+        ColorVector<double> const* values,
+        int colorIndex,
+        double const* timePoints,
+        int count,
+        double startTime,
+        double endTime,
+        int fracPartDecimals);
 
     SimulationController _simController;
     ExportStatisticsDialog _exportStatisticsDialog;
 
     bool _live = true;
-    bool _showCellsByColor = false;
+    int _plotType = 0;
 
-    LiveStatistics _liveStatistics;
-    LongtermStatistics _longtermStatistics;
+    std::optional<StatisticsData> _lastStatisticsData;
+    std::optional<float> _histogramUpperBound;
+    std::map<int, std::vector<double>> _cachedTimelines;
+
+    TimelineLiveStatistics _liveStatistics;
+    TimelineLongtermStatistics _longtermStatistics;
 };

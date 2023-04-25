@@ -1,63 +1,95 @@
-﻿#include "SimulationKernelsLauncher.cuh"
+﻿#include <cmath>
+#include "SimulationKernelsLauncher.cuh"
 
 #include "SimulationKernels.cuh"
 #include "FlowFieldKernels.cuh"
 #include "GarbageCollectorKernelsLauncher.cuh"
+#include "DebugKernels.cuh"
+#include "SimulationStatistics.cuh"
 
 _SimulationKernelsLauncher::_SimulationKernelsLauncher()
 {
     _garbageCollector = std::make_shared<_GarbageCollectorKernelsLauncher>();
 }
 
-void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, SimulationData const& data, SimulationResult const& result)
+namespace 
+{
+    int calcOptimalThreadsForFluidKernel(SimulationParameters const& parameters)
+    {
+        auto scanRectLength = ceilf(parameters.motionData.fluidMotion.smoothingLength * 2) * 2 + 1;
+        return scanRectLength * scanRectLength;
+    }
+}
+
+void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, SimulationData const& data, SimulationStatistics const& statistics)
 {
     auto const gpuSettings = settings.gpuSettings;
-    KERNEL_CALL_1_1(cudaPrepareNextTimestep, data, result);
-    if (settings.flowFieldSettings.active) {
+    KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, statistics);
+    if (settings.simulationParameters.numSpots > 0) {
         KERNEL_CALL(cudaApplyFlowFieldSettings, data);
     }
-    KERNEL_CALL(cudaNextTimestep_substep1, data);
-    KERNEL_CALL(cudaNextTimestep_substep2, data);
-    KERNEL_CALL(cudaNextTimestep_substep3, data);
-    KERNEL_CALL(cudaNextTimestep_substep4, data);
-    KERNEL_CALL(cudaNextTimestep_substep5, data);
-    KERNEL_CALL(cudaNextTimestep_substep6, data, result);
-    KERNEL_CALL(cudaNextTimestep_substep7, data);
-    KERNEL_CALL(cudaNextTimestep_substep8, data, result);
-    if (_counter == 0) {
-        KERNEL_CALL(cudaNextTimestep_substep9, data);
-    }
-    KERNEL_CALL(cudaNextTimestep_substep10, data);
 
-    if (isRigidityUpdateEnabled(settings)) {
-        if (_counter == 0) {  //execute rigidity update only every 3rd time step for performance reasons
-            KERNEL_CALL(cudaInitClusterData, data);
-            KERNEL_CALL(cudaFindClusterIteration, data);  //3 iterations should provide a good approximation
-            KERNEL_CALL(cudaFindClusterIteration, data);
-            KERNEL_CALL(cudaFindClusterIteration, data);
-            KERNEL_CALL(cudaFindClusterBoundaries, data);
-            KERNEL_CALL(cudaAccumulateClusterPosAndVel, data);
-            KERNEL_CALL(cudaAccumulateClusterAngularProp, data);
-            KERNEL_CALL(cudaApplyClusterData, data);
-        }
+    //not all kernels need to be executed in each time step for performance reasons
+    bool considerForcesFromAngleDifferences = (data.timestep % 3 == 0);
+    bool considerInnerFriction = (data.timestep % 3 == 0);
+    bool considerRigidityUpdate = (data.timestep % 3 == 0);
+
+    KERNEL_CALL(cudaNextTimestep_physics_init, data);
+    KERNEL_CALL(cudaNextTimestep_physics_fillMaps, data);
+    if (settings.simulationParameters.motionType == MotionType_Fluid) {
+        auto threads = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
+        cudaNextTimestep_physics_calcFluidForces<<<gpuSettings.numBlocks, threads>>>(data);
+    } else {
+        KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, data);
     }
-    KERNEL_CALL_1_1(cudaNextTimestep_substep11, data);
-    KERNEL_CALL(cudaNextTimestep_substep12, data);
-    KERNEL_CALL(cudaNextTimestep_substep13, data);
-    KERNEL_CALL(cudaNextTimestep_substep14, data);
+    KERNEL_CALL(cudaNextTimestep_physics_applyForces, data);
+    KERNEL_CALL(cudaNextTimestep_physics_calcConnectionForces, data, considerForcesFromAngleDifferences);
+    KERNEL_CALL(cudaNextTimestep_physics_verletPositionUpdate, data);
+    KERNEL_CALL(cudaNextTimestep_physics_calcConnectionForces, data, considerForcesFromAngleDifferences);
+    KERNEL_CALL(cudaNextTimestep_physics_verletVelocityUpdate, data);
+
+    //cell functions
+    KERNEL_CALL(cudaNextTimestep_cellFunction_prepare_substep1, data);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_prepare_substep2, data);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_nerve, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_neuron, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_constructor, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_injector, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_attacker, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_transmitter, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_muscle, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_sensor, data, statistics);
+
+    if (considerInnerFriction) {
+        KERNEL_CALL(cudaNextTimestep_physics_substep7_innerFriction, data);
+    }
+    KERNEL_CALL(cudaNextTimestep_physics_substep8, data);
+
+    if (considerRigidityUpdate && isRigidityUpdateEnabled(settings)) {
+        KERNEL_CALL(cudaInitClusterData, data);
+        KERNEL_CALL(cudaFindClusterIteration, data);  //3 iterations should provide a good approximation
+        KERNEL_CALL(cudaFindClusterIteration, data);
+        KERNEL_CALL(cudaFindClusterIteration, data);
+        KERNEL_CALL(cudaFindClusterBoundaries, data);
+        KERNEL_CALL(cudaAccumulateClusterPosAndVel, data);
+        KERNEL_CALL(cudaAccumulateClusterAngularProp, data);
+        KERNEL_CALL(cudaApplyClusterData, data);
+    }
+    KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, data);
+    KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, data);
+    KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, data);
+    KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, data);
+    KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, data);
 
     _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);
-    if (++_counter == 3) {
-        _counter = 0;
-    }
 }
 
 bool _SimulationKernelsLauncher::isRigidityUpdateEnabled(Settings const& settings) const
 {
-    for(int i = 0; i < settings.simulationParametersSpots.numSpots; ++i) {
-        if (settings.simulationParametersSpots.spots[i].values.rigidity != 0) {
+    for (int i = 0; i < settings.simulationParameters.numSpots; ++i) {
+        if (settings.simulationParameters.spots[i].values.rigidity != 0) {
             return true;
         }
     }
-    return settings.simulationParameters.spotValues.rigidity != 0;
+    return settings.simulationParameters.baseValues.rigidity != 0;
 }

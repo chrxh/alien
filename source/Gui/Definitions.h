@@ -46,14 +46,11 @@ using NewSimulationDialog = std::shared_ptr<_NewSimulationDialog>;
 class _StartupController;
 using StartupController = std::shared_ptr<_StartupController>;
 
-class _FlowGeneratorWindow;
-using FlowGeneratorWindow = std::shared_ptr<_FlowGeneratorWindow>;
-
 class _AboutDialog;
 using AboutDialog = std::shared_ptr<_AboutDialog>;
 
-class _ColorizeDialog;
-using ColorizeDialog = std::shared_ptr<_ColorizeDialog>;
+class _MassOperationsDialog;
+using MassOperationsDialog = std::shared_ptr<_MassOperationsDialog>;
 
 class _LogWindow;
 using LogWindow = std::shared_ptr<_LogWindow>;
@@ -87,6 +84,7 @@ using EditorModel = std::shared_ptr<_EditorModel>;
 
 class _EditorController;
 using EditorController = std::shared_ptr<_EditorController>;
+using EditorControllerWeakPtr = _EditorController*;
 
 class _SelectionWindow;
 using SelectionWindow = std::shared_ptr<_SelectionWindow>;
@@ -99,9 +97,6 @@ using WindowController = std::shared_ptr<_WindowController>;
 
 class _SavePatternDialog;
 using SavePatternDialog = std::shared_ptr<_SavePatternDialog>;
-
-class _SaveSymbolsDialog;
-using SaveSymbolsDialog = std::shared_ptr<_SaveSymbolsDialog>;
 
 class _OpenPatternDialog;
 using OpenPatternDialog = std::shared_ptr<_OpenPatternDialog>;
@@ -118,20 +113,11 @@ using CreatorWindow = std::shared_ptr<_CreatorWindow>;
 class _MultiplierWindow;
 using MultiplierWindow = std::shared_ptr<_MultiplierWindow>;
 
-class _SymbolsWindow;
-using SymbolsWindow = std::shared_ptr<_SymbolsWindow>;
-
 class _PatternAnalysisDialog;
 using PatternAnalysisDialog = std::shared_ptr<_PatternAnalysisDialog>;
 
 class _ExportStatisticsDialog;
 using ExportStatisticsDialog = std::shared_ptr<_ExportStatisticsDialog>;
-
-class _SimulationParametersChanger;
-using SimulationParametersChanger = std::shared_ptr<_SimulationParametersChanger>;
-
-class _SimulationParametersCalculator;
-using SimulationParametersCalculator = std::shared_ptr<_SimulationParametersCalculator>;
 
 class _FpsController;
 using FpsController = std::shared_ptr<_FpsController>;
@@ -173,6 +159,12 @@ using NewPasswordDialog = std::shared_ptr<_NewPasswordDialog>;
 
 class _ImageToPatternDialog;
 using ImageToPatternDialog = std::shared_ptr<_ImageToPatternDialog>;
+
+class _GenomeEditorWindow;
+using GenomeEditorWindow = std::shared_ptr<_GenomeEditorWindow>;
+
+class _RadiationSourcesWindow;
+using RadiationSourcesWindow = std::shared_ptr<_RadiationSourcesWindow>;
 
 struct GLFWvidmode;
 struct GLFWwindow;

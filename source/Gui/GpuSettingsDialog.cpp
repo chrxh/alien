@@ -10,7 +10,7 @@
 
 namespace
 {
-    auto const MaxContentTextWidth = 180.0f;
+    auto const RightColumnWidth = 180.0f;
 }
 
 _GpuSettingsDialog::_GpuSettingsDialog(SimulationController const& simController)
@@ -41,7 +41,7 @@ void _GpuSettingsDialog::process()
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
                 .name("Blocks")
-                .textWidth(MaxContentTextWidth)
+                .textWidth(RightColumnWidth)
                 .defaultValue(origGpuSettings.numBlocks)
                 .tooltip(std::string("Number of CUDA thread blocks.")),
             gpuSettings.numBlocks);
@@ -49,7 +49,7 @@ void _GpuSettingsDialog::process()
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
                 .name("Threads per Block")
-                .textWidth(MaxContentTextWidth)
+                .textWidth(RightColumnWidth)
                 .defaultValue(origGpuSettings.numThreadsPerBlock)
                 .tooltip(std::string("Number of CUDA threads per blocks.")),
             gpuSettings.numThreadsPerBlock);
