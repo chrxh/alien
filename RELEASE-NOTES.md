@@ -1,5 +1,46 @@
 # Release notes
 
+## [4.0.0-beta] - 2023-04-25
+### Added
+- engine: new cell functions and corresponding parameters: neurons, transmitters, nerves, injectors and defenders
+- engine: neural activity for cells
+- engine: radiation sources and extended logic (absorption factors, cell age radiation, high energy radiation)
+- engine: simulation parameter override function for spots
+- engine: most simulation parameters can be configured by cell color
+- engine: SPH solver
+- engine: stiffness per cell
+- engine: linear and central force fields
+- engine: new mutation types
+- engine: living states for cells
+- engine: tracking of genome generation
+- engine: energy pump function for constructors
+- engine: rendering improved
+- gui/genome editor: editor with preview added
+- gui/pattern editor: inspect genome function added
+- gui/mass operations: dialog added
+- gui/simulation parameters: save, load, copy and paste function
+- gui/statistics: plot each cell function activity
+- gui/statistics: every plot can be broken down by colors
+- gui/statistics: plot values in the long-term view are smoothed at regular intervals so that they remain readable
+- gui/statistics: histogram for cell ages
+- gui/browser: version check for simulation files
+- gui/browser: filter for community creations
+- gui/creator: pencil width for brush draw function and fitting mouse cursor
+- various examples
+
+### Changed
+- cell functions obtain input from and provide output to neural activities instead from/to token memory
+- constructor cells contain a construction sequence for an entire cell cluster (encoded in a genome) instead of performing a single cell construction
+- 'token branch number' to 'execution order number' changed
+
+### Removed
+- tokens
+- cell function for computing operating
+- cell code editor and compiler
+- cell memory editor
+- symbols
+- time-varying simulation parameters
+
 ## [3.3.1] - 2023-02-03
 ### Added
 - allow comments starting with # in cell code
