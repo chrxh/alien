@@ -14,7 +14,7 @@
 - engine: living states for cells
 - engine: tracking of genome generation
 - engine: energy pump function for constructors
-- engine: rendering improved
+- engine: cell rendering improved
 - gui/genome editor: editor with preview added
 - gui/pattern editor: inspect genome function added
 - gui/mass operations: dialog added
