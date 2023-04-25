@@ -17,6 +17,7 @@ std::vector<RemoteSimulationData> RemoteSimulationDataParser::decode(boost::prop
         entry.contentSize = std::stoll(subTree.get<std::string>("contentSize"));
         entry.likes = subTree.get<int>("likes");
         entry.numDownloads = subTree.get<int>("numDownloads");
+        entry.fromRelease = subTree.get<int>("fromRelease") == 1;
         result.emplace_back(entry);
     }
     return result;

@@ -1,9 +1,15 @@
 ﻿#include "RenderingKernels.cuh"
 
+#include "CellFunctionProcessor.cuh"
 #include "SpotCalculator.cuh"
 
 namespace
 {
+    auto constexpr ZoomLevelForActivity = 2.0f;
+    auto constexpr ZoomLevelForConnections = 1.0f;
+    auto constexpr ZoomLevelForShadedCells = 10.0f;
+    auto constexpr ZoomLevelForArrows = 15.0f;
+
     __device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, float3 const& color)
     {
         imageData[index] = toUInt64(color.y * 225.0f) << 16 | toUInt64(color.x * 225.0f) << 0 | toUInt64(color.z * 225.0f) << 32;
@@ -12,7 +18,7 @@ namespace
     __device__ __inline__ void drawAddingPixel(uint64_t* imageData, unsigned int index, float3 const& colorToAdd)
     {
         uint64_t rawColorToAdd = toUInt64(colorToAdd.y * 255.0f) << 16 | toUInt64(colorToAdd.x * 255.0f) << 0 | toUInt64(colorToAdd.z * 255.0f) << 32;
-        alienAtomicAdd(&imageData[index], rawColorToAdd);
+        alienAtomicAdd64(&imageData[index], rawColorToAdd);
     }
 
     __device__ __inline__ float3 colorToFloat3(unsigned int value)
@@ -28,7 +34,7 @@ namespace
     __device__ __inline__ float3 calcColor(Cell* cell, int selected)
     {
         uint32_t cellColor;
-        switch (cell->metadata.color % 7) {
+        switch (calcMod(cell->color, 7)) {
         case 0: {
             cellColor = Const::IndividualCellColor1;
             break;
@@ -75,15 +81,13 @@ namespace
 
     __device__ __inline__ float3 calcColor(Particle* particle, bool selected)
     {
-        auto intensity = max(min((toInt(particle->energy) + 10) * 5, 150), 20) / 266.0f;
+        auto intensity = max(min((toInt(particle->energy) + 10.0f) * 5, 450.0f), 20.0f) / 1000.0f;
         if (selected) {
             intensity *= 2.5f;
         }
 
-        return {intensity, 0, 0.08f};
+        return {intensity, intensity, 0.08f};
     }
-
-    __device__ __inline__ float3 calcColor(bool selected) { return selected ? float3{0.75f, 0.75f, 0.75f} : float3{0.5f, 0.5f, 0.5f}; }
 
     __device__ __inline__ void drawDot(uint64_t* imageData, int2 const& imageSize, float2 const& pos, float3 const& colorToAdd)
     {
@@ -97,7 +101,7 @@ namespace
             drawAddingPixel(imageData, index, colorToAdd1);
 
             float3 colorToAdd2 = colorToAdd * posFrac.x * (1.0f - posFrac.y);
-            drawAddingPixel(imageData, index, colorToAdd2);
+            drawAddingPixel(imageData, index + 1, colorToAdd2);
 
             float3 colorToAdd3 = colorToAdd * (1.0f - posFrac.x) * posFrac.y;
             drawAddingPixel(imageData, index + imageSize.x, colorToAdd3);
@@ -107,15 +111,26 @@ namespace
         }
     }
 
-    __device__ __inline__ void drawCircle(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius, bool inverted = false)
+    __device__ __inline__ void drawCircle(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius, bool shaded = true, bool inverted = false)
     {
-        if (radius > 1.5 - FP_PRECISION) {
+        if (radius > 2.0 - NEAR_ZERO) {
             auto radiusSquared = radius * radius;
             for (float x = -radius; x <= radius; x += 1.0f) {
                 for (float y = -radius; y <= radius; y += 1.0f) {
                     auto rSquared = x * x + y * y;
                     if (rSquared <= radiusSquared) {
                         auto factor = inverted ? (rSquared / radiusSquared) * 2 : (1.0f - rSquared / radiusSquared) * 2;
+                        auto angle = Math::angleOfVector({x, y});
+                        if (shaded) {
+                            angle -= 45.0f;
+                            if (angle > 180.0f) {
+                                angle -= 360.0f;
+                            }
+                            if (angle < -180.0f) {
+                                angle += 360.0f;
+                            }
+                            factor *= 65.0f / (abs(angle) + 1.0f); 
+                        }
                         drawDot(imageData, imageSize, pos + float2{x, y}, color * min(factor, 1.0f));
                     }
                 }
@@ -156,9 +171,11 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
 
     BaseMap map;
     map.init(worldSize);
-    auto baseColor = colorToFloat3(Const::SpaceColor);
-    auto spotColor1 = colorToFloat3(cudaSimulationParametersSpots.spots[0].color);
-    auto spotColor2 = colorToFloat3(cudaSimulationParametersSpots.spots[1].color);
+    auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
+    float3 spotColors[MAX_SPOTS];
+    for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+        spotColors[i] = colorToFloat3(cudaSimulationParameters.spots[i].color);
+    }
 
     auto const block = calcPartition(imageSize.x * imageSize.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = block.startIndex; index <= block.endIndex; ++index) {
@@ -168,7 +185,8 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
             imageData[index] = 0;
         } else {
             float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
-            auto color = SpotCalculator::calcColor(map, worldPos, baseColor, spotColor1, spotColor2);
+
+            auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors);
             drawPixel(imageData, index, color);
         }
     }
@@ -176,11 +194,12 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
 
 __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
 {
-    auto const partition = calcPartition(cells.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     BaseMap map;
     map.init(universeSize);
 
+    auto shadedCells = zoom >= ZoomLevelForShadedCells;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
 
@@ -188,86 +207,63 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
         map.correctPosition(cellPos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
             auto cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
-            auto color = calcColor(cell, cell->selected);
-            auto radius = 1 == cell->selected ? zoom / 2 : zoom / 3;
-            drawCircle(imageData, imageSize, cellImagePos, color, radius, true);
-            color = color * min((zoom - 1.0f) / 3, 1.0f);
 
-            //draw connection lines
-            if (zoom >= 1.0f) {
+            //draw cell
+            auto color = calcColor(cell, cell->selected);
+            auto radius = zoom / 3;
+            drawCircle(imageData, imageSize, cellImagePos, color, radius, shadedCells, true);
+
+            color = color * min((zoom - 1.0f) / 3, 1.0f);
+            if (cell->isActive() && zoom >= ZoomLevelForActivity) {
+                drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, radius, shadedCells);
+            }
+
+            //draw connections
+            if (zoom >= ZoomLevelForConnections) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const otherCell = cell->connections[i].cell;
                     auto const otherCellPos = otherCell->absPos;
                     auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
-                    if (Math::lengthSquared(topologyCorrection) < FP_PRECISION) {
-                        auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
-                        drawLine(cellImagePos, otherCellImagePos, color, imageData, imageSize);
+
+                    if (Math::lengthSquared(topologyCorrection) < NEAR_ZERO) {
+                        auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) / 3;
+                        auto const startImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos + distFromCellCenter, zoom);
+                        auto const endImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, zoom);
+                        drawLine(startImagePos, endImagePos, color, imageData, imageSize);
                     }
                 }
             }
 
             //draw arrows
-            if (zoom >= 15.0f) {
-                for (int i = 0; i < cell->numConnections; ++i) {
-                    auto const otherCell = cell->connections[i].cell;
-                    auto const otherCellPos = otherCell->absPos;
-                    auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
-                    if (Math::lengthSquared(topologyCorrection) > FP_PRECISION) {
-                        continue;
-                    }
-                    if ((cell->branchNumber + 1 - otherCell->branchNumber) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0) {
-                        auto const arrowEnd =
-                            mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos + Math::normalized(cellPos - otherCellPos) / 3, zoom);
-                        auto direction = Math::normalized(arrowEnd - cellImagePos);
-                        {
-                            float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
-                            arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
-                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.7f);
-                        }
-                        {
-                            float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
-                            arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
-                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.7f);
-                        }
-                    }
-                    if ((cell->branchNumber - 1 - otherCell->branchNumber) % cudaSimulationParameters.cellMaxTokenBranchNumber == 0) {
-                        auto const arrowEnd = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 3, zoom);
-                        auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
-                        auto direction = Math::normalized(arrowEnd - otherCellImagePos);
-                        {
-                            float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
-                            arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
-                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.7f);
-                        }
-                        {
-                            float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
-                            arrowPartStart = arrowPartStart * zoom / 6 + arrowEnd;
-                            drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.7f);
+            if (zoom >= ZoomLevelForArrows) {
+                auto inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
+                if (inputExecutionOrderNumber != -1 && inputExecutionOrderNumber != cell->executionOrderNumber) {
+                    for (int i = 0; i < cell->numConnections; ++i) {
+                        auto const& otherCell = cell->connections[i].cell;
+                        if (otherCell->executionOrderNumber == inputExecutionOrderNumber && !otherCell->outputBlocked) {
+                            auto const otherCellPos = otherCell->absPos;
+                            auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
+                            if (Math::lengthSquared(topologyCorrection) > NEAR_ZERO) {
+                                continue;
+                            }
+
+                            auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
+                            auto const arrowEnd = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 3, zoom);
+                            auto direction = Math::normalized(arrowEnd - otherCellImagePos);
+                            {
+                                float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
+                                arrowPartStart = arrowPartStart * zoom / 8 + arrowEnd;
+                                drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                            }
+                            {
+                                float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
+                                arrowPartStart = arrowPartStart * zoom / 8 + arrowEnd;
+                                drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                            }
                         }
                     }
                 }
             }
-        }
-    }
-}
-
-__global__ void
-cudaDrawTokens(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Token*> tokens, uint64_t* imageData, int2 imageSize, float zoom)
-{
-    BaseMap map;
-    map.init(universeSize);
-
-    auto partition = calcPartition(tokens.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (auto tokenIndex = partition.startIndex; tokenIndex <= partition.endIndex; ++tokenIndex) {
-        auto const& token = tokens.at(tokenIndex);
-        auto const& cell = token->cell;
-
-        auto cellPos = cell->absPos;
-        map.correctPosition(cellPos);
-        auto const cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
-        if (isContainedInRect({0, 0}, imageSize, cellImagePos)) {
-            auto const color = calcColor(false);
-            drawCircle(imageData, imageSize, cellImagePos, color, zoom / 2);
         }
     }
 }
@@ -278,9 +274,9 @@ cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight
     BaseMap map;
     map.init(universeSize);
 
-    auto const particleBlock = calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const partition = calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& particle = particles.at(index);
         auto particlePos = particle->absPos;
         map.correctPosition(particlePos);
@@ -288,25 +284,34 @@ cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight
         auto const particleImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, particlePos, zoom);
         if (isContainedInRect({0, 0}, imageSize, particleImagePos)) {
             auto const color = calcColor(particle, 0 != particle->selected);
-            auto radius = 1 == particle->selected ? zoom / 2 : zoom / 3;
+            auto radius = zoom / 3;
             drawCircle(imageData, imageSize, particleImagePos, color, radius);
         }
     }
 }
 
-__global__ void cudaDrawFlowCenters(uint64_t* targetImage, float2 rectUpperLeft, int2 imageSize, float zoom)
+__global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpperLeft, int2 imageSize, float zoom)
 {
-    if (cudaFlowFieldSettings.active) {
-        for (int i = 0; i < cudaFlowFieldSettings.numCenters; ++i) {
-            auto const& radialFlowData = cudaFlowFieldSettings.centers[i];
-            int screenPosX = toInt(radialFlowData.posX * zoom) - rectUpperLeft.x * zoom;
-            int screenPosY = toInt(radialFlowData.posY * zoom) - rectUpperLeft.y * zoom;
-            auto drawX = screenPosX;
+    for (int i = 0; i < cudaSimulationParameters.numParticleSources; ++i) {
+        auto const& particleSource = cudaSimulationParameters.particleSources[i];
+        int screenPosX = toInt(particleSource.posX * zoom) - rectUpperLeft.x * zoom;
+        int screenPosY = toInt(particleSource.posY * zoom) - rectUpperLeft.y * zoom;
+        for (int dx = -5; dx <= 5; ++dx) {
+            auto drawX = screenPosX + dx;
             auto drawY = screenPosY;
             if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
                 int index = drawX + drawY * imageSize.x;
-                targetImage[index] = 0xffff00000000;
+                targetImage[index] = 0x0000000001ff;
+            }
+        }
+        for (int dy = -5; dy <= 5; ++dy) {
+            auto drawX = screenPosX;
+            auto drawY = screenPosY + dy;
+            if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
+                int index = drawX + drawY * imageSize.x;
+                targetImage[index] = 0x0000000001ff;
             }
         }
     }
 }
+

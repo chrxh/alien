@@ -4,6 +4,7 @@
 #include <ImFileDialog.h>
 
 #include "Base/Definitions.h"
+#include "Base/StringHelper.h"
 
 #include "GlobalSettings.h"
 #include "MessageDialog.h"
@@ -38,7 +39,7 @@ void _ExportStatisticsDialog::process()
     ifd::FileDialog::Instance().Close();
 }
 
-void _ExportStatisticsDialog::show(LongtermStatistics const& longtermStatistics)
+void _ExportStatisticsDialog::show(TimelineLongtermStatistics const& longtermStatistics)
 {
     _statistics = longtermStatistics;
     ifd::FileDialog::Instance().Save("ExportStatisticsDialog", "Export statistics", "Comma-separated values (*.csv){.csv},.*", _startingPath);
@@ -46,10 +47,6 @@ void _ExportStatisticsDialog::show(LongtermStatistics const& longtermStatistics)
 
 void _ExportStatisticsDialog::onSaveStatistics(std::string const& filename)
 {
-    for (auto const& data : _statistics.datas) {
-        CHECK(_statistics.timestepHistory.size() == _statistics.datas[0].size());
-    }
-
     std::ofstream file;
     file.open(filename, std::ios_base::out);
     if (!file) {
@@ -57,14 +54,54 @@ void _ExportStatisticsDialog::onSaveStatistics(std::string const& filename)
         return;
     }
 
-    file << "time step, cells, cells (color 0), cells (color 1), cells (color 2), cells (color 3), cells (color 4), cells (color 5), cells (color 6), "
-         << "cell connections, particles, tokens, created cells, successful attacks, failed attacks, muscle activities"
-         << std::endl;
-    for (int i = 0; i < _statistics.timestepHistory.size(); ++i) {
-        file << static_cast<uint64_t>(_statistics.timestepHistory.at(i));
-        for (int j = 0; j <= 14; ++j) {
-            file << ", " << static_cast<uint64_t>(_statistics.datas[j].at(i));
+    file << "time step";
+    auto writeLabelAllColors = [&file](auto const& name) {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            file << ", " << name << " (color " << i << ")";
         }
+    };
+    writeLabelAllColors("Cells");
+    writeLabelAllColors("Cell connections");
+    writeLabelAllColors("Energy particles");
+    writeLabelAllColors("Created cells");
+    writeLabelAllColors("Attacks");
+    writeLabelAllColors("Muscle activities");
+    writeLabelAllColors("Transmitter activities");
+    writeLabelAllColors("Defender activities");
+    writeLabelAllColors("Injection activities");
+    writeLabelAllColors("Completed injections");
+    writeLabelAllColors("Nerve pulses");
+    writeLabelAllColors("Neuron activities");
+    writeLabelAllColors("Sensor activities");
+    writeLabelAllColors("Sensor matches");
+    file << std::endl;
+
+    auto writeIntValueAllColors = [&file](auto const& colorVector) {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            file << ", " << static_cast<uint64_t>(colorVector[i]);
+        }
+    };
+    auto writeDoubleValueAllColors = [&file](auto const& colorVector) {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            file << ", " << StringHelper::format(toFloat(colorVector[i]), 8);
+        }
+    };
+    for (auto const& dataPoint : _statistics.dataPoints) {
+        file << static_cast<uint64_t>(dataPoint.time);
+        writeIntValueAllColors(dataPoint.numCells);
+        writeIntValueAllColors(dataPoint.numConnections);
+        writeIntValueAllColors(dataPoint.numParticles);
+        writeDoubleValueAllColors(dataPoint.numCreatedCells);
+        writeDoubleValueAllColors(dataPoint.numAttacks);
+        writeDoubleValueAllColors(dataPoint.numMuscleActivities);
+        writeDoubleValueAllColors(dataPoint.numDefenderActivities);
+        writeDoubleValueAllColors(dataPoint.numTransmitterActivities);
+        writeDoubleValueAllColors(dataPoint.numInjectionActivities);
+        writeDoubleValueAllColors(dataPoint.numCompletedInjections);
+        writeDoubleValueAllColors(dataPoint.numNervePulses);
+        writeDoubleValueAllColors(dataPoint.numNeuronActivities);
+        writeDoubleValueAllColors(dataPoint.numSensorActivities);
+        writeDoubleValueAllColors(dataPoint.numSensorMatches);
         file << std::endl;
     }
     file.close();

@@ -5,7 +5,6 @@
 #include <condition_variable>
 
 #if defined(_WIN32)
-#define NOMINMAX
 #include <windows.h>
 #endif
 #include <GL/gl.h>
@@ -15,12 +14,12 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
-#include "EngineInterface/MonitorData.h"
+#include "EngineInterface/StatisticsData.h"
 #include "EngineInterface/OverlayDescriptions.h"
-#include "EngineInterface/FlowFieldSettings.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
+#include "EngineInterface/MutationType.h"
 #include "EngineGpuKernels/Definitions.h"
 
 #include "Definitions.h"
@@ -31,7 +30,7 @@ struct ExceptionData
     std::optional<std::string> errorMessage;
 };
 
-struct DataAccessTO;
+struct DataTO;
 
 class EngineWorker
 {
@@ -39,7 +38,7 @@ class EngineWorker
 public:
     void initCuda();
 
-    void newSimulation(uint64_t timestep, Settings const& settings);
+    void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters);
     void clear();
 
     void registerImageResource(void* image);
@@ -48,19 +47,24 @@ public:
     std::optional<OverlayDescription>
     tryDrawVectorGraphicsAndReturnOverlay(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
 
+    bool isSyncSimulationWithRendering() const;
+    void setSyncSimulationWithRendering(bool value);
+    int getSyncSimulationWithRenderingRatio() const;
+    void setSyncSimulationWithRenderingRatio(int value);
+
     ClusteredDataDescription getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters);
     DataDescription getSelectedSimulationData(bool includeClusters);
-    DataDescription getInspectedSimulationData(std::vector<uint64_t> entityIds);
-    MonitorData getMonitorData() const;
+    DataDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
+    StatisticsData getStatistics() const;
 
     void addAndSelectSimulationData(DataDescription const& dataToUpdate);
     void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate);
     void setSimulationData(DataDescription const& dataToUpdate);
-    void removeSelectedEntities(bool includeClusters);
-    void relaxSelectedEntities(bool includeClusters);
-    void uniformVelocitiesForSelectedEntities(bool includeClusters);
+    void removeSelectedObjects(bool includeClusters);
+    void relaxSelectedObjects(bool includeClusters);
+    void uniformVelocitiesForSelectedObjects(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
@@ -79,10 +83,9 @@ public:
     uint64_t getCurrentTimestep() const;
     void setCurrentTimestep(uint64_t value);
 
+    void setSimulationParameters(SimulationParameters const& parameters);
     void setSimulationParameters_async(SimulationParameters const& parameters);
-    void setSimulationParametersSpots_async(SimulationParametersSpots const& spots);
     void setGpuSettings_async(GpuSettings const& gpuSettings);
-    void setFlowFieldSettings_async(FlowFieldSettings const& flowFieldSettings);
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
 
@@ -92,29 +95,39 @@ public:
     void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
     void removeSelection();
     void updateSelection();
-    void shallowUpdateSelectedEntities(ShallowUpdateSelectionData const& updateData);
-    void colorSelectedEntities(unsigned char color, bool includeClusters);
-    void reconnectSelectedEntities();
+    void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData);
+    void colorSelectedObjects(unsigned char color, bool includeClusters);
+    void reconnectSelectedObjects();
+    void setDetached(bool value);
 
     void runThreadLoop();
     void runSimulation();
     void pauseSimulation();
     bool isSimulationRunning() const;
 
+    //for tests
+    void testOnly_mutate(uint64_t cellId, MutationType mutationType);
+
 private:
-    DataAccessTO provideTO(); 
-    void resetProcessMonitorData();
-    void updateMonitorDataIntern(bool afterMinDuration = false);
+    DataTO provideTO(); 
+    void resetTimeIntervalStatistics();
+    void updateStatistics(bool afterMinDuration = false);
     void processJobs();
 
+    void syncSimulationWithRenderingIfDesired();
     void waitAndAllowAccess(std::chrono::microseconds const& duration);
     void measureTPS();
     void slowdownTPS();
 
     CudaSimulationFacade _cudaSimulation;
 
+    //settings
+    Settings _settings;
+
     //sync
-    std::atomic<int> _accessState{0};    //0 = worker thread has access, 1 = require access from other thread, 2 = access granted to other thread
+    std::atomic<bool> _syncSimulationWithRendering{false};
+    std::atomic<int> _syncSimulationWithRenderingRatio{2};
+    std::atomic<int> _accessState{0};  //0 = worker thread has access, 1 = require access from other thread, 2 = access granted to other thread
     std::atomic<bool> _isSimulationRunning{false};
     std::atomic<bool> _isShutdown{false};
     ExceptionData _exceptionData;
@@ -122,9 +135,7 @@ private:
     //async jobs
     mutable std::mutex _mutexForAsyncJobs;
     std::optional<SimulationParameters> _updateSimulationParametersJob;
-    std::optional<SimulationParametersSpots> _updateSimulationParametersSpotsJob;
     std::optional<GpuSettings> _updateGpuSettingsJob;
-    std::optional<FlowFieldSettings> _flowFieldSettings;
     std::optional<GLuint> _imageResourceToRegister;
 
     struct ApplyForceJob
@@ -144,14 +155,11 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _slowDownTimepoint;
     std::optional<std::chrono::microseconds> _slowDownOvershot;
   
-    //settings
-    Settings _settings;
-
     //statistics data
-    std::optional<std::chrono::steady_clock::time_point> _lastMonitorUpdate;
+    std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
     mutable std::mutex _mutexForStatistics;
-    MonitorData _lastStatistics;
-    int _monitorCounter = 0;
+    StatisticsData _lastStatistics;
+    int _statisticsCounter = 0;
 
     //internals
     void* _cudaResource;

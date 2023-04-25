@@ -4,19 +4,17 @@
 
 #include "Definitions.cuh"
 #include "Macros.cuh"
-#include "SimulationKernels.cuh"
 
 class _SimulationKernelsLauncher
 {
 public:
     _SimulationKernelsLauncher();
 
-    void calcTimestep(Settings const& settings, SimulationData const& simulationData, SimulationResult const& result);
+    void calcTimestep(Settings const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
 
 private:
     bool isRigidityUpdateEnabled(Settings const& settings) const;
 
     GarbageCollectorKernelsLauncher _garbageCollector;
-    int _counter = 0;
 };
 

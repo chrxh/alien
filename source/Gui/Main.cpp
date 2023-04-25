@@ -9,8 +9,6 @@
 #include "SimpleLogger.h"
 #include "FileLogger.h"
 
-#include <boost/optional.hpp>
-
 int main(int, char**)
 {
     SimpleLogger logger = std::make_shared<_SimpleLogger>();
@@ -38,6 +36,10 @@ int main(int, char**)
                   << std::endl
                   << "See log.txt for more detailed information."
                   << std::endl;
+    } catch (...) {
+        auto message = std::string("An unknown exception occured.");
+        log(Priority::Important, message);
+        std::cerr << message << std::endl << std::endl << "See log.txt for more detailed information." << std::endl;
     }
     return 0;
 }

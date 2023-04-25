@@ -1,30 +1,38 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
+#include "EngineInterface/SimulationParametersSpot.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/SimulationParametersSpots.h"
 #include "Definitions.h"
 #include "AlienWindow.h"
 
 class _SimulationParametersWindow : public _AlienWindow
 {
 public:
-    _SimulationParametersWindow(SimulationController const& simController);
+    _SimulationParametersWindow(SimulationController const& simController, RadiationSourcesWindow const& radiationSourcesWindow);
     ~_SimulationParametersWindow();
 
 private:
     void processIntern() override;
-    void processBackground() override;
 
     SimulationParametersSpot createSpot(SimulationParameters const& simParameters, int index);
+    void createDefaultSpotData(SimulationParametersSpot& spot);
 
+    void processToolbar();
     void processBase(SimulationParameters& simParameters, SimulationParameters const& origSimParameters);
-    void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot);
+    void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot, SimulationParameters const& parameters);
+
+    void onOpenParameters();
+    void onSaveParameters();
+
+    void validationAndCorrection(SimulationParameters& parameters) const;
+    void validationAndCorrection(SimulationParametersSpot& spot) const;
 
     SimulationController _simController;
-    SimulationParametersChanger _simulationParametersChanger;
+    RadiationSourcesWindow _radiationSourcesWindow;
 
     uint32_t _savedPalette[32] = {};
     uint32_t _backupColor;
-    bool _changeAutomatically = false;
+    std::string _startingPath;
+    std::optional<SimulationParameters> _copiedParameters;
 };

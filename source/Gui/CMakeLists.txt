@@ -13,13 +13,16 @@ PUBLIC
     AutosaveController.h
     BrowserWindow.cpp
     BrowserWindow.h
-    ColorizeDialog.cpp
-    ColorizeDialog.h
+    CellFunctionStrings.h
+    CollectedStatisticsData.cpp
+    CollectedStatisticsData.h
     CreateUserDialog.cpp
     CreateUserDialog.h
     CreatorWindow.cpp
     CreatorWindow.h
     Definitions.h
+    DelayedExecutionController.cpp
+    DelayedExecutionController.h
     DeleteUserDialog.cpp
     DeleteUserDialog.h
     DisplaySettingsDialog.cpp
@@ -32,12 +35,12 @@ PUBLIC
     ExportStatisticsDialog.h
     FileLogger.cpp
     FileLogger.h
-    FlowGeneratorWindow.cpp
-    FlowGeneratorWindow.h
     FpsController.cpp
     FpsController.h
-    GenericOpenFileDialog.cpp
-    GenericOpenFileDialog.h
+    GenericFileDialogs.cpp
+    GenericFileDialogs.h
+    GenomeEditorWindow.cpp
+    GenomeEditorWindow.h
     GettingStartedWindow.cpp
     GettingStartedWindow.h
     GlobalSettings.cpp
@@ -55,6 +58,8 @@ PUBLIC
     Main.cpp
     MainWindow.cpp
     MainWindow.h
+    MassOperationsDialog.cpp
+    MassOperationsDialog.h
     MessageDialog.cpp
     MessageDialog.h
     ModeController.cpp
@@ -75,12 +80,14 @@ PUBLIC
     OpenPatternDialog.h
     OpenSimulationDialog.cpp
     OpenSimulationDialog.h
-    OpenSymbolsDialog.cpp
-    OpenSymbolsDialog.h
+    OverlayMessageController.cpp
+    OverlayMessageController.h
     PatternAnalysisDialog.cpp
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
+    RadiationSourcesWindow.cpp
+    RadiationSourcesWindow.h
     RemoteSimulationData.cpp
     RemoteSimulationData.h
     RemoteSimulationDataParser.cpp
@@ -91,8 +98,6 @@ PUBLIC
     SavePatternDialog.h
     SaveSimulationDialog.cpp
     SaveSimulationDialog.h
-    SaveSymbolsDialog.cpp
-    SaveSymbolsDialog.h
     SelectionWindow.cpp
     SelectionWindow.h
     Shader.cpp
@@ -101,10 +106,6 @@ PUBLIC
     ShaderWindow.h
     SimpleLogger.cpp
     SimpleLogger.h
-    SimulationParametersCalculator.cpp
-    SimulationParametersCalculator.h
-    SimulationParametersChanger.cpp
-    SimulationParametersChanger.h
     SimulationParametersWindow.cpp
     SimulationParametersWindow.h
     SimulationScrollbar.cpp
@@ -115,14 +116,10 @@ PUBLIC
     SpatialControlWindow.h
     StartupController.cpp
     StartupController.h
-    StatisticsHistory.cpp
-    StatisticsHistory.h
     StatisticsWindow.cpp
     StatisticsWindow.h
     StyleRepository.cpp
     StyleRepository.h
-    SymbolsWindow.cpp
-    SymbolsWindow.h
     TemporalControlWindow.cpp
     TemporalControlWindow.h
     UiController.cpp
@@ -150,3 +147,7 @@ target_link_libraries(alien implot::implot)
 target_link_libraries(alien glfw)
 target_link_libraries(alien glad::glad)
 target_link_libraries(alien OpenSSL::SSL OpenSSL::Crypto)
+
+if (MSVC)
+    target_compile_options(alien PRIVATE "/MP")
+endif()

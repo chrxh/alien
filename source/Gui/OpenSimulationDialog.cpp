@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <ImFileDialog.h>
 
+#include "DelayedExecutionController.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 #include "StatisticsWindow.h"
@@ -10,6 +11,7 @@
 #include "TemporalControlWindow.h"
 #include "GlobalSettings.h"
 #include "MessageDialog.h"
+#include "OverlayMessageController.h"
 
 _OpenSimulationDialog::_OpenSimulationDialog(
     SimulationController const& simController,
@@ -45,19 +47,23 @@ void _OpenSimulationDialog::process()
 
         DeserializedSimulation deserializedData;
         if (Serializer::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
-            _simController->closeSimulation();
-            _statisticsWindow->reset();
+            printOverlayMessage("Loading ...");
+            delayedExecution([=, this] {
+                _simController->closeSimulation();
+                _statisticsWindow->reset();
 
-            _simController->newSimulation(
-                deserializedData.timestep, deserializedData.settings, deserializedData.symbolMap);
-            _simController->setClusteredSimulationData(deserializedData.content);
-            _viewport->setCenterInWorldPos(
-                {toFloat(deserializedData.settings.generalSettings.worldSizeX) / 2,
-                 toFloat(deserializedData.settings.generalSettings.worldSizeY) / 2});
-            _viewport->setZoomFactor(2.0f);
-            _temporalControlWindow->onSnapshot();
+                _simController->newSimulation(
+                    deserializedData.auxiliaryData.timestep,
+                    deserializedData.auxiliaryData.generalSettings,
+                    deserializedData.auxiliaryData.simulationParameters);
+                _simController->setClusteredSimulationData(deserializedData.mainData);
+                _viewport->setCenterInWorldPos(deserializedData.auxiliaryData.center);
+                _viewport->setZoomFactor(deserializedData.auxiliaryData.zoom);
+                _temporalControlWindow->onSnapshot();
+                printOverlayMessage(firstFilename.filename().string());
+            });
         } else {
-            MessageDialog::getInstance().show("Open simulation", "The selected file could not be opened.");
+            printMessage("Open simulation", "The selected file could not be opened.");
         }
     }
     ifd::FileDialog::Instance().Close();

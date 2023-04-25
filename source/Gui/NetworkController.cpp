@@ -210,14 +210,16 @@ bool _NetworkController::setNewPassword(std::string const& userName, std::string
     return parseBoolResult(result->body);
 }
 
-bool _NetworkController::getRemoteSimulationDataList(std::vector<RemoteSimulationData>& result, bool withRetry) const
+bool _NetworkController::getSimulationDataList(std::vector<RemoteSimulationData>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get simulation list");
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
-    auto postResult = executeRequest([&] { return client.Get("/alien-server/getsimulationinfo.php"); }, withRetry);
+    httplib::Params params;
+    params.emplace("version", Const::ProgramVersion);
+    auto postResult = executeRequest([&] { return client.Post("/alien-server/getversionedsimulationlist.php", params); }, withRetry);
 
     try {
         std::stringstream stream(postResult->body);
@@ -311,9 +313,8 @@ bool _NetworkController::uploadSimulation(
     std::string const& description,
     IntVector2D const& size,
     int particles,
-    std::string const& content,
-    std::string const& settings,
-    std::string const& symbolMap)
+    std::string const& mainData,
+    std::string const& auxiliaryData)
 {
     log(Priority::Important, "network: upload simulation with name='" + simulationName + "'");
 
@@ -329,9 +330,9 @@ bool _NetworkController::uploadSimulation(
         {"height", std::to_string(size.y), "", ""},
         {"particles", std::to_string(particles), "", ""},
         {"version", Const::ProgramVersion, "", ""},
-        {"content", content, "", "application/octet-stream"},
-        {"settings", settings, "", ""},
-        {"symbolMap", symbolMap, "", ""},
+        {"content", mainData, "", "application/octet-stream"},
+        {"settings", auxiliaryData, "", ""},
+        {"symbolMap", "", "", ""},
     };
 
     auto result = executeRequest([&] { return client.Post("/alien-server/uploadsimulation.php", items); });
@@ -339,7 +340,7 @@ bool _NetworkController::uploadSimulation(
     return parseBoolResult(result->body);
 }
 
-bool _NetworkController::downloadSimulation(std::string& content, std::string& settings, std::string& symbolMap, std::string const& simId)
+bool _NetworkController::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string const& simId)
 {
     log(Priority::Important, "network: download simulation with id=" + simId);
 
@@ -352,15 +353,11 @@ bool _NetworkController::downloadSimulation(std::string& content, std::string& s
     try {
         {
             auto result = executeRequest([&] { return client.Get("/alien-server/downloadcontent.php", params, {}); });
-            content = result->body;
+            mainData = result->body;
         }
         {
             auto result = executeRequest([&] { return client.Get("/alien-server/downloadsettings.php", params, {}); });
-            settings = result->body;
-        }
-        {
-            auto result = executeRequest([&] { return client.Get("/alien-server/downloadsymbolmap.php", params, {}); });
-            symbolMap = result->body;
+            auxiliaryData = result->body;
         }
         return true;
     } catch (...) {

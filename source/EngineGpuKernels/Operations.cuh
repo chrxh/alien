@@ -3,64 +3,49 @@
 #include "Base.cuh"
 #include "Definitions.cuh"
 
-struct AddConnectionOperation {
+struct AddConnectionPairOperation {
     bool addTokens;
     Cell* cell;
     Cell* otherCell;
 };
 
-struct DelConnectionsOperation
+struct DelAllConnectionsOperation
 {
-    Cell* cell;
 };
 
 struct DelConnectionOperation
 {
-    Cell* cell1;
-    Cell* cell2;
+    Cell* connectedCell;
 };
 
 struct DelCellOperation
 {
-    Cell* cell;
-    int cellIndex;
-};
-
-struct DelCellAndConnectionOperations
-{
-    Cell* cell;
-    int cellIndex;
+    uint64_t cellIndex;
 };
 
 union StructureOperationData
 {
-    AddConnectionOperation addConnectionOperation;
-    DelConnectionsOperation delConnectionsOperation;
-    DelConnectionOperation delConnectionOperation;
-    DelCellOperation delCellOperation;
-    DelCellAndConnectionOperations delCellAndConnectionOperation;
+    AddConnectionPairOperation addConnection;
+    DelAllConnectionsOperation delAllConnections;
+    DelConnectionOperation delConnection;
+    DelCellOperation delCell;
 };
 
 struct StructuralOperation
 {
-    enum class Type
+    enum class Type : int
     {
-        AddConnections,
-        DelConnections,
+        AddConnectionPair,
+        DelAllConnections,
         DelConnection,
         DelCell,
-        DelCellAndConnections,
     };
     Type type;
     StructureOperationData data;
+    int nextOperationIndex; //linked list, = -1 end
 };
 
-struct SensorOperation
+struct CellFunctionOperation
 {
-    Token* token;
-};
-
-struct NeuralNetOperation
-{
-    Token* token;
+    Cell* cell;
 };

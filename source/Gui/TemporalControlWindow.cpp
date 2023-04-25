@@ -6,13 +6,18 @@
 
 #include "Base/Definitions.h"
 #include "Base/StringHelper.h"
-#include "Base/Resources.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "StyleRepository.h"
 #include "StatisticsWindow.h"
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
+#include "OverlayMessageController.h"
+
+namespace
+{
+    auto const LeftColumnWidth = 180.0f;
+}
 
 _TemporalControlWindow::_TemporalControlWindow(
     SimulationController const& simController,
@@ -36,9 +41,13 @@ void _TemporalControlWindow::processIntern()
     ImGui::SameLine();
     processPauseButton();
     ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+    ImGui::SameLine();
     processStepBackwardButton();
     ImGui::SameLine();
     processStepForwardButton();
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
     ImGui::SameLine();
     processSnapshotButton();
     ImGui::SameLine();
@@ -81,16 +90,29 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
 void _TemporalControlWindow::processTpsRestriction()
 {
     AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Slow down"), _slowDown);
-    ImGui::SameLine();
+    ImGui::SameLine(contentScale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
     ImGui::BeginDisabled(!_slowDown);
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-    ImGui::SliderInt("", &_tpsRestriction, 1, 400, "%d TPS", ImGuiSliderFlags_Logarithmic);
+    ImGui::SliderInt("", &_tpsRestriction, 1, 1000, "%d TPS", ImGuiSliderFlags_Logarithmic);
     if (_slowDown) {
         _simController->setTpsRestriction(_tpsRestriction);
     } else {
         _simController->setTpsRestriction(std::nullopt);
     }
     ImGui::PopItemWidth();
+    ImGui::EndDisabled();
+
+    auto syncSimulationWithRendering = _simController->isSyncSimulationWithRendering();
+    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Sync with rendering"), syncSimulationWithRendering)) {
+        _simController->setSyncSimulationWithRendering(syncSimulationWithRendering);
+    }
+
+    ImGui::BeginDisabled(!syncSimulationWithRendering);
+    ImGui::SameLine(contentScale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
+    auto syncSimulationWithRenderingRatio = _simController->getSyncSimulationWithRenderingRatio();
+    if (AlienImGui::SliderInt(AlienImGui::SliderIntParameters().textWidth(0).min(1).max(40).logarithmic(true).format("%d TPS : FPS"), &syncSimulationWithRenderingRatio)) {
+        _simController->setSyncSimulationWithRenderingRatio(syncSimulationWithRenderingRatio);
+    }
     ImGui::EndDisabled();
 }
 
@@ -143,6 +165,7 @@ void _TemporalControlWindow::processSnapshotButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_CAMERA)) {
         onSnapshot();
+        printOverlayMessage("Snapshot taken");
     }
 }
 
@@ -153,7 +176,9 @@ void _TemporalControlWindow::processRestoreButton()
         _statisticsWindow->reset();
         _simController->setCurrentTimestep(_snapshot->timestep);
         _simController->setSimulationData(_snapshot->data);
+        _simController->removeSelection();
         _history.clear();
+        printOverlayMessage("Snapshot restored");   //flashback?
     }
     ImGui::EndDisabled();
 }

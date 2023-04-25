@@ -83,7 +83,7 @@ namespace ifd {
 		bool m_isMultiselect;
 		bool m_isOpen;
 		uint8_t m_type;
-		char m_inputTextbox[1024];
+		char8_t m_inputTextbox[1024];
 		char m_pathBuffer[1024];
 		char m_newEntryBuffer[1024];
 		char m_searchBuffer[128];
@@ -97,7 +97,7 @@ namespace ifd {
 		void m_select(const std::filesystem::path& path, bool isCtrlDown = false);
 
 		std::vector<std::filesystem::path> m_result;
-		bool m_finalize(const std::string& filename = "");
+		bool m_finalize(const std::u8string& filename = u8"");
 
 		std::string m_filter;
 		std::vector<std::vector<std::string>> m_filterExtensions;
@@ -105,8 +105,8 @@ namespace ifd {
 		void m_parseFilter(const std::string& filter);
 
 		std::vector<int> m_iconIndices;
-		std::vector<std::string> m_iconFilepaths; // m_iconIndices[x] <-> m_iconFilepaths[x]
-		std::unordered_map<std::string, void*> m_icons;
+		std::vector<std::u8string> m_iconFilepaths; // m_iconIndices[x] <-> m_iconFilepaths[x]
+		std::unordered_map<std::u8string, void*> m_icons;
 		void* m_getIcon(const std::filesystem::path& path);
 		void m_clearIcons();
 		void m_refreshIconPreview();

@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Base/Definitions.h"
-#include "Enums.h"
+#include "CellFunctionEnums.h"
 
 struct SimulationParameters;
 
@@ -23,5 +23,8 @@ struct Settings;
 class _SimulationController;
 using SimulationController = std::shared_ptr<_SimulationController>;
 
-struct MonitorData;
+struct TimelineStatistics;
+struct HistogramData;
+struct StatisticsData;
+
 class SpaceCalculator;

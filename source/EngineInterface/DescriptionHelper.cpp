@@ -1,6 +1,8 @@
 #include "DescriptionHelper.h"
 
+#include <cmath>
 #include <boost/range/adaptor/indexed.hpp>
+#include <boost/range/adaptor/map.hpp>
 
 #include "Base/NumberGenerator.h"
 #include "Base/Math.h"
@@ -15,8 +17,9 @@ DataDescription DescriptionHelper::createRect(CreateRectParameters const& parame
                                .setId(NumberGenerator::getInstance().getId())
                                .setPos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
                                .setEnergy(parameters._energy)
-                               .setMaxConnections(parameters._maxConnection)
-                               .setMetadata(CellMetadata().setColor(parameters._color))
+                               .setStiffness(parameters._stiffness)
+                               .setMaxConnections(parameters._maxConnections)
+                               .setColor(parameters._color)
                                .setBarrier(parameters._barrier));
         }
     }
@@ -25,6 +28,89 @@ DataDescription DescriptionHelper::createRect(CreateRectParameters const& parame
         removeStickiness(result);
     }
     result.setCenter(parameters._center);
+    return result;
+}
+
+DataDescription DescriptionHelper::createHex(CreateHexParameters const& parameters)
+{
+    DataDescription result;
+    auto incY = sqrt(3.0) * parameters._cellDistance / 2.0;
+    for (int j = 0; j < parameters._layers; ++j) {
+        for (int i = -(parameters._layers - 1); i < parameters._layers - j; ++i) {
+
+            //create cell: upper layer
+            result.addCell(CellDescription()
+                               .setId(NumberGenerator::getInstance().getId())
+                               .setEnergy(parameters._energy)
+                               .setStiffness(parameters._stiffness)
+                               .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
+                               .setMaxConnections(parameters._maxConnections)
+                               .setColor(parameters._color)
+                               .setBarrier(parameters._barrier));
+
+            //create cell: under layer (except for 0-layer)
+            if (j > 0) {
+                result.addCell(CellDescription()
+                                 .setId(NumberGenerator::getInstance().getId())
+                                   .setEnergy(parameters._energy)
+                                   .setStiffness(parameters._stiffness)
+                                   .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
+                                   .setMaxConnections(parameters._maxConnections)
+                                   .setColor(parameters._color)
+                                   .setBarrier(parameters._barrier));
+            }
+        }
+    }
+
+    reconnectCells(result, parameters._cellDistance * 1.5f);
+    if (parameters._removeStickiness) {
+        removeStickiness(result);
+    }
+    result.setCenter(parameters._center);
+
+    return result;
+}
+
+DataDescription DescriptionHelper::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters)
+{
+    DataDescription result;
+
+    if (parameters._radius <= 1 + NEAR_ZERO) {
+        result.addCell(CellDescription()
+                           .setId(NumberGenerator::getInstance().getId())
+                           .setPos(parameters._center)
+                           .setEnergy(parameters._energy)
+                           .setStiffness(parameters._stiffness)
+                           .setMaxConnections(parameters._maxConnections)
+                           .setColor(parameters._color)
+                           .setBarrier(parameters._barrier));
+        return result;
+    }
+
+    auto centerRow = toInt(parameters._center.y / parameters._cellDistance);
+    auto radiusRow = toInt(parameters._radius / parameters._cellDistance);
+
+    auto startYRow = centerRow - radiusRow;
+    auto radiusRounded = radiusRow * parameters._cellDistance;
+    for (float dx = -radiusRounded; dx <= radiusRounded + NEAR_ZERO; dx += parameters._cellDistance) {
+        int row = 0;
+        for (float dy = -radiusRounded; dy <= radiusRounded + NEAR_ZERO; dy += parameters._cellDistance, ++row) {
+            float evenRowIncrement = (startYRow + row) % 2 == 0 ? parameters._cellDistance / 2 : 0.0f;
+            auto dxMod = dx + evenRowIncrement;
+            if (dxMod * dxMod + dy * dy > radiusRounded * radiusRounded + NEAR_ZERO) {
+                continue;
+            }
+            result.addCell(CellDescription()
+                               .setId(NumberGenerator::getInstance().getId())
+                               .setEnergy(parameters._energy)
+                               .setStiffness(parameters._stiffness)
+                               .setPos({parameters._center.x + dxMod, parameters._center.y + dy})
+                               .setMaxConnections(parameters._maxConnections)
+                               .setColor(parameters._color)
+                               .setBarrier(parameters._barrier));
+
+        }
+    }
     return result;
 }
 
@@ -132,14 +218,14 @@ DataDescription DescriptionHelper::randomMultiply(
 {
     overlappingCheckSuccessful = true;
     SpaceCalculator spaceCalculator(worldSize);
-    std::unordered_map<IntVector2D, std::vector<int>> cellIndicesByPos;
+    std::unordered_map<IntVector2D, std::vector<RealVector2D>> cellPosBySlot;
 
     //create map for overlapping check
     if (parameters._overlappingCheck) {
         int index = 0;
         for (auto const& cell : existentData.cells) {
             auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell.pos));
-            cellIndicesByPos[intPos].emplace_back(index);
+            cellPosBySlot[intPos].emplace_back(cell.pos);
             ++index;
         }
     }
@@ -167,7 +253,7 @@ DataDescription DescriptionHelper::randomMultiply(
             if (parameters._overlappingCheck) {
                 for (auto const& cell : copy.cells) {
                     auto pos = spaceCalculator.getCorrectedPosition(cell.pos);
-                    if (isCellPresent(existentData, cellIndicesByPos, spaceCalculator, pos)) {
+                    if (isCellPresent(cellPosBySlot, spaceCalculator, pos, 2.0f)) {
                         overlapping = true;
                     }
                 }
@@ -187,12 +273,29 @@ DataDescription DescriptionHelper::randomMultiply(
                 auto index = toInt(existentData.cells.size());
                 existentData.cells.emplace_back(cell);
                 auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell.pos));
-                cellIndicesByPos[intPos].emplace_back(index);
+                cellPosBySlot[intPos].emplace_back(cell.pos);
             }
         }
     }
 
     return result;
+}
+
+void DescriptionHelper::addIfSpaceAvailable(
+    DataDescription& result,
+    Occupancy& cellOccupancy,
+    DataDescription const& toAdd,
+    float distance,
+    IntVector2D const& worldSize)
+{
+    SpaceCalculator space(worldSize);
+
+    for (auto const& cell : toAdd.cells) {
+        if (!isCellPresent(cellOccupancy, space, cell.pos, distance)) {
+            result.addCell(cell);
+            cellOccupancy[toIntVector2D(cell.pos)].emplace_back(cell.pos);
+        }
+    }
 }
 
 void DescriptionHelper::reconnectCells(DataDescription& data, float maxDistance)
@@ -216,7 +319,7 @@ void DescriptionHelper::reconnectCells(DataDescription& data, float maxDistance)
             auto const& nearbyCell = data.cells.at(nearbyCellIndex);
             if (cell.id != nearbyCell.id && cell.connections.size() < cell.maxConnections && nearbyCell.connections.size() < nearbyCell.maxConnections
                 && !cell.isConnectedTo(nearbyCell.id)) {
-                data.addConnection(cell.id, nearbyCell.id, cache);
+                data.addConnection(cell.id, nearbyCell.id, &cache);
             }
         }
     }
@@ -231,7 +334,6 @@ void DescriptionHelper::removeStickiness(DataDescription& data)
 
 void DescriptionHelper::correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize)
 {
-//     SpaceCalculator spaceCalculator(worldSize);
     auto threshold = std::min(worldSize.x, worldSize.y) /3;
     std::unordered_map<uint64_t, CellDescription&> cellById;
     for (auto& cluster : data.clusters) {
@@ -253,22 +355,45 @@ void DescriptionHelper::correctConnections(ClusteredDataDescription& data, IntVe
                     newConnections.emplace_back(connection);
                 }
             }
+            if (angleToAdd > NEAR_ZERO && !newConnections.empty()) {
+                newConnections.front().angleFromPrevious += angleToAdd;
+            }
             cell.connections = newConnections;
         }
     }
 }
 
-void DescriptionHelper::colorize(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
+void DescriptionHelper::randomizeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
 {
     for (auto& cluster : data.clusters) {
         auto color = colorCodes[NumberGenerator::getInstance().getRandomInt(toInt(colorCodes.size()))];
         for (auto& cell : cluster.cells) {
-            cell.metadata.color = color;
+            cell.color = color;
         }
     }
 }
 
-void DescriptionHelper::generateBranchNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers)
+void DescriptionHelper::randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy)
+{
+    for (auto& cluster : data.clusters) {
+        auto energy = NumberGenerator::getInstance().getRandomReal(minEnergy, maxEnergy);
+        for (auto& cell : cluster.cells) {
+            cell.energy = energy;
+        }
+    }
+}
+
+void DescriptionHelper::randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge)
+{
+    for (auto& cluster : data.clusters) {
+        auto age = NumberGenerator::getInstance().getRandomReal(minAge, maxAge);
+        for (auto& cell : cluster.cells) {
+            cell.age = age;
+        }
+    }
+}
+
+void DescriptionHelper::generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers)
 {
     std::unordered_map<uint64_t, int> idToIndexMap;
     for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {
@@ -292,7 +417,7 @@ void DescriptionHelper::generateBranchNumbers(DataDescription& data, std::unorde
             auto const& lastCellId = cellIdPath.back();
 
             auto& cell = data.cells.at(idToIndexMap.at(lastCellId));
-            cell.setTokenBranchNumber((cellIdPath.size() - 1) % maxBranchNumbers);
+            cell.setExecutionOrderNumber((cellIdPath.size() - 1) % maxBranchNumbers);
         }
 
         //modify paths
@@ -363,40 +488,36 @@ void DescriptionHelper::removeMetadata(DataDescription& data)
 
 void DescriptionHelper::removeMetadata(CellDescription& cell)
 {
-    cell.metadata.computerSourcecode.clear();
     cell.metadata.description.clear();
     cell.metadata.name.clear();
 }
 
-bool DescriptionHelper::isCellPresent(
-    DataDescription const& data,
-    std::unordered_map<IntVector2D, std::vector<int>> const& cellIndicesByPos,
-    SpaceCalculator const& spaceCalculator,
-    RealVector2D const& posToCheck)
+bool DescriptionHelper::isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance)
 {
     auto intPos = toIntVector2D(posToCheck);
 
-    auto getMatchingCellIndices = [&cellIndicesByPos](IntVector2D const& intPos) {
-        auto findResult = cellIndicesByPos.find(intPos);
-        if (findResult != cellIndicesByPos.end()) {
+    auto getMatchingSlots = [&cellPosBySlot](IntVector2D const& intPos) {
+        auto findResult = cellPosBySlot.find(intPos);
+        if (findResult != cellPosBySlot.end()) {
             return findResult->second;
         }
-        return std::vector<int>{};
+        return std::vector<RealVector2D>{};
     };
 
-    auto checkCells = [&](std::vector<int> const& cellIndices) {
-        for (auto const& cellIndex : cellIndices) {
-            auto otherPos = spaceCalculator.getCorrectedPosition(data.cells.at(cellIndex).pos);
-            if (Math::length(posToCheck - otherPos) < 2.0f) {
+    auto isOccupied = [&](std::vector<RealVector2D> const& cellPositions) {
+        for (auto const& cellPos : cellPositions) {
+            auto otherPos = spaceCalculator.getCorrectedPosition(cellPos);
+            if (Math::length(posToCheck - otherPos) < distance) {
                 return true;
             }
         }
         return false;
     };
 
-    for (int dx = -1; dx <= 1; ++dx) {
-        for (int dy = -1; dy <= 1; ++dy) {
-            if (checkCells(getMatchingCellIndices({intPos.x + dx, intPos.y + dy}))) {
+    auto distanceInt = toInt(ceilf(distance));
+    for (int dx = -distanceInt; dx <= distanceInt; ++dx) {
+        for (int dy = -distanceInt; dy <= distanceInt; ++dy) {
+            if (isOccupied(getMatchingSlots({intPos.x + dx, intPos.y + dy}))) {
                 return true;
             }
         }
@@ -420,7 +541,7 @@ RealVector2D DescriptionHelper::getPos(CellOrParticleDescription const& entity)
     return std::get<ParticleDescription>(entity).pos;
 }
 
-std::vector<CellOrParticleDescription> DescriptionHelper::getEntities(
+std::vector<CellOrParticleDescription> DescriptionHelper::getObjects(
     DataDescription const& data)
 {
     std::vector<CellOrParticleDescription> result;
@@ -429,6 +550,65 @@ std::vector<CellOrParticleDescription> DescriptionHelper::getEntities(
     }
     for (auto const& cell : data.cells) {
         result.emplace_back(cell);
+    }
+    return result;
+}
+
+namespace
+{
+    template <typename T1, typename T2>
+    bool contains(std::vector<T1> const& a, std::vector<T2> const& b)
+    {
+        for (auto i = a.begin(), y = a.end(); i != y; ++i) {
+            bool match = true;
+
+            auto ii = i;
+            for (auto j = b.begin(), z = b.end(); j != z; ++j) {
+                if (ii == a.end() || *j != *ii) {
+                    match = false;
+                    break;
+                }
+                ii++;
+            }
+            if (match) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+std::vector<CellOrParticleDescription> DescriptionHelper::getConstructorToMainGenomes(DataDescription const& data)
+{
+    std::map<std::vector<uint8_t>, size_t> genomeToCellIndex;
+    for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {
+        if (cell.getCellFunctionType() == CellFunction_Constructor) {
+            auto const& genome = std::get<ConstructorDescription>(*cell.cellFunction).genome;
+            if (!genomeToCellIndex.contains(genome) || cell.livingState != LivingState_UnderConstruction) {
+                genomeToCellIndex[genome] = index;
+            }
+        }
+    }
+    std::vector<std::pair<std::vector<uint8_t>, size_t>> genomeAndCellIndex;
+    for (auto const& [genome, index] : genomeToCellIndex) {
+        genomeAndCellIndex.emplace_back(std::make_pair(genome, index));
+    }
+    std::ranges::sort(genomeAndCellIndex, [](auto const& element1, auto const& element2) { return element1.first.size() > element2.first.size(); });
+
+    std::vector<CellOrParticleDescription> result;
+    for (auto it = genomeAndCellIndex.begin(); it != genomeAndCellIndex.end(); ++it) {
+        bool alreadyContained = false;
+        for (auto it2 = genomeAndCellIndex.begin(); it2 != it; ++it2) {
+            auto const& genome1 = it->first;
+            auto const& genome2 = it2->first;
+            if (contains(genome2, genome1)) {
+                alreadyContained = true;
+                break;
+            }
+        }
+        if (!alreadyContained) {
+            result.emplace_back(data.cells.at(it->second));
+        }
     }
     return result;
 }

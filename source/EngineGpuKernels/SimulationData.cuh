@@ -2,48 +2,50 @@
 
 #include <atomic>
 
-#include "Base.cuh"
-#include "CellFunctionData.cuh"
-#include "Definitions.cuh"
+#include "EngineInterface/CellFunctionEnums.h"
 #include "EngineInterface/GpuSettings.h"
-#include "Entities.cuh"
+
+#include "Base.cuh"
+#include "CudaNumberGenerator.cuh"
+#include "ProprocessedCellFunctionData.cuh"
+#include "Definitions.cuh"
+#include "Objects.cuh"
 #include "Map.cuh"
 #include "Operations.cuh"
-#include "Token.cuh"
 
 struct SimulationData
 {
     //maps
+    uint64_t timestep;
     int2 worldSize;
     CellMap cellMap;
     ParticleMap particleMap;
 
     //objects
-    Entities entities;
-    Entities entitiesForCleanup;
+    Objects objects;
+    Objects tempObjects;
 
     //additional data for cell functions
+    double* residualEnergy;
     RawMemory processMemory;
-    CellFunctionData cellFunctionData;
+    PreprocessedCellFunctionData preprocessedCellFunctionData;
 
     //scheduled operations
-    TempArray<StructuralOperation> structuralOperations;
-    TempArray<SensorOperation> sensorOperations;
-    TempArray<NeuralNetOperation> neuralNetOperations;
+    UnmanagedArray<StructuralOperation> structuralOperations;
+    UnmanagedArray<CellFunctionOperation> cellFunctionOperations[CellFunction_WithoutNoneCount];
 
     //number generators
     CudaNumberGenerator numberGen1;
     CudaNumberGenerator numberGen2;  //second random number generator used in combination with the first generator for evaluating very low probabilities
 
-    void init(int2 const& worldSize);
-    bool shouldResize(int additionalCells, int additionalParticles, int additionalTokens);
-    void resizeEntitiesForCleanup(int additionalCells, int additionalParticles, int additionalTokens);
-    void resizeRemainings();
+    void init(int2 const& worldSize, uint64_t timestep);
+    bool shouldResize(ArraySizes const& additionals);
+    void resizeTargetObjects(ArraySizes const& additionals);
+    void resizeObjects();
     bool isEmpty();
     void free();
 
     __device__ void prepareForNextTimestep();
-    __device__ bool shouldResize();
 
 private:
     template <typename Entity>

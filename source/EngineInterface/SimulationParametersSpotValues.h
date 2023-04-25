@@ -1,26 +1,33 @@
 #pragma once
 
+#include "Constants.h"
+#include "Colors.h"
+
+/**
+ * NOTE: header is also included in kernel code
+ */
+
 struct SimulationParametersSpotValues
 {
     float friction = 0.001f;
     float rigidity = 0.0f;
-    float radiationFactor = 0.0002f;
+    ColorVector<float> radiationAbsorption = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    ColorVector<float> radiationCellAgeStrength = {0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f};
     float cellMaxForce = 0.8f;
-    float cellMinEnergy = 50.0f;
-
-    float cellBindingForce = 1.0f;
+    ColorVector<float> cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
     float cellFusionVelocity = 0.4f;
-    float cellMaxBindingEnergy = 500000.0f;
-
-    float tokenMutationRate = 0;
-    float cellMutationRate = 0;
-    int cellColorTransitionDuration[7] = {0, 0, 0, 0, 0, 0, 0};
-    int cellColorTransitionTargetColor[7] = {0, 1, 2, 3, 4, 5, 6};
-    int cellFunctionMinInvocations = 40000;
-    float cellFunctionInvocationDecayProb = 0;
-    float cellFunctionWeaponEnergyCost = 0.2f;
-    float cellFunctionWeaponColorTargetMismatchPenalty = 0.0f;
-    float cellFunctionWeaponFoodChainColorMatrix[7][7] = {
+    float cellMaxBindingEnergy = Infinity<float>::value;
+    ColorVector<int> cellColorTransitionDuration = {
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value};
+    ColorVector<int> cellColorTransitionTargetColor = {0, 1, 2, 3, 4, 5, 6};
+    ColorVector<float> cellFunctionAttackerEnergyCost = {0, 0, 0, 0, 0, 0, 0};
+    ColorMatrix<float> cellFunctionAttackerFoodChainColorMatrix = {
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
@@ -28,22 +35,85 @@ struct SimulationParametersSpotValues
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1}};
-    float cellFunctionWeaponGeometryDeviationExponent = 0.0f;
-    float cellFunctionWeaponConnectionsMismatchPenalty = 0.33f;
-    float cellFunctionWeaponTokenPenalty = 0.0f;
+
+    ColorVector<float> cellFunctionAttackerGeometryDeviationExponent = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionAttackerConnectionsMismatchPenalty = {0, 0, 0, 0, 0, 0, 0};
+
+    ColorVector<float> cellFunctionConstructorMutationNeuronDataProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationPropertiesProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationCellFunctionProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationStructureProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationInsertionProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationDeletionProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationTranslationProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationDuplicationProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationColorProbability = {0, 0, 0, 0, 0, 0, 0};
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {
-        return friction == other.friction && rigidity == other.rigidity && radiationFactor == other.radiationFactor
-            && cellMaxForce == other.cellMaxForce && cellMinEnergy == other.cellMinEnergy
-            && cellBindingForce == other.cellBindingForce && cellFusionVelocity == other.cellFusionVelocity
-            && tokenMutationRate == other.tokenMutationRate && cellMutationRate == other.cellMutationRate
-            && cellFunctionWeaponEnergyCost == other.cellFunctionWeaponEnergyCost && cellFunctionWeaponFoodChainColorMatrix == other.cellFunctionWeaponFoodChainColorMatrix
-            && cellFunctionWeaponColorTargetMismatchPenalty == other.cellFunctionWeaponColorTargetMismatchPenalty
-            && cellFunctionWeaponGeometryDeviationExponent == other.cellFunctionWeaponGeometryDeviationExponent
-            && cellMaxBindingEnergy == other.cellMaxBindingEnergy && cellFunctionMinInvocations == other.cellFunctionMinInvocations
-            && cellFunctionInvocationDecayProb == other.cellFunctionInvocationDecayProb
-            && cellFunctionWeaponTokenPenalty == other.cellFunctionWeaponTokenPenalty
-            && cellFunctionWeaponConnectionsMismatchPenalty == other.cellFunctionWeaponConnectionsMismatchPenalty;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            for (int j = 0; j < MAX_COLORS; ++j) {
+                if (cellFunctionAttackerFoodChainColorMatrix[i][j] != other.cellFunctionAttackerFoodChainColorMatrix[i][j]) {
+                    return false;
+                }
+            }
+            if (cellColorTransitionDuration[i] != other.cellColorTransitionDuration[i]) {
+                return false;
+            }
+            if (cellColorTransitionTargetColor[i] != other.cellColorTransitionTargetColor[i]) {
+                return false;
+            }
+        }
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            if (cellFunctionConstructorMutationStructureProbability[i] != other.cellFunctionConstructorMutationStructureProbability[i]) {
+                return false;
+            }
+            if (radiationAbsorption[i] != other.radiationAbsorption[i]) {
+                return false;
+            }
+            if (cellFunctionAttackerEnergyCost[i] != other.cellFunctionAttackerEnergyCost[i]) {
+                return false;
+            }
+            if (cellFunctionAttackerGeometryDeviationExponent[i] != other.cellFunctionAttackerGeometryDeviationExponent[i]) {
+                return false;
+            }
+            if (cellFunctionAttackerConnectionsMismatchPenalty[i] != other.cellFunctionAttackerConnectionsMismatchPenalty[i]) {
+                return false;
+            }
+            if (cellMinEnergy[i] != other.cellMinEnergy[i]) {
+                return false;
+            }
+            if (radiationCellAgeStrength[i] != other.radiationCellAgeStrength[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorMutationNeuronDataProbability[i] != other.cellFunctionConstructorMutationNeuronDataProbability[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorMutationPropertiesProbability[i] != other.cellFunctionConstructorMutationPropertiesProbability[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorMutationCellFunctionProbability[i] != other.cellFunctionConstructorMutationCellFunctionProbability[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorMutationInsertionProbability[i] != other.cellFunctionConstructorMutationInsertionProbability[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorMutationDeletionProbability[i] != other.cellFunctionConstructorMutationDeletionProbability[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorMutationTranslationProbability[i] != other.cellFunctionConstructorMutationTranslationProbability[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorMutationDuplicationProbability[i] != other.cellFunctionConstructorMutationDuplicationProbability[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorMutationColorProbability[i] != other.cellFunctionConstructorMutationColorProbability[i]) {
+                return false;
+            }
+        }
+        return friction == other.friction && rigidity == other.rigidity && cellMaxForce == other.cellMaxForce
+            && cellFusionVelocity == other.cellFusionVelocity
+            && cellMaxBindingEnergy == other.cellMaxBindingEnergy
+        ;
     }
 };
