@@ -260,7 +260,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             return true;
         });
 
-    //connect surrounding cells if possible
+    //assemble surrounding cell candidates
     Cell* otherCells[MAX_CELL_BONDS];
     int numOtherCells = 0;
     for (int i = 0; i < numOtherCellCandidates; ++i) {
@@ -276,7 +276,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         }
     }
     if (constructionData.numRequiredAdditionalConnections != -1) {
-        if (numOtherCells != constructionData.numRequiredAdditionalConnections) {
+        if (numOtherCells < constructionData.numRequiredAdditionalConnections) {
             return false;
         }
     }
@@ -337,6 +337,11 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             auto dist2 = data.cellMap.getDistance(cell2->absPos, newCellPos);
             return dist1 < dist2;
         });
+
+        if (constructionData.numRequiredAdditionalConnections != -1) {
+            //it is already ensured that numOtherCells is not less than constructionData.numRequiredAdditionalConnections
+            numOtherCells = constructionData.numRequiredAdditionalConnections;
+        }
 
         //connect surrounding cells if possible
         for (int i = 0; i < numOtherCells; ++i) {
