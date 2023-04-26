@@ -61,6 +61,7 @@ namespace
     auto constexpr Id_Constructor_ConstructionActivationTime = 6;
     auto constexpr Id_Constructor_CurrentGenomePos = 7;
     auto constexpr Id_Constructor_GenomeGeneration = 9;
+    auto constexpr Id_Constructor_GenomeInfo = 10;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -71,6 +72,7 @@ namespace
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
+    auto constexpr Id_Injector_GenomeInfo = 2;
 
     auto constexpr Id_Attacker_Mode = 0;
 
@@ -82,6 +84,8 @@ namespace
     auto constexpr Id_Sensor_Color = 2;
 
     auto constexpr Id_Transmitter_Mode = 0;
+
+    auto constexpr Id_GenomeInfo_Shape = 0;
 
     auto constexpr Id_CellGenome_ReferenceAngle = 1;
     auto constexpr Id_CellGenome_Energy = 7;
@@ -207,15 +211,29 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_ConstructorGenome_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
         loadSave<float>(task, auxiliaries, Id_ConstructorGenome_Stiffness, data.stiffness, defaultObject.stiffness);
         loadSave<int>(task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
+        if (task == SerializationTask::Save) {
+            auxiliaries[Id_Constructor_GenomeInfo] = true;
+        }
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-            ar(genomeData);
-            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
-                data.genome = MakeGenomeCopy();
+            auto hasGenomeInfo = auxiliaries.contains(Id_Constructor_GenomeInfo);
+            if (hasGenomeInfo) {
+                std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+                ar(genomeData);
+                if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                    data.genome = MakeGenomeCopy();
+                } else {
+                    data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                }
             } else {
-                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                std::variant<MakeGenomeCopy, std::vector<CellGenomeDescription>> genomeData;
+                ar(genomeData);
+                if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                    data.genome = MakeGenomeCopy();
+                } else {
+                    data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<std::vector<CellGenomeDescription>>(genomeData));
+                }
             }
         } else {
             std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
@@ -268,15 +286,29 @@ namespace cereal
         InjectorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_InjectorGenome_Mode, data.mode, defaultObject.mode);
+        if (task == SerializationTask::Save) {
+            auxiliaries[Id_Constructor_GenomeInfo] = true;
+        }
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-            ar(genomeData);
-            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
-                data.genome = MakeGenomeCopy();
+            auto hasGenomeInfo = auxiliaries.contains(Id_Constructor_GenomeInfo);
+            if (hasGenomeInfo) {
+                std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+                ar(genomeData);
+                if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                    data.genome = MakeGenomeCopy();
+                } else {
+                    data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                }
             } else {
-                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                std::variant<MakeGenomeCopy, std::vector<CellGenomeDescription>> genomeData;
+                ar(genomeData);
+                if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                    data.genome = MakeGenomeCopy();
+                } else {
+                    data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<std::vector<CellGenomeDescription>>(genomeData));
+                }
             }
         } else {
             std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
@@ -337,6 +369,22 @@ namespace cereal
     SPLIT_SERIALIZATION(CellGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, GenomeInfoDescription& data)
+    {
+        GenomeInfoDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Id_GenomeInfo_Shape, data.shape, defaultObject.shape);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(GenomeInfoDescription)
+
+    template <class Archive>
+    void serialize(Archive& ar, GenomeDescription& data)
+    {
+        ar(data.info, data.cells);
+    }
+
+    template <class Archive>
     void serialize(Archive& ar, CellMetadataDescription& data)
     {
         ar(data.name, data.description);
@@ -387,12 +435,22 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
         loadSave<int>(task, auxiliaries, Id_Constructor_CurrentGenomePos, data.currentGenomePos, defaultObject.currentGenomePos);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
+        if (task == SerializationTask::Save) {
+            auxiliaries[Id_Constructor_GenomeInfo] = true;
+        }
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            GenomeDescription genomeDesc;
-            ar(genomeDesc);
-            data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+            auto hasGenomeInfo = auxiliaries.contains(Id_Constructor_GenomeInfo);
+            if (hasGenomeInfo) {
+                GenomeDescription genomeDesc;
+                ar(genomeDesc);
+                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc.cells);
+            } else {
+                std::vector<CellGenomeDescription> cellsGenomeDesc;
+                ar(cellsGenomeDesc);
+                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(cellsGenomeDesc);
+            }
         } else {
             GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
             ar(genomeDesc);
@@ -440,12 +498,22 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_Injector_Mode, data.mode, defaultObject.mode);
         loadSave<int>(task, auxiliaries, Id_Injector_Counter, data.counter, defaultObject.counter);
+        if (task == SerializationTask::Save) {
+            auxiliaries[Id_Injector_GenomeInfo] = true;
+        }
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            GenomeDescription genomeDesc;
-            ar(genomeDesc);
-            data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+            auto hasGenomeInfo = auxiliaries.contains(Id_Constructor_GenomeInfo);
+            if (hasGenomeInfo) {
+                GenomeDescription genomeDesc;
+                ar(genomeDesc);
+                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+            } else {
+                std::vector<CellGenomeDescription> cellsGenomeDesc;
+                ar(cellsGenomeDesc);
+                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(cellsGenomeDesc);
+            }
         } else {
             GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
             ar(genomeDesc);

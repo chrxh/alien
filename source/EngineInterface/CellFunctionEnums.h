@@ -89,3 +89,10 @@ enum InjectorMode_
     InjectorMode_InjectAll,
     InjectorMode_Count
 };
+
+using ConstructionShape = int;
+enum ConstructionShape_
+{
+    ConstructionShape_FreeForm,
+    ConstructionShape_Count
+};

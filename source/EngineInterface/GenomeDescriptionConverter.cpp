@@ -128,13 +128,12 @@ namespace
     }
 }
 
-std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription const& genome)
+std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(std::vector<CellGenomeDescription> const& cells)
 {
-
     std::vector<uint8_t> result;
-    result.reserve(genome.size() * 6);
+    result.reserve(cells.size() * 6);
     int index = 0;
-    for (auto const& cell : genome) {
+    for (auto const& cell : cells) {
         writeByte(result, cell.getCellFunctionType());
         writeAngle(result, cell.referenceAngle);
         writeEnergy(result, cell.energy);
@@ -205,6 +204,11 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
         ++index;
     }
     return result;
+}
+
+std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription const& genome)
+{
+    return convertDescriptionToBytes(genome.cells);
 }
 
 namespace
@@ -309,7 +313,7 @@ namespace
                 cell.cellFunction = PlaceHolderGenomeDescription();
             } break;
             }
-            result.genome.emplace_back(cell);
+            result.genome.cells.emplace_back(cell);
             ++cellIndex;
         }
         return result;
@@ -325,7 +329,7 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
 int GenomeDescriptionConverter::convertByteIndexToCellIndex(std::vector<uint8_t> const& data, int byteIndex)
 {
     //wasteful approach but sufficient for GUI
-    return convertBytesToDescriptionIntern(data, byteIndex, data.size()).genome.size();
+    return convertBytesToDescriptionIntern(data, byteIndex, data.size()).genome.cells.size();
 }
 
 int GenomeDescriptionConverter::convertCellIndexToByteIndex(std::vector<uint8_t> const& data, int cellIndex)
