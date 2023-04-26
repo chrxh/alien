@@ -150,7 +150,7 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
             cell->cellFunctionData.muscle.lastBendingDirection = bendingDirection;
             cell->cellFunctionData.muscle.lastBendingSourceIndex = i;
 
-            if (cell->numConnections <= 2 && abs(activity.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold
+            if (abs(activity.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold
                 && !hasTriangularConnection(cell, connection.cell)) {
                 auto delta = Math::normalized(data.cellMap.getCorrectedDirection(connection.cell->absPos - cell->absPos));
                 Math::rotateQuarterCounterClockwise(delta);
