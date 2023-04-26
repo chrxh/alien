@@ -374,4 +374,17 @@ struct CellGenomeDescription
     }
 };
 
-using GenomeDescription = std::vector<CellGenomeDescription>;
+struct GenomeInfoDescription
+{
+    ConstructionShape shape = ConstructionShape_FreeForm;
+
+    auto operator<=>(GenomeInfoDescription const&) const = default;
+};
+
+struct GenomeDescription
+{
+    GenomeInfoDescription info;
+    std::vector<CellGenomeDescription> cells;
+
+    auto operator<=>(GenomeDescription const&) const = default;
+};

@@ -57,7 +57,7 @@ _GenomeEditorWindow::~_GenomeEditorWindow()
 void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
 {
     setOn(true);
-    if (_tabDatas.size() == 1 && _tabDatas.front().genome.empty()) {
+    if (_tabDatas.size() == 1 && _tabDatas.front().genome.cells.empty()) {
         _tabDatas.clear();
     }
     std::optional<int> tabIndex;
@@ -179,7 +179,7 @@ void _GenomeEditorWindow::processToolbar()
     AlienImGui::Tooltip("Add node");
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(selectedTab.genome.empty());
+    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
     if (AlienImGui::ToolbarButton(ICON_FA_MINUS)) {
         onDeleteNode();
     }
@@ -196,7 +196,7 @@ void _GenomeEditorWindow::processToolbar()
     AlienImGui::Tooltip("Decrease sequence number of selected node");
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!(selectedNode && *selectedNode < selectedTab.genome.size() - 1));
+    ImGui::BeginDisabled(!(selectedNode && *selectedNode < selectedTab.genome.cells.size() - 1));
     if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_DOWN)) {
         onNodeIncreaseSequenceNumber();
     }
@@ -317,7 +317,7 @@ void _GenomeEditorWindow::processGenomeEditTab(TabData& tab)
 {
     if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
         int index = 0;
-        for (auto& cell : tab.genome) {
+        for (auto& cell : tab.genome.cells) {
             ImGui::PushID(index);
 
             float h, s, v;
@@ -638,35 +638,38 @@ void _GenomeEditorWindow::onSaveGenome()
 void _GenomeEditorWindow::onAddNode()
 {
     auto& tabData = _tabDatas.at(_selectedTabIndex);
+    auto& cells = tabData.genome.cells;
 
     CellGenomeDescription newNode;
     if (tabData.selectedNode) {
-        newNode.color = tabData.genome.at(*tabData.selectedNode).color;
-        tabData.genome.insert(tabData.genome.begin() + *tabData.selectedNode + 1, newNode);
+        newNode.color = cells.at(*tabData.selectedNode).color;
+        cells.insert(cells.begin() + *tabData.selectedNode + 1, newNode);
         ++(*tabData.selectedNode);
     } else {
-        if (!tabData.genome.empty()) {
-            newNode.color = tabData.genome.back().color;
+        if (!cells.empty()) {
+            newNode.color = cells.back().color;
         }
-        tabData.genome.emplace_back(newNode);
-        tabData.selectedNode = toInt(tabData.genome.size() - 1);
+        cells.emplace_back(newNode);
+        tabData.selectedNode = toInt(cells.size() - 1);
     }
 }
 
 void _GenomeEditorWindow::onDeleteNode()
 {
     auto& tabData = _tabDatas.at(_selectedTabIndex);
+    auto& cells = tabData.genome.cells;
+
     if (tabData.selectedNode) {
-        tabData.genome.erase(tabData.genome.begin() + *tabData.selectedNode);
-        if (*tabData.selectedNode == toInt(tabData.genome.size())) {
+        cells.erase(cells.begin() + *tabData.selectedNode);
+        if (*tabData.selectedNode == toInt(cells.size())) {
             if (--(*tabData.selectedNode) < 0) {
                 tabData.selectedNode.reset();
             }
         }
     } else {
-        tabData.genome.pop_back();
-        if (!tabData.genome.empty()) {
-            tabData.selectedNode = toInt(tabData.genome.size() - 1);
+        cells.pop_back();
+        if (!cells.empty()) {
+            tabData.selectedNode = toInt(cells.size() - 1);
         }
     }
     _collapseAllNodes = true;
@@ -676,7 +679,7 @@ void _GenomeEditorWindow::onNodeDecreaseSequenceNumber()
 {
     auto& selectedTab = _tabDatas.at(_selectedTabIndex);
     auto& selectedNode = selectedTab.selectedNode;
-    std::swap(selectedTab.genome.at(*selectedNode), selectedTab.genome.at(*selectedNode - 1));
+    std::swap(selectedTab.genome.cells.at(*selectedNode), selectedTab.genome.cells.at(*selectedNode - 1));
     --(*selectedNode);
     _collapseAllNodes = true;
 }
@@ -685,7 +688,7 @@ void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
 {
     auto& selectedTab = _tabDatas.at(_selectedTabIndex);
     auto& selectedNode = selectedTab.selectedNode;
-    std::swap(selectedTab.genome.at(*selectedNode), selectedTab.genome.at(*selectedNode + 1));
+    std::swap(selectedTab.genome.cells.at(*selectedNode), selectedTab.genome.cells.at(*selectedNode + 1));
     ++(*selectedNode);
     _collapseAllNodes = true;
 }
@@ -702,7 +705,7 @@ void _GenomeEditorWindow::onCreateSpore()
     auto parameter = _simController->getSimulationParameters();
     auto cell = CellDescription()
                     .setPos(pos)
-                    .setEnergy(parameter.cellNormalEnergy[_editorModel->getDefaultColorCode()] * (genomeDesc.size() * 2 + 1))
+                    .setEnergy(parameter.cellNormalEnergy[_editorModel->getDefaultColorCode()] * (genomeDesc.cells.size() * 2 + 1))
                     .setStiffness(1.0f)
                     .setMaxConnections(6)
                     .setExecutionOrderNumber(0)

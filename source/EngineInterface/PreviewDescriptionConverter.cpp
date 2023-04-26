@@ -95,7 +95,7 @@ namespace
         RealVector2D pos;
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
         int index = 0;
-        for (auto const& node : genome) {
+        for (auto const& node : genome.cells) {
             if (index > 0) {
                 pos += result.direction;
             }
@@ -115,7 +115,7 @@ namespace
             if (index > 0) {
                 cellIntern.connectionIndices.insert(index - 1);
             }
-            if (index < genome.size() - 1) {
+            if (index < genome.cells.size() - 1) {
                 cellIntern.connectionIndices.insert(index + 1);
             }
 
@@ -169,7 +169,7 @@ namespace
         std::optional<float> const& desiredEndAngle,
         SimulationParameters const& parameters)
     {
-        if (genome.empty()) {
+        if (genome.cells.empty()) {
             return {};
         }
 
@@ -180,7 +180,7 @@ namespace
         //process sub genomes
         size_t indexOffset = 0;
         int index = 0;
-        for (auto const& [node, cellIntern] : boost::combine(genome, processedGenome.cellsIntern)) {
+        for (auto const& [node, cellIntern] : boost::combine(genome.cells, processedGenome.cellsIntern)) {
             if (node.getCellFunctionType() == CellFunction_Constructor) {
                 auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
                 if (constructor.isMakeGenomeCopy()) {
@@ -222,7 +222,7 @@ namespace
                 if (angles.size() == 1) {
                     targetAngle = angles.front() + 180.0f;
                 }
-                targetAngle += subGenome.front().referenceAngle;
+                targetAngle += subGenome.cells.front().referenceAngle;
                 auto direction = Math::unitVectorOfAngle(targetAngle);
                 auto previewPart = processGenomeDescription(subGenome, cellIntern.nodeIndex, cellIntern.pos + direction, targetAngle, parameters);
                 insert(result, previewPart);
