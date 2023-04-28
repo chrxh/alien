@@ -418,11 +418,11 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         auto parameters = _simController->getSimulationParameters();
 
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(CellFunctionTextWidth), constructor.singleConstruction);
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Separate construction").textWidth(CellFunctionTextWidth), constructor.separateConstruction);
-        AlienImGui::InputOptionalInt(
-            AlienImGui::InputIntParameters().name("Max connections").textWidth(CellFunctionTextWidth), constructor.maxConnections);
+        //AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(CellFunctionTextWidth), constructor.singleConstruction);
+        //AlienImGui::Checkbox(
+        //    AlienImGui::CheckboxParameters().name("Separate construction").textWidth(CellFunctionTextWidth), constructor.separateConstruction);
+        //AlienImGui::InputOptionalInt(
+        //    AlienImGui::InputIntParameters().name("Max connections").textWidth(CellFunctionTextWidth), constructor.maxConnections);
         int constructorMode = constructor.activationMode == 0 ? 0 : 1;
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters().name("Activation mode").textWidth(CellFunctionTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
@@ -431,10 +431,10 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
         if (constructorMode == 1) {
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Interval").textWidth(CellFunctionTextWidth), constructor.activationMode);
         }
-        AlienImGui::AngleAlignmentCombo(
-            AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(CellFunctionTextWidth), constructor.angleAlignment);
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.1f).textWidth(CellFunctionTextWidth), constructor.stiffness);
+        //AlienImGui::AngleAlignmentCombo(
+        //    AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(CellFunctionTextWidth), constructor.angleAlignment);
+        //AlienImGui::InputFloat(
+        //    AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.1f).textWidth(CellFunctionTextWidth), constructor.stiffness);
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(CellFunctionTextWidth), constructor.constructionActivationTime);
         ImGui::TreePop();
@@ -566,10 +566,10 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
         if (constructor.activationMode < 0) {
             constructor.activationMode = 0;
         }
-        if (constructor.maxConnections) {
-            constructor.maxConnections = (*constructor.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
-        }
-        constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
+        //if (constructor.maxConnections) {
+        //    constructor.maxConnections = (*constructor.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
+        //}
+        //constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
         constructor.genomeGeneration = std::max(0, constructor.genomeGeneration);
     } break;
     case CellFunction_Sensor: {

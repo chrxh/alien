@@ -128,11 +128,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     } break;
     case CellFunction_Constructor: {
         cell->cellFunctionData.constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
-        cell->cellFunctionData.constructor.singleConstruction = cellTO.cellFunctionData.constructor.singleConstruction;
-        cell->cellFunctionData.constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
-        cell->cellFunctionData.constructor.maxConnections = cellTO.cellFunctionData.constructor.maxConnections;
-        cell->cellFunctionData.constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
-        cell->cellFunctionData.constructor.stiffness = cellTO.cellFunctionData.constructor.stiffness;
         cell->cellFunctionData.constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         createAuxiliaryData(
             cellTO.cellFunctionData.constructor.genomeSize % MAX_GENOME_BYTES,
@@ -275,11 +270,6 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             } else {
                 cell->cellFunctionData.constructor.activationMode = _data->numberGen1.random(50);
             }
-            cell->cellFunctionData.constructor.singleConstruction = _data->numberGen1.randomBool();
-            cell->cellFunctionData.constructor.separateConstruction = _data->numberGen1.randomBool();
-            cell->cellFunctionData.constructor.maxConnections = _data->numberGen1.random(MAX_CELL_BONDS + 1) - 1;
-            cell->cellFunctionData.constructor.angleAlignment = _data->numberGen1.random(ConstructorAngleAlignment_Count - 1);
-            cell->cellFunctionData.constructor.stiffness = _data->numberGen1.random();
             cell->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
             cell->cellFunctionData.constructor.genomeSize = 0;
             //_timestepData->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);

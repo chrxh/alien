@@ -79,11 +79,6 @@ namespace
         } break;
         case CellFunction_Constructor: {
             cellTO.cellFunctionData.constructor.activationMode = cell->cellFunctionData.constructor.activationMode;
-            cellTO.cellFunctionData.constructor.singleConstruction = cell->cellFunctionData.constructor.singleConstruction;
-            cellTO.cellFunctionData.constructor.separateConstruction = cell->cellFunctionData.constructor.separateConstruction;
-            cellTO.cellFunctionData.constructor.maxConnections = cell->cellFunctionData.constructor.maxConnections;
-            cellTO.cellFunctionData.constructor.angleAlignment = cell->cellFunctionData.constructor.angleAlignment;
-            cellTO.cellFunctionData.constructor.stiffness = cell->cellFunctionData.constructor.stiffness;
             cellTO.cellFunctionData.constructor.constructionActivationTime = cell->cellFunctionData.constructor.constructionActivationTime;
             copyAuxiliaryData(
                 cell->cellFunctionData.constructor.genomeSize,

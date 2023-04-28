@@ -68,7 +68,7 @@ TEST_F(InjectorTests, nothingFound)
 
 TEST_F(InjectorTests, matchButNoInjection)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells(
@@ -113,7 +113,7 @@ TEST_F(InjectorTests, matchButNoInjection)
 
 TEST_F(InjectorTests, injection)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -156,7 +156,7 @@ TEST_F(InjectorTests, injection)
 
 TEST_F(InjectorTests, injectOnlyUnderConstruction_failed)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -199,7 +199,7 @@ TEST_F(InjectorTests, injectOnlyUnderConstruction_failed)
 
 TEST_F(InjectorTests, injectOnlyUnderConstruction_success)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({

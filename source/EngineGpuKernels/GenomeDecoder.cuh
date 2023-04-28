@@ -3,10 +3,19 @@
 #include "Base.cuh"
 #include "Cell.cuh"
 
+struct GenomeInfo
+{
+    bool singleConstruction;
+    bool separateConstruction;
+    ConstructorAngleAlignment angleAlignment;
+    float stiffness;
+};
+
 class GenomeDecoder
 {
 public:
     __inline__ __device__ static bool isFinished(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool isFinishedSingleConstruction(ConstructorFunction const& constructor);
     __inline__ __device__ static bool readBool(ConstructorFunction& constructor);
     __inline__ __device__ static uint8_t readByte(ConstructorFunction& constructor);
     __inline__ __device__ static int readOptionalByte(ConstructorFunction& constructor, int moduloValue);
@@ -16,6 +25,7 @@ public:
     __inline__ __device__ static float readAngle(ConstructorFunction& constructor);
     template <typename GenomeHolderSource, typename GenomeHolderTarget>
     __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target);
+    __inline__ __device__ static GenomeInfo readGenomeInfo(ConstructorFunction const& constructor);
 
     __inline__ __device__ static bool convertByteToBool(uint8_t b);
     __inline__ __device__ static int convertBytesToWord(uint8_t b1, uint8_t b2);
@@ -28,6 +38,12 @@ public:
 __inline__ __device__ bool GenomeDecoder::isFinished(ConstructorFunction const& constructor)
 {
     return constructor.currentGenomePos >= constructor.genomeSize;
+}
+
+__inline__ __device__ bool GenomeDecoder::isFinishedSingleConstruction(ConstructorFunction const& constructor)
+{
+    auto genomeInfo = readGenomeInfo(constructor);
+    return genomeInfo.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize;
 }
 
 __inline__ __device__ bool GenomeDecoder::readBool(ConstructorFunction& constructor)
@@ -71,6 +87,18 @@ __inline__ __device__ float GenomeDecoder::readEnergy(ConstructorFunction& const
 __inline__ __device__ float GenomeDecoder::readAngle(ConstructorFunction& constructor)
 {
     return static_cast<float>(static_cast<int8_t>(readByte(constructor))) / 120 * 180;
+}
+
+__inline__ __device__ GenomeInfo GenomeDecoder::readGenomeInfo(ConstructorFunction const& constructor)
+{
+    GenomeInfo result;
+    if (constructor.genomeSize > 0) {
+        result.singleConstruction = GenomeDecoder::convertByteToBool(constructor.genome[0]);
+        result.separateConstruction = GenomeDecoder::convertByteToBool(constructor.genome[1]);
+        result.angleAlignment = constructor.genome[2] % ConstructorAngleAlignment_Count;
+        result.stiffness = toFloat(constructor.genome[3]) / 255;
+    }
+    return result;
 }
 
 __inline__ __device__ bool GenomeDecoder::convertByteToBool(uint8_t b)

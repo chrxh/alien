@@ -125,7 +125,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
 
 TEST_F(DefenderTests, injectorVsAntiAttacker)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -177,7 +177,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
 
 TEST_F(DefenderTests, injectorVsAntiInjector)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({

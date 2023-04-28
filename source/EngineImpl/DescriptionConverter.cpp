@@ -420,12 +420,6 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     case CellFunction_Constructor: {
         ConstructorDescription constructor;
         constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
-        constructor.singleConstruction = cellTO.cellFunctionData.constructor.singleConstruction;
-        constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
-        constructor.maxConnections =
-            cellTO.cellFunctionData.constructor.maxConnections >= 0 ? std::make_optional(cellTO.cellFunctionData.constructor.maxConnections) : std::nullopt;
-        constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
-        constructor.stiffness = cellTO.cellFunctionData.constructor.stiffness;
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
         constructor.currentGenomePos = toInt(cellTO.cellFunctionData.constructor.currentGenomePos);
@@ -535,11 +529,6 @@ void DescriptionConverter::addCell(
         auto const& constructorDesc = std::get<ConstructorDescription>(*cellDesc.cellFunction);
         ConstructorTO constructorTO;
         constructorTO.activationMode = constructorDesc.activationMode;
-        constructorTO.singleConstruction = constructorDesc.singleConstruction;
-        constructorTO.separateConstruction = constructorDesc.separateConstruction;
-        constructorTO.maxConnections = constructorDesc.maxConnections.value_or(-1);
-        constructorTO.angleAlignment = constructorDesc.angleAlignment;
-        constructorTO.stiffness = constructorDesc.stiffness;
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
         constructorTO.currentGenomePos = constructorDesc.currentGenomePos;

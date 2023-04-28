@@ -18,6 +18,8 @@ public:
 private:
     struct ConstructionData
     {
+        GenomeInfo genomeInfo;
+
         float angle;
         float energy;
         int numRequiredAdditionalConnections;
@@ -80,7 +82,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             }
             if (GenomeDecoder::isFinished(cell->cellFunctionData.constructor)) {
                 auto& constructor = cell->cellFunctionData.constructor;
-                if (!constructor.singleConstruction) {
+                if (!constructionData.genomeInfo.singleConstruction) {
                     constructor.currentGenomePos = 0;
                 }
             }
@@ -114,6 +116,9 @@ ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* 
 __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::readConstructionData(Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
+    if (constructor.currentGenomePos == 0) {
+        constructor.currentGenomePos = Const::GenomeInfoSize;
+    }
 
     ConstructionData result;
     result.cellFunction = GenomeDecoder::readByte(constructor) % CellFunction_Count;
@@ -126,6 +131,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.inputExecutionOrderNumber = GenomeDecoder::readOptionalByte(constructor, cudaSimulationParameters.cellNumExecutionOrderNumbers);
     result.outputBlocked = GenomeDecoder::readBool(constructor);
 
+    //genome-wide data
+    result.genomeInfo = GenomeDecoder::readGenomeInfo(constructor);
     return result;
 }
 
@@ -170,9 +177,8 @@ __inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite
 __inline__ __device__ bool
 ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData)
 {
-    auto maxConnections = hostCell->cellFunctionData.constructor.maxConnections;
-
-    if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, maxConnections < 0)) {
+    if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, true)) {
+        printf("1\n");
         return false;
     }
 
@@ -190,15 +196,16 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     }
 
     hostCell->constructionId = data.numberGen1.random(65535);
-    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, max(0, maxConnections), constructionData);
+    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, 0, constructionData);
 
     if (!newCell->tryLock()) {
         return false;
     }
 
-    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
+    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !constructionData.genomeInfo.separateConstruction) {
         auto const& constructor = hostCell->cellFunctionData.constructor;
-        auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
+        auto distance =
+            GenomeDecoder::isFinished(constructor) && !constructionData.genomeInfo.separateConstruction && constructionData.genomeInfo.singleConstruction
             ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
         CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
@@ -206,10 +213,8 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
         newCell->livingState = LivingState_JustReady;
     }
-    if (maxConnections < 0) {
-        hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
-        newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
-    }
+    hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
+    newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
 
     newCell->releaseLock();
 
@@ -233,10 +238,6 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
         || constructionSiteDistance - desiredDistance < cudaSimulationParameters.cellMinDistance) {
-        return false;
-    }
-    auto maxConnections = hostCell->cellFunctionData.constructor.maxConnections;    //-1 means automatic adaption
-    if (maxConnections < 2 && maxConnections >= 0) {
         return false;
     }
 
@@ -285,7 +286,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     if (!checkAndReduceHostEnergy(data, hostCell, constructionData)) {
         return false;
     }
-    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, max(0, maxConnections), constructionData);
+    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, 0, constructionData);
 
     if (!newCell->tryLock()) {
         return false;
@@ -309,8 +310,8 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
     //possibly connect newCell to hostCell
     bool adaptReferenceAngle = false;
-    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
-        auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction
+    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !constructionData.genomeInfo.separateConstruction) {
+        auto distance = GenomeDecoder::isFinished(constructor) && !constructionData.genomeInfo.separateConstruction
             ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
         if (CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, /*angleFromPreviousForCell*/ 0, 0, distance)) {
@@ -348,14 +349,11 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             Cell* otherCell = otherCells[i];
 
             if (otherCell->tryLock()) {
-                if (isConnectable(newCell->numConnections, newCell->maxConnections, maxConnections < 0)
-                    && isConnectable(otherCell->numConnections, otherCell->maxConnections, maxConnections < 0)) {
+                if (isConnectable(newCell->numConnections, newCell->maxConnections, true)
+                    && isConnectable(otherCell->numConnections, otherCell->maxConnections, true)) {
 
-                    CellConnectionProcessor::tryAddConnections(
-                        data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
-                    if (maxConnections < 0) {
-                        otherCell->maxConnections = max(otherCell->numConnections, otherCell->maxConnections);
-                    }
+                    CellConnectionProcessor::tryAddConnections(data, newCell, otherCell, 0, 0, desiredDistance, constructionData.genomeInfo.angleAlignment);
+                    otherCell->maxConnections = max(otherCell->numConnections, otherCell->maxConnections);
                 }
                 otherCell->releaseLock();
             }
@@ -395,10 +393,8 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             newCell->connections[hostIndex].angleFromPrevious = 360.0f - angleFromPreviousForNewCell - consumedAngle2;
         }
     }
-    if (maxConnections < 0) {
-        hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
-        newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
-    }
+    hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
+    newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
 
     newCell->releaseLock();
 
@@ -435,7 +431,7 @@ ConstructorProcessor::constructCellIntern(
 
     Cell * result = factory.createCell();
     result->energy = constructionData.energy;
-    result->stiffness = constructor.stiffness;
+    result->stiffness = constructionData.genomeInfo.stiffness;
     result->absPos = posOfNewCell;
     data.cellMap.correctPosition(result->absPos);
     result->maxConnections = maxConnections;
@@ -466,11 +462,6 @@ ConstructorProcessor::constructCellIntern(
     case CellFunction_Constructor: {
         auto& newConstructor = result->cellFunctionData.constructor;
         newConstructor.activationMode = GenomeDecoder::readByte(constructor);
-        newConstructor.singleConstruction = GenomeDecoder::readBool(constructor);
-        newConstructor.separateConstruction = GenomeDecoder::readBool(constructor);
-        newConstructor.maxConnections = GenomeDecoder::readOptionalByte(constructor, MAX_CELL_BONDS + 1);
-        newConstructor.angleAlignment = GenomeDecoder::readByte(constructor) % ConstructorAngleAlignment_Count;
-        newConstructor.stiffness = toFloat(GenomeDecoder::readByte(constructor)) / 255;
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor);
         newConstructor.currentGenomePos = 0;
         GenomeDecoder::copyGenome(data, constructor, newConstructor);

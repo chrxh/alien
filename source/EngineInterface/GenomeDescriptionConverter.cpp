@@ -128,11 +128,16 @@ namespace
     }
 }
 
-std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(std::vector<CellGenomeDescription> const& cells)
+std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription const& genome)
 {
+    auto const& cells = genome.cells;
     std::vector<uint8_t> result;
-    result.reserve(cells.size() * 6);
-    int index = 0;
+    result.reserve(cells.size() * 12 + 4);
+    writeBool(result, genome.info.singleConstruction);
+    writeBool(result, genome.info.separateConstruction);
+    writeByte(result, genome.info.angleAlignment);
+    writeStiffness(result, genome.info.stiffness);
+
     for (auto const& cell : cells) {
         writeByte(result, cell.getCellFunctionType());
         writeAngle(result, cell.referenceAngle);
@@ -161,11 +166,6 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(std::
         case CellFunction_Constructor: {
             auto const& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
             writeByte(result, constructor.mode);
-            writeBool(result, constructor.singleConstruction);
-            writeBool(result, constructor.separateConstruction);
-            writeOptionalByte(result, constructor.maxConnections);
-            writeByte(result, constructor.angleAlignment);
-            writeStiffness(result, constructor.stiffness);
             writeWord(result, constructor.constructionActivationTime);
             writeGenome(result, constructor.genome);
         } break;
@@ -201,14 +201,8 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(std::
         case CellFunction_Placeholder: {
         } break;
         }
-        ++index;
     }
     return result;
-}
-
-std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription const& genome)
-{
-    return convertDescriptionToBytes(genome.cells);
 }
 
 namespace
@@ -227,8 +221,15 @@ namespace
     {
         SimulationParameters parameters;
         ConversionResult result;
+
         int cellIndex = 0;
         auto& bytePosition = result.lastBytePosition;
+
+        result.genome.info.singleConstruction = readBool(data, bytePosition);
+        result.genome.info.separateConstruction = readBool(data, bytePosition);
+        result.genome.info.angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;
+        result.genome.info.stiffness = readStiffness(data, bytePosition);
+        
         while (bytePosition < maxBytePosition && cellIndex < maxEntries) {
             CellFunction cellFunction = readByte(data, bytePosition) % CellFunction_Count;
 
@@ -262,11 +263,6 @@ namespace
             case CellFunction_Constructor: {
                 ConstructorGenomeDescription constructor;
                 constructor.mode = readByte(data, bytePosition);
-                constructor.singleConstruction = readBool(data, bytePosition);
-                constructor.separateConstruction = readBool(data, bytePosition);
-                constructor.maxConnections = readOptionalByte(data, bytePosition, MAX_CELL_BONDS + 1);
-                constructor.angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;
-                constructor.stiffness = readStiffness(data, bytePosition);
                 constructor.constructionActivationTime = readWord(data, bytePosition);
                 constructor.genome = readGenome(data, bytePosition);
                 cell.cellFunction = constructor;
