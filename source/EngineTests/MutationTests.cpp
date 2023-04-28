@@ -27,7 +27,7 @@ protected:
     std::vector<int> const genomeCellColors = {1, 4, 5};
     std::vector<uint8_t> createGenomeWithMultipleCellsWithDifferentFunctions() const
     {
-        std::vector<uint8_t> subGenome;
+        std::vector<uint8_t> subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription());
         for (int i = 0; i < 15; ++i) {
             subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
                 CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
@@ -467,9 +467,9 @@ TEST_F(MutationTests, propertiesMutation_startPos)
         {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setCurrentGenomePos(byteIndex)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
-    //for (int i = 0; i < 10000; ++i) {
-    //    _simController->testOnly_mutate(1, MutationType::Properties);
-    //}
+    for (int i = 0; i < 10000; ++i) {
+        _simController->testOnly_mutate(1, MutationType::Properties);
+    }
 
     auto actualData = _simController->getSimulationData();
     auto actualCellById = getCellById(actualData);
@@ -611,8 +611,11 @@ TEST_F(MutationTests, insertMutation)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
-    auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setCurrentGenomePos(0)).setExecutionOrderNumber(0)});
+    auto data = DataDescription().addCells({CellDescription()
+                                                .setId(1)
+                                                .setCellFunction(ConstructorDescription().setGenome(genome).setCurrentGenomePos(0))
+                                                .setExecutionOrderNumber(0)
+                                                .setColor(genomeCellColors[0])});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {

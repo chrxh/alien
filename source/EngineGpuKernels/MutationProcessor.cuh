@@ -304,7 +304,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
     auto makeSelfCopy = cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication ? data.numberGen1.randomBool() : false;
 
-    auto newCellFunctionSize = getCellFunctionDataSize(newCellFunction, makeSelfCopy, 0);
+    auto newCellFunctionSize = getCellFunctionDataSize(newCellFunction, makeSelfCopy, Const::GenomeInfoSize);
     auto sizeDelta = newCellFunctionSize + Const::CellBasicBytes;
 
     auto targetGenomeSize = genomeSize + sizeDelta;
@@ -318,7 +318,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     data.numberGen1.randomBytes(targetGenome + nodeIndex, Const::CellBasicBytes);
     setNextCellFunctionType(targetGenome, nodeIndex, newCellFunction);
     setNextCellColor(targetGenome, nodeIndex, newColor);
-    setRandomCellFunctionData(data, targetGenome, nodeIndex + Const::CellBasicBytes, newCellFunction, makeSelfCopy, 0);
+    setRandomCellFunctionData(data, targetGenome, nodeIndex + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeInfoSize);
 
     for (int i = nodeIndex; i < genomeSize; ++i) {
         targetGenome[i + sizeDelta] = genome[i];
@@ -656,9 +656,9 @@ __inline__ __device__ int MutationProcessor::getRandomGenomeNodeIndex(
                 }
                 auto subGenomeStartIndex = nodeIndex + Const::CellBasicBytes + cellFunctionFixedBytes + 3;
                 auto subGenomeSize = getNextSubGenomeSize(genome, genomeSize, nodeIndex);
-                if (subGenomeSize == 0) {
+                if (subGenomeSize == Const::GenomeInfoSize) {
                     if (considerZeroSubGenomes && data.numberGen1.randomBool()) {
-                        result += Const::CellBasicBytes + cellFunctionFixedBytes + 3;
+                        result += Const::CellBasicBytes + cellFunctionFixedBytes + 3 + Const::GenomeInfoSize;
                     } else {
                         if (numSubGenomesSizeIndices) {
                             --(*numSubGenomesSizeIndices);
