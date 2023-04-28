@@ -58,8 +58,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
         }
         if (connectedCell->cellFunction == CellFunction_Constructor) {
             auto constructor = connectedCell->cellFunctionData.constructor;
-            auto isFinished = constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize;
-            if (!isFinished) {
+            if (!GenomeDecoder::isFinishedSingleConstruction(constructor)) {
                 continue;
             }
         }
@@ -107,7 +106,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
                 return false;
             }
             auto const& constructor = otherCell->cellFunctionData.constructor;
-            auto isFinished = constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize;
+            auto isFinished = GenomeDecoder::isFinishedSingleConstruction(constructor);
             if (otherCell->cellFunction == CellFunction_Constructor && !isFinished) {
                 if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameColor || otherCell->color == cell->color) {
                     return true;

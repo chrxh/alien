@@ -96,11 +96,6 @@ struct TransmitterDescription
 struct ConstructorDescription
 {
     int activationMode = 13;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    bool singleConstruction = false;
-    bool separateConstruction = true;
-    std::optional<int> maxConnections;
-    ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
-    float stiffness = 1.0f;
     int constructionActivationTime = 100;
     std::vector<uint8_t> genome;
     int genomeGeneration = 0;
@@ -113,31 +108,6 @@ struct ConstructorDescription
     ConstructorDescription& setActivationMode(int value)
     {
         activationMode = value;
-        return *this;
-    }
-    ConstructorDescription& setSingleConstruction(bool value)
-    {
-        singleConstruction = value;
-        return *this;
-    }
-    ConstructorDescription& setSeparateConstruction(bool value)
-    {
-        separateConstruction = value;
-        return *this;
-    }
-    ConstructorDescription& setMaxConnections(std::optional<int> value)
-    {
-        maxConnections = value;
-        return *this;
-    }
-    ConstructorDescription& setAngleAlignment(ConstructorAngleAlignment value)
-    {
-        angleAlignment = value;
-        return *this;
-    }
-    ConstructorDescription& setStiffness(float value)
-    {
-        stiffness = value;
         return *this;
     }
     ConstructorDescription& setConstructionActivationTime(int value)

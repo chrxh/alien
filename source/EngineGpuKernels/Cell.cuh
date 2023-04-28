@@ -46,11 +46,6 @@ struct ConstructorFunction
 {
     //settings
     int activationMode; //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    bool singleConstruction;
-    bool separateConstruction;
-    int maxConnections; //-1 adapt maxConnections
-    ConstructorAngleAlignment angleAlignment;
-    float stiffness;
     int constructionActivationTime;
 
     //genome

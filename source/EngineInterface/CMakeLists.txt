@@ -12,6 +12,7 @@ add_library(alien_engine_interface_lib
     DescriptionHelper.h
     Descriptions.cpp
     Descriptions.h
+    GenomeConstants.h
     GenomeDescriptionConverter.cpp
     GenomeDescriptionConverter.h
     GenomeDescriptions.h

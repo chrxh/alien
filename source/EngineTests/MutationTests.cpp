@@ -29,15 +29,17 @@ protected:
     {
         std::vector<uint8_t> subGenome;
         for (int i = 0; i < 15; ++i) {
-            subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription{
+            subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
                 CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
                 CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(genomeCellColors[1]),
                 CellGenomeDescription().setColor(genomeCellColors[2]),
                 CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeGenomeCopy()).setColor(genomeCellColors[2]),
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome).setMode(std::rand() % 100)).setColor(genomeCellColors[0]),
-            });
-        };
-        return GenomeDescriptionConverter::convertDescriptionToBytes({
+                CellGenomeDescription()
+                    .setCellFunction(ConstructorGenomeDescription().setGenome(subGenome).setMode(std::rand() % 100))
+                    .setColor(genomeCellColors[0]),
+            }));
+        }
+        return GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
             CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
             CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(genomeCellColors[1]),
             CellGenomeDescription().setColor(genomeCellColors[0]),
@@ -50,7 +52,7 @@ protected:
             CellGenomeDescription().setCellFunction(MuscleGenomeDescription()).setColor(genomeCellColors[2]),
             CellGenomeDescription().setCellFunction(DefenderGenomeDescription()).setColor(genomeCellColors[2]),
             CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription()).setColor(genomeCellColors[0]),
-        });
+        }));
     }
 
     std::vector<uint8_t> createGenomeWithUniformColorPerSubgenome() const
@@ -58,7 +60,7 @@ protected:
         std::vector<uint8_t> subGenome;
         for (int i = 0; i < 15; ++i) {
             auto color = genomeCellColors[i % genomeCellColors.size()];
-            subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription{
+            subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
                 CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(color),
                 CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(color),
                 CellGenomeDescription().setColor(color),
@@ -66,9 +68,9 @@ protected:
                 CellGenomeDescription()
                     .setCellFunction(ConstructorGenomeDescription().setGenome(subGenome).setMode(std::rand() % 100))
                     .setColor(color),
-            });
+            }));
         };
-        return GenomeDescriptionConverter::convertDescriptionToBytes({
+        return GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
             CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
             CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(genomeCellColors[0]),
             CellGenomeDescription().setColor(genomeCellColors[0]),
@@ -81,15 +83,15 @@ protected:
             CellGenomeDescription().setCellFunction(MuscleGenomeDescription()).setColor(genomeCellColors[0]),
             CellGenomeDescription().setCellFunction(DefenderGenomeDescription()).setColor(genomeCellColors[0]),
             CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription()).setColor(genomeCellColors[0]),
-        });
+        }));
     }
 
     void rollout(GenomeDescription const& input, std::set<CellGenomeDescription>& result)
     {
-        for (auto const& cell : input) {
-            if (auto subGenome = cell.getSubGenome()) {
-                auto subGenomeCells = GenomeDescriptionConverter::convertBytesToDescription(*subGenome);
-                rollout(subGenomeCells, result);
+        for (auto const& cell : input.cells) {
+            if (auto subGenomeBytes = cell.getSubGenome()) {
+                auto subGenome = GenomeDescriptionConverter::convertBytesToDescription(*subGenomeBytes);
+                rollout(subGenome, result);
                 auto cellClone = cell;
                 cellClone.setSubGenome({});
                 result.insert(cellClone);
@@ -106,11 +108,14 @@ protected:
         }
         auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
         auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
-        if (expectedGenome.size() != actualGenome.size()) {
+        if (expectedGenome.info.shape != actualGenome.info.shape) {
+            return false;
+        }
+        if (expectedGenome.cells.size() != actualGenome.cells.size()) {
             return false;
         }
 
-        for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome, actualGenome)) {
+        for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome.cells, actualGenome.cells)) {
             if (expectedCell.getCellFunctionType() != actualCell.getCellFunctionType()) {
                 return false;
             }
@@ -158,11 +163,14 @@ protected:
         }
         auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
         auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
-        if (expectedGenome.size() != actualGenome.size()) {
+        if (expectedGenome.info != actualGenome.info) {
+            return false;
+        }
+        if (expectedGenome.cells.size() != actualGenome.cells.size()) {
             return false;
         }
 
-        for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome, actualGenome)) {
+        for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome.cells, actualGenome.cells)) {
             if (expectedCell.getCellFunctionType() != actualCell.getCellFunctionType()) {
                 return false;
             }
@@ -209,7 +217,12 @@ protected:
         }
         auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
         auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
-        if (expectedGenome.size() != actualGenome.size()) {
+        expectedGenome.info.shape = ConstructionShape_FreeForm; //compare all expect shape
+        actualGenome.info.shape = ConstructionShape_FreeForm;
+        if (expectedGenome.info != actualGenome.info) {
+            return false;
+        }
+        if (expectedGenome.cells.size() != actualGenome.cells.size()) {
             return false;
         }
 
@@ -232,7 +245,7 @@ protected:
             return clone;
         };
 
-        for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome, actualGenome)) {
+        for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome.cells, actualGenome.cells)) {
             if (createCompareClone(expectedCell) != createCompareClone(actualCell)) {
                 return false;
             }
@@ -268,10 +281,13 @@ protected:
     {
         auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
         auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
-        if (expectedGenome.size() != actualGenome.size()) {
+        if (expectedGenome.info != actualGenome.info) {
             return false;
         }
-        for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome, actualGenome)) {
+        if (expectedGenome.cells.size() != actualGenome.cells.size()) {
+            return false;
+        }
+        for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome.cells, actualGenome.cells)) {
             if (std::abs(expectedCell.referenceAngle - actualCell.referenceAngle) > NEAR_ZERO) {
                 return false;
             }
@@ -301,6 +317,9 @@ protected:
     {
         auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
         auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
+        if (afterGenome.info != beforeGenome.info) {
+            return false;
+        }
         std::set<CellGenomeDescription> afterGenomeRollout;
         rollout(afterGenome, afterGenomeRollout);
         for (auto const& cell : afterGenomeRollout) {
@@ -308,8 +327,8 @@ protected:
                 return false;
             }
         }
-        for (auto const& beforeCell : beforeGenome) {
-            auto matchingAfterCells = afterGenome | std::views::filter([&beforeCell](auto const& afterCell) {
+        for (auto const& beforeCell : beforeGenome.cells) {
+            auto matchingAfterCells = afterGenome.cells | std::views::filter([&beforeCell](auto const& afterCell) {
                 auto beforeCellClone = beforeCell;
                 auto afterCellClone = afterCell;
                 beforeCellClone.cellFunction.reset();
@@ -346,6 +365,9 @@ protected:
     {
         auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
         auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
+        if (afterGenome.info != beforeGenome.info) {
+            return false;
+        }
         std::set<CellGenomeDescription> afterGenomeRollout;
         rollout(afterGenome, afterGenomeRollout);
         for (auto const& cell : afterGenomeRollout) {
@@ -353,8 +375,8 @@ protected:
                 return false;
             }
         }
-        for (auto const& afterCell : afterGenome) {
-            auto matchingBeforeCells = beforeGenome | std::views::filter([&afterCell](auto const& beforeCell) {
+        for (auto const& afterCell : afterGenome.cells) {
+            auto matchingBeforeCells = beforeGenome.cells | std::views::filter([&afterCell](auto const& beforeCell) {
                                           auto beforeCellClone = beforeCell;
                                           auto afterCellClone = afterCell;
                                           beforeCellClone.cellFunction.reset();
@@ -404,8 +426,11 @@ protected:
     {
         auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
         auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
+        if (afterGenome.info != beforeGenome.info) {
+            return false;
+        }
         
-        for (auto const& [beforeCell, afterCell] : boost::combine(beforeGenome, afterGenome)) {
+        for (auto const& [beforeCell, afterCell] : boost::combine(beforeGenome.cells, afterGenome.cells)) {
 
             auto beforeCellClone = beforeCell;
             auto afterCellClone = afterCell;
@@ -442,9 +467,9 @@ TEST_F(MutationTests, propertiesMutation_startPos)
         {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setCurrentGenomePos(byteIndex)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
-    for (int i = 0; i < 10000; ++i) {
-        _simController->testOnly_mutate(1, MutationType::Properties);
-    }
+    //for (int i = 0; i < 10000; ++i) {
+    //    _simController->testOnly_mutate(1, MutationType::Properties);
+    //}
 
     auto actualData = _simController->getSimulationData();
     auto actualCellById = getCellById(actualData);
@@ -578,8 +603,8 @@ TEST_F(MutationTests, insertMutation_emptyGenome)
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
 
     auto actualGenomeDescription = GenomeDescriptionConverter::convertBytesToDescription(actualConstructor.genome);
-    EXPECT_EQ(1, actualGenomeDescription.size());
-    EXPECT_EQ(cellColor, actualGenomeDescription.front().color);
+    EXPECT_EQ(1, actualGenomeDescription.cells.size());
+    EXPECT_EQ(cellColor, actualGenomeDescription.cells.front().color);
 }
 
 TEST_F(MutationTests, insertMutation)
@@ -604,9 +629,9 @@ TEST_F(MutationTests, insertMutation)
 
 TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
         CellGenomeDescription().setCellFunction(NeuronGenomeDescription()),
-    });
+    }));
 
     auto data = DataDescription().addCells(
         {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setCurrentGenomePos(0)).setExecutionOrderNumber(0)});

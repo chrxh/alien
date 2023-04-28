@@ -75,7 +75,6 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             if (otherCell->cellFunction == CellFunction_Constructor) {
                 otherCell->cellFunctionData.constructor.genome = targetGenome;
                 otherCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
-                otherCell->cellFunctionData.constructor.separateConstruction = true;
             } else {
                 otherCell->cellFunctionData.injector.genome = targetGenome;
                 otherCell->cellFunctionData.injector.genomeSize = injector.genomeSize;

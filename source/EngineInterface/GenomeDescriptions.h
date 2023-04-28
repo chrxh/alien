@@ -42,11 +42,6 @@ struct TransmitterGenomeDescription
 struct ConstructorGenomeDescription
 {
     int mode = 13;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    bool singleConstruction = false;
-    bool separateConstruction = true;
-    std::optional<int> maxConnections;
-    ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
-    float stiffness = 1.0f;
     int constructionActivationTime = 100;
 
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
@@ -56,31 +51,6 @@ struct ConstructorGenomeDescription
     ConstructorGenomeDescription& setMode(int value)
     {
         mode = value;
-        return *this;
-    }
-    ConstructorGenomeDescription& setSingleConstruction(bool value)
-    {
-        singleConstruction = value;
-        return *this;
-    }
-    ConstructorGenomeDescription& setSeparateConstruction(bool value)
-    {
-        separateConstruction = value;
-        return *this;
-    }
-    ConstructorGenomeDescription& setMaxConnection(std::optional<int> value)
-    {
-        maxConnections = value;
-        return *this;
-    }
-    ConstructorGenomeDescription& setAngleAlignment(ConstructorAngleAlignment value)
-    {
-        angleAlignment = value;
-        return *this;
-    }
-    ConstructorGenomeDescription& setStiffness(float value)
-    {
-        stiffness = value;
         return *this;
     }
     ConstructorGenomeDescription& setConstructionActivationTime(int value)
@@ -377,8 +347,33 @@ struct CellGenomeDescription
 struct GenomeInfoDescription
 {
     ConstructionShape shape = ConstructionShape_FreeForm;
+    bool singleConstruction = false;
+    bool separateConstruction = true;
+    ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
+    float stiffness = 1.0f;
 
     auto operator<=>(GenomeInfoDescription const&) const = default;
+
+    GenomeInfoDescription& setSingleConstruction(bool value)
+    {
+        singleConstruction = value;
+        return *this;
+    }
+    GenomeInfoDescription& setSeparateConstruction(bool value)
+    {
+        separateConstruction = value;
+        return *this;
+    }
+    GenomeInfoDescription& setAngleAlignment(ConstructorAngleAlignment value)
+    {
+        angleAlignment = value;
+        return *this;
+    }
+    GenomeInfoDescription& setStiffness(float value)
+    {
+        stiffness = value;
+        return *this;
+    }
 };
 
 struct GenomeDescription
@@ -387,4 +382,16 @@ struct GenomeDescription
     std::vector<CellGenomeDescription> cells;
 
     auto operator<=>(GenomeDescription const&) const = default;
+
+    GenomeDescription& setInfo(GenomeInfoDescription const& value)
+    {
+        info = value;
+        return *this;
+    }
+
+    GenomeDescription& setCells(std::vector<CellGenomeDescription> const& value)
+    {
+        cells = value;
+        return *this;
+    }
 };

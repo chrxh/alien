@@ -408,13 +408,13 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         case CellFunction_Constructor: {
             auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
 
-            table.next();
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(ContentTextWidth), constructor.singleConstruction);
-            table.next();
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Separate construction").textWidth(ContentTextWidth), constructor.separateConstruction);
-            table.next();
-            AlienImGui::InputOptionalInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(ContentTextWidth), constructor.maxConnections);
+            //table.next();
+            //AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(ContentTextWidth), constructor.singleConstruction);
+            //table.next();
+            //AlienImGui::Checkbox(
+            //    AlienImGui::CheckboxParameters().name("Separate construction").textWidth(ContentTextWidth), constructor.separateConstruction);
+            //table.next();
+            //AlienImGui::InputOptionalInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(ContentTextWidth), constructor.maxConnections);
             int constructorMode = constructor.mode == 0 ? 0 : 1;
             table.next();
             if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Activation mode").textWidth(ContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
@@ -427,13 +427,13 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
                     constructor.mode = 0;
                 }
             }
-            table.next();
-            AlienImGui::AngleAlignmentCombo(
-                AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(ContentTextWidth), constructor.angleAlignment);
-            table.next();
-            AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth),
-                constructor.stiffness);
+            //table.next();
+            //AlienImGui::AngleAlignmentCombo(
+            //    AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(ContentTextWidth), constructor.angleAlignment);
+            //table.next();
+            //AlienImGui::InputFloat(
+            //    AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth),
+            //    constructor.stiffness);
             table.next();
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(ContentTextWidth), constructor.constructionActivationTime);
         } break;
@@ -746,10 +746,10 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
         if (constructor.mode < 0) {
             constructor.mode = 0;
         }
-        if (constructor.maxConnections) {
-            constructor.maxConnections = (*constructor.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
-        }
-        constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
+        //if (constructor.maxConnections) {
+        //    constructor.maxConnections = (*constructor.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
+        //}
+        //constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
     } break;
     case CellFunction_Sensor: {
         auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
