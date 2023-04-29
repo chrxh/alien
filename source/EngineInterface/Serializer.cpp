@@ -22,6 +22,7 @@
 #include "Descriptions.h"
 #include "SimulationParameters.h"
 #include "AuxiliaryDataParser.h"
+#include "GenomeConstants.h"
 #include "GenomeDescriptions.h"
 #include "GenomeDescriptionConverter.h"
 
@@ -458,6 +459,7 @@ namespace cereal
                 genomeDesc.info.angleAlignment = std::get<int>(auxiliaries.at(Id_Constructor_AngleAlignment));
                 genomeDesc.info.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
                 data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+                data.currentGenomePos += Const::GenomeInfoSize;
             }
         } else {
             GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);

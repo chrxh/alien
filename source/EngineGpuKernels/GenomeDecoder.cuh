@@ -92,12 +92,13 @@ __inline__ __device__ float GenomeDecoder::readAngle(ConstructorFunction& constr
 __inline__ __device__ GenomeInfo GenomeDecoder::readGenomeInfo(ConstructorFunction const& constructor)
 {
     GenomeInfo result;
-    if (constructor.genomeSize > 0) {
-        result.singleConstruction = GenomeDecoder::convertByteToBool(constructor.genome[0]);
-        result.separateConstruction = GenomeDecoder::convertByteToBool(constructor.genome[1]);
-        result.angleAlignment = constructor.genome[2] % ConstructorAngleAlignment_Count;
-        result.stiffness = toFloat(constructor.genome[3]) / 255;
+    if (constructor.genomeSize < Const::GenomeInfoSize) {
+        CUDA_THROW_NOT_IMPLEMENTED();
     }
+    result.singleConstruction = GenomeDecoder::convertByteToBool(constructor.genome[0]);
+    result.separateConstruction = GenomeDecoder::convertByteToBool(constructor.genome[1]);
+    result.angleAlignment = constructor.genome[2] % ConstructorAngleAlignment_Count;
+    result.stiffness = toFloat(constructor.genome[3]) / 255;
     return result;
 }
 
