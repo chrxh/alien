@@ -22,7 +22,7 @@ public:
     __inline__ __device__ static void colorMutation(SimulationData& data, Cell* cell);
 
 private:
-    static auto constexpr MAX_SUBGENOME_RECURSION_DEPTH = 20;
+    static auto constexpr MAX_SUBGENOME_RECURSION_DEPTH = 30;
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
 
     __inline__ __device__ static int getRandomGenomeNodeIndex(
@@ -162,7 +162,7 @@ __inline__ __device__ void MutationProcessor::neuronDataMutation(SimulationData&
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
     auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize == 0) {
+    if (genomeSize <= Const::GenomeInfoSize) {
         return;
     }
     auto nodeIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, false);
@@ -179,7 +179,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
     auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize == 0) {
+    if (genomeSize <= Const::GenomeInfoSize) {
         return;
     }
     auto nodeIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, false);
@@ -218,7 +218,7 @@ __inline__ __device__ void MutationProcessor::structureMutation(SimulationData& 
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
     auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize == 0) {
+    if (genomeSize <= Const::GenomeInfoSize) {
         return;
     }
     auto nodeIndex = getRandomGenomeNodeIndex(data, genome, genomeSize, false);
@@ -235,7 +235,7 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
     auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize == 0) {
+    if (genomeSize <= Const::GenomeInfoSize) {
         return;
     }
     int subGenomesSizeIndices[MAX_SUBGENOME_RECURSION_DEPTH];
@@ -247,11 +247,11 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
 
     auto origCellFunction = getNextCellFunctionType(genome, nodeIndex);
     if (origCellFunction == CellFunction_Constructor || origCellFunction == CellFunction_Injector) {
-        if (getNextSubGenomeSize(genome, genomeSize, nodeIndex) > 0) {
+        if (getNextSubGenomeSize(genome, genomeSize, nodeIndex) > Const::GenomeInfoSize) {
             return;
         }
     }
-    auto newCellFunctionSize = getCellFunctionDataSize(newCellFunction, makeSelfCopy, 0);
+    auto newCellFunctionSize = getCellFunctionDataSize(newCellFunction, makeSelfCopy, Const::GenomeInfoSize);
     auto origCellFunctionSize = getNextCellFunctionDataSize(genome, genomeSize, nodeIndex);
     auto sizeDelta = newCellFunctionSize - origCellFunctionSize;
 
@@ -270,7 +270,7 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
         targetGenome[i] = genome[i];
     }
     setNextCellFunctionType(targetGenome, nodeIndex, newCellFunction);
-    setRandomCellFunctionData(data, targetGenome, nodeIndex + Const::CellBasicBytes, newCellFunction, makeSelfCopy, 0);
+    setRandomCellFunctionData(data, targetGenome, nodeIndex + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeInfoSize);
 
     for (int i = nodeIndex + Const::CellBasicBytes + origCellFunctionSize; i < genomeSize; ++i) {
         targetGenome[i + sizeDelta] = genome[i];
@@ -340,7 +340,7 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
     auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize == 0) {
+    if (genomeSize <= Const::GenomeInfoSize) {
         return;
     }
 
@@ -377,7 +377,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
     auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize == 0) {
+    if (genomeSize <= Const::GenomeInfoSize) {
         return;
     }
 
@@ -497,7 +497,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
     auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize == 0) {
+    if (genomeSize <= Const::GenomeInfoSize) {
         return;
     }
 
@@ -569,7 +569,7 @@ __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
     auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize == 0) {
+    if (genomeSize <= Const::GenomeInfoSize) {
         return;
     }
 
@@ -577,14 +577,15 @@ __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data
     int numSubGenomesSizeIndices;
     getRandomGenomeNodeIndex(data, genome, genomeSize, false, subGenomesSizeIndices, &numSubGenomesSizeIndices);  //return value will be discarded
 
-    int nodeIndex = 0;
+    int nodeIndex = Const::GenomeInfoSize;
+    auto subgenome = genome;
     int subgenomeSize = genomeSize;
     if (numSubGenomesSizeIndices > 0) {
-        nodeIndex = subGenomesSizeIndices[numSubGenomesSizeIndices - 1] + 2;   //+2 because 2 bytes encode the sub-genome length
+        subgenome = genome + subGenomesSizeIndices[numSubGenomesSizeIndices - 1] + 2;  //+2 because 2 bytes encode the sub-genome length
         subgenomeSize = readWord(genome, subGenomesSizeIndices[numSubGenomesSizeIndices - 1]);
     }
 
-    auto origColor = getNextCellColor(genome, nodeIndex);
+    auto origColor = getNextCellColor(subgenome, nodeIndex);
     int numAllowedColors = 0;
     for (int i = 0; i < MAX_COLORS; ++i) {
         if (cudaSimulationParameters.cellFunctionConstructorMutationColorTransitions[origColor][i]) {
@@ -607,9 +608,9 @@ __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data
         }
     }
 
-    for (int dummy = 0; nodeIndex < genomeSize && dummy < subgenomeSize; ++dummy) {
-        setNextCellColor(genome, nodeIndex, newColor);
-        nodeIndex += Const::CellBasicBytes + getNextCellFunctionDataSize(genome, subgenomeSize, nodeIndex);
+    for (int dummy = 0; nodeIndex < subgenomeSize && dummy < subgenomeSize; ++dummy) {
+        setNextCellColor(subgenome, nodeIndex, newColor);
+        nodeIndex += Const::CellBasicBytes + getNextCellFunctionDataSize(subgenome, subgenomeSize, nodeIndex);
     }
 }
 
