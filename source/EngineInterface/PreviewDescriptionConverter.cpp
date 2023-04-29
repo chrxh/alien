@@ -2,6 +2,7 @@
 
 #include <boost/range/combine.hpp>
 
+#include "GenomeConstants.h"
 #include "Base/Math.h"
 #include "EngineInterface/GenomeDescriptionConverter.h"
 
@@ -188,7 +189,7 @@ namespace
                     continue;
                 }
                 auto data = constructor.getGenomeData();
-                if (data.empty()) {
+                if (data.size() <= Const::GenomeInfoSize) {
                     ++index;
                     continue;
                 }
