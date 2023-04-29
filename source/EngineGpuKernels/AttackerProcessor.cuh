@@ -227,10 +227,9 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
             if (otherCell->livingState != LivingState_Ready) {
                 return false;
             }
-            auto const& constructor = otherCell->cellFunctionData.constructor;
-            auto isFinished = GenomeDecoder::isFinishedSingleConstruction(constructor);
-            if (otherCell->cellFunction == CellFunction_Constructor && !isFinished) {
-                if (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color) {
+            if (otherCell->cellFunction == CellFunction_Constructor) {
+                auto isFinished = GenomeDecoder::isFinishedSingleConstruction(otherCell->cellFunctionData.constructor);
+                if (!isFinished && (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color)) {
                     return true;
                 }
             }
