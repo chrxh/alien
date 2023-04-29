@@ -121,7 +121,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.energy = GenomeDecoder::readEnergy(constructor);
     result.numRequiredAdditionalConnections = GenomeDecoder::readByte(constructor);
     result.numRequiredAdditionalConnections = result.numRequiredAdditionalConnections > 127 ? -1 : result.numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
-    result.executionOrderNumber = GenomeDecoder::readOptionalByte(constructor, cudaSimulationParameters.cellNumExecutionOrderNumbers);
+    result.executionOrderNumber = GenomeDecoder::readByte(constructor) % cudaSimulationParameters.cellNumExecutionOrderNumbers;
     result.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
     result.inputExecutionOrderNumber = GenomeDecoder::readOptionalByte(constructor, cudaSimulationParameters.cellNumExecutionOrderNumbers);
     result.outputBlocked = GenomeDecoder::readBool(constructor);
@@ -260,7 +260,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             return true;
         });
 
-    //connect surrounding cells if possible
+    //assemble surrounding cell candidates
     Cell* otherCells[MAX_CELL_BONDS];
     int numOtherCells = 0;
     for (int i = 0; i < numOtherCellCandidates; ++i) {
@@ -276,7 +276,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         }
     }
     if (constructionData.numRequiredAdditionalConnections != -1) {
-        if (numOtherCells != constructionData.numRequiredAdditionalConnections) {
+        if (numOtherCells < constructionData.numRequiredAdditionalConnections) {
             return false;
         }
     }
@@ -337,6 +337,11 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             auto dist2 = data.cellMap.getDistance(cell2->absPos, newCellPos);
             return dist1 < dist2;
         });
+
+        if (constructionData.numRequiredAdditionalConnections != -1) {
+            //it is already ensured that numOtherCells is not less than constructionData.numRequiredAdditionalConnections
+            numOtherCells = constructionData.numRequiredAdditionalConnections;
+        }
 
         //connect surrounding cells if possible
         for (int i = 0; i < numOtherCells; ++i) {

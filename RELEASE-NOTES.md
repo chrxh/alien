@@ -35,10 +35,10 @@
 
 ### Removed
 - tokens
-- cell function for computing operating
+- cell function for computing operations
 - cell code editor and compiler
 - cell memory editor
-- symbols
+- symbol map and symbol editor
 - time-varying simulation parameters
 
 ## [3.3.1] - 2023-02-03
