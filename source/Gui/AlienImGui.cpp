@@ -726,15 +726,19 @@ bool AlienImGui::ToolbarButton(std::string const& text)
     return result;
 }
 
-void AlienImGui::ToolbarSeparator()
+void AlienImGui::VerticalSeparator(float length)
 {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     auto cursorPos = ImGui::GetCursorScreenPos();
-    auto color = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Border]); 
+    auto color = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Border]);
     color.Value.w *= ImGui::GetStyle().Alpha;
-    drawList->AddLine(
-        ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x, cursorPos.y + contentScale(40.0f)), color, 2.0f);
+    drawList->AddLine(ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x, cursorPos.y + contentScale(length)), color, 2.0f);
     ImGui::Dummy(ImVec2(ImGui::GetStyle().FramePadding.x * 2, 1));
+}
+
+void AlienImGui::ToolbarSeparator()
+{
+    VerticalSeparator(40.0f);
 }
 
 bool AlienImGui::Button(std::string const& text, float size)
@@ -989,7 +993,7 @@ bool AlienImGui::CellFunctionCombo(CellFunctionComboParameters& parameters, int&
 
 bool AlienImGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, int& value)
 {
-    std::vector const AngleAlignmentStrings = {"None"s, "Align to 180 deg"s, "Align to 120 deg"s, "Align to 90 deg"s, "Align to 72 deg"s, "Align to 60 deg"s};
+    std::vector const AngleAlignmentStrings = {"None"s, "180 deg"s, "120 deg"s, "90 deg"s, "72 deg"s, "60 deg"s};
     return AlienImGui::Combo(AlienImGui::ComboParameters().name(parameters._name).values(AngleAlignmentStrings).textWidth(parameters._textWidth), value);
 }
 

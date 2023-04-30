@@ -178,7 +178,6 @@ __inline__ __device__ bool
 ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData)
 {
     if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, true)) {
-        printf("1\n");
         return false;
     }
 

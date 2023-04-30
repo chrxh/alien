@@ -1,10 +1,10 @@
 {
     "general": {
         "time step": "0",
-        "zoom": "2.11041355",
+        "zoom": "2.51326013",
         "center": {
-            "x": "534.51318359",
-            "y": "236.18615723"
+            "x": "523.77661133",
+            "y": "246.31555176"
         },
         "world size": {
             "x": "1000",
@@ -47,6 +47,13 @@
             "min energy[6]": "50.00000000",
             "fusion velocity": "0.82400000",
             "max binding energy": "500000.00000000",
+            "max age[0]": "2147483647",
+            "max age[1]": "2147483647",
+            "max age[2]": "2147483647",
+            "max age[3]": "2147483647",
+            "max age[4]": "2147483647",
+            "max age[5]": "2147483647",
+            "max age[6]": "2147483647",
             "color transition rules": {
                 "duration[0]": "0",
                 "duration[1]": "0",
@@ -65,6 +72,13 @@
             },
             "function": {
                 "constructor": {
+                    "pump energy factor[0]": "0.00000000",
+                    "pump energy factor[1]": "0.00000000",
+                    "pump energy factor[2]": "0.00000000",
+                    "pump energy factor[3]": "0.00000000",
+                    "pump energy factor[4]": "0.00000000",
+                    "pump energy factor[5]": "0.00000000",
+                    "pump energy factor[6]": "0.00000000",
                     "offspring distance[0]": "2.00000000",
                     "offspring distance[1]": "2.00000000",
                     "offspring distance[2]": "2.00000000",
@@ -101,6 +115,13 @@
                         "data[4]": "0.00000000",
                         "data[5]": "0.00000000",
                         "data[6]": "0.00000000",
+                        "structure[0]": "0.00000000",
+                        "structure[1]": "0.00000000",
+                        "structure[2]": "0.00000000",
+                        "structure[3]": "0.00000000",
+                        "structure[4]": "0.00000000",
+                        "structure[5]": "0.00000000",
+                        "structure[6]": "0.00000000",
                         "cell function[0]": "0.00000000",
                         "cell function[1]": "0.00000000",
                         "cell function[2]": "0.00000000",
@@ -464,12 +485,12 @@
             "absorption[5]": "0.23000000",
             "absorption[6]": "0.23000000",
             "min cell age[0]": "150583",
-            "min cell age[1]": "150583",
-            "min cell age[2]": "150583",
-            "min cell age[3]": "150583",
-            "min cell age[4]": "150583",
-            "min cell age[5]": "150583",
-            "min cell age[6]": "150583"
+            "min cell age[1]": "44966",
+            "min cell age[2]": "38616",
+            "min cell age[3]": "52361",
+            "min cell age[4]": "44966",
+            "min cell age[5]": "48523",
+            "min cell age[6]": "56502"
         },
         "high radiation": {
             "min cell energy[0]": "1483.98205566",
@@ -545,6 +566,16 @@
                     "value": "0.00000000"
                 },
                 "radiation": {
+                    "absorption": {
+                        "activated": "false"
+                    },
+                    "absorption[0]": "1.00000000",
+                    "absorption[1]": "1.00000000",
+                    "absorption[2]": "1.00000000",
+                    "absorption[3]": "1.00000000",
+                    "absorption[4]": "1.00000000",
+                    "absorption[5]": "1.00000000",
+                    "absorption[6]": "1.00000000",
                     "factor": {
                         "activated": "false"
                     },
@@ -693,6 +724,26 @@
                                 "neuron data[4]": "0.00000000",
                                 "neuron data[5]": "0.00000000",
                                 "neuron data[6]": "0.00000000",
+                                "data ": {
+                                    "activated": "false"
+                                },
+                                "data [0]": "0.00000000",
+                                "data [1]": "0.00000000",
+                                "data [2]": "0.00000000",
+                                "data [3]": "0.00000000",
+                                "data [4]": "0.00000000",
+                                "data [5]": "0.00000000",
+                                "data [6]": "0.00000000",
+                                "structure": {
+                                    "activated": "false"
+                                },
+                                "structure[0]": "0.00000000",
+                                "structure[1]": "0.00000000",
+                                "structure[2]": "0.00000000",
+                                "structure[3]": "0.00000000",
+                                "structure[4]": "0.00000000",
+                                "structure[5]": "0.00000000",
+                                "structure[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
@@ -753,24 +804,6 @@
                                 "color[4]": "0.00000000",
                                 "color[5]": "0.00000000",
                                 "color[6]": "0.00000000"
-                            }
-                        }
-                    }
-                },
-                " cell": {
-                    "function": {
-                        "constructor": {
-                            "mutation probability": {
-                                "data ": {
-                                    "activated": "false"
-                                },
-                                "data [0]": "0.00000000",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00000000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
                             }
                         }
                     }
