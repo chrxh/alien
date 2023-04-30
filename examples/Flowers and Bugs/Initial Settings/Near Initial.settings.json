@@ -1,10 +1,10 @@
 {
     "general": {
-        "time step": "196572",
-        "zoom": "3.28795266",
+        "time step": "236058",
+        "zoom": "2.70386434",
         "center": {
-            "x": "385.62478638",
-            "y": "225.13616943"
+            "x": "489.85330200",
+            "y": "263.85919189"
         },
         "world size": {
             "x": "1000",
@@ -79,13 +79,6 @@
                     "pump energy factor[4]": "0.00000000",
                     "pump energy factor[5]": "0.00000000",
                     "pump energy factor[6]": "0.00000000",
-                    "energy from radiation factor[0]": "0.00000000",
-                    "energy from radiation factor[1]": "0.00000000",
-                    "energy from radiation factor[2]": "0.00000000",
-                    "energy from radiation factor[3]": "0.00000000",
-                    "energy from radiation factor[4]": "0.00000000",
-                    "energy from radiation factor[5]": "0.00000000",
-                    "energy from radiation factor[6]": "0.00000000",
                     "offspring distance[0]": "2.00000000",
                     "offspring distance[1]": "2.00000000",
                     "offspring distance[2]": "2.00000000",
@@ -122,6 +115,13 @@
                         "data[4]": "0.00000000",
                         "data[5]": "0.00000000",
                         "data[6]": "0.00000000",
+                        "structure[0]": "0.00000000",
+                        "structure[1]": "0.00000000",
+                        "structure[2]": "0.00000000",
+                        "structure[3]": "0.00000000",
+                        "structure[4]": "0.00000000",
+                        "structure[5]": "0.00000000",
+                        "structure[6]": "0.00000000",
                         "cell function[0]": "0.00000000",
                         "cell function[1]": "0.00000000",
                         "cell function[2]": "0.00000000",
@@ -485,12 +485,12 @@
             "absorption[5]": "0.23000000",
             "absorption[6]": "0.23000000",
             "min cell age[0]": "150583",
-            "min cell age[1]": "150583",
-            "min cell age[2]": "150583",
-            "min cell age[3]": "150583",
-            "min cell age[4]": "150583",
-            "min cell age[5]": "150583",
-            "min cell age[6]": "150583"
+            "min cell age[1]": "44966",
+            "min cell age[2]": "38616",
+            "min cell age[3]": "52361",
+            "min cell age[4]": "44966",
+            "min cell age[5]": "48523",
+            "min cell age[6]": "56502"
         },
         "high radiation": {
             "min cell energy[0]": "1483.98205566",
@@ -724,6 +724,26 @@
                                 "neuron data[4]": "0.00000000",
                                 "neuron data[5]": "0.00000000",
                                 "neuron data[6]": "0.00000000",
+                                "data ": {
+                                    "activated": "false"
+                                },
+                                "data [0]": "0.00000000",
+                                "data [1]": "0.00000000",
+                                "data [2]": "0.00000000",
+                                "data [3]": "0.00000000",
+                                "data [4]": "0.00000000",
+                                "data [5]": "0.00000000",
+                                "data [6]": "0.00000000",
+                                "structure": {
+                                    "activated": "false"
+                                },
+                                "structure[0]": "0.00000000",
+                                "structure[1]": "0.00000000",
+                                "structure[2]": "0.00000000",
+                                "structure[3]": "0.00000000",
+                                "structure[4]": "0.00000000",
+                                "structure[5]": "0.00000000",
+                                "structure[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
@@ -784,24 +804,6 @@
                                 "color[4]": "0.00000000",
                                 "color[5]": "0.00000000",
                                 "color[6]": "0.00000000"
-                            }
-                        }
-                    }
-                },
-                " cell": {
-                    "function": {
-                        "constructor": {
-                            "mutation probability": {
-                                "data ": {
-                                    "activated": "false"
-                                },
-                                "data [0]": "0.00000000",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00000000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
                             }
                         }
                     }
