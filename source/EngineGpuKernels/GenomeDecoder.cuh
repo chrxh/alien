@@ -43,7 +43,8 @@ __inline__ __device__ bool GenomeDecoder::isFinished(ConstructorFunction const& 
 __inline__ __device__ bool GenomeDecoder::isFinishedSingleConstruction(ConstructorFunction const& constructor)
 {
     auto genomeInfo = readGenomeInfo(constructor);
-    return genomeInfo.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize;
+    return genomeInfo.singleConstruction
+        && (constructor.currentGenomePos >= constructor.genomeSize || (constructor.currentGenomePos == 0 && constructor.genomeSize == Const::GenomeInfoSize));
 }
 
 __inline__ __device__ bool GenomeDecoder::readBool(ConstructorFunction& constructor)
