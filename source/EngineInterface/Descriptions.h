@@ -103,6 +103,7 @@ struct ConstructorDescription
     //process data
     int currentGenomePos = 0;
 
+    ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
 
     ConstructorDescription& setActivationMode(int value)
