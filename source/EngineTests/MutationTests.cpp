@@ -217,8 +217,8 @@ protected:
         }
         auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
         auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
-        expectedGenome.info.shape = ConstructionShape_FreeForm; //compare all expect shape
-        actualGenome.info.shape = ConstructionShape_FreeForm;
+        expectedGenome.info.shape = ConstructionShape_IndividualShape; //compare all expect shape
+        actualGenome.info.shape = ConstructionShape_IndividualShape;
         if (expectedGenome.info != actualGenome.info) {
             return false;
         }

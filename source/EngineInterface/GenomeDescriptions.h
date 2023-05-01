@@ -346,7 +346,7 @@ struct CellGenomeDescription
 
 struct GenomeInfoDescription
 {
-    ConstructionShape shape = ConstructionShape_FreeForm;
+    ConstructionShape shape = ConstructionShape_IndividualShape;
     bool singleConstruction = false;
     bool separateConstruction = true;
     ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
