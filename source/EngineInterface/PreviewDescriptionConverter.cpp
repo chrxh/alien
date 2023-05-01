@@ -228,7 +228,7 @@ namespace
                 auto previewPart = processGenomeDescription(subGenome, cellIntern.nodeIndex, cellIntern.pos + direction, targetAngle, parameters);
                 insert(result, previewPart);
                 indexOffset += previewPart.size();
-                if (!genome.info.separateConstruction) {
+                if (!subGenome.info.separateConstruction) {
                     auto cellIndex1 = previewPart.size() - 1;
                     auto cellIndex2 = index + indexOffset;
                     result.at(cellIndex1).connectionIndices.insert(toInt(cellIndex2));

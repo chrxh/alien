@@ -50,6 +50,8 @@ private:
     constructCellIntern(SimulationData& data, Cell* hostCell, float2 const& newCellPos, int maxConnections, ConstructionData const& constructionData);
 
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
+
+    __inline__ __device__ static void setTriangleConstructionData(ConstructionData& constructionData, ConstructorFunction const& constructor);
 };
 
 /************************************************************************/
@@ -133,6 +135,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 
     //genome-wide data
     result.genomeInfo = GenomeDecoder::readGenomeInfo(constructor);
+    if (result.genomeInfo.shape == ConstructionShape_Triangle) {
+        setTriangleConstructionData(result, constructor);
+    }
     return result;
 }
 
@@ -523,4 +528,47 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }
     return true;
+}
+
+__inline__ __device__ void ConstructorProcessor::setTriangleConstructionData(ConstructionData& constructionData, ConstructorFunction const& constructor)
+{
+    int edgePos = 0;
+    int edgeLength = 2;
+    int processedEdges = 0;
+    for (int currentNodeAddress = Const::GenomeInfoSize; currentNodeAddress < constructor.currentGenomePos;) {
+        currentNodeAddress +=
+            Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(constructor.genome, constructor.genomeSize, currentNodeAddress);
+        if (currentNodeAddress < constructor.currentGenomePos) {
+            if (++edgePos == edgeLength) {
+                edgePos = 0;
+                ++processedEdges;
+                if (processedEdges >= 2) {
+                    ++edgeLength;
+                }
+            }
+        }
+    }
+    if (edgePos < edgeLength - 1) {
+        constructionData.angle = 0;
+    } else {
+        constructionData.angle = 120.0f;
+    }
+    if (processedEdges == 0) {
+        constructionData.numRequiredAdditionalConnections = 0;
+    } else if (processedEdges == 1) {
+        if (edgePos == 0) {
+            constructionData.numRequiredAdditionalConnections = 1;
+        } else {
+            constructionData.numRequiredAdditionalConnections = 0;
+        }
+    } else {
+        if (edgePos == edgeLength - 1) {
+            constructionData.numRequiredAdditionalConnections = 0;
+        } else if (edgePos == edgeLength - 2) {
+            constructionData.numRequiredAdditionalConnections = 1;
+        } else {
+            constructionData.numRequiredAdditionalConnections = 2;
+        }
+    }
+    constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
 }

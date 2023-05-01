@@ -133,6 +133,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
     auto const& cells = genome.cells;
     std::vector<uint8_t> result;
     result.reserve(cells.size() * 12 + 4);
+    writeByte(result, genome.info.shape);
     writeBool(result, genome.info.singleConstruction);
     writeBool(result, genome.info.separateConstruction);
     writeByte(result, genome.info.angleAlignment);
@@ -225,6 +226,7 @@ namespace
         int cellIndex = 0;
         auto& bytePosition = result.lastBytePosition;
 
+        result.genome.info.shape = readByte(data, bytePosition) % ConstructionShape_Count;
         result.genome.info.singleConstruction = readBool(data, bytePosition);
         result.genome.info.separateConstruction = readBool(data, bytePosition);
         result.genome.info.angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;

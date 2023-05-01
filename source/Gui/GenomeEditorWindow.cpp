@@ -261,24 +261,10 @@ namespace
 void _GenomeEditorWindow::processTab(TabData& tab)
 {
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewHeight), true)) {
-        AlienImGui::Group("Properties");
-        DynamicTableLayout table;
-        if (table.begin()) {
-            AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth),
-                tab.genome.info.stiffness);
-            table.next();
-            AlienImGui::AngleAlignmentCombo(
-                AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(ContentTextWidth), tab.genome.info.angleAlignment);
-            table.next();
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(ContentTextWidth), tab.genome.info.singleConstruction);
-            table.next();
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Separate construction").textWidth(ContentTextWidth), tab.genome.info.separateConstruction);
-            table.end();
-        }
+        AlienImGui::Group("Construction settings");
+        processConstructionSettings(tab);
         AlienImGui::Group("Construction sequence");
-        processGenomeEditTab(tab);
+        processConstructionSequence(tab);
     }
     ImGui::EndChild();
     ImGui::Button("", ImVec2(-1, StyleRepository::getInstance().contentScale(5.0f)));
@@ -290,6 +276,29 @@ void _GenomeEditorWindow::processTab(TabData& tab)
         showPreview(tab);
     }
     ImGui::EndChild();
+}
+
+void _GenomeEditorWindow::processConstructionSettings(TabData& tab)
+{
+    DynamicTableLayout table;
+    if (table.begin()) {
+        std::vector ShapeStrings = {"Individual"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Ring"s};
+        AlienImGui::Combo(AlienImGui::ComboParameters().name("Shape").values(ShapeStrings).textWidth(ContentTextWidth), tab.genome.info.shape);
+        table.next();
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth), tab.genome.info.stiffness);
+        if (tab.genome.info.shape == ConstructionShape_IndividualShape) {
+            table.next();
+            AlienImGui::AngleAlignmentCombo(
+                AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(ContentTextWidth), tab.genome.info.angleAlignment);
+        }
+        table.next();
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(ContentTextWidth), tab.genome.info.singleConstruction);
+        table.next();
+        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Separate construction").textWidth(ContentTextWidth), tab.genome.info.separateConstruction);
+        table.end();
+    }
+    validationAndCorrection(tab.genome.info);
 }
 
 namespace 
@@ -334,54 +343,51 @@ namespace
     }
 }
 
-void _GenomeEditorWindow::processGenomeEditTab(TabData& tab)
+void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 {
-//    if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
-        int index = 0;
-        for (auto& cell : tab.genome.cells) {
-            ImGui::PushID(index);
+    int index = 0;
+    for (auto& cell : tab.genome.cells) {
+        ImGui::PushID(index);
 
-            float h, s, v;
-            AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.5f, v));
-            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow;
+        float h, s, v;
+        AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.5f, v));
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow;
+        if (tab.selectedNode && *tab.selectedNode == index) {
+            flags |= ImGuiTreeNodeFlags_Selected;
+        }
+        if (_nodeIndexToJump && *_nodeIndexToJump == index) {
+            ImGui::SetScrollHereY();
+            _nodeIndexToJump = std::nullopt;
+        }
+
+        if (_collapseAllNodes) {
+            ImGui::SetNextTreeNodeOpen(false);
+        }
+        auto treeNodeOpen = ImGui::TreeNodeEx((generateShortDescription(index, cell) + "###").c_str(), flags);
+        ImGui::PopStyleColor();
+        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
             if (tab.selectedNode && *tab.selectedNode == index) {
-                flags |= ImGuiTreeNodeFlags_Selected;
-            }
-            if (_nodeIndexToJump && *_nodeIndexToJump == index) {
-                ImGui::SetScrollHereY();
-                _nodeIndexToJump = std::nullopt;
-            }
-
-            if (_collapseAllNodes) {
-                ImGui::SetNextTreeNodeOpen(false);
-            }
-            auto treeNodeOpen = ImGui::TreeNodeEx((generateShortDescription(index, cell) + "###").c_str(), flags);
-            ImGui::PopStyleColor();
-            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-                if (tab.selectedNode && *tab.selectedNode == index) {
-                    tab.selectedNode.reset();
-                } else {
-                    tab.selectedNode = index;
-                }
-            }
-            if (ImGui::IsItemToggledOpen()) {
+                tab.selectedNode.reset();
+            } else {
                 tab.selectedNode = index;
             }
-
-            if (treeNodeOpen) {
-                auto origCell = cell;
-                processNodeEdit(tab, cell);
-                if (origCell != cell) {
-                    tab.selectedNode = index;
-                }
-                ImGui::TreePop();
-            }
-            ImGui::PopID();
-            ++index;
         }
-    //}
-    //ImGui::EndChild();
+        if (ImGui::IsItemToggledOpen()) {
+            tab.selectedNode = index;
+        }
+
+        if (treeNodeOpen) {
+            auto origCell = cell;
+            processNodeEdit(tab, cell);
+            if (origCell != cell) {
+                tab.selectedNode = index;
+            }
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
+        ++index;
+    }
     _collapseAllNodes = false;
 }
 
@@ -734,6 +740,11 @@ void _GenomeEditorWindow::showPreview(TabData& tab)
     }
 }
 
+void _GenomeEditorWindow::validationAndCorrection(GenomeInfoDescription& info) const
+{
+    info.stiffness = std::max(0.0f, std::min(1.0f, info.stiffness));
+}
+
 void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const
 {
     auto numExecutionOrderNumbers = _simController->getSimulationParameters().cellNumExecutionOrderNumbers;
@@ -753,10 +764,6 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
         if (constructor.mode < 0) {
             constructor.mode = 0;
         }
-        //if (constructor.maxConnections) {
-        //    constructor.maxConnections = (*constructor.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
-        //}
-        //constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
     } break;
     case CellFunction_Sensor: {
         auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);

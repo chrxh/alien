@@ -25,7 +25,8 @@ private:
         std::optional<int> selectedNode;
     };
     void processTab(TabData& tab);
-    void processGenomeEditTab(TabData& tab);
+    void processConstructionSettings(TabData& tab);
+    void processConstructionSequence(TabData& tab);
     void processNodeEdit(TabData& tab, CellGenomeDescription& cell);
     template<typename Description>
     void processSubGenomeWidgets(TabData const& tab, Description& desc);
@@ -40,6 +41,7 @@ private:
 
     void showPreview(TabData& tab);
 
+    void validationAndCorrection(GenomeInfoDescription& info) const;
     void validationAndCorrection(CellGenomeDescription& cell) const;
 
     void scheduleAddTab(GenomeDescription const& genome);
