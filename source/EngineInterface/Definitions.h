@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Base/Definitions.h"
-#include "CellFunctionEnums.h"
+#include "CellFunctionConstants.h"
 
 struct SimulationParameters;
 

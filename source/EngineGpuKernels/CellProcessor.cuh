@@ -3,7 +3,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/CellFunctionConstants.h"
 
 #include "TOs.cuh"
 #include "Base.cuh"

@@ -4,14 +4,14 @@ add_library(alien_engine_interface_lib
     AuxiliaryData.h
     AuxiliaryDataParser.cpp
     AuxiliaryDataParser.h
-    CellFunctionEnums.h
+    CellFunctionConstants.h
     Colors.h
-    Constants.h
     Definitions.h
     DescriptionHelper.cpp
     DescriptionHelper.h
     Descriptions.cpp
     Descriptions.h
+    FundamentalConstants.h
     GenomeConstants.h
     GenomeDescriptionConverter.cpp
     GenomeDescriptionConverter.h

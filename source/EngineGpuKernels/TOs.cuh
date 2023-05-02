@@ -3,8 +3,8 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
-#include "EngineInterface/Constants.h"
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/CellFunctionConstants.h"
 
 struct ParticleTO
 {

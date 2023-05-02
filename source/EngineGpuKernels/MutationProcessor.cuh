@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/CellFunctionConstants.h"
 #include "EngineInterface/GenomeConstants.h"
 
 #include "CellConnectionProcessor.cuh"

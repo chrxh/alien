@@ -48,7 +48,7 @@ namespace
         }
     }
 
-    bool noOverlappingConnection(
+    bool isThereNoOverlappingConnection(
         std::vector<CellPreviewDescriptionIntern> const& cells,
         CellPreviewDescriptionIntern const& cell1,
         CellPreviewDescriptionIntern const& cell2)
@@ -83,6 +83,52 @@ namespace
         return true;
     }
 
+    struct EdgeData
+    {
+        int edgePos = 0;
+        int edgeLength = 2;
+        int processedEdges = 0;
+    };
+    struct ConstructionData
+    {
+        float angle;
+        std::optional<int> numRequiredAdditionalConnections;
+    };
+    ConstructionData getNextConstructionDataForTriangle(EdgeData& edgeData)
+    {
+        ConstructionData result;
+        if (edgeData.edgePos < edgeData.edgeLength - 1) {
+            result.angle = 0;
+        } else {
+            result.angle = 120.0f;
+        }
+        if (edgeData.processedEdges == 0) {
+            result.numRequiredAdditionalConnections = 0;
+        } else if (edgeData.processedEdges == 1) {
+            if (edgeData.edgePos == 0) {
+                result.numRequiredAdditionalConnections = 1;
+            } else {
+                result.numRequiredAdditionalConnections = 0;
+            }
+        } else {
+            if (edgeData.edgePos == edgeData.edgeLength - 1) {
+                result.numRequiredAdditionalConnections = 0;
+            } else if (edgeData.edgePos == edgeData.edgeLength - 2) {
+                result.numRequiredAdditionalConnections = 1;
+            } else {
+                result.numRequiredAdditionalConnections = 2;
+            }
+        }
+        if (++edgeData.edgePos == edgeData.edgeLength) {
+            edgeData.edgePos = 0;
+            ++edgeData.processedEdges;
+            if (edgeData.processedEdges >= 2) {
+                ++edgeData.edgeLength;
+            }
+        }
+        return result;
+    }
+
     struct ProcessedGenomeDescriptionResult
     {
         std::vector<CellPreviewDescriptionIntern> cellsIntern;
@@ -96,13 +142,21 @@ namespace
         RealVector2D pos;
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
         int index = 0;
+        EdgeData edgeData;
         for (auto const& node : genome.cells) {
             if (index > 0) {
                 pos += result.direction;
             }
 
+            ConstructionData constructionData;
+            constructionData.angle = node.referenceAngle;
+            constructionData.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
+            if (genome.info.shape == ConstructionShape_Triangle) {
+                constructionData = getNextConstructionDataForTriangle(edgeData);
+            }
+
             if (index > 0) {
-                result.direction = Math::rotateClockwise(-result.direction, (180.0f + node.referenceAngle));
+                result.direction = Math::rotateClockwise(-result.direction, (180.0f + constructionData.angle));
             }
 
             //create cell description intern
@@ -150,7 +204,7 @@ namespace
             //add connections
             for (auto const& otherCellIndex : nearbyCellIndices) {
                 auto& otherCell = result.cellsIntern.at(otherCellIndex);
-                if (noOverlappingConnection(result.cellsIntern, cellIntern, otherCell) && noOverlappingConnection(result.cellsIntern, otherCell, cellIntern)) {
+                if (isThereNoOverlappingConnection(result.cellsIntern, cellIntern, otherCell) && isThereNoOverlappingConnection(result.cellsIntern, otherCell, cellIntern)) {
                     cellIntern.connectionIndices.insert(otherCellIndex);
                     otherCell.connectionIndices.insert(index);
                 }
@@ -163,7 +217,7 @@ namespace
         return result;
     }
 
-    std::vector<CellPreviewDescriptionIntern> processGenomeDescription(
+    std::vector<CellPreviewDescriptionIntern> convertToPreviewDescriptionIntern(
         GenomeDescription const& genome,
         std::optional<int> nodeIndex,
         std::optional<RealVector2D> const& desiredEndPos,
@@ -225,7 +279,7 @@ namespace
                 }
                 targetAngle += subGenome.cells.front().referenceAngle;
                 auto direction = Math::unitVectorOfAngle(targetAngle);
-                auto previewPart = processGenomeDescription(subGenome, cellIntern.nodeIndex, cellIntern.pos + direction, targetAngle, parameters);
+                auto previewPart = convertToPreviewDescriptionIntern(subGenome, cellIntern.nodeIndex, cellIntern.pos + direction, targetAngle, parameters);
                 insert(result, previewPart);
                 indexOffset += previewPart.size();
                 if (!subGenome.info.separateConstruction) {
@@ -285,7 +339,7 @@ namespace
 PreviewDescription
 PreviewDescriptionConverter::convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters)
 {
-    auto cellInterDescriptions =
-        processGenomeDescription(genome, std::nullopt, std::nullopt, std::nullopt, parameters);
-    return createPreviewDescription(cellInterDescriptions, parameters);
+    auto cellInternDescriptions =
+        convertToPreviewDescriptionIntern(genome, std::nullopt, std::nullopt, std::nullopt, parameters);
+    return createPreviewDescription(cellInternDescriptions, parameters);
 }

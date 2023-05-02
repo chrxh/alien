@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/CellFunctionConstants.h"
 
 #include "QuantityConverter.cuh"
 #include "CellFunctionProcessor.cuh"
@@ -51,7 +51,7 @@ private:
 
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
 
-    __inline__ __device__ static void setTriangleConstructionData(ConstructionData& constructionData, ConstructorFunction const& constructor);
+    __inline__ __device__ static void applyTriangleShape(ConstructionData& constructionData, ConstructorFunction const& constructor);
 };
 
 /************************************************************************/
@@ -136,7 +136,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     //genome-wide data
     result.genomeInfo = GenomeDecoder::readGenomeInfo(constructor);
     if (result.genomeInfo.shape == ConstructionShape_Triangle) {
-        setTriangleConstructionData(result, constructor);
+        applyTriangleShape(result, constructor);
     }
     return result;
 }
@@ -530,7 +530,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     return true;
 }
 
-__inline__ __device__ void ConstructorProcessor::setTriangleConstructionData(ConstructionData& constructionData, ConstructorFunction const& constructor)
+__inline__ __device__ void ConstructorProcessor::applyTriangleShape(ConstructionData& constructionData, ConstructorFunction const& constructor)
 {
     int edgePos = 0;
     int edgeLength = 2;
@@ -548,10 +548,12 @@ __inline__ __device__ void ConstructorProcessor::setTriangleConstructionData(Con
             }
         }
     }
-    if (edgePos < edgeLength - 1) {
-        constructionData.angle = 0;
-    } else {
-        constructionData.angle = 120.0f;
+    if (!GenomeDecoder::isAtBeginning(constructor) && !GenomeDecoder::isFinished(constructor)) {
+        if (edgePos < edgeLength - 1) {
+            constructionData.angle = 0;
+        } else {
+            constructionData.angle = 120.0f;
+        }
     }
     if (processedEdges == 0) {
         constructionData.numRequiredAdditionalConnections = 0;

@@ -282,7 +282,7 @@ void _GenomeEditorWindow::processConstructionSettings(TabData& tab)
 {
     DynamicTableLayout table;
     if (table.begin()) {
-        std::vector ShapeStrings = {"Individual"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Ring"s};
+        std::vector ShapeStrings = {"Individual"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s};
         AlienImGui::Combo(AlienImGui::ComboParameters().name("Shape").values(ShapeStrings).textWidth(ContentTextWidth), tab.genome.info.shape);
         table.next();
         AlienImGui::InputFloat(
