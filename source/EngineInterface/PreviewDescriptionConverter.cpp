@@ -1,6 +1,7 @@
 #include "PreviewDescriptionConverter.h"
 
 #include <boost/range/combine.hpp>
+#include <boost/range/adaptor/indexed.hpp>
 
 #include "GenomeConstants.h"
 #include "Base/Math.h"
@@ -183,7 +184,7 @@ namespace
                     if (findResult != cellInternIndicesBySlot.end()) {
                         for (auto const& otherCellIndex : findResult->second) {
                             auto& otherCell = result.cellsIntern.at(otherCellIndex);
-                            if (otherCellIndex != index
+                            if (otherCellIndex != index && otherCellIndex != index - 1
                                 && Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance[node.color]) {
                                 if (otherCell.connectionIndices.size() < MAX_CELL_BONDS && cellIntern.connectionIndices.size() < MAX_CELL_BONDS) {
                                     nearbyCellIndices.emplace_back(otherCellIndex);
@@ -202,7 +203,10 @@ namespace
             });
 
             //add connections
-            for (auto const& otherCellIndex : nearbyCellIndices) {
+            for (auto const& [otherIndex, otherCellIndex] : nearbyCellIndices | boost::adaptors::indexed(0)) {
+                if (constructionData.numRequiredAdditionalConnections.has_value() && otherIndex >= *constructionData.numRequiredAdditionalConnections) {
+                    continue;
+                }
                 auto& otherCell = result.cellsIntern.at(otherCellIndex);
                 if (isThereNoOverlappingConnection(result.cellsIntern, cellIntern, otherCell) && isThereNoOverlappingConnection(result.cellsIntern, otherCell, cellIntern)) {
                     cellIntern.connectionIndices.insert(otherCellIndex);
