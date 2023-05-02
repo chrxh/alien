@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/CellFunctionConstants.h"
 #include "Base.cuh"
 #include "Cell.cuh"
 
@@ -25,6 +25,7 @@ public:
     __inline__ __device__ static float readEnergy(ConstructorFunction& constructor);  //return values from 36 to 1060
     __inline__ __device__ static float readAngle(ConstructorFunction& constructor);
 
+    __inline__ __device__ static bool isAtBeginning(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isFinished(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isFinishedSingleConstruction(ConstructorFunction const& constructor);
 
@@ -118,6 +119,11 @@ __inline__ __device__ float GenomeDecoder::readEnergy(ConstructorFunction& const
 __inline__ __device__ float GenomeDecoder::readAngle(ConstructorFunction& constructor)
 {
     return static_cast<float>(static_cast<int8_t>(readByte(constructor))) / 120 * 180;
+}
+
+__inline__ __device__ bool GenomeDecoder::isAtBeginning(ConstructorFunction const& constructor)
+{
+    return constructor.currentGenomePos <= Const::GenomeInfoSize;
 }
 
 __inline__ __device__ bool GenomeDecoder::isFinished(ConstructorFunction const& constructor)

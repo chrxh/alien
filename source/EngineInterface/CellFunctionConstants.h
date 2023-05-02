@@ -98,6 +98,6 @@ enum ConstructionShape_
     ConstructionShape_Triangle,
     ConstructionShape_Rectangle,
     ConstructionShape_Hexagon,
-    ConstructionShape_Ring,
+    ConstructionShape_Loop,
     ConstructionShape_Count
 };

@@ -5,8 +5,8 @@
 #include <optional>
 #include <variant>
 
-#include "Constants.h"
-#include "CellFunctionEnums.h"
+#include "FundamentalConstants.h"
+#include "CellFunctionConstants.h"
 
 struct MakeGenomeCopy
 {
