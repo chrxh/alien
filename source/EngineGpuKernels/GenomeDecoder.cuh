@@ -54,7 +54,7 @@ public:
         int subGenomeSize);
 
     __inline__ __device__ static int getNumGenomeCells(uint8_t* genome, int genomeSize);
-    __inline__ __device__ static int getNodeAddress(uint8_t* genome, int genomeSize, int cellIndex);
+    __inline__ __device__ static int getNodeAddress(uint8_t* genome, int genomeSize, int nodeIndex);
     __inline__ __device__ static int findStartNodeAddress(uint8_t* genome, int genomeSize, int refIndex);
     __inline__ __device__ static int getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeAddress);
     __inline__ __device__ static int getNextCellFunctionType(uint8_t* genome, int nodeAddress);
@@ -288,10 +288,10 @@ __inline__ __device__ int GenomeDecoder::getNumGenomeCells(uint8_t* genome, int 
     return result;
 }
 
-__inline__ __device__ int GenomeDecoder::getNodeAddress(uint8_t* genome, int genomeSize, int cellIndex)
+__inline__ __device__ int GenomeDecoder::getNodeAddress(uint8_t* genome, int genomeSize, int nodeIndex)
 {
     int currentNodeAddress = Const::GenomeInfoSize;
-    for (int currentCellIndex = 0; currentCellIndex < cellIndex; ++currentCellIndex) {
+    for (int currentNodeIndex = 0; currentNodeIndex < nodeIndex; ++currentNodeIndex) {
         if (currentNodeAddress >= genomeSize) {
             break;
         }
