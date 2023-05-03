@@ -45,6 +45,8 @@ struct ConstructorGenomeDescription
     int constructionActivationTime = 100;
 
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
+    float constructionAngle1 = 0;
+    float constructionAngle2 = 0;
 
     auto operator<=>(ConstructorGenomeDescription const&) const = default;
 

@@ -99,6 +99,8 @@ struct ConstructorDescription
     int constructionActivationTime = 100;
     std::vector<uint8_t> genome;
     int genomeGeneration = 0;
+    float constructionAngle1 = 0;
+    float constructionAngle2 = 0;
 
     //process data
     int currentGenomePos = 0;
