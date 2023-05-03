@@ -154,10 +154,13 @@ namespace
             }
 
             ConstructionData constructionData;
-            constructionData.angle = lastReferenceAngle.has_value() && index == genome.cells.size() - 1 ? *lastReferenceAngle : node.referenceAngle;
+            constructionData.angle = node.referenceAngle;
             constructionData.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
             if (genome.info.shape == ConstructionShape_Triangle) {
                 constructionData = getNextConstructionDataForTriangle(edgeData);
+            }
+            if (lastReferenceAngle.has_value() && index == genome.cells.size() - 1) {
+                constructionData.angle = *lastReferenceAngle;
             }
 
             if (index > 0) {

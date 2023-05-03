@@ -125,6 +125,12 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     ConstructionData result;
     result.cellFunction = GenomeDecoder::readByte(constructor) % CellFunction_Count;
     result.angle = GenomeDecoder::readAngle(constructor);
+    if (GenomeDecoder::isAtBeginning(constructor)) {
+        result.angle = constructor.constructionAngle1;
+    }
+    if (GenomeDecoder::isFinished(constructor)) {
+        result.angle = constructor.constructionAngle2;
+    }
     result.energy = GenomeDecoder::readEnergy(constructor);
     result.numRequiredAdditionalConnections = GenomeDecoder::readByte(constructor);
     result.numRequiredAdditionalConnections = result.numRequiredAdditionalConnections > 127 ? -1 : result.numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
@@ -468,6 +474,8 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.activationMode = GenomeDecoder::readByte(constructor);
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor);
         newConstructor.currentGenomePos = 0;
+        newConstructor.constructionAngle1 = GenomeDecoder::readAngle(constructor);
+        newConstructor.constructionAngle2 = GenomeDecoder::readAngle(constructor);
         GenomeDecoder::copyGenome(data, constructor, newConstructor);
         newConstructor.genomeGeneration = constructor.genomeGeneration + 1;
     } break;
