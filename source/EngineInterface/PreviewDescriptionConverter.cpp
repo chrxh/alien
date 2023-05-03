@@ -135,7 +135,11 @@ namespace
         std::vector<CellPreviewDescriptionIntern> cellsIntern;
         RealVector2D direction;
     };
-    ProcessedGenomeDescriptionResult processMainGenomeDescription(GenomeDescription const& genome, std::optional<int> nodeIndex, SimulationParameters const& parameters)
+    ProcessedGenomeDescriptionResult processMainGenomeDescription(
+        GenomeDescription const& genome,
+        std::optional<int> const& uniformNodeIndex,
+        std::optional<float> const& lastReferenceAngle,
+        SimulationParameters const& parameters)
     {
         ProcessedGenomeDescriptionResult result;
         result.direction = RealVector2D{0, 1};
@@ -150,7 +154,7 @@ namespace
             }
 
             ConstructionData constructionData;
-            constructionData.angle = node.referenceAngle;
+            constructionData.angle = lastReferenceAngle.has_value() && index == genome.cells.size() - 1 ? *lastReferenceAngle : node.referenceAngle;
             constructionData.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
             if (genome.info.shape == ConstructionShape_Triangle) {
                 constructionData = getNextConstructionDataForTriangle(edgeData);
@@ -166,7 +170,7 @@ namespace
             cellIntern.inputExecutionOrderNumber = node.inputExecutionOrderNumber;
             cellIntern.outputBlocked = node.outputBlocked;
             cellIntern.executionOrderNumber = node.executionOrderNumber;
-            cellIntern.nodeIndex = nodeIndex ? *nodeIndex : index;
+            cellIntern.nodeIndex = uniformNodeIndex ? *uniformNodeIndex : index;
             cellIntern.pos = pos;
             if (index > 0) {
                 cellIntern.connectionIndices.insert(index - 1);
@@ -223,7 +227,8 @@ namespace
 
     std::vector<CellPreviewDescriptionIntern> convertToPreviewDescriptionIntern(
         GenomeDescription const& genome,
-        std::optional<int> nodeIndex,
+        std::optional<int> const& uniformNodeIndex,
+        std::optional<float> const& lastReferenceAngle,
         std::optional<RealVector2D> const& desiredEndPos,
         std::optional<float> const& desiredEndAngle,
         SimulationParameters const& parameters)
@@ -232,7 +237,7 @@ namespace
             return {};
         }
 
-        ProcessedGenomeDescriptionResult processedGenome = processMainGenomeDescription(genome, nodeIndex, parameters);
+        ProcessedGenomeDescriptionResult processedGenome = processMainGenomeDescription(genome, uniformNodeIndex, lastReferenceAngle, parameters);
 
         std::vector<CellPreviewDescriptionIntern> result = processedGenome.cellsIntern;
 
@@ -281,9 +286,10 @@ namespace
                 if (angles.size() == 1) {
                     targetAngle = angles.front() + 180.0f;
                 }
-                targetAngle += subGenome.cells.front().referenceAngle;
+                targetAngle += constructor.constructionAngle1;
                 auto direction = Math::unitVectorOfAngle(targetAngle);
-                auto previewPart = convertToPreviewDescriptionIntern(subGenome, cellIntern.nodeIndex, cellIntern.pos + direction, targetAngle, parameters);
+                auto previewPart = convertToPreviewDescriptionIntern(
+                    subGenome, cellIntern.nodeIndex, constructor.constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
                 insert(result, previewPart);
                 indexOffset += previewPart.size();
                 if (!subGenome.info.separateConstruction) {
@@ -343,7 +349,6 @@ namespace
 PreviewDescription
 PreviewDescriptionConverter::convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters)
 {
-    auto cellInternDescriptions =
-        convertToPreviewDescriptionIntern(genome, std::nullopt, std::nullopt, std::nullopt, parameters);
+    auto cellInternDescriptions = convertToPreviewDescriptionIntern(genome, std::nullopt, std::nullopt, std::nullopt, std::nullopt, parameters);
     return createPreviewDescription(cellInternDescriptions, parameters);
 }
