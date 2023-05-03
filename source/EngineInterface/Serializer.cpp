@@ -481,8 +481,8 @@ namespace cereal
 
                 //heuristic to obtain a valid currentGenomePos
                 data.currentGenomePos += Const::GenomeInfoSize;
-                auto cellIndex = GenomeDescriptionConverter::convertNodeAddressToCellIndex(data.genome, data.currentGenomePos);
-                data.currentGenomePos = GenomeDescriptionConverter::convertCellIndexToNodeAddress(data.genome, cellIndex);
+                auto cellIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(data.genome, data.currentGenomePos);
+                data.currentGenomePos = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(data.genome, cellIndex);
 
                 if (!genomeDesc.cells.empty()) {
                     data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;

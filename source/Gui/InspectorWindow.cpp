@@ -341,9 +341,9 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             }
 
             if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                auto entry = GenomeDescriptionConverter::convertNodeAddressToCellIndex(desc.genome, desc.currentGenomePos);
+                auto entry = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, desc.currentGenomePos);
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Sequence number").textWidth(GenomeTabTextWidth), entry);
-                desc.currentGenomePos = GenomeDescriptionConverter::convertCellIndexToNodeAddress(desc.genome, entry);
+                desc.currentGenomePos = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(desc.genome, entry);
             }
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth), desc.genomeGeneration);
 

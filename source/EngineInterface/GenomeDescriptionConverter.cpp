@@ -223,7 +223,7 @@ namespace
         SimulationParameters parameters;
         ConversionResult result;
 
-        int cellIndex = 0;
+        int nodeIndex = 0;
         auto& bytePosition = result.lastBytePosition;
 
         result.genome.info.shape = readByte(data, bytePosition) % ConstructionShape_Count;
@@ -232,7 +232,7 @@ namespace
         result.genome.info.angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;
         result.genome.info.stiffness = readStiffness(data, bytePosition);
         
-        while (bytePosition < maxBytePosition && cellIndex < maxEntries) {
+        while (bytePosition < maxBytePosition && nodeIndex < maxEntries) {
             CellFunction cellFunction = readByte(data, bytePosition) % CellFunction_Count;
 
             CellGenomeDescription cell;
@@ -312,7 +312,7 @@ namespace
             } break;
             }
             result.genome.cells.emplace_back(cell);
-            ++cellIndex;
+            ++nodeIndex;
         }
         return result;
     }
@@ -324,14 +324,14 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
     return convertBytesToDescriptionIntern(data, data.size(), data.size()).genome;
 }
 
-int GenomeDescriptionConverter::convertNodeAddressToCellIndex(std::vector<uint8_t> const& data, int byteIndex)
+int GenomeDescriptionConverter::convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress)
 {
     //wasteful approach but sufficient for GUI
-    return convertBytesToDescriptionIntern(data, byteIndex, data.size()).genome.cells.size();
+    return convertBytesToDescriptionIntern(data, nodeAddress, data.size()).genome.cells.size();
 }
 
-int GenomeDescriptionConverter::convertCellIndexToNodeAddress(std::vector<uint8_t> const& data, int cellIndex)
+int GenomeDescriptionConverter::convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex)
 {
     //wasteful approach but sufficient for GUI
-    return convertBytesToDescriptionIntern(data, data.size(), cellIndex).lastBytePosition;
+    return convertBytesToDescriptionIntern(data, data.size(), nodeIndex).lastBytePosition;
 }
