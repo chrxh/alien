@@ -25,7 +25,7 @@ private:
         std::optional<int> selectedNode;
     };
     void processTab(TabData& tab);
-    void processConstructionSettings(TabData& tab);
+    void processGeneralProperties(TabData& tab);
     void processConstructionSequence(TabData& tab);
     void processNodeEdit(TabData& tab, CellGenomeDescription& cell);
     template<typename Description>
@@ -65,6 +65,6 @@ private:
     std::optional<int> _tabIndexToSelect;
     std::optional<int> _nodeIndexToJump;
     std::optional<TabData> _tabToAdd;
-    bool _collapseAllNodes = false;
+    std::optional<bool> _expandNodes;
 
 };

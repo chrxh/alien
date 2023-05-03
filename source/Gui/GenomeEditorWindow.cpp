@@ -208,10 +208,19 @@ void _GenomeEditorWindow::processToolbar()
     AlienImGui::Tooltip("Increase sequence number of selected node");
 
     ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_MINUS_SQUARE)) {
-        _collapseAllNodes = true;
+        _expandNodes = false;
     }
     AlienImGui::Tooltip("Collapse all nodes");
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_PLUS_SQUARE)) {
+        _expandNodes = true;
+    }
+    AlienImGui::Tooltip("Expand all nodes");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
@@ -265,8 +274,8 @@ namespace
 void _GenomeEditorWindow::processTab(TabData& tab)
 {
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewHeight), true)) {
-        AlienImGui::Group("Construction settings");
-        processConstructionSettings(tab);
+        AlienImGui::Group("General properties");
+        processGeneralProperties(tab);
         AlienImGui::Group("Construction sequence");
         processConstructionSequence(tab);
     }
@@ -282,7 +291,7 @@ void _GenomeEditorWindow::processTab(TabData& tab)
     ImGui::EndChild();
 }
 
-void _GenomeEditorWindow::processConstructionSettings(TabData& tab)
+void _GenomeEditorWindow::processGeneralProperties(TabData& tab)
 {
     DynamicTableLayout table;
     if (table.begin()) {
@@ -365,8 +374,8 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
             _nodeIndexToJump = std::nullopt;
         }
 
-        if (_collapseAllNodes) {
-            ImGui::SetNextTreeNodeOpen(false);
+        if (_expandNodes) {
+            ImGui::SetNextTreeNodeOpen(*_expandNodes);
         }
         auto treeNodeOpen = ImGui::TreeNodeEx((generateShortDescription(index, cell, tab.genome.info.shape) + "###").c_str(), flags);
         ImGui::PopStyleColor();
@@ -392,7 +401,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
         ImGui::PopID();
         ++index;
     }
-    _collapseAllNodes = false;
+    _expandNodes.reset();
 }
 
 void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& cell)
@@ -456,6 +465,12 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
             }
             table.next();
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(ContentTextWidth), constructor.constructionActivationTime);
+            table.next();
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters().name("Construction angle 1").format("%.1f").textWidth(ContentTextWidth), constructor.constructionAngle1);
+            table.next();
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters().name("Construction angle 2").format("%.1f").textWidth(ContentTextWidth), constructor.constructionAngle2);
         } break;
         case CellFunction_Sensor: {
             auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
@@ -692,7 +707,7 @@ void _GenomeEditorWindow::onDeleteNode()
             tabData.selectedNode = toInt(cells.size() - 1);
         }
     }
-    _collapseAllNodes = true;
+    _expandNodes = true;
 }
 
 void _GenomeEditorWindow::onNodeDecreaseSequenceNumber()
@@ -701,7 +716,7 @@ void _GenomeEditorWindow::onNodeDecreaseSequenceNumber()
     auto& selectedNode = selectedTab.selectedNode;
     std::swap(selectedTab.genome.cells.at(*selectedNode), selectedTab.genome.cells.at(*selectedNode - 1));
     --(*selectedNode);
-    _collapseAllNodes = true;
+    _expandNodes = true;
 }
 
 void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
@@ -710,7 +725,7 @@ void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
     auto& selectedNode = selectedTab.selectedNode;
     std::swap(selectedTab.genome.cells.at(*selectedNode), selectedTab.genome.cells.at(*selectedNode + 1));
     ++(*selectedNode);
-    _collapseAllNodes = true;
+    _expandNodes = true;
 }
 
 void _GenomeEditorWindow::onCreateSpore()
