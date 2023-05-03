@@ -138,6 +138,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cell->cellFunctionData.constructor.genome);
         cell->cellFunctionData.constructor.currentGenomePos = cellTO.cellFunctionData.constructor.currentGenomePos;
         cell->cellFunctionData.constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
+        cell->cellFunctionData.constructor.constructionAngle1 = cellTO.cellFunctionData.constructor.constructionAngle1;
+        cell->cellFunctionData.constructor.constructionAngle2 = cellTO.cellFunctionData.constructor.constructionAngle2;
     } break;
     case CellFunction_Sensor: {
         cell->cellFunctionData.sensor.mode = cellTO.cellFunctionData.sensor.mode;
@@ -280,6 +282,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             }
             cell->cellFunctionData.constructor.currentGenomePos = 0;
             cell->cellFunctionData.constructor.genomeGeneration = 0;
+            cell->cellFunctionData.constructor.constructionAngle1 = 0;
+            cell->cellFunctionData.constructor.constructionAngle2 = 0;
         } break;
         case CellFunction_Sensor: {
             cell->cellFunctionData.sensor.mode = _data->numberGen1.random(SensorMode_Count - 1);

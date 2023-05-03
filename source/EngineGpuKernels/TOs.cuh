@@ -56,6 +56,8 @@ struct ConstructorTO
     uint64_t genomeSize;
     uint64_t genomeDataIndex;
     int genomeGeneration;
+    float constructionAngle1;
+    float constructionAngle2;
 
     //process data
     uint64_t currentGenomePos;

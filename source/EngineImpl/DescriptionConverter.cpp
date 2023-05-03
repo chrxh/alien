@@ -424,6 +424,8 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
         constructor.currentGenomePos = toInt(cellTO.cellFunctionData.constructor.currentGenomePos);
         constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
+        constructor.constructionAngle1 = cellTO.cellFunctionData.constructor.constructionAngle1;
+        constructor.constructionAngle2 = cellTO.cellFunctionData.constructor.constructionAngle2;
         result.cellFunction = constructor;
     } break;
     case CellFunction_Sensor: {
@@ -533,6 +535,8 @@ void DescriptionConverter::addCell(
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
         constructorTO.currentGenomePos = constructorDesc.currentGenomePos;
         constructorTO.genomeGeneration = constructorDesc.genomeGeneration;
+        constructorTO.constructionAngle1 = constructorDesc.constructionAngle1;
+        constructorTO.constructionAngle2 = constructorDesc.constructionAngle2;
         cellTO.cellFunctionData.constructor = constructorTO;
     } break;
     case CellFunction_Sensor: {
