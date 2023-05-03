@@ -572,7 +572,7 @@ TEST_F(MutationTests, cellFunctionMutation)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
     auto cellIndex = 7;
-    int byteIndex = GenomeDescriptionConverter::convertCellIndexToByteIndex(genome, cellIndex);
+    int byteIndex = GenomeDescriptionConverter::convertCellIndexToNodeAddress(genome, cellIndex);
 
     auto data = DataDescription().addCells(
         {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setCurrentGenomePos(byteIndex)).setExecutionOrderNumber(0)});
@@ -587,7 +587,7 @@ TEST_F(MutationTests, cellFunctionMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareCellFunctionMutation(genome, actualConstructor.genome));
-    auto actualCellIndex = GenomeDescriptionConverter::convertByteIndexToCellIndex(actualConstructor.genome, actualConstructor.currentGenomePos);
+    auto actualCellIndex = GenomeDescriptionConverter::convertNodeAddressToCellIndex(actualConstructor.genome, actualConstructor.currentGenomePos);
     EXPECT_EQ(cellIndex, actualCellIndex);
 }
 

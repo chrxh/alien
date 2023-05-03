@@ -62,6 +62,8 @@ namespace
     auto constexpr Id_Constructor_CurrentGenomePos = 7;
     auto constexpr Id_Constructor_GenomeGeneration = 9;
     auto constexpr Id_Constructor_GenomeInfo = 10;
+    auto constexpr Id_Constructor_ConstructionAngle1 = 11;
+    auto constexpr Id_Constructor_ConstructionAngle2 = 12;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -107,6 +109,9 @@ namespace
     auto constexpr Id_ConstructorGenome_AngleAlignment = 4;
     auto constexpr Id_ConstructorGenome_Stiffness = 5;
     auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 6;
+    auto constexpr Id_ConstructorGenome_GenomeInfo = 8;
+    auto constexpr Id_ConstructorGenome_ConstructionAngle1 = 9;
+    auto constexpr Id_ConstructorGenome_ConstructionAngle2 = 10;
 
     auto constexpr Id_DefenderGenome_Mode = 0;
 
@@ -209,13 +214,15 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_ConstructorGenome_Mode, data.mode, defaultObject.mode);
         loadSave<int>(task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
+        loadSave<float>(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
+        loadSave<float>(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
         if (task == SerializationTask::Save) {
-            auxiliaries[Id_Constructor_GenomeInfo] = true;
+            auxiliaries[Id_ConstructorGenome_GenomeInfo] = true;
         }
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            auto hasGenomeInfo = auxiliaries.contains(Id_Constructor_GenomeInfo);
+            auto hasGenomeInfo = auxiliaries.contains(Id_ConstructorGenome_GenomeInfo);
             if (hasGenomeInfo) {
                 std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
                 ar(genomeData);
@@ -229,7 +236,10 @@ namespace cereal
                 ar(genomeData);
                 if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
                     data.genome = MakeGenomeCopy();
-                } else {
+                }
+
+                //compatibility with older versions
+                else {
                     GenomeDescription genomeDesc;
                     genomeDesc.cells = std::get<std::vector<CellGenomeDescription>>(genomeData);
                     genomeDesc.info.singleConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SingleConstruction));
@@ -237,6 +247,10 @@ namespace cereal
                     genomeDesc.info.angleAlignment = std::get<int>(auxiliaries.at(Id_ConstructorGenome_AngleAlignment));
                     genomeDesc.info.stiffness = std::get<float>(auxiliaries.at(Id_ConstructorGenome_Stiffness));
                     data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+                    if (!genomeDesc.cells.empty()) {
+                        data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;
+                        data.constructionAngle2 = genomeDesc.cells.back().referenceAngle;
+                    }
                 }
             }
         } else {
@@ -440,6 +454,8 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
         loadSave<int>(task, auxiliaries, Id_Constructor_CurrentGenomePos, data.currentGenomePos, defaultObject.currentGenomePos);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
+        loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
+        loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
         if (task == SerializationTask::Save) {
             auxiliaries[Id_Constructor_GenomeInfo] = true;
         }
@@ -451,7 +467,10 @@ namespace cereal
                 GenomeDescription genomeDesc;
                 ar(genomeDesc);
                 data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
-            } else {
+            }
+
+            //compatibility with older versions
+            else {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc.cells);
                 genomeDesc.info.singleConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction));
@@ -459,7 +478,16 @@ namespace cereal
                 genomeDesc.info.angleAlignment = std::get<int>(auxiliaries.at(Id_Constructor_AngleAlignment));
                 genomeDesc.info.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
                 data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+
+                //heuristic to obtain a valid currentGenomePos
                 data.currentGenomePos += Const::GenomeInfoSize;
+                auto cellIndex = GenomeDescriptionConverter::convertNodeAddressToCellIndex(data.genome, data.currentGenomePos);
+                data.currentGenomePos = GenomeDescriptionConverter::convertCellIndexToNodeAddress(data.genome, cellIndex);
+
+                if (!genomeDesc.cells.empty()) {
+                    data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;
+                    data.constructionAngle2 = genomeDesc.cells.back().referenceAngle;
+                }
             }
         } else {
             GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);

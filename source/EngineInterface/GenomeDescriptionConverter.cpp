@@ -132,7 +132,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
 {
     auto const& cells = genome.cells;
     std::vector<uint8_t> result;
-    result.reserve(cells.size() * 12 + 4);
+    result.reserve(cells.size() * 12 + 5);
     writeByte(result, genome.info.shape);
     writeBool(result, genome.info.singleConstruction);
     writeBool(result, genome.info.separateConstruction);
@@ -324,13 +324,13 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
     return convertBytesToDescriptionIntern(data, data.size(), data.size()).genome;
 }
 
-int GenomeDescriptionConverter::convertByteIndexToCellIndex(std::vector<uint8_t> const& data, int byteIndex)
+int GenomeDescriptionConverter::convertNodeAddressToCellIndex(std::vector<uint8_t> const& data, int byteIndex)
 {
     //wasteful approach but sufficient for GUI
     return convertBytesToDescriptionIntern(data, byteIndex, data.size()).genome.cells.size();
 }
 
-int GenomeDescriptionConverter::convertCellIndexToByteIndex(std::vector<uint8_t> const& data, int cellIndex)
+int GenomeDescriptionConverter::convertCellIndexToNodeAddress(std::vector<uint8_t> const& data, int cellIndex)
 {
     //wasteful approach but sufficient for GUI
     return convertBytesToDescriptionIntern(data, data.size(), cellIndex).lastBytePosition;
