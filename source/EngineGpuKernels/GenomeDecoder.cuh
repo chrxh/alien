@@ -25,7 +25,8 @@ public:
     __inline__ __device__ static float readEnergy(ConstructorFunction& constructor);  //return values from 36 to 1060
     __inline__ __device__ static float readAngle(ConstructorFunction& constructor);
 
-    __inline__ __device__ static bool isAtBeginning(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool isAtFirstNode(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool isAtLastNode(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isFinished(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isFinishedSingleConstruction(ConstructorFunction const& constructor);
 
@@ -121,9 +122,16 @@ __inline__ __device__ float GenomeDecoder::readAngle(ConstructorFunction& constr
     return static_cast<float>(static_cast<int8_t>(readByte(constructor))) / 120 * 180;
 }
 
-__inline__ __device__ bool GenomeDecoder::isAtBeginning(ConstructorFunction const& constructor)
+__inline__ __device__ bool GenomeDecoder::isAtFirstNode(ConstructorFunction const& constructor)
 {
     return constructor.currentGenomePos <= Const::GenomeInfoSize;
+}
+
+__inline__ __device__ bool GenomeDecoder::isAtLastNode(ConstructorFunction const& constructor)
+{
+    auto nextNodeBytes =
+        Const::CellBasicBytes + getNextCellFunctionDataSize(constructor.genome, toInt(constructor.genomeSize), toInt(constructor.currentGenomePos));
+    return toInt(constructor.currentGenomePos) + nextNodeBytes >= toInt(constructor.genomeSize);
 }
 
 __inline__ __device__ bool GenomeDecoder::isFinished(ConstructorFunction const& constructor)

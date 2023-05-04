@@ -122,18 +122,16 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
         constructor.currentGenomePos = Const::GenomeInfoSize;
     }
 
+    auto isAtFirstNode = GenomeDecoder::isAtFirstNode(constructor);
+    auto isAtLastNode = GenomeDecoder::isAtLastNode(constructor);
+
     ConstructionData result;
     result.cellFunction = GenomeDecoder::readByte(constructor) % CellFunction_Count;
     result.angle = GenomeDecoder::readAngle(constructor);
-    if (GenomeDecoder::isAtBeginning(constructor)) {
-        result.angle = constructor.constructionAngle1;
-    }
-    if (GenomeDecoder::isFinished(constructor)) {
-        result.angle = constructor.constructionAngle2;
-    }
     result.energy = GenomeDecoder::readEnergy(constructor);
     result.numRequiredAdditionalConnections = GenomeDecoder::readByte(constructor);
-    result.numRequiredAdditionalConnections = result.numRequiredAdditionalConnections > 127 ? -1 : result.numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
+    result.numRequiredAdditionalConnections =
+        result.numRequiredAdditionalConnections > 127 ? -1 : result.numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
     result.executionOrderNumber = GenomeDecoder::readByte(constructor) % cudaSimulationParameters.cellNumExecutionOrderNumbers;
     result.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
     result.inputExecutionOrderNumber = GenomeDecoder::readOptionalByte(constructor, cudaSimulationParameters.cellNumExecutionOrderNumbers);
@@ -143,6 +141,12 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.genomeInfo = GenomeDecoder::readGenomeInfo(constructor);
     if (result.genomeInfo.shape == ConstructionShape_Triangle) {
         applyTriangleShape(result, constructor);
+    }
+    if (isAtFirstNode) {
+        result.angle = constructor.constructionAngle1;
+    }
+    if (isAtLastNode) {
+        result.angle = constructor.constructionAngle2;
     }
     return result;
 }
@@ -556,12 +560,10 @@ __inline__ __device__ void ConstructorProcessor::applyTriangleShape(Construction
             }
         }
     }
-    if (!GenomeDecoder::isAtBeginning(constructor) && !GenomeDecoder::isFinished(constructor)) {
-        if (edgePos < edgeLength - 1) {
-            constructionData.angle = 0;
-        } else {
-            constructionData.angle = 120.0f;
-        }
+    if (edgePos < edgeLength - 1) {
+        constructionData.angle = 0;
+    } else {
+        constructionData.angle = 120.0f;
     }
     if (processedEdges == 0) {
         constructionData.numRequiredAdditionalConnections = 0;
