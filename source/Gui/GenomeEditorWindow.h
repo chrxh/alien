@@ -27,7 +27,7 @@ private:
     void processTab(TabData& tab);
     void processGeneralProperties(TabData& tab);
     void processConstructionSequence(TabData& tab);
-    void processNodeEdit(TabData& tab, CellGenomeDescription& cell);
+    void processNode(TabData& tab, CellGenomeDescription& cell, bool isFirstOrLast);
     template<typename Description>
     void processSubGenomeWidgets(TabData const& tab, Description& desc);
 
