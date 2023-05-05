@@ -84,50 +84,104 @@ namespace
         return true;
     }
 
-    struct EdgeData
-    {
-        int edgePos = 0;
-        int edgeLength = 2;
-        int processedEdges = 0;
-    };
     struct ConstructionData
     {
         float angle;
         std::optional<int> numRequiredAdditionalConnections;
     };
-    ConstructionData getNextConstructionDataForTriangle(EdgeData& edgeData)
+    class _ShapeGenerator
     {
-        ConstructionData result;
-        if (edgeData.edgePos < edgeData.edgeLength - 1) {
+    public:
+        virtual ConstructionData generateNextConstructionData() = 0;
+    };
+    using ShapeGenerator = std::shared_ptr<_ShapeGenerator>;
+
+    class _SegmentGenerator : public _ShapeGenerator
+    {
+    public:
+        ConstructionData generateNextConstructionData() override
+        {
+            ConstructionData result;
             result.angle = 0;
-        } else {
-            result.angle = 120.0f;
-        }
-        if (edgeData.processedEdges == 0) {
             result.numRequiredAdditionalConnections = 0;
-        } else if (edgeData.processedEdges == 1) {
-            if (edgeData.edgePos == 0) {
-                result.numRequiredAdditionalConnections = 1;
-            } else {
-                result.numRequiredAdditionalConnections = 0;
-            }
-        } else {
-            if (edgeData.edgePos == edgeData.edgeLength - 1) {
-                result.numRequiredAdditionalConnections = 0;
-            } else if (edgeData.edgePos == edgeData.edgeLength - 2) {
-                result.numRequiredAdditionalConnections = 1;
-            } else {
-                result.numRequiredAdditionalConnections = 2;
-            }
+            return result;
         }
-        if (++edgeData.edgePos == edgeData.edgeLength) {
-            edgeData.edgePos = 0;
-            ++edgeData.processedEdges;
-            if (edgeData.processedEdges >= 2) {
-                ++edgeData.edgeLength;
+    };
+
+    class _TriangleGenerator : public _ShapeGenerator
+    {
+    public:
+        ConstructionData generateNextConstructionData() override
+        {
+            ConstructionData result;
+            auto edgeLength = std::max(2, _processedEdges + 1);
+            result.angle = _edgePos < edgeLength - 1 ? 0 : 120.0f;
+            if (_processedEdges == 0) {
+                result.numRequiredAdditionalConnections = 0;
+            } else if (_processedEdges == 1) {
+                result.numRequiredAdditionalConnections = _edgePos == 0 ? 1 : 0;
+            } else {
+                if (_edgePos == edgeLength - 1) {
+                    result.numRequiredAdditionalConnections = 0;
+                } else if (_edgePos == edgeLength - 2) {
+                    result.numRequiredAdditionalConnections = 1;
+                } else {
+                    result.numRequiredAdditionalConnections = 2;
+                }
             }
+            if (++_edgePos == edgeLength) {
+                _edgePos = 0;
+                ++_processedEdges;
+            }
+            return result;
         }
-        return result;
+
+    private:
+        int _edgePos = 0;
+        int _processedEdges = 0;
+    };
+
+    class _RectangleGenerator : public _ShapeGenerator
+    {
+    public:
+        ConstructionData generateNextConstructionData() override
+        {
+            ConstructionData result;
+            if (_processedEdges == 0) {
+                result.angle = 0.0f;
+                result.numRequiredAdditionalConnections = 0;
+            } else if (_processedEdges == 1) {
+                result.angle = 90.0f;
+                result.numRequiredAdditionalConnections = 0;
+            } else {
+                result.angle = _edgePos == 0 ? 90.0f : 0.0f;
+                result.numRequiredAdditionalConnections = _edgePos == 0 ? 0 : 1;
+            }
+
+            auto edgeLength = _processedEdges / 2;
+            if (++_edgePos > edgeLength) {
+                _edgePos = 0;
+                ++_processedEdges;
+            }
+            return result;
+        }
+
+    private:
+        int _edgePos = 0;
+        int _processedEdges = 0;
+    };
+
+    ShapeGenerator createShapeGenerator(ConstructionShape shape)
+    {
+        switch (shape) {
+        case ConstructionShape_Segment:
+            return std::make_shared<_SegmentGenerator>();
+        case ConstructionShape_Triangle:
+            return std::make_shared<_TriangleGenerator>();
+        case ConstructionShape_Rectangle:
+            return std::make_shared<_RectangleGenerator>();
+        }
+        return nullptr;
     }
 
     struct ProcessedGenomeDescriptionResult
@@ -147,7 +201,7 @@ namespace
         RealVector2D pos;
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
         int index = 0;
-        EdgeData edgeData;
+        auto shapeGenerator = createShapeGenerator(genome.info.shape);
         for (auto const& node : genome.cells) {
             if (index > 0) {
                 pos += result.direction;
@@ -156,8 +210,8 @@ namespace
             ConstructionData constructionData;
             constructionData.angle = node.referenceAngle;
             constructionData.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
-            if (genome.info.shape == ConstructionShape_Triangle) {
-                constructionData = getNextConstructionDataForTriangle(edgeData);
+            if (genome.info.shape != ConstructionShape_IndividualShape) {
+                constructionData = shapeGenerator->generateNextConstructionData();
             }
             if (lastReferenceAngle.has_value() && index == genome.cells.size() - 1) {
                 constructionData.angle = *lastReferenceAngle;
@@ -185,8 +239,9 @@ namespace
             //find nearby cells
             std::vector<int> nearbyCellIndices;
             IntVector2D intPos{toInt(pos.x), toInt(pos.y)};
-            for (int dx = -2; dx <= 2; ++dx) {
-                for (int dy = -2; dy <= 2; ++dy) {
+            auto radius = toInt(parameters.cellFunctionConstructorConnectingCellMaxDistance[node.color]) + 1;
+            for (int dx = -radius; dx <= radius; ++dx) {
+                for (int dy = -radius; dy <= radius; ++dy) {
                     auto const& findResult = cellInternIndicesBySlot.find({intPos.x + dx, intPos.y + dy});
                     if (findResult != cellInternIndicesBySlot.end()) {
                         for (auto const& otherCellIndex : findResult->second) {
