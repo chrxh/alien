@@ -99,5 +99,6 @@ enum ConstructionShape_
     ConstructionShape_Rectangle,
     ConstructionShape_Hexagon,
     ConstructionShape_Loop,
+    ConstructionShape_Lolli,
     ConstructionShape_Count
 };

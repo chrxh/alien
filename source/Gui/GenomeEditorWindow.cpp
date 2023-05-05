@@ -80,11 +80,11 @@ GenomeDescription const& _GenomeEditorWindow::getCurrentGenome() const
 
 namespace
 {
-    std::string generateShortDescription(int index, CellGenomeDescription const& cell, ConstructionShape const& shape)
+    std::string generateShortDescription(int index, CellGenomeDescription const& cell, ConstructionShape const& shape, bool isFirstOrLast)
     {
         auto result = "No. " + std::to_string(index + 1) + ", Type: " + Const::CellFunctionToStringMap.at(cell.getCellFunctionType())
             + ", Color: " + std::to_string(cell.color);
-        if (shape == ConstructionShape_IndividualShape) {
+        if (shape == ConstructionShape_IndividualShape && !isFirstOrLast) {
             result += ", Angle: " + StringHelper::format(cell.referenceAngle, 1);
         }
         result += ", Energy: " + StringHelper::format(cell.energy, 1);
@@ -360,6 +360,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 {
     int index = 0;
     for (auto& cell : tab.genome.cells) {
+        auto isFirstOrLast = index == 0 || index == tab.genome.cells.size() - 1;
         ImGui::PushID(index);
 
         float h, s, v;
@@ -377,7 +378,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
         if (_expandNodes) {
             ImGui::SetNextTreeNodeOpen(*_expandNodes);
         }
-        auto treeNodeOpen = ImGui::TreeNodeEx((generateShortDescription(index, cell, tab.genome.info.shape) + "###").c_str(), flags);
+        auto treeNodeOpen = ImGui::TreeNodeEx((generateShortDescription(index, cell, tab.genome.info.shape, isFirstOrLast) + "###").c_str(), flags);
         ImGui::PopStyleColor();
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
             if (tab.selectedNode && *tab.selectedNode == index) {
@@ -392,7 +393,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 
         if (treeNodeOpen) {
             auto origCell = cell;
-            processNodeEdit(tab, cell);
+            processNode(tab, cell, isFirstOrLast);
             if (origCell != cell) {
                 tab.selectedNode = index;
             }
@@ -404,7 +405,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
     _expandNodes.reset();
 }
 
-void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& cell)
+void _GenomeEditorWindow::processNode(TabData& tab, CellGenomeDescription& cell, bool isFirstOrLast)
 {
     auto type = cell.getCellFunctionType();
 
@@ -416,7 +417,7 @@ void _GenomeEditorWindow::processNodeEdit(TabData& tab, CellGenomeDescription& c
         }
         table.next();
         AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(ContentTextWidth), cell.color);
-        if (tab.genome.info.shape == ConstructionShape_IndividualShape) {
+        if (tab.genome.info.shape == ConstructionShape_IndividualShape && !isFirstOrLast) {
             table.next();
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f"), cell.referenceAngle);
         }
@@ -707,7 +708,7 @@ void _GenomeEditorWindow::onDeleteNode()
             tabData.selectedNode = toInt(cells.size() - 1);
         }
     }
-    _expandNodes = true;
+    _expandNodes = false;
 }
 
 void _GenomeEditorWindow::onNodeDecreaseSequenceNumber()
@@ -716,7 +717,7 @@ void _GenomeEditorWindow::onNodeDecreaseSequenceNumber()
     auto& selectedNode = selectedTab.selectedNode;
     std::swap(selectedTab.genome.cells.at(*selectedNode), selectedTab.genome.cells.at(*selectedNode - 1));
     --(*selectedNode);
-    _expandNodes = true;
+    _expandNodes = false;
 }
 
 void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
@@ -725,7 +726,7 @@ void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
     auto& selectedNode = selectedTab.selectedNode;
     std::swap(selectedTab.genome.cells.at(*selectedNode), selectedTab.genome.cells.at(*selectedNode + 1));
     ++(*selectedNode);
-    _expandNodes = true;
+    _expandNodes = false;
 }
 
 void _GenomeEditorWindow::onCreateSpore()

@@ -198,7 +198,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
 
     auto anglesForNewConnection = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
 
-    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle) * cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
+    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
     if (CellConnectionProcessor::existCrossingConnections(data, hostCell->absPos, newCellPos, hostCell->detached)) {
@@ -319,18 +319,32 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         }
     }
 
-    //cut connections
-    CellConnectionProcessor::deleteConnections(hostCell, underConstructionCell);
-
     //possibly connect newCell to hostCell
     bool adaptReferenceAngle = false;
     if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !constructionData.genomeInfo.separateConstruction) {
+
+        //move connection
         auto distance = GenomeDecoder::isFinished(constructor) && !constructionData.genomeInfo.separateConstruction
             ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
-        if (CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, /*angleFromPreviousForCell*/ 0, 0, distance)) {
-            adaptReferenceAngle = true;
+        for (int i = 0; i < hostCell->numConnections; ++i) {
+            auto& connectedCell = hostCell->connections[i];
+            if (connectedCell.cell == underConstructionCell) {
+                connectedCell.cell = newCell;
+                connectedCell.distance = distance;
+                newCell->numConnections = 1;
+                newCell->connections[0].cell = hostCell;
+                newCell->connections[0].distance = distance;
+                newCell->connections[0].angleFromPrevious = 360.0f;
+                adaptReferenceAngle = true;
+                CellConnectionProcessor::deleteConnectionOneWay(underConstructionCell, hostCell);
+                break;
+            }
         }
+    } else {
+
+        //cut connections
+        CellConnectionProcessor::deleteConnections(hostCell, underConstructionCell);
     }
 
     //connect newCell to underConstructionCell
