@@ -382,7 +382,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
             auto actualDistance = Math::length(displacement);
             auto bondDistance = cell->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
-            force = force + Math::normalized(displacement) * deviation * (cellStiffnessSquared + connectedCellStiffnessSquared) / 4;
+            force = force + Math::normalized(displacement) * deviation * (cellStiffnessSquared + connectedCellStiffnessSquared) / 6;
 
             if (considerAngles && (numConnections > 2 || (numConnections == 2 && i == 0))) {
 
