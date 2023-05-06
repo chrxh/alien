@@ -56,7 +56,7 @@ struct ConstructorFunction
     float constructionAngle2;
 
     //process data
-    uint64_t currentGenomePos;
+    uint64_t genomeReadPosition;
 };
 
 struct SensorFunction

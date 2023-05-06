@@ -87,7 +87,7 @@ namespace
                 cellTO.cellFunctionData.constructor.genomeDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
-            cellTO.cellFunctionData.constructor.currentGenomePos = cell->cellFunctionData.constructor.currentGenomePos;
+            cellTO.cellFunctionData.constructor.genomeReadPosition = cell->cellFunctionData.constructor.genomeReadPosition;
             cellTO.cellFunctionData.constructor.genomeGeneration = cell->cellFunctionData.constructor.genomeGeneration;
         } break;
         case CellFunction_Sensor: {

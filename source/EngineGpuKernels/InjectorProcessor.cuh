@@ -52,7 +52,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             //if (otherCell->livingState == LivingState_UnderConstruction) {
             //    return;
             //}
-            if (otherCell->cellFunctionData.constructor.currentGenomePos != 0) {
+            if (otherCell->cellFunctionData.constructor.genomeReadPosition != 0) {
                 return;
             }
             match = true;
@@ -91,7 +91,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             for (int j = 0; j < connectedCell->numConnections; ++j) {
                 auto connectedConnectedCell = connectedCell->connections[j].cell;
                 if (connectedConnectedCell->livingState == LivingState_UnderConstruction
-                    && connectedConnectedCell->cellFunctionData.constructor.currentGenomePos == 0) {
+                    && connectedConnectedCell->cellFunctionData.constructor.genomeReadPosition == 0) {
                     auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(injector.genomeSize);
                     for (int i = 0; i < injector.genomeSize; ++i) {
                         targetGenome[i] = injector.genome[i];

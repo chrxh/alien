@@ -336,14 +336,14 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Retrieve from editor").textWidth(GenomeTabTextWidth))) {
                 desc.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
                 if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                    desc.currentGenomePos = 0;
+                    desc.genomeReadPosition = 0;
                 }
             }
 
             if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                auto entry = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, desc.currentGenomePos);
+                auto entry = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, desc.genomeReadPosition);
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Sequence number").textWidth(GenomeTabTextWidth), entry);
-                desc.currentGenomePos = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(desc.genome, entry);
+                desc.genomeReadPosition = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(desc.genome, entry);
             }
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth), desc.genomeGeneration);
 
@@ -557,8 +557,8 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
     switch (cell.getCellFunctionType()) {
     case CellFunction_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
-        if (constructor.currentGenomePos < 0) {
-            constructor.currentGenomePos = 0;
+        if (constructor.genomeReadPosition < 0) {
+            constructor.genomeReadPosition = 0;
         }
         if (constructor.constructionActivationTime < 0) {
             constructor.constructionActivationTime = 0;
