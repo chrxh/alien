@@ -57,6 +57,7 @@ private:
     __inline__ __device__ static void generateConstructionDataForHexagon(ConstructionData& constructionData, ConstructorFunction const& constructor);
     __inline__ __device__ static void generateConstructionDataForLoop(ConstructionData& constructionData, ConstructorFunction const& constructor);
     __inline__ __device__ static void generateConstructionDataForTube(ConstructionData& constructionData, ConstructorFunction const& constructor);
+    __inline__ __device__ static void generateConstructionDataForLolli(ConstructionData& constructionData, ConstructorFunction const& constructor);
 };
 
 /************************************************************************/
@@ -153,6 +154,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
         break;
     case ConstructionShape_Tube:
         generateConstructionDataForTube(result, constructor);
+        break;
+    case ConstructionShape_Lolli:
+        generateConstructionDataForLolli(result, constructor);
         break;
     }
 
@@ -746,5 +750,43 @@ __inline__ __device__ void ConstructorProcessor::generateConstructionDataForTube
             constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
         }
         ++pos;
+    });
+}
+
+__inline__ __device__ void ConstructorProcessor::generateConstructionDataForLolli(ConstructionData& constructionData, ConstructorFunction const& constructor)
+{
+    int edgePos = 0;
+    int processedEdges = 0;
+
+    GenomeDecoder::executeForEachNodeUntilReadPosition(constructor, [&](bool isLastNode) {
+        if (processedEdges < 12 || edgePos == 0) {
+            auto edgeLength = processedEdges / 6 + 1;
+            if (processedEdges % 6 == 1) {
+                --edgeLength;
+            }
+            if (isLastNode) {
+                if (processedEdges < 2) {
+                    constructionData.angle = 120.0f;
+                    constructionData.numRequiredAdditionalConnections = 0;
+                } else if (processedEdges < 6) {
+                    constructionData.angle = 60.0f;
+                    constructionData.numRequiredAdditionalConnections = 1;
+                } else {
+                    constructionData.angle = edgePos < edgeLength - 1 ? 0.0f : 60.0f;
+                    constructionData.numRequiredAdditionalConnections = edgePos < edgeLength - 1 ? 2 : 1;
+                }
+                constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
+            }
+            if (++edgePos >= edgeLength) {
+                edgePos = 0;
+                ++processedEdges;
+            }
+        } else {
+            if (isLastNode) {
+                constructionData.angle = edgePos == 1 ? -60.0f : 0.0f;
+                constructionData.numRequiredAdditionalConnections = edgePos == 1 ? 2 : 0;
+            }
+            ++edgePos;
+        }
     });
 }
