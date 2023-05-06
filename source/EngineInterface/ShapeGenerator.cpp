@@ -145,6 +145,45 @@ private:
     int _processedEdges = 0;
 };
 
+class _TubeGenerator : public _ShapeGenerator
+{
+public:
+    ShapeGeneratorResult generateNextConstructionData() override
+    {
+        ShapeGeneratorResult result;
+        if (_pos % 6 == 0) {
+            result.angle = 0;
+            result.numRequiredAdditionalConnections = 2;
+        }
+        if (_pos % 6 == 1) {
+            result.angle = 60.0f;
+            result.numRequiredAdditionalConnections = _pos == 1 ? 0 : 1;
+        }
+        if (_pos % 6 == 2) {
+            result.angle = 120.0f;
+            result.numRequiredAdditionalConnections = 0;
+        }
+        if (_pos % 6 == 3) {
+            result.angle = 0;
+            result.numRequiredAdditionalConnections = 2;
+        }
+        if (_pos % 6 == 4) {
+            result.angle = -120.0f;
+            result.numRequiredAdditionalConnections = _pos == 4 ? 1 : 2;
+        }
+        if (_pos % 6 == 5) {
+            result.angle = -60.0f;
+            result.numRequiredAdditionalConnections = 1;
+        }
+        ++_pos;
+
+        return result;
+    }
+
+private:
+    int _pos = 0;
+};
+
 ShapeGenerator ShapeGeneratorFactory::create(ConstructionShape shape)
 {
     switch (shape) {
@@ -158,6 +197,8 @@ ShapeGenerator ShapeGeneratorFactory::create(ConstructionShape shape)
         return std::make_shared<_HexagonGenerator>();
     case ConstructionShape_Loop:
         return std::make_shared<_LoopGenerator>();
+    case ConstructionShape_Tube:
+        return std::make_shared<_TubeGenerator>();
     }
     return nullptr;
 }
