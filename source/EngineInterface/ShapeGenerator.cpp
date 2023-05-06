@@ -110,6 +110,41 @@ private:
     int _processedEdges = 0;
 };
 
+class _LoopGenerator : public _ShapeGenerator
+{
+public:
+    ShapeGeneratorResult generateNextConstructionData() override
+    {
+        ShapeGeneratorResult result;
+
+        auto edgeLength = (_processedEdges + 1) / 6 + 1;
+        if (_processedEdges % 6 == 0) {
+            --edgeLength;
+        }
+
+        if (_processedEdges < 5) {
+            result.angle = 60.0f;
+            result.numRequiredAdditionalConnections = 0;
+        } else if (_processedEdges == 5) {
+            result.angle = _edgePos == 0 ? 0.0f : 60.0f;
+            result.numRequiredAdditionalConnections = 1;
+        } else {
+            result.angle = _edgePos < edgeLength - 1 ? 0.0f : 60.0f;
+            result.numRequiredAdditionalConnections = _edgePos < edgeLength - 1 ? 2 : 1;
+        }
+
+        if (++_edgePos >= edgeLength) {
+            _edgePos = 0;
+            ++_processedEdges;
+        }
+        return result;
+    }
+
+private:
+    int _edgePos = 0;
+    int _processedEdges = 0;
+};
+
 ShapeGenerator ShapeGeneratorFactory::create(ConstructionShape shape)
 {
     switch (shape) {
@@ -121,6 +156,8 @@ ShapeGenerator ShapeGeneratorFactory::create(ConstructionShape shape)
         return std::make_shared<_RectangleGenerator>();
     case ConstructionShape_Hexagon:
         return std::make_shared<_HexagonGenerator>();
+    case ConstructionShape_Loop:
+        return std::make_shared<_LoopGenerator>();
     }
     return nullptr;
 }

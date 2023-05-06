@@ -55,6 +55,7 @@ private:
     __inline__ __device__ static void generateConstructionDataForTriangle(ConstructionData& constructionData, ConstructorFunction const& constructor);
     __inline__ __device__ static void generateConstructionDataForRectangle(ConstructionData& constructionData, ConstructorFunction const& constructor);
     __inline__ __device__ static void generateConstructionDataForHexagon(ConstructionData& constructionData, ConstructorFunction const& constructor);
+    __inline__ __device__ static void generateConstructionDataForLoop(ConstructionData& constructionData, ConstructorFunction const& constructor);
 };
 
 /************************************************************************/
@@ -144,6 +145,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     }
     if (result.genomeInfo.shape == ConstructionShape_Hexagon) {
         generateConstructionDataForHexagon(result, constructor);
+    }
+    if (result.genomeInfo.shape == ConstructionShape_Loop) {
+        generateConstructionDataForLoop(result, constructor);
     }
 
     //node data
@@ -664,6 +668,37 @@ __inline__ __device__ void ConstructorProcessor::generateConstructionDataForHexa
             }
             constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
         }
+        if (++edgePos >= edgeLength) {
+            edgePos = 0;
+            ++processedEdges;
+        }
+    });
+}
+
+__inline__ __device__ void ConstructorProcessor::generateConstructionDataForLoop(ConstructionData& constructionData, ConstructorFunction const& constructor)
+{
+    int edgePos = 0;
+    int processedEdges = 0;
+
+    GenomeDecoder::executeForEachNodeUntilReadPosition(constructor, [&](bool isLastNode) {
+        auto edgeLength = (processedEdges + 1) / 6 + 1;
+        if (processedEdges % 6 == 0) {
+            --edgeLength;
+        }
+
+        if (isLastNode) {
+            if (processedEdges < 5) {
+                constructionData.angle = 60.0f;
+                constructionData.numRequiredAdditionalConnections = 0;
+            } else if (processedEdges == 5) {
+                constructionData.angle = edgePos == 0 ? 0.0f : 60.0f;
+                constructionData.numRequiredAdditionalConnections = 1;
+            } else {
+                constructionData.angle = edgePos < edgeLength - 1 ? 0.0f : 60.0f;
+                constructionData.numRequiredAdditionalConnections = edgePos < edgeLength - 1 ? 2 : 1;
+            }
+        }
+
         if (++edgePos >= edgeLength) {
             edgePos = 0;
             ++processedEdges;
