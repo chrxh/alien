@@ -30,7 +30,8 @@ add_library(alien_engine_interface_lib
     Serializer.h
     Settings.h
     ShallowUpdateSelectionData.h
-    ShapeGenerators.h
+    ShapeGenerator.cpp
+    ShapeGenerator.h
     SimulationController.h
     SimulationParameters.h
     SimulationParametersSpot.h
