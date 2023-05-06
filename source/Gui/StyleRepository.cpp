@@ -15,6 +15,7 @@
 #include "Fonts/AlienIconFont.h"
 #include "Fonts/FontAwesomeSolid.h"
 #include "Fonts/IconsFontAwesome5.h"
+#include "Fonts/Reef.h"
 
 StyleRepository& StyleRepository::getInstance()
 {
@@ -31,11 +32,7 @@ void StyleRepository::init()
     ImGuiIO& io = ImGui::GetIO();
 
     //default font (small with icons)
-    if (io.Fonts->AddFontFromMemoryCompressedTTF(
-            DroidSans_compressed_data, DroidSans_compressed_size, 16.0f * _contentScaleFactor)
-        == nullptr) {
-        throw std::runtime_error("Could not load font.");
-    };
+    io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 16.0f * _contentScaleFactor);
 
     ImFontConfig configMerge;
     configMerge.MergeMode = true;
@@ -50,16 +47,10 @@ void StyleRepository::init()
 
     //medium font
     _mediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 24.0f * _contentScaleFactor);
-    if (_mediumFont == nullptr) {
-        throw std::runtime_error("Could not load font.");
-    }
 
     //large font
     _largeFont = io.Fonts->AddFontFromMemoryCompressedTTF(
         DroidSans_compressed_data, DroidSans_compressed_size, 48.0f * _contentScaleFactor);
-    if (_largeFont == nullptr) {
-        throw std::runtime_error("Could not load font.");
-    }
 
     //icon font
     _iconFont = io.Fonts->AddFontFromMemoryCompressedTTF(AlienIconFont_compressed_data, AlienIconFont_compressed_size, 24.0f * _contentScaleFactor);
@@ -71,15 +62,12 @@ void StyleRepository::init()
 
     //monospace medium font
     _monospaceMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 14.0f * _contentScaleFactor);
-    if (_monospaceMediumFont == nullptr) {
-        throw std::runtime_error("Could not load font.");
-    }
 
     //monospace large font
     _monospaceLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 128.0f * _contentScaleFactor);
-    if (_monospaceLargeFont == nullptr) {
-        throw std::runtime_error("Could not load font.");
-    }
+
+    _reefMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 28.0f * _contentScaleFactor);
+    _reefLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 64.0f * _contentScaleFactor);
 
     ImPlot::GetStyle().AntiAliasedLines = true;
 }
@@ -107,6 +95,16 @@ ImFont* StyleRepository::getMonospaceMediumFont() const
 ImFont* StyleRepository::getMonospaceLargeFont() const
 {
     return _monospaceLargeFont;
+}
+
+ImFont* StyleRepository::getReefMediumFont() const
+{
+    return _reefMediumFont;
+}
+
+ImFont* StyleRepository::getReefLargeFont() const
+{
+    return _reefLargeFont;
 }
 
 float StyleRepository::contentScale(float value) const

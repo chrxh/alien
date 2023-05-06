@@ -135,17 +135,17 @@ void _StartupController::processWindow()
     textColor.Value.w = ImGui::GetStyle().Alpha;
 
     drawList->AddText(
-        styleRep.getLargeFont(),
-        styleRep.contentScale(32.0f),
-        {center.x - styleRep.contentScale(165), center.y + styleRep.contentScale(100 + 150)},
+        styleRep.getReefLargeFont(),
+        styleRep.contentScale(48.0f),
+        {center.x - styleRep.contentScale(185), center.y + styleRep.contentScale(100 + 140)},
         textColor,
         "Artificial Life Environment");
 
     auto versionString = "Version " + Const::ProgramVersion;
     drawList->AddText(
-        styleRep.getMediumFont(),
-        styleRep.contentScale(20.0f),
-        {center.x - styleRep.contentScale(versionString.size() * 4), center.y + styleRep.contentScale(150 + 150)},
+        styleRep.getReefMediumFont(),
+        styleRep.contentScale(24.0f),
+        {center.x - styleRep.contentScale(toFloat(versionString.size()) * 3.8f), center.y + styleRep.contentScale(150 + 150)},
         textColor,
         versionString.c_str());
 }
