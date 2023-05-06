@@ -56,6 +56,7 @@ private:
     __inline__ __device__ static void generateConstructionDataForRectangle(ConstructionData& constructionData, ConstructorFunction const& constructor);
     __inline__ __device__ static void generateConstructionDataForHexagon(ConstructionData& constructionData, ConstructorFunction const& constructor);
     __inline__ __device__ static void generateConstructionDataForLoop(ConstructionData& constructionData, ConstructorFunction const& constructor);
+    __inline__ __device__ static void generateConstructionDataForTube(ConstructionData& constructionData, ConstructorFunction const& constructor);
 };
 
 /************************************************************************/
@@ -134,20 +135,25 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     //genome-wide data
     result.genomeInfo = GenomeDecoder::readGenomeInfo(constructor);
 
-    if (result.genomeInfo.shape == ConstructionShape_Segment) {
+    switch (result.genomeInfo.shape) {
+    case ConstructionShape_Segment:
         generateConstructionDataForSegment(result, constructor);
-    }
-    if (result.genomeInfo.shape == ConstructionShape_Triangle) {
+        break;
+    case ConstructionShape_Triangle:
         generateConstructionDataForTriangle(result, constructor);
-    }
-    if (result.genomeInfo.shape == ConstructionShape_Rectangle) {
+        break;
+    case ConstructionShape_Rectangle:
         generateConstructionDataForRectangle(result, constructor);
-    }
-    if (result.genomeInfo.shape == ConstructionShape_Hexagon) {
+        break;
+    case ConstructionShape_Hexagon:
         generateConstructionDataForHexagon(result, constructor);
-    }
-    if (result.genomeInfo.shape == ConstructionShape_Loop) {
+        break;
+    case ConstructionShape_Loop:
         generateConstructionDataForLoop(result, constructor);
+        break;
+    case ConstructionShape_Tube:
+        generateConstructionDataForTube(result, constructor);
+        break;
     }
 
     //node data
@@ -697,11 +703,48 @@ __inline__ __device__ void ConstructorProcessor::generateConstructionDataForLoop
                 constructionData.angle = edgePos < edgeLength - 1 ? 0.0f : 60.0f;
                 constructionData.numRequiredAdditionalConnections = edgePos < edgeLength - 1 ? 2 : 1;
             }
+            constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
         }
 
         if (++edgePos >= edgeLength) {
             edgePos = 0;
             ++processedEdges;
         }
+    });
+}
+
+__inline__ __device__ void ConstructorProcessor::generateConstructionDataForTube(ConstructionData& constructionData, ConstructorFunction const& constructor)
+{
+    int pos = 0;
+
+    GenomeDecoder::executeForEachNodeUntilReadPosition(constructor, [&](bool isLastNode) {
+        if (isLastNode) {
+            if (pos % 6 == 0) {
+                constructionData.angle = 0;
+                constructionData.numRequiredAdditionalConnections = 2;
+            }
+            if (pos % 6 == 1) {
+                constructionData.angle = 60.0f;
+                constructionData.numRequiredAdditionalConnections = pos == 1 ? 0 : 1;
+            }
+            if (pos % 6 == 2) {
+                constructionData.angle = 120.0f;
+                constructionData.numRequiredAdditionalConnections = 0;
+            }
+            if (pos % 6 == 3) {
+                constructionData.angle = 0;
+                constructionData.numRequiredAdditionalConnections = 2;
+            }
+            if (pos % 6 == 4) {
+                constructionData.angle = -120.0f;
+                constructionData.numRequiredAdditionalConnections = pos == 4 ? 1 : 2;
+            }
+            if (pos % 6 == 5) {
+                constructionData.angle = -60.0f;
+                constructionData.numRequiredAdditionalConnections = 1;
+            }
+            constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
+        }
+        ++pos;
     });
 }
