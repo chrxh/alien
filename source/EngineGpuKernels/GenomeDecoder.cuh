@@ -39,6 +39,9 @@ public:
     __inline__ __device__ static int convertBytesToWord(uint8_t b1, uint8_t b2);
     __inline__ __device__ static void convertWordToBytes(int word, uint8_t& b1, uint8_t& b2);
 
+    template <typename Func>
+    __inline__ __device__ static void executeForEachNodeUntilReadPosition(ConstructorFunction const& constructor, Func func);
+
     __inline__ __device__ static int getRandomGenomeNodeAddress(
         SimulationData& data,
         uint8_t* genome,
@@ -208,6 +211,17 @@ __inline__ __device__ void GenomeDecoder::convertWordToBytes(int word, uint8_t& 
 {
     b1 = static_cast<uint8_t>(word & 0xff);
     b2 = static_cast<uint8_t>((word >> 8) & 0xff);
+}
+
+template <typename Func>
+__inline__ __device__ void GenomeDecoder::executeForEachNodeUntilReadPosition(ConstructorFunction const& constructor, Func func)
+{
+    for (int currentNodeAddress = Const::GenomeInfoSize; currentNodeAddress <= constructor.currentGenomePos;) {
+        currentNodeAddress +=
+            Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(constructor.genome, constructor.genomeSize, currentNodeAddress);
+
+        func(currentNodeAddress > constructor.currentGenomePos);
+    }
 }
 
 __inline__ __device__ int GenomeDecoder::getRandomGenomeNodeAddress(
