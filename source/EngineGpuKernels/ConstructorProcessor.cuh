@@ -164,8 +164,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.cellFunction = GenomeDecoder::readByte(constructor) % CellFunction_Count;
     auto angle = GenomeDecoder::readAngle(constructor);
     result.energy = GenomeDecoder::readEnergy(constructor);
-    auto numRequiredAdditionalConnections = GenomeDecoder::readByte(constructor);
-    numRequiredAdditionalConnections = numRequiredAdditionalConnections > 127 ? -1 : result.numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
+    int numRequiredAdditionalConnections = GenomeDecoder::readByte(constructor);
+    numRequiredAdditionalConnections = numRequiredAdditionalConnections > 127 ? -1 : numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
     result.executionOrderNumber = GenomeDecoder::readByte(constructor) % cudaSimulationParameters.cellNumExecutionOrderNumbers;
     result.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
     result.inputExecutionOrderNumber = GenomeDecoder::readOptionalByte(constructor, cudaSimulationParameters.cellNumExecutionOrderNumbers);
