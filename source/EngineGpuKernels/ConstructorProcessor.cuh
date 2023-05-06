@@ -51,9 +51,10 @@ private:
 
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
 
-    __inline__ __device__ static void updateConstructionDataForSegment(ConstructionData& constructionData, ConstructorFunction const& constructor);
-    __inline__ __device__ static void updateConstructionDataForTriangle(ConstructionData& constructionData, ConstructorFunction const& constructor);
-    __inline__ __device__ static void updateConstructionDataForRectangle(ConstructionData& constructionData, ConstructorFunction const& constructor);
+    __inline__ __device__ static void generateConstructionDataForSegment(ConstructionData& constructionData, ConstructorFunction const& constructor);
+    __inline__ __device__ static void generateConstructionDataForTriangle(ConstructionData& constructionData, ConstructorFunction const& constructor);
+    __inline__ __device__ static void generateConstructionDataForRectangle(ConstructionData& constructionData, ConstructorFunction const& constructor);
+    __inline__ __device__ static void generateConstructionDataForHexagon(ConstructionData& constructionData, ConstructorFunction const& constructor);
 };
 
 /************************************************************************/
@@ -142,13 +143,16 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     //genome-wide data
     result.genomeInfo = GenomeDecoder::readGenomeInfo(constructor);
     if (result.genomeInfo.shape == ConstructionShape_Segment) {
-        updateConstructionDataForSegment(result, constructor);
+        generateConstructionDataForSegment(result, constructor);
     }
     if (result.genomeInfo.shape == ConstructionShape_Triangle) {
-        updateConstructionDataForTriangle(result, constructor);
+        generateConstructionDataForTriangle(result, constructor);
     }
     if (result.genomeInfo.shape == ConstructionShape_Rectangle) {
-        updateConstructionDataForRectangle(result, constructor);
+        generateConstructionDataForRectangle(result, constructor);
+    }
+    if (result.genomeInfo.shape == ConstructionShape_Hexagon) {
+        generateConstructionDataForHexagon(result, constructor);
     }
     if (isAtFirstNode) {
         result.angle = constructor.constructionAngle1;
@@ -564,13 +568,13 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     return true;
 }
 
-__inline__ __device__ void ConstructorProcessor::updateConstructionDataForSegment(ConstructionData& constructionData, ConstructorFunction const& constructor)
+__inline__ __device__ void ConstructorProcessor::generateConstructionDataForSegment(ConstructionData& constructionData, ConstructorFunction const& constructor)
 {
     constructionData.angle = 0;
     constructionData.numRequiredAdditionalConnections = 0;
 }
 
-__inline__ __device__ void ConstructorProcessor::updateConstructionDataForTriangle(ConstructionData& constructionData, ConstructorFunction const& constructor)
+__inline__ __device__ void ConstructorProcessor::generateConstructionDataForTriangle(ConstructionData& constructionData, ConstructorFunction const& constructor)
 {
     int edgePos = 0;
     int edgeLength = 2;
@@ -605,7 +609,7 @@ __inline__ __device__ void ConstructorProcessor::updateConstructionDataForTriang
     constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
 }
 
-__inline__ __device__ void ConstructorProcessor::updateConstructionDataForRectangle(ConstructionData& constructionData, ConstructorFunction const& constructor)
+__inline__ __device__ void ConstructorProcessor::generateConstructionDataForRectangle(ConstructionData& constructionData, ConstructorFunction const& constructor)
 {
     int edgePos = 0;
     int processedEdges = 0;
@@ -620,15 +624,45 @@ __inline__ __device__ void ConstructorProcessor::updateConstructionDataForRectan
             }
         }
     }
-    if (processedEdges == 0) {
+    if (processedEdges < 2) {
         constructionData.angle = 0.0f;
-        constructionData.numRequiredAdditionalConnections = 0;
-    } else if (processedEdges == 1) {
-        constructionData.angle = 90.0f;
         constructionData.numRequiredAdditionalConnections = 0;
     } else {
         constructionData.angle = edgePos == 0 ? 90.0f : 0.0f;
         constructionData.numRequiredAdditionalConnections = edgePos == 0 ? 0 : 1;
     }
     constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_90;
+}
+
+__inline__ __device__ void ConstructorProcessor::generateConstructionDataForHexagon(ConstructionData& constructionData, ConstructorFunction const& constructor)
+{
+    int edgePos = 0;
+    int edgeLength = 0;
+    int processedEdges = 0;
+    for (int currentNodeAddress = Const::GenomeInfoSize; currentNodeAddress < constructor.currentGenomePos;) {
+        currentNodeAddress +=
+            Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(constructor.genome, constructor.genomeSize, currentNodeAddress);
+        if (currentNodeAddress < constructor.currentGenomePos) {
+            edgeLength = processedEdges / 6 + 1;
+            if (processedEdges % 6 == 1) {
+                --edgeLength;
+            }
+
+            if (++edgePos >= edgeLength) {
+                edgePos = 0;
+                ++processedEdges;
+            }
+        }
+    }
+    if (processedEdges < 2) {
+        constructionData.angle = 120.0f;
+        constructionData.numRequiredAdditionalConnections = 0;
+    } else if (processedEdges < 6) {
+        constructionData.angle = 60.0f;
+        constructionData.numRequiredAdditionalConnections = 1;
+    } else {
+        constructionData.angle = edgePos < edgeLength - 1 ? 0.0f : 60.0f;
+        constructionData.numRequiredAdditionalConnections = edgePos < edgeLength - 1 ? 2 : 1;
+    }
+    constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
 }
