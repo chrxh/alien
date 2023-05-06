@@ -184,6 +184,47 @@ private:
     int _pos = 0;
 };
 
+class _LolliGenerator : public _ShapeGenerator
+{
+public:
+    ShapeGeneratorResult generateNextConstructionData() override
+    {
+        ShapeGeneratorResult result;
+
+        if (_processedEdges < 12 || _edgePos == 0) {
+            auto edgeLength = _processedEdges / 6 + 1;
+            if (_processedEdges % 6 == 1) {
+                --edgeLength;
+            }
+
+            if (_processedEdges < 2) {
+                result.angle = 120.0f;
+                result.numRequiredAdditionalConnections = 0;
+            } else if (_processedEdges < 6) {
+                result.angle = 60.0f;
+                result.numRequiredAdditionalConnections = 1;
+            } else {
+                result.angle = _edgePos < edgeLength - 1 ? 0.0f : 60.0f;
+                result.numRequiredAdditionalConnections = _edgePos < edgeLength - 1 ? 2 : 1;
+            }
+
+            if (++_edgePos >= edgeLength) {
+                _edgePos = 0;
+                ++_processedEdges;
+            }
+        } else {
+            result.angle = _edgePos == 1 ? -60.0f : 0.0f;
+            result.numRequiredAdditionalConnections = _edgePos == 1 ? 2 : 0;
+            ++_edgePos;
+        }
+        return result;
+    }
+
+private:
+    int _edgePos = 0;
+    int _processedEdges = 0;
+};
+
 ShapeGenerator ShapeGeneratorFactory::create(ConstructionShape shape)
 {
     switch (shape) {
@@ -199,6 +240,8 @@ ShapeGenerator ShapeGeneratorFactory::create(ConstructionShape shape)
         return std::make_shared<_LoopGenerator>();
     case ConstructionShape_Tube:
         return std::make_shared<_TubeGenerator>();
+    case ConstructionShape_Lolli:
+        return std::make_shared<_LolliGenerator>();
     }
     return nullptr;
 }
