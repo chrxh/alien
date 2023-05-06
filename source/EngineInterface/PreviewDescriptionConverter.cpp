@@ -4,6 +4,7 @@
 #include <boost/range/adaptor/indexed.hpp>
 
 #include "GenomeConstants.h"
+#include "ShapeGenerator.h"
 #include "Base/Math.h"
 #include "EngineInterface/GenomeDescriptionConverter.h"
 
@@ -84,106 +85,6 @@ namespace
         return true;
     }
 
-    struct ConstructionData
-    {
-        float angle;
-        std::optional<int> numRequiredAdditionalConnections;
-    };
-    class _ShapeGenerator
-    {
-    public:
-        virtual ConstructionData generateNextConstructionData() = 0;
-    };
-    using ShapeGenerator = std::shared_ptr<_ShapeGenerator>;
-
-    class _SegmentGenerator : public _ShapeGenerator
-    {
-    public:
-        ConstructionData generateNextConstructionData() override
-        {
-            ConstructionData result;
-            result.angle = 0;
-            result.numRequiredAdditionalConnections = 0;
-            return result;
-        }
-    };
-
-    class _TriangleGenerator : public _ShapeGenerator
-    {
-    public:
-        ConstructionData generateNextConstructionData() override
-        {
-            ConstructionData result;
-            auto edgeLength = std::max(2, _processedEdges + 1);
-            result.angle = _edgePos < edgeLength - 1 ? 0 : 120.0f;
-            if (_processedEdges == 0) {
-                result.numRequiredAdditionalConnections = 0;
-            } else if (_processedEdges == 1) {
-                result.numRequiredAdditionalConnections = _edgePos == 0 ? 1 : 0;
-            } else {
-                if (_edgePos == edgeLength - 1) {
-                    result.numRequiredAdditionalConnections = 0;
-                } else if (_edgePos == edgeLength - 2) {
-                    result.numRequiredAdditionalConnections = 1;
-                } else {
-                    result.numRequiredAdditionalConnections = 2;
-                }
-            }
-            if (++_edgePos == edgeLength) {
-                _edgePos = 0;
-                ++_processedEdges;
-            }
-            return result;
-        }
-
-    private:
-        int _edgePos = 0;
-        int _processedEdges = 0;
-    };
-
-    class _RectangleGenerator : public _ShapeGenerator
-    {
-    public:
-        ConstructionData generateNextConstructionData() override
-        {
-            ConstructionData result;
-            if (_processedEdges == 0) {
-                result.angle = 0.0f;
-                result.numRequiredAdditionalConnections = 0;
-            } else if (_processedEdges == 1) {
-                result.angle = 90.0f;
-                result.numRequiredAdditionalConnections = 0;
-            } else {
-                result.angle = _edgePos == 0 ? 90.0f : 0.0f;
-                result.numRequiredAdditionalConnections = _edgePos == 0 ? 0 : 1;
-            }
-
-            auto edgeLength = _processedEdges / 2;
-            if (++_edgePos > edgeLength) {
-                _edgePos = 0;
-                ++_processedEdges;
-            }
-            return result;
-        }
-
-    private:
-        int _edgePos = 0;
-        int _processedEdges = 0;
-    };
-
-    ShapeGenerator createShapeGenerator(ConstructionShape shape)
-    {
-        switch (shape) {
-        case ConstructionShape_Segment:
-            return std::make_shared<_SegmentGenerator>();
-        case ConstructionShape_Triangle:
-            return std::make_shared<_TriangleGenerator>();
-        case ConstructionShape_Rectangle:
-            return std::make_shared<_RectangleGenerator>();
-        }
-        return nullptr;
-    }
-
     struct ProcessedGenomeDescriptionResult
     {
         std::vector<CellPreviewDescriptionIntern> cellsIntern;
@@ -201,24 +102,24 @@ namespace
         RealVector2D pos;
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
         int index = 0;
-        auto shapeGenerator = createShapeGenerator(genome.info.shape);
+        auto shapeGenerator = ShapeGeneratorFactory::create(genome.info.shape);
         for (auto const& node : genome.cells) {
             if (index > 0) {
                 pos += result.direction;
             }
 
-            ConstructionData constructionData;
-            constructionData.angle = node.referenceAngle;
-            constructionData.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
+            ShapeGeneratorResult shapeResult;
+            shapeResult.angle = node.referenceAngle;
+            shapeResult.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
             if (genome.info.shape != ConstructionShape_IndividualShape) {
-                constructionData = shapeGenerator->generateNextConstructionData();
+                shapeResult = shapeGenerator->generateNextConstructionData();
             }
             if (lastReferenceAngle.has_value() && index == genome.cells.size() - 1) {
-                constructionData.angle = *lastReferenceAngle;
+                shapeResult.angle = *lastReferenceAngle;
             }
 
             if (index > 0) {
-                result.direction = Math::rotateClockwise(-result.direction, (180.0f + constructionData.angle));
+                result.direction = Math::rotateClockwise(-result.direction, (180.0f + shapeResult.angle));
             }
 
             //create cell description intern
@@ -266,7 +167,7 @@ namespace
 
             //add connections
             for (auto const& [otherIndex, otherCellIndex] : nearbyCellIndices | boost::adaptors::indexed(0)) {
-                if (constructionData.numRequiredAdditionalConnections.has_value() && otherIndex >= *constructionData.numRequiredAdditionalConnections) {
+                if (shapeResult.numRequiredAdditionalConnections.has_value() && otherIndex >= *shapeResult.numRequiredAdditionalConnections) {
                     continue;
                 }
                 auto& otherCell = result.cellsIntern.at(otherCellIndex);
