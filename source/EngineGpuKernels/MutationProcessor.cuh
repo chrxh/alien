@@ -238,8 +238,8 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
         auto subGenomeSize = GenomeDecoder::readWord(genome, subGenomesSizeIndices[i]);
         GenomeDecoder::writeWord(targetGenome, subGenomesSizeIndices[i], subGenomeSize + sizeDelta);
     }
-    if (constructor.currentGenomePos > nodeAddress) {
-        constructor.currentGenomePos += sizeDelta;
+    if (constructor.genomeReadPosition > nodeAddress) {
+        constructor.genomeReadPosition += sizeDelta;
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
@@ -286,8 +286,8 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
         auto subGenomeSize = GenomeDecoder::readWord(genome, subGenomesSizeIndices[i]);
         GenomeDecoder::writeWord(targetGenome, subGenomesSizeIndices[i], subGenomeSize + sizeDelta);
     }
-    if (constructor.currentGenomePos > nodeAddress || constructor.currentGenomePos == constructor.genomeSize) {
-        constructor.currentGenomePos += sizeDelta;
+    if (constructor.genomeReadPosition > nodeAddress || constructor.genomeReadPosition == constructor.genomeSize) {
+        constructor.genomeReadPosition += sizeDelta;
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
@@ -324,8 +324,8 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
         auto subGenomeSize = GenomeDecoder::readWord(genome, subGenomesSizeIndices[i]);
         GenomeDecoder::writeWord(genome, subGenomesSizeIndices[i], subGenomeSize - deleteSize);
     }
-    if (constructor.currentGenomePos > nodeAddress || constructor.currentGenomePos == constructor.genomeSize) {
-        constructor.currentGenomePos -= deleteSize;
+    if (constructor.genomeReadPosition > nodeAddress || constructor.genomeReadPosition == constructor.genomeSize) {
+        constructor.genomeReadPosition -= deleteSize;
     }
     constructor.genomeSize = targetGenomeSize;
 }
@@ -392,8 +392,8 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
             targetGenome[startSourceIndex + delta1 + delta2 + i] = genome[startTargetIndex + i];
         }
 
-        if (constructor.currentGenomePos >= startSourceIndex && constructor.currentGenomePos <= startTargetIndex) {
-            constructor.currentGenomePos = 0;
+        if (constructor.genomeReadPosition >= startSourceIndex && constructor.genomeReadPosition <= startTargetIndex) {
+            constructor.genomeReadPosition = 0;
         }
 
         //adjust sub genome size fields
@@ -428,8 +428,8 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
         for (int i = 0; i < delta3; ++i) {
             targetGenome[startTargetIndex + delta1 + delta2 + i] = genome[endSourceIndex + i];
         }
-        if (constructor.currentGenomePos >= startTargetIndex && constructor.currentGenomePos <= endSourceIndex) {
-            constructor.currentGenomePos = 0;
+        if (constructor.genomeReadPosition >= startTargetIndex && constructor.genomeReadPosition <= endSourceIndex) {
+            constructor.genomeReadPosition = 0;
         }
 
         //adjust sub genome size fields
@@ -515,8 +515,8 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
         auto subGenomeSize = GenomeDecoder::readWord(targetGenome, subGenomesSizeIndices[i]);
         GenomeDecoder::writeWord(targetGenome, subGenomesSizeIndices[i], subGenomeSize + sizeDelta);
     }
-    if (constructor.currentGenomePos > startTargetIndex || constructor.currentGenomePos == constructor.genomeSize) {
-        constructor.currentGenomePos += sizeDelta;
+    if (constructor.genomeReadPosition > startTargetIndex || constructor.genomeReadPosition == constructor.genomeSize) {
+        constructor.genomeReadPosition += sizeDelta;
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;

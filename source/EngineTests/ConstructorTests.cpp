@@ -64,7 +64,7 @@ TEST_F(ConstructorTests, noEnergy)
     auto actualHostCell = getCell(actualData, 1);
 
     EXPECT_EQ(0, actualHostCell.connections.size());
-    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentGenomePos);
+    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeReadPosition);
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0] * 2 - 1.0f, actualHostCell.energy));
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
 }
@@ -77,7 +77,7 @@ TEST_F(ConstructorTests, alreadyFinished)
         GenomeDescription().setInfo(GenomeInfoDescription().setSingleConstruction(true)).setCells({CellGenomeDescription()}));
 
     auto constructor = ConstructorDescription().setGenome(genome);
-    constructor.setCurrentGenomePos(constructor.genome.size());
+    constructor.setGenomeReadPosition(constructor.genome.size());
 
     data.addCell(
         CellDescription()
@@ -95,7 +95,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
     EXPECT_EQ(0, actualHostCell.connections.size());
-    EXPECT_EQ(actualConstructor.genome.size(), actualConstructor.currentGenomePos);
+    EXPECT_EQ(actualConstructor.genome.size(), actualConstructor.genomeReadPosition);
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
 }
 
@@ -147,7 +147,7 @@ TEST_F(ConstructorTests, manualConstruction_noInputActivity)
     auto actualHostCell = getCell(actualData, 1);
 
     EXPECT_EQ(0, actualHostCell.connections.size());
-    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentGenomePos);
+    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeReadPosition);
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0] * 3, actualHostCell.energy));
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
 }
@@ -225,7 +225,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(1, actualHostCell.connections.size());
-    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentGenomePos);
+    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeReadPosition);
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0] * 2, actualHostCell.energy));
     EXPECT_TRUE(approxCompare(1.0f, actualHostCell.activity.channels[0]));
     EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
@@ -326,7 +326,7 @@ TEST_F(ConstructorTests, constructFirstCell_singleConstruction)
 
     EXPECT_EQ(0, actualHostCell.connections.size());
     auto const& constructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
-    EXPECT_EQ(constructor.genome.size(), constructor.currentGenomePos);
+    EXPECT_EQ(constructor.genome.size(), constructor.genomeReadPosition);
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
     EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
@@ -957,7 +957,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSpace)
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
     ASSERT_EQ(1, actualPrevConstructedCell.connections.size());
     auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
-    EXPECT_EQ(0, actualConstructor.currentGenomePos);
+    EXPECT_EQ(0, actualConstructor.genomeReadPosition);
 }
 
 TEST_F(ConstructorTests, constructSecondCell_notFinished)

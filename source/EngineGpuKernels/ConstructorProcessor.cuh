@@ -79,24 +79,24 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
     if (!isConstructionFinished(cell)) {
-        auto origGenomePos = cell->cellFunctionData.constructor.currentGenomePos;
+        auto origGenomePos = cell->cellFunctionData.constructor.genomeReadPosition;
         auto constructionData = readConstructionData(cell);
         if (isConstructionTriggered(data, cell, constructionData, activity)) {
            if (tryConstructCell(data, statistics, cell, constructionData)) {
                 activity.channels[0] = 1;
             } else {
                 activity.channels[0] = 0;
-                cell->cellFunctionData.constructor.currentGenomePos = origGenomePos;
+                cell->cellFunctionData.constructor.genomeReadPosition = origGenomePos;
             }
             if (GenomeDecoder::isFinished(cell->cellFunctionData.constructor)) {
                 auto& constructor = cell->cellFunctionData.constructor;
                 if (!constructionData.genomeInfo.singleConstruction) {
-                    constructor.currentGenomePos = 0;
+                    constructor.genomeReadPosition = 0;
                 }
             }
         } else {
             activity.channels[0] = 0;
-            cell->cellFunctionData.constructor.currentGenomePos = origGenomePos;
+            cell->cellFunctionData.constructor.genomeReadPosition = origGenomePos;
         }
     }
     CellFunctionProcessor::setActivity(cell, activity);
@@ -104,7 +104,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
 __inline__ __device__ bool ConstructorProcessor::isConstructionFinished(Cell* cell)
 {
-    return cell->cellFunctionData.constructor.currentGenomePos >= cell->cellFunctionData.constructor.genomeSize;
+    return cell->cellFunctionData.constructor.genomeReadPosition >= cell->cellFunctionData.constructor.genomeSize;
 }
 
 __inline__ __device__ bool
@@ -124,8 +124,8 @@ ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* 
 __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::readConstructionData(Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    if (constructor.currentGenomePos == 0) {
-        constructor.currentGenomePos = Const::GenomeInfoSize;
+    if (constructor.genomeReadPosition == 0) {
+        constructor.genomeReadPosition = Const::GenomeInfoSize;
     }
 
     auto isAtFirstNode = GenomeDecoder::isAtFirstNode(constructor);
@@ -525,7 +525,7 @@ ConstructorProcessor::constructCellIntern(
         auto& newConstructor = result->cellFunctionData.constructor;
         newConstructor.activationMode = GenomeDecoder::readByte(constructor);
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor);
-        newConstructor.currentGenomePos = 0;
+        newConstructor.genomeReadPosition = 0;
         newConstructor.constructionAngle1 = GenomeDecoder::readAngle(constructor);
         newConstructor.constructionAngle2 = GenomeDecoder::readAngle(constructor);
         GenomeDecoder::copyGenome(data, constructor, newConstructor);

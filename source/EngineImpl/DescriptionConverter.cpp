@@ -422,7 +422,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
-        constructor.currentGenomePos = toInt(cellTO.cellFunctionData.constructor.currentGenomePos);
+        constructor.genomeReadPosition = toInt(cellTO.cellFunctionData.constructor.genomeReadPosition);
         constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
         constructor.constructionAngle1 = cellTO.cellFunctionData.constructor.constructionAngle1;
         constructor.constructionAngle2 = cellTO.cellFunctionData.constructor.constructionAngle2;
@@ -533,7 +533,7 @@ void DescriptionConverter::addCell(
         constructorTO.activationMode = constructorDesc.activationMode;
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
-        constructorTO.currentGenomePos = constructorDesc.currentGenomePos;
+        constructorTO.genomeReadPosition = constructorDesc.genomeReadPosition;
         constructorTO.genomeGeneration = constructorDesc.genomeGeneration;
         constructorTO.constructionAngle1 = constructorDesc.constructionAngle1;
         constructorTO.constructionAngle2 = constructorDesc.constructionAngle2;

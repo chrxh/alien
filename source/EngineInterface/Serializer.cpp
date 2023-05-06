@@ -59,7 +59,7 @@ namespace
     auto constexpr Id_Constructor_AngleAlignment = 4;
     auto constexpr Id_Constructor_Stiffness = 5;
     auto constexpr Id_Constructor_ConstructionActivationTime = 6;
-    auto constexpr Id_Constructor_CurrentGenomePos = 7;
+    auto constexpr Id_Constructor_GenomeReadPosition = 7;
     auto constexpr Id_Constructor_GenomeGeneration = 9;
     auto constexpr Id_Constructor_GenomeInfo = 10;
     auto constexpr Id_Constructor_ConstructionAngle1 = 11;
@@ -452,7 +452,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
         loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
-        loadSave<int>(task, auxiliaries, Id_Constructor_CurrentGenomePos, data.currentGenomePos, defaultObject.currentGenomePos);
+        loadSave<int>(task, auxiliaries, Id_Constructor_GenomeReadPosition, data.genomeReadPosition, defaultObject.genomeReadPosition);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
         loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
         loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
@@ -479,10 +479,10 @@ namespace cereal
                 genomeDesc.info.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
                 data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
 
-                //heuristic to obtain a valid currentGenomePos
-                data.currentGenomePos += Const::GenomeInfoSize;
-                auto cellIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(data.genome, data.currentGenomePos);
-                data.currentGenomePos = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(data.genome, cellIndex);
+                //heuristic to obtain a valid genomeReadPosition
+                data.genomeReadPosition += Const::GenomeInfoSize;
+                auto cellIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(data.genome, data.genomeReadPosition);
+                data.genomeReadPosition = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(data.genome, cellIndex);
 
                 if (!genomeDesc.cells.empty()) {
                     data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;

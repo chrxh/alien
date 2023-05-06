@@ -103,7 +103,7 @@ struct ConstructorDescription
     float constructionAngle2 = 0;
 
     //process data
-    int currentGenomePos = 0;
+    int genomeReadPosition = 0;
 
     ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
@@ -123,9 +123,9 @@ struct ConstructorDescription
         genome = value;
         return *this;
     }
-    ConstructorDescription& setCurrentGenomePos(int value)
+    ConstructorDescription& setGenomeReadPosition(int value)
     {
-        currentGenomePos = value;
+        genomeReadPosition = value;
         return *this;
     }
     ConstructorDescription& setGenomeGeneration(int value)

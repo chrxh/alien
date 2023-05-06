@@ -16,7 +16,7 @@ struct GenomeInfo
 class GenomeDecoder
 {
 public:
-    //automatic increment currentGenomePos
+    //automatic increment genomeReadPosition
     __inline__ __device__ static bool readBool(ConstructorFunction& constructor);
     __inline__ __device__ static uint8_t readByte(ConstructorFunction& constructor);
     __inline__ __device__ static int readOptionalByte(ConstructorFunction& constructor, int moduloValue);
@@ -92,7 +92,7 @@ __inline__ __device__ uint8_t GenomeDecoder::readByte(ConstructorFunction& const
     if (isFinished(constructor)) {
         return 0;
     }
-    uint8_t result = constructor.genome[constructor.currentGenomePos++];
+    uint8_t result = constructor.genome[constructor.genomeReadPosition++];
     return result;
 }
 
@@ -127,19 +127,19 @@ __inline__ __device__ float GenomeDecoder::readAngle(ConstructorFunction& constr
 
 __inline__ __device__ bool GenomeDecoder::isAtFirstNode(ConstructorFunction const& constructor)
 {
-    return constructor.currentGenomePos <= Const::GenomeInfoSize;
+    return constructor.genomeReadPosition <= Const::GenomeInfoSize;
 }
 
 __inline__ __device__ bool GenomeDecoder::isAtLastNode(ConstructorFunction const& constructor)
 {
     auto nextNodeBytes =
-        Const::CellBasicBytes + getNextCellFunctionDataSize(constructor.genome, toInt(constructor.genomeSize), toInt(constructor.currentGenomePos));
-    return toInt(constructor.currentGenomePos) + nextNodeBytes >= toInt(constructor.genomeSize);
+        Const::CellBasicBytes + getNextCellFunctionDataSize(constructor.genome, toInt(constructor.genomeSize), toInt(constructor.genomeReadPosition));
+    return toInt(constructor.genomeReadPosition) + nextNodeBytes >= toInt(constructor.genomeSize);
 }
 
 __inline__ __device__ bool GenomeDecoder::isFinished(ConstructorFunction const& constructor)
 {
-    return constructor.currentGenomePos >= constructor.genomeSize;
+    return constructor.genomeReadPosition >= constructor.genomeSize;
 }
 
 template <typename GenomeHolderSource, typename GenomeHolderTarget>
@@ -148,7 +148,7 @@ __inline__ __device__ void GenomeDecoder::copyGenome(SimulationData& data, Genom
     bool makeGenomeCopy = readBool(source);
     if (!makeGenomeCopy) {
         auto size = readWord(source);
-        size = min(size, toInt(source.genomeSize) - toInt(source.currentGenomePos));
+        size = min(size, toInt(source.genomeSize) - toInt(source.genomeReadPosition));
         target.genomeSize = size;
         target.genome = data.objects.auxiliaryData.getAlignedSubArray(size);
         //#TODO can be optimized
@@ -170,7 +170,7 @@ __inline__ __device__ bool GenomeDecoder::isFinishedSingleConstruction(Construct
 {
     auto genomeInfo = readGenomeInfo(constructor);
     return genomeInfo.singleConstruction
-        && (constructor.currentGenomePos >= constructor.genomeSize || (constructor.currentGenomePos == 0 && constructor.genomeSize == Const::GenomeInfoSize));
+        && (constructor.genomeReadPosition >= constructor.genomeSize || (constructor.genomeReadPosition == 0 && constructor.genomeSize == Const::GenomeInfoSize));
 }
 
 __inline__ __device__ GenomeInfo GenomeDecoder::readGenomeInfo(ConstructorFunction const& constructor)
@@ -216,11 +216,11 @@ __inline__ __device__ void GenomeDecoder::convertWordToBytes(int word, uint8_t& 
 template <typename Func>
 __inline__ __device__ void GenomeDecoder::executeForEachNodeUntilReadPosition(ConstructorFunction const& constructor, Func func)
 {
-    for (int currentNodeAddress = Const::GenomeInfoSize; currentNodeAddress <= constructor.currentGenomePos;) {
+    for (int currentNodeAddress = Const::GenomeInfoSize; currentNodeAddress <= constructor.genomeReadPosition;) {
         currentNodeAddress +=
             Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(constructor.genome, constructor.genomeSize, currentNodeAddress);
 
-        func(currentNodeAddress > constructor.currentGenomePos);
+        func(currentNodeAddress > constructor.genomeReadPosition);
     }
 }
 
