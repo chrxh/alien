@@ -171,7 +171,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.inputExecutionOrderNumber = GenomeDecoder::readOptionalByte(constructor, cudaSimulationParameters.cellNumExecutionOrderNumbers);
     result.outputBlocked = GenomeDecoder::readBool(constructor);
 
-    if (result.genomeHeader.shape == ConstructionShape_IndividualShape) {
+    if (result.genomeHeader.shape == ConstructionShape_Custom) {
         result.angle = angle;
         result.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
     }

@@ -13,7 +13,7 @@ public:
 
     __inline__ __device__ static void neuronDataMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void propertiesMutation(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void structureMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void customGeometryMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void cellFunctionMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void insertMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void deleteMutation(SimulationData& data, Cell* cell);
@@ -43,9 +43,9 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         data,
         cell->absPos,
         cell->color);
-    auto cellFunctionConstructorMutationStructureProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationStructureProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationStructureProbability,
+    auto cellFunctionConstructorMutationCustomGeometryProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationCustomGeometryProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCustomGeometryProbability,
         data,
         cell->absPos,
         cell->color);
@@ -92,8 +92,8 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
     if (isRandomEvent(data, cellFunctionConstructorMutationDataProbability)) {
         propertiesMutation(data, cell);
     }
-    if (isRandomEvent(data, cellFunctionConstructorMutationStructureProbability)) {
-        structureMutation(data, cell);
+    if (isRandomEvent(data, cellFunctionConstructorMutationCustomGeometryProbability)) {
+        customGeometryMutation(data, cell);
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationCellFunctionProbability)) {
         cellFunctionMutation(data, cell);
@@ -171,7 +171,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
     }
 }
 
-__inline__ __device__ void MutationProcessor::structureMutation(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::customGeometryMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;

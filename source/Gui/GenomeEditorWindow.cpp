@@ -84,7 +84,7 @@ namespace
     {
         auto result = "No. " + std::to_string(index + 1) + ", Type: " + Const::CellFunctionToStringMap.at(cell.getCellFunctionType())
             + ", Color: " + std::to_string(cell.color);
-        if (shape == ConstructionShape_IndividualShape && !isFirstOrLast) {
+        if (shape == ConstructionShape_Custom && !isFirstOrLast) {
             result += ", Angle: " + StringHelper::format(cell.referenceAngle, 1);
         }
         result += ", Energy: " + StringHelper::format(cell.energy, 1);
@@ -295,15 +295,15 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
 {
     DynamicTableLayout table;
     if (table.begin()) {
-        std::vector ShapeStrings = {"Individual"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s, "Tube"s, "Lolli"s};
-        AlienImGui::Combo(AlienImGui::ComboParameters().name("Shape").values(ShapeStrings).textWidth(ContentTextWidth), tab.genome.info.shape);
+        std::vector ShapeStrings = {"Custom"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s, "Tube"s, "Lolli"s};
+        AlienImGui::Combo(AlienImGui::ComboParameters().name("Geometry").values(ShapeStrings).textWidth(ContentTextWidth), tab.genome.info.shape);
         table.next();
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(ContentTextWidth), tab.genome.info.connectionDistance);
         table.next();
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth), tab.genome.info.stiffness);
-        if (tab.genome.info.shape == ConstructionShape_IndividualShape) {
+        if (tab.genome.info.shape == ConstructionShape_Custom) {
             table.next();
             AlienImGui::AngleAlignmentCombo(
                 AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(ContentTextWidth), tab.genome.info.angleAlignment);
@@ -420,7 +420,7 @@ void _GenomeEditorWindow::processNode(TabData& tab, CellGenomeDescription& cell,
         }
         table.next();
         AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(ContentTextWidth), cell.color);
-        if (tab.genome.info.shape == ConstructionShape_IndividualShape && !isFirstOrLast) {
+        if (tab.genome.info.shape == ConstructionShape_Custom && !isFirstOrLast) {
             table.next();
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f"), cell.referenceAngle);
         }
@@ -432,7 +432,7 @@ void _GenomeEditorWindow::processNode(TabData& tab, CellGenomeDescription& cell,
         AlienImGui::InputOptionalInt(AlienImGui::InputIntParameters().name("Input execution number").textWidth(ContentTextWidth), cell.inputExecutionOrderNumber);
         table.next();
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(ContentTextWidth), cell.outputBlocked);
-        if (tab.genome.info.shape == ConstructionShape_IndividualShape) {
+        if (tab.genome.info.shape == ConstructionShape_Custom) {
             table.next();
             AlienImGui::InputOptionalInt(
                 AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth), cell.numRequiredAdditionalConnections);

@@ -93,7 +93,7 @@ enum InjectorMode_
 using ConstructionShape = int;
 enum ConstructionShape_
 {
-    ConstructionShape_IndividualShape,
+    ConstructionShape_Custom,
     ConstructionShape_Segment,
     ConstructionShape_Triangle,
     ConstructionShape_Rectangle,

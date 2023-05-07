@@ -4,7 +4,7 @@ enum class MutationType
 {
     Properties,
     NeuronData,
-    Structure,
+    CustomGeometry,
     CellFunction,
     Insertion,
     Deletion,
