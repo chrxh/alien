@@ -44,6 +44,10 @@ namespace
         value = std::max(-3.9f, std::min(3.9f, value));
         writeFloat(data, value / 4);
     }
+    void writeDistance(std::vector<uint8_t>& data, float value)
+    {
+        data.emplace_back(static_cast<uint8_t>((value - 0.5f) * 255));
+    }
     void writeStiffness(std::vector<uint8_t>& data, float value) { data.emplace_back(static_cast<uint8_t>(value * 255)); }
     void writeGenome(std::vector<uint8_t>& data, std::variant<MakeGenomeCopy, std::vector<uint8_t>> const& value)
     {
@@ -100,11 +104,11 @@ namespace
     float readNeuronProperty(std::vector<uint8_t> const& data, int& pos) { return readFloat(data, pos) * 4; }
     float readDistance(std::vector<uint8_t> const& data, int& pos)
     {
-        return readFloat(data, pos) + 1.0f;
+        return toFloat(readByte(data, pos)) / 255 + 0.5f;
     }
     float readStiffness(std::vector<uint8_t> const& data, int& pos)
     {
-        return static_cast<float>(readByte(data, pos)) / 255;
+        return toFloat(readByte(data, pos)) / 255;
     }
 
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> readGenome(std::vector<uint8_t> const& data, int& pos)
@@ -138,6 +142,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
     writeBool(result, genome.info.separateConstruction);
     writeByte(result, genome.info.angleAlignment);
     writeStiffness(result, genome.info.stiffness);
+    writeDistance(result, genome.info.connectionDistance);
 
     for (auto const& cell : cells) {
         writeByte(result, cell.getCellFunctionType());
@@ -233,6 +238,7 @@ namespace
         result.genome.info.separateConstruction = readBool(data, bytePosition);
         result.genome.info.angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;
         result.genome.info.stiffness = readStiffness(data, bytePosition);
+        result.genome.info.connectionDistance = readDistance(data, bytePosition);
         
         while (bytePosition < maxBytePosition && nodeIndex < maxEntries) {
             CellFunction cellFunction = readByte(data, bytePosition) % CellFunction_Count;

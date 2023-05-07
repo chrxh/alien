@@ -275,7 +275,7 @@ void _GenomeEditorWindow::processTab(TabData& tab)
 {
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewHeight), true)) {
         AlienImGui::Group("General properties");
-        processGeneralProperties(tab);
+        processGenomeHeader(tab);
         AlienImGui::Group("Construction sequence");
         processConstructionSequence(tab);
     }
@@ -284,19 +284,22 @@ void _GenomeEditorWindow::processTab(TabData& tab)
     if (ImGui::IsItemActive()) {
         _previewHeight -= ImGui::GetIO().MouseDelta.y;
     }
-    AlienImGui::Group("Preview (approximation)");
+    AlienImGui::Group("Preview (reference configuration)");
     if (ImGui::BeginChild("##child4", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         showPreview(tab);
     }
     ImGui::EndChild();
 }
 
-void _GenomeEditorWindow::processGeneralProperties(TabData& tab)
+void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
 {
     DynamicTableLayout table;
     if (table.begin()) {
         std::vector ShapeStrings = {"Individual"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s, "Tube"s, "Lolli"s};
         AlienImGui::Combo(AlienImGui::ComboParameters().name("Shape").values(ShapeStrings).textWidth(ContentTextWidth), tab.genome.info.shape);
+        table.next();
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(ContentTextWidth), tab.genome.info.connectionDistance);
         table.next();
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth), tab.genome.info.stiffness);
@@ -766,6 +769,7 @@ void _GenomeEditorWindow::showPreview(TabData& tab)
 void _GenomeEditorWindow::validationAndCorrection(GenomeInfoDescription& info) const
 {
     info.stiffness = std::max(0.0f, std::min(1.0f, info.stiffness));
+    info.connectionDistance = std::max(0.5f, std::min(1.5f, info.connectionDistance));
 }
 
 void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const

@@ -347,7 +347,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             }
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth), desc.genomeGeneration);
 
-            AlienImGui::Group("Preview (approximation)");
+            AlienImGui::Group("Preview (reference configuration)");
             if (ImGui::BeginChild("##child", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar)) {
                 auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome);
                 auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);

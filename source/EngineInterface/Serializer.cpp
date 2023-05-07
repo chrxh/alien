@@ -92,6 +92,7 @@ namespace
     auto constexpr Id_GenomeInfo_SeparateConstruction = 2;
     auto constexpr Id_GenomeInfo_AngleAlignment = 3;
     auto constexpr Id_GenomeInfo_Stiffness = 4;
+    auto constexpr Id_GenomeInfo_ConnectionDistance = 5;
 
     auto constexpr Id_CellGenome_ReferenceAngle = 1;
     auto constexpr Id_CellGenome_Energy = 7;
@@ -398,6 +399,7 @@ namespace cereal
         loadSave<bool>(task, auxiliaries, Id_GenomeInfo_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
         loadSave<int>(task, auxiliaries, Id_GenomeInfo_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
         loadSave<float>(task, auxiliaries, Id_GenomeInfo_Stiffness, data.stiffness, defaultObject.stiffness);
+        loadSave<float>(task, auxiliaries, Id_GenomeInfo_ConnectionDistance, data.connectionDistance, defaultObject.connectionDistance);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(GenomeInfoDescription)

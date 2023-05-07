@@ -2,7 +2,7 @@
 
 namespace Const
 {
-    int constexpr GenomeInfoSize = 5;
+    int constexpr GenomeInfoSize = 6;
     int constexpr CellFunctionMutationMaxGenomeSize = 200;
     int constexpr CellAnglePos = 1;
     int constexpr CellRequiredConnectionsPos = 3;
