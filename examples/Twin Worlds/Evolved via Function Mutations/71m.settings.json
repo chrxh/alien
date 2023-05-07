@@ -115,13 +115,20 @@
                         "data[4]": "0.00000000",
                         "data[5]": "0.00000000",
                         "data[6]": "0.00000000",
-                        "structure[0]": "0.00003600",
-                        "structure[1]": "0.00000000",
-                        "structure[2]": "0.00000000",
-                        "structure[3]": "0.00017200",
-                        "structure[4]": "0.00000000",
-                        "structure[5]": "0.00000000",
-                        "structure[6]": "0.00000000",
+                        "geometry[0]": "0.00003600",
+                        "geometry[1]": "0.00000000",
+                        "geometry[2]": "0.00000000",
+                        "geometry[3]": "0.00003600",
+                        "geometry[4]": "0.00000000",
+                        "geometry[5]": "0.00000000",
+                        "geometry[6]": "0.00000000",
+                        "custom geometry[0]": "0.00003600",
+                        "custom geometry[1]": "0.00000000",
+                        "custom geometry[2]": "0.00000000",
+                        "custom geometry[3]": "0.00003600",
+                        "custom geometry[4]": "0.00000000",
+                        "custom geometry[5]": "0.00000000",
+                        "custom geometry[6]": "0.00000000",
                         "cell function[0]": "0.00005400",
                         "cell function[1]": "0.00000000",
                         "cell function[2]": "0.00000000",
@@ -740,16 +747,26 @@
                                 "data [4]": "0.00000000",
                                 "data [5]": "0.00000000",
                                 "data [6]": "0.00000000",
-                                "structure": {
+                                "geometry": {
                                     "activated": "false"
                                 },
-                                "structure[0]": "0.00000000",
-                                "structure[1]": "0.00000000",
-                                "structure[2]": "0.00000000",
-                                "structure[3]": "0.00000000",
-                                "structure[4]": "0.00000000",
-                                "structure[5]": "0.00000000",
-                                "structure[6]": "0.00000000",
+                                "geometry[0]": "0.00000000",
+                                "geometry[1]": "0.00000000",
+                                "geometry[2]": "0.00000000",
+                                "geometry[3]": "0.00000000",
+                                "geometry[4]": "0.00000000",
+                                "geometry[5]": "0.00000000",
+                                "geometry[6]": "0.00000000",
+                                "custom geometry": {
+                                    "activated": "false"
+                                },
+                                "custom geometry[0]": "0.00000000",
+                                "custom geometry[1]": "0.00000000",
+                                "custom geometry[2]": "0.00000000",
+                                "custom geometry[3]": "0.00000000",
+                                "custom geometry[4]": "0.00000000",
+                                "custom geometry[5]": "0.00000000",
+                                "custom geometry[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
@@ -1013,16 +1030,26 @@
                                 "data [4]": "0.00000000",
                                 "data [5]": "0.00000000",
                                 "data [6]": "0.00000000",
-                                "structure": {
+                                "geometry": {
                                     "activated": "false"
                                 },
-                                "structure[0]": "0.00003600",
-                                "structure[1]": "0.00000000",
-                                "structure[2]": "0.00000000",
-                                "structure[3]": "0.00003600",
-                                "structure[4]": "0.00000000",
-                                "structure[5]": "0.00000000",
-                                "structure[6]": "0.00000000",
+                                "geometry[0]": "0.00000000",
+                                "geometry[1]": "0.00000000",
+                                "geometry[2]": "0.00000000",
+                                "geometry[3]": "0.00000000",
+                                "geometry[4]": "0.00000000",
+                                "geometry[5]": "0.00000000",
+                                "geometry[6]": "0.00000000",
+                                "custom geometry": {
+                                    "activated": "false"
+                                },
+                                "custom geometry[0]": "0.00000000",
+                                "custom geometry[1]": "0.00000000",
+                                "custom geometry[2]": "0.00000000",
+                                "custom geometry[3]": "0.00000000",
+                                "custom geometry[4]": "0.00000000",
+                                "custom geometry[5]": "0.00000000",
+                                "custom geometry[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
@@ -1286,16 +1313,26 @@
                                 "data [4]": "0.00000000",
                                 "data [5]": "0.00000000",
                                 "data [6]": "0.00000000",
-                                "structure": {
+                                "geometry": {
                                     "activated": "false"
                                 },
-                                "structure[0]": "0.00000000",
-                                "structure[1]": "0.00000000",
-                                "structure[2]": "0.00000000",
-                                "structure[3]": "0.00000000",
-                                "structure[4]": "0.00000000",
-                                "structure[5]": "0.00000000",
-                                "structure[6]": "0.00000000",
+                                "geometry[0]": "0.00000000",
+                                "geometry[1]": "0.00000000",
+                                "geometry[2]": "0.00000000",
+                                "geometry[3]": "0.00000000",
+                                "geometry[4]": "0.00000000",
+                                "geometry[5]": "0.00000000",
+                                "geometry[6]": "0.00000000",
+                                "custom geometry": {
+                                    "activated": "false"
+                                },
+                                "custom geometry[0]": "0.00000000",
+                                "custom geometry[1]": "0.00000000",
+                                "custom geometry[2]": "0.00000000",
+                                "custom geometry[3]": "0.00000000",
+                                "custom geometry[4]": "0.00000000",
+                                "custom geometry[5]": "0.00000000",
+                                "custom geometry[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
@@ -1559,16 +1596,26 @@
                                 "data [4]": "0.00000000",
                                 "data [5]": "0.00000000",
                                 "data [6]": "0.00000000",
-                                "structure": {
+                                "geometry": {
                                     "activated": "false"
                                 },
-                                "structure[0]": "0.00000000",
-                                "structure[1]": "0.00000000",
-                                "structure[2]": "0.00000000",
-                                "structure[3]": "0.00000000",
-                                "structure[4]": "0.00000000",
-                                "structure[5]": "0.00000000",
-                                "structure[6]": "0.00000000",
+                                "geometry[0]": "0.00000000",
+                                "geometry[1]": "0.00000000",
+                                "geometry[2]": "0.00000000",
+                                "geometry[3]": "0.00000000",
+                                "geometry[4]": "0.00000000",
+                                "geometry[5]": "0.00000000",
+                                "geometry[6]": "0.00000000",
+                                "custom geometry": {
+                                    "activated": "false"
+                                },
+                                "custom geometry[0]": "0.00000000",
+                                "custom geometry[1]": "0.00000000",
+                                "custom geometry[2]": "0.00000000",
+                                "custom geometry[3]": "0.00000000",
+                                "custom geometry[4]": "0.00000000",
+                                "custom geometry[5]": "0.00000000",
+                                "custom geometry[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },

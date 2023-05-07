@@ -79,13 +79,6 @@
                     "pump energy factor[4]": "0.89999998",
                     "pump energy factor[5]": "0.89999998",
                     "pump energy factor[6]": "0.89999998",
-                    "energy from radiation factor[0]": "0.69999999",
-                    "energy from radiation factor[1]": "0.69999999",
-                    "energy from radiation factor[2]": "0.69999999",
-                    "energy from radiation factor[3]": "0.69999999",
-                    "energy from radiation factor[4]": "0.69999999",
-                    "energy from radiation factor[5]": "0.69999999",
-                    "energy from radiation factor[6]": "0.69999999",
                     "offspring distance[0]": "2.00000000",
                     "offspring distance[1]": "2.00000000",
                     "offspring distance[2]": "2.00000000",
@@ -122,13 +115,20 @@
                         "data[4]": "0.00000000",
                         "data[5]": "0.00000000",
                         "data[6]": "0.00000000",
-                        "structure[0]": "0.00003600",
-                        "structure[1]": "0.00000000",
-                        "structure[2]": "0.00000000",
-                        "structure[3]": "0.00003600",
-                        "structure[4]": "0.00000000",
-                        "structure[5]": "0.00000000",
-                        "structure[6]": "0.00000000",
+                        "geometry[0]": "0.00004500",
+                        "geometry[1]": "0.00000000",
+                        "geometry[2]": "0.00000000",
+                        "geometry[3]": "0.00009200",
+                        "geometry[4]": "0.00000000",
+                        "geometry[5]": "0.00000000",
+                        "geometry[6]": "0.00000000",
+                        "custom geometry[0]": "0.00005700",
+                        "custom geometry[1]": "0.00000000",
+                        "custom geometry[2]": "0.00000000",
+                        "custom geometry[3]": "0.00001700",
+                        "custom geometry[4]": "0.00000000",
+                        "custom geometry[5]": "0.00000000",
+                        "custom geometry[6]": "0.00000000",
                         "cell function[0]": "0.00002400",
                         "cell function[1]": "0.00000000",
                         "cell function[2]": "0.00000000",
@@ -737,6 +737,36 @@
                                 "neuron data[4]": "0.00000000",
                                 "neuron data[5]": "0.00000000",
                                 "neuron data[6]": "0.00000000",
+                                "data ": {
+                                    "activated": "false"
+                                },
+                                "data [0]": "0.00000000",
+                                "data [1]": "0.00000000",
+                                "data [2]": "0.00000000",
+                                "data [3]": "0.00000000",
+                                "data [4]": "0.00000000",
+                                "data [5]": "0.00000000",
+                                "data [6]": "0.00000000",
+                                "geometry": {
+                                    "activated": "false"
+                                },
+                                "geometry[0]": "0.00000000",
+                                "geometry[1]": "0.00000000",
+                                "geometry[2]": "0.00000000",
+                                "geometry[3]": "0.00000000",
+                                "geometry[4]": "0.00000000",
+                                "geometry[5]": "0.00000000",
+                                "geometry[6]": "0.00000000",
+                                "custom geometry": {
+                                    "activated": "false"
+                                },
+                                "custom geometry[0]": "0.00000000",
+                                "custom geometry[1]": "0.00000000",
+                                "custom geometry[2]": "0.00000000",
+                                "custom geometry[3]": "0.00000000",
+                                "custom geometry[4]": "0.00000000",
+                                "custom geometry[5]": "0.00000000",
+                                "custom geometry[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
@@ -797,24 +827,6 @@
                                 "color[4]": "0.00000600",
                                 "color[5]": "0.00000600",
                                 "color[6]": "0.00000600"
-                            }
-                        }
-                    }
-                },
-                " cell": {
-                    "function": {
-                        "constructor": {
-                            "mutation probability": {
-                                "data ": {
-                                    "activated": "false"
-                                },
-                                "data [0]": "0.00020900",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00019000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
                             }
                         }
                     }
@@ -1008,6 +1020,36 @@
                                 "neuron data[4]": "0.00000000",
                                 "neuron data[5]": "0.00000000",
                                 "neuron data[6]": "0.00000000",
+                                "data ": {
+                                    "activated": "false"
+                                },
+                                "data [0]": "0.00000000",
+                                "data [1]": "0.00000000",
+                                "data [2]": "0.00000000",
+                                "data [3]": "0.00000000",
+                                "data [4]": "0.00000000",
+                                "data [5]": "0.00000000",
+                                "data [6]": "0.00000000",
+                                "geometry": {
+                                    "activated": "false"
+                                },
+                                "geometry[0]": "0.00000000",
+                                "geometry[1]": "0.00000000",
+                                "geometry[2]": "0.00000000",
+                                "geometry[3]": "0.00000000",
+                                "geometry[4]": "0.00000000",
+                                "geometry[5]": "0.00000000",
+                                "geometry[6]": "0.00000000",
+                                "custom geometry": {
+                                    "activated": "false"
+                                },
+                                "custom geometry[0]": "0.00000000",
+                                "custom geometry[1]": "0.00000000",
+                                "custom geometry[2]": "0.00000000",
+                                "custom geometry[3]": "0.00000000",
+                                "custom geometry[4]": "0.00000000",
+                                "custom geometry[5]": "0.00000000",
+                                "custom geometry[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
@@ -1068,24 +1110,6 @@
                                 "color[4]": "0.00000600",
                                 "color[5]": "0.00000600",
                                 "color[6]": "0.00000600"
-                            }
-                        }
-                    }
-                },
-                " cell": {
-                    "function": {
-                        "constructor": {
-                            "mutation probability": {
-                                "data ": {
-                                    "activated": "false"
-                                },
-                                "data [0]": "0.00020900",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00019000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
                             }
                         }
                     }
@@ -1279,6 +1303,36 @@
                                 "neuron data[4]": "0.00000000",
                                 "neuron data[5]": "0.00000000",
                                 "neuron data[6]": "0.00000000",
+                                "data ": {
+                                    "activated": "false"
+                                },
+                                "data [0]": "0.00000000",
+                                "data [1]": "0.00000000",
+                                "data [2]": "0.00000000",
+                                "data [3]": "0.00000000",
+                                "data [4]": "0.00000000",
+                                "data [5]": "0.00000000",
+                                "data [6]": "0.00000000",
+                                "geometry": {
+                                    "activated": "false"
+                                },
+                                "geometry[0]": "0.00000000",
+                                "geometry[1]": "0.00000000",
+                                "geometry[2]": "0.00000000",
+                                "geometry[3]": "0.00000000",
+                                "geometry[4]": "0.00000000",
+                                "geometry[5]": "0.00000000",
+                                "geometry[6]": "0.00000000",
+                                "custom geometry": {
+                                    "activated": "false"
+                                },
+                                "custom geometry[0]": "0.00000000",
+                                "custom geometry[1]": "0.00000000",
+                                "custom geometry[2]": "0.00000000",
+                                "custom geometry[3]": "0.00000000",
+                                "custom geometry[4]": "0.00000000",
+                                "custom geometry[5]": "0.00000000",
+                                "custom geometry[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
@@ -1339,24 +1393,6 @@
                                 "color[4]": "0.00000000",
                                 "color[5]": "0.00000000",
                                 "color[6]": "0.00000000"
-                            }
-                        }
-                    }
-                },
-                " cell": {
-                    "function": {
-                        "constructor": {
-                            "mutation probability": {
-                                "data ": {
-                                    "activated": "false"
-                                },
-                                "data [0]": "0.00006500",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00000000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
                             }
                         }
                     }
@@ -1550,6 +1586,36 @@
                                 "neuron data[4]": "0.00000000",
                                 "neuron data[5]": "0.00000000",
                                 "neuron data[6]": "0.00000000",
+                                "data ": {
+                                    "activated": "false"
+                                },
+                                "data [0]": "0.00000000",
+                                "data [1]": "0.00000000",
+                                "data [2]": "0.00000000",
+                                "data [3]": "0.00000000",
+                                "data [4]": "0.00000000",
+                                "data [5]": "0.00000000",
+                                "data [6]": "0.00000000",
+                                "geometry": {
+                                    "activated": "false"
+                                },
+                                "geometry[0]": "0.00000000",
+                                "geometry[1]": "0.00000000",
+                                "geometry[2]": "0.00000000",
+                                "geometry[3]": "0.00000000",
+                                "geometry[4]": "0.00000000",
+                                "geometry[5]": "0.00000000",
+                                "geometry[6]": "0.00000000",
+                                "custom geometry": {
+                                    "activated": "false"
+                                },
+                                "custom geometry[0]": "0.00000000",
+                                "custom geometry[1]": "0.00000000",
+                                "custom geometry[2]": "0.00000000",
+                                "custom geometry[3]": "0.00000000",
+                                "custom geometry[4]": "0.00000000",
+                                "custom geometry[5]": "0.00000000",
+                                "custom geometry[6]": "0.00000000",
                                 "cell function": {
                                     "activated": "false"
                                 },
@@ -1610,24 +1676,6 @@
                                 "color[4]": "0.00000000",
                                 "color[5]": "0.00000000",
                                 "color[6]": "0.00000000"
-                            }
-                        }
-                    }
-                },
-                " cell": {
-                    "function": {
-                        "constructor": {
-                            "mutation probability": {
-                                "data ": {
-                                    "activated": "false"
-                                },
-                                "data [0]": "0.00006500",
-                                "data [1]": "0.00000000",
-                                "data [2]": "0.00000000",
-                                "data [3]": "0.00000000",
-                                "data [4]": "0.00000000",
-                                "data [5]": "0.00000000",
-                                "data [6]": "0.00000000"
                             }
                         }
                     }
