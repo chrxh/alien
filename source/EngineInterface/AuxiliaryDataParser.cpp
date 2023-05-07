@@ -290,9 +290,9 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationStructureProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationStructureProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.structure",
+            parameters.baseValues.cellFunctionConstructorMutationCustomGeometryProbability,
+            defaultParameters.baseValues.cellFunctionConstructorMutationCustomGeometryProbability,
+            "simulation parameters.cell.function.constructor.mutation probability.individual geometry",
             parserTask);
         encodeDecodeProperty(
             tree,
@@ -684,9 +684,9 @@ namespace
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationStructureProbability,
-                spot.activatedValues.cellFunctionConstructorMutationStructureProbability,
-                defaultSpot.values.cellFunctionConstructorMutationStructureProbability,
+                spot.values.cellFunctionConstructorMutationCustomGeometryProbability,
+                spot.activatedValues.cellFunctionConstructorMutationCustomGeometryProbability,
+                defaultSpot.values.cellFunctionConstructorMutationCustomGeometryProbability,
                 base + "cell.function.constructor.mutation probability.structure",
                 parserTask);
             encodeDecodeSpotProperty(

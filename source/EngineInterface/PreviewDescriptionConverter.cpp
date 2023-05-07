@@ -111,7 +111,7 @@ namespace
             ShapeGeneratorResult shapeResult;
             shapeResult.angle = node.referenceAngle;
             shapeResult.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
-            if (genome.info.shape != ConstructionShape_IndividualShape) {
+            if (genome.info.shape != ConstructionShape_Custom) {
                 shapeResult = shapeGenerator->generateNextConstructionData();
             }
             if (lastReferenceAngle.has_value() && index == genome.cells.size() - 1) {

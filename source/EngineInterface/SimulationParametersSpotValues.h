@@ -42,7 +42,7 @@ struct SimulationParametersSpotValues
     ColorVector<float> cellFunctionConstructorMutationNeuronDataProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationPropertiesProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationCellFunctionProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationStructureProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationCustomGeometryProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationInsertionProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationDeletionProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationTranslationProbability = {0, 0, 0, 0, 0, 0, 0};
@@ -65,7 +65,7 @@ struct SimulationParametersSpotValues
             }
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
-            if (cellFunctionConstructorMutationStructureProbability[i] != other.cellFunctionConstructorMutationStructureProbability[i]) {
+            if (cellFunctionConstructorMutationCustomGeometryProbability[i] != other.cellFunctionConstructorMutationCustomGeometryProbability[i]) {
                 return false;
             }
             if (radiationAbsorption[i] != other.radiationAbsorption[i]) {

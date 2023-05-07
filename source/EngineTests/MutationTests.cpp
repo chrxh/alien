@@ -210,15 +210,15 @@ protected:
         return true;
     }
 
-    bool compareStructureMutation(std::vector<uint8_t> const& expected, std::vector<uint8_t> const& actual)
+    bool compareIndividualGeometryMutation(std::vector<uint8_t> const& expected, std::vector<uint8_t> const& actual)
     {
         if (expected.size() != actual.size()) {
             return false;
         }
         auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
         auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
-        expectedGenome.info.shape = ConstructionShape_IndividualShape; //compare all expect shape
-        actualGenome.info.shape = ConstructionShape_IndividualShape;
+        expectedGenome.info.shape = ConstructionShape_Custom; //compare all expect shape
+        actualGenome.info.shape = ConstructionShape_Custom;
         if (expectedGenome.info != actualGenome.info) {
             return false;
         }
@@ -256,7 +256,7 @@ protected:
                     return false;
                 }
                 if (!expectedConstructor.isMakeGenomeCopy()) {
-                    if (!compareStructureMutation(expectedConstructor.getGenomeData(), actualConstructor.getGenomeData())) {
+                    if (!compareIndividualGeometryMutation(expectedConstructor.getGenomeData(), actualConstructor.getGenomeData())) {
                         return false;
                     }
                 }
@@ -268,7 +268,7 @@ protected:
                     return false;
                 }
                 if (!expectedInjector.isMakeGenomeCopy()) {
-                    if (!compareStructureMutation(expectedInjector.getGenomeData(), actualInjector.getGenomeData())) {
+                    if (!compareIndividualGeometryMutation(expectedInjector.getGenomeData(), actualInjector.getGenomeData())) {
                         return false;
                     }
                 }
@@ -547,7 +547,7 @@ TEST_F(MutationTests, neuronDataMutation)
     EXPECT_EQ(byteIndex, actualConstructor.genomeReadPosition);
 }
 
-TEST_F(MutationTests, structureMutation)
+TEST_F(MutationTests, individualGeometryMutation)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
     int byteIndex = 0;
@@ -557,14 +557,14 @@ TEST_F(MutationTests, structureMutation)
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
-        _simController->testOnly_mutate(1, MutationType::Structure);
+        _simController->testOnly_mutate(1, MutationType::CustomGeometry);
     }
 
     auto actualData = _simController->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
-    EXPECT_TRUE(compareStructureMutation(genome, actualConstructor.genome));
+    EXPECT_TRUE(compareIndividualGeometryMutation(genome, actualConstructor.genome));
     EXPECT_EQ(byteIndex, actualConstructor.genomeReadPosition);
 }
 
