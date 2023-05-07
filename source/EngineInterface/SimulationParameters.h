@@ -89,7 +89,7 @@ struct SimulationParameters
     
     bool cellFunctionConstructionUnlimitedEnergy = false;
     ColorVector<float> cellFunctionConstructorOffspringDistance = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
-    ColorVector<float> cellFunctionConstructorConnectingCellMaxDistance = {1.9f, 1.9f, 1.9f, 1.9f, 1.9f, 1.9f, 1.9f};
+    ColorVector<float> cellFunctionConstructorConnectingCellMaxDistance = {1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f};
     ColorVector<float> cellFunctionConstructorActivityThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
 
     ColorMatrix<bool> cellFunctionConstructorMutationColorTransitions = {
