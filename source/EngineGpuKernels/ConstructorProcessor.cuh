@@ -18,7 +18,7 @@ public:
 private:
     struct ConstructionData
     {
-        GenomeInfo genomeInfo;
+        GenomeHeader genomeHeader;
 
         float angle;
         float energy;
@@ -90,7 +90,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             }
             if (GenomeDecoder::isFinished(cell->cellFunctionData.constructor)) {
                 auto& constructor = cell->cellFunctionData.constructor;
-                if (!constructionData.genomeInfo.singleConstruction) {
+                if (!constructionData.genomeHeader.singleConstruction) {
                     constructor.genomeReadPosition = 0;
                 }
             }
@@ -125,7 +125,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 {
     auto& constructor = cell->cellFunctionData.constructor;
     if (constructor.genomeReadPosition == 0) {
-        constructor.genomeReadPosition = Const::GenomeInfoSize;
+        constructor.genomeReadPosition = Const::GenomeHeaderSize;
     }
 
     auto isAtFirstNode = GenomeDecoder::isAtFirstNode(constructor);
@@ -134,9 +134,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     ConstructionData result;
 
     //genome-wide data
-    result.genomeInfo = GenomeDecoder::readGenomeInfo(constructor);
+    result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
 
-    switch (result.genomeInfo.shape % ConstructionShape_Count) {
+    switch (result.genomeHeader.shape % ConstructionShape_Count) {
     case ConstructionShape_Segment:
         generateConstructionDataForSegment(result, constructor);
         break;
@@ -171,7 +171,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.inputExecutionOrderNumber = GenomeDecoder::readOptionalByte(constructor, cudaSimulationParameters.cellNumExecutionOrderNumbers);
     result.outputBlocked = GenomeDecoder::readBool(constructor);
 
-    if (result.genomeInfo.shape == ConstructionShape_IndividualShape) {
+    if (result.genomeHeader.shape == ConstructionShape_IndividualShape) {
         result.angle = angle;
         result.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
     }
@@ -250,10 +250,10 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         return false;
     }
 
-    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !constructionData.genomeInfo.separateConstruction) {
+    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !constructionData.genomeHeader.separateConstruction) {
         auto const& constructor = hostCell->cellFunctionData.constructor;
         auto distance =
-            GenomeDecoder::isFinished(constructor) && !constructionData.genomeInfo.separateConstruction && constructionData.genomeInfo.singleConstruction
+            GenomeDecoder::isFinished(constructor) && !constructionData.genomeHeader.separateConstruction && constructionData.genomeHeader.singleConstruction
             ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
         CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
@@ -280,7 +280,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     auto posDelta = underConstructionCell->absPos - hostCell->absPos;
     data.cellMap.correctDirection(posDelta);
 
-    auto desiredDistance = constructionData.genomeInfo.connectionDistance;
+    auto desiredDistance = constructionData.genomeHeader.connectionDistance;
     auto constructionSiteDistance = data.cellMap.getDistance(hostCell->absPos, underConstructionCell->absPos);
     posDelta = Math::normalized(posDelta) * (constructionSiteDistance - desiredDistance);
 
@@ -355,10 +355,10 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
     //possibly connect newCell to hostCell
     bool adaptReferenceAngle = false;
-    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !constructionData.genomeInfo.separateConstruction) {
+    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !constructionData.genomeHeader.separateConstruction) {
 
         //move connection
-        auto distance = GenomeDecoder::isFinished(constructor) && !constructionData.genomeInfo.separateConstruction
+        auto distance = GenomeDecoder::isFinished(constructor) && !constructionData.genomeHeader.separateConstruction
             ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
         for (int i = 0; i < hostCell->numConnections; ++i) {
@@ -414,7 +414,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
                 if (isConnectable(newCell->numConnections, newCell->maxConnections, true)
                     && isConnectable(otherCell->numConnections, otherCell->maxConnections, true)) {
 
-                    CellConnectionProcessor::tryAddConnections(data, newCell, otherCell, 0, 0, desiredDistance, constructionData.genomeInfo.angleAlignment);
+                    CellConnectionProcessor::tryAddConnections(data, newCell, otherCell, 0, 0, desiredDistance, constructionData.genomeHeader.angleAlignment);
                     otherCell->maxConnections = max(otherCell->numConnections, otherCell->maxConnections);
                 }
                 otherCell->releaseLock();
@@ -493,7 +493,7 @@ ConstructorProcessor::constructCellIntern(
 
     Cell * result = factory.createCell();
     result->energy = constructionData.energy;
-    result->stiffness = constructionData.genomeInfo.stiffness;
+    result->stiffness = constructionData.genomeHeader.stiffness;
     result->absPos = posOfNewCell;
     data.cellMap.correctPosition(result->absPos);
     result->maxConnections = maxConnections;
@@ -619,7 +619,7 @@ __inline__ __device__ void ConstructorProcessor::generateConstructionDataForTria
                     constructionData.numRequiredAdditionalConnections = 2;
                 }
             }
-            constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
+            constructionData.genomeHeader.angleAlignment = ConstructorAngleAlignment_60;
         }
         if (++edgePos == edgeLength) {
             edgePos = 0;
@@ -645,7 +645,7 @@ __inline__ __device__ void ConstructorProcessor::generateConstructionDataForRect
                 constructionData.angle = edgePos == 0 ? 90.0f : 0.0f;
                 constructionData.numRequiredAdditionalConnections = edgePos == 0 ? 0 : 1;
             }
-            constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_90;
+            constructionData.genomeHeader.angleAlignment = ConstructorAngleAlignment_90;
         }
         auto edgeLength = processedEdges / 2;
         if (++edgePos > edgeLength) {
@@ -676,7 +676,7 @@ __inline__ __device__ void ConstructorProcessor::generateConstructionDataForHexa
                 constructionData.angle = edgePos < edgeLength - 1 ? 0.0f : 60.0f;
                 constructionData.numRequiredAdditionalConnections = edgePos < edgeLength - 1 ? 2 : 1;
             }
-            constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
+            constructionData.genomeHeader.angleAlignment = ConstructorAngleAlignment_60;
         }
         if (++edgePos >= edgeLength) {
             edgePos = 0;
@@ -707,7 +707,7 @@ __inline__ __device__ void ConstructorProcessor::generateConstructionDataForLoop
                 constructionData.angle = edgePos < edgeLength - 1 ? 0.0f : 60.0f;
                 constructionData.numRequiredAdditionalConnections = edgePos < edgeLength - 1 ? 2 : 1;
             }
-            constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
+            constructionData.genomeHeader.angleAlignment = ConstructorAngleAlignment_60;
         }
 
         if (++edgePos >= edgeLength) {
@@ -747,7 +747,7 @@ __inline__ __device__ void ConstructorProcessor::generateConstructionDataForTube
                 constructionData.angle = -60.0f;
                 constructionData.numRequiredAdditionalConnections = 1;
             }
-            constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
+            constructionData.genomeHeader.angleAlignment = ConstructorAngleAlignment_60;
         }
         ++pos;
     });
@@ -775,7 +775,7 @@ __inline__ __device__ void ConstructorProcessor::generateConstructionDataForLoll
                     constructionData.angle = edgePos < edgeLength - 1 ? 0.0f : 60.0f;
                     constructionData.numRequiredAdditionalConnections = edgePos < edgeLength - 1 ? 2 : 1;
                 }
-                constructionData.genomeInfo.angleAlignment = ConstructorAngleAlignment_60;
+                constructionData.genomeHeader.angleAlignment = ConstructorAngleAlignment_60;
             }
             if (++edgePos >= edgeLength) {
                 edgePos = 0;

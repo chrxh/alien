@@ -766,7 +766,7 @@ void _GenomeEditorWindow::showPreview(TabData& tab)
     }
 }
 
-void _GenomeEditorWindow::validationAndCorrection(GenomeInfoDescription& info) const
+void _GenomeEditorWindow::validationAndCorrection(GenomeHeaderDescription& info) const
 {
     info.stiffness = std::max(0.0f, std::min(1.0f, info.stiffness));
     info.connectionDistance = std::max(0.5f, std::min(1.5f, info.connectionDistance));

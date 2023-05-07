@@ -5,7 +5,7 @@
 #include "Base.cuh"
 #include "Cell.cuh"
 
-struct GenomeInfo
+struct GenomeHeader
 {
     ConstructionShape shape;
     bool singleConstruction;
@@ -34,7 +34,7 @@ public:
 
     template <typename GenomeHolderSource, typename GenomeHolderTarget>
     __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target);
-    __inline__ __device__ static GenomeInfo readGenomeInfo(ConstructorFunction const& constructor);
+    __inline__ __device__ static GenomeHeader readGenomeHeader(ConstructorFunction const& constructor);
     __inline__ __device__ static int readWord(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static void writeWord(uint8_t* genome, int address, int word);
     __inline__ __device__ static bool convertByteToBool(uint8_t b);
@@ -129,7 +129,7 @@ __inline__ __device__ float GenomeDecoder::readAngle(ConstructorFunction& constr
 
 __inline__ __device__ bool GenomeDecoder::isAtFirstNode(ConstructorFunction const& constructor)
 {
-    return constructor.genomeReadPosition <= Const::GenomeInfoSize;
+    return constructor.genomeReadPosition <= Const::GenomeHeaderSize;
 }
 
 __inline__ __device__ bool GenomeDecoder::isAtLastNode(ConstructorFunction const& constructor)
@@ -170,15 +170,15 @@ __inline__ __device__ void GenomeDecoder::copyGenome(SimulationData& data, Genom
 
 __inline__ __device__ bool GenomeDecoder::isFinishedSingleConstruction(ConstructorFunction const& constructor)
 {
-    auto genomeInfo = readGenomeInfo(constructor);
-    return genomeInfo.singleConstruction
-        && (constructor.genomeReadPosition >= constructor.genomeSize || (constructor.genomeReadPosition == 0 && constructor.genomeSize == Const::GenomeInfoSize));
+    auto genomeHeader = readGenomeHeader(constructor);
+    return genomeHeader.singleConstruction
+        && (constructor.genomeReadPosition >= constructor.genomeSize || (constructor.genomeReadPosition == 0 && constructor.genomeSize == Const::GenomeHeaderSize));
 }
 
-__inline__ __device__ GenomeInfo GenomeDecoder::readGenomeInfo(ConstructorFunction const& constructor)
+__inline__ __device__ GenomeHeader GenomeDecoder::readGenomeHeader(ConstructorFunction const& constructor)
 {
-    GenomeInfo result;
-    if (constructor.genomeSize < Const::GenomeInfoSize) {
+    GenomeHeader result;
+    if (constructor.genomeSize < Const::GenomeHeaderSize) {
         CUDA_THROW_NOT_IMPLEMENTED();
     }
     result.shape = constructor.genome[0] % ConstructionShape_Count;
@@ -219,7 +219,7 @@ __inline__ __device__ void GenomeDecoder::convertWordToBytes(int word, uint8_t& 
 template <typename Func>
 __inline__ __device__ void GenomeDecoder::executeForEachNodeUntilReadPosition(ConstructorFunction const& constructor, Func func)
 {
-    for (int currentNodeAddress = Const::GenomeInfoSize; currentNodeAddress <= constructor.genomeReadPosition;) {
+    for (int currentNodeAddress = Const::GenomeHeaderSize; currentNodeAddress <= constructor.genomeReadPosition;) {
         currentNodeAddress +=
             Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(constructor.genome, constructor.genomeSize, currentNodeAddress);
 
@@ -261,9 +261,9 @@ __inline__ __device__ int GenomeDecoder::getRandomGenomeNodeAddress(
                 }
                 auto subGenomeStartIndex = nodeAddress + Const::CellBasicBytes + cellFunctionFixedBytes + 3;
                 auto subGenomeSize = getNextSubGenomeSize(genome, genomeSize, nodeAddress);
-                if (subGenomeSize == Const::GenomeInfoSize) {
+                if (subGenomeSize == Const::GenomeHeaderSize) {
                     if (considerZeroSubGenomes && data.numberGen1.randomBool()) {
-                        result += Const::CellBasicBytes + cellFunctionFixedBytes + 3 + Const::GenomeInfoSize;
+                        result += Const::CellBasicBytes + cellFunctionFixedBytes + 3 + Const::GenomeHeaderSize;
                     } else {
                         if (numSubGenomesSizeIndices) {
                             --(*numSubGenomesSizeIndices);
@@ -305,7 +305,7 @@ __inline__ __device__ void GenomeDecoder::setRandomCellFunctionData(
 __inline__ __device__ int GenomeDecoder::getNumGenomeCells(uint8_t* genome, int genomeSize)
 {
     int result = 0;
-    int currentNodeAddress = Const::GenomeInfoSize;
+    int currentNodeAddress = Const::GenomeHeaderSize;
     for (; result < genomeSize && currentNodeAddress < genomeSize; ++result) {
         currentNodeAddress += Const::CellBasicBytes + getNextCellFunctionDataSize(genome, genomeSize, currentNodeAddress);
     }
@@ -315,7 +315,7 @@ __inline__ __device__ int GenomeDecoder::getNumGenomeCells(uint8_t* genome, int 
 
 __inline__ __device__ int GenomeDecoder::getNodeAddress(uint8_t* genome, int genomeSize, int nodeIndex)
 {
-    int currentNodeAddress = Const::GenomeInfoSize;
+    int currentNodeAddress = Const::GenomeHeaderSize;
     for (int currentNodeIndex = 0; currentNodeIndex < nodeIndex; ++currentNodeIndex) {
         if (currentNodeAddress >= genomeSize) {
             break;
@@ -329,7 +329,7 @@ __inline__ __device__ int GenomeDecoder::getNodeAddress(uint8_t* genome, int gen
 
 __inline__ __device__ int GenomeDecoder::findStartNodeAddress(uint8_t* genome, int genomeSize, int refIndex)
 {
-    int currentNodeAddress = Const::GenomeInfoSize;
+    int currentNodeAddress = Const::GenomeHeaderSize;
     for (; currentNodeAddress <= refIndex;) {
         auto prevCurrentNodeAddress = currentNodeAddress;
         currentNodeAddress += Const::CellBasicBytes + getNextCellFunctionDataSize(genome, genomeSize, currentNodeAddress);
@@ -337,7 +337,7 @@ __inline__ __device__ int GenomeDecoder::findStartNodeAddress(uint8_t* genome, i
             return prevCurrentNodeAddress;
         }
     }
-    return Const::GenomeInfoSize;
+    return Const::GenomeHeaderSize;
 }
 
 __inline__ __device__ int GenomeDecoder::getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeAddress)
