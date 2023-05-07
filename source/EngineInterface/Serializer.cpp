@@ -544,7 +544,7 @@ namespace cereal
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            auto hasGenomeHeader = auxiliaries.contains(Id_Constructor_GenomeHeader);
+            auto hasGenomeHeader = auxiliaries.contains(Id_Injector_GenomeHeader);
             if (hasGenomeHeader) {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc);
