@@ -21,6 +21,7 @@ struct SimulationParametersSpotActivatedValues
     bool cellFunctionConstructorMutationNeuronDataProbability = false;
     bool cellFunctionConstructorMutationPropertiesProbability = false;
     bool cellFunctionConstructorMutationCellFunctionProbability = false;
+    bool cellFunctionConstructorMutationGeometryProbability = false;
     bool cellFunctionConstructorMutationCustomGeometryProbability = false; 
     bool cellFunctionConstructorMutationInsertionProbability = false;
     bool cellFunctionConstructorMutationDeletionProbability = false;
@@ -47,6 +48,7 @@ struct SimulationParametersSpotActivatedValues
             && cellFunctionConstructorMutationColorProbability == other.cellFunctionConstructorMutationColorProbability
             && radiationAbsorption == other.radiationAbsorption
             && cellFunctionConstructorMutationCustomGeometryProbability == other.cellFunctionConstructorMutationCustomGeometryProbability
+            && cellFunctionConstructorMutationGeometryProbability == other.cellFunctionConstructorMutationGeometryProbability
         ;
     }
 };

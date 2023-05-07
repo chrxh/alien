@@ -17,6 +17,9 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationTyp
             case MutationType::NeuronData:
                 MutationProcessor::neuronDataMutation(data, cell);
                 break;
+            case MutationType::Geometry:
+                MutationProcessor::geometryMutation(data, cell);
+                break;
             case MutationType::CustomGeometry:
                 MutationProcessor::customGeometryMutation(data, cell);
                 break;
