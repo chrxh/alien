@@ -13,6 +13,7 @@ public:
 
     __inline__ __device__ static void neuronDataMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void propertiesMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void geometryMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void customGeometryMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void cellFunctionMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void insertMutation(SimulationData& data, Cell* cell);
@@ -40,6 +41,12 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
     auto cellFunctionConstructorMutationDataProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationPropertiesProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationPropertiesProbability,
+        data,
+        cell->absPos,
+        cell->color);
+    auto cellFunctionConstructorMutationGeometryProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationGeometryProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationGeometryProbability,
         data,
         cell->absPos,
         cell->color);
@@ -91,6 +98,9 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationDataProbability)) {
         propertiesMutation(data, cell);
+    }
+    if (isRandomEvent(data, cellFunctionConstructorMutationGeometryProbability)) {
+        geometryMutation(data, cell);
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationCustomGeometryProbability)) {
         customGeometryMutation(data, cell);
@@ -169,6 +179,31 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
             genome[nodeAddress + Const::CellBasicBytes + randomDelta] = data.numberGen1.randomByte();
         }
     }
+}
+
+__inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    auto& genome = constructor.genome;
+    auto genomeSize = toInt(constructor.genomeSize);
+    if (genomeSize < Const::GenomeHeaderSize) {
+        return;
+    }
+
+    auto subgenome = genome;
+    if (genomeSize > Const::GenomeHeaderSize) {
+        int subGenomesSizeIndices[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH];
+        int numSubGenomesSizeIndices;
+        GenomeDecoder::getRandomGenomeNodeAddress(
+            data, genome, genomeSize, false, subGenomesSizeIndices, &numSubGenomesSizeIndices);  //return value will be discarded
+
+        if (numSubGenomesSizeIndices > 0) {
+            subgenome = genome + subGenomesSizeIndices[numSubGenomesSizeIndices - 1] + 2;  //+2 because 2 bytes encode the sub-genome length
+        }
+    }
+
+    auto delta = data.numberGen1.random(Const::GenomeHeaderSize - 1);
+    subgenome[delta] = data.numberGen1.randomByte();
 }
 
 __inline__ __device__ void MutationProcessor::customGeometryMutation(SimulationData& data, Cell* cell)

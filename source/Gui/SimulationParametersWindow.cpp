@@ -575,6 +575,18 @@ void _SimulationParametersWindow::processBase(
                 simParameters.baseValues.cellFunctionConstructorMutationPropertiesProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
+                    .name("Geometry")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationGeometryProbability)
+                    .tooltip("This type of mutation changes the geometry type, connection distance, stiffness, separation and single construction flag."),
+                simParameters.baseValues.cellFunctionConstructorMutationGeometryProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
                     .name("Custom geometry")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
@@ -1400,6 +1412,19 @@ void _SimulationParametersWindow::processSpot(
                     .disabledValue(parameters.baseValues.cellFunctionConstructorMutationPropertiesProbability),
                 spot.values.cellFunctionConstructorMutationPropertiesProbability,
                 &spot.activatedValues.cellFunctionConstructorMutationPropertiesProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Geometry")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .colorDependence(true)
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationGeometryProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationGeometryProbability),
+                spot.values.cellFunctionConstructorMutationGeometryProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationGeometryProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Custom geometry")
