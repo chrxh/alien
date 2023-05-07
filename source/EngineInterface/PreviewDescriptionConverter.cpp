@@ -105,7 +105,7 @@ namespace
         auto shapeGenerator = ShapeGeneratorFactory::create(genome.info.shape);
         for (auto const& node : genome.cells) {
             if (index > 0) {
-                pos += result.direction;
+                pos += result.direction * genome.info.connectionDistance;
             }
 
             ShapeGeneratorResult shapeResult;

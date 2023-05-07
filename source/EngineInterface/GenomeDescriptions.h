@@ -353,6 +353,7 @@ struct GenomeInfoDescription
     bool separateConstruction = true;
     ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
     float stiffness = 1.0f;
+    float connectionDistance = 1.0f;
 
     auto operator<=>(GenomeInfoDescription const&) const = default;
 
@@ -374,6 +375,11 @@ struct GenomeInfoDescription
     GenomeInfoDescription& setStiffness(float value)
     {
         stiffness = value;
+        return *this;
+    }
+    GenomeInfoDescription& setConnectionDistance(float value)
+    {
+        connectionDistance = value;
         return *this;
     }
 };

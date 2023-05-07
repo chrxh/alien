@@ -136,7 +136,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     //genome-wide data
     result.genomeInfo = GenomeDecoder::readGenomeInfo(constructor);
 
-    switch (result.genomeInfo.shape) {
+    switch (result.genomeInfo.shape % ConstructionShape_Count) {
     case ConstructionShape_Segment:
         generateConstructionDataForSegment(result, constructor);
         break;
@@ -280,7 +280,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     auto posDelta = underConstructionCell->absPos - hostCell->absPos;
     data.cellMap.correctDirection(posDelta);
 
-    auto desiredDistance = 1.0f;
+    auto desiredDistance = constructionData.genomeInfo.connectionDistance;
     auto constructionSiteDistance = data.cellMap.getDistance(hostCell->absPos, underConstructionCell->absPos);
     posDelta = Math::normalized(posDelta) * (constructionSiteDistance - desiredDistance);
 

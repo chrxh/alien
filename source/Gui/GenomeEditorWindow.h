@@ -25,7 +25,7 @@ private:
         std::optional<int> selectedNode;
     };
     void processTab(TabData& tab);
-    void processGeneralProperties(TabData& tab);
+    void processGenomeHeader(TabData& tab);
     void processConstructionSequence(TabData& tab);
     void processNode(TabData& tab, CellGenomeDescription& cell, bool isFirstOrLast);
     template<typename Description>

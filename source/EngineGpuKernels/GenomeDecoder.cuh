@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/GenomeConstants.h"
 #include "Base.cuh"
 #include "Cell.cuh"
 
@@ -11,6 +12,7 @@ struct GenomeInfo
     bool separateConstruction;
     ConstructorAngleAlignment angleAlignment;
     float stiffness;
+    float connectionDistance;
 };
 
 class GenomeDecoder
@@ -184,6 +186,7 @@ __inline__ __device__ GenomeInfo GenomeDecoder::readGenomeInfo(ConstructorFuncti
     result.separateConstruction = GenomeDecoder::convertByteToBool(constructor.genome[2]);
     result.angleAlignment = constructor.genome[3] % ConstructorAngleAlignment_Count;
     result.stiffness = toFloat(constructor.genome[4]) / 255;
+    result.connectionDistance = toFloat(constructor.genome[5]) / 255 + 0.5f;
     return result;
 }
 
