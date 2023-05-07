@@ -211,7 +211,7 @@ namespace
                     continue;
                 }
                 auto data = constructor.getGenomeData();
-                if (data.size() <= Const::GenomeInfoSize) {
+                if (data.size() <= Const::GenomeHeaderSize) {
                     ++index;
                     continue;
                 }

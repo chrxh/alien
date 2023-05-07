@@ -274,7 +274,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
                 cell->cellFunctionData.constructor.activationMode = _data->numberGen1.random(50);
             }
             cell->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
-            cell->cellFunctionData.constructor.genomeSize = Const::GenomeInfoSize;
+            cell->cellFunctionData.constructor.genomeSize = Const::GenomeHeaderSize;
             cell->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.constructor.genomeSize);
             auto& genome = cell->cellFunctionData.constructor.genome;
             for (int i = 0; i < cell->cellFunctionData.constructor.genomeSize; ++i) {

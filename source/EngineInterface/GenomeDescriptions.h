@@ -346,7 +346,7 @@ struct CellGenomeDescription
     }
 };
 
-struct GenomeInfoDescription
+struct GenomeHeaderDescription
 {
     ConstructionShape shape = ConstructionShape_IndividualShape;
     bool singleConstruction = false;
@@ -355,29 +355,29 @@ struct GenomeInfoDescription
     float stiffness = 1.0f;
     float connectionDistance = 1.0f;
 
-    auto operator<=>(GenomeInfoDescription const&) const = default;
+    auto operator<=>(GenomeHeaderDescription const&) const = default;
 
-    GenomeInfoDescription& setSingleConstruction(bool value)
+    GenomeHeaderDescription& setSingleConstruction(bool value)
     {
         singleConstruction = value;
         return *this;
     }
-    GenomeInfoDescription& setSeparateConstruction(bool value)
+    GenomeHeaderDescription& setSeparateConstruction(bool value)
     {
         separateConstruction = value;
         return *this;
     }
-    GenomeInfoDescription& setAngleAlignment(ConstructorAngleAlignment value)
+    GenomeHeaderDescription& setAngleAlignment(ConstructorAngleAlignment value)
     {
         angleAlignment = value;
         return *this;
     }
-    GenomeInfoDescription& setStiffness(float value)
+    GenomeHeaderDescription& setStiffness(float value)
     {
         stiffness = value;
         return *this;
     }
-    GenomeInfoDescription& setConnectionDistance(float value)
+    GenomeHeaderDescription& setConnectionDistance(float value)
     {
         connectionDistance = value;
         return *this;
@@ -386,12 +386,12 @@ struct GenomeInfoDescription
 
 struct GenomeDescription
 {
-    GenomeInfoDescription info;
+    GenomeHeaderDescription info;
     std::vector<CellGenomeDescription> cells;
 
     auto operator<=>(GenomeDescription const&) const = default;
 
-    GenomeDescription& setInfo(GenomeInfoDescription const& value)
+    GenomeDescription& setInfo(GenomeHeaderDescription const& value)
     {
         info = value;
         return *this;

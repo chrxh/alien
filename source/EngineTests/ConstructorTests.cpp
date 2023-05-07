@@ -45,7 +45,7 @@ protected:
 TEST_F(ConstructorTests, noEnergy)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCell(
@@ -74,7 +74,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     DataDescription data;
 
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSingleConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSingleConstruction(true)).setCells({CellGenomeDescription()}));
 
     auto constructor = ConstructorDescription().setGenome(genome);
     constructor.setGenomeReadPosition(constructor.genome.size());
@@ -104,7 +104,7 @@ TEST_F(ConstructorTests, notActivated)
     DataDescription data;
 
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSingleConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSingleConstruction(true)).setCells({CellGenomeDescription()}));
     auto constructor = ConstructorDescription().setGenome(genome);
 
     data.addCell(CellDescription()
@@ -203,7 +203,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
         GenomeDescription()
-            .setInfo(GenomeInfoDescription().setSeparateConstruction(false).setStiffness(0.35f))
+            .setInfo(GenomeHeaderDescription().setSeparateConstruction(false).setStiffness(0.35f))
             .setCells({CellGenomeDescription().setColor(2).setExecutionOrderNumber(4).setInputExecutionOrderNumber(5).setOutputBlocked(true)}));
 
     DataDescription data;
@@ -247,7 +247,7 @@ TEST_F(ConstructorTests, constructFirstCell_notFinished)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
         GenomeDescription()
-            .setInfo(GenomeInfoDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription(), CellGenomeDescription()}));
+            .setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription(), CellGenomeDescription()}));
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -276,7 +276,7 @@ TEST_F(ConstructorTests, constructFirstCell_notFinished)
 TEST_F(ConstructorTests, constructFirstCell_separation)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(true)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -306,7 +306,7 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
 TEST_F(ConstructorTests, constructFirstCell_singleConstruction)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(true).setSingleConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(true).setSingleConstruction(true)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -768,7 +768,7 @@ TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
 TEST_F(ConstructorTests, constructSecondCell_separation)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(true)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -814,7 +814,7 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
 TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(true)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -869,7 +869,7 @@ TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
 TEST_F(ConstructorTests, constructSecondCell_noSeparation)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -923,7 +923,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
 TEST_F(ConstructorTests, constructSecondCell_noSpace)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -963,7 +963,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSpace)
 TEST_F(ConstructorTests, constructSecondCell_notFinished)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription(), CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription(), CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -1007,7 +1007,7 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
 TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription().setReferenceAngle(90.0f)}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription().setReferenceAngle(90.0f)}));
 
     DataDescription data;
     data.addCells({
@@ -1056,7 +1056,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
 TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription().setReferenceAngle(-90.0f)}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription().setReferenceAngle(-90.0f)}));
 
     DataDescription data;
     data.addCells({
@@ -1105,7 +1105,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
 TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -1163,7 +1163,7 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
 TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -1221,7 +1221,7 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
 TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(false).setSingleConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false).setSingleConstruction(true)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -1254,7 +1254,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
 TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeInfoDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
