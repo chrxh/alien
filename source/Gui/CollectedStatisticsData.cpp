@@ -13,6 +13,7 @@ DataPoint DataPoint::operator+(DataPoint const& other) const
         result.numCells[i] = numCells[i] + other.numCells[i];
         result.numConnections[i] = numConnections[i] + other.numConnections[i];
         result.numParticles[i] = numParticles[i] + other.numParticles[i];
+        result.totalEnergy[i] = totalEnergy[i] + other.totalEnergy[i];
         result.numCreatedCells[i] = numCreatedCells[i] + other.numCreatedCells[i];
         result.numAttacks[i] = numAttacks[i] + other.numAttacks[i];
         result.numMuscleActivities[i] = numMuscleActivities[i] + other.numMuscleActivities[i];
@@ -36,6 +37,7 @@ DataPoint DataPoint::operator/(double divisor) const
         result.numCells[i] = numCells[i] / divisor;
         result.numConnections[i] = numConnections[i] / divisor;
         result.numParticles[i] = numParticles[i] / divisor;
+        result.totalEnergy[i] = totalEnergy[i] / divisor;
         result.numCreatedCells[i] = numCreatedCells[i] / divisor;
         result.numAttacks[i] = numAttacks[i] / divisor;
         result.numMuscleActivities[i] = numMuscleActivities[i] / divisor;
@@ -72,6 +74,7 @@ namespace
             result.numCells[i] = toDouble(data.timestep.numCells[i]);
             result.numConnections[i] = toDouble(data.timestep.numConnections[i]);
             result.numParticles[i] = toDouble(data.timestep.numParticles[i]);
+            result.totalEnergy[i] = toDouble(data.timestep.totalEnergy[i]);
         }
 
         auto deltaTimesteps = lastTimestep ? toDouble(timestep) - toDouble(*lastTimestep) : 1.0;

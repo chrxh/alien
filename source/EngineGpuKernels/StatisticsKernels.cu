@@ -1,46 +1,8 @@
 ﻿#include "StatisticsKernels.cuh"
 
-namespace
-{
-/*
-    __global__ void getEnergyForMonitorData(SimulationData data, SimulationStatistics monitorData)
-    {
-        {
-            auto& cells = data.entities.cellPointers;
-            auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-
-            for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-                auto& cell = cells.at(index);
-                monitorData.incInternalEnergy(cell->energy);
-            }
-        }
-        {
-            auto& particles = data.entities.particlePointers;
-            auto const partition = calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-
-            for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-                auto& particle = particles.at(index);
-                monitorData.incInternalEnergy(particle->energy);
-            }
-        }
-        {
-            auto& tokens = data.entities.tokenPointers;
-            auto const partition = calcPartition(tokens.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-
-            for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-                auto& token = tokens.at(index);
-                monitorData.incInternalEnergy(token->energy);
-            }
-        }
-    }
-*/
-}
-
 __global__ void cudaUpdateTimestepStatistics_substep1(SimulationData data, SimulationStatistics statistics)
 {
     statistics.resetTimestepData();
-
-    //    KERNEL_CALL(getEnergyForMonitorData, data, statistics);
 }
 
 __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, SimulationStatistics statistics)
@@ -53,6 +15,7 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
             auto& cell = cells.at(index);
             statistics.incNumCells(cell->color);
             statistics.incNumConnections(cell->color, cell->numConnections);
+            statistics.addEnergy(cell->color, cell->energy);
         }
     }
     {
@@ -62,6 +25,7 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& particle = particles.at(index);
             statistics.incNumParticles(particle->color);
+            statistics.addEnergy(particle->color, particle->energy);
         }
     }
 }
