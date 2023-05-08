@@ -210,6 +210,66 @@ protected:
         return true;
     }
 
+    bool compareGeometryMutation(std::vector<uint8_t> const& expected, std::vector<uint8_t> const& actual)
+    {
+        if (expected.size() != actual.size()) {
+            return false;
+        }
+        auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
+        auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
+        if (expectedGenome.cells.size() != actualGenome.cells.size()) {
+            return false;
+        }
+
+        auto createCompareClone = [](CellGenomeDescription const& cell) {
+            auto clone = cell;
+            if (clone.getCellFunctionType() == CellFunction_Constructor) {
+                auto& constructor = std::get<ConstructorGenomeDescription>(*clone.cellFunction);
+                if (!constructor.isMakeGenomeCopy()) {
+                    constructor.genome = {};
+                }
+            }
+            if (clone.getCellFunctionType() == CellFunction_Injector) {
+                auto& injector = std::get<InjectorGenomeDescription>(*clone.cellFunction);
+                if (!injector.isMakeGenomeCopy()) {
+                    injector.genome = {};
+                }
+            }
+            return clone;
+        };
+
+        for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome.cells, actualGenome.cells)) {
+            if (createCompareClone(expectedCell) != createCompareClone(actualCell)) {
+                return false;
+            }
+            if (expectedCell.getCellFunctionType() == CellFunction_Constructor) {
+                auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellFunction);
+                auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellFunction);
+                if (expectedConstructor.isMakeGenomeCopy() != actualConstructor.isMakeGenomeCopy()) {
+                    return false;
+                }
+                if (!expectedConstructor.isMakeGenomeCopy()) {
+                    if (!compareGeometryMutation(expectedConstructor.getGenomeData(), actualConstructor.getGenomeData())) {
+                        return false;
+                    }
+                }
+            }
+            if (expectedCell.getCellFunctionType() == CellFunction_Injector) {
+                auto expectedInjector = std::get<InjectorGenomeDescription>(*expectedCell.cellFunction);
+                auto actualInjector = std::get<InjectorGenomeDescription>(*actualCell.cellFunction);
+                if (expectedInjector.isMakeGenomeCopy() != actualInjector.isMakeGenomeCopy()) {
+                    return false;
+                }
+                if (!expectedInjector.isMakeGenomeCopy()) {
+                    if (!compareGeometryMutation(expectedInjector.getGenomeData(), actualInjector.getGenomeData())) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     bool compareIndividualGeometryMutation(std::vector<uint8_t> const& expected, std::vector<uint8_t> const& actual)
     {
         if (expected.size() != actual.size()) {
@@ -544,6 +604,27 @@ TEST_F(MutationTests, neuronDataMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareNeuronDataMutation(genome, actualConstructor.genome));
+    EXPECT_EQ(byteIndex, actualConstructor.genomeReadPosition);
+}
+
+TEST_F(MutationTests, geometryMutation)
+{
+    auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
+    int byteIndex = 0;
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(byteIndex)).setExecutionOrderNumber(0)});
+
+    _simController->setSimulationData(data);
+    for (int i = 0; i < 10000; ++i) {
+        _simController->testOnly_mutate(1, MutationType::Geometry);
+    }
+
+    auto actualData = _simController->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    EXPECT_TRUE(compareGeometryMutation(genome, actualConstructor.genome));
     EXPECT_EQ(byteIndex, actualConstructor.genomeReadPosition);
 }
 
