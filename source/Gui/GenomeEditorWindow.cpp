@@ -302,7 +302,7 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
             AlienImGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(ContentTextWidth), tab.genome.info.connectionDistance);
         table.next();
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth), tab.genome.info.stiffness);
+            AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth), tab.genome.info.stiffness);
         if (tab.genome.info.shape == ConstructionShape_Custom) {
             table.next();
             AlienImGui::AngleAlignmentCombo(
