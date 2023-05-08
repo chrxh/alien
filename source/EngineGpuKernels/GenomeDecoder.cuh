@@ -238,8 +238,11 @@ __inline__ __device__ int GenomeDecoder::getRandomGenomeNodeAddress(
     if (numSubGenomesSizeIndices) {
         *numSubGenomesSizeIndices = 0;
     }
-    if (genomeSize == 0) {
-        return 0;
+    if (genomeSize < Const::GenomeHeaderSize) {
+        CUDA_THROW_NOT_IMPLEMENTED();
+    }
+    if (genomeSize == Const::GenomeHeaderSize) {
+        return Const::GenomeHeaderSize;
     }
     auto randomRefIndex = data.numberGen1.random(genomeSize - 1);
 
