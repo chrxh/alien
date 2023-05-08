@@ -1,5 +1,7 @@
 ﻿#include "StatisticsKernels.cuh"
 
+#include "GenomeDecoder.cuh"
+
 __global__ void cudaUpdateTimestepStatistics_substep1(SimulationData data, SimulationStatistics statistics)
 {
     statistics.resetTimestepData();
@@ -16,6 +18,12 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
             statistics.incNumCells(cell->color);
             statistics.incNumConnections(cell->color, cell->numConnections);
             statistics.addEnergy(cell->color, cell->energy);
+            if (cell->cellFunction == CellFunction_Constructor && GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor)) {
+                statistics.incNumReplicator(cell->color);
+            }
+            if (cell->cellFunction == CellFunction_Injector && cell->cellFunctionData.injector.mode == InjectorMode_InjectAll) {
+                statistics.incNumReplicator(cell->color);
+            }
         }
     }
     {

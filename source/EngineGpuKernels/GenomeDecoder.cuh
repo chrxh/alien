@@ -31,6 +31,7 @@ public:
     __inline__ __device__ static bool isAtLastNode(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isFinished(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isFinishedSingleConstruction(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool containsSelfReplication(ConstructorFunction const& constructor);
 
     template <typename GenomeHolderSource, typename GenomeHolderTarget>
     __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target);
@@ -173,6 +174,18 @@ __inline__ __device__ bool GenomeDecoder::isFinishedSingleConstruction(Construct
     auto genomeHeader = readGenomeHeader(constructor);
     return genomeHeader.singleConstruction
         && (constructor.genomeReadPosition >= constructor.genomeSize || (constructor.genomeReadPosition == 0 && constructor.genomeSize == Const::GenomeHeaderSize));
+}
+
+__inline__ __device__ bool GenomeDecoder::containsSelfReplication(ConstructorFunction const& constructor)
+{
+    for (int currentNodeAddress = Const::GenomeHeaderSize; currentNodeAddress < constructor.genomeSize;) {
+        if (isNextCellSelfCopy(constructor.genome, currentNodeAddress)) {
+            return true;
+        }
+        currentNodeAddress += Const::CellBasicBytes + getNextCellFunctionDataSize(constructor.genome, constructor.genomeSize, currentNodeAddress);
+    }
+
+    return false;
 }
 
 __inline__ __device__ GenomeHeader GenomeDecoder::readGenomeHeader(ConstructorFunction const& constructor)
