@@ -135,6 +135,18 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Total energy");
 
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPoint::numSelfReplicators);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Self-Replicators");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPoint::numViruses);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Viruses");
+
         ImPlot::PopColormap();
 
         ImGui::EndTable();
@@ -362,7 +374,7 @@ void _StatisticsWindow::plotSumColorsIntern(
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
     if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, contentScale(80.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        auto color = ImPlot::GetColormapColor(std::min(10, row));
+        auto color = ImPlot::GetColormapColor(row <= 10 ? row : 20 - row);
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::AnnotateClamped(
                 endTime, endValue, ImVec2(-10.0f, 10.0f), ImPlot::GetLastItemColor(), "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());

@@ -11,6 +11,8 @@ struct DataPoint
     double time; //could be a time step or real time
 
     ColorVector<double> numCells = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numSelfReplicators = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> numViruses = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numConnections = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numParticles = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> totalEnergy = {0, 0, 0, 0, 0, 0, 0};

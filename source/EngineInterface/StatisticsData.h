@@ -7,6 +7,8 @@
 struct TimestepStatistics
 {
     ColorVector<int> numCells = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<int> numSelfReplicators = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<int> numViruses = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numConnections = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numParticles = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> totalEnergy = {0, 0, 0, 0, 0, 0, 0};
