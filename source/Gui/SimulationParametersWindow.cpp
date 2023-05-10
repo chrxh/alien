@@ -13,6 +13,7 @@
 #include "GlobalSettings.h"
 #include "MessageDialog.h"
 #include "RadiationSourcesWindow.h"
+#include "BalancerController.h"
 
 namespace
 {
@@ -43,10 +44,14 @@ namespace
     }
 }
 
-_SimulationParametersWindow::_SimulationParametersWindow(SimulationController const& simController, RadiationSourcesWindow const& radiationSourcesWindow)
+_SimulationParametersWindow::_SimulationParametersWindow(
+    SimulationController const& simController,
+    RadiationSourcesWindow const& radiationSourcesWindow,
+    BalancerController const& balancerController)
     : _AlienWindow("Simulation parameters", "windows.simulation parameters", false)
     , _simController(simController)
     , _radiationSourcesWindow(radiationSourcesWindow)
+    , _balancerController(balancerController)
 {
     for (int n = 0; n < IM_ARRAYSIZE(_savedPalette); n++) {
         ImVec4 color;
@@ -498,6 +503,21 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.cellMaxAge)
                     .tooltip("Defines the maximum age of a cell. If a cell exceeds this age it will be transformed to an energy particle."),
                 simParameters.cellMaxAge);
+            AlienImGui::SliderInt(
+                AlienImGui::SliderIntParameters()
+                    .name("Maximum age balancer")
+                    .tooltip("")
+                    .textWidth(RightColumnWidth)
+                    .logarithmic(true)
+                    .min(1000)
+                    .max(1000000)
+                    .disabledValue(&simParameters.adaptiveCellMaxAgeInterval)
+                    .defaultEnabledValue(&origSimParameters.adaptiveCellMaxAge)
+                    .defaultValue(&origSimParameters.adaptiveCellMaxAgeInterval)
+                    .tooltip("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest replicators exist. "
+                             "Conversely, the maximum age is decreased for the cell color with the most replicators."),
+                &simParameters.adaptiveCellMaxAgeInterval,
+                &simParameters.adaptiveCellMaxAge);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum energy")
@@ -1664,6 +1684,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
+    parameters.adaptiveCellMaxAgeInterval = std::max(1000, std::min(1000000, parameters.adaptiveCellMaxAgeInterval));
 }
 
 void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot) const

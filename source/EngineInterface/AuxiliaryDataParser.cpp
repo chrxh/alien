@@ -201,6 +201,10 @@ namespace
             parserTask);
         encodeDecodeProperty(tree, parameters.cellMaxAge, defaultParameters.cellMaxAge, "simulation parameters.cell.max age", parserTask);
         encodeDecodeProperty(
+            tree, parameters.adaptiveCellMaxAge, defaultParameters.adaptiveCellMaxAge, "simulation parameters.cell.max age.adaptive.enabled", parserTask);
+        encodeDecodeProperty(
+            tree, parameters.adaptiveCellMaxAge, defaultParameters.adaptiveCellMaxAge, "simulation parameters.cell.max age.adaptive.interval", parserTask);
+        encodeDecodeProperty(
             tree,
             parameters.baseValues.cellColorTransitionDuration,
             defaultParameters.baseValues.cellColorTransitionDuration,
@@ -347,6 +351,12 @@ namespace
             parameters.cellFunctionConstructorMutationSelfReplication,
             defaultParameters.cellFunctionConstructorMutationSelfReplication,
             "simulation parameters.cell.function.constructor.mutation self replication",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionConstructionUnlimitedEnergy,
+            defaultParameters.cellFunctionConstructionUnlimitedEnergy,
+            "simulation parameters.cell.function.constructor.unlimited energy",
             parserTask);
 
         encodeDecodeProperty(
