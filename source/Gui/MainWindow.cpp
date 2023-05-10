@@ -72,6 +72,7 @@
 #include "GenomeEditorWindow.h"
 #include "RadiationSourcesWindow.h"
 #include "OverlayMessageController.h"
+#include "BalancerController.h"
 
 namespace
 {
@@ -137,7 +138,8 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _viewport);
     _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController);
-    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow);
+    _balancerController = std::make_shared<_BalancerController>(_simController);
+    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow, _balancerController);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
     _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow, _viewport);
     _aboutDialog = std::make_shared<_AboutDialog>();
@@ -745,6 +747,7 @@ void _MainWindow::processControllers()
 {
     _autosaveController->process();
     _editorController->process();
+    _balancerController->process();
     OverlayMessageController::getInstance().process();
     DelayedExecutionController::getInstance().process();
 }

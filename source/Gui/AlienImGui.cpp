@@ -1243,8 +1243,8 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
 
         ImGui::PopID();
 
-        //revert button
         if (color == 0) {
+            //revert button
             if (parameters._defaultValue) {
                 ImGui::SameLine();
 
@@ -1256,10 +1256,18 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
                         break;
                     }
                 }
+                if (parameters._defaultEnabledValue) {
+                    if (*parameters._defaultEnabledValue != *enabled) {
+                        equal = false;
+                    }
+                }
                 ImGui::BeginDisabled(equal);
                 if (revertButton(parameters._name)) {
                     for (int row = 0; row < numRows; ++row) {
                         value[row] = parameters._defaultValue[row];
+                    }
+                    if (parameters._defaultEnabledValue) {
+                        *enabled = *parameters._defaultEnabledValue;
                     }
                     result = true;
                 }
