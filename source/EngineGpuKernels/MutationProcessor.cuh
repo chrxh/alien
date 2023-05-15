@@ -237,6 +237,12 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
 
     auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
     auto makeSelfCopy = cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication ? data.numberGen1.randomBool() : false;
+    if ((newCellFunction == CellFunction_Constructor || newCellFunction == CellFunction_Injector) && !makeSelfCopy) {
+        if (cudaSimulationParameters.cellFunctionConstructorMutationPreventDepthIncrease
+            && GenomeDecoder::getGenomeDepth(genome, genomeSize) <= numSubGenomesSizeIndices) {
+            return;
+        }
+    }
 
     auto origCellFunction = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
     if (origCellFunction == CellFunction_Constructor || origCellFunction == CellFunction_Injector) {
@@ -296,6 +302,12 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     }
     auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
     auto makeSelfCopy = cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication ? data.numberGen1.randomBool() : false;
+    if ((newCellFunction == CellFunction_Constructor || newCellFunction == CellFunction_Injector) && !makeSelfCopy) {
+        if (cudaSimulationParameters.cellFunctionConstructorMutationPreventDepthIncrease
+            && GenomeDecoder::getGenomeDepth(genome, genomeSize) <= numSubGenomesSizeIndices) {
+            return;
+        }
+    }
 
     auto newCellFunctionSize = GenomeDecoder::getCellFunctionDataSize(newCellFunction, makeSelfCopy, Const::GenomeHeaderSize);
     auto sizeDelta = newCellFunctionSize + Const::CellBasicBytes;
@@ -406,6 +418,13 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
     if (startTargetIndex >= startSourceIndex && startTargetIndex <= endSourceIndex) {
         return;
     }
+    if (cudaSimulationParameters.cellFunctionConstructorMutationPreventDepthIncrease) {
+        auto genomeDepth = GenomeDecoder::getGenomeDepth(genome, genomeSize);
+        auto sourceRangeDepth = GenomeDecoder::getGenomeDepth(subGenome, subGenomeSize);
+        if (genomeDepth < sourceRangeDepth + numSubGenomesSizeIndices2) {
+            return;
+        }
+    }
 
     auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(genomeSize);
     if (startTargetIndex > endSourceIndex) {
@@ -496,13 +515,13 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
 
     int startSourceIndex;
     int endSourceIndex;
+    int subGenomeSize;
+    uint8_t* subGenome;
     {
         int subGenomesSizeIndices[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH + 1];
         int numSubGenomesSizeIndices;
         startSourceIndex = GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, false, subGenomesSizeIndices, &numSubGenomesSizeIndices);
 
-        int subGenomeSize;
-        uint8_t* subGenome;
         if (numSubGenomesSizeIndices > 0) {
             auto sizeIndex = subGenomesSizeIndices[numSubGenomesSizeIndices - 1];
             subGenome = genome + sizeIndex + 2;  //after the 2 size bytes the subGenome starts
@@ -530,11 +549,19 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     int numSubGenomesSizeIndices;
     auto startTargetIndex = GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, true, subGenomesSizeIndices, &numSubGenomesSizeIndices);
 
-
     auto targetGenomeSize = genomeSize + sizeDelta;
     if (targetGenomeSize > MAX_GENOME_BYTES) {
         return;
     }
+
+    if (cudaSimulationParameters.cellFunctionConstructorMutationPreventDepthIncrease) {
+        auto genomeDepth = GenomeDecoder::getGenomeDepth(genome, genomeSize);
+        auto sourceRangeDepth = GenomeDecoder::getGenomeDepth(subGenome, subGenomeSize);
+        if (genomeDepth < sourceRangeDepth + numSubGenomesSizeIndices) {
+            return;
+        }
+    }
+
     auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(targetGenomeSize);
     for (int i = 0; i < startTargetIndex; ++i) {
         targetGenome[i] = genome[i];

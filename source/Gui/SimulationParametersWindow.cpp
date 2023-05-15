@@ -699,6 +699,14 @@ void _SimulationParametersWindow::processBase(
                     .tooltip(
                         "The color transitions are used for color mutations. The row index indicates the source color and the column index the target color."),
                 simParameters.cellFunctionConstructorMutationColorTransitions);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Prevent genome depth increase")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.cellFunctionConstructorMutationPreventDepthIncrease)
+                    .tooltip(std::string("A genome has a tree-like structure because it can contain sub-genomes. If this flag is activated, the mutations will "
+                                         "not increase the depth of the genome structure.")),
+                simParameters.cellFunctionConstructorMutationPreventDepthIncrease);
             auto preserveSelfReplication = !simParameters.cellFunctionConstructorMutationSelfReplication;
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
