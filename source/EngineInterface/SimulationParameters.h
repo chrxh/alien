@@ -102,6 +102,7 @@ struct SimulationParameters
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true}};
+    bool cellFunctionConstructorMutationPreventDepthIncrease = false;
     bool cellFunctionConstructorMutationSelfReplication = false;
 
     ColorVector<float> cellFunctionInjectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
@@ -302,6 +303,7 @@ struct SimulationParameters
             && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
             && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication
             && adaptiveCellMaxAge == other.adaptiveCellMaxAge && adaptiveCellMaxAgeInterval == other.adaptiveCellMaxAgeInterval
+            && cellFunctionConstructorMutationPreventDepthIncrease == other.cellFunctionConstructorMutationPreventDepthIncrease
         ;
     }
 

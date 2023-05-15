@@ -354,6 +354,12 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.cellFunctionConstructorMutationPreventDepthIncrease,
+            defaultParameters.cellFunctionConstructorMutationPreventDepthIncrease,
+            "simulation parameters.cell.function.constructor.mutation prevent depth increase",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.cellFunctionConstructionUnlimitedEnergy,
             defaultParameters.cellFunctionConstructionUnlimitedEnergy,
             "simulation parameters.cell.function.constructor.unlimited energy",
