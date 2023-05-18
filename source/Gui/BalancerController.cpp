@@ -77,7 +77,7 @@ void _BalancerController::doAdaption()
             if (!adaptColors.empty()) {
                 _cellMaxAge[colorOfMaxReplicators] *= AdaptionFactor;
                 for (auto const& color : adaptColors) {
-                    _cellMaxAge[color] /= std::pow(AdaptionFactor, 1.0 / toInt(adaptColors.size()));
+                    _cellMaxAge[color] /= pow(AdaptionFactor, 1.0 / toInt(adaptColors.size()));
                 }
 
                 auto parameters = _simController->getSimulationParameters();
