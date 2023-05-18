@@ -82,7 +82,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         auto origGenomePos = cell->cellFunctionData.constructor.genomeReadPosition;
         auto constructionData = readConstructionData(cell);
         if (isConstructionTriggered(data, cell, constructionData, activity)) {
-           if (tryConstructCell(data, statistics, cell, constructionData)) {
+            if (tryConstructCell(data, statistics, cell, constructionData)) {
                 activity.channels[0] = 1;
             } else {
                 activity.channels[0] = 0;

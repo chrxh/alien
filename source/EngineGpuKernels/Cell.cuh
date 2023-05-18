@@ -178,6 +178,30 @@ struct Cell
         return false;
     }
 
+    __device__ __inline__ uint8_t* getGenome()
+    {
+        if (cellFunction == CellFunction_Constructor) {
+            return cellFunctionData.constructor.genome;
+        }
+        if (cellFunction == CellFunction_Injector) {
+            return cellFunctionData.injector.genome;
+        }
+        CUDA_THROW_NOT_IMPLEMENTED();
+        return nullptr;
+    }
+
+    __device__ __inline__ int getGenomeSize()
+    {
+        if (cellFunction == CellFunction_Constructor) {
+            return cellFunctionData.constructor.genomeSize;
+        }
+        if (cellFunction == CellFunction_Injector) {
+            return cellFunctionData.injector.genomeSize;
+        }
+        CUDA_THROW_NOT_IMPLEMENTED();
+        return 0;
+    }
+
     __device__ __inline__ void getLock()
     {
         while (1 == atomicExch(&locked, 1)) {}

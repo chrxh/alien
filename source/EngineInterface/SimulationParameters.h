@@ -73,6 +73,7 @@ struct SimulationParameters
     ColorVector<int> radiationMinCellAge = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> highRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
+    ColorVector<float> genomeRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
     bool clusterDecay = false;
     ColorVector<float> clusterDecayProb = {0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f};
     ColorVector<int> cellMaxAge = {
@@ -167,8 +168,11 @@ struct SimulationParameters
                 return false;
             }
         }
-
+         
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (genomeRadiationFactor[i] != other.genomeRadiationFactor[i]) {
+                return false;
+            }
             if (cellFunctionConstructorPumpEnergyFactor[i] != other.cellFunctionConstructorPumpEnergyFactor[i]) {
                 return false;
             }

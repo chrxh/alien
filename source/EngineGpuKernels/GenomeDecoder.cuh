@@ -31,7 +31,9 @@ public:
     __inline__ __device__ static bool isAtLastNode(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isFinished(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isFinishedSingleConstruction(ConstructorFunction const& constructor);
-    __inline__ __device__ static bool containsSelfReplication(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool isSeparating(ConstructorFunction const& constructor);
+    template <typename ConstructorOrInjector>
+    __inline__ __device__ static bool containsSelfReplication(ConstructorOrInjector const& cellFunction);
 
     template <typename GenomeHolderSource, typename GenomeHolderTarget>
     __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target);
@@ -43,7 +45,11 @@ public:
     __inline__ __device__ static void convertWordToBytes(int word, uint8_t& b1, uint8_t& b2);
 
     template <typename Func>
+    __inline__ __device__ static void executeForEachNodeRecursively(uint8_t* genome, int genomeSize, Func func);
+    template <typename Func>
     __inline__ __device__ static void executeForEachNodeUntilReadPosition(ConstructorFunction const& constructor, Func func);
+    __inline__ __device__ static int getGenomeDepth(uint8_t* genome, int genomeSize);
+    __inline__ __device__ static int getNumNodesRecursively(uint8_t* genome, int genomeSize);
 
     __inline__ __device__ static int getRandomGenomeNodeAddress(
         SimulationData& data,
@@ -59,9 +65,8 @@ public:
         CellFunction const& cellFunction,
         bool makeSelfCopy,
         int subGenomeSize);
-    __inline__ __device__ static int getGenomeDepth(uint8_t* genome, int genomeSize);
 
-    __inline__ __device__ static int getNumGenomeCells(uint8_t* genome, int genomeSize);
+    __inline__ __device__ static int getNumNodes(uint8_t* genome, int genomeSize);
     __inline__ __device__ static int getNodeAddress(uint8_t* genome, int genomeSize, int nodeIndex);
     __inline__ __device__ static int findStartNodeAddress(uint8_t* genome, int genomeSize, int refIndex);
     __inline__ __device__ static int getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeAddress);
@@ -177,13 +182,20 @@ __inline__ __device__ bool GenomeDecoder::isFinishedSingleConstruction(Construct
         && (constructor.genomeReadPosition >= constructor.genomeSize || (constructor.genomeReadPosition == 0 && constructor.genomeSize == Const::GenomeHeaderSize));
 }
 
-__inline__ __device__ bool GenomeDecoder::containsSelfReplication(ConstructorFunction const& constructor)
+__inline__ __device__ bool GenomeDecoder::isSeparating(ConstructorFunction const& constructor)
 {
-    for (int currentNodeAddress = Const::GenomeHeaderSize; currentNodeAddress < constructor.genomeSize;) {
-        if (isNextCellSelfCopy(constructor.genome, currentNodeAddress)) {
+    auto genomeHeader = readGenomeHeader(constructor);
+    return genomeHeader.separateConstruction;
+}
+
+template <typename ConstructorOrInjector>
+__inline__ __device__ bool GenomeDecoder::containsSelfReplication(ConstructorOrInjector const& cellFunction)
+{
+    for (int currentNodeAddress = Const::GenomeHeaderSize; currentNodeAddress < cellFunction.genomeSize;) {
+        if (isNextCellSelfCopy(cellFunction.genome, currentNodeAddress)) {
             return true;
         }
-        currentNodeAddress += Const::CellBasicBytes + getNextCellFunctionDataSize(constructor.genome, constructor.genomeSize, currentNodeAddress);
+        currentNodeAddress += Const::CellBasicBytes + getNextCellFunctionDataSize(cellFunction.genome, cellFunction.genomeSize, currentNodeAddress);
     }
 
     return false;
@@ -231,6 +243,45 @@ __inline__ __device__ void GenomeDecoder::convertWordToBytes(int word, uint8_t& 
 }
 
 template <typename Func>
+__inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t* genome, int genomeSize, Func func)
+{
+    if (genomeSize < Const::GenomeHeaderSize) {
+        CUDA_THROW_NOT_IMPLEMENTED();
+    }
+    int subGenomeEndAddresses[MAX_SUBGENOME_RECURSION_DEPTH];
+    int depth = 0;
+    for (auto nodeAddress = Const::GenomeHeaderSize; nodeAddress < genomeSize;) {
+        auto cellFunction = getNextCellFunctionType(genome, nodeAddress);
+
+        bool goToNextSibling = true;
+        if (cellFunction == CellFunction_Constructor || cellFunction == CellFunction_Injector) {
+            auto cellFunctionFixedBytes = cellFunction == CellFunction_Constructor ? Const::ConstructorFixedBytes : Const::InjectorFixedBytes;
+            auto makeSelfCopy = GenomeDecoder::convertByteToBool(genome[nodeAddress + Const::CellBasicBytes + cellFunctionFixedBytes]);
+            if (!makeSelfCopy) {
+                auto subGenomeSize = getNextSubGenomeSize(genome, genomeSize, nodeAddress);
+                nodeAddress += Const::CellBasicBytes + cellFunctionFixedBytes + 3;
+                subGenomeEndAddresses[depth++] = nodeAddress + subGenomeSize;
+                nodeAddress += Const::GenomeHeaderSize;
+                goToNextSibling = false;
+            }
+        }
+        func(depth);
+        if (goToNextSibling) {
+            nodeAddress += Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(genome, genomeSize, nodeAddress);
+        }
+        for (int i = 0; i < MAX_SUBGENOME_RECURSION_DEPTH && depth > 0; ++i) {
+            if (depth > 0) {
+                if (subGenomeEndAddresses[depth - 1] == nodeAddress) {
+                    --depth;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+}
+
+template <typename Func>
 __inline__ __device__ void GenomeDecoder::executeForEachNodeUntilReadPosition(ConstructorFunction const& constructor, Func func)
 {
     for (int currentNodeAddress = Const::GenomeHeaderSize; currentNodeAddress <= constructor.genomeReadPosition;) {
@@ -239,6 +290,20 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeUntilReadPosition(Co
 
         func(currentNodeAddress > constructor.genomeReadPosition);
     }
+}
+
+__inline__ __device__ int GenomeDecoder::getGenomeDepth(uint8_t* genome, int genomeSize)
+{
+    auto result = 0;
+    executeForEachNodeRecursively(genome, genomeSize, [&result](int depth) { result = max(result, depth); });
+    return result;
+}
+
+__inline__ __device__ int GenomeDecoder::getNumNodesRecursively(uint8_t* genome, int genomeSize)
+{
+    auto result = 0;
+    executeForEachNodeRecursively(genome, genomeSize, [&result](int depth) { ++result; });
+    return result;
 }
 
 __inline__ __device__ int GenomeDecoder::getRandomGenomeNodeAddress(
@@ -319,48 +384,7 @@ __inline__ __device__ void GenomeDecoder::setRandomCellFunctionData(
     }
 }
 
-__inline__ __device__ int GenomeDecoder::getGenomeDepth(uint8_t* genome, int genomeSize)
-{
-    if (genomeSize < Const::GenomeHeaderSize) {
-        CUDA_THROW_NOT_IMPLEMENTED();
-    }
-    int result = 0;
-    int subGenomeEndAddresses[MAX_SUBGENOME_RECURSION_DEPTH];
-    int numSubGenomeEndAddresses = 0;
-    for (auto nodeAddress = Const::GenomeHeaderSize; nodeAddress < genomeSize;) {
-        auto cellFunction = getNextCellFunctionType(genome, nodeAddress);
-
-        bool goToNextSibling = true;
-        if (cellFunction == CellFunction_Constructor || cellFunction == CellFunction_Injector) {
-            auto cellFunctionFixedBytes = cellFunction == CellFunction_Constructor ? Const::ConstructorFixedBytes : Const::InjectorFixedBytes;
-            auto makeSelfCopy = GenomeDecoder::convertByteToBool(genome[nodeAddress + Const::CellBasicBytes + cellFunctionFixedBytes]);
-            if (!makeSelfCopy) {
-                auto subGenomeSize = getNextSubGenomeSize(genome, genomeSize, nodeAddress);
-                nodeAddress += Const::CellBasicBytes + cellFunctionFixedBytes + 3;
-                subGenomeEndAddresses[numSubGenomeEndAddresses++] = nodeAddress + subGenomeSize;
-                nodeAddress += Const::GenomeHeaderSize;
-                goToNextSibling = false;
-                result = max(result, numSubGenomeEndAddresses);
-            }
-        }
-
-        if (goToNextSibling) {
-            nodeAddress += Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(genome, genomeSize, nodeAddress);
-        }
-        for (int i = 0; i < MAX_SUBGENOME_RECURSION_DEPTH && numSubGenomeEndAddresses > 0; ++i) {
-            if (numSubGenomeEndAddresses > 0) {
-                if (subGenomeEndAddresses[numSubGenomeEndAddresses - 1] == nodeAddress) {
-                    --numSubGenomeEndAddresses;
-                } else {
-                    break;
-                }
-            }
-        }
-    }
-    return result;
-}
-
-__inline__ __device__ int GenomeDecoder::getNumGenomeCells(uint8_t* genome, int genomeSize)
+__inline__ __device__ int GenomeDecoder::getNumNodes(uint8_t* genome, int genomeSize)
 {
     int result = 0;
     int currentNodeAddress = Const::GenomeHeaderSize;

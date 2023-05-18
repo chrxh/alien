@@ -139,7 +139,7 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPoint::numSelfReplicators);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Self-Replicators");
+        AlienImGui::Text("Self-replicators");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
