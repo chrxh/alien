@@ -56,6 +56,7 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     particle->locked = 0;
     particle->selected = 0;
     particle->color = particleTO.color;
+    particle->lastAbsorbedCell = nullptr;
     return particle;
 }
 
@@ -216,6 +217,7 @@ ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     particle->absPos = pos;
     particle->vel = vel;
     particle->color = color;
+    particle->lastAbsorbedCell = nullptr;
     return particle;
 }
 

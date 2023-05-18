@@ -201,9 +201,13 @@ namespace
             parserTask);
         encodeDecodeProperty(tree, parameters.cellMaxAge, defaultParameters.cellMaxAge, "simulation parameters.cell.max age", parserTask);
         encodeDecodeProperty(
-            tree, parameters.adaptiveCellMaxAge, defaultParameters.adaptiveCellMaxAge, "simulation parameters.cell.max age.adaptive.enabled", parserTask);
+            tree, parameters.cellMaxAgeBalancer, defaultParameters.cellMaxAgeBalancer, "simulation parameters.cell.max age.balance.enabled", parserTask);
         encodeDecodeProperty(
-            tree, parameters.adaptiveCellMaxAge, defaultParameters.adaptiveCellMaxAge, "simulation parameters.cell.max age.adaptive.interval", parserTask);
+            tree,
+            parameters.cellMaxAgeBalancerInterval,
+            defaultParameters.cellMaxAgeBalancerInterval,
+            "simulation parameters.cell.max age.balance.interval",
+            parserTask);
         encodeDecodeProperty(
             tree,
             parameters.baseValues.cellColorTransitionDuration,
@@ -251,6 +255,12 @@ namespace
             tree, parameters.highRadiationFactor, defaultParameters.highRadiationFactor, "simulation parameters.high radiation.factor", parserTask);
         encodeDecodeProperty(
             tree, parameters.radiationMinCellAge, defaultParameters.radiationMinCellAge, "simulation parameters.radiation.min cell age", parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.genomeRadiationFactor,
+            defaultParameters.genomeRadiationFactor,
+            "simulation parameters.genome radiation.factor",
+            parserTask);
 
         encodeDecodeProperty(tree, parameters.clusterDecay, defaultParameters.clusterDecay, "simulation parameters.cluster.decay", parserTask);
         encodeDecodeProperty(

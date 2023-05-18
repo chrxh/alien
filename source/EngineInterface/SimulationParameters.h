@@ -84,8 +84,8 @@ struct SimulationParameters
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value};
-    bool adaptiveCellMaxAge = false;
-    int adaptiveCellMaxAgeInterval = 10000;
+    bool cellMaxAgeBalancer = false;
+    int cellMaxAgeBalancerInterval = 10000;
     bool particleTransformationAllowed = false;
     bool particleTransformationRandomCellFunction = false;
     int particleTransformationMaxGenomeSize = 300;
@@ -306,7 +306,7 @@ struct SimulationParameters
             && cellFunctionConstructionUnlimitedEnergy == other.cellFunctionConstructionUnlimitedEnergy
             && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
             && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication
-            && adaptiveCellMaxAge == other.adaptiveCellMaxAge && adaptiveCellMaxAgeInterval == other.adaptiveCellMaxAgeInterval
+            && cellMaxAgeBalancer == other.cellMaxAgeBalancer && cellMaxAgeBalancerInterval == other.cellMaxAgeBalancerInterval
             && cellFunctionConstructorMutationPreventDepthIncrease == other.cellFunctionConstructorMutationPreventDepthIncrease
         ;
     }
