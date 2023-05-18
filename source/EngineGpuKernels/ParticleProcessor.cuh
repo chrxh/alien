@@ -63,6 +63,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                     auto factor1 = particle->energy / (particle->energy + otherParticle->energy);
                     otherParticle->vel = particle->vel * factor1 + otherParticle->vel * (1.0f - factor1);
                     otherParticle->energy += particle->energy;
+                    otherParticle->lastAbsorbedCell = nullptr;
                     particle->energy = 0;
                     particle = nullptr;
                 }
@@ -72,6 +73,9 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
         } else {
             if (auto cell = data.cellMap.getFirst(particle->absPos)) {
                 if (cell->barrier) {
+                    continue;
+                }
+                if (particle->lastAbsorbedCell == cell) {
                     continue;
                 }
                 auto radiationAbsorption = SpotCalculator::calcParameter(
@@ -101,6 +105,8 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
 
                     if (killParticle) {
                         particle = nullptr;
+                    } else {
+                        particle->lastAbsorbedCell = cell;
                     }
                 }
                 cell->releaseLock();

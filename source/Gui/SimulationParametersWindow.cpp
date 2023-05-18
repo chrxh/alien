@@ -431,9 +431,21 @@ void _SimulationParametersWindow::processBase(
                     .tooltip("The fraction of energy that a cell can absorb from an incoming energy particle can be specified here."),
                 simParameters.baseValues.radiationAbsorption);
 
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Radiation type 1: Strength")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(0.01f)
+                    .logarithmic(true)
+                    .format("%.6f")
+                    .defaultValue(origSimParameters.baseValues.radiationCellAgeStrength)
+                    .tooltip("Indicates how energetic the emitted particles of aged cells are."),
+                simParameters.baseValues.radiationCellAgeStrength);
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
-                    .name("Minimum age for radiation")
+                    .name("Radiation type 1: Minimum age")
                     .tooltip("")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
@@ -444,22 +456,22 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.radiationMinCellAge)
                     .tooltip("The minimum age of a cell can be defined here, from which it emits energy particles."),
                 simParameters.radiationMinCellAge);
+
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Cell age radiation strength")
+                    .name("Radiation type 2: Strength")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0)
                     .max(0.01f)
                     .logarithmic(true)
                     .format("%.6f")
-                    .defaultValue(origSimParameters.baseValues.radiationCellAgeStrength)
-                    .tooltip("Indicates how energetic the emitted particles of aged cells are."),
-                simParameters.baseValues.radiationCellAgeStrength);
-
+                    .defaultValue(origSimParameters.highRadiationFactor)
+                    .tooltip("Indicates how energetic the emitted particles of high energy cells are."),
+                simParameters.highRadiationFactor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("High energy radiation threshold")
+                    .name("Radiation type 2: Energy threshold")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .infinity(true)
@@ -472,19 +484,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.highRadiationMinCellEnergy);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("High energy radiation strength")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(0.01f)
-                    .logarithmic(true)
-                    .format("%.6f")
-                    .defaultValue(origSimParameters.highRadiationFactor)
-                    .tooltip("Indicates how energetic the emitted particles of high energy cells are."),
-                simParameters.highRadiationFactor);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Genome energy radiation strength")
+                    .name("Radiation type 3: Strength")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0)
@@ -522,13 +522,13 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .min(1000)
                     .max(1000000)
-                    .disabledValue(&simParameters.adaptiveCellMaxAgeInterval)
-                    .defaultEnabledValue(&origSimParameters.adaptiveCellMaxAge)
-                    .defaultValue(&origSimParameters.adaptiveCellMaxAgeInterval)
+                    .disabledValue(&simParameters.cellMaxAgeBalancerInterval)
+                    .defaultEnabledValue(&origSimParameters.cellMaxAgeBalancer)
+                    .defaultValue(&origSimParameters.cellMaxAgeBalancerInterval)
                     .tooltip("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest replicators exist. "
                              "Conversely, the maximum age is decreased for the cell color with the most replicators."),
-                &simParameters.adaptiveCellMaxAgeInterval,
-                &simParameters.adaptiveCellMaxAge);
+                &simParameters.cellMaxAgeBalancerInterval,
+                &simParameters.cellMaxAgeBalancer);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum energy")
@@ -1389,7 +1389,7 @@ void _SimulationParametersWindow::processSpot(
 
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Radiation strength")
+                    .name("Radiation type 1: Strength")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0)
@@ -1703,7 +1703,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
-    parameters.adaptiveCellMaxAgeInterval = std::max(1000, std::min(1000000, parameters.adaptiveCellMaxAgeInterval));
+    parameters.cellMaxAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.cellMaxAgeBalancerInterval));
 }
 
 void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot) const
