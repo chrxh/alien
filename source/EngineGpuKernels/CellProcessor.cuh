@@ -11,6 +11,7 @@
 #include "Map.cuh"
 #include "Physics.cuh"
 #include "CellConnectionProcessor.cuh"
+#include "GenomeDecoder.cuh"
 #include "ParticleProcessor.cuh"
 #include "SpotCalculator.cuh"
 
@@ -546,7 +547,9 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
         if (livingState == LivingState_Dying) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectedCell = cell->connections[i].cell;
-                if (connectedCell->cellFunction != CellFunction_None) {
+                if (connectedCell->cellFunction != CellFunction_Constructor
+                    || !GenomeDecoder::containsSelfReplication(connectedCell->cellFunctionData.constructor)
+                    || GenomeDecoder::isSeparating(connectedCell->cellFunctionData.constructor)) {
                     atomicExch(&connectedCell->livingState, LivingState_Dying);
                 }
             }
@@ -610,17 +613,29 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         if (cell->barrier) {
             continue;
         }
-        auto radiationMinAge = cudaSimulationParameters.radiationMinCellAge[cell->color];
-        if (data.numberGen1.random() < cudaSimulationParameters.radiationProb
-            && (cell->energy > cudaSimulationParameters.highRadiationMinCellEnergy[cell->color] || cell->age > radiationMinAge)) {
-            auto radiationFactor = [&] {
-                if (cell->energy < cudaSimulationParameters.highRadiationMinCellEnergy[cell->color]) {
-                    return SpotCalculator::calcParameter(
-                        &SimulationParametersSpotValues::radiationCellAgeStrength, &SimulationParametersSpotActivatedValues::radiationCellAgeStrength, data, cell->absPos, cell->color);
-                } else {
-                    return cudaSimulationParameters.highRadiationFactor[cell->color];
+        if (data.numberGen1.random() < cudaSimulationParameters.radiationProb) {
+
+            auto radiationFactor = 0.0f;
+            if (cell->energy > cudaSimulationParameters.highRadiationMinCellEnergy[cell->color]) {
+                radiationFactor += cudaSimulationParameters.highRadiationFactor[cell->color];
+            }
+            if (cell->age > cudaSimulationParameters.radiationMinCellAge[cell->color]) {
+                radiationFactor += SpotCalculator::calcParameter(
+                    &SimulationParametersSpotValues::radiationCellAgeStrength,
+                    &SimulationParametersSpotActivatedValues::radiationCellAgeStrength,
+                    data,
+                    cell->absPos,
+                    cell->color);
+            }
+            if (cell->cellFunction == CellFunction_Constructor || cell->cellFunction == CellFunction_Injector) {
+                if (!GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor)) {
+                    if (cell->cellFunction != CellFunction_Constructor || !GenomeDecoder::isFinished(cell->cellFunctionData.constructor)) {
+                        auto numNodes = GenomeDecoder::getNumNodesRecursively(cell->getGenome(), cell->getGenomeSize());
+                        radiationFactor += cudaSimulationParameters.genomeRadiationFactor[cell->color] * numNodes;
+                    }
                 }
-            }();
+            }
+
             if (radiationFactor > 0) {
 
                 auto const& cellEnergy = cell->energy;

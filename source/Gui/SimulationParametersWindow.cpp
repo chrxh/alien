@@ -482,6 +482,18 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.highRadiationFactor)
                     .tooltip("Indicates how energetic the emitted particles of high energy cells are."),
                 simParameters.highRadiationFactor);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Genome energy radiation strength")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(0.01f)
+                    .logarithmic(true)
+                    .format("%.6f")
+                    .defaultValue(origSimParameters.genomeRadiationFactor)
+                    .tooltip(""),
+                simParameters.genomeRadiationFactor);
 
             ImGui::TreePop();
         }
@@ -505,8 +517,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.cellMaxAge);
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
-                    .name("Maximum age balancer")
-                    .tooltip("")
+                    .name("Maximum age balancing")
                     .textWidth(RightColumnWidth)
                     .logarithmic(true)
                     .min(1000)

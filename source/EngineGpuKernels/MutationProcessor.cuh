@@ -401,7 +401,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
         subGenome = genome;
         subGenomeSize = genomeSize;
     }
-    auto numCells = GenomeDecoder::getNumGenomeCells(subGenome, subGenomeSize);
+    auto numCells = GenomeDecoder::getNumNodes(subGenome, subGenomeSize);
     auto endRelativeCellIndex = data.numberGen1.random(numCells - 1) + 1;
     auto endRelativeNodeAddress = GenomeDecoder::getNodeAddress(subGenome, subGenomeSize, endRelativeCellIndex);
     auto endSourceIndex = toInt(endRelativeNodeAddress + (subGenome - genome));
@@ -530,7 +530,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
             subGenome = genome;
             subGenomeSize = genomeSize;
         }
-        auto numCells = GenomeDecoder::getNumGenomeCells(subGenome, subGenomeSize);
+        auto numCells = GenomeDecoder::getNumNodes(subGenome, subGenomeSize);
         auto endRelativeCellIndex = data.numberGen1.random(numCells - 1) + 1;
         auto endRelativeNodeAddress = GenomeDecoder::getNodeAddress(subGenome, subGenomeSize, endRelativeCellIndex);
         endSourceIndex = toInt(endRelativeNodeAddress + (subGenome - genome));

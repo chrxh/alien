@@ -55,30 +55,29 @@ void _BalancerController::doAdaption()
     }
     if (_simController->getCurrentTimestep() - *_lastTimestep > parameters.adaptiveCellMaxAgeInterval) {
         uint64_t maxReplicators = 0;
-        uint64_t minReplicators = 0;
-        int colorOfMinReplicators = 0;
+        uint64_t averageReplicators = 0;
         int colorOfMaxReplicators = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
             if (maxReplicators < _numReplicators[i]) {
                 maxReplicators = _numReplicators[i];
                 colorOfMaxReplicators = i;
             }
-            if ((minReplicators == 0 || minReplicators > _numReplicators[i]) && _numReplicators[i] > 0) {
-                minReplicators = _numReplicators[i];
-                colorOfMinReplicators = i;
-            }
+            averageReplicators += _numReplicators[i];
         }
-        if (minReplicators > 0 && maxReplicators / minReplicators > AdaptionRatio) {
-            if (_cellMaxAge[colorOfMinReplicators] < 100000000) {
-                _cellMaxAge[colorOfMaxReplicators] *= AdaptionFactor;
-                _cellMaxAge[colorOfMinReplicators] /= AdaptionFactor;
-
-                auto parameters = _simController->getSimulationParameters();
-                for (int i = 0; i < MAX_COLORS; ++i) {
-                    parameters.cellMaxAge[i] = toInt(_cellMaxAge[i]);
+        averageReplicators /= MAX_COLORS;
+        if (maxReplicators / averageReplicators > AdaptionRatio) {
+            _cellMaxAge[colorOfMaxReplicators] *= AdaptionFactor;
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                if (i != colorOfMaxReplicators) {
+                    _cellMaxAge[i] /= std::pow(AdaptionFactor, 1.0 / (MAX_COLORS - 1));
                 }
-                _simController->setSimulationParameters(parameters);
             }
+
+            auto parameters = _simController->getSimulationParameters();
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                parameters.cellMaxAge[i] = toInt(_cellMaxAge[i]);
+            }
+            _simController->setSimulationParameters(parameters);
         }
         startNewMeasurement();
     }
