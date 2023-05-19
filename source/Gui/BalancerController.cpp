@@ -1,14 +1,16 @@
 #include "BalancerController.h"
 
+#include <cmath>
+
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/StatisticsData.h"
 
 namespace
 {
-    auto constexpr AdaptionInterval = 10000;
     auto constexpr AdaptionRatio = 2;
     auto constexpr AdaptionFactor = 0.9;
-    auto constexpr MaxCellAge = 500000;
+    auto constexpr MaxCellAge = 300000;
+    auto constexpr MinReplicators = 30;
 }
 
 _BalancerController::_BalancerController(SimulationController const& simController)
@@ -63,11 +65,11 @@ void _BalancerController::doAdaption()
                 maxReplicators = _numReplicators[i];
                 colorOfMaxReplicators = i;
             }
-            if ((minReplicators == 0 || minReplicators > _numReplicators[i]) && _numReplicators[i] > 0) {
+            if ((minReplicators == 0 || minReplicators > _numReplicators[i]) && _numReplicators[i] > MinReplicators) {
                 minReplicators = _numReplicators[i];
             }
         }
-        if (maxReplicators / minReplicators > AdaptionRatio) {
+        if (minReplicators > 0 && maxReplicators / minReplicators > AdaptionRatio) {
             std::vector<int> adaptColors;
             for (int i = 0; i < MAX_COLORS; ++i) {
                 if (i != colorOfMaxReplicators && _cellMaxAge[i] < MaxCellAge) {
