@@ -94,7 +94,7 @@ void _StatisticsWindow::processTimelines()
 void _StatisticsWindow::processTimelineStatistics()
 {
     ImGui::Spacing();
-    AlienImGui::Group("Absolute quantities");
+    AlienImGui::Group("Time step data");
     ImGui::PushID(1);
     int row = 0;
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
