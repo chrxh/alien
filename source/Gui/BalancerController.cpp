@@ -7,10 +7,11 @@
 
 namespace
 {
-    auto constexpr AdaptionRatio = 2;
+    auto constexpr AdaptionRatio = 1.3f;
     auto constexpr AdaptionFactor = 0.9;
     auto constexpr MaxCellAge = 300000;
-    auto constexpr MinReplicators = 30;
+    auto constexpr MinReplicatorsUpperValue = 100;
+    auto constexpr MinReplicatorsLowerValue = 10;
 }
 
 _BalancerController::_BalancerController(SimulationController const& simController)
@@ -58,36 +59,41 @@ void _BalancerController::doAdaption()
     }
     if (_simController->getCurrentTimestep() - *_lastTimestep > parameters.cellMaxAgeBalancerInterval) {
         uint64_t maxReplicators = 0;
+        uint64_t averageReplicators = 0;
+        int numColors = 0;
         uint64_t minReplicators = 0;
-        int colorOfMaxReplicators = 0;
+        std::vector<int> colors;
         for (int i = 0; i < MAX_COLORS; ++i) {
             if (maxReplicators < _numReplicators[i]) {
                 maxReplicators = _numReplicators[i];
-                colorOfMaxReplicators = i;
             }
-            if ((minReplicators == 0 || minReplicators > _numReplicators[i]) && _numReplicators[i] > MinReplicators) {
-                minReplicators = _numReplicators[i];
+            if (_numReplicators[i] > MinReplicatorsLowerValue) {
+                if ((minReplicators == 0 || minReplicators > _numReplicators[i])) {
+                    minReplicators = _numReplicators[i];
+                }
+                averageReplicators += _numReplicators[i];
+                ++numColors;
+                colors.emplace_back(i);
             }
         }
-        if (minReplicators > 0 && maxReplicators / minReplicators > AdaptionRatio) {
-            std::vector<int> adaptColors;
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                if (i != colorOfMaxReplicators && _cellMaxAge[i] < MaxCellAge) {
-                    adaptColors.emplace_back(i);
-                }
-            }
-            if (!adaptColors.empty()) {
-                _cellMaxAge[colorOfMaxReplicators] *= AdaptionFactor;
-                for (auto const& color : adaptColors) {
-                    _cellMaxAge[color] /= pow(AdaptionFactor, 1.0 / toInt(adaptColors.size()));
-                }
+        if (numColors > 0) {
+            averageReplicators /= numColors;
+        }
 
-                auto parameters = _simController->getSimulationParameters();
-                for (int i = 0; i < MAX_COLORS; ++i) {
-                    parameters.cellMaxAge[i] = toInt(_cellMaxAge[i]);
+        if (averageReplicators > 0) {
+            for (auto const& color : colors) {
+                if (_numReplicators[color] > MinReplicatorsUpperValue && _numReplicators[color] / averageReplicators > AdaptionRatio) {
+                    _cellMaxAge[color] *= AdaptionFactor;
+                } else if (_cellMaxAge[color] < MaxCellAge && _numReplicators[color] / averageReplicators < AdaptionRatio) {
+                    _cellMaxAge[color] /= AdaptionFactor;
                 }
-                _simController->setSimulationParameters(parameters);
             }
+
+            auto parameters = _simController->getSimulationParameters();
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                parameters.cellMaxAge[i] = toInt(_cellMaxAge[i]);
+            }
+            _simController->setSimulationParameters(parameters);
         }
         startNewMeasurement();
     }

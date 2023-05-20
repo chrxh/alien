@@ -114,6 +114,9 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             return false;
         };
         auto matchTransmitterFunc = [&](Cell* const& otherCell) {
+            if (otherCell->livingState != LivingState_Ready) {
+                return false;
+            }
             if (otherCell->cellFunction == CellFunction_Transmitter) {
                 if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameColor || otherCell->color == cell->color) {
                     return true;

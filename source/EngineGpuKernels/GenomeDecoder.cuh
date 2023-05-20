@@ -251,14 +251,14 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
     int subGenomeEndAddresses[MAX_SUBGENOME_RECURSION_DEPTH];
     int depth = 0;
     for (auto nodeAddress = Const::GenomeHeaderSize; nodeAddress < genomeSize;) {
-        auto cellFunction = getNextCellFunctionType(genome, nodeAddress);
+        auto cellFunction = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
 
         bool goToNextSibling = true;
         if (cellFunction == CellFunction_Constructor || cellFunction == CellFunction_Injector) {
             auto cellFunctionFixedBytes = cellFunction == CellFunction_Constructor ? Const::ConstructorFixedBytes : Const::InjectorFixedBytes;
             auto makeSelfCopy = GenomeDecoder::convertByteToBool(genome[nodeAddress + Const::CellBasicBytes + cellFunctionFixedBytes]);
             if (!makeSelfCopy) {
-                auto subGenomeSize = getNextSubGenomeSize(genome, genomeSize, nodeAddress);
+                auto subGenomeSize = GenomeDecoder::getNextSubGenomeSize(genome, genomeSize, nodeAddress);
                 nodeAddress += Const::CellBasicBytes + cellFunctionFixedBytes + 3;
                 subGenomeEndAddresses[depth++] = nodeAddress + subGenomeSize;
                 nodeAddress += Const::GenomeHeaderSize;
