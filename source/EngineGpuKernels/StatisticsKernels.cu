@@ -20,17 +20,11 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
             statistics.addEnergy(cell->color, cell->energy);
             if (cell->cellFunction == CellFunction_Constructor && GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor)) {
                 statistics.incNumReplicator(cell->color);
-            }
-            if (cell->cellFunction == CellFunction_Injector && cell->cellFunctionData.injector.mode == InjectorMode_InjectAll) {
-                statistics.incNumReplicator(cell->color);
-            }
-            if (cell->cellFunction == CellFunction_Constructor) {
                 statistics.addNumGenomeBytes(cell->color, cell->cellFunctionData.constructor.genomeSize);
-                statistics.incNumGenomes(cell->color);
             }
             if (cell->cellFunction == CellFunction_Injector) {
+                statistics.incNumViruses(cell->color);
                 statistics.addNumGenomeBytes(cell->color, cell->cellFunctionData.injector.genomeSize);
-                statistics.incNumGenomes(cell->color);
             }
         }
     }
