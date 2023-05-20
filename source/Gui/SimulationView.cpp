@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <imgui.h>
+#include <cmath>
 
 #include "AlienImGui.h"
 #include "Base/Resources.h"
