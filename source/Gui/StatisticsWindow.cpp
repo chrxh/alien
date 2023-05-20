@@ -22,16 +22,8 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
 
 namespace
 {
-    auto const HeadColWidth = 150.0f;
-
-    double getMax(double const* data, int count)
-    {
-        double result = 0;
-        for (int i = count / 20; i < count; ++i) {
-            result = std::max(result, *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(data) + i));
-        }
-        return result;
-    }
+    auto const RightColumnWidth = 175.0f;
+    auto const RightColumnWidthTable = 150.0f;
 }
 
 void _StatisticsWindow::reset()
@@ -72,7 +64,7 @@ void _StatisticsWindow::processTimelines()
     AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Real time"), _live);
     ImGui::SameLine();
     ImGui::BeginDisabled(!_live);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(HeadColWidth));
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - contentScale(RightColumnWidth));
     ImGui::SliderFloat("", &_liveStatistics.history, 1, TimelineLiveStatistics::MaxLiveHistory, "%.1f s");
     ImGui::EndDisabled();
 
@@ -85,7 +77,7 @@ void _StatisticsWindow::processTimelines()
     AlienImGui::Switcher(
         AlienImGui::SwitcherParameters()
             .name("Plot type")
-            .textWidth(HeadColWidth)
+            .textWidth(RightColumnWidth)
             .values(
             {"Accumulate values for all colors", "Break down by color", "Color #0", "Color #1", "Color #2", "Color #3", "Color #4", "Color #5", "Color #6"}),
         _plotType);
@@ -107,7 +99,7 @@ void _StatisticsWindow::processTimelineStatistics()
     int row = 0;
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");
-        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, contentScale(HeadColWidth));
+        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, contentScale(RightColumnWidthTable));
 
         ImPlot::PushColormap(ImPlotColormap_Cool);
 
@@ -164,7 +156,7 @@ void _StatisticsWindow::processTimelineStatistics()
     ImGui::PushID(2);
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");
-        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, contentScale(HeadColWidth));
+        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, contentScale(RightColumnWidthTable));
         ImPlot::PushColormap(ImPlotColormap_Cool);
 
         ImGui::TableNextRow();
@@ -351,6 +343,18 @@ void _StatisticsWindow::processBackground()
     _longtermStatistics.add(_lastStatisticsData->timeline, timestep);
 }
 
+namespace
+{
+    double getMaxWithDataPointStride(double const* data, int count)
+    {
+        double result = 0;
+        for (int i = count / 20; i < count; ++i) {
+            result = std::max(result, *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(data) + i));
+        }
+        return result;
+    }
+}
+
 void _StatisticsWindow::plotSumColorsIntern(
     int row,
     ColorVector<double> const* values,
@@ -389,7 +393,7 @@ void _StatisticsWindow::plotSumColorsIntern(
         plotDataY = accumulatedData.data();
         stride = toInt(sizeof(double));
     } else {
-        upperBound = getMax(summedValues, count);
+        upperBound = getMaxWithDataPointStride(summedValues, count);
         endValue = count > 0 ? *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(summedValues) + count - 1) : 0.0;
         plotDataX = timePoints;
         plotDataY = summedValues;
@@ -434,7 +438,7 @@ void _StatisticsWindow::plotByColorIntern(
 {
     auto upperBound = 0.0;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        upperBound = std::max(upperBound, getMax(reinterpret_cast<double const*>(values) + i, count));
+        upperBound = std::max(upperBound, getMaxWithDataPointStride(reinterpret_cast<double const*>(values) + i, count));
     }
     upperBound *= 1.5;
 
@@ -477,7 +481,7 @@ void _StatisticsWindow::plotForColorIntern(
     int fracPartDecimals)
 {
     auto valuesForColor = reinterpret_cast<double const*>(values) + colorIndex;
-    auto upperBound = getMax(valuesForColor, count) * 1.5;
+    auto upperBound = getMaxWithDataPointStride(valuesForColor, count) * 1.5;
     auto endValue = count > 0 ? *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(valuesForColor) + count - 1) : 0.0;
 
     ImGui::PushID(row);
