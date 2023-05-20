@@ -150,13 +150,14 @@ void _SimulationView::resize(IntVector2D const& size)
 void _SimulationView::leftMouseButtonPressed(IntVector2D const& viewPos)
 {
     _navigationState = NavigationState::Moving;
+    _lastZoomTimepoint.reset();
     updateMotionBlur();
 }
 
 void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
 {
     if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
-        _viewport->zoom(viewPos, _viewport->getZoomSensitivity());
+        _viewport->zoom(viewPos, calcZoomFactor());
     }
 }
 
@@ -169,13 +170,14 @@ void _SimulationView::leftMouseButtonReleased()
 void _SimulationView::rightMouseButtonPressed()
 {
     _navigationState = NavigationState::Moving;
+    _lastZoomTimepoint.reset();
     updateMotionBlur();
 }
 
 void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
     if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
-        _viewport->zoom(viewPos, 1.0f / _viewport->getZoomSensitivity());
+        _viewport->zoom(viewPos, 1.0f / calcZoomFactor());
     }
 }
 
@@ -414,5 +416,13 @@ void _SimulationView::drawEditCursor()
             drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));
         }
     }
+}
+
+float _SimulationView::calcZoomFactor()
+{
+    auto now = std::chrono::steady_clock::now();
+    auto duration = _lastZoomTimepoint ? toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - *_lastZoomTimepoint).count()) : 30.0f;
+    _lastZoomTimepoint = now;
+    return pow(_viewport->getZoomSensitivity(), duration / 15);
 }
 

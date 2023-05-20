@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "Base/Definitions.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/OverlayDescriptions.h"
@@ -46,6 +48,7 @@ private:
     void updateMotionBlur();
 
     void drawEditCursor();
+    float calcZoomFactor();
 
     //widgets
     SimulationScrollbar _scrollbarX;
@@ -73,6 +76,7 @@ private:
     //navigation
     std::optional<RealVector2D> _worldPosForMovement;
     std::optional<IntVector2D> _prevMousePosInt;
+    std::optional<std::chrono::steady_clock::time_point> _lastZoomTimepoint;
 
     Viewport _viewport;
     ModeController _modeWindow;
