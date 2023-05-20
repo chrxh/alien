@@ -24,7 +24,6 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
             }
             if (cell->cellFunction == CellFunction_Injector) {
                 statistics.incNumViruses(cell->color);
-                statistics.addNumGenomeBytes(cell->color, cell->cellFunctionData.injector.genomeSize);
             }
         }
     }
