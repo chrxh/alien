@@ -397,6 +397,9 @@ struct CellDescription
         return *this;
     }
 
+    bool hasGenome() const;
+    std::vector<uint8_t>& getGenomeRef();
+
     bool isConnectedTo(uint64_t id) const;
 };
 

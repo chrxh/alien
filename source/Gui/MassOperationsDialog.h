@@ -2,6 +2,7 @@
 
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
+#include "EngineInterface/FundamentalConstants.h"
 
 class _MassOperationsDialog
 {
@@ -23,8 +24,11 @@ private:
 
     bool _show = false;
 
-    bool _randomizeColors = false;
-    bool _checkColors[7] = {false, false, false, false, false, false, false};
+    bool _randomizeCellColors = false;
+    bool _checkedCellColors[MAX_COLORS] = {false, false, false, false, false, false, false};
+
+    bool _randomizeGenomeColors = false;
+    bool _checkedGenomeColors[MAX_COLORS] = {false, false, false, false, false, false, false};
 
     bool _randomizeEnergies = false;
     float _minEnergy = 200.0;
