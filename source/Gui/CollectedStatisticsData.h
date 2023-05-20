@@ -15,7 +15,10 @@ struct DataPoint
     ColorVector<double> numViruses = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numConnections = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numParticles = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> averageGenomeSize = {0, 0, 0, 0, 0, 0, 0};
+    double sumAverageGenomeSize = 0;
     ColorVector<double> totalEnergy = {0, 0, 0, 0, 0, 0, 0};
+
     ColorVector<double> numCreatedCells = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numAttacks = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<double> numMuscleActivities = {0, 0, 0, 0, 0, 0, 0};
