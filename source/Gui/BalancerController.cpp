@@ -11,7 +11,7 @@ namespace
     auto constexpr AdaptionFactor = 0.9;
     auto constexpr MaxCellAge = 300000;
     auto constexpr MinReplicatorsUpperValue = 100;
-    auto constexpr MinReplicatorsLowerValue = 10;
+    auto constexpr MinReplicatorsLowerValue = 20;
 }
 
 _BalancerController::_BalancerController(SimulationController const& simController)

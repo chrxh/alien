@@ -1,5 +1,7 @@
 ﻿#include "DebugKernels.cuh"
 
+#include "GenomeDecoder.cuh"
+
 __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int location)
 {
     auto& cells = data.objects.cellPointers;
@@ -75,6 +77,67 @@ __global__ void DEBUG_checkCellsAndParticles(SimulationData data, float* sumEner
 {
     DEBUG_checkCells(data, sumEnergy, location);
     DEBUG_checkParticles(data, sumEnergy, location);
+}
+
+__global__ void DEBUG_checkGenomes(SimulationData data, int location)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        if (auto& cell = cells.at(index)) {
+            if (cell->cellFunction == CellFunction_Constructor || cell->cellFunction == CellFunction_Injector) {
+                auto genome = cell->getGenome();
+                auto genomeSize = cell->getGenomeSize();
+
+
+                if (genomeSize < Const::GenomeHeaderSize) {
+                    printf("1: %d\n", location);
+                    ABORT();
+                }
+                int subGenomeEndAddresses[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH];
+                int depth = 0;
+                for (auto nodeAddress = Const::GenomeHeaderSize; nodeAddress < genomeSize;) {
+                    auto cellFunction = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
+
+                    bool goToNextSibling = true;
+                    if (cellFunction == CellFunction_Constructor || cellFunction == CellFunction_Injector) {
+                        auto cellFunctionFixedBytes = cellFunction == CellFunction_Constructor ? Const::ConstructorFixedBytes : Const::InjectorFixedBytes;
+                        auto makeSelfCopy = GenomeDecoder::convertByteToBool(genome[nodeAddress + Const::CellBasicBytes + cellFunctionFixedBytes]);
+                        if (!makeSelfCopy) {
+                            auto subGenomeSize = GenomeDecoder::getNextSubGenomeSize(genome, genomeSize, nodeAddress);
+                            nodeAddress += Const::CellBasicBytes + cellFunctionFixedBytes + 3;
+                            subGenomeEndAddresses[depth++] = nodeAddress + subGenomeSize;
+                            nodeAddress += Const::GenomeHeaderSize;
+                            goToNextSibling = false;
+                            if (nodeAddress > genomeSize) {
+                                printf("2: %d\n", location);
+                                ABORT();
+                            }
+                        }
+                    }
+
+                    if (goToNextSibling) {
+                        nodeAddress += Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(genome, genomeSize, nodeAddress);
+                        if (nodeAddress > genomeSize) {
+                            printf("3: %d\n", location);
+                            ABORT();
+                        }
+                    }
+                    for (int i = 0; i < GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH && depth > 0; ++i) {
+                        if (depth > 0) {
+                            if (subGenomeEndAddresses[depth - 1] == nodeAddress) {
+                                --depth;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
 }
 
 /*
