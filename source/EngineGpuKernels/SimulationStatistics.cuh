@@ -43,7 +43,6 @@ public:
     {
         alienAtomicAdd64(&_data->timeline.timestep.numGenomeBytes[color], valueToAdd);
     }
-    __inline__ __device__ void incNumGenomes(int color) { atomicAdd(&_data->timeline.timestep.numGenomes[color], 1); }
     __inline__ __device__ void halveNumConnections()
     {
         for (int i = 0; i < MAX_COLORS; ++i) {

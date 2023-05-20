@@ -87,7 +87,7 @@ namespace
             result.numConnections[i] = toDouble(data.timestep.numConnections[i]);
             result.numParticles[i] = toDouble(data.timestep.numParticles[i]);
             result.averageGenomeSize[i] = toDouble(data.timestep.numGenomeBytes[i]);
-            auto numGenomes = toDouble(data.timestep.numGenomes[i]);
+            auto numGenomes = result.numSelfReplicators[i] + result.numViruses[i];
             sumGenomeBytes += result.averageGenomeSize[i];
             sumNumGenomes += numGenomes;
             if (numGenomes > 0) {
