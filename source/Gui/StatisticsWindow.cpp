@@ -105,7 +105,7 @@ void _StatisticsWindow::processTimelineStatistics()
     AlienImGui::Group("Absolute quantities");
     ImGui::PushID(1);
     int row = 0;
-    if (ImGui::BeginTable("##", 2, 0, ImVec2(-1, 0))) {
+    if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");
         ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, contentScale(HeadColWidth));
 
@@ -162,7 +162,7 @@ void _StatisticsWindow::processTimelineStatistics()
     ImGui::Spacing();
     AlienImGui::Group("Processes per time step and cell");
     ImGui::PushID(2);
-    if (ImGui::BeginTable("##", 2, 0, ImVec2(-1, 0))) {
+    if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");
         ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, contentScale(HeadColWidth));
         ImPlot::PushColormap(ImPlotColormap_Cool);
