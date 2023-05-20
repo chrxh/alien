@@ -5,6 +5,7 @@
 #include <optional>
 #include <variant>
 
+#include "Base/Definitions.h"
 #include "FundamentalConstants.h"
 #include "CellFunctionConstants.h"
 
@@ -250,7 +251,39 @@ struct CellGenomeDescription
         outputBlocked = value;
         return *this;
     }
-    std::optional<std::vector<uint8_t>> getSubGenome() const
+    bool hasGenome() const
+    {
+        auto cellFunctionType = getCellFunctionType();
+        if (cellFunctionType == CellFunction_Constructor) {
+            auto& constructor = std::get<ConstructorGenomeDescription>(*cellFunction);
+            return std::holds_alternative<std::vector<uint8_t>>(constructor.genome);
+        }
+        if (cellFunctionType == CellFunction_Injector) {
+            auto& injector = std::get<InjectorGenomeDescription>(*cellFunction);
+            return std::holds_alternative<std::vector<uint8_t>>(injector.genome);
+        }
+        return false;
+    }
+
+    std::vector<uint8_t>& getGenomeRef()
+    {
+        auto cellFunctionType = getCellFunctionType();
+        if (cellFunctionType == CellFunction_Constructor) {
+            auto& constructor = std::get<ConstructorGenomeDescription>(*cellFunction);
+            if (std::holds_alternative<std::vector<uint8_t>>(constructor.genome)) {
+                return std::get<std::vector<uint8_t>>(constructor.genome);
+            }
+        }
+        if (cellFunctionType == CellFunction_Injector) {
+            auto& injector = std::get<InjectorGenomeDescription>(*cellFunction);
+            if (std::holds_alternative<std::vector<uint8_t>>(injector.genome)) {
+                return std::get<std::vector<uint8_t>>(injector.genome);
+            }
+        }
+        THROW_NOT_IMPLEMENTED();
+    }
+
+    std::optional<std::vector<uint8_t>> getGenome() const
     {
         switch (getCellFunctionType()) {
         case CellFunction_Constructor: {
@@ -273,7 +306,7 @@ struct CellGenomeDescription
             return std::nullopt;
         }
     }
-    void setSubGenome(std::vector<uint8_t> const& genome)
+    void setGenome(std::vector<uint8_t> const& genome)
     {
         switch (getCellFunctionType()) {
         case CellFunction_Constructor: {

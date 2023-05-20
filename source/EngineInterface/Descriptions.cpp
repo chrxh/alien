@@ -49,6 +49,27 @@ CellFunction CellDescription::getCellFunctionType() const
     return CellFunction_None;
 }
 
+bool CellDescription::hasGenome() const
+{
+    auto cellFunctionType = getCellFunctionType();
+    if (cellFunctionType == CellFunction_Constructor || cellFunctionType == CellFunction_Injector) {
+        return true;
+    }
+    return false;
+}
+
+std::vector<uint8_t>& CellDescription::getGenomeRef()
+{
+    auto cellFunctionType = getCellFunctionType();
+    if (cellFunctionType == CellFunction_Constructor) {
+        return std::get<ConstructorDescription>(*cellFunction).genome;
+    }
+    if (cellFunctionType == CellFunction_Injector) {
+        return std::get<InjectorDescription>(*cellFunction).genome;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
 bool CellDescription::isConnectedTo(uint64_t id) const
 {
     return std::find_if(connections.begin(), connections.end(), [&id](auto const& connection) { return connection.cellId == id; }) != connections.end();

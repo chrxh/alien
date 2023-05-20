@@ -28,24 +28,47 @@ void _MassOperationsDialog::process()
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal(name, NULL)) {
 
-        AlienImGui::Group("Colors");
-        ImGui::Checkbox("##colors", &_randomizeColors);
-        ImGui::BeginDisabled(!_randomizeColors);
+        AlienImGui::Group("Cell colors");
+        ImGui::PushID("cell");
+        ImGui::Checkbox("##colors", &_randomizeCellColors);
+        ImGui::BeginDisabled(!_randomizeCellColors);
         ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-        colorCheckbox("##color1", Const::IndividualCellColor1, _checkColors[0]);
+        colorCheckbox("##color1", Const::IndividualCellColor1, _checkedCellColors[0]);
         ImGui::SameLine();
-        colorCheckbox("##color2", Const::IndividualCellColor2, _checkColors[1]);
+        colorCheckbox("##color2", Const::IndividualCellColor2, _checkedCellColors[1]);
         ImGui::SameLine();
-        colorCheckbox("##color3", Const::IndividualCellColor3, _checkColors[2]);
+        colorCheckbox("##color3", Const::IndividualCellColor3, _checkedCellColors[2]);
         ImGui::SameLine();
-        colorCheckbox("##color4", Const::IndividualCellColor4, _checkColors[3]);
+        colorCheckbox("##color4", Const::IndividualCellColor4, _checkedCellColors[3]);
         ImGui::SameLine();
-        colorCheckbox("##color5", Const::IndividualCellColor5, _checkColors[4]);
+        colorCheckbox("##color5", Const::IndividualCellColor5, _checkedCellColors[4]);
         ImGui::SameLine();
-        colorCheckbox("##color6", Const::IndividualCellColor6, _checkColors[5]);
+        colorCheckbox("##color6", Const::IndividualCellColor6, _checkedCellColors[5]);
         ImGui::SameLine();
-        colorCheckbox("##color7", Const::IndividualCellColor7, _checkColors[6]);
+        colorCheckbox("##color7", Const::IndividualCellColor7, _checkedCellColors[6]);
         ImGui::EndDisabled();
+        ImGui::PopID();
+
+        AlienImGui::Group("Genome colors");
+        ImGui::PushID("genome");
+        ImGui::Checkbox("##colors", &_randomizeGenomeColors);
+        ImGui::BeginDisabled(!_randomizeGenomeColors);
+        ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
+        colorCheckbox("##color1", Const::IndividualCellColor1, _checkedGenomeColors[0]);
+        ImGui::SameLine();
+        colorCheckbox("##color2", Const::IndividualCellColor2, _checkedGenomeColors[1]);
+        ImGui::SameLine();
+        colorCheckbox("##color3", Const::IndividualCellColor3, _checkedGenomeColors[2]);
+        ImGui::SameLine();
+        colorCheckbox("##color4", Const::IndividualCellColor4, _checkedGenomeColors[3]);
+        ImGui::SameLine();
+        colorCheckbox("##color5", Const::IndividualCellColor5, _checkedGenomeColors[4]);
+        ImGui::SameLine();
+        colorCheckbox("##color6", Const::IndividualCellColor6, _checkedGenomeColors[5]);
+        ImGui::SameLine();
+        colorCheckbox("##color7", Const::IndividualCellColor7, _checkedGenomeColors[6]);
+        ImGui::EndDisabled();
+        ImGui::PopID();
 
         AlienImGui::Group("Cell Energies");
         ImGui::Checkbox("##energies", &_randomizeEnergies);
@@ -125,14 +148,20 @@ void _MassOperationsDialog::onExecute()
         }
     }();
 
-    std::vector<int> colorCodes;
-    for (int i = 0; i < 7; ++i) {
-        if(_checkColors[i]) {
-            colorCodes.emplace_back(i);
+    auto getColorVector = [](bool* colors) {
+        std::vector<int> result;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            if (colors[i]) {
+                result.emplace_back(i);
+            }
         }
+        return result;
+    };
+    if (_randomizeCellColors) {
+        DescriptionHelper::randomizeCellColors(content, getColorVector(_checkedCellColors));
     }
-    if (_randomizeColors) {
-        DescriptionHelper::randomizeColors(content, colorCodes);
+    if (_randomizeGenomeColors) {
+        DescriptionHelper::randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
     }
     if (_randomizeEnergies) {
         DescriptionHelper::randomizeEnergies(content, _minEnergy, _maxEnergy);
@@ -154,8 +183,13 @@ void _MassOperationsDialog::onExecute()
 bool _MassOperationsDialog::isOkEnabled()
 {
     bool result = false;
-    if (_randomizeColors) {
-        for (bool checkColor : _checkColors) {
+    if (_randomizeCellColors) {
+        for (bool checkColor : _checkedCellColors) {
+            result |= checkColor;
+        }
+    }
+    if (_randomizeGenomeColors) {
+        for (bool checkColor : _checkedGenomeColors) {
             result |= checkColor;
         }
     }

@@ -89,11 +89,11 @@ protected:
     void rollout(GenomeDescription const& input, std::set<CellGenomeDescription>& result)
     {
         for (auto const& cell : input.cells) {
-            if (auto subGenomeBytes = cell.getSubGenome()) {
+            if (auto subGenomeBytes = cell.getGenome()) {
                 auto subGenome = GenomeDescriptionConverter::convertBytesToDescription(*subGenomeBytes);
                 rollout(subGenome, result);
                 auto cellClone = cell;
-                cellClone.setSubGenome({});
+                cellClone.setGenome({});
                 result.insert(cellClone);
             } else {
                 result.insert(cell);
@@ -400,7 +400,7 @@ protected:
             }
             if (beforeCell.getCellFunctionType() == CellFunction_Constructor || beforeCell.getCellFunctionType() == CellFunction_Injector) {
                 auto matches = false;
-                auto beforeSubGenome = beforeCell.getSubGenome();
+                auto beforeSubGenome = beforeCell.getGenome();
                 auto beforeIsMakeCopyGenome = beforeCell.isMakeGenomeCopy();
                 for (auto const& afterCell : matchingAfterCells) {
                     auto afterIsMakeCopyGenome = afterCell.isMakeGenomeCopy();
@@ -408,7 +408,7 @@ protected:
                         matches = true;
                         break;
                     }
-                    auto afterSubGenome = afterCell.getSubGenome();
+                    auto afterSubGenome = afterCell.getGenome();
                     if (beforeSubGenome && afterSubGenome) {
                         matches |= compareInsertMutation(*beforeSubGenome, *afterSubGenome);
                     }
@@ -448,7 +448,7 @@ protected:
             }
             if (afterCell.getCellFunctionType() == CellFunction_Constructor || afterCell.getCellFunctionType() == CellFunction_Injector) {
                 auto matches = false;
-                auto afterSubGenome = afterCell.getSubGenome();
+                auto afterSubGenome = afterCell.getGenome();
                 auto afterIsMakeCopyGenome = afterCell.isMakeGenomeCopy();
                 for (auto const& beforeCell : matchingBeforeCells) {
                     auto beforeIsMakeCopyGenome = beforeCell.isMakeGenomeCopy();
@@ -456,7 +456,7 @@ protected:
                         matches = true;
                         break;
                     }
-                    auto beforeSubGenome = beforeCell.getSubGenome();
+                    auto beforeSubGenome = beforeCell.getGenome();
                     if (beforeSubGenome && beforeSubGenome) {
                         matches |= compareDeleteMutation(*beforeSubGenome, *beforeSubGenome);
                     }
@@ -510,8 +510,8 @@ protected:
             }
             uniformColor = afterCell.color;
             if (beforeCell.getCellFunctionType() == CellFunction_Constructor || beforeCell.getCellFunctionType() == CellFunction_Injector) {
-                auto beforeSubGenome = beforeCell.getSubGenome();
-                auto afterSubGenome = afterCell.getSubGenome();
+                auto beforeSubGenome = beforeCell.getGenome();
+                auto afterSubGenome = afterCell.getGenome();
                 if (beforeSubGenome && afterSubGenome) {
                     if (!compareColorMutation(*beforeSubGenome, *afterSubGenome, allowedColors)) {
                         return false;
