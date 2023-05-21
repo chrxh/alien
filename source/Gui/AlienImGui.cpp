@@ -1209,29 +1209,50 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
         }
 
         //slider
-        auto format = toString(value[color], parameters._format, parameters._infinity, true);
+
+        T sliderValue;
+        T minValue = value[0], maxValue = value[0];
+        int sliderValueColor = 0;
+        std::string format;
         if (parameters._colorDependence && !isExpanded) {
-            T minValue = value[0], maxValue = value[0];
             for (int color = 1; color < MAX_COLORS; ++color) {
                 maxValue = std::max(maxValue, value[color]);
-                minValue = std::min(minValue, value[color]);
+                if (minValue > value[color]) {
+                    minValue = value[color];
+                    sliderValueColor = color;
+                }
             }
             if (minValue != maxValue) {
-                format = toString(minValue, parameters._format, parameters._infinity, false) + " ... "
-                    + toString(maxValue, parameters._format, parameters._infinity, false);
+                if constexpr (std::is_same<T, float>()) {
+                    format = parameters._format + " ... " + toString(maxValue, parameters._format, parameters._infinity, false);
+                } else {
+                    format = toString(minValue, parameters._format, parameters._infinity, false) + " ... "
+                        + toString(maxValue, parameters._format, parameters._infinity, false);
+                }
+            } else {
+                format = toString(value[color], parameters._format, parameters._infinity, true);
             }
+            sliderValue = minValue;
+        }
+        else {
+            format = toString(value[color], parameters._format, parameters._infinity, true);
+            sliderValue = value[color];
+            sliderValueColor = color;
         }
         if (parameters._infinity && value[color] == Infinity<T>::value) {
             value[color] = parameters._max;
         }
+
         if constexpr (std::is_same<T, float>()) {
             result |= ImGui::SliderFloat(
-                "##slider", &value[color], parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+                "##slider", &sliderValue, parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
         }
         if constexpr (std::is_same<T, int>()) {
             result |= ImGui::SliderInt(
-                "##slider", &value[color], parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+                "##slider", &sliderValue, parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
         }
+        value[sliderValueColor] = sliderValue;
+
         if (parameters._infinity && value[color] == parameters._max) {
             value[color] = Infinity<T>::value;
         }
