@@ -433,7 +433,7 @@ void _SimulationParametersWindow::processBase(
 
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Radiation type 1: Strength")
+                    .name("Radiation type I: Strength")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0)
@@ -445,7 +445,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.baseValues.radiationCellAgeStrength);
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
-                    .name("Radiation type 1: Minimum age")
+                    .name("Radiation type I: Minimum age")
                     .tooltip("")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
@@ -459,7 +459,7 @@ void _SimulationParametersWindow::processBase(
 
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Radiation type 2: Strength")
+                    .name("Radiation type II: Strength")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0)
@@ -471,7 +471,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.highRadiationFactor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Radiation type 2: Energy threshold")
+                    .name("Radiation type II: Energy threshold")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .infinity(true)
@@ -484,7 +484,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.highRadiationMinCellEnergy);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Radiation type 3: Strength")
+                    .name("Radiation type III: Strength")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0)
