@@ -105,26 +105,27 @@ namespace
         auto lastDataValue = lastData.value_or(data);
         for (int i = 0; i < MAX_COLORS; ++i) {
             auto numCells = std::max(result.numCells[i], 1.0);
-            result.numCreatedCells[i] =
-                toDouble(data.accumulated.numCreatedCells[i] - lastDataValue.accumulated.numCreatedCells[i]) / deltaTimesteps / numCells;
-            result.numAttacks[i] = toDouble(data.accumulated.numAttacks[i] - lastDataValue.accumulated.numAttacks[i]) / deltaTimesteps / numCells;
-            result.numMuscleActivities[i] =
-                toDouble(data.accumulated.numMuscleActivities[i] - lastDataValue.accumulated.numMuscleActivities[i]) / deltaTimesteps / numCells;
-            result.numDefenderActivities[i] =
-                toDouble(data.accumulated.numDefenderActivities[i] - lastDataValue.accumulated.numDefenderActivities[i]) / deltaTimesteps / numCells;
+            auto calcNumProcesses = [&](uint64_t value, uint64_t lastValue) {
+                if (lastValue > value) {
+                    return 0.0;
+                }
+                return toDouble(value - lastValue) / deltaTimesteps / numCells;
+            };
+
+            result.numCreatedCells[i] = calcNumProcesses(data.accumulated.numCreatedCells[i], lastDataValue.accumulated.numCreatedCells[i]);
+            result.numAttacks[i] = calcNumProcesses(data.accumulated.numAttacks[i], lastDataValue.accumulated.numAttacks[i]);
+            result.numMuscleActivities[i] = calcNumProcesses(data.accumulated.numMuscleActivities[i], lastDataValue.accumulated.numMuscleActivities[i]);
+            result.numDefenderActivities[i] = calcNumProcesses(data.accumulated.numDefenderActivities[i], lastDataValue.accumulated.numDefenderActivities[i]);
             result.numTransmitterActivities[i] =
-                toDouble(data.accumulated.numTransmitterActivities[i] - lastDataValue.accumulated.numTransmitterActivities[i]) / deltaTimesteps / numCells;
+                calcNumProcesses(data.accumulated.numTransmitterActivities[i], lastDataValue.accumulated.numTransmitterActivities[i]);
             result.numInjectionActivities[i] =
-                toDouble(data.accumulated.numInjectionActivities[i] - lastDataValue.accumulated.numInjectionActivities[i]) / deltaTimesteps / numCells;
+                calcNumProcesses(data.accumulated.numInjectionActivities[i], lastDataValue.accumulated.numInjectionActivities[i]);
             result.numCompletedInjections[i] =
-                toDouble(data.accumulated.numCompletedInjections[i] - lastDataValue.accumulated.numCompletedInjections[i]) / deltaTimesteps / numCells;
-            result.numNervePulses[i] = toDouble(data.accumulated.numNervePulses[i] - lastDataValue.accumulated.numNervePulses[i]) / deltaTimesteps / numCells;
-            result.numNeuronActivities[i] =
-                toDouble(data.accumulated.numNeuronActivities[i] - lastDataValue.accumulated.numNeuronActivities[i]) / deltaTimesteps / numCells;
-            result.numSensorActivities[i] =
-                toDouble(data.accumulated.numSensorActivities[i] - lastDataValue.accumulated.numSensorActivities[i]) / deltaTimesteps / numCells;
-            result.numSensorMatches[i] =
-                toDouble(data.accumulated.numSensorMatches[i] - lastDataValue.accumulated.numSensorMatches[i]) / deltaTimesteps / numCells;
+                calcNumProcesses(data.accumulated.numCompletedInjections[i], lastDataValue.accumulated.numCompletedInjections[i]);
+            result.numNervePulses[i] = calcNumProcesses(data.accumulated.numNervePulses[i], lastDataValue.accumulated.numNervePulses[i]);
+            result.numNeuronActivities[i] = calcNumProcesses(data.accumulated.numNeuronActivities[i], lastDataValue.accumulated.numNeuronActivities[i]);
+            result.numSensorActivities[i] = calcNumProcesses(data.accumulated.numSensorActivities[i], lastDataValue.accumulated.numSensorActivities[i]);
+            result.numSensorMatches[i] = calcNumProcesses(data.accumulated.numSensorMatches[i], lastDataValue.accumulated.numSensorMatches[i]);
         }
         return result;
     }
