@@ -19,13 +19,14 @@ public:
 
 private:
     void initializeIfNecessary();
-    void doAdaption();
+    void doAdaptionIfNecessary();
     void startNewMeasurement();
     void saveLastState();
 
     SimulationController _simController;
 
     ColorVector<uint64_t> _numReplicators = {0, 0, 0, 0, 0, 0, 0};
+    int _numMeasurements = 0;
     std::optional<uint64_t> _lastTimestep;
     ColorVector<double> _cellMaxAge = {0, 0, 0, 0, 0, 0, 0};    //cloned parameter with double precision
 
