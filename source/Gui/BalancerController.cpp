@@ -23,7 +23,7 @@ void _BalancerController::process()
     auto const& parameters = _simController->getSimulationParameters();
     if (parameters.cellMaxAgeBalancer) {
         initializeIfNecessary();
-        doAdaption();
+        doAdaptionIfNecessary();
     }
 
     saveLastState();
@@ -50,13 +50,14 @@ void _BalancerController::initializeIfNecessary()
     }
 }
 
-void _BalancerController::doAdaption()
+void _BalancerController::doAdaptionIfNecessary()
 {
     auto const& parameters = _simController->getSimulationParameters();
     auto statistics = _simController->getStatistics();
     for (int i = 0; i < MAX_COLORS; ++i) {
         _numReplicators[i] += statistics.timeline.timestep.numSelfReplicators[i];
     }
+    ++_numMeasurements;
     if (_simController->getCurrentTimestep() - *_lastTimestep > parameters.cellMaxAgeBalancerInterval) {
         uint64_t maxReplicators = 0;
         uint64_t averageReplicators = 0;
@@ -67,7 +68,7 @@ void _BalancerController::doAdaption()
             if (maxReplicators < _numReplicators[i]) {
                 maxReplicators = _numReplicators[i];
             }
-            if (_numReplicators[i] > MinReplicatorsLowerValue) {
+            if (_numReplicators[i] / _numMeasurements > MinReplicatorsLowerValue) {
                 if ((minReplicators == 0 || minReplicators > _numReplicators[i])) {
                     minReplicators = _numReplicators[i];
                 }
@@ -82,9 +83,10 @@ void _BalancerController::doAdaption()
 
         if (averageReplicators > 0) {
             for (auto const& color : colors) {
-                if (_numReplicators[color] > MinReplicatorsUpperValue && _numReplicators[color] / averageReplicators > AdaptionRatio) {
+                if (toDouble(_numReplicators[color]) / _numMeasurements > MinReplicatorsUpperValue
+                    && toDouble(_numReplicators[color]) / averageReplicators > AdaptionRatio) {
                     _cellMaxAge[color] *= AdaptionFactor;
-                } else if (_cellMaxAge[color] < MaxCellAge && _numReplicators[color] / averageReplicators < AdaptionRatio) {
+                } else if (_cellMaxAge[color] < MaxCellAge && averageReplicators / _numReplicators[color] > AdaptionRatio) {
                     _cellMaxAge[color] /= AdaptionFactor;
                 }
             }
@@ -105,6 +107,7 @@ void _BalancerController::startNewMeasurement()
     for (int i = 0; i < MAX_COLORS; ++i) {
         _numReplicators[i] = 0;
     }
+    _numMeasurements = 0;
 }
 
 void _BalancerController::saveLastState()
