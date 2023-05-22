@@ -108,13 +108,13 @@ struct SimulationParameters
 
     ColorVector<float> cellFunctionInjectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
     ColorMatrix<int> cellFunctionInjectorDurationColorMatrix = {
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1}
+        {10, 10, 10, 10, 10, 10, 10},
+        {10, 10, 10, 10, 10, 10, 10},
+        {10, 10, 10, 10, 10, 10, 10},
+        {10, 10, 10, 10, 10, 10, 10},
+        {10, 10, 10, 10, 10, 10, 10},
+        {10, 10, 10, 10, 10, 10, 10},
+        {10, 10, 10, 10, 10, 10, 10}
     };
     float cellFunctionInjectorActivityThreshold = 0.1f;
 

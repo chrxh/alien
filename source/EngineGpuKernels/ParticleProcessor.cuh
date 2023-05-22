@@ -147,7 +147,7 @@ __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, floa
     data.cellMap.correctPosition(pos);
 
     auto residualEnergyPerCell = *data.residualEnergy / max(static_cast<uint64_t>(1), data.objects.cells.getNumOrigEntries());
-    auto cellFunctionConstructorEnergyFromRadiationFactor = residualEnergyPerCell < 0.05 ? cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[color] / 3 : 0;
+    auto cellFunctionConstructorEnergyFromRadiationFactor = residualEnergyPerCell < 0.2 ? cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[color] / 3 : 0;
     auto particleEnergy = energy * (1.0f - cellFunctionConstructorEnergyFromRadiationFactor);
     if (particleEnergy > NEAR_ZERO) {
         ObjectFactory factory;
