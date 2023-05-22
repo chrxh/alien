@@ -61,30 +61,30 @@ void _BalancerController::doAdaptionIfNecessary()
     if (_simController->getCurrentTimestep() - *_lastTimestep > parameters.cellMaxAgeBalancerInterval) {
         uint64_t maxReplicators = 0;
         uint64_t averageReplicators = 0;
-        uint64_t minReplicators = 0;
+        int numAveragedReplicators = 0;
         std::vector<int> colors;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            if (maxReplicators < _numReplicators[i]) {
-                maxReplicators = _numReplicators[i];
+        for (int color = 0; color < MAX_COLORS; ++color) {
+            if (maxReplicators < _numReplicators[color]) {
+                maxReplicators = _numReplicators[color];
             }
-            if (_numReplicators[i] / _numMeasurements > MinReplicatorsLowerValue) {
-                if ((minReplicators == 0 || minReplicators > _numReplicators[i])) {
-                    minReplicators = _numReplicators[i];
-                }
-                averageReplicators += _numReplicators[i];
-                colors.emplace_back(i);
+            if (_numReplicators[color] / _numMeasurements > MinReplicatorsLowerValue) {
+                averageReplicators += _numReplicators[color];
+                ++numAveragedReplicators;
             }
         }
-        if (!colors.empty()) {
-            averageReplicators /= toInt(colors.size());
+        if (numAveragedReplicators > 0) {
+            averageReplicators /= numAveragedReplicators;
         }
 
         if (averageReplicators > 0) {
-            for (auto const& color : colors) {
+            for (int color = 0; color < MAX_COLORS; ++color) {
                 if (toDouble(_numReplicators[color]) / _numMeasurements > MinReplicatorsUpperValue
                     && toDouble(_numReplicators[color]) / toDouble(averageReplicators) > AdaptionRatio) {
                     _cellMaxAge[color] /= AdaptionFactor;
-                } else if (_cellMaxAge[color] < MaxCellAge && toDouble(averageReplicators) / toDouble(_numReplicators[color]) > AdaptionRatio) {
+                } else if (
+                    _cellMaxAge[color] < MaxCellAge
+                    && (_numReplicators[color] / _numMeasurements <= MinReplicatorsLowerValue
+                        || toDouble(averageReplicators) / toDouble(_numReplicators[color]) > AdaptionRatio)) {
                     _cellMaxAge[color] *= AdaptionFactor;
                 }
             }
