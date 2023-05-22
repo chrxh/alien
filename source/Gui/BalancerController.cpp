@@ -7,8 +7,8 @@
 
 namespace
 {
-    auto constexpr AdaptionRatio = 1.3f;
-    auto constexpr AdaptionFactor = 0.9;
+    auto constexpr AdaptionRatio = 1.3;
+    auto constexpr AdaptionFactor = 1.1;
     auto constexpr MaxCellAge = 300000;
     auto constexpr MinReplicatorsUpperValue = 100;
     auto constexpr MinReplicatorsLowerValue = 20;
@@ -61,7 +61,6 @@ void _BalancerController::doAdaptionIfNecessary()
     if (_simController->getCurrentTimestep() - *_lastTimestep > parameters.cellMaxAgeBalancerInterval) {
         uint64_t maxReplicators = 0;
         uint64_t averageReplicators = 0;
-        int numColors = 0;
         uint64_t minReplicators = 0;
         std::vector<int> colors;
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -73,21 +72,20 @@ void _BalancerController::doAdaptionIfNecessary()
                     minReplicators = _numReplicators[i];
                 }
                 averageReplicators += _numReplicators[i];
-                ++numColors;
                 colors.emplace_back(i);
             }
         }
-        if (numColors > 0) {
-            averageReplicators /= numColors;
+        if (!colors.empty()) {
+            averageReplicators /= toInt(colors.size());
         }
 
         if (averageReplicators > 0) {
             for (auto const& color : colors) {
                 if (toDouble(_numReplicators[color]) / _numMeasurements > MinReplicatorsUpperValue
-                    && toDouble(_numReplicators[color]) / averageReplicators > AdaptionRatio) {
-                    _cellMaxAge[color] *= AdaptionFactor;
-                } else if (_cellMaxAge[color] < MaxCellAge && averageReplicators / _numReplicators[color] > AdaptionRatio) {
+                    && toDouble(_numReplicators[color]) / toDouble(averageReplicators) > AdaptionRatio) {
                     _cellMaxAge[color] /= AdaptionFactor;
+                } else if (_cellMaxAge[color] < MaxCellAge && toDouble(averageReplicators) / toDouble(_numReplicators[color]) > AdaptionRatio) {
+                    _cellMaxAge[color] *= AdaptionFactor;
                 }
             }
 
