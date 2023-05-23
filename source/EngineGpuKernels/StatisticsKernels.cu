@@ -22,7 +22,7 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
                 statistics.incNumReplicator(cell->color);
                 statistics.addNumGenomeBytes(cell->color, cell->cellFunctionData.constructor.genomeSize);
             }
-            if (cell->cellFunction == CellFunction_Injector) {
+            if (cell->cellFunction == CellFunction_Injector && GenomeDecoder::containsSelfReplication(cell->cellFunctionData.injector)) {
                 statistics.incNumViruses(cell->color);
             }
         }
