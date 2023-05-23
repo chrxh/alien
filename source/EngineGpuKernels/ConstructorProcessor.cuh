@@ -13,6 +13,7 @@
 class ConstructorProcessor
 {
 public:
+    __inline__ __device__ static void preprocess(SimulationData& data, SimulationStatistics& statistics);
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
@@ -30,10 +31,11 @@ private:
         CellFunction cellFunction;
     };
 
+    __inline__ __device__ static void preprocessCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static bool isConstructionAtBeginning(Cell* cell);
     __inline__ __device__ static bool isConstructionFinished(Cell* cell);
-    __inline__ __device__ static bool
-    isConstructionTriggered(SimulationData const& data, Cell* cell, ConstructionData const& constructionData, Activity const& activity);
+    __inline__ __device__ static bool isConstructionTriggered(SimulationData const& data, Cell* cell, Activity const& activity);
     __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
 
     __inline__ __device__ static bool tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
@@ -63,6 +65,14 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
+__inline__ __device__ void ConstructorProcessor::preprocess(SimulationData& data, SimulationStatistics& statistics)
+{
+    auto& operations = data.cellFunctionOperations[CellFunction_Constructor];
+    auto partition = calcAllThreadsPartition(operations.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+        preprocessCell(data, statistics, operations.at(i).cell);
+    }
+}
 
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
@@ -73,6 +83,92 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
     }
 }
 
+namespace
+{
+    __inline__ __device__ bool isSelfReplicator(Cell* cell)
+    {
+        if (cell->cellFunction != CellFunction_Constructor) {
+            return false;
+        }
+        return GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor);
+    }
+
+    __inline__ __device__ bool hasOngoingConstruction(Cell* cell)
+    {
+        if (cell->cellFunction != CellFunction_Constructor) {
+            return false;
+        }
+        auto constructor = cell->cellFunctionData.constructor;
+        return constructor.genomeReadPosition < constructor.genomeSize;
+    }
+}
+
+__inline__ __device__ void ConstructorProcessor::preprocessCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
+    if (!isConstructionAtBeginning(cell)) {
+        return;        
+    }
+    auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    if (!isConstructionTriggered(data, cell, activity)) {
+        return;
+    }
+
+    auto& constructor = cell->cellFunctionData.constructor;
+    if (!GenomeDecoder::containsSelfReplication(constructor)) {
+        constructor.isComplete = true;
+        return;
+    }
+    auto constexpr ContainerSize = 50;
+    Cell* temp[ContainerSize * 2];
+    HashSet<Cell*, HashFunctor<Cell*>> visitedCells(ContainerSize * 2, temp);
+    visitedCells.insert(cell);
+
+    auto currentCell = cell;
+    int depth = 0;
+    int connectionIndex = 0;
+    Cell* lastCells[ContainerSize];
+    int lastIndices[ContainerSize];
+
+    do {
+        auto goBack = false;
+        if (connectionIndex < currentCell->numConnections) {
+            auto nextCell = currentCell->connections[connectionIndex].cell;
+            if (!visitedCells.contains(nextCell)) {
+                visitedCells.insert(nextCell);
+                if (isSelfReplicator(nextCell)) {
+                    goBack = true;
+                } else {
+                    if (hasOngoingConstruction(nextCell)) {
+                        constructor.isComplete = false;
+                        return;
+                    }
+                    lastCells[depth] = currentCell;
+                    lastIndices[depth] = connectionIndex;
+                    currentCell = nextCell;
+                    connectionIndex = 0;
+                    ++depth;
+                    if (depth >= ContainerSize) {
+                        goBack = true;
+                    }
+                }
+            } else {
+                ++connectionIndex;
+            }
+        }
+        if (connectionIndex == currentCell->numConnections || goBack) {
+            if (depth == 0) {
+                break;
+            }
+            --depth;
+            currentCell = lastCells[depth];
+            connectionIndex = lastIndices[depth];
+            ++connectionIndex;
+        }
+    } while (true);
+
+    constructor.isComplete = true;
+}
+
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     MutationProcessor::applyRandomMutation(data, cell);
@@ -81,7 +177,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     if (!isConstructionFinished(cell)) {
         auto origGenomePos = cell->cellFunctionData.constructor.genomeReadPosition;
         auto constructionData = readConstructionData(cell);
-        if (isConstructionTriggered(data, cell, constructionData, activity)) {
+        if (isConstructionTriggered(data, cell, activity)) {
             if (tryConstructCell(data, statistics, cell, constructionData)) {
                 activity.channels[0] = 1;
             } else {
@@ -102,13 +198,18 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     CellFunctionProcessor::setActivity(cell, activity);
 }
 
+__inline__ __device__ bool ConstructorProcessor::isConstructionAtBeginning(Cell* cell)
+{
+    return cell->cellFunctionData.constructor.genomeReadPosition <= Const::GenomeHeaderSize;
+}
+
 __inline__ __device__ bool ConstructorProcessor::isConstructionFinished(Cell* cell)
 {
     return cell->cellFunctionData.constructor.genomeReadPosition >= cell->cellFunctionData.constructor.genomeSize;
 }
 
 __inline__ __device__ bool
-ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* cell, ConstructionData const& constructionData, Activity const& activity)
+ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* cell, Activity const& activity)
 {
     if (cell->cellFunctionData.constructor.activationMode == 0
         && abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionConstructorActivityThreshold[cell->color]) {
@@ -236,6 +337,11 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
     if (CellConnectionProcessor::existCrossingConnections(data, hostCell->absPos, newCellPos, hostCell->detached)) {
+        return false;
+    }
+
+    if (cudaSimulationParameters.cellFunctionConstructorCheckCompletenessForSelfReplication
+        && !hostCell->cellFunctionData.constructor.isComplete) {
         return false;
     }
 

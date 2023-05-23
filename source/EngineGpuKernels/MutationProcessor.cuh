@@ -203,6 +203,9 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
     }
 
     auto delta = data.numberGen1.random(Const::GenomeHeaderSize - 1);
+    if (delta == Const::GenomeHeaderSeparationPos) {
+        return;
+    }
     subgenome[delta] = data.numberGen1.randomByte();
 }
 

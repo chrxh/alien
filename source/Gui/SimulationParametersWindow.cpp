@@ -482,18 +482,6 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.highRadiationMinCellEnergy)
                     .tooltip("The minimum energy of a cell can be defined here, from which it emits energy particles."),
                 simParameters.highRadiationMinCellEnergy);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Radiation type III: Strength")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(0.01f)
-                    .logarithmic(true)
-                    .format("%.6f")
-                    .defaultValue(origSimParameters.genomeRadiationFactor)
-                    .tooltip(""),
-                simParameters.genomeRadiationFactor);
 
             ImGui::TreePop();
         }
@@ -614,7 +602,7 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationGeometryProbability)
-                    .tooltip("This type of mutation changes the geometry type, connection distance, stiffness, separation and single construction flag."),
+                    .tooltip("This type of mutation changes the geometry type, connection distance, stiffness and single construction flag."),
                 simParameters.baseValues.cellFunctionConstructorMutationGeometryProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -766,6 +754,14 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.cellFunctionConstructorConnectingCellMaxDistance)
                     .tooltip("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
                 simParameters.cellFunctionConstructorConnectingCellMaxDistance);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Completeness check")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.cellFunctionConstructorCheckCompletenessForSelfReplication)
+                    .tooltip("If activated, a self-replication process can only start when all other non-self-replicating constructors in the cell clusters are "
+                             "finished."),
+                simParameters.cellFunctionConstructorCheckCompletenessForSelfReplication);
             ImGui::TreePop();
         }
 

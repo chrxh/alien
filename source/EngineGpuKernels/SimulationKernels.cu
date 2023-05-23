@@ -92,7 +92,12 @@ __global__ void cudaNextTimestep_cellFunction_neuron(SimulationData data, Simula
     NeuronProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellFunction_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics)
+{
+    ConstructorProcessor::preprocess(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellFunction_constructor_process(SimulationData data, SimulationStatistics statistics)
 {
     ConstructorProcessor::process(data, statistics);
 }

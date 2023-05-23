@@ -73,7 +73,6 @@ struct SimulationParameters
     ColorVector<int> radiationMinCellAge = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> highRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
-    ColorVector<float> genomeRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
     bool clusterDecay = false;
     ColorVector<float> clusterDecayProb = {0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f};
     ColorVector<int> cellMaxAge = {
@@ -94,6 +93,7 @@ struct SimulationParameters
     ColorVector<float> cellFunctionConstructorOffspringDistance = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
     ColorVector<float> cellFunctionConstructorConnectingCellMaxDistance = {1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f};
     ColorVector<float> cellFunctionConstructorActivityThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+    bool cellFunctionConstructorCheckCompletenessForSelfReplication = false;
 
     ColorMatrix<bool> cellFunctionConstructorMutationColorTransitions = {
         {true, true, true, true, true, true, true},
@@ -170,9 +170,6 @@ struct SimulationParameters
         }
          
         for (int i = 0; i < MAX_COLORS; ++i) {
-            if (genomeRadiationFactor[i] != other.genomeRadiationFactor[i]) {
-                return false;
-            }
             if (cellFunctionConstructorPumpEnergyFactor[i] != other.cellFunctionConstructorPumpEnergyFactor[i]) {
                 return false;
             }

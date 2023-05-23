@@ -199,6 +199,76 @@ TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
     ASSERT_EQ(1, actualData.cells.size());
 }
 
+TEST_F(ConstructorTests, constructFirstCell_completenessCheck_notReady)
+{
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeGenomeCopy();
+    auto genome =
+        GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructorGenome)}));
+    auto otherGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome)),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(NerveDescription()),
+        CellDescription()
+            .setId(3)
+            .setPos({12.0f, 10.0f})
+            .setEnergy(100)
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(4)
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome)),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(3, actualData.cells.size());
+}
+
+TEST_F(ConstructorTests, constructFirstCell_completenessCheck_ready)
+{
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeGenomeCopy();
+    auto genome =
+        GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructorGenome)}));
+    auto otherGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome)),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(NerveDescription()),
+        CellDescription()
+            .setId(3)
+            .setPos({12.0f, 10.0f})
+            .setEnergy(100)
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(4)
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setGenomeReadPosition(toInt(otherGenome.size()))),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simController->setSimulationData(data);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(4, actualData.cells.size());
+}
+
 TEST_F(ConstructorTests, constructFirstCell_noSeparation)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
