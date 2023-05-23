@@ -447,13 +447,17 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
 
         bool scheduleForDestruction = false;
         for (int i = 0; i < cell->numConnections; ++i) {
-            auto connectingCell = cell->connections[i].cell;
+            auto connectedCell = cell->connections[i].cell;
 
-            auto displacement = connectingCell->absPos - cell->absPos;
+            auto displacement = connectedCell->absPos - cell->absPos;
             data.cellMap.correctDirection(displacement);
             auto actualDistance = Math::length(displacement);
             if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance) {
                 scheduleForDestruction = true;
+                if (cudaSimulationParameters.clusterDecay) {
+                    connectedCell->livingState = LivingState_Dying;
+                    cell->livingState = LivingState_Dying;
+                }
             }
         }
         if (scheduleForDestruction) {
@@ -626,14 +630,6 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                     data,
                     cell->absPos,
                     cell->color);
-            }
-            if (cell->cellFunction == CellFunction_Constructor || cell->cellFunction == CellFunction_Injector) {
-                if (!GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor)) {
-                    if (cell->cellFunction != CellFunction_Constructor || !GenomeDecoder::isFinished(cell->cellFunctionData.constructor)) {
-                        auto numNodes = GenomeDecoder::getNumNodesRecursively(cell->getGenome(), cell->getGenomeSize());
-                        radiationFactor += cudaSimulationParameters.genomeRadiationFactor[cell->color] * numNodes;
-                    }
-                }
             }
 
             if (radiationFactor > 0) {

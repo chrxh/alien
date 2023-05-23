@@ -53,7 +53,10 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_cellFunction_prepare_substep2, data);
     KERNEL_CALL(cudaNextTimestep_cellFunction_nerve, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_neuron, data, statistics);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_constructor, data, statistics);
+    if (settings.simulationParameters.cellFunctionConstructorCheckCompletenessForSelfReplication) {
+        KERNEL_CALL(cudaNextTimestep_cellFunction_constructor_completenessCheck, data, statistics);
+    }
+    KERNEL_CALL(cudaNextTimestep_cellFunction_constructor_process, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_injector, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_attacker, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_transmitter, data, statistics);

@@ -57,6 +57,9 @@ struct ConstructorFunction
 
     //process data
     uint64_t genomeReadPosition;
+
+    //temp
+    bool isComplete;
 };
 
 struct SensorFunction

@@ -255,12 +255,6 @@ namespace
             tree, parameters.highRadiationFactor, defaultParameters.highRadiationFactor, "simulation parameters.high radiation.factor", parserTask);
         encodeDecodeProperty(
             tree, parameters.radiationMinCellAge, defaultParameters.radiationMinCellAge, "simulation parameters.radiation.min cell age", parserTask);
-        encodeDecodeProperty(
-            tree,
-            parameters.genomeRadiationFactor,
-            defaultParameters.genomeRadiationFactor,
-            "simulation parameters.genome radiation.factor",
-            parserTask);
 
         encodeDecodeProperty(tree, parameters.clusterDecay, defaultParameters.clusterDecay, "simulation parameters.cluster.decay", parserTask);
         encodeDecodeProperty(
@@ -367,6 +361,12 @@ namespace
             parameters.cellFunctionConstructorMutationPreventDepthIncrease,
             defaultParameters.cellFunctionConstructorMutationPreventDepthIncrease,
             "simulation parameters.cell.function.constructor.mutation prevent depth increase",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionConstructorCheckCompletenessForSelfReplication,
+            defaultParameters.cellFunctionConstructorCheckCompletenessForSelfReplication,
+            "simulation parameters.cell.function.constructor.completeness check for self-replication",
             parserTask);
         encodeDecodeProperty(
             tree,
