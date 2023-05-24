@@ -240,6 +240,9 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
 
     auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
     auto makeSelfCopy = cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication ? data.numberGen1.randomBool() : false;
+    if (newCellFunction == CellFunction_Injector) {      //not injection mutation allowed at the moment
+        return;
+    }
     if ((newCellFunction == CellFunction_Constructor || newCellFunction == CellFunction_Injector) && !makeSelfCopy) {
         if (cudaSimulationParameters.cellFunctionConstructorMutationPreventDepthIncrease
             && GenomeDecoder::getGenomeDepth(genome, genomeSize) <= numSubGenomesSizeIndices) {
@@ -305,6 +308,9 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     }
     auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
     auto makeSelfCopy = cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication ? data.numberGen1.randomBool() : false;
+    if (newCellFunction == CellFunction_Injector) {  //not injection mutation allowed at the moment
+        return;
+    }
     if ((newCellFunction == CellFunction_Constructor || newCellFunction == CellFunction_Injector) && !makeSelfCopy) {
         if (cudaSimulationParameters.cellFunctionConstructorMutationPreventDepthIncrease
             && GenomeDecoder::getGenomeDepth(genome, genomeSize) <= numSubGenomesSizeIndices) {
