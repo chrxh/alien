@@ -118,7 +118,7 @@ __inline__ __device__ void ConstructorProcessor::preprocessCell(SimulationData& 
         constructor.isComplete = true;
         return;
     }
-    auto constexpr ContainerSize = 50;
+    auto constexpr ContainerSize = 70;
     Cell* temp[ContainerSize * 2];
     HashSet<Cell*, HashFunctor<Cell*>> visitedCells(ContainerSize * 2, temp);
     visitedCells.insert(cell);

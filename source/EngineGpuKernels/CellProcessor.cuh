@@ -673,38 +673,42 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
             &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->absPos);
 
-        bool decay = false;
+        bool activatePossibleConstructions = false;
         if (cell->livingState == LivingState_Dying) {
             if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb[cell->color]) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
-                decay = true;
+                activatePossibleConstructions = true;
             }
         }
+
+        bool cellDestruction = false;
         if (cell->energy < cellMinEnergy) {
+            cellDestruction = true;
+        } else if (cell->energy > cellMaxBindingEnergy) {
+            CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
+        }
+
+        auto cellMaxAge = cudaSimulationParameters.cellMaxAge[cell->color];
+        if (cellMaxAge > 0 && cell->age > cellMaxAge) {
+            if (data.timestep % 20 == index % 20) {  //slow down destruction process to avoid too many deletion jobs
+                cellDestruction = true;
+            }
+        }
+
+        if (cellDestruction) {
             if (cudaSimulationParameters.clusterDecay) {
                 cell->livingState = LivingState_Dying;
             } else {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
-                decay = true;
+                activatePossibleConstructions = true;
             }
-        } else if (cell->energy > cellMaxBindingEnergy) {
-            CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
-            decay = true;
         }
-
-        if (decay && cell->livingState != LivingState_UnderConstruction) {
+        if (activatePossibleConstructions && cell->livingState != LivingState_UnderConstruction) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto& connectedCell = cell->connections[i].cell;
                 if (connectedCell->livingState == LivingState_UnderConstruction) {
                     connectedCell->livingState = LivingState_JustReady;
                 }
-            }
-        }
-
-        auto cellMaxAge = cudaSimulationParameters.cellMaxAge[cell->color];
-        if (cellMaxAge > 0 && cell->age > cellMaxAge) {
-            if (data.timestep % 20 == index % 20) { //slow down destruction process to avoid too many deletion jobs
-                CellConnectionProcessor::scheduleDeleteCell(data, index);
             }
         }
     }
