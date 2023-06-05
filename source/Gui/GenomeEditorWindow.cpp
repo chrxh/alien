@@ -273,7 +273,7 @@ namespace
 
 void _GenomeEditorWindow::processTab(TabData& tab)
 {
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewHeight), true)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - contentScale(_previewHeight)), true)) {
         AlienImGui::Group("General properties");
         processGenomeHeader(tab);
         AlienImGui::Group("Construction sequence");

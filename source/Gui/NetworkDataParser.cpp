@@ -1,6 +1,6 @@
-#include "RemoteSimulationDataParser.h"
+#include "NetworkDataParser.h"
 
-std::vector<RemoteSimulationData> RemoteSimulationDataParser::decode(boost::property_tree::ptree tree)
+std::vector<RemoteSimulationData> NetworkDataParser::decodeRemoteSimulationData(boost::property_tree::ptree tree)
 {
     std::vector<RemoteSimulationData> result;
     for (auto const& [key, subTree] : tree) {
@@ -18,6 +18,20 @@ std::vector<RemoteSimulationData> RemoteSimulationDataParser::decode(boost::prop
         entry.likes = subTree.get<int>("likes");
         entry.numDownloads = subTree.get<int>("numDownloads");
         entry.fromRelease = subTree.get<int>("fromRelease") == 1;
+        result.emplace_back(entry);
+    }
+    return result;
+}
+
+std::vector<UserData> NetworkDataParser::decodeUserData(boost::property_tree::ptree tree)
+{
+    std::vector<UserData> result;
+    for (auto const& [key, subTree] : tree) {
+        UserData entry;
+        entry.userName = subTree.get<std::string>("userName");
+        entry.starsEarned = subTree.get<int>("starsEarned");
+        entry.starsGiven = subTree.get<int>("starsGiven");
+        entry.timestamp = subTree.get<std::string>("timestamp");
         result.emplace_back(entry);
     }
     return result;
