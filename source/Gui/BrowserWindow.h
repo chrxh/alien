@@ -4,6 +4,7 @@
 
 #include "AlienWindow.h"
 #include "RemoteSimulationData.h"
+#include "UserData.h"
 #include "Definitions.h"
 
 class _BrowserWindow : public _AlienWindow
@@ -26,7 +27,8 @@ private:
 
     void processIntern() override;
 
-    void processTable();
+    void processSimulationTable();
+    void processUserTable();
     void processStatus();
     void processFilter();
     void processToolbar();
@@ -35,7 +37,8 @@ private:
 
     void processActivated() override;
 
-    void sortTable();
+    void sortSimulationList();
+    void sortUserList();
 
     void onDownloadSimulation(RemoteSimulationData* remoteData);
     void onDeleteSimulation(RemoteSimulationData* remoteData);
@@ -55,8 +58,9 @@ private:
     std::unordered_set<std::string> _selectionIds;
     std::unordered_set<std::string> _likedIds;
     std::unordered_map<std::string, std::set<std::string>> _userLikesByIdCache;
-    std::vector<RemoteSimulationData> _remoteSimulationDatas;
-    std::vector<RemoteSimulationData> _filteredRemoteSimulationDatas;
+    std::vector<RemoteSimulationData> _remoteSimulationList;
+    std::vector<RemoteSimulationData> _filteredRemoteSimulationList;
+    std::vector<UserData> _userList;
 
     SimulationController _simController;
     NetworkController _networkController;

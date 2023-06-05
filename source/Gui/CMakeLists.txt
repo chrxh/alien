@@ -70,6 +70,8 @@ PUBLIC
     MultiplierWindow.h
     NetworkController.cpp
     NetworkController.h
+    NetworkDataParser.cpp
+    NetworkDataParser.h
     NetworkSettingsDialog.cpp
     NetworkSettingsDialog.h
     NewSimulationDialog.cpp
@@ -92,8 +94,6 @@ PUBLIC
     RadiationSourcesWindow.h
     RemoteSimulationData.cpp
     RemoteSimulationData.h
-    RemoteSimulationDataParser.cpp
-    RemoteSimulationDataParser.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
     SavePatternDialog.cpp
@@ -128,6 +128,7 @@ PUBLIC
     UiController.h
     UploadSimulationDialog.cpp
     UploadSimulationDialog.h
+    UserData.h
     Viewport.cpp
     Viewport.h
     WindowController.cpp

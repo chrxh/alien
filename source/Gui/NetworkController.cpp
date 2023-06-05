@@ -9,7 +9,7 @@
 #include "Base/LoggingService.h"
 
 #include "GlobalSettings.h"
-#include "RemoteSimulationDataParser.h"
+#include "NetworkDataParser.h"
 
 _NetworkController::_NetworkController()
 {
@@ -226,7 +226,30 @@ bool _NetworkController::getSimulationDataList(std::vector<RemoteSimulationData>
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
         result.clear();
-        result = RemoteSimulationDataParser::decode(tree);
+        result = NetworkDataParser::decodeRemoteSimulationData(tree);
+        return true;
+    } catch (...) {
+        logNetworkError(postResult->body);
+        return false;
+    }
+}
+
+bool _NetworkController::getUserList(std::vector<UserData>& result, bool withRetry) const
+{
+    log(Priority::Important, "network: get user list");
+
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlist.php", params); }, withRetry);
+
+    try {
+        std::stringstream stream(postResult->body);
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+        result.clear();
+        result = NetworkDataParser::decodeUserData(tree);
         return true;
     } catch (...) {
         logNetworkError(postResult->body);

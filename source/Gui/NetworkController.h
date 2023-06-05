@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RemoteSimulationData.h"
+#include "UserData.h"
 #include "Definitions.h"
 
 class _NetworkController
@@ -23,6 +24,7 @@ public:
     bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
 
     bool getSimulationDataList(std::vector<RemoteSimulationData>& result, bool withRetry) const;
+    bool getUserList(std::vector<UserData>& result, bool withRetry) const;
     bool getLikedSimulationIdList(std::vector<std::string>& result) const;
     bool getUserLikesForSimulation(std::set<std::string>& result, std::string const& simId);
     bool toggleLikeSimulation(std::string const& simId);
