@@ -180,8 +180,8 @@ void _BrowserWindow::processSimulationTable()
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    auto sizeAvailable = ImGui::GetContentRegionAvail();
-    if (ImGui::BeginTable("Browser", 12, flags, ImVec2(sizeAvailable.x, sizeAvailable.y), 0.0f)) {
+    AlienImGui::Group("Simulation list");
+    if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn(
             "Actions",
             ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed,
@@ -317,15 +317,15 @@ void _BrowserWindow::processUserTable()
          | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    auto sizeAvailable = ImGui::GetContentRegionAvail();
-    if (ImGui::BeginTable("Browser", 4, flags, ImVec2(sizeAvailable.x, sizeAvailable.y), 0.0f)) {
+    AlienImGui::Group("User list");
+    if (ImGui::BeginTable("Browser", 3, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn(
-            "User",
+            "User name",
             ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed,
             contentScale(90.0f),
             RemoteSimulationDataColumnId_Actions);
         ImGui::TableSetupColumn(
-            "Stars earned",
+            "Stars received",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             contentScale(100.0f),
             RemoteSimulationDataColumnId_Timestamp);
@@ -334,11 +334,6 @@ void _BrowserWindow::processUserTable()
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.contentScale(100.0f),
             RemoteSimulationDataColumnId_UserName);
-        ImGui::TableSetupColumn(
-            "Last login",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.contentScale(135.0f),
-            RemoteSimulationDataColumnId_SimulationName);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
@@ -352,16 +347,17 @@ void _BrowserWindow::processUserTable()
                 ImGui::TableNextRow();
 
                 ImGui::TableNextColumn();
-                AlienImGui::Text(item->userName);
+                if (item->online) {
+                    AlienImGui::OnlineSymbol();
+                    ImGui::SameLine();
+                }
+                processShortenedText(item->userName);
 
                 ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(item->starsEarned));
+                AlienImGui::Text(std::to_string(item->starsReceived));
 
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->starsGiven));
-
-                ImGui::TableNextColumn();
-                AlienImGui::Text(item->timestamp);
 
                 ImGui::PopID();
             }

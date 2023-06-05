@@ -29,9 +29,10 @@ std::vector<UserData> NetworkDataParser::decodeUserData(boost::property_tree::pt
     for (auto const& [key, subTree] : tree) {
         UserData entry;
         entry.userName = subTree.get<std::string>("userName");
-        entry.starsEarned = subTree.get<int>("starsEarned");
+        entry.starsReceived = subTree.get<int>("starsReceived");
         entry.starsGiven = subTree.get<int>("starsGiven");
         entry.timestamp = subTree.get<std::string>("timestamp");
+        entry.online = subTree.get<bool>("online");
         result.emplace_back(entry);
     }
     return result;

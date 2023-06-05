@@ -1,5 +1,7 @@
 #include "AlienImGui.h"
 
+#include <chrono>
+
 #include <boost/algorithm/string.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -1122,6 +1124,16 @@ void AlienImGui::NeuronSelection(
         ImColor::HSV(0.0f, 0.0f, 1.0f, 0.35f));
     drawList->AddLine(
         {inputPos[selectedInput].x, inputPos[selectedInput].y}, {outputPos[selectedOutput].x, outputPos[selectedOutput].y}, ImColor::HSV(0.0f, 0.0f, 1.0f, 0.35f), 8.0f);
+}
+
+void AlienImGui::OnlineSymbol()
+{
+    auto counter = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    counter = (((counter % 2000) + 2000) % 2000);
+    auto color = ImColor::HSV(0.0f, counter < 1000 ? toFloat(counter) / 1000.0f : 2.0f - toFloat(counter) / 1000.0f, 1.0f);
+    ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
+    ImGui::Text(ICON_FA_GENDERLESS);
+    ImGui::PopStyleColor();
 }
 
 namespace
