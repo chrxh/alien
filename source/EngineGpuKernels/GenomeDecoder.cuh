@@ -252,6 +252,7 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
     int depth = 0;
     for (auto nodeAddress = Const::GenomeHeaderSize; nodeAddress < genomeSize;) {
         auto cellFunction = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
+        func(depth, nodeAddress);
 
         bool goToNextSibling = true;
         if (cellFunction == CellFunction_Constructor || cellFunction == CellFunction_Injector) {
@@ -265,7 +266,6 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
                 goToNextSibling = false;
             }
         }
-        func(depth);
         if (goToNextSibling) {
             nodeAddress += Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(genome, genomeSize, nodeAddress);
         }
@@ -295,14 +295,14 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeUntilReadPosition(Co
 __inline__ __device__ int GenomeDecoder::getGenomeDepth(uint8_t* genome, int genomeSize)
 {
     auto result = 0;
-    executeForEachNodeRecursively(genome, genomeSize, [&result](int depth) { result = max(result, depth); });
+    executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress) { result = max(result, depth); });
     return result;
 }
 
 __inline__ __device__ int GenomeDecoder::getNumNodesRecursively(uint8_t* genome, int genomeSize)
 {
     auto result = 0;
-    executeForEachNodeRecursively(genome, genomeSize, [&result](int depth) { ++result; });
+    executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress) { ++result; });
     return result;
 }
 

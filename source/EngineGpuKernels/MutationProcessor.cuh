@@ -21,9 +21,11 @@ public:
     __inline__ __device__ static void translateMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void duplicateMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void colorMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void uniformColorMutation(SimulationData& data, Cell* cell);
 
 private:
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
+    __inline__ __device__ static int getNewColorFromTransition(SimulationData& data, int origColor);
 };
 
 /************************************************************************/
@@ -92,6 +94,12 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         data,
         cell->absPos,
         cell->color);
+    auto cellFunctionConstructorMutationUniformColorProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationUniformColorProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationUniformColorProbability,
+        data,
+        cell->absPos,
+        cell->color);
 
     if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
         neuronDataMutation(data, cell);
@@ -122,6 +130,9 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationColorProbability)) {
         colorMutation(data, cell);
+    }
+    if (isRandomEvent(data, cellFunctionConstructorMutationUniformColorProbability)) {
+        uniformColorMutation(data, cell);
     }
 }
 
@@ -615,6 +626,41 @@ __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data
     }
 
     auto origColor = GenomeDecoder::getNextCellColor(subgenome, nodeAddress);
+    auto newColor = getNewColorFromTransition(data, origColor);
+
+    for (int dummy = 0; nodeAddress < subgenomeSize && dummy < subgenomeSize; ++dummy) {
+        GenomeDecoder::setNextCellColor(subgenome, nodeAddress, newColor);
+        nodeAddress += Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(subgenome, subgenomeSize, nodeAddress);
+    }
+}
+
+__inline__ __device__ void MutationProcessor::uniformColorMutation(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    auto& genome = constructor.genome;
+    auto genomeSize = toInt(constructor.genomeSize);
+    if (genomeSize <= Const::GenomeHeaderSize) {
+        return;
+    }
+
+    auto origColor = GenomeDecoder::getNextCellColor(genome, Const::GenomeHeaderSize);
+    auto newColor = getNewColorFromTransition(data, origColor);
+
+    GenomeDecoder::executeForEachNodeRecursively(
+        genome, genomeSize, [&](int depth, int nodeAddress) { GenomeDecoder::setNextCellColor(genome, nodeAddress, newColor); });
+}
+
+__inline__ __device__ bool MutationProcessor::isRandomEvent(SimulationData& data, float probability)
+{
+    if (probability > 0.001f) {
+        return data.numberGen1.random() < probability;
+    } else {
+        return data.numberGen1.random() < probability * 1000 && data.numberGen2.random() < 0.001f;
+    }
+}
+
+__inline__ __device__ int MutationProcessor::getNewColorFromTransition(SimulationData& data, int origColor)
+{
     int numAllowedColors = 0;
     for (int i = 0; i < MAX_COLORS; ++i) {
         if (cudaSimulationParameters.cellFunctionConstructorMutationColorTransitions[origColor][i]) {
@@ -626,29 +672,16 @@ __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data
     }
     int randomAllowedColorIndex = data.numberGen1.random(numAllowedColors - 1);
     int allowedColorIndex = 0;
-    int newColor = 0;
+    int result = 0;
     for (int i = 0; i < MAX_COLORS; ++i) {
         if (cudaSimulationParameters.cellFunctionConstructorMutationColorTransitions[origColor][i]) {
             if (allowedColorIndex == randomAllowedColorIndex) {
-                newColor = i;
+                result = i;
                 break;
             }
             ++allowedColorIndex;
         }
     }
-
-    for (int dummy = 0; nodeAddress < subgenomeSize && dummy < subgenomeSize; ++dummy) {
-        GenomeDecoder::setNextCellColor(subgenome, nodeAddress, newColor);
-        nodeAddress += Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(subgenome, subgenomeSize, nodeAddress);
-    }
-}
-
-__inline__ __device__ bool MutationProcessor::isRandomEvent(SimulationData& data, float probability)
-{
-    if (probability > 0.001f) {
-        return data.numberGen1.random() < probability;
-    } else {
-        return data.numberGen1.random() < probability * 1000 && data.numberGen2.random() < 0.001f;
-    }
+    return result;
 }
 
