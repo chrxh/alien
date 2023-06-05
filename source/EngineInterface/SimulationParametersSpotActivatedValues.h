@@ -28,6 +28,7 @@ struct SimulationParametersSpotActivatedValues
     bool cellFunctionConstructorMutationTranslationProbability = false;
     bool cellFunctionConstructorMutationDuplicationProbability = false;
     bool cellFunctionConstructorMutationColorProbability = false;
+    bool cellFunctionConstructorMutationUniformColorProbability = false;
 
     bool operator==(SimulationParametersSpotActivatedValues const& other) const
     {
@@ -49,6 +50,7 @@ struct SimulationParametersSpotActivatedValues
             && radiationAbsorption == other.radiationAbsorption
             && cellFunctionConstructorMutationCustomGeometryProbability == other.cellFunctionConstructorMutationCustomGeometryProbability
             && cellFunctionConstructorMutationGeometryProbability == other.cellFunctionConstructorMutationGeometryProbability
+            && cellFunctionConstructorMutationUniformColorProbability == other.cellFunctionConstructorMutationUniformColorProbability
         ;
     }
 };

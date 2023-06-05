@@ -86,6 +86,35 @@ protected:
         }));
     }
 
+    std::vector<uint8_t> createGenomeWithUniformColor() const
+    {
+        auto color = genomeCellColors[0];
+        std::vector<uint8_t> subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription());
+        for (int i = 0; i < 15; ++i) {
+            subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
+                CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(color),
+                CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(color),
+                CellGenomeDescription().setColor(color),
+                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeGenomeCopy()).setColor(color),
+                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome).setMode(std::rand() % 100)).setColor(color),
+            }));
+        };
+        return GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
+            CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(color),
+            CellGenomeDescription().setColor(color),
+            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeGenomeCopy()).setColor(color),
+            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)).setColor(color),
+            CellGenomeDescription().setCellFunction(SensorGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellFunction(NerveGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellFunction(AttackerGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellFunction(InjectorGenomeDescription().setGenome(subGenome)).setColor(color),
+            CellGenomeDescription().setCellFunction(MuscleGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellFunction(DefenderGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription()).setColor(color),
+        }));
+    }
+
     void rollout(GenomeDescription const& input, std::set<CellGenomeDescription>& result)
     {
         for (auto const& cell : input.cells) {
@@ -521,6 +550,43 @@ protected:
         }
         return true;
     }
+
+    bool compareUniformColorMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after, std::optional<int> const& allowedColor)
+    {
+        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
+        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
+        if (afterGenome.info != beforeGenome.info) {
+            return false;
+        }
+
+        int uniformColor = allowedColor ? *allowedColor : afterGenome.cells.at(0).color;
+        for (auto const& [beforeCell, afterCell] : boost::combine(beforeGenome.cells, afterGenome.cells)) {
+
+            auto beforeCellClone = beforeCell;
+            auto afterCellClone = afterCell;
+            beforeCellClone.color = 0;
+            beforeCellClone.cellFunction = std::nullopt;
+            afterCellClone.color = 0;
+            afterCellClone.cellFunction = std::nullopt;
+            if (beforeCellClone != afterCellClone) {
+                return false;
+            }
+            if (afterCell.color != uniformColor) {
+                return false;
+            }
+            uniformColor = afterCell.color;
+            if (beforeCell.getCellFunctionType() == CellFunction_Constructor || beforeCell.getCellFunctionType() == CellFunction_Injector) {
+                auto beforeSubGenome = beforeCell.getGenome();
+                auto afterSubGenome = afterCell.getGenome();
+                if (beforeSubGenome && afterSubGenome) {
+                    if (!compareUniformColorMutation(*beforeSubGenome, *afterSubGenome, uniformColor)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 };
 
 TEST_F(MutationTests, propertiesMutation_startPos)
@@ -871,4 +937,34 @@ TEST_F(MutationTests, colorMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareColorMutation(genome, actualConstructor.genome, {1, 2, 4, 5}));
+}
+
+TEST_F(MutationTests, uniformColorMutation)
+{
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        for (int j = 0; j < MAX_COLORS; ++j) {
+            _parameters.cellFunctionConstructorMutationColorTransitions[i][j] = false;
+        }
+    }
+    _parameters.cellFunctionConstructorMutationColorTransitions[0][3] = true;
+    _parameters.cellFunctionConstructorMutationColorTransitions[0][5] = true;
+    _parameters.cellFunctionConstructorMutationColorTransitions[4][2] = true;
+    _parameters.cellFunctionConstructorMutationColorTransitions[4][5] = true;
+    _simController->setSimulationParameters(_parameters);
+
+    auto genome = createGenomeWithUniformColor();
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(0)).setExecutionOrderNumber(0)});
+
+    _simController->setSimulationData(data);
+    for (int i = 0; i < 10000; ++i) {
+        _simController->testOnly_mutate(1, MutationType::UniformColor);
+    }
+
+    auto actualData = _simController->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    EXPECT_TRUE(compareUniformColorMutation(genome, actualConstructor.genome, std::nullopt));
 }

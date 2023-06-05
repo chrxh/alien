@@ -688,8 +688,21 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationColorProbability)
-                    .tooltip("This type of mutation alters the color of all cell descriptions in a genome or sub-genome by using the specified color transitions."),
+                    .tooltip("This type of mutation alters the color of all cell descriptions in a sub-genome by using the specified color transitions."),
                 simParameters.baseValues.cellFunctionConstructorMutationColorProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Uniform color")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationUniformColorProbability)
+                    .tooltip(
+                        "This type of mutation alters the color of all cell descriptions in a genome by using the specified color transitions."),
+                simParameters.baseValues.cellFunctionConstructorMutationUniformColorProbability);
             AlienImGui::CheckboxColorMatrix(
                 AlienImGui::CheckboxColorMatrixParameters()
                     .name("Color transitions")
@@ -1551,6 +1564,19 @@ void _SimulationParametersWindow::processSpot(
                     .disabledValue(parameters.baseValues.cellFunctionConstructorMutationColorProbability),
                 spot.values.cellFunctionConstructorMutationColorProbability,
                 &spot.activatedValues.cellFunctionConstructorMutationColorProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Uniform color")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .colorDependence(true)
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationUniformColorProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationUniformColorProbability),
+                spot.values.cellFunctionConstructorMutationUniformColorProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationUniformColorProbability);
             ImGui::TreePop();
         }
 

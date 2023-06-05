@@ -346,6 +346,12 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.baseValues.cellFunctionConstructorMutationUniformColorProbability,
+            defaultParameters.baseValues.cellFunctionConstructorMutationUniformColorProbability,
+            "simulation parameters.cell.function.constructor.mutation probability.uniform color",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.cellFunctionConstructorMutationColorTransitions,
             defaultParameters.cellFunctionConstructorMutationColorTransitions,
             "simulation parameters.cell.function.constructor.mutation color transition",
@@ -769,6 +775,13 @@ namespace
                 spot.activatedValues.cellFunctionConstructorMutationColorProbability,
                 defaultSpot.values.cellFunctionConstructorMutationColorProbability,
                 base + "cell.function.constructor.mutation probability.color",
+                parserTask);
+            encodeDecodeSpotProperty(
+                tree,
+                spot.values.cellFunctionConstructorMutationUniformColorProbability,
+                spot.activatedValues.cellFunctionConstructorMutationUniformColorProbability,
+                defaultSpot.values.cellFunctionConstructorMutationUniformColorProbability,
+                base + "cell.function.constructor.mutation probability.uniform color",
                 parserTask);
         }
     }
