@@ -278,6 +278,8 @@ public:
         int& selectedOutput
     );
 
+    static void OnlineSymbol();
+
 private:
 
     template <typename Parameter, typename T>
