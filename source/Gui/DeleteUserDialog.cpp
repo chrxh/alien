@@ -68,7 +68,10 @@ void _DeleteUserDialog::show()
 void _DeleteUserDialog::onDelete()
 {
     auto userName = *_networkController->getLoggedInUserName();
-    _networkController->deleteUser();
-    _browserWindow->onRefresh();
-    MessageDialog::getInstance().show("Information", "The user '" + userName + "' has been deleted.\nYou are logged out.");
+    if (_networkController->deleteUser()) {
+        _browserWindow->onRefresh();
+        MessageDialog::getInstance().show("Information", "The user '" + userName + "' has been deleted.\nYou are logged out.");
+    } else {
+        MessageDialog::getInstance().show("Error", "An error occurred on the server.");
+    }
 }

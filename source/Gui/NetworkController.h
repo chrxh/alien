@@ -44,6 +44,8 @@ public:
     bool deleteSimulation(std::string const& simId);
 
 private:
+    void refreshLogin();
+
     std::string _serverAddress;
     std::optional<std::string> _loggedInUserName;
     std::optional<std::string> _password;
