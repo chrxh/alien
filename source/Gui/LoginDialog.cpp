@@ -27,7 +27,9 @@ _LoginDialog::_LoginDialog(
         _userName = settings.getStringState("dialogs.login.user name", "");
         _password = settings.getStringState("dialogs.login.password", "");
         if (!_userName.empty()) {
-            _networkController->login(_userName, _password);
+            if (!_networkController->login(_userName, _password)) {
+                MessageDialog::getInstance().show("Error", "Login failed.");
+            }
         }
     }
 }
