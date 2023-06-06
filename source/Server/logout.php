@@ -9,7 +9,7 @@
     $success = checkPw($db, $userName, $pw);
 
     if ($success) {
-        $success = $db->query("UPDATE user SET FLAGS=1, TIMESTAMP=CURRENT_TIMESTAMP WHERE NAME='".addslashes($userName)."'");
+        $success = $db->query("UPDATE user SET FLAGS=0, TIMESTAMP=CURRENT_TIMESTAMP WHERE NAME='".addslashes($userName)."'");
     }
 
     echo json_encode(["result"=>$success]);

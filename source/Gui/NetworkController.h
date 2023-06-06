@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "RemoteSimulationData.h"
 #include "UserData.h"
 #include "Definitions.h"
@@ -10,6 +12,8 @@ public:
     _NetworkController();
     ~_NetworkController();
 
+    void process();
+
     std::string getServerAddress() const;
     void setServerAddress(std::string const& value);
     std::optional<std::string> getLoggedInUserName() const;
@@ -18,7 +22,7 @@ public:
     bool createUser(std::string const& userName, std::string const& password, std::string const& email);
     bool activateUser(std::string const& userName, std::string const& password, std::string const& confirmationCode);
     bool login(std::string const& userName, std::string const& password);
-    void logout();
+    bool logout();
     bool deleteUser();
     bool resetPassword(std::string const& userName, std::string const& email);
     bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
@@ -43,4 +47,5 @@ private:
     std::string _serverAddress;
     std::optional<std::string> _loggedInUserName;
     std::optional<std::string> _password;
+    std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 };

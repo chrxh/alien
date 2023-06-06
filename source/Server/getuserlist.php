@@ -2,6 +2,7 @@
     require './helpers.php';
 
     $db = connectToDB();
+    $db->begin_transaction();
 
     $response = $db->query("SELECT u.ID as id, count(1) as likes FROM user u, simulation s, userlike ul WHERE s.USER_ID = u.ID AND ul.SIMULATION_ID = s.ID GROUP BY u.ID");
     $starsReceivedByUser = array();
@@ -15,7 +16,7 @@
         $likesGivenByUser[$obj->id] = (int)$obj->likes;
     }
 
-    $response = $db->query("SELECT u.ID as id FROM user u WHERE u.TIMESTAMP >= DATE_SUB(NOW(), INTERVAL 20 MINUTE)");
+    $response = $db->query("SELECT u.ID as id FROM user u WHERE u.TIMESTAMP >= DATE_SUB(NOW(), INTERVAL 60 MINUTE)");
     $onlineByUser = array();
     while($obj = $response->fetch_object()){
         $onlineByUser[$obj->id] = true;

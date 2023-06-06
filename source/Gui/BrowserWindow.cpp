@@ -180,7 +180,7 @@ void _BrowserWindow::processSimulationTable()
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    AlienImGui::Group("Simulation list");
+    AlienImGui::Group("Simulations");
     if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn(
             "Actions",
@@ -317,10 +317,10 @@ void _BrowserWindow::processUserTable()
          | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    AlienImGui::Group("User list");
+    AlienImGui::Group("Registered users");
     if (ImGui::BeginTable("Browser", 3, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn(
-            "User name",
+            "Name",
             ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed,
             contentScale(90.0f),
             RemoteSimulationDataColumnId_Actions);

@@ -11,39 +11,10 @@
 #include "GlobalSettings.h"
 #include "NetworkDataParser.h"
 
-_NetworkController::_NetworkController()
-{
-    _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
-}
-
-_NetworkController::~_NetworkController()
-{
-    GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
-}
-
-std::string _NetworkController::getServerAddress() const
-{
-    return _serverAddress;
-}
-
-void _NetworkController::setServerAddress(std::string const& value)
-{
-    _serverAddress = value;
-    logout();
-}
-
-std::optional<std::string> _NetworkController::getLoggedInUserName() const
-{
-    return _loggedInUserName;
-}
-
-std::optional<std::string> _NetworkController::getPassword() const
-{
-    return _password;
-}
-
 namespace
 {
+    auto RefreshInterval = 20;  //in minutes
+
     void configureClient(httplib::SSLClient& client)
     {
         client.set_ca_cert_path("./resources/ca-bundle.crt");
@@ -56,7 +27,7 @@ namespace
     httplib::Result executeRequest(std::function<httplib::Result()> const& func, bool withRetry = true)
     {
         auto attempt = 0;
-        while(true) {
+        while (true) {
             auto result = func();
             if (result) {
                 return result;
@@ -84,13 +55,68 @@ namespace
                 log(Priority::Important, "network: negative response received from server");
             }
             return result;
-        }
-        catch(...) {
+        } catch (...) {
             logNetworkError(serverResponse);
             return false;
         }
     }
+}
 
+_NetworkController::_NetworkController()
+{
+    _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
+}
+
+_NetworkController::~_NetworkController()
+{
+    GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
+}
+
+void _NetworkController::process()
+{
+    auto now = std::chrono::steady_clock::now();
+    if (!_lastRefreshTime || std::chrono::duration_cast<std::chrono::minutes>(now - *_lastRefreshTime).count() >= RefreshInterval) {
+        _lastRefreshTime = now;
+
+        auto userName = getLoggedInUserName();
+        auto password = getPassword();
+        if (userName && password) {
+            log(Priority::Important, "network: refresh login");
+
+            httplib::SSLClient client(_serverAddress);
+            configureClient(client);
+
+            httplib::Params params;
+            params.emplace("userName", *userName);
+            params.emplace("password", *password);
+
+            try {
+                executeRequest([&] { return client.Post("/alien-server/login.php", params); });
+            } catch (...) {
+            }
+        }
+    }
+}
+
+std::string _NetworkController::getServerAddress() const
+{
+    return _serverAddress;
+}
+
+void _NetworkController::setServerAddress(std::string const& value)
+{
+    _serverAddress = value;
+    logout();
+}
+
+std::optional<std::string> _NetworkController::getLoggedInUserName() const
+{
+    return _loggedInUserName;
+}
+
+std::optional<std::string> _NetworkController::getPassword() const
+{
+    return _password;
 }
 
 bool _NetworkController::createUser(std::string const& userName, std::string const& password, std::string const& email)
@@ -148,12 +174,28 @@ bool _NetworkController::login(std::string const& userName, std::string const& p
     return boolResult;
 }
 
-void _NetworkController::logout()
+bool _NetworkController::logout()
 {
     log(Priority::Important, "network: logout");
+    bool result = true;
+
+    if (_loggedInUserName && _password) {
+        httplib::SSLClient client(_serverAddress);
+        configureClient(client);
+
+        httplib::Params params;
+        params.emplace("userName", *_loggedInUserName);
+        params.emplace("password", *_password);
+
+        try {
+            result = executeRequest([&] { return client.Post("/alien-server/logout.php", params); });
+        } catch (...) {
+        }
+    }
 
     _loggedInUserName = std::nullopt;
     _password = std::nullopt;
+    return result;
 }
 
 bool _NetworkController::deleteUser()
