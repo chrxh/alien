@@ -748,6 +748,7 @@ void _MainWindow::processControllers()
     _autosaveController->process();
     _editorController->process();
     _balancerController->process();
+    _networkController->process();
     OverlayMessageController::getInstance().process();
     DelayedExecutionController::getInstance().process();
 }
