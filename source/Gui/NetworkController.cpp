@@ -71,6 +71,7 @@ _NetworkController::_NetworkController()
 _NetworkController::~_NetworkController()
 {
     GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
+    logout();
 }
 
 void _NetworkController::process()

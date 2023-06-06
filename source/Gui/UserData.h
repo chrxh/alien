@@ -10,6 +10,15 @@ public:
     std::string timestamp;
     bool online;
 
-    static int compare(UserData const& left, UserData const& right) { return left.timestamp.compare(right.timestamp); }
+    static int compare(UserData const& left, UserData const& right)
+    {
+        if (int result = static_cast<int>(left.online) - static_cast<int>(right.online)) {
+            return result;
+        }
+        if (int result = left.timestamp.compare(right.timestamp)) {
+            return result;
+        }
+        return 0;
+    }
 };
 

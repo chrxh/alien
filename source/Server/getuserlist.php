@@ -16,7 +16,7 @@
         $likesGivenByUser[$obj->id] = (int)$obj->likes;
     }
 
-    $response = $db->query("SELECT u.ID as id FROM user u WHERE u.TIMESTAMP >= DATE_SUB(NOW(), INTERVAL 60 MINUTE)");
+    $response = $db->query("SELECT u.ID as id FROM user u WHERE u.TIMESTAMP >= DATE_SUB(NOW(), INTERVAL 60 MINUTE) AND u.FLAGS = 1");
     $onlineByUser = array();
     while($obj = $response->fetch_object()){
         $onlineByUser[$obj->id] = true;
@@ -27,7 +27,10 @@
             u.ID as id,
             u.NAME as userName,
             u.TIMESTAMP as timestamp
-        FROM user u");
+        FROM
+            user u
+        WHERE
+            u.ACTIVATION_CODE=''");
     $result = array();
     while($obj = $response->fetch_object()){
         $starsReceived = is_null($starsReceivedByUser[$obj->id]) ? 0 : $starsReceivedByUser[$obj->id];
