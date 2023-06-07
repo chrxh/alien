@@ -31,7 +31,7 @@ private:
         CellFunction cellFunction;
     };
 
-    __inline__ __device__ static void preprocessCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static bool isConstructionAtBeginning(Cell* cell);
     __inline__ __device__ static bool isConstructionFinished(Cell* cell);
@@ -70,7 +70,7 @@ __inline__ __device__ void ConstructorProcessor::preprocess(SimulationData& data
     auto& operations = data.cellFunctionOperations[CellFunction_Constructor];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        preprocessCell(data, statistics, operations.at(i).cell);
+        completenessCheck(data, statistics, operations.at(i).cell);
     }
 }
 
@@ -103,7 +103,7 @@ namespace
     }
 }
 
-__inline__ __device__ void ConstructorProcessor::preprocessCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     if (!isConstructionAtBeginning(cell)) {
         return;        
@@ -124,8 +124,8 @@ __inline__ __device__ void ConstructorProcessor::preprocessCell(SimulationData& 
     visitedCells.insert(cell);
 
     auto currentCell = cell;
-    int depth = 0;
-    int connectionIndex = 0;
+    auto depth = 0;
+    auto connectionIndex = 0;
     Cell* lastCells[ContainerSize];
     int lastIndices[ContainerSize];
 

@@ -180,13 +180,14 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
 
     //cell function specific mutation
     else {
-        auto nextCellFunctionDataSize = GenomeDecoder::getNextCellFunctionDataSize(genome, genomeSize, nodeAddress);
-        auto type = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
-        if (type == CellFunction_Constructor || type == CellFunction_Injector) {
-            nextCellFunctionDataSize = type == CellFunction_Constructor ? Const::ConstructorFixedBytes : Const::InjectorFixedBytes;
-        }
+        auto nextCellFunctionDataSize = GenomeDecoder::getNextCellFunctionDataSize(genome, genomeSize, nodeAddress, false);
         if (nextCellFunctionDataSize > 0) {
             auto randomDelta = data.numberGen1.random(nextCellFunctionDataSize - 1);
+            auto cellFunction = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
+            if (cellFunction == CellFunction_Constructor
+                && (randomDelta == Const::ConstructorConstructionAngle1Pos || randomDelta == Const::ConstructorConstructionAngle2Pos)) {
+                return;
+            }
             genome[nodeAddress + Const::CellBasicBytes + randomDelta] = data.numberGen1.randomByte();
         }
     }
@@ -228,13 +229,31 @@ __inline__ __device__ void MutationProcessor::customGeometryMutation(SimulationD
     if (genomeSize <= Const::GenomeHeaderSize) {
         return;
     }
-    auto nodeAddress = GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, false);
 
-    if (data.numberGen1.randomBool()) {
-        GenomeDecoder::setNextAngle(genome, nodeAddress, data.numberGen1.randomByte());
-    } else {
-        GenomeDecoder::setNextRequiredConnections(genome, nodeAddress, data.numberGen1.randomByte());
-    }
+    auto numNodes = GenomeDecoder::getNumNodesRecursively(genome, genomeSize);
+    auto node = data.numberGen1.random(numNodes - 1);
+    auto sequenceNumber = 0;
+    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, [&](int depth, int nodeAddress) {
+        if (sequenceNumber++ == node) {
+            auto cellFunction = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
+            auto choice =
+                cellFunction == CellFunction_Constructor ? data.numberGen1.random(3) : data.numberGen1.random(1);
+            switch (choice) {
+            case 0:
+                GenomeDecoder::setNextAngle(genome, nodeAddress, data.numberGen1.randomByte());
+                break;
+            case 1:
+                GenomeDecoder::setNextRequiredConnections(genome, nodeAddress, data.numberGen1.randomByte());
+                break;
+            case 2:
+                GenomeDecoder::setNextConstructionAngle1(genome, nodeAddress, data.numberGen1.randomByte());
+                break;
+            case 3:
+                GenomeDecoder::setNextConstructionAngle2(genome, nodeAddress, data.numberGen1.randomByte());
+                break;
+            }
+        }
+    });
 }
 
 __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationData& data, Cell* cell)
