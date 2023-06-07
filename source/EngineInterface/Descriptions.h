@@ -133,6 +133,16 @@ struct ConstructorDescription
         genomeGeneration = value;
         return *this;
     }
+    ConstructorDescription& setConstructionAngle1(float value)
+    {
+        constructionAngle1 = value;
+        return *this;
+    }
+    ConstructorDescription& setConstructionAngle2(float value)
+    {
+        constructionAngle2 = value;
+        return *this;
+    }
 };
 
 struct SensorDescription
