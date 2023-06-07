@@ -2,20 +2,24 @@
 
 namespace Const
 {
-    int constexpr GenomeHeaderSize = 6;
-    int constexpr GenomeHeaderSeparationPos = 2;
-    int constexpr CellFunctionMutationMaxGenomeSize = 200;
-    int constexpr CellAnglePos = 1;
-    int constexpr CellRequiredConnectionsPos = 3;
-    int constexpr CellColorPos = 5;
-    int constexpr CellBasicBytes = 8;
-    int constexpr NeuronBytes = 72;
-    int constexpr TransmitterBytes = 1;
-    int constexpr ConstructorFixedBytes = 5;
-    int constexpr SensorBytes = 4;
-    int constexpr NerveBytes = 2;
-    int constexpr AttackerBytes = 1;
-    int constexpr InjectorFixedBytes = 1;
-    int constexpr MuscleBytes = 1;
-    int constexpr DefenderBytes = 1;
+    auto constexpr GenomeHeaderSize = 6;
+    auto constexpr GenomeHeaderSeparationPos = 2;
+    auto constexpr CellFunctionMutationMaxGenomeSize = 200;
+
+    auto constexpr CellAnglePos = 1;
+    auto constexpr CellRequiredConnectionsPos = 3;
+    auto constexpr CellColorPos = 5;
+    auto constexpr ConstructorConstructionAngle1Pos = 3;
+    auto constexpr ConstructorConstructionAngle2Pos = 4;
+
+    auto constexpr CellBasicBytes = 8;
+    auto constexpr NeuronBytes = 72;
+    auto constexpr TransmitterBytes = 1;
+    auto constexpr ConstructorFixedBytes = 5;
+    auto constexpr SensorBytes = 4;
+    auto constexpr NerveBytes = 2;
+    auto constexpr AttackerBytes = 1;
+    auto constexpr InjectorFixedBytes = 1;
+    auto constexpr MuscleBytes = 1;
+    auto constexpr DefenderBytes = 1;
 }

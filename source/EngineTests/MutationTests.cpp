@@ -160,6 +160,12 @@ protected:
             if (expectedCell.getCellFunctionType() == CellFunction_Constructor) {
                 auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellFunction);
                 auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellFunction);
+                if (expectedConstructor.constructionAngle1 != actualConstructor.constructionAngle1) {
+                    return false;
+                }
+                if (expectedConstructor.constructionAngle2 != actualConstructor.constructionAngle2) {
+                    return false;
+                }
                 if (expectedConstructor.isMakeGenomeCopy() != actualConstructor.isMakeGenomeCopy()) {
                     return false;
                 }
@@ -324,6 +330,8 @@ protected:
                 if (!constructor.isMakeGenomeCopy()) {
                     constructor.genome = {};
                 }
+                constructor.constructionAngle1 = 0;
+                constructor.constructionAngle2 = 0;
             }
             if (clone.getCellFunctionType() == CellFunction_Injector) {
                 auto& injector = std::get<InjectorGenomeDescription>(*clone.cellFunction);

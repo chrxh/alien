@@ -69,7 +69,7 @@ public:
     __inline__ __device__ static int getNumNodes(uint8_t* genome, int genomeSize);
     __inline__ __device__ static int getNodeAddress(uint8_t* genome, int genomeSize, int nodeIndex);
     __inline__ __device__ static int findStartNodeAddress(uint8_t* genome, int genomeSize, int refIndex);
-    __inline__ __device__ static int getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeAddress);
+    __inline__ __device__ static int getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeAddress, bool withSubgenomes = true);
     __inline__ __device__ static int getNextCellFunctionType(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static bool isNextCellSelfCopy(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static int getNextCellColor(uint8_t* genome, int nodeAddress);
@@ -77,6 +77,8 @@ public:
     __inline__ __device__ static void setNextCellColor(uint8_t* genome, int nodeAddress, int color);
     __inline__ __device__ static void setNextAngle(uint8_t* genome, int nodeAddress, uint8_t angle);
     __inline__ __device__ static void setNextRequiredConnections(uint8_t* genome, int nodeAddress, uint8_t angle);
+    __inline__ __device__ static void setNextConstructionAngle1(uint8_t* genome, int nodeAddress, uint8_t angle);
+    __inline__ __device__ static void setNextConstructionAngle2(uint8_t* genome, int nodeAddress, uint8_t angle);
     __inline__ __device__ static int
     getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeAddress);  //prerequisites: (constructor or injector) and !makeSelfCopy
     __inline__ __device__ static int getCellFunctionDataSize(
@@ -425,7 +427,7 @@ __inline__ __device__ int GenomeDecoder::findStartNodeAddress(uint8_t* genome, i
     return Const::GenomeHeaderSize;
 }
 
-__inline__ __device__ int GenomeDecoder::getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeAddress)
+__inline__ __device__ int GenomeDecoder::getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeAddress, bool withSubgenomes)
 {
     auto cellFunction = getNextCellFunctionType(genome, nodeAddress);
     switch (cellFunction) {
@@ -434,11 +436,15 @@ __inline__ __device__ int GenomeDecoder::getNextCellFunctionDataSize(uint8_t* ge
     case CellFunction_Transmitter:
         return Const::TransmitterBytes;
     case CellFunction_Constructor: {
-        auto isMakeCopy = GenomeDecoder::convertByteToBool(genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorFixedBytes]);
-        if (isMakeCopy) {
-            return Const::ConstructorFixedBytes + 1;
+        if (withSubgenomes) {
+            auto isMakeCopy = GenomeDecoder::convertByteToBool(genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorFixedBytes]);
+            if (isMakeCopy) {
+                return Const::ConstructorFixedBytes + 1;
+            } else {
+                return Const::ConstructorFixedBytes + 3 + getNextSubGenomeSize(genome, genomeSize, nodeAddress);
+            }
         } else {
-            return Const::ConstructorFixedBytes + 3 + getNextSubGenomeSize(genome, genomeSize, nodeAddress);
+            return Const::ConstructorFixedBytes;
         }
     }
     case CellFunction_Sensor:
@@ -448,11 +454,15 @@ __inline__ __device__ int GenomeDecoder::getNextCellFunctionDataSize(uint8_t* ge
     case CellFunction_Attacker:
         return Const::AttackerBytes;
     case CellFunction_Injector: {
-        auto isMakeCopy = GenomeDecoder::convertByteToBool(genome[nodeAddress + Const::CellBasicBytes + Const::InjectorFixedBytes]);
-        if (isMakeCopy) {
-            return Const::InjectorFixedBytes + 1;
+        if (withSubgenomes) {
+            auto isMakeCopy = GenomeDecoder::convertByteToBool(genome[nodeAddress + Const::CellBasicBytes + Const::InjectorFixedBytes]);
+            if (isMakeCopy) {
+                return Const::InjectorFixedBytes + 1;
+            } else {
+                return Const::InjectorFixedBytes + 3 + getNextSubGenomeSize(genome, genomeSize, nodeAddress);
+            }
         } else {
-            return Const::InjectorFixedBytes + 3 + getNextSubGenomeSize(genome, genomeSize, nodeAddress);
+            return Const::InjectorFixedBytes;
         }
     }
     case CellFunction_Muscle:
@@ -503,6 +513,16 @@ __inline__ __device__ void GenomeDecoder::setNextAngle(uint8_t* genome, int node
 __inline__ __device__ void GenomeDecoder::setNextRequiredConnections(uint8_t* genome, int nodeAddress, uint8_t angle)
 {
     genome[nodeAddress + Const::CellRequiredConnectionsPos] = angle;
+}
+
+__inline__ __device__ void GenomeDecoder::setNextConstructionAngle1(uint8_t* genome, int nodeAddress, uint8_t angle)
+{
+    genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorConstructionAngle1Pos] = angle;
+}
+
+__inline__ __device__ void GenomeDecoder::setNextConstructionAngle2(uint8_t* genome, int nodeAddress, uint8_t angle)
+{
+    genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorConstructionAngle2Pos] = angle;
 }
 
 __inline__ __device__ int GenomeDecoder::getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeAddress)
