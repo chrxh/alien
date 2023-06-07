@@ -337,6 +337,9 @@ __inline__ __device__ int GenomeDecoder::getRandomGenomeNodeAddress(
             if (makeSelfCopy) {
                 break;
             } else {
+                if (nodeAddress + Const::CellBasicBytes + cellFunctionFixedBytes > randomRefIndex) {
+                    break;
+                }
                 if (numSubGenomesSizeIndices) {
                     subGenomesSizeIndices[*numSubGenomesSizeIndices] = result + Const::CellBasicBytes + cellFunctionFixedBytes + 1;
                     ++(*numSubGenomesSizeIndices);
