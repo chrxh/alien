@@ -227,6 +227,8 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_notReady)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
+    _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
+    _simController->setSimulationParameters(_parameters);
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
@@ -310,7 +312,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_EQ(123, actualConstructedCell.activationTime);
     EXPECT_TRUE(approxCompare(0.35f, actualConstructedCell.stiffness, 0.01f));
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0], actualConstructedCell.energy));
-    EXPECT_TRUE(approxCompare(_parameters.cellFunctionConstructorOffspringDistance[0], Math::length(actualHostCell.pos - actualConstructedCell.pos)));
+    EXPECT_TRUE(approxCompare(1.0f, Math::length(actualHostCell.pos - actualConstructedCell.pos)));
 }
 
 TEST_F(ConstructorTests, constructFirstCell_notFinished)
@@ -441,13 +443,13 @@ TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
     EXPECT_EQ(0, actualConstructedCell.connections.size());
     EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
 
-    EXPECT_TRUE(approxCompare(10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], actualConstructedCell.pos.x));
+    EXPECT_TRUE(approxCompare(10.0f - 1.0f, actualConstructedCell.pos.x));
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.y));
 }
 
 TEST_F(ConstructorTests, constructFirstCell_differentAngle1)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setReferenceAngle(90.0f)}));
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -458,7 +460,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle1)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(ConstructorDescription().setActivationMode(0).setGenome(genome)),
+             .setCellFunction(ConstructorDescription().setActivationMode(0).setGenome(genome).setConstructionAngle2(90.0f)),
         CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -478,7 +480,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle1)
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.x));
-    EXPECT_TRUE(approxCompare(10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], actualConstructedCell.pos.y));
+    EXPECT_TRUE(approxCompare(10.0f - 1.0f, actualConstructedCell.pos.y));
 }
 
 TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
@@ -494,7 +496,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(ConstructorDescription().setActivationMode(0).setGenome(genome)),
+             .setCellFunction(ConstructorDescription().setActivationMode(0).setGenome(genome).setConstructionAngle2(-90.0f)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -514,7 +516,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.x));
-    EXPECT_TRUE(approxCompare(10.0f + _parameters.cellFunctionConstructorOffspringDistance[0], actualConstructedCell.pos.y));
+    EXPECT_TRUE(approxCompare(10.0f + 1.0f, actualConstructedCell.pos.y));
 }
 
 TEST_F(ConstructorTests, constructNeuronCell)
@@ -1077,7 +1079,7 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
 TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription().setReferenceAngle(90.0f)}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -1087,7 +1089,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome(genome)),
+            .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle2(90.0f)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
@@ -1126,7 +1128,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
 TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
-        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription().setReferenceAngle(-90.0f)}));
+        GenomeDescription().setInfo(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -1136,7 +1138,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome(genome)),
+            .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle2(-90.0f)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})

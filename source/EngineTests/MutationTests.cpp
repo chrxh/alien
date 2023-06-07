@@ -597,52 +597,10 @@ protected:
     }
 };
 
-TEST_F(MutationTests, propertiesMutation_startPos)
+TEST_F(MutationTests, propertiesMutation)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
     int byteIndex = 0;
-
-    auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(byteIndex)).setExecutionOrderNumber(0)});
-
-    _simController->setSimulationData(data);
-    for (int i = 0; i < 10000; ++i) {
-        _simController->testOnly_mutate(1, MutationType::Properties);
-    }
-
-    auto actualData = _simController->getSimulationData();
-    auto actualCellById = getCellById(actualData);
-
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
-    EXPECT_TRUE(comparePropertiesMutation(genome, actualConstructor.genome));
-    EXPECT_EQ(byteIndex, actualConstructor.genomeReadPosition);
-}
-
-TEST_F(MutationTests, propertiesMutation_endPos)
-{
-    auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
-    int byteIndex = toInt(genome.size());
-
-    auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(byteIndex)).setExecutionOrderNumber(0)});
-
-    _simController->setSimulationData(data);
-    for (int i = 0; i < 10000; ++i) {
-        _simController->testOnly_mutate(1, MutationType::Properties);
-    }
-
-    auto actualData = _simController->getSimulationData();
-    auto actualCellById = getCellById(actualData);
-
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
-    EXPECT_TRUE(comparePropertiesMutation(genome, actualConstructor.genome));
-    EXPECT_EQ(byteIndex, actualConstructor.genomeReadPosition);
-}
-
-TEST_F(MutationTests, propertiesMutation_invalidPos)
-{
-    auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
-    int byteIndex = toInt(genome.size()) / 2;
 
     auto data = DataDescription().addCells(
         {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(byteIndex)).setExecutionOrderNumber(0)});
