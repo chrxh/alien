@@ -211,16 +211,16 @@ void _GenomeEditorWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_MINUS_SQUARE)) {
-        _expandNodes = false;
-    }
-    AlienImGui::Tooltip("Collapse all nodes");
-
-    ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS_SQUARE)) {
         _expandNodes = true;
     }
     AlienImGui::Tooltip("Expand all nodes");
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_MINUS_SQUARE)) {
+        _expandNodes = false;
+    }
+    AlienImGui::Tooltip("Collapse all nodes");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
