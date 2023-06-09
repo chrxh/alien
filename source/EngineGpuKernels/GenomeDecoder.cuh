@@ -43,7 +43,12 @@ public:
     __inline__ __device__ static bool convertByteToBool(uint8_t b);
     __inline__ __device__ static int convertBytesToWord(uint8_t b1, uint8_t b2);
     __inline__ __device__ static void convertWordToBytes(int word, uint8_t& b1, uint8_t& b2);
+    __inline__ __device__ static uint8_t convertAngleToByte(float angle);
+    __inline__ __device__ static uint8_t convertOptionalByteToByte(int value);
 
+
+    template <typename Func>
+    __inline__ __device__ static void executeForEachNode(uint8_t* genome, int genomeSize, Func func);
     template <typename Func>
     __inline__ __device__ static void executeForEachNodeRecursively(uint8_t* genome, int genomeSize, Func func);
     template <typename Func>
@@ -242,6 +247,33 @@ __inline__ __device__ void GenomeDecoder::convertWordToBytes(int word, uint8_t& 
 {
     b1 = static_cast<uint8_t>(word & 0xff);
     b2 = static_cast<uint8_t>((word >> 8) & 0xff);
+}
+
+__inline__ __device__ uint8_t GenomeDecoder::convertAngleToByte(float angle)
+{
+    if (angle > 180.0f) {
+        angle -= 360.0f;
+    }
+    if (angle < -180.0f) {
+        angle += 360.0f;
+    }
+    return static_cast<uint8_t>(static_cast<int8_t>(angle / 180 * 120));
+}
+
+__inline__ __device__ uint8_t GenomeDecoder::convertOptionalByteToByte(int value)
+{
+    return static_cast<uint8_t>(value);
+}
+
+template <typename Func>
+__inline__ __device__ void GenomeDecoder::executeForEachNode(uint8_t* genome, int genomeSize, Func func)
+{
+    for (int currentNodeAddress = Const::GenomeHeaderSize; currentNodeAddress < genomeSize;) {
+        currentNodeAddress +=
+            Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(genome, genomeSize, currentNodeAddress);
+
+        func(currentNodeAddress);
+    }
 }
 
 template <typename Func>

@@ -258,6 +258,8 @@ protected:
 
         auto createCompareClone = [](CellGenomeDescription const& cell) {
             auto clone = cell;
+            clone.referenceAngle = 0;
+            clone.numRequiredAdditionalConnections = 0;
             if (clone.getCellFunctionType() == CellFunction_Constructor) {
                 auto& constructor = std::get<ConstructorGenomeDescription>(*clone.cellFunction);
                 if (!constructor.isMakeGenomeCopy()) {

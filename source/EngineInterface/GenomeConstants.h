@@ -2,9 +2,12 @@
 
 namespace Const
 {
-    auto constexpr GenomeHeaderSize = 6;
-    auto constexpr GenomeHeaderSeparationPos = 2;
     auto constexpr CellFunctionMutationMaxGenomeSize = 200;
+
+    auto constexpr GenomeHeaderSize = 6;
+    auto constexpr GenomeHeaderShapePos = 0;
+    auto constexpr GenomeHeaderSeparationPos = 2;
+    auto constexpr GenomeHeaderAlignmentPos = 3;
 
     auto constexpr CellAnglePos = 1;
     auto constexpr CellRequiredConnectionsPos = 3;

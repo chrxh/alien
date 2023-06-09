@@ -9,6 +9,7 @@
 #include "CellConnectionProcessor.cuh"
 #include "MutationProcessor.cuh"
 #include "GenomeDecoder.cuh"
+#include "ShapeGenerator.cuh"
 
 class ConstructorProcessor
 {
@@ -52,14 +53,6 @@ private:
     constructCellIntern(SimulationData& data, Cell* hostCell, float2 const& newCellPos, int maxConnections, ConstructionData const& constructionData);
 
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
-
-    __inline__ __device__ static void generateConstructionDataForSegment(ConstructionData& constructionData, ConstructorFunction const& constructor);
-    __inline__ __device__ static void generateConstructionDataForTriangle(ConstructionData& constructionData, ConstructorFunction const& constructor);
-    __inline__ __device__ static void generateConstructionDataForRectangle(ConstructionData& constructionData, ConstructorFunction const& constructor);
-    __inline__ __device__ static void generateConstructionDataForHexagon(ConstructionData& constructionData, ConstructorFunction const& constructor);
-    __inline__ __device__ static void generateConstructionDataForLoop(ConstructionData& constructionData, ConstructorFunction const& constructor);
-    __inline__ __device__ static void generateConstructionDataForTube(ConstructionData& constructionData, ConstructorFunction const& constructor);
-    __inline__ __device__ static void generateConstructionDataForLolli(ConstructionData& constructionData, ConstructorFunction const& constructor);
 };
 
 /************************************************************************/
@@ -237,30 +230,20 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     //genome-wide data
     result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
 
-    switch (result.genomeHeader.shape % ConstructionShape_Count) {
-    case ConstructionShape_Segment:
-        generateConstructionDataForSegment(result, constructor);
-        break;
-    case ConstructionShape_Triangle:
-        generateConstructionDataForTriangle(result, constructor);
-        break;
-    case ConstructionShape_Rectangle:
-        generateConstructionDataForRectangle(result, constructor);
-        break;
-    case ConstructionShape_Hexagon:
-        generateConstructionDataForHexagon(result, constructor);
-        break;
-    case ConstructionShape_Loop:
-        generateConstructionDataForLoop(result, constructor);
-        break;
-    case ConstructionShape_Tube:
-        generateConstructionDataForTube(result, constructor);
-        break;
-    case ConstructionShape_Lolli:
-        generateConstructionDataForLolli(result, constructor);
-        break;
-    }
+    ShapeGenerator shapeGenerator;
+    auto shape = result.genomeHeader.shape % ConstructionShape_Count;
+    if (shape != ConstructionShape_Custom) {
+        GenomeDecoder::executeForEachNodeUntilReadPosition(constructor, [&](bool isLastNode) {
+            auto generationResult = shapeGenerator.generateNextConstructionData(shape);
 
+            if (isLastNode) {
+                result.numRequiredAdditionalConnections = generationResult.numRequiredAdditionalConnections;
+                result.angle = generationResult.angle;
+                result.genomeHeader.angleAlignment = shapeGenerator.getConstructorAngleAlignment(shape);
+            }
+        });
+    }
+    
     //node data
     result.cellFunction = GenomeDecoder::readByte(constructor) % CellFunction_Count;
     auto angle = GenomeDecoder::readAngle(constructor);
@@ -694,205 +677,4 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }
     return true;
-}
-
-__inline__ __device__ void ConstructorProcessor::generateConstructionDataForSegment(ConstructionData& constructionData, ConstructorFunction const& constructor)
-{
-    constructionData.angle = 0;
-    constructionData.numRequiredAdditionalConnections = 0;
-}
-
-__inline__ __device__ void ConstructorProcessor::generateConstructionDataForTriangle(ConstructionData& constructionData, ConstructorFunction const& constructor)
-{
-    int edgePos = 0;
-    int processedEdges = 0;
-
-    GenomeDecoder::executeForEachNodeUntilReadPosition(constructor, [&](bool isLastNode) {
-        auto edgeLength = max(2, processedEdges + 1);
-
-        if (isLastNode) {
-            constructionData.angle = edgePos < edgeLength - 1 ? 0 : 120.0f;
-            if (processedEdges == 0) {
-                constructionData.numRequiredAdditionalConnections = 0;
-            } else if (processedEdges == 1) {
-                constructionData.numRequiredAdditionalConnections = edgePos == 0 ? 1 : 0;
-            } else {
-                if (edgePos == edgeLength - 1) {
-                    constructionData.numRequiredAdditionalConnections = 0;
-                } else if (edgePos == edgeLength - 2) {
-                    constructionData.numRequiredAdditionalConnections = 1;
-                } else {
-                    constructionData.numRequiredAdditionalConnections = 2;
-                }
-            }
-            constructionData.genomeHeader.angleAlignment = ConstructorAngleAlignment_60;
-        }
-        if (++edgePos == edgeLength) {
-            edgePos = 0;
-            ++processedEdges;
-        }
-    });
-}
-
-__inline__ __device__ void ConstructorProcessor::generateConstructionDataForRectangle(ConstructionData& constructionData, ConstructorFunction const& constructor)
-{
-    int edgePos = 0;
-    int processedEdges = 0;
-
-    GenomeDecoder::executeForEachNodeUntilReadPosition(constructor, [&](bool isLastNode) {
-        if (isLastNode) {
-            if (processedEdges == 0) {
-                constructionData.angle = 0.0f;
-                constructionData.numRequiredAdditionalConnections = 0;
-            } else if (processedEdges == 1) {
-                constructionData.angle = 90.0f;
-                constructionData.numRequiredAdditionalConnections = 0;
-            } else {
-                constructionData.angle = edgePos == 0 ? 90.0f : 0.0f;
-                constructionData.numRequiredAdditionalConnections = edgePos == 0 ? 0 : 1;
-            }
-            constructionData.genomeHeader.angleAlignment = ConstructorAngleAlignment_90;
-        }
-        auto edgeLength = processedEdges / 2;
-        if (++edgePos > edgeLength) {
-            edgePos = 0;
-            ++processedEdges;
-        }
-    });
-}
-
-__inline__ __device__ void ConstructorProcessor::generateConstructionDataForHexagon(ConstructionData& constructionData, ConstructorFunction const& constructor)
-{
-    int edgePos = 0;
-    int processedEdges = 0;
-
-    GenomeDecoder::executeForEachNodeUntilReadPosition(constructor, [&](bool isLastNode) {
-        auto edgeLength = processedEdges / 6 + 1;
-        if (processedEdges % 6 == 1) {
-            --edgeLength;
-        }
-        if (isLastNode) {
-            if (processedEdges < 2) {
-                constructionData.angle = 120.0f;
-                constructionData.numRequiredAdditionalConnections = 0;
-            } else if (processedEdges < 6) {
-                constructionData.angle = 60.0f;
-                constructionData.numRequiredAdditionalConnections = 1;
-            } else {
-                constructionData.angle = edgePos < edgeLength - 1 ? 0.0f : 60.0f;
-                constructionData.numRequiredAdditionalConnections = edgePos < edgeLength - 1 ? 2 : 1;
-            }
-            constructionData.genomeHeader.angleAlignment = ConstructorAngleAlignment_60;
-        }
-        if (++edgePos >= edgeLength) {
-            edgePos = 0;
-            ++processedEdges;
-        }
-    });
-}
-
-__inline__ __device__ void ConstructorProcessor::generateConstructionDataForLoop(ConstructionData& constructionData, ConstructorFunction const& constructor)
-{
-    int edgePos = 0;
-    int processedEdges = 0;
-
-    GenomeDecoder::executeForEachNodeUntilReadPosition(constructor, [&](bool isLastNode) {
-        auto edgeLength = (processedEdges + 1) / 6 + 1;
-        if (processedEdges % 6 == 0) {
-            --edgeLength;
-        }
-
-        if (isLastNode) {
-            if (processedEdges < 5) {
-                constructionData.angle = 60.0f;
-                constructionData.numRequiredAdditionalConnections = 0;
-            } else if (processedEdges == 5) {
-                constructionData.angle = edgePos == 0 ? 0.0f : 60.0f;
-                constructionData.numRequiredAdditionalConnections = 1;
-            } else {
-                constructionData.angle = edgePos < edgeLength - 1 ? 0.0f : 60.0f;
-                constructionData.numRequiredAdditionalConnections = edgePos < edgeLength - 1 ? 2 : 1;
-            }
-            constructionData.genomeHeader.angleAlignment = ConstructorAngleAlignment_60;
-        }
-
-        if (++edgePos >= edgeLength) {
-            edgePos = 0;
-            ++processedEdges;
-        }
-    });
-}
-
-__inline__ __device__ void ConstructorProcessor::generateConstructionDataForTube(ConstructionData& constructionData, ConstructorFunction const& constructor)
-{
-    int pos = 0;
-
-    GenomeDecoder::executeForEachNodeUntilReadPosition(constructor, [&](bool isLastNode) {
-        if (isLastNode) {
-            if (pos % 6 == 0) {
-                constructionData.angle = 0;
-                constructionData.numRequiredAdditionalConnections = 2;
-            }
-            if (pos % 6 == 1) {
-                constructionData.angle = 60.0f;
-                constructionData.numRequiredAdditionalConnections = pos == 1 ? 0 : 1;
-            }
-            if (pos % 6 == 2) {
-                constructionData.angle = 120.0f;
-                constructionData.numRequiredAdditionalConnections = 0;
-            }
-            if (pos % 6 == 3) {
-                constructionData.angle = 0;
-                constructionData.numRequiredAdditionalConnections = 2;
-            }
-            if (pos % 6 == 4) {
-                constructionData.angle = -120.0f;
-                constructionData.numRequiredAdditionalConnections = pos == 4 ? 1 : 2;
-            }
-            if (pos % 6 == 5) {
-                constructionData.angle = -60.0f;
-                constructionData.numRequiredAdditionalConnections = 1;
-            }
-            constructionData.genomeHeader.angleAlignment = ConstructorAngleAlignment_60;
-        }
-        ++pos;
-    });
-}
-
-__inline__ __device__ void ConstructorProcessor::generateConstructionDataForLolli(ConstructionData& constructionData, ConstructorFunction const& constructor)
-{
-    int edgePos = 0;
-    int processedEdges = 0;
-
-    GenomeDecoder::executeForEachNodeUntilReadPosition(constructor, [&](bool isLastNode) {
-        if (processedEdges < 12 || edgePos == 0) {
-            auto edgeLength = processedEdges / 6 + 1;
-            if (processedEdges % 6 == 1) {
-                --edgeLength;
-            }
-            if (isLastNode) {
-                if (processedEdges < 2) {
-                    constructionData.angle = 120.0f;
-                    constructionData.numRequiredAdditionalConnections = 0;
-                } else if (processedEdges < 6) {
-                    constructionData.angle = 60.0f;
-                    constructionData.numRequiredAdditionalConnections = 1;
-                } else {
-                    constructionData.angle = edgePos < edgeLength - 1 ? 0.0f : 60.0f;
-                    constructionData.numRequiredAdditionalConnections = edgePos < edgeLength - 1 ? 2 : 1;
-                }
-                constructionData.genomeHeader.angleAlignment = ConstructorAngleAlignment_60;
-            }
-            if (++edgePos >= edgeLength) {
-                edgePos = 0;
-                ++processedEdges;
-            }
-        } else {
-            if (isLastNode) {
-                constructionData.angle = edgePos == 1 ? -60.0f : 0.0f;
-                constructionData.numRequiredAdditionalConnections = edgePos == 1 ? 2 : 0;
-            }
-            ++edgePos;
-        }
-    });
 }
