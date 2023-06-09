@@ -55,7 +55,6 @@ void JsonParser::encodeDecode(
     } else {
         if constexpr (std::is_same<T, std::string>::value) {
             parameter = tree.get<std::string>(node, defaultValue);
-            boost::algorithm::to_lower(parameter);
         } else {
             parameter = tree.get<T>(node, defaultValue);
         }
