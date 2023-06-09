@@ -10,6 +10,8 @@ public:
         result.numRequiredAdditionalConnections = 0;
         return result;
     }
+
+    ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 };
 
 class _TriangleGenerator : public _ShapeGenerator
@@ -40,6 +42,8 @@ public:
         return result;
     }
 
+    ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
+
 private:
     int _edgePos = 0;
     int _processedEdges = 0;
@@ -69,6 +73,8 @@ public:
         }
         return result;
     }
+
+    ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_90; }
 
 private:
     int _edgePos = 0;
@@ -105,6 +111,8 @@ public:
         return result;
     }
 
+    ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
+
 private:
     int _edgePos = 0;
     int _processedEdges = 0;
@@ -139,6 +147,8 @@ public:
         }
         return result;
     }
+
+    ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
 private:
     int _edgePos = 0;
@@ -180,6 +190,8 @@ public:
         return result;
     }
 
+    ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
+
 private:
     int _pos = 0;
 };
@@ -219,6 +231,8 @@ public:
         }
         return result;
     }
+
+    ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
 private:
     int _edgePos = 0;

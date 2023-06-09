@@ -78,7 +78,7 @@ public:
         MEMBER_DECLARATION(InputFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER_DECLARATION(InputFloatParameters, bool, readOnly, false);
     };
-    static void InputFloat(InputFloatParameters const& parameters, float& value);
+    static bool InputFloat(InputFloatParameters const& parameters, float& value);
 
     struct InputFloat2Parameters
     {

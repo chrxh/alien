@@ -18,6 +18,7 @@ public:
 private:
     void processIntern() override;
     void processToolbar();
+    void processEditor();
 
     struct TabData
     {
@@ -46,6 +47,8 @@ private:
     void validationAndCorrection(CellGenomeDescription& cell) const;
 
     void scheduleAddTab(GenomeDescription const& genome);
+
+    void updateGeometry(GenomeDescription& genome, ConstructionShape shape);
 
     EditorModel _editorModel;
     SimulationController _simController;
