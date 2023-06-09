@@ -115,18 +115,19 @@ bool AlienImGui::InputOptionalInt(InputIntParameters const& parameters, std::opt
     return result;
 }
 
-void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value)
+bool AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value)
 {
     auto textWidth = StyleRepository::getInstance().contentScale(parameters._textWidth);
 
     ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
-    ImGui::InputFloat(("##" + parameters._name).c_str(), &value, parameters._step, 0, parameters._format.c_str(), flags);
+    auto result = ImGui::InputFloat(("##" + parameters._name).c_str(), &value, parameters._step, 0, parameters._format.c_str(), flags);
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
         if (revertButton(parameters._name)) {
             value = *parameters._defaultValue;
+            result = true;
         }
         ImGui::EndDisabled();
     }
@@ -136,6 +137,7 @@ void AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     if (parameters._tooltip) {
         HelpMarker(*parameters._tooltip);
     }
+    return result;
 }
 
 void AlienImGui::InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2)

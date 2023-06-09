@@ -16,6 +16,8 @@ class _ShapeGenerator
 {
 public:
     virtual ShapeGeneratorResult generateNextConstructionData() = 0;
+
+    virtual ConstructorAngleAlignment getConstructorAngleAlignment() = 0;
 };
 
 class ShapeGeneratorFactory
