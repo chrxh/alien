@@ -111,6 +111,7 @@ bool AlienImGui::InputOptionalInt(InputIntParameters const& parameters, std::opt
     auto enabled = optValue.has_value();
     auto value = optValue.value_or(parameters._defaultValue.value_or(0));
     auto result = InputInt(parameters, value, &enabled);
+    result |= (optValue.has_value() != enabled);
     optValue = enabled ? std::make_optional(value) : std::nullopt;
     return result;
 }

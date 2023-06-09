@@ -65,6 +65,7 @@ add_library(alien_engine_gpu_kernels_lib
     RenderingKernelsLauncher.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
+    ShapeGenerator.cuh
     SimulationData.cu
     SimulationData.cuh
     SimulationKernels.cu

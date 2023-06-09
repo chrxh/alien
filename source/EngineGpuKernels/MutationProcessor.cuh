@@ -5,6 +5,7 @@
 
 #include "CellConnectionProcessor.cuh"
 #include "GenomeDecoder.cuh"
+#include "ShapeGenerator.cuh"
 
 class MutationProcessor
 {
@@ -212,6 +213,7 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
     }
 
     auto subgenome = genome;
+    auto subgenomeSize = genomeSize;
     if (genomeSize > Const::GenomeHeaderSize) {
         int subGenomesSizeIndices[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH];
         int numSubGenomesSizeIndices;
@@ -220,14 +222,31 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
 
         if (numSubGenomesSizeIndices > 0) {
             subgenome = genome + subGenomesSizeIndices[numSubGenomesSizeIndices - 1] + 2;  //+2 because 2 bytes encode the sub-genome length
+            subgenomeSize = GenomeDecoder::readWord(genome, subGenomesSizeIndices[numSubGenomesSizeIndices - 1]);
         }
     }
 
     auto delta = data.numberGen1.random(Const::GenomeHeaderSize - 1);
-    if (delta == Const::GenomeHeaderSeparationPos) {
+    auto mutatedByte = data.numberGen1.randomByte();
+    if (delta == Const::GenomeHeaderSeparationPos && GenomeDecoder::convertByteToBool(mutatedByte)) {
         return;
     }
-    subgenome[delta] = data.numberGen1.randomByte();
+    if (delta == Const::GenomeHeaderShapePos) {
+        auto shape = mutatedByte % ConstructionShape_Count;
+        auto origShape = subgenome[delta] % ConstructionShape_Count;
+        if (origShape != ConstructionShape_Custom && shape == ConstructionShape_Custom) {
+            ShapeGenerator shapeGenerator;
+            subgenome[Const::GenomeHeaderAlignmentPos] = shapeGenerator.getConstructorAngleAlignment(shape);
+
+            GenomeDecoder::executeForEachNode(subgenome, subgenomeSize, [&](int nodeAddress) {
+                auto generationResult = shapeGenerator.generateNextConstructionData(origShape);
+                subgenome[nodeAddress + Const::CellAnglePos] = GenomeDecoder::convertAngleToByte(generationResult.angle);
+                subgenome[nodeAddress + Const::CellRequiredConnectionsPos] =
+                    GenomeDecoder::convertOptionalByteToByte(generationResult.numRequiredAdditionalConnections);
+            });
+        }
+    }
+    subgenome[delta] = mutatedByte;
 }
 
 __inline__ __device__ void MutationProcessor::customGeometryMutation(SimulationData& data, Cell* cell)
