@@ -4,6 +4,7 @@
 #include <optional>
 
 #include "CellFunctionConstants.h"
+#include "Definitions.h"
 
 struct ShapeGeneratorResult
 {
@@ -16,7 +17,6 @@ class _ShapeGenerator
 public:
     virtual ShapeGeneratorResult generateNextConstructionData() = 0;
 };
-using ShapeGenerator = std::shared_ptr<_ShapeGenerator>;
 
 class ShapeGeneratorFactory
 {

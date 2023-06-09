@@ -28,3 +28,8 @@ struct HistogramData;
 struct StatisticsData;
 
 class SpaceCalculator;
+
+class _ShapeGenerator;
+using ShapeGenerator = std::shared_ptr<_ShapeGenerator>;
+
+class ShapeGeneratorResult;
