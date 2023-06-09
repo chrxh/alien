@@ -4,6 +4,7 @@
 #include "EngineInterface/PreviewDescriptions.h"
 
 #include "AlienWindow.h"
+#include "Definitions.h"
 
 class _GenomeEditorWindow : public _AlienWindow
 {
@@ -27,7 +28,7 @@ private:
     void processTab(TabData& tab);
     void processGenomeHeader(TabData& tab);
     void processConstructionSequence(TabData& tab);
-    void processNode(TabData& tab, CellGenomeDescription& cell, bool isFirstOrLast);
+    void processNode(TabData& tab, CellGenomeDescription& cell, std::optional<ShapeGeneratorResult> const& shapeGeneratorResult, bool isFirstOrLast);
     template<typename Description>
     void processSubGenomeWidgets(TabData const& tab, Description& desc);
 

@@ -15,6 +15,7 @@
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/PreviewDescriptionConverter.h"
 #include "EngineInterface/Serializer.h"
+#include "EngineInterface/ShapeGenerator.h"
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
@@ -80,12 +81,14 @@ GenomeDescription const& _GenomeEditorWindow::getCurrentGenome() const
 
 namespace
 {
-    std::string generateShortDescription(int index, CellGenomeDescription const& cell, ConstructionShape const& shape, bool isFirstOrLast)
+    std::string
+    generateShortDescription(int index, CellGenomeDescription const& cell, std::optional<ShapeGeneratorResult> const& shapeGeneratorResult, bool isFirstOrLast)
     {
         auto result = "No. " + std::to_string(index + 1) + ", Type: " + Const::CellFunctionToStringMap.at(cell.getCellFunctionType())
             + ", Color: " + std::to_string(cell.color);
-        if (shape == ConstructionShape_Custom && !isFirstOrLast) {
-            result += ", Angle: " + StringHelper::format(cell.referenceAngle, 1);
+        if (!isFirstOrLast) {
+            auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell.referenceAngle;
+            result += ", Angle: " + StringHelper::format(referenceAngle, 1);
         }
         result += ", Energy: " + StringHelper::format(cell.energy, 1);
         return result;
@@ -362,8 +365,13 @@ namespace
 void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 {
     int index = 0;
+
+    auto shapeGenerator = ShapeGeneratorFactory::create(tab.genome.info.shape);
     for (auto& cell : tab.genome.cells) {
         auto isFirstOrLast = index == 0 || index == tab.genome.cells.size() - 1;
+        std::optional<ShapeGeneratorResult> shapeGeneratorResult =
+            shapeGenerator ? std::make_optional(shapeGenerator->generateNextConstructionData()) : std::nullopt;
+
         ImGui::PushID(index);
 
         float h, s, v;
@@ -381,7 +389,8 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
         if (_expandNodes) {
             ImGui::SetNextTreeNodeOpen(*_expandNodes);
         }
-        auto treeNodeOpen = ImGui::TreeNodeEx((generateShortDescription(index, cell, tab.genome.info.shape, isFirstOrLast) + "###").c_str(), flags);
+        auto treeNodeOpen =
+            ImGui::TreeNodeEx((generateShortDescription(index, cell, shapeGeneratorResult, isFirstOrLast) + "###").c_str(), flags);
         ImGui::PopStyleColor();
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
             if (tab.selectedNode && *tab.selectedNode == index) {
@@ -396,7 +405,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 
         if (treeNodeOpen) {
             auto origCell = cell;
-            processNode(tab, cell, isFirstOrLast);
+            processNode(tab, cell, shapeGeneratorResult, isFirstOrLast);
             if (origCell != cell) {
                 tab.selectedNode = index;
             }
@@ -408,11 +417,14 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
     _expandNodes.reset();
 }
 
-void _GenomeEditorWindow::processNode(TabData& tab, CellGenomeDescription& cell, bool isFirstOrLast)
+void _GenomeEditorWindow::processNode(
+    TabData& tab,
+    CellGenomeDescription& cell,
+    std::optional<ShapeGeneratorResult> const& shapeGeneratorResult,
+    bool isFirstOrLast)
 {
     auto type = cell.getCellFunctionType();
 
-    //cell type
     DynamicTableLayout table;
     if (table.begin()) {
         if (AlienImGui::CellFunctionCombo(AlienImGui::CellFunctionComboParameters().name("Specialization").textWidth(ContentTextWidth), type)) {
@@ -420,9 +432,11 @@ void _GenomeEditorWindow::processNode(TabData& tab, CellGenomeDescription& cell,
         }
         table.next();
         AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(ContentTextWidth), cell.color);
-        if (tab.genome.info.shape == ConstructionShape_Custom && !isFirstOrLast) {
+        if (!isFirstOrLast) {
             table.next();
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f"), cell.referenceAngle);
+            auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell.referenceAngle;
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f"), referenceAngle);
+            cell.referenceAngle = referenceAngle;
         }
         table.next();
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").textWidth(ContentTextWidth).format("%.1f"), cell.energy);
@@ -432,11 +446,12 @@ void _GenomeEditorWindow::processNode(TabData& tab, CellGenomeDescription& cell,
         AlienImGui::InputOptionalInt(AlienImGui::InputIntParameters().name("Input execution number").textWidth(ContentTextWidth), cell.inputExecutionOrderNumber);
         table.next();
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(ContentTextWidth), cell.outputBlocked);
-        if (tab.genome.info.shape == ConstructionShape_Custom) {
-            table.next();
-            AlienImGui::InputOptionalInt(
-                AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth), cell.numRequiredAdditionalConnections);
-        }
+        table.next();
+        auto numRequiredAdditionalConnections =
+            shapeGeneratorResult ? shapeGeneratorResult->numRequiredAdditionalConnections : cell.numRequiredAdditionalConnections;
+        AlienImGui::InputOptionalInt(
+            AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth), numRequiredAdditionalConnections);
+        cell.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
 
         switch (type) {
         case CellFunction_Neuron: {
