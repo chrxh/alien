@@ -1,13 +1,13 @@
 {
     "general": {
         "time step": "0",
-        "zoom": "1.45164931",
+        "zoom": "2.90329862",
         "center": {
-            "x": "1484.50183105",
-            "y": "264.21923828"
+            "x": "729.49853516",
+            "y": "214.62045288"
         },
         "world size": {
-            "x": "3000",
+            "x": "1500",
             "y": "500"
         }
     },
@@ -176,7 +176,14 @@
                         "color[3]": "0.00001500",
                         "color[4]": "0.00001500",
                         "color[5]": "0.00001500",
-                        "color[6]": "0.00001500"
+                        "color[6]": "0.00001500",
+                        "uniform color[0]": "0.00000000",
+                        "uniform color[1]": "0.00000000",
+                        "uniform color[2]": "0.00000000",
+                        "uniform color[3]": "0.00000000",
+                        "uniform color[4]": "0.00000000",
+                        "uniform color[5]": "0.00000000",
+                        "uniform color[6]": "0.00000000"
                     },
                     "mutation color transition[0, 0]": "true",
                     "mutation color transition[0, 1]": "true",
@@ -228,7 +235,7 @@
                     "mutation color transition[6, 5]": "true",
                     "mutation color transition[6, 6]": "true",
                     "mutation self replication": "false",
-                    "mutation prevent depth increase": "true",
+                    "mutation prevent depth increase": "false",
                     "completeness check for self-replication": "true",
                     "unlimited energy": "false"
                 },
