@@ -12,7 +12,7 @@
 
 struct FluidMotion
 {
-    float smoothingLength = 0.66f;
+    float smoothingLength = 0.8f;
     float viscosityStrength = 0.1f;
     float pressureStrength = 0.1f;
 
