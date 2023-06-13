@@ -109,7 +109,7 @@ void _CreatorWindow::processIntern()
                 AlienImGui::InputFloatParameters().name("Cell distance").format("%.2f").step(0.1).textWidth(RightColumnWidth), _cellDistance);
         }
         if (_mode != CreationMode::CreateParticle & _mode != CreationMode::CreateCell) {
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Make sticky").textWidth(RightColumnWidth), _makeSticky);
+            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth), _makeSticky);
         }
         AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(RightColumnWidth), _barrier);
     }
