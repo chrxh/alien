@@ -657,11 +657,12 @@ ConstructorProcessor::constructCellIntern(
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
     if (!cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
-        auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.cellNormalEnergy[hostCell->color])
-            + min(constructionData.energy, cudaSimulationParameters.cellNormalEnergy[hostCell->color])
-                * (1.0f - cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[hostCell->color]);
+        auto cellFunctionConstructorPumpEnergyFactor = cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[hostCell->color];
 
-        if (hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + energyNeededFromHost) {
+        auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.cellNormalEnergy[hostCell->color])
+            + min(constructionData.energy, cudaSimulationParameters.cellNormalEnergy[hostCell->color]) * (1.0f - cellFunctionConstructorPumpEnergyFactor);
+
+        if (cellFunctionConstructorPumpEnergyFactor < 1.0f && hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + energyNeededFromHost) {
             return false;
         }
         auto energyNeededFromRadiation = constructionData.energy - energyNeededFromHost;
