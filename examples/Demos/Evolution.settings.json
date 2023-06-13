@@ -1,10 +1,10 @@
 {
     "general": {
-        "time step": "0",
-        "zoom": "0.54521924",
+        "time step": "658213",
+        "zoom": "0.65854549",
         "center": {
-            "x": "1487.59985352",
-            "y": "452.26501465"
+            "x": "1589.25280762",
+            "y": "479.73571777"
         },
         "world size": {
             "x": "3000",
@@ -47,12 +47,12 @@
             "min energy[6]": "50.00000000",
             "fusion velocity": "0.40000001",
             "max binding energy": "340282346638528859811704183484516925440.00000000",
-            "max age[0]": "322102",
-            "max age[1]": "57932",
-            "max age[2]": "9472",
-            "max age[3]": "322094",
-            "max age[4]": "322100",
-            "max age[5]": "18459",
+            "max age[0]": "266200",
+            "max age[1]": "241997",
+            "max age[2]": "165286",
+            "max age[3]": "29728",
+            "max age[4]": "52666",
+            "max age[5]": "322102",
             "max age[6]": "322102",
             "max age": {
                 "balance": {
@@ -500,13 +500,13 @@
             "probability": "0.03000000",
             "velocity multiplier": "1.00000000",
             "velocity perturbation": "0.50000000",
-            "absorption[0]": "0.08210000",
+            "absorption[0]": "0.25119999",
             "absorption[1]": "1.00000000",
             "absorption[2]": "1.00000000",
-            "absorption[3]": "0.08210000",
-            "absorption[4]": "0.08210000",
-            "absorption[5]": "0.08210000",
-            "absorption[6]": "0.08210000",
+            "absorption[3]": "0.25119999",
+            "absorption[4]": "0.25119999",
+            "absorption[5]": "0.25119999",
+            "absorption[6]": "0.25119999",
             "min cell age[0]": "0",
             "min cell age[1]": "0",
             "min cell age[2]": "0",
@@ -564,7 +564,7 @@
             },
             "2": {
                 "pos": {
-                    "x": "1325.00000000",
+                    "x": "1500.00000000",
                     "y": "500.00000000"
                 }
             }
@@ -865,7 +865,7 @@
                 }
             },
             "1": {
-                "color": "4281535013",
+                "color": "4279632912",
                 "pos": {
                     "x": "2225.80004883",
                     "y": "500.00000000"
@@ -971,8 +971,8 @@
                                 "activated": "false"
                             },
                             "food chain color matrix[0, 0]": "1.00000000",
-                            "food chain color matrix[0, 1]": "0.30000001",
-                            "food chain color matrix[0, 2]": "0.30000001",
+                            "food chain color matrix[0, 1]": "1.00000000",
+                            "food chain color matrix[0, 2]": "1.00000000",
                             "food chain color matrix[0, 3]": "0.30000001",
                             "food chain color matrix[0, 4]": "0.30000001",
                             "food chain color matrix[0, 5]": "0.30000001",
@@ -992,29 +992,29 @@
                             "food chain color matrix[2, 5]": "0.00000000",
                             "food chain color matrix[2, 6]": "0.00000000",
                             "food chain color matrix[3, 0]": "0.30000001",
-                            "food chain color matrix[3, 1]": "0.30000001",
-                            "food chain color matrix[3, 2]": "0.30000001",
+                            "food chain color matrix[3, 1]": "1.00000000",
+                            "food chain color matrix[3, 2]": "1.00000000",
                             "food chain color matrix[3, 3]": "1.00000000",
                             "food chain color matrix[3, 4]": "0.30000001",
                             "food chain color matrix[3, 5]": "0.30000001",
                             "food chain color matrix[3, 6]": "0.30000001",
                             "food chain color matrix[4, 0]": "0.30000001",
-                            "food chain color matrix[4, 1]": "0.30000001",
-                            "food chain color matrix[4, 2]": "0.30000001",
+                            "food chain color matrix[4, 1]": "1.00000000",
+                            "food chain color matrix[4, 2]": "1.00000000",
                             "food chain color matrix[4, 3]": "0.30000001",
                             "food chain color matrix[4, 4]": "1.00000000",
                             "food chain color matrix[4, 5]": "0.30000001",
                             "food chain color matrix[4, 6]": "0.30000001",
                             "food chain color matrix[5, 0]": "0.30000001",
-                            "food chain color matrix[5, 1]": "0.30000001",
-                            "food chain color matrix[5, 2]": "0.30000001",
+                            "food chain color matrix[5, 1]": "1.00000000",
+                            "food chain color matrix[5, 2]": "1.00000000",
                             "food chain color matrix[5, 3]": "0.30000001",
                             "food chain color matrix[5, 4]": "0.30000001",
                             "food chain color matrix[5, 5]": "1.00000000",
                             "food chain color matrix[5, 6]": "0.30000001",
                             "food chain color matrix[6, 0]": "0.30000001",
-                            "food chain color matrix[6, 1]": "0.30000001",
-                            "food chain color matrix[6, 2]": "0.30000001",
+                            "food chain color matrix[6, 1]": "1.00000000",
+                            "food chain color matrix[6, 2]": "1.00000000",
                             "food chain color matrix[6, 3]": "0.30000001",
                             "food chain color matrix[6, 4]": "0.30000001",
                             "food chain color matrix[6, 5]": "0.30000001",
