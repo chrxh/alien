@@ -87,6 +87,12 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);
 }
 
+void _SimulationKernelsLauncher::prepareForSimulationParametersChanges(Settings const& settings, SimulationData const& data)
+{
+    auto const gpuSettings = settings.gpuSettings;
+    KERNEL_CALL(cudaResetDensity, data);
+}
+
 bool _SimulationKernelsLauncher::isRigidityUpdateEnabled(Settings const& settings) const
 {
     for (int i = 0; i < settings.simulationParameters.numSpots; ++i) {

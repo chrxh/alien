@@ -11,6 +11,7 @@ public:
     _SimulationKernelsLauncher();
 
     void calcTimestep(Settings const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
+    void prepareForSimulationParametersChanges(Settings const& settings, SimulationData const& simulationData);
 
 private:
     bool isRigidityUpdateEnabled(Settings const& settings) const;
