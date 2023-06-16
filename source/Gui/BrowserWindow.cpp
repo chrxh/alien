@@ -161,13 +161,15 @@ void _BrowserWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
     if (AlienImGui::ToolbarButton(ICON_FA_UPLOAD)) {
-        if (auto uploadSimulationDialog = _uploadSimulationDialog.lock()) {
-            uploadSimulationDialog->show();
+        if (_networkController->getLoggedInUserName()) {
+            if (auto uploadSimulationDialog = _uploadSimulationDialog.lock()) {
+                uploadSimulationDialog->show();
+            }
+        } else {
+            _loginDialog.lock()->show();
         }
     }
-    ImGui::EndDisabled();
     AlienImGui::Tooltip("Upload simulation");
     AlienImGui::Separator();
 }
