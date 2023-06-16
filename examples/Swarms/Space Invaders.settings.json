@@ -1,10 +1,10 @@
 {
     "general": {
         "time step": "0",
-        "zoom": "2.25132322",
+        "zoom": "2.43596816",
         "center": {
-            "x": "1031.57470703",
-            "y": "824.42858887"
+            "x": "1023.51666260",
+            "y": "806.98583984"
         },
         "world size": {
             "x": "3000",
@@ -54,6 +54,12 @@
             "max age[4]": "2147483647",
             "max age[5]": "2147483647",
             "max age[6]": "2147483647",
+            "max age": {
+                "balance": {
+                    "enabled": "false",
+                    "interval": "10000"
+                }
+            },
             "color transition rules": {
                 "duration[0]": "0",
                 "duration[1]": "0",
@@ -72,6 +78,13 @@
             },
             "function": {
                 "constructor": {
+                    "pump energy factor[0]": "0.00000000",
+                    "pump energy factor[1]": "0.00000000",
+                    "pump energy factor[2]": "0.00000000",
+                    "pump energy factor[3]": "0.00000000",
+                    "pump energy factor[4]": "0.00000000",
+                    "pump energy factor[5]": "0.00000000",
+                    "pump energy factor[6]": "0.00000000",
                     "offspring distance[0]": "2.00000000",
                     "offspring distance[1]": "2.00000000",
                     "offspring distance[2]": "2.00000000",
@@ -108,6 +121,20 @@
                         "data[4]": "0.00000000",
                         "data[5]": "0.00000000",
                         "data[6]": "0.00000000",
+                        "geometry[0]": "0.00000000",
+                        "geometry[1]": "0.00000000",
+                        "geometry[2]": "0.00000000",
+                        "geometry[3]": "0.00000000",
+                        "geometry[4]": "0.00000000",
+                        "geometry[5]": "0.00000000",
+                        "geometry[6]": "0.00000000",
+                        "custom geometry[0]": "0.00000000",
+                        "custom geometry[1]": "0.00000000",
+                        "custom geometry[2]": "0.00000000",
+                        "custom geometry[3]": "0.00000000",
+                        "custom geometry[4]": "0.00000000",
+                        "custom geometry[5]": "0.00000000",
+                        "custom geometry[6]": "0.00000000",
                         "cell function[0]": "0.00000000",
                         "cell function[1]": "0.00000000",
                         "cell function[2]": "0.00000000",
@@ -149,7 +176,14 @@
                         "color[3]": "0.00000000",
                         "color[4]": "0.00000000",
                         "color[5]": "0.00000000",
-                        "color[6]": "0.00000000"
+                        "color[6]": "0.00000000",
+                        "uniform color[0]": "0.00000000",
+                        "uniform color[1]": "0.00000000",
+                        "uniform color[2]": "0.00000000",
+                        "uniform color[3]": "0.00000000",
+                        "uniform color[4]": "0.00000000",
+                        "uniform color[5]": "0.00000000",
+                        "uniform color[6]": "0.00000000"
                     },
                     "mutation color transition[0, 0]": "true",
                     "mutation color transition[0, 1]": "true",
@@ -200,7 +234,10 @@
                     "mutation color transition[6, 4]": "true",
                     "mutation color transition[6, 5]": "true",
                     "mutation color transition[6, 6]": "true",
-                    "mutation self replication": "false"
+                    "mutation self replication": "false",
+                    "mutation prevent depth increase": "false",
+                    "completeness check for self-replication": "false",
+                    "unlimited energy": "false"
                 },
                 "injector": {
                     "radius[0]": "2.00000000",
@@ -515,7 +552,300 @@
             "num sources": "0"
         },
         "spots": {
-            "num spots": "0"
+            "num spots": "1",
+            "0": {
+                "color": "4279439879",
+                "pos": {
+                    "x": "1045.19995117",
+                    "y": "832.29998779"
+                },
+                "shape": {
+                    "type": "0",
+                    "circular": {
+                        "core radius": "264.50000000"
+                    }
+                },
+                "flow": {
+                    "type": "1",
+                    "radial": {
+                        "orientation": "0",
+                        "strength": "0.01049000",
+                        "drift angle": "10.30000019"
+                    }
+                },
+                "fadeout radius": "245.19999695",
+                "friction": {
+                    "activated": "false",
+                    "value": "0.00440000"
+                },
+                "rigidity": {
+                    "activated": "false",
+                    "value": "0.00000000"
+                },
+                "radiation": {
+                    "absorption": {
+                        "activated": "false"
+                    },
+                    "absorption[0]": "1.00000000",
+                    "absorption[1]": "1.00000000",
+                    "absorption[2]": "1.00000000",
+                    "absorption[3]": "1.00000000",
+                    "absorption[4]": "1.00000000",
+                    "absorption[5]": "1.00000000",
+                    "absorption[6]": "1.00000000",
+                    "factor": {
+                        "activated": "false"
+                    },
+                    "factor[0]": "0.00002900",
+                    "factor[1]": "0.00002900",
+                    "factor[2]": "0.00002900",
+                    "factor[3]": "0.00002900",
+                    "factor[4]": "0.00002900",
+                    "factor[5]": "0.00002900",
+                    "factor[6]": "0.00002900"
+                },
+                "cell": {
+                    "max force": {
+                        "activated": "false",
+                        "value": "0.80000001"
+                    },
+                    "min energy": {
+                        "activated": "false"
+                    },
+                    "min energy[0]": "50.00000000",
+                    "min energy[1]": "50.00000000",
+                    "min energy[2]": "50.00000000",
+                    "min energy[3]": "50.00000000",
+                    "min energy[4]": "50.00000000",
+                    "min energy[5]": "50.00000000",
+                    "min energy[6]": "50.00000000",
+                    "fusion velocity": {
+                        "activated": "false",
+                        "value": "0.40000001"
+                    },
+                    "max binding energy": {
+                        "activated": "false",
+                        "value": "500000.00000000"
+                    },
+                    "color transition rules": {
+                        "activated": "false",
+                        "duration[0]": "0",
+                        "duration[1]": "0",
+                        "duration[2]": "0",
+                        "duration[3]": "0",
+                        "duration[4]": "0",
+                        "duration[5]": "0",
+                        "duration[6]": "0",
+                        "target color[0]": "0",
+                        "target color[1]": "1",
+                        "target color[2]": "2",
+                        "target color[3]": "3",
+                        "target color[4]": "4",
+                        "target color[5]": "5",
+                        "target color[6]": "6"
+                    },
+                    "function": {
+                        "attacker": {
+                            "energy cost": {
+                                "activated": "false"
+                            },
+                            "energy cost[0]": "0.00000000",
+                            "energy cost[1]": "0.00000000",
+                            "energy cost[2]": "0.00000000",
+                            "energy cost[3]": "0.00000000",
+                            "energy cost[4]": "0.00000000",
+                            "energy cost[5]": "0.00000000",
+                            "energy cost[6]": "0.00000000",
+                            "food chain color matrix": {
+                                "activated": "false"
+                            },
+                            "food chain color matrix[0, 0]": "0.00000000",
+                            "food chain color matrix[0, 1]": "0.00000000",
+                            "food chain color matrix[0, 2]": "1.00000000",
+                            "food chain color matrix[0, 3]": "0.00000000",
+                            "food chain color matrix[0, 4]": "0.00000000",
+                            "food chain color matrix[0, 5]": "0.00000000",
+                            "food chain color matrix[0, 6]": "0.00000000",
+                            "food chain color matrix[1, 0]": "0.00000000",
+                            "food chain color matrix[1, 1]": "0.00000000",
+                            "food chain color matrix[1, 2]": "0.00000000",
+                            "food chain color matrix[1, 3]": "0.00000000",
+                            "food chain color matrix[1, 4]": "0.00000000",
+                            "food chain color matrix[1, 5]": "0.00000000",
+                            "food chain color matrix[1, 6]": "0.00000000",
+                            "food chain color matrix[2, 0]": "0.00000000",
+                            "food chain color matrix[2, 1]": "0.00000000",
+                            "food chain color matrix[2, 2]": "0.00000000",
+                            "food chain color matrix[2, 3]": "0.00000000",
+                            "food chain color matrix[2, 4]": "0.00000000",
+                            "food chain color matrix[2, 5]": "0.00000000",
+                            "food chain color matrix[2, 6]": "0.00000000",
+                            "food chain color matrix[3, 0]": "0.00000000",
+                            "food chain color matrix[3, 1]": "0.00000000",
+                            "food chain color matrix[3, 2]": "0.00000000",
+                            "food chain color matrix[3, 3]": "0.00000000",
+                            "food chain color matrix[3, 4]": "0.00000000",
+                            "food chain color matrix[3, 5]": "0.00000000",
+                            "food chain color matrix[3, 6]": "0.00000000",
+                            "food chain color matrix[4, 0]": "0.00000000",
+                            "food chain color matrix[4, 1]": "0.00000000",
+                            "food chain color matrix[4, 2]": "0.00000000",
+                            "food chain color matrix[4, 3]": "0.00000000",
+                            "food chain color matrix[4, 4]": "0.00000000",
+                            "food chain color matrix[4, 5]": "0.00000000",
+                            "food chain color matrix[4, 6]": "0.00000000",
+                            "food chain color matrix[5, 0]": "0.00000000",
+                            "food chain color matrix[5, 1]": "0.00000000",
+                            "food chain color matrix[5, 2]": "0.00000000",
+                            "food chain color matrix[5, 3]": "0.00000000",
+                            "food chain color matrix[5, 4]": "0.00000000",
+                            "food chain color matrix[5, 5]": "0.00000000",
+                            "food chain color matrix[5, 6]": "0.00000000",
+                            "food chain color matrix[6, 0]": "0.00000000",
+                            "food chain color matrix[6, 1]": "0.00000000",
+                            "food chain color matrix[6, 2]": "0.00000000",
+                            "food chain color matrix[6, 3]": "0.00000000",
+                            "food chain color matrix[6, 4]": "0.00000000",
+                            "food chain color matrix[6, 5]": "0.00000000",
+                            "food chain color matrix[6, 6]": "0.00000000",
+                            "geometry deviation exponent": {
+                                "activated": "false"
+                            },
+                            "geometry deviation exponent[0]": "0.00000000",
+                            "geometry deviation exponent[1]": "0.00000000",
+                            "geometry deviation exponent[2]": "0.00000000",
+                            "geometry deviation exponent[3]": "0.00000000",
+                            "geometry deviation exponent[4]": "0.00000000",
+                            "geometry deviation exponent[5]": "0.00000000",
+                            "geometry deviation exponent[6]": "0.00000000",
+                            "connections mismatch penalty": {
+                                "activated": "false"
+                            },
+                            "connections mismatch penalty[0]": "0.00000000",
+                            "connections mismatch penalty[1]": "0.00000000",
+                            "connections mismatch penalty[2]": "0.00000000",
+                            "connections mismatch penalty[3]": "0.00000000",
+                            "connections mismatch penalty[4]": "0.00000000",
+                            "connections mismatch penalty[5]": "0.00000000",
+                            "connections mismatch penalty[6]": "0.00000000"
+                        },
+                        "constructor": {
+                            "mutation probability": {
+                                "neuron data": {
+                                    "activated": "false"
+                                },
+                                "neuron data[0]": "0.00000000",
+                                "neuron data[1]": "0.00000000",
+                                "neuron data[2]": "0.00000000",
+                                "neuron data[3]": "0.00000000",
+                                "neuron data[4]": "0.00000000",
+                                "neuron data[5]": "0.00000000",
+                                "neuron data[6]": "0.00000000",
+                                "data ": {
+                                    "activated": "false"
+                                },
+                                "data [0]": "0.00000000",
+                                "data [1]": "0.00000000",
+                                "data [2]": "0.00000000",
+                                "data [3]": "0.00000000",
+                                "data [4]": "0.00000000",
+                                "data [5]": "0.00000000",
+                                "data [6]": "0.00000000",
+                                "geometry": {
+                                    "activated": "false"
+                                },
+                                "geometry[0]": "0.00000000",
+                                "geometry[1]": "0.00000000",
+                                "geometry[2]": "0.00000000",
+                                "geometry[3]": "0.00000000",
+                                "geometry[4]": "0.00000000",
+                                "geometry[5]": "0.00000000",
+                                "geometry[6]": "0.00000000",
+                                "custom geometry": {
+                                    "activated": "false"
+                                },
+                                "custom geometry[0]": "0.00000000",
+                                "custom geometry[1]": "0.00000000",
+                                "custom geometry[2]": "0.00000000",
+                                "custom geometry[3]": "0.00000000",
+                                "custom geometry[4]": "0.00000000",
+                                "custom geometry[5]": "0.00000000",
+                                "custom geometry[6]": "0.00000000",
+                                "cell function": {
+                                    "activated": "false"
+                                },
+                                "cell function[0]": "0.00000000",
+                                "cell function[1]": "0.00000000",
+                                "cell function[2]": "0.00000000",
+                                "cell function[3]": "0.00000000",
+                                "cell function[4]": "0.00000000",
+                                "cell function[5]": "0.00000000",
+                                "cell function[6]": "0.00000000",
+                                "insertion": {
+                                    "activated": "false"
+                                },
+                                "insertion[0]": "0.00000000",
+                                "insertion[1]": "0.00000000",
+                                "insertion[2]": "0.00000000",
+                                "insertion[3]": "0.00000000",
+                                "insertion[4]": "0.00000000",
+                                "insertion[5]": "0.00000000",
+                                "insertion[6]": "0.00000000",
+                                "deletion": {
+                                    "activated": "false"
+                                },
+                                "deletion[0]": "0.00000000",
+                                "deletion[1]": "0.00000000",
+                                "deletion[2]": "0.00000000",
+                                "deletion[3]": "0.00000000",
+                                "deletion[4]": "0.00000000",
+                                "deletion[5]": "0.00000000",
+                                "deletion[6]": "0.00000000",
+                                "translation": {
+                                    "activated": "false"
+                                },
+                                "translation[0]": "0.00000000",
+                                "translation[1]": "0.00000000",
+                                "translation[2]": "0.00000000",
+                                "translation[3]": "0.00000000",
+                                "translation[4]": "0.00000000",
+                                "translation[5]": "0.00000000",
+                                "translation[6]": "0.00000000",
+                                "duplication": {
+                                    "activated": "false"
+                                },
+                                "duplication[0]": "0.00000000",
+                                "duplication[1]": "0.00000000",
+                                "duplication[2]": "0.00000000",
+                                "duplication[3]": "0.00000000",
+                                "duplication[4]": "0.00000000",
+                                "duplication[5]": "0.00000000",
+                                "duplication[6]": "0.00000000",
+                                "color": {
+                                    "activated": "false"
+                                },
+                                "color[0]": "0.00000000",
+                                "color[1]": "0.00000000",
+                                "color[2]": "0.00000000",
+                                "color[3]": "0.00000000",
+                                "color[4]": "0.00000000",
+                                "color[5]": "0.00000000",
+                                "color[6]": "0.00000000",
+                                "uniform color": {
+                                    "activated": "false"
+                                },
+                                "uniform color[0]": "0.00000000",
+                                "uniform color[1]": "0.00000000",
+                                "uniform color[2]": "0.00000000",
+                                "uniform color[3]": "0.00000000",
+                                "uniform color[4]": "0.00000000",
+                                "uniform color[5]": "0.00000000",
+                                "uniform color[6]": "0.00000000"
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
