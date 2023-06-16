@@ -194,6 +194,11 @@ __global__ void cudaApplyClusterData(SimulationData data)
     ClusterProcessor::applyClusterData(data);
 }
 
+__global__ void cudaResetDensity(SimulationData data)
+{
+    CellProcessor::resetDensity(data);
+}
+
 
 //This is the only calcKernel that uses dynamic parallelism.
 //When it is removed, performance drops by about 20% for unknown reasons.

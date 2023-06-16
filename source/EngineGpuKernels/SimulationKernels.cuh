@@ -37,3 +37,5 @@ __global__ void cudaFindClusterBoundaries(SimulationData data);
 __global__ void cudaAccumulateClusterPosAndVel(SimulationData data);
 __global__ void cudaAccumulateClusterAngularProp(SimulationData data);
 __global__ void cudaApplyClusterData(SimulationData data);
+
+__global__ void cudaResetDensity(SimulationData data);

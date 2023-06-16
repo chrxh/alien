@@ -43,6 +43,8 @@ public:
 
     __inline__ __device__ static void radiation(SimulationData& data);
     __inline__ __device__ static void decay(SimulationData& data);
+
+    __inline__ __device__ static void resetDensity(SimulationData& data);
 };
 
 /************************************************************************/
@@ -190,8 +192,8 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                         if (!otherCell->barrier) {
 
                             //for simplicity pressure = density
-                            auto const& cellPressure = cell->density;
-                            auto const& otherCellPressure = otherCell->density;
+                            auto const& cellPressure = cell->density;   //optimization: using the density from last time step
+                            auto const& otherCellPressure = otherCell->density; //optimization: using the density from last time step
                             auto factor = (cellPressure / (cell->density * cell->density) + otherCellPressure / (otherCell->density * otherCell->density));
 
                             if (abs(distance) > NEAR_ZERO) {
@@ -711,5 +713,17 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 }
             }
         }
+    }
+}
+
+__inline__ __device__ void CellProcessor::resetDensity(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
+        cell->density = 1.0f;
     }
 }

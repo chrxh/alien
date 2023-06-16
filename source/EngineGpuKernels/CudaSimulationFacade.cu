@@ -438,6 +438,9 @@ void _CudaSimulationFacade::setSimulationParameters(SimulationParameters const& 
 {
     _settings.simulationParameters = parameters;
     CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+    if (_cudaSimulationData) {
+        _simulationKernels->prepareForSimulationParametersChanges(_settings, getSimulationDataIntern());
+    }
 }
 
 void _CudaSimulationFacade::clear()
