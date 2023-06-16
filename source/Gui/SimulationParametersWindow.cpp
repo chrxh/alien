@@ -572,7 +572,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability)
@@ -584,7 +584,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationPropertiesProbability)
@@ -598,7 +598,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationGeometryProbability)
@@ -610,7 +610,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationCustomGeometryProbability)
@@ -622,7 +622,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability)
@@ -636,7 +636,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationInsertionProbability)
@@ -648,7 +648,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDeletionProbability)
@@ -660,7 +660,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationTranslationProbability)
@@ -672,7 +672,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability)
@@ -684,7 +684,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationColorProbability)
@@ -696,7 +696,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationUniformColorProbability)
@@ -729,80 +729,6 @@ void _SimulationParametersWindow::processBase(
                              "something else or vice versa."),
                 preserveSelfReplication);
             simParameters.cellFunctionConstructorMutationSelfReplication = !preserveSelfReplication;
-            ImGui::TreePop();
-        }
-
-        /**
-         * Constructor
-         */
-        if (ImGui::TreeNodeEx("Cell function: Constructor", flags)) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Pump energy")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.00f)
-                    .max(1.0f)
-                    .defaultValue(origSimParameters.cellFunctionConstructorPumpEnergyFactor)
-                    .tooltip("This parameter controls the energy pump system. It describes the fraction of the energy cost for a offspring which a constructor "
-                             "can get for free. This additional energy is obtain from radiation of other cells."),
-                simParameters.cellFunctionConstructorPumpEnergyFactor);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Offspring distance")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.1f)
-                    .max(3.0f)
-                    .defaultValue(origSimParameters.cellFunctionConstructorOffspringDistance)
-                    .tooltip("The distance of the constructed cell from the constructor cell."),
-                simParameters.cellFunctionConstructorOffspringDistance);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Connection distance")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.1f)
-                    .max(3.0f)
-                    .defaultValue(origSimParameters.cellFunctionConstructorConnectingCellMaxDistance)
-                    .tooltip("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
-                simParameters.cellFunctionConstructorConnectingCellMaxDistance);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Completeness check")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.cellFunctionConstructorCheckCompletenessForSelfReplication)
-                    .tooltip("If activated, a self-replication process can only start when all other non-self-replicating constructors in the cell clusters are "
-                             "finished."),
-                simParameters.cellFunctionConstructorCheckCompletenessForSelfReplication);
-            ImGui::TreePop();
-        }
-
-        /**
-         * Injector
-         */
-        if (ImGui::TreeNodeEx("Cell function: Injector", flags)) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Injection radius")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.1f)
-                    .max(3.0f)
-                    .defaultValue(origSimParameters.cellFunctionInjectorRadius)
-                    .tooltip("The maximum distance over which an injector cell can infect another cell."),
-                simParameters.cellFunctionInjectorRadius);
-            AlienImGui::InputIntColorMatrix(
-                AlienImGui::InputIntColorMatrixParameters()
-                    .name("Injection time")
-                    .logarithmic(true)
-                    .max(100000)
-                    .textWidth(RightColumnWidth)
-                    .tooltip("")
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionInjectorDurationColorMatrix))
-                    .tooltip("The number of activations an injector cell requires to infect another cell. One activation usually takes 6 time steps. The row "
-                             "number determines the color of the injector cell, while the column number corresponds to the color of the infected cell."),
-                simParameters.cellFunctionInjectorDurationColorMatrix);
             ImGui::TreePop();
         }
 
@@ -864,7 +790,7 @@ void _SimulationParametersWindow::processBase(
                     .max(5.0f)
                     .defaultValue(origSimParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent)
                     .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local "
-                                         "geometry of the attacked cell does not match the attacking cell."),
+                             "geometry of the attacked cell does not match the attacking cell."),
                 simParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -929,6 +855,52 @@ void _SimulationParametersWindow::processBase(
         ImGui::PopID();
 
         /**
+         * Constructor
+         */
+        if (ImGui::TreeNodeEx("Cell function: Constructor", flags)) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Pump energy")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0.00f)
+                    .max(1.0f)
+                    .defaultValue(origSimParameters.cellFunctionConstructorPumpEnergyFactor)
+                    .tooltip("This parameter controls the energy pump system. It describes the fraction of the energy cost for a offspring which a constructor "
+                             "can get for free. This additional energy is obtain from radiation of other cells."),
+                simParameters.cellFunctionConstructorPumpEnergyFactor);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Offspring distance")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0.1f)
+                    .max(3.0f)
+                    .defaultValue(origSimParameters.cellFunctionConstructorOffspringDistance)
+                    .tooltip("The distance of the constructed cell from the constructor cell."),
+                simParameters.cellFunctionConstructorOffspringDistance);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Connection distance")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0.1f)
+                    .max(3.0f)
+                    .defaultValue(origSimParameters.cellFunctionConstructorConnectingCellMaxDistance)
+                    .tooltip("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
+                simParameters.cellFunctionConstructorConnectingCellMaxDistance);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Completeness check")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.cellFunctionConstructorCheckCompletenessForSelfReplication)
+                    .tooltip("If activated, a self-replication process can only start when all other non-self-replicating constructors in the cell clusters are "
+                             "finished."),
+                simParameters.cellFunctionConstructorCheckCompletenessForSelfReplication);
+            ImGui::TreePop();
+        }
+
+        /**
          * Defender
          */
         if (ImGui::TreeNodeEx("Cell function: Defender", flags)) {
@@ -950,42 +922,37 @@ void _SimulationParametersWindow::processBase(
                     .min(1.0f)
                     .max(5.0f)
                     .defaultValue(origSimParameters.cellFunctionDefenderAgainstInjectorStrength)
-                    .tooltip("If a constructor cell is attacked by an injector and connected to defender cells, the injection duration is increased by this factor."),
+                    .tooltip("If a constructor cell is attacked by an injector and connected to defender cells, the injection duration is increased by this "
+                             "factor."),
                 simParameters.cellFunctionDefenderAgainstInjectorStrength);
             ImGui::TreePop();
         }
 
         /**
-         * Transmitter
+         * Injector
          */
-        if (ImGui::TreeNodeEx("Cell function: Transmitter", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Injector", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Energy distribution radius")
+                    .name("Injection radius")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
-                    .min(0)
-                    .max(5.0f)
-                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionRadius)
-                    .tooltip("The maximum distance over which a transmitter cell transfers its additional energy to nearby transmitter or constructor cells."),
-                simParameters.cellFunctionTransmitterEnergyDistributionRadius);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Energy distribution Value")
+                    .min(0.1f)
+                    .max(3.0f)
+                    .defaultValue(origSimParameters.cellFunctionInjectorRadius)
+                    .tooltip("The maximum distance over which an injector cell can infect another cell."),
+                simParameters.cellFunctionInjectorRadius);
+            AlienImGui::InputIntColorMatrix(
+                AlienImGui::InputIntColorMatrixParameters()
+                    .name("Injection time")
+                    .logarithmic(true)
+                    .max(100000)
                     .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(20.0f)
-                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionValue)
-                    .tooltip("The amount of energy which a transmitter cell can transfer to nearby transmitter or constructor cells or to connected cells."),
-                simParameters.cellFunctionTransmitterEnergyDistributionValue);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Same color energy distribution")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionSameColor)
-                    .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells with the same color."),
-                simParameters.cellFunctionTransmitterEnergyDistributionSameColor);
+                    .tooltip("")
+                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionInjectorDurationColorMatrix))
+                    .tooltip("The number of activations an injector cell requires to infect another cell. One activation usually takes 6 time steps. The row "
+                             "number determines the color of the injector cell, while the column number corresponds to the color of the infected cell."),
+                simParameters.cellFunctionInjectorDurationColorMatrix);
             ImGui::TreePop();
         }
 
@@ -1055,6 +1022,40 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.cellFunctionSensorRange)
                     .tooltip("The maximum radius in which a sensor cell can detect mass concentrations."),
                 simParameters.cellFunctionSensorRange);
+            ImGui::TreePop();
+        }
+
+        /**
+         * Transmitter
+         */
+        if (ImGui::TreeNodeEx("Cell function: Transmitter", flags)) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Energy distribution radius")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(5.0f)
+                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionRadius)
+                    .tooltip("The maximum distance over which a transmitter cell transfers its additional energy to nearby transmitter or constructor cells."),
+                simParameters.cellFunctionTransmitterEnergyDistributionRadius);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Energy distribution Value")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(20.0f)
+                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionValue)
+                    .tooltip("The amount of energy which a transmitter cell can transfer to nearby transmitter or constructor cells or to connected cells."),
+                simParameters.cellFunctionTransmitterEnergyDistributionValue);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Same color energy distribution")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionSameColor)
+                    .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells with the same color."),
+                simParameters.cellFunctionTransmitterEnergyDistributionSameColor);
             ImGui::TreePop();
         }
 
@@ -1440,7 +1441,7 @@ void _SimulationParametersWindow::processSpot(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .colorDependence(true)
                     .logarithmic(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationNeuronDataProbability)
@@ -1453,7 +1454,7 @@ void _SimulationParametersWindow::processSpot(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationPropertiesProbability)
@@ -1466,7 +1467,7 @@ void _SimulationParametersWindow::processSpot(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationGeometryProbability)
@@ -1479,7 +1480,7 @@ void _SimulationParametersWindow::processSpot(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationCustomGeometryProbability)
@@ -1492,7 +1493,7 @@ void _SimulationParametersWindow::processSpot(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationCellFunctionProbability)
@@ -1505,7 +1506,7 @@ void _SimulationParametersWindow::processSpot(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationInsertionProbability)
@@ -1518,7 +1519,7 @@ void _SimulationParametersWindow::processSpot(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationDeletionProbability)
@@ -1531,7 +1532,7 @@ void _SimulationParametersWindow::processSpot(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationTranslationProbability)
@@ -1544,7 +1545,7 @@ void _SimulationParametersWindow::processSpot(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationDuplicationProbability)
@@ -1557,7 +1558,7 @@ void _SimulationParametersWindow::processSpot(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationColorProbability)
@@ -1570,7 +1571,7 @@ void _SimulationParametersWindow::processSpot(
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
-                    .format("%.6f")
+                    .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationUniformColorProbability)
