@@ -54,7 +54,7 @@ private:
     bool _scheduleRefresh = false;
     bool _scheduleSort = false;
     std::string _filter;
-    bool _showCommunitySimulations = true;
+    bool _showCommunityCreations = false;
     std::unordered_set<std::string> _selectionIds;
     std::unordered_set<std::string> _likedIds;
     std::unordered_map<std::string, std::set<std::string>> _userLikesByIdCache;
