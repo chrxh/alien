@@ -50,7 +50,7 @@ _BrowserWindow::_BrowserWindow(
 
 _BrowserWindow::~_BrowserWindow()
 {
-    GlobalSettings::getInstance().setStringState("windows.browser.show community creations", _showCommunityCreations);
+    GlobalSettings::getInstance().setBoolState("windows.browser.show community creations", _showCommunityCreations);
     _on = false;
 }
 
