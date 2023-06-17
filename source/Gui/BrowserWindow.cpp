@@ -45,10 +45,12 @@ _BrowserWindow::_BrowserWindow(
     , _temporalControlWindow(temporalControlWindow)
 {
     refreshIntern(true);
+    _showCommunityCreations = GlobalSettings::getInstance().getBoolState("windows.browser.show community creations", _showCommunityCreations);
 }
 
 _BrowserWindow::~_BrowserWindow()
 {
+    GlobalSettings::getInstance().setStringState("windows.browser.show community creations", _showCommunityCreations);
     _on = false;
 }
 
@@ -399,7 +401,7 @@ void _BrowserWindow::processStatus()
 void _BrowserWindow::processFilter()
 {
     ImGui::Spacing();
-    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Community creations"), _showCommunitySimulations)) {
+    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Community creations"), _showCommunityCreations)) {
         calcFilteredSimulationDatas();
     }
     ImGui::SameLine();
@@ -578,7 +580,7 @@ void _BrowserWindow::calcFilteredSimulationDatas()
     _filteredRemoteSimulationList.clear();
     _filteredRemoteSimulationList.reserve(_remoteSimulationList.size());
     for (auto const& simData : _remoteSimulationList) {
-        if (simData.matchWithFilter(_filter) &&_showCommunitySimulations != simData.fromRelease) {
+        if (simData.matchWithFilter(_filter) &&_showCommunityCreations != simData.fromRelease) {
             _filteredRemoteSimulationList.emplace_back(simData);
         }
     }
