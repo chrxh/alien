@@ -38,31 +38,26 @@ void _GettingStartedWindow::processIntern()
         ImGui::Text("Introduction");
         ImGui::PopStyleColor();
 
-        ImGui::Text("ALIEN is an artificial life and physics simulation tool based on a specialized 2D particle engine written in CUDA for soft bodies and fluids.");
+        ImGui::Text("ALIEN is an artificial life and physics simulation tool based on a 2D CUDA-powered particle engine for soft bodies and fluids.");
         ImGui::Text("Each particle can be equipped with higher-level functions including sensors, muscles, neurons, constructors, etc. that allow to "
-                    "mimic certain functionalities of (a group of) biological cells or of robotic components. Multi-cellular organisms are simulated as networks of "
-                    "particles that exchange energy and information over their connections. The engine encompasses a genetic system capable of encoding the "
-                    "blueprints of organisms in genomes which are stored in individual particles. This approach allows to simulate entire ecosystems inhabited "
-                    "by different populations where every object (regardless of whether it is a plant, a herbivore or a pure physical structure) is composed of "
-                    "interacting particles with specific functions.");
+                    "mimic certain functionalities of biological cells or of robotic components. Multi-cellular organisms are simulated as networks of "
+                    "particles that exchange energy and information over their bonds. The engine encompasses a genetic system capable of encoding the "
+                    "blueprints of organisms in genomes which are stored in individual cells. The simulator is capable to simulate entire ecosystems inhabited "
+                    "by different populations where every object is composed of interacting particles with specific functions (regardless of whether it models a "
+                    "plant, herbivore, carnivore, virus, environmental structure, etc.).");
 
         AlienImGui::Separator();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
         ImGui::Text("First steps");
         ImGui::PopStyleColor();
 
-        ImGui::Text("The easiest way to get to know the ALIEN simulator is to load and run an existing simulation file.");
-        ImGui::Text(ICON_FA_CARET_RIGHT);
-        ImGui::SameLine();
-        ImGui::Text("You find various demos in ./examples/* demonstrating capabilities of the "
-                    "engine ranging from physics examples, self-deploying structures, replicators to small "
-                    "ecosystems. To this end, please invoke Simulation " ICON_FA_ARROW_RIGHT
-                    " Open in the menu and select a file.");
-        ImGui::Text(ICON_FA_CARET_RIGHT);
-        ImGui::SameLine();
-        ImGui::Text("Simulations from other users can be downloaded by using the in-game browser that is connected to a server. "
-                    "For this purpose, please click on 'Browser' in the 'Network' menu. In order to upload own simulations to the server and rate other "
-                    "simulations, you need to create a new user, which can be accomplished in the login dialog.");
+        ImGui::Text("The easiest way to get to know the ALIEN simulator is to download and run an existing simulation file.");
+        ImGui::Text("You find various examples in the in-game simulation browser demonstrating capabilities of the "
+                    "engine ranging from pure physics examples, self-deploying structures, self-replicators to evolving ecosystems. If not already open, please "
+                    "invoke Network " ICON_FA_ARROW_RIGHT " Browser in the menu bar. "
+                    "Simulations can be conveniently downloaded and uploaded from/to the connected server, which is alien-project.org by default. "
+                    "In order to upload own simulations to the server or rate other simulations, you need to register a new user, which can be accomplished in "
+                    "the login dialog.");
             
         ImGui::Text("For the beginning, however, you can use the evolution example already loaded. At the beginning it is recommended to get familiar with "
                     "the windows for temporal and spatial controls. The handling should be intuitive and requires no deeper knowledge.");
@@ -108,7 +103,7 @@ void _GettingStartedWindow::processIntern()
 
         AlienImGui::Separator();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
-        ImGui::Text("Further steps");
+        ImGui::Text("Basic notion");
         ImGui::PopStyleColor();
 
         //ImGui::Text("There is a lot to explore. ALIEN features an extensive graph and particle editor in order to build custom worlds with desired "
