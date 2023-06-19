@@ -55,12 +55,12 @@ void _GettingStartedWindow::processIntern()
         ImGui::Text("You find various examples in the in-game simulation browser demonstrating capabilities of the "
                     "engine ranging from pure physics examples, self-deploying structures, self-replicators to evolving ecosystems. If not already open, please "
                     "invoke Network " ICON_FA_ARROW_RIGHT " Browser in the menu bar. "
-                    "Simulations can be conveniently downloaded and uploaded from/to the connected server, which is alien-project.org by default. "
+                    "Simulations can be conveniently downloaded and uploaded from/to the connected server (alien-project.org by default). "
                     "In order to upload own simulations to the server or rate other simulations, you need to register a new user, which can be accomplished in "
                     "the login dialog.");
             
-        ImGui::Text("For the beginning, however, you can use the evolution example already loaded. At the beginning it is recommended to get familiar with "
-                    "the windows for temporal and spatial controls. The handling should be intuitive and requires no deeper knowledge.");
+        ImGui::Text("For the beginning, however, you can use the evolution example already loaded. Initially, it is advisable to become acquainted with the "
+                    "windows for temporal and spatial controls. The handling should be intuitive and requires no deeper knowledge.");
         ImGui::Text(ICON_FA_CARET_RIGHT);
         ImGui::SameLine();
         ImGui::Text("In the temporal control window, a simulation can be started or paused. The execution speed "
@@ -91,8 +91,9 @@ void _GettingStartedWindow::processIntern()
                     "simulation parameters. This can be accomplished in the window 'Simulation parameters'. For example, "
                     "the radiation intensity can be increased or the friction can be adjusted. Explanations to the "
                     "individual parameters can be found in the tooltip next to them.");
-        ImGui::Text("ALIEN also uses a simple color system consisting of 7 different colors for the cells. It is possible to restrict simulation parameters to "
-                    "cells with a certain color. This allows to create special conditions for different populations populating a world together. For example, "
+        ImGui::Text("ALIEN also uses a simple color system consisting of 7 different colors for the cells. It is possible to apply different values of the "
+                    "simulation parameters depending on the color of the cells. This allows for the creation of specific conditions for populations "
+                    "coexisting in a shared world. For example, "
                     "plant-like organisms may have a higher absorption rate for radiation particles, so they can get their energy from that.");
 
         AlienImGui::Separator();
