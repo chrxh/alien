@@ -204,7 +204,7 @@ void _BrowserWindow::processSimulationTable()
         ImGui::TableSetupColumn(
             "Simulation name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.contentScale(135.0f),
+            styleRepository.contentScale(160.0f),
             RemoteSimulationDataColumnId_SimulationName);
         ImGui::TableSetupColumn(
             "Description",
