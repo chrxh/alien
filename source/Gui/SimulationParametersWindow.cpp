@@ -210,12 +210,22 @@ void _SimulationParametersWindow::processBase(
         /**
          * Colors
          */
-        if (ImGui::TreeNodeEx("Colors", flags)) {
+        if (ImGui::TreeNodeEx("Visualization", flags)) {
             AlienImGui::ColorButtonWithPicker(
                 AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(RightColumnWidth).defaultValue(origSimParameters.backgroundColor),
                 simParameters.backgroundColor,
                 _backupColor,
                 _savedPalette);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Zoom for neural activity")
+                    .textWidth(RightColumnWidth)
+                    .min(0)
+                    .max(32.0f)
+                    .infinity(true)
+                    .defaultValue(&origSimParameters.zoomLevelNeuronalActivity)
+                    .tooltip(std::string("")),
+                &simParameters.zoomLevelNeuronalActivity);
             ImGui::TreePop();
         }
 
@@ -1119,13 +1129,16 @@ void _SimulationParametersWindow::processSpot(
         /**
          * Colors and location
          */
-        if (ImGui::TreeNodeEx("Colors and location", flags)) {
+        if (ImGui::TreeNodeEx("Visualization", flags)) {
             AlienImGui::ColorButtonWithPicker(
                 AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(RightColumnWidth).defaultValue(origSpot.color),
                 spot.color,
                 _backupColor,
                 _savedPalette);
+            ImGui::TreePop();
+        }
 
+        if (ImGui::TreeNodeEx("Location", flags)) {
             if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Shape")

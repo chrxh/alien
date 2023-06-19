@@ -53,6 +53,7 @@ struct SimulationParameters
     SimulationParametersSpotValues baseValues;
 
     uint32_t backgroundColor = 0x1b0000;
+    float zoomLevelNeuronalActivity = 2.0f;
 
     float timestepSize = 1.0f;
     MotionType motionType = MotionType_Fluid;
@@ -285,8 +286,9 @@ struct SimulationParameters
             }
         }
 
-        return backgroundColor == other.backgroundColor && baseValues == other.baseValues && timestepSize == other.timestepSize
-            && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
+        return backgroundColor == other.backgroundColor && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity && baseValues == other.baseValues
+            && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance
+            && cellMinDistance == other.cellMinDistance
             && cellMaxForceDecayProb == other.cellMaxForceDecayProb
             && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers
             && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier

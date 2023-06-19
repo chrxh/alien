@@ -5,7 +5,6 @@
 
 namespace
 {
-    auto constexpr ZoomLevelForActivity = 2.0f;
     auto constexpr ZoomLevelForConnections = 1.0f;
     auto constexpr ZoomLevelForShadedCells = 10.0f;
     auto constexpr ZoomLevelForArrows = 15.0f;
@@ -214,7 +213,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
             drawCircle(imageData, imageSize, cellImagePos, color, radius, shadedCells, true);
 
             color = color * min((zoom - 1.0f) / 3, 1.0f);
-            if (cell->isActive() && zoom >= ZoomLevelForActivity) {
+            if (cell->isActive() && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, radius, shadedCells);
             }
 
