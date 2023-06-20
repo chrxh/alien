@@ -23,7 +23,7 @@ public:
     void onRefresh();
 
 private:
-    void refreshIntern(bool firstTimeStartup);
+    void refreshIntern(bool withRetry);
 
     void processIntern() override;
 
