@@ -224,7 +224,7 @@ void _SimulationParametersWindow::processBase(
                     .max(32.0f)
                     .infinity(true)
                     .defaultValue(&origSimParameters.zoomLevelNeuronalActivity)
-                    .tooltip(std::string("")),
+                    .tooltip(std::string("The zoom level from which the neuronal activities become visible.")),
                 &simParameters.zoomLevelNeuronalActivity);
             ImGui::TreePop();
         }

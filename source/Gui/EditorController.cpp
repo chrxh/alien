@@ -222,7 +222,7 @@ void _EditorController::processEvents()
     RealVector2D mousePos{ImGui::GetMousePos().x, ImGui::GetMousePos().y};
     RealVector2D prevMousePos = _prevMousePos ? *_prevMousePos : mousePos;
 
-    if (!ImGui::GetIO().WantCaptureMouse) {
+    if (!ImGui::GetIO().WantCaptureMouse && !ImGui::GetIO().KeyAlt) {
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
             if (!running) {

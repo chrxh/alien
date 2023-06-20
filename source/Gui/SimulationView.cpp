@@ -157,7 +157,7 @@ void _SimulationView::leftMouseButtonPressed(IntVector2D const& viewPos)
 
 void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
 {
-    if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
+    if (_modeWindow->getMode() == _ModeController::Mode::Navigation || ImGui::GetIO().KeyAlt) {
         _viewport->zoom(viewPos, calcZoomFactor());
     }
 }
@@ -177,7 +177,7 @@ void _SimulationView::rightMouseButtonPressed()
 
 void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
-    if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
+    if (_modeWindow->getMode() == _ModeController::Mode::Navigation || ImGui::GetIO().KeyAlt) {
         _viewport->zoom(viewPos, 1.0f / calcZoomFactor());
     }
 }
