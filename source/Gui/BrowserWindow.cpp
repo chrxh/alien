@@ -44,13 +44,15 @@ _BrowserWindow::_BrowserWindow(
     , _viewport(viewport)
     , _temporalControlWindow(temporalControlWindow)
 {
-    refreshIntern(true);
+    auto firstStart = GlobalSettings::getInstance().getBoolState("windows.browser.first start", true);
+    refreshIntern(firstStart);
     _showCommunityCreations = GlobalSettings::getInstance().getBoolState("windows.browser.show community creations", _showCommunityCreations);
 }
 
 _BrowserWindow::~_BrowserWindow()
 {
     GlobalSettings::getInstance().setBoolState("windows.browser.show community creations", _showCommunityCreations);
+    GlobalSettings::getInstance().setBoolState("windows.browser.first start", false);
     _on = false;
 }
 
@@ -62,17 +64,17 @@ void _BrowserWindow::registerCyclicReferences(LoginDialogWeakPtr const& loginDia
 
 void _BrowserWindow::onRefresh()
 {
-    refreshIntern(false);
+    refreshIntern(true);
 }
 
-void _BrowserWindow::refreshIntern(bool firstTimeStartup)
+void _BrowserWindow::refreshIntern(bool withRetry)
 {
     try {
-        bool success = _networkController->getSimulationDataList(_remoteSimulationList, !firstTimeStartup);
-        success &= _networkController->getUserList(_userList, !firstTimeStartup);
+        bool success = _networkController->getSimulationDataList(_remoteSimulationList, withRetry);
+        success &= _networkController->getUserList(_userList, withRetry);
 
         if (!success) {
-            if (!firstTimeStartup) {
+            if (withRetry) {
                 MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
             }
         }
@@ -91,7 +93,7 @@ void _BrowserWindow::refreshIntern(bool firstTimeStartup)
         sortSimulationList();
         sortUserList();
     } catch (std::exception const& e) {
-        if (!firstTimeStartup) {
+        if (withRetry) {
             MessageDialog::getInstance().show("Error", e.what());
         }
     }
