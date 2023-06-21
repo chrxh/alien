@@ -11,6 +11,7 @@
 #include "Base/Resources.h"
 
 #include "Fonts/DroidSans.h"
+#include "Fonts/DroidSansBold.h"
 #include "Fonts/Cousine-Regular.h"
 #include "Fonts/AlienIconFont.h"
 #include "Fonts/FontAwesomeSolid.h"
@@ -46,6 +47,9 @@ void StyleRepository::init()
         rangesIcons);
 
     //medium font
+    _smallBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 16.0f * _contentScaleFactor);
+
+    //medium font
     _mediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 24.0f * _contentScaleFactor);
 
     //large font
@@ -75,6 +79,11 @@ void StyleRepository::init()
 ImFont* StyleRepository::getIconFont() const
 {
     return _iconFont;
+}
+
+ImFont* StyleRepository::getSmallBoldFont() const
+{
+    return _smallBoldFont;
 }
 
 ImFont* StyleRepository::getMediumFont() const

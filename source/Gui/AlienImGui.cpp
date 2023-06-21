@@ -520,6 +520,13 @@ void AlienImGui::Text(std::string const& text)
     ImGui::TextUnformatted(text.c_str());
 }
 
+void AlienImGui::BoldText(std::string const& text)
+{
+    ImGui::PushFont(StyleRepository::getInstance().getSmallBoldFont());
+    AlienImGui::Text(text);
+    ImGui::PopFont();
+}
+
 void AlienImGui::MonospaceText(std::string const& text)
 {
     ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());

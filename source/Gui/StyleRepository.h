@@ -73,8 +73,11 @@ public:
     void init();
 
     ImFont* getIconFont() const;
+
+    ImFont* getSmallBoldFont() const;
     ImFont* getMediumFont() const;
     ImFont* getLargeFont() const;
+
     ImFont* getMonospaceMediumFont() const;
     ImFont* getMonospaceLargeFont() const;
 
@@ -89,6 +92,7 @@ private:
 
     float _contentScaleFactor = 1.0f;
     ImFont* _iconFont = nullptr;
+    ImFont* _smallBoldFont = nullptr;
     ImFont* _mediumFont = nullptr;
     ImFont* _largeFont = nullptr;
     ImFont* _monospaceMediumFont = nullptr;
