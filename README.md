@@ -32,7 +32,7 @@ https://user-images.githubusercontent.com/73127001/229868357-131fa71f-d03d-45db-
 - Genetic system and cell by cell construction of offspring
 - Neural networks for controlling higher-level functions (e.g. sensors and muscles)
 - Various colors may be used to customize cell types according to own specifications
-- Spatially varying simulation parameters
+- Support for spatially varying simulation parameters
 
 https://user-images.githubusercontent.com/73127001/229569056-0db6562b-0147-43c8-a977-5f12c1b6277b.mp4
 
