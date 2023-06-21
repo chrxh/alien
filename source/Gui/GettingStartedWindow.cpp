@@ -88,8 +88,9 @@ void _GettingStartedWindow::processIntern()
 
         AlienImGui::Separator();
 
+        AlienImGui::BoldText("IMPORTANT: ");
         ImGui::Text(
-            "IMPORTANT: On older graphics cards or when using a high resolution (e.g. 4K), it is recommended to reduce the rendered frames per second, "
+            "On older graphics cards or when using a high resolution (e.g. 4K), it is recommended to reduce the rendered frames per second, "
             "as this significantly increases the simulation speed (time steps per second). This adjustment can be made in the display settings.");
 
         headline("Basic notion");
@@ -108,8 +109,20 @@ void _GettingStartedWindow::processIntern()
             "(to model barriers), possess special functions and transport neural activities. Additionally, cells have various physical properties, including");
         itemText("Position in space");
         itemText("Velocity");
-        itemText("Internal energy (corresponding to its temperature)");
+        itemText("Internal energy (may be interpreted as its temperature)");
         itemText("Upper limit of connections");
+
+        ImGui::Spacing();
+        AlienImGui::BoldText("Cell connection");
+        ImGui::Text(
+            "A cell connection is a bond between two cells. It stores the reference distance and on each side a reference angle to a possibly further cell "
+            "connection. The reference distance and angles are calculated when the connection is established. As soon as the actual distance deviates from "
+            "the reference distance, a pulling/pushing force is applied at both ends. Furthermore, tangential forces are applied at both ends in the "
+            "case of an angle mismatch.");
+
+        ImGui::Spacing();
+        AlienImGui::BoldText("Cell function");
+        ImGui::Text("Each cell can be assigned a special function that retrieve/return input/output from connected cells:");
 
         //ImGui::Text("There is a lot to explore. ALIEN features an extensive graph and particle editor in order to build custom worlds with desired "
         //            "environmental structures and machines. A documentation with tutorial-like introductions to various topics can be found at");

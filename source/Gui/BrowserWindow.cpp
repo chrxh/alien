@@ -75,7 +75,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
 
         if (!success) {
             if (withRetry) {
-                MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
+                MessageDialog::getInstance().show("Error", "Failed to retrieve browser data. Please try again.");
             }
         }
         calcFilteredSimulationDatas();
@@ -83,7 +83,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         if (_networkController->getLoggedInUserName()) {
             std::vector<std::string> likedIds;
             if (!_networkController->getLikedSimulationIdList(likedIds)) {
-                MessageDialog::getInstance().show("Error", "Failed to retrieve browser data.");
+                MessageDialog::getInstance().show("Error", "Failed to retrieve browser data. Please try again.");
             }
             _likedIds = std::unordered_set<std::string>(likedIds.begin(), likedIds.end());
         } else {
@@ -503,7 +503,7 @@ void _BrowserWindow::onDeleteSimulation(RemoteSimulationData* remoteData)
 
     delayedExecution([remoteData = remoteData, this] {
         if (!_networkController->deleteSimulation(remoteData->id)) {
-            MessageDialog::getInstance().show("Error", "Failed to delete simulation.");
+            MessageDialog::getInstance().show("Error", "Failed to delete simulation. Please try again later.");
             return;
         }
         _scheduleRefresh = true;
