@@ -226,6 +226,7 @@ public:
     };
     static void ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color, uint32_t& backupColor, uint32_t (&savedPalette)[32]);
 
+    static void NegativeSpacing();
     static void Separator();
     static void Group(std::string const& text);
 

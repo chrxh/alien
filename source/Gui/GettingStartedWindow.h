@@ -15,8 +15,9 @@ public:
 private:
     void processIntern() override;
 
-    void headline(std::string const& text);
-    void itemText(std::string const& text);
+    void drawTitle();
+    void drawHeadline(std::string const& text);
+    void drawItemText(std::string const& text);
     void openWeblink(std::string const& link);
 
     bool _showAfterStartup = true;

@@ -696,6 +696,12 @@ void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& pa
     }
 }
 
+void AlienImGui::NegativeSpacing()
+{
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    ImGui::SetCursorScreenPos(ImVec2(pos.x - ImGui::GetStyle().FramePadding.x, pos.y));
+}
+
 void AlienImGui::Separator()
 {
     ImGui::Spacing();

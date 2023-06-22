@@ -46,8 +46,11 @@ void StyleRepository::init()
         &configMerge,
         rangesIcons);
 
-    //medium font
+    //small bold font
     _smallBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 16.0f * _contentScaleFactor);
+
+    //medium bold font
+    _mediumBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 24.0f * _contentScaleFactor);
 
     //medium font
     _mediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 24.0f * _contentScaleFactor);
@@ -84,6 +87,11 @@ ImFont* StyleRepository::getIconFont() const
 ImFont* StyleRepository::getSmallBoldFont() const
 {
     return _smallBoldFont;
+}
+
+ImFont* StyleRepository::getMediumBoldFont() const
+{
+    return _mediumBoldFont;
 }
 
 ImFont* StyleRepository::getMediumFont() const
