@@ -246,7 +246,7 @@ void _BrowserWindow::processSimulationTable()
                 ImGui::TableNextRow();
 
                 ImGui::TableNextColumn();
-                if (ImGui::Button(ICON_FA_DOWNLOAD)) {
+                if (processActionButton(ICON_FA_DOWNLOAD)) {
                     onDownloadSimulation(item);
                 }
                 AlienImGui::Tooltip("Download");
@@ -256,7 +256,7 @@ void _BrowserWindow::processSimulationTable()
                 if (liked) {
                     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeTextColor);
                 }
-                if (ImGui::Button(ICON_FA_STAR)) {
+                if (processActionButton(ICON_FA_STAR)) {
                     if (_networkController->getLoggedInUserName()) {
                         onToggleLike(*item);
                     } else {
@@ -270,7 +270,7 @@ void _BrowserWindow::processSimulationTable()
                 }
                 ImGui::SameLine();
                 ImGui::BeginDisabled(item->userName != _networkController->getLoggedInUserName().value_or(""));
-                if (ImGui::Button(ICON_FA_TRASH)) {
+                if (processActionButton(ICON_FA_TRASH)) {
                     onDeleteSimulation(item);
                 }
                 ImGui::EndDisabled();
@@ -439,6 +439,15 @@ void _BrowserWindow::processShortenedText(std::string const& text) {
         processDetailButton();
         AlienImGui::Tooltip(text.c_str(), false);
     }
+}
+
+bool _BrowserWindow::processActionButton(std::string const& text)
+{
+    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
+    auto result = ImGui::Button(text.c_str());
+    ImGui::PopStyleColor();
+   
+    return result;
 }
 
 bool _BrowserWindow::processDetailButton()

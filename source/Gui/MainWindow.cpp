@@ -123,7 +123,6 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
         throw std::runtime_error("Failed to initialize GLAD");
     }
 
-    auto worldSize = _simController->getWorldSize();
     _viewport = std::make_shared<_Viewport>(_windowController);
     _uiController = std::make_shared<_UiController>();
     _autosaveController = std::make_shared<_AutosaveController>(_simController, _viewport);

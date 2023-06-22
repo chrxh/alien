@@ -195,10 +195,9 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
 void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Function", nullptr, ImGuiTabItemFlags_None)) {
+        int type = cell.getCellFunctionType();
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            auto const& parameters = _simController->getSimulationParameters();
             if (ImGui::TreeNodeEx("Properties##Function", TreeNodeFlags)) {
-                int type = cell.getCellFunctionType();
                 if (AlienImGui::CellFunctionCombo(AlienImGui::CellFunctionComboParameters().name("Function").textWidth(CellFunctionBaseTabTextWidth), type)) {
                     switch (type) {
                     case CellFunction_Neuron: {
@@ -253,7 +252,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                 ImGui::TreePop();
             }
         }
-        if (ImGui::TreeNodeEx("Neural activity", TreeNodeFlags)) {
+        if (type != CellFunction_None && ImGui::TreeNodeEx("Neural activity", TreeNodeFlags)) {
             int index = 0;
             for (auto& channel : cell.activity.channels) {
                 AlienImGui::InputFloat(
