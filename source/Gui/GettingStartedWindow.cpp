@@ -46,7 +46,7 @@ void _GettingStartedWindow::processIntern()
                     "function and modify the simulation according to your wishes.");
         ImGui::Text("Various examples can be found in the in-game simulation browser demonstrating capabilities of the "
                     "engine ranging from pure physics examples, self-deploying structures, self-replicators to evolving ecosystems. If not already open, please "
-                    "invoke Network " ICON_FA_ARROW_RIGHT " Browser in the menu bar. "
+                    "invoke Network " ICON_FA_LONG_ARROW_ALT_RIGHT " Browser in the menu bar. "
                     "Simulations can be conveniently downloaded and uploaded from/to the connected server (alien-project.org by default). "
                     "In order to upload own simulations to the server or rate other simulations, you need to register a new user, which can be accomplished in "
                     "the login dialog.");
@@ -63,15 +63,17 @@ void _GettingStartedWindow::processIntern()
                     "the original world can be made.");
         ImGui::Text("There are basically two modes of how the user can operate in the view where the simulation is "
                     "shown: a navigation mode and an edit mode. You can switch between these two modes by invoking "
-                    "the edit button at the bottom left of the screen or in the menu via Editor " ICON_FA_ARROW_RIGHT " Activate.");
+                    "the edit button at the bottom left of the screen or in the menu via Editor " ICON_FA_LONG_ARROW_ALT_RIGHT " Activate.");
         drawItemText("The navigation mode is enabled by default and allows you to zoom in (holding the left mouse "
                     "button) and out (holding the right mouse button) continuously. By holding the middle mouse "
                     "button and moving the mouse, you can pan the visualized section of the world.");
-        drawItemText("In the edit mode, it is possible to apply forces to bodies in a running simulation by holding and moving the right mouse button."
-                    "With the left mouse button you can drag and drop objects. Please try this out. It can make a lot of fun! The editing mode also allows you "
-                    "to activate various editing windows (Pattern editor, Creator, Multiplier, etc.) whose possibilities can be explored over time.");
+        drawItemText(
+            "In the edit mode, it is possible to push bodies around in a running simulation by holding and moving the right mouse button. "
+            "With the left mouse button you can drag and drop objects. Please try this out. It can make a lot of fun! The editing mode also allows you "
+            "to activate lot of editing windows (Pattern editor, Creator, Multiplier, Genome editor, etc.) whose possibilities can be explored over time. "
+            "Practically all properties of each single particle can be manipulated. In addition, there are mass editing functions available.");
 
-        ImGui::Text("To be able to experiment with existing simulation files, it is important to know and change the "
+        ImGui::Text("To be able to experiment with existing simulations, it is important to know and change the "
                     "simulation parameters. This can be accomplished in the window 'Simulation parameters'. For example, "
                     "the radiation intensity can be increased or the friction can be adjusted. Explanations to the "
                     "individual parameters can be found in the tooltip next to them.");
@@ -90,8 +92,8 @@ void _GettingStartedWindow::processIntern()
 
         drawHeadline("Basic notion");
 
-        ImGui::Text("Generally, in an ALIEN simulation, all objects as well as thermal radiation are modeled by different types of particles. The following "
-                    "terms are frequently used:");
+        ImGui::Text("Generally, in an ALIEN simulation, all objects as well as thermal radiation are modeled by different types of particles moving through an "
+                    "empty space. The following terms are frequently used:");
 
         ImGui::Spacing();
         AlienImGui::BoldText("World");
@@ -101,7 +103,7 @@ void _GettingStartedWindow::processIntern()
         AlienImGui::BoldText("Cell");
         ImGui::Text(
             "Cells are the basic building blocks that make up everything. They can be connected to each others, possibly attached to the background "
-            "(to model barriers), possess special functions and transport neural activities. Additionally, cells have various physical properties, including");
+            "(to model barriers), possess special functions and transport activity values. Additionally, cells have various physical properties, including");
         drawItemText("Position in space");
         drawItemText("Velocity");
         drawItemText("Internal energy (may be interpreted as its temperature)");
@@ -116,32 +118,50 @@ void _GettingStartedWindow::processIntern()
             "case of an angle mismatch.");
 
         ImGui::Spacing();
+        AlienImGui::BoldText("Cell activity");
+        ImGui::Text("Cells can contain an activity state comprising of 8 real values, primarily utilized for controlling cell functions. The activities are "
+                    "refreshed periodically, specifically when the cell functions are executed. To be more precise, each cell function is executed at regular "
+                    "time intervals (every 6 time steps). The 'execution order number' specifies the exact time within each interval.");
+        ImGui::Text("The process for updating the cell activity is as follows: Firstly, the activities of all connected cells that serve as input are summed "
+                    "up. The resulted sum is then employed as input for the cell function, which may potentially alter the activity values. Subsequently, the "
+                    "outcome is utilized to determine the new cell activity.");
+
+        ImGui::Spacing();
         AlienImGui::BoldText("Cell function");
-        ImGui::Text("Each cell can be assigned a special function that retrieve/return input/output from connected cells:");
-        drawItemText("Neuron");
-        drawItemText("Transmitter");
-        drawItemText("Constructor");
-        drawItemText("Injector");
-        drawItemText("Nerve");
-        drawItemText("Attacker");
-        drawItemText("Defender");
-        drawItemText("Muscle");
-        drawItemText("Sensor");
+        ImGui::Text("It is possible to assign a special function to a cell, which will be executed at regular time intervals. The following functions are implemented:");
+        drawItemText("Neuron: It equips the cell with a small network of 8 neurons. It processes the activity values fetched from the input."); 
+        drawItemText("Transmitter: It distributes energy to other constructors, transmitters or surrounding cells. In particular, it can be used to power active "
+                     "constructors. No activity is required for triggering.");
+        drawItemText("Constructor: A constructor can build a cell cluster based on a built-in genome. The construction is done cell by cell and requires "
+                     "energy. A constructor can either be controlled via activities or become active automatically (default).");
+        drawItemText("Injector: It can infect other constructor cells to inject its own built-in genome.");
+        drawItemText("Nerve: On the one hand, it transfers activity values from connected input cells and on the other hand, it can optionally generate "
+                     "activity pulses at specific intervals.");
+        drawItemText("Attacker: If activated, it attacks (not connected) surrounding cells.");
+        drawItemText("Defender: It reduces the attack strength when another cell in the vicinity performs an attack.");
+        drawItemText("Muscle: When a muscle cell is activated, it can produce either a movement, a bending or a change in length of the cell connection.");
+        drawItemText("Sensor: If activated, it performs a long-range scan for the concentration of cells with a certain color.");
 
         ImGui::Spacing();
         AlienImGui::BoldText("Cell color");
+        ImGui::Text("In addition to cell functions, a color can be used to perform additional user-defined customization of cells. For this purpose, most "
+                    "simulation parameters can be adjusted separately for each color, if desired. As a result, cells of different colors may have individual "
+                    "properties.");
 
         ImGui::Spacing();
         AlienImGui::BoldText("Cell cluster");
-
-        ImGui::Spacing();
-        AlienImGui::BoldText("Neural activity");
+        ImGui::Text("A cell cluster (or cluster for short) is a connected graph consisting of cells and cell connections. Two cells in a cluster are therefore "
+                    "connected to each other directly or via other cells. A cluster physically represents a particular body.");
 
         ImGui::Spacing();
         AlienImGui::BoldText("Energy particle");
+        ImGui::Text(
+            "An energy particle is a particle which has only an energy value, position and velocity. Unlike cells, they cannot form clusters or perform any "
+            "additional functions. Energy particles are produced by cells as radiation or during decay and can, in turn, also be absorbed.");
 
         ImGui::Spacing();
         AlienImGui::BoldText("Pattern");
+        ImGui::Text("A pattern is a set of cell clusters and energy particles.");
 
         //ImGui::Text("There is a lot to explore. ALIEN features an extensive graph and particle editor in order to build custom worlds with desired "
         //            "environmental structures and machines. A documentation with tutorial-like introductions to various topics can be found at");
@@ -230,7 +250,7 @@ void _GettingStartedWindow::drawHeadline(std::string const& text)
 
 void _GettingStartedWindow::drawItemText(std::string const& text)
 {
-    ImGui::Text(ICON_FA_CARET_RIGHT);
+    ImGui::Text(ICON_FA_CHEVRON_RIGHT);
     ImGui::SameLine();
     AlienImGui::Text(text);
 }
