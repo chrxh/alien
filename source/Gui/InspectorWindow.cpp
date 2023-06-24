@@ -252,7 +252,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                 ImGui::TreePop();
             }
         }
-        if (type != CellFunction_None && ImGui::TreeNodeEx("Neural activity", TreeNodeFlags)) {
+        if (type != CellFunction_None && ImGui::TreeNodeEx("Cell activity", TreeNodeFlags)) {
             int index = 0;
             for (auto& channel : cell.activity.channels) {
                 AlienImGui::InputFloat(

@@ -218,7 +218,7 @@ void _SimulationParametersWindow::processBase(
                 _savedPalette);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Zoom for neural activity")
+                    .name("Zoom level for cell activity")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(32.0f)
