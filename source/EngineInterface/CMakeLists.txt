@@ -19,6 +19,7 @@ add_library(alien_engine_interface_lib
     GeneralSettings.h
     GpuSettings.h
     InspectedEntityIds.h
+    Motion.h
     MutationType.h
     OverlayDescriptions.h
     PreviewDescriptionConverter.cpp
