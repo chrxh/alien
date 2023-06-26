@@ -54,6 +54,12 @@ public:
         return maxVal * static_cast<float>(number) / RAND_MAX;
     }
 
+    __device__ __inline__ float random(float minVal, float maxVal)
+    {
+        int number = getRandomNumber();
+        return minVal + (maxVal - minVal) * static_cast<float>(number) / RAND_MAX;
+    }
+
     __device__ __inline__ float random()
     {
         int number = getRandomNumber();

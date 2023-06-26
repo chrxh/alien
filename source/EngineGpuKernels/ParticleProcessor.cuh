@@ -71,45 +71,51 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                 lock.releaseLock();
             }
         } else {
-            if (auto cell = data.cellMap.getFirst(particle->absPos)) {
+            if (auto cell = data.cellMap.getFirst(particle->absPos + particle->vel)) {
                 if (cell->barrier) {
-                    continue;
-                }
-                if (particle->lastAbsorbedCell == cell) {
-                    continue;
-                }
-                auto radiationAbsorption = SpotCalculator::calcParameter(
-                    &SimulationParametersSpotValues::radiationAbsorption,
-                    &SimulationParametersSpotActivatedValues::radiationAbsorption,
-                    data,
-                    cell->absPos,
-                    cell->color);
-
-                if (radiationAbsorption < NEAR_ZERO) {
-                    continue;
-                }
-                if (!cell->tryLock()) {
-                    continue;
-                }
-                if (particle->tryLock()) {
-
-                    auto energyToTransfer = particle->energy * radiationAbsorption;
-                    if (particle->energy < 1) {
-                        energyToTransfer = particle->energy;
+                    auto vr = particle->vel;
+                    auto r = data.cellMap.getCorrectedDirection(particle->absPos - cell->absPos);
+                    auto dot_vr_r = Math::dot(vr, r);
+                    if (dot_vr_r < 0) {
+                        particle->vel = vr - r * 2 * dot_vr_r / Math::lengthSquared(r);
                     }
-                    cell->energy += energyToTransfer;
-                    particle->energy -= energyToTransfer;
-                    bool killParticle = particle->energy < NEAR_ZERO;
-                        
-                    particle->releaseLock();
-
-                    if (killParticle) {
-                        particle = nullptr;
-                    } else {
-                        particle->lastAbsorbedCell = cell;
+                } else {
+                    if (particle->lastAbsorbedCell == cell) {
+                        continue;
                     }
+                    auto radiationAbsorption = SpotCalculator::calcParameter(
+                        &SimulationParametersSpotValues::radiationAbsorption,
+                        &SimulationParametersSpotActivatedValues::radiationAbsorption,
+                        data,
+                        cell->absPos,
+                        cell->color);
+
+                    if (radiationAbsorption < NEAR_ZERO) {
+                        continue;
+                    }
+                    if (!cell->tryLock()) {
+                        continue;
+                    }
+                    if (particle->tryLock()) {
+
+                        auto energyToTransfer = particle->energy * radiationAbsorption;
+                        if (particle->energy < 1) {
+                            energyToTransfer = particle->energy;
+                        }
+                        cell->energy += energyToTransfer;
+                        particle->energy -= energyToTransfer;
+                        bool killParticle = particle->energy < NEAR_ZERO;
+
+                        particle->releaseLock();
+
+                        if (killParticle) {
+                            particle = nullptr;
+                        } else {
+                            particle->lastAbsorbedCell = cell;
+                        }
+                    }
+                    cell->releaseLock();
                 }
-                cell->releaseLock();
             }
         }
     }
@@ -155,7 +161,7 @@ __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, floa
                 }
             }
             pos += delta;
-            vel = Math::normalized(delta);
+            vel = Math::normalized(delta) * data.numberGen1.random(0.5f, 1.0f);
         }
         if (source.shapeType == RadiationSourceShapeType_Rectangular) {
             auto const& rectangle = source.shapeData.rectangularRadiationSource;
@@ -196,6 +202,7 @@ __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, floa
                     vel.y = 1;
                 }
             }
+            vel = vel * data.numberGen1.random(0.5f, 1.0f);
         }
     }
 
