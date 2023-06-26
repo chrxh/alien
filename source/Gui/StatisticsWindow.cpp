@@ -290,7 +290,7 @@ void _StatisticsWindow::processHistograms()
     ImPlot::SetNextPlotFormatX("");
 
     //plot histogram
-    if (ImPlot::BeginPlot("##Histograms", "Age", "Cells count", ImVec2(-1, -1))) {
+    if (ImPlot::BeginPlot("##Histograms", "Age", "Cell count", ImVec2(-1, -1))) {
 
         auto const width = 1.0f / MAX_COLORS;
         for (int i = 0; i < MAX_COLORS; ++i) {

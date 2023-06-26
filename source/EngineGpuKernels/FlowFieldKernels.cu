@@ -61,6 +61,6 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
         }
         auto resultingAcceleration =
             SpotCalculator::calcResultingValue(data.cellMap, cell->absPos, float2{0, 0}, accelerations);
-        cell->vel = cell->vel + resultingAcceleration;
+        cell->shared1 += resultingAcceleration;
     }
 }

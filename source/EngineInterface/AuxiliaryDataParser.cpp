@@ -577,6 +577,29 @@ namespace
             auto& defaultSource = defaultParameters.particleSources[index];
             encodeDecodeProperty(tree, source.posX, defaultSource.posX, base + "pos.x", parserTask);
             encodeDecodeProperty(tree, source.posY, defaultSource.posY, base + "pos.y", parserTask);
+            encodeDecodeProperty(tree, source.shapeType, defaultSource.shapeType, base + "shape.type", parserTask);
+            if (source.shapeType == SpotShapeType_Circular) {
+                encodeDecodeProperty(
+                    tree,
+                    source.shapeData.circularRadiationSource.radius,
+                    defaultSource.shapeData.circularRadiationSource.radius,
+                    base + "shape.circular.radius",
+                    parserTask);
+            }
+            if (source.shapeType == SpotShapeType_Rectangular) {
+                encodeDecodeProperty(
+                    tree,
+                    source.shapeData.rectangularRadiationSource.width,
+                    defaultSource.shapeData.rectangularRadiationSource.width,
+                    base + "shape.rectangular.width",
+                    parserTask);
+                encodeDecodeProperty(
+                    tree,
+                    source.shapeData.rectangularRadiationSource.height,
+                    defaultSource.shapeData.rectangularRadiationSource.height,
+                    base + "shape.rectangular.height",
+                    parserTask);
+            }
         }
 
         //spots
@@ -590,7 +613,7 @@ namespace
             encodeDecodeProperty(tree, spot.posY, defaultSpot.posY, base + "pos.y", parserTask);
 
             encodeDecodeProperty(tree, spot.shapeType, defaultSpot.shapeType, base + "shape.type", parserTask);
-            if (spot.shapeType == ShapeType_Circular) {
+            if (spot.shapeType == SpotShapeType_Circular) {
                 encodeDecodeProperty(
                     tree,
                     spot.shapeData.circularSpot.coreRadius,
@@ -598,7 +621,7 @@ namespace
                     base + "shape.circular.core radius",
                     parserTask);
             }
-            if (spot.shapeType == ShapeType_Rectangular) {
+            if (spot.shapeType == SpotShapeType_Rectangular) {
                 encodeDecodeProperty(
                     tree, spot.shapeData.rectangularSpot.width, defaultSpot.shapeData.rectangularSpot.width, base + "shape.rectangular.core width", parserTask);
                 encodeDecodeProperty(

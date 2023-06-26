@@ -145,7 +145,7 @@ private:
 
     __device__ __inline__ static float calcWeight(float2 const& delta, int const& spotIndex)
     {
-        if (cudaSimulationParameters.spots[spotIndex].shapeType == ShapeType_Rectangular) {
+        if (cudaSimulationParameters.spots[spotIndex].shapeType == SpotShapeType_Rectangular) {
             return calcWeightForRectSpot(delta, spotIndex);
         } else {
             return calcWeightForCircularSpot(delta, spotIndex);

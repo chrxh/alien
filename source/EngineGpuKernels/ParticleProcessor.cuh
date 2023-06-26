@@ -16,7 +16,7 @@ public:
     __inline__ __device__ static void movement(SimulationData& data);
     __inline__ __device__ static void collision(SimulationData& data);
     __inline__ __device__ static void transformation(SimulationData& data);
-    __inline__ __device__ static void radiate(SimulationData& data, float2 pos, float2 const& vel, int color, float energy);  //return needed energy
+    __inline__ __device__ static void radiate(SimulationData& data, float2 pos, float2 vel, int color, float energy);  //return needed energy
 };
 
 
@@ -136,12 +136,67 @@ __inline__ __device__ void ParticleProcessor::transformation(SimulationData& dat
     }
 }
 
-__inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, float2 pos, float2 const& vel, int color, float energy)
+__inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, float2 pos, float2 vel, int color, float energy)
 {
     if (cudaSimulationParameters.numParticleSources > 0) {
         auto sourceIndex = data.numberGen1.random(cudaSimulationParameters.numParticleSources - 1);
         pos.x = cudaSimulationParameters.particleSources[sourceIndex].posX;
         pos.y = cudaSimulationParameters.particleSources[sourceIndex].posY;
+
+        auto const& source = cudaSimulationParameters.particleSources[sourceIndex];
+        if (source.shapeType == RadiationSourceShapeType_Circular) {
+            auto radius = max(1.0f, source.shapeData.circularRadiationSource.radius);
+            float2 delta{0, 0};
+            for (int i = 0; i < 10; ++i) {
+                delta.x = data.numberGen1.random() * radius * 2 - radius;
+                delta.y = data.numberGen1.random() * radius * 2 - radius;
+                if (Math::length(delta) <= radius) {
+                    break;
+                }
+            }
+            pos += delta;
+            vel = Math::normalized(delta);
+        }
+        if (source.shapeType == RadiationSourceShapeType_Rectangular) {
+            auto const& rectangle = source.shapeData.rectangularRadiationSource;
+            float2 delta;
+            delta.x = data.numberGen1.random() * rectangle.width - rectangle.width / 2;
+            delta.y = data.numberGen1.random() * rectangle.height - rectangle.height / 2;
+            pos += delta;
+            auto roundSize = min(rectangle.width, rectangle.height) / 2;
+            float2 corner1{-rectangle.width / 2, -rectangle.height / 2};
+            float2 corner2{rectangle.width / 2, -rectangle.height / 2};
+            float2 corner3{-rectangle.width / 2, rectangle.height / 2};
+            float2 corner4{rectangle.width / 2, rectangle.height / 2};
+            if (Math::lengthMax(corner1 - delta) <= roundSize) {
+                vel = Math::normalized(delta - (corner1 + float2{roundSize, roundSize}));
+            } else if (Math::lengthMax(corner2 - delta) <= roundSize) {
+                vel = Math::normalized(delta - (corner2 + float2{-roundSize, roundSize}));
+            } else if (Math::lengthMax(corner3 - delta) <= roundSize) {
+                vel = Math::normalized(delta - (corner3 + float2{roundSize, -roundSize}));
+            } else if (Math::lengthMax(corner4 - delta) <= roundSize) {
+                vel = Math::normalized(delta - (corner4 + float2{-roundSize, -roundSize}));
+            } else {
+                vel.x = 0;
+                vel.y = 0;
+                auto dx1 = rectangle.width / 2 + delta.x;
+                auto dx2 = rectangle.width / 2 - delta.x;
+                auto dy1 = rectangle.height / 2 + delta.y;
+                auto dy2 = rectangle.height / 2 - delta.y;
+                if (dx1 <= dy1 && dx1 <= dy2 && delta.x <= 0) {
+                    vel.x = -1;
+                }
+                if (dy1 <= dx1 && dy1 <= dx2 && delta.y <= 0) {
+                    vel.y = -1;
+                }
+                if (dx2 <= dy1 && dx2 <= dy2 && delta.x > 0) {
+                    vel.x = 1;
+                }
+                if (dy2 <= dx1 && dy2 <= dx2 && delta.y > 0) {
+                    vel.y = 1;
+                }
+            }
+        }
     }
 
     data.cellMap.correctPosition(pos);
