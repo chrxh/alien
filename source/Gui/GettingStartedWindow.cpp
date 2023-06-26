@@ -172,9 +172,16 @@ void _GettingStartedWindow::processIntern()
         ImGui::Text(
             "ALIEN comes with a lot of simulation files that can be found in the browser window. They are good for experimenting with certain aspects of the "
                     "program. We pick some examples to give a short overview:");
-        AlienImGui::BoldText("Fluids/Pump with Soft-Bodies");
-        ImGui::Text("This is a pure physics simulation consisting of different colored fluids, walls and soft bodies. One can control the behavior with "
-                    "different simulation parameters like 'Smoothing length', 'Pressure', 'Viscosity', etc.");
+        AlienImGui::BoldText("Fluids, walls and soft bodies");
+        ImGui::Text("There are several pure physics simulations demonstrating the engines' capability.");
+        drawItemText("Fluids/Pump with Soft-Bodies");
+        drawItemText("Demos/Stormy Night");
+        ImGui::Text("They are suitable for testing the influence of simulation parameters such as 'Smoothing length', 'Pressure', 'Viscosity', etc.");
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Text("[work in progress]");
 
         
         //ImGui::Text("There is a lot to explore. ALIEN features an extensive graph and particle editor in order to build custom worlds with desired "

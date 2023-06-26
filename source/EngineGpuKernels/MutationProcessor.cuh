@@ -675,6 +675,9 @@ __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data
 
     auto origColor = GenomeDecoder::getNextCellColor(subgenome, nodeAddress);
     auto newColor = getNewColorFromTransition(data, origColor);
+    if (newColor == -1) {
+        return;
+    }
 
     for (int dummy = 0; nodeAddress < subgenomeSize && dummy < subgenomeSize; ++dummy) {
         GenomeDecoder::setNextCellColor(subgenome, nodeAddress, newColor);
@@ -693,6 +696,9 @@ __inline__ __device__ void MutationProcessor::uniformColorMutation(SimulationDat
 
     auto origColor = GenomeDecoder::getNextCellColor(genome, Const::GenomeHeaderSize);
     auto newColor = getNewColorFromTransition(data, origColor);
+    if (newColor == -1) {
+        return;
+    }
 
     GenomeDecoder::executeForEachNodeRecursively(
         genome, genomeSize, [&](int depth, int nodeAddress) { GenomeDecoder::setNextCellColor(genome, nodeAddress, newColor); });
@@ -716,7 +722,7 @@ __inline__ __device__ int MutationProcessor::getNewColorFromTransition(Simulatio
         }
     }
     if (numAllowedColors == 0) {
-        return;
+        return -1;
     }
     int randomAllowedColorIndex = data.numberGen1.random(numAllowedColors - 1);
     int allowedColorIndex = 0;
