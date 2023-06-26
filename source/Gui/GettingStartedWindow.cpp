@@ -33,40 +33,42 @@ void _GettingStartedWindow::processIntern()
         drawHeadline("Introduction");
 
         ImGui::Text("ALIEN is an artificial life and physics simulation tool based on a 2D CUDA-powered particle engine for soft bodies and fluids.");
-        ImGui::Text("Each particle can be equipped with higher-level functions including sensors, muscles, neurons, constructors, etc. that allow to "
-                    "mimic certain functionalities of biological cells or of robotic components. Multi-cellular organisms are simulated as networks of "
-                    "particles that exchange energy and information over their bonds. The engine encompasses a genetic system capable of encoding the "
-                    "blueprints of organisms in genomes which are stored in individual cells. The simulator is capable to simulate entire ecosystems inhabited "
-                    "by different populations where every object is composed of interacting particles with specific functions (regardless of whether it models a "
-                    "plant, herbivore, carnivore, virus, environmental structure, etc.).");
+        ImGui::Text(
+            "Each particle can be equipped with higher-level functions including sensors, muscles, neurons, constructors, etc. that allow to "
+            "mimic certain functionalities of biological cells or of robotic components. Multi-cellular organisms are simulated as networks of "
+            "particles that exchange energy and information over their bonds. The engine encompasses a genetic system capable of encoding the "
+            "blueprints of organisms in genomes which are stored in individual cells. The simulator is capable to simulate entire ecosystems inhabited "
+            "by different populations where every object is composed of interacting particles with specific functions (regardless of whether it models a "
+            "plant, herbivore, carnivore, virus, environmental structure, etc.).");
 
         drawHeadline("First steps");
 
         ImGui::Text("The easiest way to get to know the ALIEN simulator is to download and run an existing simulation file. You can then try out different "
                     "function and modify the simulation according to your wishes.");
-        ImGui::Text("Various examples can be found in the in-game simulation browser demonstrating capabilities of the "
-                    "engine ranging from pure physics examples, self-deploying structures, self-replicators to evolving ecosystems. If not already open, please "
-                    "invoke Network " ICON_FA_LONG_ARROW_ALT_RIGHT " Browser in the menu bar. "
-                    "Simulations can be conveniently downloaded and uploaded from/to the connected server (alien-project.org by default). "
-                    "In order to upload own simulations to the server or rate other simulations, you need to register a new user, which can be accomplished in "
-                    "the login dialog.");
+        ImGui::Text(
+            "Various examples can be found in the in-game simulation browser demonstrating capabilities of the "
+            "engine ranging from pure physics examples, self-deploying structures, self-replicators to evolving ecosystems. If not already open, please "
+            "invoke Network " ICON_FA_LONG_ARROW_ALT_RIGHT " Browser in the menu bar. "
+            "Simulations can be conveniently downloaded and uploaded from/to the connected server (alien-project.org by default). "
+            "In order to upload own simulations to the server or rate other simulations, you need to register a new user, which can be accomplished in "
+            "the login dialog.");
             
         ImGui::Text("For the beginning, however, you can use the evolution example already loaded. Initially, it is advisable to become acquainted with the "
                     "windows for temporal and spatial controls. The handling should be intuitive and requires no deeper knowledge.");
         drawItemText("In the temporal control window, a simulation can be started or paused. The execution speed "
-                    "may be regulated if necessary. In addition, it is possible to calculate and revert single time steps as "
-                    "well as to make snapshots of a simulation to which one can return at any time without having "
-                    "to reload the simulation from a file.");
+                     "may be regulated if necessary. In addition, it is possible to calculate and revert single time steps as "
+                     "well as to make snapshots of a simulation to which one can return at any time without having "
+                     "to reload the simulation from a file.");
         drawItemText("The spatial control window combines zoom information and settings on the one hand, and "
-                    "scaling functions on the other hand. A quite useful feature in the dialog for "
-                    "scaling/resizing is the option 'Scale content'. If activated, periodic spatial copies of "
-                    "the original world can be made.");
+                     "scaling functions on the other hand. A quite useful feature in the dialog for "
+                     "scaling/resizing is the option 'Scale content'. If activated, periodic spatial copies of "
+                     "the original world can be made.");
         ImGui::Text("There are basically two modes of how the user can operate in the view where the simulation is "
                     "shown: a navigation mode and an edit mode. You can switch between these two modes by invoking "
                     "the edit button at the bottom left of the screen or in the menu via Editor " ICON_FA_LONG_ARROW_ALT_RIGHT " Activate.");
         drawItemText("The navigation mode is enabled by default and allows you to zoom in (holding the left mouse "
-                    "button) and out (holding the right mouse button) continuously. By holding the middle mouse "
-                    "button and moving the mouse, you can pan the visualized section of the world.");
+                     "button) and out (holding the right mouse button) continuously. By holding the middle mouse "
+                     "button and moving the mouse, you can pan the visualized section of the world.");
         drawItemText(
             "In the edit mode, it is possible to push bodies around in a running simulation by holding and moving the right mouse button. "
             "With the left mouse button you can drag and drop objects. Please try this out. It can make a lot of fun! The editing mode also allows you "
@@ -78,10 +80,11 @@ void _GettingStartedWindow::processIntern()
                     "the radiation intensity can be increased or the friction can be adjusted. Explanations to the "
                     "individual parameters can be found in the tooltip next to them.");
 
-        ImGui::Text("ALIEN offers the possibility for users to customize the basic entities through a color system with 7 different colors. More precisely, each "
-                    "cell is assigned a specific color, allowing the application of different simulation parameter values based on the cell's color. This "
-                    "enables the creation of specific conditions for populations coexisting in a shared world. For example, "
-                    "plant-like organisms may have a higher absorption rate for radiation particles, so they can get their energy from that.");
+        ImGui::Text(
+            "ALIEN offers the possibility for users to customize the basic entities through a color system with 7 different colors. More precisely, each "
+            "cell is assigned a specific color, allowing the application of different simulation parameter values based on the cell's color. This "
+            "enables the creation of specific conditions for populations coexisting in a shared world. For example, "
+            "plant-like organisms may have a higher absorption rate for radiation particles, so they can get their energy from that.");
 
         ImGui::Spacing();
 
@@ -128,10 +131,12 @@ void _GettingStartedWindow::processIntern()
 
         ImGui::Spacing();
         AlienImGui::BoldText("Cell function");
-        ImGui::Text("It is possible to assign a special function to a cell, which will be executed at regular time intervals. The following functions are implemented:");
-        drawItemText("Neuron: It equips the cell with a small network of 8 neurons. It processes the activity values fetched from the input."); 
-        drawItemText("Transmitter: It distributes energy to other constructors, transmitters or surrounding cells. In particular, it can be used to power active "
-                     "constructors. No activity is required for triggering.");
+        ImGui::Text("It is possible to assign a special function to a cell, which will be executed at regular time intervals. The following functions are "
+                    "implemented:");
+        drawItemText("Neuron: It equips the cell with a small network of 8 neurons. It processes the activity values fetched from the input.");
+        drawItemText(
+            "Transmitter: It distributes energy to other constructors, transmitters or surrounding cells. In particular, it can be used to power active "
+            "constructors. No activity is required for triggering.");
         drawItemText("Constructor: A constructor can build a cell cluster based on a built-in genome. The construction is done cell by cell and requires "
                      "energy. A constructor can either be controlled via activities or become active automatically (default).");
         drawItemText("Injector: It can infect other constructor cells to inject its own built-in genome.");
@@ -163,6 +168,15 @@ void _GettingStartedWindow::processIntern()
         AlienImGui::BoldText("Pattern");
         ImGui::Text("A pattern is a set of cell clusters and energy particles.");
 
+        drawHeadline("Examples");
+        ImGui::Text(
+            "ALIEN comes with a lot of simulation files that can be found in the browser window. They are good for experimenting with certain aspects of the "
+                    "program. We pick some examples to give a short overview:");
+        AlienImGui::BoldText("Fluids/Pump with Soft-Bodies");
+        ImGui::Text("This is a pure physics simulation consisting of different colored fluids, walls and soft bodies. One can control the behavior with "
+                    "different simulation parameters like 'Smoothing length', 'Pressure', 'Viscosity', etc.");
+
+        
         //ImGui::Text("There is a lot to explore. ALIEN features an extensive graph and particle editor in order to build custom worlds with desired "
         //            "environmental structures and machines. A documentation with tutorial-like introductions to various topics can be found at");
 

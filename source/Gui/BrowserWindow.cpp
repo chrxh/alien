@@ -29,6 +29,7 @@ namespace
 {
     auto constexpr UserTableWidth = 200.0f;
     auto constexpr BrowserBottomHeight = 68.0f;
+    auto constexpr RowHeight = 25.0f;
 }
 
 _BrowserWindow::_BrowserWindow(
@@ -243,7 +244,7 @@ void _BrowserWindow::processSimulationTable()
                 RemoteSimulationData* item = &_filteredRemoteSimulationList[row];
 
                 ImGui::PushID(row);
-                ImGui::TableNextRow();
+                ImGui::TableNextRow(0, contentScale(RowHeight));
 
                 ImGui::TableNextColumn();
                 if (processActionButton(ICON_FA_DOWNLOAD)) {
@@ -350,7 +351,7 @@ void _BrowserWindow::processUserTable()
                 auto item = &_userList[row];
 
                 ImGui::PushID(row);
-                ImGui::TableNextRow();
+                ImGui::TableNextRow(0, contentScale(RowHeight));
 
                 ImGui::TableNextColumn();
                 if (item->online) {
