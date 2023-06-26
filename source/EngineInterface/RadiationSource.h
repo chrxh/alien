@@ -38,6 +38,8 @@ struct RadiationSource
 {
     float posX = 0;
     float posY = 0;
+    bool useAngle = false;
+    float angle = 0;
 
     RadiationSourceShapeType shapeType = RadiationSourceShapeType_Circular;
     RadiationSourceShapeData shapeData = {CircularRadiationSource()};
@@ -57,7 +59,7 @@ struct RadiationSource
                 return false;
             }
         }
-        return posX == other.posX && posY == other.posY;
+        return posX == other.posX && posY == other.posY && useAngle == other.useAngle && angle == other.angle;
     }
     bool operator!=(RadiationSource const& other) const { return !operator==(other); }
 };
