@@ -5,11 +5,11 @@
 #include "SimulationParametersSpotActivatedValues.h"
 #include "SimulationParametersSpotValues.h"
 
-using ShapeType = int;
-enum SpotShape_
+using SpotShapeType = int;
+enum SpotShapeType_
 {
-    ShapeType_Circular,
-    ShapeType_Rectangular
+    SpotShapeType_Circular,
+    SpotShapeType_Rectangular
 };
 
 using FlowType = int;
@@ -80,7 +80,7 @@ struct RectangularSpot
     bool operator!=(RectangularSpot const& other) const { return !operator==(other); }
 };
 
-union ShapeData
+union SpotShapeData
 {
     CircularSpot circularSpot;
     RectangularSpot rectangularSpot;
@@ -94,8 +94,8 @@ struct SimulationParametersSpot
 
     float fadeoutRadius = 100.0f;
 
-    ShapeType shapeType = ShapeType_Circular;
-    ShapeData shapeData = {CircularSpot()};
+    SpotShapeType shapeType = SpotShapeType_Circular;
+    SpotShapeData shapeData = {CircularSpot()};
 
     FlowType flowType = FlowType_None;
     FlowData flowData = {RadialFlow()};
@@ -126,12 +126,12 @@ struct SimulationParametersSpot
         if (shapeType != other.shapeType) {
             return false;
         }
-        if (shapeType == ShapeType_Circular) {
+        if (shapeType == SpotShapeType_Circular) {
             if (shapeData.circularSpot != other.shapeData.circularSpot) {
                 return false;
             }
         }
-        if (shapeType == ShapeType_Rectangular) {
+        if (shapeType == SpotShapeType_Rectangular) {
             if (shapeData.rectangularSpot != other.shapeData.rectangularSpot) {
                 return false;
             }

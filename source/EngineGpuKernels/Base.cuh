@@ -125,7 +125,7 @@ __device__ __inline__ T alienAtomicAdd64(T* address, T const& value)
     // CUDA headers use "unsigned long long" for 64bit types, which
     // may not be structurally equivalent to std::uint64_t
     //
-    // Due to this, we need an ugly type casting workaround here
+    // Due to this, we need an ugly shapeType casting workaround here
     //
     static_assert(sizeof(unsigned long long) == sizeof(T));
     return atomicAdd(reinterpret_cast<unsigned long long*>(address), static_cast<unsigned long long>(value));

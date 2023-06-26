@@ -25,9 +25,6 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
 {
     auto const gpuSettings = settings.gpuSettings;
     KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, statistics);
-    if (settings.simulationParameters.numSpots > 0) {
-        KERNEL_CALL(cudaApplyFlowFieldSettings, data);
-    }
 
     //not all kernels need to be executed in each time step for performance reasons
     bool considerForcesFromAngleDifferences = (data.timestep % 3 == 0);
@@ -41,6 +38,9 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
         cudaNextTimestep_physics_calcFluidForces<<<gpuSettings.numBlocks, threads>>>(data);
     } else {
         KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, data);
+    }
+    if (settings.simulationParameters.numSpots > 0) {
+        KERNEL_CALL(cudaApplyFlowFieldSettings, data);
     }
     KERNEL_CALL(cudaNextTimestep_physics_applyForces, data);
     KERNEL_CALL(cudaNextTimestep_physics_calcConnectionForces, data, considerForcesFromAngleDifferences);
