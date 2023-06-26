@@ -86,6 +86,18 @@ void _RadiationSourcesWindow::processIntern()
                         .format("%.0f")
                         .defaultValue(&origSource.posY),
                     &source.posY);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Angle")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(360.0f)
+                        .defaultEnabledValue(&origSource.useAngle)
+                        .defaultValue(&origSource.angle)
+                        .disabledValue(&source.angle)
+                        .format("%.1f"),
+                    &source.angle,
+                    &source.useAngle);
                 if (source.shapeType == RadiationSourceShapeType_Circular) {
                     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y));
                     AlienImGui::SliderFloat(
