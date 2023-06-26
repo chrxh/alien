@@ -76,7 +76,8 @@ void SimulationData::resizeObjects()
 
     auto cellArraySize = objects.cells.getSize_host();
     cellMap.resize(cellArraySize);
-    particleMap.resize(cellArraySize);
+    auto particleArraySize = objects.particles.getSize_host();
+    particleMap.resize(particleArraySize);
 
     int upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(CellFunctionOperation) * CellFunction_Count + 200) * (cellArraySize + 1000); //heuristic
     processMemory.resize(upperBoundDynamicMemory);
