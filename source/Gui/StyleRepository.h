@@ -86,8 +86,8 @@ public:
     ImFont* getReefMediumFont() const;
     ImFont* getReefLargeFont() const;
 
-    float contentScale(float value) const;
-    float contentInverseScale(float value) const;
+    float scale(float value) const;
+    float scaleInverse(float value) const;
 
 private:
     StyleRepository() = default;
@@ -104,7 +104,7 @@ private:
     ImFont* _reefLargeFont = nullptr;
 };
 
-inline float contentScale(float value)
+inline float scale(float value)
 {
-    return StyleRepository::getInstance().contentScale(value);
+    return StyleRepository::getInstance().scale(value);
 }

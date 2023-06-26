@@ -124,12 +124,12 @@ ImFont* StyleRepository::getReefLargeFont() const
     return _reefLargeFont;
 }
 
-float StyleRepository::contentScale(float value) const
+float StyleRepository::scale(float value) const
 {
     return _contentScaleFactor * value;
 }
 
-float StyleRepository::contentInverseScale(float value) const
+float StyleRepository::scaleInverse(float value) const
 {
     return _contentScaleFactor / value;
 }

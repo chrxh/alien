@@ -62,8 +62,8 @@ void _InspectorWindow::process()
         return;
     }
     auto width = calcWindowWidth();
-    auto height = isCell() ? StyleRepository::getInstance().contentScale(370.0f)
-                           : StyleRepository::getInstance().contentScale(70.0f);
+    auto height = isCell() ? StyleRepository::getInstance().scale(370.0f)
+                           : StyleRepository::getInstance().scale(70.0f);
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
@@ -77,7 +77,7 @@ void _InspectorWindow::process()
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
-        auto factor = StyleRepository::getInstance().contentScale(1);
+        auto factor = StyleRepository::getInstance().scale(1);
 
         drawList->AddLine(
             {windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor},
@@ -536,9 +536,9 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
 float _InspectorWindow::calcWindowWidth() const
 {
     if (isCell()) {
-        return StyleRepository::getInstance().contentScale(CellWindowWidth);
+        return StyleRepository::getInstance().scale(CellWindowWidth);
     } else {
-        return StyleRepository::getInstance().contentScale(ParticleWindowWidth);
+        return StyleRepository::getInstance().scale(ParticleWindowWidth);
     }
 }
 

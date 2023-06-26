@@ -18,8 +18,8 @@ _ModeController::_ModeController(EditorController const& editorController)
 void _ModeController::process()
 {
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + viewport->Size.y - contentScale(120.0f)));
-    ImGui::SetNextWindowSize(ImVec2(contentScale(160.0f), contentScale(100.0f)));
+    ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + viewport->Size.y - scale(120.0f)));
+    ImGui::SetNextWindowSize(ImVec2(scale(160.0f), scale(100.0f)));
 
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
@@ -30,7 +30,7 @@ void _ModeController::process()
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor());
 
     auto actionTexture = Mode::Editor == _mode ? _editorOn.textureId : _editorOff.textureId;
-    if (ImGui::ImageButton((void*)(intptr_t)actionTexture, {contentScale(80.0f), contentScale(80.0f)}, {0, 0}, {1.0f, 1.0f})) {
+    if (ImGui::ImageButton((void*)(intptr_t)actionTexture, {scale(80.0f), scale(80.0f)}, {0, 0}, {1.0f, 1.0f})) {
         _mode = _mode == Mode::Editor ? Mode::Navigation : Mode::Editor;
         _editorController->setOn(!_editorController->isOn());
     }

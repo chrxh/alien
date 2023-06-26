@@ -39,7 +39,7 @@ void _MultiplierWindow::processIntern()
         _mode = MultiplierMode::Random;
     }
 
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - contentScale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
 
