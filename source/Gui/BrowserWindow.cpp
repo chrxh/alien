@@ -108,7 +108,7 @@ void _BrowserWindow::processIntern()
         auto sizeAvailable = ImGui::GetContentRegionAvail();
         if (ImGui::BeginChild(
                 "##1",
-                ImVec2(sizeAvailable.x - contentScale(UserTableWidth), sizeAvailable.y - contentScale(BrowserBottomHeight)),
+                ImVec2(sizeAvailable.x - scale(UserTableWidth), sizeAvailable.y - scale(BrowserBottomHeight)),
                 false,
                 ImGuiWindowFlags_HorizontalScrollbar)) {
             processSimulationTable();
@@ -120,7 +120,7 @@ void _BrowserWindow::processIntern()
     {
         auto sizeAvailable = ImGui::GetContentRegionAvail();
         if (ImGui::BeginChild(
-                "##2", ImVec2(sizeAvailable.x, sizeAvailable.y - contentScale(BrowserBottomHeight)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+                "##2", ImVec2(sizeAvailable.x, sizeAvailable.y - scale(BrowserBottomHeight)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             processUserTable();
         }
         ImGui::EndChild();
@@ -192,27 +192,27 @@ void _BrowserWindow::processSimulationTable()
         ImGui::TableSetupColumn(
             "Actions",
             ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed,
-            contentScale(90.0f),
+            scale(90.0f),
             RemoteSimulationDataColumnId_Actions);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
-            contentScale(135.0f),
+            scale(135.0f),
             RemoteSimulationDataColumnId_Timestamp);
         ImGui::TableSetupColumn(
             "User name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.contentScale(120.0f),
+            styleRepository.scale(120.0f),
             RemoteSimulationDataColumnId_UserName);
         ImGui::TableSetupColumn(
             "Simulation name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.contentScale(160.0f),
+            styleRepository.scale(160.0f),
             RemoteSimulationDataColumnId_SimulationName);
         ImGui::TableSetupColumn(
             "Description",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.contentScale(120.0f),
+            styleRepository.scale(120.0f),
             RemoteSimulationDataColumnId_Description);
         ImGui::TableSetupColumn("Stars", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Likes);
         ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_NumDownloads);
@@ -244,7 +244,7 @@ void _BrowserWindow::processSimulationTable()
                 RemoteSimulationData* item = &_filteredRemoteSimulationList[row];
 
                 ImGui::PushID(row);
-                ImGui::TableNextRow(0, contentScale(RowHeight));
+                ImGui::TableNextRow(0, scale(RowHeight));
 
                 ImGui::TableNextColumn();
                 if (processActionButton(ICON_FA_DOWNLOAD)) {
@@ -329,17 +329,17 @@ void _BrowserWindow::processUserTable()
         ImGui::TableSetupColumn(
             "Name",
             ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed,
-            contentScale(90.0f),
+            scale(90.0f),
             RemoteSimulationDataColumnId_Actions);
         ImGui::TableSetupColumn(
             "Stars received",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
-            contentScale(100.0f),
+            scale(100.0f),
             RemoteSimulationDataColumnId_Timestamp);
         ImGui::TableSetupColumn(
             "Stars given",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.contentScale(100.0f),
+            styleRepository.scale(100.0f),
             RemoteSimulationDataColumnId_UserName);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
@@ -351,7 +351,7 @@ void _BrowserWindow::processUserTable()
                 auto item = &_userList[row];
 
                 ImGui::PushID(row);
-                ImGui::TableNextRow(0, contentScale(RowHeight));
+                ImGui::TableNextRow(0, scale(RowHeight));
 
                 ImGui::TableNextColumn();
                 if (item->online) {
@@ -378,7 +378,7 @@ void _BrowserWindow::processStatus()
 {
     auto styleRepository = StyleRepository::getInstance();
 
-    if (ImGui::BeginChild("##", ImVec2(0, styleRepository.contentScale(33.0f)), true)) {
+    if (ImGui::BeginChild("##", ImVec2(0, styleRepository.scale(33.0f)), true)) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
         std::string statusText;
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
@@ -431,7 +431,7 @@ void _BrowserWindow::processShortenedText(std::string const& text) {
     auto styleRepository = StyleRepository::getInstance();
     auto textSize = ImGui::CalcTextSize(substrings.at(0).c_str());
     auto needDetailButton = textSize.x > ImGui::GetContentRegionAvailWidth() || substrings.size() > 1;
-    auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - styleRepository.contentScale(15.0f);
+    auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - styleRepository.scale(15.0f);
     AlienImGui::Text(substrings.at(0));
     if (needDetailButton) {
         ImGui::SameLine();

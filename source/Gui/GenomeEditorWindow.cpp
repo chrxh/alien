@@ -248,7 +248,7 @@ namespace
     public:
         bool begin()
         {
-            auto width = StyleRepository::getInstance().contentScale(ImGui::GetContentRegionAvail().x);
+            auto width = StyleRepository::getInstance().scale(ImGui::GetContentRegionAvail().x);
             _columns = std::max(toInt(width / DynamicTableColumnWidth), 1);
             auto result = ImGui::BeginTable("##", _columns, ImGuiTableFlags_None);
             if (result) {
@@ -280,7 +280,7 @@ namespace
 
 void _GenomeEditorWindow::processTab(TabData& tab)
 {
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - contentScale(_previewHeight)), true)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(_previewHeight)), true)) {
         AlienImGui::Group("General properties");
         processGenomeHeader(tab);
 
@@ -289,7 +289,7 @@ void _GenomeEditorWindow::processTab(TabData& tab)
     }
     ImGui::EndChild();
 
-    ImGui::Button("", ImVec2(-1, StyleRepository::getInstance().contentScale(5.0f)));
+    ImGui::Button("", ImVec2(-1, StyleRepository::getInstance().scale(5.0f)));
     if (ImGui::IsItemActive()) {
         _previewHeight -= ImGui::GetIO().MouseDelta.y;
     }
@@ -642,7 +642,7 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
         }
     }
     auto width = ImGui::GetContentRegionAvail().x / 2;
-    if (ImGui::BeginChild("##", ImVec2(width, contentScale(60.0f)), true)) {
+    if (ImGui::BeginChild("##", ImVec2(width, scale(60.0f)), true)) {
         AlienImGui::MonospaceText(content);
         if (AlienImGui::Button("Clear")) {
             desc.setGenome({});
