@@ -257,7 +257,6 @@ struct SimulationParameters
             && radiationVelocityPerturbation == other.radiationVelocityPerturbation
             && cellFunctionAttackerActivityThreshold == other.cellFunctionAttackerActivityThreshold
             && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
-            && cellFunctionAttackerEnergyDistributionSameColor == other.cellFunctionAttackerEnergyDistributionSameColor
             && cellFunctionTransmitterEnergyDistributionSameCreature == other.cellFunctionTransmitterEnergyDistributionSameCreature
             && particleTransformationAllowed == other.particleTransformationAllowed
             && particleTransformationRandomCellFunction == other.particleTransformationRandomCellFunction
