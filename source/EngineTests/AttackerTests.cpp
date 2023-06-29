@@ -11,7 +11,6 @@ public:
     static SimulationParameters getParameters()
     {
         SimulationParameters result;
-        result.cellFunctionAttackerEnergyDistributionSameColor = true;
         result.innerFriction = 0;
         result.baseValues.friction = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
