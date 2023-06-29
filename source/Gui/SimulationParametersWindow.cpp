@@ -853,13 +853,6 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.cellFunctionAttackerColorInhomogeneityFactor)
                     .tooltip("If the attacked cell is connected to cells with different colors, this factor affects the energy of the captured energy."),
                 simParameters.cellFunctionAttackerColorInhomogeneityFactor);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Same color energy distribution")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.cellFunctionAttackerEnergyDistributionSameColor)
-                    .tooltip("If activated, the captured energy after an attack is only transferred to nearby cells with the same color."),
-                simParameters.cellFunctionAttackerEnergyDistributionSameColor);
             ImGui::TreePop();
         }
         ImGui::PopID();
@@ -1061,11 +1054,11 @@ void _SimulationParametersWindow::processBase(
                 simParameters.cellFunctionTransmitterEnergyDistributionValue);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Same color energy distribution")
+                    .name("Same creature energy distribution")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionSameColor)
-                    .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells with the same color."),
-                simParameters.cellFunctionTransmitterEnergyDistributionSameColor);
+                    .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionSameCreature)
+                    .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells belonging to the same creature."),
+                simParameters.cellFunctionTransmitterEnergyDistributionSameCreature);
             ImGui::TreePop();
         }
 

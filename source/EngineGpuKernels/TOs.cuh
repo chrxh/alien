@@ -61,7 +61,7 @@ struct ConstructorTO
 
     //process data
     uint64_t genomeReadPosition;
-    int offspringConstructionId;
+    int offspringCreatureId;
 };
 
 struct SensorTO
@@ -138,7 +138,7 @@ struct CellTO
     bool barrier;
     int age;
     LivingState livingState;
-    int constructionId;
+    int creatureId;
 
     //cell function
     int executionOrderNumber;
@@ -148,7 +148,7 @@ struct CellTO
     CellFunctionTO cellFunctionData;
     ActivityTO activity;
     int activationTime;
-    int origGenomeSize;
+    int genomeSize;
 
     CellMetadataTO metadata;
 

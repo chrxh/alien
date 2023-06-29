@@ -104,7 +104,7 @@ struct ConstructorDescription
 
     //process data
     int genomeReadPosition = 0;
-    int offspringConstructionId = 0;
+    int offspringCreatureId = 0;
 
     ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
@@ -285,7 +285,7 @@ struct CellDescription
     bool barrier = false;
     int age = 0;
     LivingState livingState = LivingState_Ready;
-    int constructionId = 0;
+    int creatureId = 0;
 
     //cell function
     int executionOrderNumber = 0;
@@ -294,7 +294,7 @@ struct CellDescription
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
     int activationTime = 0;
-    int origGenomeSize = 0;
+    int genomeSize = 0;
 
     CellMetadataDescription metadata;
 
@@ -364,7 +364,7 @@ struct CellDescription
     }
     CellDescription& setConstructionId(int value)
     {
-        constructionId = value;
+        creatureId = value;
         return *this;
     }
     CellDescription& setInputExecutionOrderNumber(int value)

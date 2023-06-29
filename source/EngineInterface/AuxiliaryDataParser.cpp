@@ -420,12 +420,6 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.cellFunctionAttackerEnergyDistributionSameColor,
-            defaultParameters.cellFunctionAttackerEnergyDistributionSameColor,
-            "simulation parameters.cell.function.attacker.energy distribution same color",
-            parserTask);
-        encodeDecodeProperty(
-            tree,
             parameters.cellFunctionAttackerEnergyDistributionValue,
             defaultParameters.cellFunctionAttackerEnergyDistributionValue,
             "simulation parameters.cell.function.attacker.energy distribution value",
@@ -488,9 +482,9 @@ namespace
 
         encodeDecodeProperty(
             tree,
-            parameters.cellFunctionTransmitterEnergyDistributionSameColor,
-            defaultParameters.cellFunctionTransmitterEnergyDistributionSameColor,
-            "simulation parameters.cell.function.transmitter.energy distribution same color",
+            parameters.cellFunctionTransmitterEnergyDistributionSameCreature,
+            defaultParameters.cellFunctionTransmitterEnergyDistributionSameCreature,
+            "simulation parameters.cell.function.transmitter.energy distribution same creature",
             parserTask);
         encodeDecodeProperty(
             tree,

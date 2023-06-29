@@ -48,7 +48,7 @@ namespace
     auto constexpr Id_Cell_Barrier = 3;
     auto constexpr Id_Cell_Age = 4;
     auto constexpr Id_Cell_LivingState = 5;
-    auto constexpr Id_Cell_ConstructionId = 10;
+    auto constexpr Id_Cell_CreatureId = 10;
     auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
     auto constexpr Id_Cell_OutputBlocked = 7;
     auto constexpr Id_Cell_ActivationTime = 8;
@@ -64,6 +64,7 @@ namespace
     auto constexpr Id_Constructor_GenomeHeader = 10;
     auto constexpr Id_Constructor_ConstructionAngle1 = 11;
     auto constexpr Id_Constructor_ConstructionAngle2 = 12;
+    auto constexpr Id_Constructor_OffspringCreatureId = 13;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -240,6 +241,7 @@ namespace cereal
                 }
 
                 //compatibility with older versions
+                //>>>
                 else {
                     GenomeDescription genomeDesc;
                     genomeDesc.cells = std::get<std::vector<CellGenomeDescription>>(genomeData);
@@ -253,6 +255,7 @@ namespace cereal
                         data.constructionAngle2 = genomeDesc.cells.back().referenceAngle;
                     }
                 }
+                //<<<
             }
         } else {
             std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
@@ -455,6 +458,7 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
         loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeReadPosition, data.genomeReadPosition, defaultObject.genomeReadPosition);
+        loadSave<int>(task, auxiliaries, Id_Constructor_OffspringCreatureId, data.offspringCreatureId, defaultObject.offspringCreatureId);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
         loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
         loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
@@ -472,6 +476,7 @@ namespace cereal
             }
 
             //compatibility with older versions
+            //>>>
             else {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc.cells);
@@ -491,6 +496,7 @@ namespace cereal
                     data.constructionAngle2 = genomeDesc.cells.back().referenceAngle;
                 }
             }
+            //<<<
         } else {
             GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
             ar(genomeDesc);
@@ -603,7 +609,7 @@ namespace cereal
         loadSave<bool>(task, auxiliaries, Id_Cell_Barrier, data.barrier, defaultObject.barrier);
         loadSave<int>(task, auxiliaries, Id_Cell_Age, data.age, defaultObject.age);
         loadSave<int>(task, auxiliaries, Id_Cell_LivingState, data.livingState, defaultObject.livingState);
-        loadSave<int>(task, auxiliaries, Id_Cell_ConstructionId, data.constructionId, defaultObject.constructionId);
+        loadSave<int>(task, auxiliaries, Id_Cell_CreatureId, data.creatureId, defaultObject.creatureId);
         loadSave<std::optional<int>>(
             task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);

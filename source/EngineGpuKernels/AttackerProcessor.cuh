@@ -53,12 +53,21 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
     Cell* someOtherCell = nullptr;
     data.cellMap.executeForEach(cell->absPos, cudaSimulationParameters.cellFunctionAttackerRadius[cell->color], cell->detached, [&](auto const& otherCell) {
-        if (otherCell->constructionId != cell->constructionId && !otherCell->barrier /*&& otherCell->livingState != LivingState_UnderConstruction*/) {
+        if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
+            return;
+        }
+        //compatibility with older versions
+        //>>>
+        if (cell->creatureId == 0 && isConnectedConnected(cell, otherCell)) {
+            return;
+        }
+        //<<<
+        if (otherCell->creatureId != cell->creatureId && !otherCell->barrier /*&& otherCell->livingState != LivingState_UnderConstruction*/) {
             auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength[cell->color];
             if (energyToTransfer < 0) {
                 return;
             }
-            //if (otherCell->origGenomeSize > cell->origGenomeSize) {
+            //if (otherCell->genomeSize > cell->genomeSize) {
             //    return;
             //}
 
@@ -208,16 +217,10 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (connectedCell->constructionId != cell->constructionId) {
-                continue;
-            }
             atomicAdd(&connectedCell->energy, energyPerReceiver);
             energyDelta -= energyPerReceiver;
             for (int i = 0; i < connectedCell->numConnections; ++i) {
                 auto connectedConnectedCell = connectedCell->connections[i].cell;
-                if (connectedConnectedCell->constructionId != cell->constructionId) {
-                    continue;
-                }
                 atomicAdd(&connectedConnectedCell->energy, energyPerReceiver);
                 energyDelta -= energyPerReceiver;
             }
@@ -232,7 +235,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
             }
             if (otherCell->cellFunction == CellFunction_Constructor) {
                 auto isFinished = GenomeDecoder::isFinishedSingleConstruction(otherCell->cellFunctionData.constructor);
-                if (!isFinished && otherCell->constructionId == cell->constructionId) {
+                if (!isFinished && otherCell->creatureId == cell->creatureId) {
                     return true;
                 }
             }
@@ -243,7 +246,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
                 return false;
             }
             if (otherCell->cellFunction == CellFunction_Transmitter) {
-                if (otherCell->constructionId == cell->constructionId) {
+                if (otherCell->creatureId == cell->creatureId) {
                     return true;
                 }
             }
