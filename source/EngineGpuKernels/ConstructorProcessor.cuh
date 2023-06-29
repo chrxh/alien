@@ -335,10 +335,10 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     }
 
     if (GenomeDecoder::containsSelfReplication(constructor)) {
-        constructor.offspringConstructionId = data.numberGen1.random(65535);
-        hostCell->origGenomeSize = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
+        constructor.offspringCreatureId = data.numberGen1.random(65535);
+        hostCell->genomeSize = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
     } else {
-        hostCell->cellFunctionData.constructor.offspringConstructionId = hostCell->constructionId;
+        hostCell->cellFunctionData.constructor.offspringCreatureId = hostCell->creatureId;
     }
 
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, 0, constructionData);
@@ -399,7 +399,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         hostCell->detached,
         [&](Cell* const& otherCell) {
             if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != LivingState_UnderConstruction
-                || otherCell->constructionId != hostCell->cellFunctionData.constructor.offspringConstructionId) {
+                || otherCell->creatureId != hostCell->cellFunctionData.constructor.offspringCreatureId) {
                 return false;
             }
             return true;
@@ -596,14 +596,14 @@ ConstructorProcessor::constructCellIntern(
     result->numConnections = 0;
     result->executionOrderNumber = constructionData.executionOrderNumber;
     result->livingState = true;
-    result->constructionId = constructor.offspringConstructionId;
+    result->creatureId = constructor.offspringCreatureId;
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
     result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;
     result->outputBlocked = constructionData.outputBlocked;
 
     result->activationTime = constructor.constructionActivationTime;
-    result->origGenomeSize = hostCell->origGenomeSize;
+    result->genomeSize = hostCell->genomeSize;
 
     switch (constructionData.cellFunction) {
     case CellFunction_Neuron: {

@@ -91,7 +91,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->vel = cellTO.vel;
     cell->executionOrderNumber = cellTO.executionOrderNumber;
     cell->livingState = cellTO.livingState;
-    cell->constructionId = cellTO.constructionId;
+    cell->creatureId = cellTO.creatureId;
     cell->inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber;
     cell->outputBlocked = cellTO.outputBlocked;
     cell->maxConnections = cellTO.maxConnections;
@@ -102,7 +102,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->age = cellTO.age;
     cell->color = cellTO.color;
     cell->activationTime = cellTO.activationTime;
-    cell->origGenomeSize = cellTO.origGenomeSize;
+    cell->genomeSize = cellTO.genomeSize;
 
     createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
 
@@ -139,7 +139,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cell->cellFunctionData.constructor.genomeSize,
             cell->cellFunctionData.constructor.genome);
         cell->cellFunctionData.constructor.genomeReadPosition = cellTO.cellFunctionData.constructor.genomeReadPosition;
-        cell->cellFunctionData.constructor.offspringConstructionId = cellTO.cellFunctionData.constructor.offspringConstructionId;
+        cell->cellFunctionData.constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
         cell->cellFunctionData.constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
         cell->cellFunctionData.constructor.constructionAngle1 = cellTO.cellFunctionData.constructor.constructionAngle1;
         cell->cellFunctionData.constructor.constructionAngle2 = cellTO.cellFunctionData.constructor.constructionAngle2;
@@ -248,7 +248,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->barrier = false;
     cell->age = 0;
     cell->activationTime = 0;
-    cell->origGenomeSize = 0;
+    cell->genomeSize = 0;
     cell->inputExecutionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellNumExecutionOrderNumbers - 1);
     cell->outputBlocked = _data->numberGen1.randomBool();
     for (int i = 0; i < MAX_CHANNELS; ++i) {

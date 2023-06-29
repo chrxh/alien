@@ -83,7 +83,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameColor && connectedCell->constructionId != cell->constructionId) {
+            if (cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature && connectedCell->creatureId != cell->creatureId) {
                 continue;
             }
             atomicAdd(&connectedCell->energy, energyPerReceiver);
@@ -91,8 +91,8 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             energyDelta -= energyPerReceiver;
             for (int i = 0; i < connectedCell->numConnections; ++i) {
                 auto connectedConnectedCell = connectedCell->connections[i].cell;
-                if (cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameColor
-                    && connectedConnectedCell->constructionId != cell->constructionId) {
+                if (cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature
+                    && connectedConnectedCell->creatureId != cell->creatureId) {
                     continue;
                 }
                 atomicAdd(&connectedConnectedCell->energy, energyPerReceiver);
@@ -109,7 +109,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             if (otherCell->cellFunction == CellFunction_Constructor) {
                 auto isFinished = GenomeDecoder::isFinishedSingleConstruction(otherCell->cellFunctionData.constructor);
                 if (!isFinished
-                    && (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameColor || otherCell->constructionId == cell->constructionId)) {
+                    && (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId)) {
                     return true;
                 }
             }
@@ -120,7 +120,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
                 return false;
             }
             if (otherCell->cellFunction == CellFunction_Transmitter) {
-                if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameColor || otherCell->constructionId == cell->constructionId) {
+                if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId) {
                     return true;
                 }
             }

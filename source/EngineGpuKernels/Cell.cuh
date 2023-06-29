@@ -57,7 +57,7 @@ struct ConstructorFunction
 
     //process data
     uint64_t genomeReadPosition;
-    int offspringConstructionId;    //will be filled when self-replication starts
+    int offspringCreatureId;    //will be filled when self-replication starts
 
     //temp
     bool isComplete;
@@ -137,7 +137,7 @@ struct Cell
     bool barrier;
     int age;
     LivingState livingState;
-    int constructionId;
+    int creatureId;
 
     //cell function
     int executionOrderNumber;
@@ -147,7 +147,7 @@ struct Cell
     CellFunctionData cellFunctionData;
     Activity activity;
     int activationTime;
-    int origGenomeSize;
+    int genomeSize;
 
     CellMetadataDescription metadata;
 
