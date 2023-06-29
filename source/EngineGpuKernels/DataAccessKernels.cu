@@ -30,6 +30,7 @@ namespace
         cellTO.executionOrderNumber = cell->executionOrderNumber;
         cellTO.livingState = cell->livingState;
         cellTO.constructionId = cell->constructionId;
+        cellTO.origGenomeSize = cell->origGenomeSize;
         cellTO.inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
         cellTO.outputBlocked = cell->outputBlocked;
         cellTO.cellFunction = cell->cellFunction;
@@ -88,6 +89,7 @@ namespace
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
             cellTO.cellFunctionData.constructor.genomeReadPosition = cell->cellFunctionData.constructor.genomeReadPosition;
+            cellTO.cellFunctionData.constructor.offspringConstructionId = cell->cellFunctionData.constructor.offspringConstructionId;
             cellTO.cellFunctionData.constructor.genomeGeneration = cell->cellFunctionData.constructor.genomeGeneration;
         } break;
         case CellFunction_Sensor: {

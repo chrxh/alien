@@ -104,6 +104,7 @@ struct ConstructorDescription
 
     //process data
     int genomeReadPosition = 0;
+    int offspringConstructionId = 0;
 
     ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
@@ -293,6 +294,7 @@ struct CellDescription
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
     int activationTime = 0;
+    int origGenomeSize = 0;
 
     CellMetadataDescription metadata;
 

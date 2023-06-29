@@ -92,7 +92,7 @@ namespace
             return false;
         }
         auto constructor = cell->cellFunctionData.constructor;
-        return constructor.genomeReadPosition < constructor.genomeSize;
+        return constructor.genomeReadPosition >= Const::GenomeHeaderSize && constructor.genomeReadPosition < constructor.genomeSize;
     }
 }
 
@@ -198,7 +198,8 @@ __inline__ __device__ bool ConstructorProcessor::isConstructionAtBeginning(Cell*
 
 __inline__ __device__ bool ConstructorProcessor::isConstructionFinished(Cell* cell)
 {
-    return cell->cellFunctionData.constructor.genomeReadPosition >= cell->cellFunctionData.constructor.genomeSize;
+    return cell->cellFunctionData.constructor.genomeReadPosition >= cell->cellFunctionData.constructor.genomeSize
+        || cell->cellFunctionData.constructor.genomeSize <= Const::GenomeHeaderSize;
 }
 
 __inline__ __device__ bool
@@ -310,6 +311,8 @@ __inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite
 __inline__ __device__ bool
 ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData)
 {
+    auto& constructor = hostCell->cellFunctionData.constructor;
+
     if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, true)) {
         return false;
     }
@@ -323,8 +326,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         return false;
     }
 
-    if (cudaSimulationParameters.cellFunctionConstructorCheckCompletenessForSelfReplication
-        && !hostCell->cellFunctionData.constructor.isComplete) {
+    if (cudaSimulationParameters.cellFunctionConstructorCheckCompletenessForSelfReplication && !constructor.isComplete) {
         return false;
     }
 
@@ -332,7 +334,13 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         return false;
     }
 
-    hostCell->constructionId = data.numberGen1.random(65535);
+    if (GenomeDecoder::containsSelfReplication(constructor)) {
+        constructor.offspringConstructionId = data.numberGen1.random(65535);
+        hostCell->origGenomeSize = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
+    } else {
+        hostCell->cellFunctionData.constructor.offspringConstructionId = hostCell->constructionId;
+    }
+
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, 0, constructionData);
 
     if (!newCell->tryLock()) {
@@ -340,7 +348,6 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     }
 
     if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !constructionData.genomeHeader.separateConstruction) {
-        auto const& constructor = hostCell->cellFunctionData.constructor;
         auto distance =
             GenomeDecoder::isFinished(constructor) && !constructionData.genomeHeader.separateConstruction && constructionData.genomeHeader.singleConstruction
             ? 1.0f
@@ -392,7 +399,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         hostCell->detached,
         [&](Cell* const& otherCell) {
             if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != LivingState_UnderConstruction
-                || otherCell->constructionId != hostCell->constructionId) {
+                || otherCell->constructionId != hostCell->cellFunctionData.constructor.offspringConstructionId) {
                 return false;
             }
             return true;
@@ -589,13 +596,14 @@ ConstructorProcessor::constructCellIntern(
     result->numConnections = 0;
     result->executionOrderNumber = constructionData.executionOrderNumber;
     result->livingState = true;
-    result->constructionId = hostCell->constructionId;
+    result->constructionId = constructor.offspringConstructionId;
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
     result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;
     result->outputBlocked = constructionData.outputBlocked;
 
     result->activationTime = constructor.constructionActivationTime;
+    result->origGenomeSize = hostCell->origGenomeSize;
 
     switch (constructionData.cellFunction) {
     case CellFunction_Neuron: {
@@ -614,7 +622,7 @@ ConstructorProcessor::constructCellIntern(
         auto& newConstructor = result->cellFunctionData.constructor;
         newConstructor.activationMode = GenomeDecoder::readByte(constructor);
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor);
-        newConstructor.genomeReadPosition = 0;
+        newConstructor.genomeReadPosition = Const::GenomeHeaderSize;
         newConstructor.constructionAngle1 = GenomeDecoder::readAngle(constructor);
         newConstructor.constructionAngle2 = GenomeDecoder::readAngle(constructor);
         GenomeDecoder::copyGenome(data, constructor, newConstructor);
