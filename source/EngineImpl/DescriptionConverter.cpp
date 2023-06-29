@@ -390,6 +390,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.barrier = cellTO.barrier;
     result.age = cellTO.age;
     result.color = cellTO.color;
+    result.origGenomeSize = cellTO.origGenomeSize;
 
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
@@ -423,6 +424,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
         constructor.genomeReadPosition = toInt(cellTO.cellFunctionData.constructor.genomeReadPosition);
+        constructor.offspringConstructionId = cellTO.cellFunctionData.constructor.offspringConstructionId;
         constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
         constructor.constructionAngle1 = cellTO.cellFunctionData.constructor.constructionAngle1;
         constructor.constructionAngle2 = cellTO.cellFunctionData.constructor.constructionAngle2;
@@ -534,6 +536,7 @@ void DescriptionConverter::addCell(
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
         constructorTO.genomeReadPosition = constructorDesc.genomeReadPosition;
+        constructorTO.offspringConstructionId = constructorDesc.offspringConstructionId;
         constructorTO.genomeGeneration = constructorDesc.genomeGeneration;
         constructorTO.constructionAngle1 = constructorDesc.constructionAngle1;
         constructorTO.constructionAngle2 = constructorDesc.constructionAngle2;
@@ -598,6 +601,7 @@ void DescriptionConverter::addCell(
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;
     cellTO.color = cellDesc.color;
+    cellTO.origGenomeSize = cellDesc.origGenomeSize;
     convert(dataTO, cellDesc.metadata.name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
     convert(dataTO, cellDesc.metadata.description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);

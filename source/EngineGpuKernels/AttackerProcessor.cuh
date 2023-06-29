@@ -53,11 +53,14 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
     Cell* someOtherCell = nullptr;
     data.cellMap.executeForEach(cell->absPos, cudaSimulationParameters.cellFunctionAttackerRadius[cell->color], cell->detached, [&](auto const& otherCell) {
-        if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier /*&& otherCell->livingState != LivingState_UnderConstruction*/) {
+        if (otherCell->constructionId != cell->constructionId && !otherCell->barrier /*&& otherCell->livingState != LivingState_UnderConstruction*/) {
             auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength[cell->color];
             if (energyToTransfer < 0) {
                 return;
             }
+            //if (otherCell->origGenomeSize > cell->origGenomeSize) {
+            //    return;
+            //}
 
             auto velocityPenalty = Math::length(cell->vel) * 20 * cudaSimulationParameters.cellFunctionAttackerVelocityPenalty[cell->color] + 1.0f;
             energyToTransfer /= velocityPenalty;
@@ -205,14 +208,14 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor && connectedCell->color != cell->color) {
+            if (connectedCell->constructionId != cell->constructionId) {
                 continue;
             }
             atomicAdd(&connectedCell->energy, energyPerReceiver);
             energyDelta -= energyPerReceiver;
             for (int i = 0; i < connectedCell->numConnections; ++i) {
                 auto connectedConnectedCell = connectedCell->connections[i].cell;
-                if (cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor && connectedConnectedCell->color != cell->color) {
+                if (connectedConnectedCell->constructionId != cell->constructionId) {
                     continue;
                 }
                 atomicAdd(&connectedConnectedCell->energy, energyPerReceiver);
@@ -229,7 +232,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
             }
             if (otherCell->cellFunction == CellFunction_Constructor) {
                 auto isFinished = GenomeDecoder::isFinishedSingleConstruction(otherCell->cellFunctionData.constructor);
-                if (!isFinished && (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color)) {
+                if (!isFinished && otherCell->constructionId == cell->constructionId) {
                     return true;
                 }
             }
@@ -240,7 +243,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
                 return false;
             }
             if (otherCell->cellFunction == CellFunction_Transmitter) {
-                if (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color) {
+                if (otherCell->constructionId == cell->constructionId) {
                     return true;
                 }
             }

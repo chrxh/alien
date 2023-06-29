@@ -162,7 +162,7 @@ __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, floa
             }
             pos += delta;
             if (source.useAngle) {
-                vel = Math::unitVectorOfAngle(source.angle);
+                vel = Math::unitVectorOfAngle(source.angle) * data.numberGen1.random(0.5f, 1.0f);
             } else {
                 vel = Math::normalized(delta) * data.numberGen1.random(0.5f, 1.0f);
             }
@@ -174,7 +174,7 @@ __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, floa
             delta.y = data.numberGen1.random() * rectangle.height - rectangle.height / 2;
             pos += delta;
             if (source.useAngle) {
-                vel = Math::unitVectorOfAngle(source.angle);
+                vel = Math::unitVectorOfAngle(source.angle) * data.numberGen1.random(0.5f, 1.0f);
             } else {
                 auto roundSize = min(rectangle.width, rectangle.height) / 2;
                 float2 corner1{-rectangle.width / 2, -rectangle.height / 2};

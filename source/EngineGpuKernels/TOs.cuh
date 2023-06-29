@@ -61,6 +61,7 @@ struct ConstructorTO
 
     //process data
     uint64_t genomeReadPosition;
+    int offspringConstructionId;
 };
 
 struct SensorTO
@@ -147,6 +148,7 @@ struct CellTO
     CellFunctionTO cellFunctionData;
     ActivityTO activity;
     int activationTime;
+    int origGenomeSize;
 
     CellMetadataTO metadata;
 
