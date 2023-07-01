@@ -56,13 +56,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
             return;
         }
-        //compatibility with older versions
-        //>>>
         if (cell->creatureId == 0 && isConnectedConnected(cell, otherCell)) {
             return;
         }
-        //<<<
-        if (otherCell->creatureId != cell->creatureId && !otherCell->barrier /*&& otherCell->livingState != LivingState_UnderConstruction*/) {
+        if (!otherCell->barrier /*&& otherCell->livingState != LivingState_UnderConstruction*/) {
             auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength[cell->color];
             if (energyToTransfer < 0) {
                 return;
