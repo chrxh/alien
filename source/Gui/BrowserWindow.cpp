@@ -165,7 +165,7 @@ void _BrowserWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_UPLOAD)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_SHARE_ALT)) {
         if (_networkController->getLoggedInUserName()) {
             if (auto uploadSimulationDialog = _uploadSimulationDialog.lock()) {
                 uploadSimulationDialog->show();
@@ -174,7 +174,7 @@ void _BrowserWindow::processToolbar()
             _loginDialog.lock()->show();
         }
     }
-    AlienImGui::Tooltip("Upload simulation");
+    AlienImGui::Tooltip("Share your simulation with other users:\nYour current simulation will be uploaded to the server and made visible in the browser.");
     AlienImGui::Separator();
 }
 
@@ -392,7 +392,7 @@ void _BrowserWindow::processStatus()
 
         if (!_networkController->getLoggedInUserName()) {
             statusText += std::string("   " ICON_FA_INFO_CIRCLE " ");
-            statusText += "In order to upload and rate simulations you need to log in.";
+            statusText += "In order to share and upvote simulations you need to log in.";
         }
         AlienImGui::Text(statusText);
         ImGui::PopStyleColor();
