@@ -88,6 +88,7 @@ struct SimulationParameters
     ColorVector<float> cellFunctionAttackerEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
     ColorVector<float> cellFunctionAttackerColorInhomogeneityFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorVector<float> cellFunctionAttackerVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    ColorVector<float> cellFunctionAttackerGenomeSizeBonus = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     float cellFunctionAttackerActivityThreshold = 0.1f;
 
     ColorVector<float> cellFunctionDefenderAgainstAttackerStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
@@ -133,6 +134,9 @@ struct SimulationParameters
         }
          
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (cellFunctionAttackerGenomeSizeBonus[i] != other.cellFunctionAttackerGenomeSizeBonus[i]) {
+                return false;
+            }
             if (cellFunctionConstructorPumpEnergyFactor[i] != other.cellFunctionConstructorPumpEnergyFactor[i]) {
                 return false;
             }

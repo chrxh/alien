@@ -782,6 +782,27 @@ void _SimulationParametersWindow::processBase(
                 simParameters.cellFunctionAttackerStrength);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
+                    .name("Attack radius")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(2.5f)
+                    .defaultValue(origSimParameters.cellFunctionAttackerRadius)
+                    .tooltip("The maximum distance over which an attacker cell can attack another cell."),
+                simParameters.cellFunctionAttackerRadius);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Genome size bonus")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(20.0f)
+                    .infinity(true)
+                    .defaultValue(origSimParameters.cellFunctionAttackerGenomeSizeBonus)
+                    .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with larger genomes."),
+                simParameters.cellFunctionAttackerGenomeSizeBonus);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
                     .name("Velocity penalty")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
@@ -812,16 +833,6 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty)
                     .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
                 simParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Attack radius")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(2.5f)
-                    .defaultValue(origSimParameters.cellFunctionAttackerRadius)
-                    .tooltip("The maximum distance over which an attacker cell can attack another cell."),
-                simParameters.cellFunctionAttackerRadius);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy distribution radius")

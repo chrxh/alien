@@ -466,6 +466,12 @@ namespace
             defaultParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty,
             "simulation parameters.cell.function.attacker.connections mismatch penalty",
             parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionAttackerGenomeSizeBonus,
+            defaultParameters.cellFunctionAttackerGenomeSizeBonus,
+            "simulation parameters.cell.function.attacker.genome size bonus",
+            parserTask);
 
         encodeDecodeProperty(
             tree,
