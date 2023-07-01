@@ -2,7 +2,6 @@
 
 #include "EngineInterface/CellFunctionConstants.h"
 
-#include "QuantityConverter.cuh"
 #include "CellFunctionProcessor.cuh"
 #include "CudaSimulationFacade.cuh"
 #include "SimulationStatistics.cuh"
