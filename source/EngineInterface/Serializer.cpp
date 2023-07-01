@@ -623,7 +623,9 @@ namespace cereal
     template <class Archive>
     void serialize(Archive& ar, ClusterDescription& data)
     {
-        ar(data.id, data.cells);
+        uint64_t id = 0;
+        ar(id); //legacy: not used anymore
+        ar(data.cells);
     }
 
     template <class Archive>

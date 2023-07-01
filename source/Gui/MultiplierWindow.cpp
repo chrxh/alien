@@ -155,15 +155,16 @@ void _MultiplierWindow::onBuild()
     auto multiplicationResult = [&] {
         if (_mode == MultiplierMode::Grid) {
             return DescriptionHelper::gridMultiply(_origSelection, _gridParameters);
+        } else {
+            auto data = _simController->getSimulationData();
+            auto overlappingCheckSuccessful = true;
+            auto result = DescriptionHelper::randomMultiply(
+                _origSelection, _randomParameters, _simController->getWorldSize(), std::move(data), overlappingCheckSuccessful);
+            if (!overlappingCheckSuccessful) {
+                MessageDialog::getInstance().show("Random multiplication", "Non-overlapping copies could not be created.");
+            }
+            return result;
         }
-        auto data = _simController->getSimulationData();
-        auto overlappingCheckSuccessful = true;
-        auto result =
-            DescriptionHelper::randomMultiply(_origSelection, _randomParameters, _simController->getWorldSize(), std::move(data), overlappingCheckSuccessful);
-        if (!overlappingCheckSuccessful) {
-            MessageDialog::getInstance().show("Random multiplication", "Non-overlapping copies could not be created.");
-        }
-        return result;
     }();
     _simController->removeSelectedObjects(true);
     _simController->addAndSelectSimulationData(multiplicationResult);

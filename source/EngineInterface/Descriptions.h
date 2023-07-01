@@ -417,18 +417,11 @@ struct CellDescription
 
 struct ClusterDescription
 {
-    uint64_t id = 0;
-
     std::vector<CellDescription> cells;
 
     ClusterDescription() = default;
     auto operator<=>(ClusterDescription const&) const = default;
 
-    ClusterDescription& setId(uint64_t value)
-    {
-        id = value;
-        return *this;
-    }
     ClusterDescription& addCells(std::vector<CellDescription> const& value)
     {
         cells.insert(cells.end(), value.begin(), value.end());

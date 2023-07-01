@@ -351,7 +351,6 @@ auto DescriptionConverter::scanAndCreateClusterDescription(
 
     setInplaceDifference(freeCellIndices, scannedCellIndices);
 
-    result.cluster.id = NumberGenerator::getInstance().getId();
     result.cluster.addCells(cells);
 
     return result;

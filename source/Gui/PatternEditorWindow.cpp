@@ -345,6 +345,7 @@ void _PatternEditorWindow::onPaste()
     auto data = *_copiedSelection;
     auto center = _viewport->getCenterInWorldPos();
     data.setCenter(center);
+    DescriptionHelper::generateNewCreatureIds(data);
     _simController->addAndSelectSimulationData(data);
     _editorModel->update();
 }

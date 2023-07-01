@@ -108,6 +108,8 @@ public:
     static std::vector<CellOrParticleDescription> getConstructorToMainGenomes(DataDescription const& data);
 
     static void removeMetadata(DataDescription& data);
+    static void generateNewCreatureIds(DataDescription& data);
+    static void generateNewCreatureIds(ClusteredDataDescription& data);
 
 private:
     static void removeMetadata(CellDescription& cell);
