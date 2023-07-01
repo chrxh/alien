@@ -45,7 +45,7 @@ https://user-images.githubusercontent.com/73127001/229569056-0db6562b-0147-43c8-
 ### Networking
 - Built-in simulation browser
 - Download and upload simulation files
-- Rate simulations by giving stars
+- Upvote simulations by giving stars
 
 # But for what is this useful?
 - A first attempt to answer: Feed your curiosity by watching evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
