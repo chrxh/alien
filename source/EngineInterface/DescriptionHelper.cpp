@@ -118,7 +118,7 @@ DataDescription DescriptionHelper::createUnconnectedCircle(CreateUnconnectedCirc
 
 namespace
 {
-    void makeValid(DataDescription& data)
+    void generateNewIds(DataDescription& data)
     {
         auto& numberGen = NumberGenerator::getInstance();
         std::unordered_map<uint64_t, uint64_t> newByOldIds;
@@ -135,10 +135,10 @@ namespace
         }
     }
 
-    void makeValid(ClusterDescription& cluster)
+    void generateNewIds(ClusterDescription& cluster)
     {
         auto& numberGen = NumberGenerator::getInstance();
-        cluster.id = numberGen.getId();
+        //cluster.id = numberGen.getId();
         std::unordered_map<uint64_t, uint64_t> newByOldIds;
         for (auto& cell : cluster.cells) {
             uint64_t newId = numberGen.getId();
@@ -160,6 +160,8 @@ void DescriptionHelper::duplicate(ClusteredDataDescription& data, IntVector2D co
 
     for (int incX = 0; incX < size.x; incX += origSize.x) {
         for (int incY = 0; incY < size.y; incY += origSize.y) {
+            generateNewCreatureIds(data);
+
             for (auto cluster : data.clusters) {
                 auto origPos = cluster.getClusterPosFromCells();
                 RealVector2D clusterPos = {origPos.x + incX, origPos.y + incY};
@@ -170,7 +172,8 @@ void DescriptionHelper::duplicate(ClusteredDataDescription& data, IntVector2D co
                             removeMetadata(cell);
                         }
                     }
-                    makeValid(cluster);
+                    generateNewIds(cluster);
+
                     result.addCluster(cluster);
                 }
             }
@@ -241,7 +244,8 @@ DataDescription DescriptionHelper::gridMultiply(DataDescription const& input, Gr
                 {i * parameters._horizontalVelXinc + j * parameters._verticalVelXinc, i * parameters._horizontalVelYinc + j * parameters._verticalVelYinc},
                 i * parameters._horizontalAngularVelInc + j * parameters._verticalAngularVelInc);
 
-            makeValid(templateData);
+            generateNewIds(templateData);
+            generateNewCreatureIds(templateData);
             result.add(templateData);
         }
     }
@@ -272,7 +276,7 @@ DataDescription DescriptionHelper::randomMultiply(
 
     //do multiplication
     DataDescription result = input;
-    makeValid(result);
+    generateNewIds(result);
     auto& numberGen = NumberGenerator::getInstance();
     for (int i = 0; i < parameters._number; ++i) {
         bool overlapping = false;
@@ -304,7 +308,8 @@ DataDescription DescriptionHelper::randomMultiply(
             overlappingCheckSuccessful = false;
         }
 
-        makeValid(copy);
+        generateNewIds(copy);
+        generateNewCreatureIds(copy);
         result.add(copy);
 
         //add copy to existentData for overlapping check
@@ -517,6 +522,49 @@ void DescriptionHelper::removeMetadata(DataDescription& data)
         removeMetadata(cell);
     }
 }
+
+void DescriptionHelper::generateNewCreatureIds(DataDescription& data)
+{
+    std::unordered_map<int, int> origToNewCreatureIdMap;
+    for (auto& cell : data.cells) {
+        if (cell.creatureId != 0) {
+            auto findResult = origToNewCreatureIdMap.find(cell.creatureId);
+            if (findResult != origToNewCreatureIdMap.end()) {
+                cell.creatureId = findResult->second;
+            } else {
+                int newCreatureId = 0;
+                while (newCreatureId == 0) {
+                    newCreatureId = NumberGenerator::getInstance().getRandomInt();
+                }
+                origToNewCreatureIdMap.emplace(cell.creatureId, newCreatureId);
+                cell.creatureId = newCreatureId;
+            }
+        }
+    }
+}
+
+void DescriptionHelper::generateNewCreatureIds(ClusteredDataDescription& data)
+{
+    std::unordered_map<int, int> origToNewCreatureIdMap;
+    for (auto& cluster: data.clusters) {
+        for (auto& cell : cluster.cells) {
+            if (cell.creatureId != 0) {
+                auto findResult = origToNewCreatureIdMap.find(cell.creatureId);
+                if (findResult != origToNewCreatureIdMap.end()) {
+                    cell.creatureId = findResult->second;
+                } else {
+                    int newCreatureId = 0;
+                    while (newCreatureId == 0) {
+                        newCreatureId = NumberGenerator::getInstance().getRandomInt();
+                    }
+                    origToNewCreatureIdMap.emplace(cell.creatureId, newCreatureId);
+                    cell.creatureId = newCreatureId;
+                }
+            }
+        }
+    }
+}
+
 
 void DescriptionHelper::removeMetadata(CellDescription& cell)
 {
