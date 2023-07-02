@@ -66,7 +66,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
             if (otherCell->genomeSize > cell->genomeSize) {
                 auto genomeSizeBonus = cudaSimulationParameters.cellFunctionAttackerGenomeSizeBonus[cell->color];
-                energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<int>(otherCell->genomeSize - cell->genomeSize));
+                energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<float>(otherCell->genomeSize - cell->genomeSize));
             }
 
             auto velocityPenalty = Math::length(cell->vel) * 20 * cudaSimulationParameters.cellFunctionAttackerVelocityPenalty[cell->color] + 1.0f;

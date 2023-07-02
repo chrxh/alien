@@ -110,7 +110,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
         constructor.isComplete = true;
         return;
     }
-    auto constexpr ContainerSize = 70;
+    auto constexpr ContainerSize = 256;
     Cell* temp[ContainerSize * 2];
     HashSet<Cell*, HashFunctor<Cell*>> visitedCells(ContainerSize * 2, temp);
     visitedCells.insert(cell);
