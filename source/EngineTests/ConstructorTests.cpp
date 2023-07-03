@@ -264,11 +264,35 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_ready)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
+    _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
+    _simController->setSimulationParameters(_parameters);
     _simController->setSimulationData(data);
     _simController->calcSingleTimestep();
     auto actualData = _simController->getSimulationData();
 
     ASSERT_EQ(4, actualData.cells.size());
+}
+
+TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
+{
+    auto constexpr RectLength = 50;
+    auto rect = DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().height(RectLength).width(RectLength));
+
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeGenomeCopy();
+    auto genome =
+        GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructorGenome)}));
+    auto otherGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+
+    auto& cell1 = rect.cells.at(0);
+    cell1.setEnergy(_parameters.cellNormalEnergy[0] * 3).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setGenome(genome));
+
+    _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
+    _simController->setSimulationParameters(_parameters);
+    _simController->setSimulationData(rect);
+    _simController->calcSingleTimestep();
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(RectLength * RectLength + 1, actualData.cells.size());
 }
 
 TEST_F(ConstructorTests, constructFirstCell_noSeparation)
