@@ -140,7 +140,9 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
                     connectionIndex = 0;
                     ++depth;
                     if (depth >= ContainerSize) {
-                        goBack = true;
+                        //goBack = true;
+                        constructor.isComplete = true;
+                        return;
                     }
                 }
             } else {
