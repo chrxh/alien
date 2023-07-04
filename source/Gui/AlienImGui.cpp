@@ -28,6 +28,7 @@ namespace
 }
 
 std::unordered_set<unsigned int> AlienImGui::_isExpanded;
+int AlienImGui::_rotationStartIndex;
 
 void AlienImGui::HelpMarker(std::string const& text)
 {
@@ -1345,6 +1346,7 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
 template <typename T>
 void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS])
 {
+    ImGui::PushID(parameters._name.c_str());
     auto toggleButtonId = ImGui::GetID("expanded");
     auto isExpanded = _isExpanded.contains(toggleButtonId);
     auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
@@ -1358,15 +1360,27 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
     auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
 
     ImGui::SameLine();
-    auto startPosX = ImGui::GetCursorPosX();
 
     if (isExpanded) {
+        ImGui::BeginGroup();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(140.0f));
+        ImGui::Text("[target cell]");
+
+        auto startPos = ImGui::GetCursorPos();
+
+        ImGui::SetCursorPos({startPos.x - scale(48), startPos.y + scale(108)});
+        RotateStart();
+        ImGui::Text("[host cell]");
+        RotateEnd(90.0f);
+
+        ImGui::SetCursorPos(startPos);
+
 
         //color matrix
         if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS + 1, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
             for (int row = 0; row < MAX_COLORS + 1; ++row) {
                 ImGui::PushID(row);
-                ImGui::SetCursorPosX(startPosX);
+                ImGui::SetCursorPosX(startPos.x);
                 for (int col = 0; col < MAX_COLORS + 1; ++col) {
                     ImGui::PushID(col);
                     ImGui::TableNextColumn();
@@ -1397,6 +1411,7 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
             }
         }
         ImGui::EndTable();
+        ImGui::EndGroup();
     } else {
 
         //collapsed view
@@ -1444,6 +1459,7 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
             }
         }
     }
+
     ImGui::SameLine();
     if (parameters._defaultValue) {
         bool changed = false;
@@ -1471,4 +1487,44 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
+    ImGui::PopID();
 }
+
+//RotateStart, RotationCenter, etc. are taken from https://gist.github.com/carasuca/e72aacadcf6cf8139de46f97158f790f
+//>>>>>>>>>>
+void AlienImGui::RotateStart()
+{
+    _rotationStartIndex = ImGui::GetWindowDrawList()->VtxBuffer.Size;
+}
+
+ImVec2 AlienImGui::RotationCenter()
+{
+    ImVec2 l(FLT_MAX, FLT_MAX), u(-FLT_MAX, -FLT_MAX);  // bounds
+
+    const auto& buf = ImGui::GetWindowDrawList()->VtxBuffer;
+    for (int i = _rotationStartIndex; i < buf.Size; i++)
+        l = ImMin(l, buf[i].pos), u = ImMax(u, buf[i].pos);
+
+    return ImVec2((l.x + u.x) / 2, (l.y + u.y) / 2);  // or use _ClipRectStack?
+}
+
+namespace
+{
+    ImVec2 operator-(const ImVec2& l, const ImVec2& r)
+    {
+        return {l.x - r.x, l.y - r.y};
+    }
+}
+
+void AlienImGui::RotateEnd(float angle)
+{
+    auto center = RotationCenter();
+    float s = sin((angle + 90.0f) * Const::DegToRad), c = cos((angle + 90.0f) * Const::DegToRad);
+    center = ImRotate(center, s, c) - center;
+
+    auto& buf = ImGui::GetWindowDrawList()->VtxBuffer;
+    for (int i = _rotationStartIndex; i < buf.Size; i++) {
+        buf[i].pos = ImRotate(buf[i].pos, s, c) - center;
+    }
+}
+//<<<<<<<<<<

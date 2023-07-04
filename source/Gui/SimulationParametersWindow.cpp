@@ -790,16 +790,13 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.cellFunctionAttackerRadius)
                     .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                 simParameters.cellFunctionAttackerRadius);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
+            AlienImGui::InputFloatColorMatrix(
+                AlienImGui::InputFloatColorMatrixParameters()
                     .name("Genome size bonus")
                     .textWidth(RightColumnWidth)
-                    .colorDependence(true)
                     .min(0)
                     .max(5.0f)
-                    .infinity(true)
-                    .logarithmic(true)
-                    .defaultValue(origSimParameters.cellFunctionAttackerGenomeSizeBonus)
+                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionAttackerGenomeSizeBonus))
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with larger genomes."),
                 simParameters.cellFunctionAttackerGenomeSizeBonus);
             AlienImGui::SliderFloat(

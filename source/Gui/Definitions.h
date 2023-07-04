@@ -172,6 +172,7 @@ using BalancerController = std::shared_ptr<_BalancerController>;
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;
+struct ImVec2;
 
 struct TextureData
 {
