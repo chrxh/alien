@@ -495,7 +495,7 @@ bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
     auto result = ImGui::Checkbox(("##" + parameters._name).c_str(), &value);
     ImGui::SameLine();
     if (parameters._textWidth != 0) {
-        ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - parameters._textWidth, 0.0f));
+        ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth), 0.0f));
     }
 
     ImGui::SameLine();
@@ -1363,14 +1363,14 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
 
     if (isExpanded) {
         ImGui::BeginGroup();
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(140.0f));
-        ImGui::Text("[target cell]");
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(130.0f));
+        ImGui::Text("[target color]");
 
         auto startPos = ImGui::GetCursorPos();
 
-        ImGui::SetCursorPos({startPos.x - scale(48), startPos.y + scale(108)});
+        ImGui::SetCursorPos({startPos.x - scale(48), startPos.y + scale(105)});
         RotateStart();
-        ImGui::Text("[host cell]");
+        ImGui::Text("[host color]");
         RotateEnd(90.0f);
 
         ImGui::SetCursorPos(startPos);
