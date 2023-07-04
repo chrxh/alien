@@ -303,5 +303,10 @@ private:
     template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS]);
 
+    static void RotateStart();
+    static ImVec2 RotationCenter();
+    static void RotateEnd(float angle);
+
     static std::unordered_set<unsigned int> _isExpanded;
+    static int _rotationStartIndex;
 };

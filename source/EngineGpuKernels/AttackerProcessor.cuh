@@ -65,7 +65,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 return;
             }
             if (otherCell->genomeSize > cell->genomeSize) {
-                auto genomeSizeBonus = cudaSimulationParameters.cellFunctionAttackerGenomeSizeBonus[cell->color];
+                auto genomeSizeBonus = cudaSimulationParameters.cellFunctionAttackerGenomeSizeBonus[cell->color][otherCell->color];
                 energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<float>(otherCell->genomeSize - cell->genomeSize));
             }
 
