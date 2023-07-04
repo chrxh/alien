@@ -177,6 +177,9 @@ void _GettingStartedWindow::processIntern()
         drawItemText("Fluids/Pump with Soft-Bodies");
         drawItemText("Demos/Stormy Night");
         ImGui::Text("They are suitable for testing the influence of simulation parameters such as 'Smoothing length', 'Pressure', 'Viscosity', etc.");
+        AlienImGui::BoldText("Evolution of self-replicators");
+        AlienImGui::BoldText("Plant-herbivore ecosystems");
+        AlienImGui::BoldText("Swarming");
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Spacing();
