@@ -675,11 +675,9 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
             &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->absPos);
 
-        bool activatePossibleConstructions = false;
         if (cell->livingState == LivingState_Dying) {
             if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb[cell->color]) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
-                activatePossibleConstructions = true;
             }
         }
 
@@ -702,15 +700,6 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 cell->livingState = LivingState_Dying;
             } else {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
-                activatePossibleConstructions = true;
-            }
-        }
-        if (activatePossibleConstructions && cell->livingState != LivingState_UnderConstruction) {
-            for (int i = 0; i < cell->numConnections; ++i) {
-                auto& connectedCell = cell->connections[i].cell;
-                if (connectedCell->livingState == LivingState_UnderConstruction) {
-                    connectedCell->livingState = LivingState_JustReady;
-                }
             }
         }
     }
