@@ -18,35 +18,6 @@ struct GenomeHeader
 class GenomeDecoder
 {
 public:
-    //automatic increment genomeReadPosition
-    __inline__ __device__ static bool readBool(ConstructorFunction& constructor);
-    __inline__ __device__ static uint8_t readByte(ConstructorFunction& constructor);
-    __inline__ __device__ static int readOptionalByte(ConstructorFunction& constructor, int moduloValue);
-    __inline__ __device__ static int readWord(ConstructorFunction& constructor);
-    __inline__ __device__ static float readFloat(ConstructorFunction& constructor);  //return values from -1 to 1
-    __inline__ __device__ static float readEnergy(ConstructorFunction& constructor);  //return values from 36 to 1060
-    __inline__ __device__ static float readAngle(ConstructorFunction& constructor);
-
-    __inline__ __device__ static bool isAtFirstNode(ConstructorFunction const& constructor);
-    __inline__ __device__ static bool isAtLastNode(ConstructorFunction const& constructor);
-    __inline__ __device__ static bool isFinished(ConstructorFunction const& constructor);
-    __inline__ __device__ static bool isFinishedSingleConstruction(ConstructorFunction const& constructor);
-    __inline__ __device__ static bool isSeparating(ConstructorFunction const& constructor);
-    template <typename ConstructorOrInjector>
-    __inline__ __device__ static bool containsSelfReplication(ConstructorOrInjector const& cellFunction);
-
-    template <typename GenomeHolderSource, typename GenomeHolderTarget>
-    __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target);
-    __inline__ __device__ static GenomeHeader readGenomeHeader(ConstructorFunction const& constructor);
-    __inline__ __device__ static int readWord(uint8_t* genome, int nodeAddress);
-    __inline__ __device__ static void writeWord(uint8_t* genome, int address, int word);
-    __inline__ __device__ static bool convertByteToBool(uint8_t b);
-    __inline__ __device__ static int convertBytesToWord(uint8_t b1, uint8_t b2);
-    __inline__ __device__ static void convertWordToBytes(int word, uint8_t& b1, uint8_t& b2);
-    __inline__ __device__ static uint8_t convertAngleToByte(float angle);
-    __inline__ __device__ static uint8_t convertOptionalByteToByte(int value);
-
-
     template <typename Func>
     __inline__ __device__ static void executeForEachNode(uint8_t* genome, int genomeSize, Func func);
     template <typename Func>
@@ -62,7 +33,8 @@ public:
         int genomeSize,
         bool considerZeroSubGenomes,
         int* subGenomesSizeIndices = nullptr,
-        int* numSubGenomesSizeIndices = nullptr);
+        int* numSubGenomesSizeIndices = nullptr,
+        int randomRefIndex = 0);
     __inline__ __device__ static void setRandomCellFunctionData(
         SimulationData& data,
         uint8_t* genome,
@@ -84,6 +56,8 @@ public:
     __inline__ __device__ static void setNextRequiredConnections(uint8_t* genome, int nodeAddress, uint8_t angle);
     __inline__ __device__ static void setNextConstructionAngle1(uint8_t* genome, int nodeAddress, uint8_t angle);
     __inline__ __device__ static void setNextConstructionAngle2(uint8_t* genome, int nodeAddress, uint8_t angle);
+    __inline__ __device__ static void setNextConstructorSeparation(uint8_t* genome, int nodeAddress, bool separation);
+
     __inline__ __device__ static int
     getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeAddress);  //prerequisites: (constructor or injector) and !makeSelfCopy
     __inline__ __device__ static int getCellFunctionDataSize(
@@ -91,6 +65,37 @@ public:
         bool makeSelfCopy,
         int genomeSize);  //genomeSize only relevant for cellFunction = constructor or injector
     __inline__ __device__ static bool hasSelfCopy(uint8_t* genome, int genomeSize);
+
+
+    //automatic increment genomeReadPosition
+    __inline__ __device__ static bool readBool(ConstructorFunction& constructor);
+    __inline__ __device__ static uint8_t readByte(ConstructorFunction& constructor);
+    __inline__ __device__ static int readOptionalByte(ConstructorFunction& constructor, int moduloValue);
+    __inline__ __device__ static int readWord(ConstructorFunction& constructor);
+    __inline__ __device__ static float readFloat(ConstructorFunction& constructor);   //return values from -1 to 1
+    __inline__ __device__ static float readEnergy(ConstructorFunction& constructor);  //return values from 36 to 1060
+    __inline__ __device__ static float readAngle(ConstructorFunction& constructor);
+
+    __inline__ __device__ static bool isAtFirstNode(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool isAtLastNode(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool isFinished(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool isFinishedSingleConstruction(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool isSeparating(ConstructorFunction const& constructor);
+    template <typename ConstructorOrInjector>
+    __inline__ __device__ static bool containsSelfReplication(ConstructorOrInjector const& cellFunction);
+
+    template <typename GenomeHolderSource, typename GenomeHolderTarget>
+    __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target);
+    __inline__ __device__ static GenomeHeader readGenomeHeader(ConstructorFunction const& constructor);
+    __inline__ __device__ static int readWord(uint8_t* genome, int nodeAddress);
+    __inline__ __device__ static void writeWord(uint8_t* genome, int address, int word);
+
+    __inline__ __device__ static bool convertByteToBool(uint8_t b);
+    __inline__ __device__ static uint8_t convertBoolToByte(bool value);
+    __inline__ __device__ static int convertBytesToWord(uint8_t b1, uint8_t b2);
+    __inline__ __device__ static void convertWordToBytes(int word, uint8_t& b1, uint8_t& b2);
+    __inline__ __device__ static uint8_t convertAngleToByte(float angle);
+    __inline__ __device__ static uint8_t convertOptionalByteToByte(int value);
 
     static auto constexpr MAX_SUBGENOME_RECURSION_DEPTH = 30;
 };
@@ -238,6 +243,11 @@ __inline__ __device__ bool GenomeDecoder::convertByteToBool(uint8_t b)
     return static_cast<int8_t>(b) > 0;
 }
 
+__inline__ __device__ uint8_t GenomeDecoder::convertBoolToByte(bool value)
+{
+    return value ? 1 : 0;
+}
+
 __inline__ __device__ int GenomeDecoder::convertBytesToWord(uint8_t b1, uint8_t b2)
 {
     return static_cast<int>(b1) | (static_cast<int>(b2 << 8));
@@ -346,7 +356,8 @@ __inline__ __device__ int GenomeDecoder::getRandomGenomeNodeAddress(
     int genomeSize,
     bool considerZeroSubGenomes,
     int* subGenomesSizeIndices,
-    int* numSubGenomesSizeIndices)
+    int* numSubGenomesSizeIndices,
+    int randomRefIndex)
 {
     if (numSubGenomesSizeIndices) {
         *numSubGenomesSizeIndices = 0;
@@ -357,7 +368,9 @@ __inline__ __device__ int GenomeDecoder::getRandomGenomeNodeAddress(
     if (genomeSize == Const::GenomeHeaderSize) {
         return Const::GenomeHeaderSize;
     }
-    auto randomRefIndex = data.numberGen1.random(genomeSize - 1);
+    if (randomRefIndex == 0) {
+        randomRefIndex = data.numberGen1.random(genomeSize - 1);
+    }
 
     int result = 0;
     for (int depth = 0; depth < MAX_SUBGENOME_RECURSION_DEPTH; ++depth) {
@@ -555,6 +568,11 @@ __inline__ __device__ void GenomeDecoder::setNextConstructionAngle1(uint8_t* gen
 __inline__ __device__ void GenomeDecoder::setNextConstructionAngle2(uint8_t* genome, int nodeAddress, uint8_t angle)
 {
     genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorConstructionAngle2Pos] = angle;
+}
+
+__inline__ __device__ void GenomeDecoder::setNextConstructorSeparation(uint8_t* genome, int nodeAddress, bool separation)
+{
+    genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorFixedBytes + 3 + Const::ConstructorSeparation] = convertBoolToByte(separation);
 }
 
 __inline__ __device__ int GenomeDecoder::getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeAddress)
