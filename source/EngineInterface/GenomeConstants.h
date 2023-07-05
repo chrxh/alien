@@ -12,8 +12,11 @@ namespace Const
     auto constexpr CellAnglePos = 1;
     auto constexpr CellRequiredConnectionsPos = 3;
     auto constexpr CellColorPos = 5;
+
     auto constexpr ConstructorConstructionAngle1Pos = 3;
     auto constexpr ConstructorConstructionAngle2Pos = 4;
+
+    auto constexpr ConstructorSeparation = 2;
 
     auto constexpr CellBasicBytes = 8;
     auto constexpr NeuronBytes = 72;
