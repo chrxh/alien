@@ -79,7 +79,8 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     __syncthreads();
 
     auto const partition = calcPartition(NumScanAngles, threadIdx.x, blockDim.x);
-    for (float radius = 14.0f; radius <= cudaSimulationParameters.cellFunctionSensorRange[cell->color]; radius += 8.0f) {
+    auto startRadius = color == cell->color ? 14.0f : 0.0f;
+    for (float radius = startRadius; radius <= cudaSimulationParameters.cellFunctionSensorRange[cell->color]; radius += 8.0f) {
         for (int angleIndex = partition.startIndex; angleIndex <= partition.endIndex; ++angleIndex) {
             float angle = 360.0f / NumScanAngles * angleIndex;
 
