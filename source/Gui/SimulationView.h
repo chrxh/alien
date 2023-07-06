@@ -34,10 +34,12 @@ private:
 
     void leftMouseButtonPressed(IntVector2D const& viewPos);
     void leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos);
+    void mouseWheelUp(IntVector2D const& viewPos);
     void leftMouseButtonReleased();
 
     void rightMouseButtonPressed();
     void rightMouseButtonHold(IntVector2D const& viewPos);
+    void mouseWheelDown(IntVector2D const& viewPos);
     void rightMouseButtonReleased();
 
     void middleMouseButtonPressed(IntVector2D const& viewPos);
