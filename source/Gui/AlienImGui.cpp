@@ -1427,14 +1427,10 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
             auto format = parameters._format;
             T sliderValue;
             T minValue = value[0][0], maxValue = value[0][0];
-            int sliderValueColor1 = 0;
-            int sliderValueColor2 = 0;
             for (int i = 1; i < MAX_COLORS; ++i) {
                 for (int j = 1; j < MAX_COLORS; ++j) {
                     maxValue = std::max(maxValue, value[i][j]);
                     minValue = std::min(minValue, value[i][j]);
-                    sliderValueColor1 = i;
-                    sliderValueColor2 = j;
                 }
             }
 
