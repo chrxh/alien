@@ -1420,40 +1420,51 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
             static bool test = false;
             ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
             if (ImGui::Button("Define matrix", ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-                if (isExpanded) {
-                    _isExpanded.erase(toggleButtonId);
-                } else {
-                    _isExpanded.insert(toggleButtonId);
-                }
+                _isExpanded.insert(toggleButtonId);
             }
             ImGui::PopStyleVar();
         } else {
             auto format = parameters._format;
-            if (!isExpanded) {
-                T minValue = value[0][0], maxValue = value[0][0];
-                for (int i = 1; i < MAX_COLORS; ++i) {
-                    for (int j = 1; j < MAX_COLORS; ++j) {
-                        maxValue = std::max(maxValue, value[i][j]);
-                        minValue = std::min(minValue, value[i][j]);
-                    }
+            T sliderValue;
+            T minValue = value[0][0], maxValue = value[0][0];
+            int sliderValueColor1 = 0;
+            int sliderValueColor2 = 0;
+            for (int i = 1; i < MAX_COLORS; ++i) {
+                for (int j = 1; j < MAX_COLORS; ++j) {
+                    maxValue = std::max(maxValue, value[i][j]);
+                    minValue = std::min(minValue, value[i][j]);
+                    sliderValueColor1 = i;
+                    sliderValueColor2 = j;
                 }
-                if (minValue != maxValue) {
-                    format = toString(minValue, parameters._format) + " ... " + toString(maxValue, parameters._format);
-                }
-                auto sliderMoved = false;
+            }
+
+            if (minValue != maxValue) {
                 if constexpr (std::is_same<T, float>()) {
-                    sliderMoved |= ImGui::SliderFloat(
-                        "##slider", &value[0][0], parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+                    format = parameters._format + " ... " + toString(maxValue, parameters._format, false, false);
+                } else {
+                    format = toString(minValue, parameters._format, false, false) + " ... " + toString(maxValue, parameters._format, false, false);
                 }
-                if constexpr (std::is_same<T, int>()) {
-                    sliderMoved |= ImGui::SliderInt(
-                        "##slider", &value[0][0], parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
-                }
-                if (sliderMoved) {
-                    for (int i = 0; i < MAX_COLORS; ++i) {
-                        for (int j = 0; j < MAX_COLORS; ++j) {
-                            value[i][j] = value[0][0];
-                        }
+            } else {
+                format = toString(value[0][0], parameters._format, false, true);
+            }
+            sliderValue = minValue;
+
+            if (minValue != maxValue) {
+                format = toString(minValue, parameters._format) + " ... " + toString(maxValue, parameters._format);
+            }
+            auto sliderMoved = false;
+            if constexpr (std::is_same<T, float>()) {
+                sliderMoved |= ImGui::SliderFloat(
+                    "##slider", &sliderValue, parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+            }
+            if constexpr (std::is_same<T, int>()) {
+                sliderMoved |= ImGui::SliderInt(
+                    "##slider", &sliderValue, parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+            }
+            if (sliderMoved) {
+                for (int i = 0; i < MAX_COLORS; ++i) {
+                    for (int j = 0; j < MAX_COLORS; ++j) {
+                        value[i][j] = sliderValue;
                     }
                 }
             }
