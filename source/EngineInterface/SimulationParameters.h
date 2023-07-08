@@ -16,7 +16,7 @@ enum CellColorization_
 {
     CellColorization_None,
     CellColorization_CellColor,
-    CellColorization_SpeciesId
+    CellColorization_MutationId
 };
 
 struct SimulationParameters

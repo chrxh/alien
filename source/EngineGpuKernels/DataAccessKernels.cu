@@ -30,7 +30,7 @@ namespace
         cellTO.executionOrderNumber = cell->executionOrderNumber;
         cellTO.livingState = cell->livingState;
         cellTO.creatureId = cell->creatureId;
-        cellTO.speciesId = cell->speciesId;
+        cellTO.mutationId = cell->mutationId;
         cellTO.genomeSize = cell->genomeSize;
         cellTO.inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
         cellTO.outputBlocked = cell->outputBlocked;
@@ -91,7 +91,7 @@ namespace
                 dataTO.auxiliaryData);
             cellTO.cellFunctionData.constructor.genomeReadPosition = cell->cellFunctionData.constructor.genomeReadPosition;
             cellTO.cellFunctionData.constructor.offspringCreatureId = cell->cellFunctionData.constructor.offspringCreatureId;
-            cellTO.cellFunctionData.constructor.offspringSpeciesId = cell->cellFunctionData.constructor.offspringSpeciesId;
+            cellTO.cellFunctionData.constructor.offspringMutationId = cell->cellFunctionData.constructor.offspringMutationId;
             cellTO.cellFunctionData.constructor.genomeGeneration = cell->cellFunctionData.constructor.genomeGeneration;
         } break;
         case CellFunction_Sensor: {
@@ -362,7 +362,7 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataTO d
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = dataTO.cells[index];
             numberGen.adaptMaxId(cell.id);
-            numberGen.adaptMaxSmallId(cell.speciesId);
+            numberGen.adaptMaxSmallId(cell.mutationId);
         }
     }
     {

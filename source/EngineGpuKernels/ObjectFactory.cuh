@@ -92,7 +92,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->executionOrderNumber = cellTO.executionOrderNumber;
     cell->livingState = cellTO.livingState;
     cell->creatureId = cellTO.creatureId;
-    cell->speciesId = cellTO.speciesId;
+    cell->mutationId = cellTO.mutationId;
     cell->inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber;
     cell->outputBlocked = cellTO.outputBlocked;
     cell->maxConnections = cellTO.maxConnections;
@@ -141,7 +141,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cell->cellFunctionData.constructor.genome);
         cell->cellFunctionData.constructor.genomeReadPosition = cellTO.cellFunctionData.constructor.genomeReadPosition;
         cell->cellFunctionData.constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
-        cell->cellFunctionData.constructor.offspringSpeciesId = cellTO.cellFunctionData.constructor.offspringSpeciesId;
+        cell->cellFunctionData.constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
         cell->cellFunctionData.constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
         cell->cellFunctionData.constructor.constructionAngle1 = cellTO.cellFunctionData.constructor.constructionAngle1;
         cell->cellFunctionData.constructor.constructionAngle2 = cellTO.cellFunctionData.constructor.constructionAngle2;
