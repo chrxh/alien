@@ -126,6 +126,7 @@ namespace
         //simulation parameters
         SimulationParameters defaultParameters;
         encodeDecodeProperty(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
+        encodeDecodeProperty(tree, parameters.cellColorization, defaultParameters.cellColorization, "simulation parameters.cell colorization", parserTask);
         encodeDecodeProperty(
             tree,
             parameters.zoomLevelNeuronalActivity,

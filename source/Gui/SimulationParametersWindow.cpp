@@ -221,7 +221,7 @@ void _SimulationParametersWindow::processBase(
                         .name("Cell colorization")
                         .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellColorization)
-                        .values({"None", "Cell colors", "Species ID"}),
+                        .values({"None", "Cell colors", "Mutations"}),
                     simParameters.cellColorization);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()

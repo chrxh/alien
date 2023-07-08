@@ -70,6 +70,52 @@ namespace
             }
             }
         }
+        if (cudaSimulationParameters.cellColorization == CellColorization_SpeciesId) {
+            auto h = abs((cell->speciesId * 12107) % 360);
+            auto s = 0.5f + toFloat((cell->speciesId * 12107) % 256) / 512;
+            auto v = 1.0f;
+
+            auto c = v * s;
+            auto x = c * (1 - abs(((h / 60) % 2) - 1));
+            auto m = v - c;
+
+            float r_, g_, b_;
+            if (0 <= h && h < 60) {
+                r_ = c;
+                g_ = x;
+                b_ = 0;
+            }
+            if (60 <= h && h < 120) {
+                r_ = x;
+                g_ = c;
+                b_ = 0;
+            }
+            if (120 <= h && h < 180) {
+                r_ = 0;
+                g_ = c;
+                b_ = x;
+            }
+            if (180 <= h && h < 240) {
+                r_ = 0;
+                g_ = x;
+                b_ = c;
+            }
+            if (240 <= h && h < 300) {
+                r_ = x;
+                g_ = 0;
+                b_ = c;
+            }
+            if (300 <= h && h < 360) {
+                r_ = c;
+                g_ = 0;
+                b_ = x;
+            }
+            int r = toInt((r_ + m) * 255);
+            int g = toInt((g_ + m) * 255);
+            int b = toInt((b_ + m) * 255);
+
+            cellColor = (r << 16) | (g << 8) | b;
+        }
 
         float factor = min(300.0f, cell->energy) / 320.0f;
         if (1 == selected) {
