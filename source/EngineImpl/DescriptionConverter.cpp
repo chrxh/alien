@@ -383,7 +383,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.connections = connections;
     result.livingState = cellTO.livingState;
     result.creatureId = cellTO.creatureId;
-    result.speciesId = cellTO.speciesId;
+    result.mutationId = cellTO.mutationId;
     result.inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber >= 0 ? std::make_optional(cellTO.inputExecutionOrderNumber) : std::nullopt;
     result.outputBlocked = cellTO.outputBlocked;
     result.executionOrderNumber = cellTO.executionOrderNumber;
@@ -425,7 +425,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
         constructor.genomeReadPosition = toInt(cellTO.cellFunctionData.constructor.genomeReadPosition);
         constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
-        constructor.offspringSpeciesId = cellTO.cellFunctionData.constructor.offspringSpeciesId;
+        constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
         constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
         constructor.constructionAngle1 = cellTO.cellFunctionData.constructor.constructionAngle1;
         constructor.constructionAngle2 = cellTO.cellFunctionData.constructor.constructionAngle2;
@@ -511,7 +511,7 @@ void DescriptionConverter::addCell(
     cellTO.executionOrderNumber = cellDesc.executionOrderNumber;
     cellTO.livingState = cellDesc.livingState;
     cellTO.creatureId = cellDesc.creatureId;
-    cellTO.speciesId = cellDesc.speciesId;
+    cellTO.mutationId = cellDesc.mutationId;
     cellTO.inputExecutionOrderNumber = cellDesc.inputExecutionOrderNumber.value_or(-1);
     cellTO.outputBlocked = cellDesc.outputBlocked;
     cellTO.cellFunction = cellDesc.getCellFunctionType();
@@ -539,7 +539,7 @@ void DescriptionConverter::addCell(
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
         constructorTO.genomeReadPosition = constructorDesc.genomeReadPosition;
         constructorTO.offspringCreatureId = constructorDesc.offspringCreatureId;
-        constructorTO.offspringSpeciesId = constructorDesc.offspringSpeciesId;
+        constructorTO.offspringMutationId = constructorDesc.offspringMutationId;
         constructorTO.genomeGeneration = constructorDesc.genomeGeneration;
         constructorTO.constructionAngle1 = constructorDesc.constructionAngle1;
         constructorTO.constructionAngle2 = constructorDesc.constructionAngle2;

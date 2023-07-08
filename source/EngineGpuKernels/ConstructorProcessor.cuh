@@ -598,7 +598,7 @@ ConstructorProcessor::constructCellIntern(
     result->executionOrderNumber = constructionData.executionOrderNumber;
     result->livingState = true;
     result->creatureId = constructor.offspringCreatureId;
-    result->speciesId = constructor.offspringSpeciesId;
+    result->mutationId = constructor.offspringMutationId;
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
     result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;
@@ -629,7 +629,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.constructionAngle2 = GenomeDecoder::readAngle(constructor);
         GenomeDecoder::copyGenome(data, constructor, newConstructor);
         newConstructor.genomeGeneration = constructor.genomeGeneration + 1;
-        newConstructor.offspringSpeciesId = constructor.offspringSpeciesId;
+        newConstructor.offspringMutationId = constructor.offspringMutationId;
     } break;
     case CellFunction_Sensor: {
         result->cellFunctionData.sensor.mode = GenomeDecoder::readByte(constructor) % SensorMode_Count;

@@ -758,7 +758,7 @@ __inline__ __device__ void MutationProcessor::uniformColorMutation(SimulationDat
 __inline__ __device__ bool MutationProcessor::adaptMutationId(SimulationData& data, ConstructorFunction& constructor)
 {
     if (GenomeDecoder::containsSelfReplication(constructor)) {
-        constructor.offspringSpeciesId = abs(toInt(data.numberGen1.createNewSmalllId()));
+        constructor.offspringMutationId = abs(toInt(data.numberGen1.createNewSmalllId()));
     }
 }
 
