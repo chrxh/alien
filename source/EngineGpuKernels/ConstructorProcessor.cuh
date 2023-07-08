@@ -629,6 +629,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.constructionAngle2 = GenomeDecoder::readAngle(constructor);
         GenomeDecoder::copyGenome(data, constructor, newConstructor);
         newConstructor.genomeGeneration = constructor.genomeGeneration + 1;
+        newConstructor.offspringSpeciesId = constructor.offspringSpeciesId;
     } break;
     case CellFunction_Sensor: {
         result->cellFunctionData.sensor.mode = GenomeDecoder::readByte(constructor) % SensorMode_Count;
