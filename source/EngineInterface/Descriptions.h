@@ -105,6 +105,7 @@ struct ConstructorDescription
     //process data
     int genomeReadPosition = 0;
     int offspringCreatureId = 0;
+    int offspringSpeciesId = 0;
 
     ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
@@ -286,6 +287,7 @@ struct CellDescription
     int age = 0;
     LivingState livingState = LivingState_Ready;
     int creatureId = 0;
+    int speciesId = 0;
 
     //cell function
     int executionOrderNumber = 0;

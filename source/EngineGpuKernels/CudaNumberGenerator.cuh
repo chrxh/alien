@@ -20,6 +20,7 @@ private:
     int _size;
 
     unsigned long long int* _currentId;
+    unsigned int* _currentSmallId;
 
 public:
     void init(int size)
@@ -29,10 +30,13 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, _currentIndex);
         CudaMemoryManager::getInstance().acquireMemory<int>(size, _array);
         CudaMemoryManager::getInstance().acquireMemory<unsigned long long int>(1, _currentId);
+        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, _currentSmallId);
 
         CHECK_FOR_CUDA_ERROR(cudaMemset(_currentIndex, 0, sizeof(unsigned int)));
         unsigned long long int hostCurrentId = 1;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_currentId, &hostCurrentId, sizeof(_currentId), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_currentId, &hostCurrentId, sizeof(unsigned long long int), cudaMemcpyHostToDevice));
+        unsigned int hostCurrentSmallId = 1;
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_currentSmallId, &hostCurrentSmallId, sizeof(unsigned int), cudaMemcpyHostToDevice));
 
         std::vector<int> randomNumbers(size);
         for (int i = 0; i < size; ++i) {
@@ -77,15 +81,18 @@ public:
         }
     }
 
-    __device__ __inline__ unsigned long long int createNewId_kernel() { return atomicAdd(_currentId, 1); }
+    __device__ __inline__ unsigned long long int createNewId() { return atomicAdd(_currentId, 1); }
+    __device__ __inline__ unsigned int createNewSmalllId() { return atomicAdd(_currentSmallId, 1); }
 
     __device__ __inline__ void adaptMaxId(unsigned long long int id) { atomicMax(_currentId, id + 1); }
+    __device__ __inline__ void adaptMaxSmallId(unsigned int id) { atomicMax(_currentSmallId, id + 1); }
 
     void free()
     {
         CudaMemoryManager::getInstance().freeMemory(_currentIndex);
         CudaMemoryManager::getInstance().freeMemory(_array);
         CudaMemoryManager::getInstance().freeMemory(_currentId);
+        CudaMemoryManager::getInstance().freeMemory(_currentSmallId);
     }
 
 private:

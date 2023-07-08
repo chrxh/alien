@@ -62,6 +62,7 @@ struct ConstructorTO
     //process data
     uint64_t genomeReadPosition;
     int offspringCreatureId;
+    int offspringSpeciesId;
 };
 
 struct SensorTO
@@ -139,6 +140,7 @@ struct CellTO
     int age;
     LivingState livingState;
     int creatureId;
+    int speciesId;
 
     //cell function
     int executionOrderNumber;

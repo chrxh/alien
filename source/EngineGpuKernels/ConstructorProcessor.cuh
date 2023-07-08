@@ -598,6 +598,7 @@ ConstructorProcessor::constructCellIntern(
     result->executionOrderNumber = constructionData.executionOrderNumber;
     result->livingState = true;
     result->creatureId = constructor.offspringCreatureId;
+    result->speciesId = constructor.offspringSpeciesId;
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
     result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;
