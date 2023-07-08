@@ -222,9 +222,9 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellColorization)
                     .values({"None", "Cell colors", "Mutations"})
-                    .tooltip("Here you can set how the cells are to be colored during rendering. In addition to coloring according to the 7 cell colors, there "
-                             "is also the option of coloring mutations. Almost every mutation (except for neuronal networks) in the genome of a creature is "
-                             "assigned a different color."),
+                    .tooltip("Here one can set how the cells are to be colored during rendering. In addition to coloring according to the 7 cell colors, there "
+                             "is also the option of coloring mutations. Almost every mutation (except changes in the neuronal networks) in the genome of a creature leads "
+                             "to a different color."),
                 simParameters.cellColorization);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
