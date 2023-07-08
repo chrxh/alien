@@ -11,11 +11,20 @@
  * NOTE: header is also included in kernel code
  */
 
+using CellColorization = int;
+enum CellColorization_
+{
+    CellColorization_None,
+    CellColorization_CellColor,
+    CellColorization_SpeciesId
+};
+
 struct SimulationParameters
 {
     SimulationParametersSpotValues baseValues;
 
     uint32_t backgroundColor = 0x1b0000;
+    CellColorization cellColorization = CellColorization_CellColor;
     float zoomLevelNeuronalActivity = 2.0f;
 
     float timestepSize = 1.0f;
@@ -260,7 +269,9 @@ struct SimulationParameters
             }
         }
 
-        return backgroundColor == other.backgroundColor && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity && baseValues == other.baseValues
+        return backgroundColor == other.backgroundColor && cellColorization == other.cellColorization
+            && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity
+            && baseValues == other.baseValues
             && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance
             && cellMinDistance == other.cellMinDistance
             && cellMaxForceDecayProb == other.cellMaxForceDecayProb

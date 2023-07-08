@@ -48,7 +48,7 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     Particle* particle = _data->objects.particles.getNewElement();
     *particlePointer = particle;
     
-    particle->id = createIds ? _data->numberGen1.createNewId_kernel() : particleTO.id;
+    particle->id = createIds ? _data->numberGen1.createNewId() : particleTO.id;
     particle->absPos = particleTO.pos;
     _map.correctPosition(particle->absPos);
     particle->vel = particleTO.vel;
@@ -67,7 +67,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO
     *cellPointer = cell;
 
     changeCellFromTO(dataTO, cellTO, cell);
-    cell->id = createIds ? _data->numberGen1.createNewId_kernel() : cellTO.id;
+    cell->id = createIds ? _data->numberGen1.createNewId() : cellTO.id;
     cell->locked = 0;
     cell->detached = 0;
     cell->selected = 0;
@@ -92,6 +92,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->executionOrderNumber = cellTO.executionOrderNumber;
     cell->livingState = cellTO.livingState;
     cell->creatureId = cellTO.creatureId;
+    cell->speciesId = cellTO.speciesId;
     cell->inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber;
     cell->outputBlocked = cellTO.outputBlocked;
     cell->maxConnections = cellTO.maxConnections;
@@ -140,6 +141,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cell->cellFunctionData.constructor.genome);
         cell->cellFunctionData.constructor.genomeReadPosition = cellTO.cellFunctionData.constructor.genomeReadPosition;
         cell->cellFunctionData.constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
+        cell->cellFunctionData.constructor.offspringSpeciesId = cellTO.cellFunctionData.constructor.offspringSpeciesId;
         cell->cellFunctionData.constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
         cell->cellFunctionData.constructor.constructionAngle1 = cellTO.cellFunctionData.constructor.constructionAngle1;
         cell->cellFunctionData.constructor.constructionAngle2 = cellTO.cellFunctionData.constructor.constructionAngle2;
@@ -212,7 +214,7 @@ ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     Particle** particlePointer = _data->objects.particlePointers.getNewElement();
     Particle* particle = _data->objects.particles.getNewElement();
     *particlePointer = particle;
-    particle->id = _data->numberGen1.createNewId_kernel();
+    particle->id = _data->numberGen1.createNewId();
     particle->selected = 0;
     particle->locked = 0;
     particle->energy = energy;
@@ -229,7 +231,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     auto cellPointers = _data->objects.cellPointers.getNewElement();
     *cellPointers = cell;
 
-    cell->id = _data->numberGen1.createNewId_kernel();
+    cell->id = _data->numberGen1.createNewId();
     cell->absPos = pos;
     cell->vel = vel;
     cell->energy = energy;
@@ -337,7 +339,7 @@ __inline__ __device__ Cell* ObjectFactory::createCell()
     auto cellPointer = _data->objects.cellPointers.getNewElement();
     *cellPointer = cell;
 
-    cell->id = _data->numberGen1.createNewId_kernel();
+    cell->id = _data->numberGen1.createNewId();
     cell->stiffness = 1.0f;
     cell->selected = 0;
     cell->detached = 0;

@@ -246,6 +246,9 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
             });
         }
     }
+    if (subgenome[delta] != mutatedByte) {
+        constructor.offspringSpeciesId = data.numberGen1.createNewSmalllId();
+    }
     subgenome[delta] = mutatedByte;
 }
 
@@ -282,6 +285,7 @@ __inline__ __device__ void MutationProcessor::customGeometryMutation(SimulationD
             GenomeDecoder::setNextConstructionAngle2(genome, nodeAddress, data.numberGen1.randomByte());
             break;
         }
+        constructor.offspringSpeciesId = data.numberGen1.createNewSmalllId();
     });
 }
 
@@ -352,6 +356,7 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
+    constructor.offspringSpeciesId = data.numberGen1.createNewSmalllId();
 }
 
 __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& data, Cell* cell)
@@ -439,6 +444,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
+    constructor.offspringSpeciesId = data.numberGen1.createNewSmalllId();
 }
 
 __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& data, Cell* cell)
@@ -476,6 +482,7 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
         constructor.genomeReadPosition -= deleteSize;
     }
     constructor.genomeSize = targetGenomeSize;
+    constructor.offspringSpeciesId = data.numberGen1.createNewSmalllId();
 }
 
 __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& data, Cell* cell)
@@ -603,6 +610,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
     }
 
     constructor.genome = targetGenome;
+    constructor.offspringSpeciesId = data.numberGen1.createNewSmalllId();
 }
 
 __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& data, Cell* cell)
@@ -683,6 +691,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
+    constructor.offspringSpeciesId = data.numberGen1.createNewSmalllId();
 }
 
 __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data, Cell* cell)
@@ -711,6 +720,9 @@ __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data
     if (newColor == -1) {
         return;
     }
+    if (origColor != newColor) {
+        constructor.offspringSpeciesId = data.numberGen1.createNewSmalllId();
+    }
 
     for (int dummy = 0; nodeAddress < subgenomeSize && dummy < subgenomeSize; ++dummy) {
         GenomeDecoder::setNextCellColor(subgenome, nodeAddress, newColor);
@@ -731,6 +743,9 @@ __inline__ __device__ void MutationProcessor::uniformColorMutation(SimulationDat
     auto newColor = getNewColorFromTransition(data, origColor);
     if (newColor == -1) {
         return;
+    }
+    if (origColor != newColor) {
+        constructor.offspringSpeciesId = data.numberGen1.createNewSmalllId();
     }
 
     GenomeDecoder::executeForEachNodeRecursively(

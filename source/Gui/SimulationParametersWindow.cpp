@@ -216,6 +216,13 @@ void _SimulationParametersWindow::processBase(
                 simParameters.backgroundColor,
                 _backupColor,
                 _savedPalette);
+            AlienImGui::Combo(
+                    AlienImGui::ComboParameters()
+                        .name("Cell colorization")
+                        .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.cellColorization)
+                        .values({"None", "Cell colors", "Species ID"}),
+                    simParameters.cellColorization);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Zoom level for cell activity")
