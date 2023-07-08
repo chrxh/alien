@@ -217,12 +217,15 @@ void _SimulationParametersWindow::processBase(
                 _backupColor,
                 _savedPalette);
             AlienImGui::Combo(
-                    AlienImGui::ComboParameters()
-                        .name("Cell colorization")
-                        .textWidth(RightColumnWidth)
+                AlienImGui::ComboParameters()
+                    .name("Cell colorization")
+                    .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellColorization)
-                        .values({"None", "Cell colors", "Mutations"}),
-                    simParameters.cellColorization);
+                    .values({"None", "Cell colors", "Mutations"})
+                    .tooltip("Here you can set how the cells are to be colored during rendering. In addition to coloring according to the 7 cell colors, there "
+                             "is also the option of coloring mutations. Almost every mutation (except for neuronal networks) in the genome of a creature is "
+                             "assigned a different color."),
+                simParameters.cellColorization);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Zoom level for cell activity")
@@ -231,7 +234,7 @@ void _SimulationParametersWindow::processBase(
                     .max(32.0f)
                     .infinity(true)
                     .defaultValue(&origSimParameters.zoomLevelNeuronalActivity)
-                    .tooltip(std::string("The zoom level from which the neuronal activities become visible.")),
+                    .tooltip("The zoom level from which the neuronal activities become visible."),
                 &simParameters.zoomLevelNeuronalActivity);
             ImGui::TreePop();
         }

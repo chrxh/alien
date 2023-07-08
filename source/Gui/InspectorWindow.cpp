@@ -237,6 +237,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                 }
 
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Age").textWidth(CellFunctionBaseTabTextWidth), cell.age);
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Mutation Id").textWidth(CellFunctionBaseTabTextWidth), cell.speciesId);
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Activation time").textWidth(CellFunctionBaseTabTextWidth), cell.activationTime);
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Execution order").textWidth(CellFunctionBaseTabTextWidth), cell.executionOrderNumber);
