@@ -156,7 +156,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog, _networkController);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_browserWindow, _networkController);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog, _networkController);
-    _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _resetPasswordDialog, _networkController);
+    _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog, _networkController);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController, _viewport);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);

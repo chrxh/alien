@@ -47,19 +47,14 @@ namespace
 
     bool parseBoolResult(std::string const& serverResponse)
     {
-        try {
-            std::stringstream stream(serverResponse);
-            boost::property_tree::ptree tree;
-            boost::property_tree::read_json(stream, tree);
-            auto result = tree.get<bool>("result");
-            if (!result) {
-                log(Priority::Important, "network: negative response received from server");
-            }
-            return result;
-        } catch (...) {
-            logNetworkError();
-            return false;
+        std::stringstream stream(serverResponse);
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+        auto result = tree.get<bool>("result");
+        if (!result) {
+            log(Priority::Important, "network: negative response received from server");
         }
+        return result;
     }
 }
 
@@ -147,7 +142,7 @@ bool _NetworkController::activateUser(std::string const& userName, std::string c
     }
 }
 
-bool _NetworkController::login(std::string const& userName, std::string const& password)
+bool _NetworkController::login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password)
 {
     log(Priority::Important, "network: login user '" + userName + "'");
 
@@ -166,6 +161,13 @@ bool _NetworkController::login(std::string const& userName, std::string const& p
             _loggedInUserName = userName;
             _password = password;
         }
+
+        errorCode = false;
+        std::stringstream stream(result->body);
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+        errorCode = tree.get<LoginErrorCode>("errorCode");
+
         return boolResult;
     } catch (...) {
         logNetworkError();

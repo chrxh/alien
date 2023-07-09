@@ -6,6 +6,13 @@
 #include "UserData.h"
 #include "Definitions.h"
 
+using LoginErrorCode = int;
+enum LoginErrorCode_
+{
+    LoginErrorCode_UnconfirmedUser,
+    LoginErrorCode_Other
+};
+
 class _NetworkController
 {
 public:
@@ -21,7 +28,8 @@ public:
 
     bool createUser(std::string const& userName, std::string const& password, std::string const& email);
     bool activateUser(std::string const& userName, std::string const& password, std::string const& confirmationCode);
-    bool login(std::string const& userName, std::string const& password);
+
+    bool login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password);
     bool logout();
     bool deleteUser();
     bool resetPassword(std::string const& userName, std::string const& email);

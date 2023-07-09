@@ -9,14 +9,17 @@
 #include "CreateUserDialog.h"
 #include "BrowserWindow.h"
 #include "ResetPasswordDialog.h"
+#include "ActivateUserDialog.h"
 
 _LoginDialog::_LoginDialog(
     BrowserWindow const& browserWindow,
     CreateUserDialog const& createUserDialog,
+    ActivateUserDialog const& activateUserDialog,
     ResetPasswordDialog const& resetPasswordDialog,
     NetworkController const& networkController)
     : _browserWindow(browserWindow)
     , _createUserDialog(createUserDialog)
+    , _activateUserDialog(activateUserDialog)
     , _networkController(networkController)
     , _resetPasswordDialog(resetPasswordDialog)
 
@@ -27,7 +30,8 @@ _LoginDialog::_LoginDialog(
         _userName = settings.getStringState("dialogs.login.user name", "");
         _password = settings.getStringState("dialogs.login.password", "");
         if (!_userName.empty()) {
-            if (!_networkController->login(_userName, _password)) {
+            LoginErrorCode errorCode;
+            if (!_networkController->login(errorCode, _userName, _password)) {
                 MessageDialog::getInstance().show("Error", "Login failed.");
             }
         }
@@ -126,8 +130,16 @@ void _LoginDialog::show()
 
 void _LoginDialog::onLogin()
 {
-    if (!_networkController->login(_userName, _password)) {
-        MessageDialog::getInstance().show("Error", "Login failed.");
+    LoginErrorCode errorCode;
+    if (!_networkController->login(errorCode, _userName, _password)) {
+        switch (errorCode) {
+        case LoginErrorCode_UnconfirmedUser: {
+            _activateUserDialog->show(_userName, _password);
+        } break;
+        default: {
+            MessageDialog::getInstance().show("Error", "Login failed.");
+        } break;
+        }
         return;
     }
     _browserWindow->onRefresh();
