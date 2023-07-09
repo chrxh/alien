@@ -7,6 +7,8 @@
 #include "MessageDialog.h"
 #include "NetworkController.h"
 #include "BrowserWindow.h"
+#include "CreateUserDialog.h"
+#include "StyleRepository.h"
 
 _ActivateUserDialog::_ActivateUserDialog(BrowserWindow const& browserWindow, NetworkController const& networkController)
     : _browserWindow(browserWindow)
@@ -14,6 +16,11 @@ _ActivateUserDialog::_ActivateUserDialog(BrowserWindow const& browserWindow, Net
 {}
 
 _ActivateUserDialog::~_ActivateUserDialog() {}
+
+void _ActivateUserDialog::registerCyclicReferences(CreateUserDialogWeakPtr const& createUserDialog)
+{
+    _createUserDialog = createUserDialog;
+}
 
 void _ActivateUserDialog::process()
 {
@@ -40,6 +47,24 @@ void _ActivateUserDialog::process()
         }
         ImGui::EndDisabled();
         ImGui::SetItemDefaultFocus();
+
+        ImGui::SameLine();
+        AlienImGui::VerticalSeparator();
+
+        ImGui::SameLine();
+        if (AlienImGui::Button("Resend")) {
+            _createUserDialog.lock()->onCreateUser();
+        }
+
+        ImGui::SameLine();
+        if (AlienImGui::Button("Resend to other email address")) {
+            ImGui::CloseCurrentPopup();
+            _show = false;
+            _createUserDialog.lock()->show(_userName, _password);
+        }
+
+        ImGui::SameLine();
+        AlienImGui::VerticalSeparator();
 
         ImGui::SameLine();
         if (AlienImGui::Button("Cancel")) {

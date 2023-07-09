@@ -165,6 +165,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
 
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog);
+    _activateUserDialog->registerCyclicReferences(_createUserDialog);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;

@@ -10,6 +10,7 @@
 #include "BrowserWindow.h"
 #include "ResetPasswordDialog.h"
 #include "ActivateUserDialog.h"
+#include "StyleRepository.h"
 
 _LoginDialog::_LoginDialog(
     BrowserWindow const& browserWindow,
@@ -95,7 +96,7 @@ void _LoginDialog::process()
         ImGui::SetItemDefaultFocus();
 
         ImGui::SameLine();
-        ImGui::Dummy(ImVec2(40.0f, 0.0f));
+        AlienImGui::VerticalSeparator();
 
         ImGui::SameLine();
         ImGui::BeginDisabled(_userName.empty() || _password.empty());
@@ -114,6 +115,9 @@ void _LoginDialog::process()
             _resetPasswordDialog->show(_userName);
         }
         ImGui::EndDisabled();
+
+        ImGui::SameLine();
+        AlienImGui::VerticalSeparator();
 
         ImGui::SameLine();
         if (AlienImGui::Button("Cancel")) {
