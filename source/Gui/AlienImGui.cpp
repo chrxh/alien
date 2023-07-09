@@ -1332,7 +1332,13 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
 
             //tooltip
             if (parameters._tooltip) {
+                if (enabled) {
+                    ImGui::EndDisabled();
+                }
                 AlienImGui::HelpMarker(*parameters._tooltip);
+                if (enabled) {
+                    ImGui::BeginDisabled(!(*enabled));
+                }
             }
         }
     }

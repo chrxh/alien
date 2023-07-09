@@ -1410,7 +1410,6 @@ void _SimulationParametersWindow::processSpot(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Absorption factor")
-                    .tooltip("")
                     .textWidth(RightColumnWidth)
                     .logarithmic(true)
                     .colorDependence(true)
