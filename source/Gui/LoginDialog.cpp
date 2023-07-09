@@ -18,7 +18,7 @@ _LoginDialog::_LoginDialog(
     ResetPasswordDialog const& resetPasswordDialog,
     NetworkController const& networkController)
     : _browserWindow(browserWindow)
-    , _createUserDialog(createUserDialog)
+    , _createUserDialog(createUserDialog) 
     , _activateUserDialog(activateUserDialog)
     , _networkController(networkController)
     , _resetPasswordDialog(resetPasswordDialog)
@@ -32,7 +32,9 @@ _LoginDialog::_LoginDialog(
         if (!_userName.empty()) {
             LoginErrorCode errorCode;
             if (!_networkController->login(errorCode, _userName, _password)) {
-                MessageDialog::getInstance().show("Error", "Login failed.");
+                if (errorCode != LoginErrorCode_UnconfirmedUser) {
+                    MessageDialog::getInstance().show("Error", "Login failed.");
+                }
             }
         }
     }
