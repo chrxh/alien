@@ -62,7 +62,8 @@ void _ActivateUserDialog::onActivateUser()
 {
     auto result = _networkController->activateUser(_userName, _password, _confirmationCode);
     if (result) {
-        result |= _networkController->login(_userName, _password);
+        LoginErrorCode errorCode;
+        result |= _networkController->login(errorCode, _userName, _password);
     }
     if (!result) {
         MessageDialog::getInstance().show("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");
@@ -70,7 +71,7 @@ void _ActivateUserDialog::onActivateUser()
         MessageDialog::getInstance().show(
             "Information",
             "The user '" + _userName
-                + "' has been successfully created.\nYou are logged in and are now able to upload your own simulations\nor rate others by likes.");
+                + "' has been successfully created.\nYou are logged in and are now able to upload your own simulations\nor upvote others by likes.");
         _browserWindow->onRefresh();
     }
 }

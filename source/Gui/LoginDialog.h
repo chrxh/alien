@@ -8,6 +8,7 @@ public:
     _LoginDialog(
         BrowserWindow const& browserWindow,
         CreateUserDialog const& createUserDialog,
+        ActivateUserDialog const& activateUserDialog,
         ResetPasswordDialog const& resetPasswordDialog,
         NetworkController const& networkController);
     ~_LoginDialog();
@@ -21,6 +22,7 @@ private:
 
     BrowserWindow _browserWindow;
     CreateUserDialog _createUserDialog;
+    ActivateUserDialog _activateUserDialog;
     NetworkController _networkController;
     ResetPasswordDialog _resetPasswordDialog;
 

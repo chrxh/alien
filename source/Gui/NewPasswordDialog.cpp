@@ -68,7 +68,8 @@ void _NewPasswordDialog::onNewPassword()
 {
     auto result = _networkController->setNewPassword(_userName, _newPassword, _confirmationCode);
     if (result) {
-        result |= _networkController->login(_userName, _newPassword);
+        LoginErrorCode errorCode;
+        result |= _networkController->login(errorCode, _userName, _newPassword);
     }
     if (!result) {
         MessageDialog::getInstance().show("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to reset the password again.");
