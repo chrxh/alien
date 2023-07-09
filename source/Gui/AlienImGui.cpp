@@ -1433,8 +1433,8 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
             auto format = parameters._format;
             T sliderValue;
             T minValue = value[0][0], maxValue = value[0][0];
-            for (int i = 1; i < MAX_COLORS; ++i) {
-                for (int j = 1; j < MAX_COLORS; ++j) {
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                for (int j = 0; j < MAX_COLORS; ++j) {
                     maxValue = std::max(maxValue, value[i][j]);
                     minValue = std::min(minValue, value[i][j]);
                 }
@@ -1444,16 +1444,13 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
                 if constexpr (std::is_same<T, float>()) {
                     format = parameters._format + " ... " + toString(maxValue, parameters._format, false, false);
                 } else {
-                    format = toString(minValue, parameters._format, false, false) + " ... " + toString(maxValue, parameters._format, false, false);
+                    format = std::to_string(minValue) + " ... " + std::to_string(maxValue);
                 }
             } else {
                 format = toString(value[0][0], parameters._format, false, true);
             }
             sliderValue = minValue;
 
-            if (minValue != maxValue) {
-                format = toString(minValue, parameters._format) + " ... " + toString(maxValue, parameters._format);
-            }
             auto sliderMoved = false;
             if constexpr (std::is_same<T, float>()) {
                 sliderMoved |= ImGui::SliderFloat(
