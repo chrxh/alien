@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Base/Definitions.h"
-#include "CellFunctionEnums.h"
+#include "CellFunctionConstants.h"
 
 struct SimulationParameters;
 
@@ -28,3 +28,8 @@ struct HistogramData;
 struct StatisticsData;
 
 class SpaceCalculator;
+
+class _ShapeGenerator;
+using ShapeGenerator = std::shared_ptr<_ShapeGenerator>;
+
+class ShapeGeneratorResult;

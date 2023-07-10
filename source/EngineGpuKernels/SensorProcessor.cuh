@@ -19,6 +19,7 @@ private:
     searchByAngle(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity);
 
     __inline__ __device__ static uint8_t convertAngleToData(float angle);
+    __inline__ __device__ static float convertDataToAngle(uint8_t b);
 };
 
 /************************************************************************/
@@ -78,7 +79,8 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     __syncthreads();
 
     auto const partition = calcPartition(NumScanAngles, threadIdx.x, blockDim.x);
-    for (float radius = 14.0f; radius <= cudaSimulationParameters.cellFunctionSensorRange[cell->color]; radius += 8.0f) {
+    auto startRadius = color == cell->color ? 14.0f : 0.0f;
+    for (float radius = startRadius; radius <= cudaSimulationParameters.cellFunctionSensorRange[cell->color]; radius += 8.0f) {
         for (int angleIndex = partition.startIndex; angleIndex <= partition.endIndex; ++angleIndex) {
             float angle = 360.0f / NumScanAngles * angleIndex;
 
@@ -101,7 +103,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             activity.channels[0] = 1;                                                     //something found
             activity.channels[1] = static_cast<float>((lookupResult >> 8) & 0xff) / 256;  //density
             activity.channels[2] = static_cast<float>(lookupResult >> 16) / 256;  //distance
-            activity.channels[3] = static_cast<float>(static_cast<int8_t>(lookupResult & 0xff)) / 256;  //angle
+            activity.channels[3] = convertDataToAngle(static_cast<int8_t>(lookupResult & 0xff)) / 360.0f;  //angle: between -0.5 and 0.5
             statistics.incNumSensorMatches(cell->color);
         } else {
             activity.channels[0] = 0;  //nothing found
@@ -164,4 +166,15 @@ __inline__ __device__ uint8_t SensorProcessor::convertAngleToData(float angle)
     }
     int result = static_cast<int>(angle * 128.0f / 180.0f);
     return static_cast<uint8_t>(result);
+}
+
+__inline__ __device__ float SensorProcessor::convertDataToAngle(uint8_t b)
+{
+    //0 to 127 => 0 to 179 degree
+    //128 to 255 => -179 to 0 degree
+    if (b < 128) {
+        return (0.5f + static_cast<float>(b)) * (180.0f / 128.0f);
+    } else {
+        return (-256.0f - 0.5f + static_cast<float>(b)) * (180.0f / 128.0f);
+    }
 }

@@ -12,7 +12,6 @@ public:
     static SimulationParameters getParameters()
     {
         SimulationParameters result;
-        result.cellFunctionAttackerEnergyDistributionSameColor = true;
         result.innerFriction = 0;
         result.baseValues.friction = 1;
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -125,7 +124,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
 
 TEST_F(DefenderTests, injectorVsAntiAttacker)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -177,7 +176,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
 
 TEST_F(DefenderTests, injectorVsAntiInjector)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes({CellGenomeDescription()});
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({

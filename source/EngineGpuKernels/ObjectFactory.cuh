@@ -1,7 +1,8 @@
 #pragma once
 
-#include "EngineInterface/Constants.h"
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/GenomeConstants.h"
 
 #include "Base.cuh"
 #include "ConstantMemory.cuh"
@@ -47,7 +48,7 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     Particle* particle = _data->objects.particles.getNewElement();
     *particlePointer = particle;
     
-    particle->id = createIds ? _data->numberGen1.createNewId_kernel() : particleTO.id;
+    particle->id = createIds ? _data->numberGen1.createNewId() : particleTO.id;
     particle->absPos = particleTO.pos;
     _map.correctPosition(particle->absPos);
     particle->vel = particleTO.vel;
@@ -55,6 +56,7 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     particle->locked = 0;
     particle->selected = 0;
     particle->color = particleTO.color;
+    particle->lastAbsorbedCell = nullptr;
     return particle;
 }
 
@@ -65,7 +67,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO
     *cellPointer = cell;
 
     changeCellFromTO(dataTO, cellTO, cell);
-    cell->id = createIds ? _data->numberGen1.createNewId_kernel() : cellTO.id;
+    cell->id = createIds ? _data->numberGen1.createNewId() : cellTO.id;
     cell->locked = 0;
     cell->detached = 0;
     cell->selected = 0;
@@ -89,7 +91,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->vel = cellTO.vel;
     cell->executionOrderNumber = cellTO.executionOrderNumber;
     cell->livingState = cellTO.livingState;
-    cell->constructionId = cellTO.constructionId;
+    cell->creatureId = cellTO.creatureId;
+    cell->mutationId = cellTO.mutationId;
     cell->inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber;
     cell->outputBlocked = cellTO.outputBlocked;
     cell->maxConnections = cellTO.maxConnections;
@@ -100,6 +103,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->age = cellTO.age;
     cell->color = cellTO.color;
     cell->activationTime = cellTO.activationTime;
+    cell->genomeSize = cellTO.genomeSize;
 
     createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
 
@@ -128,11 +132,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     } break;
     case CellFunction_Constructor: {
         cell->cellFunctionData.constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
-        cell->cellFunctionData.constructor.singleConstruction = cellTO.cellFunctionData.constructor.singleConstruction;
-        cell->cellFunctionData.constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
-        cell->cellFunctionData.constructor.maxConnections = cellTO.cellFunctionData.constructor.maxConnections;
-        cell->cellFunctionData.constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
-        cell->cellFunctionData.constructor.stiffness = cellTO.cellFunctionData.constructor.stiffness;
         cell->cellFunctionData.constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         createAuxiliaryData(
             cellTO.cellFunctionData.constructor.genomeSize % MAX_GENOME_BYTES,
@@ -140,8 +139,12 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             dataTO.auxiliaryData,
             cell->cellFunctionData.constructor.genomeSize,
             cell->cellFunctionData.constructor.genome);
-        cell->cellFunctionData.constructor.currentGenomePos = cellTO.cellFunctionData.constructor.currentGenomePos;
+        cell->cellFunctionData.constructor.genomeReadPosition = cellTO.cellFunctionData.constructor.genomeReadPosition;
+        cell->cellFunctionData.constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
+        cell->cellFunctionData.constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
         cell->cellFunctionData.constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
+        cell->cellFunctionData.constructor.constructionAngle1 = cellTO.cellFunctionData.constructor.constructionAngle1;
+        cell->cellFunctionData.constructor.constructionAngle2 = cellTO.cellFunctionData.constructor.constructionAngle2;
     } break;
     case CellFunction_Sensor: {
         cell->cellFunctionData.sensor.mode = cellTO.cellFunctionData.sensor.mode;
@@ -211,13 +214,14 @@ ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     Particle** particlePointer = _data->objects.particlePointers.getNewElement();
     Particle* particle = _data->objects.particles.getNewElement();
     *particlePointer = particle;
-    particle->id = _data->numberGen1.createNewId_kernel();
+    particle->id = _data->numberGen1.createNewId();
     particle->selected = 0;
     particle->locked = 0;
     particle->energy = energy;
     particle->absPos = pos;
     particle->vel = vel;
     particle->color = color;
+    particle->lastAbsorbedCell = nullptr;
     return particle;
 }
 
@@ -227,7 +231,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     auto cellPointers = _data->objects.cellPointers.getNewElement();
     *cellPointers = cell;
 
-    cell->id = _data->numberGen1.createNewId_kernel();
+    cell->id = _data->numberGen1.createNewId();
     cell->absPos = pos;
     cell->vel = vel;
     cell->energy = energy;
@@ -246,6 +250,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->barrier = false;
     cell->age = 0;
     cell->activationTime = 0;
+    cell->genomeSize = 0;
     cell->inputExecutionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellNumExecutionOrderNumbers - 1);
     cell->outputBlocked = _data->numberGen1.randomBool();
     for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -275,21 +280,17 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             } else {
                 cell->cellFunctionData.constructor.activationMode = _data->numberGen1.random(50);
             }
-            cell->cellFunctionData.constructor.singleConstruction = _data->numberGen1.randomBool();
-            cell->cellFunctionData.constructor.separateConstruction = _data->numberGen1.randomBool();
-            cell->cellFunctionData.constructor.maxConnections = _data->numberGen1.random(MAX_CELL_BONDS + 1) - 1;
-            cell->cellFunctionData.constructor.angleAlignment = _data->numberGen1.random(ConstructorAngleAlignment_Count - 1);
-            cell->cellFunctionData.constructor.stiffness = _data->numberGen1.random();
             cell->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
-            cell->cellFunctionData.constructor.genomeSize = 0;
-            //_timestepData->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
-            //cell->cellFunctionData.constructor.genome = _timestepData->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.constructor.genomeSize);
-            //auto& genome = cell->cellFunctionData.constructor.genome;
-            //for (int i = 0; i < cell->cellFunctionData.constructor.genomeSize; ++i) {
-            //    genome[i] = _timestepData->numberGen1.randomByte();
-            //}
-            cell->cellFunctionData.constructor.currentGenomePos = 0;
+            cell->cellFunctionData.constructor.genomeSize = Const::GenomeHeaderSize;
+            cell->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.constructor.genomeSize);
+            auto& genome = cell->cellFunctionData.constructor.genome;
+            for (int i = 0; i < cell->cellFunctionData.constructor.genomeSize; ++i) {
+                genome[i] = _data->numberGen1.randomByte();
+            }
+            cell->cellFunctionData.constructor.genomeReadPosition = 0;
             cell->cellFunctionData.constructor.genomeGeneration = 0;
+            cell->cellFunctionData.constructor.constructionAngle1 = 0;
+            cell->cellFunctionData.constructor.constructionAngle2 = 0;
         } break;
         case CellFunction_Sensor: {
             cell->cellFunctionData.sensor.mode = _data->numberGen1.random(SensorMode_Count - 1);
@@ -338,7 +339,7 @@ __inline__ __device__ Cell* ObjectFactory::createCell()
     auto cellPointer = _data->objects.cellPointers.getNewElement();
     *cellPointer = cell;
 
-    cell->id = _data->numberGen1.createNewId_kernel();
+    cell->id = _data->numberGen1.createNewId();
     cell->stiffness = 1.0f;
     cell->selected = 0;
     cell->detached = 0;

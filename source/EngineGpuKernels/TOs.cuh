@@ -3,8 +3,8 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
-#include "EngineInterface/Constants.h"
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/CellFunctionConstants.h"
 
 struct ParticleTO
 {
@@ -51,19 +51,18 @@ struct TransmitterTO
 struct ConstructorTO
 {
     int activationMode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    bool singleConstruction;
-    bool separateConstruction;
-    int maxConnections;
-    ConstructorAngleAlignment angleAlignment;
-    float stiffness;
     int constructionActivationTime;
 
     uint64_t genomeSize;
     uint64_t genomeDataIndex;
     int genomeGeneration;
+    float constructionAngle1;
+    float constructionAngle2;
 
     //process data
-    uint64_t currentGenomePos;
+    uint64_t genomeReadPosition;
+    int offspringCreatureId;
+    int offspringMutationId;
 };
 
 struct SensorTO
@@ -140,7 +139,8 @@ struct CellTO
     bool barrier;
     int age;
     LivingState livingState;
-    int constructionId;
+    int creatureId;
+    int mutationId;
 
     //cell function
     int executionOrderNumber;
@@ -150,6 +150,7 @@ struct CellTO
     CellFunctionTO cellFunctionData;
     ActivityTO activity;
     int activationTime;
+    int genomeSize;
 
     CellMetadataTO metadata;
 

@@ -90,7 +90,7 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
 void _TemporalControlWindow::processTpsRestriction()
 {
     AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Slow down"), _slowDown);
-    ImGui::SameLine(contentScale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
+    ImGui::SameLine(scale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
     ImGui::BeginDisabled(!_slowDown);
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
     ImGui::SliderInt("", &_tpsRestriction, 1, 1000, "%d TPS", ImGuiSliderFlags_Logarithmic);
@@ -108,7 +108,7 @@ void _TemporalControlWindow::processTpsRestriction()
     }
 
     ImGui::BeginDisabled(!syncSimulationWithRendering);
-    ImGui::SameLine(contentScale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
+    ImGui::SameLine(scale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
     auto syncSimulationWithRenderingRatio = _simController->getSyncSimulationWithRenderingRatio();
     if (AlienImGui::SliderInt(AlienImGui::SliderIntParameters().textWidth(0).min(1).max(40).logarithmic(true).format("%d TPS : FPS"), &syncSimulationWithRenderingRatio)) {
         _simController->setSyncSimulationWithRenderingRatio(syncSimulationWithRenderingRatio);

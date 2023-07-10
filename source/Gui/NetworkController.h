@@ -1,13 +1,25 @@
 #pragma once
 
+#include <chrono>
+
 #include "RemoteSimulationData.h"
+#include "UserData.h"
 #include "Definitions.h"
+
+using LoginErrorCode = int;
+enum LoginErrorCode_
+{
+    LoginErrorCode_UnconfirmedUser,
+    LoginErrorCode_Other
+};
 
 class _NetworkController
 {
 public:
     _NetworkController();
     ~_NetworkController();
+
+    void process();
 
     std::string getServerAddress() const;
     void setServerAddress(std::string const& value);
@@ -16,13 +28,15 @@ public:
 
     bool createUser(std::string const& userName, std::string const& password, std::string const& email);
     bool activateUser(std::string const& userName, std::string const& password, std::string const& confirmationCode);
-    bool login(std::string const& userName, std::string const& password);
-    void logout();
+
+    bool login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password);
+    bool logout();
     bool deleteUser();
     bool resetPassword(std::string const& userName, std::string const& email);
     bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
 
     bool getSimulationDataList(std::vector<RemoteSimulationData>& result, bool withRetry) const;
+    bool getUserList(std::vector<UserData>& result, bool withRetry) const;
     bool getLikedSimulationIdList(std::vector<std::string>& result) const;
     bool getUserLikesForSimulation(std::set<std::string>& result, std::string const& simId);
     bool toggleLikeSimulation(std::string const& simId);
@@ -38,7 +52,10 @@ public:
     bool deleteSimulation(std::string const& simId);
 
 private:
+    void refreshLogin();
+
     std::string _serverAddress;
     std::optional<std::string> _loggedInUserName;
     std::optional<std::string> _password;
+    std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 };

@@ -9,7 +9,10 @@
 class _SimulationParametersWindow : public _AlienWindow
 {
 public:
-    _SimulationParametersWindow(SimulationController const& simController, RadiationSourcesWindow const& radiationSourcesWindow);
+    _SimulationParametersWindow(
+        SimulationController const& simController,
+        RadiationSourcesWindow const& radiationSourcesWindow,
+        BalancerController const& balancerController);
     ~_SimulationParametersWindow();
 
 private:
@@ -30,6 +33,7 @@ private:
 
     SimulationController _simController;
     RadiationSourcesWindow _radiationSourcesWindow;
+    BalancerController _balancerController;
 
     uint32_t _savedPalette[32] = {};
     uint32_t _backupColor;

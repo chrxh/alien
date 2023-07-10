@@ -7,8 +7,6 @@ int RemoteSimulationData::compare(void const* left, void const* right, ImGuiTabl
     auto leftImpl = reinterpret_cast<RemoteSimulationData const*>(left);
     auto rightImpl = reinterpret_cast<RemoteSimulationData const*>(right);
     for (int n = 0; n < specs->SpecsCount; n++) {
-        // Here we identify columns using the ColumnUserID value that we ourselves passed to TableSetupColumn()
-        // We could also choose to identify columns based on their index (sort_spec->ColumnIndex), which is simpler!
         const ImGuiTableColumnSortSpecs* sortSpec = &specs->Specs[n];
         int delta = 0;
         switch (sortSpec->ColumnUserID) {

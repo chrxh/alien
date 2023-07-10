@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <limits>
 
-#include "Constants.h"
+#include "FundamentalConstants.h"
 
 namespace Const
 {

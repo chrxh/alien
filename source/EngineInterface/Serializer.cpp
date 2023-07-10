@@ -22,6 +22,7 @@
 #include "Descriptions.h"
 #include "SimulationParameters.h"
 #include "AuxiliaryDataParser.h"
+#include "GenomeConstants.h"
 #include "GenomeDescriptions.h"
 #include "GenomeDescriptionConverter.h"
 
@@ -47,7 +48,8 @@ namespace
     auto constexpr Id_Cell_Barrier = 3;
     auto constexpr Id_Cell_Age = 4;
     auto constexpr Id_Cell_LivingState = 5;
-    auto constexpr Id_Cell_ConstructionId = 10;
+    auto constexpr Id_Cell_CreatureId = 11;
+    auto constexpr Id_Cell_MutationId = 12;
     auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
     auto constexpr Id_Cell_OutputBlocked = 7;
     auto constexpr Id_Cell_ActivationTime = 8;
@@ -55,12 +57,16 @@ namespace
     auto constexpr Id_Constructor_ActivationMode = 0;
     auto constexpr Id_Constructor_SingleConstruction = 1;
     auto constexpr Id_Constructor_SeparateConstruction = 2;
-    auto constexpr Id_Constructor_MaxConnections = 8;
     auto constexpr Id_Constructor_AngleAlignment = 4;
     auto constexpr Id_Constructor_Stiffness = 5;
     auto constexpr Id_Constructor_ConstructionActivationTime = 6;
-    auto constexpr Id_Constructor_CurrentGenomePos = 7;
+    auto constexpr Id_Constructor_GenomeReadPosition = 7;
     auto constexpr Id_Constructor_GenomeGeneration = 9;
+    auto constexpr Id_Constructor_GenomeHeader = 10;
+    auto constexpr Id_Constructor_ConstructionAngle1 = 11;
+    auto constexpr Id_Constructor_ConstructionAngle2 = 12;
+    auto constexpr Id_Constructor_OffspringCreatureId = 13;
+    auto constexpr Id_Constructor_OffspringMutationId = 14;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -71,6 +77,7 @@ namespace
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
+    auto constexpr Id_Injector_GenomeHeader = 2;
 
     auto constexpr Id_Attacker_Mode = 0;
 
@@ -82,6 +89,13 @@ namespace
     auto constexpr Id_Sensor_Color = 2;
 
     auto constexpr Id_Transmitter_Mode = 0;
+
+    auto constexpr Id_GenomeHeader_Shape = 0;
+    auto constexpr Id_GenomeHeader_SingleConstruction = 1;
+    auto constexpr Id_GenomeHeader_SeparateConstruction = 2;
+    auto constexpr Id_GenomeHeader_AngleAlignment = 3;
+    auto constexpr Id_GenomeHeader_Stiffness = 4;
+    auto constexpr Id_GenomeHeader_ConnectionDistance = 5;
 
     auto constexpr Id_CellGenome_ReferenceAngle = 1;
     auto constexpr Id_CellGenome_Energy = 7;
@@ -96,10 +110,12 @@ namespace
     auto constexpr Id_ConstructorGenome_Mode = 0;
     auto constexpr Id_ConstructorGenome_SingleConstruction = 1;
     auto constexpr Id_ConstructorGenome_SeparateConstruction = 2;
-    auto constexpr Id_ConstructorGenome_MaxConnections = 7;
     auto constexpr Id_ConstructorGenome_AngleAlignment = 4;
     auto constexpr Id_ConstructorGenome_Stiffness = 5;
     auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 6;
+    auto constexpr Id_ConstructorGenome_GenomeHeader = 8;
+    auto constexpr Id_ConstructorGenome_ConstructionAngle1 = 9;
+    auto constexpr Id_ConstructorGenome_ConstructionAngle2 = 10;
 
     auto constexpr Id_DefenderGenome_Mode = 0;
 
@@ -201,21 +217,47 @@ namespace cereal
         ConstructorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_ConstructorGenome_Mode, data.mode, defaultObject.mode);
-        loadSave<bool>(task, auxiliaries, Id_ConstructorGenome_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
-        loadSave<bool>(task, auxiliaries, Id_ConstructorGenome_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
-        loadSave<std::optional<int>>(task, auxiliaries, Id_ConstructorGenome_MaxConnections, data.maxConnections, defaultObject.maxConnections);
-        loadSave<int>(task, auxiliaries, Id_ConstructorGenome_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
-        loadSave<float>(task, auxiliaries, Id_ConstructorGenome_Stiffness, data.stiffness, defaultObject.stiffness);
         loadSave<int>(task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
+        loadSave<float>(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
+        loadSave<float>(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
+        if (task == SerializationTask::Save) {
+            auxiliaries[Id_ConstructorGenome_GenomeHeader] = true;
+        }
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-            ar(genomeData);
-            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
-                data.genome = MakeGenomeCopy();
+            auto hasGenomeHeader = auxiliaries.contains(Id_ConstructorGenome_GenomeHeader);
+            if (hasGenomeHeader) {
+                std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+                ar(genomeData);
+                if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                    data.genome = MakeGenomeCopy();
+                } else {
+                    data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                }
             } else {
-                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                std::variant<MakeGenomeCopy, std::vector<CellGenomeDescription>> genomeData;
+                ar(genomeData);
+                if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                    data.genome = MakeGenomeCopy();
+                }
+
+                //compatibility with older versions
+                //>>>
+                else {
+                    GenomeDescription genomeDesc;
+                    genomeDesc.cells = std::get<std::vector<CellGenomeDescription>>(genomeData);
+                    genomeDesc.info.singleConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SingleConstruction));
+                    genomeDesc.info.separateConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SeparateConstruction));
+                    genomeDesc.info.angleAlignment = std::get<int>(auxiliaries.at(Id_ConstructorGenome_AngleAlignment));
+                    genomeDesc.info.stiffness = std::get<float>(auxiliaries.at(Id_ConstructorGenome_Stiffness));
+                    data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+                    if (!genomeDesc.cells.empty()) {
+                        data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;
+                        data.constructionAngle2 = genomeDesc.cells.back().referenceAngle;
+                    }
+                }
+                //<<<
             }
         } else {
             std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
@@ -268,15 +310,31 @@ namespace cereal
         InjectorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_InjectorGenome_Mode, data.mode, defaultObject.mode);
+        if (task == SerializationTask::Save) {
+            auxiliaries[Id_Constructor_GenomeHeader] = true;
+        }
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-            ar(genomeData);
-            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
-                data.genome = MakeGenomeCopy();
+            auto hasGenomeHeader = auxiliaries.contains(Id_Constructor_GenomeHeader);
+            if (hasGenomeHeader) {
+                std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+                ar(genomeData);
+                if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                    data.genome = MakeGenomeCopy();
+                } else {
+                    data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                }
             } else {
-                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                std::variant<MakeGenomeCopy, std::vector<CellGenomeDescription>> genomeData;
+                ar(genomeData);
+                if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                    data.genome = MakeGenomeCopy();
+                } else {
+                    GenomeDescription genomeDesc;
+                    genomeDesc.cells = std::get<std::vector<CellGenomeDescription>>(genomeData);
+                    data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+                }
             }
         } else {
             std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
@@ -337,6 +395,27 @@ namespace cereal
     SPLIT_SERIALIZATION(CellGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, GenomeHeaderDescription& data)
+    {
+        GenomeHeaderDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Id_GenomeHeader_Shape, data.shape, defaultObject.shape);
+        loadSave<bool>(task, auxiliaries, Id_GenomeHeader_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
+        loadSave<bool>(task, auxiliaries, Id_GenomeHeader_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
+        loadSave<int>(task, auxiliaries, Id_GenomeHeader_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
+        loadSave<float>(task, auxiliaries, Id_GenomeHeader_Stiffness, data.stiffness, defaultObject.stiffness);
+        loadSave<float>(task, auxiliaries, Id_GenomeHeader_ConnectionDistance, data.connectionDistance, defaultObject.connectionDistance);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(GenomeHeaderDescription)
+
+    template <class Archive>
+    void serialize(Archive& ar, GenomeDescription& data)
+    {
+        ar(data.info, data.cells);
+    }
+
+    template <class Archive>
     void serialize(Archive& ar, CellMetadataDescription& data)
     {
         ar(data.name, data.description);
@@ -379,20 +458,48 @@ namespace cereal
         ConstructorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
-        loadSave<bool>(task, auxiliaries, Id_Constructor_SingleConstruction, data.singleConstruction, defaultObject.singleConstruction);
-        loadSave<bool>(task, auxiliaries, Id_Constructor_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
-        loadSave<std::optional<int>>(task, auxiliaries, Id_Constructor_MaxConnections, data.maxConnections, defaultObject.maxConnections);
-        loadSave<int>(task, auxiliaries, Id_Constructor_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
-        loadSave<float>(task, auxiliaries, Id_Constructor_Stiffness, data.stiffness, defaultObject.stiffness);
         loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
-        loadSave<int>(task, auxiliaries, Id_Constructor_CurrentGenomePos, data.currentGenomePos, defaultObject.currentGenomePos);
+        loadSave<int>(task, auxiliaries, Id_Constructor_GenomeReadPosition, data.genomeReadPosition, defaultObject.genomeReadPosition);
+        loadSave<int>(task, auxiliaries, Id_Constructor_OffspringCreatureId, data.offspringCreatureId, defaultObject.offspringCreatureId);
+        loadSave<int>(task, auxiliaries, Id_Constructor_OffspringMutationId, data.offspringMutationId, defaultObject.offspringMutationId);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
+        loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
+        loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
+        if (task == SerializationTask::Save) {
+            auxiliaries[Id_Constructor_GenomeHeader] = true;
+        }
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            GenomeDescription genomeDesc;
-            ar(genomeDesc);
-            data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+            auto hasGenomeHeader = auxiliaries.contains(Id_Constructor_GenomeHeader);
+            if (hasGenomeHeader) {
+                GenomeDescription genomeDesc;
+                ar(genomeDesc);
+                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+            }
+
+            //compatibility with older versions
+            //>>>
+            else {
+                GenomeDescription genomeDesc;
+                ar(genomeDesc.cells);
+                genomeDesc.info.singleConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction));
+                genomeDesc.info.separateConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SeparateConstruction));
+                genomeDesc.info.angleAlignment = std::get<int>(auxiliaries.at(Id_Constructor_AngleAlignment));
+                genomeDesc.info.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
+                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+
+                //heuristic to obtain a valid genomeReadPosition
+                data.genomeReadPosition += Const::GenomeHeaderSize;
+                auto cellIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(data.genome, data.genomeReadPosition);
+                data.genomeReadPosition = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(data.genome, cellIndex);
+
+                if (!genomeDesc.cells.empty()) {
+                    data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;
+                    data.constructionAngle2 = genomeDesc.cells.back().referenceAngle;
+                }
+            }
+            //<<<
         } else {
             GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
             ar(genomeDesc);
@@ -440,12 +547,22 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_Injector_Mode, data.mode, defaultObject.mode);
         loadSave<int>(task, auxiliaries, Id_Injector_Counter, data.counter, defaultObject.counter);
+        if (task == SerializationTask::Save) {
+            auxiliaries[Id_Injector_GenomeHeader] = true;
+        }
         setLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            GenomeDescription genomeDesc;
-            ar(genomeDesc);
-            data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+            auto hasGenomeHeader = auxiliaries.contains(Id_Injector_GenomeHeader);
+            if (hasGenomeHeader) {
+                GenomeDescription genomeDesc;
+                ar(genomeDesc);
+                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+            } else {
+                GenomeDescription genomeDesc;
+                ar(genomeDesc.cells);
+                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+            }
         } else {
             GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
             ar(genomeDesc);
@@ -495,7 +612,8 @@ namespace cereal
         loadSave<bool>(task, auxiliaries, Id_Cell_Barrier, data.barrier, defaultObject.barrier);
         loadSave<int>(task, auxiliaries, Id_Cell_Age, data.age, defaultObject.age);
         loadSave<int>(task, auxiliaries, Id_Cell_LivingState, data.livingState, defaultObject.livingState);
-        loadSave<int>(task, auxiliaries, Id_Cell_ConstructionId, data.constructionId, defaultObject.constructionId);
+        loadSave<int>(task, auxiliaries, Id_Cell_CreatureId, data.creatureId, defaultObject.creatureId);
+        loadSave<int>(task, auxiliaries, Id_Cell_MutationId, data.mutationId, defaultObject.mutationId);
         loadSave<std::optional<int>>(
             task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
@@ -509,7 +627,9 @@ namespace cereal
     template <class Archive>
     void serialize(Archive& ar, ClusterDescription& data)
     {
-        ar(data.id, data.cells);
+        uint64_t id = 0;
+        ar(id); //legacy: not used anymore
+        ar(data.cells);
     }
 
     template <class Archive>

@@ -75,6 +75,7 @@ private:
     EditorController _editorController; 
     FpsController _fpsController;
     NetworkController _networkController;
+    BalancerController _balancerController;
 
     bool _onClose = false;
     bool _simulationMenuToggled = false;

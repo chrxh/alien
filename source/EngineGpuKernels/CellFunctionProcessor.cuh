@@ -34,7 +34,7 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    auto executionOrderNumber = data.timestep % cudaSimulationParameters.cellNumExecutionOrderNumbers;
+    auto executionOrderNumber = toInt(data.timestep % cudaSimulationParameters.cellNumExecutionOrderNumbers);
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->cellFunction != CellFunction_None && cell->executionOrderNumber == executionOrderNumber && cell->activationTime == 0

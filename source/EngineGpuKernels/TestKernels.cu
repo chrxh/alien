@@ -17,8 +17,11 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationTyp
             case MutationType::NeuronData:
                 MutationProcessor::neuronDataMutation(data, cell);
                 break;
-            case MutationType::Structure:
-                MutationProcessor::structureMutation(data, cell);
+            case MutationType::Geometry:
+                MutationProcessor::geometryMutation(data, cell);
+                break;
+            case MutationType::CustomGeometry:
+                MutationProcessor::customGeometryMutation(data, cell);
                 break;
             case MutationType::CellFunction:
                 MutationProcessor::cellFunctionMutation(data, cell);
@@ -37,6 +40,9 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationTyp
                 break;
             case MutationType::Color:
                 MutationProcessor::colorMutation(data, cell);
+                break;
+            case MutationType::UniformColor:
+                MutationProcessor::uniformColorMutation(data, cell);
                 break;
             }
         }

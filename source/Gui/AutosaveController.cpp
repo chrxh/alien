@@ -4,6 +4,8 @@
 
 #include "Base/Resources.h"
 #include "EngineInterface/Serializer.h"
+#include "EngineInterface/SimulationController.h"
+
 #include "GlobalSettings.h"
 #include "Viewport.h"
 #include "DelayedExecutionController.h"

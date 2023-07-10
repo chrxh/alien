@@ -39,7 +39,7 @@ void _MultiplierWindow::processIntern()
         _mode = MultiplierMode::Random;
     }
 
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - contentScale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
 
@@ -155,15 +155,16 @@ void _MultiplierWindow::onBuild()
     auto multiplicationResult = [&] {
         if (_mode == MultiplierMode::Grid) {
             return DescriptionHelper::gridMultiply(_origSelection, _gridParameters);
+        } else {
+            auto data = _simController->getSimulationData();
+            auto overlappingCheckSuccessful = true;
+            auto result = DescriptionHelper::randomMultiply(
+                _origSelection, _randomParameters, _simController->getWorldSize(), std::move(data), overlappingCheckSuccessful);
+            if (!overlappingCheckSuccessful) {
+                MessageDialog::getInstance().show("Random multiplication", "Non-overlapping copies could not be created.");
+            }
+            return result;
         }
-        auto data = _simController->getSimulationData();
-        auto overlappingCheckSuccessful = true;
-        auto result =
-            DescriptionHelper::randomMultiply(_origSelection, _randomParameters, _simController->getWorldSize(), std::move(data), overlappingCheckSuccessful);
-        if (!overlappingCheckSuccessful) {
-            MessageDialog::getInstance().show("Random multiplication", "Non-overlapping copies could not be created.");
-        }
-        return result;
     }();
     _simController->removeSelectedObjects(true);
     _simController->addAndSelectSimulationData(multiplicationResult);

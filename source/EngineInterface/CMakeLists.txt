@@ -4,20 +4,22 @@ add_library(alien_engine_interface_lib
     AuxiliaryData.h
     AuxiliaryDataParser.cpp
     AuxiliaryDataParser.h
-    CellFunctionEnums.h
+    CellFunctionConstants.h
     Colors.h
-    Constants.h
     Definitions.h
     DescriptionHelper.cpp
     DescriptionHelper.h
     Descriptions.cpp
     Descriptions.h
+    FundamentalConstants.h
+    GenomeConstants.h
     GenomeDescriptionConverter.cpp
     GenomeDescriptionConverter.h
     GenomeDescriptions.h
     GeneralSettings.h
     GpuSettings.h
     InspectedEntityIds.h
+    Motion.h
     MutationType.h
     OverlayDescriptions.h
     PreviewDescriptionConverter.cpp
@@ -29,6 +31,8 @@ add_library(alien_engine_interface_lib
     Serializer.h
     Settings.h
     ShallowUpdateSelectionData.h
+    ShapeGenerator.cpp
+    ShapeGenerator.h
     SimulationController.h
     SimulationParameters.h
     SimulationParametersSpot.h

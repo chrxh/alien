@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/CellFunctionConstants.h"
 
 #include "Cell.cuh"
 #include "CellFunctionProcessor.cuh"
@@ -58,8 +58,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
         }
         if (connectedCell->cellFunction == CellFunction_Constructor) {
             auto constructor = connectedCell->cellFunctionData.constructor;
-            auto isFinished = constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize;
-            if (!isFinished) {
+            if (!GenomeDecoder::isFinishedSingleConstruction(constructor)) {
                 continue;
             }
         }
@@ -84,7 +83,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameColor && connectedCell->color != cell->color) {
+            if (cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature && connectedCell->creatureId != cell->creatureId) {
                 continue;
             }
             atomicAdd(&connectedCell->energy, energyPerReceiver);
@@ -92,7 +91,8 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             energyDelta -= energyPerReceiver;
             for (int i = 0; i < connectedCell->numConnections; ++i) {
                 auto connectedConnectedCell = connectedCell->connections[i].cell;
-                if (cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameColor && connectedConnectedCell->color != cell->color) {
+                if (cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature
+                    && connectedConnectedCell->creatureId != cell->creatureId) {
                     continue;
                 }
                 atomicAdd(&connectedConnectedCell->energy, energyPerReceiver);
@@ -106,18 +106,21 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             if (otherCell->livingState != LivingState_Ready) {
                 return false;
             }
-            auto const& constructor = otherCell->cellFunctionData.constructor;
-            auto isFinished = constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize;
-            if (otherCell->cellFunction == CellFunction_Constructor && !isFinished) {
-                if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameColor || otherCell->color == cell->color) {
+            if (otherCell->cellFunction == CellFunction_Constructor) {
+                auto isFinished = GenomeDecoder::isFinishedSingleConstruction(otherCell->cellFunctionData.constructor);
+                if (!isFinished
+                    && (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId)) {
                     return true;
                 }
             }
             return false;
         };
         auto matchTransmitterFunc = [&](Cell* const& otherCell) {
+            if (otherCell->livingState != LivingState_Ready) {
+                return false;
+            }
             if (otherCell->cellFunction == CellFunction_Transmitter) {
-                if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameColor || otherCell->color == cell->color) {
+                if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId) {
                     return true;
                 }
             }

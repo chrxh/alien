@@ -21,7 +21,7 @@
             sim.VERSION as version, 
             sim.TIMESTAMP as timestamp,
             sim.NUM_DOWNLOADS as numDownloads,
-            OCTET_LENGTH(sim.content) as contentSize,
+            sim.SIZE as contentSize,
             sim.FROM_RELEASE as fromRelease
         FROM simulation sim
         LEFT JOIN

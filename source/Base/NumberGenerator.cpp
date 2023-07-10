@@ -4,14 +4,8 @@
 
 #include "NumberGenerator.h"
 
-namespace
-{
-    double const RandMax = 4294967296.0;
-}
-
 NumberGenerator::NumberGenerator()
 {
-    _threadId = static_cast<uint64_t>(1) << 48;
     _arrayOfRandomNumbers.reserve(1323781);
     _runningNumber = 0;
     std::random_device rd;   //Will be used to obtain a seed for the random number engine
@@ -66,12 +60,12 @@ float NumberGenerator::getRandomFloat(float min, float max)
 
 double NumberGenerator::getRandomReal()
 {
-    return static_cast<double>(getNumberFromArray()) / RandMax;
+    return static_cast<double>(getNumberFromArray()) / static_cast<double>(std::numeric_limits<int>::max());
 }
 
 uint64_t NumberGenerator::getId()
 {
-	return _threadId | ++_runningNumber;
+    return (static_cast<uint64_t>(1) << 48) | ++_runningNumber; //first term is to avoid collisions with GPU-generated ids
 }
 
 uint32_t NumberGenerator::getNumberFromArray()

@@ -3,7 +3,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/CellFunctionConstants.h"
 
 #include "TOs.cuh"
 #include "Base.cuh"
@@ -11,6 +11,7 @@
 #include "Map.cuh"
 #include "Physics.cuh"
 #include "CellConnectionProcessor.cuh"
+#include "GenomeDecoder.cuh"
 #include "ParticleProcessor.cuh"
 #include "SpotCalculator.cuh"
 
@@ -42,6 +43,8 @@ public:
 
     __inline__ __device__ static void radiation(SimulationData& data);
     __inline__ __device__ static void decay(SimulationData& data);
+
+    __inline__ __device__ static void resetDensity(SimulationData& data);
 };
 
 /************************************************************************/
@@ -189,8 +192,8 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                         if (!otherCell->barrier) {
 
                             //for simplicity pressure = density
-                            auto const& cellPressure = cell->density;
-                            auto const& otherCellPressure = otherCell->density;
+                            auto const& cellPressure = cell->density;   //optimization: using the density from last time step
+                            auto const& otherCellPressure = otherCell->density; //optimization: using the density from last time step
                             auto factor = (cellPressure / (cell->density * cell->density) + otherCellPressure / (otherCell->density * otherCell->density));
 
                             if (abs(distance) > NEAR_ZERO) {
@@ -382,7 +385,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
             auto actualDistance = Math::length(displacement);
             auto bondDistance = cell->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
-            force = force + Math::normalized(displacement) * deviation * (cellStiffnessSquared + connectedCellStiffnessSquared) / 4;
+            force = force + Math::normalized(displacement) * deviation * (cellStiffnessSquared + connectedCellStiffnessSquared) / 6;
 
             if (considerAngles && (numConnections > 2 || (numConnections == 2 && i == 0))) {
 
@@ -446,13 +449,17 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
 
         bool scheduleForDestruction = false;
         for (int i = 0; i < cell->numConnections; ++i) {
-            auto connectingCell = cell->connections[i].cell;
+            auto connectedCell = cell->connections[i].cell;
 
-            auto displacement = connectingCell->absPos - cell->absPos;
+            auto displacement = connectedCell->absPos - cell->absPos;
             data.cellMap.correctDirection(displacement);
             auto actualDistance = Math::length(displacement);
             if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance) {
                 scheduleForDestruction = true;
+                if (cudaSimulationParameters.clusterDecay) {
+                    connectedCell->livingState = LivingState_Dying;
+                    cell->livingState = LivingState_Dying;
+                }
             }
         }
         if (scheduleForDestruction) {
@@ -546,7 +553,9 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
         if (livingState == LivingState_Dying) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectedCell = cell->connections[i].cell;
-                if (connectedCell->cellFunction != CellFunction_None) {
+                if (connectedCell->cellFunction != CellFunction_Constructor
+                    || !GenomeDecoder::containsSelfReplication(connectedCell->cellFunctionData.constructor)
+                    || GenomeDecoder::isSeparating(connectedCell->cellFunctionData.constructor)) {
                     atomicExch(&connectedCell->livingState, LivingState_Dying);
                 }
             }
@@ -610,17 +619,21 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         if (cell->barrier) {
             continue;
         }
-        auto radiationMinAge = cudaSimulationParameters.radiationMinCellAge[cell->color];
-        if (data.numberGen1.random() < cudaSimulationParameters.radiationProb
-            && (cell->energy > cudaSimulationParameters.highRadiationMinCellEnergy[cell->color] || cell->age > radiationMinAge)) {
-            auto radiationFactor = [&] {
-                if (cell->energy < cudaSimulationParameters.highRadiationMinCellEnergy[cell->color]) {
-                    return SpotCalculator::calcParameter(
-                        &SimulationParametersSpotValues::radiationCellAgeStrength, &SimulationParametersSpotActivatedValues::radiationCellAgeStrength, data, cell->absPos, cell->color);
-                } else {
-                    return cudaSimulationParameters.highRadiationFactor[cell->color];
-                }
-            }();
+        if (data.numberGen1.random() < cudaSimulationParameters.radiationProb) {
+
+            auto radiationFactor = 0.0f;
+            if (cell->energy > cudaSimulationParameters.highRadiationMinCellEnergy[cell->color]) {
+                radiationFactor += cudaSimulationParameters.highRadiationFactor[cell->color];
+            }
+            if (cell->age > cudaSimulationParameters.radiationMinCellAge[cell->color]) {
+                radiationFactor += SpotCalculator::calcParameter(
+                    &SimulationParametersSpotValues::radiationCellAgeStrength,
+                    &SimulationParametersSpotActivatedValues::radiationCellAgeStrength,
+                    data,
+                    cell->absPos,
+                    cell->color);
+            }
+
             if (radiationFactor > 0) {
 
                 auto const& cellEnergy = cell->energy;
@@ -662,39 +675,44 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
             &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->absPos);
 
-        bool decay = false;
         if (cell->livingState == LivingState_Dying) {
             if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb[cell->color]) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
-                decay = true;
             }
-        }
-        if (cell->energy < cellMinEnergy) {
-            if (cudaSimulationParameters.clusterDecay) {
-                cell->livingState = LivingState_Dying;
-            } else {
-                CellConnectionProcessor::scheduleDeleteCell(data, index);
-                decay = true;
-            }
-        } else if (cell->energy > cellMaxBindingEnergy) {
-            CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
-            decay = true;
         }
 
-        if (decay && cell->livingState != LivingState_UnderConstruction) {
-            for (int i = 0; i < cell->numConnections; ++i) {
-                auto& connectedCell = cell->connections[i].cell;
-                if (connectedCell->livingState == LivingState_UnderConstruction) {
-                    connectedCell->livingState = LivingState_JustReady;
-                }
-            }
+        bool cellDestruction = false;
+        if (cell->energy < cellMinEnergy) {
+            cellDestruction = true;
+        } else if (cell->energy > cellMaxBindingEnergy) {
+            CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
         }
 
         auto cellMaxAge = cudaSimulationParameters.cellMaxAge[cell->color];
         if (cellMaxAge > 0 && cell->age > cellMaxAge) {
-            if (data.timestep % 20 == index % 20) { //slow down destruction process to avoid too many deletion jobs
+            if (data.timestep % 20 == index % 20) {  //slow down destruction process to avoid too many deletion jobs
+                cellDestruction = true;
+            }
+        }
+
+        if (cellDestruction) {
+            if (cudaSimulationParameters.clusterDecay) {
+                cell->livingState = LivingState_Dying;
+            } else {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
             }
         }
+    }
+}
+
+__inline__ __device__ void CellProcessor::resetDensity(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
+        cell->density = 1.0f;
     }
 }

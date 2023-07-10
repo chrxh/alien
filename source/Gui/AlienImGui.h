@@ -3,7 +3,7 @@
 #include <functional>
 
 #include "Base/Definitions.h"
-#include "EngineInterface/Constants.h"
+#include "EngineInterface/FundamentalConstants.h"
 #include "EngineInterface/PreviewDescriptions.h"
 #include "Definitions.h"
 
@@ -24,6 +24,7 @@ public:
         MEMBER_DECLARATION(SliderFloatParameters, bool, colorDependence, false);
         MEMBER_DECLARATION(SliderFloatParameters, float const*, defaultValue, nullptr);
         MEMBER_DECLARATION(SliderFloatParameters, float const*, disabledValue, nullptr);
+        MEMBER_DECLARATION(SliderFloatParameters, bool const*, defaultEnabledValue, nullptr);
         MEMBER_DECLARATION(SliderFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled = nullptr);
@@ -40,6 +41,7 @@ public:
         MEMBER_DECLARATION(SliderIntParameters, bool, colorDependence, false);
         MEMBER_DECLARATION(SliderIntParameters, int const*, defaultValue, nullptr);
         MEMBER_DECLARATION(SliderIntParameters, int const*, disabledValue, nullptr);
+        MEMBER_DECLARATION(SliderIntParameters, bool const*, defaultEnabledValue, nullptr);
         MEMBER_DECLARATION(SliderIntParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled = nullptr);
@@ -76,7 +78,7 @@ public:
         MEMBER_DECLARATION(InputFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER_DECLARATION(InputFloatParameters, bool, readOnly, false);
     };
-    static void InputFloat(InputFloatParameters const& parameters, float& value);
+    static bool InputFloat(InputFloatParameters const& parameters, float& value);
 
     struct InputFloat2Parameters
     {
@@ -208,6 +210,7 @@ public:
     static bool ToggleButton(ToggleButtonParameters const& parameters, bool& value);
 
     static void Text(std::string const& text);
+    static void BoldText(std::string const& text);
     static void MonospaceText(std::string const& text);
 
     static bool BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup, float focus = true);  //return toggle
@@ -223,10 +226,12 @@ public:
     };
     static void ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color, uint32_t& backupColor, uint32_t (&savedPalette)[32]);
 
+    static void NegativeSpacing();
     static void Separator();
     static void Group(std::string const& text);
 
     static bool ToolbarButton(std::string const& text);
+    static void VerticalSeparator(float length = 23.0f);
     static void ToolbarSeparator();
     static bool Button(std::string const& text, float size = 0);
 
@@ -275,6 +280,8 @@ public:
         int& selectedOutput
     );
 
+    static void OnlineSymbol();
+
 private:
 
     template <typename Parameter, typename T>
@@ -296,5 +303,10 @@ private:
     template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS]);
 
+    static void RotateStart();
+    static ImVec2 RotationCenter();
+    static void RotateEnd(float angle);
+
     static std::unordered_set<unsigned int> _isExpanded;
+    static int _rotationStartIndex;
 };

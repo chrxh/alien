@@ -126,6 +126,13 @@ namespace
         //simulation parameters
         SimulationParameters defaultParameters;
         encodeDecodeProperty(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
+        encodeDecodeProperty(tree, parameters.cellColorization, defaultParameters.cellColorization, "simulation parameters.cell colorization", parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.zoomLevelNeuronalActivity,
+            defaultParameters.zoomLevelNeuronalActivity,
+            "simulation parameters.zoom level.neural activity",
+            parserTask);
         encodeDecodeProperty(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);
 
         encodeDecodeProperty(tree, parameters.motionType, defaultParameters.motionType, "simulation parameters.motion.type", parserTask);
@@ -200,6 +207,14 @@ namespace
             "simulation parameters.cell.max binding energy",
             parserTask);
         encodeDecodeProperty(tree, parameters.cellMaxAge, defaultParameters.cellMaxAge, "simulation parameters.cell.max age", parserTask);
+        encodeDecodeProperty(
+            tree, parameters.cellMaxAgeBalancer, defaultParameters.cellMaxAgeBalancer, "simulation parameters.cell.max age.balance.enabled", parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellMaxAgeBalancerInterval,
+            defaultParameters.cellMaxAgeBalancerInterval,
+            "simulation parameters.cell.max age.balance.interval",
+            parserTask);
         encodeDecodeProperty(
             tree,
             parameters.baseValues.cellColorTransitionDuration,
@@ -290,9 +305,15 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationStructureProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationStructureProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.structure",
+            parameters.baseValues.cellFunctionConstructorMutationGeometryProbability,
+            defaultParameters.baseValues.cellFunctionConstructorMutationGeometryProbability,
+            "simulation parameters.cell.function.constructor.mutation probability.geometry",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.baseValues.cellFunctionConstructorMutationCustomGeometryProbability,
+            defaultParameters.baseValues.cellFunctionConstructorMutationCustomGeometryProbability,
+            "simulation parameters.cell.function.constructor.mutation probability.custom geometry",
             parserTask);
         encodeDecodeProperty(
             tree,
@@ -332,6 +353,12 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.baseValues.cellFunctionConstructorMutationUniformColorProbability,
+            defaultParameters.baseValues.cellFunctionConstructorMutationUniformColorProbability,
+            "simulation parameters.cell.function.constructor.mutation probability.uniform color",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.cellFunctionConstructorMutationColorTransitions,
             defaultParameters.cellFunctionConstructorMutationColorTransitions,
             "simulation parameters.cell.function.constructor.mutation color transition",
@@ -341,6 +368,24 @@ namespace
             parameters.cellFunctionConstructorMutationSelfReplication,
             defaultParameters.cellFunctionConstructorMutationSelfReplication,
             "simulation parameters.cell.function.constructor.mutation self replication",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionConstructorMutationPreventDepthIncrease,
+            defaultParameters.cellFunctionConstructorMutationPreventDepthIncrease,
+            "simulation parameters.cell.function.constructor.mutation prevent depth increase",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionConstructorCheckCompletenessForSelfReplication,
+            defaultParameters.cellFunctionConstructorCheckCompletenessForSelfReplication,
+            "simulation parameters.cell.function.constructor.completeness check for self-replication",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionConstructionUnlimitedEnergy,
+            defaultParameters.cellFunctionConstructionUnlimitedEnergy,
+            "simulation parameters.cell.function.constructor.unlimited energy",
             parserTask);
 
         encodeDecodeProperty(
@@ -373,12 +418,6 @@ namespace
             parameters.cellFunctionAttackerEnergyDistributionRadius,
             defaultParameters.cellFunctionAttackerEnergyDistributionRadius,
             "simulation parameters.cell.function.attacker.energy distribution radius",
-            parserTask);
-        encodeDecodeProperty(
-            tree,
-            parameters.cellFunctionAttackerEnergyDistributionSameColor,
-            defaultParameters.cellFunctionAttackerEnergyDistributionSameColor,
-            "simulation parameters.cell.function.attacker.energy distribution same color",
             parserTask);
         encodeDecodeProperty(
             tree,
@@ -428,6 +467,12 @@ namespace
             defaultParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty,
             "simulation parameters.cell.function.attacker.connections mismatch penalty",
             parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionAttackerGenomeSizeBonus,
+            defaultParameters.cellFunctionAttackerGenomeSizeBonus,
+            "simulation parameters.cell.function.attacker.genome size bonus",
+            parserTask);
 
         encodeDecodeProperty(
             tree,
@@ -444,9 +489,9 @@ namespace
 
         encodeDecodeProperty(
             tree,
-            parameters.cellFunctionTransmitterEnergyDistributionSameColor,
-            defaultParameters.cellFunctionTransmitterEnergyDistributionSameColor,
-            "simulation parameters.cell.function.transmitter.energy distribution same color",
+            parameters.cellFunctionTransmitterEnergyDistributionSameCreature,
+            defaultParameters.cellFunctionTransmitterEnergyDistributionSameCreature,
+            "simulation parameters.cell.function.transmitter.energy distribution same creature",
             parserTask);
         encodeDecodeProperty(
             tree,
@@ -533,6 +578,31 @@ namespace
             auto& defaultSource = defaultParameters.particleSources[index];
             encodeDecodeProperty(tree, source.posX, defaultSource.posX, base + "pos.x", parserTask);
             encodeDecodeProperty(tree, source.posY, defaultSource.posY, base + "pos.y", parserTask);
+            encodeDecodeProperty(tree, source.useAngle, defaultSource.useAngle, base + "use angle", parserTask);
+            encodeDecodeProperty(tree, source.angle, defaultSource.angle, base + "angle", parserTask);
+            encodeDecodeProperty(tree, source.shapeType, defaultSource.shapeType, base + "shape.type", parserTask);
+            if (source.shapeType == SpotShapeType_Circular) {
+                encodeDecodeProperty(
+                    tree,
+                    source.shapeData.circularRadiationSource.radius,
+                    defaultSource.shapeData.circularRadiationSource.radius,
+                    base + "shape.circular.radius",
+                    parserTask);
+            }
+            if (source.shapeType == SpotShapeType_Rectangular) {
+                encodeDecodeProperty(
+                    tree,
+                    source.shapeData.rectangularRadiationSource.width,
+                    defaultSource.shapeData.rectangularRadiationSource.width,
+                    base + "shape.rectangular.width",
+                    parserTask);
+                encodeDecodeProperty(
+                    tree,
+                    source.shapeData.rectangularRadiationSource.height,
+                    defaultSource.shapeData.rectangularRadiationSource.height,
+                    base + "shape.rectangular.height",
+                    parserTask);
+            }
         }
 
         //spots
@@ -546,7 +616,7 @@ namespace
             encodeDecodeProperty(tree, spot.posY, defaultSpot.posY, base + "pos.y", parserTask);
 
             encodeDecodeProperty(tree, spot.shapeType, defaultSpot.shapeType, base + "shape.type", parserTask);
-            if (spot.shapeType == ShapeType_Circular) {
+            if (spot.shapeType == SpotShapeType_Circular) {
                 encodeDecodeProperty(
                     tree,
                     spot.shapeData.circularSpot.coreRadius,
@@ -554,7 +624,7 @@ namespace
                     base + "shape.circular.core radius",
                     parserTask);
             }
-            if (spot.shapeType == ShapeType_Rectangular) {
+            if (spot.shapeType == SpotShapeType_Rectangular) {
                 encodeDecodeProperty(
                     tree, spot.shapeData.rectangularSpot.width, defaultSpot.shapeData.rectangularSpot.width, base + "shape.rectangular.core width", parserTask);
                 encodeDecodeProperty(
@@ -684,10 +754,17 @@ namespace
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationStructureProbability,
-                spot.activatedValues.cellFunctionConstructorMutationStructureProbability,
-                defaultSpot.values.cellFunctionConstructorMutationStructureProbability,
-                base + "cell.function.constructor.mutation probability.structure",
+                spot.values.cellFunctionConstructorMutationGeometryProbability,
+                spot.activatedValues.cellFunctionConstructorMutationGeometryProbability,
+                defaultSpot.values.cellFunctionConstructorMutationGeometryProbability,
+                base + "cell.function.constructor.mutation probability.geometry",
+                parserTask);
+            encodeDecodeSpotProperty(
+                tree,
+                spot.values.cellFunctionConstructorMutationCustomGeometryProbability,
+                spot.activatedValues.cellFunctionConstructorMutationCustomGeometryProbability,
+                defaultSpot.values.cellFunctionConstructorMutationCustomGeometryProbability,
+                base + "cell.function.constructor.mutation probability.custom geometry",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
@@ -730,6 +807,13 @@ namespace
                 spot.activatedValues.cellFunctionConstructorMutationColorProbability,
                 defaultSpot.values.cellFunctionConstructorMutationColorProbability,
                 base + "cell.function.constructor.mutation probability.color",
+                parserTask);
+            encodeDecodeSpotProperty(
+                tree,
+                spot.values.cellFunctionConstructorMutationUniformColorProbability,
+                spot.activatedValues.cellFunctionConstructorMutationUniformColorProbability,
+                defaultSpot.values.cellFunctionConstructorMutationUniformColorProbability,
+                base + "cell.function.constructor.mutation probability.uniform color",
                 parserTask);
         }
     }

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/CellFunctionConstants.h"
 
 #include "Cell.cuh"
 #include "CellFunctionProcessor.cuh"
@@ -53,10 +53,20 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
     Cell* someOtherCell = nullptr;
     data.cellMap.executeForEach(cell->absPos, cudaSimulationParameters.cellFunctionAttackerRadius[cell->color], cell->detached, [&](auto const& otherCell) {
-        if (!isConnectedConnected(cell, otherCell) && !otherCell->barrier /*&& otherCell->livingState != LivingState_UnderConstruction*/) {
+        if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
+            return;
+        }
+        if (cell->creatureId == 0 && isConnectedConnected(cell, otherCell)) {
+            return;
+        }
+        if (!otherCell->barrier /*&& otherCell->livingState != LivingState_UnderConstruction*/) {
             auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength[cell->color];
             if (energyToTransfer < 0) {
                 return;
+            }
+            if (otherCell->genomeSize > cell->genomeSize) {
+                auto genomeSizeBonus = cudaSimulationParameters.cellFunctionAttackerGenomeSizeBonus[cell->color][otherCell->color];
+                energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<float>(otherCell->genomeSize - cell->genomeSize));
             }
 
             auto velocityPenalty = Math::length(cell->vel) * 20 * cudaSimulationParameters.cellFunctionAttackerVelocityPenalty[cell->color] + 1.0f;
@@ -205,16 +215,10 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor && connectedCell->color != cell->color) {
-                continue;
-            }
             atomicAdd(&connectedCell->energy, energyPerReceiver);
             energyDelta -= energyPerReceiver;
             for (int i = 0; i < connectedCell->numConnections; ++i) {
                 auto connectedConnectedCell = connectedCell->connections[i].cell;
-                if (cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor && connectedConnectedCell->color != cell->color) {
-                    continue;
-                }
                 atomicAdd(&connectedConnectedCell->energy, energyPerReceiver);
                 energyDelta -= energyPerReceiver;
             }
@@ -227,18 +231,20 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
             if (otherCell->livingState != LivingState_Ready) {
                 return false;
             }
-            auto const& constructor = otherCell->cellFunctionData.constructor;
-            auto isFinished = constructor.singleConstruction && constructor.currentGenomePos >= constructor.genomeSize;
-            if (otherCell->cellFunction == CellFunction_Constructor && !isFinished) {
-                if (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color) {
+            if (otherCell->cellFunction == CellFunction_Constructor) {
+                auto isFinished = GenomeDecoder::isFinishedSingleConstruction(otherCell->cellFunctionData.constructor);
+                if (!isFinished && otherCell->creatureId == cell->creatureId) {
                     return true;
                 }
             }
             return false;
         };
         auto matchTransmitterFunc = [&](Cell* const& otherCell) {
+            if (otherCell->livingState != LivingState_Ready) {
+                return false;
+            }
             if (otherCell->cellFunction == CellFunction_Transmitter) {
-                if (!cudaSimulationParameters.cellFunctionAttackerEnergyDistributionSameColor || otherCell->color == cell->color) {
+                if (otherCell->creatureId == cell->creatureId) {
                     return true;
                 }
             }

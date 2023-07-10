@@ -32,7 +32,7 @@ https://user-images.githubusercontent.com/73127001/229868357-131fa71f-d03d-45db-
 - Genetic system and cell by cell construction of offspring
 - Neural networks for controlling higher-level functions (e.g. sensors and muscles)
 - Various colors may be used to customize cell types according to own specifications
-- Spatially varying simulation parameters
+- Support for spatially varying simulation parameters
 
 https://user-images.githubusercontent.com/73127001/229569056-0db6562b-0147-43c8-a977-5f12c1b6277b.mp4
 
@@ -45,12 +45,13 @@ https://user-images.githubusercontent.com/73127001/229569056-0db6562b-0147-43c8-
 ### Networking
 - Built-in simulation browser
 - Download and upload simulation files
-- Rate simulations by giving stars
+- Upvote simulations by giving stars
 
 # But for what is this useful?
 - A first attempt to answer: Feed your curiosity by watching evolution at work! As soon as self-replicating machines come into play and mutations are turned on, the simulation itself does everything.
 - Perhaps the most honest answer: Fun! It is almost like a game with a pretty fast and realistic physics engine. You can make hundreds of thousands of machines accelerate and destroy with the mouse cursor. It feels like playing god in your own universe with your own rules. Different render styles and a visual editor offer fascinating insights into the events. There are a lot of videos on the [YouTube channel](https://youtube.com/channel/UCtotfE3yvG0wwAZ4bDfPGYw) for illustration.
 - A more academic answer: A tool to tackle fundamental questions of how complexity or life-like structure may arise from simple components. How do entire ecosystems adapt to environmental changes and find a new equilibrium? How to find conditions that allow open-ended evolution?
+- A tool for generative art: Evolution is a creative force that leads to ever new forms and behaviors.
 
 # Documentation
 A documentation for the previous major version, which introduces the reader to the simulator with tutorial-like articles, can be found at [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs). Please notice that many of the information therein are no longer up to date.
@@ -68,7 +69,7 @@ Further information and artwork:
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 # Installer
-An installer for the latest beta for Windows: [download link](https://alien-project.org/media/files/alien-installer-v4-beta.zip)
+An installer for the latest beta for Windows: [download link](https://alien-project.org/media/files/alien-installer-v4-beta.zip) (Updated: 2023-07-08)
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
 

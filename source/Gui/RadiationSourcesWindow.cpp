@@ -22,6 +22,7 @@ void _RadiationSourcesWindow::processIntern()
 {
 
     auto parameters = _simController->getSimulationParameters();
+    auto lastParameters = parameters;
     auto origParameters = _simController->getOriginalSimulationParameters();
 
     auto worldSize = _simController->getWorldSize();
@@ -44,13 +45,28 @@ void _RadiationSourcesWindow::processIntern()
         }
 
         for (int tab = 0; tab < parameters.numParticleSources; ++tab) {
-            RadiationSource& flowCenter = parameters.particleSources[tab];
-            RadiationSource& origFlowCenter = origParameters.particleSources[tab];
+            RadiationSource& source = parameters.particleSources[tab];
+            RadiationSource& origSource = origParameters.particleSources[tab];
             bool open = true;
             char name[18] = {};
             bool* openPtr = &open;
             snprintf(name, IM_ARRAYSIZE(name), "Source %01d", tab + 1);
             if (ImGui::BeginTabItem(name, openPtr, ImGuiTabItemFlags_None)) {
+
+                if (AlienImGui::Combo(
+                        AlienImGui::ComboParameters()
+                            .name("Shape")
+                            .values({"Circular", "Rectangular"})
+                            .textWidth(RightColumnWidth)
+                            .defaultValue(origSource.shapeType),
+                        source.shapeType)) {
+                    if (source.shapeType == RadiationSourceShapeType_Circular) {
+                        source.shapeData.circularRadiationSource.radius = 1;
+                    } else {
+                        source.shapeData.rectangularRadiationSource.width = 40;
+                        source.shapeData.rectangularRadiationSource.height = 10;
+                    }
+                }
 
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -59,8 +75,8 @@ void _RadiationSourcesWindow::processIntern()
                         .min(0)
                         .max(toFloat(worldSize.x))
                         .format("%.0f")
-                        .defaultValue(&origFlowCenter.posX),
-                    &flowCenter.posX);
+                        .defaultValue(&origSource.posX),
+                    &source.posX);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Position Y")
@@ -68,10 +84,54 @@ void _RadiationSourcesWindow::processIntern()
                         .min(0)
                         .max(toFloat(worldSize.y))
                         .format("%.0f")
-                        .defaultValue(&origFlowCenter.posY),
-                    &flowCenter.posY);
-
+                        .defaultValue(&origSource.posY),
+                    &source.posY);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Angle")
+                        .textWidth(RightColumnWidth)
+                        .min(-180.0f)
+                        .max(180.0f)
+                        .defaultEnabledValue(&origSource.useAngle)
+                        .defaultValue(&origSource.angle)
+                        .disabledValue(&source.angle)
+                        .format("%.1f"),
+                    &source.angle,
+                    &source.useAngle);
+                if (source.shapeType == RadiationSourceShapeType_Circular) {
+                    auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y));
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Radius")
+                            .textWidth(RightColumnWidth)
+                            .min(1)
+                            .max(maxRadius)
+                            .format("%.0f")
+                            .defaultValue(&origSource.shapeData.circularRadiationSource.radius),
+                        &source.shapeData.circularRadiationSource.radius);
+                }
+                if (source.shapeType == RadiationSourceShapeType_Rectangular) {
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Width")
+                            .textWidth(RightColumnWidth)
+                            .min(1)
+                            .max(toFloat(worldSize.x))
+                            .format("%.0f")
+                            .defaultValue(&origSource.shapeData.rectangularRadiationSource.width),
+                        &source.shapeData.rectangularRadiationSource.width);
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Height")
+                            .textWidth(RightColumnWidth)
+                            .min(1)
+                            .max(toFloat(worldSize.y))
+                            .format("%.0f")
+                            .defaultValue(&origSource.shapeData.rectangularRadiationSource.height),
+                        &source.shapeData.rectangularRadiationSource.height);
+                }
                 ImGui::EndTabItem();
+                validationAndCorrection(source);
             }
 
             //del source
@@ -89,7 +149,7 @@ void _RadiationSourcesWindow::processIntern()
 
         ImGui::EndTabBar();
     }
-    if (parameters != origParameters) {
+    if (parameters != lastParameters) {
         _simController->setSimulationParameters_async(parameters);
     }
 }
@@ -101,4 +161,15 @@ RadiationSource _RadiationSourcesWindow::createParticleSource() const
     result.posX = toFloat(worldSize.x / 2);
     result.posY = toFloat(worldSize.y / 2);
     return result;
+}
+
+void _RadiationSourcesWindow::validationAndCorrection(RadiationSource& source) const
+{
+    if (source.shapeType == RadiationSourceShapeType_Circular) {
+        source.shapeData.circularRadiationSource.radius = std::max(1.0f, source.shapeData.circularRadiationSource.radius);
+    }
+    if (source.shapeType == RadiationSourceShapeType_Rectangular) {
+        source.shapeData.rectangularRadiationSource.width = std::max(1.0f, source.shapeData.rectangularRadiationSource.width);
+        source.shapeData.rectangularRadiationSource.height = std::max(1.0f, source.shapeData.rectangularRadiationSource.height);
+    }
 }

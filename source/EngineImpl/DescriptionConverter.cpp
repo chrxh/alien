@@ -351,7 +351,6 @@ auto DescriptionConverter::scanAndCreateClusterDescription(
 
     setInplaceDifference(freeCellIndices, scannedCellIndices);
 
-    result.cluster.id = NumberGenerator::getInstance().getId();
     result.cluster.addCells(cells);
 
     return result;
@@ -383,13 +382,15 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     }
     result.connections = connections;
     result.livingState = cellTO.livingState;
-    result.constructionId = cellTO.constructionId;
+    result.creatureId = cellTO.creatureId;
+    result.mutationId = cellTO.mutationId;
     result.inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber >= 0 ? std::make_optional(cellTO.inputExecutionOrderNumber) : std::nullopt;
     result.outputBlocked = cellTO.outputBlocked;
     result.executionOrderNumber = cellTO.executionOrderNumber;
     result.barrier = cellTO.barrier;
     result.age = cellTO.age;
     result.color = cellTO.color;
+    result.genomeSize = cellTO.genomeSize;
 
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
@@ -420,16 +421,14 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     case CellFunction_Constructor: {
         ConstructorDescription constructor;
         constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
-        constructor.singleConstruction = cellTO.cellFunctionData.constructor.singleConstruction;
-        constructor.separateConstruction = cellTO.cellFunctionData.constructor.separateConstruction;
-        constructor.maxConnections =
-            cellTO.cellFunctionData.constructor.maxConnections >= 0 ? std::make_optional(cellTO.cellFunctionData.constructor.maxConnections) : std::nullopt;
-        constructor.angleAlignment = cellTO.cellFunctionData.constructor.angleAlignment;
-        constructor.stiffness = cellTO.cellFunctionData.constructor.stiffness;
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
-        constructor.currentGenomePos = toInt(cellTO.cellFunctionData.constructor.currentGenomePos);
+        constructor.genomeReadPosition = toInt(cellTO.cellFunctionData.constructor.genomeReadPosition);
+        constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
+        constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
         constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
+        constructor.constructionAngle1 = cellTO.cellFunctionData.constructor.constructionAngle1;
+        constructor.constructionAngle2 = cellTO.cellFunctionData.constructor.constructionAngle2;
         result.cellFunction = constructor;
     } break;
     case CellFunction_Sensor: {
@@ -511,7 +510,8 @@ void DescriptionConverter::addCell(
     cellTO.maxConnections = cellDesc.maxConnections;
     cellTO.executionOrderNumber = cellDesc.executionOrderNumber;
     cellTO.livingState = cellDesc.livingState;
-    cellTO.constructionId = cellDesc.constructionId;
+    cellTO.creatureId = cellDesc.creatureId;
+    cellTO.mutationId = cellDesc.mutationId;
     cellTO.inputExecutionOrderNumber = cellDesc.inputExecutionOrderNumber.value_or(-1);
     cellTO.outputBlocked = cellDesc.outputBlocked;
     cellTO.cellFunction = cellDesc.getCellFunctionType();
@@ -535,15 +535,14 @@ void DescriptionConverter::addCell(
         auto const& constructorDesc = std::get<ConstructorDescription>(*cellDesc.cellFunction);
         ConstructorTO constructorTO;
         constructorTO.activationMode = constructorDesc.activationMode;
-        constructorTO.singleConstruction = constructorDesc.singleConstruction;
-        constructorTO.separateConstruction = constructorDesc.separateConstruction;
-        constructorTO.maxConnections = constructorDesc.maxConnections.value_or(-1);
-        constructorTO.angleAlignment = constructorDesc.angleAlignment;
-        constructorTO.stiffness = constructorDesc.stiffness;
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
-        constructorTO.currentGenomePos = constructorDesc.currentGenomePos;
+        constructorTO.genomeReadPosition = constructorDesc.genomeReadPosition;
+        constructorTO.offspringCreatureId = constructorDesc.offspringCreatureId;
+        constructorTO.offspringMutationId = constructorDesc.offspringMutationId;
         constructorTO.genomeGeneration = constructorDesc.genomeGeneration;
+        constructorTO.constructionAngle1 = constructorDesc.constructionAngle1;
+        constructorTO.constructionAngle2 = constructorDesc.constructionAngle2;
         cellTO.cellFunctionData.constructor = constructorTO;
     } break;
     case CellFunction_Sensor: {
@@ -605,6 +604,7 @@ void DescriptionConverter::addCell(
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;
     cellTO.color = cellDesc.color;
+    cellTO.genomeSize = cellDesc.genomeSize;
     convert(dataTO, cellDesc.metadata.name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
     convert(dataTO, cellDesc.metadata.description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);

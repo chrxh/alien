@@ -73,26 +73,38 @@ public:
     void init();
 
     ImFont* getIconFont() const;
+
+    ImFont* getSmallBoldFont() const;
+    ImFont* getMediumBoldFont() const;
+
     ImFont* getMediumFont() const;
     ImFont* getLargeFont() const;
+
     ImFont* getMonospaceMediumFont() const;
     ImFont* getMonospaceLargeFont() const;
 
-    float contentScale(float value) const;
-    float contentInverseScale(float value) const;
+    ImFont* getReefMediumFont() const;
+    ImFont* getReefLargeFont() const;
+
+    float scale(float value) const;
+    float scaleInverse(float value) const;
 
 private:
     StyleRepository() = default;
 
     float _contentScaleFactor = 1.0f;
     ImFont* _iconFont = nullptr;
+    ImFont* _smallBoldFont = nullptr;
+    ImFont* _mediumBoldFont = nullptr;
     ImFont* _mediumFont = nullptr;
     ImFont* _largeFont = nullptr;
     ImFont* _monospaceMediumFont = nullptr;
     ImFont* _monospaceLargeFont = nullptr;
+    ImFont* _reefMediumFont = nullptr;
+    ImFont* _reefLargeFont = nullptr;
 };
 
-inline float contentScale(float value)
+inline float scale(float value)
 {
-    return StyleRepository::getInstance().contentScale(value);
+    return StyleRepository::getInstance().scale(value);
 }

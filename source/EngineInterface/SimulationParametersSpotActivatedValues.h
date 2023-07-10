@@ -21,12 +21,14 @@ struct SimulationParametersSpotActivatedValues
     bool cellFunctionConstructorMutationNeuronDataProbability = false;
     bool cellFunctionConstructorMutationPropertiesProbability = false;
     bool cellFunctionConstructorMutationCellFunctionProbability = false;
-    bool cellFunctionConstructorMutationStructureProbability = false; 
+    bool cellFunctionConstructorMutationGeometryProbability = false;
+    bool cellFunctionConstructorMutationCustomGeometryProbability = false; 
     bool cellFunctionConstructorMutationInsertionProbability = false;
     bool cellFunctionConstructorMutationDeletionProbability = false;
     bool cellFunctionConstructorMutationTranslationProbability = false;
     bool cellFunctionConstructorMutationDuplicationProbability = false;
     bool cellFunctionConstructorMutationColorProbability = false;
+    bool cellFunctionConstructorMutationUniformColorProbability = false;
 
     bool operator==(SimulationParametersSpotActivatedValues const& other) const
     {
@@ -46,7 +48,9 @@ struct SimulationParametersSpotActivatedValues
             && cellFunctionConstructorMutationDuplicationProbability == other.cellFunctionConstructorMutationDuplicationProbability
             && cellFunctionConstructorMutationColorProbability == other.cellFunctionConstructorMutationColorProbability
             && radiationAbsorption == other.radiationAbsorption
-            && cellFunctionConstructorMutationStructureProbability == other.cellFunctionConstructorMutationStructureProbability
+            && cellFunctionConstructorMutationCustomGeometryProbability == other.cellFunctionConstructorMutationCustomGeometryProbability
+            && cellFunctionConstructorMutationGeometryProbability == other.cellFunctionConstructorMutationGeometryProbability
+            && cellFunctionConstructorMutationUniformColorProbability == other.cellFunctionConstructorMutationUniformColorProbability
         ;
     }
 };

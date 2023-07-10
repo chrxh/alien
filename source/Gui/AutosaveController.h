@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/Definitions.h"
 #include "Definitions.h"
 
 class _AutosaveController

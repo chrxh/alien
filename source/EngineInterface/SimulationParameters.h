@@ -5,47 +5,18 @@
 #include "SimulationParametersSpotValues.h"
 #include "RadiationSource.h"
 #include "SimulationParametersSpot.h"
+#include "Motion.h"
 
 /**
  * NOTE: header is also included in kernel code
  */
 
-struct FluidMotion
+using CellColorization = int;
+enum CellColorization_
 {
-    float smoothingLength = 0.66f;
-    float viscosityStrength = 0.1f;
-    float pressureStrength = 0.1f;
-
-    bool operator==(FluidMotion const& other) const
-    {
-        return smoothingLength == other.smoothingLength && viscosityStrength == other.viscosityStrength && pressureStrength == other.pressureStrength;
-    }
-    bool operator!=(FluidMotion const& other) const { return !operator==(other); }
-};
-
-struct CollisionMotion
-{
-    float cellMaxCollisionDistance = 1.3f;
-    float cellRepulsionStrength = 0.08f;
-
-    bool operator==(CollisionMotion const& other) const
-    {
-        return cellMaxCollisionDistance == other.cellMaxCollisionDistance && cellRepulsionStrength == other.cellRepulsionStrength;
-    }
-    bool operator!=(CollisionMotion const& other) const { return !operator==(other); }
-};
-
-union MotionData
-{
-    FluidMotion fluidMotion;
-    CollisionMotion collisionMotion;
-};
-
-using MotionType = int;
-enum MotionType_
-{
-    MotionType_Fluid,
-    MotionType_Collision
+    CellColorization_None,
+    CellColorization_CellColor,
+    CellColorization_MutationId
 };
 
 struct SimulationParameters
@@ -53,6 +24,8 @@ struct SimulationParameters
     SimulationParametersSpotValues baseValues;
 
     uint32_t backgroundColor = 0x1b0000;
+    CellColorization cellColorization = CellColorization_CellColor;
+    float zoomLevelNeuronalActivity = 2.0f;
 
     float timestepSize = 1.0f;
     MotionType motionType = MotionType_Fluid;
@@ -83,14 +56,17 @@ struct SimulationParameters
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value};
+    bool cellMaxAgeBalancer = false;
+    int cellMaxAgeBalancerInterval = 10000;
     bool particleTransformationAllowed = false;
     bool particleTransformationRandomCellFunction = false;
     int particleTransformationMaxGenomeSize = 300;
     
     bool cellFunctionConstructionUnlimitedEnergy = false;
     ColorVector<float> cellFunctionConstructorOffspringDistance = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
-    ColorVector<float> cellFunctionConstructorConnectingCellMaxDistance = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
+    ColorVector<float> cellFunctionConstructorConnectingCellMaxDistance = {1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f};
     ColorVector<float> cellFunctionConstructorActivityThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+    bool cellFunctionConstructorCheckCompletenessForSelfReplication = false;
 
     ColorMatrix<bool> cellFunctionConstructorMutationColorTransitions = {
         {true, true, true, true, true, true, true},
@@ -100,33 +76,42 @@ struct SimulationParameters
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true}};
+    bool cellFunctionConstructorMutationPreventDepthIncrease = false;
     bool cellFunctionConstructorMutationSelfReplication = false;
 
     ColorVector<float> cellFunctionInjectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
     ColorMatrix<int> cellFunctionInjectorDurationColorMatrix = {
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1}
+        {3, 3, 3, 3, 3, 3, 3},
+        {3, 3, 3, 3, 3, 3, 3},
+        {3, 3, 3, 3, 3, 3, 3},
+        {3, 3, 3, 3, 3, 3, 3},
+        {3, 3, 3, 3, 3, 3, 3},
+        {3, 3, 3, 3, 3, 3, 3},
+        {3, 3, 3, 3, 3, 3, 3}
     };
     float cellFunctionInjectorActivityThreshold = 0.1f;
 
     ColorVector<float> cellFunctionAttackerRadius = {1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f};
     ColorVector<float> cellFunctionAttackerStrength = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
     ColorVector<float> cellFunctionAttackerEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
-    bool cellFunctionAttackerEnergyDistributionSameColor = true;
     ColorVector<float> cellFunctionAttackerEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
     ColorVector<float> cellFunctionAttackerColorInhomogeneityFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorVector<float> cellFunctionAttackerVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    ColorMatrix<float> cellFunctionAttackerGenomeSizeBonus = {
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
+    };
     float cellFunctionAttackerActivityThreshold = 0.1f;
 
     ColorVector<float> cellFunctionDefenderAgainstAttackerStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
     ColorVector<float> cellFunctionDefenderAgainstInjectorStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
 
-    bool cellFunctionTransmitterEnergyDistributionSameColor = false;
+    bool cellFunctionTransmitterEnergyDistributionSameCreature = true;
     ColorVector<float> cellFunctionTransmitterEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
     ColorVector<float> cellFunctionTransmitterEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
 
@@ -164,7 +149,7 @@ struct SimulationParameters
                 return false;
             }
         }
-
+         
         for (int i = 0; i < MAX_COLORS; ++i) {
             if (cellFunctionConstructorPumpEnergyFactor[i] != other.cellFunctionConstructorPumpEnergyFactor[i]) {
                 return false;
@@ -270,6 +255,9 @@ struct SimulationParameters
                 if (cellFunctionInjectorDurationColorMatrix[i][j] != other.cellFunctionInjectorDurationColorMatrix[i][j]) {
                     return false;
                 }
+                if (cellFunctionAttackerGenomeSizeBonus[i][j] != other.cellFunctionAttackerGenomeSizeBonus[i][j]) {
+                    return false;
+                }
             }
         }
         if (numSpots != other.numSpots) {
@@ -281,16 +269,18 @@ struct SimulationParameters
             }
         }
 
-        return backgroundColor == other.backgroundColor && baseValues == other.baseValues && timestepSize == other.timestepSize
-            && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
+        return backgroundColor == other.backgroundColor && cellColorization == other.cellColorization
+            && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity
+            && baseValues == other.baseValues
+            && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance
+            && cellMinDistance == other.cellMinDistance
             && cellMaxForceDecayProb == other.cellMaxForceDecayProb
             && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers
             && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
             && radiationVelocityPerturbation == other.radiationVelocityPerturbation
             && cellFunctionAttackerActivityThreshold == other.cellFunctionAttackerActivityThreshold
             && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
-            && cellFunctionAttackerEnergyDistributionSameColor == other.cellFunctionAttackerEnergyDistributionSameColor
-            && cellFunctionTransmitterEnergyDistributionSameColor == other.cellFunctionTransmitterEnergyDistributionSameColor
+            && cellFunctionTransmitterEnergyDistributionSameCreature == other.cellFunctionTransmitterEnergyDistributionSameCreature
             && particleTransformationAllowed == other.particleTransformationAllowed
             && particleTransformationRandomCellFunction == other.particleTransformationRandomCellFunction
             && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
@@ -299,6 +289,9 @@ struct SimulationParameters
             && cellFunctionConstructionUnlimitedEnergy == other.cellFunctionConstructionUnlimitedEnergy
             && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
             && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication
+            && cellMaxAgeBalancer == other.cellMaxAgeBalancer && cellMaxAgeBalancerInterval == other.cellMaxAgeBalancerInterval
+            && cellFunctionConstructorMutationPreventDepthIncrease == other.cellFunctionConstructorMutationPreventDepthIncrease
+            && cellFunctionConstructorCheckCompletenessForSelfReplication == other.cellFunctionConstructorCheckCompletenessForSelfReplication
         ;
     }
 

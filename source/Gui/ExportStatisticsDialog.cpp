@@ -63,6 +63,7 @@ void _ExportStatisticsDialog::onSaveStatistics(std::string const& filename)
     writeLabelAllColors("Cells");
     writeLabelAllColors("Cell connections");
     writeLabelAllColors("Energy particles");
+    writeLabelAllColors("Total energy");
     writeLabelAllColors("Created cells");
     writeLabelAllColors("Attacks");
     writeLabelAllColors("Muscle activities");
@@ -91,6 +92,7 @@ void _ExportStatisticsDialog::onSaveStatistics(std::string const& filename)
         writeIntValueAllColors(dataPoint.numCells);
         writeIntValueAllColors(dataPoint.numConnections);
         writeIntValueAllColors(dataPoint.numParticles);
+        writeDoubleValueAllColors(dataPoint.totalEnergy);
         writeDoubleValueAllColors(dataPoint.numCreatedCells);
         writeDoubleValueAllColors(dataPoint.numAttacks);
         writeDoubleValueAllColors(dataPoint.numMuscleActivities);

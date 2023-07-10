@@ -73,7 +73,7 @@ void _CreateUserDialog::show(std::string const& userName, std::string const& pas
 
 void _CreateUserDialog::onCreateUser()
 {
-    if(_networkController->createUser(_userName, _password, _email)) {
+    if (_networkController->createUser(_userName, _password, _email)) {
         _activateUserDialog->show(_userName, _password);
     } else {
         MessageDialog::getInstance().show(

@@ -1,7 +1,10 @@
 #include "PreviewDescriptionConverter.h"
 
 #include <boost/range/combine.hpp>
+#include <boost/range/adaptor/indexed.hpp>
 
+#include "GenomeConstants.h"
+#include "ShapeGenerator.h"
 #include "Base/Math.h"
 #include "EngineInterface/GenomeDescriptionConverter.h"
 
@@ -47,7 +50,7 @@ namespace
         }
     }
 
-    bool noOverlappingConnection(
+    bool isThereNoOverlappingConnection(
         std::vector<CellPreviewDescriptionIntern> const& cells,
         CellPreviewDescriptionIntern const& cell1,
         CellPreviewDescriptionIntern const& cell2)
@@ -87,7 +90,11 @@ namespace
         std::vector<CellPreviewDescriptionIntern> cellsIntern;
         RealVector2D direction;
     };
-    ProcessedGenomeDescriptionResult processMainGenomeDescription(GenomeDescription const& genome, std::optional<int> nodeIndex, SimulationParameters const& parameters)
+    ProcessedGenomeDescriptionResult processMainGenomeDescription(
+        GenomeDescription const& genome,
+        std::optional<int> const& uniformNodeIndex,
+        std::optional<float> const& lastReferenceAngle,
+        SimulationParameters const& parameters)
     {
         ProcessedGenomeDescriptionResult result;
         result.direction = RealVector2D{0, 1};
@@ -95,13 +102,24 @@ namespace
         RealVector2D pos;
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
         int index = 0;
-        for (auto const& node : genome) {
+        auto shapeGenerator = ShapeGeneratorFactory::create(genome.info.shape);
+        for (auto const& node : genome.cells) {
             if (index > 0) {
-                pos += result.direction;
+                pos += result.direction * genome.info.connectionDistance;
+            }
+
+            ShapeGeneratorResult shapeResult;
+            shapeResult.angle = node.referenceAngle;
+            shapeResult.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
+            if (genome.info.shape != ConstructionShape_Custom) {
+                shapeResult = shapeGenerator->generateNextConstructionData();
+            }
+            if (lastReferenceAngle.has_value() && index == genome.cells.size() - 1) {
+                shapeResult.angle = *lastReferenceAngle;
             }
 
             if (index > 0) {
-                result.direction = Math::rotateClockwise(-result.direction, (180.0f + node.referenceAngle));
+                result.direction = Math::rotateClockwise(-result.direction, (180.0f + shapeResult.angle));
             }
 
             //create cell description intern
@@ -110,25 +128,26 @@ namespace
             cellIntern.inputExecutionOrderNumber = node.inputExecutionOrderNumber;
             cellIntern.outputBlocked = node.outputBlocked;
             cellIntern.executionOrderNumber = node.executionOrderNumber;
-            cellIntern.nodeIndex = nodeIndex ? *nodeIndex : index;
+            cellIntern.nodeIndex = uniformNodeIndex ? *uniformNodeIndex : index;
             cellIntern.pos = pos;
             if (index > 0) {
                 cellIntern.connectionIndices.insert(index - 1);
             }
-            if (index < genome.size() - 1) {
+            if (index < genome.cells.size() - 1) {
                 cellIntern.connectionIndices.insert(index + 1);
             }
 
             //find nearby cells
             std::vector<int> nearbyCellIndices;
             IntVector2D intPos{toInt(pos.x), toInt(pos.y)};
-            for (int dx = -2; dx <= 2; ++dx) {
-                for (int dy = -2; dy <= 2; ++dy) {
+            auto radius = toInt(parameters.cellFunctionConstructorConnectingCellMaxDistance[node.color]) + 1;
+            for (int dx = -radius; dx <= radius; ++dx) {
+                for (int dy = -radius; dy <= radius; ++dy) {
                     auto const& findResult = cellInternIndicesBySlot.find({intPos.x + dx, intPos.y + dy});
                     if (findResult != cellInternIndicesBySlot.end()) {
                         for (auto const& otherCellIndex : findResult->second) {
                             auto& otherCell = result.cellsIntern.at(otherCellIndex);
-                            if (otherCellIndex != index
+                            if (otherCellIndex != index && otherCellIndex != index - 1
                                 && Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance[node.color]) {
                                 if (otherCell.connectionIndices.size() < MAX_CELL_BONDS && cellIntern.connectionIndices.size() < MAX_CELL_BONDS) {
                                     nearbyCellIndices.emplace_back(otherCellIndex);
@@ -147,9 +166,12 @@ namespace
             });
 
             //add connections
-            for (auto const& otherCellIndex : nearbyCellIndices) {
+            for (auto const& [otherIndex, otherCellIndex] : nearbyCellIndices | boost::adaptors::indexed(0)) {
+                if (shapeResult.numRequiredAdditionalConnections.has_value() && otherIndex >= *shapeResult.numRequiredAdditionalConnections) {
+                    continue;
+                }
                 auto& otherCell = result.cellsIntern.at(otherCellIndex);
-                if (noOverlappingConnection(result.cellsIntern, cellIntern, otherCell) && noOverlappingConnection(result.cellsIntern, otherCell, cellIntern)) {
+                if (isThereNoOverlappingConnection(result.cellsIntern, cellIntern, otherCell) && isThereNoOverlappingConnection(result.cellsIntern, otherCell, cellIntern)) {
                     cellIntern.connectionIndices.insert(otherCellIndex);
                     otherCell.connectionIndices.insert(index);
                 }
@@ -162,25 +184,26 @@ namespace
         return result;
     }
 
-    std::vector<CellPreviewDescriptionIntern> processGenomeDescription(
+    std::vector<CellPreviewDescriptionIntern> convertToPreviewDescriptionIntern(
         GenomeDescription const& genome,
-        std::optional<int> nodeIndex,
+        std::optional<int> const& uniformNodeIndex,
+        std::optional<float> const& lastReferenceAngle,
         std::optional<RealVector2D> const& desiredEndPos,
         std::optional<float> const& desiredEndAngle,
         SimulationParameters const& parameters)
     {
-        if (genome.empty()) {
+        if (genome.cells.empty()) {
             return {};
         }
 
-        ProcessedGenomeDescriptionResult processedGenome = processMainGenomeDescription(genome, nodeIndex, parameters);
+        ProcessedGenomeDescriptionResult processedGenome = processMainGenomeDescription(genome, uniformNodeIndex, lastReferenceAngle, parameters);
 
         std::vector<CellPreviewDescriptionIntern> result = processedGenome.cellsIntern;
 
         //process sub genomes
         size_t indexOffset = 0;
         int index = 0;
-        for (auto const& [node, cellIntern] : boost::combine(genome, processedGenome.cellsIntern)) {
+        for (auto const& [node, cellIntern] : boost::combine(genome.cells, processedGenome.cellsIntern)) {
             if (node.getCellFunctionType() == CellFunction_Constructor) {
                 auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
                 if (constructor.isMakeGenomeCopy()) {
@@ -188,7 +211,7 @@ namespace
                     continue;
                 }
                 auto data = constructor.getGenomeData();
-                if (data.empty()) {
+                if (data.size() <= Const::GenomeHeaderSize) {
                     ++index;
                     continue;
                 }
@@ -222,12 +245,13 @@ namespace
                 if (angles.size() == 1) {
                     targetAngle = angles.front() + 180.0f;
                 }
-                targetAngle += subGenome.front().referenceAngle;
+                targetAngle += constructor.constructionAngle1;
                 auto direction = Math::unitVectorOfAngle(targetAngle);
-                auto previewPart = processGenomeDescription(subGenome, cellIntern.nodeIndex, cellIntern.pos + direction, targetAngle, parameters);
+                auto previewPart = convertToPreviewDescriptionIntern(
+                    subGenome, cellIntern.nodeIndex, constructor.constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
                 insert(result, previewPart);
                 indexOffset += previewPart.size();
-                if (!constructor.separateConstruction) {
+                if (!subGenome.info.separateConstruction) {
                     auto cellIndex1 = previewPart.size() - 1;
                     auto cellIndex2 = index + indexOffset;
                     result.at(cellIndex1).connectionIndices.insert(toInt(cellIndex2));
@@ -284,7 +308,6 @@ namespace
 PreviewDescription
 PreviewDescriptionConverter::convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters)
 {
-    auto cellInterDescriptions =
-        processGenomeDescription(genome, std::nullopt, std::nullopt, std::nullopt, parameters);
-    return createPreviewDescription(cellInterDescriptions, parameters);
+    auto cellInternDescriptions = convertToPreviewDescriptionIntern(genome, std::nullopt, std::nullopt, std::nullopt, std::nullopt, parameters);
+    return createPreviewDescription(cellInternDescriptions, parameters);
 }

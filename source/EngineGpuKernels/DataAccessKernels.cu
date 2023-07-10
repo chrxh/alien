@@ -29,7 +29,9 @@ namespace
         cellTO.numConnections = cell->numConnections;
         cellTO.executionOrderNumber = cell->executionOrderNumber;
         cellTO.livingState = cell->livingState;
-        cellTO.constructionId = cell->constructionId;
+        cellTO.creatureId = cell->creatureId;
+        cellTO.mutationId = cell->mutationId;
+        cellTO.genomeSize = cell->genomeSize;
         cellTO.inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
         cellTO.outputBlocked = cell->outputBlocked;
         cellTO.cellFunction = cell->cellFunction;
@@ -79,11 +81,6 @@ namespace
         } break;
         case CellFunction_Constructor: {
             cellTO.cellFunctionData.constructor.activationMode = cell->cellFunctionData.constructor.activationMode;
-            cellTO.cellFunctionData.constructor.singleConstruction = cell->cellFunctionData.constructor.singleConstruction;
-            cellTO.cellFunctionData.constructor.separateConstruction = cell->cellFunctionData.constructor.separateConstruction;
-            cellTO.cellFunctionData.constructor.maxConnections = cell->cellFunctionData.constructor.maxConnections;
-            cellTO.cellFunctionData.constructor.angleAlignment = cell->cellFunctionData.constructor.angleAlignment;
-            cellTO.cellFunctionData.constructor.stiffness = cell->cellFunctionData.constructor.stiffness;
             cellTO.cellFunctionData.constructor.constructionActivationTime = cell->cellFunctionData.constructor.constructionActivationTime;
             copyAuxiliaryData(
                 cell->cellFunctionData.constructor.genomeSize,
@@ -92,7 +89,9 @@ namespace
                 cellTO.cellFunctionData.constructor.genomeDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
-            cellTO.cellFunctionData.constructor.currentGenomePos = cell->cellFunctionData.constructor.currentGenomePos;
+            cellTO.cellFunctionData.constructor.genomeReadPosition = cell->cellFunctionData.constructor.genomeReadPosition;
+            cellTO.cellFunctionData.constructor.offspringCreatureId = cell->cellFunctionData.constructor.offspringCreatureId;
+            cellTO.cellFunctionData.constructor.offspringMutationId = cell->cellFunctionData.constructor.offspringMutationId;
             cellTO.cellFunctionData.constructor.genomeGeneration = cell->cellFunctionData.constructor.genomeGeneration;
         } break;
         case CellFunction_Sensor: {
@@ -363,6 +362,7 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataTO d
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = dataTO.cells[index];
             numberGen.adaptMaxId(cell.id);
+            numberGen.adaptMaxSmallId(cell.mutationId);
         }
     }
     {

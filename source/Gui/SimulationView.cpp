@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <imgui.h>
+#include <cmath>
 
 #include "AlienImGui.h"
 #include "Base/Resources.h"
@@ -150,14 +151,20 @@ void _SimulationView::resize(IntVector2D const& size)
 void _SimulationView::leftMouseButtonPressed(IntVector2D const& viewPos)
 {
     _navigationState = NavigationState::Moving;
+    _lastZoomTimepoint.reset();
     updateMotionBlur();
 }
 
 void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
 {
     if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
-        _viewport->zoom(viewPos, _viewport->getZoomSensitivity());
+        _viewport->zoom(viewPos, calcZoomFactor());
     }
+}
+
+void _SimulationView::mouseWheelUp(IntVector2D const& viewPos)
+{
+    _viewport->zoom(viewPos, pow(_viewport->getZoomSensitivity(), 4.0f));
 }
 
 void _SimulationView::leftMouseButtonReleased()
@@ -169,14 +176,20 @@ void _SimulationView::leftMouseButtonReleased()
 void _SimulationView::rightMouseButtonPressed()
 {
     _navigationState = NavigationState::Moving;
+    _lastZoomTimepoint.reset();
     updateMotionBlur();
 }
 
 void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
     if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
-        _viewport->zoom(viewPos, 1.0f / _viewport->getZoomSensitivity());
+        _viewport->zoom(viewPos, 1.0f / calcZoomFactor());
     }
+}
+
+void _SimulationView::mouseWheelDown(IntVector2D const& viewPos)
+{
+    _viewport->zoom(viewPos, 1.0f / (pow(_viewport->getZoomSensitivity(), 4.0f)));
 }
 
 void _SimulationView::rightMouseButtonReleased()
@@ -213,6 +226,9 @@ void _SimulationView::processEvents()
         if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
             leftMouseButtonHold(mousePosInt, prevMousePosInt);
         }
+        if (ImGui::GetIO().MouseWheel > 0) {
+            mouseWheelUp(mousePosInt);
+        }
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
             leftMouseButtonReleased();
         }
@@ -222,6 +238,9 @@ void _SimulationView::processEvents()
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
             rightMouseButtonHold(mousePosInt);
+        }
+        if (ImGui::GetIO().MouseWheel < 0) {
+            mouseWheelDown(mousePosInt);
         }
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
             rightMouseButtonReleased();
@@ -281,7 +300,7 @@ void _SimulationView::draw()
 void _SimulationView::processControls()
 {
     ImGuiViewport* viewport = ImGui::GetMainViewport();
-    auto mainMenubarHeight = StyleRepository::getInstance().contentScale(22);
+    auto mainMenubarHeight = StyleRepository::getInstance().scale(22);
     auto scrollbarThickness = 17;   //fixed
     _scrollbarX->process(
         {{viewport->Pos.x, viewport->Size.y - scrollbarThickness}, {viewport->Size.x - 1 - scrollbarThickness, 1}});
@@ -414,5 +433,13 @@ void _SimulationView::drawEditCursor()
             drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));
         }
     }
+}
+
+float _SimulationView::calcZoomFactor()
+{
+    auto now = std::chrono::steady_clock::now();
+    auto duration = _lastZoomTimepoint ? toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - *_lastZoomTimepoint).count()) : 30.0f;
+    _lastZoomTimepoint = now;
+    return pow(_viewport->getZoomSensitivity(), duration / 15);
 }
 
