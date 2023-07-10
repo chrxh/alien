@@ -372,7 +372,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     int numSubGenomesSizeIndices;
 
     int nodeAddress = 0;
-    if (data.numberGen1.randomBool() && genomeSize > Const::GenomeHeaderSize) {
+    if (data.numberGen1.randomBool() && data.numberGen1.randomBool() && genomeSize > Const::GenomeHeaderSize) {
 
         //choose a random node position to a constructor with a subgenome
         int numConstructorsWithSubgenome = 0;
