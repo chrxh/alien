@@ -140,6 +140,9 @@ CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& dat
         angle += angleDiff;
     }
     auto angleFromPreviousConnection = cell->connections[index].angleFromPrevious / 2 + angleDeviation;
+    if (angleFromPreviousConnection < 30.0f || angleFromPreviousConnection > cell->connections[index].angleFromPrevious - 30.0f) {
+        angleFromPreviousConnection = cell->connections[index].angleFromPrevious / 2;
+    }
     if (angleFromPreviousConnection > 360.0f) {
         angleFromPreviousConnection -= 360;
     }

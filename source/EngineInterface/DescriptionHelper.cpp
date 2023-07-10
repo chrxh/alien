@@ -523,22 +523,35 @@ void DescriptionHelper::removeMetadata(DataDescription& data)
     }
 }
 
+namespace
+{
+    int getNewCreatureId(int origCreatureId, std::unordered_map<int, int>& origToNewCreatureIdMap)
+    {
+        auto findResult = origToNewCreatureIdMap.find(origCreatureId);
+        if (findResult != origToNewCreatureIdMap.end()) {
+            return findResult->second;
+        } else {
+            int newCreatureId = 0;
+            while (newCreatureId == 0) {
+                newCreatureId = NumberGenerator::getInstance().getRandomInt();
+            }
+            origToNewCreatureIdMap.emplace(origCreatureId, newCreatureId);
+            return newCreatureId;
+        }
+    };
+
+}
+
 void DescriptionHelper::generateNewCreatureIds(DataDescription& data)
 {
     std::unordered_map<int, int> origToNewCreatureIdMap;
     for (auto& cell : data.cells) {
         if (cell.creatureId != 0) {
-            auto findResult = origToNewCreatureIdMap.find(cell.creatureId);
-            if (findResult != origToNewCreatureIdMap.end()) {
-                cell.creatureId = findResult->second;
-            } else {
-                int newCreatureId = 0;
-                while (newCreatureId == 0) {
-                    newCreatureId = NumberGenerator::getInstance().getRandomInt();
-                }
-                origToNewCreatureIdMap.emplace(cell.creatureId, newCreatureId);
-                cell.creatureId = newCreatureId;
-            }
+            cell.creatureId = getNewCreatureId(cell.creatureId, origToNewCreatureIdMap);
+        }
+        if (cell.getCellFunctionType() == CellFunction_Constructor) {
+            auto& offspringCreatureId = std::get<ConstructorDescription>(*cell.cellFunction).offspringCreatureId;
+            offspringCreatureId = getNewCreatureId(offspringCreatureId, origToNewCreatureIdMap);
         }
     }
 }
@@ -549,17 +562,11 @@ void DescriptionHelper::generateNewCreatureIds(ClusteredDataDescription& data)
     for (auto& cluster: data.clusters) {
         for (auto& cell : cluster.cells) {
             if (cell.creatureId != 0) {
-                auto findResult = origToNewCreatureIdMap.find(cell.creatureId);
-                if (findResult != origToNewCreatureIdMap.end()) {
-                    cell.creatureId = findResult->second;
-                } else {
-                    int newCreatureId = 0;
-                    while (newCreatureId == 0) {
-                        newCreatureId = NumberGenerator::getInstance().getRandomInt();
-                    }
-                    origToNewCreatureIdMap.emplace(cell.creatureId, newCreatureId);
-                    cell.creatureId = newCreatureId;
-                }
+                cell.creatureId = getNewCreatureId(cell.creatureId, origToNewCreatureIdMap);
+            }
+            if (cell.getCellFunctionType() == CellFunction_Constructor) {
+                auto& offspringCreatureId = std::get<ConstructorDescription>(*cell.cellFunction).offspringCreatureId;
+                offspringCreatureId = getNewCreatureId(offspringCreatureId, origToNewCreatureIdMap);
             }
         }
     }
