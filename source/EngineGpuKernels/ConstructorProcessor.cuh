@@ -1,23 +1,26 @@
 #pragma once
 
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/CellFunctionConstants.h"
 
-#include "QuantityConverter.cuh"
 #include "CellFunctionProcessor.cuh"
 #include "CudaSimulationFacade.cuh"
 #include "SimulationStatistics.cuh"
 #include "CellConnectionProcessor.cuh"
 #include "MutationProcessor.cuh"
 #include "GenomeDecoder.cuh"
+#include "ShapeGenerator.cuh"
 
 class ConstructorProcessor
 {
 public:
+    __inline__ __device__ static void preprocess(SimulationData& data, SimulationStatistics& statistics);
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
     struct ConstructionData
     {
+        GenomeHeader genomeHeader;
+
         float angle;
         float energy;
         int numRequiredAdditionalConnections;
@@ -28,10 +31,11 @@ private:
         CellFunction cellFunction;
     };
 
+    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static bool isConstructionAtBeginning(Cell* cell);
     __inline__ __device__ static bool isConstructionFinished(Cell* cell);
-    __inline__ __device__ static bool
-    isConstructionTriggered(SimulationData const& data, Cell* cell, ConstructionData const& constructionData, Activity const& activity);
+    __inline__ __device__ static bool isConstructionTriggered(SimulationData const& data, Cell* cell, Activity const& activity);
     __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
 
     __inline__ __device__ static bool tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
@@ -53,6 +57,14 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
+__inline__ __device__ void ConstructorProcessor::preprocess(SimulationData& data, SimulationStatistics& statistics)
+{
+    auto& operations = data.cellFunctionOperations[CellFunction_Constructor];
+    auto partition = calcAllThreadsPartition(operations.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+        completenessCheck(data, statistics, operations.at(i).cell);
+    }
+}
 
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
@@ -63,42 +75,136 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
     }
 }
 
+namespace
+{
+    __inline__ __device__ bool isSelfReplicator(Cell* cell)
+    {
+        if (cell->cellFunction != CellFunction_Constructor) {
+            return false;
+        }
+        return GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor);
+    }
+
+    __inline__ __device__ bool hasOngoingConstruction(Cell* cell)
+    {
+        if (cell->cellFunction != CellFunction_Constructor) {
+            return false;
+        }
+        auto constructor = cell->cellFunctionData.constructor;
+        return constructor.genomeReadPosition >= Const::GenomeHeaderSize && constructor.genomeReadPosition < constructor.genomeSize;
+    }
+}
+
+__inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
+    if (!isConstructionAtBeginning(cell)) {
+        return;        
+    }
+    auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    if (!isConstructionTriggered(data, cell, activity)) {
+        return;
+    }
+
+    auto& constructor = cell->cellFunctionData.constructor;
+    if (!GenomeDecoder::containsSelfReplication(constructor)) {
+        constructor.isComplete = true;
+        return;
+    }
+    auto constexpr ContainerSize = 256;
+    Cell* temp[ContainerSize * 2];
+    HashSet<Cell*, HashFunctor<Cell*>> visitedCells(ContainerSize * 2, temp);
+    visitedCells.insert(cell);
+
+    auto currentCell = cell;
+    auto depth = 0;
+    auto connectionIndex = 0;
+    Cell* lastCells[ContainerSize];
+    int lastIndices[ContainerSize];
+
+    do {
+        auto goBack = false;
+        if (connectionIndex < currentCell->numConnections) {
+            auto nextCell = currentCell->connections[connectionIndex].cell;
+            if (!visitedCells.contains(nextCell)) {
+                visitedCells.insert(nextCell);
+                if (isSelfReplicator(nextCell)) {
+                    goBack = true;
+                } else {
+                    if (hasOngoingConstruction(nextCell)) {
+                        constructor.isComplete = false;
+                        return;
+                    }
+                    lastCells[depth] = currentCell;
+                    lastIndices[depth] = connectionIndex;
+                    currentCell = nextCell;
+                    connectionIndex = 0;
+                    ++depth;
+                    if (depth >= ContainerSize) {
+                        //goBack = true;
+                        constructor.isComplete = true;
+                        return;
+                    }
+                }
+            } else {
+                ++connectionIndex;
+            }
+        }
+        if (connectionIndex == currentCell->numConnections || goBack) {
+            if (depth == 0) {
+                break;
+            }
+            --depth;
+            currentCell = lastCells[depth];
+            connectionIndex = lastIndices[depth];
+            ++connectionIndex;
+        }
+    } while (true);
+
+    constructor.isComplete = true;
+}
+
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     MutationProcessor::applyRandomMutation(data, cell);
 
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
     if (!isConstructionFinished(cell)) {
-        auto origGenomePos = cell->cellFunctionData.constructor.currentGenomePos;
+        auto origGenomePos = cell->cellFunctionData.constructor.genomeReadPosition;
         auto constructionData = readConstructionData(cell);
-        if (isConstructionTriggered(data, cell, constructionData, activity)) {
-           if (tryConstructCell(data, statistics, cell, constructionData)) {
+        if (isConstructionTriggered(data, cell, activity)) {
+            if (tryConstructCell(data, statistics, cell, constructionData)) {
                 activity.channels[0] = 1;
             } else {
                 activity.channels[0] = 0;
-                cell->cellFunctionData.constructor.currentGenomePos = origGenomePos;
+                cell->cellFunctionData.constructor.genomeReadPosition = origGenomePos;
             }
             if (GenomeDecoder::isFinished(cell->cellFunctionData.constructor)) {
                 auto& constructor = cell->cellFunctionData.constructor;
-                if (!constructor.singleConstruction) {
-                    constructor.currentGenomePos = 0;
+                if (!constructionData.genomeHeader.singleConstruction) {
+                    constructor.genomeReadPosition = 0;
                 }
             }
         } else {
             activity.channels[0] = 0;
-            cell->cellFunctionData.constructor.currentGenomePos = origGenomePos;
+            cell->cellFunctionData.constructor.genomeReadPosition = origGenomePos;
         }
     }
     CellFunctionProcessor::setActivity(cell, activity);
 }
 
+__inline__ __device__ bool ConstructorProcessor::isConstructionAtBeginning(Cell* cell)
+{
+    return cell->cellFunctionData.constructor.genomeReadPosition <= Const::GenomeHeaderSize;
+}
+
 __inline__ __device__ bool ConstructorProcessor::isConstructionFinished(Cell* cell)
 {
-    return cell->cellFunctionData.constructor.currentGenomePos >= cell->cellFunctionData.constructor.genomeSize;
+    return cell->cellFunctionData.constructor.genomeReadPosition >= cell->cellFunctionData.constructor.genomeSize
+        || cell->cellFunctionData.constructor.genomeSize <= Const::GenomeHeaderSize;
 }
 
 __inline__ __device__ bool
-ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* cell, ConstructionData const& constructionData, Activity const& activity)
+ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* cell, Activity const& activity)
 {
     if (cell->cellFunctionData.constructor.activationMode == 0
         && abs(activity.channels[0]) < cudaSimulationParameters.cellFunctionConstructorActivityThreshold[cell->color]) {
@@ -114,18 +220,54 @@ ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* 
 __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::readConstructionData(Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
+    if (constructor.genomeReadPosition == 0) {
+        constructor.genomeReadPosition = Const::GenomeHeaderSize;
+    }
+
+    auto isAtFirstNode = GenomeDecoder::isAtFirstNode(constructor);
+    auto isAtLastNode = GenomeDecoder::isAtLastNode(constructor);
 
     ConstructionData result;
+
+    //genome-wide data
+    result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
+
+    ShapeGenerator shapeGenerator;
+    auto shape = result.genomeHeader.shape % ConstructionShape_Count;
+    if (shape != ConstructionShape_Custom) {
+        GenomeDecoder::executeForEachNodeUntilReadPosition(constructor, [&](bool isLastNode) {
+            auto generationResult = shapeGenerator.generateNextConstructionData(shape);
+
+            if (isLastNode) {
+                result.numRequiredAdditionalConnections = generationResult.numRequiredAdditionalConnections;
+                result.angle = generationResult.angle;
+                result.genomeHeader.angleAlignment = shapeGenerator.getConstructorAngleAlignment(shape);
+            }
+        });
+    }
+    
+    //node data
     result.cellFunction = GenomeDecoder::readByte(constructor) % CellFunction_Count;
-    result.angle = GenomeDecoder::readAngle(constructor);
+    auto angle = GenomeDecoder::readAngle(constructor);
     result.energy = GenomeDecoder::readEnergy(constructor);
-    result.numRequiredAdditionalConnections = GenomeDecoder::readByte(constructor);
-    result.numRequiredAdditionalConnections = result.numRequiredAdditionalConnections > 127 ? -1 : result.numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
+    int numRequiredAdditionalConnections = GenomeDecoder::readByte(constructor);
+    numRequiredAdditionalConnections = numRequiredAdditionalConnections > 127 ? -1 : numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
     result.executionOrderNumber = GenomeDecoder::readByte(constructor) % cudaSimulationParameters.cellNumExecutionOrderNumbers;
     result.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
     result.inputExecutionOrderNumber = GenomeDecoder::readOptionalByte(constructor, cudaSimulationParameters.cellNumExecutionOrderNumbers);
     result.outputBlocked = GenomeDecoder::readBool(constructor);
 
+    if (result.genomeHeader.shape == ConstructionShape_Custom) {
+        result.angle = angle;
+        result.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
+    }
+
+    if (isAtFirstNode) {
+        result.angle = constructor.constructionAngle1;
+    }
+    if (isAtLastNode) {
+        result.angle = constructor.constructionAngle2;
+    }
     return result;
 }
 
@@ -170,18 +312,22 @@ __inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite
 __inline__ __device__ bool
 ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData)
 {
-    auto maxConnections = hostCell->cellFunctionData.constructor.maxConnections;
+    auto& constructor = hostCell->cellFunctionData.constructor;
 
-    if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, maxConnections < 0)) {
+    if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, true)) {
         return false;
     }
 
     auto anglesForNewConnection = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
 
-    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle) * cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
+    auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
     float2 newCellPos = hostCell->absPos + newCellDirection;
 
     if (CellConnectionProcessor::existCrossingConnections(data, hostCell->absPos, newCellPos, hostCell->detached)) {
+        return false;
+    }
+
+    if (cudaSimulationParameters.cellFunctionConstructorCheckCompletenessForSelfReplication && !constructor.isComplete) {
         return false;
     }
 
@@ -189,16 +335,22 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         return false;
     }
 
-    hostCell->constructionId = data.numberGen1.random(65535);
-    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, max(0, maxConnections), constructionData);
+    if (GenomeDecoder::containsSelfReplication(constructor)) {
+        constructor.offspringCreatureId = 1 + data.numberGen1.random(65535);
+        hostCell->genomeSize = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
+    } else {
+        hostCell->cellFunctionData.constructor.offspringCreatureId = hostCell->creatureId;
+    }
+
+    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, 0, constructionData);
 
     if (!newCell->tryLock()) {
         return false;
     }
 
-    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
-        auto const& constructor = hostCell->cellFunctionData.constructor;
-        auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction && constructor.singleConstruction
+    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !constructionData.genomeHeader.separateConstruction) {
+        auto distance =
+            GenomeDecoder::isFinished(constructor) && !constructionData.genomeHeader.separateConstruction && constructionData.genomeHeader.singleConstruction
             ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
         CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
@@ -206,10 +358,8 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
         newCell->livingState = LivingState_JustReady;
     }
-    if (maxConnections < 0) {
-        hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
-        newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
-    }
+    hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
+    newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
 
     newCell->releaseLock();
 
@@ -227,16 +377,12 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     auto posDelta = underConstructionCell->absPos - hostCell->absPos;
     data.cellMap.correctDirection(posDelta);
 
-    auto desiredDistance = 1.0f;
+    auto desiredDistance = constructionData.genomeHeader.connectionDistance;
     auto constructionSiteDistance = data.cellMap.getDistance(hostCell->absPos, underConstructionCell->absPos);
     posDelta = Math::normalized(posDelta) * (constructionSiteDistance - desiredDistance);
 
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
         || constructionSiteDistance - desiredDistance < cudaSimulationParameters.cellMinDistance) {
-        return false;
-    }
-    auto maxConnections = hostCell->cellFunctionData.constructor.maxConnections;    //-1 means automatic adaption
-    if (maxConnections < 2 && maxConnections >= 0) {
         return false;
     }
 
@@ -254,7 +400,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         hostCell->detached,
         [&](Cell* const& otherCell) {
             if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != LivingState_UnderConstruction
-                || otherCell->constructionId != hostCell->constructionId) {
+                || otherCell->creatureId != hostCell->cellFunctionData.constructor.offspringCreatureId) {
                 return false;
             }
             return true;
@@ -285,7 +431,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     if (!checkAndReduceHostEnergy(data, hostCell, constructionData)) {
         return false;
     }
-    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, max(0, maxConnections), constructionData);
+    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, 0, constructionData);
 
     if (!newCell->tryLock()) {
         return false;
@@ -304,18 +450,32 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         }
     }
 
-    //cut connections
-    CellConnectionProcessor::deleteConnections(hostCell, underConstructionCell);
-
     //possibly connect newCell to hostCell
     bool adaptReferenceAngle = false;
-    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !hostCell->cellFunctionData.constructor.separateConstruction) {
-        auto distance = GenomeDecoder::isFinished(constructor) && !constructor.separateConstruction
+    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !constructionData.genomeHeader.separateConstruction) {
+
+        //move connection
+        auto distance = GenomeDecoder::isFinished(constructor) && !constructionData.genomeHeader.separateConstruction
             ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
-        if (CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, /*angleFromPreviousForCell*/ 0, 0, distance)) {
-            adaptReferenceAngle = true;
+        for (int i = 0; i < hostCell->numConnections; ++i) {
+            auto& connectedCell = hostCell->connections[i];
+            if (connectedCell.cell == underConstructionCell) {
+                connectedCell.cell = newCell;
+                connectedCell.distance = distance;
+                newCell->numConnections = 1;
+                newCell->connections[0].cell = hostCell;
+                newCell->connections[0].distance = distance;
+                newCell->connections[0].angleFromPrevious = 360.0f;
+                adaptReferenceAngle = true;
+                CellConnectionProcessor::deleteConnectionOneWay(underConstructionCell, hostCell);
+                break;
+            }
         }
+    } else {
+
+        //cut connections
+        CellConnectionProcessor::deleteConnections(hostCell, underConstructionCell);
     }
 
     //connect newCell to underConstructionCell
@@ -348,14 +508,11 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             Cell* otherCell = otherCells[i];
 
             if (otherCell->tryLock()) {
-                if (isConnectable(newCell->numConnections, newCell->maxConnections, maxConnections < 0)
-                    && isConnectable(otherCell->numConnections, otherCell->maxConnections, maxConnections < 0)) {
+                if (isConnectable(newCell->numConnections, newCell->maxConnections, true)
+                    && isConnectable(otherCell->numConnections, otherCell->maxConnections, true)) {
 
-                    CellConnectionProcessor::tryAddConnections(
-                        data, newCell, otherCell, 0, 0, desiredDistance, hostCell->cellFunctionData.constructor.angleAlignment);
-                    if (maxConnections < 0) {
-                        otherCell->maxConnections = max(otherCell->numConnections, otherCell->maxConnections);
-                    }
+                    CellConnectionProcessor::tryAddConnections(data, newCell, otherCell, 0, 0, desiredDistance, constructionData.genomeHeader.angleAlignment);
+                    otherCell->maxConnections = max(otherCell->numConnections, otherCell->maxConnections);
                 }
                 otherCell->releaseLock();
             }
@@ -395,10 +552,8 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             newCell->connections[hostIndex].angleFromPrevious = 360.0f - angleFromPreviousForNewCell - consumedAngle2;
         }
     }
-    if (maxConnections < 0) {
-        hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
-        newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
-    }
+    hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
+    newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
 
     newCell->releaseLock();
 
@@ -435,20 +590,22 @@ ConstructorProcessor::constructCellIntern(
 
     Cell * result = factory.createCell();
     result->energy = constructionData.energy;
-    result->stiffness = constructor.stiffness;
+    result->stiffness = constructionData.genomeHeader.stiffness;
     result->absPos = posOfNewCell;
     data.cellMap.correctPosition(result->absPos);
     result->maxConnections = maxConnections;
     result->numConnections = 0;
     result->executionOrderNumber = constructionData.executionOrderNumber;
     result->livingState = true;
-    result->constructionId = hostCell->constructionId;
+    result->creatureId = constructor.offspringCreatureId;
+    result->mutationId = constructor.offspringMutationId;
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
     result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;
     result->outputBlocked = constructionData.outputBlocked;
 
     result->activationTime = constructor.constructionActivationTime;
+    result->genomeSize = hostCell->genomeSize;
 
     switch (constructionData.cellFunction) {
     case CellFunction_Neuron: {
@@ -466,15 +623,13 @@ ConstructorProcessor::constructCellIntern(
     case CellFunction_Constructor: {
         auto& newConstructor = result->cellFunctionData.constructor;
         newConstructor.activationMode = GenomeDecoder::readByte(constructor);
-        newConstructor.singleConstruction = GenomeDecoder::readBool(constructor);
-        newConstructor.separateConstruction = GenomeDecoder::readBool(constructor);
-        newConstructor.maxConnections = GenomeDecoder::readOptionalByte(constructor, MAX_CELL_BONDS + 1);
-        newConstructor.angleAlignment = GenomeDecoder::readByte(constructor) % ConstructorAngleAlignment_Count;
-        newConstructor.stiffness = toFloat(GenomeDecoder::readByte(constructor)) / 255;
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor);
-        newConstructor.currentGenomePos = 0;
+        newConstructor.genomeReadPosition = Const::GenomeHeaderSize;
+        newConstructor.constructionAngle1 = GenomeDecoder::readAngle(constructor);
+        newConstructor.constructionAngle2 = GenomeDecoder::readAngle(constructor);
         GenomeDecoder::copyGenome(data, constructor, newConstructor);
         newConstructor.genomeGeneration = constructor.genomeGeneration + 1;
+        newConstructor.offspringMutationId = constructor.offspringMutationId;
     } break;
     case CellFunction_Sensor: {
         result->cellFunctionData.sensor.mode = GenomeDecoder::readByte(constructor) % SensorMode_Count;
@@ -513,11 +668,12 @@ ConstructorProcessor::constructCellIntern(
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
     if (!cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
-        auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.cellNormalEnergy[hostCell->color])
-            + min(constructionData.energy, cudaSimulationParameters.cellNormalEnergy[hostCell->color])
-                * (1.0f - cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[hostCell->color]);
+        auto cellFunctionConstructorPumpEnergyFactor = cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[hostCell->color];
 
-        if (hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + energyNeededFromHost) {
+        auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.cellNormalEnergy[hostCell->color])
+            + min(constructionData.energy, cudaSimulationParameters.cellNormalEnergy[hostCell->color]) * (1.0f - cellFunctionConstructorPumpEnergyFactor);
+
+        if (cellFunctionConstructorPumpEnergyFactor < 1.0f && hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + energyNeededFromHost) {
             return false;
         }
         auto energyNeededFromRadiation = constructionData.energy - energyNeededFromHost;

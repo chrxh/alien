@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineInterface/Constants.h"
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/CellFunctionConstants.h"
 
 #include "Base.cuh"
 
@@ -46,20 +46,22 @@ struct ConstructorFunction
 {
     //settings
     int activationMode; //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    bool singleConstruction;
-    bool separateConstruction;
-    int maxConnections; //-1 adapt maxConnections
-    ConstructorAngleAlignment angleAlignment;
-    float stiffness;
     int constructionActivationTime;
 
     //genome
     uint64_t genomeSize;
     uint8_t* genome;
     int genomeGeneration;
+    float constructionAngle1;
+    float constructionAngle2;
 
     //process data
-    uint64_t currentGenomePos;
+    uint64_t genomeReadPosition;
+    int offspringCreatureId;    //will be filled when self-replication starts
+    int offspringMutationId;
+
+    //temp
+    bool isComplete;
 };
 
 struct SensorFunction
@@ -136,7 +138,8 @@ struct Cell
     bool barrier;
     int age;
     LivingState livingState;
-    int constructionId;
+    int creatureId;
+    int mutationId;
 
     //cell function
     int executionOrderNumber;
@@ -146,6 +149,7 @@ struct Cell
     CellFunctionData cellFunctionData;
     Activity activity;
     int activationTime;
+    int genomeSize;
 
     CellMetadataDescription metadata;
 
@@ -179,6 +183,30 @@ struct Cell
             }
         }
         return false;
+    }
+
+    __device__ __inline__ uint8_t* getGenome()
+    {
+        if (cellFunction == CellFunction_Constructor) {
+            return cellFunctionData.constructor.genome;
+        }
+        if (cellFunction == CellFunction_Injector) {
+            return cellFunctionData.injector.genome;
+        }
+        CUDA_THROW_NOT_IMPLEMENTED();
+        return nullptr;
+    }
+
+    __device__ __inline__ int getGenomeSize()
+    {
+        if (cellFunction == CellFunction_Constructor) {
+            return cellFunctionData.constructor.genomeSize;
+        }
+        if (cellFunction == CellFunction_Injector) {
+            return cellFunctionData.injector.genomeSize;
+        }
+        CUDA_THROW_NOT_IMPLEMENTED();
+        return 0;
     }
 
     __device__ __inline__ void getLock()

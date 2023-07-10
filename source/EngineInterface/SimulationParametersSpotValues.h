@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Constants.h"
+#include "FundamentalConstants.h"
 #include "Colors.h"
 
 /**
@@ -12,7 +12,7 @@ struct SimulationParametersSpotValues
     float friction = 0.001f;
     float rigidity = 0.0f;
     ColorVector<float> radiationAbsorption = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    ColorVector<float> radiationCellAgeStrength = {0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f, 0.0002f};
+    ColorVector<float> radiationCellAgeStrength = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f};
     float cellMaxForce = 0.8f;
     ColorVector<float> cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
     float cellFusionVelocity = 0.4f;
@@ -42,12 +42,14 @@ struct SimulationParametersSpotValues
     ColorVector<float> cellFunctionConstructorMutationNeuronDataProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationPropertiesProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationCellFunctionProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationStructureProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationGeometryProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationCustomGeometryProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationInsertionProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationDeletionProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationTranslationProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationDuplicationProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationColorProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationUniformColorProbability = {0, 0, 0, 0, 0, 0, 0};
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {
@@ -65,7 +67,13 @@ struct SimulationParametersSpotValues
             }
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
-            if (cellFunctionConstructorMutationStructureProbability[i] != other.cellFunctionConstructorMutationStructureProbability[i]) {
+            if (cellFunctionConstructorMutationUniformColorProbability[i] != other.cellFunctionConstructorMutationUniformColorProbability[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorMutationGeometryProbability[i] != other.cellFunctionConstructorMutationGeometryProbability[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorMutationCustomGeometryProbability[i] != other.cellFunctionConstructorMutationCustomGeometryProbability[i]) {
                 return false;
             }
             if (radiationAbsorption[i] != other.radiationAbsorption[i]) {

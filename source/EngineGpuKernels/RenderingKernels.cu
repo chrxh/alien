@@ -1,11 +1,12 @@
 ﻿#include "RenderingKernels.cuh"
 
+#include <boost/mpl/min_max.hpp>
+
 #include "CellFunctionProcessor.cuh"
 #include "SpotCalculator.cuh"
 
 namespace
 {
-    auto constexpr ZoomLevelForActivity = 2.0f;
     auto constexpr ZoomLevelForConnections = 1.0f;
     auto constexpr ZoomLevelForShadedCells = 10.0f;
     auto constexpr ZoomLevelForArrows = 15.0f;
@@ -31,38 +32,89 @@ namespace
         return float2{(pos.x - rectUpperLeft.x) * zoom, (pos.y - rectUpperLeft.y) * zoom};
     }
 
+    __device__ __inline__ int3 convertHSVtoRGB(int h, float s, float v)
+    {
+        auto c = v * s;
+        auto x = c * (1 - abs(((h / 60) % 2) - 1));
+        auto m = v - c;
+
+        float r_, g_, b_;
+        if (0 <= h && h < 60) {
+            r_ = c;
+            g_ = x;
+            b_ = 0;
+        }
+        if (60 <= h && h < 120) {
+            r_ = x;
+            g_ = c;
+            b_ = 0;
+        }
+        if (120 <= h && h < 180) {
+            r_ = 0;
+            g_ = c;
+            b_ = x;
+        }
+        if (180 <= h && h < 240) {
+            r_ = 0;
+            g_ = x;
+            b_ = c;
+        }
+        if (240 <= h && h < 300) {
+            r_ = x;
+            g_ = 0;
+            b_ = c;
+        }
+        if (300 <= h && h < 360) {
+            r_ = c;
+            g_ = 0;
+            b_ = x;
+        }
+        return {toInt((r_ + m) * 255), toInt((g_ + m) * 255), toInt((b_ + m) * 255)};
+    }
+
     __device__ __inline__ float3 calcColor(Cell* cell, int selected)
     {
         uint32_t cellColor;
-        switch (calcMod(cell->color, 7)) {
-        case 0: {
-            cellColor = Const::IndividualCellColor1;
-            break;
+        if (cudaSimulationParameters.cellColorization == CellColorization_None) {
+            cellColor = 0xbfbfbf;
         }
-        case 1: {
-            cellColor = Const::IndividualCellColor2;
-            break;
+        if (cudaSimulationParameters.cellColorization == CellColorization_CellColor) {
+            switch (calcMod(cell->color, 7)) {
+            case 0: {
+                cellColor = Const::IndividualCellColor1;
+                break;
+            }
+            case 1: {
+                cellColor = Const::IndividualCellColor2;
+                break;
+            }
+            case 2: {
+                cellColor = Const::IndividualCellColor3;
+                break;
+            }
+            case 3: {
+                cellColor = Const::IndividualCellColor4;
+                break;
+            }
+            case 4: {
+                cellColor = Const::IndividualCellColor5;
+                break;
+            }
+            case 5: {
+                cellColor = Const::IndividualCellColor6;
+                break;
+            }
+            case 6: {
+                cellColor = Const::IndividualCellColor7;
+                break;
+            }
+            }
         }
-        case 2: {
-            cellColor = Const::IndividualCellColor3;
-            break;
-        }
-        case 3: {
-            cellColor = Const::IndividualCellColor4;
-            break;
-        }
-        case 4: {
-            cellColor = Const::IndividualCellColor5;
-            break;
-        }
-        case 5: {
-            cellColor = Const::IndividualCellColor6;
-            break;
-        }
-        case 6: {
-            cellColor = Const::IndividualCellColor7;
-            break;
-        }
+        if (cudaSimulationParameters.cellColorization == CellColorization_MutationId) {
+            auto h = abs((cell->mutationId * 12107) % 360);
+            auto s = 0.5f + toFloat((cell->mutationId * 12107) % 256) / 512;
+            auto rgb = convertHSVtoRGB(h, s, 1.0f);
+            cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
 
         float factor = min(300.0f, cell->energy) / 320.0f;
@@ -214,7 +266,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
             drawCircle(imageData, imageSize, cellImagePos, color, radius, shadedCells, true);
 
             color = color * min((zoom - 1.0f) / 3, 1.0f);
-            if (cell->isActive() && zoom >= ZoomLevelForActivity) {
+            if (cell->isActive() && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, radius, shadedCells);
             }
 

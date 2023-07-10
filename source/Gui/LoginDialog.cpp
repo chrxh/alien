@@ -9,14 +9,18 @@
 #include "CreateUserDialog.h"
 #include "BrowserWindow.h"
 #include "ResetPasswordDialog.h"
+#include "ActivateUserDialog.h"
+#include "StyleRepository.h"
 
 _LoginDialog::_LoginDialog(
     BrowserWindow const& browserWindow,
     CreateUserDialog const& createUserDialog,
+    ActivateUserDialog const& activateUserDialog,
     ResetPasswordDialog const& resetPasswordDialog,
     NetworkController const& networkController)
     : _browserWindow(browserWindow)
-    , _createUserDialog(createUserDialog)
+    , _createUserDialog(createUserDialog) 
+    , _activateUserDialog(activateUserDialog)
     , _networkController(networkController)
     , _resetPasswordDialog(resetPasswordDialog)
 
@@ -27,7 +31,12 @@ _LoginDialog::_LoginDialog(
         _userName = settings.getStringState("dialogs.login.user name", "");
         _password = settings.getStringState("dialogs.login.password", "");
         if (!_userName.empty()) {
-            _networkController->login(_userName, _password);
+            LoginErrorCode errorCode;
+            if (!_networkController->login(errorCode, _userName, _password)) {
+                if (errorCode != LoginErrorCode_UnconfirmedUser) {
+                    MessageDialog::getInstance().show("Error", "Login failed.");
+                }
+            }
         }
     }
 }
@@ -87,7 +96,7 @@ void _LoginDialog::process()
         ImGui::SetItemDefaultFocus();
 
         ImGui::SameLine();
-        ImGui::Dummy(ImVec2(40.0f, 0.0f));
+        AlienImGui::VerticalSeparator();
 
         ImGui::SameLine();
         ImGui::BeginDisabled(_userName.empty() || _password.empty());
@@ -108,6 +117,9 @@ void _LoginDialog::process()
         ImGui::EndDisabled();
 
         ImGui::SameLine();
+        AlienImGui::VerticalSeparator();
+
+        ImGui::SameLine();
         if (AlienImGui::Button("Cancel")) {
             ImGui::CloseCurrentPopup();
             _show = false;
@@ -124,8 +136,16 @@ void _LoginDialog::show()
 
 void _LoginDialog::onLogin()
 {
-    if (!_networkController->login(_userName, _password)) {
-        MessageDialog::getInstance().show("Error", "Login failed.");
+    LoginErrorCode errorCode;
+    if (!_networkController->login(errorCode, _userName, _password)) {
+        switch (errorCode) {
+        case LoginErrorCode_UnconfirmedUser: {
+            _activateUserDialog->show(_userName, _password);
+        } break;
+        default: {
+            MessageDialog::getInstance().show("Error", "Login failed.");
+        } break;
+        }
         return;
     }
     _browserWindow->onRefresh();

@@ -14,5 +14,7 @@ private:
 
     RadiationSource createParticleSource() const;
 
+    void validationAndCorrection(RadiationSource& source) const;
+
     SimulationController _simController;
 };

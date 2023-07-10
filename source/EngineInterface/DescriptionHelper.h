@@ -95,7 +95,8 @@ public:
     static void removeStickiness(DataDescription& data);
     static void correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize);
 
-    static void randomizeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
+    static void randomizeCellColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
+    static void randomizeGenomeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
     static void randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy);
     static void randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge);
 
@@ -107,10 +108,14 @@ public:
     static std::vector<CellOrParticleDescription> getConstructorToMainGenomes(DataDescription const& data);
 
     static void removeMetadata(DataDescription& data);
+    static void generateNewCreatureIds(DataDescription& data);
+    static void generateNewCreatureIds(ClusteredDataDescription& data);
 
 private:
-    static void makeValid(DataDescription& data);
-    static void makeValid(ClusterDescription& cluster);
     static void removeMetadata(CellDescription& cell);
-    static bool isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance);
+    static bool isCellPresent(
+        Occupancy const& cellPosBySlot,
+        SpaceCalculator const& spaceCalculator,
+        RealVector2D const& posToCheck,
+        float distance);
 };

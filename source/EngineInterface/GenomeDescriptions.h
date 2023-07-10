@@ -5,8 +5,9 @@
 #include <optional>
 #include <variant>
 
-#include "Constants.h"
-#include "CellFunctionEnums.h"
+#include "Base/Definitions.h"
+#include "FundamentalConstants.h"
+#include "CellFunctionConstants.h"
 
 struct MakeGenomeCopy
 {
@@ -42,45 +43,17 @@ struct TransmitterGenomeDescription
 struct ConstructorGenomeDescription
 {
     int mode = 13;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    bool singleConstruction = false;
-    bool separateConstruction = true;
-    std::optional<int> maxConnections;
-    ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
-    float stiffness = 1.0f;
     int constructionActivationTime = 100;
 
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
+    float constructionAngle1 = 0;
+    float constructionAngle2 = 0;
 
     auto operator<=>(ConstructorGenomeDescription const&) const = default;
 
     ConstructorGenomeDescription& setMode(int value)
     {
         mode = value;
-        return *this;
-    }
-    ConstructorGenomeDescription& setSingleConstruction(bool value)
-    {
-        singleConstruction = value;
-        return *this;
-    }
-    ConstructorGenomeDescription& setSeparateConstruction(bool value)
-    {
-        separateConstruction = value;
-        return *this;
-    }
-    ConstructorGenomeDescription& setMaxConnection(std::optional<int> value)
-    {
-        maxConnections = value;
-        return *this;
-    }
-    ConstructorGenomeDescription& setAngleAlignment(ConstructorAngleAlignment value)
-    {
-        angleAlignment = value;
-        return *this;
-    }
-    ConstructorGenomeDescription& setStiffness(float value)
-    {
-        stiffness = value;
         return *this;
     }
     ConstructorGenomeDescription& setConstructionActivationTime(int value)
@@ -278,7 +251,39 @@ struct CellGenomeDescription
         outputBlocked = value;
         return *this;
     }
-    std::optional<std::vector<uint8_t>> getSubGenome() const
+    bool hasGenome() const
+    {
+        auto cellFunctionType = getCellFunctionType();
+        if (cellFunctionType == CellFunction_Constructor) {
+            auto& constructor = std::get<ConstructorGenomeDescription>(*cellFunction);
+            return std::holds_alternative<std::vector<uint8_t>>(constructor.genome);
+        }
+        if (cellFunctionType == CellFunction_Injector) {
+            auto& injector = std::get<InjectorGenomeDescription>(*cellFunction);
+            return std::holds_alternative<std::vector<uint8_t>>(injector.genome);
+        }
+        return false;
+    }
+
+    std::vector<uint8_t>& getGenomeRef()
+    {
+        auto cellFunctionType = getCellFunctionType();
+        if (cellFunctionType == CellFunction_Constructor) {
+            auto& constructor = std::get<ConstructorGenomeDescription>(*cellFunction);
+            if (std::holds_alternative<std::vector<uint8_t>>(constructor.genome)) {
+                return std::get<std::vector<uint8_t>>(constructor.genome);
+            }
+        }
+        if (cellFunctionType == CellFunction_Injector) {
+            auto& injector = std::get<InjectorGenomeDescription>(*cellFunction);
+            if (std::holds_alternative<std::vector<uint8_t>>(injector.genome)) {
+                return std::get<std::vector<uint8_t>>(injector.genome);
+            }
+        }
+        THROW_NOT_IMPLEMENTED();
+    }
+
+    std::optional<std::vector<uint8_t>> getGenome() const
     {
         switch (getCellFunctionType()) {
         case CellFunction_Constructor: {
@@ -301,7 +306,7 @@ struct CellGenomeDescription
             return std::nullopt;
         }
     }
-    void setSubGenome(std::vector<uint8_t> const& genome)
+    void setGenome(std::vector<uint8_t> const& genome)
     {
         switch (getCellFunctionType()) {
         case CellFunction_Constructor: {
@@ -374,4 +379,60 @@ struct CellGenomeDescription
     }
 };
 
-using GenomeDescription = std::vector<CellGenomeDescription>;
+struct GenomeHeaderDescription
+{
+    ConstructionShape shape = ConstructionShape_Custom;
+    bool singleConstruction = false;
+    bool separateConstruction = true;
+    ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
+    float stiffness = 1.0f;
+    float connectionDistance = 1.0f;
+
+    auto operator<=>(GenomeHeaderDescription const&) const = default;
+
+    GenomeHeaderDescription& setSingleConstruction(bool value)
+    {
+        singleConstruction = value;
+        return *this;
+    }
+    GenomeHeaderDescription& setSeparateConstruction(bool value)
+    {
+        separateConstruction = value;
+        return *this;
+    }
+    GenomeHeaderDescription& setAngleAlignment(ConstructorAngleAlignment value)
+    {
+        angleAlignment = value;
+        return *this;
+    }
+    GenomeHeaderDescription& setStiffness(float value)
+    {
+        stiffness = value;
+        return *this;
+    }
+    GenomeHeaderDescription& setConnectionDistance(float value)
+    {
+        connectionDistance = value;
+        return *this;
+    }
+};
+
+struct GenomeDescription
+{
+    GenomeHeaderDescription info;
+    std::vector<CellGenomeDescription> cells;
+
+    auto operator<=>(GenomeDescription const&) const = default;
+
+    GenomeDescription& setInfo(GenomeHeaderDescription const& value)
+    {
+        info = value;
+        return *this;
+    }
+
+    GenomeDescription& setCells(std::vector<CellGenomeDescription> const& value)
+    {
+        cells = value;
+        return *this;
+    }
+};

@@ -141,6 +141,7 @@ using UploadSimulationDialogWeakPtr = std::weak_ptr<_UploadSimulationDialog>;
 
 class _CreateUserDialog;
 using CreateUserDialog = std::shared_ptr<_CreateUserDialog>;
+using CreateUserDialogWeakPtr = std::weak_ptr<_CreateUserDialog>;
 
 class _ActivateUserDialog;
 using ActivateUserDialog = std::shared_ptr<_ActivateUserDialog>;
@@ -166,9 +167,13 @@ using GenomeEditorWindow = std::shared_ptr<_GenomeEditorWindow>;
 class _RadiationSourcesWindow;
 using RadiationSourcesWindow = std::shared_ptr<_RadiationSourcesWindow>;
 
+class _BalancerController;
+using BalancerController = std::shared_ptr<_BalancerController>;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;
+struct ImVec2;
 
 struct TextureData
 {

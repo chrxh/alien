@@ -9,6 +9,7 @@ struct Particle
     float2 vel;
     int color;
     float energy;
+    Cell* lastAbsorbedCell; //could be invalid
 
     //editing data
     int selected;  //0 = no, 1 = selected

@@ -12,6 +12,6 @@ public:
     static std::vector<uint8_t> convertDescriptionToBytes(GenomeDescription const& genome);
     static GenomeDescription convertBytesToDescription(std::vector<uint8_t> const& data);
 
-    static int convertByteIndexToCellIndex(std::vector<uint8_t> const& data, int byteIndex);
-    static int convertCellIndexToByteIndex(std::vector<uint8_t> const& data, int cellIndex);
+    static int convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress);
+    static int convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex);
 };

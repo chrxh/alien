@@ -44,6 +44,10 @@ namespace
         value = std::max(-3.9f, std::min(3.9f, value));
         writeFloat(data, value / 4);
     }
+    void writeDistance(std::vector<uint8_t>& data, float value)
+    {
+        data.emplace_back(static_cast<uint8_t>((value - 0.5f) * 255));
+    }
     void writeStiffness(std::vector<uint8_t>& data, float value) { data.emplace_back(static_cast<uint8_t>(value * 255)); }
     void writeGenome(std::vector<uint8_t>& data, std::variant<MakeGenomeCopy, std::vector<uint8_t>> const& value)
     {
@@ -100,11 +104,11 @@ namespace
     float readNeuronProperty(std::vector<uint8_t> const& data, int& pos) { return readFloat(data, pos) * 4; }
     float readDistance(std::vector<uint8_t> const& data, int& pos)
     {
-        return readFloat(data, pos) + 1.0f;
+        return toFloat(readByte(data, pos)) / 255 + 0.5f;
     }
     float readStiffness(std::vector<uint8_t> const& data, int& pos)
     {
-        return static_cast<float>(readByte(data, pos)) / 255;
+        return toFloat(readByte(data, pos)) / 255;
     }
 
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> readGenome(std::vector<uint8_t> const& data, int& pos)
@@ -130,11 +134,17 @@ namespace
 
 std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription const& genome)
 {
-
+    auto const& cells = genome.cells;
     std::vector<uint8_t> result;
-    result.reserve(genome.size() * 6);
-    int index = 0;
-    for (auto const& cell : genome) {
+    result.reserve(cells.size() * 12 + 5);
+    writeByte(result, genome.info.shape);
+    writeBool(result, genome.info.singleConstruction);
+    writeBool(result, genome.info.separateConstruction);
+    writeByte(result, genome.info.angleAlignment);
+    writeStiffness(result, genome.info.stiffness);
+    writeDistance(result, genome.info.connectionDistance);
+
+    for (auto const& cell : cells) {
         writeByte(result, cell.getCellFunctionType());
         writeAngle(result, cell.referenceAngle);
         writeEnergy(result, cell.energy);
@@ -162,12 +172,9 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
         case CellFunction_Constructor: {
             auto const& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
             writeByte(result, constructor.mode);
-            writeBool(result, constructor.singleConstruction);
-            writeBool(result, constructor.separateConstruction);
-            writeOptionalByte(result, constructor.maxConnections);
-            writeByte(result, constructor.angleAlignment);
-            writeStiffness(result, constructor.stiffness);
             writeWord(result, constructor.constructionActivationTime);
+            writeAngle(result, constructor.constructionAngle1);
+            writeAngle(result, constructor.constructionAngle2);
             writeGenome(result, constructor.genome);
         } break;
         case CellFunction_Sensor: {
@@ -202,7 +209,6 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
         case CellFunction_Placeholder: {
         } break;
         }
-        ++index;
     }
     return result;
 }
@@ -223,9 +229,18 @@ namespace
     {
         SimulationParameters parameters;
         ConversionResult result;
-        int cellIndex = 0;
+
+        int nodeIndex = 0;
         auto& bytePosition = result.lastBytePosition;
-        while (bytePosition < maxBytePosition && cellIndex < maxEntries) {
+
+        result.genome.info.shape = readByte(data, bytePosition) % ConstructionShape_Count;
+        result.genome.info.singleConstruction = readBool(data, bytePosition);
+        result.genome.info.separateConstruction = readBool(data, bytePosition);
+        result.genome.info.angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;
+        result.genome.info.stiffness = readStiffness(data, bytePosition);
+        result.genome.info.connectionDistance = readDistance(data, bytePosition);
+        
+        while (bytePosition < maxBytePosition && nodeIndex < maxEntries) {
             CellFunction cellFunction = readByte(data, bytePosition) % CellFunction_Count;
 
             CellGenomeDescription cell;
@@ -258,12 +273,9 @@ namespace
             case CellFunction_Constructor: {
                 ConstructorGenomeDescription constructor;
                 constructor.mode = readByte(data, bytePosition);
-                constructor.singleConstruction = readBool(data, bytePosition);
-                constructor.separateConstruction = readBool(data, bytePosition);
-                constructor.maxConnections = readOptionalByte(data, bytePosition, MAX_CELL_BONDS + 1);
-                constructor.angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;
-                constructor.stiffness = readStiffness(data, bytePosition);
                 constructor.constructionActivationTime = readWord(data, bytePosition);
+                constructor.constructionAngle1 = readAngle(data, bytePosition);
+                constructor.constructionAngle2 = readAngle(data, bytePosition);
                 constructor.genome = readGenome(data, bytePosition);
                 cell.cellFunction = constructor;
             } break;
@@ -309,8 +321,8 @@ namespace
                 cell.cellFunction = PlaceHolderGenomeDescription();
             } break;
             }
-            result.genome.emplace_back(cell);
-            ++cellIndex;
+            result.genome.cells.emplace_back(cell);
+            ++nodeIndex;
         }
         return result;
     }
@@ -322,14 +334,14 @@ GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vec
     return convertBytesToDescriptionIntern(data, data.size(), data.size()).genome;
 }
 
-int GenomeDescriptionConverter::convertByteIndexToCellIndex(std::vector<uint8_t> const& data, int byteIndex)
+int GenomeDescriptionConverter::convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress)
 {
     //wasteful approach but sufficient for GUI
-    return convertBytesToDescriptionIntern(data, byteIndex, data.size()).genome.size();
+    return convertBytesToDescriptionIntern(data, nodeAddress, data.size()).genome.cells.size();
 }
 
-int GenomeDescriptionConverter::convertCellIndexToByteIndex(std::vector<uint8_t> const& data, int cellIndex)
+int GenomeDescriptionConverter::convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex)
 {
     //wasteful approach but sufficient for GUI
-    return convertBytesToDescriptionIntern(data, data.size(), cellIndex).lastBytePosition;
+    return convertBytesToDescriptionIntern(data, data.size(), nodeIndex).lastBytePosition;
 }

@@ -3,7 +3,7 @@
 #include <variant>
 
 #include "Base/Definitions.h"
-#include "EngineInterface/Constants.h"
+#include "EngineInterface/FundamentalConstants.h"
 
 #include "Definitions.h"
 
@@ -96,48 +96,23 @@ struct TransmitterDescription
 struct ConstructorDescription
 {
     int activationMode = 13;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    bool singleConstruction = false;
-    bool separateConstruction = true;
-    std::optional<int> maxConnections;
-    ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
-    float stiffness = 1.0f;
     int constructionActivationTime = 100;
     std::vector<uint8_t> genome;
     int genomeGeneration = 0;
+    float constructionAngle1 = 0;
+    float constructionAngle2 = 0;
 
     //process data
-    int currentGenomePos = 0;
+    int genomeReadPosition = 0;
+    int offspringCreatureId = 0;
+    int offspringMutationId = 0;
 
+    ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
 
     ConstructorDescription& setActivationMode(int value)
     {
         activationMode = value;
-        return *this;
-    }
-    ConstructorDescription& setSingleConstruction(bool value)
-    {
-        singleConstruction = value;
-        return *this;
-    }
-    ConstructorDescription& setSeparateConstruction(bool value)
-    {
-        separateConstruction = value;
-        return *this;
-    }
-    ConstructorDescription& setMaxConnections(std::optional<int> value)
-    {
-        maxConnections = value;
-        return *this;
-    }
-    ConstructorDescription& setAngleAlignment(ConstructorAngleAlignment value)
-    {
-        angleAlignment = value;
-        return *this;
-    }
-    ConstructorDescription& setStiffness(float value)
-    {
-        stiffness = value;
         return *this;
     }
     ConstructorDescription& setConstructionActivationTime(int value)
@@ -150,14 +125,24 @@ struct ConstructorDescription
         genome = value;
         return *this;
     }
-    ConstructorDescription& setCurrentGenomePos(int value)
+    ConstructorDescription& setGenomeReadPosition(int value)
     {
-        currentGenomePos = value;
+        genomeReadPosition = value;
         return *this;
     }
     ConstructorDescription& setGenomeGeneration(int value)
     {
         genomeGeneration = value;
+        return *this;
+    }
+    ConstructorDescription& setConstructionAngle1(float value)
+    {
+        constructionAngle1 = value;
+        return *this;
+    }
+    ConstructorDescription& setConstructionAngle2(float value)
+    {
+        constructionAngle2 = value;
         return *this;
     }
 };
@@ -301,7 +286,8 @@ struct CellDescription
     bool barrier = false;
     int age = 0;
     LivingState livingState = LivingState_Ready;
-    int constructionId = 0;
+    int creatureId = 0;
+    int mutationId = 0;
 
     //cell function
     int executionOrderNumber = 0;
@@ -310,6 +296,7 @@ struct CellDescription
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
     int activationTime = 0;
+    int genomeSize = 0;
 
     CellMetadataDescription metadata;
 
@@ -379,7 +366,7 @@ struct CellDescription
     }
     CellDescription& setConstructionId(int value)
     {
-        constructionId = value;
+        creatureId = value;
         return *this;
     }
     CellDescription& setInputExecutionOrderNumber(int value)
@@ -424,23 +411,19 @@ struct CellDescription
         return *this;
     }
 
+    bool hasGenome() const;
+    std::vector<uint8_t>& getGenomeRef();
+
     bool isConnectedTo(uint64_t id) const;
 };
 
 struct ClusterDescription
 {
-    uint64_t id = 0;
-
     std::vector<CellDescription> cells;
 
     ClusterDescription() = default;
     auto operator<=>(ClusterDescription const&) const = default;
 
-    ClusterDescription& setId(uint64_t value)
-    {
-        id = value;
-        return *this;
-    }
     ClusterDescription& addCells(std::vector<CellDescription> const& value)
     {
         cells.insert(cells.end(), value.begin(), value.end());

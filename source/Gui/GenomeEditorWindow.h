@@ -4,6 +4,7 @@
 #include "EngineInterface/PreviewDescriptions.h"
 
 #include "AlienWindow.h"
+#include "Definitions.h"
 
 class _GenomeEditorWindow : public _AlienWindow
 {
@@ -17,6 +18,7 @@ public:
 private:
     void processIntern() override;
     void processToolbar();
+    void processEditor();
 
     struct TabData
     {
@@ -25,8 +27,9 @@ private:
         std::optional<int> selectedNode;
     };
     void processTab(TabData& tab);
-    void processGenomeEditTab(TabData& tab);
-    void processNodeEdit(TabData& tab, CellGenomeDescription& cell);
+    void processGenomeHeader(TabData& tab);
+    void processConstructionSequence(TabData& tab);
+    void processNode(TabData& tab, CellGenomeDescription& cell, std::optional<ShapeGeneratorResult> const& shapeGeneratorResult, bool isFirstOrLast);
     template<typename Description>
     void processSubGenomeWidgets(TabData const& tab, Description& desc);
 
@@ -40,9 +43,12 @@ private:
 
     void showPreview(TabData& tab);
 
+    void validationAndCorrection(GenomeHeaderDescription& info) const;
     void validationAndCorrection(CellGenomeDescription& cell) const;
 
     void scheduleAddTab(GenomeDescription const& genome);
+
+    void updateGeometry(GenomeDescription& genome, ConstructionShape shape);
 
     EditorModel _editorModel;
     SimulationController _simController;
@@ -63,6 +69,6 @@ private:
     std::optional<int> _tabIndexToSelect;
     std::optional<int> _nodeIndexToJump;
     std::optional<TabData> _tabToAdd;
-    bool _collapseAllNodes = false;
+    std::optional<bool> _expandNodes;
 
 };

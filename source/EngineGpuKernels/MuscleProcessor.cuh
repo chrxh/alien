@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/CellFunctionConstants.h"
 
 #include "Cell.cuh"
 #include "SimulationData.cuh"
@@ -64,6 +64,8 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
         return;
     }
     float2 direction = CellFunctionProcessor::calcSignalDirection(data, cell);
+    float angle = max(-0.5f, min(0.5f, activity.channels[3])) * 360.0f;
+    direction = Math::rotateClockwise(direction, angle);
     if (direction.x != 0 || direction.y != 0) {
         cell->vel += Math::normalized(direction) * cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color] * getTruncatedUnitValue(activity);
     }

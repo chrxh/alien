@@ -25,9 +25,6 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
 {
     auto const gpuSettings = settings.gpuSettings;
     KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, statistics);
-    if (settings.simulationParameters.numSpots > 0) {
-        KERNEL_CALL(cudaApplyFlowFieldSettings, data);
-    }
 
     //not all kernels need to be executed in each time step for performance reasons
     bool considerForcesFromAngleDifferences = (data.timestep % 3 == 0);
@@ -42,6 +39,9 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     } else {
         KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, data);
     }
+    if (settings.simulationParameters.numSpots > 0) {
+        KERNEL_CALL(cudaApplyFlowFieldSettings, data);
+    }
     KERNEL_CALL(cudaNextTimestep_physics_applyForces, data);
     KERNEL_CALL(cudaNextTimestep_physics_calcConnectionForces, data, considerForcesFromAngleDifferences);
     KERNEL_CALL(cudaNextTimestep_physics_verletPositionUpdate, data);
@@ -53,7 +53,10 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_cellFunction_prepare_substep2, data);
     KERNEL_CALL(cudaNextTimestep_cellFunction_nerve, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_neuron, data, statistics);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_constructor, data, statistics);
+    if (settings.simulationParameters.cellFunctionConstructorCheckCompletenessForSelfReplication) {
+        KERNEL_CALL(cudaNextTimestep_cellFunction_constructor_completenessCheck, data, statistics);
+    }
+    KERNEL_CALL(cudaNextTimestep_cellFunction_constructor_process, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_injector, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_attacker, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_transmitter, data, statistics);
@@ -82,6 +85,12 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, data);
 
     _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);
+}
+
+void _SimulationKernelsLauncher::prepareForSimulationParametersChanges(Settings const& settings, SimulationData const& data)
+{
+    auto const gpuSettings = settings.gpuSettings;
+    KERNEL_CALL(cudaResetDensity, data);
 }
 
 bool _SimulationKernelsLauncher::isRigidityUpdateEnabled(Settings const& settings) const

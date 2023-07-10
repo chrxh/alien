@@ -9,7 +9,54 @@
 #include "Base/LoggingService.h"
 
 #include "GlobalSettings.h"
-#include "RemoteSimulationDataParser.h"
+#include "MessageDialog.h"
+#include "NetworkDataParser.h"
+
+namespace
+{
+    auto RefreshInterval = 20;  //in minutes
+
+    void configureClient(httplib::SSLClient& client)
+    {
+        client.set_ca_cert_path("./resources/ca-bundle.crt");
+        client.enable_server_certificate_verification(true);
+        if (auto result = client.get_openssl_verify_result()) {
+            throw std::runtime_error("OpenSSL verify error: " + std::string(X509_verify_cert_error_string(result)));
+        }
+    }
+
+    httplib::Result executeRequest(std::function<httplib::Result()> const& func, bool withRetry = true)
+    {
+        auto attempt = 0;
+        while (true) {
+            auto result = func();
+            if (result) {
+                return result;
+            }
+            if (++attempt == 5 || !withRetry) {
+                throw std::runtime_error("Error connecting to the server.");
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
+
+    void logNetworkError()
+    {
+        log(Priority::Important, "network: an error occurred");
+    }
+
+    bool parseBoolResult(std::string const& serverResponse)
+    {
+        std::stringstream stream(serverResponse);
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+        auto result = tree.get<bool>("result");
+        if (!result) {
+            log(Priority::Important, "network: negative response received from server");
+        }
+        return result;
+    }
+}
 
 _NetworkController::_NetworkController()
 {
@@ -19,6 +66,17 @@ _NetworkController::_NetworkController()
 _NetworkController::~_NetworkController()
 {
     GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
+    logout();
+}
+
+void _NetworkController::process()
+{
+    auto now = std::chrono::steady_clock::now();
+    if (!_lastRefreshTime || std::chrono::duration_cast<std::chrono::minutes>(now - *_lastRefreshTime).count() >= RefreshInterval) {
+        _lastRefreshTime = now;
+
+        refreshLogin();
+    }
 }
 
 std::string _NetworkController::getServerAddress() const
@@ -42,57 +100,6 @@ std::optional<std::string> _NetworkController::getPassword() const
     return _password;
 }
 
-namespace
-{
-    void configureClient(httplib::SSLClient& client)
-    {
-        client.set_ca_cert_path("./resources/ca-bundle.crt");
-        client.enable_server_certificate_verification(true);
-        if (auto result = client.get_openssl_verify_result()) {
-            throw std::runtime_error("OpenSSL verify error: " + std::string(X509_verify_cert_error_string(result)));
-        }
-    }
-
-    httplib::Result executeRequest(std::function<httplib::Result()> const& func, bool withRetry = true)
-    {
-        auto attempt = 0;
-        while(true) {
-            auto result = func();
-            if (result) {
-                return result;
-            }
-            if (++attempt == 5 || !withRetry) {
-                throw std::runtime_error("Error connecting to the server.");
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
-    }
-
-    void logNetworkError(std::string const& serverResponse)
-    {
-        log(Priority::Important, "network: an error occurred while parsing the server response: " + serverResponse);
-    }
-
-    bool parseBoolResult(std::string const& serverResponse)
-    {
-        try {
-            std::stringstream stream(serverResponse);
-            boost::property_tree::ptree tree;
-            boost::property_tree::read_json(stream, tree);
-            auto result = tree.get<bool>("result");
-            if (!result) {
-                log(Priority::Important, "network: negative response received from server");
-            }
-            return result;
-        }
-        catch(...) {
-            logNetworkError(serverResponse);
-            return false;
-        }
-    }
-
-}
-
 bool _NetworkController::createUser(std::string const& userName, std::string const& password, std::string const& email)
 {
     log(Priority::Important, "network: create user '" + userName + "'");
@@ -105,9 +112,13 @@ bool _NetworkController::createUser(std::string const& userName, std::string con
     params.emplace("password", password);
     params.emplace("email", email);
 
-    auto result = executeRequest([&] { return client.Post("/alien-server/createuser.php", params); });
-
-    return parseBoolResult(result->body);
+    try {
+        auto result = executeRequest([&] { return client.Post("/alien-server/createuser.php", params); });
+        return parseBoolResult(result->body);
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
 }
 
 bool _NetworkController::activateUser(std::string const& userName, std::string const& password, std::string const& confirmationCode)
@@ -122,12 +133,16 @@ bool _NetworkController::activateUser(std::string const& userName, std::string c
     params.emplace("password", password);
     params.emplace("activationCode", confirmationCode);
 
-    auto result = executeRequest([&] { return client.Post("/alien-server/activateuser.php", params); });
-
-    return parseBoolResult(result->body);
+    try {
+        auto result = executeRequest([&] { return client.Post("/alien-server/activateuser.php", params); });
+        return parseBoolResult(result->body);
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
 }
 
-bool _NetworkController::login(std::string const& userName, std::string const& password)
+bool _NetworkController::login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password)
 {
     log(Priority::Important, "network: login user '" + userName + "'");
 
@@ -138,22 +153,52 @@ bool _NetworkController::login(std::string const& userName, std::string const& p
     params.emplace("userName", userName);
     params.emplace("password", password);
 
-    auto result = executeRequest([&] { return client.Post("/alien-server/login.php", params); });
+    try {
+        auto result = executeRequest([&] { return client.Post("/alien-server/login.php", params); });
 
-    auto boolResult = parseBoolResult(result->body);
-    if (boolResult) {
-        _loggedInUserName = userName;
-        _password = password;
+        auto boolResult = parseBoolResult(result->body);
+        if (boolResult) {
+            _loggedInUserName = userName;
+            _password = password;
+        }
+
+        errorCode = false;
+        std::stringstream stream(result->body);
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+        errorCode = tree.get<LoginErrorCode>("errorCode");
+
+        return boolResult;
+    } catch (...) {
+        logNetworkError();
+        return false;
     }
-    return boolResult;
 }
 
-void _NetworkController::logout()
+bool _NetworkController::logout()
 {
     log(Priority::Important, "network: logout");
+    bool result = true;
+
+    if (_loggedInUserName && _password) {
+        httplib::SSLClient client(_serverAddress);
+        configureClient(client);
+
+        httplib::Params params;
+        params.emplace("userName", *_loggedInUserName);
+        params.emplace("password", *_password);
+
+        try {
+            result = executeRequest([&] { return client.Post("/alien-server/logout.php", params); });
+        } catch (...) {
+            logNetworkError();
+            result = false;
+        }
+    }
 
     _loggedInUserName = std::nullopt;
     _password = std::nullopt;
+    return result;
 }
 
 bool _NetworkController::deleteUser()
@@ -167,14 +212,18 @@ bool _NetworkController::deleteUser()
     params.emplace("userName", *_loggedInUserName);
     params.emplace("password", *_password);
 
-    auto postResult = executeRequest([&] { return client.Post("/alien-server/deleteuser.php", params); });
+    try {
+        auto postResult = executeRequest([&] { return client.Post("/alien-server/deleteuser.php", params); });
 
-    auto result = parseBoolResult(postResult->body);
-    if (result) {
-        logout();
+        auto result = parseBoolResult(postResult->body);
+        if (result) {
+            return logout();
+        }
+        return result;
+    } catch (...) {
+        logNetworkError();
+        return false;
     }
-
-    return result;
 }
 
 bool _NetworkController::resetPassword(std::string const& userName, std::string const& email)
@@ -188,9 +237,13 @@ bool _NetworkController::resetPassword(std::string const& userName, std::string 
     params.emplace("userName", userName);
     params.emplace("email", email);
 
-    auto result = executeRequest([&] { return client.Post("/alien-server/resetpw.php", params); });
-
-    return parseBoolResult(result->body);
+    try {
+        auto result = executeRequest([&] { return client.Post("/alien-server/resetpw.php", params); });
+        return parseBoolResult(result->body);
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
 }
 
 bool _NetworkController::setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode)
@@ -205,9 +258,13 @@ bool _NetworkController::setNewPassword(std::string const& userName, std::string
     params.emplace("newPassword", newPassword);
     params.emplace("activationCode", confirmationCode);
 
-    auto result = executeRequest([&] { return client.Post("/alien-server/setnewpw.php", params); });
-
-    return parseBoolResult(result->body);
+    try {
+        auto result = executeRequest([&] { return client.Post("/alien-server/setnewpw.php", params); });
+        return parseBoolResult(result->body);
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
 }
 
 bool _NetworkController::getSimulationDataList(std::vector<RemoteSimulationData>& result, bool withRetry) const
@@ -219,17 +276,41 @@ bool _NetworkController::getSimulationDataList(std::vector<RemoteSimulationData>
 
     httplib::Params params;
     params.emplace("version", Const::ProgramVersion);
-    auto postResult = executeRequest([&] { return client.Post("/alien-server/getversionedsimulationlist.php", params); }, withRetry);
 
     try {
+        auto postResult = executeRequest([&] { return client.Post("/alien-server/getversionedsimulationlist.php", params); }, withRetry);
+
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
         result.clear();
-        result = RemoteSimulationDataParser::decode(tree);
+        result = NetworkDataParser::decodeRemoteSimulationData(tree);
         return true;
     } catch (...) {
-        logNetworkError(postResult->body);
+        logNetworkError();
+        return false;
+    }
+}
+
+bool _NetworkController::getUserList(std::vector<UserData>& result, bool withRetry) const
+{
+    log(Priority::Important, "network: get user list");
+
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    try {
+        httplib::Params params;
+        auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlist.php", params); }, withRetry);
+
+        std::stringstream stream(postResult->body);
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+        result.clear();
+        result = NetworkDataParser::decodeUserData(tree);
+        return true;
+    } catch (...) {
+        logNetworkError();
         return false;
     }
 }
@@ -245,9 +326,9 @@ bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& resu
     params.emplace("userName", *_loggedInUserName);
     params.emplace("password", *_password);
 
-    auto postResult = executeRequest([&] { return client.Post("/alien-server/getlikedsimulations.php", params); });
-
     try {
+        auto postResult = executeRequest([&] { return client.Post("/alien-server/getlikedsimulations.php", params); });
+
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
@@ -258,7 +339,7 @@ bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& resu
         }
         return true;
     } catch (...) {
-        logNetworkError(postResult->body);
+        logNetworkError();
         return false;
     }
 }
@@ -273,9 +354,9 @@ bool _NetworkController::getUserLikesForSimulation(std::set<std::string>& result
     httplib::Params params;
     params.emplace("simId", simId);
 
-    auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlikes.php", params); });
-
     try {
+        auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlikes.php", params); });
+
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
@@ -286,7 +367,7 @@ bool _NetworkController::getUserLikesForSimulation(std::set<std::string>& result
         }
         return true;
     } catch (...) {
-        logNetworkError(postResult->body);
+        logNetworkError();
         return false;
     }
 }
@@ -303,9 +384,13 @@ bool _NetworkController::toggleLikeSimulation(std::string const& simId)
     params.emplace("password", *_password);
     params.emplace("simId", simId);
 
-    auto result = executeRequest([&] { return client.Post("/alien-server/togglelikesimulation.php", params); });
-
-    return parseBoolResult(result->body);
+    try {
+        auto result = executeRequest([&] { return client.Post("/alien-server/togglelikesimulation.php", params); });
+        return parseBoolResult(result->body);
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
 }
 
 bool _NetworkController::uploadSimulation(
@@ -335,9 +420,13 @@ bool _NetworkController::uploadSimulation(
         {"symbolMap", "", "", ""},
     };
 
-    auto result = executeRequest([&] { return client.Post("/alien-server/uploadsimulation.php", items); });
-
-    return parseBoolResult(result->body);
+    try {
+        auto result = executeRequest([&] { return client.Post("/alien-server/uploadsimulation.php", items); });
+        return parseBoolResult(result->body);
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
 }
 
 bool _NetworkController::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string const& simId)
@@ -361,7 +450,7 @@ bool _NetworkController::downloadSimulation(std::string& mainData, std::string& 
         }
         return true;
     } catch (...) {
-        log(Priority::Important, "network: an error occurred");
+        logNetworkError();
         return false;
     }
 }
@@ -378,7 +467,30 @@ bool _NetworkController::deleteSimulation(std::string const& simId)
     params.emplace("password", *_password);
     params.emplace("simId", simId);
 
+    try {
     auto result = executeRequest([&] { return client.Post("/alien-server/deletesimulation.php", params); });
-
     return parseBoolResult(result->body);
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
+}
+
+void _NetworkController::refreshLogin()
+{
+    if (_loggedInUserName && _password) {
+        log(Priority::Important, "network: refresh login");
+
+        httplib::SSLClient client(_serverAddress);
+        configureClient(client);
+
+        httplib::Params params;
+        params.emplace("userName", *_loggedInUserName);
+        params.emplace("password", *_password);
+
+        try {
+            executeRequest([&] { return client.Post("/alien-server/login.php", params); });
+        } catch (...) {
+        }
+    }
 }

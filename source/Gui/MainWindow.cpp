@@ -72,6 +72,7 @@
 #include "GenomeEditorWindow.h"
 #include "RadiationSourcesWindow.h"
 #include "OverlayMessageController.h"
+#include "BalancerController.h"
 
 namespace
 {
@@ -122,7 +123,6 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
         throw std::runtime_error("Failed to initialize GLAD");
     }
 
-    auto worldSize = _simController->getWorldSize();
     _viewport = std::make_shared<_Viewport>(_windowController);
     _uiController = std::make_shared<_UiController>();
     _autosaveController = std::make_shared<_AutosaveController>(_simController, _viewport);
@@ -137,7 +137,8 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _viewport);
     _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController);
-    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow);
+    _balancerController = std::make_shared<_BalancerController>(_simController);
+    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow, _balancerController);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
     _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow, _viewport);
     _aboutDialog = std::make_shared<_AboutDialog>();
@@ -155,7 +156,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog, _networkController);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_browserWindow, _networkController);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog, _networkController);
-    _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _resetPasswordDialog, _networkController);
+    _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog, _networkController);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController, _viewport);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
@@ -164,6 +165,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
 
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog);
+    _activateUserDialog->registerCyclicReferences(_createUserDialog);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -745,6 +747,8 @@ void _MainWindow::processControllers()
 {
     _autosaveController->process();
     _editorController->process();
+    _balancerController->process();
+    _networkController->process();
     OverlayMessageController::getInstance().process();
     DelayedExecutionController::getInstance().process();
 }

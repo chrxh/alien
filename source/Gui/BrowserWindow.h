@@ -4,6 +4,7 @@
 
 #include "AlienWindow.h"
 #include "RemoteSimulationData.h"
+#include "UserData.h"
 #include "Definitions.h"
 
 class _BrowserWindow : public _AlienWindow
@@ -22,20 +23,23 @@ public:
     void onRefresh();
 
 private:
-    void refreshIntern(bool firstTimeStartup);
+    void refreshIntern(bool withRetry);
 
     void processIntern() override;
 
-    void processTable();
+    void processSimulationTable();
+    void processUserTable();
     void processStatus();
     void processFilter();
     void processToolbar();
     void processShortenedText(std::string const& text);
+    bool processActionButton(std::string const& text);
     bool processDetailButton();
 
     void processActivated() override;
 
-    void sortTable();
+    void sortSimulationList();
+    void sortUserList();
 
     void onDownloadSimulation(RemoteSimulationData* remoteData);
     void onDeleteSimulation(RemoteSimulationData* remoteData);
@@ -51,12 +55,13 @@ private:
     bool _scheduleRefresh = false;
     bool _scheduleSort = false;
     std::string _filter;
-    bool _showCommunitySimulations = true;
+    bool _showCommunityCreations = false;
     std::unordered_set<std::string> _selectionIds;
     std::unordered_set<std::string> _likedIds;
     std::unordered_map<std::string, std::set<std::string>> _userLikesByIdCache;
-    std::vector<RemoteSimulationData> _remoteSimulationDatas;
-    std::vector<RemoteSimulationData> _filteredRemoteSimulationDatas;
+    std::vector<RemoteSimulationData> _remoteSimulationList;
+    std::vector<RemoteSimulationData> _filteredRemoteSimulationList;
+    std::vector<UserData> _userList;
 
     SimulationController _simController;
     NetworkController _networkController;

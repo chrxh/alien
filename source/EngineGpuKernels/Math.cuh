@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/CellFunctionEnums.h"
+#include "EngineInterface/CellFunctionConstants.h"
 
 #include "Base.cuh"
 
@@ -32,6 +32,7 @@ public:
     __inline__ __device__ static float dot(float2 const& p, float2 const& q);
     __inline__ __device__ static float2 crossProdProjected(float3 const& p, float3 const& q);
     __inline__ __host__ __device__ static float length(float2 const& v);
+    __inline__ __host__ __device__ static float lengthMax(float2 const& v);
     __inline__ __host__ __device__ static float length(int2 const& v);
     __inline__ __host__ __device__ static float lengthSquared(float2 const& v);
     __inline__ __device__ static float2 rotateClockwise(float2 const& v, float angle);
@@ -219,6 +220,11 @@ __inline__ __device__ float2 Math::crossProdProjected(float3 const& p, float3 co
 __host__ __device__ __inline__ float Math::length(float2 const & v)
 {
     return sqrt(v.x * v.x + v.y * v.y);
+}
+
+__host__ __device__ __inline__ float Math::lengthMax(float2 const& v)
+{
+    return max(abs(v.x), abs(v.y));
 }
 
 __host__ __device__ __inline__ float Math::length(int2 const & v)

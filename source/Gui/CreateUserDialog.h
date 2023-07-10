@@ -12,8 +12,8 @@ public:
 
     void show(std::string const& userName, std::string const& password);
 
-private:
     void onCreateUser();
+private:
 
     NetworkController _networkController;
     ActivateUserDialog _activateUserDialog; 

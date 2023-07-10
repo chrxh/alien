@@ -89,3 +89,17 @@ enum InjectorMode_
     InjectorMode_InjectAll,
     InjectorMode_Count
 };
+
+using ConstructionShape = int;
+enum ConstructionShape_
+{
+    ConstructionShape_Custom,
+    ConstructionShape_Segment,
+    ConstructionShape_Triangle,
+    ConstructionShape_Rectangle,
+    ConstructionShape_Hexagon,
+    ConstructionShape_Loop,
+    ConstructionShape_Tube,
+    ConstructionShape_Lolli,
+    ConstructionShape_Count
+};

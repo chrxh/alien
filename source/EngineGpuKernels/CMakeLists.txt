@@ -56,7 +56,6 @@ add_library(alien_engine_gpu_kernels_lib
     ParticleProcessor.cuh
     Physics.cuh
     ProprocessedCellFunctionData.cuh
-    QuantityConverter.cuh
     RenderingData.cu
     RenderingData.cuh
     RenderingKernels.cu
@@ -65,6 +64,7 @@ add_library(alien_engine_gpu_kernels_lib
     RenderingKernelsLauncher.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
+    ShapeGenerator.cuh
     SimulationData.cu
     SimulationData.cuh
     SimulationKernels.cu

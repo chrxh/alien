@@ -62,8 +62,8 @@ void _InspectorWindow::process()
         return;
     }
     auto width = calcWindowWidth();
-    auto height = isCell() ? StyleRepository::getInstance().contentScale(370.0f)
-                           : StyleRepository::getInstance().contentScale(70.0f);
+    auto height = isCell() ? StyleRepository::getInstance().scale(370.0f)
+                           : StyleRepository::getInstance().scale(70.0f);
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
@@ -77,7 +77,7 @@ void _InspectorWindow::process()
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
-        auto factor = StyleRepository::getInstance().contentScale(1);
+        auto factor = StyleRepository::getInstance().scale(1);
 
         drawList->AddLine(
             {windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor},
@@ -195,10 +195,9 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
 void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Function", nullptr, ImGuiTabItemFlags_None)) {
+        int type = cell.getCellFunctionType();
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            auto const& parameters = _simController->getSimulationParameters();
             if (ImGui::TreeNodeEx("Properties##Function", TreeNodeFlags)) {
-                int type = cell.getCellFunctionType();
                 if (AlienImGui::CellFunctionCombo(AlienImGui::CellFunctionComboParameters().name("Function").textWidth(CellFunctionBaseTabTextWidth), type)) {
                     switch (type) {
                     case CellFunction_Neuron: {
@@ -238,6 +237,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                 }
 
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Age").textWidth(CellFunctionBaseTabTextWidth), cell.age);
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Mutation id").textWidth(CellFunctionBaseTabTextWidth), cell.mutationId);
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Activation time").textWidth(CellFunctionBaseTabTextWidth), cell.activationTime);
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Execution order").textWidth(CellFunctionBaseTabTextWidth), cell.executionOrderNumber);
@@ -253,7 +253,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                 ImGui::TreePop();
             }
         }
-        if (ImGui::TreeNodeEx("Neural activity", TreeNodeFlags)) {
+        if (type != CellFunction_None && ImGui::TreeNodeEx("Cell activity", TreeNodeFlags)) {
             int index = 0;
             for (auto& channel : cell.activity.channels) {
                 AlienImGui::InputFloat(
@@ -336,18 +336,18 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Retrieve from editor").textWidth(GenomeTabTextWidth))) {
                 desc.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
                 if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                    desc.currentGenomePos = 0;
+                    desc.genomeReadPosition = 0;
                 }
             }
 
             if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                auto entry = GenomeDescriptionConverter::convertByteIndexToCellIndex(desc.genome, desc.currentGenomePos);
+                auto entry = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, desc.genomeReadPosition);
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Sequence number").textWidth(GenomeTabTextWidth), entry);
-                desc.currentGenomePos = GenomeDescriptionConverter::convertCellIndexToByteIndex(desc.genome, entry);
+                desc.genomeReadPosition = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(desc.genome, entry);
             }
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth), desc.genomeGeneration);
 
-            AlienImGui::Group("Preview (approximation)");
+            AlienImGui::Group("Preview (reference configuration)");
             if (ImGui::BeginChild("##child", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar)) {
                 auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome);
                 auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);
@@ -418,11 +418,11 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         auto parameters = _simController->getSimulationParameters();
 
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(CellFunctionTextWidth), constructor.singleConstruction);
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Separate construction").textWidth(CellFunctionTextWidth), constructor.separateConstruction);
-        AlienImGui::InputOptionalInt(
-            AlienImGui::InputIntParameters().name("Max connections").textWidth(CellFunctionTextWidth), constructor.maxConnections);
+        //AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(CellFunctionTextWidth), constructor.singleConstruction);
+        //AlienImGui::Checkbox(
+        //    AlienImGui::CheckboxParameters().name("Separate construction").textWidth(CellFunctionTextWidth), constructor.separateConstruction);
+        //AlienImGui::InputOptionalInt(
+        //    AlienImGui::InputIntParameters().name("Max connections").textWidth(CellFunctionTextWidth), constructor.maxConnections);
         int constructorMode = constructor.activationMode == 0 ? 0 : 1;
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters().name("Activation mode").textWidth(CellFunctionTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
@@ -431,10 +431,10 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
         if (constructorMode == 1) {
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Interval").textWidth(CellFunctionTextWidth), constructor.activationMode);
         }
-        AlienImGui::AngleAlignmentCombo(
-            AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(CellFunctionTextWidth), constructor.angleAlignment);
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.1f).textWidth(CellFunctionTextWidth), constructor.stiffness);
+        //AlienImGui::AngleAlignmentCombo(
+        //    AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(CellFunctionTextWidth), constructor.angleAlignment);
+        //AlienImGui::InputFloat(
+        //    AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.1f).textWidth(CellFunctionTextWidth), constructor.stiffness);
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(CellFunctionTextWidth), constructor.constructionActivationTime);
         ImGui::TreePop();
@@ -537,9 +537,9 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
 float _InspectorWindow::calcWindowWidth() const
 {
     if (isCell()) {
-        return StyleRepository::getInstance().contentScale(CellWindowWidth);
+        return StyleRepository::getInstance().scale(CellWindowWidth);
     } else {
-        return StyleRepository::getInstance().contentScale(ParticleWindowWidth);
+        return StyleRepository::getInstance().scale(ParticleWindowWidth);
     }
 }
 
@@ -557,8 +557,8 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
     switch (cell.getCellFunctionType()) {
     case CellFunction_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
-        if (constructor.currentGenomePos < 0) {
-            constructor.currentGenomePos = 0;
+        if (constructor.genomeReadPosition < 0) {
+            constructor.genomeReadPosition = 0;
         }
         if (constructor.constructionActivationTime < 0) {
             constructor.constructionActivationTime = 0;
@@ -566,10 +566,10 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
         if (constructor.activationMode < 0) {
             constructor.activationMode = 0;
         }
-        if (constructor.maxConnections) {
-            constructor.maxConnections = (*constructor.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
-        }
-        constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
+        //if (constructor.maxConnections) {
+        //    constructor.maxConnections = (*constructor.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
+        //}
+        //constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
         constructor.genomeGeneration = std::max(0, constructor.genomeGeneration);
     } break;
     case CellFunction_Sensor: {

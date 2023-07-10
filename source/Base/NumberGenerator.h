@@ -30,6 +30,5 @@ private:
 	int _index = 0;
 	std::vector<uint32_t> _arrayOfRandomNumbers;
 	uint64_t _runningNumber = 0;
-	uint64_t _threadId = 0;
 };
 
