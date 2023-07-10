@@ -339,7 +339,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         constructor.offspringCreatureId = 1 + data.numberGen1.random(65535);
         hostCell->genomeSize = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
     } else {
-        hostCell->cellFunctionData.constructor.offspringCreatureId = hostCell->creatureId;
+        constructor.offspringCreatureId = hostCell->creatureId;
     }
 
     Cell* newCell = constructCellIntern(data, hostCell, newCellPos, 0, constructionData);
