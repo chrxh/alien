@@ -437,6 +437,11 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
         //    AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.1f).textWidth(CellFunctionTextWidth), constructor.stiffness);
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(CellFunctionTextWidth), constructor.constructionActivationTime);
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters().name("Construction angle 1").textWidth(CellFunctionTextWidth).format("%.1f"), constructor.constructionAngle1);
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters().name("Construction angle 2").textWidth(CellFunctionTextWidth).format("%.1f"),
+            constructor.constructionAngle2);
         ImGui::TreePop();
 
     }
