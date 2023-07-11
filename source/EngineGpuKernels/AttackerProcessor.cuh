@@ -68,6 +68,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 auto genomeSizeBonus = cudaSimulationParameters.cellFunctionAttackerGenomeSizeBonus[cell->color][otherCell->color];
                 energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<float>(otherCell->genomeSize - cell->genomeSize));
             }
+            if (otherCell->mutationId == cell->mutationId) {
+                auto sameMutantPenalty =
+                    cudaSimulationParameters.cellFunctionAttackerSameMutantPenalty[cell->color][otherCell->color];
+                energyToTransfer *= (1.0f - sameMutantPenalty);
+            }
 
             auto velocityPenalty = Math::length(cell->vel) * 20 * cudaSimulationParameters.cellFunctionAttackerVelocityPenalty[cell->color] + 1.0f;
             energyToTransfer /= velocityPenalty;
