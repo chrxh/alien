@@ -473,6 +473,12 @@ namespace
             defaultParameters.cellFunctionAttackerGenomeSizeBonus,
             "simulation parameters.cell.function.attacker.genome size bonus",
             parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionAttackerSameMutantPenalty,
+            defaultParameters.cellFunctionAttackerSameMutantPenalty,
+            "simulation parameters.cell.function.attacker.same mutant penalty",
+            parserTask);
 
         encodeDecodeProperty(
             tree,

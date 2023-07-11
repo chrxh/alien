@@ -221,7 +221,7 @@ void _SimulationParametersWindow::processBase(
                     .name("Cell colorization")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellColorization)
-                    .values({"None", "Cell colors", "Mutations"})
+                    .values({"None", "Standard cell colors", "Mutants"})
                     .tooltip("Here one can set how the cells are to be colored during rendering. In addition to coloring according to the 7 cell colors, there "
                              "is also the option of coloring mutations. Almost every mutation (except changes in the neuronal networks) in the genome of a creature leads "
                              "to a different color."),
@@ -809,6 +809,15 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionAttackerGenomeSizeBonus))
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with larger genomes."),
                 simParameters.cellFunctionAttackerGenomeSizeBonus);
+            AlienImGui::InputFloatColorMatrix(
+                AlienImGui::InputFloatColorMatrixParameters()
+                    .name("Same mutant penalty")
+                    .textWidth(RightColumnWidth)
+                    .min(0)
+                    .max(1.0f)
+                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionAttackerSameMutantPenalty))
+                    .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation ID."),
+                simParameters.cellFunctionAttackerSameMutantPenalty);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Velocity penalty")
@@ -1744,6 +1753,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         for (int j = 0; j < MAX_COLORS; ++j) {
             parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
+            parameters.cellFunctionAttackerSameMutantPenalty[i][j] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSameMutantPenalty[i][j]));
+            parameters.cellFunctionAttackerGenomeSizeBonus[i][j] = std::max(0.0f, parameters.cellFunctionAttackerGenomeSizeBonus[i][j]);
         }
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
         parameters.cellFunctionConstructorPumpEnergyFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorPumpEnergyFactor[i]));
