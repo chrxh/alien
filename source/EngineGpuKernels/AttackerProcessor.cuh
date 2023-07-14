@@ -60,6 +60,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             return;
         }
         if (!otherCell->barrier /*&& otherCell->livingState != LivingState_UnderConstruction*/) {
+            //notify attacked cell
+            if (otherCell->cellFunction != CellFunction_None) {
+                atomicAdd(&otherCell->activity.channels[7], 1.0f);
+            }
+
             auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength[cell->color];
             if (energyToTransfer < 0) {
                 return;
@@ -125,11 +130,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             if (abs(energyToTransfer) < NEAR_ZERO) {
                 return;
-            }
-
-            //notify attacked cell
-            if (otherCell->cellFunction != CellFunction_None) {
-                atomicAdd(&otherCell->activity.channels[7], 1.0f);
             }
 
             someOtherCell = otherCell;
