@@ -248,8 +248,7 @@ namespace
     public:
         bool begin()
         {
-            auto width = StyleRepository::getInstance().scale(ImGui::GetContentRegionAvail().x);
-            _columns = std::max(toInt(width / DynamicTableColumnWidth), 1);
+            _columns = std::max(toInt(ImGui::GetContentRegionAvail().x / scale(DynamicTableColumnWidth)), 1);
             auto result = ImGui::BeginTable("##", _columns, ImGuiTableFlags_None);
             if (result) {
                 ImGui::TableNextRow();
