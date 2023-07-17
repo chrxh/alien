@@ -811,7 +811,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.cellFunctionAttackerGenomeSizeBonus);
             AlienImGui::InputFloatColorMatrix(
                 AlienImGui::InputFloatColorMatrixParameters()
-                    .name("Same mutant penalty")
+                    .name("Same mutant protection")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1.0f)
