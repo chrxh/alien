@@ -6,7 +6,7 @@
 class _DisplaySettingsDialog
 {
 public:
-    _DisplaySettingsDialog(WindowController const& windowController);
+    _DisplaySettingsDialog();
     ~_DisplaySettingsDialog();
 
     void process();
@@ -16,8 +16,6 @@ private:
     void setFullscreen(int selectionIndex);
     int getSelectionIndex() const;
     std::vector<std::string> createVideoModeStrings() const;
-
-    WindowController _windowController;
 
     bool _show = false;
     std::string _origMode;

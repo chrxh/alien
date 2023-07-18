@@ -44,13 +44,29 @@ namespace
     }
 }
 
-_WindowController::_WindowController()
+WindowController::WindowController()
+{
+}
+
+WindowController& WindowController::getInstance()
+{
+    static WindowController instance;
+    return instance;
+}
+
+WindowController::~WindowController()
+{
+    delete _desktopVideoMode;
+}
+
+void WindowController::init()
 {
     auto& settings = GlobalSettings::getInstance();
     _mode = settings.getStringState("settings.display.mode", DesktopMode);
     _sizeInWindowedMode.x = settings.getIntState("settings.display.window width", _sizeInWindowedMode.x);
     _sizeInWindowedMode.y = settings.getIntState("settings.display.window height", _sizeInWindowedMode.y);
     _fps = settings.getIntState("settings.display.fps", _fps);
+    _lastContentScaleFactor = settings.getFloatState("settings.display.content scale factor", _lastContentScaleFactor);
 
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
     _windowData.mode = glfwGetVideoMode(primaryMonitor);
@@ -65,7 +81,7 @@ _WindowController::_WindowController()
             return glfwCreateWindow(_sizeInWindowedMode.x, _sizeInWindowedMode.y, "alien", nullptr, nullptr);
         } else {
             log(Priority::Important, "set full screen mode");
-            _startupSize = {_windowData.mode->width, _windowData.mode->height };
+            _startupSize = {_windowData.mode->width, _windowData.mode->height};
             return glfwCreateWindow(_windowData.mode->width, _windowData.mode->height, "alien", primaryMonitor, nullptr);
         }
     }();
@@ -79,75 +95,73 @@ _WindowController::_WindowController()
         auto userMode = getUserDefinedResolution();
         _startupSize = {userMode.width, userMode.height};
         log(Priority::Important, "switching to  " + createLogString(userMode));
-        glfwSetWindowMonitor(
-            _windowData.window, primaryMonitor, 0, 0, userMode.width, userMode.height, userMode.refreshRate);
+        glfwSetWindowMonitor(_windowData.window, primaryMonitor, 0, 0, userMode.width, userMode.height, userMode.refreshRate);
     }
+
+    float temp;
+    glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &_contentScaleFactor, &temp);  //consider only horizontal content scale
 }
 
-_WindowController::~_WindowController()
-{
-    delete _desktopVideoMode;
-}
-
-void _WindowController::shutdown()
+void WindowController::shutdown()
 {
     auto& settings = GlobalSettings::getInstance();
     settings.setStringState("settings.display.mode", _mode);
+    settings.setIntState("settings.display.window width", _sizeInWindowedMode.x);
+    settings.setIntState("settings.display.window height", _sizeInWindowedMode.y);
+    settings.setIntState("settings.display.fps", _fps);
+    settings.setFloatState("settings.display.content scale factor", _contentScaleFactor);
 
     if (isWindowedMode()) {
         updateWindowSize();
     }
-    settings.setIntState("settings.display.window width", _sizeInWindowedMode.x);
-    settings.setIntState("settings.display.window height", _sizeInWindowedMode.y);
-    settings.setIntState("settings.display.fps", _fps);
 }
 
-auto _WindowController::getWindowData() const -> WindowData
+auto WindowController::getWindowData() const -> WindowData
 {
     return _windowData;
 }
 
-bool _WindowController::isWindowedMode() const
+bool WindowController::isWindowedMode() const
 {
     return _mode == WindowedMode;
 }
 
-void _WindowController::setWindowedMode()
+void WindowController::setWindowedMode()
 {
     setMode(WindowedMode);
 }
 
-bool _WindowController::isDesktopMode() const
+bool WindowController::isDesktopMode() const
 {
     return _mode == DesktopMode;
 }
 
-void _WindowController::setDesktopMode()
+void WindowController::setDesktopMode()
 {
     setMode(DesktopMode);
 }
 
-GLFWvidmode _WindowController::getUserDefinedResolution() const
+GLFWvidmode WindowController::getUserDefinedResolution() const
 {
     return convert(_mode);
 }
 
-void _WindowController::setUserDefinedResolution(GLFWvidmode const& videoMode)
+void WindowController::setUserDefinedResolution(GLFWvidmode const& videoMode)
 {
     setMode(convert(videoMode));
 }
 
-IntVector2D _WindowController::getStartupWindowSize() const
+IntVector2D WindowController::getStartupWindowSize() const
 {
     return _startupSize;
 }
 
-std::string _WindowController::getMode() const
+std::string WindowController::getMode() const
 {
     return _mode;
 }
 
-void _WindowController::setMode(std::string const& mode)
+void WindowController::setMode(std::string const& mode)
 {
     if (getMode() == mode) {
         return;
@@ -189,24 +203,34 @@ void _WindowController::setMode(std::string const& mode)
     _mode = mode;
 }
 
-void _WindowController::updateWindowSize()
+void WindowController::updateWindowSize()
 {
     glfwGetWindowSize(_windowData.window, &_sizeInWindowedMode.x, &_sizeInWindowedMode.y);
 }
 
-std::string _WindowController::createLogString(GLFWvidmode const& videoMode) const
+std::string WindowController::createLogString(GLFWvidmode const& videoMode) const
 {
     std::stringstream ss;
     ss << videoMode.width << " x " << videoMode.height << " @ " << videoMode.refreshRate << "Hz";
     return ss.str();
 }
 
-int _WindowController::getFps() const
+int WindowController::getFps() const
 {
     return _fps;
 }
 
-void _WindowController::setFps(int value)
+void WindowController::setFps(int value)
 {
     _fps = value;
+}
+
+float WindowController::getContentScaleFactor() const
+{
+    return _contentScaleFactor;
+}
+
+float WindowController::getLastContentScaleFactor() const
+{
+    return _lastContentScaleFactor;
 }

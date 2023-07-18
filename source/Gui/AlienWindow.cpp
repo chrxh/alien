@@ -4,6 +4,7 @@
 
 #include "GlobalSettings.h"
 #include "StyleRepository.h"
+#include "WindowController.h"
 
 _AlienWindow::_AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn)
     : _title(title)
@@ -28,6 +29,13 @@ void _AlienWindow::process()
 
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     if (ImGui::Begin(_title.c_str(), &_on)) {
+        if (!_sizeInitialized) {
+            auto size = ImGui::GetWindowSize();
+            auto& windowController = WindowController::getInstance();
+            auto factor = windowController.getContentScaleFactor() / windowController.getLastContentScaleFactor();
+            ImGui::SetWindowSize({size.x * factor, size.y * factor});
+            _sizeInitialized = true;
+        }
         processIntern();
     }
     ImGui::End();

@@ -92,7 +92,6 @@ public:
 private:
     StyleRepository() = default;
 
-    float _contentScaleFactor = 1.0f;
     ImFont* _iconFont = nullptr;
     ImFont* _smallBoldFont = nullptr;
     ImFont* _mediumBoldFont = nullptr;
