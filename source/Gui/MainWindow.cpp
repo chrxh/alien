@@ -43,8 +43,6 @@
 #include "UiController.h"
 #include "AutosaveController.h"
 #include "GettingStartedWindow.h"
-#include "OpenSimulationDialog.h"
-#include "SaveSimulationDialog.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
 #include "SelectionWindow.h"
@@ -148,8 +146,6 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _logWindow = std::make_shared<_LogWindow>(_logger);
     _gettingStartedWindow = std::make_shared<_GettingStartedWindow>();
     _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simController, _temporalControlWindow, _viewport, _statisticsWindow);
-    _openSimulationDialog = std::make_shared<_OpenSimulationDialog>(_simController, _temporalControlWindow, _statisticsWindow, _viewport);
-    _saveSimulationDialog = std::make_shared<_SaveSimulationDialog>(_simController, _viewport);
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
@@ -380,11 +376,11 @@ void _MainWindow::processMenubar()
                 _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Open", "CTRL+O")) {
-                _openSimulationDialog->show();
+                onOpenSimulation();
                 _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Save", "CTRL+S")) {
-                _saveSimulationDialog->show();
+                onSaveSimulation();
                 _simulationMenuToggled = false;
             }
             ImGui::Separator();
@@ -576,10 +572,10 @@ void _MainWindow::processMenubar()
             _newSimulationDialog->open();
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_O)) {
-            _openSimulationDialog->show();
+            onOpenSimulation();
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_S)) {
-            _saveSimulationDialog->show();
+            onSaveSimulation();
         }
         if (ImGui::IsKeyPressed(GLFW_KEY_SPACE)) {
             if (_simController->isSimulationRunning()) {
@@ -710,8 +706,6 @@ void _MainWindow::processMenubar()
 
 void _MainWindow::processDialogs()
 {
-    _openSimulationDialog->process();
-    _saveSimulationDialog->process();
     _newSimulationDialog->process();
     _aboutDialog->process();
     _massOperationsDialog->process();
@@ -754,6 +748,59 @@ void _MainWindow::processControllers()
     _networkController->process();
     OverlayMessageController::getInstance().process();
     DelayedExecutionController::getInstance().process();
+}
+
+void _MainWindow::onOpenSimulation()
+{
+    GenericFileDialogs::getInstance().showOpenFileDialog(
+        "Open simulation", "Simulation file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _startingPath = firstFilenameCopy.remove_filename().string();
+
+            DeserializedSimulation deserializedData;
+            if (Serializer::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
+                printOverlayMessage("Loading ...");
+                delayedExecution([=, this] {
+                    _simController->closeSimulation();
+                    _statisticsWindow->reset();
+
+                    _simController->newSimulation(
+                        deserializedData.auxiliaryData.timestep,
+                        deserializedData.auxiliaryData.generalSettings,
+                        deserializedData.auxiliaryData.simulationParameters);
+                    _simController->setClusteredSimulationData(deserializedData.mainData);
+                    _viewport->setCenterInWorldPos(deserializedData.auxiliaryData.center);
+                    _viewport->setZoomFactor(deserializedData.auxiliaryData.zoom);
+                    _temporalControlWindow->onSnapshot();
+                    printOverlayMessage(firstFilename.filename().string());
+                });
+            } else {
+                printMessage("Open simulation", "The selected file could not be opened.");
+            }
+        });
+}
+
+void _MainWindow::onSaveSimulation()
+{
+    GenericFileDialogs::getInstance().showSaveFileDialog(
+        "Save simulation", "Simulation file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _startingPath = firstFilenameCopy.remove_filename().string();
+
+            DeserializedSimulation sim;
+            sim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+            sim.auxiliaryData.zoom = _viewport->getZoomFactor();
+            sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
+            sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
+            sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
+            sim.mainData = _simController->getClusteredSimulationData();
+
+            if (!Serializer::serializeSimulationToFiles(firstFilename.string(), sim)) {
+                MessageDialog::getInstance().show("Save simulation", "The simulation could not be saved to the specified file.");
+            }
+        });
 }
 
 void _MainWindow::onRunSimulation()

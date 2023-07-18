@@ -82,10 +82,6 @@ PUBLIC
     NewPasswordDialog.h
     OpenGLHelper.cpp
     OpenGLHelper.h
-    OpenPatternDialog.cpp
-    OpenPatternDialog.h
-    OpenSimulationDialog.cpp
-    OpenSimulationDialog.h
     OverlayMessageController.cpp
     OverlayMessageController.h
     PatternAnalysisDialog.cpp
@@ -100,10 +96,6 @@ PUBLIC
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp
     ResizeWorldDialog.h
-    SavePatternDialog.cpp
-    SavePatternDialog.h
-    SaveSimulationDialog.cpp
-    SaveSimulationDialog.h
     SelectionWindow.cpp
     SelectionWindow.h
     Shader.cpp

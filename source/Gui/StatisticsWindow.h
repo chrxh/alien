@@ -13,6 +13,7 @@ class _StatisticsWindow : public _AlienWindow
 {
 public:
     _StatisticsWindow(SimulationController const& simController);
+    ~_StatisticsWindow();
 
     void reset();
 
@@ -55,7 +56,7 @@ private:
         double endTime,
         int fracPartDecimals);
 
-    void onSaveStatistics(std::string const& filename);
+    void onSaveStatistics();
 
     SimulationController _simController;
 

@@ -35,7 +35,7 @@ namespace
 }
 
 _CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport)
-    : _AlienWindow("Creator", "editor.creator", true), _editorModel(editorModel)
+    : _AlienWindow("Creator", "editors.creator", true), _editorModel(editorModel)
     , _simController(simController)
     , _viewport(viewport)
 {
