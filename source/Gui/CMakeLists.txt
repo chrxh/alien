@@ -37,8 +37,6 @@ PUBLIC
     EditorModel.h
     ExitDialog.cpp
     ExitDialog.h
-    ExportStatisticsDialog.cpp
-    ExportStatisticsDialog.h
     FileLogger.cpp
     FileLogger.h
     FpsController.cpp
@@ -100,6 +98,8 @@ PUBLIC
     RemoteSimulationData.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
+    ResizeWorldDialog.cpp
+    ResizeWorldDialog.h
     SavePatternDialog.cpp
     SavePatternDialog.h
     SaveSimulationDialog.cpp

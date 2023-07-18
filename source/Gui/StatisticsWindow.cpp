@@ -1,5 +1,8 @@
 #include "StatisticsWindow.h"
 
+#include <fstream>
+
+#include <ImFileDialog.h>
 #include <imgui.h>
 #include <implot.h>
 
@@ -11,13 +14,13 @@
 #include "StyleRepository.h"
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
-#include "ExportStatisticsDialog.h"
+#include "GenericFileDialogs.h"
+#include "MessageDialog.h"
 
 _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
     : _AlienWindow("Statistics", "windows.statistics", false)
     , _simController(simController)
 {
-    _exportStatisticsDialog = std::make_shared<_ExportStatisticsDialog>();
 }
 
 namespace
@@ -34,8 +37,6 @@ void _StatisticsWindow::reset()
 
 void _StatisticsWindow::processIntern()
 {
-    _exportStatisticsDialog->process();
-
     if (ImGui::BeginTabBar("##Statistics", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
         if (ImGui::BeginTabItem("Timelines")) {
@@ -70,7 +71,13 @@ void _StatisticsWindow::processTimelines()
 
     ImGui::SameLine();
     if (AlienImGui::Button("Export")) {
-        _exportStatisticsDialog->show(_longtermStatistics);
+        GenericFileDialogs::getInstance().showSaveFileDialog(
+            "Export statistics", "Comma-separated values (*.csv){.csv},.*", _startingPath, [&](std::filesystem::path const& path) {
+                auto firstFilename = ifd::FileDialog::Instance().GetResult();
+                auto firstFilenameCopy = firstFilename;
+                _startingPath = firstFilenameCopy.remove_filename().string();
+                onSaveStatistics(firstFilename.string());
+            });
     }
     AlienImGui::Separator();
 
@@ -512,5 +519,69 @@ void _StatisticsWindow::plotForColorIntern(
     ImPlot::PopStyleVar();
     ImPlot::PopStyleColor(3);
     ImGui::PopID();
+}
+
+void _StatisticsWindow::onSaveStatistics(std::string const& filename)
+{
+    std::ofstream file;
+    file.open(filename, std::ios_base::out);
+    if (!file) {
+        MessageDialog::getInstance().show("Export statistics", "The statistics could not be saved to the specified file.");
+        return;
+    }
+
+    file << "time step";
+    auto writeLabelAllColors = [&file](auto const& name) {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            file << ", " << name << " (color " << i << ")";
+        }
+    };
+    writeLabelAllColors("Cells");
+    writeLabelAllColors("Cell connections");
+    writeLabelAllColors("Energy particles");
+    writeLabelAllColors("Total energy");
+    writeLabelAllColors("Created cells");
+    writeLabelAllColors("Attacks");
+    writeLabelAllColors("Muscle activities");
+    writeLabelAllColors("Transmitter activities");
+    writeLabelAllColors("Defender activities");
+    writeLabelAllColors("Injection activities");
+    writeLabelAllColors("Completed injections");
+    writeLabelAllColors("Nerve pulses");
+    writeLabelAllColors("Neuron activities");
+    writeLabelAllColors("Sensor activities");
+    writeLabelAllColors("Sensor matches");
+    file << std::endl;
+
+    auto writeIntValueAllColors = [&file](auto const& colorVector) {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            file << ", " << static_cast<uint64_t>(colorVector[i]);
+        }
+    };
+    auto writeDoubleValueAllColors = [&file](auto const& colorVector) {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            file << ", " << StringHelper::format(toFloat(colorVector[i]), 8);
+        }
+    };
+    for (auto const& dataPoint : _longtermStatistics.dataPoints) {
+        file << static_cast<uint64_t>(dataPoint.time);
+        writeIntValueAllColors(dataPoint.numCells);
+        writeIntValueAllColors(dataPoint.numConnections);
+        writeIntValueAllColors(dataPoint.numParticles);
+        writeDoubleValueAllColors(dataPoint.totalEnergy);
+        writeDoubleValueAllColors(dataPoint.numCreatedCells);
+        writeDoubleValueAllColors(dataPoint.numAttacks);
+        writeDoubleValueAllColors(dataPoint.numMuscleActivities);
+        writeDoubleValueAllColors(dataPoint.numDefenderActivities);
+        writeDoubleValueAllColors(dataPoint.numTransmitterActivities);
+        writeDoubleValueAllColors(dataPoint.numInjectionActivities);
+        writeDoubleValueAllColors(dataPoint.numCompletedInjections);
+        writeDoubleValueAllColors(dataPoint.numNervePulses);
+        writeDoubleValueAllColors(dataPoint.numNeuronActivities);
+        writeDoubleValueAllColors(dataPoint.numSensorActivities);
+        writeDoubleValueAllColors(dataPoint.numSensorMatches);
+        file << std::endl;
+    }
+    file.close();
 }
 

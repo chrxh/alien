@@ -55,10 +55,12 @@ private:
         double endTime,
         int fracPartDecimals);
 
+    void onSaveStatistics(std::string const& filename);
+
     SimulationController _simController;
-    ExportStatisticsDialog _exportStatisticsDialog;
 
     bool _live = true;
+    std::string _startingPath;
     int _plotType = 0;
 
     std::optional<StatisticsData> _lastStatisticsData;
