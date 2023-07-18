@@ -27,7 +27,7 @@ void _GettingStartedWindow::processIntern()
 {
     drawTitle();
 
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - 50), false)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50)), false)) {
         ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x);
 
         drawHeadline("Introduction");
@@ -175,6 +175,7 @@ void _GettingStartedWindow::processIntern()
         AlienImGui::BoldText("Fluids, walls and soft bodies");
         ImGui::Text("There are several pure physics simulations demonstrating the engines' capability.");
         drawItemText("Fluids/Pump with Soft-Bodies");
+        drawItemText("Demos/Perpetual Motion Machine");
         drawItemText("Demos/Stormy Night");
         ImGui::Text("They are suitable for testing the influence of simulation parameters such as 'Smoothing length', 'Pressure', 'Viscosity', etc.");
         AlienImGui::BoldText("Evolution of self-replicators");
@@ -202,7 +203,7 @@ void _GettingStartedWindow::processIntern()
         //}
         //ImGui::PopFont();
 
-        ImGui::Dummy(ImVec2(0.0f, 20.0f));
+        ImGui::Dummy(ImVec2(0.0f, scale(20.0f)));
 
         ImGui::PopTextWrapPos();
     }

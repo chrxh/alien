@@ -12,7 +12,7 @@
 
 _ActivateUserDialog::_ActivateUserDialog(BrowserWindow const& browserWindow, NetworkController const& networkController)
     : _AlienDialog("Activate user")
-    ,_browserWindow(browserWindow)
+    , _browserWindow(browserWindow)
     , _networkController(networkController)
 {}
 
