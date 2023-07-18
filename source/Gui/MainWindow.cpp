@@ -788,18 +788,20 @@ void _MainWindow::onSaveSimulation()
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
+            printOverlayMessage("Saving ...");
+            delayedExecution([=, this] {
+                DeserializedSimulation sim;
+                sim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+                sim.auxiliaryData.zoom = _viewport->getZoomFactor();
+                sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
+                sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
+                sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
+                sim.mainData = _simController->getClusteredSimulationData();
 
-            DeserializedSimulation sim;
-            sim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-            sim.auxiliaryData.zoom = _viewport->getZoomFactor();
-            sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
-            sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
-            sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
-            sim.mainData = _simController->getClusteredSimulationData();
-
-            if (!Serializer::serializeSimulationToFiles(firstFilename.string(), sim)) {
-                MessageDialog::getInstance().show("Save simulation", "The simulation could not be saved to the specified file.");
-            }
+                if (!Serializer::serializeSimulationToFiles(firstFilename.string(), sim)) {
+                    MessageDialog::getInstance().show("Save simulation", "The simulation could not be saved to the specified file.");
+                }
+            });
         });
 }
 
