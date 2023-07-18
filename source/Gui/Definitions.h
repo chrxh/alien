@@ -73,12 +73,6 @@ using AutosaveController = std::shared_ptr<_AutosaveController>;
 class _GettingStartedWindow;
 using GettingStartedWindow = std::shared_ptr<_GettingStartedWindow>;
 
-class _OpenSimulationDialog;
-using OpenSimulationDialog = std::shared_ptr<_OpenSimulationDialog>;
-
-class _SaveSimulationDialog;
-using SaveSimulationDialog = std::shared_ptr<_SaveSimulationDialog>;
-
 class _DisplaySettingsDialog;
 using DisplaySettingsDialog = std::shared_ptr<_DisplaySettingsDialog>;
 
@@ -99,12 +93,6 @@ class WindowController;
 
 class _ResizeWorldDialog;
 using ResizeWorldDialog = std::shared_ptr<_ResizeWorldDialog>;
-
-class _SavePatternDialog;
-using SavePatternDialog = std::shared_ptr<_SavePatternDialog>;
-
-class _OpenPatternDialog;
-using OpenPatternDialog = std::shared_ptr<_OpenPatternDialog>;
 
 class _OpenSymbolsDialog;
 using OpenSymbolsDialog = std::shared_ptr<_OpenSymbolsDialog>;

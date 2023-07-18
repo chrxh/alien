@@ -1,5 +1,6 @@
 #include "PatternEditorWindow.h"
 
+#include <ImFileDialog.h>
 #include <imgui.h>
 
 #include "Fonts/IconsFontAwesome5.h"
@@ -14,9 +15,10 @@
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
 #include "EditorController.h"
+#include "GenericFileDialogs.h"
+#include "MessageDialog.h"
 #include "Viewport.h"
-#include "SavePatternDialog.h"
-#include "OpenPatternDialog.h"
+#include "EngineInterface/Serializer.h"
 
 namespace
 {
@@ -29,14 +31,22 @@ _PatternEditorWindow::_PatternEditorWindow(
     SimulationController const& simController,
     Viewport const& viewport,
     EditorControllerWeakPtr const& editorController)
-    : _AlienWindow("Pattern editor", "editor.pattern editor", true)
+    : _AlienWindow("Pattern editor", "editors.pattern editor", true)
     , _editorModel(editorModel)
     , _simController(simController)
     , _viewport(viewport)
     , _editorController(editorController)
 {
-    _savePatternDialog = std::make_shared<_SavePatternDialog>(simController);
-    _openPatternDialog = std::make_shared<_OpenPatternDialog>(editorModel, simController, viewport);
+    auto path = std::filesystem::current_path();
+    if (path.has_parent_path()) {
+        path = path.parent_path();
+    }
+    _startingPath = GlobalSettings::getInstance().getStringState("editors.pattern editor.starting path", path.string());
+}
+
+_PatternEditorWindow::~_PatternEditorWindow()
+{
+    GlobalSettings::getInstance().setStringState("editors.pattern editor.starting path", _startingPath);
 }
 
 void _PatternEditorWindow::processIntern()
@@ -50,14 +60,14 @@ void _PatternEditorWindow::processIntern()
 
     //load button
     if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
-        _openPatternDialog->show();
+        onOpenPattern();
     }
 
     //save button
     ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
-        _savePatternDialog->show(_editorModel->isRolloutToClusters());
+        onSavePattern();
     }
     ImGui::EndDisabled();
 
@@ -309,9 +319,40 @@ void _PatternEditorWindow::processIntern()
     AlienImGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell clusters of the selected cell.\n"
                            "If this option is disabled, the changes will be applied only to the selected cells. In this case, the connections between the cells and the neighboring cells are recalculated when the positions are changed.\n"
                            "If you hold down the SHIFT key, this toggle button is temporarily turned off.");
+}
 
-    _savePatternDialog->process();
-    _openPatternDialog->process();
+void _PatternEditorWindow::onOpenPattern()
+{
+    GenericFileDialogs::getInstance().showOpenFileDialog(
+        "Open pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _startingPath = firstFilenameCopy.remove_filename().string();
+            ClusteredDataDescription content;
+            if (Serializer::deserializeContentFromFile(content, firstFilename.string())) {
+                auto center = _viewport->getCenterInWorldPos();
+                content.setCenter(center);
+                _simController->addAndSelectSimulationData(DataDescription(content));
+                _editorModel->update();
+            } else {
+                MessageDialog::getInstance().show("Open pattern", "The selected file could not be opened.");
+            }
+        });
+}
+
+void _PatternEditorWindow::onSavePattern()
+{
+    GenericFileDialogs::getInstance().showSaveFileDialog(
+        "Save pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _startingPath = firstFilenameCopy.remove_filename().string();
+
+            auto content = _simController->getSelectedClusteredSimulationData(_editorModel->isRolloutToClusters());
+            if (!Serializer::serializeContentToFile(firstFilename.string(), content)) {
+                MessageDialog::getInstance().show("Save pattern", "The selected pattern could not be saved to the specified file.");
+            }
+        });
 }
 
 bool _PatternEditorWindow::isObjectInspectionPossible() const

@@ -26,6 +26,8 @@ private:
     void processWindows();
     void processControllers();
 
+    void onOpenSimulation();
+    void onSaveSimulation();
     void onRunSimulation();
     void onPauseSimulation();
 
@@ -52,8 +54,6 @@ private:
     GpuSettingsDialog _gpuSettingsDialog;
     MassOperationsDialog _massOperationsDialog;
     NewSimulationDialog _newSimulationDialog;
-    OpenSimulationDialog _openSimulationDialog; 
-    SaveSimulationDialog _saveSimulationDialog; 
     DisplaySettingsDialog _displaySettingsDialog;
     PatternAnalysisDialog _patternAnalysisDialog;
     AboutDialog _aboutDialog;
@@ -87,4 +87,6 @@ private:
     bool _toolsMenuToggled = false;
     bool _helpMenuToggled = false;
     bool _renderSimulation = true;
+
+    std::string _startingPath;
 };

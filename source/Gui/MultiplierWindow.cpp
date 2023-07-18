@@ -22,7 +22,7 @@ namespace
 }
 
 _MultiplierWindow::_MultiplierWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport)
-    : _AlienWindow("Multiplier", "editor.multiplier", false)
+    : _AlienWindow("Multiplier", "editors.multiplier", false)
     , _editorModel(editorModel)
     , _simController(simController)
     , _viewport(viewport)
