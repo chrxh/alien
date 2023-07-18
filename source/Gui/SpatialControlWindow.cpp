@@ -12,12 +12,14 @@
 #include "Viewport.h"
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
+#include "ResizeWorldDialog.h"
 
 _SpatialControlWindow::_SpatialControlWindow(SimulationController const& simController, Viewport const& viewport)
     : _AlienWindow("Spatial control", "windows.spatial control", true)
     , _simController(simController)
     , _viewport(viewport)
 {
+    _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simController);
 }
 
 void _SpatialControlWindow::processIntern()
@@ -74,7 +76,7 @@ void _SpatialControlWindow::processIntern()
     }
     ImGui::EndChild();
 
-    processResizeDialog();
+    _resizeWorldDialog->process();
 }
 
 void _SpatialControlWindow::processBackground()
@@ -99,67 +101,7 @@ void _SpatialControlWindow::processZoomOutButton()
 void _SpatialControlWindow::processResizeButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
-        _showResizeDialog = true;
-        auto worldSize = _simController->getWorldSize();
-        _width = worldSize.x;
-        _height = worldSize.y;
-    }
-}
-
-void _SpatialControlWindow::processResizeDialog()
-{
-    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-
-    if (_showResizeDialog) {
-        ImGui::OpenPopup("Resize world");
-        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        if (ImGui::BeginPopupModal("Resize world", NULL, 0)) {
-            if (ImGui::BeginTable("##", 2, ImGuiTableFlags_SizingStretchProp)) {
-
-                //width
-                ImGui::TableNextRow();
-
-                ImGui::TableSetColumnIndex(0);
-                ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-                ImGui::InputInt("##width", &_width);
-                ImGui::PopItemWidth();
-
-                ImGui::TableSetColumnIndex(1);
-                ImGui::Text("Width");
-
-                //height
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-                ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-                ImGui::InputInt("##height", &_height);
-                ImGui::PopItemWidth();
-
-                ImGui::TableSetColumnIndex(1);
-                ImGui::Text("Height");
-
-                ImGui::EndTable();
-            }
-            AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Scale content"), _scaleContent);
-
-            AlienImGui::Separator();
-
-            if (AlienImGui::Button("OK")) {
-                ImGui::CloseCurrentPopup();
-                _showResizeDialog = false;
-                onResizing();
-            }
-            ImGui::SetItemDefaultFocus();
-
-            ImGui::SameLine();
-            if (AlienImGui::Button("Cancel")) {
-                ImGui::CloseCurrentPopup();
-                _showResizeDialog = false;
-            }
-
-            ImGui::EndPopup();
-            _width = std::max(1, _width);
-            _height = std::max(1, _height);
-        }
+        _resizeWorldDialog->open();
     }
 }
 
@@ -171,26 +113,4 @@ void _SpatialControlWindow::processCenterOnSelection()
             _viewport->setCenterInWorldPos({shallowData.centerPosX, shallowData.centerPosY});
         }
     }
-}
-
-void _SpatialControlWindow::onResizing()
-{
-    auto timestep = _simController->getCurrentTimestep();
-    auto generalSettings = _simController->getGeneralSettings();
-    auto parameters = _simController->getSimulationParameters();
-    auto content = _simController->getClusteredSimulationData();
-
-    _simController->closeSimulation();
-
-    IntVector2D origWorldSize{generalSettings.worldSizeX, generalSettings.worldSizeY};
-    generalSettings.worldSizeX = _width;
-    generalSettings.worldSizeY = _height;
-    
-    _simController->newSimulation(timestep, generalSettings, parameters);
-
-    DescriptionHelper::correctConnections(content, {_width, _height});
-    if (_scaleContent) {
-        DescriptionHelper::duplicate(content, origWorldSize, {_width, _height});
-    }
-    _simController->setClusteredSimulationData(content);
 }

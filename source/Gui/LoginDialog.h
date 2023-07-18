@@ -1,8 +1,9 @@
 #pragma once
 
+#include "AlienDialog.h"
 #include "Definitions.h"
 
-class _LoginDialog
+class _LoginDialog : public _AlienDialog
 {
 public:
     _LoginDialog(
@@ -13,11 +14,9 @@ public:
         NetworkController const& networkController);
     ~_LoginDialog();
 
-    void process();
-
-    void show();
-
 private:
+    void processIntern();
+
     void onLogin();
 
     BrowserWindow _browserWindow;
@@ -26,7 +25,6 @@ private:
     NetworkController _networkController;
     ResetPasswordDialog _resetPasswordDialog;
 
-    bool _show = false;
     bool _remember = true;
     std::string _userName;
     std::string _password;

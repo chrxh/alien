@@ -1,24 +1,23 @@
 #pragma once
 
+#include "AlienDialog.h"
 #include "Definitions.h"
 
-class _NewPasswordDialog
+class _NewPasswordDialog : public _AlienDialog
 {
 public:
     _NewPasswordDialog(BrowserWindow const& browserWindow, NetworkController const& networkController);
-    ~_NewPasswordDialog();
 
-    void process();
-
-    void show(std::string const& userName);
+    void open(std::string const& userName);
 
 private:
+    void processIntern();
+
     void onNewPassword();
 
     BrowserWindow _browserWindow;
     NetworkController _networkController;
 
-    bool _show = false;
     std::string _userName;
     std::string _newPassword;
     std::string _confirmationCode;

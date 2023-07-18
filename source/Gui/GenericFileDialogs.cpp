@@ -4,6 +4,7 @@
 #include <ImFileDialog.h>
 
 #include "AlienImGui.h"
+#include "WindowController.h"
 
 GenericFileDialogs& GenericFileDialogs::getInstance()
 {
@@ -33,7 +34,7 @@ void GenericFileDialogs::showSaveFileDialog(
 
 void GenericFileDialogs::process()
 {
-    if (!ifd::FileDialog::Instance().IsDone("GenericFileDialog")) {
+    if (!ifd::FileDialog::Instance().IsDone("GenericFileDialog", WindowController::getInstance().getContentScaleFactor())) {
         return;
     }
     if (ifd::FileDialog::Instance().HasResult()) {

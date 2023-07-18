@@ -18,8 +18,9 @@ _LoginDialog::_LoginDialog(
     ActivateUserDialog const& activateUserDialog,
     ResetPasswordDialog const& resetPasswordDialog,
     NetworkController const& networkController)
-    : _browserWindow(browserWindow)
-    , _createUserDialog(createUserDialog) 
+    : _AlienDialog("Login")
+    , _browserWindow(browserWindow)
+    , _createUserDialog(createUserDialog)
     , _activateUserDialog(activateUserDialog)
     , _networkController(networkController)
     , _resetPasswordDialog(resetPasswordDialog)
@@ -51,87 +52,65 @@ _LoginDialog::~_LoginDialog()
     }
 }
 
-void _LoginDialog::process()
+void _LoginDialog::processIntern()
 {
-    if (!_show) {
-        return;
+    AlienImGui::Text("How to create a new user?");
+    AlienImGui::HelpMarker("Please enter the desired user name and password and proceed by clicking the 'Create user' button.");
+
+    AlienImGui::Text("Forgot your password?");
+    AlienImGui::HelpMarker("Please enter the user name and proceed by clicking the 'Reset password' button.");
+
+    AlienImGui::Text("Security information");
+    AlienImGui::HelpMarker(
+        "The data transfer to the server is encrypted via https. On the server side, the password is not stored in cleartext, but as a salted SHA-256 hash "
+        "value in the database. If the toggle 'Remember' is activated the password will be stored in 'settings.json' on your local machine.");
+
+    AlienImGui::Separator();
+
+    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("User name").textWidth(0), _userName);
+    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Password").password(true).textWidth(0), _password);
+    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Remember"), _remember);
+
+    AlienImGui::Separator();
+
+    ImGui::BeginDisabled(_userName.empty() || _password.empty());
+    if (AlienImGui::Button("Login")) {
+        close();
+        onLogin();
+        if (!_remember) {
+            _userName.clear();
+            _password.clear();
+        }
     }
+    ImGui::EndDisabled();
+    ImGui::SetItemDefaultFocus();
 
-    ImGui::OpenPopup("Login");
-    if (ImGui::BeginPopupModal("Login", NULL, ImGuiWindowFlags_None)) {
+    ImGui::SameLine();
+    AlienImGui::VerticalSeparator();
 
-        AlienImGui::Text("How to create a new user?");
-        AlienImGui::HelpMarker("Please enter the desired user name and password and proceed by clicking the 'Create user' button.");
-
-        AlienImGui::Text("Forgot your password?");
-        AlienImGui::HelpMarker("Please enter the user name and proceed by clicking the 'Reset password' button.");
-
-        AlienImGui::Text("Security information");
-        AlienImGui::HelpMarker(
-            "The data transfer to the server is encrypted via https. On the server side, the password is not stored in cleartext, but as a salted SHA-256 hash "
-            "value in the database. If the toggle 'Remember' is activated the password will be stored in 'settings.json' on your local machine.");
-
-        AlienImGui::Separator();
-
-        AlienImGui::InputText(AlienImGui::InputTextParameters().hint("User name").textWidth(0), _userName);
-        AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Password").password(true).textWidth(0), _password);
-        AlienImGui::ToggleButton(
-            AlienImGui::ToggleButtonParameters()
-                .name("Remember"),
-            _remember);
-
-        AlienImGui::Separator();
-        
-        ImGui::BeginDisabled(_userName.empty() || _password.empty());
-        if (AlienImGui::Button("Login")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-            onLogin();
-            if(!_remember) {
-                _userName.clear();
-                _password.clear();
-            }
-        }
-        ImGui::EndDisabled();
-        ImGui::SetItemDefaultFocus();
-
-        ImGui::SameLine();
-        AlienImGui::VerticalSeparator();
-
-        ImGui::SameLine();
-        ImGui::BeginDisabled(_userName.empty() || _password.empty());
-        if (AlienImGui::Button("Create user")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-            _createUserDialog->show(_userName, _password);
-        }
-        ImGui::EndDisabled();
-
-        ImGui::SameLine();
-        ImGui::BeginDisabled(_userName.empty());
-        if (AlienImGui::Button("Reset password")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-            _resetPasswordDialog->show(_userName);
-        }
-        ImGui::EndDisabled();
-
-        ImGui::SameLine();
-        AlienImGui::VerticalSeparator();
-
-        ImGui::SameLine();
-        if (AlienImGui::Button("Cancel")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-        }
-
-        ImGui::EndPopup();
+    ImGui::SameLine();
+    ImGui::BeginDisabled(_userName.empty() || _password.empty());
+    if (AlienImGui::Button("Create user")) {
+        close();
+        _createUserDialog->open(_userName, _password);
     }
-}
+    ImGui::EndDisabled();
 
-void _LoginDialog::show()
-{
-    _show = true;
+    ImGui::SameLine();
+    ImGui::BeginDisabled(_userName.empty());
+    if (AlienImGui::Button("Reset password")) {
+        close();
+        _resetPasswordDialog->open(_userName);
+    }
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    AlienImGui::VerticalSeparator();
+
+    ImGui::SameLine();
+    if (AlienImGui::Button("Cancel")) {
+        close();
+    }
 }
 
 void _LoginDialog::onLogin()
@@ -140,7 +119,7 @@ void _LoginDialog::onLogin()
     if (!_networkController->login(errorCode, _userName, _password)) {
         switch (errorCode) {
         case LoginErrorCode_UnconfirmedUser: {
-            _activateUserDialog->show(_userName, _password);
+            _activateUserDialog->open(_userName, _password);
         } break;
         default: {
             MessageDialog::getInstance().show("Error", "Login failed.");

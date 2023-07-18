@@ -18,86 +18,67 @@ namespace
 }
 
 _DisplaySettingsDialog::_DisplaySettingsDialog()
+    : _AlienDialog("Display settings")
 {
     auto primaryMonitor = glfwGetPrimaryMonitor();
     _videoModes = glfwGetVideoModes(primaryMonitor, &_videoModesCount);
     _videoModeStrings = createVideoModeStrings();
 }
 
-_DisplaySettingsDialog::~_DisplaySettingsDialog()
+void _DisplaySettingsDialog::processIntern()
 {
-}
+    auto isFullscreen = !WindowController::getInstance().isWindowedMode();
 
-void _DisplaySettingsDialog::process()
-{
-    if (!_show) {
-        return;
-    }
-
-    ImGui::OpenPopup("Display settings");
-    if (ImGui::BeginPopupModal("Display settings", NULL, ImGuiWindowFlags_None)) {
-        auto isFullscreen = !WindowController::getInstance().isWindowedMode();
-
-        if(AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Full screen"), isFullscreen)) {
-            if (isFullscreen) {
-                setFullscreen(_selectionIndex);
-            } else {
-                _origSelectionIndex = _selectionIndex;
-                WindowController::getInstance().setWindowedMode();
-            }
-        }
-
-        ImGui::BeginDisabled(!isFullscreen);
-
-        if (AlienImGui::Combo(
-                AlienImGui::ComboParameters()
-                    .name("Resolution")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(_origSelectionIndex)
-                    .values(_videoModeStrings),
-                _selectionIndex)) {
-
+    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Full screen"), isFullscreen)) {
+        if (isFullscreen) {
             setFullscreen(_selectionIndex);
+        } else {
+            _origSelectionIndex = _selectionIndex;
+            WindowController::getInstance().setWindowedMode();
         }
-        ImGui::EndDisabled();
+    }
 
-        auto fps = WindowController::getInstance().getFps();
-        if (AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters()
-                    .name("Frames per second")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(&_origFps)
-                    .min(20)
-                    .max(100)
-                    .tooltip("A high frame rate leads to a greater GPU workload for rendering and thus lowers the simulation speed (time steps per second)."),
-                &fps)) {
-            WindowController::getInstance().setFps(fps);
-        }
+    ImGui::BeginDisabled(!isFullscreen);
 
-        AlienImGui::Separator();
+    if (AlienImGui::Combo(
+            AlienImGui::ComboParameters().name("Resolution").textWidth(RightColumnWidth).defaultValue(_origSelectionIndex).values(_videoModeStrings),
+            _selectionIndex)) {
 
-        if (AlienImGui::Button("OK")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-        }
-        ImGui::SetItemDefaultFocus();
+        setFullscreen(_selectionIndex);
+    }
+    ImGui::EndDisabled();
 
-        ImGui::SameLine();
-        if (AlienImGui::Button("Cancel")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-            WindowController::getInstance().setMode(_origMode);
-            WindowController::getInstance().setFps(_origFps);
-            _selectionIndex = _origSelectionIndex;
-        }
+    auto fps = WindowController::getInstance().getFps();
+    if (AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters()
+                .name("Frames per second")
+                .textWidth(RightColumnWidth)
+                .defaultValue(&_origFps)
+                .min(20)
+                .max(100)
+                .tooltip("A high frame rate leads to a greater GPU workload for rendering and thus lowers the simulation speed (time steps per second)."),
+            &fps)) {
+        WindowController::getInstance().setFps(fps);
+    }
 
-        ImGui::EndPopup();
+    AlienImGui::Separator();
+
+    if (AlienImGui::Button("OK")) {
+        close();
+    }
+    ImGui::SetItemDefaultFocus();
+
+    ImGui::SameLine();
+    if (AlienImGui::Button("Cancel")) {
+        close();
+        WindowController::getInstance().setMode(_origMode);
+        WindowController::getInstance().setFps(_origFps);
+        _selectionIndex = _origSelectionIndex;
     }
 }
 
-void _DisplaySettingsDialog::show()
+void _DisplaySettingsDialog::openIntern()
 {
-    _show = true;
     _selectionIndex = getSelectionIndex();
     _origSelectionIndex = _selectionIndex;
     _origMode = WindowController::getInstance().getMode();

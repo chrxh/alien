@@ -20,7 +20,8 @@ _UploadSimulationDialog::_UploadSimulationDialog(
     SimulationController const& simController,
     NetworkController const& networkController,
     Viewport const& viewport)
-    : _simController(simController)
+    : _AlienDialog("Upload simulation")
+    ,_simController(simController)
     , _networkController(networkController)
     , _browserWindow(browserWindow)
     , _viewport(viewport)
@@ -37,54 +38,41 @@ _UploadSimulationDialog::~_UploadSimulationDialog()
     settings.setStringState("dialogs.upload.simulation description", _simDescription);
 }
 
-void _UploadSimulationDialog::process()
+void _UploadSimulationDialog::processIntern()
 {
-    if (!_show) {
-        return;
+    AlienImGui::Text("Data privacy policy");
+    AlienImGui::HelpMarker("The simulation file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
+    AlienImGui::Separator();
+
+    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Simulation name").textWidth(0), _simName);
+    AlienImGui::Separator();
+    AlienImGui::InputTextMultiline(
+        AlienImGui::InputTextMultilineParameters()
+            .hint("Description (optional)")
+            .textWidth(0)
+            .height(ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(50)),
+        _simDescription);
+
+    AlienImGui::Separator();
+
+    ImGui::BeginDisabled(_simName.empty());
+    if (AlienImGui::Button("OK")) {
+        close();
+        onUpload();
     }
+    ImGui::EndDisabled();
+    ImGui::SetItemDefaultFocus();
 
-    ImGui::OpenPopup("Upload simulation");
-    if (ImGui::BeginPopupModal("Upload simulation", NULL, ImGuiWindowFlags_None)) {
-        AlienImGui::Text("Data privacy policy");
-        AlienImGui::HelpMarker("The simulation file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
-        AlienImGui::Separator();
-
-        AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Simulation name").textWidth(0), _simName);
-        AlienImGui::Separator();
-        AlienImGui::InputTextMultiline(
-            AlienImGui::InputTextMultilineParameters()
-                .hint("Description (optional)")
-                .textWidth(0)
-                .height(
-                ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(50)),
-            _simDescription);
-
-        AlienImGui::Separator();
-
-        ImGui::BeginDisabled(_simName.empty());
-        if (AlienImGui::Button("OK")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-            onUpload();
-        }
-        ImGui::EndDisabled();
-        ImGui::SetItemDefaultFocus();
-
-        ImGui::SameLine();
-        if (AlienImGui::Button("Cancel")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-            _simName = _origSimName;
-            _simDescription = _origSimDescription;
-        }
-
-        ImGui::EndPopup();
+    ImGui::SameLine();
+    if (AlienImGui::Button("Cancel")) {
+        close();
+        _simName = _origSimName;
+        _simDescription = _origSimDescription;
     }
 }
 
-void _UploadSimulationDialog::show()
+void _UploadSimulationDialog::openIntern()
 {
-    _show = true;
     _origSimName = _simName;
     _origSimDescription = _simDescription;
 }
