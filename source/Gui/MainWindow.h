@@ -48,6 +48,7 @@ private:
     ShaderWindow _shaderWindow;
     RadiationSourcesWindow _radiationSourcesWindow;
 
+    ExitDialog _exitDialog;
     GpuSettingsDialog _gpuSettingsDialog;
     MassOperationsDialog _massOperationsDialog;
     NewSimulationDialog _newSimulationDialog;
@@ -76,7 +77,7 @@ private:
     NetworkController _networkController;
     BalancerController _balancerController;
 
-    bool _onClose = false;
+    bool _onExit = false;
     bool _simulationMenuToggled = false;
     bool _networkMenuToggled = false;
     bool _windowMenuToggled = false;
@@ -85,6 +86,5 @@ private:
     bool _editorMenuToggled = false;
     bool _toolsMenuToggled = false;
     bool _helpMenuToggled = false;
-    bool _showExitDialog = false;
     bool _renderSimulation = true;
 };

@@ -5,6 +5,8 @@ PUBLIC
     AboutDialog.h
     ActivateUserDialog.cpp
     ActivateUserDialog.h
+    AlienDialog.cpp
+    AlienDialog.h
     AlienImGui.cpp
     AlienImGui.h
     AlienWindow.cpp
@@ -33,6 +35,8 @@ PUBLIC
     EditorController.h
     EditorModel.cpp
     EditorModel.h
+    ExitDialog.cpp
+    ExitDialog.h
     ExportStatisticsDialog.cpp
     ExportStatisticsDialog.h
     FileLogger.cpp

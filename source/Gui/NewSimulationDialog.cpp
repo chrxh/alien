@@ -19,7 +19,8 @@ _NewSimulationDialog::_NewSimulationDialog(
     TemporalControlWindow const& temporalControlWindow,
     Viewport const& viewport,
     StatisticsWindow const& statisticsWindow)
-    : _simController(simController)
+    : _AlienDialog("New simulation")
+    , _simController(simController)
     , _temporalControlWindow(temporalControlWindow)
     , _viewport(viewport)
     , _statisticsWindow(statisticsWindow)
@@ -32,43 +33,33 @@ _NewSimulationDialog::~_NewSimulationDialog()
     GlobalSettings::getInstance().setBoolState("dialogs.new simulation.adopt simulation parameters", _adoptSimulationParameters);
 }
 
-void _NewSimulationDialog::process()
+void _NewSimulationDialog::processIntern()
 {
-    if (!_on) {
-        return;
+    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
+    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
+    AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters().name("Adopt simulation parameters").textWidth(0), _adoptSimulationParameters);
+
+    AlienImGui::Separator();
+    if (AlienImGui::Button("OK")) {
+        ImGui::CloseCurrentPopup();
+        onNewSimulation();
+        close();
     }
-    ImGui::OpenPopup("New simulation");
-    ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (ImGui::BeginPopupModal("New simulation", NULL, 0)) {
+    ImGui::SetItemDefaultFocus();
 
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Adopt simulation parameters").textWidth(0), _adoptSimulationParameters);
-
-        AlienImGui::Separator();
-        if (AlienImGui::Button("OK")) {
-            ImGui::CloseCurrentPopup();
-            onNewSimulation();
-            _on = false;
-        }
-        ImGui::SetItemDefaultFocus();
-
-        ImGui::SameLine();
-        if (AlienImGui::Button("Cancel")) {
-            ImGui::CloseCurrentPopup();
-            _on = false;
-        }
-
-        ImGui::EndPopup();
-        _width = std::max(1, _width);
-        _height = std::max(1, _height);
+    ImGui::SameLine();
+    if (AlienImGui::Button("Cancel")) {
+        ImGui::CloseCurrentPopup();
+        close();
     }
+
+    _width = std::max(1, _width);
+    _height = std::max(1, _height);
 }
 
-void _NewSimulationDialog::show()
+void _NewSimulationDialog::openIntern()
 {
-    _on = true;
     auto worldSize = _simController->getWorldSize();
     _width = worldSize.x;
     _height = worldSize.y;

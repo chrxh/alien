@@ -1,16 +1,13 @@
 #pragma once
 
+#include "AlienDialog.h"
 #include "Definitions.h"
 
-class _AboutDialog
+class _AboutDialog : public _AlienDialog
 {
 public:
     _AboutDialog();
 
-    void process();
-
-    void show();
-
 private:
-    bool _show = false;
+    void processIntern() override;
 };

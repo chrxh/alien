@@ -29,7 +29,7 @@ namespace ifd {
 
 		bool Open(const std::string& key, const std::string& title, const std::string& filter, bool isMultiselect = false, const std::string& startingDir = "");
 
-		bool IsDone(const std::string& key);
+		bool IsDone(const std::string& key, float contentScale = 1.0f);
 
 		inline bool HasResult() { return m_result.size(); }
 		inline const std::filesystem::path& GetResult() { return m_result[0]; }

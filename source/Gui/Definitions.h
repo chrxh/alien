@@ -46,6 +46,9 @@ using NewSimulationDialog = std::shared_ptr<_NewSimulationDialog>;
 class _StartupController;
 using StartupController = std::shared_ptr<_StartupController>;
 
+class _ExitDialog;
+using ExitDialog = std::shared_ptr<_ExitDialog>;
+
 class _AboutDialog;
 using AboutDialog = std::shared_ptr<_AboutDialog>;
 
@@ -93,6 +96,9 @@ class _PatternEditorWindow;
 using PatternEditorWindow = std::shared_ptr<_PatternEditorWindow>;
 
 class WindowController;
+
+class _ResizeWorldDialog;
+using ResizeWorldDialog = std::shared_ptr<_ResizeWorldDialog>;
 
 class _SavePatternDialog;
 using SavePatternDialog = std::shared_ptr<_SavePatternDialog>;

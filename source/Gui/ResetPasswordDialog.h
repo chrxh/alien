@@ -1,24 +1,23 @@
 #pragma once
 
+#include "AlienDialog.h"
 #include "Definitions.h"
 
-class _ResetPasswordDialog
+class _ResetPasswordDialog : public _AlienDialog
 {
 public:
     _ResetPasswordDialog(NewPasswordDialog const& newPasswordDialog, NetworkController const& networkController);
-    ~_ResetPasswordDialog();
 
-    void process();
-
-    void show(std::string const& userName);
+    void open(std::string const& userName);
 
 private:
+    void processIntern();
+
     void onResetPassword();
 
     NewPasswordDialog _newPasswordDialog; 
     NetworkController _networkController;
 
-    bool _show = false;
     std::string _userName;
     std::string _email;
 };

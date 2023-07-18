@@ -144,7 +144,7 @@ void _BrowserWindow::processToolbar()
     ImGui::BeginDisabled(_networkController->getLoggedInUserName().has_value());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_IN_ALT)) {
         if (auto loginDialog = _loginDialog.lock()) {
-            loginDialog->show();
+            loginDialog->open();
         }
     }
     ImGui::EndDisabled();
@@ -168,10 +168,10 @@ void _BrowserWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_SHARE_ALT)) {
         if (_networkController->getLoggedInUserName()) {
             if (auto uploadSimulationDialog = _uploadSimulationDialog.lock()) {
-                uploadSimulationDialog->show();
+                uploadSimulationDialog->open();
             }
         } else {
-            _loginDialog.lock()->show();
+            _loginDialog.lock()->open();
         }
     }
     AlienImGui::Tooltip("Share your simulation with other users:\nYour current simulation will be uploaded to the server and made visible in the browser.");
@@ -260,7 +260,7 @@ void _BrowserWindow::processSimulationTable()
                     if (_networkController->getLoggedInUserName()) {
                         onToggleLike(*item);
                     } else {
-                        _loginDialog.lock()->show();
+                        _loginDialog.lock()->open();
                     }
                 }
                 AlienImGui::Tooltip("Give a star");
