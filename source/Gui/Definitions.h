@@ -92,8 +92,7 @@ using SelectionWindow = std::shared_ptr<_SelectionWindow>;
 class _PatternEditorWindow;
 using PatternEditorWindow = std::shared_ptr<_PatternEditorWindow>;
 
-class _WindowController;
-using WindowController = std::shared_ptr<_WindowController>;
+class WindowController;
 
 class _SavePatternDialog;
 using SavePatternDialog = std::shared_ptr<_SavePatternDialog>;

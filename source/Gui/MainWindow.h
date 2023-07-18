@@ -67,7 +67,6 @@ private:
     ImageToPatternDialog _imageToPatternDialog;
 
     ModeController _modeController;
-    WindowController _windowController;
     SimulationController _simController;
     StartupController _startupController;
     AutosaveController _autosaveController; 

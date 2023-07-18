@@ -8,6 +8,8 @@
 #include <imgui_freetype.h>
 #include <implot.h>
 
+#include "GlobalSettings.h"
+#include "WindowController.h"
 #include "Base/Resources.h"
 
 #include "Fonts/DroidSans.h"
@@ -26,14 +28,16 @@ StyleRepository& StyleRepository::getInstance()
 
 void StyleRepository::init()
 {
-    float temp;
-    glfwGetMonitorContentScale(
-        glfwGetPrimaryMonitor(), &_contentScaleFactor, &temp);  //consider only horizontal content scale
+    auto scaleFactor = WindowController::getInstance().getContentScaleFactor();
+
+    auto& style = ImGui::GetStyle();
+    style.ScaleAllSizes(scaleFactor);
+
 
     ImGuiIO& io = ImGui::GetIO();
 
     //default font (small with icons)
-    io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 16.0f * _contentScaleFactor);
+    io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 16.0f * scaleFactor);
 
     ImFontConfig configMerge;
     configMerge.MergeMode = true;
@@ -41,40 +45,38 @@ void StyleRepository::init()
     static const ImWchar rangesIcons[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
     io.Fonts->AddFontFromMemoryCompressedTTF(
         FontAwesomeSolid_compressed_data,
-        FontAwesomeSolid_compressed_size,
-        16.0f * _contentScaleFactor,
+        FontAwesomeSolid_compressed_size, 16.0f * scaleFactor,
         &configMerge,
         rangesIcons);
 
     //small bold font
-    _smallBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 16.0f * _contentScaleFactor);
+    _smallBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 16.0f * scaleFactor);
 
     //medium bold font
-    _mediumBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 24.0f * _contentScaleFactor);
+    _mediumBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 24.0f * scaleFactor);
 
     //medium font
-    _mediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 24.0f * _contentScaleFactor);
+    _mediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 24.0f * scaleFactor);
 
     //large font
-    _largeFont = io.Fonts->AddFontFromMemoryCompressedTTF(
-        DroidSans_compressed_data, DroidSans_compressed_size, 48.0f * _contentScaleFactor);
+    _largeFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 48.0f * scaleFactor);
 
     //icon font
-    _iconFont = io.Fonts->AddFontFromMemoryCompressedTTF(AlienIconFont_compressed_data, AlienIconFont_compressed_size, 24.0f * _contentScaleFactor);
+    _iconFont = io.Fonts->AddFontFromMemoryCompressedTTF(AlienIconFont_compressed_data, AlienIconFont_compressed_size, 24.0f * scaleFactor);
 
     static const ImWchar rangesIcons2[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
     io.Fonts->AddFontFromMemoryCompressedTTF(
-        FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 28.0f * _contentScaleFactor, &configMerge, rangesIcons2);
+        FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 28.0f * scaleFactor, &configMerge, rangesIcons2);
     io.Fonts->Build();
 
     //monospace medium font
-    _monospaceMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 14.0f * _contentScaleFactor);
+    _monospaceMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 14.0f * scaleFactor);
 
     //monospace large font
-    _monospaceLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 128.0f * _contentScaleFactor);
+    _monospaceLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 128.0f * scaleFactor);
 
-    _reefMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 24.0f * _contentScaleFactor);
-    _reefLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 64.0f * _contentScaleFactor);
+    _reefMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 24.0f * scaleFactor);
+    _reefLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 64.0f * scaleFactor);
 
     ImPlot::GetStyle().AntiAliasedLines = true;
 }
@@ -126,10 +128,10 @@ ImFont* StyleRepository::getReefLargeFont() const
 
 float StyleRepository::scale(float value) const
 {
-    return _contentScaleFactor * value;
+    return WindowController::getInstance().getContentScaleFactor() * value;
 }
 
 float StyleRepository::scaleInverse(float value) const
 {
-    return _contentScaleFactor / value;
+    return WindowController::getInstance().getContentScaleFactor() / value;
 }

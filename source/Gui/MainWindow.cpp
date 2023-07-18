@@ -98,9 +98,9 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     
     auto glfwVersion = initGlfw();
 
-    _windowController = std::make_shared<_WindowController>();
+    WindowController::getInstance().init();
 
-    auto windowData = _windowController->getWindowData();
+    auto windowData = WindowController::getInstance().getWindowData();
     glfwSetFramebufferSizeCallback(windowData.window, framebuffer_size_callback);
     glfwSwapInterval(1);  //enable vsync
 
@@ -123,7 +123,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
         throw std::runtime_error("Failed to initialize GLAD");
     }
 
-    _viewport = std::make_shared<_Viewport>(_windowController);
+    _viewport = std::make_shared<_Viewport>();
     _uiController = std::make_shared<_UiController>();
     _autosaveController = std::make_shared<_AutosaveController>(_simController, _viewport);
 
@@ -148,7 +148,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simController, _temporalControlWindow, _viewport, _statisticsWindow);
     _openSimulationDialog = std::make_shared<_OpenSimulationDialog>(_simController, _temporalControlWindow, _statisticsWindow, _viewport);
     _saveSimulationDialog = std::make_shared<_SaveSimulationDialog>(_simController, _viewport);
-    _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>(_windowController);
+    _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
     _browserWindow = std::make_shared<_BrowserWindow>(_simController, _networkController, _statisticsWindow, _viewport, _temporalControlWindow);
@@ -226,7 +226,7 @@ void _MainWindow::mainLoop()
 
 void _MainWindow::shutdown()
 {
-    _windowController->shutdown();
+    WindowController::getInstance().shutdown();
     _autosaveController->shutdown();
 
     ImGui_ImplOpenGL3_Shutdown();
@@ -353,7 +353,7 @@ void _MainWindow::renderSimulation()
     }
     ImGui::Render();
 
-    _fpsController->processForceFps(_windowController->getFps());
+    _fpsController->processForceFps(WindowController::getInstance().getFps());
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(_window);
@@ -673,10 +673,11 @@ void _MainWindow::processMenubar()
             _displaySettingsDialog->show();
         }
         if (ImGui::IsKeyPressed(GLFW_KEY_F7)) {
-            if (_windowController->isDesktopMode()) {
-                _windowController->setWindowedMode();
+            auto& windowController = WindowController::getInstance();
+            if (windowController.isDesktopMode()) {
+                windowController.setWindowedMode();
             } else {
-                _windowController->setDesktopMode();
+                windowController.setDesktopMode();
             }
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_K)) {

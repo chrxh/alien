@@ -17,8 +17,7 @@ namespace
     auto const RightColumnWidth = 185.0f;
 }
 
-_DisplaySettingsDialog::_DisplaySettingsDialog(WindowController const& windowController)
-    : _windowController(windowController)
+_DisplaySettingsDialog::_DisplaySettingsDialog()
 {
     auto primaryMonitor = glfwGetPrimaryMonitor();
     _videoModes = glfwGetVideoModes(primaryMonitor, &_videoModesCount);
@@ -37,14 +36,14 @@ void _DisplaySettingsDialog::process()
 
     ImGui::OpenPopup("Display settings");
     if (ImGui::BeginPopupModal("Display settings", NULL, ImGuiWindowFlags_None)) {
-        auto isFullscreen = !_windowController->isWindowedMode();
+        auto isFullscreen = !WindowController::getInstance().isWindowedMode();
 
         if(AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Full screen"), isFullscreen)) {
             if (isFullscreen) {
                 setFullscreen(_selectionIndex);
             } else {
                 _origSelectionIndex = _selectionIndex;
-                _windowController->setWindowedMode();
+                WindowController::getInstance().setWindowedMode();
             }
         }
 
@@ -62,7 +61,7 @@ void _DisplaySettingsDialog::process()
         }
         ImGui::EndDisabled();
 
-        auto fps = _windowController->getFps();
+        auto fps = WindowController::getInstance().getFps();
         if (AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
                     .name("Frames per second")
@@ -72,7 +71,7 @@ void _DisplaySettingsDialog::process()
                     .max(100)
                     .tooltip("A high frame rate leads to a greater GPU workload for rendering and thus lowers the simulation speed (time steps per second)."),
                 &fps)) {
-            _windowController->setFps(fps);
+            WindowController::getInstance().setFps(fps);
         }
 
         AlienImGui::Separator();
@@ -87,8 +86,8 @@ void _DisplaySettingsDialog::process()
         if (AlienImGui::Button("Cancel")) {
             ImGui::CloseCurrentPopup();
             _show = false;
-            _windowController->setMode(_origMode);
-            _windowController->setFps(_origFps);
+            WindowController::getInstance().setMode(_origMode);
+            WindowController::getInstance().setFps(_origFps);
             _selectionIndex = _origSelectionIndex;
         }
 
@@ -101,16 +100,16 @@ void _DisplaySettingsDialog::show()
     _show = true;
     _selectionIndex = getSelectionIndex();
     _origSelectionIndex = _selectionIndex;
-    _origMode = _windowController->getMode();
-    _origFps = _windowController->getFps();
+    _origMode = WindowController::getInstance().getMode();
+    _origFps = WindowController::getInstance().getFps();
 }
 
 void _DisplaySettingsDialog::setFullscreen(int selectionIndex)
 {
     if (0 == selectionIndex) {
-        _windowController->setDesktopMode();
+        WindowController::getInstance().setDesktopMode();
     } else {
-        _windowController->setUserDefinedResolution(_videoModes[selectionIndex - 1]);
+        WindowController::getInstance().setUserDefinedResolution(_videoModes[selectionIndex - 1]);
     }
 }
 
@@ -126,8 +125,9 @@ namespace
 int _DisplaySettingsDialog::getSelectionIndex() const
 {
     auto result = 0;
-    if (!_windowController->isWindowedMode() && !_windowController->isDesktopMode()) {
-        auto userMode = _windowController->getUserDefinedResolution();
+    auto& windowController = WindowController::getInstance();
+    if (!windowController.isWindowedMode() && !windowController.isDesktopMode()) {
+        auto userMode = windowController.getUserDefinedResolution();
         for (int i = 0; i < _videoModesCount; ++i) {
             if (_videoModes[i] == userMode) {
                 return i + 1;
