@@ -121,9 +121,6 @@ using MultiplierWindow = std::shared_ptr<_MultiplierWindow>;
 class _PatternAnalysisDialog;
 using PatternAnalysisDialog = std::shared_ptr<_PatternAnalysisDialog>;
 
-class _ExportStatisticsDialog;
-using ExportStatisticsDialog = std::shared_ptr<_ExportStatisticsDialog>;
-
 class _FpsController;
 using FpsController = std::shared_ptr<_FpsController>;
 
