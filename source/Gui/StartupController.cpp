@@ -15,7 +15,7 @@
 
 namespace
 {
-    std::chrono::milliseconds::rep const LogoDuration = 1500;
+    std::chrono::milliseconds::rep const LogoDuration = 2500;
     std::chrono::milliseconds::rep const FadeOutDuration = 1500;
     std::chrono::milliseconds::rep const FadeInDuration = 500;
 }
@@ -119,9 +119,10 @@ void _StartupController::processWindow()
 {
     auto styleRep = StyleRepository::getInstance();
     auto center = ImGui::GetMainViewport()->GetCenter();
+    auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    auto imageScale = styleRep.scale(1.0f);
-    ImGui::SetNextWindowSize(ImVec2(_logo.width * imageScale + 30.0f, _logo.height * imageScale + 30.0f));
+    auto imageScale = scale(1.0f);
+    ImGui::SetNextWindowSize(ImVec2(_logo.width * imageScale + 10.0f, _logo.height * imageScale + 10.0f));
 
     ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
@@ -129,19 +130,70 @@ void _StartupController::processWindow()
     ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(_logo.width * imageScale, _logo.height * imageScale));
     ImGui::End();
 
-    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+    drawGrid();
 
+    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     ImColor textColor = Const::ProgramVersionColor;
     textColor.Value.w = ImGui::GetStyle().Alpha;
-
-    drawList->AddText(
-        styleRep.getReefLargeFont(), scale(48.0f), {center.x - scale(185), center.y + scale(100 + 140)}, textColor, "Artificial Life Environment");
+    drawList->AddText(styleRep.getReefLargeFont(), scale(48.0f), {center.x - scale(165), bottom - scale(200)}, textColor, "Artificial Life Environment");
 
     auto versionString = "Version " + Const::ProgramVersion;
     drawList->AddText(
         styleRep.getReefMediumFont(),
         scale(24.0f),
-        {center.x - scale(toFloat(versionString.size()) * 3.8f), center.y + scale(150 + 150)},
+        {center.x - scale(toFloat(versionString.size()) * 3.0f), bottom - scale(140)},
         textColor,
         versionString.c_str());
+}
+
+namespace
+{
+    enum class Direction
+    {
+        Up,
+        Down,
+        Left,
+        Right
+    };
+    void drawGridIntern(float lineDistance, float maxDistance, Direction const& direction, bool includeMainLine)
+    {
+        if (lineDistance > 10.0f) {
+            drawGridIntern(lineDistance / 2, maxDistance, direction, false);
+        }
+        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+        auto alpha = std::min(1.0f, lineDistance / 20.0f);
+        float accumulatedDistance = 0.0f;
+
+        if (!includeMainLine) {
+            accumulatedDistance += lineDistance;
+        }
+        while (accumulatedDistance < maxDistance) {
+            ImU32 color = ImColor::HSV(0.0f, 0.8f, 0.45f, alpha * (maxDistance - accumulatedDistance) / maxDistance);
+            switch (direction) {
+            case Direction::Up:
+                drawList->AddLine(ImVec2(0.0f, 500.0f - accumulatedDistance), ImVec2(1980.0f, 500.0f - accumulatedDistance), color);
+                break;
+            case Direction::Down:
+                drawList->AddLine(ImVec2(0.0f, 500.0f + accumulatedDistance), ImVec2(1980.0f, 500.0f + accumulatedDistance), color);
+                break;
+            case Direction::Left:
+                drawList->AddLine(ImVec2(990.0f - accumulatedDistance, 0.0f), ImVec2(990.0f - accumulatedDistance, 1080.0f), color);
+                break;
+            case Direction::Right:
+                drawList->AddLine(ImVec2(990.0f + accumulatedDistance, 0.0f), ImVec2(990.0f + accumulatedDistance, 1080.0f), color);
+                break;
+            }
+            accumulatedDistance += lineDistance;
+        }
+    }
+}
+
+void _StartupController::drawGrid()
+{
+    static float lineDistance = 10.0f;
+    drawGridIntern(lineDistance, 300.0f, Direction::Up, true);
+    drawGridIntern(lineDistance, 300.0f, Direction::Down, false);
+    //drawGridIntern(lineDistance, 1000.0f, Direction::Left, true);
+    //drawGridIntern(lineDistance, 1000.0f, Direction::Right, false);
+    lineDistance *= 1.01f;
 }
