@@ -130,9 +130,7 @@ void _StartupController::processWindow()
     ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(_logo.width * imageScale, _logo.height * imageScale));
     ImGui::End();
 
-    if (_state == State::Unintialized || _state == State::RequestLoading) {
-        drawGrid();
-    }
+    drawGrid();
 
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     ImColor textColor = Const::ProgramVersionColor;
@@ -163,7 +161,7 @@ namespace
             drawGridIntern(lineDistance / 2, maxDistance, direction, false);
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto alpha = std::min(1.0f, lineDistance / 20.0f);
+        auto alpha = std::min(1.0f, lineDistance / 20.0f) * ImGui::GetStyle().Alpha;
         float accumulatedDistance = 0.0f;
 
         if (!includeMainLine) {

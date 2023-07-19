@@ -45,9 +45,6 @@ _BrowserWindow::_BrowserWindow(
     , _viewport(viewport)
     , _temporalControlWindow(temporalControlWindow)
 {
-    auto firstStart = GlobalSettings::getInstance().getBoolState("windows.browser.first start", true);
-    refreshIntern(firstStart);
-    _showCommunityCreations = GlobalSettings::getInstance().getBoolState("windows.browser.show community creations", _showCommunityCreations);
 }
 
 _BrowserWindow::~_BrowserWindow()
@@ -60,6 +57,10 @@ void _BrowserWindow::registerCyclicReferences(LoginDialogWeakPtr const& loginDia
 {
     _loginDialog = loginDialog;
     _uploadSimulationDialog = uploadSimulationDialog;
+
+    auto firstStart = GlobalSettings::getInstance().getBoolState("windows.browser.first start", true);
+    refreshIntern(firstStart);
+    _showCommunityCreations = GlobalSettings::getInstance().getBoolState("windows.browser.show community creations", _showCommunityCreations);
 }
 
 void _BrowserWindow::onRefresh()
