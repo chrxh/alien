@@ -104,6 +104,9 @@ void WindowController::init()
 
 void WindowController::shutdown()
 {
+    if (isWindowedMode()) {
+        updateWindowSize();
+    }
     auto& settings = GlobalSettings::getInstance();
     settings.setStringState("settings.display.mode", _mode);
     settings.setIntState("settings.display.window width", _sizeInWindowedMode.x);
@@ -111,9 +114,6 @@ void WindowController::shutdown()
     settings.setIntState("settings.display.fps", _fps);
     settings.setFloatState("settings.display.content scale factor", _contentScaleFactor);
 
-    if (isWindowedMode()) {
-        updateWindowSize();
-    }
 }
 
 auto WindowController::getWindowData() const -> WindowData
