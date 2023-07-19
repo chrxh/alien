@@ -26,6 +26,8 @@ public:
 private:
     void processWindow();
 
+    void drawGrid();
+
     SimulationController _simController;
     TemporalControlWindow _temporalControlWindow;
     Viewport _viewport;
