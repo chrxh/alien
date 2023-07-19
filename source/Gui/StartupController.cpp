@@ -169,20 +169,22 @@ namespace
         if (!includeMainLine) {
             accumulatedDistance += lineDistance;
         }
+        auto right = ImGui::GetMainViewport()->Pos.x + ImGui::GetMainViewport()->Size.x;
+        auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
         while (accumulatedDistance < maxDistance) {
             ImU32 color = ImColor::HSV(0.0f, 0.8f, 0.45f, alpha * (maxDistance - accumulatedDistance) / maxDistance);
             switch (direction) {
             case Direction::Up:
-                drawList->AddLine(ImVec2(0.0f, 500.0f - accumulatedDistance), ImVec2(1980.0f, 500.0f - accumulatedDistance), color);
+                drawList->AddLine(ImVec2(0.0f, bottom / 2 - accumulatedDistance), ImVec2(right, bottom / 2 - accumulatedDistance), color);
                 break;
             case Direction::Down:
-                drawList->AddLine(ImVec2(0.0f, 500.0f + accumulatedDistance), ImVec2(1980.0f, 500.0f + accumulatedDistance), color);
+                drawList->AddLine(ImVec2(0.0f, bottom / 2 + accumulatedDistance), ImVec2(right, bottom / 2 + accumulatedDistance), color);
                 break;
             case Direction::Left:
-                drawList->AddLine(ImVec2(990.0f - accumulatedDistance, 0.0f), ImVec2(990.0f - accumulatedDistance, 1080.0f), color);
+                drawList->AddLine(ImVec2(right / 2 - accumulatedDistance, 0.0f), ImVec2(right / 2 - accumulatedDistance, bottom), color);
                 break;
             case Direction::Right:
-                drawList->AddLine(ImVec2(990.0f + accumulatedDistance, 0.0f), ImVec2(990.0f + accumulatedDistance, 1080.0f), color);
+                drawList->AddLine(ImVec2(right / 2 + accumulatedDistance, 0.0f), ImVec2(right / 2 + accumulatedDistance, bottom), color);
                 break;
             }
             accumulatedDistance += lineDistance;
