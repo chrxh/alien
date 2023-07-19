@@ -29,6 +29,7 @@ private:
 
     void processSimulationTable();
     void processUserTable();
+
     void processStatus();
     void processFilter();
     void processToolbar();
