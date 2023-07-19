@@ -130,7 +130,9 @@ void _StartupController::processWindow()
     ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(_logo.width * imageScale, _logo.height * imageScale));
     ImGui::End();
 
-    drawGrid();
+    if (_state == State::Unintialized || _state == State::RequestLoading) {
+        drawGrid();
+    }
 
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     ImColor textColor = Const::ProgramVersionColor;
