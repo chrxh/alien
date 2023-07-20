@@ -30,7 +30,10 @@ void _GettingStartedWindow::processIntern()
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50)), false)) {
         ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x);
 
-        drawHeadline("Introduction");
+        /**
+         * INTRO
+         */
+        drawHeading1("Introduction");
 
         ImGui::Text("ALIEN is an artificial life and physics simulation tool based on a 2D CUDA-powered particle engine for soft bodies and fluids.");
         ImGui::Text(
@@ -41,7 +44,10 @@ void _GettingStartedWindow::processIntern()
             "by different populations where every object is composed of interacting particles with specific functions (regardless of whether it models a "
             "plant, herbivore, carnivore, virus, environmental structure, etc.).");
 
-        drawHeadline("First steps");
+        /**
+         * FIRST STEPS
+         */
+        drawHeading1("First steps");
 
         ImGui::Text("The easiest way to get to know the ALIEN simulator is to download and run an existing simulation file. You can then try out different "
                     "function and modify the simulation according to your wishes.");
@@ -86,24 +92,25 @@ void _GettingStartedWindow::processIntern()
             "enables the creation of specific conditions for populations coexisting in a shared world. For example, "
             "plant-like organisms may have a higher absorption rate for radiation particles, so they can get their energy from that.");
 
-        ImGui::Spacing();
-
-        AlienImGui::BoldText("Important");
+        drawHeading2("Important");
         ImGui::Text(
             "On older graphics cards or when using a high resolution (e.g. 4K), it is recommended to reduce the rendered frames per second, "
             "as this significantly increases the simulation speed (time steps per second). This adjustment can be made in the display settings.");
 
-        drawHeadline("Basic notion");
+        /**
+         * BASIC NOTION
+         */
+        drawHeading1("Basic notion");
 
         ImGui::Text("Generally, in an ALIEN simulation, all objects as well as thermal radiation are modeled by different types of particles moving through an "
                     "empty space. The following terms are frequently used:");
 
         ImGui::Spacing();
-        AlienImGui::BoldText("World");
+        drawHeading2("World");
         ImGui::Text("An ALIEN world is two-dimensional rectangular domain with periodic boundary conditions. The space is modeled as a continuum.");
 
         ImGui::Spacing();
-        AlienImGui::BoldText("Cell");
+        drawHeading2("Cell");
         ImGui::Text(
             "Cells are the basic building blocks that make up everything. They can be connected to each others, possibly attached to the background "
             "(to model barriers), possess special functions and transport activity values. Additionally, cells have various physical properties, including");
@@ -113,7 +120,7 @@ void _GettingStartedWindow::processIntern()
         drawItemText("Upper limit of connections");
 
         ImGui::Spacing();
-        AlienImGui::BoldText("Cell connection");
+        drawHeading2("Cell connection");
         ImGui::Text(
             "A cell connection is a bond between two cells. It stores the reference distance and on each side a reference angle to a possibly further cell "
             "connection. The reference distance and angles are calculated when the connection is established. As soon as the actual distance deviates from "
@@ -121,7 +128,7 @@ void _GettingStartedWindow::processIntern()
             "case of an angle mismatch.");
 
         ImGui::Spacing();
-        AlienImGui::BoldText("Cell activity");
+        drawHeading2("Cell activity");
         ImGui::Text("Cells can contain an activity state comprising of 8 real values, primarily utilized for controlling cell functions. The activities are "
                     "refreshed periodically, specifically when the cell functions are executed. To be more precise, each cell function is executed at regular "
                     "time intervals (every 6 time steps). The 'execution order number' specifies the exact time within each interval.");
@@ -130,7 +137,7 @@ void _GettingStartedWindow::processIntern()
                     "outcome is utilized to determine the new cell activity.");
 
         ImGui::Spacing();
-        AlienImGui::BoldText("Cell function");
+        drawHeading2("Cell function");
         ImGui::Text("It is possible to assign a special function to a cell, which will be executed at regular time intervals. The following functions are "
                     "implemented:");
         drawItemText("Neuron: It equips the cell with a small network of 8 neurons. It processes the activity values fetched from the input.");
@@ -148,46 +155,86 @@ void _GettingStartedWindow::processIntern()
         drawItemText("Sensor: If activated, it performs a long-range scan for the concentration of cells with a certain color.");
 
         ImGui::Spacing();
-        AlienImGui::BoldText("Cell color");
+        drawHeading2("Cell color");
         ImGui::Text("In addition to cell functions, a color can be used to perform additional user-defined customization of cells. For this purpose, most "
                     "simulation parameters can be adjusted separately for each color, if desired. As a result, cells of different colors may have individual "
                     "properties.");
 
         ImGui::Spacing();
-        AlienImGui::BoldText("Cell cluster");
+        drawHeading2("Cell cluster");
         ImGui::Text("A cell cluster (or cluster for short) is a connected graph consisting of cells and cell connections. Two cells in a cluster are therefore "
                     "connected to each other directly or via other cells. A cluster physically represents a particular body.");
 
         ImGui::Spacing();
-        AlienImGui::BoldText("Energy particle");
+        drawHeading2("Energy particle");
         ImGui::Text(
             "An energy particle is a particle which has only an energy value, position and velocity. Unlike cells, they cannot form clusters or perform any "
             "additional functions. Energy particles are produced by cells as radiation or during decay and can, in turn, also be absorbed.");
 
         ImGui::Spacing();
-        AlienImGui::BoldText("Pattern");
+        drawHeading2("Pattern");
         ImGui::Text("A pattern is a set of cell clusters and energy particles.");
 
-        drawHeadline("Examples");
-        ImGui::Text(
+        /**
+         * EXAMPLES
+         */
+        drawHeading1("Examples");
+        drawParagraph(
             "ALIEN comes with a lot of simulation files that can be found in the browser window. They are good for experimenting with certain aspects of the "
                     "program. We pick some examples to give a short overview:");
-        AlienImGui::BoldText("Fluids, walls and soft bodies");
-        ImGui::Text("There are several pure physics simulations demonstrating the engines' capability.");
+
+        drawHeading2("Fluids, walls and soft bodies");
+        drawParagraph("There are several pure physics simulations demonstrating the engines' capability. They are suitable for testing the influence of "
+                      "simulation parameters such as 'Smoothing length', 'Pressure', 'Viscosity', etc.");
         drawItemText("Fluids/Pump with Soft-Bodies");
         drawItemText("Demos/Perpetual Motion Machine");
         drawItemText("Demos/Stormy Night");
-        ImGui::Text("They are suitable for testing the influence of simulation parameters such as 'Smoothing length', 'Pressure', 'Viscosity', etc.");
-        AlienImGui::BoldText("Evolution of self-replicators");
-        AlienImGui::BoldText("Plant-herbivore ecosystems");
-        AlienImGui::BoldText("Swarming");
+
+        drawHeading2("Evolution of self-replicators");
+        drawParagraph("By attaching higher-level functions to particle networks, complex multicellular organisms can be modeled. They can evolve over time as "
+                    "they are subject to mutations. The following examples consist of homogeneous worlds populated by self-replicating agents. Different "
+                    "selection pressures control evolution.");
+        drawItemText("Complex Evolution Testbed/Example");
+        drawItemText("Diversity/Example");
+        drawItemText("Color Niches/Example");
+
+        drawHeading2("Plant-herbivore ecosystems");
+        drawParagraph("By customizing the cells according to their color, it is possible to specify different types of organisms. There are many examples that "
+                      "feature two classes: plants and herbivores. Plants are able to consume radiation particles, while herbivores can consume plants. This "
+                      "simple relationship already provides interesting dynamics, as the following examples show.");
+        drawItemText("Twin Worlds/Example");
+        drawItemText("Bugs and Flowers/Example");
+        drawItemText("Self-replicating Fluid/Initial Setting");
+
+        drawHeading2("Swarming");
+        drawParagraph("There are powerful sensors available as cell functions for detecting concentrations of specific colors in the surroundings. "
+                      "Organisms equipped with these sensors can perceive their environment, nourish their neural networks, and respond accordingly.");
+        drawItemText("Swarms/Space Invaders");
+        drawItemText("Evolving Swarms/Example");
+
+        /**
+         * SIMULATION PARAMETERS
+         */
+        drawHeading1("Simulation parameters");
+        drawHeading2("Physics");
+        drawHeading2("Radiation sources");
+        drawHeading2("Cell specific parameters");
+
+        /**
+         * EDITORS
+         */
+        drawHeading1("Editors");
+        drawHeading2("Drag and drop");
+        drawHeading2("Pattern editor");
+        drawHeading2("Genome editor");
+        drawHeading2("Cell inspection");
+        
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Text("[work in progress]");
 
-        
         //ImGui::Text("There is a lot to explore. ALIEN features an extensive graph and particle editor in order to build custom worlds with desired "
         //            "environmental structures and machines. A documentation with tutorial-like introductions to various topics can be found at");
 
@@ -264,7 +311,7 @@ void _GettingStartedWindow::drawTitle()
     AlienImGui::Separator();
 }
 
-void _GettingStartedWindow::drawHeadline(std::string const& text)
+void _GettingStartedWindow::drawHeading1(std::string const& text)
 {
     AlienImGui::Separator();
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
@@ -273,11 +320,22 @@ void _GettingStartedWindow::drawHeadline(std::string const& text)
     AlienImGui::Separator();
 }
 
+void _GettingStartedWindow::drawHeading2(std::string const& text)
+{
+    ImGui::Spacing();
+    AlienImGui::BoldText(text);
+}
+
 void _GettingStartedWindow::drawItemText(std::string const& text)
 {
     ImGui::Text(ICON_FA_CHEVRON_RIGHT);
     ImGui::SameLine();
     AlienImGui::Text(text);
+}
+
+void _GettingStartedWindow::drawParagraph(std::string const& text)
+{
+    ImGui::Text(text.c_str());
 }
 
 void _GettingStartedWindow::openWeblink(std::string const& link)
