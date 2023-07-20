@@ -130,7 +130,9 @@ void _StartupController::processWindow()
     ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(_logo.width * imageScale, _logo.height * imageScale));
     ImGui::End();
 
-    drawGrid();
+    if (_state == State::Unintialized || _state == State::RequestLoading) {
+        drawGrid();
+    }
 
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     ImColor textColor = Const::ProgramVersionColor;
@@ -148,6 +150,7 @@ void _StartupController::processWindow()
 
 namespace
 {
+    auto constexpr InitialLineDistance = 15.0f;
     enum class Direction
     {
         Up,
@@ -157,11 +160,11 @@ namespace
     };
     void drawGridIntern(float lineDistance, float maxDistance, Direction const& direction, bool includeMainLine)
     {
-        if (lineDistance > 10.0f) {
-            drawGridIntern(lineDistance / 2, maxDistance, direction, false);
+        if (lineDistance > scale(InitialLineDistance)) {
+            drawGridIntern(lineDistance / 2, maxDistance, direction, includeMainLine);
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto alpha = std::min(1.0f, lineDistance / 20.0f) * ImGui::GetStyle().Alpha;
+        auto alpha = std::min(1.0f, lineDistance / scale(InitialLineDistance * 2)) * ImGui::GetStyle().Alpha;
         float accumulatedDistance = 0.0f;
 
         if (!includeMainLine) {
@@ -170,7 +173,7 @@ namespace
         auto right = ImGui::GetMainViewport()->Pos.x + ImGui::GetMainViewport()->Size.x;
         auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
         while (accumulatedDistance < maxDistance) {
-            ImU32 color = ImColor::HSV(0.0f, 0.8f, 0.45f, alpha * (maxDistance - accumulatedDistance) / maxDistance);
+            ImU32 color = ImColor::HSV(0.6f, 0.8f, 0.4f, alpha * (maxDistance - accumulatedDistance) / maxDistance);
             switch (direction) {
             case Direction::Up:
                 drawList->AddLine(ImVec2(0.0f, bottom / 2 - accumulatedDistance), ImVec2(right, bottom / 2 - accumulatedDistance), color);
@@ -192,10 +195,10 @@ namespace
 
 void _StartupController::drawGrid()
 {
-    static float lineDistance = 10.0f;
-    drawGridIntern(lineDistance, 300.0f, Direction::Up, true);
-    drawGridIntern(lineDistance, 300.0f, Direction::Down, false);
+    static float lineDistance = scale(InitialLineDistance);
+    drawGridIntern(lineDistance, scale(300.0f), Direction::Up, true);
+    drawGridIntern(lineDistance, scale(300.0f), Direction::Down, false);
     //drawGridIntern(lineDistance, 1000.0f, Direction::Left, true);
     //drawGridIntern(lineDistance, 1000.0f, Direction::Right, false);
-    lineDistance *= 1.01f;
+    lineDistance *= 1.05f;
 }
