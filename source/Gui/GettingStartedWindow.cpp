@@ -349,7 +349,7 @@ void _GettingStartedWindow::drawItemText(std::string const& text)
 
 void _GettingStartedWindow::drawParagraph(std::string const& text)
 {
-    ImGui::Text(text.c_str());
+    AlienImGui::Text(text);
 }
 
 void _GettingStartedWindow::openWeblink(std::string const& link)
