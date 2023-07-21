@@ -816,7 +816,7 @@ void _SimulationParametersWindow::processBase(
                     .min(0)
                     .max(1.0f)
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionAttackerSameMutantPenalty))
-                    .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation ID."),
+                    .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
                 simParameters.cellFunctionAttackerSameMutantPenalty);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()

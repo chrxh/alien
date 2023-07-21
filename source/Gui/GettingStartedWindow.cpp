@@ -216,6 +216,20 @@ void _GettingStartedWindow::processIntern()
          * SIMULATION PARAMETERS
          */
         drawHeading1("Simulation parameters");
+        drawParagraph(
+            "All parameters relevant to the simulation can be adjusted here. By default, the parameters are set uniformly for the entire world. However, it is "
+            "also possible to allow certain parameters to vary locally. To do this, you can create a new tab in the simulation parameter window by clicking on "
+            "the '+' button. This provides a spatially (fuzzy) delimited area where the global parameters can be overwritten. This area or spot is also characterized by a "
+              "different color.");
+        drawParagraph("Regardless of this, many parameters can also be set depending on the cell color. For this purpose click the '+' button beside the "
+                      "parameter. This customization is useful when you want to define different classes of species.");
+        drawParagraph("In general, the following types of parameters can be set.");
+        drawHeading2("Rendering");
+        drawParagraph(
+            "In addition to the background color, you can determine the coloring of the cells here. Each cell is assigned a specific color, which can be used "
+            "for customization and which is also used by default for rendering. However, in evolution simulations, it can be very useful to color mutants "
+            "differently. This allows for better visual evaluation of diversities, mutation rates, and successful mutants, etc. For this purpose, you can "
+            "switch the colorization  to the mutation id.");
         drawHeading2("Physics");
         drawHeading2("Radiation sources");
         drawHeading2("Cell specific parameters");
