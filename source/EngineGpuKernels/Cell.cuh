@@ -70,6 +70,7 @@ struct SensorFunction
     float angle;
     float minDensity;
     int color;
+    int targetedCreatureId;
 };
 
 struct NerveFunction

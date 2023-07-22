@@ -238,6 +238,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
 
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Age").textWidth(CellFunctionBaseTabTextWidth), cell.age);
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Mutation id").textWidth(CellFunctionBaseTabTextWidth), cell.mutationId);
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Creature id").textWidth(CellFunctionBaseTabTextWidth), cell.creatureId);
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Activation time").textWidth(CellFunctionBaseTabTextWidth), cell.activationTime);
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Execution order").textWidth(CellFunctionBaseTabTextWidth), cell.executionOrderNumber);
@@ -542,6 +543,8 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
         AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellFunctionTextWidth), sensor.color);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Min density").format("%.2f").step(0.05f).textWidth(CellFunctionTextWidth), sensor.minDensity);
+        AlienImGui::InputInt(
+            AlienImGui::InputIntParameters().name("Target creature id").textWidth(CellFunctionTextWidth), sensor.targetedCreatureId);
         ImGui::TreePop();
     }
 }

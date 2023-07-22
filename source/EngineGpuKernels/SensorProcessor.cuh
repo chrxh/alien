@@ -67,14 +67,14 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     __shared__ int minDensity;
     __shared__ int color;
     __shared__ float refScanAngle;
-    __shared__ uint32_t lookupResult;
+    __shared__ uint64_t lookupResult;
 
     if (threadIdx.x == 0) {
         refScanAngle = Math::angleOfVector(CellFunctionProcessor::calcSignalDirection(data, cell));
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 100);
         color = cell->cellFunctionData.sensor.color;
 
-        lookupResult = 0xffffffff;
+        lookupResult = 0xffffffffffffffff;
     }
     __syncthreads();
 
@@ -89,9 +89,19 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             data.cellMap.correctPosition(scanPos);
             auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getDensity(scanPos, color));
             if (density >= minDensity) {
+                //uint32_t creatureId = 0;
+                //data.cellMap.executeForEach(scanPos, 2.0f, cell->detached, [&creatureId](auto const& otherCell) {
+                //    creatureId = otherCell->creatureId;
+                //});
+                auto otherCell = data.cellMap.getFirst(scanPos);
+                uint32_t creatureId = 0;
+                if (otherCell && otherCell->color == color) {
+                    creatureId = otherCell->creatureId;
+                }
                 auto relAngle = Math::subtractAngle(angle, refScanAngle);
                 uint32_t angle = convertAngleToData(relAngle);
-                uint32_t combined = static_cast<uint32_t>(radius) << 16 | density << 8 | angle;
+                uint64_t combined =
+                    static_cast<uint64_t>(radius) << 48 | static_cast<uint64_t>(density) << 40 | static_cast<uint64_t>(angle) << 32 | creatureId;
                 atomicMin(&lookupResult, combined);
             }
         }
@@ -99,12 +109,16 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     }
 
     if (threadIdx.x == 0) {
-        if (lookupResult != 0xffffffff) {
+        if (lookupResult != 0xffffffffffffffff) {
             activity.channels[0] = 1;                                                     //something found
-            activity.channels[1] = static_cast<float>((lookupResult >> 8) & 0xff) / 256;  //density
-            activity.channels[2] = static_cast<float>(lookupResult >> 16) / 256;  //distance
-            activity.channels[3] = convertDataToAngle(static_cast<int8_t>(lookupResult & 0xff)) / 360.0f;  //angle: between -0.5 and 0.5
+            activity.channels[1] = static_cast<float>((lookupResult >> 40) & 0xff) / 256;  //density
+            activity.channels[2] = static_cast<float>(lookupResult >> 48) / 256;  //distance
+            activity.channels[3] = convertDataToAngle(static_cast<int8_t>((lookupResult >> 32) & 0xff)) / 360.0f;  //angle: between -0.5 and 0.5
             statistics.incNumSensorMatches(cell->color);
+            auto targetCreatureId = lookupResult & 0xffffffff;
+            if (targetCreatureId != 0xffffffff) {
+                cell->cellFunctionData.sensor.targetedCreatureId = toInt(targetCreatureId);
+            }
         } else {
             activity.channels[0] = 0;  //nothing found
         }

@@ -89,6 +89,7 @@ namespace
     auto constexpr Id_Sensor_FixedAngle = 0;
     auto constexpr Id_Sensor_MinDensity = 1;
     auto constexpr Id_Sensor_Color = 2;
+    auto constexpr Id_Sensor_TargetedCreatureId = 3;
 
     auto constexpr Id_Transmitter_Mode = 0;
 
@@ -517,6 +518,7 @@ namespace cereal
         loadSave<std::optional<float>>(task, auxiliaries, Id_Sensor_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
         loadSave<float>(task, auxiliaries, Id_Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
         loadSave<int>(task, auxiliaries, Id_Sensor_Color, data.color, defaultObject.color);
+        loadSave<int>(task, auxiliaries, Id_Sensor_TargetedCreatureId, data.targetedCreatureId, defaultObject.targetedCreatureId);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SensorDescription)
