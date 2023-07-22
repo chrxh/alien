@@ -69,6 +69,27 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (energyToTransfer < 0) {
                 return;
             }
+
+            bool creatureIdMatch = false;
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto lookupCell = cell->connections[i].cell;
+                if (lookupCell->cellFunction == CellFunction_Sensor && lookupCell->cellFunctionData.sensor.targetedCreatureId == otherCell->creatureId) {
+                    creatureIdMatch = true;
+                    break;
+                }
+                for (int j = 0; j < lookupCell->numConnections; ++j) {
+                    auto otherLookupCell = lookupCell->connections[j].cell;
+                    if (otherLookupCell->cellFunction == CellFunction_Sensor
+                        && otherLookupCell->cellFunctionData.sensor.targetedCreatureId == otherCell->creatureId) {
+                        creatureIdMatch = true;
+                        break;
+                    }
+                }
+            }
+            if (!creatureIdMatch) {
+                return;
+            }
+
             if (otherCell->genomeSize > cell->genomeSize) {
                 auto genomeSizeBonus = cudaSimulationParameters.cellFunctionAttackerGenomeSizeBonus[cell->color][otherCell->color];
                 energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<float>(otherCell->genomeSize - cell->genomeSize));
