@@ -231,7 +231,16 @@ void _GettingStartedWindow::processIntern()
             "differently. This allows for better visual evaluation of diversities, mutation rates, and successful mutants, etc. For this purpose, you can "
             "switch the colorization  to the mutation id.");
         drawHeading2("Physics");
+        drawParagraph("Basic physical properties can be modified in these settings. This includes adjusting the radiation intensity, various thresholds, and "
+                     "the motion algorithm. Changes can have significant effects on performance and, in the worst case, may lead to program crashes.");
         drawHeading2("Radiation sources");
+        drawParagraph("Optionally, you can define radiation sources by opening the corresponding editor. Typically, all cells lose energy over time by "
+                      "emitting particles. These energy particles travel through space and can be absorbed by other cells under certain conditions. When no "
+                      "radiation source is defined, energy particles are emitted at the cell's position, resulting in a more or less uniform distribution of "
+                      "energy particles throughout space over time. For certain simulations, especially in modeling plant species, it is beneficial to specify "
+                      "explicit sources where energy particles should be generated. This can be achieved in the 'Radiation sources' window. Even when a source "
+                      "is defined, cells continue to lose the same amount of energy as before. The difference is that particles are now spawned at the "
+                      "specified source. The energy conservation principle remains intact.");
         drawHeading2("Cell specific parameters");
 
         /**
@@ -242,7 +251,16 @@ void _GettingStartedWindow::processIntern()
         drawHeading2("Pattern editor");
         drawHeading2("Genome editor");
         drawHeading2("Cell inspection");
-        
+        drawHeading2("Mass operations");
+
+        /**
+         * FREQUENTLY ASK QUESTIONS
+         */
+        drawHeading1("Frequently asked questions");
+        drawHeading2("Why does the radiation source generates no energy particles?");
+        drawHeading2("How does a simple organism work?");
+        drawHeading2("How are neural networks incorporated?");
+
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Spacing();
