@@ -44,6 +44,7 @@ struct SimulationParameters
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
     ColorVector<int> radiationMinCellAge = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> radiationAbsorptionVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> highRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
     bool clusterDecay = false;
@@ -96,7 +97,6 @@ struct SimulationParameters
     ColorVector<float> cellFunctionAttackerEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
     ColorVector<float> cellFunctionAttackerEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
     ColorVector<float> cellFunctionAttackerColorInhomogeneityFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    ColorVector<float> cellFunctionAttackerVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorMatrix<float> cellFunctionAttackerGenomeSizeBonus = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
@@ -166,7 +166,7 @@ struct SimulationParameters
             if (cellMaxAge[i] != other.cellMaxAge[i]) {
                 return false;
             }
-            if (cellFunctionAttackerVelocityPenalty[i] != other.cellFunctionAttackerVelocityPenalty[i]) {
+            if (radiationAbsorptionVelocityPenalty[i] != other.radiationAbsorptionVelocityPenalty[i]) {
                 return false;
             }
             if (cellFunctionInjectorRadius[i] != other.cellFunctionInjectorRadius[i]) {

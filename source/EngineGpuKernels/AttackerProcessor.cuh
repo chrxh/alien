@@ -79,9 +79,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 energyToTransfer *= (1.0f - sameMutantPenalty);
             }
 
-            auto velocityPenalty = Math::length(cell->vel) * 20 * cudaSimulationParameters.cellFunctionAttackerVelocityPenalty[cell->color] + 1.0f;
-            energyToTransfer /= velocityPenalty;
-
             auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);
             float defendStrength =
                 numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.cellFunctionDefenderAgainstAttackerStrength[cell->color], numDefenderCells);
