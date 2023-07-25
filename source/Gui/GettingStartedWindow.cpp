@@ -242,6 +242,16 @@ void _GettingStartedWindow::processIntern()
                       "is defined, cells continue to lose the same amount of energy as before. The difference is that particles are now spawned at the "
                       "specified source. The energy conservation principle remains intact.");
         drawHeading2("Cell specific parameters");
+        drawParagraph("These parameter types are particularly important when simulating (self-replicating) agents composed of cell networks, going beyond pure "
+                      "physical simulations. Many of the different cell functions depend on specific parameters, which can be adjusted here. Particularly "
+                      "important are the parameters for mutation rates and the attack functions.With the latter, the food chain between cells of different "
+                      "colors can be configured. For example, in the 'Food chain color matrix' one could specify that cells with a certain color can only "
+                      "consume cells with a certain other color but not themselves.");
+        drawParagraph("The mutation rates influence the probability of modifying a genome for the underlying cells. When adjusting these rates, it should "
+                      "be noted that different types of mutations also have different impacts. For instance, a 'Duplication' mutation affects the genome much "
+                      "more invasively than a 'Neural net' mutation, which only adjusts weights and biases. Furthermore, it should be considered that for "
+                      "evolutionary simulations, where individuals require a long time for self-replication, high mutation rates should be "
+                      "avoided. The correct values are best determined through experimentation.");
 
         /**
          * EDITORS
