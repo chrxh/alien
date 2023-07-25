@@ -345,3 +345,15 @@ int GenomeDescriptionConverter::convertNodeIndexToNodeAddress(std::vector<uint8_
     //wasteful approach but sufficient for GUI
     return convertBytesToDescriptionIntern(data, data.size(), nodeIndex).lastBytePosition;
 }
+
+int GenomeDescriptionConverter::getNumNodesRecursively(std::vector<uint8_t> const& data)
+{
+    auto genome = convertBytesToDescriptionIntern(data, data.size(), data.size()).genome;
+    auto result = toInt(genome.cells.size());
+    for (auto const& node : genome.cells) {
+        if (auto subgenome = node.getGenome()) {
+            result += getNumNodesRecursively(*subgenome);
+        }
+    }
+    return result;
+}

@@ -14,4 +14,5 @@ public:
 
     static int convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress);
     static int convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex);
+    static int getNumNodesRecursively(std::vector<uint8_t> const& data);
 };
