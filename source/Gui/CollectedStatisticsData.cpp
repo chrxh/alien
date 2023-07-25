@@ -15,7 +15,7 @@ DataPoint DataPoint::operator+(DataPoint const& other) const
         result.numViruses[i] = numViruses[i] + other.numViruses[i];
         result.numConnections[i] = numConnections[i] + other.numConnections[i];
         result.numParticles[i] = numParticles[i] + other.numParticles[i];
-        result.averageGenomeSize[i] = averageGenomeSize[i] + other.averageGenomeSize[i];
+        result.averageGenomeNodes[i] = averageGenomeNodes[i] + other.averageGenomeNodes[i];
         result.totalEnergy[i] = totalEnergy[i] + other.totalEnergy[i];
         result.numCreatedCells[i] = numCreatedCells[i] + other.numCreatedCells[i];
         result.numAttacks[i] = numAttacks[i] + other.numAttacks[i];
@@ -29,7 +29,7 @@ DataPoint DataPoint::operator+(DataPoint const& other) const
         result.numSensorActivities[i] = numSensorActivities[i] + other.numSensorActivities[i];
         result.numSensorMatches[i] = numSensorMatches[i] + other.numSensorMatches[i];
     }
-    result.sumAverageGenomeSize = sumAverageGenomeSize + other.sumAverageGenomeSize;
+    result.sumAverageGenomeNodes = sumAverageGenomeNodes + other.sumAverageGenomeNodes;
     return result;
 }
 
@@ -43,7 +43,7 @@ DataPoint DataPoint::operator/(double divisor) const
         result.numViruses[i] = numViruses[i] / divisor;
         result.numConnections[i] = numConnections[i] / divisor;
         result.numParticles[i] = numParticles[i] / divisor;
-        result.averageGenomeSize[i] = averageGenomeSize[i] / divisor;
+        result.averageGenomeNodes[i] = averageGenomeNodes[i] / divisor;
         result.totalEnergy[i] = totalEnergy[i] / divisor;
         result.numCreatedCells[i] = numCreatedCells[i] / divisor;
         result.numAttacks[i] = numAttacks[i] / divisor;
@@ -57,7 +57,7 @@ DataPoint DataPoint::operator/(double divisor) const
         result.numSensorActivities[i] = numSensorActivities[i] / divisor;
         result.numSensorMatches[i] = numSensorMatches[i] / divisor;
     }
-    result.sumAverageGenomeSize = sumAverageGenomeSize / divisor;
+    result.sumAverageGenomeNodes = sumAverageGenomeNodes / divisor;
     return result;
 }
 
@@ -86,16 +86,16 @@ namespace
             result.numViruses[i] = toDouble(data.timestep.numViruses[i]);
             result.numConnections[i] = toDouble(data.timestep.numConnections[i]);
             result.numParticles[i] = toDouble(data.timestep.numParticles[i]);
-            result.averageGenomeSize[i] = toDouble(data.timestep.numGenomeBytes[i]);
+            result.averageGenomeNodes[i] = toDouble(data.timestep.numGenomeNodes[i]);
             auto numGenomes = result.numSelfReplicators[i];
-            sumGenomeBytes += result.averageGenomeSize[i];
+            sumGenomeBytes += result.averageGenomeNodes[i];
             sumNumGenomes += numGenomes;
             if (numGenomes > 0) {
-                result.averageGenomeSize[i] /= numGenomes;
+                result.averageGenomeNodes[i] /= numGenomes;
             }
             result.totalEnergy[i] = toDouble(data.timestep.totalEnergy[i]);
         }
-        result.sumAverageGenomeSize = sumNumGenomes > 0 ? sumGenomeBytes / sumNumGenomes : sumGenomeBytes;
+        result.sumAverageGenomeNodes = sumNumGenomes > 0 ? sumGenomeBytes / sumNumGenomes : sumGenomeBytes;
 
         auto deltaTimesteps = lastTimestep ? toDouble(timestep) - toDouble(*lastTimestep) : 1.0;
         if (deltaTimesteps < NEAR_ZERO) {

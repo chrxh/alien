@@ -39,9 +39,9 @@ public:
     __inline__ __device__ void incNumConnections(int color, int numConnections) { atomicAdd(&_data->timeline.timestep.numConnections[color], numConnections); }
     __inline__ __device__ void incNumParticles(int color) { atomicAdd(&_data->timeline.timestep.numParticles[color], 1); }
     __inline__ __device__ void addEnergy(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.totalEnergy[color], valueToAdd); }
-    __inline__ __device__ void addNumGenomeBytes(int color, uint64_t valueToAdd)
+    __inline__ __device__ void addNumGenomeNodes(int color, uint64_t valueToAdd)
     {
-        alienAtomicAdd64(&_data->timeline.timestep.numGenomeBytes[color], valueToAdd);
+        alienAtomicAdd64(&_data->timeline.timestep.numGenomeNodes[color], valueToAdd);
     }
     __inline__ __device__ void halveNumConnections()
     {
