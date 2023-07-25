@@ -327,34 +327,45 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
     }
     if (ImGui::BeginTabItem("Genome", nullptr, flags)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            AlienImGui::Group("Genome: " + std::to_string(desc.genome.size()) + " bytes");
-            if (AlienImGui::Button("Edit")) {
-                _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(desc.genome));
-            }
 
-            ImGui::SameLine();
-            if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Retrieve from editor").textWidth(GenomeTabTextWidth))) {
-                desc.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
-                if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                    desc.genomeReadPosition = 0;
+            if (ImGui::TreeNodeEx("Genome data", TreeNodeFlags)) {
+                if (ImGui::BeginChild("##child", ImVec2(0, scale(200)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+                    auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome);
+                    auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);
+                    std::optional<int> selectedNodeDummy;
+                    AlienImGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
                 }
+                ImGui::EndChild();
+                if (AlienImGui::Button("Edit")) {
+                    _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(desc.genome));
+                }
+
+                ImGui::SameLine();
+                if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Retrieve from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
+                    desc.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
+                    if constexpr (std::is_same<Description, ConstructorDescription>()) {
+                        desc.genomeReadPosition = 0;
+                    }
+                }
+                ImGui::TreePop();
             }
 
-            if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                auto entry = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, desc.genomeReadPosition);
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Sequence number").textWidth(GenomeTabTextWidth), entry);
-                desc.genomeReadPosition = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(desc.genome, entry);
-            }
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth), desc.genomeGeneration);
+            if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+                auto numNodes = toFloat(GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, toInt(desc.genome.size())) + 0.5f);
+                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Number of nodes").textWidth(GenomeTabTextWidth).format("%.0f").readOnly(true), numNodes);
 
-            AlienImGui::Group("Preview (reference configuration)");
-            if (ImGui::BeginChild("##child", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-                auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome);
-                auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);
-                std::optional<int> selectedNodeDummy;
-                AlienImGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
+                auto numBytes = toFloat(desc.genome.size() + 0.5f);
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Bytes").textWidth(GenomeTabTextWidth).format("%.0f").readOnly(true), numBytes);
+
+                if constexpr (std::is_same<Description, ConstructorDescription>()) {
+                    auto entry = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, desc.genomeReadPosition);
+                    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Current node").textWidth(GenomeTabTextWidth), entry);
+                    desc.genomeReadPosition = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(desc.genome, entry);
+                }
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth), desc.genomeGeneration);
+                ImGui::TreePop();
             }
-            ImGui::EndChild();
         }
         ImGui::EndChild();
         ImGui::EndTabItem();

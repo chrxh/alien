@@ -259,7 +259,7 @@ void _GettingStartedWindow::processIntern()
         drawHeading1("Frequently asked questions");
         drawHeading2("Why does the radiation source generates no energy particles?");
         drawHeading2("How does a simple organism work?");
-        drawHeading2("How are neural networks incorporated?");
+        drawHeading2("How can neural networks be incorporated?");
 
         ImGui::Spacing();
         ImGui::Spacing();
