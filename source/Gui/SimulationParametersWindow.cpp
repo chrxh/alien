@@ -453,6 +453,18 @@ void _SimulationParametersWindow::processBase(
 
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
+                    .name("Absorption velocity penalty")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(30.0f)
+                    .logarithmic(true)
+                    .defaultValue(origSimParameters.radiationAbsorptionVelocityPenalty)
+                    .tooltip("When this parameter is increased, cells with higher velocity can absorb less energy from an incoming energy particle."),
+                simParameters.radiationAbsorptionVelocityPenalty);
+
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
                     .name("Radiation type I: Strength")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
@@ -818,17 +830,6 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionAttackerSameMutantPenalty))
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
                 simParameters.cellFunctionAttackerSameMutantPenalty);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Velocity penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(5.0f)
-                    .defaultValue(origSimParameters.cellFunctionAttackerVelocityPenalty)
-                    .tooltip("This parameter reduces the captured energy during an attack when the attacker cell is moving. The faster the cell moves or the "
-                             "higher this parameter is, the less energy is captured."),
-                simParameters.cellFunctionAttackerVelocityPenalty);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Geometry penalty")

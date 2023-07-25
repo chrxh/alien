@@ -254,6 +254,12 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.radiationAbsorptionVelocityPenalty,
+            defaultParameters.radiationAbsorptionVelocityPenalty,
+            "simulation parameters.radiation.absorption velocity penalty",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.highRadiationMinCellEnergy,
             defaultParameters.highRadiationMinCellEnergy,
             "simulation parameters.high radiation.min cell energy",
@@ -442,12 +448,6 @@ namespace
             parameters.baseValues.cellFunctionAttackerEnergyCost,
             defaultParameters.baseValues.cellFunctionAttackerEnergyCost,
             "simulation parameters.cell.function.attacker.energy cost",
-            parserTask);
-        encodeDecodeProperty(
-            tree,
-            parameters.cellFunctionAttackerVelocityPenalty,
-            defaultParameters.cellFunctionAttackerVelocityPenalty,
-            "simulation parameters.cell.function.attacker.velocity penalty",
             parserTask);
         encodeDecodeProperty(
             tree,
