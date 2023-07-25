@@ -328,7 +328,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
     if (ImGui::BeginTabItem("Genome", nullptr, flags)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
-            if (ImGui::TreeNodeEx("Genome data", TreeNodeFlags)) {
+            if (ImGui::TreeNodeEx("Data", TreeNodeFlags)) {
                 if (ImGui::BeginChild("##child", ImVec2(0, scale(200)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
                     auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome);
                     auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);
@@ -351,6 +351,10 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             }
 
             if (ImGui::TreeNodeEx("Properties (entire genome)", TreeNodeFlags)) {
+                auto numNodes = toFloat(GenomeDescriptionConverter::getNumNodesRecursively(desc.genome));
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Number of nodes").textWidth(GenomeTabTextWidth).format("%.0f").readOnly(true), numNodes);
+
                 auto numBytes = toFloat(desc.genome.size() + 0.5f);
                 AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Bytes").textWidth(GenomeTabTextWidth).format("%.0f").readOnly(true), numBytes);
 
@@ -359,7 +363,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             }
 
             if (ImGui::TreeNodeEx("Properties (responsible genome part)", TreeNodeFlags)) {
-                auto numNodes = toFloat(GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, toInt(desc.genome.size())) + 0.5f);
+                auto numNodes = toFloat(GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, toInt(desc.genome.size())));
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters().name("Number of nodes").textWidth(GenomeTabTextWidth).format("%.0f").readOnly(true), numNodes);
 
