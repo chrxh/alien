@@ -365,7 +365,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             if (ImGui::TreeNodeEx("Properties (responsible genome part)", TreeNodeFlags)) {
                 auto numNodes = toFloat(GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, toInt(desc.genome.size())));
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Number of cell").textWidth(GenomeTabTextWidth).format("%.0f").readOnly(true), numNodes);
+                    AlienImGui::InputFloatParameters().name("Number of cells").textWidth(GenomeTabTextWidth).format("%.0f").readOnly(true), numNodes);
 
                 if constexpr (std::is_same<Description, ConstructorDescription>()) {
                     auto entry = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, desc.genomeReadPosition);
