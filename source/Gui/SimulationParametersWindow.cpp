@@ -450,7 +450,6 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.baseValues.radiationAbsorption)
                     .tooltip("The fraction of energy that a cell can absorb from an incoming energy particle can be specified here."),
                 simParameters.baseValues.radiationAbsorption);
-
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Absorption velocity penalty")
@@ -459,10 +458,10 @@ void _SimulationParametersWindow::processBase(
                     .min(0)
                     .max(30.0f)
                     .logarithmic(true)
+                    .format("%.1f")
                     .defaultValue(origSimParameters.radiationAbsorptionVelocityPenalty)
                     .tooltip("When this parameter is increased, cells with higher velocity can absorb less energy from an incoming energy particle."),
                 simParameters.radiationAbsorptionVelocityPenalty);
-
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Radiation type I: Strength")
@@ -488,7 +487,6 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.radiationMinCellAge)
                     .tooltip("The minimum age of a cell can be defined here, from which it emits energy particles."),
                 simParameters.radiationMinCellAge);
-
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Radiation type II: Strength")
@@ -514,6 +512,13 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.highRadiationMinCellEnergy)
                     .tooltip("The minimum energy of a cell can be defined here, from which it emits energy particles."),
                 simParameters.highRadiationMinCellEnergy);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Energy to cell transformation")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.particleTransformationAllowed)
+                    .tooltip("If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
+                simParameters.particleTransformationAllowed);
 
             ImGui::TreePop();
         }
@@ -575,13 +580,6 @@ void _SimulationParametersWindow::processBase(
                              ICON_FA_CARET_RIGHT" If the transformation of energy particles to "
                              "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
                 simParameters.cellNormalEnergy);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Energy to cell transformation")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.particleTransformationAllowed)
-                    .tooltip("If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
-                simParameters.particleTransformationAllowed);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Cell cluster decay")
