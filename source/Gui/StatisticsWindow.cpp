@@ -148,7 +148,7 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPoint::averageGenomeNodes, &DataPoint::sumAverageGenomeNodes);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Average genome nodes");
+        AlienImGui::Text("Average genome cells");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
