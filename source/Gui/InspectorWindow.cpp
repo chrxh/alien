@@ -353,7 +353,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             if (ImGui::TreeNodeEx("Properties (entire genome)", TreeNodeFlags)) {
                 auto numNodes = toFloat(GenomeDescriptionConverter::getNumNodesRecursively(desc.genome));
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Number of nodes").textWidth(GenomeTabTextWidth).format("%.0f").readOnly(true), numNodes);
+                    AlienImGui::InputFloatParameters().name("Number of cells").textWidth(GenomeTabTextWidth).format("%.0f").readOnly(true), numNodes);
 
                 auto numBytes = toFloat(desc.genome.size() + 0.5f);
                 AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Bytes").textWidth(GenomeTabTextWidth).format("%.0f").readOnly(true), numBytes);
@@ -365,11 +365,11 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             if (ImGui::TreeNodeEx("Properties (responsible genome part)", TreeNodeFlags)) {
                 auto numNodes = toFloat(GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, toInt(desc.genome.size())));
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Number of nodes").textWidth(GenomeTabTextWidth).format("%.0f").readOnly(true), numNodes);
+                    AlienImGui::InputFloatParameters().name("Number of cell").textWidth(GenomeTabTextWidth).format("%.0f").readOnly(true), numNodes);
 
                 if constexpr (std::is_same<Description, ConstructorDescription>()) {
                     auto entry = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, desc.genomeReadPosition);
-                    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Current node").textWidth(GenomeTabTextWidth), entry);
+                    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Current cell").textWidth(GenomeTabTextWidth), entry);
                     desc.genomeReadPosition = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(desc.genome, entry);
                 }
                 ImGui::TreePop();

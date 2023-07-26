@@ -135,7 +135,7 @@ void _GenomeEditorWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
         onAddNode();
     }
-    AlienImGui::Tooltip("Add node");
+    AlienImGui::Tooltip("Add cell");
 
     ImGui::SameLine();
     ImGui::BeginDisabled(selectedTab.genome.cells.empty());
@@ -143,7 +143,7 @@ void _GenomeEditorWindow::processToolbar()
         onDeleteNode();
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Delete node");
+    AlienImGui::Tooltip("Delete cell");
 
     ImGui::SameLine();
     auto& selectedNode = selectedTab.selectedNode;
@@ -152,7 +152,7 @@ void _GenomeEditorWindow::processToolbar()
         onNodeDecreaseSequenceNumber();
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Decrease sequence number of selected node");
+    AlienImGui::Tooltip("Decrease sequence number of selected cell");
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!(selectedNode && *selectedNode < selectedTab.genome.cells.size() - 1));
@@ -160,7 +160,7 @@ void _GenomeEditorWindow::processToolbar()
         onNodeIncreaseSequenceNumber();
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Increase sequence number of selected node");
+    AlienImGui::Tooltip("Increase sequence number of selected cell");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
@@ -169,13 +169,13 @@ void _GenomeEditorWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS_SQUARE)) {
         _expandNodes = true;
     }
-    AlienImGui::Tooltip("Expand all nodes");
+    AlienImGui::Tooltip("Expand all cells");
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_MINUS_SQUARE)) {
         _expandNodes = false;
     }
-    AlienImGui::Tooltip("Collapse all nodes");
+    AlienImGui::Tooltip("Collapse all cells");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
