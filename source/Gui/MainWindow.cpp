@@ -529,7 +529,7 @@ void _MainWindow::processMenubar()
                 _patternAnalysisDialog->show();
                 _toolsMenuToggled = false;
             }
-            if (ImGui::MenuItem("Image to pattern", "ALT+G")) {
+            if (ImGui::MenuItem("Image converter", "ALT+G")) {
                 _imageToPatternDialog->show();
                 _toolsMenuToggled = false;
             }
