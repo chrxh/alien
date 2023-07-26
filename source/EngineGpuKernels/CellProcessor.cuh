@@ -699,7 +699,9 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             if (cudaSimulationParameters.clusterDecay) {
                 cell->livingState = LivingState_Dying;
             } else {
-                CellConnectionProcessor::scheduleDeleteCell(data, index);
+                if (data.timestep % 20 == index % 20) {  //slow down destruction process to avoid too many deletion jobs
+                    CellConnectionProcessor::scheduleDeleteCell(data, index);
+                }
             }
         }
     }
