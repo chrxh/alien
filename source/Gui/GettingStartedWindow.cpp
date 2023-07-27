@@ -257,8 +257,24 @@ void _GettingStartedWindow::processIntern()
          * EDITORS
          */
         drawHeading1("Editors");
+        drawParagraph(
+            "If you want to design your own worlds, sceneries or organisms, there are many different editors available, which partially require deeper "
+            "knowledge. To open the editors, you have to switch to the edit mode (e.g. a click on the icon at the bottom left). A short overview of "
+            "the possibilities are given below.");
         drawHeading2("Drag and drop");
+        drawParagraph(
+            "The easiest way is to select and move objects with the mouse. You can simply drag and drop cell clusters in the simulation view. This "
+            "also works during running simulations. When the simulation is paused, you can select a rectangular area to be highlighted by holding "
+            "down the right mouse button. The selection is visually highlighted and can be moved via drag and drop. By holding down the SHIFT button during"
+            "a mouse action, only the selected cells and not the associated cell clusters are shifted. This can lead to the destruction or formation of cell "
+            "connections which are not selected.");
+        drawHeading2("Creator");
+        drawParagraph("If you want to create individual cells, cell clusters, or energy particles, you can open the 'Creator' window. In this window you also "
+                      "find a mode for creating cell structures by freehand drawing on the simulation area. The created cells are equipped with default values "
+                      "and can be modified later if desired.");
         drawHeading2("Pattern editor");
+        drawParagraph("Physical properties of already selected cells and energy particles, such as center velocities, positions, colors, etc., can be "
+                      "conveniently changed in the 'Pattern Editor'. In addition, selections can be saved, loaded, copied and pasted.");
         drawHeading2("Genome editor");
         drawHeading2("Cell inspection");
         drawHeading2("Mass operations");

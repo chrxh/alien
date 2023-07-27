@@ -50,7 +50,6 @@ private:
     std::string getUserLikes(std::string const& id);
 
     void pushTextColor(RemoteSimulationData const& entry);
-    bool isVersionCompatible(RemoteSimulationData const& entry) const;
     void calcFilteredSimulationDatas();
 
     bool _scheduleRefresh = false;
