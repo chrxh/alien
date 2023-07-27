@@ -310,13 +310,13 @@ void _PatternEditorWindow::processIntern()
 
     AlienImGui::Separator();
     auto rolloutToClusters = _editorModel->isRolloutToClusters();
-    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Roll out changes to cell clusters"), rolloutToClusters)) {
+    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Roll out changes to cell networks"), rolloutToClusters)) {
         _editorModel->setRolloutToClusters(rolloutToClusters);
         _angle = 0;
         _angularVel = 0;
     }
     ImGui::SameLine();
-    AlienImGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell clusters of the selected cell.\n"
+    AlienImGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell networks of the selected cell.\n"
                            "If this option is disabled, the changes will be applied only to the selected cells. In this case, the connections between the cells and the neighboring cells are recalculated when the positions are changed.\n"
                            "If you hold down the SHIFT key, this toggle button is temporarily turned off.");
 }

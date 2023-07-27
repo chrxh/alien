@@ -144,7 +144,7 @@ void _GettingStartedWindow::processIntern()
         drawItemText(
             "Transmitter: It distributes energy to other constructors, transmitters or surrounding cells. In particular, it can be used to power active "
             "constructors. No activity is required for triggering.");
-        drawItemText("Constructor: A constructor can build a cell cluster based on a built-in genome. The construction is done cell by cell and requires "
+        drawItemText("Constructor: A constructor can build a cell network based on a built-in genome. The construction is done cell by cell and requires "
                      "energy. A constructor can either be controlled via activities or become active automatically (default).");
         drawItemText("Injector: It can infect other constructor cells to inject its own built-in genome.");
         drawItemText("Nerve: On the one hand, it transfers activity values from connected input cells and on the other hand, it can optionally generate "
@@ -156,24 +156,33 @@ void _GettingStartedWindow::processIntern()
 
         ImGui::Spacing();
         drawHeading2("Cell color");
-        ImGui::Text("In addition to cell functions, a color can be used to perform additional user-defined customization of cells. For this purpose, most "
+        drawParagraph("In addition to cell functions, a color can be used to perform additional user-defined customization of cells. For this purpose, most "
                     "simulation parameters can be adjusted separately for each color, if desired. As a result, cells of different colors may have individual "
                     "properties.");
 
         ImGui::Spacing();
-        drawHeading2("Cell cluster");
-        ImGui::Text("A cell cluster (or cluster for short) is a connected graph consisting of cells and cell connections. Two cells in a cluster are therefore "
-                    "connected to each other directly or via other cells. A cluster physically represents a particular body.");
+        drawHeading2("Cell network");
+        drawParagraph("A cell network is a connected graph consisting of cells and cell connections. Two cells in a network are therefore "
+                    "connected to each other directly or via other cells. A cell network physically represents a particular body.");
+
+        ImGui::Spacing();
+        drawHeading2("Genome");
+        drawParagraph("The blueprints for entire cell networks can be stored in genomes. These genomes are translated into real cell networks by constructor "
+              "cells and, if necessary, copied to their offspring. Furthermore, injector cells are able to inject their own genome into other "
+              "constructor cells, which allows to model virus behaviors.");
+        drawParagraph("A genome in ALIEN may describe several cell networks, which are hierarchically structured und possibly connected when constructed. More "
+                      "precisely, it means that there is a top-level blueprint describing a certain network. If there are further constructor cells "
+                      "within this network, they can also contain further genomes, which in turn describe other cell networks and so on.");
 
         ImGui::Spacing();
         drawHeading2("Energy particle");
-        ImGui::Text(
-            "An energy particle is a particle which has only an energy value, position and velocity. Unlike cells, they cannot form clusters or perform any "
+        drawParagraph(
+            "An energy particle is a particle which has only an energy value, position and velocity. Unlike cells, they cannot form networks or perform any "
             "additional functions. Energy particles are produced by cells as radiation or during decay and can, in turn, also be absorbed.");
 
         ImGui::Spacing();
         drawHeading2("Pattern");
-        ImGui::Text("A pattern is a set of cell clusters and energy particles.");
+        drawParagraph("A pattern is a set of cell networks and energy particles.");
 
         /**
          * EXAMPLES
@@ -259,23 +268,33 @@ void _GettingStartedWindow::processIntern()
         drawHeading1("Editors");
         drawParagraph(
             "If you want to design your own worlds, sceneries or organisms, there are many different editors available, which partially require deeper "
-            "knowledge. To open the editors, you have to switch to the edit mode (e.g. a click on the icon at the bottom left). A short overview of "
-            "the possibilities are given below.");
+            "knowledge. To open the editors, you have to switch to the edit mode (e.g. a click on the icon at the bottom left). A short overview of the "
+            "possibilities are given below.");
         drawHeading2("Drag and drop");
         drawParagraph(
-            "The easiest way is to select and move objects with the mouse. You can simply drag and drop cell clusters in the simulation view. This "
+            "The easiest way is to select and move objects with the mouse. You can simply drag and drop cell networks in the simulation view. This "
             "also works during running simulations. When the simulation is paused, you can select a rectangular area to be highlighted by holding "
             "down the right mouse button. The selection is visually highlighted and can be moved via drag and drop. By holding down the SHIFT button during"
-            "a mouse action, only the selected cells and not the associated cell clusters are shifted. This can lead to the destruction or formation of cell "
+            "a mouse action, only the selected cells and not the associated cell networks are shifted. This can lead to the destruction or formation of cell "
             "connections which are not selected.");
         drawHeading2("Creator");
-        drawParagraph("If you want to create individual cells, cell clusters, or energy particles, you can open the 'Creator' window. In this window you also "
+        drawParagraph("If you want to create individual cells, cell networks, or energy particles, you can open the 'Creator' window. In this window you also "
                       "find a mode for creating cell structures by freehand drawing on the simulation area. The created cells are equipped with default values "
                       "and can be modified later if desired.");
         drawHeading2("Pattern editor");
         drawParagraph("Physical properties of already selected cells and energy particles, such as center velocities, positions, colors, etc., can be "
-                      "conveniently changed in the 'Pattern Editor'. In addition, selections can be saved, loaded, copied and pasted.");
+                      "conveniently changed in the 'Pattern editor'. In addition, selections can be saved, loaded, copied and pasted.");
         drawHeading2("Genome editor");
+        drawParagraph("In the 'Genome editor', genomes describing cell networks can be created and modified. Each tab shows the principal part of the genome. "
+                      "It is a sequence of cells that are supposed to be constructed in that order. If one of these cells is a constructor cell, it contains "
+                      "an additional genome that can be edited in a separate tab, if desired.");
+        drawParagraph("To translate a genome into an actual structure, there are two options:");
+        drawItemText("You can generate a spore using the corresponding toolbar button. A spore is a single constructor cell containing the specific genome and "
+                     "possessing enough energy to create the main structure described within.");
+        drawItemText(
+            "Another option is to inject the genome into an existing organism. To do this, you must select the organism and click on 'Inspect principal "
+            "genome' in the editor menu. A window will open where you see the existing genome of that creature. Then you can inject your own genome by "
+            "invoking the 'Retrieve genome from editor' button.");
         drawHeading2("Cell inspection");
         drawHeading2("Mass operations");
 
