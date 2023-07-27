@@ -25,6 +25,7 @@
 #include "GenomeConstants.h"
 #include "GenomeDescriptions.h"
 #include "GenomeDescriptionConverter.h"
+#include "Gui/VersionChecker.h"
 
 #define SPLIT_SERIALIZATION(Classname) \
     template <class Archive> \
@@ -867,54 +868,19 @@ bool Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
     return true;
 }
 
-
-namespace
-{
-    bool isVersionValid(std::string const& s)
-    {
-        std::vector<std::string> versionParts;
-        boost::split(versionParts, s, boost::is_any_of("."));
-        if (versionParts.size() < 3) {
-            return false;
-        }
-        try {
-            for (auto const& versionPart : versionParts | boost::adaptors::sliced(0, 3)) {
-                static_cast<void>(std::stoi(versionPart));
-            }
-        } catch (...) {
-            return false;
-        }
-        return true;
-    }
-    struct VersionParts
-    {
-        int major;
-        int minor;
-        int patch;
-    };
-    VersionParts getVersionParts(std::string const& s)
-    {
-        std::vector<std::string> versionParts;
-        boost::split(versionParts, s, boost::is_any_of("."));
-        return {std::stoi(versionParts.at(0)), std::stoi(versionParts.at(1)), std::stoi(versionParts.at(2))};
-    }
-}
-
 void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream)
 {
     cereal::PortableBinaryInputArchive archive(stream);
     std::string version;
     archive(version);
-    if (!isVersionValid(version)) {
+
+    if (!VersionChecker::isVersionValid(version)) {
         throw std::runtime_error("No version detected.");
     }
-    auto versionParts = getVersionParts(version);
-    auto ownVersionParts = getVersionParts(Const::ProgramVersion);
-    if (versionParts.major >= ownVersionParts.major) {
-        archive(data);
-    } else {
+    if (VersionChecker::isVersionOutdated(version)) {
         throw std::runtime_error("Version not supported.");
     }
+    archive(data);
 }
 
 void Serializer::serializeAuxiliaryData(AuxiliaryData const& auxiliaryData, std::ostream& stream)

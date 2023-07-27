@@ -15,9 +15,9 @@ namespace Const
     int64_t const TextDecentColor = 0xff909090;
     int64_t const TextInfoColor = 0xff30b0b0;
 
-    ImColor const MenuButtonColor = ImColor::HSV(0.6f, 0.3f, 0.35f);
+    ImColor const MenuButtonColor = ImColor::HSV(0.6f, 0.6f, 0.5f);
     ImColor const MenuButtonHoveredColor = ImColor::HSV(0.6f, 1.0f, 1.0f);
-    ImColor const MenuButtonActiveColor = ImColor::HSV(0.6f, 0.6f, 0.6f);
+    ImColor const MenuButtonActiveColor = ImColor::HSV(0.6f, 0.8f, 0.7f);
 
     ImColor const ShutdownButtonColor = ImColor::HSV(0.0f, 0.6f, 0.6f);
     ImColor const ShutdownButtonHoveredColor = ImColor::HSV(0.0f, 1.0f, 1.0f);

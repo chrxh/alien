@@ -24,6 +24,7 @@
 #include "UploadSimulationDialog.h"
 #include "DelayedExecutionController.h"
 #include "OverlayMessageController.h"
+#include "VersionChecker.h"
 
 namespace
 {
@@ -557,34 +558,11 @@ std::string _BrowserWindow::getUserLikes(std::string const& id)
 
 void _BrowserWindow::pushTextColor(RemoteSimulationData const& entry)
 {
-    if (isVersionCompatible(entry)) {
+    if (!VersionChecker::isVersionOutdated(entry.version)) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 0.0f, 1.0f));
     } else {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.6f));
     }
-}
-
-bool _BrowserWindow::isVersionCompatible(RemoteSimulationData const& entry) const
-{
-    bool result = true;
-
-    std::vector<std::string> remoteVersionParts;
-    boost::split(remoteVersionParts, entry.version, boost::is_any_of("."));
-
-    std::vector<std::string> ownVersionParts;
-    boost::split(ownVersionParts, Const::ProgramVersion, boost::is_any_of("."));
-
-    auto remoteMajorVersion = std::stoi(remoteVersionParts.at(0));
-    auto ownMajorVersion = std::stoi(ownVersionParts.at(0));
-    if (remoteMajorVersion < ownMajorVersion) {
-        result = false;
-    } else if (remoteVersionParts.size() == 5 && remoteVersionParts.at(3) == "alpha") {
-        auto remoteAlphaVersion = std::stoi(remoteVersionParts.at(4));
-        if (remoteAlphaVersion < 2) {
-            result = false;
-        }
-    }
-    return result;
 }
 
 void _BrowserWindow::calcFilteredSimulationDatas()
