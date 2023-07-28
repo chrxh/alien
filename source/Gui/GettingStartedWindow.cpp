@@ -294,8 +294,12 @@ void _GettingStartedWindow::processIntern()
         drawItemText(
             "Another option is to inject the genome into an existing organism. To do this, you must select the organism and click on 'Inspect principal "
             "genome' in the editor menu. A window will open where you see the existing genome of that creature. Then you can inject your own genome by "
-            "invoking the 'Retrieve genome from editor' button.");
-        drawHeading2("Cell inspection");
+            "invoking the 'Inject from editor' button.");
+        drawHeading2("Object inspection");
+        drawParagraph("Nearly every property of each particle can be viewed and edited. For this purpose, special editing windows can be attached to a "
+                      "particle. To do this, you have to select one or more particles (not too many) and invoke 'Inspect objects' from the editor menu. Each "
+                      "selected particle is now connected to a window. It is even possible to view these editing windows during a running simulation. In this "
+                      "way, you can monitor in real-time how properties of individual particles change over time.");
         drawHeading2("Mass operations");
 
         /**

@@ -22,7 +22,7 @@ void _SelectionWindow::processIntern()
     ImGui::PopStyleColor();
     ImGui::PopFont();
 
-    ImGui::Text("Cells from clusters");
+    ImGui::Text("Connected cells");
     ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
     ImGui::TextUnformatted(StringHelper::format(selection.numClusterCells).c_str());

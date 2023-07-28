@@ -341,7 +341,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                 }
 
                 ImGui::SameLine();
-                if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Retrieve from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
+                if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Inject from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
                     desc.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
                     if constexpr (std::is_same<Description, ConstructorDescription>()) {
                         desc.genomeReadPosition = 0;
