@@ -421,10 +421,15 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
                         force1 = force1 * (-1);
                         force2 = force2 * (-1);
                     }
-                    atomicAdd(&connectedCell->shared1.x, force1.x);
-                    atomicAdd(&connectedCell->shared1.y, force1.y);
-                    atomicAdd(&cell->connections[lastIndex].cell->shared1.x, force2.x);
-                    atomicAdd(&cell->connections[lastIndex].cell->shared1.y, force2.y);
+                    if (!connectedCell->barrier) {
+                        atomicAdd(&connectedCell->shared1.x, force1.x);
+                        atomicAdd(&connectedCell->shared1.y, force1.y);
+                    }
+                    auto otherConnectedCell = cell->connections[lastIndex].cell;
+                    if (!otherConnectedCell->barrier) {
+                        atomicAdd(&otherConnectedCell->shared1.x, force2.x);
+                        atomicAdd(&otherConnectedCell->shared1.y, force2.y);
+                    }
                     force -= force1 + force2;
                 }
             }
@@ -477,14 +482,15 @@ __inline__ __device__ void CellProcessor::verletPositionUpdate(SimulationData& d
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->barrier) {
-            continue;
+            cell->pos += cell->vel * cudaSimulationParameters.timestepSize;
+            data.cellMap.correctPosition(cell->pos);
+        } else {
+            cell->pos += cell->vel * cudaSimulationParameters.timestepSize
+                + cell->shared1 * cudaSimulationParameters.timestepSize * cudaSimulationParameters.timestepSize / 2;
+            data.cellMap.correctPosition(cell->pos);
+            cell->shared2 = cell->shared1;  //forces
+            cell->shared1 = {0, 0};
         }
-
-        cell->pos += cell->vel * cudaSimulationParameters.timestepSize
-            + cell->shared1 * cudaSimulationParameters.timestepSize * cudaSimulationParameters.timestepSize / 2;
-        data.cellMap.correctPosition(cell->pos);
-        cell->shared2 = cell->shared1;  //forces
-        cell->shared1 = {0, 0};
     }
 }
 
@@ -496,11 +502,10 @@ __inline__ __device__ void CellProcessor::verletVelocityUpdate(SimulationData& d
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->barrier) {
-            cell->vel = {0, 0};
-        } else {
-            auto acceleration = (cell->shared1 + cell->shared2) / 2;
-            cell->vel += acceleration * cudaSimulationParameters.timestepSize;
+            continue;
         }
+        auto acceleration = (cell->shared1 + cell->shared2) / 2;
+        cell->vel += acceleration * cudaSimulationParameters.timestepSize;
     }
 }
 
@@ -577,7 +582,9 @@ __inline__ __device__ void CellProcessor::applyInnerFriction(SimulationData& dat
         }
         for (int index = 0; index < cell->numConnections; ++index) {
             auto connectingCell = cell->connections[index].cell;
-
+            if (connectingCell->barrier) {
+                continue;
+            }
             SystemDoubleLock lock;
             lock.init(&cell->locked, &connectingCell->locked);
             if (lock.tryLock()) {
