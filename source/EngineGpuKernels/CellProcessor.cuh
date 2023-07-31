@@ -143,13 +143,13 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             cellPosDelta = {0, 0};
             density = 0;
             cellMaxBindingEnergy = SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->absPos);
+                &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->pos);
             cellFusionVelocity = SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::cellFusionVelocity, &SimulationParametersSpotActivatedValues::cellFusionVelocity, data, cell->absPos);
+                &SimulationParametersSpotValues::cellFusionVelocity, &SimulationParametersSpotActivatedValues::cellFusionVelocity, data, cell->pos);
 
             int radiusInt = ceilf(smoothingLength * 2);
             scanLength = radiusInt * 2 + 1;
-            cellPosInt = {floorInt(cell->absPos.x) - radiusInt, floorInt(cell->absPos.y) - radiusInt};
+            cellPosInt = {floorInt(cell->pos.x) - radiusInt, floorInt(cell->pos.y) - radiusInt};
         }
         __syncthreads();
 
@@ -160,7 +160,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             if (!otherCell) {
                 break;
             }
-            auto posDelta = cell->absPos - otherCell->absPos;
+            auto posDelta = cell->pos - otherCell->pos;
             data.cellMap.correctDirection(posDelta);
             auto distance = Math::length(posDelta);
 
@@ -227,7 +227,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
         __syncthreads();
 
         if (threadIdx.x == 0) {
-            cell->absPos += cellPosDelta;
+            cell->pos += cellPosDelta;
             cell->shared1 += F_pressure * cudaSimulationParameters.motionData.fluidMotion.pressureStrength
                 + F_viscosity * cudaSimulationParameters.motionData.fluidMotion.viscosityStrength + F_boundary;
             cell->shared2.x = density;
@@ -244,12 +244,12 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         data.cellMap.executeForEach(
-            cell->absPos, cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance, cell->detached, [&](auto const& otherCell) {
+            cell->pos, cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance, cell->detached, [&](auto const& otherCell) {
                 if (otherCell == cell) {
                     return;
                 }
 
-                auto posDelta = cell->absPos - otherCell->absPos;
+                auto posDelta = cell->pos - otherCell->pos;
                 data.cellMap.correctDirection(posDelta);
 
                 auto distance = Math::length(posDelta);
@@ -257,7 +257,7 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
                 //overlap correction
                 if (!cell->barrier) {
                     if (distance < cudaSimulationParameters.cellMinDistance) {
-                        cell->absPos += posDelta * cudaSimulationParameters.cellMinDistance / 5;
+                        cell->pos += posDelta * cudaSimulationParameters.cellMinDistance / 5;
                     }
                 }
 
@@ -299,13 +299,13 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
                         &SimulationParametersSpotValues::cellMaxBindingEnergy,
                         &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy,
                         data,
-                        cell->absPos);
+                        cell->pos);
 
                     auto cellFusionVelocity = SpotCalculator::calcParameter(
                         &SimulationParametersSpotValues::cellFusionVelocity,
                         &SimulationParametersSpotActivatedValues::cellFusionVelocity,
                         data,
-                        cell->absPos);
+                        cell->pos);
 
                     if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
                         && Math::length(velDelta) >= cellFusionVelocity
@@ -331,7 +331,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
         }
 
         if (Math::length(cell->shared1) > SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::cellMaxForce, &SimulationParametersSpotActivatedValues::cellMaxForce, data, cell->absPos)) {
+                &SimulationParametersSpotValues::cellMaxForce, &SimulationParametersSpotActivatedValues::cellMaxForce, data, cell->pos)) {
             if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             }
@@ -370,7 +370,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
             continue;
         }
         float2 force{0, 0};
-        float2 prevDisplacement = cell->connections[cell->numConnections - 1].cell->absPos - cell->absPos;
+        float2 prevDisplacement = cell->connections[cell->numConnections - 1].cell->pos - cell->pos;
         data.cellMap.correctDirection(prevDisplacement);
         auto cellStiffnessSquared = cell->stiffness * cell->stiffness;
 
@@ -379,7 +379,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
             auto connectedCell = cell->connections[i].cell;
             auto connectedCellStiffnessSquared = connectedCell->stiffness * connectedCell->stiffness;
 
-            auto displacement = connectedCell->absPos - cell->absPos;
+            auto displacement = connectedCell->pos - cell->pos;
             data.cellMap.correctDirection(displacement);
 
             auto actualDistance = Math::length(displacement);
@@ -451,7 +451,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
 
-            auto displacement = connectedCell->absPos - cell->absPos;
+            auto displacement = connectedCell->pos - cell->pos;
             data.cellMap.correctDirection(displacement);
             auto actualDistance = Math::length(displacement);
             if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance) {
@@ -480,9 +480,9 @@ __inline__ __device__ void CellProcessor::verletPositionUpdate(SimulationData& d
             continue;
         }
 
-        cell->absPos += cell->vel * cudaSimulationParameters.timestepSize
+        cell->pos += cell->vel * cudaSimulationParameters.timestepSize
             + cell->shared1 * cudaSimulationParameters.timestepSize * cudaSimulationParameters.timestepSize / 2;
-        data.cellMap.correctPosition(cell->absPos);
+        data.cellMap.correctPosition(cell->pos);
         cell->shared2 = cell->shared1;  //forces
         cell->shared1 = {0, 0};
     }
@@ -516,7 +516,7 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
         int transitionDuration;
         int targetColor;
         auto color = calcMod(cell->color, MAX_COLORS);
-        auto spotIndex = SpotCalculator::getFirstMatchingSpotOrBase(data, cell->absPos, &SimulationParametersSpotActivatedValues::cellColorTransition);
+        auto spotIndex = SpotCalculator::getFirstMatchingSpotOrBase(data, cell->pos, &SimulationParametersSpotActivatedValues::cellColorTransition);
         if (spotIndex == -1) {
             transitionDuration = cudaSimulationParameters.baseValues.cellColorTransitionDuration[color];
             targetColor = cudaSimulationParameters.baseValues.cellColorTransitionTargetColor[color];
@@ -603,7 +603,7 @@ __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
         }
 
         auto friction = SpotCalculator::calcParameter(
-            &SimulationParametersSpotValues::friction, &SimulationParametersSpotActivatedValues::friction, data, cell->absPos);
+            &SimulationParametersSpotValues::friction, &SimulationParametersSpotActivatedValues::friction, data, cell->pos);
         cell->vel = cell->vel * (1.0f - friction);
     }
 }
@@ -630,7 +630,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                     &SimulationParametersSpotValues::radiationCellAgeStrength,
                     &SimulationParametersSpotActivatedValues::radiationCellAgeStrength,
                     data,
-                    cell->absPos,
+                    cell->pos,
                     cell->color);
             }
 
@@ -644,7 +644,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 
                     float2 particleVel = cell->vel * cudaSimulationParameters.radiationVelocityMultiplier
                         + Math::unitVectorOfAngle(data.numberGen1.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
-                    float2 particlePos = cell->absPos + Math::normalized(particleVel) * 1.5f
+                    float2 particlePos = cell->pos + Math::normalized(particleVel) * 1.5f
                         - particleVel;  //"- particleVel" because particle will still be moved in current time step
                     data.cellMap.correctPosition(particlePos);
                     if (energyLoss > cellEnergy - 1) {
@@ -671,9 +671,9 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         auto cellMinEnergy = SpotCalculator::calcParameter(
-            &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->absPos, cell->color);
+            &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
         auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
-            &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->absPos);
+            &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->pos);
 
         if (cell->livingState == LivingState_Dying) {
             if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb[cell->color]) {

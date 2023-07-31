@@ -95,7 +95,7 @@ void _SimulationParametersWindow::processIntern()
                     _simController->setSimulationParameters_async(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
-                AlienImGui::Tooltip("Add spot");
+                AlienImGui::Tooltip("Add parameter zone");
             }
 
             if (ImGui::BeginTabItem("Base", nullptr, ImGuiTabItemFlags_None)) {
@@ -107,7 +107,7 @@ void _SimulationParametersWindow::processIntern()
                 SimulationParametersSpot& spot = parameters.spots[tab];
                 SimulationParametersSpot const& origSpot = origParameters.spots[tab];
                 bool open = true;
-                std::string name = "Spot " + std::to_string(tab+1);
+                std::string name = "Zone " + std::to_string(tab+1);
                 if (ImGui::BeginTabItem(name.c_str(), &open, ImGuiTabItemFlags_None)) {
                     processSpot(spot, origSpot, parameters);
                     ImGui::EndTabItem();

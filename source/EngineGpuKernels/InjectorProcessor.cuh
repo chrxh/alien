@@ -42,7 +42,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 
     switch (injector.mode) {
     case InjectorMode_InjectAll: {
-        data.cellMap.executeForEach(cell->absPos, cudaSimulationParameters.cellFunctionInjectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
+        data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellFunctionInjectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
             if (cell == otherCell) {
                 return;
             }

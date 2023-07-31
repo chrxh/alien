@@ -113,7 +113,7 @@ public:
         auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = cells[index];
-            int2 posInt = {floorInt(cell->absPos.x), floorInt(cell->absPos.y)};
+            int2 posInt = {floorInt(cell->pos.x), floorInt(cell->pos.y)};
             correctPosition(posInt);
             auto slot = posInt.x + posInt.y * _size.x;
             Cell* slotCell = reinterpret_cast<Cell*>(atomicCAS(
@@ -167,7 +167,7 @@ public:
                     if (!slotCell) {
                         break;
                     }
-                    if (Math::length(slotCell->absPos - pos) <= radius && detached + slotCell->detached != 1 && matchFunc(slotCell)) {
+                    if (Math::length(slotCell->pos - pos) <= radius && detached + slotCell->detached != 1 && matchFunc(slotCell)) {
                         cells[numCells] = slotCell;
                         ++numCells;
                     }
@@ -192,7 +192,7 @@ public:
                     if (!slotCell) {
                         break;
                     }
-                    if (Math::length(slotCell->absPos - pos) <= radius && detached + slotCell->detached != 1) {
+                    if (Math::length(slotCell->pos - pos) <= radius && detached + slotCell->detached != 1) {
                         execFunc(slotCell);
                     }
                     slotCell = slotCell->nextCell;

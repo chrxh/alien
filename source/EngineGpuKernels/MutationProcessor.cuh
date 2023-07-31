@@ -40,67 +40,67 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         &SimulationParametersSpotValues::cellFunctionConstructorMutationNeuronDataProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationNeuronDataProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationDataProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationPropertiesProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationPropertiesProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationGeometryProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationGeometryProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationGeometryProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationCustomGeometryProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationCustomGeometryProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCustomGeometryProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationCellFunctionProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationCellFunctionProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCellFunctionProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationInsertionProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationInsertionProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationInsertionProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationDeletionProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationDeletionProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDeletionProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationTranslationProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationTranslationProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationTranslationProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationDuplicationProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationDuplicationProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDuplicationProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationColorProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationColorProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationColorProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationUniformColorProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationUniformColorProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationUniformColorProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
 
     if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {

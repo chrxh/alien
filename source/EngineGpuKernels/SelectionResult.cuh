@@ -48,15 +48,15 @@ public:
     {
         if (1 == cell->selected) {
             atomicAdd(&_selectionShallowData->numCells, 1);
-            atomicAdd(&_selectionShallowData->centerPosX, cell->absPos.x);
-            atomicAdd(&_selectionShallowData->centerPosY, cell->absPos.y);
+            atomicAdd(&_selectionShallowData->centerPosX, cell->pos.x);
+            atomicAdd(&_selectionShallowData->centerPosY, cell->pos.y);
             atomicAdd(&_selectionShallowData->centerVelX, cell->vel.x);
             atomicAdd(&_selectionShallowData->centerVelY, cell->vel.y);
         }
 
         atomicAdd(&_selectionShallowData->numClusterCells, 1);
-        atomicAdd(&_selectionShallowData->clusterCenterPosX, cell->absPos.x);
-        atomicAdd(&_selectionShallowData->clusterCenterPosY, cell->absPos.y);
+        atomicAdd(&_selectionShallowData->clusterCenterPosX, cell->pos.x);
+        atomicAdd(&_selectionShallowData->clusterCenterPosY, cell->pos.y);
         atomicAdd(&_selectionShallowData->clusterCenterVelX, cell->vel.x);
         atomicAdd(&_selectionShallowData->clusterCenterVelY, cell->vel.y);
     }

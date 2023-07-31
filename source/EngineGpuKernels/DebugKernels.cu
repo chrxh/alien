@@ -13,7 +13,7 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectingCell = cell->connections[i].cell;
 
-                auto displacement = connectingCell->absPos - cell->absPos;
+                auto displacement = connectingCell->pos - cell->pos;
                 data.cellMap.correctDirection(displacement);
                 auto actualDistance = Math::length(displacement);
                 if (actualDistance > 14) {

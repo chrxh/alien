@@ -74,7 +74,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
             if (auto cell = data.cellMap.getFirst(particle->absPos + particle->vel)) {
                 if (cell->barrier) {
                     auto vr = particle->vel;
-                    auto r = data.cellMap.getCorrectedDirection(particle->absPos - cell->absPos);
+                    auto r = data.cellMap.getCorrectedDirection(particle->absPos - cell->pos);
                     auto dot_vr_r = Math::dot(vr, r);
                     if (dot_vr_r < 0) {
                         particle->vel = vr - r * 2 * dot_vr_r / Math::lengthSquared(r);
@@ -87,7 +87,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                         &SimulationParametersSpotValues::radiationAbsorption,
                         &SimulationParametersSpotActivatedValues::radiationAbsorption,
                         data,
-                        cell->absPos,
+                        cell->pos,
                         cell->color);
 
                     if (radiationAbsorption < NEAR_ZERO) {

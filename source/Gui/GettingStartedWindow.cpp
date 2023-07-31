@@ -227,9 +227,9 @@ void _GettingStartedWindow::processIntern()
         drawHeading1("Simulation parameters");
         drawParagraph(
             "All parameters relevant to the simulation can be adjusted here. By default, the parameters are set uniformly for the entire world. However, it is "
-            "also possible to allow certain parameters to vary locally. To do this, you can create a new tab in the simulation parameter window by clicking on "
-            "the '+' button. This provides a spatially (fuzzy) delimited area where the global parameters can be overwritten. This area or spot is also characterized by a "
-              "different color.");
+            "also possible to allow certain parameters to vary locally in special zones. To do this, you can create a new tab in the simulation parameter window by clicking on "
+            "the '+' button. It adds a spatially (fuzzy) delimited area where the global parameters can be overwritten. This zone is also visible by a "
+            "different color.");
         drawParagraph("Regardless of this, many parameters can also be set depending on the cell color. For this purpose click the '+' button beside the "
                       "parameter. This customization is useful when you want to define different classes of species.");
         drawParagraph("In general, the following types of parameters can be set.");

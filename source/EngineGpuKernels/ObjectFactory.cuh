@@ -86,8 +86,8 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO
 __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO, CellTO const& cellTO, Cell* cell)
 {
     cell->id = cellTO.id;
-    cell->absPos = cellTO.pos;
-    _map.correctPosition(cell->absPos);
+    cell->pos = cellTO.pos;
+    _map.correctPosition(cell->pos);
     cell->vel = cellTO.vel;
     cell->executionOrderNumber = cellTO.executionOrderNumber;
     cell->livingState = cellTO.livingState;
@@ -232,7 +232,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     *cellPointers = cell;
 
     cell->id = _data->numberGen1.createNewId();
-    cell->absPos = pos;
+    cell->pos = pos;
     cell->vel = vel;
     cell->energy = energy;
     cell->stiffness = _data->numberGen1.random();

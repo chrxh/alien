@@ -57,10 +57,10 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
             continue;
         }
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            accelerations[i] = calcAcceleration(data.cellMap, cell->absPos, i);
+            accelerations[i] = calcAcceleration(data.cellMap, cell->pos, i);
         }
         auto resultingAcceleration =
-            SpotCalculator::calcResultingValue(data.cellMap, cell->absPos, float2{0, 0}, accelerations);
+            SpotCalculator::calcResultingValue(data.cellMap, cell->pos, float2{0, 0}, accelerations);
         cell->shared1 += resultingAcceleration;
     }
 }
