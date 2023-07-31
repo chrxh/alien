@@ -255,7 +255,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
 
-        auto cellPos = cell->absPos;
+        auto cellPos = cell->pos;
         map.correctPosition(cellPos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
             auto cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
@@ -274,7 +274,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
             if (zoom >= ZoomLevelForConnections) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const otherCell = cell->connections[i].cell;
-                    auto const otherCellPos = otherCell->absPos;
+                    auto const otherCellPos = otherCell->pos;
                     auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
 
                     if (Math::lengthSquared(topologyCorrection) < NEAR_ZERO) {
@@ -293,7 +293,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
                     for (int i = 0; i < cell->numConnections; ++i) {
                         auto const& otherCell = cell->connections[i].cell;
                         if (otherCell->executionOrderNumber == inputExecutionOrderNumber && !otherCell->outputBlocked) {
-                            auto const otherCellPos = otherCell->absPos;
+                            auto const otherCellPos = otherCell->pos;
                             auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                             if (Math::lengthSquared(topologyCorrection) > NEAR_ZERO) {
                                 continue;

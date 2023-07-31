@@ -321,9 +321,9 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     auto anglesForNewConnection = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
 
     auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
-    float2 newCellPos = hostCell->absPos + newCellDirection;
+    float2 newCellPos = hostCell->pos + newCellDirection;
 
-    if (CellConnectionProcessor::existCrossingConnections(data, hostCell->absPos, newCellPos, hostCell->detached)) {
+    if (CellConnectionProcessor::existCrossingConnections(data, hostCell->pos, newCellPos, hostCell->detached)) {
         return false;
     }
 
@@ -374,11 +374,11 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     Cell* underConstructionCell,
     ConstructionData const& constructionData)
 {
-    auto posDelta = underConstructionCell->absPos - hostCell->absPos;
+    auto posDelta = underConstructionCell->pos - hostCell->pos;
     data.cellMap.correctDirection(posDelta);
 
     auto desiredDistance = constructionData.genomeHeader.connectionDistance;
-    auto constructionSiteDistance = data.cellMap.getDistance(hostCell->absPos, underConstructionCell->absPos);
+    auto constructionSiteDistance = data.cellMap.getDistance(hostCell->pos, underConstructionCell->pos);
     posDelta = Math::normalized(posDelta) * (constructionSiteDistance - desiredDistance);
 
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
@@ -386,7 +386,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         return false;
     }
 
-    auto newCellPos = hostCell->absPos + posDelta;
+    auto newCellPos = hostCell->pos + posDelta;
 
     //get surrounding cells
     Cell* otherCellCandidates[MAX_CELL_BONDS * 2];
@@ -493,8 +493,8 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
         //sort surrounding cells by distance from newCell
         bubbleSort(otherCells, numOtherCells, [&](auto const& cell1, auto const& cell2) {
-            auto dist1 = data.cellMap.getDistance(cell1->absPos, newCellPos);
-            auto dist2 = data.cellMap.getDistance(cell2->absPos, newCellPos);
+            auto dist1 = data.cellMap.getDistance(cell1->pos, newCellPos);
+            auto dist2 = data.cellMap.getDistance(cell2->pos, newCellPos);
             return dist1 < dist2;
         });
 
@@ -591,8 +591,8 @@ ConstructorProcessor::constructCellIntern(
     Cell * result = factory.createCell();
     result->energy = constructionData.energy;
     result->stiffness = constructionData.genomeHeader.stiffness;
-    result->absPos = posOfNewCell;
-    data.cellMap.correctPosition(result->absPos);
+    result->pos = posOfNewCell;
+    data.cellMap.correctPosition(result->pos);
     result->maxConnections = maxConnections;
     result->numConnections = 0;
     result->executionOrderNumber = constructionData.executionOrderNumber;
