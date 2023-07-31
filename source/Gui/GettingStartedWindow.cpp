@@ -301,7 +301,13 @@ void _GettingStartedWindow::processIntern()
                       "selected particle is now connected to a window. It is even possible to view these editing windows during a running simulation. In this "
                       "way, you can monitor in real-time how properties of individual particles change over time.");
         drawHeading2("Mass operations");
-
+        drawParagraph("Various mass editing functions are available. On the one hand, the pattern editor allows to change different physical properties of an "
+                      "entire selection. On the other hand, through the 'Tools' menu, the 'Mass operations' dialog can be opened. Here, colors of cells and "
+                      "genomes, energy values, and other properties can be globally modified. The new values will be randomly chosen from a specified range. "
+                      "Cells within a cell networks will be assigned the same value.");
+        drawParagraph("In addition, simulations can be scaled up by increasing the size of the world and filling the resulting empty space with copies of the "
+                      "original world. This functionality is available via the resize dialog in the 'Spatial control' window, if you set a new size there and "
+                      "activate 'Scale content'.");
         /**
          * FREQUENTLY ASK QUESTIONS
          */

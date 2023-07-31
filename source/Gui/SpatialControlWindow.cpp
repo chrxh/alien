@@ -89,6 +89,7 @@ void _SpatialControlWindow::processZoomInButton()
     if (AlienImGui::ToolbarButton(ICON_FA_SEARCH_PLUS)) {
         _viewport->setZoomFactor(_viewport->getZoomFactor() * 2);
     }
+    AlienImGui::Tooltip("Zoom in");
 }
 
 void _SpatialControlWindow::processZoomOutButton()
@@ -96,6 +97,7 @@ void _SpatialControlWindow::processZoomOutButton()
     if (AlienImGui::ToolbarButton(ICON_FA_SEARCH_MINUS)) {
         _viewport->setZoomFactor(_viewport->getZoomFactor() / 2);
     }
+    AlienImGui::Tooltip("Zoom out");
 }
 
 void _SpatialControlWindow::processResizeButton()
@@ -103,6 +105,7 @@ void _SpatialControlWindow::processResizeButton()
     if (AlienImGui::ToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
         _resizeWorldDialog->open();
     }
+    AlienImGui::Tooltip("Resize");
 }
 
 void _SpatialControlWindow::processCenterOnSelection()
