@@ -436,6 +436,9 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     if (!newCell->tryLock()) {
         return false;
     }
+    if (underConstructionCell->livingState == LivingState_Dying) {
+        newCell->livingState = LivingState_Dying;
+    }
 
     auto const& constructor = hostCell->cellFunctionData.constructor;
     if (GenomeDecoder::isFinished(constructor)) {
@@ -596,7 +599,7 @@ ConstructorProcessor::constructCellIntern(
     result->maxConnections = maxConnections;
     result->numConnections = 0;
     result->executionOrderNumber = constructionData.executionOrderNumber;
-    result->livingState = true;
+    result->livingState = LivingState_UnderConstruction;
     result->creatureId = constructor.offspringCreatureId;
     result->mutationId = constructor.offspringMutationId;
     result->cellFunction = constructionData.cellFunction;
