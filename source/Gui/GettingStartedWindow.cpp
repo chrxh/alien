@@ -118,6 +118,7 @@ void _GettingStartedWindow::processIntern()
         drawItemText("Velocity");
         drawItemText("Internal energy (may be interpreted as its temperature)");
         drawItemText("Upper limit of connections");
+        drawItemText("Living state");
 
         ImGui::Spacing();
         drawHeading2("Cell connection");
@@ -312,9 +313,11 @@ void _GettingStartedWindow::processIntern()
          * FREQUENTLY ASK QUESTIONS
          */
         drawHeading1("Frequently asked questions");
+        drawHeading2("How does self-replication work?");
         drawHeading2("Why does the radiation source generates no energy particles?");
         drawHeading2("How does a simple organism work?");
         drawHeading2("How can neural networks be incorporated?");
+        drawHeading2("For how long should I run a simulation to see evolutionary changes?");
 
         ImGui::Spacing();
         ImGui::Spacing();
