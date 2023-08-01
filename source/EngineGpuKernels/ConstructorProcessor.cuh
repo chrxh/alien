@@ -301,9 +301,17 @@ __inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite
 {
     Cell* result = nullptr;
     for (int i = 0; i < hostCell->numConnections; ++i) {
-        auto const& connectingCell = hostCell->connections[i].cell;
-        if (connectingCell->livingState == LivingState_UnderConstruction) {
-            result = connectingCell;
+        auto const& connectedCell = hostCell->connections[i].cell;
+        if (connectedCell->livingState == LivingState_UnderConstruction) {
+            result = connectedCell;
+        }
+    }
+    if (!result) {
+        for (int i = 0; i < hostCell->numConnections; ++i) {
+            auto const& connectedCell = hostCell->connections[i].cell;
+            if (connectedCell->livingState == LivingState_Dying) {
+                return connectedCell;
+            }
         }
     }
     return result;
