@@ -18,6 +18,8 @@ namespace
     std::chrono::milliseconds::rep const LogoDuration = 2500;
     std::chrono::milliseconds::rep const FadeOutDuration = 1500;
     std::chrono::milliseconds::rep const FadeInDuration = 500;
+
+    auto constexpr InitialLineDistance = 15.0f;
 }
 
 _StartupController::_StartupController(
@@ -29,6 +31,7 @@ _StartupController::_StartupController(
     , _viewport(viewport)
 {
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
+    _lineDistance = scale(InitialLineDistance);
     _startupTimepoint = std::chrono::steady_clock::now();
 }
 
@@ -130,9 +133,10 @@ void _StartupController::processWindow()
     ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(_logo.width * imageScale, _logo.height * imageScale));
     ImGui::End();
 
-    if (_state == State::Unintialized || _state == State::RequestLoading) {
-        drawGrid();
-    }
+    auto now = std::chrono::steady_clock::now();
+    auto millisecSinceStartup = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_startupTimepoint).count();
+
+    drawGrid(std::max(0.0f, 1.0f - toFloat(millisecSinceStartup) / LogoDuration));
 
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     ImColor textColor = Const::ProgramVersionColor;
@@ -150,7 +154,6 @@ void _StartupController::processWindow()
 
 namespace
 {
-    auto constexpr InitialLineDistance = 15.0f;
     enum class Direction
     {
         Up,
@@ -158,13 +161,13 @@ namespace
         Left,
         Right
     };
-    void drawGridIntern(float lineDistance, float maxDistance, Direction const& direction, bool includeMainLine)
+    void drawGridIntern(float lineDistance, float maxDistance, Direction const& direction, bool includeMainLine, float alpha)
     {
         if (lineDistance > scale(InitialLineDistance)) {
-            drawGridIntern(lineDistance / 2, maxDistance, direction, includeMainLine);
+            drawGridIntern(lineDistance / 2, maxDistance, direction, includeMainLine, alpha);
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto alpha = std::min(1.0f, lineDistance / scale(InitialLineDistance * 2)) * ImGui::GetStyle().Alpha;
+        alpha *= std::min(1.0f, lineDistance / scale(InitialLineDistance * 2)) * ImGui::GetStyle().Alpha;
         float accumulatedDistance = 0.0f;
 
         if (!includeMainLine) {
@@ -193,12 +196,11 @@ namespace
     }
 }
 
-void _StartupController::drawGrid()
+void _StartupController::drawGrid(float alpha)
 {
-    static float lineDistance = scale(InitialLineDistance);
-    drawGridIntern(lineDistance, scale(300.0f), Direction::Up, true);
-    drawGridIntern(lineDistance, scale(300.0f), Direction::Down, false);
+    drawGridIntern(_lineDistance, scale(300.0f), Direction::Up, true, alpha);
+    drawGridIntern(_lineDistance, scale(300.0f), Direction::Down, false, alpha);
     //drawGridIntern(lineDistance, 1000.0f, Direction::Left, true);
     //drawGridIntern(lineDistance, 1000.0f, Direction::Right, false);
-    lineDistance *= 1.05f;
+    _lineDistance *= 1.05f;
 }
