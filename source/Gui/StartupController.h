@@ -26,7 +26,7 @@ public:
 private:
     void processWindow();
 
-    void drawGrid();
+    void drawGrid(float alpha);
 
     SimulationController _simController;
     TemporalControlWindow _temporalControlWindow;
@@ -36,4 +36,5 @@ private:
     TextureData _logo;
     std::optional<std::chrono::steady_clock::time_point> _startupTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _lastActivationTimepoint;
+    float _lineDistance = 0;
 };
