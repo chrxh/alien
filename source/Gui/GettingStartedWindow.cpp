@@ -313,10 +313,28 @@ void _GettingStartedWindow::processIntern()
          * FREQUENTLY ASK QUESTIONS
          */
         drawHeading1("Frequently asked questions");
-        drawHeading2("How does self-replication work?");
+
+        drawHeading2("How does a simple self-replicating organism work?");
+        drawParagraph("In general, an organism in ALIEN consists of a network of cells where the cells work together by communicating with each other through "
+                      "activity signals.");
+        drawParagraph(
+            "A simple creature first needs a constructor cell that contains its genome and is responsible for self-replication. The constructor cell "
+            "is automatically triggered and generates (as soon as enough energy is available) the cell network of the offspring built cell by cell as described in "
+            "its genome. The genome for the offspring is also copied and placed into the constructor cell of the offspring.");
+        drawParagraph(
+            "Self-replication requires energy, which must be obtained in some way. On the one hand, energy can be acquired by the absorption of "
+            "energy particles flying around. This can be the main source of energy for plant-like species. On the other hand, there is the possibility to utilize "
+            "attacker cells. They can attack cells from other organisms by stealing energy from them. If an attacker cell is part of the creature, it must be "
+            "explicitly triggered by an activity signal. This signal may come, for example, from another cell equipped with a neural network. The energy "
+            "obtained by an attacker cell is distributed to nearby constructor or transmitter cells.");
+        drawParagraph("To perform movements, an organism requires muscle cells. These are also controlled by activity signals. Muscle cells can work in "
+                      "various modes: they can bend, contract/expand, or generate an impulse.");
+        drawParagraph("For the perception of the environment, sensor cells are available. When such a cell is triggered by activity signals, it provide information about the relative position of cell concentrations with respect to a specific color, which can be further processed by e.g. cell with neural networks.");
+
         drawHeading2("Why does the radiation source generates no energy particles?");
-        drawHeading2("How does a simple organism work?");
+
         drawHeading2("How can neural networks be incorporated?");
+
         drawHeading2("For how long should I run a simulation to see evolutionary changes?");
 
         ImGui::Spacing();
