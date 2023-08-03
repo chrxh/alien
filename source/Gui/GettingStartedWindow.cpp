@@ -129,19 +129,11 @@ void _GettingStartedWindow::processIntern()
             "case of an angle mismatch.");
 
         ImGui::Spacing();
-        drawHeading2("Cell activity");
-        ImGui::Text("Cells can contain an activity state comprising of 8 real values, primarily utilized for controlling cell functions. The activities are "
-                    "refreshed periodically, specifically when the cell functions are executed. To be more precise, each cell function is executed at regular "
-                    "time intervals (every 6 time steps). The 'execution order number' specifies the exact time within each interval.");
-        ImGui::Text("The process for updating the cell activity is as follows: Firstly, the activities of all connected cells that serve as input are summed "
-                    "up. The resulted sum is then employed as input for the cell function, which may potentially alter the activity values. Subsequently, the "
-                    "outcome is utilized to determine the new cell activity.");
-
-        ImGui::Spacing();
         drawHeading2("Cell function");
         ImGui::Text("It is possible to assign a special function to a cell, which will be executed at regular time intervals. The following functions are "
                     "implemented:");
-        drawItemText("Neuron: It equips the cell with a small network of 8 neurons. It processes the activity values fetched from the input.");
+        drawItemText("Neuron: It equips the cell with a small network of 8 neurons. It processes input gained from the activity states of connected cells and provides an "
+                     "output to other connected cells.");
         drawItemText(
             "Transmitter: It distributes energy to other constructors, transmitters or surrounding cells. In particular, it can be used to power active "
             "constructors. No activity is required for triggering.");
@@ -154,6 +146,15 @@ void _GettingStartedWindow::processIntern()
         drawItemText("Defender: It reduces the attack strength when another cell in the vicinity performs an attack.");
         drawItemText("Muscle: When a muscle cell is activated, it can produce either a movement, a bending or a change in length of the cell connection.");
         drawItemText("Sensor: If activated, it performs a long-range scan for the concentration of cells with a certain color.");
+
+        ImGui::Spacing();
+        drawHeading2("Activity states");
+        ImGui::Text("Cells contain activity states comprising of 8 values, primarily utilized for controlling cell functions. The states are "
+                    "refreshed periodically, specifically when the cell functions are executed. To be more precise, each cell function is executed at regular "
+                    "time intervals (every 6 time steps). The 'execution order number' specifies the exact time offset within those intervals.");
+        ImGui::Text("The process for updating the activity states is as follows: Firstly, the states of all connected cells that serve as input are summed "
+                    "up. The resulted sum is then employed as input for the cell function, which may potentially alter the values. Subsequently, the "
+                    "outcome is utilized to determine the new states.");
 
         ImGui::Spacing();
         drawHeading2("Cell color");
@@ -334,6 +335,12 @@ void _GettingStartedWindow::processIntern()
                       "cell with neural network.");
 
         drawHeading2("Why does the radiation source generates no energy particles?");
+        drawParagraph("The principle of energy conservation holds true in a simulation, which means that energy particles cannot spontaneously come into "
+                      "existence out of nothingness. This principle plays a vital role in ensuring the stability of long-term simulations. If a radiation "
+                      "source is defined, it will emit a particle only when a cell somewhere loses energy. Conversely, in the absence of a radiation source, "
+                      "any emitted energy particle would originate directly in the spatial vicinity of the corresponding cell.");
+        drawParagraph("The existence of matter in the form of cells is a prerequisite for the radiation source to emit particles. Furthermore, the simulation "
+                      "parameters should be adjusted in a way that guarantees a gradual loss of energy from cells over time.");
 
         drawHeading2("How can neural networks be incorporated?");
 
