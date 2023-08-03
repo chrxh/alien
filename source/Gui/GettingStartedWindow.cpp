@@ -329,7 +329,9 @@ void _GettingStartedWindow::processIntern()
             "obtained by an attacker cell is distributed to nearby constructor or transmitter cells.");
         drawParagraph("To perform movements, an organism requires muscle cells. These are also controlled by activity signals. Muscle cells can work in "
                       "various modes: they can bend, contract/expand, or generate an impulse.");
-        drawParagraph("For the perception of the environment, sensor cells are available. When such a cell is triggered by activity signals, it provide information about the relative position of cell concentrations with respect to a specific color, which can be further processed by e.g. cell with neural networks.");
+        drawParagraph("For the perception of the environment, sensor cells are available. When such a cell is triggered by activity signals, it provide "
+                      "information about the relative position of cell concentrations with respect to a specific color, which can be further processed by e.g. "
+                      "cell with neural network.");
 
         drawHeading2("Why does the radiation source generates no energy particles?");
 
