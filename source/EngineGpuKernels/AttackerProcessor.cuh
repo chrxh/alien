@@ -70,24 +70,26 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 return;
             }
 
-            bool creatureIdMatch = false;
-            for (int i = 0; i < cell->numConnections; ++i) {
-                auto lookupCell = cell->connections[i].cell;
-                if (lookupCell->cellFunction == CellFunction_Sensor && lookupCell->cellFunctionData.sensor.targetedCreatureId == otherCell->creatureId) {
-                    creatureIdMatch = true;
-                    break;
-                }
-                for (int j = 0; j < lookupCell->numConnections; ++j) {
-                    auto otherLookupCell = lookupCell->connections[j].cell;
-                    if (otherLookupCell->cellFunction == CellFunction_Sensor
-                        && otherLookupCell->cellFunctionData.sensor.targetedCreatureId == otherCell->creatureId) {
+            if (cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color] > NEAR_ZERO) {
+                bool creatureIdMatch = false;
+                for (int i = 0; i < cell->numConnections; ++i) {
+                    auto lookupCell = cell->connections[i].cell;
+                    if (lookupCell->cellFunction == CellFunction_Sensor && lookupCell->cellFunctionData.sensor.targetedCreatureId == otherCell->creatureId) {
                         creatureIdMatch = true;
                         break;
                     }
+                    for (int j = 0; j < lookupCell->numConnections; ++j) {
+                        auto otherLookupCell = lookupCell->connections[j].cell;
+                        if (otherLookupCell->cellFunction == CellFunction_Sensor
+                            && otherLookupCell->cellFunctionData.sensor.targetedCreatureId == otherCell->creatureId) {
+                            creatureIdMatch = true;
+                            break;
+                        }
+                    }
                 }
-            }
-            if (!creatureIdMatch) {
-                return;
+                if (!creatureIdMatch) {
+                    energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color]);
+                }
             }
 
             if (otherCell->genomeSize > cell->genomeSize) {
