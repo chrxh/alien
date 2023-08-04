@@ -479,6 +479,12 @@ namespace
             defaultParameters.cellFunctionAttackerSameMutantPenalty,
             "simulation parameters.cell.function.attacker.same mutant penalty",
             parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionAttackerSensorDetectionFactor,
+            defaultParameters.cellFunctionAttackerSensorDetectionFactor,
+            "simulation parameters.cell.function.attacker.sensor detection factor",
+            parserTask);
 
         encodeDecodeProperty(
             tree,

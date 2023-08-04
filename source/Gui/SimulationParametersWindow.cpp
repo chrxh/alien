@@ -796,8 +796,9 @@ void _SimulationParametersWindow::processBase(
                     .name("Attack strength")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
+                    .logarithmic(true)
                     .min(0)
-                    .max(0.1f)
+                    .max(0.5f)
                     .defaultValue(origSimParameters.cellFunctionAttackerStrength),
                 simParameters.cellFunctionAttackerStrength);
             AlienImGui::SliderFloat(
@@ -828,6 +829,20 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionAttackerSameMutantPenalty))
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
                 simParameters.cellFunctionAttackerSameMutantPenalty);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Sensor detection factor")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(1.0f)
+                    .defaultValue(origSimParameters.cellFunctionAttackerSensorDetectionFactor)
+                    .tooltip(
+                        "This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
+                        "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the attacker "
+                        "cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last time and "
+                        "compares them with the attacked target."),
+                simParameters.cellFunctionAttackerSensorDetectionFactor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Geometry penalty")
@@ -1757,6 +1772,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         }
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
         parameters.cellFunctionConstructorPumpEnergyFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorPumpEnergyFactor[i]));
+        parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
