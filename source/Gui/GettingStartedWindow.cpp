@@ -186,12 +186,13 @@ void _GettingStartedWindow::processIntern()
 
         ImGui::Spacing();
         drawHeading2("Activity states");
-        ImGui::Text("Cells contain activity states comprising of 8 values, primarily utilized for controlling cell functions. The states are "
+        drawParagraph(
+            "Cells contain activity states comprising of 8 values, primarily utilized for controlling cell functions. The states are "
                     "refreshed periodically, specifically when the cell functions are executed. To be more precise, each cell function is executed at regular "
                     "time intervals (every 6 time steps). The 'execution order number' specifies the exact time offset within those intervals.");
-        ImGui::Text("The process for updating the activity states is as follows: Firstly, the states of all connected cells that serve as input are summed "
-                    "up. The resulted sum is then employed as input for the cell function, which may potentially alter the values. Subsequently, the "
-                    "outcome is utilized to determine the new states.");
+        drawParagraph("The process for updating the activity states is as follows: Firstly, the states of all connected cells that serve as input (more "
+                    "precisely: connected cell which matches with the input execution number) are summed up. The resulted sum is then employed as input for "
+                    "the cell function, which may potentially alter the values. Subsequently, the outcome is utilized to determine the new states.");
 
         ImGui::Spacing();
         drawHeading2("Cell color");
@@ -343,14 +344,17 @@ void _GettingStartedWindow::processIntern()
                       "parameters should be adjusted in a way that guarantees a gradual loss of energy from cells over time.");
 
         drawHeading2("How can neural networks be incorporated?");
+        drawParagraph("Neural networks are available as cell functions. If a cell is assigned the function 'Neuron', it possesses a small neural network "
+                      "consisting of 8 neurons. However, these networks can be interconnected to form arbitrarily large networks, as each cell receives input "
+                      "from the output of certain connected cells.");
+        drawParagraph("Furthermore, these networks can be fed by sensors and, in turn, control muscle and attacker cells.");
 
         drawHeading2("For how long should I run a simulation to see evolutionary changes?");
+        drawParagraph(
+            "This depends on many factors: On the size of the simulated world, on the mutation rate, on various selection pressures that can be influenced "
+            "with the simulation parameters and last but not least on the graphics card. In small worlds with smaller organisms and high mutation rates, "
+            "evolutionary changes can sometimes be observed every minute.  With more complex simulations, you should rather expect a few hours.");
 
-        ImGui::Spacing();
-        ImGui::Spacing();
-        ImGui::Spacing();
-        ImGui::Spacing();
-        ImGui::Text("[work in progress]");
 
         //ImGui::Text("There is a lot to explore. ALIEN features an extensive graph and particle editor in order to build custom worlds with desired "
         //            "environmental structures and machines. A documentation with tutorial-like introductions to various topics can be found at");

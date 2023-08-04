@@ -102,7 +102,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
                 uint32_t angle = convertAngleToData(relAngle);
                 uint64_t combined =
                     static_cast<uint64_t>(radius) << 48 | static_cast<uint64_t>(density) << 40 | static_cast<uint64_t>(angle) << 32 | creatureId;
-                atomicMin(&lookupResult, combined);
+                alienAtomicMin64(&lookupResult, combined);
             }
         }
         __syncthreads();
