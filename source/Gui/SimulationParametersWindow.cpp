@@ -895,6 +895,14 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.cellFunctionAttackerColorInhomogeneityFactor)
                     .tooltip("If the attacked cell is connected to cells with different colors, this factor affects the energy of the captured energy."),
                 simParameters.cellFunctionAttackerColorInhomogeneityFactor);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Destroy cells")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.cellFunctionAttackerDestroyCells)
+                    .tooltip(
+                        "If activated, the attacker cell is able to destroy other cells. If deactivated, it only damages them."),
+                simParameters.cellFunctionAttackerDestroyCells);
             ImGui::TreePop();
         }
         ImGui::PopID();

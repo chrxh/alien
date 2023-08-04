@@ -485,6 +485,12 @@ namespace
             defaultParameters.cellFunctionAttackerSensorDetectionFactor,
             "simulation parameters.cell.function.attacker.sensor detection factor",
             parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionAttackerDestroyCells,
+            defaultParameters.cellFunctionAttackerDestroyCells,
+            "simulation parameters.cell.function.attacker.destroy cells",
+            parserTask);
 
         encodeDecodeProperty(
             tree,

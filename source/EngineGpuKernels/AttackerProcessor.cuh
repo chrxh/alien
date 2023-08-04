@@ -50,6 +50,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     float energyDelta = 0;
     auto cellMinEnergy =
         SpotCalculator::calcParameter(&SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
+    auto baseValue = cudaSimulationParameters.cellFunctionAttackerDestroyCells ? cellMinEnergy * 0.9f : cellMinEnergy;
 
     Cell* someOtherCell = nullptr;
     data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellFunctionAttackerRadius[cell->color], cell->detached, [&](auto const& otherCell) {
@@ -65,7 +66,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 atomicAdd(&otherCell->activity.channels[7], 1.0f);
             }
 
-            auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - cellMinEnergy) * cudaSimulationParameters.cellFunctionAttackerStrength[cell->color];
+            auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - baseValue) * cudaSimulationParameters.cellFunctionAttackerStrength[cell->color];
             if (energyToTransfer < 0) {
                 return;
             }
@@ -155,14 +156,14 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             someOtherCell = otherCell;
             if (energyToTransfer >= 0) {
                 auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
-                if (origEnergy > cellMinEnergy + energyToTransfer) {
+                if (origEnergy > baseValue + energyToTransfer) {
                     energyDelta += energyToTransfer;
                 } else {
                     atomicAdd(&otherCell->energy, energyToTransfer);  //revert
                 }
             } else {
                 auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
-                if (origEnergy >= cellMinEnergy - (energyDelta + energyToTransfer)) {
+                if (origEnergy >= baseValue - (energyDelta + energyToTransfer)) {
                     energyDelta += energyToTransfer;
                 } else {
                     atomicAdd(&otherCell->energy, energyToTransfer);  //revert
