@@ -117,6 +117,7 @@ struct SimulationParameters
     };
     ColorVector<float> cellFunctionAttackerSensorDetectionFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     float cellFunctionAttackerActivityThreshold = 0.1f;
+    bool cellFunctionAttackerDestroyCells = false;
 
     ColorVector<float> cellFunctionDefenderAgainstAttackerStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
     ColorVector<float> cellFunctionDefenderAgainstInjectorStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
@@ -308,6 +309,7 @@ struct SimulationParameters
             && cellMaxAgeBalancer == other.cellMaxAgeBalancer && cellMaxAgeBalancerInterval == other.cellMaxAgeBalancerInterval
             && cellFunctionConstructorMutationPreventDepthIncrease == other.cellFunctionConstructorMutationPreventDepthIncrease
             && cellFunctionConstructorCheckCompletenessForSelfReplication == other.cellFunctionConstructorCheckCompletenessForSelfReplication
+            && cellFunctionAttackerDestroyCells == other.cellFunctionAttackerDestroyCells
         ;
     }
 
