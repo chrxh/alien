@@ -98,6 +98,43 @@ void _GettingStartedWindow::processIntern()
             "as this significantly increases the simulation speed (time steps per second). This adjustment can be made in the display settings.");
 
         /**
+         * EXAMPLES
+         */
+        drawHeading1("Examples");
+        drawParagraph(
+            "ALIEN comes with a lot of simulation files that can be found in the browser window. They are good for experimenting with certain aspects of the "
+            "program. We pick some examples to give a short overview:");
+
+        drawHeading2("Fluids, walls and soft bodies");
+        drawParagraph("There are several pure physics simulations demonstrating the engines' capability. They are suitable for testing the influence of "
+                      "simulation parameters such as 'Smoothing length', 'Pressure', 'Viscosity', etc.");
+        drawItemText("Fluids/Pump with Soft-Bodies");
+        drawItemText("Demos/Perpetual Motion Machine");
+        drawItemText("Demos/Stormy Night");
+
+        drawHeading2("Evolution of self-replicators");
+        drawParagraph("By attaching higher-level functions to particle networks, complex multicellular organisms can be modeled. They can evolve over time as "
+                      "they are subject to mutations. The following examples consist of homogeneous worlds populated by self-replicating agents. Different "
+                      "selection pressures control evolution.");
+        drawItemText("Complex Evolution Testbed/Example");
+        drawItemText("Diversity/Example");
+        drawItemText("Color Niches/Example");
+
+        drawHeading2("Plant-herbivore ecosystems");
+        drawParagraph("By customizing the cells according to their color, it is possible to specify different types of organisms. There are many examples that "
+                      "feature two classes: plants and herbivores. Plants are able to consume radiation particles, while herbivores can consume plants. This "
+                      "simple relationship already provides interesting dynamics, as the following examples show.");
+        drawItemText("Twin Worlds/Example");
+        drawItemText("Bugs and Flowers/Example");
+        drawItemText("Self-replicating Fluid/Initial Setting");
+
+        drawHeading2("Swarming");
+        drawParagraph("There are powerful sensors available as cell functions for detecting concentrations of specific colors in the surroundings. "
+                      "Organisms equipped with these sensors can perceive their environment, nourish their neural networks, and respond accordingly.");
+        drawItemText("Swarms/Space Invaders");
+        drawItemText("Evolving Swarms/Example");
+
+        /**
          * BASIC NOTION
          */
         drawHeading1("Basic notion");
@@ -185,43 +222,6 @@ void _GettingStartedWindow::processIntern()
         ImGui::Spacing();
         drawHeading2("Pattern");
         drawParagraph("A pattern is a set of cell networks and energy particles.");
-
-        /**
-         * EXAMPLES
-         */
-        drawHeading1("Examples");
-        drawParagraph(
-            "ALIEN comes with a lot of simulation files that can be found in the browser window. They are good for experimenting with certain aspects of the "
-                    "program. We pick some examples to give a short overview:");
-
-        drawHeading2("Fluids, walls and soft bodies");
-        drawParagraph("There are several pure physics simulations demonstrating the engines' capability. They are suitable for testing the influence of "
-                      "simulation parameters such as 'Smoothing length', 'Pressure', 'Viscosity', etc.");
-        drawItemText("Fluids/Pump with Soft-Bodies");
-        drawItemText("Demos/Perpetual Motion Machine");
-        drawItemText("Demos/Stormy Night");
-
-        drawHeading2("Evolution of self-replicators");
-        drawParagraph("By attaching higher-level functions to particle networks, complex multicellular organisms can be modeled. They can evolve over time as "
-                    "they are subject to mutations. The following examples consist of homogeneous worlds populated by self-replicating agents. Different "
-                    "selection pressures control evolution.");
-        drawItemText("Complex Evolution Testbed/Example");
-        drawItemText("Diversity/Example");
-        drawItemText("Color Niches/Example");
-
-        drawHeading2("Plant-herbivore ecosystems");
-        drawParagraph("By customizing the cells according to their color, it is possible to specify different types of organisms. There are many examples that "
-                      "feature two classes: plants and herbivores. Plants are able to consume radiation particles, while herbivores can consume plants. This "
-                      "simple relationship already provides interesting dynamics, as the following examples show.");
-        drawItemText("Twin Worlds/Example");
-        drawItemText("Bugs and Flowers/Example");
-        drawItemText("Self-replicating Fluid/Initial Setting");
-
-        drawHeading2("Swarming");
-        drawParagraph("There are powerful sensors available as cell functions for detecting concentrations of specific colors in the surroundings. "
-                      "Organisms equipped with these sensors can perceive their environment, nourish their neural networks, and respond accordingly.");
-        drawItemText("Swarms/Space Invaders");
-        drawItemText("Evolving Swarms/Example");
 
         /**
          * SIMULATION PARAMETERS
