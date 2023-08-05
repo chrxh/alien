@@ -62,11 +62,10 @@ public:
     virtual uint64_t getCurrentTimestep() const = 0;
     virtual void setCurrentTimestep(uint64_t value) = 0;
 
-    virtual SimulationParameters const& getSimulationParameters() const = 0;
-    virtual SimulationParameters getOriginalSimulationParameters() const = 0;
+    virtual SimulationParameters getSimulationParameters() const = 0;
+    virtual SimulationParameters const& getOriginalSimulationParameters() const = 0;
     virtual void setSimulationParameters(SimulationParameters const& parameters) = 0;
     virtual void setOriginalSimulationParameters(SimulationParameters const& parameters) = 0;
-    virtual void setSimulationParameters_async(SimulationParameters const& parameters) = 0;
 
     virtual GpuSettings getGpuSettings() const = 0;
     virtual GpuSettings getOriginalGpuSettings() const = 0;

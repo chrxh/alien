@@ -60,6 +60,7 @@ public:
     void setDetached(bool value);
 
     void setGpuConstants(GpuSettings const& cudaConstants);
+    SimulationParameters getSimulationParameters() const;
     void setSimulationParameters(SimulationParameters const& parameters);
 
     ArraySizes getArraySizes() const;
@@ -82,18 +83,22 @@ private:
     void copyDataTOtoHost(DataTO const& dataTO);
     void automaticResizeArrays();
     void resizeArrays(ArraySizes const& additionals = ArraySizes());
+    void checkAndProcessSimulationParameterChanges();
 
     SimulationData getSimulationDataIntern() const;
 
+    mutable std::mutex _mutexForSimulationParameters;
+    std::optional<SimulationParameters> _newSimulationParameters;
     Settings _settings;
 
+    mutable std::mutex _mutexForSimulationData;
     std::shared_ptr<SimulationData> _cudaSimulationData;
+
     std::shared_ptr<RenderingData> _cudaRenderingData;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     std::shared_ptr<DataTO> _cudaAccessTO;
     std::shared_ptr<SimulationStatistics> _simulationStatistics;
 
-    mutable std::mutex _mutex;
 
     SimulationKernelsLauncher _simulationKernels;
     DataAccessKernelsLauncher _dataAccessKernels;

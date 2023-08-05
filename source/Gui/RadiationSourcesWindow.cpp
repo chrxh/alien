@@ -38,7 +38,7 @@ void _RadiationSourcesWindow::processIntern()
                 origParameters.particleSources[index] = createParticleSource();
                 ++parameters.numParticleSources;
                 ++origParameters.numParticleSources;
-                _simController->setSimulationParameters_async(parameters);
+                _simController->setSimulationParameters(parameters);
                 _simController->setOriginalSimulationParameters(origParameters);
             }
             AlienImGui::Tooltip("Add source");
@@ -142,7 +142,7 @@ void _RadiationSourcesWindow::processIntern()
                 }
                 --parameters.numParticleSources;
                 --origParameters.numParticleSources;
-                _simController->setSimulationParameters_async(parameters);
+                _simController->setSimulationParameters(parameters);
                 _simController->setOriginalSimulationParameters(origParameters);
             }
         }
@@ -150,7 +150,7 @@ void _RadiationSourcesWindow::processIntern()
         ImGui::EndTabBar();
     }
     if (parameters != lastParameters) {
-        _simController->setSimulationParameters_async(parameters);
+        _simController->setSimulationParameters(parameters);
     }
 }
 
