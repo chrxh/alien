@@ -158,13 +158,14 @@ void _SimulationView::leftMouseButtonPressed(IntVector2D const& viewPos)
 void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
 {
     if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
-        _viewport->zoom(viewPos, calcZoomFactor());
+        _viewport->zoom(viewPos, calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
     }
 }
 
-void _SimulationView::mouseWheelUp(IntVector2D const& viewPos)
+void _SimulationView::mouseWheelUp(IntVector2D const& viewPos, float strongness)
 {
-    _viewport->zoom(viewPos, pow(_viewport->getZoomSensitivity(), 4.0f));
+    _mouseWheelAction =
+        MouseWheelAction{.up = true, .strongness = strongness, .start = std::chrono::steady_clock::now(), .lastTime = std::chrono::steady_clock::now()};
 }
 
 void _SimulationView::leftMouseButtonReleased()
@@ -183,19 +184,35 @@ void _SimulationView::rightMouseButtonPressed()
 void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
     if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
-        _viewport->zoom(viewPos, 1.0f / calcZoomFactor());
+        _viewport->zoom(viewPos, 1.0f / calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
     }
 }
 
-void _SimulationView::mouseWheelDown(IntVector2D const& viewPos)
+void _SimulationView::mouseWheelDown(IntVector2D const& viewPos, float strongness)
 {
-    _viewport->zoom(viewPos, 1.0f / (pow(_viewport->getZoomSensitivity(), 4.0f)));
+    _mouseWheelAction =
+        MouseWheelAction{.up = false, .strongness = strongness, .start = std::chrono::steady_clock::now(), .lastTime = std::chrono::steady_clock::now()};
 }
 
 void _SimulationView::rightMouseButtonReleased()
 {
     _navigationState = NavigationState::Static;
     updateMotionBlur();
+}
+
+void _SimulationView::processMouseWheel(IntVector2D const& viewPos)
+{
+    if (_mouseWheelAction) {
+        auto zoomFactor = std::powf(calcZoomFactor(_mouseWheelAction->lastTime), 2.5f * _mouseWheelAction->strongness);
+        auto now = std::chrono::steady_clock::now();
+        _mouseWheelAction->lastTime = now;
+
+        _viewport->zoom(viewPos, _mouseWheelAction->up ? zoomFactor : 1.0f / zoomFactor);
+
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - _mouseWheelAction->start).count() > 100) {
+            _mouseWheelAction.reset();
+        }
+    }
 }
 
 void _SimulationView::middleMouseButtonPressed(IntVector2D const& viewPos)
@@ -215,11 +232,11 @@ void _SimulationView::middleMouseButtonReleased()
 
 void _SimulationView::processEvents()
 {
-    if (!ImGui::GetIO().WantCaptureMouse) {
-        auto mousePos = ImGui::GetMousePos();
-        IntVector2D mousePosInt{toInt(mousePos.x), toInt(mousePos.y)};
-        IntVector2D prevMousePosInt = _prevMousePosInt ? *_prevMousePosInt : mousePosInt;
+    auto mousePos = ImGui::GetMousePos();
+    IntVector2D mousePosInt{toInt(mousePos.x), toInt(mousePos.y)};
+    IntVector2D prevMousePosInt = _prevMousePosInt ? *_prevMousePosInt : mousePosInt;
 
+    if (!ImGui::GetIO().WantCaptureMouse) {
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
             leftMouseButtonPressed(mousePosInt);
         }
@@ -227,7 +244,7 @@ void _SimulationView::processEvents()
             leftMouseButtonHold(mousePosInt, prevMousePosInt);
         }
         if (ImGui::GetIO().MouseWheel > 0) {
-            mouseWheelUp(mousePosInt);
+            mouseWheelUp(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
         }
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
             leftMouseButtonReleased();
@@ -240,7 +257,7 @@ void _SimulationView::processEvents()
             rightMouseButtonHold(mousePosInt);
         }
         if (ImGui::GetIO().MouseWheel < 0) {
-            mouseWheelDown(mousePosInt);
+            mouseWheelDown(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
         }
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
             rightMouseButtonReleased();
@@ -257,9 +274,10 @@ void _SimulationView::processEvents()
         }
 
         drawEditCursor();
-
-        _prevMousePosInt = mousePosInt;
     }
+    processMouseWheel(mousePosInt);
+
+    _prevMousePosInt = mousePosInt;
 }
 
 void _SimulationView::draw()
@@ -435,10 +453,10 @@ void _SimulationView::drawEditCursor()
     }
 }
 
-float _SimulationView::calcZoomFactor()
+float _SimulationView::calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint)
 {
     auto now = std::chrono::steady_clock::now();
-    auto duration = _lastZoomTimepoint ? toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - *_lastZoomTimepoint).count()) : 30.0f;
+    auto duration = toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTimepoint).count());
     _lastZoomTimepoint = now;
     return pow(_viewport->getZoomSensitivity(), duration / 15);
 }
