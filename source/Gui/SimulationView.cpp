@@ -203,7 +203,7 @@ void _SimulationView::rightMouseButtonReleased()
 void _SimulationView::processMouseWheel(IntVector2D const& viewPos)
 {
     if (_mouseWheelAction) {
-        auto zoomFactor = std::powf(calcZoomFactor(_mouseWheelAction->lastTime), 2.5f * _mouseWheelAction->strongness);
+        auto zoomFactor = powf(calcZoomFactor(_mouseWheelAction->lastTime), 2.2f * _mouseWheelAction->strongness);
         auto now = std::chrono::steady_clock::now();
         _mouseWheelAction->lastTime = now;
 
