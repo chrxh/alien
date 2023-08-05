@@ -14,7 +14,9 @@ add_library(alien_base_lib
     Physics.h
     Resources.h
     StringHelper.cpp
-    StringHelper.h)
+    StringHelper.h
+    Vector2D.cpp
+    Vector2D.h)
 
 target_link_libraries(alien_base_lib Boost::boost)
 
