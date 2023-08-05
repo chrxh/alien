@@ -225,6 +225,7 @@ __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, floa
     if (particleEnergy > NEAR_ZERO) {
         ObjectFactory factory;
         factory.init(&data);
+        data.cellMap.correctPosition(pos);
         factory.createParticle(particleEnergy, pos, vel, color);
     }
 

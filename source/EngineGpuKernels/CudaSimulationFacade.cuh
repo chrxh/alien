@@ -84,6 +84,7 @@ private:
     void automaticResizeArrays();
     void resizeArrays(ArraySizes const& additionals = ArraySizes());
     void checkAndProcessSimulationParameterChanges();
+    Settings getSettingsForNextTimestep();
 
     SimulationData getSimulationDataIntern() const;
 
