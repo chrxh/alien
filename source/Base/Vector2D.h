@@ -23,7 +23,6 @@ namespace std
         {
             using std::hash;
             using std::size_t;
-            using std::string;
 
             size_t res = 17;
             res = res * 31 + hash<int>()(value.x);
