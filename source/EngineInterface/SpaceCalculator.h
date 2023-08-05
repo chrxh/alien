@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Base/Definitions.h"
-#include "Definitions.h"
+#include "Base/Vector2D.h"
 
 class SpaceCalculator
 {

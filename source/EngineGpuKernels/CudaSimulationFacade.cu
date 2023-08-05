@@ -16,6 +16,7 @@
 #include "EngineInterface/InspectedEntityIds.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/SpaceCalculator.h"
 
 #include "DataAccessKernels.cuh"
 #include "TOs.cuh"
@@ -116,6 +117,7 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
 {
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
+    _settings.generalSettings = settings.generalSettings;
     setSimulationParameters(settings.simulationParameters);
     setGpuConstants(settings.gpuSettings);
 
@@ -571,12 +573,14 @@ Settings _CudaSimulationFacade::getSettingsForNextTimestep()
     std::lock_guard lock(_mutexForSimulationParameters);
     auto const& worldSizeX = _settings.generalSettings.worldSizeX;
     auto const& worldSizeY = _settings.generalSettings.worldSizeY;
+    SpaceCalculator space({worldSizeX, worldSizeY});
     for (int i = 0; i < _settings.simulationParameters.numParticleSources; ++i) {
         auto& source = _settings.simulationParameters.particleSources[i];
         source.posX += source.velX;
         source.posY += source.velY;
-        source.posX = std::fmod(std::fmod(source.posX, worldSizeX) + worldSizeX, worldSizeX);
-        source.posY = std::fmod(std::fmod(source.posY, worldSizeY) + worldSizeY, worldSizeY);
+        auto correctedPosition = space.getCorrectedPosition({source.posX, source.posY});
+        source.posX = correctedPosition.x;
+        source.posY = correctedPosition.y;
     }
     CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
     return _settings;
