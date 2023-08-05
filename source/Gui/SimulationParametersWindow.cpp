@@ -92,7 +92,7 @@ void _SimulationParametersWindow::processIntern()
                     origParameters.spots[index] = createSpot(parameters, index);
                     ++parameters.numSpots;
                     ++origParameters.numSpots;
-                    _simController->setSimulationParameters_async(parameters);
+                    _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
                 AlienImGui::Tooltip("Add parameter zone");
@@ -121,7 +121,7 @@ void _SimulationParametersWindow::processIntern()
                     }
                     --parameters.numSpots;
                     --origParameters.numSpots;
-                    _simController->setSimulationParameters_async(parameters);
+                    _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
             }
@@ -132,7 +132,7 @@ void _SimulationParametersWindow::processIntern()
     ImGui::EndChild();
 
     if (parameters != lastParameters) {
-        _simController->setSimulationParameters_async(parameters);
+        _simController->setSimulationParameters(parameters);
     }
 }
 
@@ -1749,7 +1749,7 @@ void _SimulationParametersWindow::onOpenParameters()
         if (!Serializer::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
             MessageDialog::getInstance().show("Open simulation parameters", "The selected file could not be opened.");
         } else {
-            _simController->setSimulationParameters_async(parameters);
+            _simController->setSimulationParameters(parameters);
         }
     });
 }

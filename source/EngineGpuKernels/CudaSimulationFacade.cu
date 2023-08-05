@@ -176,12 +176,20 @@ void* _CudaSimulationFacade::registerImageResource(GLuint image)
 
 void _CudaSimulationFacade::calcTimestep()
 {
-    _simulationKernels->calcTimestep(_settings, getSimulationDataIntern(), *_simulationStatistics);
+    checkAndProcessSimulationParameterChanges();
+
+    Settings settings;
+    {
+        std::lock_guard lock(_mutexForSimulationParameters);
+        settings = _settings;
+    }
+    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+    _simulationKernels->calcTimestep(settings, getSimulationDataIntern(), *_simulationStatistics);
     syncAndCheck();
 
     automaticResizeArrays();
 
-    std::lock_guard lock(_mutex);
+    std::lock_guard lock(_mutexForSimulationData);
     ++_cudaSimulationData->timestep;
 }
 
@@ -192,6 +200,8 @@ void _CudaSimulationFacade::drawVectorGraphics(
     int2 const& imageSize,
     double zoom)
 {
+    checkAndProcessSimulationParameterChanges();
+
     auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaResource);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
 
@@ -400,6 +410,18 @@ void _CudaSimulationFacade::setGpuConstants(GpuSettings const& gpuConstants)
         cudaMemcpyToSymbol(cudaThreadSettings, &gpuConstants, sizeof(GpuSettings), 0, cudaMemcpyHostToDevice));
 }
 
+SimulationParameters _CudaSimulationFacade::getSimulationParameters() const
+{
+    std::lock_guard lock(_mutexForSimulationParameters);
+    return _newSimulationParameters ? *_newSimulationParameters : _settings.simulationParameters;
+}
+
+void _CudaSimulationFacade::setSimulationParameters(SimulationParameters const& parameters)
+{
+    std::lock_guard lock(_mutexForSimulationParameters);
+    _newSimulationParameters = parameters;
+}
+
 auto _CudaSimulationFacade::getArraySizes() const -> ArraySizes
 {
     return {
@@ -424,23 +446,14 @@ void _CudaSimulationFacade::resetTimeIntervalStatistics()
 
 uint64_t _CudaSimulationFacade::getCurrentTimestep() const
 {
-    std::lock_guard lock(_mutex);
+    std::lock_guard lock(_mutexForSimulationData);
     return _cudaSimulationData->timestep;
 }
 
 void _CudaSimulationFacade::setCurrentTimestep(uint64_t timestep)
 {
-    std::lock_guard lock(_mutex);
+    std::lock_guard lock(_mutexForSimulationData);
     _cudaSimulationData->timestep = timestep;
-}
-
-void _CudaSimulationFacade::setSimulationParameters(SimulationParameters const& parameters)
-{
-    _settings.simulationParameters = parameters;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
-    if (_cudaSimulationData) {
-        _simulationKernels->prepareForSimulationParametersChanges(_settings, getSimulationDataIntern());
-    }
 }
 
 void _CudaSimulationFacade::clear()
@@ -496,7 +509,7 @@ void _CudaSimulationFacade::automaticResizeArrays()
 {
     uint64_t timestep;
     {
-        std::lock_guard lock(_mutex);
+        std::lock_guard lock(_mutexForSimulationData);
         timestep = _cudaSimulationData->timestep;
     }
     //make check after every 10th time step
@@ -543,8 +556,22 @@ void _CudaSimulationFacade::resizeArrays(ArraySizes const& additionals)
     log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory acquired");
 }
 
+void _CudaSimulationFacade::checkAndProcessSimulationParameterChanges()
+{
+    std::lock_guard lock(_mutexForSimulationParameters);
+    if (_newSimulationParameters) {
+        _settings.simulationParameters = *_newSimulationParameters;
+        CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+        _newSimulationParameters.reset();
+
+        if (_cudaSimulationData) {
+            _simulationKernels->prepareForSimulationParametersChanges(_settings, getSimulationDataIntern());
+        }
+    }
+}
+
 SimulationData _CudaSimulationFacade::getSimulationDataIntern() const
 {
-    std::lock_guard lock(_mutex);
+    std::lock_guard lock(_mutexForSimulationData);
     return *_cudaSimulationData;
 }

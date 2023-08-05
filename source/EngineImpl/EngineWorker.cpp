@@ -368,16 +368,14 @@ void EngineWorker::setCurrentTimestep(uint64_t value)
     resetTimeIntervalStatistics();
 }
 
-void EngineWorker::setSimulationParameters(SimulationParameters const& parameters)
+SimulationParameters EngineWorker::getSimulationParameters() const
 {
-    EngineWorkerGuard access(this);
-    _cudaSimulation->setSimulationParameters(parameters);
+    return _cudaSimulation->getSimulationParameters();
 }
 
-void EngineWorker::setSimulationParameters_async(SimulationParameters const& parameters)
+void EngineWorker::setSimulationParameters(SimulationParameters const& parameters)
 {
-    std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
-    _updateSimulationParametersJob = parameters;
+    _cudaSimulation->setSimulationParameters(parameters);
 }
 
 void EngineWorker::setGpuSettings_async(GpuSettings const& gpuSettings)
@@ -542,10 +540,6 @@ void EngineWorker::updateStatistics(bool afterMinDuration)
 void EngineWorker::processJobs()
 {
     std::unique_lock<std::mutex> asyncJobsLock(_mutexForAsyncJobs);
-    if (_updateSimulationParametersJob) {
-        _cudaSimulation->setSimulationParameters(*_updateSimulationParametersJob);
-        _updateSimulationParametersJob = std::nullopt;
-    }
     if (_updateGpuSettingsJob) {
         _cudaSimulation->setGpuConstants(*_updateGpuSettingsJob);
         _updateGpuSettingsJob = std::nullopt;

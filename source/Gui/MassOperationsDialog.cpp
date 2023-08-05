@@ -93,7 +93,7 @@ void _MassOperationsDialog::process()
         AlienImGui::Group("Options");
         ImGui::Checkbox("##restrictToSelectedClusters", &_restrictToSelectedClusters);
         ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-        AlienImGui::Text("Restrict to selected clusters");
+        AlienImGui::Text("Restrict to selected cell networks");
 
         AlienImGui::Separator();
 
