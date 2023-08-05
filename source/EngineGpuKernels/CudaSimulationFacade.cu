@@ -178,12 +178,8 @@ void _CudaSimulationFacade::calcTimestep()
 {
     checkAndProcessSimulationParameterChanges();
 
-    Settings settings;
-    {
-        std::lock_guard lock(_mutexForSimulationParameters);
-        settings = _settings;
-    }
-    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+    auto settings = getSettingsForNextTimestep();
+
     _simulationKernels->calcTimestep(settings, getSimulationDataIntern(), *_simulationStatistics);
     syncAndCheck();
 
@@ -568,6 +564,22 @@ void _CudaSimulationFacade::checkAndProcessSimulationParameterChanges()
             _simulationKernels->prepareForSimulationParametersChanges(_settings, getSimulationDataIntern());
         }
     }
+}
+
+Settings _CudaSimulationFacade::getSettingsForNextTimestep()
+{
+    std::lock_guard lock(_mutexForSimulationParameters);
+    auto const& worldSizeX = _settings.generalSettings.worldSizeX;
+    auto const& worldSizeY = _settings.generalSettings.worldSizeY;
+    for (int i = 0; i < _settings.simulationParameters.numParticleSources; ++i) {
+        auto& source = _settings.simulationParameters.particleSources[i];
+        source.posX += source.velX;
+        source.posY += source.velY;
+        source.posX = std::fmod(std::fmod(source.posX, worldSizeX) + worldSizeX, worldSizeX);
+        source.posY = std::fmod(std::fmod(source.posY, worldSizeY) + worldSizeY, worldSizeY);
+    }
+    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+    return _settings;
 }
 
 SimulationData _CudaSimulationFacade::getSimulationDataIntern() const

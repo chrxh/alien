@@ -69,7 +69,7 @@ void _RadiationSourcesWindow::processIntern()
                 }
 
                 AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
+                AlienImGui::SliderFloatParameters()
                         .name("Position X")
                         .textWidth(RightColumnWidth)
                         .min(0)
@@ -86,6 +86,24 @@ void _RadiationSourcesWindow::processIntern()
                         .format("%.0f")
                         .defaultValue(&origSource.posY),
                     &source.posY);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Velocity X")
+                        .textWidth(RightColumnWidth)
+                        .min(-4.0f)
+                        .max(4.0f)
+                        .format("%.2f")
+                        .defaultValue(&origSource.velX),
+                    &source.velX);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Velocity Y")
+                        .textWidth(RightColumnWidth)
+                        .min(-4.0f)
+                        .max(4.0f)
+                        .format("%.2f")
+                        .defaultValue(&origSource.velY),
+                    &source.velY);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Angle")

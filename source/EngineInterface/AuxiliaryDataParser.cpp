@@ -596,6 +596,8 @@ namespace
             auto& defaultSource = defaultParameters.particleSources[index];
             encodeDecodeProperty(tree, source.posX, defaultSource.posX, base + "pos.x", parserTask);
             encodeDecodeProperty(tree, source.posY, defaultSource.posY, base + "pos.y", parserTask);
+            encodeDecodeProperty(tree, source.velX, defaultSource.velX, base + "vel.x", parserTask);
+            encodeDecodeProperty(tree, source.velY, defaultSource.velY, base + "vel.y", parserTask);
             encodeDecodeProperty(tree, source.useAngle, defaultSource.useAngle, base + "use angle", parserTask);
             encodeDecodeProperty(tree, source.angle, defaultSource.angle, base + "angle", parserTask);
             encodeDecodeProperty(tree, source.shapeType, defaultSource.shapeType, base + "shape.type", parserTask);
