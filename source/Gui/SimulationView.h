@@ -34,13 +34,15 @@ private:
 
     void leftMouseButtonPressed(IntVector2D const& viewPos);
     void leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos);
-    void mouseWheelUp(IntVector2D const& viewPos);
+    void mouseWheelUp(IntVector2D const& viewPos, float strongness);
     void leftMouseButtonReleased();
 
     void rightMouseButtonPressed();
     void rightMouseButtonHold(IntVector2D const& viewPos);
-    void mouseWheelDown(IntVector2D const& viewPos);
+    void mouseWheelDown(IntVector2D const& viewPos, float strongness);
     void rightMouseButtonReleased();
+
+    void processMouseWheel(IntVector2D const& viewPos);
 
     void middleMouseButtonPressed(IntVector2D const& viewPos);
     void middleMouseButtonHold(IntVector2D const& viewPos);
@@ -50,7 +52,7 @@ private:
     void updateMotionBlur();
 
     void drawEditCursor();
-    float calcZoomFactor();
+    float calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint);
 
     //widgets
     SimulationScrollbar _scrollbarX;
@@ -79,6 +81,15 @@ private:
     std::optional<RealVector2D> _worldPosForMovement;
     std::optional<IntVector2D> _prevMousePosInt;
     std::optional<std::chrono::steady_clock::time_point> _lastZoomTimepoint;
+
+    struct MouseWheelAction
+    {
+        bool up;    //false=down
+        float strongness;
+        std::chrono::steady_clock::time_point start;
+        std::chrono::steady_clock::time_point lastTime;
+    };
+    std::optional<MouseWheelAction> _mouseWheelAction;
 
     Viewport _viewport;
     ModeController _modeWindow;
