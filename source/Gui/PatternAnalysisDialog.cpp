@@ -69,10 +69,10 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
     }
     std::sort(partitionData.begin(), partitionData.end());
 
-    file << "number of repetitive active clusters: " << partitionData.size() << std::endl << std::endl;
+    file << "number of repetitive active cell networks: " << partitionData.size() << std::endl << std::endl;
     for (auto const& [index, partitionClassData] : partitionData | boost::adaptors::reversed | boost::adaptors::indexed(1)) {
 
-        file << "cluster " << index << ": " << partitionClassData.numberOfElements << " exemplars" << std::endl;
+        file << "cell network " << index << ": " << partitionClassData.numberOfElements << " exemplars" << std::endl;
 
         std::stringstream clusterNameStream;
         clusterNameStream << "cluster" << std::setfill('0') << std::setw(6) << index << ".sim";

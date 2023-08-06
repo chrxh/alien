@@ -25,10 +25,10 @@ namespace
     auto const ModeText = std::unordered_map<CreationMode, std::string>{
         {CreationMode::CreateParticle, "Create single energy particle"},
         {CreationMode::CreateCell, "Create single cell"},
-        {CreationMode::CreateRectangle, "Create rectangular cell cluster"},
-        {CreationMode::CreateHexagon, "Create hexagonal cell cluster"},
-        {CreationMode::CreateDisc, "Create disc-shaped cell cluster"},
-        {CreationMode::Drawing, "Draw freehand cell cluster"},
+        {CreationMode::CreateRectangle, "Create rectangular cell network"},
+        {CreationMode::CreateHexagon, "Create hexagonal cell network"},
+        {CreationMode::CreateDisc, "Create disc-shaped cell network"},
+        {CreationMode::Drawing, "Draw freehand cell network"},
     };
 
     auto const RightColumnWidth = 180.0f;
