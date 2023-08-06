@@ -582,10 +582,10 @@ void _SimulationParametersWindow::processBase(
                 simParameters.cellNormalEnergy);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Cell cluster decay")
+                    .name("Cell network decay")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.clusterDecay)
-                    .tooltip("If enabled, entire cell clusters will disintegrate when one of their cells is dying because of insufficient energy. This option "
+                    .tooltip("If enabled, entire cell networks will disintegrate when one of their cells is dying because of insufficient energy. This option "
                              "is useful to minimize the presence of cell corpses."),
                 simParameters.clusterDecay);
             ImGui::TreePop();
@@ -947,7 +947,7 @@ void _SimulationParametersWindow::processBase(
                     .name("Completeness check")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellFunctionConstructorCheckCompletenessForSelfReplication)
-                    .tooltip("If activated, a self-replication process can only start when all other non-self-replicating constructors in the cell clusters are "
+                    .tooltip("If activated, a self-replication process can only start when all other non-self-replicating constructors in the cell network are "
                              "finished."),
                 simParameters.cellFunctionConstructorCheckCompletenessForSelfReplication);
             ImGui::TreePop();
