@@ -10,6 +10,7 @@
 class MutationProcessor
 {
 public:
+
     __inline__ __device__ static void applyRandomMutation(SimulationData& data, Cell* cell);
 
     __inline__ __device__ static void neuronDataMutation(SimulationData& data, Cell* cell);
@@ -185,7 +186,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
                 return;
             }
             genome[nodeAddress + randomDelta] = data.numberGen1.randomByte();
-            adaptMutationId(data, constructor);
+            //adaptMutationId(data, constructor);
         }
 
         //cell function specific mutation
@@ -200,7 +201,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
                     return;
                 }
                 genome[nodeAddress + Const::CellBasicBytes + randomDelta] = data.numberGen1.randomByte();
-                adaptMutationId(data, constructor);
+                //adaptMutationId(data, constructor);
             }
         }
     });
@@ -342,7 +343,7 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
     }
     GenomeDecoder::setNextCellFunctionType(targetGenome, nodeAddress, newCellFunction);
     GenomeDecoder::setRandomCellFunctionData(data, targetGenome, nodeAddress + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeHeaderSize);
-    if (!GenomeDecoder::isNextCellSelfCopy(targetGenome, nodeAddress)) {
+    if (newCellFunction == CellFunction_Constructor && !makeSelfCopy) {
         GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);  //currently no subgenome with separation property wished
     }
 
@@ -367,6 +368,9 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
     auto genomeSize = toInt(constructor.genomeSize);
+    if (genomeSize < Const::GenomeHeaderSize) {
+        return;
+    }
 
     int subGenomesSizeIndices[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH + 1];
     int numSubGenomesSizeIndices;
@@ -430,7 +434,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     GenomeDecoder::setNextCellFunctionType(targetGenome, nodeAddress, newCellFunction);
     GenomeDecoder::setNextCellColor(targetGenome, nodeAddress, newColor);
     GenomeDecoder::setRandomCellFunctionData(data, targetGenome, nodeAddress + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeHeaderSize);
-    if (!GenomeDecoder::isNextCellSelfCopy(targetGenome, nodeAddress)) {
+    if (newCellFunction == CellFunction_Constructor && !makeSelfCopy) {
         GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);      //currently no subgenome with separation property wished
     }
 
