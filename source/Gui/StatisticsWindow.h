@@ -58,11 +58,14 @@ private:
 
     void onSaveStatistics();
 
+    float getPlotHeight() const;
+
     SimulationController _simController;
 
     bool _live = true;
     std::string _startingPath;
     int _plotType = 0;
+    bool _maximize = false;
 
     std::optional<StatisticsData> _lastStatisticsData;
     std::optional<float> _histogramUpperBound;

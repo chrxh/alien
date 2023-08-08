@@ -262,6 +262,7 @@ public:
     {
         MEMBER_DECLARATION(AngleAlignmentComboParameters, std::string, name, "");
         MEMBER_DECLARATION(AngleAlignmentComboParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(AngleAlignmentComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, int& value);
 

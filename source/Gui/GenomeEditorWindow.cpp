@@ -29,7 +29,7 @@
 
 namespace
 {
-    auto const ContentTextWidth = 165.0f;
+    auto const ContentTextWidth = 170.0f;
     auto const WeightsAndBiasTextWidth = 100.0f;
     auto const WeightsAndBiasSelectionTextWidth = 400.0f;
     auto const DynamicTableColumnWidth = 275.0f;
@@ -306,24 +306,66 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
     if (table.begin()) {
         std::vector ShapeStrings = {"Custom"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s, "Tube"s, "Lolli"s};
         auto origShape = tab.genome.info.shape;
-        if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Geometry").values(ShapeStrings).textWidth(ContentTextWidth), tab.genome.info.shape)) {
+        if (AlienImGui::Combo(
+                AlienImGui::ComboParameters()
+                    .name("Geometry")
+                    .values(ShapeStrings)
+                    .textWidth(ContentTextWidth)
+                    .tooltip("A genome describes a network of connected cells. On the one hand, there is the option to select a pre-defined geometry (e.g. "
+                             "triangle or hexagon). Then, the cells encoded in the genome are generated along this geometry and connected together "
+                             "appropriately. On the other hand, it is also possible to define custom geometries by setting an angle between predecessor and "
+                             "successor cells for each cell (except for the first and last in the sequence)."),
+                tab.genome.info.shape)) {
             updateGeometry(tab.genome, origShape);
         }
         table.next();
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(ContentTextWidth), tab.genome.info.connectionDistance);
+            AlienImGui::InputFloatParameters()
+                .name("Connection distance")
+                .format("%.2f")
+                .step(0.05f)
+                .textWidth(ContentTextWidth)
+                .tooltip("The spatial distance between each cell and its predecessor cell in the genome sequence is determined here."),
+            tab.genome.info.connectionDistance);
         table.next();
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth), tab.genome.info.stiffness);
+            AlienImGui::InputFloatParameters()
+                .name("Stiffness")
+                .format("%.2f")
+                .step(0.05f)
+                .textWidth(ContentTextWidth)
+                .tooltip("This value sets the stiffness for the entire encoded cell network."),
+            tab.genome.info.stiffness);
         if (tab.genome.info.shape == ConstructionShape_Custom) {
             table.next();
             AlienImGui::AngleAlignmentCombo(
-                AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(ContentTextWidth), tab.genome.info.angleAlignment);
+                AlienImGui::AngleAlignmentComboParameters()
+                    .name("Angle alignment")
+                    .textWidth(ContentTextWidth)
+                    .tooltip("Triples of connected cells within a network have specific spatial angles relative to each other. These angles are guided by the "
+                             "reference angles encoded in the cells. With this setting, it is optionally possible to specify that the reference angles must "
+                             "only be multiples of certain values. This allows for greater stability of the created networks, as the angles would otherwise be "
+                             "more susceptible to external influences. Choosing 60 degrees is recommended here, as it allows for the accurate representation "
+                             "of most geometries."),
+                tab.genome.info.angleAlignment);
         }
         table.next();
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(ContentTextWidth), tab.genome.info.singleConstruction);
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters()
+                .name("Single construction")
+                .textWidth(ContentTextWidth)
+                .tooltip("This determines whether the encoded cell network in the genome should be constructed by the corresponding constructor cell only once "
+                         "or multiple times."),
+            tab.genome.info.singleConstruction);
         table.next();
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Separate construction").textWidth(ContentTextWidth), tab.genome.info.separateConstruction);
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters()
+                .name("Separate construction")
+                .textWidth(ContentTextWidth)
+                .tooltip("Here, one can configure whether the encoded cell network in the genome should be detached from the constructor cell once it has been "
+                         "fully constructed. Disabling this property is useful for encoding growing structures (such as plant-like species) or creature body "
+                         "parts."),
+            tab.genome.info.separateConstruction);
         table.end();
     }
     validationAndCorrection(tab.genome.info);
