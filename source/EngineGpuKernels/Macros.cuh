@@ -43,7 +43,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 #define NEAR_ZERO 0.00001f
 
 #define CUDA_THROW_NOT_IMPLEMENTED() \
-    printf("not implemented\n"); \
+    printf("Not implemented error. File: %s, Line: %d\n", __FILE__, __LINE__); \
     asm("trap;");
 
 #define KERNEL_CALL_1_1(func, ...) func<<<1, 1>>>(__VA_ARGS__);
