@@ -1013,7 +1013,8 @@ bool AlienImGui::CellFunctionCombo(CellFunctionComboParameters& parameters, int&
 bool AlienImGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, int& value)
 {
     std::vector const AngleAlignmentStrings = {"None"s, "180 deg"s, "120 deg"s, "90 deg"s, "72 deg"s, "60 deg"s};
-    return AlienImGui::Combo(AlienImGui::ComboParameters().name(parameters._name).values(AngleAlignmentStrings).textWidth(parameters._textWidth), value);
+    return AlienImGui::Combo(
+        AlienImGui::ComboParameters().name(parameters._name).values(AngleAlignmentStrings).textWidth(parameters._textWidth).tooltip(parameters._tooltip), value);
 }
 
 void AlienImGui::NeuronSelection(

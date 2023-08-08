@@ -17,6 +17,15 @@
 #include "GenericFileDialogs.h"
 #include "MessageDialog.h"
 
+
+namespace
+{
+    auto const RightColumnWidth = 175.0f;
+    auto const RightColumnWidthTable = 150.0f;
+    auto const PlotMaxHeight = 160.0f;
+    auto const PlotMinHeight = 80.0f;
+}
+
 _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
     : _AlienWindow("Statistics", "windows.statistics", false)
     , _simController(simController)
@@ -26,17 +35,13 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
         path = path.parent_path();
     }
     _startingPath = GlobalSettings::getInstance().getStringState("windows.statistics.starting path", path.string());
+    _startingPath = GlobalSettings::getInstance().getBoolState("windows.statistics.maximized", _maximize);
 }
 
 _StatisticsWindow::~_StatisticsWindow()
 {
     GlobalSettings::getInstance().setStringState("windows.statistics.starting path", _startingPath);
-}
-
-namespace
-{
-    auto const RightColumnWidth = 175.0f;
-    auto const RightColumnWidthTable = 150.0f;
+    GlobalSettings::getInstance().setBoolState("windows.statistics.maximized", _maximize);
 }
 
 void _StatisticsWindow::reset()
@@ -92,6 +97,10 @@ void _StatisticsWindow::processTimelines()
             .values(
             {"Accumulate values for all colors", "Break down by color", "Color #0", "Color #1", "Color #2", "Color #3", "Color #4", "Color #5", "Color #6"}),
         _plotType);
+    ImGui::SameLine();
+    if (ImGui::Button(_maximize ? ICON_FA_WINDOW_MINIMIZE : ICON_FA_WINDOW_MAXIMIZE)) {
+        _maximize = !_maximize;
+    }
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -343,6 +352,7 @@ void _StatisticsWindow::processPlot(int row, ColorVector<double> DataPoint::*val
         plotForColorIntern(row, values, _plotType - 2, timePoints, count, startTime, endTime, fracPartDecimals);
         break;
     }
+    ImGui::Spacing();
 }
 
 void _StatisticsWindow::processBackground()
@@ -417,7 +427,7 @@ void _StatisticsWindow::plotSumColorsIntern(
     ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
-    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(160.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(getPlotHeight())), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         auto color = ImPlot::GetColormapColor(row <= 10 ? row : 20 - row);
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::AnnotateClamped(
@@ -460,7 +470,9 @@ void _StatisticsWindow::plotByColorIntern(
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 1.5f);
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
-    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(160.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+
+    auto flags = _maximize ? ImPlotFlags_None : ImPlotFlags_NoLegend;
+    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(getPlotHeight())), flags, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         for (int i = 0; i < MAX_COLORS; ++i) {
             ImGui::PushID(i);
             auto colorRaw = Const::IndividualCellColors[i];
@@ -501,7 +513,7 @@ void _StatisticsWindow::plotForColorIntern(
     ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
-    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(160.0f)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(getPlotHeight())), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
 
         float h, s, v;
         AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[colorIndex], h, s, v);
@@ -593,5 +605,10 @@ void _StatisticsWindow::onSaveStatistics()
             }
             file.close();
         });
+}
+
+float _StatisticsWindow::getPlotHeight() const
+{
+    return _maximize ? PlotMaxHeight : PlotMinHeight;
 }
 
