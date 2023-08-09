@@ -190,9 +190,9 @@ void _GettingStartedWindow::processIntern()
             "Cells contain activity states comprising of 8 values, primarily utilized for controlling cell functions. The states are "
                     "refreshed periodically, specifically when the cell functions are executed. To be more precise, each cell function is executed at regular "
                     "time intervals (every 6 time steps). The 'execution order number' specifies the exact time offset within those intervals.");
-        drawParagraph("The process for updating the activity states is as follows: Firstly, the states of all connected cells that serve as input (more "
-                    "precisely: connected cell which matches with the input execution number) are summed up. The resulted sum is then employed as input for "
-                    "the cell function, which may potentially alter the values. Subsequently, the outcome is utilized to determine the new states.");
+        drawParagraph("The process for updating the activity states is as follows: Firstly, the states of all connected cells that serve as input (i.e. "
+                    "the connected cells which matches with the input execution number) are summed up. The resulted sum is then employed as input for "
+                    "the cell function, which may potentially alter the values. Subsequently, the outcome is used to update the activity states.");
 
         ImGui::Spacing();
         drawHeading2("Cell color");
@@ -352,8 +352,9 @@ void _GettingStartedWindow::processIntern()
         drawHeading2("For how long should I run a simulation to see evolutionary changes?");
         drawParagraph(
             "This depends on many factors: On the size of the simulated world, on the mutation rate, on various selection pressures that can be influenced "
-            "with the simulation parameters and last but not least on the graphics card. In small worlds with smaller organisms and high mutation rates, "
-            "evolutionary changes can sometimes be observed every minute.  With more complex simulations, you should rather expect a few hours.");
+            "with the simulation parameters and last but not least on the graphics card. Usually one should wait several hundred thousand or million time steps."
+            "In small worlds with smaller organisms and high mutation rates, evolutionary changes can sometimes be observed every minute. With more complex "
+            "simulations, you should rather expect a few hours.");
 
 
         //ImGui::Text("There is a lot to explore. ALIEN features an extensive graph and particle editor in order to build custom worlds with desired "

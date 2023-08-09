@@ -34,7 +34,7 @@ void AlienImGui::HelpMarker(std::string const& text)
 {
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextInfoColor);
-    ImGui::Text("(?)");
+    ImGui::Text(ICON_FA_QUESTION_CIRCLE);
     ImGui::PopStyleColor();
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -1004,8 +1004,9 @@ bool AlienImGui::CellFunctionCombo(CellFunctionComboParameters& parameters, int&
     modCellFunctionStrings.insert(modCellFunctionStrings.begin(), noneString);
 
     value = (value + 1) % CellFunction_Count;
-    auto result =
-        AlienImGui::Combo(AlienImGui::ComboParameters().name(parameters._name).values(modCellFunctionStrings).textWidth(parameters._textWidth), value);
+    auto result = AlienImGui::Combo(
+        AlienImGui::ComboParameters().name(parameters._name).values(modCellFunctionStrings).textWidth(parameters._textWidth).tooltip(parameters._tooltip),
+        value);
     value = (value + CellFunction_Count - 1) % CellFunction_Count;
     return result;
 }

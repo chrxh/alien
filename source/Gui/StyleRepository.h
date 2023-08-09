@@ -13,7 +13,7 @@ namespace Const
     int64_t const SimulationSliderColor_Base = 0xff4c4c4c;
     int64_t const SimulationSliderColor_Active = 0xff6c6c6c;
     int64_t const TextDecentColor = 0xff909090;
-    int64_t const TextInfoColor = 0xff30b0b0;
+    int64_t const TextInfoColor = 0xff308787;
 
     ImColor const MenuButtonColor = ImColor::HSV(0.6f, 0.6f, 0.5f);
     ImColor const MenuButtonHoveredColor = ImColor::HSV(0.6f, 1.0f, 1.0f);
