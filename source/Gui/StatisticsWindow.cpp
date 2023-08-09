@@ -35,13 +35,17 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
         path = path.parent_path();
     }
     _startingPath = GlobalSettings::getInstance().getStringState("windows.statistics.starting path", path.string());
-    _startingPath = GlobalSettings::getInstance().getBoolState("windows.statistics.maximized", _maximize);
+    _maximize = GlobalSettings::getInstance().getBoolState("windows.statistics.maximized", _maximize);
+    _live = GlobalSettings::getInstance().getBoolState("windows.statistics.live", _live);
+    _plotType = GlobalSettings::getInstance().getIntState("windows.statistics.plot type", _plotType);
 }
 
 _StatisticsWindow::~_StatisticsWindow()
 {
     GlobalSettings::getInstance().setStringState("windows.statistics.starting path", _startingPath);
     GlobalSettings::getInstance().setBoolState("windows.statistics.maximized", _maximize);
+    GlobalSettings::getInstance().setBoolState("windows.statistics.live", _live);
+    GlobalSettings::getInstance().setIntState("windows.statistics.plot type", _plotType);
 }
 
 void _StatisticsWindow::reset()
