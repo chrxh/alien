@@ -256,6 +256,7 @@ public:
     {
         MEMBER_DECLARATION(CellFunctionComboParameters, std::string, name, "");
         MEMBER_DECLARATION(CellFunctionComboParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(CellFunctionComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool CellFunctionCombo(CellFunctionComboParameters& parameters, int& value);
     struct AngleAlignmentComboParameters

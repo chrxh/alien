@@ -29,10 +29,10 @@
 
 namespace
 {
-    auto const ContentTextWidth = 170.0f;
+    auto const ContentTextWidth = 190.0f;
+    auto const DynamicTableColumnWidth = 300.0f;
     auto const WeightsAndBiasTextWidth = 100.0f;
     auto const WeightsAndBiasSelectionTextWidth = 400.0f;
-    auto const DynamicTableColumnWidth = 275.0f;
 }
 
 _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController, Viewport const& viewport)
@@ -478,7 +478,13 @@ void _GenomeEditorWindow::processNode(
 
     DynamicTableLayout table;
     if (table.begin()) {
-        if (AlienImGui::CellFunctionCombo(AlienImGui::CellFunctionComboParameters().name("Specialization").textWidth(ContentTextWidth), type)) {
+        if (AlienImGui::CellFunctionCombo(
+                AlienImGui::CellFunctionComboParameters()
+                    .name("Function")
+                    .textWidth(ContentTextWidth)
+                    .tooltip("Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
+                             "take action."),
+                type)) {
             applyNewCellFunction(cell, type);
         }
         table.next();
@@ -486,25 +492,76 @@ void _GenomeEditorWindow::processNode(
         if (!isFirstOrLast) {
             table.next();
             auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell.referenceAngle;
-            if (AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f"), referenceAngle)) {
+            if (AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters()
+                        .name("Angle")
+                        .textWidth(ContentTextWidth)
+                        .format("%.1f")
+                        .tooltip("The angle between the predecessor and successor cell can be specified here. Please note that the shown angle here is shifted "
+                                 "by 180 degrees for convenience. In other words, a value of 0 actually corresponds to an angle of 180 degrees, i.e. a straight segment."),
+                    referenceAngle)) {
                 updateGeometry(tab.genome, tab.genome.info.shape);
                 tab.genome.info.shape = ConstructionShape_Custom;
             }
             cell.referenceAngle = referenceAngle;
         }
         table.next();
-        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").textWidth(ContentTextWidth).format("%.1f"), cell.energy);
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters()
+                .name("Energy")
+                .textWidth(ContentTextWidth)
+                .format("%.1f")
+                .tooltip("The energy that the cell should receive after its creation. The larger this value is, the more energy the constructor cell must expend to create it."),
+            cell.energy);
         table.next();
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Execution number").textWidth(ContentTextWidth), cell.executionOrderNumber);
+        AlienImGui::InputInt(
+            AlienImGui::InputIntParameters()
+                .name("Execution number")
+                .textWidth(ContentTextWidth)
+                .tooltip("The functions of cells can be executed in a specific sequence determined by this number. The values are limited between 0 and 5 and "
+                         "follow a modulo 6 logic. For example, a cell with an execution number of 0 will be executed at time points 0, 6, 12, 18, etc. A cell "
+                         "with an execution number of 1 will be shifted by one, i.e. executed at 1, 7, 13, 19, etc. This time offset enables the orchestration "
+                         "of cell functions. A muscle cell, for instance, requiring input from a neuron cell, should then be executed one time step later."),
+            cell.executionOrderNumber);
         table.next();
-        AlienImGui::InputOptionalInt(AlienImGui::InputIntParameters().name("Input execution number").textWidth(ContentTextWidth), cell.inputExecutionOrderNumber);
+        AlienImGui::InputOptionalInt(
+            AlienImGui::InputIntParameters()
+                .name("Input execution number")
+                .textWidth(ContentTextWidth)
+                .tooltip(
+                    "A functioning organism requires cells to collaborate. This can involve sensor cells that perceive the environment, neuron cells that "
+                    "process information, muscle cells that perform movements, and so on. These various cell functions often require input and produce an "
+                    "output. Both input and output are based on the cell's activity states. The process for updating is performed in two steps:\n\n1) When a "
+                    "cell function is executed, the activity states are first updated. This involves reading the activity states of all connected cells "
+                    "whose 'execution number' matches the specified 'input execution number', summing them up, and then setting the result to the "
+                    "activity states for the considered cell.\n\n2) The cell function is executed and can use the cell's activity states as input. "
+                    "The output is used to update the activity states again.\n\nSetting an 'input execution number' is optional. If none is set, the cell can "
+                    "receive no input."),
+            cell.inputExecutionOrderNumber);
         table.next();
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Block output").textWidth(ContentTextWidth), cell.outputBlocked);
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters()
+                .name("Block output")
+                .textWidth(ContentTextWidth)
+                .tooltip("Activating this toggle, the cell's output can be locked, preventing any other cell from utilizing it as input."),
+            cell.outputBlocked);
         table.next();
         auto numRequiredAdditionalConnections =
             shapeGeneratorResult ? shapeGeneratorResult->numRequiredAdditionalConnections : cell.numRequiredAdditionalConnections;
         if (AlienImGui::InputOptionalInt(
-            AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth), numRequiredAdditionalConnections)) {
+                AlienImGui::InputIntParameters()
+                    .name("Required connections")
+                    .textWidth(ContentTextWidth)
+                    .tooltip(
+                        "By default, cells in the genome sequence are automatically connected to all neighboring cells belonging to the same genome when they "
+                        "are created. However, this can pose a challenge because the constructed cells need time to fold into their desired positions. If the "
+                        "current spatial location of the constructor cell is unfavorable, the newly formed cell might not be connected to the desired cells, "
+                        "for instance, due to being too far away. An better approach would involve delaying the construction process until a desired number of "
+                        "neighboring cells from the same genome are in the direct vicinity. This number of cells can be optionally set here.\nIt is important "
+                        "to note that the predecessor cell is not counted for the 'required connections.' For example, a value of 2 means that the cell to be "
+                        "constructed will only be created when there are at least 2 already constructed cells (excluding the predecessor cell) available for "
+                        "potential connections. If the condition is not met, the construction process is postponed."),
+                numRequiredAdditionalConnections)) {
             updateGeometry(tab.genome, tab.genome.info.shape);
             tab.genome.info.shape = ConstructionShape_Custom;
         }
