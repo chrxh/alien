@@ -68,6 +68,7 @@ public:
     void calcSingleTimestep() override;
     void runSimulation() override;
     void pauseSimulation() override;
+    void applyCataclysm(int power) override;
 
     bool isSimulationRunning() const override;
 

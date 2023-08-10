@@ -263,3 +263,8 @@ void _EditKernelsLauncher::rolloutSelection(GpuSettings const& gpuSettings, Simu
 
     } while (1 == copyToHost(_cudaRolloutResult));
 }
+
+void _EditKernelsLauncher::applyCataclysm(GpuSettings const& gpuSettings, SimulationData const& data)
+{
+    KERNEL_CALL(cudaApplyCataclysm, data);
+}

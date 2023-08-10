@@ -1,5 +1,7 @@
 ﻿#include "EditKernels.cuh"
 
+#include "MutationProcessor.cuh"
+
 __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color, bool includeClusters)
 {
     auto const cellBlock = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
@@ -604,6 +606,39 @@ __global__ void cudaSetDetached(SimulationData data, bool value)
         auto const& cell = data.objects.cellPointers.at(index);
         if (0 != cell->selected) {
             cell->detached = value ? 1 : 0;
+        }
+    }
+}
+
+__global__ void cudaApplyCataclysm(SimulationData data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
+        if (cell->cellFunction == CellFunction_Constructor) {
+            if (data.numberGen1.random() < 0.3f) {
+                for (int j = 0; j < 100; ++j) {
+                    MutationProcessor::neuronDataMutation(data, cell);
+                }
+                for (int j = 0; j < 50; ++j) {
+                    MutationProcessor::propertiesMutation(data, cell);
+                }
+                MutationProcessor::geometryMutation(data, cell);
+                MutationProcessor::customGeometryMutation(data, cell);
+                MutationProcessor::cellFunctionMutation(data, cell);
+                int num = data.numberGen1.random(5);
+                for (int i = 0; i < num; ++i) {
+                    MutationProcessor::insertMutation(data, cell);
+                }
+                //                MutationProcessor::translateMutation(data, cell);
+                for (int i = 0; i < 2; ++i) {
+                    MutationProcessor::duplicateMutation(data, cell);
+                }
+                //                MutationProcessor::deleteMutation(data, cell);
+            }
         }
     }
 }
