@@ -186,6 +186,11 @@ void _SimulationControllerImpl::pauseSimulation()
     _selectionNeedsUpdate = true;
 }
 
+void _SimulationControllerImpl::applyCataclysm(int power)
+{
+    _worker.applyCataclysm(power);
+}
+
 bool _SimulationControllerImpl::isSimulationRunning() const
 {
     return _worker.isSimulationRunning();

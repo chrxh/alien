@@ -799,7 +799,9 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .min(0)
                     .max(0.5f)
-                    .defaultValue(origSimParameters.cellFunctionAttackerStrength),
+                    .defaultValue(origSimParameters.cellFunctionAttackerStrength)
+                    .tooltip("Indicates the portion of energy through which a successfully attacked cell is weakened. However, this energy portion can be "
+                             "influenced by other factors adjustable within the attacker's simulation parameters."),
                 simParameters.cellFunctionAttackerStrength);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()

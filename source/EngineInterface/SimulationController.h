@@ -54,6 +54,7 @@ public:
     virtual void calcSingleTimestep() = 0;
     virtual void runSimulation() = 0;
     virtual void pauseSimulation() = 0;
+    virtual void applyCataclysm(int power) = 0;
 
     virtual bool isSimulationRunning() const = 0;
 

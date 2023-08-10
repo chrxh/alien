@@ -47,7 +47,6 @@ __device__ void SimulationData::prepareForNextTimestep()
 bool SimulationData::shouldResize(ArraySizes const& additionals)
 {
     auto cellAndParticleArraySizeInc = std::max(additionals.cellArraySize, additionals.particleArraySize);
-
     return objects.cells.shouldResize_host(cellAndParticleArraySizeInc)
         || objects.cellPointers.shouldResize_host(cellAndParticleArraySizeInc * 10)
         || objects.particles.shouldResize_host(cellAndParticleArraySizeInc)

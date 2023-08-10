@@ -191,6 +191,15 @@ void _CudaSimulationFacade::calcTimestep()
     ++_cudaSimulationData->timestep;
 }
 
+void _CudaSimulationFacade::applyCataclysm(int power)
+{
+    for (int i = 0; i < power; ++i) {
+        _editKernels->applyCataclysm(_settings.gpuSettings, getSimulationDataIntern());
+        syncAndCheck();
+        resizeArraysIfNecessary();
+    }
+}
+
 void _CudaSimulationFacade::drawVectorGraphics(
     float2 const& rectUpperLeft,
     float2 const& rectLowerRight,

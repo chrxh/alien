@@ -328,6 +328,12 @@ void EngineWorker::calcSingleTimestep()
     updateStatistics();
 }
 
+void EngineWorker::applyCataclysm(int power)
+{
+    EngineWorkerGuard access(this);
+    _cudaSimulation->applyCataclysm(power);
+}
+
 void EngineWorker::beginShutdown()
 {
     _isShutdown.store(true);

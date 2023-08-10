@@ -72,6 +72,7 @@ public:
     void changeParticle(ParticleDescription const& changedParticle);
 
     void calcSingleTimestep();
+    void applyCataclysm(int power);
 
     void beginShutdown(); //caller should wait for termination of thread
     void endShutdown();
