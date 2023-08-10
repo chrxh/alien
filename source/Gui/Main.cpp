@@ -37,7 +37,7 @@ int main(int, char**)
                   << "See log.txt for more detailed information."
                   << std::endl;
     } catch (...) {
-        auto message = std::string("An unknown exception occured.");
+        auto message = std::string("An unknown exception occurred.");
         log(Priority::Important, message);
         std::cerr << message << std::endl << std::endl << "See log.txt for more detailed information." << std::endl;
     }

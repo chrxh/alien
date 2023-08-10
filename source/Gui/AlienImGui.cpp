@@ -418,6 +418,9 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
     ImGui::SetCursorPos({backupPos.x, backupPos.y + style.FramePadding.y});
 
     AlienImGui::Text(parameters._name);
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
     ImGui::SameLine();
     ImGui::Dummy(ImVec2(0, ImGui::GetTextLineHeight() + style.FramePadding.y));
 

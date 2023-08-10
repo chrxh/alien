@@ -488,7 +488,15 @@ void _GenomeEditorWindow::processNode(
             applyNewCellFunction(cell, type);
         }
         table.next();
-        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(ContentTextWidth), cell.color);
+        AlienImGui::ComboColor(
+            AlienImGui::ComboColorParameters()
+                .name("Color")
+                .textWidth(ContentTextWidth)
+                .tooltip("On the one hand, the cell color can be used to define own types of cells that are subject to different rules. For this purpose, the "
+                         "simulation parameters can be specified depending on the color. For example, one could define that green cells are particularly good "
+                         "at absorbing energy particles, while other cell colors are better at attacking foreign cells.\nOn the other hand, cell color also "
+                         "plays a role in perception. Sensor cells are dedicated to a specific color and can only detect the corresponding cells."),
+            cell.color);
         if (!isFirstOrLast) {
             table.next();
             auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell.referenceAngle;
