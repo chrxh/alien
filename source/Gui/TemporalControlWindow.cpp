@@ -7,6 +7,7 @@
 #include "Base/Definitions.h"
 #include "Base/StringHelper.h"
 #include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SpaceCalculator.h"
 
 #include "StyleRepository.h"
 #include "StatisticsWindow.h"
@@ -16,7 +17,8 @@
 
 namespace
 {
-    auto const LeftColumnWidth = 180.0f;
+    auto constexpr LeftColumnWidth = 180.0f;
+    auto constexpr RestorePositionTolerance = 2.0f;
 }
 
 _TemporalControlWindow::_TemporalControlWindow(
@@ -29,10 +31,7 @@ _TemporalControlWindow::_TemporalControlWindow(
 
 void _TemporalControlWindow::onSnapshot()
 {
-    Snapshot newSnapshot;
-    newSnapshot.timestep = _simController->getCurrentTimestep();
-    newSnapshot.data = _simController->getSimulationData();
-    _snapshot = newSnapshot;
+    _snapshot = createSnapshot();
 }
 
 void _TemporalControlWindow::processIntern()
@@ -140,8 +139,7 @@ void _TemporalControlWindow::processStepBackwardButton()
     ImGui::BeginDisabled(_history.empty() || _simController->isSimulationRunning());
     if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_LEFT)) {
         auto const& snapshot = _history.back();
-        _simController->setCurrentTimestep(snapshot.timestep);
-        _simController->setSimulationData(snapshot.data);
+        applySnapshot(*_snapshot);
         _history.pop_back();
     }
     ImGui::EndDisabled();
@@ -151,11 +149,7 @@ void _TemporalControlWindow::processStepForwardButton()
 {
     ImGui::BeginDisabled(_simController->isSimulationRunning());
     if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_RIGHT)) {
-        Snapshot newSnapshot;
-        newSnapshot.timestep = _simController->getCurrentTimestep();
-        newSnapshot.data = _simController->getSimulationData();
-        _history.emplace_back(newSnapshot);
-
+        _history.emplace_back(createSnapshot());
         _simController->calcSingleTimestep();
     }
     ImGui::EndDisabled();
@@ -174,11 +168,58 @@ void _TemporalControlWindow::processRestoreButton()
     ImGui::BeginDisabled(!_snapshot);
     if (AlienImGui::ToolbarButton(ICON_FA_UNDO)) {
         _statisticsWindow->reset();
-        _simController->setCurrentTimestep(_snapshot->timestep);
-        _simController->setSimulationData(_snapshot->data);
+        applySnapshot(*_snapshot);
         _simController->removeSelection();
         _history.clear();
+
         printOverlayMessage("Snapshot restored");   //flashback?
     }
     ImGui::EndDisabled();
+}
+
+_TemporalControlWindow::Snapshot _TemporalControlWindow::createSnapshot()
+{
+    Snapshot result;
+    result.timestep = _simController->getCurrentTimestep();
+    result.data = _simController->getSimulationData();
+    result.parameters = _simController->getSimulationParameters();
+    return result;
+}
+
+void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
+{
+    auto parameters = _simController->getSimulationParameters();
+    auto const& origParameters = snapshot.parameters;
+    if (origParameters.numParticleSources == parameters.numParticleSources) {
+        for (int i = 0; i < parameters.numParticleSources; ++i) {
+            auto origSourceCompareClone = origParameters.particleSources[i];
+            auto sourceCompareClone = parameters.particleSources[i];
+
+            origSourceCompareClone.posX = 0;
+            origSourceCompareClone.posY = 0;
+            sourceCompareClone.posX = 0;
+            sourceCompareClone.posY = 0;
+            if (origSourceCompareClone != sourceCompareClone) {
+                continue;
+            }
+            auto const& origSource = origParameters.particleSources[i];
+            auto const& source = parameters.particleSources[i];
+
+            auto timestepDelta = toFloat(_simController->getCurrentTimestep()) - toFloat(snapshot.timestep);
+            auto projectedPos = RealVector2D(origSource.posX, origSource.posY) + RealVector2D(origSource.velX, origSource.velY) * timestepDelta;
+
+            SpaceCalculator space(_simController->getWorldSize());
+            projectedPos = space.getCorrectedPosition(projectedPos);
+
+            auto deviation = std::abs(source.posX - projectedPos.x) + std::abs(source.posY - projectedPos.y);
+            if (deviation < RestorePositionTolerance) {
+                parameters.particleSources[i].posX = origParameters.particleSources[i].posX;
+                parameters.particleSources[i].posY = origParameters.particleSources[i].posY;
+            }
+        }
+    }
+
+    _simController->setCurrentTimestep(snapshot.timestep);
+    _simController->setSimulationData(snapshot.data);
+    _simController->setSimulationParameters(parameters);
 }
