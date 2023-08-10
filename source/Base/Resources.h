@@ -22,7 +22,7 @@ namespace Const
     auto const StepBackwardFilename = BasePath + "step backward.png";
     auto const StepForwardFilename = BasePath + "step forward.png";
     auto const SnapshotFilename = BasePath + "snapshot.png";
-    auto const RestoreFilname = BasePath + "restore.png";
+    auto const RestoreFilename = BasePath + "restore.png";
 
     auto const ZoomInFilename = BasePath + "zoom in.png";
     auto const ZoomOutFilename = BasePath + "zoom out.png";

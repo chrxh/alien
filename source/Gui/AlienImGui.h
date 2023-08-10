@@ -175,6 +175,7 @@ public:
         MEMBER_DECLARATION(ComboColorParameters, std::string, name, "");
         MEMBER_DECLARATION(ComboColorParameters, int, textWidth, 100);
         MEMBER_DECLARATION(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(ComboColorParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ComboColor(ComboColorParameters const& parameters, int& value);
 
