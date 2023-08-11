@@ -385,7 +385,7 @@ void _StatisticsWindow::plotSumColorsIntern(
 {
     double const* plotDataY = reinterpret_cast<double const*>(dataPoint) + MAX_COLORS;
     double upperBound = getMaxWithDataPointStride(plotDataY, count);
-    double endValue = count > 0 ? *reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(dataPoint) + count - 1) : 0.0;
+    double endValue = count > 0 ? *(reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(dataPoint) + count - 1) + MAX_COLORS): 0.0;
     auto stride = toInt(sizeof(DataPointCollection));
     upperBound *= 1.5;
     ImGui::PushID(row);
