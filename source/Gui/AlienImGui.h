@@ -167,8 +167,9 @@ public:
         MEMBER_DECLARATION(SwitcherParameters, int, textWidth, 100);
         MEMBER_DECLARATION(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
+        MEMBER_DECLARATION(SwitcherParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void Switcher(SwitcherParameters& parameters, int& value);
+    static bool Switcher(SwitcherParameters& parameters, int& value);
 
     struct ComboColorParameters
     {
