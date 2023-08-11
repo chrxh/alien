@@ -24,31 +24,15 @@ private:
 
     void processHistograms();
 
-    void processPlot(int row, ColorVector<double> DataPoint::*valuesPtr, double const DataPoint::*summedValuesPtr = nullptr, int fracPartDecimals = 0);
+    void processPlot(int row, DataPoint DataPointCollection::*valuesPtr, int fracPartDecimals = 0);
 
     void processBackground() override;
 
-    void plotSumColorsIntern(
-        int row,
-        ColorVector<double> const* values,
-        double const* summedValues,
-        double const* timePoints,
-        int count,
-        double startTime,
-        double endTime,
-        int fracPartDecimals);
-    void
-    plotByColorIntern(
-        int row,
-        ColorVector<double> const* values,
-        double const* timePoints,
-        int count,
-        double startTime,
-        double endTime,
-        int fracPartDecimals);
+    void plotSumColorsIntern(int row, DataPoint const* dataPoint, double const* timePoints, int count, double startTime, double endTime, int fracPartDecimals);
+    void plotByColorIntern(int row, DataPoint const* values, double const* timePoints, int count, double startTime, double endTime, int fracPartDecimals);
     void plotForColorIntern(
         int row,
-        ColorVector<double> const* values,
+        DataPoint const* values,
         int colorIndex,
         double const* timePoints,
         int count,
