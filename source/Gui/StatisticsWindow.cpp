@@ -129,43 +129,43 @@ void _StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numCells);
+        processPlot(row++, &DataPointCollection::numCells);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Cells");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numConnections);
+        processPlot(row++, &DataPointCollection::numConnections);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Cell connections");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numParticles);
+        processPlot(row++, &DataPointCollection::numParticles);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Energy particles");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::totalEnergy);
+        processPlot(row++, &DataPointCollection::totalEnergy);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Total energy");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numSelfReplicators);
+        processPlot(row++, &DataPointCollection::numSelfReplicators);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Self-replicators");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::averageGenomeNodes, &DataPoint::sumAverageGenomeNodes, 2);
+        processPlot(row++, &DataPointCollection::averageGenomeNodes, 2);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Average genome size");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numViruses);
+        processPlot(row++, &DataPointCollection::numViruses);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Viruses");
 
@@ -185,67 +185,67 @@ void _StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numCreatedCells, nullptr, 6);
+        processPlot(row++, &DataPointCollection::numCreatedCells, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Created cells");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numAttacks, nullptr, 6);
+        processPlot(row++, &DataPointCollection::numAttacks, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Attacks");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numMuscleActivities, nullptr, 6);
+        processPlot(row++, &DataPointCollection::numMuscleActivities, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Muscle activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numTransmitterActivities, nullptr, 6);
+        processPlot(row++, &DataPointCollection::numTransmitterActivities, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Transmitter activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numDefenderActivities, nullptr, 6);
+        processPlot(row++, &DataPointCollection::numDefenderActivities, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Defender activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numInjectionActivities, nullptr, 6);
+        processPlot(row++, &DataPointCollection::numInjectionActivities, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Injection activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numCompletedInjections, nullptr, 6);
+        processPlot(row++, &DataPointCollection::numCompletedInjections, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Completed injections");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numNervePulses, nullptr, 6);
+        processPlot(row++, &DataPointCollection::numNervePulses, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Nerve pulses");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numNeuronActivities, nullptr, 6);
+        processPlot(row++, &DataPointCollection::numNeuronActivities, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Neuron activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numSensorActivities, nullptr, 6);
+        processPlot(row++, &DataPointCollection::numSensorActivities, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Sensor activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPoint::numSensorMatches, nullptr, 6);
+        processPlot(row++, &DataPointCollection::numSensorMatches, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Sensor matches");
 
@@ -331,23 +331,17 @@ void _StatisticsWindow::processHistograms()
 
 }
 
-void _StatisticsWindow::processPlot(int row, ColorVector<double> DataPoint::*valuesPtr, double const DataPoint::*summedValuesPtr, int fracPartDecimals)
+void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valuesPtr, int fracPartDecimals)
 {
-    auto count = _live ? toInt(_liveStatistics.dataPoints.size()) : toInt(_longtermStatistics.dataPoints.size());
-    auto startTime = _live ? _liveStatistics.dataPoints.back().time - toDouble(_liveStatistics.history) : _longtermStatistics.dataPoints.front().time;
-    auto endTime = _live ? _liveStatistics.dataPoints.back().time : _longtermStatistics.dataPoints.back().time;
-    auto values = _live ? &(_liveStatistics.dataPoints[0].*valuesPtr) : &(_longtermStatistics.dataPoints[0].*valuesPtr);
-    auto summedValues = [&] {
-        if (summedValuesPtr) {
-            return _live ? &(_liveStatistics.dataPoints[0].*summedValuesPtr) : &(_longtermStatistics.dataPoints[0].*summedValuesPtr);
-        }
-        return static_cast<double const*>(nullptr);
-    }();
-    auto timePoints = _live ? &_liveStatistics.dataPoints[0].time : &_longtermStatistics.dataPoints[0].time;
+    auto count = _live ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(_longtermStatistics.dataPointCollectionHistory.size());
+    auto startTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : _longtermStatistics.dataPointCollectionHistory.front().time;
+    auto endTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time : _longtermStatistics.dataPointCollectionHistory.back().time;
+    auto values = _live ? &(_liveStatistics.dataPointCollectionHistory[0].*valuesPtr) : &(_longtermStatistics.dataPointCollectionHistory[0].*valuesPtr);
+    auto timePoints = _live ? &_liveStatistics.dataPointCollectionHistory[0].time : &_longtermStatistics.dataPointCollectionHistory[0].time;
 
     switch (_plotType) {
     case 0:
-        plotSumColorsIntern(row, values, summedValues, timePoints, count, startTime, endTime, fracPartDecimals);
+        plotSumColorsIntern(row, values, timePoints, count, startTime, endTime, fracPartDecimals);
         break;
     case 1:
         plotByColorIntern(row, values, timePoints, count, startTime, endTime, fracPartDecimals);
@@ -374,7 +368,7 @@ namespace
     {
         double result = 0;
         for (int i = count / 20; i < count; ++i) {
-            result = std::max(result, *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(data) + i));
+            result = std::max(result, *reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(data) + i));
         }
         return result;
     }
@@ -382,48 +376,17 @@ namespace
 
 void _StatisticsWindow::plotSumColorsIntern(
     int row,
-    ColorVector<double> const* values,
-    double const* summedValues,
+    DataPoint const* dataPoint,
     double const* timePoints,
     int count,
     double startTime,
     double endTime,
     int fracPartDecimals)
 {
-    double upperBound = 0;
-    double endValue;
-
-    double const* plotDataX;
-    double const* plotDataY;
-    int stride;
-    if (!summedValues) {
-        auto& accumulatedData = _cachedTimelines[0];
-        auto& rearragedTimePoints = _cachedTimelines[1];
-        accumulatedData.resize(count);
-        rearragedTimePoints.resize(count);
-        for (int i = 0; i < count; ++i) {
-            double sum = 0;
-            auto ptr = reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(values) + i);
-            for (int color = 0; color < MAX_COLORS; ++color) {
-                sum += *(ptr + color);
-            }
-            accumulatedData[i] = sum;
-            if (i >= count / 20) {
-                upperBound = std::max(upperBound, sum);
-            }
-            rearragedTimePoints[i] = *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(timePoints) + i);
-        }
-        endValue = count > 0 ? accumulatedData.back() : 0.0;
-        plotDataX = rearragedTimePoints.data();
-        plotDataY = accumulatedData.data();
-        stride = toInt(sizeof(double));
-    } else {
-        upperBound = getMaxWithDataPointStride(summedValues, count);
-        endValue = count > 0 ? *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(summedValues) + count - 1) : 0.0;
-        plotDataX = timePoints;
-        plotDataY = summedValues;
-        stride = toInt(sizeof(DataPoint));
-    }
+    double const* plotDataY = reinterpret_cast<double const*>(dataPoint) + MAX_COLORS;
+    double upperBound = getMaxWithDataPointStride(plotDataY, count);
+    double endValue = count > 0 ? *reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(dataPoint) + count - 1) : 0.0;
+    auto stride = toInt(sizeof(DataPointCollection));
     upperBound *= 1.5;
     ImGui::PushID(row);
     ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
@@ -439,9 +402,9 @@ void _StatisticsWindow::plotSumColorsIntern(
         }
         if (count > 0) {
             ImPlot::PushStyleColor(ImPlotCol_Line, color);
-            ImPlot::PlotLine("##", plotDataX, plotDataY, count, 0, stride);
+            ImPlot::PlotLine("##", timePoints, plotDataY, count, 0, stride);
             ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.5f * ImGui::GetStyle().Alpha);
-            ImPlot::PlotShaded("##", plotDataX, plotDataY, count, 0, 0, stride);
+            ImPlot::PlotShaded("##", timePoints, plotDataY, count, 0, 0, stride);
             ImPlot::PopStyleVar();
             ImPlot::PopStyleColor();
         }
@@ -454,7 +417,7 @@ void _StatisticsWindow::plotSumColorsIntern(
 
 void _StatisticsWindow::plotByColorIntern(
     int row,
-    ColorVector<double> const* values,
+    DataPoint const* values,
     double const* timePoints,
     int count,
     double startTime,
@@ -483,9 +446,9 @@ void _StatisticsWindow::plotByColorIntern(
             ImColor color(toInt((colorRaw >> 16) & 0xff), toInt((colorRaw >> 8) & 0xff), toInt(colorRaw & 0xff));
 
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
-            auto endValue = count > 0 ? *(reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(values) + (count - 1)) + i) : 0.0f;
+            auto endValue = count > 0 ? *(reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(values) + (count - 1)) + i) : 0.0f;
             auto labelId = StringHelper::format(toFloat(endValue), fracPartDecimals);
-            ImPlot::PlotLine(labelId.c_str(), timePoints, reinterpret_cast<double const*>(values) + i, count, 0, sizeof(DataPoint));
+            ImPlot::PlotLine(labelId.c_str(), timePoints, reinterpret_cast<double const*>(values) + i, count, 0, sizeof(DataPointCollection));
             ImPlot::PopStyleColor();
             ImGui::PopID();
         }
@@ -499,7 +462,7 @@ void _StatisticsWindow::plotByColorIntern(
 
 void _StatisticsWindow::plotForColorIntern(
     int row,
-    ColorVector<double> const* values,
+    DataPoint const* values,
     int colorIndex,
     double const* timePoints,
     int count,
@@ -509,7 +472,7 @@ void _StatisticsWindow::plotForColorIntern(
 {
     auto valuesForColor = reinterpret_cast<double const*>(values) + colorIndex;
     auto upperBound = getMaxWithDataPointStride(valuesForColor, count) * 1.5;
-    auto endValue = count > 0 ? *reinterpret_cast<double const*>(reinterpret_cast<DataPoint const*>(valuesForColor) + count - 1) : 0.0;
+    auto endValue = count > 0 ? *reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(valuesForColor) + count - 1) : 0.0;
 
     ImGui::PushID(row);
     ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
@@ -528,9 +491,9 @@ void _StatisticsWindow::plotForColorIntern(
         }
         if (count > 0) {
             ImPlot::PushStyleColor(ImPlotCol_Line, color);
-            ImPlot::PlotLine("##", timePoints, valuesForColor, count, 0, sizeof(DataPoint));
+            ImPlot::PlotLine("##", timePoints, valuesForColor, count, 0, sizeof(DataPointCollection));
             ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.5f * ImGui::GetStyle().Alpha);
-            ImPlot::PlotShaded("##", timePoints, valuesForColor, count, 0, 0, sizeof(DataPoint));
+            ImPlot::PlotShaded("##", timePoints, valuesForColor, count, 0, 0, sizeof(DataPointCollection));
             ImPlot::PopStyleVar();
             ImPlot::PopStyleColor();
         }
@@ -578,33 +541,33 @@ void _StatisticsWindow::onSaveStatistics()
             writeLabelAllColors("Sensor matches");
             file << std::endl;
 
-            auto writeIntValueAllColors = [&file](auto const& colorVector) {
+            auto writeIntValueAllColors = [&file](DataPoint const& dataPoint) {
                 for (int i = 0; i < MAX_COLORS; ++i) {
-                    file << ", " << static_cast<uint64_t>(colorVector[i]);
+                    file << ", " << static_cast<uint64_t>(dataPoint.values[i]);
                 }
             };
-            auto writeDoubleValueAllColors = [&file](auto const& colorVector) {
+            auto writeDoubleValueAllColors = [&file](DataPoint const& dataPoint) {
                 for (int i = 0; i < MAX_COLORS; ++i) {
-                    file << ", " << StringHelper::format(toFloat(colorVector[i]), 8);
+                    file << ", " << StringHelper::format(toFloat(dataPoint.values[i]), 8);
                 }
             };
-            for (auto const& dataPoint : _longtermStatistics.dataPoints) {
-                file << static_cast<uint64_t>(dataPoint.time);
-                writeIntValueAllColors(dataPoint.numCells);
-                writeIntValueAllColors(dataPoint.numConnections);
-                writeIntValueAllColors(dataPoint.numParticles);
-                writeDoubleValueAllColors(dataPoint.totalEnergy);
-                writeDoubleValueAllColors(dataPoint.numCreatedCells);
-                writeDoubleValueAllColors(dataPoint.numAttacks);
-                writeDoubleValueAllColors(dataPoint.numMuscleActivities);
-                writeDoubleValueAllColors(dataPoint.numDefenderActivities);
-                writeDoubleValueAllColors(dataPoint.numTransmitterActivities);
-                writeDoubleValueAllColors(dataPoint.numInjectionActivities);
-                writeDoubleValueAllColors(dataPoint.numCompletedInjections);
-                writeDoubleValueAllColors(dataPoint.numNervePulses);
-                writeDoubleValueAllColors(dataPoint.numNeuronActivities);
-                writeDoubleValueAllColors(dataPoint.numSensorActivities);
-                writeDoubleValueAllColors(dataPoint.numSensorMatches);
+            for (auto const& dataPointCollection : _longtermStatistics.dataPointCollectionHistory) {
+                file << static_cast<uint64_t>(dataPointCollection.time);
+                writeIntValueAllColors(dataPointCollection.numCells);
+                writeIntValueAllColors(dataPointCollection.numConnections);
+                writeIntValueAllColors(dataPointCollection.numParticles);
+                writeDoubleValueAllColors(dataPointCollection.totalEnergy);
+                writeDoubleValueAllColors(dataPointCollection.numCreatedCells);
+                writeDoubleValueAllColors(dataPointCollection.numAttacks);
+                writeDoubleValueAllColors(dataPointCollection.numMuscleActivities);
+                writeDoubleValueAllColors(dataPointCollection.numDefenderActivities);
+                writeDoubleValueAllColors(dataPointCollection.numTransmitterActivities);
+                writeDoubleValueAllColors(dataPointCollection.numInjectionActivities);
+                writeDoubleValueAllColors(dataPointCollection.numCompletedInjections);
+                writeDoubleValueAllColors(dataPointCollection.numNervePulses);
+                writeDoubleValueAllColors(dataPointCollection.numNeuronActivities);
+                writeDoubleValueAllColors(dataPointCollection.numSensorActivities);
+                writeDoubleValueAllColors(dataPointCollection.numSensorMatches);
                 file << std::endl;
             }
             file.close();
