@@ -216,8 +216,8 @@ void _SimulationParametersWindow::processBase(
                 simParameters.backgroundColor,
                 _backupColor,
                 _savedPalette);
-            AlienImGui::Combo(
-                AlienImGui::ComboParameters()
+            AlienImGui::Switcher(
+                AlienImGui::SwitcherParameters()
                     .name("Cell colorization")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellColorization)
@@ -260,8 +260,8 @@ void _SimulationParametersWindow::processBase(
          * Physics: Motion
          */
         if (ImGui::TreeNodeEx("Physics: Motion", flags)) {
-            if (AlienImGui::Combo(
-                    AlienImGui::ComboParameters()
+            if (AlienImGui::Switcher(
+                    AlienImGui::SwitcherParameters()
                         .name("Motion type")
                         .textWidth(RightColumnWidth)
                         .defaultValue(origSimParameters.motionType)

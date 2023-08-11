@@ -351,10 +351,12 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     return result;
 }
 
-void AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
+bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
 {
-    auto numValues = toInt(parameters._values.size());
     static auto constexpr buttonWidth = 20;
+
+    auto result = false;
+    auto numValues = toInt(parameters._values.size());
 
     std::string text = parameters._values[value];
 
@@ -367,15 +369,33 @@ void AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_CARET_LEFT, ImVec2(scale(buttonWidth), 0))) {
         value = (value + numValues - 1) % numValues;
+        result = true;
     }
 
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_CARET_RIGHT, ImVec2(scale(buttonWidth), 0))) {
         value = (value + 1) % numValues;
+        result = true;
+    }
+
+    ImGui::SameLine();
+    if (parameters._defaultValue) {
+        ImGui::BeginDisabled(value == *parameters._defaultValue);
+        if (revertButton(parameters._name)) {
+            value = *parameters._defaultValue;
+            result = true;
+        }
+        ImGui::EndDisabled();
     }
 
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
+
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
+
+    return result;
 }
 
 bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
