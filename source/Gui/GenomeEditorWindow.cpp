@@ -585,8 +585,18 @@ void _GenomeEditorWindow::processNode(
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Energy distribution")
-                    .values({"Connected cells", "Transmitters and Constructors"})
-                    .textWidth(ContentTextWidth),
+                    .values({"Connected cells", "Transmitters and constructors"})
+                    .textWidth(ContentTextWidth)
+                    .tooltip(
+                        "Transmitter cells are designed to transport energy. This is important, for example, to supply constructor cells with energy or to "
+                        "support attacked cells. The "
+                        "energy transport works as follows: A part of the excess energy of the own cell and the directly connected cells is collected and "
+                        "transferred to other cells in the vicinity. A cell has excess energy when it exceeds a defined normal value (see simulation parameter "
+                        "'Normal energy' in 'Cell life cycle'). There are two ways to control the energy distribution, which is set here:\n\n1) Connected cells: "
+                        "Here, the energy is distributed evenly across all connected and connected-connected cells.\n\n2) Transmitters and constructors: "
+                        "In this case, the energy is transferred to spatially nearby constructors or other transmitter cells within the same cell "
+                        "network. If multiple such transmitter cells are present at certain distances, energy can be transmitted over greater distances, "
+                        "for example, from attacker cells to constructor cells."),
                 transmitter.mode);
         } break;
         case CellFunction_Constructor: {
