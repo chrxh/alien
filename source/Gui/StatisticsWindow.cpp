@@ -215,18 +215,6 @@ void _StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::numInjectionActivities, 6);
-        ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Injection activities");
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::numCompletedInjections, 6);
-        ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Completed injections");
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numNervePulses, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Nerve pulses");
@@ -248,6 +236,18 @@ void _StatisticsWindow::processTimelineStatistics()
         processPlot(row++, &DataPointCollection::numSensorMatches, 6);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Sensor matches");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::numInjectionActivities, 6);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Injection activities");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::numCompletedInjections, 6);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Completed injections");
 
         ImPlot::PopColormap();
         ImGui::EndTable();
