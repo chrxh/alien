@@ -604,24 +604,58 @@ void _GenomeEditorWindow::processNode(
 
             int constructorMode = constructor.mode == 0 ? 0 : 1;
             table.next();
-            if (AlienImGui::Combo(AlienImGui::ComboParameters().name("Activation mode").textWidth(ContentTextWidth).values({"Manual", "Automatic"}), constructorMode)) {
+            if (AlienImGui::Combo(
+                    AlienImGui::ComboParameters()
+                        .name("Activation mode")
+                        .textWidth(ContentTextWidth)
+                        .values({"Manual", "Automatic"})
+                        .tooltip("There are 2 modes available for controlling constructor cells:\n\n1) Manual: The construction process is only triggered when "
+                                 "there is activity in channel #0.\n\n2) Automatic: The construction process is automatically triggered at regular intervals. "
+                                 "Activity in channel #0 is not necessary.\n\n In both cases, if there is not enough energy available for the cell being "
+                                 "created, the construction process will pause until the next triggering."),
+                    constructorMode)) {
                 constructor.mode = constructorMode;
             }
             if (constructorMode == 1) {
                 table.next();
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Interval").textWidth(ContentTextWidth), constructor.mode);
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters()
+                        .name("Interval")
+                        .textWidth(ContentTextWidth)
+                        .tooltip("This value specifies the time interval for automatic triggering of the constructor cell. It is given in multiples "
+                                 "of 6 (which is a complete execution cycle). This means that a value of 1 indicates that the constructor cell will be activated "
+                                 "every 6 time steps"),
+                    constructor.mode);
                 if (constructor.mode < 0) {
                     constructor.mode = 0;
                 }
             }
             table.next();
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Offspring activation time").textWidth(ContentTextWidth), constructor.constructionActivationTime);
+            AlienImGui::InputInt(
+                AlienImGui::InputIntParameters()
+                    .name("Offspring activation time")
+                    .textWidth(ContentTextWidth)
+                    .tooltip("When a new cell network has been fully constructed by a constructor cell, you can set the time until activation here. This is "
+                             "especially useful when the offspring should not become active immediately, for example, to prevent it from attacking."),
+                constructor.constructionActivationTime);
             table.next();
             AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Construction angle 1").format("%.1f").textWidth(ContentTextWidth), constructor.constructionAngle1);
+                AlienImGui::InputFloatParameters()
+                    .name("Construction angle #1")
+                    .format("%.1f")
+                    .textWidth(ContentTextWidth)
+                    .tooltip("By default, when the constructor cell initiates a new construction, the new cell is created in the area with the most available "
+                             "space. This angle specifies the deviation from that rule."),
+                constructor.constructionAngle1);
             table.next();
             AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Construction angle 2").format("%.1f").textWidth(ContentTextWidth), constructor.constructionAngle2);
+                AlienImGui::InputFloatParameters()
+                    .name("Construction angle #2")
+                    .format("%.1f")
+                    .textWidth(ContentTextWidth)
+                    .tooltip("This value determines the angle from the last constructed cell to the second-last constructed cell and the constructor cell. The "
+                             "effects can be best observed in the preview (in the lower part of the editor)."),
+                constructor.constructionAngle2);
         } break;
         case CellFunction_Sensor: {
             auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
@@ -629,7 +663,16 @@ void _GenomeEditorWindow::processNode(
 
             table.next();
             if (AlienImGui::Combo(
-                    AlienImGui::ComboParameters().name("Mode").textWidth(ContentTextWidth).values({"Scan vicinity", "Scan specific direction"}), sensorMode)) {
+                    AlienImGui::ComboParameters()
+                        .name("Mode")
+                        .textWidth(ContentTextWidth)
+                        .values({"Scan vicinity", "Scan specific direction"})
+                        .tooltip("Sensor cells scan their environment for concentrations of cells of a certain color and provide distance and angle to a "
+                                 "detection. Sensors can operate in 2 modes:\n\n1) Scan vicinity: In this mode, the entire nearby area is scanned (typically "
+                                 "within a radius of several 100 units). The scan radius can be adjusted via a simulation parameter (see 'Range' in the sensor "
+                                 "settings).\n\n2) Scan specific direction: In this mode, the scanning process is restricted to a particular direction. The "
+                                 "direction is specified as an angle."),
+                    sensorMode)) {
                 if (sensorMode == SensorMode_Neighborhood) {
                     sensor.fixedAngle.reset();
                 } else {
@@ -638,14 +681,31 @@ void _GenomeEditorWindow::processNode(
             }
             if (sensorMode == SensorMode_FixedAngle) {
                 table.next();
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Scan angle").textWidth(ContentTextWidth).format("%.1f"), *sensor.fixedAngle);
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters()
+                        .name("Scan angle")
+                        .textWidth(ContentTextWidth)
+                        .format("%.1f")
+                        .tooltip("The angle can be determined here in which direction the scanning process should take place. An angle of 0 means that the "
+                                 "scan should occur in the direction derived from the predecessor cell (the cell from which the activity input originates) "
+                                 "towards the sensor cell."),
+                    *sensor.fixedAngle);
             }
             table.next();
-            AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth), sensor.color);
+            AlienImGui::ComboColor(
+                AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip("Specifies the color of the cells to search for."),
+                sensor.color);
 
             table.next();
             AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Min density").format("%.2f").step(0.05f).textWidth(ContentTextWidth), sensor.minDensity);
+                AlienImGui::InputFloatParameters()
+                    .name("Min density")
+                    .format("%.2f")
+                    .step(0.05f)
+                    .textWidth(ContentTextWidth)
+                    .tooltip("The minimum density to search for a cell concentration of a specific color. This value ranges between 0 and 1. It controls the "
+                             "sensitivity of the sensor. Typically, very few cells of the corresponding color are already detected with a value of 0.1."),
+                sensor.minDensity);
         } break;
         case CellFunction_Nerve: {
             auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
@@ -760,6 +820,12 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
     auto width = ImGui::GetContentRegionAvail().x / 2;
     if (ImGui::BeginChild("##", ImVec2(width, scale(60.0f)), true)) {
         AlienImGui::MonospaceText(content);
+        AlienImGui::HelpMarker("If a constructor cell is encoded in a genome, this constructor cell can itself contain another genome. This sub-genome can "
+                               "describe additional body parts or branching of the creature, for instance. Furthermore, sub-genomes can in turn possess further "
+                               "sub-sub-genomes, etc. To insert a sub-genome here by clicking on 'Paste', one must have previously copied one to the clipboard. "
+                               "This can be done using the 'Copy genome' button in the toolbar. This action copies the entire genome from the current tab to "
+                               "the clipboard. If you want to create self-replication, you must not insert a sub-genome; instead, you switch it to the "
+                               "'self-copy' mode. In this case, the constructor's sub-genome refers to its superordinate genome.");
         if (AlienImGui::Button("Clear")) {
             desc.setGenome({});
         }

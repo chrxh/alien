@@ -187,9 +187,9 @@ void _GettingStartedWindow::processIntern()
         ImGui::Spacing();
         drawHeading2("Activity states");
         drawParagraph(
-            "Cells contain activity states comprising of 8 values, primarily utilized for controlling cell functions. The states are "
-                    "refreshed periodically, specifically when the cell functions are executed. To be more precise, each cell function is executed at regular "
-                    "time intervals (every 6 time steps). The 'execution order number' specifies the exact time offset within those intervals.");
+            "Cells contain activity states comprising of 8 values, primarily utilized for controlling cell functions and sometimes referred to as channel #0 "
+            "to channel #7. The states are refreshed periodically, specifically when the cell functions are executed. To be more precise, each cell function "
+            "is executed at regular time intervals (every 6 time steps). The 'execution order number' specifies the exact time offset within those intervals.");
         drawParagraph("The process for updating the activity states is as follows: Firstly, the states of all connected cells that serve as input (i.e. "
                     "the connected cells which matches with the input execution number) are summed up. The resulted sum is then employed as input for "
                     "the cell function, which may potentially alter the values. Subsequently, the outcome is used to update the activity states.");
@@ -235,6 +235,8 @@ void _GettingStartedWindow::processIntern()
             "different color.");
         drawParagraph("Regardless of this, many parameters can also be set depending on the cell color. For this purpose click the '+' button beside the "
                       "parameter. This customization is useful when you want to define different classes of species.");
+        drawParagraph("Sometimes it is difficult to set precise values in the slider. In this case, you can select the slider and then press the TAB key. This "
+                      "allows you to enter the exact value in an input field and confirm it by pressing ENTER.");
         drawParagraph("In general, the following types of parameters can be set.");
         drawHeading2("Rendering");
         drawParagraph(
