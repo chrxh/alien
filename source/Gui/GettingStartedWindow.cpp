@@ -353,7 +353,7 @@ void _GettingStartedWindow::processIntern()
 
         drawHeading2("For how long should I run a simulation to see evolutionary changes?");
         drawParagraph(
-            "This depends on many factors: On the size of the simulated world, on the mutation rate, on various selection pressures that can be influenced "
+            "This depends on many factors: On the size of the simulated world, on the mutation rates, on various selection pressures that can be influenced "
             "by the simulation parameters and on the self-replication duration. Usually one should wait for several dozen generations, which may correspond to hundreds of thousands or million time steps."
             "In small worlds with smaller organisms and high mutation rates, evolutionary changes can sometimes be observed every minute depending on the hardware. With more complex "
             "simulations, you should rather expect a few hours.");
