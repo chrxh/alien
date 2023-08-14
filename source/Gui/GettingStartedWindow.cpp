@@ -358,6 +358,13 @@ void _GettingStartedWindow::processIntern()
             "In small worlds with smaller organisms and high mutation rates, evolutionary changes can sometimes be observed every minute depending on the hardware. With more complex "
             "simulations, you should rather expect a few hours.");
 
+        drawHeading2("How can I create a cell activity in the first place?");
+        drawParagraph("To activate a cell function, an input from a connected cell in the form of non-zero activity states is required. The simplest methods "
+                      "to generate an non-zero activity state are as follows:");
+        drawItemText("The most direct approach involves using a nerve cell that generates an activity pulse at regular time intervals. The advantage here is that "
+            "you can precisely configure the length of the time intervals.");
+        drawItemText("Activities can also be generated within a neuron cell using bias values.");
+        drawParagraph("Additionally, other cells such as constructor cells provide an activity output as soon as they are triggered (automatically).");
 
         //ImGui::Text("There is a lot to explore. ALIEN features an extensive graph and particle editor in order to build custom worlds with desired "
         //            "environmental structures and machines. A documentation with tutorial-like introductions to various topics can be found at");

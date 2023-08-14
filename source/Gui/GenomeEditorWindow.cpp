@@ -592,9 +592,11 @@ void _GenomeEditorWindow::processNode(
                         "support attacked cells. The "
                         "energy transport works as follows: A part of the excess energy of the own cell and the directly connected cells is collected and "
                         "transferred to other cells in the vicinity. A cell has excess energy when it exceeds a defined normal value (see simulation parameter "
-                        "'Normal energy' in 'Cell life cycle'). There are two ways to control the energy distribution, which is set here:\n\n1) Connected cells: "
-                        "Here, the energy is distributed evenly across all connected and connected-connected cells.\n\n2) Transmitters and constructors: "
-                        "In this case, the energy is transferred to spatially nearby constructors or other transmitter cells within the same cell "
+                        "'Normal energy' in 'Cell life cycle'). There are two ways to control the energy distribution, which is set "
+                        "here:\n\n" ICON_FA_CHEVRON_RIGHT " Connected cells: "
+                        "In this case the energy will be distributed evenly across all connected and connected-connected cells.\n\n" ICON_FA_CHEVRON_RIGHT
+                        " Transmitters and constructors: "
+                        "Here, the energy will be transferred to spatially nearby constructors or other transmitter cells within the same cell "
                         "network. If multiple such transmitter cells are present at certain distances, energy can be transmitted over greater distances, "
                         "for example, from attacker cells to constructor cells."),
                 transmitter.mode);
@@ -609,8 +611,8 @@ void _GenomeEditorWindow::processNode(
                         .name("Activation mode")
                         .textWidth(ContentTextWidth)
                         .values({"Manual", "Automatic"})
-                        .tooltip("There are 2 modes available for controlling constructor cells:\n\n1) Manual: The construction process is only triggered when "
-                                 "there is activity in channel #0.\n\n2) Automatic: The construction process is automatically triggered at regular intervals. "
+                        .tooltip("There are 2 modes available for controlling constructor cells:\n\n" ICON_FA_CHEVRON_RIGHT " Manual: The construction process is only triggered when "
+                                 "there is activity in channel #0.\n\n" ICON_FA_CHEVRON_RIGHT " Automatic: The construction process is automatically triggered at regular intervals. "
                                  "Activity in channel #0 is not necessary.\n\n In both cases, if there is not enough energy available for the cell being "
                                  "created, the construction process will pause until the next triggering."),
                     constructorMode)) {
@@ -668,9 +670,11 @@ void _GenomeEditorWindow::processNode(
                         .textWidth(ContentTextWidth)
                         .values({"Scan vicinity", "Scan specific direction"})
                         .tooltip("Sensor cells scan their environment for concentrations of cells of a certain color and provide distance and angle to a "
-                                 "detection. Sensors can operate in 2 modes:\n\n1) Scan vicinity: In this mode, the entire nearby area is scanned (typically "
+                                 "detection. Sensors can operate in 2 modes:\n\n" ICON_FA_CHEVRON_RIGHT
+                                 " Scan vicinity: In this mode, the entire nearby area is scanned (typically "
                                  "within a radius of several 100 units). The scan radius can be adjusted via a simulation parameter (see 'Range' in the sensor "
-                                 "settings).\n\n2) Scan specific direction: In this mode, the scanning process is restricted to a particular direction. The "
+                                 "settings).\n\n" ICON_FA_CHEVRON_RIGHT
+                                 " Scan specific direction: In this mode, the scanning process is restricted to a particular direction. The "
                                  "direction is specified as an angle."),
                     sensorMode)) {
                 if (sensorMode == SensorMode_Neighborhood) {
@@ -711,20 +715,45 @@ void _GenomeEditorWindow::processNode(
             auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
             bool pulseGeneration = nerve.pulseMode > 0;
             table.next();
-            if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(ContentTextWidth), pulseGeneration)) {
+            if (AlienImGui::Checkbox(
+                    AlienImGui::CheckboxParameters()
+                        .name("Generate pulses")
+                        .textWidth(ContentTextWidth)
+                        .tooltip("By default, a nerve cell forwards activity states by receiving activity as input from connected cells (and summing it if "
+                                 "there are multiple cells) and directly providing it as output to other cells. Independently of this, you can specify here "
+                                 "that it also generates an activity pulse in channel #0 at regular intervals. This can be used to trigger other sensor cells, "
+                                 "attacker cells, etc."),
+                    pulseGeneration)) {
                 nerve.pulseMode = pulseGeneration ? 1 : 0;
             }
             if (pulseGeneration) {
                 table.next();
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Pulse interval").textWidth(ContentTextWidth), nerve.pulseMode);
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters()
+                        .name("Pulse interval")
+                        .textWidth(ContentTextWidth)
+                        .tooltip("The intervals between two pulses can be set here. It is specified in cycles, which corresponds to 6 time steps each."),
+                    nerve.pulseMode);
                 bool alternation = nerve.alternationMode > 0;
                 table.next();
-                if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(ContentTextWidth), alternation)) {
+                if (AlienImGui::Checkbox(
+                        AlienImGui::CheckboxParameters()
+                            .name("Alternating pulses")
+                            .textWidth(ContentTextWidth)
+                            .tooltip("By default, the generated pulses consist of a positive value in channel #0. When 'Alternating pulses' is enabled, the "
+                                     "sign of this value alternates at specific time intervals. This can be used, for example, to easily create control "
+                                     "signals for back-and-forth movements or bending in muscle cells."),
+                        alternation)) {
                     nerve.alternationMode = alternation ? 1 : 0;
                 }
                 if (alternation) {
                     table.next();
-                    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(ContentTextWidth), nerve.alternationMode);
+                    AlienImGui::InputInt(
+                        AlienImGui::InputIntParameters()
+                            .name("Pulses per phase")
+                            .textWidth(ContentTextWidth)
+                            .tooltip("This value indicates the number of pulses until a sign changes in the generated activity."),
+                        nerve.alternationMode);
                 }
             }
         } break;
@@ -735,7 +764,13 @@ void _GenomeEditorWindow::processNode(
                 AlienImGui::ComboParameters()
                     .name("Energy distribution")
                     .values({"Connected cells", "Transmitters and Constructors"})
-                    .textWidth(ContentTextWidth),
+                    .textWidth(ContentTextWidth)
+                    .tooltip("Attacker cells can distribute the acquired energy through two different methods. The energy distribution is analogous to "
+                             "transmitter cells. \n\n" ICON_FA_CHEVRON_RIGHT " Connected cells: In this case the energy will be distributed evenly across all "
+                             "connected and connected-connected cells.\n\n" ICON_FA_CHEVRON_RIGHT
+                             " Transmitters and constructors: Here, the energy will be transferred to spatially nearby constructors or other transmitter cells "
+                             "within the same cell network. If multiple such transmitter cells are present at certain distances, energy can be transmitted "
+                             "over greater distances, for example, from attacker cells to constructor cells."),
                 attacker.mode);
         } break;
         case CellFunction_Injector: {
@@ -743,7 +778,18 @@ void _GenomeEditorWindow::processNode(
 
             table.next();
             AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Mode").textWidth(ContentTextWidth).values({"Cells under construction", "All Cells"}), injector.mode);
+                AlienImGui::ComboParameters()
+                    .name("Mode")
+                    .textWidth(ContentTextWidth)
+                    .values({"Cells under construction", "All Cells"})
+                    .tooltip(
+                        "Injector cells can overwrite their genome into other constructor or injector cells. To do this, they need to be activated via channel "
+                        "#0, remain in close proximity to the target cell for a certain minimum duration, and, in the case of another constructor cell, "
+                        "its construction process must not have started yet. There are two modes to choose from:\n\n" ICON_FA_CHEVRON_RIGHT
+                        " Cells under construction: Only cells which are under construction can be infected. This mode is useful when an organism wants to "
+                        "inject its genome into another own constructor cell (e.g. to build a spore).\n\n" ICON_FA_CHEVRON_RIGHT
+                        " All Cells: In this mode there are no restrictions, e.g. any other constructor or injector cell can be infected."),
+                injector.mode);
         } break;
         case CellFunction_Muscle: {
             auto& muscle = std::get<MuscleGenomeDescription>(*cell.cellFunction);
@@ -820,7 +866,7 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
     auto width = ImGui::GetContentRegionAvail().x / 2;
     if (ImGui::BeginChild("##", ImVec2(width, scale(60.0f)), true)) {
         AlienImGui::MonospaceText(content);
-        AlienImGui::HelpMarker("If a constructor cell is encoded in a genome, this constructor cell can itself contain another genome. This sub-genome can "
+        AlienImGui::HelpMarker("If a constructor or injector cell is encoded in a genome, that cell can itself contain another genome. This sub-genome can "
                                "describe additional body parts or branching of the creature, for instance. Furthermore, sub-genomes can in turn possess further "
                                "sub-sub-genomes, etc. To insert a sub-genome here by clicking on 'Paste', one must have previously copied one to the clipboard. "
                                "This can be done using the 'Copy genome' button in the toolbar. This action copies the entire genome from the current tab to "
