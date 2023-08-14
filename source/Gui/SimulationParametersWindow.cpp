@@ -1193,7 +1193,6 @@ void _SimulationParametersWindow::processSpot(
                 spot.shapeType)) {
                 createDefaultSpotData(spot);
             }
-            auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y));
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Position X")
@@ -1210,8 +1209,27 @@ void _SimulationParametersWindow::processSpot(
                     .min(0)
                     .max(toFloat(worldSize.y))
                     .defaultValue(&origSpot.posY)
-                    .format("%.1f"),
+                    .format("%.2f"),
                 &spot.posY);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Velocity X")
+                    .textWidth(RightColumnWidth)
+                    .min(-4.0f)
+                    .max(4.0f)
+                    .defaultValue(&origSpot.velX)
+                    .format("%.2f"),
+                &spot.velX);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Velocity Y")
+                    .textWidth(RightColumnWidth)
+                    .min(-4.0f)
+                    .max(4.0f)
+                    .defaultValue(&origSpot.velY)
+                    .format("%.2f"),
+                &spot.velY);
+            auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y));
             if (spot.shapeType == SpotShapeType_Circular) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()

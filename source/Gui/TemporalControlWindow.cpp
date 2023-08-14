@@ -186,40 +186,52 @@ _TemporalControlWindow::Snapshot _TemporalControlWindow::createSnapshot()
     return result;
 }
 
+
 void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
 {
     auto parameters = _simController->getSimulationParameters();
     auto const& origParameters = snapshot.parameters;
+
     if (origParameters.numParticleSources == parameters.numParticleSources) {
         for (int i = 0; i < parameters.numParticleSources; ++i) {
-            auto origSourceCompareClone = origParameters.particleSources[i];
-            auto sourceCompareClone = parameters.particleSources[i];
+            restorePosition(parameters.particleSources[i], origParameters.particleSources[i], snapshot.timestep);
+        }
+    }
 
-            origSourceCompareClone.posX = 0;
-            origSourceCompareClone.posY = 0;
-            sourceCompareClone.posX = 0;
-            sourceCompareClone.posY = 0;
-            if (origSourceCompareClone != sourceCompareClone) {
-                continue;
-            }
-            auto const& origSource = origParameters.particleSources[i];
-            auto const& source = parameters.particleSources[i];
-
-            auto timestepDelta = toFloat(_simController->getCurrentTimestep()) - toFloat(snapshot.timestep);
-            auto projectedPos = RealVector2D(origSource.posX, origSource.posY) + RealVector2D(origSource.velX, origSource.velY) * timestepDelta;
-
-            SpaceCalculator space(_simController->getWorldSize());
-            projectedPos = space.getCorrectedPosition(projectedPos);
-
-            auto deviation = std::abs(source.posX - projectedPos.x) + std::abs(source.posY - projectedPos.y);
-            if (deviation < RestorePositionTolerance) {
-                parameters.particleSources[i].posX = origParameters.particleSources[i].posX;
-                parameters.particleSources[i].posY = origParameters.particleSources[i].posY;
-            }
+    if (origParameters.numSpots == parameters.numSpots) {
+        for (int i = 0; i < parameters.numSpots; ++i) {
+            restorePosition(parameters.spots[i], origParameters.spots[i], snapshot.timestep);
         }
     }
 
     _simController->setCurrentTimestep(snapshot.timestep);
     _simController->setSimulationData(snapshot.data);
     _simController->setSimulationParameters(parameters);
+}
+
+template <typename MovedObjectType>
+void _TemporalControlWindow::restorePosition(MovedObjectType& movedObject, MovedObjectType const& origMovedObject, uint64_t origTimestep)
+{
+    auto origMovedObjectClone = origMovedObject;
+    auto movedObjectClone = movedObject;
+
+    origMovedObjectClone.posX = 0;
+    origMovedObjectClone.posY = 0;
+    movedObjectClone.posX = 0;
+    movedObjectClone.posY = 0;
+    if (origMovedObjectClone != movedObjectClone) {
+        return;
+    }
+
+    auto timestepDelta = toFloat(toDouble(_simController->getCurrentTimestep()) - toDouble(origTimestep));
+    auto projectedPos = RealVector2D(origMovedObject.posX, origMovedObject.posY) + RealVector2D(origMovedObject.velX, origMovedObject.velY) * timestepDelta;
+
+    SpaceCalculator space(_simController->getWorldSize());
+    projectedPos = space.getCorrectedPosition(projectedPos);
+
+    auto deviation = std::abs(movedObject.posX - projectedPos.x) + std::abs(movedObject.posY - projectedPos.y);
+    if (deviation < RestorePositionTolerance) {
+        movedObject.posX = origMovedObject.posX;
+        movedObject.posY = origMovedObject.posY;
+    }
 }

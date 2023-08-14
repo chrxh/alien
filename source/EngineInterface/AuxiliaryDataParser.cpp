@@ -634,6 +634,8 @@ namespace
             encodeDecodeProperty(tree, spot.color, defaultSpot.color, base + "color", parserTask);
             encodeDecodeProperty(tree, spot.posX, defaultSpot.posX, base + "pos.x", parserTask);
             encodeDecodeProperty(tree, spot.posY, defaultSpot.posY, base + "pos.y", parserTask);
+            encodeDecodeProperty(tree, spot.velX, defaultSpot.velX, base + "vel.x", parserTask);
+            encodeDecodeProperty(tree, spot.velY, defaultSpot.velY, base + "vel.y", parserTask);
 
             encodeDecodeProperty(tree, spot.shapeType, defaultSpot.shapeType, base + "shape.type", parserTask);
             if (spot.shapeType == SpotShapeType_Circular) {

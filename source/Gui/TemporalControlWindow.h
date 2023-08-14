@@ -38,6 +38,9 @@ private:
     Snapshot createSnapshot();
     void applySnapshot(Snapshot const& snapshot);
 
+    template <typename MovedObjectType>
+    void restorePosition(MovedObjectType& movedObject, MovedObjectType const& origMovedObject, uint64_t origTimestep);
+    
     SimulationController _simController; 
     StatisticsWindow _statisticsWindow;
 
@@ -48,3 +51,4 @@ private:
     bool _slowDown = false;
     int _tpsRestriction = 30;
 };
+
