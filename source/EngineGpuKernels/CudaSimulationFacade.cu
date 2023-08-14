@@ -180,7 +180,13 @@ void _CudaSimulationFacade::calcTimestep()
 {
     checkAndProcessSimulationParameterChanges();
 
-    auto settings = getSettingsForNextTimestep();
+    Settings settings = [this] {
+        std::lock_guard lock(_mutexForSimulationParameters);
+        _simulationKernels->calcSimulationParametersForNextTimestep(_settings);
+        CHECK_FOR_CUDA_ERROR(
+            cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+        return _settings;
+    }();
 
     _simulationKernels->calcTimestep(settings, getSimulationDataIntern(), *_simulationStatistics);
     syncAndCheck();
@@ -575,24 +581,6 @@ void _CudaSimulationFacade::checkAndProcessSimulationParameterChanges()
             _simulationKernels->prepareForSimulationParametersChanges(_settings, getSimulationDataIntern());
         }
     }
-}
-
-Settings _CudaSimulationFacade::getSettingsForNextTimestep()
-{
-    std::lock_guard lock(_mutexForSimulationParameters);
-    auto const& worldSizeX = _settings.generalSettings.worldSizeX;
-    auto const& worldSizeY = _settings.generalSettings.worldSizeY;
-    SpaceCalculator space({worldSizeX, worldSizeY});
-    for (int i = 0; i < _settings.simulationParameters.numParticleSources; ++i) {
-        auto& source = _settings.simulationParameters.particleSources[i];
-        source.posX += source.velX;
-        source.posY += source.velY;
-        auto correctedPosition = space.getCorrectedPosition({source.posX, source.posY});
-        source.posX = correctedPosition.x;
-        source.posY = correctedPosition.y;
-    }
-    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
-    return _settings;
 }
 
 SimulationData _CudaSimulationFacade::getSimulationDataIntern() const

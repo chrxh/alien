@@ -6,10 +6,34 @@
 #include "GarbageCollectorKernelsLauncher.cuh"
 #include "DebugKernels.cuh"
 #include "SimulationStatistics.cuh"
+#include "EngineInterface/SpaceCalculator.h"
 
 _SimulationKernelsLauncher::_SimulationKernelsLauncher()
 {
     _garbageCollector = std::make_shared<_GarbageCollectorKernelsLauncher>();
+}
+
+void _SimulationKernelsLauncher::calcSimulationParametersForNextTimestep(Settings& settings)
+{
+    auto const& worldSizeX = settings.generalSettings.worldSizeX;
+    auto const& worldSizeY = settings.generalSettings.worldSizeY;
+    SpaceCalculator space({worldSizeX, worldSizeY});
+    for (int i = 0; i < settings.simulationParameters.numParticleSources; ++i) {
+        auto& source = settings.simulationParameters.particleSources[i];
+        source.posX += source.velX;
+        source.posY += source.velY;
+        auto correctedPosition = space.getCorrectedPosition({source.posX, source.posY});
+        source.posX = correctedPosition.x;
+        source.posY = correctedPosition.y;
+    }
+    for (int i = 0; i < settings.simulationParameters.numSpots; ++i) {
+        auto& spot = settings.simulationParameters.spots[i];
+        spot.posX += spot.velX;
+        spot.posY += spot.velY;
+        auto correctedPosition = space.getCorrectedPosition({spot.posX, spot.posY});
+        spot.posX = correctedPosition.x;
+        spot.posY = correctedPosition.y;
+    }
 }
 
 namespace 

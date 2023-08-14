@@ -67,6 +67,10 @@ void _NewSimulationDialog::openIntern()
 
 void _NewSimulationDialog::onNewSimulation()
 {
+    SimulationParameters parameters;
+    if (_adoptSimulationParameters) {
+        parameters = _simController->getSimulationParameters();
+    }
     _simController->closeSimulation();
 
     _statisticsWindow->reset();
@@ -74,10 +78,6 @@ void _NewSimulationDialog::onNewSimulation()
     GeneralSettings generalSettings;
     generalSettings.worldSizeX = _width;
     generalSettings.worldSizeY = _height;
-    SimulationParameters parameters;
-    if (_adoptSimulationParameters) {
-        parameters = _simController->getSimulationParameters();
-    }
     _simController->newSimulation(0, generalSettings, parameters);
     _viewport->setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     _viewport->setZoomFactor(4.0f);
