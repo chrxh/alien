@@ -481,6 +481,7 @@ void _GenomeEditorWindow::processNode(
         auto functionTooltip = [&] {
             switch (type) {
             case CellFunction_Neuron:
+                return std::string("[Tooltip will be added.]");
             case CellFunction_Transmitter:
                 return std::string(
                     "Transmitter cells are designed to transport energy. This is important, for example, to supply constructor cells with energy or to "
@@ -489,14 +490,20 @@ void _GenomeEditorWindow::processNode(
                     "simulation parameter 'Normal energy' in 'Cell life cycle'). Transmitter cells do not need an activation but they also transport the "
                     "activity states from input.");
             case CellFunction_Constructor:
+                return std::string("[Tooltip will be added.]");
             case CellFunction_Sensor:
                 return std::string("Sensor cells scan their environment for concentrations of cells of a certain color and provide distance and angle to the "
                                    "closest match.");
             case CellFunction_Nerve:
+                return std::string("[Tooltip will be added.]");
             case CellFunction_Attacker:
+                return std::string("[Tooltip will be added.]");
             case CellFunction_Injector:
+                return std::string("[Tooltip will be added.]");
             case CellFunction_Muscle:
+                return std::string("[Tooltip will be added.]");
             case CellFunction_Defender:
+                return std::string("[Tooltip will be added.]");
             default:
                 return std::string(
                     "Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
