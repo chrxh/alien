@@ -471,10 +471,11 @@ void _InspectorWindow::processInjectorContent(InjectorDescription& injector)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         AlienImGui::Combo(
-            AlienImGui::ComboParameters().name("Mode").textWidth(CellFunctionTextWidth).values({"Cells under construction", "All Cells"}),
-            injector.mode);
-        AlienImGui::InputInt(
-            AlienImGui::InputIntParameters().name("Counter").textWidth(CellFunctionTextWidth), injector.counter);
+            AlienImGui::ComboParameters().name("Mode").textWidth(CellFunctionTextWidth).values({"Cells under construction", "All Cells"}), injector.mode);
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNodeEx("Process data", TreeNodeFlags)) {
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Counter").textWidth(CellFunctionTextWidth), injector.counter);
         ImGui::TreePop();
     }
 }
@@ -543,8 +544,10 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
         AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellFunctionTextWidth), sensor.color);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Min density").format("%.2f").step(0.05f).textWidth(CellFunctionTextWidth), sensor.minDensity);
-        AlienImGui::InputInt(
-            AlienImGui::InputIntParameters().name("Target creature id").textWidth(CellFunctionTextWidth), sensor.targetedCreatureId);
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNodeEx("Process data", TreeNodeFlags)) {
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Target creature id").textWidth(CellFunctionTextWidth), sensor.targetedCreatureId);
         ImGui::TreePop();
     }
 }

@@ -179,7 +179,7 @@ void _GettingStartedWindow::processIntern()
         drawItemText("Injector: It can infect other constructor cells to inject its own built-in genome.");
         drawItemText("Nerve: On the one hand, it transfers activity values from connected input cells and on the other hand, it can optionally generate "
                      "activity pulses at specific intervals.");
-        drawItemText("Attacker: If activated, it attacks (not connected) surrounding cells.");
+        drawItemText("Attacker: It attacks surrounding cells from other cell networks by stealing energy from them.");
         drawItemText("Defender: It reduces the attack strength when another cell in the vicinity performs an attack.");
         drawItemText("Muscle: When a muscle cell is activated, it can produce either a movement, a bending or a change in length of the cell connection.");
         drawItemText("Sensor: If activated, it performs a long-range scan for the concentration of cells with a certain color.");
