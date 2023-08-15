@@ -481,7 +481,11 @@ void _GenomeEditorWindow::processNode(
         auto functionTooltip = [&] {
             switch (type) {
             case CellFunction_Neuron:
-                return std::string("[Tooltip will be added.]");
+                return std::string(
+                    "This function equips the cell with a small network of 8 neurons with 8x8 configurable weights and 8 bias values. It "
+                    "processes the input from channel #0 to #7 and provides the output to those channels. Each neuron uses a type of sigmoid as a "
+                    "activation function. More precisely\noutput_j := sigmoid(sum_i (input_i * weight_ji) + bias_j)\nwhere\nsigmoid(x) := 2 / "
+                    "(1 + exp(x)) - 1 = (1 - exp(x)) / (1 + exp(x))");
             case CellFunction_Transmitter:
                 return std::string(
                     "Transmitter cells are designed to transport energy. This is important, for example, to supply constructor cells with energy or to "
@@ -490,24 +494,55 @@ void _GenomeEditorWindow::processNode(
                     "simulation parameter 'Normal energy' in 'Cell life cycle'). Transmitter cells do not need an activation but they also transport the "
                     "activity states from input.");
             case CellFunction_Constructor:
-                return std::string("[Tooltip will be added.]");
+                return std::string("A constructor cell builds a cell network according to a contained genome. The construction process takes place cell by "
+                                   "cell, where energy is required for each new cell. Once a new cell is generated, it is connected to the already constructed "
+                                   "cell network.\n\n" ICON_FA_CHEVRON_RIGHT
+                                   " Input channel #0: abs(value) > threshold activates constructor (only necessary in "
+                                   "'manual' mode)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: 0 (could not constructor next cell, e.g. no energy, required "
+                                   "connection check failed, completeness check failed), 1 (next cell construction successful)");
             case CellFunction_Sensor:
                 return std::string("Sensor cells scan their environment for concentrations of cells of a certain color and provide distance and angle to the "
-                                   "closest match.");
+                                   "closest match.\n\n" ICON_FA_CHEVRON_RIGHT
+                                   " Input channel #0: abs(value) > threshold activates sensor\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: "
+                                   "0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #1: density of match\n\n" ICON_FA_CHEVRON_RIGHT
+                                   " Output channel #2: distance "
+                                   "of match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of match");
             case CellFunction_Nerve:
-                return std::string("[Tooltip will be added.]");
+                return std::string(
+                    "By default, a nerve cell forwards activity states by receiving activity as input from connected cells (and summing it if "
+                    "there are multiple cells) and directly providing it as output to other cells. Independently of this, one can specify "
+                    "that it also generates an activity pulse in channel #0 at regular intervals. This can be used to trigger other sensor cells, "
+                    "attacker cells, etc.");
             case CellFunction_Attacker:
-                return std::string("[Tooltip will be added.]");
+                return std::string("An attacker cell attacks surrounding cells from other cell networks (with different creature id) by stealing energy from "
+                                   "them. The gained energy is then distributed in the own cell network.\n\n" ICON_FA_CHEVRON_RIGHT
+                                   " Input channel #0: abs(value) > threshold activates "
+                                   "attacker\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: proportional to the gained energy");
             case CellFunction_Injector:
-                return std::string("[Tooltip will be added.]");
+                return std::string(
+                    "Injector cells can copy their genome into other constructor or injector cells. To do this, they need to be activated, remain in "
+                    "close proximity to the target cell for a certain minimum duration, and, in the case of target constructor cell, its construction process "
+                    "must not have started yet.\n\n" ICON_FA_CHEVRON_RIGHT
+                    " Input channel #0: abs(value) > threshold activates injector\n\n" ICON_FA_CHEVRON_RIGHT "
+                    "Output channel #0: 0 (no cells found) or 1 (injection in process or completed)");
             case CellFunction_Muscle:
-                return std::string("[Tooltip will be added.]");
+                return std::string("Muscle cells can perform different movements and deformations based on input and configuration.\n\n" ICON_FA_CHEVRON_RIGHT
+                                   " Input channel "
+                                   "#0: The strength of the movement, bending or expansion/contraction. A negative sign corresponds to the opposite "
+                                   "action.\n\n" ICON_FA_CHEVRON_RIGHT
+                                   " Input channel #1: This channel is solely utilized for acceleration due to bending. If the sign of channel #1 "
+                                   "differs from the sign of channel #0, no acceleration will be obtained during the bending process.");
             case CellFunction_Defender:
-                return std::string("[Tooltip will be added.]");
+                return std::string("A defender cell does not need to be activated. Its presence reduces the strength of an enemy attack involving attacker "
+                                   "cells or extends the injection duration for injector cells.");
             default:
                 return std::string(
                     "Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
-                    "take action. If you choose a cell function this tooltip will be updated to provide the corresponding information.");
+                    "take action. All cell functions have in common that they obtain the input from connected cells whose execution number matches the input "
+                    "execution number of the current cell. For this purpose, each channel from #0 to #7 of those cells is summed and the result is written "
+                    "to the channel from #0 to #7 of the current cell. In particular, if there is only one input cell, its activity is simply forwarded. After "
+                    "the execution of a cell function, some channels will be then overriden by the output of the corresponding cell function.\n\nIMPORTANT: If "
+                    "you choose a cell function, this tooltip will be updated to provide more specific information. ");
             }
         }();
 
@@ -744,10 +779,7 @@ void _GenomeEditorWindow::processNode(
                     AlienImGui::CheckboxParameters()
                         .name("Generate pulses")
                         .textWidth(ContentTextWidth)
-                        .tooltip("By default, a nerve cell forwards activity states by receiving activity as input from connected cells (and summing it if "
-                                 "there are multiple cells) and directly providing it as output to other cells. Independently of this, you can specify here "
-                                 "that it also generates an activity pulse in channel #0 at regular intervals. This can be used to trigger other sensor cells, "
-                                 "attacker cells, etc."),
+                        .tooltip("If enabled, an activity pulse in channel #0 will be generated at regular time intervals."),
                     pulseGeneration)) {
                 nerve.pulseMode = pulseGeneration ? 1 : 0;
             }
@@ -808,9 +840,7 @@ void _GenomeEditorWindow::processNode(
                     .textWidth(ContentTextWidth)
                     .values({"Cells under construction", "All Cells"})
                     .tooltip(
-                        "Injector cells can overwrite their genome into other constructor or injector cells. To do this, they need to be activated via channel "
-                        "#0, remain in close proximity to the target cell for a certain minimum duration, and, in the case of another constructor cell, "
-                        "its construction process must not have started yet. There are two modes to choose from:\n\n" ICON_FA_CHEVRON_RIGHT
+                        ICON_FA_CHEVRON_RIGHT
                         " Cells under construction: Only cells which are under construction can be infected. This mode is useful when an organism wants to "
                         "inject its genome into another own constructor cell (e.g. to build a spore).\n\n" ICON_FA_CHEVRON_RIGHT
                         " All Cells: In this mode there are no restrictions, e.g. any other constructor or injector cell can be infected."),

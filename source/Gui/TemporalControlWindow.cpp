@@ -18,7 +18,7 @@
 namespace
 {
     auto constexpr LeftColumnWidth = 180.0f;
-    auto constexpr RestorePositionTolerance = 2.0f;
+    auto constexpr RestorePositionTolerance = 3.0f;
 }
 
 _TemporalControlWindow::_TemporalControlWindow(
