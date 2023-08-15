@@ -523,7 +523,7 @@ void _GenomeEditorWindow::processNode(
                     "Injector cells can copy their genome into other constructor or injector cells. To do this, they need to be activated, remain in "
                     "close proximity to the target cell for a certain minimum duration, and, in the case of target constructor cell, its construction process "
                     "must not have started yet.\n\n" ICON_FA_CHEVRON_RIGHT
-                    " Input channel #0: abs(value) > threshold activates injector\n\n" ICON_FA_CHEVRON_RIGHT 
+                    " Input channel #0: abs(value) > threshold activates injector\n\n" ICON_FA_CHEVRON_RIGHT ""
                     " Output channel #0: 0 (no cells found) or 1 (injection in process or completed)");
             case CellFunction_Muscle:
                 return std::string("Muscle cells can perform different movements and deformations based on input and configuration.\n\n" ICON_FA_CHEVRON_RIGHT
