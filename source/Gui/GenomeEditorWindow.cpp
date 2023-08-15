@@ -523,8 +523,8 @@ void _GenomeEditorWindow::processNode(
                     "Injector cells can copy their genome into other constructor or injector cells. To do this, they need to be activated, remain in "
                     "close proximity to the target cell for a certain minimum duration, and, in the case of target constructor cell, its construction process "
                     "must not have started yet.\n\n" ICON_FA_CHEVRON_RIGHT
-                    " Input channel #0: abs(value) > threshold activates injector\n\n" ICON_FA_CHEVRON_RIGHT "
-                    "Output channel #0: 0 (no cells found) or 1 (injection in process or completed)");
+                    " Input channel #0: abs(value) > threshold activates injector\n\n" ICON_FA_CHEVRON_RIGHT 
+                    " Output channel #0: 0 (no cells found) or 1 (injection in process or completed)");
             case CellFunction_Muscle:
                 return std::string("Muscle cells can perform different movements and deformations based on input and configuration.\n\n" ICON_FA_CHEVRON_RIGHT
                                    " Input channel "
@@ -751,7 +751,7 @@ void _GenomeEditorWindow::processNode(
                         .textWidth(ContentTextWidth)
                         .format("%.1f")
                         .tooltip("The angle can be determined here in which direction the scanning process should take place. An angle of 0 means that the "
-                                 "scan should occur in the direction derived from the predecessor cell (the cell from which the activity input originates) "
+                                 "scan will be performed in the direction derived from the input cell (the cell from which the activity input originates) "
                                  "towards the sensor cell."),
                     *sensor.fixedAngle);
             }
@@ -850,14 +850,26 @@ void _GenomeEditorWindow::processNode(
             auto& muscle = std::get<MuscleGenomeDescription>(*cell.cellFunction);
             table.next();
             AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Mode").values({"Movement", "Contraction and expansion", "Bending"}).textWidth(ContentTextWidth),
+                AlienImGui::ComboParameters()
+                    .name("Mode")
+                    .values({"Movement", "Expansion and contraction", "Bending"})
+                    .textWidth(ContentTextWidth)
+                    .tooltip(ICON_FA_CHEVRON_RIGHT " Movement: Results in movement in the direction (or counter-direction) determined by the path from the "
+                             "input cell to the muscle cell.\n\n" ICON_FA_CHEVRON_RIGHT " Expansion and contraction: Causes an elongation (or contraction) of the "
+                             "reference distance to the input cell.\n\n" ICON_FA_CHEVRON_RIGHT " Bending: Increases (or decreases) the angle between the muscle "
+                             "cell, input cell, and the nearest connected cell clockwise from the muscle cell."),
                 muscle.mode);
         } break;
         case CellFunction_Defender: {
             auto& defender = std::get<DefenderGenomeDescription>(*cell.cellFunction);
             table.next();
             AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Mode").values({"Anti-attacker", "Anti-injector"}).textWidth(ContentTextWidth),
+                AlienImGui::ComboParameters()
+                    .name("Mode")
+                    .values({"Anti-attacker", "Anti-injector"})
+                    .textWidth(ContentTextWidth)
+                    .tooltip(ICON_FA_CHEVRON_RIGHT" Anti-attacker: reduces the attack strength of an enemy attacker cell\n\n" ICON_FA_CHEVRON_RIGHT
+                             "Anti-injector: increases the injection duration of an enemy injector cell"),
                 defender.mode);
         } break;
         case CellFunction_Placeholder: {

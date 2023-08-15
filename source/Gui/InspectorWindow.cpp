@@ -520,7 +520,7 @@ void _InspectorWindow::processMuscleContent(MuscleDescription& muscle)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         AlienImGui::Combo(
-            AlienImGui::ComboParameters().name("Mode").values({"Movement", "Contraction and expansion", "Bending"}).textWidth(CellFunctionTextWidth),
+            AlienImGui::ComboParameters().name("Mode").values({"Movement", "Expansion and contraction", "Bending"}).textWidth(CellFunctionTextWidth),
             muscle.mode);
         ImGui::TreePop();
     }
