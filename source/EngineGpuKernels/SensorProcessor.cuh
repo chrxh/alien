@@ -89,15 +89,19 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             data.cellMap.correctPosition(scanPos);
             auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getDensity(scanPos, color));
             if (density >= minDensity) {
-                //uint32_t creatureId = 0;
-                //data.cellMap.executeForEach(scanPos, 2.0f, cell->detached, [&creatureId](auto const& otherCell) {
-                //    creatureId = otherCell->creatureId;
-                //});
-                auto otherCell = data.cellMap.getFirst(scanPos);
-                uint32_t creatureId = 0;
-                if (otherCell && otherCell->color == color) {
-                    creatureId = otherCell->creatureId;
-                }
+                uint32_t creatureId = [&] {
+                    if (cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color] > NEAR_ZERO) {
+                        for (float dx = -3.0f; dx < 3.0f + NEAR_ZERO; dx += 1.0f) {
+                            for (float dy = -3.0f; dy < 3.0f + NEAR_ZERO; dy += 1.0f) {
+                                auto otherCell = data.cellMap.getFirst(scanPos + float2{dx, dy});
+                                if (otherCell && otherCell->color == color) {
+                                    return static_cast<uint32_t>(otherCell->creatureId);
+                                }
+                            }
+                        }
+                    }
+                    return 0xffffffff;
+                }();
                 auto relAngle = Math::subtractAngle(angle, refScanAngle);
                 uint32_t angle = convertAngleToData(relAngle);
                 uint64_t combined =
@@ -114,11 +118,11 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             activity.channels[1] = static_cast<float>((lookupResult >> 40) & 0xff) / 256;  //density
             activity.channels[2] = static_cast<float>(lookupResult >> 48) / 256;  //distance
             activity.channels[3] = convertDataToAngle(static_cast<int8_t>((lookupResult >> 32) & 0xff)) / 360.0f;  //angle: between -0.5 and 0.5
-            statistics.incNumSensorMatches(cell->color);
             auto targetCreatureId = lookupResult & 0xffffffff;
             if (targetCreatureId != 0xffffffff) {
                 cell->cellFunctionData.sensor.targetedCreatureId = toInt(targetCreatureId);
             }
+            statistics.incNumSensorMatches(cell->color);
         } else {
             activity.channels[0] = 0;  //nothing found
         }
@@ -132,7 +136,7 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
     __shared__ int minDensity;
     __shared__ int color;
     __shared__ float2 searchDelta;
-    __shared__ uint32_t lookupResult;
+    __shared__ uint64_t lookupResult;
 
     if (threadIdx.x == 0) {
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 255);
@@ -141,7 +145,7 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
         searchDelta = CellFunctionProcessor::calcSignalDirection(data, cell);
         searchDelta = Math::rotateClockwise(searchDelta, cell->cellFunctionData.sensor.angle);
 
-        lookupResult = 0xffffffff;
+        lookupResult = 0xffffffffffffffff;
     }
     __syncthreads();
 
@@ -152,17 +156,36 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
         data.cellMap.correctPosition(scanPos);
         auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getDensity(scanPos, color));
         if (density >= minDensity) {
-            uint32_t combined = static_cast<uint32_t>(distance) << 8 | static_cast<uint32_t>(density);
-            atomicMin(&lookupResult, combined);
+            uint32_t creatureId = [&] {
+                if (cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color] > NEAR_ZERO) {
+                    for (float dx = -3.0f; dx < 3.0f + NEAR_ZERO; dx += 1.0f) {
+                        for (float dy = -3.0f; dy < 3.0f + NEAR_ZERO; dy += 1.0f) {
+                            auto otherCell = data.cellMap.getFirst(scanPos + float2{dx, dy});
+                            if (otherCell && otherCell->color == color) {
+                                return static_cast<uint32_t>(otherCell->creatureId);
+                            }
+                        }
+                    }
+                }
+                return 0xffffffff;
+            }();
+
+            uint64_t combined = static_cast<uint64_t>(distance) << 48 | static_cast<uint64_t>(density) << 40 | creatureId;
+            alienAtomicMin64(&lookupResult, combined);
+
         }
     }
     __syncthreads();
 
     if (threadIdx.x == 0) {
-        if (lookupResult != 0xffffffff) {
+        if (lookupResult != 0xffffffffffffffff) {
             activity.channels[0] = 1;                                                     //something found
-            activity.channels[1] = static_cast<float>(lookupResult & 0xff) / 256;  //density
-            activity.channels[2] = static_cast<float>((lookupResult >> 8) & 0xff) / 256;  //distance
+            activity.channels[1] = static_cast<float>((lookupResult >> 40) & 0xff) / 256;  //density
+            activity.channels[2] = static_cast<float>(lookupResult >> 48) / 256;           //distance
+            auto targetCreatureId = lookupResult & 0xffffffff;
+            if (targetCreatureId != 0xffffffff) {
+                cell->cellFunctionData.sensor.targetedCreatureId = toInt(targetCreatureId);
+            }
             statistics.incNumSensorMatches(cell->color);
         } else {
             activity.channels[0] = 0;  //nothing found
