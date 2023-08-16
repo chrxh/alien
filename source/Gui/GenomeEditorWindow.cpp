@@ -7,7 +7,6 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
-
 #include "Base/StringHelper.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/GenomeDescriptionConverter.h"
@@ -26,6 +25,7 @@
 #include "OverlayMessageController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
+#include "Tooltips.h"
 
 namespace
 {
@@ -307,14 +307,7 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
         std::vector ShapeStrings = {"Custom"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s, "Tube"s, "Lolli"s};
         auto origShape = tab.genome.info.shape;
         if (AlienImGui::Combo(
-                AlienImGui::ComboParameters()
-                    .name("Geometry")
-                    .values(ShapeStrings)
-                    .textWidth(ContentTextWidth)
-                    .tooltip("A genome describes a network of connected cells. On the one hand, there is the option to select a pre-defined geometry (e.g. "
-                             "triangle or hexagon). Then, the cells encoded in the genome are generated along this geometry and connected together "
-                             "appropriately. On the other hand, it is also possible to define custom geometries by setting an angle between predecessor and "
-                             "successor cells for each cell (except for the first and last in the sequence)."),
+                AlienImGui::ComboParameters().name("Geometry").values(ShapeStrings).textWidth(ContentTextWidth).tooltip(Const::GenomeGeometryTooltip),
                 tab.genome.info.shape)) {
             updateGeometry(tab.genome, origShape);
         }
@@ -325,46 +318,25 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
                 .format("%.2f")
                 .step(0.05f)
                 .textWidth(ContentTextWidth)
-                .tooltip("The spatial distance between each cell and its predecessor cell in the genome sequence is determined here."),
+                .tooltip(Const::GenomeConnectionDistanceTooltip),
             tab.genome.info.connectionDistance);
         table.next();
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters()
-                .name("Stiffness")
-                .format("%.2f")
-                .step(0.05f)
-                .textWidth(ContentTextWidth)
-                .tooltip("This value sets the stiffness for the entire encoded cell network."),
+            AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth).tooltip(Const::GenomeStiffnessTooltip),
             tab.genome.info.stiffness);
         if (tab.genome.info.shape == ConstructionShape_Custom) {
             table.next();
             AlienImGui::AngleAlignmentCombo(
-                AlienImGui::AngleAlignmentComboParameters()
-                    .name("Angle alignment")
-                    .textWidth(ContentTextWidth)
-                    .tooltip("Triples of connected cells within a network have specific spatial angles relative to each other. These angles are guided by the "
-                             "reference angles encoded in the cells. With this setting, it is optionally possible to specify that the reference angles must "
-                             "only be multiples of certain values. This allows for greater stability of the created networks, as the angles would otherwise be "
-                             "more susceptible to external influences. Choosing 60 degrees is recommended here, as it allows for the accurate representation "
-                             "of most geometries."),
+                AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(ContentTextWidth).tooltip(Const::GenomeAngleAlignmentTooltip),
                 tab.genome.info.angleAlignment);
         }
         table.next();
         AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
-                .name("Single construction")
-                .textWidth(ContentTextWidth)
-                .tooltip("This determines whether the encoded cell network in the genome should be constructed by the corresponding constructor cell only once "
-                         "or multiple times."),
+            AlienImGui::CheckboxParameters().name("Single construction").textWidth(ContentTextWidth).tooltip(Const::GenomeSingleConstructionTooltip),
             tab.genome.info.singleConstruction);
         table.next();
         AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
-                .name("Separate construction")
-                .textWidth(ContentTextWidth)
-                .tooltip("Here, one can configure whether the encoded cell network in the genome should be detached from the constructor cell once it has been "
-                         "fully constructed. Disabling this property is useful for encoding growing structures (such as plant-like species) or creature body "
-                         "parts."),
+            AlienImGui::CheckboxParameters().name("Separate construction").textWidth(ContentTextWidth).tooltip(Const::GenomeSeparationConstructionTooltip),
             tab.genome.info.separateConstruction);
         table.end();
     }
@@ -481,99 +453,39 @@ void _GenomeEditorWindow::processNode(
         auto functionTooltip = [&] {
             switch (type) {
             case CellFunction_Neuron:
-                return std::string(
-                    "This function equips the cell with a small network of 8 neurons with 8x8 configurable weights and 8 bias values. It "
-                    "processes the input from channel #0 to #7 and provides the output to those channels. Each neuron uses a type of sigmoid as a "
-                    "activation function. More precisely\noutput_j := sigmoid(sum_i (input_i * weight_ji) + bias_j)\nwhere\nsigmoid(x) := 2 / "
-                    "(1 + exp(x)) - 1 = (1 - exp(x)) / (1 + exp(x))");
+                return Const::NeuronTooltip;
             case CellFunction_Transmitter:
-                return std::string(
-                    "Transmitter cells are designed to transport energy. This is important, for example, to supply constructor cells with energy or to "
-                    "support attacked cells. The energy transport works as follows: A part of the excess energy of the own cell and the directly connected "
-                    "cells is collected and transferred to other cells in the vicinity. A cell has excess energy when it exceeds a defined normal value (see "
-                    "simulation parameter 'Normal energy' in 'Cell life cycle'). Transmitter cells do not need an activation but they also transport the "
-                    "activity states from input.");
+                return Const::TransmitterTooltip;
             case CellFunction_Constructor:
-                return std::string("A constructor cell builds a cell network according to a contained genome. The construction process takes place cell by "
-                                   "cell, where energy is required for each new cell. Once a new cell is generated, it is connected to the already constructed "
-                                   "cell network.\n\n" ICON_FA_CHEVRON_RIGHT
-                                   " Input channel #0: abs(value) > threshold activates constructor (only necessary in "
-                                   "'manual' mode)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: 0 (could not constructor next cell, e.g. no energy, required "
-                                   "connection check failed, completeness check failed), 1 (next cell construction successful)");
+                return Const::ConstructorTooltip;
             case CellFunction_Sensor:
-                return std::string("Sensor cells scan their environment for concentrations of cells of a certain color and provide distance and angle to the "
-                                   "closest match.\n\n" ICON_FA_CHEVRON_RIGHT
-                                   " Input channel #0: abs(value) > threshold activates sensor\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: "
-                                   "0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #1: density of match\n\n" ICON_FA_CHEVRON_RIGHT
-                                   " Output channel #2: distance "
-                                   "of match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of match");
+                return Const::SensorTooltip;
             case CellFunction_Nerve:
-                return std::string(
-                    "By default, a nerve cell forwards activity states by receiving activity as input from connected cells (and summing it if "
-                    "there are multiple cells) and directly providing it as output to other cells. Independently of this, one can specify "
-                    "that it also generates an activity pulse in channel #0 at regular intervals. This can be used to trigger other sensor cells, "
-                    "attacker cells, etc.");
+                return Const::NerveTooltip;
             case CellFunction_Attacker:
-                return std::string("An attacker cell attacks surrounding cells from other cell networks (with different creature id) by stealing energy from "
-                                   "them. The gained energy is then distributed in the own cell network.\n\n" ICON_FA_CHEVRON_RIGHT
-                                   " Input channel #0: abs(value) > threshold activates "
-                                   "attacker\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: proportional to the gained energy");
+                return Const::AttackerTooltip;
             case CellFunction_Injector:
-                return std::string(
-                    "Injector cells can copy their genome into other constructor or injector cells. To do this, they need to be activated, remain in "
-                    "close proximity to the target cell for a certain minimum duration, and, in the case of target constructor cell, its construction process "
-                    "must not have started yet.\n\n" ICON_FA_CHEVRON_RIGHT
-                    " Input channel #0: abs(value) > threshold activates injector\n\n" ICON_FA_CHEVRON_RIGHT ""
-                    " Output channel #0: 0 (no cells found) or 1 (injection in process or completed)");
+                return Const::InjectorTooltip;
             case CellFunction_Muscle:
-                return std::string("Muscle cells can perform different movements and deformations based on input and configuration.\n\n" ICON_FA_CHEVRON_RIGHT
-                                   " Input channel "
-                                   "#0: The strength of the movement, bending or expansion/contraction. A negative sign corresponds to the opposite "
-                                   "action.\n\n" ICON_FA_CHEVRON_RIGHT
-                                   " Input channel #1: This channel is solely utilized for acceleration due to bending. If the sign of channel #1 "
-                                   "differs from the sign of channel #0, no acceleration will be obtained during the bending process.");
+                return Const::MuscleTooltip;
             case CellFunction_Defender:
-                return std::string("A defender cell does not need to be activated. Its presence reduces the strength of an enemy attack involving attacker "
-                                   "cells or extends the injection duration for injector cells.");
+                return Const::DefenderTooltip;
             default:
-                return std::string(
-                    "Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
-                    "take action. All cell functions have in common that they obtain the input from connected cells whose execution number matches the input "
-                    "execution number of the current cell. For this purpose, each channel from #0 to #7 of those cells is summed and the result is written "
-                    "to the channel from #0 to #7 of the current cell. In particular, if there is only one input cell, its activity is simply forwarded. After "
-                    "the execution of a cell function, some channels will be then overriden by the output of the corresponding cell function.\n\nIMPORTANT: If "
-                    "you choose a cell function, this tooltip will be updated to provide more specific information. ");
+                return Const::CellFunctionTooltip;
             }
         }();
 
         if (AlienImGui::CellFunctionCombo(
-                AlienImGui::CellFunctionComboParameters()
-                    .name("Function")
-                    .textWidth(ContentTextWidth).tooltip(functionTooltip),
-                type)) {
+                AlienImGui::CellFunctionComboParameters().name("Function").textWidth(ContentTextWidth).tooltip(functionTooltip), type)) {
             applyNewCellFunction(cell, type);
         }
         table.next();
-        AlienImGui::ComboColor(
-            AlienImGui::ComboColorParameters()
-                .name("Color")
-                .textWidth(ContentTextWidth)
-                .tooltip("On the one hand, the cell color can be used to define own types of cells that are subject to different rules. For this purpose, the "
-                         "simulation parameters can be specified depending on the color. For example, one could define that green cells are particularly good "
-                         "at absorbing energy particles, while other cell colors are better at attacking foreign cells.\nOn the other hand, cell color also "
-                         "plays a role in perception. Sensor cells are dedicated to a specific color and can only detect the corresponding cells."),
-            cell.color);
+        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(ContentTextWidth).tooltip(Const::ColorTooltip), cell.color);
         if (!isFirstOrLast) {
             table.next();
             auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell.referenceAngle;
             if (AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters()
-                        .name("Angle")
-                        .textWidth(ContentTextWidth)
-                        .format("%.1f")
-                        .tooltip("The angle between the predecessor and successor cell can be specified here. Please note that the shown angle here is shifted "
-                                 "by 180 degrees for convenience. In other words, a value of 0 actually corresponds to an angle of 180 degrees, i.e. a straight segment."),
-                    referenceAngle)) {
+                    AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::AngleTooltip), referenceAngle)) {
                 updateGeometry(tab.genome, tab.genome.info.shape);
                 tab.genome.info.shape = ConstructionShape_Custom;
             }
@@ -581,60 +493,23 @@ void _GenomeEditorWindow::processNode(
         }
         table.next();
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters()
-                .name("Energy")
-                .textWidth(ContentTextWidth)
-                .format("%.1f")
-                .tooltip("The energy that the cell should receive after its creation. The larger this value is, the more energy the constructor cell must expend to create it."),
-            cell.energy);
+            AlienImGui::InputFloatParameters().name("Energy").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::EnergyTooltip), cell.energy);
         table.next();
         AlienImGui::InputInt(
-            AlienImGui::InputIntParameters()
-                .name("Execution number")
-                .textWidth(ContentTextWidth)
-                .tooltip("The functions of cells can be executed in a specific sequence determined by this number. The values are limited between 0 and 5 and "
-                         "follow a modulo 6 logic. For example, a cell with an execution number of 0 will be executed at time points 0, 6, 12, 18, etc. A cell "
-                         "with an execution number of 1 will be shifted by one, i.e. executed at 1, 7, 13, 19, etc. This time offset enables the orchestration "
-                         "of cell functions. A muscle cell, for instance, requiring input from a neuron cell, should then be executed one time step later."),
+            AlienImGui::InputIntParameters().name("Execution number").textWidth(ContentTextWidth).tooltip(Const::ExecutionNumberTooltip),
             cell.executionOrderNumber);
         table.next();
         AlienImGui::InputOptionalInt(
-            AlienImGui::InputIntParameters()
-                .name("Input execution number")
-                .textWidth(ContentTextWidth)
-                .tooltip(
-                    "A functioning organism requires cells to collaborate. This can involve sensor cells that perceive the environment, neuron cells that "
-                    "process information, muscle cells that perform movements, and so on. These various cell functions often require input and produce an "
-                    "output. Both input and output are based on the cell's activity states. The process for updating is performed in two steps:\n\n1) When a "
-                    "cell function is executed, the activity states are first updated. This involves reading the activity states of all connected cells "
-                    "whose 'execution number' matches the specified 'input execution number', summing them up, and then setting the result to the "
-                    "activity states for the considered cell.\n\n2) The cell function is executed and can use the cell's activity states as input. "
-                    "The output is used to update the activity states again.\n\nSetting an 'input execution number' is optional. If none is set, the cell can "
-                    "receive no input."),
+            AlienImGui::InputIntParameters().name("Input execution number").textWidth(ContentTextWidth).tooltip(Const::InputExecutionNumberTooltip),
             cell.inputExecutionOrderNumber);
         table.next();
         AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
-                .name("Block output")
-                .textWidth(ContentTextWidth)
-                .tooltip("Activating this toggle, the cell's output can be locked, preventing any other cell from utilizing it as input."),
-            cell.outputBlocked);
+            AlienImGui::CheckboxParameters().name("Block output").textWidth(ContentTextWidth).tooltip(Const::BlockOutputTooltip), cell.outputBlocked);
         table.next();
         auto numRequiredAdditionalConnections =
             shapeGeneratorResult ? shapeGeneratorResult->numRequiredAdditionalConnections : cell.numRequiredAdditionalConnections;
         if (AlienImGui::InputOptionalInt(
-                AlienImGui::InputIntParameters()
-                    .name("Required connections")
-                    .textWidth(ContentTextWidth)
-                    .tooltip(
-                        "By default, cells in the genome sequence are automatically connected to all neighboring cells belonging to the same genome when they "
-                        "are created. However, this can pose a challenge because the constructed cells need time to fold into their desired positions. If the "
-                        "current spatial location of the constructor cell is unfavorable, the newly formed cell might not be connected to the desired cells, "
-                        "for instance, due to being too far away. An better approach would involve delaying the construction process until a desired number of "
-                        "neighboring cells from the same genome are in the direct vicinity. This number of cells can be optionally set here.\nIt is important "
-                        "to note that the predecessor cell is not counted for the 'required connections.' For example, a value of 2 means that the cell to be "
-                        "constructed will only be created when there are at least 2 already constructed cells (excluding the predecessor cell) available for "
-                        "potential connections. If the condition is not met, the construction process is postponed."),
+                AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::RequiredConnectionsTooltip),
                 numRequiredAdditionalConnections)) {
             updateGeometry(tab.genome, tab.genome.info.shape);
             tab.genome.info.shape = ConstructionShape_Custom;
@@ -653,13 +528,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Energy distribution")
                     .values({"Connected cells", "Transmitters and constructors"})
                     .textWidth(ContentTextWidth)
-                    .tooltip("There are two ways to control the energy distribution, which is set "
-                             "here:\n\n" ICON_FA_CHEVRON_RIGHT " Connected cells: "
-                             "In this case the energy will be distributed evenly across all connected and connected-connected cells.\n\n" ICON_FA_CHEVRON_RIGHT
-                             " Transmitters and constructors: "
-                             "Here, the energy will be transferred to spatially nearby constructors or other transmitter cells within the same cell "
-                             "network. If multiple such transmitter cells are present at certain distances, energy can be transmitted over greater distances, "
-                             "for example, from attacker cells to constructor cells."),
+                    .tooltip(Const::TransmitterEnergyDistributionTooltip),
                 transmitter.mode);
         } break;
         case CellFunction_Constructor: {
@@ -672,23 +541,14 @@ void _GenomeEditorWindow::processNode(
                         .name("Activation mode")
                         .textWidth(ContentTextWidth)
                         .values({"Manual", "Automatic"})
-                        .tooltip("There are 2 modes available for controlling constructor cells:\n\n" ICON_FA_CHEVRON_RIGHT " Manual: The construction process is only triggered when "
-                                 "there is activity in channel #0.\n\n" ICON_FA_CHEVRON_RIGHT " Automatic: The construction process is automatically triggered at regular intervals. "
-                                 "Activity in channel #0 is not necessary.\n\n In both cases, if there is not enough energy available for the cell being "
-                                 "created, the construction process will pause until the next triggering."),
+                        .tooltip(Const::ConstructorActivationModeTooltip),
                     constructorMode)) {
                 constructor.mode = constructorMode;
             }
             if (constructorMode == 1) {
                 table.next();
                 AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters()
-                        .name("Interval")
-                        .textWidth(ContentTextWidth)
-                        .tooltip("This value specifies the time interval for automatic triggering of the constructor cell. It is given in multiples "
-                                 "of 6 (which is a complete execution cycle). This means that a value of 1 indicates that the constructor cell will be activated "
-                                 "every 6 time steps"),
-                    constructor.mode);
+                    AlienImGui::InputIntParameters().name("Interval").textWidth(ContentTextWidth).tooltip(Const::ConstructorIntervalTooltip), constructor.mode);
                 if (constructor.mode < 0) {
                     constructor.mode = 0;
                 }
@@ -698,8 +558,7 @@ void _GenomeEditorWindow::processNode(
                 AlienImGui::InputIntParameters()
                     .name("Offspring activation time")
                     .textWidth(ContentTextWidth)
-                    .tooltip("When a new cell network has been fully constructed by a constructor cell, you can set the time until activation here. This is "
-                             "especially useful when the offspring should not become active immediately, for example, to prevent it from attacking."),
+                    .tooltip(Const::ConstructorOffspringActivationTime),
                 constructor.constructionActivationTime);
             table.next();
             AlienImGui::InputFloat(
@@ -707,8 +566,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Construction angle #1")
                     .format("%.1f")
                     .textWidth(ContentTextWidth)
-                    .tooltip("By default, when the constructor cell initiates a new construction, the new cell is created in the area with the most available "
-                             "space. This angle specifies the deviation from that rule."),
+                    .tooltip(Const::ConstructorAngle1Tooltip),
                 constructor.constructionAngle1);
             table.next();
             AlienImGui::InputFloat(
@@ -716,8 +574,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Construction angle #2")
                     .format("%.1f")
                     .textWidth(ContentTextWidth)
-                    .tooltip("This value determines the angle from the last constructed cell to the second-last constructed cell and the constructor cell. The "
-                             "effects can be best observed in the preview (in the lower part of the editor)."),
+                    .tooltip(Const::ConstructorAngle2Tooltip),
                 constructor.constructionAngle2);
         } break;
         case CellFunction_Sensor: {
@@ -730,12 +587,7 @@ void _GenomeEditorWindow::processNode(
                         .name("Mode")
                         .textWidth(ContentTextWidth)
                         .values({"Scan vicinity", "Scan specific direction"})
-                        .tooltip("Sensors can operate in 2 modes:\n\n" ICON_FA_CHEVRON_RIGHT
-                                 " Scan vicinity: In this mode, the entire nearby area is scanned (typically "
-                                 "within a radius of several 100 units). The scan radius can be adjusted via a simulation parameter (see 'Range' in the sensor "
-                                 "settings).\n\n" ICON_FA_CHEVRON_RIGHT
-                                 " Scan specific direction: In this mode, the scanning process is restricted to a particular direction. The "
-                                 "direction is specified as an angle."),
+                        .tooltip(Const::SensorModeTooltip),
                     sensorMode)) {
                 if (sensorMode == SensorMode_Neighborhood) {
                     sensor.fixedAngle.reset();
@@ -746,19 +598,12 @@ void _GenomeEditorWindow::processNode(
             if (sensorMode == SensorMode_FixedAngle) {
                 table.next();
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters()
-                        .name("Scan angle")
-                        .textWidth(ContentTextWidth)
-                        .format("%.1f")
-                        .tooltip("The angle can be determined here in which direction the scanning process should take place. An angle of 0 means that the "
-                                 "scan will be performed in the direction derived from the input cell (the cell from which the activity input originates) "
-                                 "towards the sensor cell."),
+                    AlienImGui::InputFloatParameters().name("Scan angle").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::SensorScanAngleTooltip),
                     *sensor.fixedAngle);
             }
             table.next();
             AlienImGui::ComboColor(
-                AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip("Specifies the color of the cells to search for."),
-                sensor.color);
+                AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip(Const::SensorScanColorTooltip), sensor.color);
 
             table.next();
             AlienImGui::InputFloat(
@@ -767,8 +612,7 @@ void _GenomeEditorWindow::processNode(
                     .format("%.2f")
                     .step(0.05f)
                     .textWidth(ContentTextWidth)
-                    .tooltip("The minimum density to search for a cell concentration of a specific color. This value ranges between 0 and 1. It controls the "
-                             "sensitivity of the sensor. Typically, very few cells of the corresponding color are already detected with a value of 0.1."),
+                    .tooltip(Const::SensorMinDensityTooltip),
                 sensor.minDensity);
         } break;
         case CellFunction_Nerve: {
@@ -776,40 +620,26 @@ void _GenomeEditorWindow::processNode(
             bool pulseGeneration = nerve.pulseMode > 0;
             table.next();
             if (AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters()
-                        .name("Generate pulses")
-                        .textWidth(ContentTextWidth)
-                        .tooltip("If enabled, an activity pulse in channel #0 will be generated at regular time intervals."),
+                    AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(ContentTextWidth).tooltip(Const::NerveGeneratePulsesTooltip),
                     pulseGeneration)) {
                 nerve.pulseMode = pulseGeneration ? 1 : 0;
             }
             if (pulseGeneration) {
                 table.next();
                 AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters()
-                        .name("Pulse interval")
-                        .textWidth(ContentTextWidth)
-                        .tooltip("The intervals between two pulses can be set here. It is specified in cycles, which corresponds to 6 time steps each."),
+                    AlienImGui::InputIntParameters().name("Pulse interval").textWidth(ContentTextWidth).tooltip(Const::NervePulseIntervalTooltip),
                     nerve.pulseMode);
                 bool alternation = nerve.alternationMode > 0;
                 table.next();
                 if (AlienImGui::Checkbox(
-                        AlienImGui::CheckboxParameters()
-                            .name("Alternating pulses")
-                            .textWidth(ContentTextWidth)
-                            .tooltip("By default, the generated pulses consist of a positive value in channel #0. When 'Alternating pulses' is enabled, the "
-                                     "sign of this value alternates at specific time intervals. This can be used, for example, to easily create control "
-                                     "signals for back-and-forth movements or bending in muscle cells."),
+                        AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(ContentTextWidth).tooltip(Const::NerveAlternatingPulsesTooltip),
                         alternation)) {
                     nerve.alternationMode = alternation ? 1 : 0;
                 }
                 if (alternation) {
                     table.next();
                     AlienImGui::InputInt(
-                        AlienImGui::InputIntParameters()
-                            .name("Pulses per phase")
-                            .textWidth(ContentTextWidth)
-                            .tooltip("This value indicates the number of pulses until a sign changes in the generated activity."),
+                        AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(ContentTextWidth).tooltip(Const::NervePulsesPerPhase),
                         nerve.alternationMode);
                 }
             }
@@ -822,12 +652,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Energy distribution")
                     .values({"Connected cells", "Transmitters and Constructors"})
                     .textWidth(ContentTextWidth)
-                    .tooltip("Attacker cells can distribute the acquired energy through two different methods. The energy distribution is analogous to "
-                             "transmitter cells. \n\n" ICON_FA_CHEVRON_RIGHT " Connected cells: In this case the energy will be distributed evenly across all "
-                             "connected and connected-connected cells.\n\n" ICON_FA_CHEVRON_RIGHT
-                             " Transmitters and constructors: Here, the energy will be transferred to spatially nearby constructors or other transmitter cells "
-                             "within the same cell network. If multiple such transmitter cells are present at certain distances, energy can be transmitted "
-                             "over greater distances, for example, from attacker cells to constructor cells."),
+                    .tooltip(Const::AttackerEnergyDistributionTooltip),
                 attacker.mode);
         } break;
         case CellFunction_Injector: {
@@ -839,11 +664,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Mode")
                     .textWidth(ContentTextWidth)
                     .values({"Cells under construction", "All Cells"})
-                    .tooltip(
-                        ICON_FA_CHEVRON_RIGHT
-                        " Cells under construction: Only cells which are under construction can be infected. This mode is useful when an organism wants to "
-                        "inject its genome into another own constructor cell (e.g. to build a spore).\n\n" ICON_FA_CHEVRON_RIGHT
-                        " All Cells: In this mode there are no restrictions, e.g. any other constructor or injector cell can be infected."),
+                    .tooltip(Const::InjectorModeTooltip),
                 injector.mode);
         } break;
         case CellFunction_Muscle: {
@@ -854,10 +675,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Mode")
                     .values({"Movement", "Expansion and contraction", "Bending"})
                     .textWidth(ContentTextWidth)
-                    .tooltip(ICON_FA_CHEVRON_RIGHT " Movement: Results in movement in the direction (or counter-direction) determined by the path from the "
-                             "input cell to the muscle cell.\n\n" ICON_FA_CHEVRON_RIGHT " Expansion and contraction: Causes an elongation (or contraction) of the "
-                             "reference distance to the input cell.\n\n" ICON_FA_CHEVRON_RIGHT " Bending: Increases (or decreases) the angle between the muscle "
-                             "cell, input cell, and the nearest connected cell clockwise from the muscle cell."),
+                    .tooltip(Const::MuscleModeTooltip),
                 muscle.mode);
         } break;
         case CellFunction_Defender: {
@@ -868,8 +686,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Mode")
                     .values({"Anti-attacker", "Anti-injector"})
                     .textWidth(ContentTextWidth)
-                    .tooltip(ICON_FA_CHEVRON_RIGHT" Anti-attacker: reduces the attack strength of an enemy attacker cell\n\n" ICON_FA_CHEVRON_RIGHT
-                             "Anti-injector: increases the injection duration of an enemy injector cell"),
+                    .tooltip(Const::DefenderModeTooltip),
                 defender.mode);
         } break;
         case CellFunction_Placeholder: {
@@ -933,12 +750,7 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
     auto width = ImGui::GetContentRegionAvail().x / 2;
     if (ImGui::BeginChild("##", ImVec2(width, scale(60.0f)), true)) {
         AlienImGui::MonospaceText(content);
-        AlienImGui::HelpMarker("If a constructor or injector cell is encoded in a genome, that cell can itself contain another genome. This sub-genome can "
-                               "describe additional body parts or branching of the creature, for instance. Furthermore, sub-genomes can in turn possess further "
-                               "sub-sub-genomes, etc. To insert a sub-genome here by clicking on 'Paste', one must have previously copied one to the clipboard. "
-                               "This can be done using the 'Copy genome' button in the toolbar. This action copies the entire genome from the current tab to "
-                               "the clipboard. If you want to create self-replication, you must not insert a sub-genome; instead, you switch it to the "
-                               "'self-copy' mode. In this case, the constructor's sub-genome refers to its superordinate genome.");
+        AlienImGui::HelpMarker(Const::SubGenomeTooltip);
         if (AlienImGui::Button("Clear")) {
             desc.setGenome({});
         }
