@@ -450,33 +450,8 @@ void _GenomeEditorWindow::processNode(
 
     DynamicTableLayout table;
     if (table.begin()) {
-        auto functionTooltip = [&] {
-            switch (type) {
-            case CellFunction_Neuron:
-                return Const::NeuronTooltip;
-            case CellFunction_Transmitter:
-                return Const::TransmitterTooltip;
-            case CellFunction_Constructor:
-                return Const::ConstructorTooltip;
-            case CellFunction_Sensor:
-                return Const::SensorTooltip;
-            case CellFunction_Nerve:
-                return Const::NerveTooltip;
-            case CellFunction_Attacker:
-                return Const::AttackerTooltip;
-            case CellFunction_Injector:
-                return Const::InjectorTooltip;
-            case CellFunction_Muscle:
-                return Const::MuscleTooltip;
-            case CellFunction_Defender:
-                return Const::DefenderTooltip;
-            default:
-                return Const::CellFunctionTooltip;
-            }
-        }();
-
         if (AlienImGui::CellFunctionCombo(
-                AlienImGui::CellFunctionComboParameters().name("Function").textWidth(ContentTextWidth).tooltip(functionTooltip), type)) {
+                AlienImGui::CellFunctionComboParameters().name("Function").textWidth(ContentTextWidth).tooltip(Const::getCellFunctionTooltip(type)), type)) {
             applyNewCellFunction(cell, type);
         }
         table.next();
