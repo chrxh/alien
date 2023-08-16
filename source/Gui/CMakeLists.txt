@@ -120,6 +120,7 @@ PUBLIC
     StyleRepository.h
     TemporalControlWindow.cpp
     TemporalControlWindow.h
+    Tooltips.h
     UiController.cpp
     UiController.h
     UploadSimulationDialog.cpp
