@@ -295,13 +295,13 @@ void _PatternEditorWindow::processIntern()
         if (ImGui::Button(ICON_FA_LINK)) {
             onSetBarrier(true);
         }
-        AlienImGui::Tooltip("Attach to background");
+        AlienImGui::Tooltip("Make indestructible");
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_UNLINK)) {
             onSetBarrier(false);
         }
-        AlienImGui::Tooltip("Detach from background");
+        AlienImGui::Tooltip("Make destructible");
         ImGui::EndDisabled();
 
         _lastSelection = selection;

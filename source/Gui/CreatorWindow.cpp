@@ -19,6 +19,7 @@
 #include "AlienImGui.h"
 #include "Viewport.h"
 #include "EditorModel.h"
+#include "Tooltips.h"
 
 namespace
 {
@@ -111,7 +112,8 @@ void _CreatorWindow::processIntern()
         if (_mode != CreationMode::CreateParticle & _mode != CreationMode::CreateCell) {
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth), _makeSticky);
         }
-        AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Attach to background").textWidth(RightColumnWidth), _barrier);
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters().name("Indestructible").textWidth(RightColumnWidth).tooltip(Const::CellIndestructibleTooltip), _barrier);
     }
     ImGui::EndChild();
 

@@ -1,8 +1,10 @@
 #pragma once
 
+#include <string>
+
 #include "Fonts/IconsFontAwesome5.h"
 
-#include <string>
+#include "EngineInterface/CellFunctionConstants.h"
 
 namespace Const
 {
@@ -21,7 +23,7 @@ namespace Const
     std::string const ConstructorTooltip = "A constructor cell builds a cell network according to a contained genome. The construction process takes place cell by "
                        "cell, where energy is required for each new cell. Once a new cell is generated, it is connected to the already constructed "
                        "cell network.\n\n" ICON_FA_CHEVRON_RIGHT " Input channel #0: abs(value) > threshold activates constructor (only necessary in "
-                       "'manual' mode)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: 0 (could not constructor next cell, e.g. no energy, required "
+                       "'Manual' mode)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: 0 (could not constructor next cell, e.g. no energy, required "
                        "connection check failed, completeness check failed), 1 (next cell construction successful)";
 
     std::string const SensorTooltip =
@@ -126,8 +128,8 @@ namespace Const
         "every 6 time steps";
 
     std::string const ConstructorOffspringActivationTime =
-        "When a new cell network has been fully constructed by a constructor cell, you can set the time until activation here. This is "
-        "especially useful when the offspring should not become active immediately, for example, to prevent it from attacking.";
+        "When a new cell network has been fully constructed by a constructor cell, one can define the time steps until activation. Before activation, the cell "
+        "network is in a dormant state. This is especially useful when the offspring should not become active immediately, for example, to prevent it from attacking its creator.";
 
     std::string const ConstructorAngle1Tooltip =
         "By default, when the constructor cell initiates a new construction, the new cell is created in the area with the most available "
@@ -206,7 +208,8 @@ namespace Const
     std::string const GenomeConnectionDistanceTooltip =
         "The spatial distance between each cell and its predecessor cell in the genome sequence is determined here.";
 
-    std::string const GenomeStiffnessTooltip = "This value sets the stiffness for the entire encoded cell network.";
+    std::string const GenomeStiffnessTooltip = "This value sets the stiffness for the entire encoded cell network. The stiffness determines the amount of "
+                                               "force generated to push the cell network to its reference configuration.";
 
     std::string const GenomeAngleAlignmentTooltip =
         "Triples of connected cells within a network have specific spatial angles relative to each other. These angles "
@@ -222,4 +225,60 @@ namespace Const
         "fully constructed. Disabling this property is useful for encoding growing structures (such as plant-like species) or creature body "
         "parts.";
 
+    std::string const CellStiffnessTooltip =
+        "The stiffness determines the amount of force generated to push the cell (network) to its reference configuration.";
+
+    std::string const CellMaxConnectionTooltip = "The maximum number of bonds this cell can form with other cells.";
+
+    std::string const CellIndestructibleTooltip =
+        "When a cell is set as indestructible, it becomes immortal, resistant to external forces, but capable of linear movement. Furthermore, unconnected "
+        "normal cells and energy particles bounce off from indestructible ones. If you plan to use indestructible cells, it is advisable to set a smoothing "
+        "length of no less than 0.8 in the simulation parameter settings. This ensures that normal cells do not cling to indestructible cells when they are "
+        "close.";
+
+    std::string const CellReferenceDistanceTooltip =
+        "The reference distance defines the distance at which no forces act between two connected cells. If the actual distance is greater than the reference "
+        "distance, the cells attract each other. If it is smaller, they repel.";
+
+    std::string const CellReferenceAngleTooltip =
+        "The reference angle defines an angle between two cell connections. If the actual angle is larger, tangential forces act on the connected cells, "
+        "aiming to reduce the angle. Conversely, if the actual angle is smaller, the tangential forces tend to enlarge this angle. With this type of force cell "
+        "networks can fold back into a desired shape after deformation.";
+
+    std::string const CellAgeTooltip = "The age of the cell in time steps.";
+
+    std::string const CellMutationIdTooltip = "The mutation id is a value to distinguish mutants. After most mutations (except neural network and cell properties) the mutation id changes.";
+
+    std::string const CellCreatureIdTooltip =
+        "This value loosely identifies a specific creature. While not guaranteed, it is very likely that two creatures will have different creature ids.";
+
+    std::string const CellLivingStateTooltip =
+        "Cells can exist in various states. When a cell network is being constructed, its cells are in the 'Under construction' state. Once the cell network "
+        "is completed by the constructor, the cells briefly enter the 'Just ready' state before transitioning to the 'Ready' state shortly after. If a cell "
+        "network is in the process of dying, its cells are in the 'Dying' state.";
+
+    inline std::string getCellFunctionTooltip(CellFunction cellFunction) {
+        switch (cellFunction) {
+        case CellFunction_Neuron:
+            return Const::NeuronTooltip;
+        case CellFunction_Transmitter:
+            return Const::TransmitterTooltip;
+        case CellFunction_Constructor:
+            return Const::ConstructorTooltip;
+        case CellFunction_Sensor:
+            return Const::SensorTooltip;
+        case CellFunction_Nerve:
+            return Const::NerveTooltip;
+        case CellFunction_Attacker:
+            return Const::AttackerTooltip;
+        case CellFunction_Injector:
+            return Const::InjectorTooltip;
+        case CellFunction_Muscle:
+            return Const::MuscleTooltip;
+        case CellFunction_Defender:
+            return Const::DefenderTooltip;
+        default:
+            return Const::CellFunctionTooltip;
+        }
+    };
 }
