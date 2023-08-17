@@ -505,6 +505,14 @@ void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
         _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
         _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
         _temporalControlWindow->onSnapshot();
+
+        if (VersionChecker::isVersionNewer(remoteData->version)) {
+            MessageDialog::getInstance().show(
+                "Warning",
+                "The download was successful but the simulation was generated using a more recent\n"
+                "version of ALIEN. Consequently, the simulation might not function as expected.\n"
+                "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
+        }
     });
 }
 
@@ -558,10 +566,12 @@ std::string _BrowserWindow::getUserLikes(std::string const& id)
 
 void _BrowserWindow::pushTextColor(RemoteSimulationData const& entry)
 {
-    if (!VersionChecker::isVersionOutdated(entry.version)) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 0.0f, 1.0f));
+    if (VersionChecker::isVersionOutdated(entry.version)) {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionOutdatedColor);
+    } else if (VersionChecker::isVersionNewer(entry.version)) {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionNewerColor);
     } else {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.6f));
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionOkColor);
     }
 }
 
