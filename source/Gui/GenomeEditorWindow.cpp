@@ -455,12 +455,12 @@ void _GenomeEditorWindow::processNode(
             applyNewCellFunction(cell, type);
         }
         table.next();
-        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(ContentTextWidth).tooltip(Const::ColorTooltip), cell.color);
+        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(ContentTextWidth).tooltip(Const::GenomeColorTooltip), cell.color);
         if (!isFirstOrLast) {
             table.next();
             auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell.referenceAngle;
             if (AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::AngleTooltip), referenceAngle)) {
+                    AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::GenomeAngleTooltip), referenceAngle)) {
                 updateGeometry(tab.genome, tab.genome.info.shape);
                 tab.genome.info.shape = ConstructionShape_Custom;
             }
@@ -468,23 +468,23 @@ void _GenomeEditorWindow::processNode(
         }
         table.next();
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Energy").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::EnergyTooltip), cell.energy);
+            AlienImGui::InputFloatParameters().name("Energy").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::GenomeEnergyTooltip), cell.energy);
         table.next();
         AlienImGui::InputInt(
-            AlienImGui::InputIntParameters().name("Execution number").textWidth(ContentTextWidth).tooltip(Const::ExecutionNumberTooltip),
+            AlienImGui::InputIntParameters().name("Execution number").textWidth(ContentTextWidth).tooltip(Const::GenomeExecutionNumberTooltip),
             cell.executionOrderNumber);
         table.next();
         AlienImGui::InputOptionalInt(
-            AlienImGui::InputIntParameters().name("Input execution number").textWidth(ContentTextWidth).tooltip(Const::InputExecutionNumberTooltip),
+            AlienImGui::InputIntParameters().name("Input execution number").textWidth(ContentTextWidth).tooltip(Const::GenomeInputExecutionNumberTooltip),
             cell.inputExecutionOrderNumber);
         table.next();
         AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Block output").textWidth(ContentTextWidth).tooltip(Const::BlockOutputTooltip), cell.outputBlocked);
+            AlienImGui::CheckboxParameters().name("Block output").textWidth(ContentTextWidth).tooltip(Const::GenomeBlockOutputTooltip), cell.outputBlocked);
         table.next();
         auto numRequiredAdditionalConnections =
             shapeGeneratorResult ? shapeGeneratorResult->numRequiredAdditionalConnections : cell.numRequiredAdditionalConnections;
         if (AlienImGui::InputOptionalInt(
-                AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::RequiredConnectionsTooltip),
+                AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::GenomeRequiredConnectionsTooltip),
                 numRequiredAdditionalConnections)) {
             updateGeometry(tab.genome, tab.genome.info.shape);
             tab.genome.info.shape = ConstructionShape_Custom;
@@ -503,7 +503,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Energy distribution")
                     .values({"Connected cells", "Transmitters and constructors"})
                     .textWidth(ContentTextWidth)
-                    .tooltip(Const::TransmitterEnergyDistributionTooltip),
+                    .tooltip(Const::GenomeTransmitterEnergyDistributionTooltip),
                 transmitter.mode);
         } break;
         case CellFunction_Constructor: {
@@ -516,14 +516,14 @@ void _GenomeEditorWindow::processNode(
                         .name("Activation mode")
                         .textWidth(ContentTextWidth)
                         .values({"Manual", "Automatic"})
-                        .tooltip(Const::ConstructorActivationModeTooltip),
+                        .tooltip(Const::GenomeConstructorActivationModeTooltip),
                     constructorMode)) {
                 constructor.mode = constructorMode;
             }
             if (constructorMode == 1) {
                 table.next();
                 AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Interval").textWidth(ContentTextWidth).tooltip(Const::ConstructorIntervalTooltip), constructor.mode);
+                    AlienImGui::InputIntParameters().name("Interval").textWidth(ContentTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip), constructor.mode);
                 if (constructor.mode < 0) {
                     constructor.mode = 0;
                 }
@@ -533,7 +533,7 @@ void _GenomeEditorWindow::processNode(
                 AlienImGui::InputIntParameters()
                     .name("Offspring activation time")
                     .textWidth(ContentTextWidth)
-                    .tooltip(Const::ConstructorOffspringActivationTime),
+                    .tooltip(Const::GenomeConstructorOffspringActivationTime),
                 constructor.constructionActivationTime);
             table.next();
             AlienImGui::InputFloat(
@@ -541,7 +541,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Construction angle #1")
                     .format("%.1f")
                     .textWidth(ContentTextWidth)
-                    .tooltip(Const::ConstructorAngle1Tooltip),
+                    .tooltip(Const::GenomeConstructorAngle1Tooltip),
                 constructor.constructionAngle1);
             table.next();
             AlienImGui::InputFloat(
@@ -549,7 +549,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Construction angle #2")
                     .format("%.1f")
                     .textWidth(ContentTextWidth)
-                    .tooltip(Const::ConstructorAngle2Tooltip),
+                    .tooltip(Const::GenomeConstructorAngle2Tooltip),
                 constructor.constructionAngle2);
         } break;
         case CellFunction_Sensor: {
@@ -562,7 +562,7 @@ void _GenomeEditorWindow::processNode(
                         .name("Mode")
                         .textWidth(ContentTextWidth)
                         .values({"Scan vicinity", "Scan specific direction"})
-                        .tooltip(Const::SensorModeTooltip),
+                        .tooltip(Const::GenomeSensorModeTooltip),
                     sensorMode)) {
                 if (sensorMode == SensorMode_Neighborhood) {
                     sensor.fixedAngle.reset();
@@ -573,12 +573,12 @@ void _GenomeEditorWindow::processNode(
             if (sensorMode == SensorMode_FixedAngle) {
                 table.next();
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Scan angle").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::SensorScanAngleTooltip),
+                    AlienImGui::InputFloatParameters().name("Scan angle").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::GenomeSensorScanAngleTooltip),
                     *sensor.fixedAngle);
             }
             table.next();
             AlienImGui::ComboColor(
-                AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip(Const::SensorScanColorTooltip), sensor.color);
+                AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.color);
 
             table.next();
             AlienImGui::InputFloat(
@@ -587,7 +587,7 @@ void _GenomeEditorWindow::processNode(
                     .format("%.2f")
                     .step(0.05f)
                     .textWidth(ContentTextWidth)
-                    .tooltip(Const::SensorMinDensityTooltip),
+                    .tooltip(Const::GenomeSensorMinDensityTooltip),
                 sensor.minDensity);
         } break;
         case CellFunction_Nerve: {
@@ -595,26 +595,26 @@ void _GenomeEditorWindow::processNode(
             bool pulseGeneration = nerve.pulseMode > 0;
             table.next();
             if (AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(ContentTextWidth).tooltip(Const::NerveGeneratePulsesTooltip),
+                    AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeNerveGeneratePulsesTooltip),
                     pulseGeneration)) {
                 nerve.pulseMode = pulseGeneration ? 1 : 0;
             }
             if (pulseGeneration) {
                 table.next();
                 AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Pulse interval").textWidth(ContentTextWidth).tooltip(Const::NervePulseIntervalTooltip),
+                    AlienImGui::InputIntParameters().name("Pulse interval").textWidth(ContentTextWidth).tooltip(Const::GenomeNervePulseIntervalTooltip),
                     nerve.pulseMode);
                 bool alternation = nerve.alternationMode > 0;
                 table.next();
                 if (AlienImGui::Checkbox(
-                        AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(ContentTextWidth).tooltip(Const::NerveAlternatingPulsesTooltip),
+                        AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeNerveAlternatingPulsesTooltip),
                         alternation)) {
                     nerve.alternationMode = alternation ? 1 : 0;
                 }
                 if (alternation) {
                     table.next();
                     AlienImGui::InputInt(
-                        AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(ContentTextWidth).tooltip(Const::NervePulsesPerPhase),
+                        AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(ContentTextWidth).tooltip(Const::GenomeNervePulsesPerPhaseTooltip),
                         nerve.alternationMode);
                 }
             }
@@ -627,7 +627,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Energy distribution")
                     .values({"Connected cells", "Transmitters and Constructors"})
                     .textWidth(ContentTextWidth)
-                    .tooltip(Const::AttackerEnergyDistributionTooltip),
+                    .tooltip(Const::GenomeAttackerEnergyDistributionTooltip),
                 attacker.mode);
         } break;
         case CellFunction_Injector: {
@@ -639,7 +639,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Mode")
                     .textWidth(ContentTextWidth)
                     .values({"Cells under construction", "All Cells"})
-                    .tooltip(Const::InjectorModeTooltip),
+                    .tooltip(Const::GenomeInjectorModeTooltip),
                 injector.mode);
         } break;
         case CellFunction_Muscle: {
@@ -650,7 +650,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Mode")
                     .values({"Movement", "Expansion and contraction", "Bending"})
                     .textWidth(ContentTextWidth)
-                    .tooltip(Const::MuscleModeTooltip),
+                    .tooltip(Const::GenomeMuscleModeTooltip),
                 muscle.mode);
         } break;
         case CellFunction_Defender: {
@@ -661,7 +661,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Mode")
                     .values({"Anti-attacker", "Anti-injector"})
                     .textWidth(ContentTextWidth)
-                    .tooltip(Const::DefenderModeTooltip),
+                    .tooltip(Const::GenomeDefenderModeTooltip),
                 defender.mode);
         } break;
         case CellFunction_Placeholder: {
