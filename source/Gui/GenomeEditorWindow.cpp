@@ -304,7 +304,7 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
 {
     DynamicTableLayout table;
     if (table.begin()) {
-        std::vector ShapeStrings = {"Custom"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s, "Tube"s, "Lolli"s};
+        std::vector ShapeStrings = {"Custom"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s, "Tube"s, "Lolli"s, "Small lolli"s};
         auto origShape = tab.genome.info.shape;
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters().name("Geometry").values(ShapeStrings).textWidth(ContentTextWidth).tooltip(Const::GenomeGeometryTooltip),

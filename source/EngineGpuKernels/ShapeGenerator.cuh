@@ -24,6 +24,7 @@ private:
     __inline__ __device__ ShapeGeneratorResult generateNextConstructionDataForLoop();
     __inline__ __device__ ShapeGeneratorResult generateNextConstructionDataForTube();
     __inline__ __device__ ShapeGeneratorResult generateNextConstructionDataForLolli();
+    __inline__ __device__ ShapeGeneratorResult generateNextConstructionDataForSmallLolli();
 
     int _edgePos = 0;
     int _processedEdges = 0;
@@ -50,6 +51,8 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
         return generateNextConstructionDataForTube();
     case ConstructionShape_Lolli:
         return generateNextConstructionDataForLolli();
+    case ConstructionShape_SmallLolli:
+        return generateNextConstructionDataForSmallLolli();
     default:
         return ShapeGeneratorResult();
     }
@@ -73,6 +76,8 @@ __inline__ __device__ ConstructorAngleAlignment ShapeGenerator::getConstructorAn
     case ConstructionShape_Tube:
         return ConstructorAngleAlignment_60;
     case ConstructionShape_Lolli:
+        return ConstructorAngleAlignment_60;
+    case ConstructionShape_SmallLolli:
         return ConstructorAngleAlignment_60;
     default:
         return ConstructorAngleAlignment_60;
@@ -248,6 +253,36 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
     } else {
         result.angle = _edgePos == 1 ? -60.0f : 0.0f;
         result.numRequiredAdditionalConnections = _edgePos == 1 ? 2 : 0;
+        ++_edgePos;
+    }
+    return result;
+}
+
+__inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForSmallLolli()
+{
+    ShapeGeneratorResult result;
+
+    if (_processedEdges < 6) {
+        auto edgeLength = _processedEdges / 6 + 1;
+        if (_processedEdges % 6 == 1) {
+            --edgeLength;
+        }
+
+        if (_processedEdges < 2) {
+            result.angle = 120.0f;
+            result.numRequiredAdditionalConnections = 0;
+        } else {
+            result.angle = 60.0f;
+            result.numRequiredAdditionalConnections = 1;
+        }
+
+        if (++_edgePos >= edgeLength) {
+            _edgePos = 0;
+            ++_processedEdges;
+        }
+    } else {
+        result.angle = _edgePos == 0 ? -60.0f : 0.0f;
+        result.numRequiredAdditionalConnections = _edgePos == 0 ? 2 : 0;
         ++_edgePos;
     }
     return result;
