@@ -125,6 +125,7 @@ void _GenomeEditorWindow::processToolbar()
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
         _copiedGenome = GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome);
+        printOverlayMessage("Genome copied");
     }
     AlienImGui::Tooltip("Copy genome");
 
@@ -737,6 +738,7 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
         ImGui::BeginDisabled(!_copiedGenome.has_value());
         if (AlienImGui::Button("Paste")) {
             desc.genome = *_copiedGenome;
+            printOverlayMessage("Genome pasted");
         }
         ImGui::EndDisabled();
         ImGui::SameLine();

@@ -18,6 +18,7 @@
 #include "CellFunctionStrings.h"
 #include "GenomeEditorWindow.h"
 #include "Tooltips.h"
+#include "OverlayMessageController.h"
 
 using namespace std::string_literals;
 
@@ -374,6 +375,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 
                 ImGui::SameLine();
                 if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Inject from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
+                    printOverlayMessage("Genome injected");
                     desc.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
                     if constexpr (std::is_same<Description, ConstructorDescription>()) {
                         desc.genomeReadPosition = 0;
