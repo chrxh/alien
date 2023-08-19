@@ -16,6 +16,7 @@
 
 #include "CellFunctionStrings.h"
 #include "StyleRepository.h"
+#include "Tooltips.h"
 
 namespace
 {
@@ -1075,23 +1076,8 @@ void AlienImGui::NeuronSelection(
             selectedInput = i;
         }
         ImGui::PopStyleColor(3);
-        if (i == 0) {
-            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT
-                    " Constructor: 0 = construction failed, 1 = construction successful\n" ICON_FA_CARET_RIGHT " Sensor: 0 = nothing found, 1 = region found");
-        }
-        if (i == 1) {
-            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT " Sensor: cell density of found region");
-        }
-        if (i == 2) {
-            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT " Sensor: distance to found region");
-        }
-        if (i == 3) {
-            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT
-                    " Sensor: relative angle of found region (when 'Scan vicinity' is activated)");
-        }
-        if (i > 3) {
-            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell");
-        }
+
+        Tooltip(Const::NeuronInputTooltipByChannel[i]);
 
         auto buttonSize = ImGui::GetItemRectSize();
         inputPos[i] = RealVector2D(
@@ -1107,21 +1093,7 @@ void AlienImGui::NeuronSelection(
             selectedOutput = i;
         }
         ImGui::PopStyleColor(3);
-        if (i == 0) {
-            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell\n" ICON_FA_CARET_RIGHT
-                    " Constructor: = 0 means do nothing, abs(*) > threshold triggers cell construction\n" ICON_FA_CARET_RIGHT
-                    " Attacker: = 0 means do nothing, abs(*) > threshold triggers attacking of nearby cells\n" ICON_FA_CARET_RIGHT
-                    " Sensor: = 0 means do nothing, abs(*) > threshold triggers scanning for cells\n" ICON_FA_CARET_RIGHT
-                    " Injector: = 0 means do nothing, abs(*) > threshold triggers injection of a genome to other constructors\n" ICON_FA_CARET_RIGHT
-                    " Muscle: abs(*) intensity of muscle process and sign(*) direction of muscle process");
-        }
-        if (i == 1) {
-            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell\n" ICON_FA_CARET_RIGHT
-                    " Muscle: abs(*) > threshold triggers tangential movement during bending");
-        }
-        if (i > 1) {
-            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell");
-        }
+        Tooltip(Const::NeuronOutputTooltipByChannel[i]);
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         for (int j = 0; j < MAX_CHANNELS; ++j) {
