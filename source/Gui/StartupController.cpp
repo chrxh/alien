@@ -136,11 +136,20 @@ void _StartupController::processWindow()
     auto now = std::chrono::steady_clock::now();
     auto millisecSinceStartup = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_startupTimepoint).count();
 
-    drawGrid(std::max(0.0f, 1.0f - toFloat(millisecSinceStartup) / LogoDuration));
-
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     ImColor textColor = Const::ProgramVersionColor;
-    textColor.Value.w = ImGui::GetStyle().Alpha;
+    textColor.Value.w *= ImGui::GetStyle().Alpha;
+
+    ImColor loadingTextColor = Const::ProgramVersionColor;
+    loadingTextColor.Value.w *= ImGui::GetStyle().Alpha * 0.5f;
+
+    //draw 'Initializing' text if it fits
+    if (bottom - scale(230) > bottom / 2 + _logo.height * imageScale / 2) {
+        drawGrid(bottom - scale(250), std::max(0.0f, 1.0f - toFloat(millisecSinceStartup) / LogoDuration));
+        if (_state == State::Unintialized) {
+            drawList->AddText(styleRep.getReefLargeFont(), scale(32.0), {center.x - scale(38), bottom - scale(270)}, loadingTextColor, "Initializing");
+        }
+    }
     drawList->AddText(styleRep.getReefLargeFont(), scale(48.0f), {center.x - scale(165), bottom - scale(200)}, textColor, "Artificial Life Environment");
 
     auto versionString = "Version " + Const::ProgramVersion;
@@ -158,13 +167,11 @@ namespace
     {
         Up,
         Down,
-        Left,
-        Right
     };
-    void drawGridIntern(float lineDistance, float maxDistance, Direction const& direction, bool includeMainLine, float alpha)
+    void drawGridIntern(float yPos, float lineDistance, float maxDistance, Direction const& direction, bool includeMainLine, float alpha)
     {
         if (lineDistance > scale(InitialLineDistance)) {
-            drawGridIntern(lineDistance / 2, maxDistance, direction, includeMainLine, alpha);
+            drawGridIntern(yPos, lineDistance / 2, maxDistance, direction, includeMainLine, alpha);
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         alpha *= std::min(1.0f, lineDistance / scale(InitialLineDistance * 2)) * ImGui::GetStyle().Alpha;
@@ -179,16 +186,10 @@ namespace
             ImU32 color = ImColor::HSV(0.6f, 0.8f, 0.4f, alpha * (maxDistance - accumulatedDistance) / maxDistance);
             switch (direction) {
             case Direction::Up:
-                drawList->AddLine(ImVec2(0.0f, bottom / 2 - accumulatedDistance), ImVec2(right, bottom / 2 - accumulatedDistance), color);
+                drawList->AddLine(ImVec2(0.0f, yPos - accumulatedDistance), ImVec2(right, yPos - accumulatedDistance), color);
                 break;
             case Direction::Down:
-                drawList->AddLine(ImVec2(0.0f, bottom / 2 + accumulatedDistance), ImVec2(right, bottom / 2 + accumulatedDistance), color);
-                break;
-            case Direction::Left:
-                drawList->AddLine(ImVec2(right / 2 - accumulatedDistance, 0.0f), ImVec2(right / 2 - accumulatedDistance, bottom), color);
-                break;
-            case Direction::Right:
-                drawList->AddLine(ImVec2(right / 2 + accumulatedDistance, 0.0f), ImVec2(right / 2 + accumulatedDistance, bottom), color);
+                drawList->AddLine(ImVec2(0.0f, yPos + accumulatedDistance), ImVec2(right, yPos + accumulatedDistance), color);
                 break;
             }
             accumulatedDistance += lineDistance;
@@ -196,11 +197,9 @@ namespace
     }
 }
 
-void _StartupController::drawGrid(float alpha)
+void _StartupController::drawGrid(float yPos, float alpha)
 {
-    drawGridIntern(_lineDistance, scale(300.0f), Direction::Up, true, alpha);
-    drawGridIntern(_lineDistance, scale(300.0f), Direction::Down, false, alpha);
-    //drawGridIntern(lineDistance, 1000.0f, Direction::Left, true);
-    //drawGridIntern(lineDistance, 1000.0f, Direction::Right, false);
+    drawGridIntern(yPos, _lineDistance, scale(300.0f), Direction::Up, true, alpha);
+    drawGridIntern(yPos, _lineDistance, scale(300.0f), Direction::Down, false, alpha);
     _lineDistance *= 1.05f;
 }

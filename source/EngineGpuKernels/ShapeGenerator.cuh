@@ -25,6 +25,7 @@ private:
     __inline__ __device__ ShapeGeneratorResult generateNextConstructionDataForTube();
     __inline__ __device__ ShapeGeneratorResult generateNextConstructionDataForLolli();
     __inline__ __device__ ShapeGeneratorResult generateNextConstructionDataForSmallLolli();
+    __inline__ __device__ ShapeGeneratorResult generateNextConstructionDataForZigzag();
 
     int _edgePos = 0;
     int _processedEdges = 0;
@@ -53,6 +54,8 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
         return generateNextConstructionDataForLolli();
     case ConstructionShape_SmallLolli:
         return generateNextConstructionDataForSmallLolli();
+    case ConstructionShape_Zigzag:
+        return generateNextConstructionDataForZigzag();
     default:
         return ShapeGeneratorResult();
     }
@@ -285,5 +288,28 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
         result.numRequiredAdditionalConnections = _edgePos == 0 ? 2 : 0;
         ++_edgePos;
     }
+    return result;
+}
+
+__inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForZigzag()
+{
+    ShapeGeneratorResult result;
+    if (_edgePos % 4 == 0) {
+        result.angle = 120.0f;
+        result.numRequiredAdditionalConnections = 0;
+    }
+    if (_edgePos % 4 == 1) {
+        result.angle = 0;
+        result.numRequiredAdditionalConnections = _edgePos == 1 ? 0 : 1;
+    }
+    if (_edgePos % 4 == 2) {
+        result.angle = -120.0f;
+        result.numRequiredAdditionalConnections = 0;
+    }
+    if (_edgePos % 4 == 3) {
+        result.angle = 0;
+        result.numRequiredAdditionalConnections = 1;
+    }
+    ++_edgePos;
     return result;
 }
