@@ -45,7 +45,7 @@ struct DataPointCollection
 
 struct TimelineLiveStatistics
 {
-    static double constexpr MaxLiveHistory = 120.0f;  //in seconds
+    static double constexpr MaxLiveHistory = 240.0f;  //in seconds
 
     double timepoint = 0.0f;  //in seconds
     float history = 10.0f;   //in seconds
