@@ -126,7 +126,7 @@ void _EditorController::onInspectSelectedObjects()
     } else {
         printMessage(
             "Inspection not possible",
-            "Too many objects are selected are selected for inspection.\nA maximum of " + std::to_string(MaxInspectorWindowsToAdd)
+            "Too many objects are selected for inspection. A maximum of " + std::to_string(MaxInspectorWindowsToAdd)
                 + " objects are allowed.");
     }
 }

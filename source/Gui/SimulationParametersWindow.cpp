@@ -14,6 +14,7 @@
 #include "MessageDialog.h"
 #include "RadiationSourcesWindow.h"
 #include "BalancerController.h"
+#include "OverlayMessageController.h"
 
 namespace
 {
@@ -185,6 +186,7 @@ void _SimulationParametersWindow::processToolbar()
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
         _copiedParameters = _simController->getSimulationParameters();
+        printOverlayMessage("Simulation parameters copied");
     }
     AlienImGui::Tooltip("Copy simulation parameters");
 
@@ -193,6 +195,7 @@ void _SimulationParametersWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
         _simController->setSimulationParameters(*_copiedParameters);
         _simController->setOriginalSimulationParameters(*_copiedParameters);
+        printOverlayMessage("Simulation parameters pasted");
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Paste simulation parameters");
