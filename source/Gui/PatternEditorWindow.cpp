@@ -22,7 +22,6 @@
 
 namespace
 {
-    auto const MaxInspectorWindowsToAdd = 10;
     auto const RightColumnWidth = 120.0f;
 }
 
@@ -62,6 +61,7 @@ void _PatternEditorWindow::processIntern()
     if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
         onOpenPattern();
     }
+    AlienImGui::Tooltip("Open pattern");
 
     //save button
     ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
@@ -70,6 +70,7 @@ void _PatternEditorWindow::processIntern()
         onSavePattern();
     }
     ImGui::EndDisabled();
+    AlienImGui::Tooltip("Save pattern");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
@@ -81,6 +82,7 @@ void _PatternEditorWindow::processIntern()
         onCopy();
     }
     ImGui::EndDisabled();
+    AlienImGui::Tooltip("Copy pattern");
 
     //paste button
     ImGui::SameLine();
@@ -89,6 +91,7 @@ void _PatternEditorWindow::processIntern()
         onPaste();
     }
     ImGui::EndDisabled();
+    AlienImGui::Tooltip("Paste pattern");
 
     //delete button
     ImGui::SameLine();
@@ -97,6 +100,7 @@ void _PatternEditorWindow::processIntern()
         onDelete();
     }
     ImGui::EndDisabled();
+    AlienImGui::Tooltip("Delete Pattern");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
@@ -108,6 +112,7 @@ void _PatternEditorWindow::processIntern()
         _editorController->onInspectSelectedObjects();
     }
     ImGui::EndDisabled();
+    AlienImGui::Tooltip("Inspect Objects");
 
     //inspect genomes button
     ImGui::SameLine();
@@ -116,6 +121,7 @@ void _PatternEditorWindow::processIntern()
         _editorController->onInspectSelectedGenomes();
     }
     ImGui::EndDisabled();
+    AlienImGui::Tooltip("Inspect principal genome");
 
     if (ImGui::BeginChild(
         "##",
@@ -357,8 +363,7 @@ void _PatternEditorWindow::onSavePattern()
 
 bool _PatternEditorWindow::isObjectInspectionPossible() const
 {
-    auto selection = _editorModel->getSelectionShallowData();
-    return !_editorModel->isSelectionEmpty() && selection.numCells + selection.numParticles <= MaxInspectorWindowsToAdd;
+    return !_editorModel->isSelectionEmpty();
 }
 
 bool _PatternEditorWindow::isGenomeInspectionPossible() const

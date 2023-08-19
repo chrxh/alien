@@ -1077,7 +1077,7 @@ void AlienImGui::NeuronSelection(
         }
         ImGui::PopStyleColor(3);
 
-        Tooltip(Const::NeuronInputTooltipByChannel[i]);
+        Tooltip(Const::NeuronInputTooltipByChannel[i], false);
 
         auto buttonSize = ImGui::GetItemRectSize();
         inputPos[i] = RealVector2D(
@@ -1093,7 +1093,7 @@ void AlienImGui::NeuronSelection(
             selectedOutput = i;
         }
         ImGui::PopStyleColor(3);
-        Tooltip(Const::NeuronOutputTooltipByChannel[i]);
+        Tooltip(Const::NeuronOutputTooltipByChannel[i], false);
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         for (int j = 0; j < MAX_CHANNELS; ++j) {
