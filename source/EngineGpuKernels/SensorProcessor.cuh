@@ -90,7 +90,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getDensity(scanPos, color));
             if (density >= minDensity) {
                 float preciseAngle = angle;
-                float preciseRadius = radius;
+                float preciseDistance = radius;
                 uint32_t creatureId = [&] {
                     if (cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color] > NEAR_ZERO) {
                         for (float dx = 0.0f; dx < 6.0f + NEAR_ZERO; dx += 1.0f) {
@@ -99,7 +99,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
                                 if (otherCell && otherCell->color == color) {
                                     auto preciseDelta = data.cellMap.getCorrectedDirection(otherCell->pos - cell->pos);
                                     preciseAngle = Math::angleOfVector(preciseDelta);
-                                    preciseRadius = Math::length(preciseDelta);
+                                    preciseDistance = Math::length(preciseDelta);
                                     return static_cast<uint32_t>(otherCell->creatureId);
                                 }
                             }
@@ -110,7 +110,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
                 auto relAngle = Math::subtractAngle(preciseAngle, refScanAngle);
                 uint32_t relAngleData = convertAngleToData(relAngle);
                 uint64_t combined = 
-                    static_cast<uint64_t>(preciseRadius) << 48 | static_cast<uint64_t>(density) << 40 | static_cast<uint64_t>(relAngleData) << 32 | creatureId;
+                    static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(density) << 40 | static_cast<uint64_t>(relAngleData) << 32 | creatureId;
                 alienAtomicMin64(&lookupResult, combined);
             }
         }

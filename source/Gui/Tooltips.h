@@ -31,8 +31,8 @@ namespace Const
     std::string const SensorTooltip =
         "Sensor cells scan their environment for concentrations of cells of a certain color and provide distance and angle to the "
         "closest match.\n\n" ICON_FA_CHEVRON_RIGHT " Input channel #0: abs(value) > threshold activates sensor\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: "
-        "0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #1: density of match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #2: distance "
-        "of match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of match";
+        "0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #1: density of the match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #2: distance "
+        "of the match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of the match";
 
     std::string const NerveTooltip =
         "By default, a nerve cell forwards activity states by receiving activity as input from connected cells (and summing it if "
@@ -43,7 +43,7 @@ namespace Const
     std::string const AttackerTooltip =
         "An attacker cell attacks surrounding cells from other cell networks (with different creature id) by stealing energy from "
         "them. The gained energy is then distributed in the own cell network.\n\n" ICON_FA_CHEVRON_RIGHT " Input channel #0: abs(value) > threshold activates "
-        "attacker\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: proportional to the gained energy";
+        "attacker\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: a value which is proportional to the gained energy";
 
     std::string const InjectorTooltip =
         "Injector cellscan copy their genome into other constructor or injector cells. To do this, they need to be activated, remain in "
@@ -312,4 +312,34 @@ namespace Const
         "specific threshold (refer to the 'Injection time' simulation parameter), the injection process is completed.";
 
     std::string const CellSensorTargetCreatureIdTooltip = "The id of the last creature that has been scanned.";
+
+    std::string const NeuronInputTooltipByChannel[8] = {
+        "The following cell functions write their output to channel #0:\n\nICON_FA_CHEVRON_RIGHT Neuron\n\nICON_FA_CHEVRON_RIGHT Constructor: 0 (could not "
+        "constructor next cell, e.g. no energy, required connection check failed, completeness check failed), 1 (next cell construction "
+        "successful)\n\nICON_FA_CHEVRON_RIGHT Sensor: 0 (no match) or 1 (match)\n\nICON_FA_CHEVRON_RIGHT Attacker: a value which is proportional to the gained "
+        "energy\n\nICON_FA_CHEVRON_RIGHT Injector: 0 (no cells found) or 1 (injection in process or completed)",
+        "The following cell functions write their output to channel #1:\n\nICON_FA_CHEVRON_RIGHT Neuron\n\nICON_FA_CHEVRON_RIGHT Sensor: density of the match",
+        "The following cell functions write their output to channel #2:\n\nICON_FA_CHEVRON_RIGHT Neuron\n\nICON_FA_CHEVRON_RIGHT Sensor: distance of the match",
+        "The following cell functions write their output to channel #3:\n\nICON_FA_CHEVRON_RIGHT Neuron\n\nICON_FA_CHEVRON_RIGHT Sensor: angle of the match",
+        "The following cell functions write their output to channel #4:\n\nICON_FA_CHEVRON_RIGHT Neuron",
+        "The following cell functions write their output to channel #5:\n\nICON_FA_CHEVRON_RIGHT Neuron",
+        "The following cell functions write their output to channel #6:\n\nICON_FA_CHEVRON_RIGHT Neuron",
+        "The following cell functions write their output to channel #7:\n\nICON_FA_CHEVRON_RIGHT Neuron"
+    };
+    std::string const NeuronOutputTooltipByChannel[8] = {
+        "The following cell functions obtain their input from channel #0:\n\nICON_FA_CHEVRON_RIGHT Neuron\n\nICON_FA_CHEVRON_RIGHT Constructor: abs(value) > "
+        "threshold activates constructor (only necessary in 'Manual' mode)\n\nICON_FA_CHEVRON_RIGHT Sensor: abs(value) > threshold activates "
+        "sensor\n\nICON_FA_CHEVRON_RIGHT Attacker: abs(value) > threshold activates attacker\n\nICON_FA_CHEVRON_RIGHT Injector: abs(value) > threshold "
+        "activates injector\n\nICON_FA_CHEVRON_RIGHT Muscle: The strength of the movement, bending or expansion/contraction. A negative sign corresponds to "
+        "the opposite action.",
+        "The following cell functions obtain their input from channel #1:\n\nICON_FA_CHEVRON_RIGHT Neuron\n\nICON_FA_CHEVRON_RIGHT Muscle: This channel is "
+        "solely utilized for acceleration due to bending. If the sign of channel #1 differs from the sign of channel #0, no acceleration will be obtained "
+        "during the bending process.",
+        "The following cell functions obtain their input from channel #2:\n\nICON_FA_CHEVRON_RIGHT Neuron",
+        "The following cell functions obtain their input from channel #3:\n\nICON_FA_CHEVRON_RIGHT Neuron",
+        "The following cell functions obtain their input from channel #4:\n\nICON_FA_CHEVRON_RIGHT Neuron",
+        "The following cell functions obtain their input from channel #5:\n\nICON_FA_CHEVRON_RIGHT Neuron",
+        "The following cell functions obtain their input from channel #6:\n\nICON_FA_CHEVRON_RIGHT Neuron",
+        "The following cell functions obtain their input from channel #7:\n\nICON_FA_CHEVRON_RIGHT Neuron"
+    };
 }
