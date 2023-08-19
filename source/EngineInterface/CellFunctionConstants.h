@@ -102,5 +102,6 @@ enum ConstructionShape_
     ConstructionShape_Tube,
     ConstructionShape_Lolli,
     ConstructionShape_SmallLolli,
+    ConstructionShape_Zigzag,
     ConstructionShape_Count
 };

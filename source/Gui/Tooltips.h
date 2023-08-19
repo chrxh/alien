@@ -109,7 +109,7 @@ namespace Const
         "current spatial location of the constructor cell is unfavorable, the newly formed cell might not be connected to the desired cells, "
         "for instance, due to being too far away. An better approach would involve delaying the construction process until a desired number of "
         "neighboring cells from the same genome are in the direct vicinity. This number of cells can be optionally set here.\nIt is important "
-        "to note that the predecessor cell is not counted for the 'required connections.' For example, a value of 2 means that the cell to be "
+        "to note that the direct predecessor cell is not counted for the 'required connections.' For example, a value of 2 means that the cell to be "
         "constructed will only be created when there are at least 2 already constructed cells (excluding the predecessor cell) available for "
         "potential connections. If the condition is not met, the construction process is postponed.";
 

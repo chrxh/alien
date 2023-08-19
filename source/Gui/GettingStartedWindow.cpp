@@ -72,9 +72,10 @@ void _GettingStartedWindow::processIntern()
         ImGui::Text("There are basically two modes of how the user can operate in the view where the simulation is "
                     "shown: a navigation mode and an edit mode. You can switch between these two modes by invoking "
                     "the edit button at the bottom left of the screen or in the menu via Editor " ICON_FA_LONG_ARROW_ALT_RIGHT " Activate.");
-        drawItemText("The navigation mode is enabled by default and allows you to zoom in (holding the left mouse "
-                     "button) and out (holding the right mouse button) continuously. By holding the middle mouse "
-                     "button and moving the mouse, you can pan the visualized section of the world.");
+        drawItemText(
+            "The navigation mode is enabled by default and allows you to zoom in (holding the left mouse "
+            "button) and out (holding the right mouse button) continuously. Alternatively, you can also use the mouse wheel. By holding the middle mouse "
+            "button and moving the mouse, you can pan the visualized section of the world.");
         drawItemText(
             "In the edit mode, it is possible to push bodies around in a running simulation by holding and moving the right mouse button. "
             "With the left mouse button you can drag and drop objects. Please try this out. It can make a lot of fun! The editing mode also allows you "

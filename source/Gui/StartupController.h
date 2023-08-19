@@ -26,7 +26,7 @@ public:
 private:
     void processWindow();
 
-    void drawGrid(float alpha);
+    void drawGrid(float yPos, float alpha);
 
     SimulationController _simController;
     TemporalControlWindow _temporalControlWindow;
