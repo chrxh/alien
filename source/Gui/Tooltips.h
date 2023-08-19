@@ -70,11 +70,10 @@ namespace Const
         "you choose a cell function, this tooltip will be updated to provide more specific information. ";
 
     std::string const GenomeColorTooltip =
-        "This allows cells to be visually colored. On the one hand, the cell color can be used to define own types of cells that are subject to different "
-        "rules. For this purpose, the simulation parameters can be specified depending on the color. For example, one could define that green cells are "
-        "particularly good "
-        "at absorbing energy particles, while other cell colors are better at attacking foreign cells.\nOn the other hand, cell color also "
-        "plays a role in perception. Sensor cells are dedicated to a specific color and can only detect the corresponding cells.";
+        "This property defines the color of the cell. It is not just a visual marker. On the one hand, the cell color can be used to define own types of cells "
+        "that are subject to different rules. For this purpose, the simulation parameters can be specified depending on the color. For example, one could "
+        "define that green cells are particularly good at absorbing energy particles, while other cell colors are better at attacking foreign cells.\nOn the "
+        "other hand, cell color also plays a role in perception. Sensor cells are dedicated to a specific color and can only detect the corresponding cells.";
 
     std::string const GenomeAngleTooltip =
         "The angle between the predecessor and successor cell can be specified here. Please note that the shown angle here is shifted "
@@ -238,9 +237,9 @@ namespace Const
                                           "threshold (refer to the 'Minimum energy' simulation parameter).";
 
     std::string const CellStiffnessTooltip =
-        "The stiffness determines the amount of force generated to push the cell (network) to its reference configuration.";
+        "The stiffness determines the amount of force generated after a displacement to push the cell (network) to its reference configuration.";
 
-    std::string const CellMaxConnectionTooltip = "The maximum number of bonds this cell can form with other cells.";
+    std::string const CellMaxConnectionTooltip = "The maximum number of bonds a cell can form with other cells.";
 
     std::string const CellIndestructibleTooltip =
         "When a cell is set as indestructible, it becomes immortal, resistant to external forces, but capable of linear movement. Furthermore, unconnected "
@@ -314,32 +313,53 @@ namespace Const
     std::string const CellSensorTargetCreatureIdTooltip = "The id of the last creature that has been scanned.";
 
     std::string const NeuronInputTooltipByChannel[8] = {
-        "The following cell functions write their output to channel #0:\n\nICON_FA_CHEVRON_RIGHT Neuron\n\nICON_FA_CHEVRON_RIGHT Constructor: 0 (could not "
+        "The following cell functions write their output to channel #0:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Constructor: 0 (could not "
         "constructor next cell, e.g. no energy, required connection check failed, completeness check failed), 1 (next cell construction "
-        "successful)\n\nICON_FA_CHEVRON_RIGHT Sensor: 0 (no match) or 1 (match)\n\nICON_FA_CHEVRON_RIGHT Attacker: a value which is proportional to the gained "
-        "energy\n\nICON_FA_CHEVRON_RIGHT Injector: 0 (no cells found) or 1 (injection in process or completed)",
-        "The following cell functions write their output to channel #1:\n\nICON_FA_CHEVRON_RIGHT Neuron\n\nICON_FA_CHEVRON_RIGHT Sensor: density of the match",
-        "The following cell functions write their output to channel #2:\n\nICON_FA_CHEVRON_RIGHT Neuron\n\nICON_FA_CHEVRON_RIGHT Sensor: distance of the match",
-        "The following cell functions write their output to channel #3:\n\nICON_FA_CHEVRON_RIGHT Neuron\n\nICON_FA_CHEVRON_RIGHT Sensor: angle of the match",
-        "The following cell functions write their output to channel #4:\n\nICON_FA_CHEVRON_RIGHT Neuron",
-        "The following cell functions write their output to channel #5:\n\nICON_FA_CHEVRON_RIGHT Neuron",
-        "The following cell functions write their output to channel #6:\n\nICON_FA_CHEVRON_RIGHT Neuron",
-        "The following cell functions write their output to channel #7:\n\nICON_FA_CHEVRON_RIGHT Neuron"
+        "successful)\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: 0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Attacker: a value which is proportional to the gained "
+        "energy\n\n" ICON_FA_CHEVRON_RIGHT " Injector: 0 (no cells found) or 1 (injection in process or completed)",
+        "The following cell functions write their output to channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: density of the match",
+        "The following cell functions write their output to channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: distance of the match",
+        "The following cell functions write their output to channel #3:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: angle of the match",
+        "The following cell functions write their output to channel #4:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
+        "The following cell functions write their output to channel #5:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
+        "The following cell functions write their output to channel #6:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
+        "The following cell functions write their output to channel #7:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron"
     };
+
     std::string const NeuronOutputTooltipByChannel[8] = {
-        "The following cell functions obtain their input from channel #0:\n\nICON_FA_CHEVRON_RIGHT Neuron\n\nICON_FA_CHEVRON_RIGHT Constructor: abs(value) > "
-        "threshold activates constructor (only necessary in 'Manual' mode)\n\nICON_FA_CHEVRON_RIGHT Sensor: abs(value) > threshold activates "
-        "sensor\n\nICON_FA_CHEVRON_RIGHT Attacker: abs(value) > threshold activates attacker\n\nICON_FA_CHEVRON_RIGHT Injector: abs(value) > threshold "
-        "activates injector\n\nICON_FA_CHEVRON_RIGHT Muscle: The strength of the movement, bending or expansion/contraction. A negative sign corresponds to "
+        "The following cell functions obtain their input from channel #0:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Constructor: abs(value) > "
+        "threshold activates constructor (only necessary in 'Manual' mode)\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: abs(value) > threshold activates "
+        "sensor\n\n" ICON_FA_CHEVRON_RIGHT " Attacker: abs(value) > threshold activates attacker\n\n" ICON_FA_CHEVRON_RIGHT " Injector: abs(value) > threshold "
+        "activates injector\n\n" ICON_FA_CHEVRON_RIGHT " Muscle: The strength of the movement, bending or expansion/contraction. A negative sign corresponds to "
         "the opposite action.",
-        "The following cell functions obtain their input from channel #1:\n\nICON_FA_CHEVRON_RIGHT Neuron\n\nICON_FA_CHEVRON_RIGHT Muscle: This channel is "
+        "The following cell functions obtain their input from channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Muscle: This channel is "
         "solely utilized for acceleration due to bending. If the sign of channel #1 differs from the sign of channel #0, no acceleration will be obtained "
         "during the bending process.",
-        "The following cell functions obtain their input from channel #2:\n\nICON_FA_CHEVRON_RIGHT Neuron",
-        "The following cell functions obtain their input from channel #3:\n\nICON_FA_CHEVRON_RIGHT Neuron",
-        "The following cell functions obtain their input from channel #4:\n\nICON_FA_CHEVRON_RIGHT Neuron",
-        "The following cell functions obtain their input from channel #5:\n\nICON_FA_CHEVRON_RIGHT Neuron",
-        "The following cell functions obtain their input from channel #6:\n\nICON_FA_CHEVRON_RIGHT Neuron",
-        "The following cell functions obtain their input from channel #7:\n\nICON_FA_CHEVRON_RIGHT Neuron"
+        "The following cell functions obtain their input from channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
+        "The following cell functions obtain their input from channel #3:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
+        "The following cell functions obtain their input from channel #4:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
+        "The following cell functions obtain their input from channel #5:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
+        "The following cell functions obtain their input from channel #6:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
+        "The following cell functions obtain their input from channel #7:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron"
     };
+
+    std::string const CreatorPencilRadiusTooltip = "The radius of the pencil in number of cells.";
+
+    std::string const CreatorAscendingExecutionOrderNumberTooltip =
+        "Each generated cell has an 'execution order number' that is one greater than the previous generated cell.";
+
+    std::string const CreatorRectangleWidthTooltip = "The width of the rectangle in cells.";
+
+    std::string const CreatorRectangleHeightTooltip = "The height of the rectangle in cells.";
+
+    std::string const CreatorHexagonLayersTooltip = "The number of layers in cells starting from the center.";
+
+    std::string const CreatorDiscOuterRadiusTooltip = "The outer radius of the disc in cells.";
+
+    std::string const CreatorDiscInnerRadiusTooltip = "The inner radius of the disc in cells.";
+
+    std::string const CreatorDistanceTooltip = "The distance between two connected cells.";
+
+    std::string const CreatorStickyTooltip = "If the Sticky property is selected, the created cells can usually form further connections. That is, they can "
+                                             "'stick together' with other cell networks after collision.";
 }

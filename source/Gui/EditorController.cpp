@@ -15,6 +15,12 @@
 #include "CreatorWindow.h"
 #include "MultiplierWindow.h"
 #include "GenomeEditorWindow.h"
+#include "MessageDialog.h"
+
+namespace
+{
+    auto const MaxInspectorWindowsToAdd = 10;
+}
 
 _EditorController::_EditorController(SimulationController const& simController, Viewport const& viewport)
     : _simController(simController)
@@ -113,8 +119,16 @@ bool _EditorController::isGenomeInspectionPossible() const
 
 void _EditorController::onInspectSelectedObjects()
 {
-    DataDescription selectedData = _simController->getSelectedSimulationData(false);
-    onInspectObjects(DescriptionHelper::getObjects(selectedData), false);
+    auto selection = _editorModel->getSelectionShallowData();
+    if (selection.numCells + selection.numParticles <= MaxInspectorWindowsToAdd) {
+        DataDescription selectedData = _simController->getSelectedSimulationData(false);
+        onInspectObjects(DescriptionHelper::getObjects(selectedData), false);
+    } else {
+        printMessage(
+            "Inspection not possible",
+            "Too many objects are selected are selected for inspection.\nA maximum of " + std::to_string(MaxInspectorWindowsToAdd)
+                + " objects are allowed.");
+    }
 }
 
 void _EditorController::onInspectSelectedGenomes()
