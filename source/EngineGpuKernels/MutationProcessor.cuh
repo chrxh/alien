@@ -247,7 +247,7 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
                 subgenome[nodeAddress + Const::CellAnglePos] = GenomeDecoder::convertAngleToByte(generationResult.angle);
                 subgenome[nodeAddress + Const::CellRequiredConnectionsPos] =
                     GenomeDecoder::convertOptionalByteToByte(generationResult.numRequiredAdditionalConnections);
-            });
+            }); 
         }
     }
     if (subgenome[delta] != mutatedByte) {
