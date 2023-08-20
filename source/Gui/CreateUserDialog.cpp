@@ -20,12 +20,13 @@ _CreateUserDialog::~_CreateUserDialog()
 {
 }
 
-void _CreateUserDialog::open(std::string const& userName, std::string const& password)
+void _CreateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
     _AlienDialog::open();
     _userName = userName;
     _password = password;
     _email.clear();
+    _userInfo = userInfo;
 }
 
 void _CreateUserDialog::processIntern()
@@ -62,7 +63,7 @@ void _CreateUserDialog::processIntern()
 void _CreateUserDialog::onCreateUser()
 {
     if (_networkController->createUser(_userName, _password, _email)) {
-        _activateUserDialog->open(_userName, _password);
+        _activateUserDialog->open(_userName, _password, _userInfo);
     } else {
         MessageDialog::getInstance().show(
             "Error",

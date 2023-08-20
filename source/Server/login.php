@@ -9,7 +9,11 @@
     $success = checkPw($db, $userName, $pw);
 
     if ($success) {
-        $success = $db->query("UPDATE user SET FLAGS=1, TIMESTAMP=CURRENT_TIMESTAMP WHERE NAME='".addslashes($userName)."'");
+        $gpu = "";
+        if (array_key_exists("gpu", $_POST)) {
+            $gpu = $_POST["gpu"];
+        }
+        $success = $db->query("UPDATE user SET FLAGS=1, TIMESTAMP=CURRENT_TIMESTAMP, GPU='".addslashes($gpu)."' WHERE NAME='".addslashes($userName)."'");
     }
 
     $errorCode = 1;

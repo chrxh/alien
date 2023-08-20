@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include "EngineInterface/SimulationController.h"
+
 #include "AlienImGui.h"
 #include "GlobalSettings.h"
 #include "MessageDialog.h"
@@ -10,8 +12,12 @@
 #include "CreateUserDialog.h"
 #include "StyleRepository.h"
 
-_ActivateUserDialog::_ActivateUserDialog(BrowserWindow const& browserWindow, NetworkController const& networkController)
+_ActivateUserDialog::_ActivateUserDialog(
+    SimulationController const& simController,
+    BrowserWindow const& browserWindow,
+    NetworkController const& networkController)
     : _AlienDialog("Activate user")
+    , _simController(simController)
     , _browserWindow(browserWindow)
     , _networkController(networkController)
 {}
@@ -24,11 +30,12 @@ void _ActivateUserDialog::registerCyclicReferences(CreateUserDialogWeakPtr const
 }
 
 
-void _ActivateUserDialog::open(std::string const& userName, std::string const& password)
+void _ActivateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
     _AlienDialog::open();
     _userName = userName;
     _password = password;
+    _userInfo = userInfo;
 }
 
 void _ActivateUserDialog::processIntern()
@@ -61,7 +68,7 @@ void _ActivateUserDialog::processIntern()
     ImGui::SameLine();
     if (AlienImGui::Button("Resend to other email address")) {
         close();
-        _createUserDialog.lock()->open(_userName, _password);
+        _createUserDialog.lock()->open(_userName, _password, _userInfo);
     }
 
     ImGui::SameLine();
@@ -78,7 +85,7 @@ void _ActivateUserDialog::onActivateUser()
     auto result = _networkController->activateUser(_userName, _password, _confirmationCode);
     if (result) {
         LoginErrorCode errorCode;
-        result |= _networkController->login(errorCode, _userName, _password);
+        result |= _networkController->login(errorCode, _userName, _password, _userInfo);
     }
     if (!result) {
         MessageDialog::getInstance().show("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");

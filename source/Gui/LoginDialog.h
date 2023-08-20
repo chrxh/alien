@@ -7,6 +7,7 @@ class _LoginDialog : public _AlienDialog
 {
 public:
     _LoginDialog(
+        SimulationController const& simController, 
         BrowserWindow const& browserWindow,
         CreateUserDialog const& createUserDialog,
         ActivateUserDialog const& activateUserDialog,
@@ -19,12 +20,16 @@ private:
 
     void onLogin();
 
+    UserInfo getUserInfo();
+
+    SimulationController _simController; 
     BrowserWindow _browserWindow;
     CreateUserDialog _createUserDialog;
     ActivateUserDialog _activateUserDialog;
     NetworkController _networkController;
     ResetPasswordDialog _resetPasswordDialog;
 
+    bool _shareGpuInfo = true;
     bool _remember = true;
     std::string _userName;
     std::string _password;

@@ -72,9 +72,11 @@ _NetworkController::~_NetworkController()
 void _NetworkController::process()
 {
     auto now = std::chrono::steady_clock::now();
-    if (!_lastRefreshTime || std::chrono::duration_cast<std::chrono::minutes>(now - *_lastRefreshTime).count() >= RefreshInterval) {
+    if (!_lastRefreshTime) {
         _lastRefreshTime = now;
-
+    }
+    if (std::chrono::duration_cast<std::chrono::minutes>(now - *_lastRefreshTime).count() >= RefreshInterval) {
+        _lastRefreshTime = now;
         refreshLogin();
     }
 }
@@ -142,7 +144,7 @@ bool _NetworkController::activateUser(std::string const& userName, std::string c
     }
 }
 
-bool _NetworkController::login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password)
+bool _NetworkController::login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
     log(Priority::Important, "network: login user '" + userName + "'");
 
@@ -152,6 +154,9 @@ bool _NetworkController::login(LoginErrorCode& errorCode, std::string const& use
     httplib::Params params;
     params.emplace("userName", userName);
     params.emplace("password", password);
+    if (userInfo.gpu) {
+        params.emplace("gpu", *userInfo.gpu);
+    }
 
     try {
         auto result = executeRequest([&] { return client.Post("/alien-server/login.php", params); });
@@ -308,6 +313,9 @@ bool _NetworkController::getUserList(std::vector<UserData>& result, bool withRet
         boost::property_tree::read_json(stream, tree);
         result.clear();
         result = NetworkDataParser::decodeUserData(tree);
+        for (UserData& userData : result) {
+            userData.timeSpent = userData.timeSpent * RefreshInterval / 60;
+        }
         return true;
     } catch (...) {
         logNetworkError();
@@ -489,7 +497,7 @@ void _NetworkController::refreshLogin()
         params.emplace("password", *_password);
 
         try {
-            executeRequest([&] { return client.Post("/alien-server/login.php", params); });
+            executeRequest([&] { return client.Post("/alien-server/refreshlogin.php", params); });
         } catch (...) {
         }
     }

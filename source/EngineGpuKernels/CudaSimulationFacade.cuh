@@ -29,6 +29,7 @@ public:
     ~_CudaSimulationFacade();
 
     void* registerImageResource(GLuint image);
+    std::string getGpuName();
 
     void calcTimestep();
     void applyCataclysm(int power);

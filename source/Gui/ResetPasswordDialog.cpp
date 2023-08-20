@@ -5,7 +5,6 @@
 #include "AlienImGui.h"
 #include "GlobalSettings.h"
 #include "MessageDialog.h"
-#include "NetworkController.h"
 #include "NewPasswordDialog.h"
 
 _ResetPasswordDialog::_ResetPasswordDialog(NewPasswordDialog const& newPasswordDialog, NetworkController const& networkController)
@@ -14,11 +13,12 @@ _ResetPasswordDialog::_ResetPasswordDialog(NewPasswordDialog const& newPasswordD
     , _newPasswordDialog(newPasswordDialog)
 {}
 
-void _ResetPasswordDialog::open(std::string const& userName)
+void _ResetPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
 {
     _AlienDialog::open();
     _userName = userName;
     _email.clear();
+    _userInfo = userInfo;
 }
 
 void _ResetPasswordDialog::processIntern()
@@ -55,7 +55,7 @@ void _ResetPasswordDialog::processIntern()
 void _ResetPasswordDialog::onResetPassword()
 {
     if (_networkController->resetPassword(_userName, _email)) {
-        _newPasswordDialog->open(_userName);
+        _newPasswordDialog->open(_userName, _userInfo);
     } else {
         MessageDialog::getInstance().show(
             "Error", "An error occurred on the server. This could be related to the fact that the\nemail address is wrong.");

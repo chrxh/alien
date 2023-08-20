@@ -325,23 +325,14 @@ void _BrowserWindow::processUserTable()
          | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    AlienImGui::Group("Registered users");
-    if (ImGui::BeginTable("Browser", 3, flags, ImVec2(0, 0), 0.0f)) {
+    AlienImGui::Group("Simulators");
+    if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
+        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+        ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
+        ImGui::TableSetupColumn("GPU", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(200.0f));
         ImGui::TableSetupColumn(
-            "Name",
-            ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed,
-            scale(90.0f),
-            RemoteSimulationDataColumnId_Actions);
-        ImGui::TableSetupColumn(
-            "Stars received",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
-            scale(100.0f),
-            RemoteSimulationDataColumnId_Timestamp);
-        ImGui::TableSetupColumn(
-            "Stars given",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(100.0f),
-            RemoteSimulationDataColumnId_UserName);
+            "Stars received", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(100.0f));
+        ImGui::TableSetupColumn("Stars given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
@@ -360,6 +351,14 @@ void _BrowserWindow::processUserTable()
                     ImGui::SameLine();
                 }
                 processShortenedText(item->userName);
+
+                ImGui::TableNextColumn();
+                if (item->timeSpent > 0) {
+                    AlienImGui::Text(std::to_string(item->timeSpent) + "h");
+                }
+
+                ImGui::TableNextColumn();
+                processShortenedText(item->gpu);
 
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->starsReceived));

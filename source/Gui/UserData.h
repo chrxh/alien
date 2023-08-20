@@ -9,6 +9,8 @@ public:
     int starsGiven;
     std::string timestamp;
     bool online;
+    int timeSpent;
+    std::string gpu;
 
     static int compare(UserData const& left, UserData const& right)
     {

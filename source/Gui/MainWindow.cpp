@@ -150,11 +150,11 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
     _browserWindow = std::make_shared<_BrowserWindow>(_simController, _networkController, _statisticsWindow, _viewport, _temporalControlWindow);
-    _activateUserDialog = std::make_shared<_ActivateUserDialog>(_browserWindow, _networkController);
+    _activateUserDialog = std::make_shared<_ActivateUserDialog>(_simController, _browserWindow, _networkController);
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog, _networkController);
-    _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_browserWindow, _networkController);
+    _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simController, _browserWindow, _networkController);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog, _networkController);
-    _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog, _networkController);
+    _loginDialog = std::make_shared<_LoginDialog>(_simController, _browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog, _networkController);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController, _viewport);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);

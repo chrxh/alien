@@ -2,24 +2,31 @@
 
 #include <imgui.h>
 
+#include "EngineInterface/SimulationController.h"
+
 #include "AlienImGui.h"
 #include "BrowserWindow.h"
 #include "GlobalSettings.h"
 #include "MessageDialog.h"
 #include "NetworkController.h"
 
-_NewPasswordDialog::_NewPasswordDialog(BrowserWindow const& browserWindow, NetworkController const& networkController)
+_NewPasswordDialog::_NewPasswordDialog(
+    SimulationController const& simController,
+    BrowserWindow const& browserWindow,
+    NetworkController const& networkController)
     : _AlienDialog("New password")
+    , _simController(simController)
     , _browserWindow(browserWindow)
     , _networkController(networkController)
 {}
 
-void _NewPasswordDialog::open(std::string const& userName)
+void _NewPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
 {
     _AlienDialog::open();
     _userName = userName;
     _newPassword.clear();
     _confirmationCode.clear();
+    _userInfo = userInfo;
 }
 
 void _NewPasswordDialog::processIntern()
@@ -57,7 +64,7 @@ void _NewPasswordDialog::onNewPassword()
     auto result = _networkController->setNewPassword(_userName, _newPassword, _confirmationCode);
     if (result) {
         LoginErrorCode errorCode;
-        result |= _networkController->login(errorCode, _userName, _newPassword);
+        result |= _networkController->login(errorCode, _userName, _newPassword, _userInfo);
     }
     if (!result) {
         MessageDialog::getInstance().show("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to reset the password again.");

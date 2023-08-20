@@ -160,6 +160,8 @@ using RadiationSourcesWindow = std::shared_ptr<_RadiationSourcesWindow>;
 class _BalancerController;
 using BalancerController = std::shared_ptr<_BalancerController>;
 
+struct UserInfo;
+
 struct GLFWvidmode;
 struct GLFWwindow;
 struct ImFont;
