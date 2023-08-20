@@ -354,7 +354,7 @@ void _BrowserWindow::processUserTable()
 
                 ImGui::TableNextColumn();
                 if (item->timeSpent > 0) {
-                    AlienImGui::Text(std::to_string(item->timeSpent) + "h");
+                    AlienImGui::Text(StringHelper::format(item->timeSpent) + "h");
                 }
 
                 ImGui::TableNextColumn();
