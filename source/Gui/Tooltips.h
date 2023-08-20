@@ -362,4 +362,18 @@ namespace Const
 
     std::string const CreatorStickyTooltip = "If the Sticky property is selected, the created cells can usually form further connections. That is, they can "
                                              "'stick together' with other cell networks after collision.";
+
+    std::string const LoginHowToCreateNewUseTooltip = "Please enter the desired user name and password and proceed by clicking the 'Create user' button.";
+
+    std::string const LoginForgotYourPasswordTooltip = "Please enter the user name and proceed by clicking the 'Reset password' button.";
+
+    std::string const LoginSecurityInformationTooltip =
+        "The data transfer to the server is encrypted via https. On the server side, the password is not stored in cleartext, but as a salted SHA-256 hash "
+        "value in the database. If the toggle 'Remember' is activated the password will be stored in 'settings.json' on your local machine.";
+
+    std::string const LoginRememberTooltip = "If the toggle 'Remember' is activated the password will be stored in 'settings.json' on your local machine. It "
+                                             "is recommended not to choose a password that is used elsewhere.";
+
+    std::string const LoginShareGpuInfoTooltip =
+        "If this option is enabled, other users will be able to see in the browser window that you have the following graphics card: ";
 }

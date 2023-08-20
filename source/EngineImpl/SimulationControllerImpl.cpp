@@ -31,6 +31,11 @@ void _SimulationControllerImpl::registerImageResource(void* image)
     _worker.registerImageResource(image);
 }
 
+std::string _SimulationControllerImpl::getGpuName() const
+{
+    return _worker.getGpuName();
+}
+
 void _SimulationControllerImpl::tryDrawVectorGraphics(
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,

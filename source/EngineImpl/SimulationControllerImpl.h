@@ -22,6 +22,7 @@ public:
     void clear() override;
 
     void registerImageResource(void* image) override;
+    std::string getGpuName() const override;
 
     /**
      * Draws section of simulation to registered texture.

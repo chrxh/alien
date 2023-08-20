@@ -13,6 +13,11 @@ enum LoginErrorCode_
     LoginErrorCode_Other
 };
 
+struct UserInfo
+{
+    std::optional<std::string> gpu;
+};
+
 class _NetworkController
 {
 public:
@@ -29,7 +34,7 @@ public:
     bool createUser(std::string const& userName, std::string const& password, std::string const& email);
     bool activateUser(std::string const& userName, std::string const& password, std::string const& confirmationCode);
 
-    bool login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password);
+    bool login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo);
     bool logout();
     bool deleteUser();
     bool resetPassword(std::string const& userName, std::string const& email);

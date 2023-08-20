@@ -42,6 +42,7 @@ public:
     void clear();
 
     void registerImageResource(void* image);
+    std::string getGpuName() const;
 
     void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
     std::optional<OverlayDescription>

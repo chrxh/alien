@@ -53,6 +53,11 @@ void EngineWorker::registerImageResource(void* image)
     }
 }
 
+std::string EngineWorker::getGpuName() const
+{
+    return _cudaSimulation->getGpuName();
+}
+
 void EngineWorker::tryDrawVectorGraphics(
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,

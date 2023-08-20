@@ -45,7 +45,8 @@ namespace
     class CudaInitializer
     {
     public:
-        static void init() { [[maybe_unused]] static CudaInitializer instance; }
+        static void init() { getInstance(); }
+        static std::string getGpuName() { return getInstance()._gpuName; }
 
         CudaInitializer()
         {
@@ -64,6 +65,12 @@ namespace
         ~CudaInitializer() { cudaDeviceReset(); }
 
     private:
+        static CudaInitializer& getInstance()
+        {
+            static CudaInitializer instance;
+            return instance;
+        }
+
         int getDeviceNumberOfHighestComputeCapability()
         {
             int result = 0;
@@ -96,6 +103,7 @@ namespace
                 if (computeCapability > highestComputeCapability) {
                     result = deviceNumber;
                     highestComputeCapability = computeCapability;
+                    _gpuName = prop.name;
                 }
             }
             if (highestComputeCapability < 600) {
@@ -105,6 +113,8 @@ namespace
 
             return result;
         }
+
+        std::string _gpuName;
     };
 }
 
@@ -174,6 +184,11 @@ void* _CudaSimulationFacade::registerImageResource(GLuint image)
         cudaGraphicsGLRegisterImage(&cudaResource, image, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
 
     return reinterpret_cast<void*>(cudaResource);
+}
+
+std::string _CudaSimulationFacade::getGpuName()
+{
+    return CudaInitializer::getGpuName();
 }
 
 void _CudaSimulationFacade::calcTimestep()

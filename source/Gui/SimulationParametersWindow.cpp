@@ -821,7 +821,7 @@ void _SimulationParametersWindow::processBase(
                     .name("Genome size bonus")
                     .textWidth(RightColumnWidth)
                     .min(0)
-                    .max(7.0f)
+                    .max(20.0f)
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionAttackerGenomeSizeBonus))
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with larger genomes."),
                 simParameters.cellFunctionAttackerGenomeSizeBonus);

@@ -16,6 +16,7 @@ public:
     virtual void clear() = 0;
 
     virtual void registerImageResource(void* image) = 0;
+    virtual std::string getGpuName() const = 0;
 
     /**
      * Draws section of simulation to registered texture.
