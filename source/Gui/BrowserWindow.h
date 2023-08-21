@@ -33,7 +33,7 @@ private:
     void processStatus();
     void processFilter();
     void processToolbar();
-    void processShortenedText(std::string const& text);
+    void processShortenedText(std::string const& text, bool bold = false);
     bool processActionButton(std::string const& text);
     bool processDetailButton();
 
