@@ -330,7 +330,7 @@ void _BrowserWindow::processUserTable()
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
         ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
         auto isLoggedIn = _networkController->getLoggedInUserName().has_value();
-        ImGui::TableSetupColumn(isLoggedIn ? "GPU" : "GPU (visible if logged in)", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(200.0f));
+        ImGui::TableSetupColumn(isLoggedIn ? "GPU model" : "GPU model (visible if logged in)", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(200.0f));
         ImGui::TableSetupColumn(
             "Stars received", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(100.0f));
         ImGui::TableSetupColumn("Stars given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
@@ -347,29 +347,29 @@ void _BrowserWindow::processUserTable()
                 ImGui::TableNextRow(0, scale(RowHeight));
 
                 ImGui::TableNextColumn();
-                auto bold = isLoggedIn && *_networkController->getLoggedInUserName() == item->userName;
+                auto isBoldFont = isLoggedIn && *_networkController->getLoggedInUserName() == item->userName;
 
                 if (item->online) {
                     AlienImGui::OnlineSymbol();
                     ImGui::SameLine();
                 }
-                processShortenedText(item->userName, bold);
+                processShortenedText(item->userName, isBoldFont);
 
                 ImGui::TableNextColumn();
                 if (item->timeSpent > 0) {
-                    processShortenedText(StringHelper::format(item->timeSpent) + "h", bold);
+                    processShortenedText(StringHelper::format(item->timeSpent) + "h", isBoldFont);
                 }
 
                 ImGui::TableNextColumn();
-                if (isLoggedIn) {
-                    processShortenedText(item->gpu, bold);
+                if (isLoggedIn && _loginDialog.lock()->isShareGpuInfo()) {
+                    processShortenedText(item->gpu, isBoldFont);
                 }
 
                 ImGui::TableNextColumn();
-                processShortenedText(std::to_string(item->starsReceived), bold);
+                processShortenedText(std::to_string(item->starsReceived), isBoldFont);
 
                 ImGui::TableNextColumn();
-                processShortenedText(std::to_string(item->starsGiven), bold);
+                processShortenedText(std::to_string(item->starsGiven), isBoldFont);
 
                 ImGui::PopID();
             }

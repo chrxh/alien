@@ -15,6 +15,8 @@ public:
         NetworkController const& networkController);
     ~_LoginDialog();
 
+    bool isShareGpuInfo() const;
+
 private:
     void processIntern();
 

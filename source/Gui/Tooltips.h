@@ -374,6 +374,8 @@ namespace Const
     std::string const LoginRememberTooltip = "If the toggle 'Remember' is activated the password will be stored in 'settings.json' on your local machine. It "
                                              "is recommended not to choose a password that is used elsewhere.";
 
-    std::string const LoginShareGpuInfoTooltip =
+    std::string const LoginShareGpuInfoTooltip1 =
         "If this option is enabled, other users will be able to see in the browser window that you have the following graphics card: ";
+    std::string const LoginShareGpuInfoTooltip2 =
+        "As a result, you will be able to see the GPU information of other registered users who have shared it.";
 }
