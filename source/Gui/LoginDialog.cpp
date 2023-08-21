@@ -59,6 +59,11 @@ _LoginDialog::~_LoginDialog()
     }
 }
 
+bool _LoginDialog::isShareGpuInfo() const
+{
+    return _shareGpuInfo;
+}
+
 void _LoginDialog::processIntern()
 {
     AlienImGui::Text("How to create a new user?");
@@ -77,7 +82,10 @@ void _LoginDialog::processIntern()
     ImGui::Spacing();
     AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Remember").tooltip(Const::LoginRememberTooltip), _remember);
     AlienImGui::ToggleButton(
-        AlienImGui::ToggleButtonParameters().name("Share GPU info").tooltip(Const::LoginShareGpuInfoTooltip + _simController->getGpuName()), _shareGpuInfo);
+        AlienImGui::ToggleButtonParameters()
+            .name("Share GPU model info")
+            .tooltip(Const::LoginShareGpuInfoTooltip1 + _simController->getGpuName() + "\n" + Const::LoginShareGpuInfoTooltip2),
+        _shareGpuInfo);
 
     AlienImGui::Separator();
 
