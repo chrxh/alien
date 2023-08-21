@@ -328,8 +328,9 @@ void _BrowserWindow::processUserTable()
     AlienImGui::Group("Simulators");
     if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
-        ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
-        ImGui::TableSetupColumn("GPU", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(200.0f));
+        ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
+        auto isLoggedIn = _networkController->getLoggedInUserName().has_value();
+        ImGui::TableSetupColumn(isLoggedIn ? "GPU" : "GPU (visible if logged in)", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(200.0f));
         ImGui::TableSetupColumn(
             "Stars received", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(100.0f));
         ImGui::TableSetupColumn("Stars given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
@@ -346,25 +347,29 @@ void _BrowserWindow::processUserTable()
                 ImGui::TableNextRow(0, scale(RowHeight));
 
                 ImGui::TableNextColumn();
+                auto bold = isLoggedIn && *_networkController->getLoggedInUserName() == item->userName;
+
                 if (item->online) {
                     AlienImGui::OnlineSymbol();
                     ImGui::SameLine();
                 }
-                processShortenedText(item->userName);
+                processShortenedText(item->userName, bold);
 
                 ImGui::TableNextColumn();
                 if (item->timeSpent > 0) {
-                    AlienImGui::Text(StringHelper::format(item->timeSpent) + "h");
+                    processShortenedText(StringHelper::format(item->timeSpent) + "h", bold);
                 }
 
                 ImGui::TableNextColumn();
-                processShortenedText(item->gpu);
+                if (isLoggedIn) {
+                    processShortenedText(item->gpu, bold);
+                }
 
                 ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(item->starsReceived));
+                processShortenedText(std::to_string(item->starsReceived), bold);
 
                 ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(item->starsGiven));
+                processShortenedText(std::to_string(item->starsGiven), bold);
 
                 ImGui::PopID();
             }
@@ -423,7 +428,7 @@ namespace
     }
 }
 
-void _BrowserWindow::processShortenedText(std::string const& text) {
+void _BrowserWindow::processShortenedText(std::string const& text, bool bold) {
     auto substrings = splitString(text);
     if (substrings.empty()) {
         return;
@@ -432,7 +437,13 @@ void _BrowserWindow::processShortenedText(std::string const& text) {
     auto textSize = ImGui::CalcTextSize(substrings.at(0).c_str());
     auto needDetailButton = textSize.x > ImGui::GetContentRegionAvailWidth() || substrings.size() > 1;
     auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - styleRepository.scale(15.0f);
+    if (bold) {
+        ImGui::PushFont(styleRepository.getSmallBoldFont());
+    }
     AlienImGui::Text(substrings.at(0));
+    if (bold) {
+        ImGui::PopFont();
+    }
     if (needDetailButton) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(cursorPos);
