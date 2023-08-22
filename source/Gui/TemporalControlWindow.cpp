@@ -215,23 +215,6 @@ void _TemporalControlWindow::restorePosition(MovedObjectType& movedObject, Moved
     auto origMovedObjectClone = origMovedObject;
     auto movedObjectClone = movedObject;
 
-    origMovedObjectClone.posX = 0;
-    origMovedObjectClone.posY = 0;
-    movedObjectClone.posX = 0;
-    movedObjectClone.posY = 0;
-    if (origMovedObjectClone != movedObjectClone) {
-        return;
-    }
-
-    auto timestepDelta = toFloat(toDouble(_simController->getCurrentTimestep()) - toDouble(origTimestep));
-    auto projectedPos = RealVector2D(origMovedObject.posX, origMovedObject.posY) + RealVector2D(origMovedObject.velX, origMovedObject.velY) * timestepDelta;
-
-    SpaceCalculator space(_simController->getWorldSize());
-    projectedPos = space.getCorrectedPosition(projectedPos);
-
-    auto deviation = std::abs(movedObject.posX - projectedPos.x) + std::abs(movedObject.posY - projectedPos.y);
-    if (deviation < RestorePositionTolerance) {
-        movedObject.posX = origMovedObject.posX;
-        movedObject.posY = origMovedObject.posY;
-    }
+    movedObject.posX = origMovedObject.posX;
+    movedObject.posY = origMovedObject.posY;
 }

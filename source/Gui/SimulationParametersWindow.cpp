@@ -290,7 +290,8 @@ void _SimulationParametersWindow::processBase(
                         .defaultValue(&origSimParameters.motionData.fluidMotion.smoothingLength)
                         .tooltip(std::string("The smoothing length determines the region of influence of the neighboring particles for the calculation of "
                                              "density, pressure and viscosity. Values that are too small lead to numerical instabilities, while values that "
-                                             "are too large cause the particles to drift apart.")),
+                                             "are too large cause the particles to drift apart. In the case of using indestructible cells in a simulation, it "
+                                             "is advisable to consider a value of no less than 0.8")),
                     &simParameters.motionData.fluidMotion.smoothingLength);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
