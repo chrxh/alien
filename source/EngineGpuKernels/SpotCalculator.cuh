@@ -5,6 +5,7 @@
 #include "EngineInterface/SimulationParametersSpotValues.h"
 #include "ConstantMemory.cuh"
 #include "Swap.cuh"
+#include "Math.cuh"
 
 class SpotCalculator
 {
@@ -46,6 +47,29 @@ public:
                 spotWeights[i] = calcWeight(delta, i);
             }
             return mix(baseValue, spotValues, spotWeights);
+        }
+    }
+
+    template <typename T>
+    __device__ __inline__ static T calcResultingFlowField(
+        BaseMap const& map,
+        float2 const& worldPos,
+        T const& baseValue,
+        T (&spotValues)[MAX_SPOTS])
+    {
+        if (0 == cudaSimulationParameters.numSpots) {
+            return baseValue;
+        } else {
+            float spotWeights[MAX_SPOTS];
+            int numValues = 0;
+            for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+                if (cudaSimulationParameters.spots[i].flowType != FlowType_None) {
+                    float2 spotPos = {cudaSimulationParameters.spots[i].posX, cudaSimulationParameters.spots[i].posY};
+                    auto delta = map.getCorrectedDirection(spotPos - worldPos);
+                    spotWeights[numValues++] = calcWeight(delta, i);
+                }
+            }
+            return mix(baseValue, spotValues, spotWeights, numValues);
         }
     }
 
@@ -172,70 +196,38 @@ private:
         return result;
     }
 
-    __device__ __inline__ static float mix(float const& baseValue, float (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS], int numValues)
+    template<typename T>
+    __device__ __inline__ static T mix(T const& baseValue, T (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS], int numValues)
     {
         float baseFactor = 1;
         float sum = 0;
         for (int i = 0; i < numValues; ++i) {
             baseFactor *= spotWeights[i];
-            sum += 1 - spotWeights[i];
+            sum += 1.0f - spotWeights[i];
         }
         sum += baseFactor;
-        float result = baseValue * baseFactor;
+        T result = baseValue * baseFactor;
         for (int i = 0; i < numValues; ++i) {
-            result += spotValues[i] * (1 - spotWeights[i]) / sum;
+            result += spotValues[i] * (1.0f - spotWeights[i]) / sum;
         }
         return result;
     }
 
-    __device__ __inline__ static float mix(float const& baseValue, float (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS])
+    template <typename T>
+    __device__ __inline__ static T mix(T const& baseValue, T (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS])
     {
         float baseFactor = 1;
         float sum = 0;
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
             baseFactor *= spotWeights[i];
-            sum += 1 - spotWeights[i];
+            sum += 1.0f - spotWeights[i];
         }
         sum += baseFactor;
-        float result = baseValue * baseFactor;
+        T result = baseValue * baseFactor;
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            result += spotValues[i] * (1 - spotWeights[i]) / sum;
+            result += spotValues[i] * (1.0f - spotWeights[i]) / sum;
         }
         return result;
     }
 
-    __device__ __inline__ static float2 mix(float2 const& baseValue, float2 (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS])
-    {
-        float baseFactor = 1;
-        float sum = 0;
-        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            baseFactor *= spotWeights[i];
-            sum += 1 - spotWeights[i];
-        }
-        sum += baseFactor;
-        float2 result = {baseValue.x * baseFactor, baseValue.y * baseFactor};
-        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            result.x += spotValues[i].x * (1 - spotWeights[i]) / sum;
-            result.y += spotValues[i].y * (1 - spotWeights[i]) / sum;
-        }
-        return result;
-    }
-
-    __device__ __inline__ static float3 mix(float3 const& baseValue, float3 (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS])
-    {
-        float baseFactor = 1;
-        float sum = 0;
-        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            baseFactor *= spotWeights[i];
-            sum += 1 - spotWeights[i];
-        }
-        sum += baseFactor;
-        float3 result = {baseValue.x * baseFactor, baseValue.y * baseFactor, baseValue.z * baseFactor};
-        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            result.x += spotValues[i].x * (1 - spotWeights[i]) / sum;
-            result.y += spotValues[i].y * (1 - spotWeights[i]) / sum;
-            result.z += spotValues[i].z * (1 - spotWeights[i]) / sum;
-        }
-        return result;
-    }
 };
