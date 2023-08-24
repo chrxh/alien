@@ -242,10 +242,8 @@ namespace Const
     std::string const CellMaxConnectionTooltip = "The maximum number of bonds a cell can form with other cells.";
 
     std::string const CellIndestructibleTooltip =
-        "When a cell is set as indestructible, it becomes immortal, resistant to external forces, but capable of linear movement. Furthermore, unconnected "
-        "normal cells and energy particles bounce off from indestructible ones. If you plan to use indestructible cells, it is advisable to set a smoothing "
-        "length of no less than 0.8 in the simulation parameter settings. This ensures that normal cells do not cling to indestructible cells when they are "
-        "close.";
+        "When a cell is set as indestructible, it becomes immortal, resistant to external forces, but still capable of linear movement. Furthermore, unconnected "
+        "normal cells and energy particles bounce off from indestructible ones.";
 
     std::string const CellReferenceDistanceTooltip =
         "The reference distance defines the distance at which no forces act between two connected cells. If the actual distance is greater than the reference "
