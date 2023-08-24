@@ -139,7 +139,7 @@ void _TemporalControlWindow::processStepBackwardButton()
     ImGui::BeginDisabled(_history.empty() || _simController->isSimulationRunning());
     if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_LEFT)) {
         auto const& snapshot = _history.back();
-        applySnapshot(*_snapshot);
+        applySnapshot(snapshot);
         _history.pop_back();
     }
     ImGui::EndDisabled();

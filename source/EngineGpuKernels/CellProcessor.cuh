@@ -45,6 +45,9 @@ public:
     __inline__ __device__ static void decay(SimulationData& data);
 
     __inline__ __device__ static void resetDensity(SimulationData& data);
+
+private:
+    static auto constexpr MaxBarrierCellsForCollision = 10;
 };
 
 /************************************************************************/
@@ -127,7 +130,6 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
 
         __shared__ float2 F_pressure;
         __shared__ float2 F_viscosity;
-        __shared__ float2 F_boundary;
         __shared__ float2 cellPosDelta;
         __shared__ float density;
         __shared__ float cellMaxBindingEnergy;
@@ -136,10 +138,12 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
         __shared__ int scanLength;
         __shared__ int2 cellPosInt;
 
+        __shared__ Cell* barrierCells[MaxBarrierCellsForCollision];
+        __shared__ int numBarrierCells;
+
         if (threadIdx.x == 0) {
             F_pressure = {0, 0};
             F_viscosity = {0, 0};
-            F_boundary = {0, 0};
             cellPosDelta = {0, 0};
             density = 0;
             cellMaxBindingEnergy = SpotCalculator::calcParameter(
@@ -150,13 +154,15 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             int radiusInt = ceilf(smoothingLength * 2);
             scanLength = radiusInt * 2 + 1;
             cellPosInt = {floorInt(cell->pos.x) - radiusInt, floorInt(cell->pos.y) - radiusInt};
+
+            numBarrierCells = 0;
         }
         __syncthreads();
 
         int2 scanPos{cellPosInt.x + (toInt(threadIdx.x) % scanLength), cellPosInt.y + (toInt(threadIdx.x) / scanLength)};
         data.cellMap.correctPosition(scanPos);
         auto otherCell = data.cellMap.getFirst(scanPos);
-        for (int level = 0; level < 10; ++level) {
+        for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
             if (!otherCell) {
                 break;
             }
@@ -164,7 +170,14 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             data.cellMap.correctDirection(posDelta);
             auto distance = Math::length(posDelta);
 
-            if (distance <= smoothingLength * 2 && cell->detached + otherCell->detached != 1) {
+            if (otherCell->barrier && distance <= smoothingLength * 2 && cell->detached + otherCell->detached != 1) {
+                auto index = atomicAdd(&numBarrierCells, 1);
+                if (index < MaxBarrierCellsForCollision) {
+                    barrierCells[index] = otherCell;
+                }
+            }
+
+            if (!otherCell->barrier && distance <= smoothingLength * 2 && cell->detached + otherCell->detached != 1) {
 
                 //calc density
                 atomicAdd_block(&density, calcKernel(distance / smoothingLength) / (smoothingLength * smoothingLength));
@@ -186,31 +199,22 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                     }
                     if (!isConnected) {
 
+                        //calc forces: for simplicity pressure = density
                         auto velDelta = cell->vel - otherCell->vel;
+                        auto const& cellPressure = cell->density;            //optimization: using the density from last time step
+                        auto const& otherCellPressure = otherCell->density;  //optimization: using the density from last time step
+                        auto factor = (cellPressure / (cell->density * cell->density) + otherCellPressure / (otherCell->density * otherCell->density));
 
-                        //calc forces
-                        if (!otherCell->barrier) {
+                        if (abs(distance) > NEAR_ZERO) {
+                            float kernel_d = calcKernel_d(distance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
 
-                            //for simplicity pressure = density
-                            auto const& cellPressure = cell->density;   //optimization: using the density from last time step
-                            auto const& otherCellPressure = otherCell->density; //optimization: using the density from last time step
-                            auto factor = (cellPressure / (cell->density * cell->density) + otherCellPressure / (otherCell->density * otherCell->density));
+                            auto F_pressureDelta = posDelta / (-distance) * factor * kernel_d;
+                            atomicAdd_block(&F_pressure.x, F_pressureDelta.x);
+                            atomicAdd_block(&F_pressure.y, F_pressureDelta.y);
 
-                            if (abs(distance) > NEAR_ZERO) {
-                                float kernel_d = calcKernel_d(distance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
-
-                                auto F_pressureDelta = posDelta / (-distance) * factor * kernel_d;
-                                atomicAdd_block(&F_pressure.x, F_pressureDelta.x);
-                                atomicAdd_block(&F_pressure.y, F_pressureDelta.y);
-
-                                auto F_viscosityDelta = velDelta / otherCell->density * distance * kernel_d / (distance * distance + 0.25f);
-                                atomicAdd_block(&F_viscosity.x, F_viscosityDelta.x);
-                                atomicAdd_block(&F_viscosity.y, F_viscosityDelta.y);
-                            }
-                        } else {
-                            auto F_boundaryDelta = posDelta * Math::dot(velDelta, posDelta) / (-distance * distance - 0.5f) * 2;
-                            atomicAdd_block(&F_boundary.x, F_boundaryDelta.x);
-                            atomicAdd_block(&F_boundary.y, F_boundaryDelta.y);
+                            auto F_viscosityDelta = velDelta / otherCell->density * distance * kernel_d / (distance * distance + 0.25f);
+                            atomicAdd_block(&F_viscosity.x, F_viscosityDelta.x);
+                            atomicAdd_block(&F_viscosity.y, F_viscosityDelta.y);
                         }
 
                         //fusion
@@ -227,9 +231,51 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
         __syncthreads();
 
         if (threadIdx.x == 0) {
+            //calculate barrier forces
+            numBarrierCells = min(MaxBarrierCellsForCollision, numBarrierCells);
+            if (numBarrierCells > 0) {
+                Cell* closestBarrierCell = nullptr;
+                float closestBarrierCellDistance;
+                for (int i = 0; i < numBarrierCells; ++i) {
+                    auto const& barrierCell = barrierCells[i];
+                    auto distance = data.cellMap.getDistance(cell->pos, barrierCell->pos);
+                    if (!closestBarrierCell || distance < closestBarrierCellDistance) {
+                        closestBarrierCell = barrierCell;
+                        closestBarrierCellDistance = distance;
+                    }
+                }
+
+                float2 r{0,0};
+                if (closestBarrierCell->numConnections <= 1) {
+                    r = data.cellMap.getCorrectedDirection(cell->pos - closestBarrierCell->pos);
+                } else {
+                    auto angleToCell = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell->pos - closestBarrierCell->pos));
+                    auto numConnections = closestBarrierCell->numConnections;
+                    for (int i = 0; i < numConnections; ++i) {
+                        auto otherCell1 = closestBarrierCell->connections[i].cell;
+                        auto otherCell2 = closestBarrierCell->connections[(i + 1) % numConnections].cell;
+                        auto angleToOtherCell1 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell1->pos - closestBarrierCell->pos));
+                        auto angleToOtherCell2 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell2->pos - closestBarrierCell->pos));
+                        if (Math::isAngleInBetween(angleToOtherCell1, angleToOtherCell2, angleToCell)) {
+                            r = otherCell2->pos - otherCell1->pos;
+                            Math::rotateQuarterCounterClockwise(r);
+                            break;
+                        }
+                    }
+                }
+                auto vr = cell->vel - closestBarrierCell->vel;
+                auto dot_vr_r = Math::dot(vr, r);
+
+                if (dot_vr_r < 0) {
+                    auto truncated_r_squared = max(0.05f, Math::lengthSquared(r));
+                    auto truncated_distance = max(0.05f, closestBarrierCellDistance);
+                    cell->shared1 += (vr - r * 2 * dot_vr_r / truncated_r_squared + closestBarrierCell->vel - cell->vel) / truncated_distance;
+                }
+            }
+
             cell->pos += cellPosDelta;
             cell->shared1 += F_pressure * cudaSimulationParameters.motionData.fluidMotion.pressureStrength
-                + F_viscosity * cudaSimulationParameters.motionData.fluidMotion.viscosityStrength + F_boundary;
+                + F_viscosity * cudaSimulationParameters.motionData.fluidMotion.viscosityStrength;
             cell->shared2.x = density;
         }
         __syncthreads();

@@ -39,7 +39,7 @@ __inline__ __device__ void ParticleProcessor::movement(SimulationData& data)
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.objects.particlePointers.at(particleIndex);
-        particle->absPos = particle->absPos + particle->vel;
+        particle->absPos = particle->absPos + particle->vel * cudaSimulationParameters.timestepSize;
         data.particleMap.correctPosition(particle->absPos);
     }
 }
@@ -77,7 +77,8 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                     auto r = data.cellMap.getCorrectedDirection(particle->absPos - cell->pos);
                     auto dot_vr_r = Math::dot(vr, r);
                     if (dot_vr_r < 0) {
-                        particle->vel = vr - r * 2 * dot_vr_r / Math::lengthSquared(r) + cell->vel;
+                        auto truncated_r_squared = max(0.1f, Math::lengthSquared(r));
+                        particle->vel = vr - r * 2 * dot_vr_r / truncated_r_squared + cell->vel;
                     }
                 } else {
                     if (particle->lastAbsorbedCell == cell) {

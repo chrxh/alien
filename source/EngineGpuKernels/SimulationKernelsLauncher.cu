@@ -20,16 +20,16 @@ void _SimulationKernelsLauncher::calcSimulationParametersForNextTimestep(Setting
     SpaceCalculator space({worldSizeX, worldSizeY});
     for (int i = 0; i < settings.simulationParameters.numParticleSources; ++i) {
         auto& source = settings.simulationParameters.particleSources[i];
-        source.posX += source.velX;
-        source.posY += source.velY;
+        source.posX += source.velX * settings.simulationParameters.timestepSize;
+        source.posY += source.velY * settings.simulationParameters.timestepSize;
         auto correctedPosition = space.getCorrectedPosition({source.posX, source.posY});
         source.posX = correctedPosition.x;
         source.posY = correctedPosition.y;
     }
     for (int i = 0; i < settings.simulationParameters.numSpots; ++i) {
         auto& spot = settings.simulationParameters.spots[i];
-        spot.posX += spot.velX;
-        spot.posY += spot.velY;
+        spot.posX += spot.velX * settings.simulationParameters.timestepSize;
+        spot.posY += spot.velY * settings.simulationParameters.timestepSize;
         auto correctedPosition = space.getCorrectedPosition({spot.posX, spot.posY});
         spot.posX = correctedPosition.x;
         spot.posY = correctedPosition.y;

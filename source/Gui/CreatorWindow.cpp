@@ -32,7 +32,7 @@ namespace
         {CreationMode::Drawing, "Draw freehand cell network"},
     };
 
-    auto const RightColumnWidth = 180.0f;
+    auto const RightColumnWidth = 210.0f;
 }
 
 _CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport)
