@@ -15,26 +15,21 @@ public:
     GlobalSettings(GlobalSettings const&) = delete;
     void operator=(GlobalSettings const&) = delete;
 
-    GpuSettings getGpuSettings();
-    void setGpuSettings(GpuSettings gpuSettings);
+    bool getBoolState(std::string const& key, bool defaultValue);
+    void setBoolState(std::string const& key, bool value);
 
-    bool getBoolState(std::string const& name, bool defaultValue);
-    void setBoolState(std::string const& name, bool value);
+    int getIntState(std::string const& key, int defaultValue);
+    void setIntState(std::string const& key, int value);
 
-    int getIntState(std::string const& name, int defaultValue);
-    void setIntState(std::string const& name, int value);
+    float getFloatState(std::string const& key, float defaultValue);
+    void setFloatState(std::string const& key, float value);
 
-    float getFloatState(std::string const& name, float defaultValue);
-    void setFloatState(std::string const& name, float value);
-
-    std::string getStringState(std::string const& name, std::string defaultValue);
-    void setStringState(std::string const& name, std::string value);
+    std::string getStringState(std::string const& key, std::string const& defaultValue);
+    void setStringState(std::string const& key, std::string const& value);
 
 private:
     GlobalSettings();
     ~GlobalSettings();
-
-    void encodeDecodeGpuSettings(GpuSettings& gpuSettings, ParserTask task);
 
     std::shared_ptr<GlobalSettingsImpl> _impl;
 };

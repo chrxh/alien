@@ -25,7 +25,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
         } else if (cudaError::cudaErrorUnsupportedPtxVersion == result) {
             throw CudaException("A CUDA error occurred (cudaErrorUnsupportedPtxVersion). Please update your Nvidia graphics driver and restart.");
         } else if (cudaError::cudaErrorMemoryAllocation == result) {
-            throw CudaMemoryAllocationException("A CUDA error occurred while allocating memory.");
+            throw CudaMemoryAllocationException("A CUDA error occurred while allocating memory. A possible reason could be that there is not enough memory available.");
         } else {
             std::stringstream stream;
             stream << "CUDA error at " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "("

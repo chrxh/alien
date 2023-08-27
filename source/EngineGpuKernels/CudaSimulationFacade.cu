@@ -109,11 +109,6 @@ void* _CudaSimulationFacade::registerImageResource(GLuint image)
     return reinterpret_cast<void*>(_cudaResource);
 }
 
-std::string _CudaSimulationFacade::getGpuName()
-{
-    return _gpuInfo.gpuModelName;
-}
-
 void _CudaSimulationFacade::calcTimestep()
 {
     checkAndProcessSimulationParameterChanges();
@@ -446,7 +441,11 @@ void _CudaSimulationFacade::initCuda()
 
 auto _CudaSimulationFacade::checkAndReturnGpuInfo() -> GpuInfo
 {
-    GpuInfo result;
+    static std::optional<GpuInfo> cachedResult;
+    if (cachedResult) {
+        return *cachedResult;
+    }
+    cachedResult = GpuInfo();
 
     int numberOfDevices;
     CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
@@ -474,16 +473,16 @@ auto _CudaSimulationFacade::checkAndReturnGpuInfo() -> GpuInfo
 
         int computeCapability = prop.major * 100 + prop.minor;
         if (computeCapability > highestComputeCapability) {
-            result.deviceNumber = deviceNumber;
+            cachedResult->deviceNumber = deviceNumber;
             highestComputeCapability = computeCapability;
-            result.gpuModelName = prop.name;
+            cachedResult->gpuModelName = prop.name;
         }
     }
     if (highestComputeCapability < 600) {
         throw SystemRequirementNotMetException("No CUDA device with compute capability of 6.0 or higher found.");
     }
 
-    return result;
+    return *cachedResult;
 }
 
 void _CudaSimulationFacade::syncAndCheck()

@@ -25,13 +25,17 @@ struct cudaGraphicsResource;
 class _CudaSimulationFacade
 {
 public:
-    //static void initCuda();
+    struct GpuInfo
+    {
+        int deviceNumber = 0;
+        std::string gpuModelName;
+    };
+    static GpuInfo checkAndReturnGpuInfo();
 
     _CudaSimulationFacade(uint64_t timestep, Settings const& settings);
     ~_CudaSimulationFacade();
 
     void* registerImageResource(GLuint image);
-    std::string getGpuName();
 
     void calcTimestep();
     void applyCataclysm(int power);
@@ -83,12 +87,6 @@ public:
 
 private:
     void initCuda();
-    struct GpuInfo
-    {
-        int deviceNumber = 0;
-        std::string gpuModelName;
-    };
-    GpuInfo checkAndReturnGpuInfo();
 
     void syncAndCheck();
     void copyDataTOtoDevice(DataTO const& dataTO);

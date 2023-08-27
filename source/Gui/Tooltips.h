@@ -367,9 +367,11 @@ namespace Const
 
     std::string const LoginSecurityInformationTooltip =
         "The data transfer to the server is encrypted via https. On the server side, the password is not stored in cleartext, but as a salted SHA-256 hash "
-        "value in the database. If the toggle 'Remember' is activated the password will be stored in 'settings.json' on your local machine.";
+        "value in the database. If the toggle 'Remember' is activated, the password will be stored in the Windows registry under the path 'HKEY_CURRENT_USER\\SOFTWARE\\alien' "
+        "or, in the case of other OS, in 'settings.json' on your local machine.";
 
-    std::string const LoginRememberTooltip = "If the toggle 'Remember' is activated the password will be stored in 'settings.json' on your local machine. It "
+    std::string const LoginRememberTooltip = "If the toggle 'Remember' is activated, the password will be stored in the Windows registry under the path "
+                                             "'HKEY_CURRENT_USER\\SOFTWARE\\alien' or, in the case of other OS, in 'settings.json' on your local machine. It "
                                              "is recommended not to choose a password that is used elsewhere.";
 
     std::string const LoginShareGpuInfoTooltip1 =
