@@ -328,9 +328,12 @@ void _BrowserWindow::processUserTable()
     AlienImGui::Group("Simulators");
     if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
-        ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
         auto isLoggedIn = _networkController->getLoggedInUserName().has_value();
-        ImGui::TableSetupColumn(isLoggedIn ? "GPU model" : "GPU model (visible if logged in)", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(200.0f));
+        ImGui::TableSetupColumn(
+            isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scale(200.0f));
+        ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
         ImGui::TableSetupColumn(
             "Stars received", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(100.0f));
         ImGui::TableSetupColumn("Stars given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
@@ -356,13 +359,13 @@ void _BrowserWindow::processUserTable()
                 processShortenedText(item->userName, isBoldFont);
 
                 ImGui::TableNextColumn();
-                if (item->timeSpent > 0) {
-                    processShortenedText(StringHelper::format(item->timeSpent) + "h", isBoldFont);
+                if (isLoggedIn && _loginDialog.lock()->isShareGpuInfo()) {
+                    processShortenedText(item->gpu, isBoldFont);
                 }
 
                 ImGui::TableNextColumn();
-                if (isLoggedIn && _loginDialog.lock()->isShareGpuInfo()) {
-                    processShortenedText(item->gpu, isBoldFont);
+                if (item->timeSpent > 0) {
+                    processShortenedText(StringHelper::format(item->timeSpent) + "h", isBoldFont);
                 }
 
                 ImGui::TableNextColumn();
@@ -515,7 +518,7 @@ void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
                 deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
             _simController->setClusteredSimulationData(deserializedSim.mainData);
         } catch (CudaMemoryAllocationException const& exception) {
-            errorMessage = std::string("Failed to load simulation: ") + exception.what();
+            errorMessage = exception.what();
         } catch (...) {
             errorMessage = "Failed to load simulation.";
         }

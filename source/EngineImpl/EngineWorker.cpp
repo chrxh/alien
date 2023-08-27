@@ -46,7 +46,7 @@ void EngineWorker::setImageResource(void* image)
 
 std::string EngineWorker::getGpuName() const
 {
-    return _cudaSimulation->getGpuName();
+    return _CudaSimulationFacade::checkAndReturnGpuInfo().gpuModelName;
 }
 
 void EngineWorker::tryDrawVectorGraphics(

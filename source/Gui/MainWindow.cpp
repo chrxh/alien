@@ -775,7 +775,7 @@ void _MainWindow::onOpenSimulation()
                             deserializedData.auxiliaryData.simulationParameters);
                         _simController->setClusteredSimulationData(deserializedData.mainData);
                     } catch (CudaMemoryAllocationException const& exception) {
-                        errorMessage = std::string("Failed to load simulation: ") + exception.what();
+                        errorMessage = exception.what();
                     } catch (...) {
                         errorMessage = "Failed to load simulation.";
                     }
