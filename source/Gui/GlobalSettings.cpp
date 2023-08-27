@@ -211,7 +211,7 @@ std::string GlobalSettings::getStringState(std::string const& key, std::string c
     return result;
 }
 
-void GlobalSettings::setStringState(std::string const& key, std::string const& value)
+void GlobalSettings::setStringState(std::string const& key, std::string value)
 {
 #ifdef _WIN32
     setStringToWinReg(key, value);

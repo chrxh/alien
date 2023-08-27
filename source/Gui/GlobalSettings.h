@@ -25,7 +25,7 @@ public:
     void setFloatState(std::string const& key, float value);
 
     std::string getStringState(std::string const& key, std::string const& defaultValue);
-    void setStringState(std::string const& key, std::string const& value);
+    void setStringState(std::string const& key, std::string value);
 
 private:
     GlobalSettings();
