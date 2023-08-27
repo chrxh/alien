@@ -43,6 +43,7 @@
 _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& settings)
 {
     initCuda();
+    CudaMemoryManager::getInstance().reset();
 
     _settings.generalSettings = settings.generalSettings;
     setSimulationParameters(settings.simulationParameters);
@@ -78,10 +79,6 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
 
 _CudaSimulationFacade::~_CudaSimulationFacade()
 {
-    if (_cudaResource) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaResource));
-    }
-
     _cudaSimulationData->free();
     _cudaRenderingData->free();
     _simulationStatistics->free();
@@ -565,7 +562,7 @@ void _CudaSimulationFacade::resizeArrays(ArraySizes const& additionals)
     log(Priority::Unimportant, "auxiliary data size: " + std::to_string(auxiliaryDataSize));
 
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
-    log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory acquired");
+    log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory used");
 }
 
 void _CudaSimulationFacade::checkAndProcessSimulationParameterChanges()

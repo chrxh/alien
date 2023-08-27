@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include "Base/LoggingService.h"
+
 #include "AlienImGui.h"
 #include "WindowController.h"
 
@@ -43,4 +45,5 @@ void MessageDialog::show(std::string const& title, std::string const& message)
     _show = true;
     _title = title;
     _message = message;
+    log(Priority::Important, "message dialog showing: '" + message + "'");
 }

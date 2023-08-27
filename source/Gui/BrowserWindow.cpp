@@ -521,7 +521,7 @@ void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
         }
 
         if (errorMessage) {
-            MessageDialog::getInstance().show("Error", *errorMessage);
+            printMessage("Error", *errorMessage);
             _simController->closeSimulation();
             _simController->newSimulation(
                 deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
