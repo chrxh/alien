@@ -2,11 +2,6 @@
 
 #include "EngineInterface/Descriptions.h"
 
-void _SimulationControllerImpl::initCuda()
-{
-    _worker.initCuda();
-}
-
 void _SimulationControllerImpl::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
 {
     _generalSettings = generalSettings;
@@ -26,9 +21,9 @@ void _SimulationControllerImpl::clear()
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationControllerImpl::registerImageResource(void* image)
+void _SimulationControllerImpl::setImageResource(void* image)
 {
-    _worker.registerImageResource(image);
+    _worker.setImageResource(image);
 }
 
 std::string _SimulationControllerImpl::getGpuName() const

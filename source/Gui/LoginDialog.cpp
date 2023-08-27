@@ -34,12 +34,18 @@ _LoginDialog::_LoginDialog(
     auto& settings = GlobalSettings::getInstance();
     _remember = settings.getBoolState("dialogs.login.remember", _remember);
     _shareGpuInfo = settings.getBoolState("dialogs.login.share gpu info", _shareGpuInfo);
+    _gpuModelName = settings.getStringState("dialogs.login.gpu model name", _gpuModelName);
+
     if (_remember) {
         _userName = settings.getStringState("dialogs.login.user name", "");
         _password = settings.getStringState("dialogs.login.password", "");
         if (!_userName.empty()) {
             LoginErrorCode errorCode;
-            if (!_networkController->login(errorCode, _userName, _password, getUserInfo())) {
+            UserInfo userInfo;
+            if (_shareGpuInfo) {
+                userInfo.gpu = _gpuModelName;
+            }
+            if (!_networkController->login(errorCode, _userName, _password, userInfo)) {
                 if (errorCode != LoginErrorCode_UnconfirmedUser) {
                     MessageDialog::getInstance().show("Error", "Login failed.");
                 }
@@ -53,6 +59,7 @@ _LoginDialog::~_LoginDialog()
     auto& settings = GlobalSettings::getInstance();
     settings.setBoolState("dialogs.login.remember", _remember);
     settings.setBoolState("dialogs.login.share gpu info", _shareGpuInfo);
+    settings.setStringState("dialogs.login.gpu model name", _gpuModelName);
     if (_remember) {
         settings.setStringState("dialogs.login.user name", _userName);
         settings.setStringState("dialogs.login.password", _password);
@@ -132,10 +139,15 @@ void _LoginDialog::processIntern()
 void _LoginDialog::onLogin()
 {
     LoginErrorCode errorCode;
-    if (!_networkController->login(errorCode, _userName, _password, getUserInfo())) {
+
+    auto userInfo = getUserInfo();
+
+    _gpuModelName = userInfo.gpu.value_or(std::string());   //save model info
+
+    if (!_networkController->login(errorCode, _userName, _password, userInfo)) {
         switch (errorCode) {
         case LoginErrorCode_UnconfirmedUser: {
-            _activateUserDialog->open(_userName, _password, getUserInfo());
+            _activateUserDialog->open(_userName, _password, userInfo);
         } break;
         default: {
             MessageDialog::getInstance().show("Error", "Login failed.");

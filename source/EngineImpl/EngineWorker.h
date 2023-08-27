@@ -36,12 +36,10 @@ class EngineWorker
 {
     friend class EngineWorkerGuard;
 public:
-    void initCuda();
-
     void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters);
     void clear();
 
-    void registerImageResource(void* image);
+    void setImageResource(void* image);
     std::string getGpuName() const;
 
     void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
@@ -137,7 +135,7 @@ private:
     //async jobs
     mutable std::mutex _mutexForAsyncJobs;
     std::optional<GpuSettings> _updateGpuSettingsJob;
-    std::optional<GLuint> _imageResourceToRegister;
+    std::optional<GLuint> _imageResource;
 
     struct ApplyForceJob
     {

@@ -10,12 +10,10 @@
 class _SimulationController
 {
 public:
-    virtual void initCuda() = 0;
-
     virtual void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& simulationParameters) = 0;
     virtual void clear() = 0;
 
-    virtual void registerImageResource(void* image) = 0;
+    virtual void setImageResource(void* image) = 0;
     virtual std::string getGpuName() const = 0;
 
     /**

@@ -15,13 +15,10 @@
 class _SimulationControllerImpl : public _SimulationController
 {
 public:
-
-    void initCuda() override;
-
     void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters) override;
     void clear() override;
 
-    void registerImageResource(void* image) override;
+    void setImageResource(void* image) override;
     std::string getGpuName() const override;
 
     /**
