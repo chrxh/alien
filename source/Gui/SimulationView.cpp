@@ -117,7 +117,7 @@ void _SimulationView::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
-    _simController->registerImageResource(reinterpret_cast<void*>(uintptr_t(_textureSimulationId)));
+    _simController->setImageResource(reinterpret_cast<void*>(uintptr_t(_textureSimulationId)));
 
     glGenTextures(1, &_textureFramebufferId1);
     glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);

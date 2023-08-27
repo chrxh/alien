@@ -509,9 +509,24 @@ void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
         _simController->closeSimulation();
         _statisticsWindow->reset();
 
-        _simController->newSimulation(
-            deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
-        _simController->setClusteredSimulationData(deserializedSim.mainData);
+        std::optional<std::string> errorMessage;
+        try {
+            _simController->newSimulation(
+                deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+            _simController->setClusteredSimulationData(deserializedSim.mainData);
+        } catch (CudaMemoryAllocationException const& exception) {
+            errorMessage = std::string("Failed to load simulation: ") + exception.what();
+        } catch (...) {
+            errorMessage = "Failed to load simulation.";
+        }
+
+        if (errorMessage) {
+            MessageDialog::getInstance().show("Error", *errorMessage);
+            _simController->closeSimulation();
+            _simController->newSimulation(
+                deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+        }
+
         _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
         _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
         _temporalControlWindow->onSnapshot();

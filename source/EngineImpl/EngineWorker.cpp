@@ -13,11 +13,6 @@ namespace
     std::chrono::milliseconds const StatisticsUpdate(30);
 }
 
-void EngineWorker::initCuda()
-{
-    _CudaSimulationFacade::initCuda();
-}
-
 void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
 {
     _accessState = 0;
@@ -26,9 +21,8 @@ void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& gener
     _dataTOCache = std::make_shared<_AccessDataTOCache>();
     _cudaSimulation = std::make_shared<_CudaSimulationFacade>(timestep, _settings);
 
-    if (_imageResourceToRegister) {
-        _cudaResource = _cudaSimulation->registerImageResource(*_imageResourceToRegister);
-        _imageResourceToRegister = std::nullopt;
+    if (_imageResource) {
+        _cudaResource = _cudaSimulation->registerImageResource(*_imageResource);
     }
     updateStatistics();
 }
@@ -39,15 +33,12 @@ void EngineWorker::clear()
     return _cudaSimulation->clear();
 }
 
-void EngineWorker::registerImageResource(void* image)
+void EngineWorker::setImageResource(void* image)
 {
     GLuint imageId = reinterpret_cast<uintptr_t>(image);
-    if (!_cudaSimulation) {
+    _imageResource = imageId;
 
-        //cuda is not initialized yet => register image resource later
-        _imageResourceToRegister = imageId;
-    } else {
-
+    if (_cudaSimulation) {
         EngineWorkerGuard access(this);
         _cudaResource = _cudaSimulation->registerImageResource(imageId);
     }
@@ -65,7 +56,6 @@ void EngineWorker::tryDrawVectorGraphics(
     double zoom)
 {
     EngineWorkerGuard access(this, FrameTimeout);
-
 
     if (!access.isTimeout()) {
         _cudaSimulation->drawVectorGraphics(

@@ -20,10 +20,12 @@
 
 #include "Definitions.cuh"
 
+struct cudaGraphicsResource;
+
 class _CudaSimulationFacade
 {
 public:
-    static void initCuda();
+    //static void initCuda();
 
     _CudaSimulationFacade(uint64_t timestep, Settings const& settings);
     ~_CudaSimulationFacade();
@@ -80,6 +82,14 @@ public:
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
 
 private:
+    void initCuda();
+    struct GpuInfo
+    {
+        int deviceNumber = 0;
+        std::string gpuModelName;
+    };
+    GpuInfo checkAndReturnGpuInfo();
+
     void syncAndCheck();
     void copyDataTOtoDevice(DataTO const& dataTO);
     void copyDataTOtoHost(DataTO const& dataTO);
@@ -88,6 +98,9 @@ private:
     void checkAndProcessSimulationParameterChanges();
 
     SimulationData getSimulationDataIntern() const;
+
+    GpuInfo _gpuInfo;
+    cudaGraphicsResource* _cudaResource = nullptr;
 
     mutable std::mutex _mutexForSimulationParameters;
     std::optional<SimulationParameters> _newSimulationParameters;

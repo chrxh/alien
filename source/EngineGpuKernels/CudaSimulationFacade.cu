@@ -40,92 +40,9 @@
 #include "RenderingData.cuh"
 #include "TestKernelsLauncher.cuh"
 
-namespace
-{
-    class CudaInitializer
-    {
-    public:
-        static void init() { getInstance(); }
-        static std::string getGpuName() { return getInstance()._gpuName; }
-
-        CudaInitializer()
-        {
-            int deviceNumber = getDeviceNumberOfHighestComputeCapability();
-
-            auto result = cudaSetDevice(deviceNumber);
-            if (result != cudaSuccess) {
-                throw SystemRequirementNotMetException("CUDA device could not be initialized.");
-            }
-
-            std::stringstream stream;
-            stream << "device " << deviceNumber << " is set";
-            log(Priority::Important, stream.str());
-        }
-
-        ~CudaInitializer() { cudaDeviceReset(); }
-
-    private:
-        static CudaInitializer& getInstance()
-        {
-            static CudaInitializer instance;
-            return instance;
-        }
-
-        int getDeviceNumberOfHighestComputeCapability()
-        {
-            int result = 0;
-            int numberOfDevices;
-            CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
-            if (numberOfDevices < 1) {
-                throw SystemRequirementNotMetException("No CUDA device found.");
-            }
-            {
-                std::stringstream stream;
-                if (1 == numberOfDevices) {
-                    stream << "1 CUDA device found";
-                } else {
-                    stream << numberOfDevices << " CUDA devices found";
-                }
-                log(Priority::Important, stream.str());
-            }
-
-            int highestComputeCapability = 0;
-            for (int deviceNumber = 0; deviceNumber < numberOfDevices; ++deviceNumber) {
-                cudaDeviceProp prop;
-                CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, deviceNumber));
-
-                std::stringstream stream;
-                stream << "device " << deviceNumber << ": " << prop.name << " with compute capability " << prop.major
-                       << "." << prop.minor;
-                log(Priority::Important, stream.str());
-
-                int computeCapability = prop.major * 100 + prop.minor;
-                if (computeCapability > highestComputeCapability) {
-                    result = deviceNumber;
-                    highestComputeCapability = computeCapability;
-                    _gpuName = prop.name;
-                }
-            }
-            if (highestComputeCapability < 600) {
-                throw SystemRequirementNotMetException(
-                    "No CUDA device with compute capability of 6.0 or higher found.");
-            }
-
-            return result;
-        }
-
-        std::string _gpuName;
-    };
-}
-
-void _CudaSimulationFacade::initCuda()
-{
-    CudaInitializer::init();
-}
-
 _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& settings)
 {
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+    initCuda();
 
     _settings.generalSettings = settings.generalSettings;
     setSimulationParameters(settings.simulationParameters);
@@ -161,6 +78,10 @@ _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& 
 
 _CudaSimulationFacade::~_CudaSimulationFacade()
 {
+    if (_cudaResource) {
+        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaResource));
+    }
+
     _cudaSimulationData->free();
     _cudaRenderingData->free();
     _simulationStatistics->free();
@@ -173,22 +94,27 @@ _CudaSimulationFacade::~_CudaSimulationFacade()
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numParticles);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numAuxiliaryData);
 
+    cudaDeviceReset();
     log(Priority::Important, "close simulation");
 }
 
 void* _CudaSimulationFacade::registerImageResource(GLuint image)
 {
-    cudaGraphicsResource* cudaResource;
+    //unregister old resource
+    if (_cudaResource) {
+        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaResource));
+    }
 
+    //register new resource
     CHECK_FOR_CUDA_ERROR(
-        cudaGraphicsGLRegisterImage(&cudaResource, image, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
+        cudaGraphicsGLRegisterImage(&_cudaResource, image, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
 
-    return reinterpret_cast<void*>(cudaResource);
+    return reinterpret_cast<void*>(_cudaResource);
 }
 
 std::string _CudaSimulationFacade::getGpuName()
 {
-    return CudaInitializer::getGpuName();
+    return _gpuInfo.gpuModelName;
 }
 
 void _CudaSimulationFacade::calcTimestep()
@@ -503,6 +429,64 @@ void _CudaSimulationFacade::testOnly_mutate(uint64_t cellId, MutationType mutati
     syncAndCheck();
 
     resizeArraysIfNecessary();
+}
+
+void _CudaSimulationFacade::initCuda()
+{
+    _gpuInfo = checkAndReturnGpuInfo();
+
+    auto result = cudaSetDevice(_gpuInfo.deviceNumber);
+    if (result != cudaSuccess) {
+        throw SystemRequirementNotMetException("CUDA device could not be initialized.");
+    }
+
+    cudaGetLastError(); //reset error code
+
+    std::stringstream stream;
+    stream << "device " << _gpuInfo.deviceNumber << " is set";
+    log(Priority::Important, stream.str());
+}
+
+auto _CudaSimulationFacade::checkAndReturnGpuInfo() -> GpuInfo
+{
+    GpuInfo result;
+
+    int numberOfDevices;
+    CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
+    if (numberOfDevices < 1) {
+        throw SystemRequirementNotMetException("No CUDA device found.");
+    }
+    {
+        std::stringstream stream;
+        if (1 == numberOfDevices) {
+            stream << "1 CUDA device found";
+        } else {
+            stream << numberOfDevices << " CUDA devices found";
+        }
+        log(Priority::Important, stream.str());
+    }
+
+    int highestComputeCapability = 0;
+    for (int deviceNumber = 0; deviceNumber < numberOfDevices; ++deviceNumber) {
+        cudaDeviceProp prop;
+        CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, deviceNumber));
+
+        std::stringstream stream;
+        stream << "device " << deviceNumber << ": " << prop.name << " with compute capability " << prop.major << "." << prop.minor;
+        log(Priority::Important, stream.str());
+
+        int computeCapability = prop.major * 100 + prop.minor;
+        if (computeCapability > highestComputeCapability) {
+            result.deviceNumber = deviceNumber;
+            highestComputeCapability = computeCapability;
+            result.gpuModelName = prop.name;
+        }
+    }
+    if (highestComputeCapability < 600) {
+        throw SystemRequirementNotMetException("No CUDA device with compute capability of 6.0 or higher found.");
+    }
+
+    return result;
 }
 
 void _CudaSimulationFacade::syncAndCheck()

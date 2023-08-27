@@ -19,14 +19,11 @@ int main(int, char**)
 
     try {
         simController = std::make_shared<_SimulationControllerImpl>();
+
         mainWindow = std::make_shared<_MainWindow>(simController, logger);
-
-        simController->initCuda();
-
         mainWindow->mainLoop();
-
         mainWindow->shutdown();
-        simController->closeSimulation();
+
     } catch (std::exception const& e) {
         auto message = std::string("The following exception occurred: ")
             + e.what();

@@ -22,7 +22,7 @@ private:
 
     void onLogin();
 
-    UserInfo getUserInfo();
+    UserInfo getUserInfo(); //can only be called when a simulation is loaded
 
     SimulationController _simController; 
     BrowserWindow _browserWindow;
@@ -35,4 +35,5 @@ private:
     bool _remember = true;
     std::string _userName;
     std::string _password;
+    std::string _gpuModelName;
 };

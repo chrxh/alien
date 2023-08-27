@@ -237,6 +237,8 @@ void _MainWindow::shutdown()
     glfwTerminate();
 
     _simulationView.reset();
+
+    _simController->closeSimulation();
 }
 
 char const* _MainWindow::initGlfw()
