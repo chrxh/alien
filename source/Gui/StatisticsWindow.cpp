@@ -525,6 +525,8 @@ void _StatisticsWindow::onSaveStatistics()
                 }
             };
             writeLabelAllColors("Cells");
+            writeLabelAllColors("Self-replicators");
+            writeLabelAllColors("Viruses");
             writeLabelAllColors("Cell connections");
             writeLabelAllColors("Energy particles");
             writeLabelAllColors("Total energy");
@@ -554,6 +556,8 @@ void _StatisticsWindow::onSaveStatistics()
             for (auto const& dataPointCollection : _longtermStatistics.dataPointCollectionHistory) {
                 file << static_cast<uint64_t>(dataPointCollection.time);
                 writeIntValueAllColors(dataPointCollection.numCells);
+                writeIntValueAllColors(dataPointCollection.numSelfReplicators);
+                writeIntValueAllColors(dataPointCollection.numViruses);
                 writeIntValueAllColors(dataPointCollection.numConnections);
                 writeIntValueAllColors(dataPointCollection.numParticles);
                 writeDoubleValueAllColors(dataPointCollection.totalEnergy);
