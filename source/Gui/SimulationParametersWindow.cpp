@@ -221,7 +221,7 @@ void _SimulationParametersWindow::processBase(
                 _savedPalette);
             AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters()
-                    .name("Cell colorization")
+                    .name("Cell coloring")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellColorization)
                     .values({"None", "Standard cell colors", "Mutants"})

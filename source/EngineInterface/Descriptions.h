@@ -167,6 +167,11 @@ struct SensorDescription
         color = value;
         return *this;
     }
+    SensorDescription& setMinDensity(float value)
+    {
+        minDensity = value;
+        return *this;
+    }
 };
 
 struct NerveDescription

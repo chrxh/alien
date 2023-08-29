@@ -798,9 +798,8 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
 
 TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
 {
-    auto parameters = _parameters;
-    parameters.cellFunctionConstructorMutationSelfReplication = true;
-    _simController->setSimulationParameters(parameters);
+    _parameters.cellFunctionConstructorMutationSelfReplication = true;
+    _simController->setSimulationParameters(_parameters);
 
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
@@ -816,6 +815,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
     auto actualCellById = getCellById(actualData);
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+
     EXPECT_EQ(GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor.genome.size());
     EXPECT_EQ(0, actualConstructor.genomeReadPosition);
 }
