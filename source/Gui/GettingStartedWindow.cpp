@@ -244,7 +244,7 @@ void _GettingStartedWindow::processIntern()
             "In addition to the background color, you can determine the coloring of the cells here. Each cell is assigned a specific color, which can be used "
             "for customization and which is also used by default for rendering. However, in evolution simulations, it can be very useful to color mutants "
             "differently. This allows for better visual evaluation of diversities, mutation rates, and successful mutants, etc. For this purpose, you can "
-            "switch the colorization  to the mutation id.");
+            "switch the cell coloring to the mutation id.");
         drawHeading2("Physics");
         drawParagraph("Basic physical properties can be modified in these settings. This includes adjusting the radiation intensity, various thresholds, and "
                      "the motion algorithm. Changes can have significant effects on performance and, in the worst case, may lead to program crashes.");

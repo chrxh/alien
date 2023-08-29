@@ -181,7 +181,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(AttackerTests, successDistributeToOneTransmittersWithSameColor)
+TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
 {
     DataDescription data;
     data.addCells({
@@ -219,7 +219,7 @@ TEST_F(AttackerTests, successDistributeToOneTransmittersWithSameColor)
 
     EXPECT_TRUE(actualAttackCell.activity.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell1.energy > origTransmitterCell1.energy + NEAR_ZERO);
-    EXPECT_TRUE(approxCompare(actualTransmitterCell2.energy, origTransmitterCell2.energy));
+    EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 

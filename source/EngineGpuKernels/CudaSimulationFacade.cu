@@ -417,6 +417,15 @@ void _CudaSimulationFacade::resizeArraysIfNecessary(ArraySizes const& additional
 
 void _CudaSimulationFacade::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
+    {
+        std::lock_guard lock(_mutexForSimulationParameters);
+        if (_newSimulationParameters) {
+            _settings.simulationParameters = *_newSimulationParameters;
+            CHECK_FOR_CUDA_ERROR(
+                cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+            _newSimulationParameters.reset();
+        }
+    }
     _testKernels->testOnly_mutate(_settings.gpuSettings, getSimulationDataIntern(), cellId, mutationType);
     syncAndCheck();
 

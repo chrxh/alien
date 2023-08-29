@@ -94,7 +94,7 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription()),
+             .setCellFunction(SensorDescription().setMinDensity(0.3f)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
@@ -300,7 +300,7 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription()),
+             .setCellFunction(SensorDescription().setMinDensity(0.3f)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})

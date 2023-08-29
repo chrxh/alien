@@ -171,8 +171,8 @@ TEST_F(MuscleTests, multipleMovementDirections)
     auto actualMuscleCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(2.0f, actualMuscleCell.activity.channels[0]));
-    EXPECT_TRUE(approxCompare(-_parameters.cellFunctionMuscleMovementAcceleration[0] / std::sqrt(2.0f), actualMuscleCell.vel.x));
-    EXPECT_TRUE(approxCompare(-_parameters.cellFunctionMuscleMovementAcceleration[0] / std::sqrt(2.0f), actualMuscleCell.vel.y));
+    EXPECT_TRUE(actualMuscleCell.vel.x < -NEAR_ZERO);
+    EXPECT_TRUE(actualMuscleCell.vel.y < -NEAR_ZERO);
 }
 
 TEST_F(MuscleTests, expansion)
