@@ -167,14 +167,16 @@ public:
         MEMBER_DECLARATION(SwitcherParameters, int, textWidth, 100);
         MEMBER_DECLARATION(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
+        MEMBER_DECLARATION(SwitcherParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void Switcher(SwitcherParameters& parameters, int& value);
+    static bool Switcher(SwitcherParameters& parameters, int& value);
 
     struct ComboColorParameters
     {
         MEMBER_DECLARATION(ComboColorParameters, std::string, name, "");
         MEMBER_DECLARATION(ComboColorParameters, int, textWidth, 100);
         MEMBER_DECLARATION(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(ComboColorParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ComboColor(ComboColorParameters const& parameters, int& value);
 
@@ -256,12 +258,14 @@ public:
     {
         MEMBER_DECLARATION(CellFunctionComboParameters, std::string, name, "");
         MEMBER_DECLARATION(CellFunctionComboParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(CellFunctionComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool CellFunctionCombo(CellFunctionComboParameters& parameters, int& value);
     struct AngleAlignmentComboParameters
     {
         MEMBER_DECLARATION(AngleAlignmentComboParameters, std::string, name, "");
         MEMBER_DECLARATION(AngleAlignmentComboParameters, int, textWidth, 100);
+        MEMBER_DECLARATION(AngleAlignmentComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, int& value);
 

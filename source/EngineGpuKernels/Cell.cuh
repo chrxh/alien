@@ -70,6 +70,7 @@ struct SensorFunction
     float angle;
     float minDensity;
     int color;
+    int targetedCreatureId;
 };
 
 struct NerveFunction
@@ -128,7 +129,7 @@ struct Cell
 
     //general
     CellConnection connections[MAX_CELL_BONDS];
-    float2 absPos;
+    float2 pos;
     float2 vel;
     int maxConnections;
     int numConnections;

@@ -16,6 +16,7 @@
 
 #include "CellFunctionStrings.h"
 #include "StyleRepository.h"
+#include "Tooltips.h"
 
 namespace
 {
@@ -34,7 +35,7 @@ void AlienImGui::HelpMarker(std::string const& text)
 {
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextInfoColor);
-    ImGui::Text("(?)");
+    ImGui::Text(ICON_FA_QUESTION_CIRCLE);
     ImGui::PopStyleColor();
     if (ImGui::IsItemHovered()) {
         ImGui::BeginTooltip();
@@ -351,10 +352,12 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     return result;
 }
 
-void AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
+bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
 {
-    auto numValues = toInt(parameters._values.size());
     static auto constexpr buttonWidth = 20;
+
+    auto result = false;
+    auto numValues = toInt(parameters._values.size());
 
     std::string text = parameters._values[value];
 
@@ -367,15 +370,33 @@ void AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_CARET_LEFT, ImVec2(scale(buttonWidth), 0))) {
         value = (value + numValues - 1) % numValues;
+        result = true;
     }
 
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_CARET_RIGHT, ImVec2(scale(buttonWidth), 0))) {
         value = (value + 1) % numValues;
+        result = true;
+    }
+
+    ImGui::SameLine();
+    if (parameters._defaultValue) {
+        ImGui::BeginDisabled(value == *parameters._defaultValue);
+        if (revertButton(parameters._name)) {
+            value = *parameters._defaultValue;
+            result = true;
+        }
+        ImGui::EndDisabled();
     }
 
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
+
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
+
+    return result;
 }
 
 bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
@@ -418,6 +439,9 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
     ImGui::SetCursorPos({backupPos.x, backupPos.y + style.FramePadding.y});
 
     AlienImGui::Text(parameters._name);
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
     ImGui::SameLine();
     ImGui::Dummy(ImVec2(0, ImGui::GetTextLineHeight() + style.FramePadding.y));
 
@@ -973,7 +997,7 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
 
     //zoom buttons
     ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10), ImGui::GetScrollY() + windowSize.y - scale(40)});
-    if (ImGui::BeginChild("##buttons", ImVec2(100, 30), false)) {
+    if (ImGui::BeginChild("##buttons", ImVec2(scale(100), scale(30)), false)) {
         ImGui::SetCursorPos({0, 0});
         ImGui::PushStyleColor(ImGuiCol_Button, color);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
@@ -1004,8 +1028,9 @@ bool AlienImGui::CellFunctionCombo(CellFunctionComboParameters& parameters, int&
     modCellFunctionStrings.insert(modCellFunctionStrings.begin(), noneString);
 
     value = (value + 1) % CellFunction_Count;
-    auto result =
-        AlienImGui::Combo(AlienImGui::ComboParameters().name(parameters._name).values(modCellFunctionStrings).textWidth(parameters._textWidth), value);
+    auto result = AlienImGui::Combo(
+        AlienImGui::ComboParameters().name(parameters._name).values(modCellFunctionStrings).textWidth(parameters._textWidth).tooltip(parameters._tooltip),
+        value);
     value = (value + CellFunction_Count - 1) % CellFunction_Count;
     return result;
 }
@@ -1013,7 +1038,8 @@ bool AlienImGui::CellFunctionCombo(CellFunctionComboParameters& parameters, int&
 bool AlienImGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, int& value)
 {
     std::vector const AngleAlignmentStrings = {"None"s, "180 deg"s, "120 deg"s, "90 deg"s, "72 deg"s, "60 deg"s};
-    return AlienImGui::Combo(AlienImGui::ComboParameters().name(parameters._name).values(AngleAlignmentStrings).textWidth(parameters._textWidth), value);
+    return AlienImGui::Combo(
+        AlienImGui::ComboParameters().name(parameters._name).values(AngleAlignmentStrings).textWidth(parameters._textWidth).tooltip(parameters._tooltip), value);
 }
 
 void AlienImGui::NeuronSelection(
@@ -1050,23 +1076,8 @@ void AlienImGui::NeuronSelection(
             selectedInput = i;
         }
         ImGui::PopStyleColor(3);
-        if (i == 0) {
-            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT
-                    " Constructor: 0 = construction failed, 1 = construction successful\n" ICON_FA_CARET_RIGHT " Sensor: 0 = nothing found, 1 = region found");
-        }
-        if (i == 1) {
-            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT " Sensor: cell density of found region");
-        }
-        if (i == 2) {
-            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT " Sensor: distance to found region");
-        }
-        if (i == 3) {
-            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell\n" ICON_FA_CARET_RIGHT
-                    " Sensor: relative angle of found region (when 'Scan vicinity' is activated)");
-        }
-        if (i > 3) {
-            Tooltip("From\n" ICON_FA_CARET_RIGHT " Neuron: output of other neuron cell");
-        }
+
+        Tooltip(Const::NeuronInputTooltipByChannel[i], false);
 
         auto buttonSize = ImGui::GetItemRectSize();
         inputPos[i] = RealVector2D(
@@ -1082,21 +1093,7 @@ void AlienImGui::NeuronSelection(
             selectedOutput = i;
         }
         ImGui::PopStyleColor(3);
-        if (i == 0) {
-            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell\n" ICON_FA_CARET_RIGHT
-                    " Constructor: = 0 means do nothing, abs(*) > threshold triggers cell construction\n" ICON_FA_CARET_RIGHT
-                    " Attacker: = 0 means do nothing, abs(*) > threshold triggers attacking of nearby cells\n" ICON_FA_CARET_RIGHT
-                    " Sensor: = 0 means do nothing, abs(*) > threshold triggers scanning for cells\n" ICON_FA_CARET_RIGHT
-                    " Injector: = 0 means do nothing, abs(*) > threshold triggers injection of a genome to other constructors\n" ICON_FA_CARET_RIGHT
-                    " Muscle: abs(*) intensity of muscle process and sign(*) direction of muscle process");
-        }
-        if (i == 1) {
-            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell\n" ICON_FA_CARET_RIGHT
-                    " Muscle: abs(*) > threshold triggers tangential movement during bending");
-        }
-        if (i > 1) {
-            Tooltip("Used by\n" ICON_FA_CARET_RIGHT " Neuron: input to other neuron cell");
-        }
+        Tooltip(Const::NeuronOutputTooltipByChannel[i], false);
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         for (int j = 0; j < MAX_CHANNELS; ++j) {

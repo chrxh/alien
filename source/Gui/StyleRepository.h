@@ -13,11 +13,11 @@ namespace Const
     int64_t const SimulationSliderColor_Base = 0xff4c4c4c;
     int64_t const SimulationSliderColor_Active = 0xff6c6c6c;
     int64_t const TextDecentColor = 0xff909090;
-    int64_t const TextInfoColor = 0xff30b0b0;
+    int64_t const TextInfoColor = 0xff308787;
 
-    ImColor const MenuButtonColor = ImColor::HSV(0.6f, 0.3f, 0.35f);
+    ImColor const MenuButtonColor = ImColor::HSV(0.6f, 0.6f, 0.5f);
     ImColor const MenuButtonHoveredColor = ImColor::HSV(0.6f, 1.0f, 1.0f);
-    ImColor const MenuButtonActiveColor = ImColor::HSV(0.6f, 0.6f, 0.6f);
+    ImColor const MenuButtonActiveColor = ImColor::HSV(0.6f, 0.8f, 0.7f);
 
     ImColor const ShutdownButtonColor = ImColor::HSV(0.0f, 0.6f, 0.6f);
     ImColor const ShutdownButtonHoveredColor = ImColor::HSV(0.0f, 1.0f, 1.0f);
@@ -61,6 +61,10 @@ namespace Const
     ImColor const NavigationCursorColor = ImColor::HSV(0, 0.0f, 1.0f, 0.4f);
     ImColor const EditCursorColor = ImColor::HSV(0.6, 0.6f, 1.0f, 0.7f);
 
+    ImColor const VersionOkColor = ImColor::HSV(0.58f, 0.0f, 1.0f);
+    ImColor const VersionOutdatedColor = ImColor::HSV(0.0f, 0.0f, 0.6f);
+    ImColor const VersionNewerColor =ImColor::HSV(0.0f, 0.2f, 1.0f);
+
     float const WindowAlpha = 0.9f;
     float const SliderBarWidth = 30.0f;
 }
@@ -92,7 +96,6 @@ public:
 private:
     StyleRepository() = default;
 
-    float _contentScaleFactor = 1.0f;
     ImFont* _iconFont = nullptr;
     ImFont* _smallBoldFont = nullptr;
     ImFont* _mediumBoldFont = nullptr;

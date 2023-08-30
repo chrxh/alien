@@ -1,11 +1,13 @@
 #pragma once
 
+#include "AlienDialog.h"
 #include "Definitions.h"
 
-class _LoginDialog
+class _LoginDialog : public _AlienDialog
 {
 public:
     _LoginDialog(
+        SimulationController const& simController, 
         BrowserWindow const& browserWindow,
         CreateUserDialog const& createUserDialog,
         ActivateUserDialog const& activateUserDialog,
@@ -13,20 +15,24 @@ public:
         NetworkController const& networkController);
     ~_LoginDialog();
 
-    void process();
-
-    void show();
+    bool isShareGpuInfo() const;
 
 private:
+    void processIntern();
+
     void onLogin();
 
+    void saveSettings();
+    UserInfo getUserInfo(); //can only be called when a simulation is loaded
+
+    SimulationController _simController; 
     BrowserWindow _browserWindow;
     CreateUserDialog _createUserDialog;
     ActivateUserDialog _activateUserDialog;
     NetworkController _networkController;
     ResetPasswordDialog _resetPasswordDialog;
 
-    bool _show = false;
+    bool _shareGpuInfo = true;
     bool _remember = true;
     std::string _userName;
     std::string _password;

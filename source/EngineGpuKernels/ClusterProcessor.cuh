@@ -74,10 +74,10 @@ __device__ __inline__ void ClusterProcessor::findClusterBoundaries(SimulationDat
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto cell = cells.at(index);
         auto cluster = cells.at(cell->clusterIndex);
-        if (cell->absPos.x < data.worldSize.x / 3) {
+        if (cell->pos.x < data.worldSize.x / 3) {
             atomicOr(&cluster->clusterBoundaries, 1);
         }
-        if (cell->absPos.y < data.worldSize.y / 3) {
+        if (cell->pos.y < data.worldSize.y / 3) {
             atomicOr(&cluster->clusterBoundaries, 2);
         }
     }
@@ -95,7 +95,7 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterPosAndVel(Simulati
         atomicAdd(&cluster->clusterVel.y, cell->vel.y);
 
         //topology correction
-        auto cellPos = cell->absPos;
+        auto cellPos = cell->pos;
         if ((cluster->clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
             cellPos.x -= data.worldSize.x;
         }
@@ -122,7 +122,7 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(Simula
         auto clusterPos = cluster->clusterPos / cluster->numCellsInCluster;
 
         //topology correction
-        auto cellPos = cell->absPos;
+        auto cellPos = cell->pos;
         if ((cluster->clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
             cellPos.x -= data.worldSize.x;
         }
@@ -149,7 +149,7 @@ __device__ __inline__ void ClusterProcessor::applyClusterData(SimulationData& da
         auto clusterPos = cluster->clusterPos / cluster->numCellsInCluster;
         auto clusterVel = cluster->clusterVel / cluster->numCellsInCluster;
 
-        auto cellPos = cell->absPos;
+        auto cellPos = cell->pos;
         if ((cluster->clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
             cellPos.x -= data.worldSize.x;
         }
@@ -161,7 +161,7 @@ __device__ __inline__ void ClusterProcessor::applyClusterData(SimulationData& da
         auto angularVel = Physics::angularVelocity(cluster->clusterAngularMomentum, cluster->clusterAngularMass);
 
         auto rigidity = SpotCalculator::calcParameter(
-                            &SimulationParametersSpotValues::rigidity, &SimulationParametersSpotActivatedValues::rigidity, data, cell->absPos)
+                            &SimulationParametersSpotValues::rigidity, &SimulationParametersSpotActivatedValues::rigidity, data, cell->pos)
             * cell->stiffness * cell->stiffness;
         cell->vel = cell->vel * (1.0f - rigidity) + Physics::tangentialVelocity(r, clusterVel, angularVel) * rigidity;
     }

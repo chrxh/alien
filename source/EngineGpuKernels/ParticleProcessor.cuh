@@ -39,7 +39,7 @@ __inline__ __device__ void ParticleProcessor::movement(SimulationData& data)
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.objects.particlePointers.at(particleIndex);
-        particle->absPos = particle->absPos + particle->vel;
+        particle->absPos = particle->absPos + particle->vel * cudaSimulationParameters.timestepSize;
         data.particleMap.correctPosition(particle->absPos);
     }
 }
@@ -73,11 +73,12 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
         } else {
             if (auto cell = data.cellMap.getFirst(particle->absPos + particle->vel)) {
                 if (cell->barrier) {
-                    auto vr = particle->vel;
-                    auto r = data.cellMap.getCorrectedDirection(particle->absPos - cell->absPos);
+                    auto vr = particle->vel - cell->vel;
+                    auto r = data.cellMap.getCorrectedDirection(particle->absPos - cell->pos);
                     auto dot_vr_r = Math::dot(vr, r);
                     if (dot_vr_r < 0) {
-                        particle->vel = vr - r * 2 * dot_vr_r / Math::lengthSquared(r);
+                        auto truncated_r_squared = max(0.1f, Math::lengthSquared(r));
+                        particle->vel = vr - r * 2 * dot_vr_r / truncated_r_squared + cell->vel;
                     }
                 } else {
                     if (particle->lastAbsorbedCell == cell) {
@@ -87,7 +88,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                         &SimulationParametersSpotValues::radiationAbsorption,
                         &SimulationParametersSpotActivatedValues::radiationAbsorption,
                         data,
-                        cell->absPos,
+                        cell->pos,
                         cell->color);
 
                     if (radiationAbsorption < NEAR_ZERO) {
@@ -99,6 +100,9 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                     if (particle->tryLock()) {
 
                         auto energyToTransfer = particle->energy * radiationAbsorption;
+                        energyToTransfer *= max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionVelocityPenalty[cell->color]);
+
+
                         if (particle->energy < 1) {
                             energyToTransfer = particle->energy;
                         }
@@ -222,6 +226,7 @@ __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, floa
     if (particleEnergy > NEAR_ZERO) {
         ObjectFactory factory;
         factory.init(&data);
+        data.cellMap.correctPosition(pos);
         factory.createParticle(particleEnergy, pos, vel, color);
     }
 

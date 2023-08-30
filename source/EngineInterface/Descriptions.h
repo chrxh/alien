@@ -150,8 +150,9 @@ struct ConstructorDescription
 struct SensorDescription
 {
     std::optional<float> fixedAngle;  //nullopt = entire neighborhood
-    float minDensity = 0.3f;
+    float minDensity = 0.05f;
     int color = 0;
+    int targetedCreatureId = 0;
 
     auto operator<=>(SensorDescription const&) const = default;
 
@@ -164,6 +165,11 @@ struct SensorDescription
     SensorDescription& setColor(int value)
     {
         color = value;
+        return *this;
+    }
+    SensorDescription& setMinDensity(float value)
+    {
+        minDensity = value;
         return *this;
     }
 };

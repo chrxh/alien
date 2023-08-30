@@ -26,7 +26,9 @@
         "SELECT 
             u.ID as id,
             u.NAME as userName,
-            u.TIMESTAMP as timestamp
+            u.TIMESTAMP as timestamp,
+            u.TIME_SPENT as timeSpent,
+            u.GPU as gpu
         FROM
             user u
         WHERE
@@ -36,13 +38,16 @@
         $starsReceived = is_null($starsReceivedByUser[$obj->id]) ? 0 : $starsReceivedByUser[$obj->id];
         $likesGiven = is_null($likesGivenByUser[$obj->id]) ? 0 : $likesGivenByUser[$obj->id];
         $online = !is_null($onlineByUser[$obj->id]);
-
+        $timeSpent = !is_null($obj->timeSpent) ? (int)$obj->timeSpent : 0;
+        $gpu = !is_null($obj->gpu) ? $obj->gpu : "";
         $result[] = [
             "userName" => htmlspecialchars($obj->userName),
             "starsReceived" => $starsReceived,
             "starsGiven" => $likesGiven,
             "timestamp" => $obj->timestamp,
-            "online" => $online
+            "online" => $online,
+            "timeSpent" => $timeSpent,
+            "gpu" => $gpu
         ];
     }
 

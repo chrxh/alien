@@ -26,6 +26,8 @@ private:
     void processWindows();
     void processControllers();
 
+    void onOpenSimulation();
+    void onSaveSimulation();
     void onRunSimulation();
     void onPauseSimulation();
 
@@ -48,11 +50,10 @@ private:
     ShaderWindow _shaderWindow;
     RadiationSourcesWindow _radiationSourcesWindow;
 
+    ExitDialog _exitDialog;
     GpuSettingsDialog _gpuSettingsDialog;
     MassOperationsDialog _massOperationsDialog;
     NewSimulationDialog _newSimulationDialog;
-    OpenSimulationDialog _openSimulationDialog; 
-    SaveSimulationDialog _saveSimulationDialog; 
     DisplaySettingsDialog _displaySettingsDialog;
     PatternAnalysisDialog _patternAnalysisDialog;
     AboutDialog _aboutDialog;
@@ -67,7 +68,6 @@ private:
     ImageToPatternDialog _imageToPatternDialog;
 
     ModeController _modeController;
-    WindowController _windowController;
     SimulationController _simController;
     StartupController _startupController;
     AutosaveController _autosaveController; 
@@ -77,7 +77,7 @@ private:
     NetworkController _networkController;
     BalancerController _balancerController;
 
-    bool _onClose = false;
+    bool _onExit = false;
     bool _simulationMenuToggled = false;
     bool _networkMenuToggled = false;
     bool _windowMenuToggled = false;
@@ -86,6 +86,7 @@ private:
     bool _editorMenuToggled = false;
     bool _toolsMenuToggled = false;
     bool _helpMenuToggled = false;
-    bool _showExitDialog = false;
     bool _renderSimulation = true;
+
+    std::string _startingPath;
 };

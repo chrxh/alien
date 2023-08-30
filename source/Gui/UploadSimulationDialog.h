@@ -1,9 +1,10 @@
 #pragma once
 
+#include "AlienDialog.h"
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
 
-class _UploadSimulationDialog
+class _UploadSimulationDialog : public _AlienDialog
 {
 public:
     _UploadSimulationDialog(
@@ -13,11 +14,10 @@ public:
         Viewport const& viewport);
     ~_UploadSimulationDialog();
 
-    void process();
-
-    void show();
-
 private:
+    void processIntern();
+    void openIntern();
+
     void onUpload();
 
     BrowserWindow _browserWindow;
@@ -25,7 +25,6 @@ private:
     Viewport _viewport;
     NetworkController _networkController;
 
-    bool _show = false;
     std::string _simName;
     std::string _simDescription;
 

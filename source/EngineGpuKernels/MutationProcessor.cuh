@@ -10,6 +10,7 @@
 class MutationProcessor
 {
 public:
+
     __inline__ __device__ static void applyRandomMutation(SimulationData& data, Cell* cell);
 
     __inline__ __device__ static void neuronDataMutation(SimulationData& data, Cell* cell);
@@ -40,67 +41,67 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         &SimulationParametersSpotValues::cellFunctionConstructorMutationNeuronDataProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationNeuronDataProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationDataProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationPropertiesProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationPropertiesProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationGeometryProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationGeometryProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationGeometryProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationCustomGeometryProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationCustomGeometryProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCustomGeometryProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationCellFunctionProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationCellFunctionProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCellFunctionProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationInsertionProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationInsertionProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationInsertionProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationDeletionProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationDeletionProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDeletionProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationTranslationProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationTranslationProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationTranslationProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationDuplicationProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationDuplicationProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDuplicationProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationColorProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationColorProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationColorProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationUniformColorProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationUniformColorProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationUniformColorProbability,
         data,
-        cell->absPos,
+        cell->pos,
         cell->color);
 
     if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
@@ -185,7 +186,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
                 return;
             }
             genome[nodeAddress + randomDelta] = data.numberGen1.randomByte();
-            adaptMutationId(data, constructor);
+            //adaptMutationId(data, constructor);
         }
 
         //cell function specific mutation
@@ -200,7 +201,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
                     return;
                 }
                 genome[nodeAddress + Const::CellBasicBytes + randomDelta] = data.numberGen1.randomByte();
-                adaptMutationId(data, constructor);
+                //adaptMutationId(data, constructor);
             }
         }
     });
@@ -246,7 +247,7 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
                 subgenome[nodeAddress + Const::CellAnglePos] = GenomeDecoder::convertAngleToByte(generationResult.angle);
                 subgenome[nodeAddress + Const::CellRequiredConnectionsPos] =
                     GenomeDecoder::convertOptionalByteToByte(generationResult.numRequiredAdditionalConnections);
-            });
+            }); 
         }
     }
     if (subgenome[delta] != mutatedByte) {
@@ -342,7 +343,7 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
     }
     GenomeDecoder::setNextCellFunctionType(targetGenome, nodeAddress, newCellFunction);
     GenomeDecoder::setRandomCellFunctionData(data, targetGenome, nodeAddress + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeHeaderSize);
-    if (!GenomeDecoder::isNextCellSelfCopy(targetGenome, nodeAddress)) {
+    if (newCellFunction == CellFunction_Constructor && !makeSelfCopy) {
         GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);  //currently no subgenome with separation property wished
     }
 
@@ -367,12 +368,15 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
     auto genomeSize = toInt(constructor.genomeSize);
+    if (genomeSize < Const::GenomeHeaderSize) {
+        return;
+    }
 
     int subGenomesSizeIndices[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH + 1];
     int numSubGenomesSizeIndices;
 
     int nodeAddress = 0;
-    if (data.numberGen1.randomBool() && genomeSize > Const::GenomeHeaderSize) {
+    if (data.numberGen1.randomBool() && data.numberGen1.randomBool() && genomeSize > Const::GenomeHeaderSize) {
 
         //choose a random node position to a constructor with a subgenome
         int numConstructorsWithSubgenome = 0;
@@ -430,7 +434,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     GenomeDecoder::setNextCellFunctionType(targetGenome, nodeAddress, newCellFunction);
     GenomeDecoder::setNextCellColor(targetGenome, nodeAddress, newColor);
     GenomeDecoder::setRandomCellFunctionData(data, targetGenome, nodeAddress + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeHeaderSize);
-    if (!GenomeDecoder::isNextCellSelfCopy(targetGenome, nodeAddress)) {
+    if (newCellFunction == CellFunction_Constructor && !makeSelfCopy) {
         GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);      //currently no subgenome with separation property wished
     }
 

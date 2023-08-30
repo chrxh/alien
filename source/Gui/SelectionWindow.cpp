@@ -8,7 +8,7 @@
 #include "EditorModel.h"
 
 _SelectionWindow::_SelectionWindow(EditorModel const& editorModel)
-    : _AlienWindow("Selection", "editor.selection", true), _editorModel(editorModel)
+    : _AlienWindow("Selection", "windows.selection", true), _editorModel(editorModel)
 {
 }
 
@@ -22,7 +22,7 @@ void _SelectionWindow::processIntern()
     ImGui::PopStyleColor();
     ImGui::PopFont();
 
-    ImGui::Text("Cells from clusters");
+    ImGui::Text("Connected cells");
     ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
     ImGui::TextUnformatted(StringHelper::format(selection.numClusterCells).c_str());

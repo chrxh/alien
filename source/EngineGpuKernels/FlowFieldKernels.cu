@@ -56,11 +56,15 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
         if (cell->barrier) {
             continue;
         }
+        int numFlowFields = 0; 
         for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-            accelerations[i] = calcAcceleration(data.cellMap, cell->absPos, i);
+
+            if (cudaSimulationParameters.spots[i].flowType != FlowType_None) {
+                accelerations[numFlowFields] = calcAcceleration(data.cellMap, cell->pos, i);
+                ++numFlowFields;
+            }
         }
-        auto resultingAcceleration =
-            SpotCalculator::calcResultingValue(data.cellMap, cell->absPos, float2{0, 0}, accelerations);
+        auto resultingAcceleration = SpotCalculator::calcResultingFlowField(data.cellMap, cell->pos, float2{0, 0}, accelerations);
         cell->shared1 += resultingAcceleration;
     }
 }

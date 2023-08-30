@@ -7,6 +7,7 @@
 #include "Base/Definitions.h"
 #include "Base/StringHelper.h"
 #include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SpaceCalculator.h"
 
 #include "StyleRepository.h"
 #include "StatisticsWindow.h"
@@ -16,7 +17,8 @@
 
 namespace
 {
-    auto const LeftColumnWidth = 180.0f;
+    auto constexpr LeftColumnWidth = 180.0f;
+    auto constexpr RestorePositionTolerance = 3.0f;
 }
 
 _TemporalControlWindow::_TemporalControlWindow(
@@ -29,10 +31,7 @@ _TemporalControlWindow::_TemporalControlWindow(
 
 void _TemporalControlWindow::onSnapshot()
 {
-    Snapshot newSnapshot;
-    newSnapshot.timestep = _simController->getCurrentTimestep();
-    newSnapshot.data = _simController->getSimulationData();
-    _snapshot = newSnapshot;
+    _snapshot = createSnapshot();
 }
 
 void _TemporalControlWindow::processIntern()
@@ -140,8 +139,7 @@ void _TemporalControlWindow::processStepBackwardButton()
     ImGui::BeginDisabled(_history.empty() || _simController->isSimulationRunning());
     if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_LEFT)) {
         auto const& snapshot = _history.back();
-        _simController->setCurrentTimestep(snapshot.timestep);
-        _simController->setSimulationData(snapshot.data);
+        applySnapshot(snapshot);
         _history.pop_back();
     }
     ImGui::EndDisabled();
@@ -151,11 +149,7 @@ void _TemporalControlWindow::processStepForwardButton()
 {
     ImGui::BeginDisabled(_simController->isSimulationRunning());
     if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_RIGHT)) {
-        Snapshot newSnapshot;
-        newSnapshot.timestep = _simController->getCurrentTimestep();
-        newSnapshot.data = _simController->getSimulationData();
-        _history.emplace_back(newSnapshot);
-
+        _history.emplace_back(createSnapshot());
         _simController->calcSingleTimestep();
     }
     ImGui::EndDisabled();
@@ -174,11 +168,53 @@ void _TemporalControlWindow::processRestoreButton()
     ImGui::BeginDisabled(!_snapshot);
     if (AlienImGui::ToolbarButton(ICON_FA_UNDO)) {
         _statisticsWindow->reset();
-        _simController->setCurrentTimestep(_snapshot->timestep);
-        _simController->setSimulationData(_snapshot->data);
+        applySnapshot(*_snapshot);
         _simController->removeSelection();
         _history.clear();
+
         printOverlayMessage("Snapshot restored");   //flashback?
     }
     ImGui::EndDisabled();
+}
+
+_TemporalControlWindow::Snapshot _TemporalControlWindow::createSnapshot()
+{
+    Snapshot result;
+    result.timestep = _simController->getCurrentTimestep();
+    result.data = _simController->getSimulationData();
+    result.parameters = _simController->getSimulationParameters();
+    return result;
+}
+
+
+void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
+{
+    auto parameters = _simController->getSimulationParameters();
+    auto const& origParameters = snapshot.parameters;
+
+    if (origParameters.numParticleSources == parameters.numParticleSources) {
+        for (int i = 0; i < parameters.numParticleSources; ++i) {
+            restorePosition(parameters.particleSources[i], origParameters.particleSources[i], snapshot.timestep);
+        }
+    }
+
+    if (origParameters.numSpots == parameters.numSpots) {
+        for (int i = 0; i < parameters.numSpots; ++i) {
+            restorePosition(parameters.spots[i], origParameters.spots[i], snapshot.timestep);
+        }
+    }
+
+    _simController->setCurrentTimestep(snapshot.timestep);
+    _simController->setSimulationData(snapshot.data);
+    _simController->setSimulationParameters(parameters);
+}
+
+template <typename MovedObjectType>
+void _TemporalControlWindow::restorePosition(MovedObjectType& movedObject, MovedObjectType const& origMovedObject, uint64_t origTimestep)
+{
+    auto origMovedObjectClone = origMovedObject;
+    auto movedObjectClone = movedObject;
+
+    movedObject.posX = origMovedObject.posX;
+    movedObject.posY = origMovedObject.posY;
 }

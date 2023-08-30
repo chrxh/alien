@@ -4,12 +4,13 @@
 
 #include "Definitions.h"
 
-class _WindowController
+class WindowController
 {
 public:
-    _WindowController();
-    ~_WindowController();
+    static WindowController& getInstance();
+    ~WindowController();
 
+    void init();
     void shutdown();
 
     struct WindowData
@@ -36,7 +37,11 @@ public:
     int getFps() const;
     void setFps(int value);
 
+    float getContentScaleFactor() const;
+    float getLastContentScaleFactor() const;
+
 private:
+    WindowController();
 
     void updateWindowSize();
     std::string createLogString(GLFWvidmode const& videoMode) const;
@@ -45,6 +50,8 @@ private:
     GLFWvidmode* _desktopVideoMode;
     IntVector2D _startupSize;
     IntVector2D _sizeInWindowedMode = {1920 * 3 / 4, 1080 * 3 / 4};
+    float _contentScaleFactor = 1.0f;
+    float _lastContentScaleFactor = 1.0f;
     int _fps = 40;
 
     std::string _mode;

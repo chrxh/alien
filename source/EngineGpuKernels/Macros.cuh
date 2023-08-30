@@ -14,21 +14,23 @@ void checkAndThrowError(T result, char const *const func, const char *const file
     if (result) {
         DEVICE_RESET
         if (cudaError::cudaErrorInsufficientDriver == result) {
-            throw SpecificCudaException(
+            throw CudaException(
                 "Your graphics driver is not compatible with the required CUDA version. Please update your Nvidia graphics driver and restart.");
         } else if (cudaError::cudaErrorOperatingSystem == result) {
-            throw SpecificCudaException("An operating system call within the CUDA api failed. Please check if your "
+            throw CudaException("An operating system call within the CUDA api failed. Please check if your "
                                         "monitor is plugged to the correct graphics card.");
         } else if (cudaError::cudaErrorInitializationError == result) {
-            throw SpecificCudaException(
+            throw CudaException(
                 "CUDA could not be initialized. Please check the minimum hardware requirements. If fulfilled please update your Nvidia graphics driver and restart.");
         } else if (cudaError::cudaErrorUnsupportedPtxVersion == result) {
-            throw SpecificCudaException("A CUDA error occurred (cudaErrorUnsupportedPtxVersion). Please update your Nvidia graphics driver and restart.");
+            throw CudaException("A CUDA error occurred (cudaErrorUnsupportedPtxVersion). Please update your Nvidia graphics driver and restart.");
+        } else if (cudaError::cudaErrorMemoryAllocation == result) {
+            throw CudaMemoryAllocationException("A CUDA error occurred while allocating memory. A possible reason could be that there is not enough memory available.");
         } else {
             std::stringstream stream;
             stream << "CUDA error at " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "("
                    << _cudaGetErrorEnum(result) << ") \"" << func << "\"";
-            throw SpecificCudaException(stream.str().c_str());
+            throw CudaException(stream.str().c_str());
         }
     }
 }
@@ -43,7 +45,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 #define NEAR_ZERO 0.00001f
 
 #define CUDA_THROW_NOT_IMPLEMENTED() \
-    printf("not implemented\n"); \
+    printf("Not implemented error. File: %s, Line: %d\n", __FILE__, __LINE__); \
     asm("trap;");
 
 #define KERNEL_CALL_1_1(func, ...) func<<<1, 1>>>(__VA_ARGS__);

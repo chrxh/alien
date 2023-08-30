@@ -5,6 +5,8 @@ PUBLIC
     AboutDialog.h
     ActivateUserDialog.cpp
     ActivateUserDialog.h
+    AlienDialog.cpp
+    AlienDialog.h
     AlienImGui.cpp
     AlienImGui.h
     AlienWindow.cpp
@@ -33,8 +35,8 @@ PUBLIC
     EditorController.h
     EditorModel.cpp
     EditorModel.h
-    ExportStatisticsDialog.cpp
-    ExportStatisticsDialog.h
+    ExitDialog.cpp
+    ExitDialog.h
     FileLogger.cpp
     FileLogger.h
     FpsController.cpp
@@ -80,10 +82,6 @@ PUBLIC
     NewPasswordDialog.h
     OpenGLHelper.cpp
     OpenGLHelper.h
-    OpenPatternDialog.cpp
-    OpenPatternDialog.h
-    OpenSimulationDialog.cpp
-    OpenSimulationDialog.h
     OverlayMessageController.cpp
     OverlayMessageController.h
     PatternAnalysisDialog.cpp
@@ -96,10 +94,8 @@ PUBLIC
     RemoteSimulationData.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
-    SavePatternDialog.cpp
-    SavePatternDialog.h
-    SaveSimulationDialog.cpp
-    SaveSimulationDialog.h
+    ResizeWorldDialog.cpp
+    ResizeWorldDialog.h
     SelectionWindow.cpp
     SelectionWindow.h
     Shader.cpp
@@ -124,11 +120,14 @@ PUBLIC
     StyleRepository.h
     TemporalControlWindow.cpp
     TemporalControlWindow.h
+    Tooltips.h
     UiController.cpp
     UiController.h
     UploadSimulationDialog.cpp
     UploadSimulationDialog.h
     UserData.h
+    VersionChecker.cpp
+    VersionChecker.h
     Viewport.cpp
     Viewport.h
     WindowController.cpp

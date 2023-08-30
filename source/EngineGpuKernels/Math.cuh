@@ -49,6 +49,11 @@ __inline__ __device__ __host__ float2 operator+(float2 const& p, float2 const& q
     return{ p.x + q.x, p.y + q.y };
 }
 
+__inline__ __device__ __host__ float3 operator+(float3 const& p, float3 const& q)
+{
+    return {p.x + q.x, p.y + q.y, p.z + q.z};
+}
+
 __inline__ __device__ __host__ float2 operator-(float2 const& p, float2 const& q)
 {
     return{ p.x - q.x, p.y - q.y };
@@ -79,6 +84,11 @@ __inline__ __device__ __host__ float2 operator/(float2 const& p, float m)
     return{ p.x / m, p.y / m };
 }
 
+__inline__ __device__ __host__ float3 operator/(float3 const& p, float m)
+{
+    return {p.x / m, p.y / m, p.z / m};
+}
+
 __inline__ __device__ __host__ bool operator==(int2 const& p, int2 const& q)
 {
     return p.x == q.x && p.y == q.y;
@@ -88,6 +98,13 @@ __inline__ __device__ __host__ void operator+=(float2& p, float2 const& q)
 {
     p.x += q.x;
     p.y += q.y;
+}
+
+__inline__ __device__ __host__ void operator+=(float3& p, float3 const& q)
+{
+    p.x += q.x;
+    p.y += q.y;
+    p.z += q.z;
 }
 
 __inline__ __device__ __host__ void operator-=(float2& p, float2 const& q)

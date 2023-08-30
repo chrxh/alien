@@ -13,11 +13,6 @@ namespace
     std::chrono::milliseconds const StatisticsUpdate(30);
 }
 
-void EngineWorker::initCuda()
-{
-    _CudaSimulationFacade::initCuda();
-}
-
 void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
 {
     _accessState = 0;
@@ -26,9 +21,8 @@ void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& gener
     _dataTOCache = std::make_shared<_AccessDataTOCache>();
     _cudaSimulation = std::make_shared<_CudaSimulationFacade>(timestep, _settings);
 
-    if (_imageResourceToRegister) {
-        _cudaResource = _cudaSimulation->registerImageResource(*_imageResourceToRegister);
-        _imageResourceToRegister = std::nullopt;
+    if (_imageResource) {
+        _cudaResource = _cudaSimulation->registerImageResource(*_imageResource);
     }
     updateStatistics();
 }
@@ -39,18 +33,20 @@ void EngineWorker::clear()
     return _cudaSimulation->clear();
 }
 
-void EngineWorker::registerImageResource(void* image)
+void EngineWorker::setImageResource(void* image)
 {
     GLuint imageId = reinterpret_cast<uintptr_t>(image);
-    if (!_cudaSimulation) {
+    _imageResource = imageId;
 
-        //cuda is not initialized yet => register image resource later
-        _imageResourceToRegister = imageId;
-    } else {
-
+    if (_cudaSimulation) {
         EngineWorkerGuard access(this);
         _cudaResource = _cudaSimulation->registerImageResource(imageId);
     }
+}
+
+std::string EngineWorker::getGpuName() const
+{
+    return _CudaSimulationFacade::checkAndReturnGpuInfo().gpuModelName;
 }
 
 void EngineWorker::tryDrawVectorGraphics(
@@ -60,7 +56,6 @@ void EngineWorker::tryDrawVectorGraphics(
     double zoom)
 {
     EngineWorkerGuard access(this, FrameTimeout);
-
 
     if (!access.isTimeout()) {
         _cudaSimulation->drawVectorGraphics(
@@ -328,6 +323,12 @@ void EngineWorker::calcSingleTimestep()
     updateStatistics();
 }
 
+void EngineWorker::applyCataclysm(int power)
+{
+    EngineWorkerGuard access(this);
+    _cudaSimulation->applyCataclysm(power);
+}
+
 void EngineWorker::beginShutdown()
 {
     _isShutdown.store(true);
@@ -368,16 +369,14 @@ void EngineWorker::setCurrentTimestep(uint64_t value)
     resetTimeIntervalStatistics();
 }
 
-void EngineWorker::setSimulationParameters(SimulationParameters const& parameters)
+SimulationParameters EngineWorker::getSimulationParameters() const
 {
-    EngineWorkerGuard access(this);
-    _cudaSimulation->setSimulationParameters(parameters);
+    return _cudaSimulation->getSimulationParameters();
 }
 
-void EngineWorker::setSimulationParameters_async(SimulationParameters const& parameters)
+void EngineWorker::setSimulationParameters(SimulationParameters const& parameters)
 {
-    std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
-    _updateSimulationParametersJob = parameters;
+    _cudaSimulation->setSimulationParameters(parameters);
 }
 
 void EngineWorker::setGpuSettings_async(GpuSettings const& gpuSettings)
@@ -542,10 +541,6 @@ void EngineWorker::updateStatistics(bool afterMinDuration)
 void EngineWorker::processJobs()
 {
     std::unique_lock<std::mutex> asyncJobsLock(_mutexForAsyncJobs);
-    if (_updateSimulationParametersJob) {
-        _cudaSimulation->setSimulationParameters(*_updateSimulationParametersJob);
-        _updateSimulationParametersJob = std::nullopt;
-    }
     if (_updateGpuSettingsJob) {
         _cudaSimulation->setGpuConstants(*_updateGpuSettingsJob);
         _updateGpuSettingsJob = std::nullopt;

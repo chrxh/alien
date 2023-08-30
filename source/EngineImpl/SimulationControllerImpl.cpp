@@ -2,16 +2,11 @@
 
 #include "EngineInterface/Descriptions.h"
 
-void _SimulationControllerImpl::initCuda()
-{
-    _worker.initCuda();
-}
-
 void _SimulationControllerImpl::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
 {
-    _settings.simulationParameters = parameters;
-    _settings.generalSettings = generalSettings;
-    _origSettings = _settings;
+    _generalSettings = generalSettings;
+    _origSettings.generalSettings = generalSettings;
+    _origSettings.simulationParameters = parameters;
     _worker.newSimulation(timestep, generalSettings, parameters);
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
@@ -26,9 +21,14 @@ void _SimulationControllerImpl::clear()
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationControllerImpl::registerImageResource(void* image)
+void _SimulationControllerImpl::setImageResource(void* image)
 {
-    _worker.registerImageResource(image);
+    _worker.setImageResource(image);
+}
+
+std::string _SimulationControllerImpl::getGpuName() const
+{
+    return _worker.getGpuName();
 }
 
 void _SimulationControllerImpl::tryDrawVectorGraphics(
@@ -186,6 +186,11 @@ void _SimulationControllerImpl::pauseSimulation()
     _selectionNeedsUpdate = true;
 }
 
+void _SimulationControllerImpl::applyCataclysm(int power)
+{
+    _worker.applyCataclysm(power);
+}
+
 bool _SimulationControllerImpl::isSimulationRunning() const
 {
     return _worker.isSimulationRunning();
@@ -210,19 +215,18 @@ void _SimulationControllerImpl::setCurrentTimestep(uint64_t value)
     _worker.setCurrentTimestep(value);
 }
 
-SimulationParameters const& _SimulationControllerImpl::getSimulationParameters() const
+SimulationParameters _SimulationControllerImpl::getSimulationParameters() const
 {
-    return _settings.simulationParameters;
+    return _worker.getSimulationParameters();
 }
 
-SimulationParameters _SimulationControllerImpl::getOriginalSimulationParameters() const
+SimulationParameters const& _SimulationControllerImpl::getOriginalSimulationParameters() const
 {
     return _origSettings.simulationParameters;
 }
 
 void _SimulationControllerImpl::setSimulationParameters(SimulationParameters const& parameters)
 {
-    _settings.simulationParameters = parameters;
     _worker.setSimulationParameters(parameters);
 }
 
@@ -231,16 +235,9 @@ void _SimulationControllerImpl::setOriginalSimulationParameters(SimulationParame
     _origSettings.simulationParameters = parameters;
 }
 
-void _SimulationControllerImpl::setSimulationParameters_async(
-    SimulationParameters const& parameters)
-{
-    _settings.simulationParameters = parameters;
-    _worker.setSimulationParameters_async(parameters);
-}
-
 GpuSettings _SimulationControllerImpl::getGpuSettings() const
 {
-    return _settings.gpuSettings;
+    return _gpuSettings;
 }
 
 GpuSettings _SimulationControllerImpl::getOriginalGpuSettings() const
@@ -250,7 +247,7 @@ GpuSettings _SimulationControllerImpl::getOriginalGpuSettings() const
 
 void _SimulationControllerImpl::setGpuSettings_async(GpuSettings const& gpuSettings)
 {
-    _settings.gpuSettings = gpuSettings;
+    _gpuSettings = gpuSettings;
     _worker.setGpuSettings_async(gpuSettings);
 }
 
@@ -305,12 +302,12 @@ bool _SimulationControllerImpl::updateSelectionIfNecessary()
 
 GeneralSettings _SimulationControllerImpl::getGeneralSettings() const
 {
-    return _settings.generalSettings;
+    return _generalSettings;
 }
 
 IntVector2D _SimulationControllerImpl::getWorldSize() const
 {
-    return {_settings.generalSettings.worldSizeX, _settings.generalSettings.worldSizeY};
+    return {_generalSettings.worldSizeX, _generalSettings.worldSizeY};
 }
 
 StatisticsData _SimulationControllerImpl::getStatistics() const

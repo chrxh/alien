@@ -25,6 +25,7 @@
 #include "GenomeConstants.h"
 #include "GenomeDescriptions.h"
 #include "GenomeDescriptionConverter.h"
+#include "Gui/VersionChecker.h"
 
 #define SPLIT_SERIALIZATION(Classname) \
     template <class Archive> \
@@ -53,6 +54,7 @@ namespace
     auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
     auto constexpr Id_Cell_OutputBlocked = 7;
     auto constexpr Id_Cell_ActivationTime = 8;
+    auto constexpr Id_Cell_GenomeSize = 13;
     
     auto constexpr Id_Constructor_ActivationMode = 0;
     auto constexpr Id_Constructor_SingleConstruction = 1;
@@ -87,6 +89,7 @@ namespace
     auto constexpr Id_Sensor_FixedAngle = 0;
     auto constexpr Id_Sensor_MinDensity = 1;
     auto constexpr Id_Sensor_Color = 2;
+    auto constexpr Id_Sensor_TargetedCreatureId = 3;
 
     auto constexpr Id_Transmitter_Mode = 0;
 
@@ -515,6 +518,7 @@ namespace cereal
         loadSave<std::optional<float>>(task, auxiliaries, Id_Sensor_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
         loadSave<float>(task, auxiliaries, Id_Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
         loadSave<int>(task, auxiliaries, Id_Sensor_Color, data.color, defaultObject.color);
+        loadSave<int>(task, auxiliaries, Id_Sensor_TargetedCreatureId, data.targetedCreatureId, defaultObject.targetedCreatureId);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SensorDescription)
@@ -618,6 +622,7 @@ namespace cereal
             task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
+        loadSave<int>(task, auxiliaries, Id_Cell_GenomeSize, data.genomeSize, defaultObject.genomeSize);
         setLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
@@ -867,54 +872,19 @@ bool Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
     return true;
 }
 
-
-namespace
-{
-    bool isVersionValid(std::string const& s)
-    {
-        std::vector<std::string> versionParts;
-        boost::split(versionParts, s, boost::is_any_of("."));
-        if (versionParts.size() < 3) {
-            return false;
-        }
-        try {
-            for (auto const& versionPart : versionParts | boost::adaptors::sliced(0, 3)) {
-                static_cast<void>(std::stoi(versionPart));
-            }
-        } catch (...) {
-            return false;
-        }
-        return true;
-    }
-    struct VersionParts
-    {
-        int major;
-        int minor;
-        int patch;
-    };
-    VersionParts getVersionParts(std::string const& s)
-    {
-        std::vector<std::string> versionParts;
-        boost::split(versionParts, s, boost::is_any_of("."));
-        return {std::stoi(versionParts.at(0)), std::stoi(versionParts.at(1)), std::stoi(versionParts.at(2))};
-    }
-}
-
 void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream)
 {
     cereal::PortableBinaryInputArchive archive(stream);
     std::string version;
     archive(version);
-    if (!isVersionValid(version)) {
+
+    if (!VersionChecker::isVersionValid(version)) {
         throw std::runtime_error("No version detected.");
     }
-    auto versionParts = getVersionParts(version);
-    auto ownVersionParts = getVersionParts(Const::ProgramVersion);
-    if (versionParts.major >= ownVersionParts.major) {
-        archive(data);
-    } else {
+    if (VersionChecker::isVersionOutdated(version)) {
         throw std::runtime_error("Version not supported.");
     }
+    archive(data);
 }
 
 void Serializer::serializeAuxiliaryData(AuxiliaryData const& auxiliaryData, std::ostream& stream)

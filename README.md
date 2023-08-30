@@ -69,7 +69,7 @@ Further information and artwork:
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 # Installer
-An installer for the latest beta for Windows: [download link](https://alien-project.org/media/files/alien-installer-v4-beta.zip) (Updated: 2023-07-08)
+An installer for Windows: [download link](https://alien-project.org/media/files/alien-installer.zip) (Updated: 2023-08-30)
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
 
@@ -84,7 +84,8 @@ git clone --recursive https://github.com/chrxh/alien.git
 Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
 
 ### Build instructions
-Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and a toolchain for CMake (e.g. GCC 9.x+ or [MSVC v142+](https://visualstudio.microsoft.com/de/free-developer-offers/))
+Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and a toolchain for CMake (e.g. GCC 9.x+ or [MSVC v142+](https://visualstudio.microsoft.com/de/free-developer-offers/)).
+There are reported compile issues with GCC 13 at the moment. Please use GCC 12 instead if you intend to use GCC.
 
 Build steps:
 ```

@@ -1,12 +1,13 @@
 #include <gtest/gtest.h>
 
 #include "Base/Math.h"
+#include "Base/NumberGenerator.h"
+#include "EngineInterface/GenomeConstants.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeDescriptionConverter.h"
 #include "EngineInterface/SimulationController.h"
 #include "IntegrationTestFramework.h"
-#include "Base/NumberGenerator.h"
 
 class ConstructorTests : public IntegrationTestFramework
 {
@@ -222,7 +223,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_notReady)
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(4)
-            .setCellFunction(ConstructorDescription().setGenome(otherGenome)),
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setGenomeReadPosition(Const::GenomeHeaderSize)),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);

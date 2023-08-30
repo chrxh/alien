@@ -24,6 +24,7 @@
 #include "UploadSimulationDialog.h"
 #include "DelayedExecutionController.h"
 #include "OverlayMessageController.h"
+#include "VersionChecker.h"
 
 namespace
 {
@@ -45,8 +46,6 @@ _BrowserWindow::_BrowserWindow(
     , _viewport(viewport)
     , _temporalControlWindow(temporalControlWindow)
 {
-    auto firstStart = GlobalSettings::getInstance().getBoolState("windows.browser.first start", true);
-    refreshIntern(firstStart);
     _showCommunityCreations = GlobalSettings::getInstance().getBoolState("windows.browser.show community creations", _showCommunityCreations);
 }
 
@@ -60,6 +59,9 @@ void _BrowserWindow::registerCyclicReferences(LoginDialogWeakPtr const& loginDia
 {
     _loginDialog = loginDialog;
     _uploadSimulationDialog = uploadSimulationDialog;
+
+    auto firstStart = GlobalSettings::getInstance().getBoolState("windows.browser.first start", true);
+    refreshIntern(firstStart);
 }
 
 void _BrowserWindow::onRefresh()
@@ -144,7 +146,7 @@ void _BrowserWindow::processToolbar()
     ImGui::BeginDisabled(_networkController->getLoggedInUserName().has_value());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_IN_ALT)) {
         if (auto loginDialog = _loginDialog.lock()) {
-            loginDialog->show();
+            loginDialog->open();
         }
     }
     ImGui::EndDisabled();
@@ -168,10 +170,10 @@ void _BrowserWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_SHARE_ALT)) {
         if (_networkController->getLoggedInUserName()) {
             if (auto uploadSimulationDialog = _uploadSimulationDialog.lock()) {
-                uploadSimulationDialog->show();
+                uploadSimulationDialog->open();
             }
         } else {
-            _loginDialog.lock()->show();
+            _loginDialog.lock()->open();
         }
     }
     AlienImGui::Tooltip("Share your simulation with other users:\nYour current simulation will be uploaded to the server and made visible in the browser.");
@@ -260,7 +262,7 @@ void _BrowserWindow::processSimulationTable()
                     if (_networkController->getLoggedInUserName()) {
                         onToggleLike(*item);
                     } else {
-                        _loginDialog.lock()->show();
+                        _loginDialog.lock()->open();
                     }
                 }
                 AlienImGui::Tooltip("Give a star");
@@ -323,23 +325,18 @@ void _BrowserWindow::processUserTable()
          | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    AlienImGui::Group("Registered users");
-    if (ImGui::BeginTable("Browser", 3, flags, ImVec2(0, 0), 0.0f)) {
+    AlienImGui::Group("Simulators");
+    if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
+        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+        auto isLoggedIn = _networkController->getLoggedInUserName().has_value();
         ImGui::TableSetupColumn(
-            "Name",
-            ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed,
-            scale(90.0f),
-            RemoteSimulationDataColumnId_Actions);
-        ImGui::TableSetupColumn(
-            "Stars received",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
-            scale(100.0f),
-            RemoteSimulationDataColumnId_Timestamp);
-        ImGui::TableSetupColumn(
-            "Stars given",
+            isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(100.0f),
-            RemoteSimulationDataColumnId_UserName);
+            styleRepository.scale(200.0f));
+        ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
+        ImGui::TableSetupColumn(
+            "Stars received", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(100.0f));
+        ImGui::TableSetupColumn("Stars given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
@@ -353,17 +350,29 @@ void _BrowserWindow::processUserTable()
                 ImGui::TableNextRow(0, scale(RowHeight));
 
                 ImGui::TableNextColumn();
+                auto isBoldFont = isLoggedIn && *_networkController->getLoggedInUserName() == item->userName;
+
                 if (item->online) {
                     AlienImGui::OnlineSymbol();
                     ImGui::SameLine();
                 }
-                processShortenedText(item->userName);
+                processShortenedText(item->userName, isBoldFont);
 
                 ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(item->starsReceived));
+                if (isLoggedIn && _loginDialog.lock()->isShareGpuInfo()) {
+                    processShortenedText(item->gpu, isBoldFont);
+                }
 
                 ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(item->starsGiven));
+                if (item->timeSpent > 0) {
+                    processShortenedText(StringHelper::format(item->timeSpent) + "h", isBoldFont);
+                }
+
+                ImGui::TableNextColumn();
+                processShortenedText(std::to_string(item->starsReceived), isBoldFont);
+
+                ImGui::TableNextColumn();
+                processShortenedText(std::to_string(item->starsGiven), isBoldFont);
 
                 ImGui::PopID();
             }
@@ -422,7 +431,7 @@ namespace
     }
 }
 
-void _BrowserWindow::processShortenedText(std::string const& text) {
+void _BrowserWindow::processShortenedText(std::string const& text, bool bold) {
     auto substrings = splitString(text);
     if (substrings.empty()) {
         return;
@@ -431,7 +440,13 @@ void _BrowserWindow::processShortenedText(std::string const& text) {
     auto textSize = ImGui::CalcTextSize(substrings.at(0).c_str());
     auto needDetailButton = textSize.x > ImGui::GetContentRegionAvailWidth() || substrings.size() > 1;
     auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - styleRepository.scale(15.0f);
+    if (bold) {
+        ImGui::PushFont(styleRepository.getSmallBoldFont());
+    }
     AlienImGui::Text(substrings.at(0));
+    if (bold) {
+        ImGui::PopFont();
+    }
     if (needDetailButton) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(cursorPos);
@@ -497,12 +512,35 @@ void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
         _simController->closeSimulation();
         _statisticsWindow->reset();
 
-        _simController->newSimulation(
-            deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
-        _simController->setClusteredSimulationData(deserializedSim.mainData);
+        std::optional<std::string> errorMessage;
+        try {
+            _simController->newSimulation(
+                deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+            _simController->setClusteredSimulationData(deserializedSim.mainData);
+        } catch (CudaMemoryAllocationException const& exception) {
+            errorMessage = exception.what();
+        } catch (...) {
+            errorMessage = "Failed to load simulation.";
+        }
+
+        if (errorMessage) {
+            printMessage("Error", *errorMessage);
+            _simController->closeSimulation();
+            _simController->newSimulation(
+                deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+        }
+
         _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
         _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
         _temporalControlWindow->onSnapshot();
+
+        if (VersionChecker::isVersionNewer(remoteData->version)) {
+            MessageDialog::getInstance().show(
+                "Warning",
+                "The download was successful but the simulation was generated using a more recent\n"
+                "version of ALIEN. Consequently, the simulation might not function as expected.\n"
+                "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
+        }
     });
 }
 
@@ -556,34 +594,13 @@ std::string _BrowserWindow::getUserLikes(std::string const& id)
 
 void _BrowserWindow::pushTextColor(RemoteSimulationData const& entry)
 {
-    if (isVersionCompatible(entry)) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 0.0f, 1.0f));
+    if (VersionChecker::isVersionOutdated(entry.version)) {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionOutdatedColor);
+    } else if (VersionChecker::isVersionNewer(entry.version)) {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionNewerColor);
     } else {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.6f));
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionOkColor);
     }
-}
-
-bool _BrowserWindow::isVersionCompatible(RemoteSimulationData const& entry) const
-{
-    bool result = true;
-
-    std::vector<std::string> remoteVersionParts;
-    boost::split(remoteVersionParts, entry.version, boost::is_any_of("."));
-
-    std::vector<std::string> ownVersionParts;
-    boost::split(ownVersionParts, Const::ProgramVersion, boost::is_any_of("."));
-
-    auto remoteMajorVersion = std::stoi(remoteVersionParts.at(0));
-    auto ownMajorVersion = std::stoi(ownVersionParts.at(0));
-    if (remoteMajorVersion < ownMajorVersion) {
-        result = false;
-    } else if (remoteVersionParts.size() == 5 && remoteVersionParts.at(3) == "alpha") {
-        auto remoteAlphaVersion = std::stoi(remoteVersionParts.at(4));
-        if (remoteAlphaVersion < 2) {
-            result = false;
-        }
-    }
-    return result;
 }
 
 void _BrowserWindow::calcFilteredSimulationDatas()

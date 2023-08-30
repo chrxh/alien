@@ -3,8 +3,9 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
 #include "Definitions.h"
+#include "AlienDialog.h"
 
-class _NewSimulationDialog
+class _NewSimulationDialog : public _AlienDialog
 {
 public:
     _NewSimulationDialog(
@@ -15,11 +16,10 @@ public:
 
     ~_NewSimulationDialog();
 
-    void process();
-
-    void show();
-
 private:
+    void processIntern() override;
+    void openIntern() override;
+
     void onNewSimulation();
 
     SimulationController _simController;
@@ -27,7 +27,6 @@ private:
     Viewport _viewport;
     StatisticsWindow _statisticsWindow;
 
-    bool _on = false;
     bool _adoptSimulationParameters = true;
     int _width = 0;
     int _height = 0;

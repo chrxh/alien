@@ -1,28 +1,30 @@
 #pragma once
 
+#include "AlienDialog.h"
 #include "Definitions.h"
+#include "NetworkController.h"
 
-class _ActivateUserDialog
+class _ActivateUserDialog : public _AlienDialog
 {
 public:
-    _ActivateUserDialog(BrowserWindow const& browserWindow, NetworkController const& networkController);
+    _ActivateUserDialog(SimulationController const& simController, BrowserWindow const& browserWindow, NetworkController const& networkController);
     ~_ActivateUserDialog();
 
     void registerCyclicReferences(CreateUserDialogWeakPtr const& createUserDialog);
 
-    void process();
-
-    void show(std::string const& userName, std::string const& password);
+    void open(std::string const& userName, std::string const& password, UserInfo const& userInfo);
 
 private:
+    void processIntern() override;
     void onActivateUser();
 
+    SimulationController _simController; 
     BrowserWindow _browserWindow;
     NetworkController _networkController;
     CreateUserDialogWeakPtr _createUserDialog;
 
-    bool _show = false;
     std::string _userName;
     std::string _password;
     std::string _confirmationCode;
+    UserInfo _userInfo;
 };

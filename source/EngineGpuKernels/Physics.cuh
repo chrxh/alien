@@ -49,7 +49,7 @@ __device__ __inline__ float2 Physics::calcNormalToCell(Cell *cell, float2 outwar
 	for (int i = 0; i < cell->numConnections; ++i) {
 
 		//calculate h (angular distance from outward vector)
-		float2 u = cell->connections[i].cell->absPos - cell->absPos;
+		float2 u = cell->connections[i].cell->pos - cell->pos;
         Math::normalize(u);
 		float h = Math::dot(outward, u);
 		if (outward.x*u.y - outward.y*u.x < 0.0) {
@@ -75,7 +75,7 @@ __device__ __inline__ float2 Physics::calcNormalToCell(Cell *cell, float2 outwar
 
 	//one adjacent cells?
 	if (minCell == maxCell) {
-		return cell->absPos - minCell->absPos;
+		return cell->pos - minCell->pos;
 	}
 
 	//calc normal vectors

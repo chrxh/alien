@@ -46,6 +46,9 @@ using NewSimulationDialog = std::shared_ptr<_NewSimulationDialog>;
 class _StartupController;
 using StartupController = std::shared_ptr<_StartupController>;
 
+class _ExitDialog;
+using ExitDialog = std::shared_ptr<_ExitDialog>;
+
 class _AboutDialog;
 using AboutDialog = std::shared_ptr<_AboutDialog>;
 
@@ -70,12 +73,6 @@ using AutosaveController = std::shared_ptr<_AutosaveController>;
 class _GettingStartedWindow;
 using GettingStartedWindow = std::shared_ptr<_GettingStartedWindow>;
 
-class _OpenSimulationDialog;
-using OpenSimulationDialog = std::shared_ptr<_OpenSimulationDialog>;
-
-class _SaveSimulationDialog;
-using SaveSimulationDialog = std::shared_ptr<_SaveSimulationDialog>;
-
 class _DisplaySettingsDialog;
 using DisplaySettingsDialog = std::shared_ptr<_DisplaySettingsDialog>;
 
@@ -92,14 +89,10 @@ using SelectionWindow = std::shared_ptr<_SelectionWindow>;
 class _PatternEditorWindow;
 using PatternEditorWindow = std::shared_ptr<_PatternEditorWindow>;
 
-class _WindowController;
-using WindowController = std::shared_ptr<_WindowController>;
+class WindowController;
 
-class _SavePatternDialog;
-using SavePatternDialog = std::shared_ptr<_SavePatternDialog>;
-
-class _OpenPatternDialog;
-using OpenPatternDialog = std::shared_ptr<_OpenPatternDialog>;
+class _ResizeWorldDialog;
+using ResizeWorldDialog = std::shared_ptr<_ResizeWorldDialog>;
 
 class _OpenSymbolsDialog;
 using OpenSymbolsDialog = std::shared_ptr<_OpenSymbolsDialog>;
@@ -115,9 +108,6 @@ using MultiplierWindow = std::shared_ptr<_MultiplierWindow>;
 
 class _PatternAnalysisDialog;
 using PatternAnalysisDialog = std::shared_ptr<_PatternAnalysisDialog>;
-
-class _ExportStatisticsDialog;
-using ExportStatisticsDialog = std::shared_ptr<_ExportStatisticsDialog>;
 
 class _FpsController;
 using FpsController = std::shared_ptr<_FpsController>;
@@ -169,6 +159,8 @@ using RadiationSourcesWindow = std::shared_ptr<_RadiationSourcesWindow>;
 
 class _BalancerController;
 using BalancerController = std::shared_ptr<_BalancerController>;
+
+struct UserInfo;
 
 struct GLFWvidmode;
 struct GLFWwindow;

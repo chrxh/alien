@@ -16,10 +16,14 @@ private:
     void processIntern() override;
 
     void drawTitle();
-    void drawHeadline(std::string const& text);
+    void drawHeading1(std::string const& text);
+    void drawHeading2(std::string const& text);
     void drawItemText(std::string const& text);
+    void drawParagraph(std::string const& text);
+
     void openWeblink(std::string const& link);
 
     bool _showAfterStartup = true;
 };
+
 
