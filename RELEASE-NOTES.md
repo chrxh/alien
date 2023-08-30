@@ -3,7 +3,7 @@
 ## [4.0.0] - 2023-08-30
 ### Added
 - engine: support for dynamic simulation parameter zones, barriers and particle sources: they can move with a fixed velocity
-- engine: different cell colorings: none, mutants, standard cell color
+- engine: different cell colorings: according to mutants, according to standard cell color, none
 - engine: different shapes for radiation sources
 - engine: geometry presets for phenotypes
 - engine: mutation types added: uniform color mutation and geometry mutation
@@ -43,7 +43,7 @@
 - plots for accumulated and averaged values have been corrected
 - loopholes anbd timeout bug for completeness check fixed
 - fetching simulation list optimized
-- unwanted conversion to lower case removed
+- unwanted conversion to lower case in input fields removed
 
 ## [4.0.0-beta] - 2023-04-25
 ### Added
