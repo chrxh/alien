@@ -5,7 +5,7 @@
 - engine: support for dynamic simulation parameter zones, barriers and particle sources: they can move with a fixed velocity
 - engine: different cell colorings: none, mutants, standard cell color
 - engine: different shapes for radiation sources
-- engine: predefined geometries for phenotypes
+- engine: geometry presets for phenotypes
 - engine: mutation types added: uniform color mutation and geometry mutation
 - engine: energy pump system for constructors
 - engine: attacker cells can be configured to attack only cells already targeted by nearby sensors
