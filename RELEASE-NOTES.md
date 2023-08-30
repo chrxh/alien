@@ -26,7 +26,7 @@
 - gui/simulation parameters: parameters for configuring new features (attacker can destroy other cells, sensor targeting for attackers, same mutant protection, genome size bonus, ...)
 
 ### Changed
-- engine: more realistic collision algorithm between energy cells and barriers
+- engine: more realistic collision algorithm between cells and barriers
 - engine: insertion mutation treats inserts to sub-genomes equally likely
 - gui/global: if OS=Windows: settings are saved to the Windows registry
 - gui/view: better zooming experience: make continuous zoom independent of the computational workload
