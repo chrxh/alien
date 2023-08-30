@@ -35,6 +35,7 @@
 - new startup simulation featuring sensor-equipped consumer and plant ecosystem
 
 ### Removed
+- simulation files in folder 'examples' (they are available in the sim browser instead)
 - simulation parameter 'Same color energy distribution' for attackers removed
 
 ### Fixed
