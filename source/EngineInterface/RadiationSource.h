@@ -38,6 +38,8 @@ struct RadiationSource
 {
     float posX = 0;
     float posY = 0;
+    float velX = 0;
+    float velY = 0;
     bool useAngle = false;
     float angle = 0;
 
@@ -59,7 +61,7 @@ struct RadiationSource
                 return false;
             }
         }
-        return posX == other.posX && posY == other.posY && useAngle == other.useAngle && angle == other.angle;
+        return posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY && useAngle == other.useAngle && angle == other.angle;
     }
     bool operator!=(RadiationSource const& other) const { return !operator==(other); }
 };

@@ -20,7 +20,7 @@ namespace
         auto& cellTO = dataTO.cells[cellTOIndex];
 
         cellTO.id = cell->id;
-        cellTO.pos = cell->absPos;
+        cellTO.pos = cell->pos;
         cellTO.vel = cell->vel;
         cellTO.barrier = cell->barrier;
         cellTO.energy = cell->energy;
@@ -93,12 +93,15 @@ namespace
             cellTO.cellFunctionData.constructor.offspringCreatureId = cell->cellFunctionData.constructor.offspringCreatureId;
             cellTO.cellFunctionData.constructor.offspringMutationId = cell->cellFunctionData.constructor.offspringMutationId;
             cellTO.cellFunctionData.constructor.genomeGeneration = cell->cellFunctionData.constructor.genomeGeneration;
+            cellTO.cellFunctionData.constructor.constructionAngle1 = cell->cellFunctionData.constructor.constructionAngle1;
+            cellTO.cellFunctionData.constructor.constructionAngle2 = cell->cellFunctionData.constructor.constructionAngle2;
         } break;
         case CellFunction_Sensor: {
             cellTO.cellFunctionData.sensor.mode = cell->cellFunctionData.sensor.mode;
             cellTO.cellFunctionData.sensor.angle = cell->cellFunctionData.sensor.angle;
             cellTO.cellFunctionData.sensor.minDensity = cell->cellFunctionData.sensor.minDensity;
             cellTO.cellFunctionData.sensor.color = cell->cellFunctionData.sensor.color;
+            cellTO.cellFunctionData.sensor.targetedCreatureId = cell->cellFunctionData.sensor.targetedCreatureId;
         } break;
         case CellFunction_Nerve: {
             cellTO.cellFunctionData.nerve.pulseMode = cell->cellFunctionData.nerve.pulseMode;
@@ -239,7 +242,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cell = cells.at(index);
 
-            auto pos = cell->absPos;
+            auto pos = cell->pos;
             data.cellMap.correctPosition(pos);
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
@@ -248,7 +251,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             auto& cellTO = dataTO.cells[cellTOIndex];
 
             cellTO.id = cell->id;
-            cellTO.pos = cell->absPos;
+            cellTO.pos = cell->pos;
             cellTO.cellFunction = cell->cellFunction;
             cellTO.selected = cell->selected;
             cellTO.executionOrderNumber = cell->executionOrderNumber;
@@ -286,7 +289,7 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        auto pos = cell->absPos;
+        auto pos = cell->pos;
         data.cellMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             cell->tag = -1;

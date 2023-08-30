@@ -86,8 +86,8 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO
 __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO, CellTO const& cellTO, Cell* cell)
 {
     cell->id = cellTO.id;
-    cell->absPos = cellTO.pos;
-    _map.correctPosition(cell->absPos);
+    cell->pos = cellTO.pos;
+    _map.correctPosition(cell->pos);
     cell->vel = cellTO.vel;
     cell->executionOrderNumber = cellTO.executionOrderNumber;
     cell->livingState = cellTO.livingState;
@@ -151,6 +151,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.sensor.angle = cellTO.cellFunctionData.sensor.angle;
         cell->cellFunctionData.sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         cell->cellFunctionData.sensor.color = cellTO.cellFunctionData.sensor.color;
+        cell->cellFunctionData.sensor.targetedCreatureId = cellTO.cellFunctionData.sensor.targetedCreatureId;
     } break;
     case CellFunction_Nerve: {
         cell->cellFunctionData.nerve.pulseMode = cellTO.cellFunctionData.nerve.pulseMode;
@@ -232,7 +233,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     *cellPointers = cell;
 
     cell->id = _data->numberGen1.createNewId();
-    cell->absPos = pos;
+    cell->pos = pos;
     cell->vel = vel;
     cell->energy = energy;
     cell->stiffness = _data->numberGen1.random();
@@ -297,6 +298,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.sensor.angle = _data->numberGen1.random(360.0f) - 180.0f;
             cell->cellFunctionData.sensor.minDensity = _data->numberGen1.random(1.0f);
             cell->cellFunctionData.sensor.color = _data->numberGen1.random(MAX_COLORS - 1);
+            cell->cellFunctionData.sensor.targetedCreatureId = 0;
         } break;
         case CellFunction_Nerve: {
         } break;

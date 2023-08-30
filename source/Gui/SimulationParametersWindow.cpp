@@ -14,6 +14,7 @@
 #include "MessageDialog.h"
 #include "RadiationSourcesWindow.h"
 #include "BalancerController.h"
+#include "OverlayMessageController.h"
 
 namespace
 {
@@ -92,10 +93,10 @@ void _SimulationParametersWindow::processIntern()
                     origParameters.spots[index] = createSpot(parameters, index);
                     ++parameters.numSpots;
                     ++origParameters.numSpots;
-                    _simController->setSimulationParameters_async(parameters);
+                    _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
-                AlienImGui::Tooltip("Add spot");
+                AlienImGui::Tooltip("Add parameter zone");
             }
 
             if (ImGui::BeginTabItem("Base", nullptr, ImGuiTabItemFlags_None)) {
@@ -107,7 +108,7 @@ void _SimulationParametersWindow::processIntern()
                 SimulationParametersSpot& spot = parameters.spots[tab];
                 SimulationParametersSpot const& origSpot = origParameters.spots[tab];
                 bool open = true;
-                std::string name = "Spot " + std::to_string(tab+1);
+                std::string name = "Zone " + std::to_string(tab+1);
                 if (ImGui::BeginTabItem(name.c_str(), &open, ImGuiTabItemFlags_None)) {
                     processSpot(spot, origSpot, parameters);
                     ImGui::EndTabItem();
@@ -121,7 +122,7 @@ void _SimulationParametersWindow::processIntern()
                     }
                     --parameters.numSpots;
                     --origParameters.numSpots;
-                    _simController->setSimulationParameters_async(parameters);
+                    _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
             }
@@ -132,7 +133,7 @@ void _SimulationParametersWindow::processIntern()
     ImGui::EndChild();
 
     if (parameters != lastParameters) {
-        _simController->setSimulationParameters_async(parameters);
+        _simController->setSimulationParameters(parameters);
     }
 }
 
@@ -185,6 +186,7 @@ void _SimulationParametersWindow::processToolbar()
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
         _copiedParameters = _simController->getSimulationParameters();
+        printOverlayMessage("Simulation parameters copied");
     }
     AlienImGui::Tooltip("Copy simulation parameters");
 
@@ -193,6 +195,7 @@ void _SimulationParametersWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
         _simController->setSimulationParameters(*_copiedParameters);
         _simController->setOriginalSimulationParameters(*_copiedParameters);
+        printOverlayMessage("Simulation parameters pasted");
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Paste simulation parameters");
@@ -216,15 +219,15 @@ void _SimulationParametersWindow::processBase(
                 simParameters.backgroundColor,
                 _backupColor,
                 _savedPalette);
-            AlienImGui::Combo(
-                AlienImGui::ComboParameters()
-                    .name("Cell colorization")
+            AlienImGui::Switcher(
+                AlienImGui::SwitcherParameters()
+                    .name("Cell coloring")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellColorization)
-                    .values({"None", "Cell colors", "Mutations"})
+                    .values({"None", "Standard cell colors", "Mutants"})
                     .tooltip("Here one can set how the cells are to be colored during rendering. In addition to coloring according to the 7 cell colors, there "
-                             "is also the option of coloring mutations. Almost every mutation (except changes in the neuronal networks) in the genome of a creature leads "
-                             "to a different color."),
+                             "is also the option of coloring mutations. Most of the mutations (except changes in the neuronal networks and cell properties) in "
+                             "the genome of a creature are represented by a different color."),
                 simParameters.cellColorization);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -260,8 +263,8 @@ void _SimulationParametersWindow::processBase(
          * Physics: Motion
          */
         if (ImGui::TreeNodeEx("Physics: Motion", flags)) {
-            if (AlienImGui::Combo(
-                    AlienImGui::ComboParameters()
+            if (AlienImGui::Switcher(
+                    AlienImGui::SwitcherParameters()
                         .name("Motion type")
                         .textWidth(RightColumnWidth)
                         .defaultValue(origSimParameters.motionType)
@@ -450,7 +453,18 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.baseValues.radiationAbsorption)
                     .tooltip("The fraction of energy that a cell can absorb from an incoming energy particle can be specified here."),
                 simParameters.baseValues.radiationAbsorption);
-
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Absorption velocity penalty")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(30.0f)
+                    .logarithmic(true)
+                    .format("%.1f")
+                    .defaultValue(origSimParameters.radiationAbsorptionVelocityPenalty)
+                    .tooltip("When this parameter is increased, cells with higher velocity can absorb less energy from an incoming energy particle."),
+                simParameters.radiationAbsorptionVelocityPenalty);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Radiation type I: Strength")
@@ -476,7 +490,6 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.radiationMinCellAge)
                     .tooltip("The minimum age of a cell can be defined here, from which it emits energy particles."),
                 simParameters.radiationMinCellAge);
-
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Radiation type II: Strength")
@@ -502,6 +515,13 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.highRadiationMinCellEnergy)
                     .tooltip("The minimum energy of a cell can be defined here, from which it emits energy particles."),
                 simParameters.highRadiationMinCellEnergy);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Energy to cell transformation")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.particleTransformationAllowed)
+                    .tooltip("If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
+                simParameters.particleTransformationAllowed);
 
             ImGui::TreePop();
         }
@@ -565,17 +585,10 @@ void _SimulationParametersWindow::processBase(
                 simParameters.cellNormalEnergy);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Energy to cell transformation")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.particleTransformationAllowed)
-                    .tooltip("If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
-                simParameters.particleTransformationAllowed);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Cell cluster decay")
+                    .name("Cell network decay")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.clusterDecay)
-                    .tooltip("If enabled, entire cell clusters will disintegrate when one of their cells is dying because of insufficient energy. This option "
+                    .tooltip("If enabled, entire cell networks will disintegrate when one of their cells is dying because of insufficient energy. This option "
                              "is useful to minimize the presence of cell corpses."),
                 simParameters.clusterDecay);
             ImGui::TreePop();
@@ -786,9 +799,12 @@ void _SimulationParametersWindow::processBase(
                     .name("Attack strength")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
+                    .logarithmic(true)
                     .min(0)
-                    .max(0.1f)
-                    .defaultValue(origSimParameters.cellFunctionAttackerStrength),
+                    .max(0.5f)
+                    .defaultValue(origSimParameters.cellFunctionAttackerStrength)
+                    .tooltip("Indicates the portion of energy through which a successfully attacked cell is weakened. However, this energy portion can be "
+                             "influenced by other factors adjustable within the attacker's simulation parameters."),
                 simParameters.cellFunctionAttackerStrength);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -805,21 +821,33 @@ void _SimulationParametersWindow::processBase(
                     .name("Genome size bonus")
                     .textWidth(RightColumnWidth)
                     .min(0)
-                    .max(5.0f)
+                    .max(20.0f)
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionAttackerGenomeSizeBonus))
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with larger genomes."),
                 simParameters.cellFunctionAttackerGenomeSizeBonus);
+            AlienImGui::InputFloatColorMatrix(
+                AlienImGui::InputFloatColorMatrixParameters()
+                    .name("Same mutant protection")
+                    .textWidth(RightColumnWidth)
+                    .min(0)
+                    .max(1.0f)
+                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSimParameters.cellFunctionAttackerSameMutantPenalty))
+                    .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
+                simParameters.cellFunctionAttackerSameMutantPenalty);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Velocity penalty")
+                    .name("Sensor detection factor")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0)
-                    .max(5.0f)
-                    .defaultValue(origSimParameters.cellFunctionAttackerVelocityPenalty)
-                    .tooltip("This parameter reduces the captured energy during an attack when the attacker cell is moving. The faster the cell moves or the "
-                             "higher this parameter is, the less energy is captured."),
-                simParameters.cellFunctionAttackerVelocityPenalty);
+                    .max(1.0f)
+                    .defaultValue(origSimParameters.cellFunctionAttackerSensorDetectionFactor)
+                    .tooltip(
+                        "This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
+                        "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the attacker "
+                        "cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last time and "
+                        "compares them with the attacked target."),
+                simParameters.cellFunctionAttackerSensorDetectionFactor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Geometry penalty")
@@ -872,6 +900,14 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.cellFunctionAttackerColorInhomogeneityFactor)
                     .tooltip("If the attacked cell is connected to cells with different colors, this factor affects the energy of the captured energy."),
                 simParameters.cellFunctionAttackerColorInhomogeneityFactor);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Destroy cells")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.cellFunctionAttackerDestroyCells)
+                    .tooltip(
+                        "If activated, the attacker cell is able to destroy other cells. If deactivated, it only damages them."),
+                simParameters.cellFunctionAttackerDestroyCells);
             ImGui::TreePop();
         }
         ImGui::PopID();
@@ -916,7 +952,7 @@ void _SimulationParametersWindow::processBase(
                     .name("Completeness check")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellFunctionConstructorCheckCompletenessForSelfReplication)
-                    .tooltip("If activated, a self-replication process can only start when all other non-self-replicating constructors in the cell clusters are "
+                    .tooltip("If activated, a self-replication process can only start when all other non-self-replicating constructors in the cell network are "
                              "finished."),
                 simParameters.cellFunctionConstructorCheckCompletenessForSelfReplication);
             ImGui::TreePop();
@@ -1160,7 +1196,6 @@ void _SimulationParametersWindow::processSpot(
                 spot.shapeType)) {
                 createDefaultSpotData(spot);
             }
-            auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y));
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Position X")
@@ -1177,8 +1212,27 @@ void _SimulationParametersWindow::processSpot(
                     .min(0)
                     .max(toFloat(worldSize.y))
                     .defaultValue(&origSpot.posY)
-                    .format("%.1f"),
+                    .format("%.2f"),
                 &spot.posY);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Velocity X")
+                    .textWidth(RightColumnWidth)
+                    .min(-4.0f)
+                    .max(4.0f)
+                    .defaultValue(&origSpot.velX)
+                    .format("%.2f"),
+                &spot.velX);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Velocity Y")
+                    .textWidth(RightColumnWidth)
+                    .min(-4.0f)
+                    .max(4.0f)
+                    .defaultValue(&origSpot.velY)
+                    .format("%.2f"),
+                &spot.velY);
+            auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y));
             if (spot.shapeType == SpotShapeType_Circular) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -1718,7 +1772,7 @@ void _SimulationParametersWindow::onOpenParameters()
         if (!Serializer::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
             MessageDialog::getInstance().show("Open simulation parameters", "The selected file could not be opened.");
         } else {
-            _simController->setSimulationParameters_async(parameters);
+            _simController->setSimulationParameters(parameters);
         }
     });
 }
@@ -1744,9 +1798,12 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         for (int j = 0; j < MAX_COLORS; ++j) {
             parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
+            parameters.cellFunctionAttackerSameMutantPenalty[i][j] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSameMutantPenalty[i][j]));
+            parameters.cellFunctionAttackerGenomeSizeBonus[i][j] = std::max(0.0f, parameters.cellFunctionAttackerGenomeSizeBonus[i][j]);
         }
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
         parameters.cellFunctionConstructorPumpEnergyFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorPumpEnergyFactor[i]));
+        parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);

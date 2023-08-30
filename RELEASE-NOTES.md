@@ -1,5 +1,50 @@
 # Release notes
 
+## [4.0.0] - 2023-08-30
+### Added
+- engine: support for dynamic simulation parameter zones, barriers and particle sources: they can move with a fixed velocity
+- engine: different cell colorings: none, mutants, standard cell color
+- engine: different shapes for radiation sources
+- engine: geometry presets for phenotypes
+- engine: mutation types added: uniform color mutation and geometry mutation
+- engine: energy pump system for constructors
+- engine: attacker cells can be configured to attack only cells already targeted by nearby sensors
+- engine: attacker strength can be dependent on the size of its genome to which it belongs
+- engine: same mutants can be protected by each others attacks
+- engine: muscle cells can directly control the relative direction of movements via their activities
+- engine: balancing of maximum age per color depending on the population size
+- gui/statistics: additional plots for self-replicators, viruses and total energy
+- gui/browser: user list added: showing online status, gpu model (if approved), time spent, stars
+- gui/browser: toggle 'community creation' in simulation browser
+- gui/browser: version validation for simulation files
+- gui/help: getting started window supplemented by additional sections (basic notions, examples, simulation parameters, editing tools, FAQ)
+- gui/view: mouse wheel support for zooming
+- gui/view: automatically scale all window sizes according to OS content scale
+- gui/genome editor: support for geometry presets and allow modify angles and connections
+- gui/mass operations: coloring cells in genomes
+- gui/simulation parameters, genome editor, inspection: tooltips for almost all fields added
+- gui/simulation parameters: parameters for configuring new features (attacker can destroy other cells, sensor targeting for attackers, same mutant protection, genome size bonus, ...)
+
+### Changed
+- engine: more realistic collision algorithm between energy cells and barriers
+- engine: insertion mutation treats inserts to sub-genomes equally likely
+- gui/global: if OS=Windows: settings are saved to the Windows registry
+- gui/view: better zooming experience: make continuous zoom independent of the computational workload
+- gui/browser: all example are available as non-community creations in the browser
+- gui/inspection: genome tab extended and new layout used
+- new startup simulation featuring sensor-equipped parasites and plant ecosystem
+
+### Removed
+- simulation parameter 'Same color energy distribution' for attackers removed
+
+### Fixed
+- display an error message if GPU memory allocation failed and allow to continue
+- fixed wrong parameter calculation in case of overlapping parameter zones
+- plots for accumulated and averaged values have been corrected
+- loopholes anbd timeout bug for completeness check fixed
+- fetching simulation list optimized
+- unwanted conversion to lower case removed
+
 ## [4.0.0-beta] - 2023-04-25
 ### Added
 - engine: new cell functions and corresponding parameters: neurons, transmitters, nerves, injectors and defenders

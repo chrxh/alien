@@ -14,6 +14,7 @@ public:
         SimulationController const& simController,
         Viewport const& viewport,
         EditorControllerWeakPtr const& editorController);
+    ~_PatternEditorWindow();
 
     bool isObjectInspectionPossible() const;
     bool isGenomeInspectionPossible() const;
@@ -28,6 +29,8 @@ public:
 private:
     void processIntern() override;
 
+    void onOpenPattern();
+    void onSavePattern();
     void onGenerateExecutionOrderNumbers();
     void onMakeSticky();
     void onRemoveStickiness();
@@ -38,10 +41,9 @@ private:
     EditorModel _editorModel;
     SimulationController _simController;
     Viewport _viewport;
-    OpenPatternDialog _openPatternDialog;
-    SavePatternDialog _savePatternDialog;
     EditorControllerWeakPtr _editorController;
 
+    std::string _startingPath;
     float _angle = 0;
     float _angularVel = 0;
     std::optional<SelectionShallowData> _lastSelection;

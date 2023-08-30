@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include "EngineInterface/SimulationController.h"
+
 #include "AlienImGui.h"
 #include "GlobalSettings.h"
 #include "MessageDialog.h"
@@ -10,8 +12,13 @@
 #include "CreateUserDialog.h"
 #include "StyleRepository.h"
 
-_ActivateUserDialog::_ActivateUserDialog(BrowserWindow const& browserWindow, NetworkController const& networkController)
-    : _browserWindow(browserWindow)
+_ActivateUserDialog::_ActivateUserDialog(
+    SimulationController const& simController,
+    BrowserWindow const& browserWindow,
+    NetworkController const& networkController)
+    : _AlienDialog("Activate user")
+    , _simController(simController)
+    , _browserWindow(browserWindow)
     , _networkController(networkController)
 {}
 
@@ -22,65 +29,55 @@ void _ActivateUserDialog::registerCyclicReferences(CreateUserDialogWeakPtr const
     _createUserDialog = createUserDialog;
 }
 
-void _ActivateUserDialog::process()
+
+void _ActivateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
-    if (!_show) {
-        return;
-    }
-
-    ImGui::OpenPopup("Activate user");
-    if (ImGui::BeginPopupModal("Activate user", NULL, ImGuiWindowFlags_None)) {
-        AlienImGui::Text("Please enter the confirmation code sent to your email address.");
-        AlienImGui::HelpMarker(
-            "Please check your spam folder if you did not find an email. If you did not receive an email there, try signing up with possibly another "
-            "email address. If this still does not work, please contact info@alien-project.org.");
-        AlienImGui::Separator();
-        AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Code (case sensitive)").textWidth(0), _confirmationCode);
-
-        AlienImGui::Separator();
-
-        ImGui::BeginDisabled(_confirmationCode.empty());
-        if (AlienImGui::Button("OK")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-            onActivateUser();
-        }
-        ImGui::EndDisabled();
-        ImGui::SetItemDefaultFocus();
-
-        ImGui::SameLine();
-        AlienImGui::VerticalSeparator();
-
-        ImGui::SameLine();
-        if (AlienImGui::Button("Resend")) {
-            _createUserDialog.lock()->onCreateUser();
-        }
-
-        ImGui::SameLine();
-        if (AlienImGui::Button("Resend to other email address")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-            _createUserDialog.lock()->show(_userName, _password);
-        }
-
-        ImGui::SameLine();
-        AlienImGui::VerticalSeparator();
-
-        ImGui::SameLine();
-        if (AlienImGui::Button("Cancel")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-        }
-
-        ImGui::EndPopup();
-    }
-}
-
-void _ActivateUserDialog::show(std::string const& userName, std::string const& password)
-{
-    _show = true;
+    _AlienDialog::open();
     _userName = userName;
     _password = password;
+    _userInfo = userInfo;
+}
+
+void _ActivateUserDialog::processIntern()
+{
+    AlienImGui::Text("Please enter the confirmation code sent to your email address.");
+    AlienImGui::HelpMarker(
+        "Please check your spam folder if you did not find an email. If you did not receive an email there, try signing up with possibly another "
+        "email address. If this still does not work, please contact info@alien-project.org.");
+    AlienImGui::Separator();
+    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Code (case sensitive)").textWidth(0), _confirmationCode);
+
+    AlienImGui::Separator();
+
+    ImGui::BeginDisabled(_confirmationCode.empty());
+    if (AlienImGui::Button("OK")) {
+        close();
+        onActivateUser();
+    }
+    ImGui::EndDisabled();
+    ImGui::SetItemDefaultFocus();
+
+    ImGui::SameLine();
+    AlienImGui::VerticalSeparator();
+
+    ImGui::SameLine();
+    if (AlienImGui::Button("Resend")) {
+        _createUserDialog.lock()->onCreateUser();
+    }
+
+    ImGui::SameLine();
+    if (AlienImGui::Button("Resend to other email address")) {
+        close();
+        _createUserDialog.lock()->open(_userName, _password, _userInfo);
+    }
+
+    ImGui::SameLine();
+    AlienImGui::VerticalSeparator();
+
+    ImGui::SameLine();
+    if (AlienImGui::Button("Cancel")) {
+        close();
+    }
 }
 
 void _ActivateUserDialog::onActivateUser()
@@ -88,7 +85,7 @@ void _ActivateUserDialog::onActivateUser()
     auto result = _networkController->activateUser(_userName, _password, _confirmationCode);
     if (result) {
         LoginErrorCode errorCode;
-        result |= _networkController->login(errorCode, _userName, _password);
+        result |= _networkController->login(errorCode, _userName, _password, _userInfo);
     }
     if (!result) {
         MessageDialog::getInstance().show("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");

@@ -239,6 +239,78 @@ private:
     int _processedEdges = 0;
 };
 
+class _SmallLolliGenerator : public _ShapeGenerator
+{
+public:
+    ShapeGeneratorResult generateNextConstructionData() override
+    {
+        ShapeGeneratorResult result;
+
+        if (_processedEdges < 6) {
+            auto edgeLength = _processedEdges / 6 + 1;
+            if (_processedEdges % 6 == 1) {
+                --edgeLength;
+            }
+
+            if (_processedEdges < 2) {
+                result.angle = 120.0f;
+                result.numRequiredAdditionalConnections = 0;
+            } else {
+                result.angle = 60.0f;
+                result.numRequiredAdditionalConnections = 1;
+            }
+
+            if (++_edgePos >= edgeLength) {
+                _edgePos = 0;
+                ++_processedEdges;
+            }
+        } else {
+            result.angle = _edgePos == 0 ? -60.0f : 0.0f;
+            result.numRequiredAdditionalConnections = _edgePos == 0 ? 2 : 0;
+            ++_edgePos;
+        }
+        return result;
+    }
+
+    ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
+
+private:
+    int _edgePos = 0;
+    int _processedEdges = 0;
+};
+
+class _ZigzagGenerator : public _ShapeGenerator
+{
+public:
+    ShapeGeneratorResult generateNextConstructionData() override
+    {
+        ShapeGeneratorResult result;
+        if (_edgePos % 4 == 0) {
+            result.angle = 120.0f;
+            result.numRequiredAdditionalConnections = 0;
+        }
+        if (_edgePos % 4 == 1) {
+            result.angle = 0;
+            result.numRequiredAdditionalConnections = _edgePos == 1 ? 0 : 1;
+        }
+        if (_edgePos % 4 == 2) {
+            result.angle = -120.0f;
+            result.numRequiredAdditionalConnections = 0;
+        }
+        if (_edgePos % 4 == 3) {
+            result.angle = 0;
+            result.numRequiredAdditionalConnections = 1;
+        }
+        ++_edgePos;
+        return result;
+    }
+
+    ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
+
+private:
+    int _edgePos = 0;
+};
+
 ShapeGenerator ShapeGeneratorFactory::create(ConstructionShape shape)
 {
     switch (shape) {
@@ -256,6 +328,10 @@ ShapeGenerator ShapeGeneratorFactory::create(ConstructionShape shape)
         return std::make_shared<_TubeGenerator>();
     case ConstructionShape_Lolli:
         return std::make_shared<_LolliGenerator>();
+    case ConstructionShape_SmallLolli:
+        return std::make_shared<_SmallLolliGenerator>();
+    case ConstructionShape_Zigzag:
+        return std::make_shared<_ZigzagGenerator>();
     }
     return nullptr;
 }

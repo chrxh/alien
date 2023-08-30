@@ -91,6 +91,8 @@ struct SimulationParametersSpot
     uint32_t color = 0;
     float posX = 0;
     float posY = 0;
+    float velX= 0;
+    float velY = 0;
 
     float fadeoutRadius = 100.0f;
 
@@ -137,8 +139,8 @@ struct SimulationParametersSpot
             }
         }
 
-        return color == other.color && posX == other.posX && posY == other.posY && fadeoutRadius == other.fadeoutRadius && values == other.values
-            && activatedValues == other.activatedValues && shapeType == other.shapeType;
+        return color == other.color && posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY
+            && fadeoutRadius == other.fadeoutRadius && values == other.values && activatedValues == other.activatedValues && shapeType == other.shapeType;
     }
     bool operator!=(SimulationParametersSpot const& other) const { return !operator==(other); }
 };

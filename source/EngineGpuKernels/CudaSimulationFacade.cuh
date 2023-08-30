@@ -20,10 +20,17 @@
 
 #include "Definitions.cuh"
 
+struct cudaGraphicsResource;
+
 class _CudaSimulationFacade
 {
 public:
-    static void initCuda();
+    struct GpuInfo
+    {
+        int deviceNumber = 0;
+        std::string gpuModelName;
+    };
+    static GpuInfo checkAndReturnGpuInfo();
 
     _CudaSimulationFacade(uint64_t timestep, Settings const& settings);
     ~_CudaSimulationFacade();
@@ -31,6 +38,7 @@ public:
     void* registerImageResource(GLuint image);
 
     void calcTimestep();
+    void applyCataclysm(int power);
 
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
     void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
@@ -60,6 +68,7 @@ public:
     void setDetached(bool value);
 
     void setGpuConstants(GpuSettings const& cudaConstants);
+    SimulationParameters getSimulationParameters() const;
     void setSimulationParameters(SimulationParameters const& parameters);
 
     ArraySizes getArraySizes() const;
@@ -77,23 +86,32 @@ public:
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
 
 private:
+    void initCuda();
+
     void syncAndCheck();
     void copyDataTOtoDevice(DataTO const& dataTO);
     void copyDataTOtoHost(DataTO const& dataTO);
     void automaticResizeArrays();
     void resizeArrays(ArraySizes const& additionals = ArraySizes());
+    void checkAndProcessSimulationParameterChanges();
 
     SimulationData getSimulationDataIntern() const;
 
+    GpuInfo _gpuInfo;
+    cudaGraphicsResource* _cudaResource = nullptr;
+
+    mutable std::mutex _mutexForSimulationParameters;
+    std::optional<SimulationParameters> _newSimulationParameters;
     Settings _settings;
 
+    mutable std::mutex _mutexForSimulationData;
     std::shared_ptr<SimulationData> _cudaSimulationData;
+
     std::shared_ptr<RenderingData> _cudaRenderingData;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     std::shared_ptr<DataTO> _cudaAccessTO;
     std::shared_ptr<SimulationStatistics> _simulationStatistics;
 
-    mutable std::mutex _mutex;
 
     SimulationKernelsLauncher _simulationKernels;
     DataAccessKernelsLauncher _dataAccessKernels;

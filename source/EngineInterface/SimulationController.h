@@ -10,12 +10,11 @@
 class _SimulationController
 {
 public:
-    virtual void initCuda() = 0;
-
     virtual void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& simulationParameters) = 0;
     virtual void clear() = 0;
 
-    virtual void registerImageResource(void* image) = 0;
+    virtual void setImageResource(void* image) = 0;
+    virtual std::string getGpuName() const = 0;
 
     /**
      * Draws section of simulation to registered texture.
@@ -54,6 +53,7 @@ public:
     virtual void calcSingleTimestep() = 0;
     virtual void runSimulation() = 0;
     virtual void pauseSimulation() = 0;
+    virtual void applyCataclysm(int power) = 0;
 
     virtual bool isSimulationRunning() const = 0;
 
@@ -62,11 +62,10 @@ public:
     virtual uint64_t getCurrentTimestep() const = 0;
     virtual void setCurrentTimestep(uint64_t value) = 0;
 
-    virtual SimulationParameters const& getSimulationParameters() const = 0;
-    virtual SimulationParameters getOriginalSimulationParameters() const = 0;
+    virtual SimulationParameters getSimulationParameters() const = 0;
+    virtual SimulationParameters const& getOriginalSimulationParameters() const = 0;
     virtual void setSimulationParameters(SimulationParameters const& parameters) = 0;
     virtual void setOriginalSimulationParameters(SimulationParameters const& parameters) = 0;
-    virtual void setSimulationParameters_async(SimulationParameters const& parameters) = 0;
 
     virtual GpuSettings getGpuSettings() const = 0;
     virtual GpuSettings getOriginalGpuSettings() const = 0;

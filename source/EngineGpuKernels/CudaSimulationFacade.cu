@@ -16,6 +16,7 @@
 #include "EngineInterface/InspectedEntityIds.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/SpaceCalculator.h"
 
 #include "DataAccessKernels.cuh"
 #include "TOs.cuh"
@@ -39,83 +40,12 @@
 #include "RenderingData.cuh"
 #include "TestKernelsLauncher.cuh"
 
-namespace
-{
-    class CudaInitializer
-    {
-    public:
-        static void init() { [[maybe_unused]] static CudaInitializer instance; }
-
-        CudaInitializer()
-        {
-            int deviceNumber = getDeviceNumberOfHighestComputeCapability();
-
-            auto result = cudaSetDevice(deviceNumber);
-            if (result != cudaSuccess) {
-                throw SystemRequirementNotMetException("CUDA device could not be initialized.");
-            }
-
-            std::stringstream stream;
-            stream << "device " << deviceNumber << " is set";
-            log(Priority::Important, stream.str());
-        }
-
-        ~CudaInitializer() { cudaDeviceReset(); }
-
-    private:
-        int getDeviceNumberOfHighestComputeCapability()
-        {
-            int result = 0;
-            int numberOfDevices;
-            CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
-            if (numberOfDevices < 1) {
-                throw SystemRequirementNotMetException("No CUDA device found.");
-            }
-            {
-                std::stringstream stream;
-                if (1 == numberOfDevices) {
-                    stream << "1 CUDA device found";
-                } else {
-                    stream << numberOfDevices << " CUDA devices found";
-                }
-                log(Priority::Important, stream.str());
-            }
-
-            int highestComputeCapability = 0;
-            for (int deviceNumber = 0; deviceNumber < numberOfDevices; ++deviceNumber) {
-                cudaDeviceProp prop;
-                CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, deviceNumber));
-
-                std::stringstream stream;
-                stream << "device " << deviceNumber << ": " << prop.name << " with compute capability " << prop.major
-                       << "." << prop.minor;
-                log(Priority::Important, stream.str());
-
-                int computeCapability = prop.major * 100 + prop.minor;
-                if (computeCapability > highestComputeCapability) {
-                    result = deviceNumber;
-                    highestComputeCapability = computeCapability;
-                }
-            }
-            if (highestComputeCapability < 600) {
-                throw SystemRequirementNotMetException(
-                    "No CUDA device with compute capability of 6.0 or higher found.");
-            }
-
-            return result;
-        }
-    };
-}
-
-void _CudaSimulationFacade::initCuda()
-{
-    CudaInitializer::init();
-}
-
 _CudaSimulationFacade::_CudaSimulationFacade(uint64_t timestep, Settings const& settings)
 {
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+    initCuda();
+    CudaMemoryManager::getInstance().reset();
 
+    _settings.generalSettings = settings.generalSettings;
     setSimulationParameters(settings.simulationParameters);
     setGpuConstants(settings.gpuSettings);
 
@@ -161,28 +91,52 @@ _CudaSimulationFacade::~_CudaSimulationFacade()
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numParticles);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numAuxiliaryData);
 
+    cudaDeviceReset();
     log(Priority::Important, "close simulation");
 }
 
 void* _CudaSimulationFacade::registerImageResource(GLuint image)
 {
-    cudaGraphicsResource* cudaResource;
+    //unregister old resource
+    if (_cudaResource) {
+        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaResource));
+    }
 
+    //register new resource
     CHECK_FOR_CUDA_ERROR(
-        cudaGraphicsGLRegisterImage(&cudaResource, image, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
+        cudaGraphicsGLRegisterImage(&_cudaResource, image, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
 
-    return reinterpret_cast<void*>(cudaResource);
+    return reinterpret_cast<void*>(_cudaResource);
 }
 
 void _CudaSimulationFacade::calcTimestep()
 {
-    _simulationKernels->calcTimestep(_settings, getSimulationDataIntern(), *_simulationStatistics);
+    checkAndProcessSimulationParameterChanges();
+
+    Settings settings = [this] {
+        std::lock_guard lock(_mutexForSimulationParameters);
+        _simulationKernels->calcSimulationParametersForNextTimestep(_settings);
+        CHECK_FOR_CUDA_ERROR(
+            cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+        return _settings;
+    }();
+
+    _simulationKernels->calcTimestep(settings, getSimulationDataIntern(), *_simulationStatistics);
     syncAndCheck();
 
     automaticResizeArrays();
 
-    std::lock_guard lock(_mutex);
+    std::lock_guard lock(_mutexForSimulationData);
     ++_cudaSimulationData->timestep;
+}
+
+void _CudaSimulationFacade::applyCataclysm(int power)
+{
+    for (int i = 0; i < power; ++i) {
+        _editKernels->applyCataclysm(_settings.gpuSettings, getSimulationDataIntern());
+        syncAndCheck();
+        resizeArraysIfNecessary();
+    }
 }
 
 void _CudaSimulationFacade::drawVectorGraphics(
@@ -192,6 +146,8 @@ void _CudaSimulationFacade::drawVectorGraphics(
     int2 const& imageSize,
     double zoom)
 {
+    checkAndProcessSimulationParameterChanges();
+
     auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaResource);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
 
@@ -400,6 +356,18 @@ void _CudaSimulationFacade::setGpuConstants(GpuSettings const& gpuConstants)
         cudaMemcpyToSymbol(cudaThreadSettings, &gpuConstants, sizeof(GpuSettings), 0, cudaMemcpyHostToDevice));
 }
 
+SimulationParameters _CudaSimulationFacade::getSimulationParameters() const
+{
+    std::lock_guard lock(_mutexForSimulationParameters);
+    return _newSimulationParameters ? *_newSimulationParameters : _settings.simulationParameters;
+}
+
+void _CudaSimulationFacade::setSimulationParameters(SimulationParameters const& parameters)
+{
+    std::lock_guard lock(_mutexForSimulationParameters);
+    _newSimulationParameters = parameters;
+}
+
 auto _CudaSimulationFacade::getArraySizes() const -> ArraySizes
 {
     return {
@@ -424,23 +392,14 @@ void _CudaSimulationFacade::resetTimeIntervalStatistics()
 
 uint64_t _CudaSimulationFacade::getCurrentTimestep() const
 {
-    std::lock_guard lock(_mutex);
+    std::lock_guard lock(_mutexForSimulationData);
     return _cudaSimulationData->timestep;
 }
 
 void _CudaSimulationFacade::setCurrentTimestep(uint64_t timestep)
 {
-    std::lock_guard lock(_mutex);
+    std::lock_guard lock(_mutexForSimulationData);
     _cudaSimulationData->timestep = timestep;
-}
-
-void _CudaSimulationFacade::setSimulationParameters(SimulationParameters const& parameters)
-{
-    _settings.simulationParameters = parameters;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &parameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
-    if (_cudaSimulationData) {
-        _simulationKernels->prepareForSimulationParametersChanges(_settings, getSimulationDataIntern());
-    }
 }
 
 void _CudaSimulationFacade::clear()
@@ -458,10 +417,81 @@ void _CudaSimulationFacade::resizeArraysIfNecessary(ArraySizes const& additional
 
 void _CudaSimulationFacade::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
+    {
+        std::lock_guard lock(_mutexForSimulationParameters);
+        if (_newSimulationParameters) {
+            _settings.simulationParameters = *_newSimulationParameters;
+            CHECK_FOR_CUDA_ERROR(
+                cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+            _newSimulationParameters.reset();
+        }
+    }
     _testKernels->testOnly_mutate(_settings.gpuSettings, getSimulationDataIntern(), cellId, mutationType);
     syncAndCheck();
 
     resizeArraysIfNecessary();
+}
+
+void _CudaSimulationFacade::initCuda()
+{
+    _gpuInfo = checkAndReturnGpuInfo();
+
+    auto result = cudaSetDevice(_gpuInfo.deviceNumber);
+    if (result != cudaSuccess) {
+        throw SystemRequirementNotMetException("CUDA device could not be initialized.");
+    }
+
+    cudaGetLastError(); //reset error code
+
+    std::stringstream stream;
+    stream << "device " << _gpuInfo.deviceNumber << " is set";
+    log(Priority::Important, stream.str());
+}
+
+auto _CudaSimulationFacade::checkAndReturnGpuInfo() -> GpuInfo
+{
+    static std::optional<GpuInfo> cachedResult;
+    if (cachedResult) {
+        return *cachedResult;
+    }
+    cachedResult = GpuInfo();
+
+    int numberOfDevices;
+    CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
+    if (numberOfDevices < 1) {
+        throw SystemRequirementNotMetException("No CUDA device found.");
+    }
+    {
+        std::stringstream stream;
+        if (1 == numberOfDevices) {
+            stream << "1 CUDA device found";
+        } else {
+            stream << numberOfDevices << " CUDA devices found";
+        }
+        log(Priority::Important, stream.str());
+    }
+
+    int highestComputeCapability = 0;
+    for (int deviceNumber = 0; deviceNumber < numberOfDevices; ++deviceNumber) {
+        cudaDeviceProp prop;
+        CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, deviceNumber));
+
+        std::stringstream stream;
+        stream << "device " << deviceNumber << ": " << prop.name << " with compute capability " << prop.major << "." << prop.minor;
+        log(Priority::Important, stream.str());
+
+        int computeCapability = prop.major * 100 + prop.minor;
+        if (computeCapability > highestComputeCapability) {
+            cachedResult->deviceNumber = deviceNumber;
+            highestComputeCapability = computeCapability;
+            cachedResult->gpuModelName = prop.name;
+        }
+    }
+    if (highestComputeCapability < 600) {
+        throw SystemRequirementNotMetException("No CUDA device with compute capability of 6.0 or higher found.");
+    }
+
+    return *cachedResult;
 }
 
 void _CudaSimulationFacade::syncAndCheck()
@@ -496,7 +526,7 @@ void _CudaSimulationFacade::automaticResizeArrays()
 {
     uint64_t timestep;
     {
-        std::lock_guard lock(_mutex);
+        std::lock_guard lock(_mutexForSimulationData);
         timestep = _cudaSimulationData->timestep;
     }
     //make check after every 10th time step
@@ -540,11 +570,25 @@ void _CudaSimulationFacade::resizeArrays(ArraySizes const& additionals)
     log(Priority::Unimportant, "auxiliary data size: " + std::to_string(auxiliaryDataSize));
 
     auto const memorySizeAfter = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
-    log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory acquired");
+    log(Priority::Important, std::to_string(memorySizeAfter / (1024 * 1024)) + " MB GPU memory used");
+}
+
+void _CudaSimulationFacade::checkAndProcessSimulationParameterChanges()
+{
+    std::lock_guard lock(_mutexForSimulationParameters);
+    if (_newSimulationParameters) {
+        _settings.simulationParameters = *_newSimulationParameters;
+        CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+        _newSimulationParameters.reset();
+
+        if (_cudaSimulationData) {
+            _simulationKernels->prepareForSimulationParametersChanges(_settings, getSimulationDataIntern());
+        }
+    }
 }
 
 SimulationData _CudaSimulationFacade::getSimulationDataIntern() const
 {
-    std::lock_guard lock(_mutex);
+    std::lock_guard lock(_mutexForSimulationData);
     return *_cudaSimulationData;
 }

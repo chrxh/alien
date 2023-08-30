@@ -15,13 +15,11 @@
 class _SimulationControllerImpl : public _SimulationController
 {
 public:
-
-    void initCuda() override;
-
     void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters) override;
     void clear() override;
 
-    void registerImageResource(void* image) override;
+    void setImageResource(void* image) override;
+    std::string getGpuName() const override;
 
     /**
      * Draws section of simulation to registered texture.
@@ -68,6 +66,7 @@ public:
     void calcSingleTimestep() override;
     void runSimulation() override;
     void pauseSimulation() override;
+    void applyCataclysm(int power) override;
 
     bool isSimulationRunning() const override;
 
@@ -76,18 +75,16 @@ public:
     uint64_t getCurrentTimestep() const override;
     void setCurrentTimestep(uint64_t value) override;
 
-    SimulationParameters const& getSimulationParameters() const override;
-    SimulationParameters getOriginalSimulationParameters() const override;
+    SimulationParameters getSimulationParameters() const override;
+    SimulationParameters const& getOriginalSimulationParameters() const override;
     void setSimulationParameters(SimulationParameters const& parameters) override;
     void setOriginalSimulationParameters(SimulationParameters const& parameters) override;
-    void setSimulationParameters_async(SimulationParameters const& parameters) override;
 
     GpuSettings getGpuSettings() const override;
     GpuSettings getOriginalGpuSettings() const override;
     void setGpuSettings_async(GpuSettings const& gpuSettings) override;
 
-    void
-    applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) override;
+    void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) override;
 
     void switchSelection(RealVector2D const& pos, float radius) override;
     void swapSelection(RealVector2D const& pos, float radius) override;
@@ -113,7 +110,8 @@ private:
     bool _selectionNeedsUpdate = false;
 
     Settings _origSettings;
-    Settings _settings;
+    GeneralSettings _generalSettings;
+    GpuSettings _gpuSettings;
 
     EngineWorker _worker;
     std::thread* _thread = nullptr;

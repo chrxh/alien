@@ -71,6 +71,7 @@ struct SensorTO
     float angle;
     float minDensity;
     int color;
+    int targetedCreatureId;
 };
 
 struct NerveTO

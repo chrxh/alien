@@ -2,6 +2,7 @@
 
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/SimulationParameters.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
@@ -14,6 +15,13 @@ public:
     void onSnapshot();
 
 private:
+    struct Snapshot
+    {
+        uint64_t timestep;
+        SimulationParameters parameters;
+        DataDescription data;
+    };
+
     void processIntern();
 
     void processTpsInfo();
@@ -27,14 +35,15 @@ private:
     void processSnapshotButton();
     void processRestoreButton();
 
+    Snapshot createSnapshot();
+    void applySnapshot(Snapshot const& snapshot);
+
+    template <typename MovedObjectType>
+    void restorePosition(MovedObjectType& movedObject, MovedObjectType const& origMovedObject, uint64_t origTimestep);
+    
     SimulationController _simController; 
     StatisticsWindow _statisticsWindow;
 
-    struct Snapshot
-    {
-        uint64_t timestep;
-        DataDescription data;
-    };
     std::optional<Snapshot> _snapshot;
 
     std::vector<Snapshot> _history;
@@ -42,3 +51,4 @@ private:
     bool _slowDown = false;
     int _tpsRestriction = 30;
 };
+

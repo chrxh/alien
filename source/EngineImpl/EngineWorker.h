@@ -36,12 +36,11 @@ class EngineWorker
 {
     friend class EngineWorkerGuard;
 public:
-    void initCuda();
-
     void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters);
     void clear();
 
-    void registerImageResource(void* image);
+    void setImageResource(void* image);
+    std::string getGpuName() const;
 
     void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
     std::optional<OverlayDescription>
@@ -72,6 +71,7 @@ public:
     void changeParticle(ParticleDescription const& changedParticle);
 
     void calcSingleTimestep();
+    void applyCataclysm(int power);
 
     void beginShutdown(); //caller should wait for termination of thread
     void endShutdown();
@@ -83,8 +83,8 @@ public:
     uint64_t getCurrentTimestep() const;
     void setCurrentTimestep(uint64_t value);
 
+    SimulationParameters getSimulationParameters() const;
     void setSimulationParameters(SimulationParameters const& parameters);
-    void setSimulationParameters_async(SimulationParameters const& parameters);
     void setGpuSettings_async(GpuSettings const& gpuSettings);
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
@@ -134,9 +134,8 @@ private:
 
     //async jobs
     mutable std::mutex _mutexForAsyncJobs;
-    std::optional<SimulationParameters> _updateSimulationParametersJob;
     std::optional<GpuSettings> _updateGpuSettingsJob;
-    std::optional<GLuint> _imageResourceToRegister;
+    std::optional<GLuint> _imageResource;
 
     struct ApplyForceJob
     {

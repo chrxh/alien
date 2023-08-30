@@ -14,29 +14,28 @@ namespace
 }
 
 _GpuSettingsDialog::_GpuSettingsDialog(SimulationController const& simController)
-    : _simController(simController)
+    : _AlienDialog("CUDA settings")
+    , _simController(simController)
 {
-    auto gpuSettings = GlobalSettings::getInstance().getGpuSettings();
+    GpuSettings gpuSettings;
+    gpuSettings.numBlocks = GlobalSettings::getInstance().getIntState("settings.gpu.num blocks", gpuSettings.numBlocks);
+    gpuSettings.numThreadsPerBlock = GlobalSettings::getInstance().getIntState("settings.gpu.num threads per block", gpuSettings.numThreadsPerBlock);
+
     _simController->setGpuSettings_async(gpuSettings);
 }
 
 _GpuSettingsDialog::~_GpuSettingsDialog()
 {
     auto gpuSettings = _simController->getGpuSettings();
-    GlobalSettings::getInstance().setGpuSettings(gpuSettings);
+    GlobalSettings::getInstance().setIntState("settings.gpu.num blocks", gpuSettings.numBlocks);
+    GlobalSettings::getInstance().setIntState("settings.gpu.num threads per block", gpuSettings.numThreadsPerBlock);
 }
 
-void _GpuSettingsDialog::process()
+void _GpuSettingsDialog::processIntern()
 {
-    if (!_show) {
-        return;
-    }
     auto gpuSettings = _simController->getGpuSettings();
     auto origGpuSettings = _simController->getOriginalGpuSettings();
     auto lastGpuSettings = gpuSettings;
-
-    ImGui::OpenPopup("CUDA settings");
-    if (ImGui::BeginPopupModal("CUDA settings", NULL, ImGuiWindowFlags_None)) {
 
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
@@ -72,27 +71,22 @@ void _GpuSettingsDialog::process()
         AlienImGui::Separator();
 
         if (AlienImGui::Button("OK")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
+            close();
         }
         ImGui::SetItemDefaultFocus();
 
         ImGui::SameLine();
         if (AlienImGui::Button("Cancel")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
+            close();
             gpuSettings = _gpuSettings;
         }
 
-        ImGui::EndPopup();
-    }
     if (gpuSettings != lastGpuSettings) {
         _simController->setGpuSettings_async(gpuSettings);
     }
 }
 
-void _GpuSettingsDialog::show()
+void _GpuSettingsDialog::openIntern()
 {
-    _show = true;
     _gpuSettings = _simController->getGpuSettings();
 }

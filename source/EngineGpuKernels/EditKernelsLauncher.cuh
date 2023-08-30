@@ -38,6 +38,8 @@ public:
 
     void rolloutSelection(GpuSettings const& gpuSettings, SimulationData const& data);
 
+    void applyCataclysm(GpuSettings const& gpuSettings, SimulationData const& data);
+
 private:
     GarbageCollectorKernelsLauncher _garbageCollector;
 

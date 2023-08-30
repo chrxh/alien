@@ -43,8 +43,6 @@
 #include "UiController.h"
 #include "AutosaveController.h"
 #include "GettingStartedWindow.h"
-#include "OpenSimulationDialog.h"
-#include "SaveSimulationDialog.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
 #include "SelectionWindow.h"
@@ -73,6 +71,7 @@
 #include "RadiationSourcesWindow.h"
 #include "OverlayMessageController.h"
 #include "BalancerController.h"
+#include "ExitDialog.h"
 
 namespace
 {
@@ -98,9 +97,9 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     
     auto glfwVersion = initGlfw();
 
-    _windowController = std::make_shared<_WindowController>();
+    WindowController::getInstance().init();
 
-    auto windowData = _windowController->getWindowData();
+    auto windowData = WindowController::getInstance().getWindowData();
     glfwSetFramebufferSizeCallback(windowData.window, framebuffer_size_callback);
     glfwSwapInterval(1);  //enable vsync
 
@@ -123,7 +122,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
         throw std::runtime_error("Failed to initialize GLAD");
     }
 
-    _viewport = std::make_shared<_Viewport>(_windowController);
+    _viewport = std::make_shared<_Viewport>();
     _uiController = std::make_shared<_UiController>();
     _autosaveController = std::make_shared<_AutosaveController>(_simController, _viewport);
 
@@ -141,22 +140,21 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow, _balancerController);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
     _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow, _viewport);
+    _exitDialog = std::make_shared<_ExitDialog>(_onExit);
     _aboutDialog = std::make_shared<_AboutDialog>();
     _massOperationsDialog = std::make_shared<_MassOperationsDialog>(_simController);
     _logWindow = std::make_shared<_LogWindow>(_logger);
     _gettingStartedWindow = std::make_shared<_GettingStartedWindow>();
     _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simController, _temporalControlWindow, _viewport, _statisticsWindow);
-    _openSimulationDialog = std::make_shared<_OpenSimulationDialog>(_simController, _temporalControlWindow, _statisticsWindow, _viewport);
-    _saveSimulationDialog = std::make_shared<_SaveSimulationDialog>(_simController, _viewport);
-    _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>(_windowController);
+    _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
     _browserWindow = std::make_shared<_BrowserWindow>(_simController, _networkController, _statisticsWindow, _viewport, _temporalControlWindow);
-    _activateUserDialog = std::make_shared<_ActivateUserDialog>(_browserWindow, _networkController);
+    _activateUserDialog = std::make_shared<_ActivateUserDialog>(_simController, _browserWindow, _networkController);
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog, _networkController);
-    _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_browserWindow, _networkController);
+    _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simController, _browserWindow, _networkController);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog, _networkController);
-    _loginDialog = std::make_shared<_LoginDialog>(_browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog, _networkController);
+    _loginDialog = std::make_shared<_LoginDialog>(_simController, _browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog, _networkController);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController, _viewport);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
@@ -192,7 +190,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
 
 void _MainWindow::mainLoop()
 {
-    while (!glfwWindowShouldClose(_window) && !_onClose)
+    while (!glfwWindowShouldClose(_window) && !_onExit)
     {
         glfwPollEvents();
 
@@ -226,7 +224,7 @@ void _MainWindow::mainLoop()
 
 void _MainWindow::shutdown()
 {
-    _windowController->shutdown();
+    WindowController::getInstance().shutdown();
     _autosaveController->shutdown();
 
     ImGui_ImplOpenGL3_Shutdown();
@@ -239,6 +237,8 @@ void _MainWindow::shutdown()
     glfwTerminate();
 
     _simulationView.reset();
+
+    _simController->closeSimulation();
 }
 
 char const* _MainWindow::initGlfw()
@@ -353,7 +353,7 @@ void _MainWindow::renderSimulation()
     }
     ImGui::Render();
 
-    _fpsController->processForceFps(_windowController->getFps());
+    _fpsController->processForceFps(WindowController::getInstance().getFps());
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(_window);
@@ -369,20 +369,20 @@ void _MainWindow::processMenubar()
 
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
-            _showExitDialog = true;
+            _exitDialog->open();
         }
         ImGui::Dummy(ImVec2(10.0f, 0.0f));
         if (AlienImGui::BeginMenuButton(" " ICON_FA_GAMEPAD "  Simulation ", _simulationMenuToggled, "Simulation")) {
             if (ImGui::MenuItem("New", "CTRL+N")) {
-                _newSimulationDialog->show();
+                _newSimulationDialog->open();
                 _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Open", "CTRL+O")) {
-                _openSimulationDialog->show();
+                onOpenSimulation();
                 _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Save", "CTRL+S")) {
-                _saveSimulationDialog->show();
+                onSaveSimulation();
                 _simulationMenuToggled = false;
             }
             ImGui::Separator();
@@ -406,7 +406,7 @@ void _MainWindow::processMenubar()
             ImGui::Separator();
             ImGui::BeginDisabled((bool)_networkController->getLoggedInUserName());
             if (ImGui::MenuItem("Login", "ALT+L")) {
-                _loginDialog->show();
+                _loginDialog->open();
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
@@ -417,14 +417,14 @@ void _MainWindow::processMenubar()
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
             if (ImGui::MenuItem("Upload", "ALT+D")) {
-                _uploadSimulationDialog->show();
+                _uploadSimulationDialog->open();
             }
             ImGui::EndDisabled();
 
             ImGui::Separator();
             ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
             if (ImGui::MenuItem("Delete", "ALT+J")) {
-                _deleteUserDialog->show();
+                _deleteUserDialog->open();
             }
             ImGui::EndDisabled();
             AlienImGui::EndMenuButton();
@@ -531,7 +531,7 @@ void _MainWindow::processMenubar()
                 _patternAnalysisDialog->show();
                 _toolsMenuToggled = false;
             }
-            if (ImGui::MenuItem("Image to pattern", "ALT+G")) {
+            if (ImGui::MenuItem("Image converter", "ALT+G")) {
                 _imageToPatternDialog->show();
                 _toolsMenuToggled = false;
             }
@@ -543,20 +543,20 @@ void _MainWindow::processMenubar()
                 _autosaveController->setOn(!_autosaveController->isOn());
             }
             if (ImGui::MenuItem("CUDA settings", "ALT+C")) {
-                _gpuSettingsDialog->show();
+                _gpuSettingsDialog->open();
             }
             if (ImGui::MenuItem("Display settings", "ALT+V")) {
-                _displaySettingsDialog->show();
+                _displaySettingsDialog->open();
             }
             if (ImGui::MenuItem("Network settings", "ALT+K")) {
-                _networkSettingsDialog->show();
+                _networkSettingsDialog->open();
             }
             AlienImGui::EndMenuButton();
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_LIFE_RING "  Help ", _helpMenuToggled, "Help")) {
             if (ImGui::MenuItem("About", "")) {
-                _aboutDialog->show();
+                _aboutDialog->open();
                 _helpMenuToggled = false;
             }
             if (ImGui::MenuItem("Getting started", "", _gettingStartedWindow->isOn())) {
@@ -571,13 +571,13 @@ void _MainWindow::processMenubar()
     auto io = ImGui::GetIO();
     if (!io.WantCaptureKeyboard) {
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_N)) {
-            _newSimulationDialog->show();
+            _newSimulationDialog->open();
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_O)) {
-            _openSimulationDialog->show();
+            onOpenSimulation();
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_S)) {
-            _saveSimulationDialog->show();
+            onSaveSimulation();
         }
         if (ImGui::IsKeyPressed(GLFW_KEY_SPACE)) {
             if (_simController->isSimulationRunning()) {
@@ -594,17 +594,17 @@ void _MainWindow::processMenubar()
             _browserWindow->setOn(!_browserWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_L) && !_networkController->getLoggedInUserName()) {
-            _loginDialog->show();
+            _loginDialog->open();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_T)) {
             _networkController->logout();
             _browserWindow->onRefresh();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_D) && _networkController->getLoggedInUserName()) {
-            _uploadSimulationDialog->show();
+            _uploadSimulationDialog->open();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_J) && _networkController->getLoggedInUserName()) {
-            _deleteUserDialog->show();
+            _deleteUserDialog->open();
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_1)) {
@@ -667,20 +667,21 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {
-            _gpuSettingsDialog->show();
+            _gpuSettingsDialog->open();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_V)) {
-            _displaySettingsDialog->show();
+            _displaySettingsDialog->open();
         }
         if (ImGui::IsKeyPressed(GLFW_KEY_F7)) {
-            if (_windowController->isDesktopMode()) {
-                _windowController->setWindowedMode();
+            auto& windowController = WindowController::getInstance();
+            if (windowController.isDesktopMode()) {
+                windowController.setWindowedMode();
             } else {
-                _windowController->setDesktopMode();
+                windowController.setDesktopMode();
             }
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_K)) {
-            _networkSettingsDialog->show();
+            _networkSettingsDialog->open();
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_O)) {
@@ -707,8 +708,6 @@ void _MainWindow::processMenubar()
 
 void _MainWindow::processDialogs()
 {
-    _openSimulationDialog->process();
-    _saveSimulationDialog->process();
     _newSimulationDialog->process();
     _aboutDialog->process();
     _massOperationsDialog->process();
@@ -723,10 +722,10 @@ void _MainWindow::processDialogs()
     _networkSettingsDialog->process();
     _resetPasswordDialog->process();
     _newPasswordDialog->process();
+    _exitDialog->process();
 
     MessageDialog::getInstance().process();
     GenericFileDialogs::getInstance().process();
-    processExitDialog();
 }
 
 void _MainWindow::processWindows()
@@ -753,6 +752,78 @@ void _MainWindow::processControllers()
     DelayedExecutionController::getInstance().process();
 }
 
+void _MainWindow::onOpenSimulation()
+{
+    GenericFileDialogs::getInstance().showOpenFileDialog(
+        "Open simulation", "Simulation file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _startingPath = firstFilenameCopy.remove_filename().string();
+
+            DeserializedSimulation deserializedData;
+            if (Serializer::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
+                printOverlayMessage("Loading ...");
+                delayedExecution([=, this] {
+                    _simController->closeSimulation();
+                    _statisticsWindow->reset();
+
+                    std::optional<std::string> errorMessage;
+                    try {
+                        _simController->newSimulation(
+                            deserializedData.auxiliaryData.timestep,
+                            deserializedData.auxiliaryData.generalSettings,
+                            deserializedData.auxiliaryData.simulationParameters);
+                        _simController->setClusteredSimulationData(deserializedData.mainData);
+                    } catch (CudaMemoryAllocationException const& exception) {
+                        errorMessage = exception.what();
+                    } catch (...) {
+                        errorMessage = "Failed to load simulation.";
+                    }
+
+                    if (errorMessage) {
+                        printMessage("Error", *errorMessage);
+                        _simController->closeSimulation();
+                        _simController->newSimulation(
+                            deserializedData.auxiliaryData.timestep,
+                            deserializedData.auxiliaryData.generalSettings,
+                            deserializedData.auxiliaryData.simulationParameters);
+                    }
+
+                    _viewport->setCenterInWorldPos(deserializedData.auxiliaryData.center);
+                    _viewport->setZoomFactor(deserializedData.auxiliaryData.zoom);
+                    _temporalControlWindow->onSnapshot();
+                    printOverlayMessage(firstFilename.filename().string());
+                });
+            } else {
+                printMessage("Open simulation", "The selected file could not be opened.");
+            }
+        });
+}
+
+void _MainWindow::onSaveSimulation()
+{
+    GenericFileDialogs::getInstance().showSaveFileDialog(
+        "Save simulation", "Simulation file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _startingPath = firstFilenameCopy.remove_filename().string();
+            printOverlayMessage("Saving ...");
+            delayedExecution([=, this] {
+                DeserializedSimulation sim;
+                sim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+                sim.auxiliaryData.zoom = _viewport->getZoomFactor();
+                sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
+                sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
+                sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
+                sim.mainData = _simController->getClusteredSimulationData();
+
+                if (!Serializer::serializeSimulationToFiles(firstFilename.string(), sim)) {
+                    MessageDialog::getInstance().show("Save simulation", "The simulation could not be saved to the specified file.");
+                }
+            });
+        });
+}
+
 void _MainWindow::onRunSimulation()
 {
     _simController->runSimulation();
@@ -761,38 +832,6 @@ void _MainWindow::onRunSimulation()
 void _MainWindow::onPauseSimulation()
 {
     _simController->pauseSimulation();
-}
-
-void _MainWindow::processExitDialog()
-{
-     if (_showExitDialog) {
-        auto name = "Exit";
-        ImGui::OpenPopup(name);
-
-        ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        if (ImGui::BeginPopupModal(name, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text("Do you really want to terminate the program?");
-
-            ImGui::Spacing();
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::Spacing();
-            ImGui::Spacing();
-
-            if (AlienImGui::Button("OK")) {
-                ImGui::CloseCurrentPopup();
-                _onClose = true;
-            }
-            ImGui::SameLine();
-            if (AlienImGui::Button("Cancel")) {
-                ImGui::CloseCurrentPopup();
-                _showExitDialog = false;
-            }
-            ImGui::SetItemDefaultFocus();
-
-            ImGui::EndPopup();
-        }
-    }
 }
 
 void _MainWindow::reset()

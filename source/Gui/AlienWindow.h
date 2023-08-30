@@ -19,6 +19,7 @@ protected:
     virtual void processBackground() {}
     virtual void processActivated() {}
 
+    bool _sizeInitialized = false;
     bool _on = false;
     std::string _title; 
     std::string _settingsNode;

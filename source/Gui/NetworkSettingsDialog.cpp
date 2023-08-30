@@ -14,47 +14,33 @@ namespace
 }
 
 _NetworkSettingsDialog::_NetworkSettingsDialog(BrowserWindow const& browserWindow, NetworkController const& networkController)
-    : _browserWindow(browserWindow), _networkController(networkController)
+    : _AlienDialog("Network settings")
+    , _browserWindow(browserWindow)
+    , _networkController(networkController)
 {
 }
 
-_NetworkSettingsDialog::~_NetworkSettingsDialog()
+void _NetworkSettingsDialog::processIntern()
 {
-}
+    AlienImGui::InputText(
+        AlienImGui::InputTextParameters().name("Blocks").defaultValue(_origServerAddress).name("Server address").textWidth(RightColumnWidth), _serverAddress);
 
-void _NetworkSettingsDialog::process()
-{
-    if (!_show) {
-        return;
+    AlienImGui::Separator();
+
+    if (AlienImGui::Button("OK")) {
+        close();
+        onChangeSettings();
     }
-    ImGui::OpenPopup("Network settings");
-    if (ImGui::BeginPopupModal("Network settings", NULL, ImGuiWindowFlags_None)) {
-        AlienImGui::InputText(
-            AlienImGui::InputTextParameters().name("Blocks").defaultValue(_origServerAddress).name("Server address").textWidth(RightColumnWidth),
-            _serverAddress);
+    ImGui::SetItemDefaultFocus();
 
-        AlienImGui::Separator();
-
-        if (AlienImGui::Button("OK")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-            onChangeSettings();
-        }
-        ImGui::SetItemDefaultFocus();
-
-        ImGui::SameLine();
-        if (AlienImGui::Button("Cancel")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
-        }
-
-        ImGui::EndPopup();
+    ImGui::SameLine();
+    if (AlienImGui::Button("Cancel")) {
+        close();
     }
 }
 
-void _NetworkSettingsDialog::show()
+void _NetworkSettingsDialog::openIntern()
 {
-    _show = true;
     _origServerAddress = _networkController->getServerAddress();
     _serverAddress = _origServerAddress;
 }

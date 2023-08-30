@@ -19,17 +19,11 @@ private:
     void processZoomOutButton();
     void processResizeButton();
 
-    void processResizeDialog();
     void processCenterOnSelection();
-
-    void onResizing();
 
     SimulationController _simController;
     Viewport _viewport;
+    ResizeWorldDialog _resizeWorldDialog;
 
-    bool _showResizeDialog = false;
-    bool _scaleContent = false;
     bool _centerSelection = false;
-    int _width = 0;
-    int _height = 0;
 };

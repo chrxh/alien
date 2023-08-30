@@ -123,7 +123,7 @@ CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& dat
     if (0 == cell->numConnections) {
         return ReferenceAndActualAngle{0, data.numberGen1.random()*360};
     }
-    auto displacement = cell->connections[0].cell->absPos - cell->absPos;
+    auto displacement = cell->connections[0].cell->pos - cell->pos;
     data.cellMap.correctDirection(displacement);
     auto angle = Math::angleOfVector(displacement);
     int index = 0;
@@ -140,6 +140,9 @@ CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& dat
         angle += angleDiff;
     }
     auto angleFromPreviousConnection = cell->connections[index].angleFromPrevious / 2 + angleDeviation;
+    if (angleFromPreviousConnection < 30.0f || angleFromPreviousConnection > cell->connections[index].angleFromPrevious - 30.0f) {
+        angleFromPreviousConnection = cell->connections[index].angleFromPrevious / 2;
+    }
     if (angleFromPreviousConnection > 360.0f) {
         angleFromPreviousConnection -= 360;
     }
@@ -155,7 +158,7 @@ __inline__ __device__ float2 CellFunctionProcessor::calcSignalDirection(Simulati
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connectedCell = cell->connections[i].cell;
         if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber && !connectedCell->outputBlocked) {
-            auto directionDelta = cell->absPos - connectedCell->absPos;
+            auto directionDelta = cell->pos - connectedCell->pos;
             data.cellMap.correctDirection(directionDelta);
             result = result + Math::normalized(directionDelta);
         }

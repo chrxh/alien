@@ -1,25 +1,22 @@
 #pragma once
 
+#include "AlienDialog.h"
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
 
-class _DisplaySettingsDialog
+class _DisplaySettingsDialog : public _AlienDialog
 {
 public:
-    _DisplaySettingsDialog(WindowController const& windowController);
-    ~_DisplaySettingsDialog();
-
-    void process();
-    void show();
+    _DisplaySettingsDialog();
 
 private:
+    void processIntern();
+    void openIntern();
+
     void setFullscreen(int selectionIndex);
     int getSelectionIndex() const;
     std::vector<std::string> createVideoModeStrings() const;
 
-    WindowController _windowController;
-
-    bool _show = false;
     std::string _origMode;
     int _origSelectionIndex;
     int _selectionIndex;

@@ -7,7 +7,7 @@
 class _Viewport
 {
 public:
-    _Viewport(WindowController const& windowController);
+    _Viewport();
 
     float getZoomFactor() const;
     void setZoomFactor(float zoomFactor);

@@ -1,5 +1,6 @@
 #include "PatternEditorWindow.h"
 
+#include <ImFileDialog.h>
 #include <imgui.h>
 
 #include "Fonts/IconsFontAwesome5.h"
@@ -14,13 +15,13 @@
 #include "GlobalSettings.h"
 #include "AlienImGui.h"
 #include "EditorController.h"
+#include "GenericFileDialogs.h"
+#include "MessageDialog.h"
 #include "Viewport.h"
-#include "SavePatternDialog.h"
-#include "OpenPatternDialog.h"
+#include "EngineInterface/Serializer.h"
 
 namespace
 {
-    auto const MaxInspectorWindowsToAdd = 10;
     auto const RightColumnWidth = 120.0f;
 }
 
@@ -29,14 +30,22 @@ _PatternEditorWindow::_PatternEditorWindow(
     SimulationController const& simController,
     Viewport const& viewport,
     EditorControllerWeakPtr const& editorController)
-    : _AlienWindow("Pattern editor", "editor.pattern editor", true)
+    : _AlienWindow("Pattern editor", "editors.pattern editor", true)
     , _editorModel(editorModel)
     , _simController(simController)
     , _viewport(viewport)
     , _editorController(editorController)
 {
-    _savePatternDialog = std::make_shared<_SavePatternDialog>(simController);
-    _openPatternDialog = std::make_shared<_OpenPatternDialog>(editorModel, simController, viewport);
+    auto path = std::filesystem::current_path();
+    if (path.has_parent_path()) {
+        path = path.parent_path();
+    }
+    _startingPath = GlobalSettings::getInstance().getStringState("editors.pattern editor.starting path", path.string());
+}
+
+_PatternEditorWindow::~_PatternEditorWindow()
+{
+    GlobalSettings::getInstance().setStringState("editors.pattern editor.starting path", _startingPath);
 }
 
 void _PatternEditorWindow::processIntern()
@@ -50,16 +59,18 @@ void _PatternEditorWindow::processIntern()
 
     //load button
     if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
-        _openPatternDialog->show();
+        onOpenPattern();
     }
+    AlienImGui::Tooltip("Open pattern");
 
     //save button
     ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
-        _savePatternDialog->show(_editorModel->isRolloutToClusters());
+        onSavePattern();
     }
     ImGui::EndDisabled();
+    AlienImGui::Tooltip("Save pattern");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
@@ -71,6 +82,7 @@ void _PatternEditorWindow::processIntern()
         onCopy();
     }
     ImGui::EndDisabled();
+    AlienImGui::Tooltip("Copy pattern");
 
     //paste button
     ImGui::SameLine();
@@ -79,6 +91,7 @@ void _PatternEditorWindow::processIntern()
         onPaste();
     }
     ImGui::EndDisabled();
+    AlienImGui::Tooltip("Paste pattern");
 
     //delete button
     ImGui::SameLine();
@@ -87,6 +100,7 @@ void _PatternEditorWindow::processIntern()
         onDelete();
     }
     ImGui::EndDisabled();
+    AlienImGui::Tooltip("Delete Pattern");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
@@ -98,6 +112,7 @@ void _PatternEditorWindow::processIntern()
         _editorController->onInspectSelectedObjects();
     }
     ImGui::EndDisabled();
+    AlienImGui::Tooltip("Inspect Objects");
 
     //inspect genomes button
     ImGui::SameLine();
@@ -106,6 +121,7 @@ void _PatternEditorWindow::processIntern()
         _editorController->onInspectSelectedGenomes();
     }
     ImGui::EndDisabled();
+    AlienImGui::Tooltip("Inspect principal genome");
 
     if (ImGui::BeginChild(
         "##",
@@ -285,13 +301,13 @@ void _PatternEditorWindow::processIntern()
         if (ImGui::Button(ICON_FA_LINK)) {
             onSetBarrier(true);
         }
-        AlienImGui::Tooltip("Attach to background");
+        AlienImGui::Tooltip("Make indestructible");
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_UNLINK)) {
             onSetBarrier(false);
         }
-        AlienImGui::Tooltip("Detach from background");
+        AlienImGui::Tooltip("Make destructible");
         ImGui::EndDisabled();
 
         _lastSelection = selection;
@@ -300,24 +316,54 @@ void _PatternEditorWindow::processIntern()
 
     AlienImGui::Separator();
     auto rolloutToClusters = _editorModel->isRolloutToClusters();
-    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Roll out changes to cell clusters"), rolloutToClusters)) {
+    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Roll out changes to cell networks"), rolloutToClusters)) {
         _editorModel->setRolloutToClusters(rolloutToClusters);
         _angle = 0;
         _angularVel = 0;
     }
     ImGui::SameLine();
-    AlienImGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell clusters of the selected cell.\n"
+    AlienImGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell networks of the selected cell.\n"
                            "If this option is disabled, the changes will be applied only to the selected cells. In this case, the connections between the cells and the neighboring cells are recalculated when the positions are changed.\n"
                            "If you hold down the SHIFT key, this toggle button is temporarily turned off.");
+}
 
-    _savePatternDialog->process();
-    _openPatternDialog->process();
+void _PatternEditorWindow::onOpenPattern()
+{
+    GenericFileDialogs::getInstance().showOpenFileDialog(
+        "Open pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _startingPath = firstFilenameCopy.remove_filename().string();
+            ClusteredDataDescription content;
+            if (Serializer::deserializeContentFromFile(content, firstFilename.string())) {
+                auto center = _viewport->getCenterInWorldPos();
+                content.setCenter(center);
+                _simController->addAndSelectSimulationData(DataDescription(content));
+                _editorModel->update();
+            } else {
+                MessageDialog::getInstance().show("Open pattern", "The selected file could not be opened.");
+            }
+        });
+}
+
+void _PatternEditorWindow::onSavePattern()
+{
+    GenericFileDialogs::getInstance().showSaveFileDialog(
+        "Save pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _startingPath = firstFilenameCopy.remove_filename().string();
+
+            auto content = _simController->getSelectedClusteredSimulationData(_editorModel->isRolloutToClusters());
+            if (!Serializer::serializeContentToFile(firstFilename.string(), content)) {
+                MessageDialog::getInstance().show("Save pattern", "The selected pattern could not be saved to the specified file.");
+            }
+        });
 }
 
 bool _PatternEditorWindow::isObjectInspectionPossible() const
 {
-    auto selection = _editorModel->getSelectionShallowData();
-    return !_editorModel->isSelectionEmpty() && selection.numCells + selection.numParticles <= MaxInspectorWindowsToAdd;
+    return !_editorModel->isSelectionEmpty();
 }
 
 bool _PatternEditorWindow::isGenomeInspectionPossible() const

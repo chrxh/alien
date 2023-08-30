@@ -2,7 +2,10 @@
 
 #include <imgui.h>
 
+#include "Base/LoggingService.h"
+
 #include "AlienImGui.h"
+#include "WindowController.h"
 
 MessageDialog& MessageDialog::getInstance()
 {
@@ -18,6 +21,13 @@ void MessageDialog::process()
     ImGui::OpenPopup(_title.c_str());
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal(_title.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (!_sizeInitialized) {
+            auto size = ImGui::GetWindowSize();
+            auto& windowController = WindowController::getInstance();
+            auto factor = windowController.getContentScaleFactor() / windowController.getLastContentScaleFactor();
+            ImGui::SetWindowSize({size.x * factor, size.y * factor});
+            _sizeInitialized = true;
+        }
 
         AlienImGui::Text(_message);
         AlienImGui::Separator();
@@ -35,4 +45,5 @@ void MessageDialog::show(std::string const& title, std::string const& message)
     _show = true;
     _title = title;
     _message = message;
+    log(Priority::Important, "message dialog showing: '" + message + "'");
 }

@@ -69,13 +69,13 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
     }
     std::sort(partitionData.begin(), partitionData.end());
 
-    file << "number of repetitive active clusters: " << partitionData.size() << std::endl << std::endl;
+    file << "number of repetitive active cell networks: " << partitionData.size() << std::endl << std::endl;
     for (auto const& [index, partitionClassData] : partitionData | boost::adaptors::reversed | boost::adaptors::indexed(1)) {
 
-        file << "cluster " << index << ": " << partitionClassData.numberOfElements << " exemplars" << std::endl;
+        file << "cell network " << index << ": " << partitionClassData.numberOfElements << " exemplars" << std::endl;
 
         std::stringstream clusterNameStream;
-        clusterNameStream << "cluster" << std::setfill('0') << std::setw(6) << index << ".sim";
+        clusterNameStream << "cell network" << std::setfill('0') << std::setw(6) << index << ".sim";
 
         std::filesystem::path clusterFilename(filename);
         clusterFilename.remove_filename();
@@ -89,9 +89,9 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
     file.close();
 
     std::stringstream messageStream;
-    messageStream << partitionData.size() << " repetitive active clusters found. A summary is saved to " << filename << "." << std::endl;
+    messageStream << partitionData.size() << " repetitive active cell network found. A summary is saved to " << filename << "." << std::endl;
     if (!partitionData.empty()) {
-        messageStream << "Representative clusters are save from `cluster" << std::setfill('0') << std::setw(6) << 0 << ".sim` to `cluster" << std::setfill('0')
+        messageStream << "Representative cell networks are save from `cluster" << std::setfill('0') << std::setw(6) << 0 << ".sim` to `cluster" << std::setfill('0')
                       << std::setw(6) << partitionData.size() - 1 << ".sim`.";
     }
     MessageDialog::getInstance().show("Analysis result", messageStream.str());

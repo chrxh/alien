@@ -29,10 +29,11 @@ private:
 
     void processSimulationTable();
     void processUserTable();
+
     void processStatus();
     void processFilter();
     void processToolbar();
-    void processShortenedText(std::string const& text);
+    void processShortenedText(std::string const& text, bool bold = false);
     bool processActionButton(std::string const& text);
     bool processDetailButton();
 
@@ -49,7 +50,6 @@ private:
     std::string getUserLikes(std::string const& id);
 
     void pushTextColor(RemoteSimulationData const& entry);
-    bool isVersionCompatible(RemoteSimulationData const& entry) const;
     void calcFilteredSimulationDatas();
 
     bool _scheduleRefresh = false;

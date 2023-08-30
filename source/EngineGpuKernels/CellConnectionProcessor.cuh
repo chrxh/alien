@@ -158,7 +158,7 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(
             Cell* empty = nullptr;
             auto origCell = alienAtomicExch(&data.objects.cellPointers.at(cellIndex), empty);
             if (origCell) {
-                ParticleProcessor::radiate(data, origCell->absPos, origCell->vel, origCell->color, origCell->energy);
+                ParticleProcessor::radiate(data, origCell->pos, origCell->vel, origCell->color, origCell->energy);
 
                 for (int i = 0; i < origCell->numConnections; ++i) {
                     StructuralOperation operation;
@@ -217,7 +217,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnections(
     float desiredDistance,
     ConstructorAngleAlignment angleAlignment)
 {
-    auto posDelta = cell2->absPos - cell1->absPos;
+    auto posDelta = cell2->pos - cell1->pos;
     data.cellMap.correctDirection(posDelta);
 
     CellConnection origConnections[MAX_CELL_BONDS];
@@ -280,7 +280,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     float desiredAngleOnCell1,
     ConstructorAngleAlignment angleAlignment)
 {
-    if (wouldResultInOverlappingConnection(cell1, cell2->absPos)) {
+    if (wouldResultInOverlappingConnection(cell1, cell2->pos)) {
         return false;
     }
 
@@ -299,7 +299,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         return true;
     }
     if (1 == cell1->numConnections) {
-        auto connectedCellDelta = cell1->connections[0].cell->absPos - cell1->absPos;
+        auto connectedCellDelta = cell1->connections[0].cell->pos - cell1->pos;
         data.cellMap.correctDirection(connectedCellDelta);
         auto prevAngle = Math::angleOfVector(connectedCellDelta);
         auto angleDiff = newAngle - prevAngle;
@@ -330,8 +330,8 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     float nextAngle = 0;
     for (; index < cell1->numConnections; ++index) {
         auto prevIndex = (index + cell1->numConnections - 1) % cell1->numConnections;
-        prevAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell1->connections[prevIndex].cell->absPos - cell1->absPos));
-        nextAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell1->connections[index].cell->absPos - cell1->absPos));
+        prevAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell1->connections[prevIndex].cell->pos - cell1->pos));
+        nextAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell1->connections[index].cell->pos - cell1->pos));
         if (Math::isAngleInBetween(prevAngle, nextAngle, newAngle)) {
             break;
         }
@@ -423,12 +423,12 @@ __inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(Sim
 
     bool result = false;
     data.cellMap.executeForEach((pos1 + pos2) / 2, distance, detached, [&](auto const& otherCell) {
-        if ((otherCell->absPos.x == pos1.x && otherCell->absPos.y == pos1.y) || (otherCell->absPos.x == pos2.x && otherCell->absPos.y == pos2.y)) {
+        if ((otherCell->pos.x == pos1.x && otherCell->pos.y == pos1.y) || (otherCell->pos.x == pos2.x && otherCell->pos.y == pos2.y)) {
             return;
         }
         if (otherCell->tryLock()) {
             for (int i = 0; i < otherCell->numConnections; ++i) {
-                if (Math::crossing(pos1, pos2, otherCell->absPos, otherCell->connections[i].cell->absPos)) {
+                if (Math::crossing(pos1, pos2, otherCell->pos, otherCell->connections[i].cell->pos)) {
                     otherCell->releaseLock();
                     result = true;
                     return;
@@ -459,7 +459,7 @@ __inline__ __device__ bool CellConnectionProcessor::wouldResultInOverlappingConn
         if (!bothConnected) {
             continue;
         }
-        if (Math::crossing(cell1->absPos, otherCellPos, connectedCell->absPos, nextConnectedCell->absPos)) {
+        if (Math::crossing(cell1->pos, otherCellPos, connectedCell->pos, nextConnectedCell->pos)) {
             return true;
         }
     }

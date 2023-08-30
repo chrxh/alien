@@ -13,6 +13,7 @@ public:
     void show(std::string const& title, std::string const& message);
 
 private:
+    bool _sizeInitialized = false;
     bool _show = false;
     std::string _title;
     std::string _message;

@@ -254,6 +254,12 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.radiationAbsorptionVelocityPenalty,
+            defaultParameters.radiationAbsorptionVelocityPenalty,
+            "simulation parameters.radiation.absorption velocity penalty",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.highRadiationMinCellEnergy,
             defaultParameters.highRadiationMinCellEnergy,
             "simulation parameters.high radiation.min cell energy",
@@ -445,12 +451,6 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.cellFunctionAttackerVelocityPenalty,
-            defaultParameters.cellFunctionAttackerVelocityPenalty,
-            "simulation parameters.cell.function.attacker.velocity penalty",
-            parserTask);
-        encodeDecodeProperty(
-            tree,
             parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent,
             defaultParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent,
             "simulation parameters.cell.function.attacker.geometry deviation exponent",
@@ -472,6 +472,24 @@ namespace
             parameters.cellFunctionAttackerGenomeSizeBonus,
             defaultParameters.cellFunctionAttackerGenomeSizeBonus,
             "simulation parameters.cell.function.attacker.genome size bonus",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionAttackerSameMutantPenalty,
+            defaultParameters.cellFunctionAttackerSameMutantPenalty,
+            "simulation parameters.cell.function.attacker.same mutant penalty",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionAttackerSensorDetectionFactor,
+            defaultParameters.cellFunctionAttackerSensorDetectionFactor,
+            "simulation parameters.cell.function.attacker.sensor detection factor",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionAttackerDestroyCells,
+            defaultParameters.cellFunctionAttackerDestroyCells,
+            "simulation parameters.cell.function.attacker.destroy cells",
             parserTask);
 
         encodeDecodeProperty(
@@ -578,6 +596,8 @@ namespace
             auto& defaultSource = defaultParameters.particleSources[index];
             encodeDecodeProperty(tree, source.posX, defaultSource.posX, base + "pos.x", parserTask);
             encodeDecodeProperty(tree, source.posY, defaultSource.posY, base + "pos.y", parserTask);
+            encodeDecodeProperty(tree, source.velX, defaultSource.velX, base + "vel.x", parserTask);
+            encodeDecodeProperty(tree, source.velY, defaultSource.velY, base + "vel.y", parserTask);
             encodeDecodeProperty(tree, source.useAngle, defaultSource.useAngle, base + "use angle", parserTask);
             encodeDecodeProperty(tree, source.angle, defaultSource.angle, base + "angle", parserTask);
             encodeDecodeProperty(tree, source.shapeType, defaultSource.shapeType, base + "shape.type", parserTask);
@@ -614,6 +634,8 @@ namespace
             encodeDecodeProperty(tree, spot.color, defaultSpot.color, base + "color", parserTask);
             encodeDecodeProperty(tree, spot.posX, defaultSpot.posX, base + "pos.x", parserTask);
             encodeDecodeProperty(tree, spot.posY, defaultSpot.posY, base + "pos.y", parserTask);
+            encodeDecodeProperty(tree, spot.velX, defaultSpot.velX, base + "vel.x", parserTask);
+            encodeDecodeProperty(tree, spot.velY, defaultSpot.velY, base + "vel.y", parserTask);
 
             encodeDecodeProperty(tree, spot.shapeType, defaultSpot.shapeType, base + "shape.type", parserTask);
             if (spot.shapeType == SpotShapeType_Circular) {

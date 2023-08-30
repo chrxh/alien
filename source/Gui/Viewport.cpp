@@ -4,9 +4,9 @@
 
 #include "WindowController.h"
 
-_Viewport::_Viewport(WindowController const& windowController)
+_Viewport::_Viewport()
 {
-    _viewSize = windowController->getStartupWindowSize();
+    _viewSize = WindowController::getInstance().getStartupWindowSize();
 }
 
 float _Viewport::getZoomFactor() const

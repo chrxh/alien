@@ -33,6 +33,8 @@ std::vector<UserData> NetworkDataParser::decodeUserData(boost::property_tree::pt
         entry.starsGiven = subTree.get<int>("starsGiven");
         entry.timestamp = subTree.get<std::string>("timestamp");
         entry.online = subTree.get<bool>("online");
+        entry.timeSpent = subTree.get<int>("timeSpent");
+        entry.gpu = subTree.get<std::string>("gpu");
         result.emplace_back(entry);
     }
     return result;
