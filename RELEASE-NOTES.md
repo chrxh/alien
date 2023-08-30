@@ -29,10 +29,10 @@
 - engine: more realistic collision algorithm between cells and barriers
 - engine: insertion mutation treats inserts to sub-genomes equally likely
 - gui/global: if OS=Windows: settings are saved to the Windows registry
-- gui/view: better zooming experience: make continuous zoom independent of the computational workload
+- gui/view: better zooming experience: make continuous zoom speed of the computational workload
 - gui/browser: all example are available as non-community creations in the browser
 - gui/inspection: genome tab extended and new layout used
-- new startup simulation featuring sensor-equipped parasites and plant ecosystem
+- new startup simulation featuring sensor-equipped consumer and plant ecosystem
 
 ### Removed
 - simulation parameter 'Same color energy distribution' for attackers removed
