@@ -19,7 +19,7 @@ namespace
         "directory. This should normally be the case.\n\n5) If you have multiple graphics cards, please check that your primary monitor is "
         "connected to the CUDA-powered card. ALIEN uses the same graphics card for computation as well as rendering and chooses the one "
         "with the highest compute capability.\n\n6) If you possess both integrated and dedicated graphics cards, please ensure that the alien-executable is "
-        "configured to use your high-performance graphics card. On Windows, you need to access the 'Graphics settings,' add 'alien.exe' to the list, click "
+        "configured to use your high-performance graphics card. On Windows you need to access the 'Graphics settings,' add 'alien.exe' to the list, click "
         "'Options,' and choose 'High performance'.\n\nIf these conditions are not met, ALIEN may crash unexpectedly.";
 }
 
