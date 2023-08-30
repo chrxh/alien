@@ -42,7 +42,7 @@
 - display an error message if GPU memory allocation failed and allow to continue
 - fixed wrong parameter calculation in case of overlapping parameter zones
 - plots for accumulated and averaged values have been corrected
-- loopholes anbd timeout bug for completeness check fixed
+- loopholes and timeout bug for completeness check fixed
 - fetching simulation list optimized
 - unwanted conversion to lower case in input fields removed
 
