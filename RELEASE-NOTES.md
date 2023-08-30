@@ -20,7 +20,7 @@
 - gui/help: getting started window supplemented by additional sections (basic notions, examples, simulation parameters, editing tools, FAQ)
 - gui/view: mouse wheel support for zooming
 - gui/view: automatically scale all window sizes according to OS content scale
-- gui/genome editor: allow editing angles and 'required connections' for predefined geometries
+- gui/genome editor: support for geometry presets and allow modify angles and connections
 - gui/mass operations: coloring cells in genomes
 - gui/simulation parameters, genome editor, inspection: tooltips for almost all fields added
 - gui/simulation parameters: parameters for configuring new features (attacker can destroy other cells, sensor targeting for attackers, same mutant protection, genome size bonus, ...)
