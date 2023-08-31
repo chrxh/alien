@@ -156,7 +156,7 @@ void _StartupController::processWindow()
     drawList->AddText(
         styleRep.getReefMediumFont(),
         scale(24.0f),
-        {center.x - scale(toFloat(versionString.size()) * 3.0f), bottom - scale(140)},
+        {center.x - scale(toFloat(versionString.size()) * 2.8f), bottom - scale(140)},
         textColor,
         versionString.c_str());
 }
