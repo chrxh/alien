@@ -165,7 +165,7 @@ TEST_F(InjectorTests, injectOnlyUnderConstruction_failed)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
-            .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectOnlyUnderConstruction).setGenome(genome)),
+            .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectOnlyEmptyCells).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -208,7 +208,7 @@ TEST_F(InjectorTests, injectOnlyUnderConstruction_success)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
-            .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectOnlyUnderConstruction).setGenome(genome)),
+            .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectOnlyEmptyCells).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})

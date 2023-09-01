@@ -46,8 +46,8 @@ namespace Const
         "attacker\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: a value which is proportional to the gained energy";
 
     std::string const InjectorTooltip =
-        "Injector cellscan copy their genome into other constructor or injector cells. To do this, they need to be activated, remain in "
-        "close proximity to the target cell for a certain minimum duration, and, in the case of target constructor cell, its construction process "
+        "Injector cells can override the genome of other constructor or injector cells by their own. To do this, they need to be activated, remain in "
+        "close proximity to the target cell for a certain minimum duration, and, in the case of a target constructor cell, its construction process "
         "must not have started yet.\n\n" ICON_FA_CHEVRON_RIGHT " Input channel #0: abs(value) > threshold activates injector\n\n" ICON_FA_CHEVRON_RIGHT
         " Output channel #0: 0 (no cells found) or 1 (injection in process or completed)";
 
@@ -186,9 +186,10 @@ namespace Const
         "over greater distances, for example, from attacker cells to constructor cells.";
 
     std::string const GenomeInjectorModeTooltip = ICON_FA_CHEVRON_RIGHT
-        " Cells under construction: Only cells which are under construction can be infected. This mode is useful when an organism wants to "
-        "inject its genome into another own constructor cell (e.g. to build a spore).\n\n" ICON_FA_CHEVRON_RIGHT
-        " All Cells: In this mode there are no restrictions, e.g. any other constructor or injector cell can be infected.";
+        " Only empty cells: Only cells which possess an empty genome can be infected. This mode is useful when an organism wants to "
+        "inject its genome into another own constructor cell (e.g. to build a spore). In this mode the injection process does not take any "
+        "time.\n\n" ICON_FA_CHEVRON_RIGHT " All Cells: In this mode there are no restrictions, e.g. any other constructor or injector cell can be infected. "
+        "The duration of the injection process depends on the simulation parameter 'Injection time'.";
 
     std::string const GenomeMuscleModeTooltip = ICON_FA_CHEVRON_RIGHT
         " Movement: Results in movement in the direction (or counter-direction) determined by the path from the "

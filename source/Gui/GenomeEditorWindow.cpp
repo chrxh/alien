@@ -639,7 +639,7 @@ void _GenomeEditorWindow::processNode(
                 AlienImGui::ComboParameters()
                     .name("Mode")
                     .textWidth(ContentTextWidth)
-                    .values({"Cells under construction", "All Cells"})
+                    .values({"Only empty cells", "All cells"})
                     .tooltip(Const::GenomeInjectorModeTooltip),
                 injector.mode);
         } break;

@@ -553,7 +553,7 @@ void _InspectorWindow::processInjectorContent(InjectorDescription& injector)
             AlienImGui::ComboParameters()
                 .name("Mode")
                 .textWidth(CellFunctionTextWidth)
-                .values({"Cells under construction", "All Cells"})
+                .values({"Only empty cells", "All cells"})
                 .tooltip(Const::GenomeInjectorModeTooltip),
             injector.mode);
         ImGui::TreePop();
