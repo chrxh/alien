@@ -80,7 +80,7 @@ struct SimulationParameters
     bool cellFunctionConstructorMutationPreventDepthIncrease = false;
     bool cellFunctionConstructorMutationSelfReplication = false;
 
-    ColorVector<float> cellFunctionInjectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
+    ColorVector<float> cellFunctionInjectorRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
     ColorMatrix<int> cellFunctionInjectorDurationColorMatrix = {
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
