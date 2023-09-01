@@ -55,6 +55,9 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             if (otherCell->cellFunctionData.constructor.genomeReadPosition != 0) {
                 return;
             }
+            if (!otherCell->tryLock()) {
+                return;
+            }
             match = true;
             auto injectorDuration = cudaSimulationParameters.cellFunctionInjectorDurationColorMatrix[cell->color][otherCell->color];
 
@@ -80,35 +83,42 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                 otherCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
             }
 
-            atomicAdd(&otherCell->activity.channels[6], 1.0f);
             injection = true;
+            otherCell->releaseLock();
         });
     } break;
 
-    case InjectorMode_InjectOnlyUnderConstruction: {
-        for (int i = 0; i < cell->numConnections; ++i) {
-            auto& connectedCell = cell->connections[i].cell;
-            for (int j = 0; j < connectedCell->numConnections; ++j) {
-                auto connectedConnectedCell = connectedCell->connections[j].cell;
-                if (connectedConnectedCell->livingState == LivingState_UnderConstruction
-                    && connectedConnectedCell->cellFunctionData.constructor.genomeReadPosition == 0) {
-                    auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(injector.genomeSize);
-                    for (int i = 0; i < injector.genomeSize; ++i) {
-                        targetGenome[i] = injector.genome[i];
-                    }
-                    if (connectedConnectedCell->cellFunction == CellFunction_Constructor) {
-                        connectedConnectedCell->cellFunctionData.constructor.genome = targetGenome;
-                        connectedConnectedCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
-                    } else {
-                        connectedConnectedCell->cellFunctionData.injector.genome = targetGenome;
-                        connectedConnectedCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
-                    }
-                    atomicAdd(&connectedConnectedCell->activity.channels[6], 1.0f);
-                    match = true;
-                    injection = true;
-                }
+    case InjectorMode_InjectOnlyEmptyCells: {
+        data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellFunctionInjectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
+            if (cell == otherCell) {
+                return;
             }
-        }
+            if (otherCell->cellFunction != CellFunction_Constructor && otherCell->cellFunction != CellFunction_Injector) {
+                return;
+            }
+            auto otherGenomeSize = otherCell->cellFunction == CellFunction_Constructor ? otherCell->cellFunctionData.constructor.genomeSize
+                                                                                  : otherCell->cellFunctionData.injector.genomeSize;
+            if (otherGenomeSize > Const::GenomeHeaderSize) {
+                return;
+            }
+            if (!otherCell->tryLock()) {
+                return;
+            }
+            auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(injector.genomeSize);
+            for (int i = 0; i < injector.genomeSize; ++i) {
+                targetGenome[i] = injector.genome[i];
+            }
+            if (otherCell->cellFunction == CellFunction_Constructor) {
+                otherCell->cellFunctionData.constructor.genome = targetGenome;
+                otherCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
+            } else {
+                otherCell->cellFunctionData.injector.genome = targetGenome;
+                otherCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
+            }
+            match = true;
+            injection = true;
+            otherCell->releaseLock();
+        });
     } break;
     }
 
