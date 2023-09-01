@@ -152,6 +152,9 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         cell->cellFunctionData.sensor.color = cellTO.cellFunctionData.sensor.color;
         cell->cellFunctionData.sensor.targetedCreatureId = cellTO.cellFunctionData.sensor.targetedCreatureId;
+        cell->cellFunctionData.sensor.memoryChannel1 = 0;
+        cell->cellFunctionData.sensor.memoryChannel2 = 0;
+        cell->cellFunctionData.sensor.memoryChannel3 = 0;
     } break;
     case CellFunction_Nerve: {
         cell->cellFunctionData.nerve.pulseMode = cellTO.cellFunctionData.nerve.pulseMode;
@@ -299,6 +302,9 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.sensor.minDensity = _data->numberGen1.random(1.0f);
             cell->cellFunctionData.sensor.color = _data->numberGen1.random(MAX_COLORS - 1);
             cell->cellFunctionData.sensor.targetedCreatureId = 0;
+            cell->cellFunctionData.sensor.memoryChannel1 = 0;
+            cell->cellFunctionData.sensor.memoryChannel2 = 0;
+            cell->cellFunctionData.sensor.memoryChannel3 = 0;
         } break;
         case CellFunction_Nerve: {
         } break;

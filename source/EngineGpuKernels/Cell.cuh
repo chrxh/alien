@@ -71,6 +71,11 @@ struct SensorFunction
     float minDensity;
     int color;
     int targetedCreatureId;
+
+    //temp
+    float memoryChannel1;
+    float memoryChannel2;
+    float memoryChannel3;
 };
 
 struct NerveFunction
