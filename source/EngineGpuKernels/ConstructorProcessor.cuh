@@ -647,6 +647,10 @@ ConstructorProcessor::constructCellIntern(
         result->cellFunctionData.sensor.angle = GenomeDecoder::readAngle(constructor);
         result->cellFunctionData.sensor.minDensity = (GenomeDecoder::readFloat(constructor) + 1.0f) / 2;
         result->cellFunctionData.sensor.color = GenomeDecoder::readByte(constructor) % MAX_COLORS;
+        result->cellFunctionData.sensor.memoryChannel1 = 0;
+        result->cellFunctionData.sensor.memoryChannel2 = 0;
+        result->cellFunctionData.sensor.memoryChannel3 = 0;
+
     } break;
     case CellFunction_Nerve: {
         result->cellFunctionData.nerve.pulseMode = GenomeDecoder::readByte(constructor);

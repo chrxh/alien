@@ -996,7 +996,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0.1f)
-                    .max(3.0f)
+                    .max(4.0f)
                     .defaultValue(origSimParameters.cellFunctionInjectorRadius)
                     .tooltip("The maximum distance over which an injector cell can infect another cell."),
                 simParameters.cellFunctionInjectorRadius);
