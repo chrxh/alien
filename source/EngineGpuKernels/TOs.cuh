@@ -72,6 +72,11 @@ struct SensorTO
     float minDensity;
     int color;
     int targetedCreatureId;
+
+    //process data
+    float memoryChannel1;
+    float memoryChannel2;
+    float memoryChannel3;
 };
 
 struct NerveTO

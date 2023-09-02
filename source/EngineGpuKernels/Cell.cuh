@@ -72,7 +72,7 @@ struct SensorFunction
     int color;
     int targetedCreatureId;
 
-    //temp
+    //process data
     float memoryChannel1;
     float memoryChannel2;
     float memoryChannel3;
