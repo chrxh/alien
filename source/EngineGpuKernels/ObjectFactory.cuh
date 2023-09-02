@@ -152,9 +152,9 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         cell->cellFunctionData.sensor.color = cellTO.cellFunctionData.sensor.color;
         cell->cellFunctionData.sensor.targetedCreatureId = cellTO.cellFunctionData.sensor.targetedCreatureId;
-        cell->cellFunctionData.sensor.memoryChannel1 = 0;
-        cell->cellFunctionData.sensor.memoryChannel2 = 0;
-        cell->cellFunctionData.sensor.memoryChannel3 = 0;
+        cell->cellFunctionData.sensor.memoryChannel1 = cellTO.cellFunctionData.sensor.memoryChannel1;
+        cell->cellFunctionData.sensor.memoryChannel2 = cellTO.cellFunctionData.sensor.memoryChannel2;
+        cell->cellFunctionData.sensor.memoryChannel3 = cellTO.cellFunctionData.sensor.memoryChannel3;
     } break;
     case CellFunction_Nerve: {
         cell->cellFunctionData.nerve.pulseMode = cellTO.cellFunctionData.nerve.pulseMode;

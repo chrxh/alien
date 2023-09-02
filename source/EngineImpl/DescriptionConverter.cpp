@@ -439,6 +439,9 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         sensor.color = cellTO.cellFunctionData.sensor.color;
         sensor.targetedCreatureId = cellTO.cellFunctionData.sensor.targetedCreatureId;
+        sensor.memoryChannel1 = cellTO.cellFunctionData.sensor.memoryChannel1;
+        sensor.memoryChannel2 = cellTO.cellFunctionData.sensor.memoryChannel2;
+        sensor.memoryChannel3 = cellTO.cellFunctionData.sensor.memoryChannel3;
         result.cellFunction = sensor;
     } break;
     case CellFunction_Nerve: {
@@ -554,6 +557,9 @@ void DescriptionConverter::addCell(
         sensorTO.minDensity = sensorDesc.minDensity;
         sensorTO.angle = sensorDesc.fixedAngle.value_or(0);
         sensorTO.targetedCreatureId = sensorDesc.targetedCreatureId;
+        sensorTO.memoryChannel1 = sensorDesc.memoryChannel1;
+        sensorTO.memoryChannel2 = sensorDesc.memoryChannel2;
+        sensorTO.memoryChannel3 = sensorDesc.memoryChannel3;
         cellTO.cellFunctionData.sensor = sensorTO;
     } break;
     case CellFunction_Nerve: {
