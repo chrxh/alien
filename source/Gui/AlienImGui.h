@@ -285,6 +285,7 @@ public:
     );
 
     static void OnlineSymbol();
+    static void LastDayOnlineSymbol();
 
 private:
 

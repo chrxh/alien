@@ -1150,6 +1150,14 @@ void AlienImGui::OnlineSymbol()
     ImGui::PopStyleColor();
 }
 
+void AlienImGui::LastDayOnlineSymbol()
+{
+    auto color = ImColor::HSV(0.16f, 0.5f, 0.66f);
+    ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
+    ImGui::Text(ICON_FA_GENDERLESS);
+    ImGui::PopStyleColor();
+}
+
 namespace
 {
     template <typename T>

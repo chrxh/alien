@@ -9,9 +9,11 @@ public:
     int starsGiven;
     std::string timestamp;
     bool online;
+    bool lastDayOnline;
     int timeSpent;
     std::string gpu;
 
+    //not a full compare
     static int compare(UserData const& left, UserData const& right)
     {
         if (int result = static_cast<int>(left.online) - static_cast<int>(right.online)) {
