@@ -123,6 +123,7 @@ A short architectural overview of the source code can be found in the [documenta
 - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
 - [googletest](https://github.com/google/googletest)
 - [vcpkg](https://vcpkg.io/en/index.html)
+- [WinReg](https://github.com/GiovanniDicanio/WinReg)
 
 # Screenshots
 #### Different plant-like populations around a radiation source
