@@ -3,7 +3,7 @@
 ## [4.0.2] - 2023-09-03
 ### Added
 - gui/browser: show online since last day status
-- gui/browser: show number of simulators in browser
+- gui/browser: show number of simulators
 
 ### Changed
 - engine: injection mode 'Cells under construction' is replaced by 'Only empty cells'
