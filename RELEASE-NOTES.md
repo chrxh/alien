@@ -1,5 +1,14 @@
 # Release notes
 
+## [4.0.2] - 2023-09-03
+### Added
+- gui/browser: show online since last day status
+- gui/browser: show number of simulators in browser
+
+### Changed
+- engine: injection mode 'Cells under construction' is replaced by 'Only empty cells'
+- engine: scanner cells return data (angel, distance) of last match if no match was found
+
 ## [4.0.0] - 2023-08-30
 ### Added
 - engine: support for dynamic simulation parameter zones, barriers and particle sources: they can move with a fixed velocity
