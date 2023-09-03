@@ -1,6 +1,6 @@
 #include "NetworkDataParser.h"
 
-std::vector<RemoteSimulationData> NetworkDataParser::decodeRemoteSimulationData(boost::property_tree::ptree tree)
+std::vector<RemoteSimulationData> NetworkDataParser::decodeRemoteSimulationData(boost::property_tree::ptree const& tree)
 {
     std::vector<RemoteSimulationData> result;
     for (auto const& [key, subTree] : tree) {
@@ -23,7 +23,7 @@ std::vector<RemoteSimulationData> NetworkDataParser::decodeRemoteSimulationData(
     return result;
 }
 
-std::vector<UserData> NetworkDataParser::decodeUserData(boost::property_tree::ptree tree)
+std::vector<UserData> NetworkDataParser::decodeUserData(boost::property_tree::ptree const& tree)
 {
     std::vector<UserData> result;
     for (auto const& [key, subTree] : tree) {
@@ -33,6 +33,7 @@ std::vector<UserData> NetworkDataParser::decodeUserData(boost::property_tree::pt
         entry.starsGiven = subTree.get<int>("starsGiven");
         entry.timestamp = subTree.get<std::string>("timestamp");
         entry.online = subTree.get<bool>("online");
+        entry.lastDayOnline = subTree.get<bool>("lastDayOnline");
         entry.timeSpent = subTree.get<int>("timeSpent");
         entry.gpu = subTree.get<std::string>("gpu");
         result.emplace_back(entry);

@@ -317,6 +317,17 @@ void _BrowserWindow::processSimulationTable()
     ImGui::PopID();
 }
 
+namespace
+{
+    std::string getGpuString(std::string const& gpu)
+    {
+        if (gpu.substr(0, 6) == "NVIDIA") {
+            return gpu.substr(7);
+        }
+        return gpu;
+    }
+}
+
 void _BrowserWindow::processUserTable()
 {
     ImGui::PushID("UserTable");
@@ -355,12 +366,15 @@ void _BrowserWindow::processUserTable()
                 if (item->online) {
                     AlienImGui::OnlineSymbol();
                     ImGui::SameLine();
+                } else if (item->lastDayOnline) {
+                    AlienImGui::LastDayOnlineSymbol();
+                    ImGui::SameLine();
                 }
                 processShortenedText(item->userName, isBoldFont);
 
                 ImGui::TableNextColumn();
                 if (isLoggedIn && _loginDialog.lock()->isShareGpuInfo()) {
-                    processShortenedText(item->gpu, isBoldFont);
+                    processShortenedText(getGpuString(item->gpu), isBoldFont);
                 }
 
                 ImGui::TableNextColumn();
@@ -391,6 +405,9 @@ void _BrowserWindow::processStatus()
         std::string statusText;
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
         statusText += std::to_string(_remoteSimulationList.size()) + " simulations found";
+
+        statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
+        statusText += std::to_string(_userList.size()) + " simulators found";
 
         statusText += std::string("  " ICON_FA_INFO_CIRCLE " ");
         if (auto userName = _networkController->getLoggedInUserName()) {

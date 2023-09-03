@@ -22,6 +22,12 @@
         $onlineByUser[$obj->id] = true;
     }
 
+    $response = $db->query("SELECT u.ID as id FROM user u WHERE u.TIMESTAMP >= DATE_SUB(NOW(), INTERVAL 60*24 MINUTE)");
+    $lastDayOnlineByUser = array();
+    while($obj = $response->fetch_object()){
+        $lastDayOnlineByUser[$obj->id] = true;
+    }
+
     $response = $db->query(
         "SELECT 
             u.ID as id,
@@ -38,6 +44,7 @@
         $starsReceived = is_null($starsReceivedByUser[$obj->id]) ? 0 : $starsReceivedByUser[$obj->id];
         $likesGiven = is_null($likesGivenByUser[$obj->id]) ? 0 : $likesGivenByUser[$obj->id];
         $online = !is_null($onlineByUser[$obj->id]);
+        $lastDayOnline = !is_null($lastDayOnlineByUser[$obj->id]);
         $timeSpent = !is_null($obj->timeSpent) ? (int)$obj->timeSpent : 0;
         $gpu = !is_null($obj->gpu) ? $obj->gpu : "";
         $result[] = [
@@ -46,6 +53,7 @@
             "starsGiven" => $likesGiven,
             "timestamp" => $obj->timestamp,
             "online" => $online,
+            "lastDayOnline" => $lastDayOnline,
             "timeSpent" => $timeSpent,
             "gpu" => $gpu
         ];
