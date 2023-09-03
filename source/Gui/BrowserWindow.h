@@ -56,6 +56,7 @@ private:
     bool _scheduleSort = false;
     std::string _filter;
     bool _showCommunityCreations = false;
+    float _userTableWidth = 0;
     std::unordered_set<std::string> _selectionIds;
     std::unordered_set<std::string> _likedIds;
     std::unordered_map<std::string, std::set<std::string>> _userLikesByIdCache;

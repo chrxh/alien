@@ -29,6 +29,7 @@
 
 namespace
 {
+    auto const PreviewHeight = 200.0f;
     auto const ContentTextWidth = 190.0f;
     auto const DynamicTableColumnWidth = 300.0f;
     auto const WeightsAndBiasTextWidth = 100.0f;
@@ -48,11 +49,13 @@ _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, Simula
         path = path.parent_path();
     }
     _startingPath = GlobalSettings::getInstance().getStringState("windows.genome editor.starting path", path.string());
+    _previewHeight = GlobalSettings::getInstance().getFloatState("windows.genome editor.preview height", scale(PreviewHeight));
 }
 
 _GenomeEditorWindow::~_GenomeEditorWindow()
 {
     GlobalSettings::getInstance().setStringState("windows.genome editor.starting path", _startingPath);
+    GlobalSettings::getInstance().setFloatState("windows.genome editor.preview height", _previewHeight);
 }
 
 void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
@@ -289,7 +292,7 @@ void _GenomeEditorWindow::processTab(TabData& tab)
     }
     ImGui::EndChild();
 
-    ImGui::Button("", ImVec2(-1, StyleRepository::getInstance().scale(5.0f)));
+    ImGui::Button("", ImVec2(-1, scale(5.0f)));
     if (ImGui::IsItemActive()) {
         _previewHeight -= ImGui::GetIO().MouseDelta.y;
     }

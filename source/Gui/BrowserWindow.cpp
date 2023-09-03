@@ -47,12 +47,14 @@ _BrowserWindow::_BrowserWindow(
     , _temporalControlWindow(temporalControlWindow)
 {
     _showCommunityCreations = GlobalSettings::getInstance().getBoolState("windows.browser.show community creations", _showCommunityCreations);
+    _userTableWidth = GlobalSettings::getInstance().getFloatState("windows.browser.user table width", scale(UserTableWidth));
 }
 
 _BrowserWindow::~_BrowserWindow()
 {
     GlobalSettings::getInstance().setBoolState("windows.browser.show community creations", _showCommunityCreations);
     GlobalSettings::getInstance().setBoolState("windows.browser.first start", false);
+    GlobalSettings::getInstance().setFloatState("windows.browser.user table width", _userTableWidth);
 }
 
 void _BrowserWindow::registerCyclicReferences(LoginDialogWeakPtr const& loginDialog, UploadSimulationDialogWeakPtr const& uploadSimulationDialog)
@@ -109,12 +111,21 @@ void _BrowserWindow::processIntern()
         auto sizeAvailable = ImGui::GetContentRegionAvail();
         if (ImGui::BeginChild(
                 "##1",
-                ImVec2(sizeAvailable.x - scale(UserTableWidth), sizeAvailable.y - scale(BrowserBottomHeight)),
+                ImVec2(sizeAvailable.x - scale(_userTableWidth), sizeAvailable.y - scale(BrowserBottomHeight)),
                 false,
                 ImGuiWindowFlags_HorizontalScrollbar)) {
             processSimulationTable();
         }
         ImGui::EndChild();
+    }
+    ImGui::SameLine();
+
+    {
+        auto sizeAvailable = ImGui::GetContentRegionAvail();
+        ImGui::Button("", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomHeight)));
+        if (ImGui::IsItemActive()) {
+            _userTableWidth -= ImGui::GetIO().MouseDelta.x;
+        }
     }
 
     ImGui::SameLine();
