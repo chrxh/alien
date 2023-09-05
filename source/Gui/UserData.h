@@ -13,8 +13,7 @@ public:
     int timeSpent;
     std::string gpu;
 
-    //not a full compare
-    static int compare(UserData const& left, UserData const& right)
+    static int compareOnlineAndTimestamp(UserData const& left, UserData const& right)
     {
         if (int result = static_cast<int>(left.online) - static_cast<int>(right.online)) {
             return result;

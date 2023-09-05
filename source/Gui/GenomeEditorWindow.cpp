@@ -29,7 +29,7 @@
 
 namespace
 {
-    auto const PreviewHeight = 200.0f;
+    auto const PreviewHeight = 300.0f;
     auto const ContentTextWidth = 190.0f;
     auto const DynamicTableColumnWidth = 300.0f;
     auto const WeightsAndBiasTextWidth = 100.0f;

@@ -1,5 +1,6 @@
 #include "RemoteSimulationData.h"
 
+#include <ranges>
 #include <imgui.h>
 
 int RemoteSimulationData::compare(void const* left, void const* right, ImGuiTableSortSpecs const* specs)
@@ -23,19 +24,19 @@ int RemoteSimulationData::compare(void const* left, void const* right, ImGuiTabl
             delta = leftImpl->description.compare(rightImpl->description);
             break;
         case RemoteSimulationDataColumnId_Likes:
-            delta = (leftImpl->likes - rightImpl->likes);
+            delta = leftImpl->getTotalLikes() - rightImpl->getTotalLikes();
             break;
         case RemoteSimulationDataColumnId_NumDownloads:
-            delta = (leftImpl->numDownloads - rightImpl->numDownloads);
+            delta = leftImpl->numDownloads - rightImpl->numDownloads;
             break;
         case RemoteSimulationDataColumnId_Width:
-            delta = (leftImpl->width - rightImpl->width);
+            delta = leftImpl->width - rightImpl->width;
             break;
         case RemoteSimulationDataColumnId_Height:
-            delta = (leftImpl->height - rightImpl->height);
+            delta = leftImpl->height - rightImpl->height;
             break;
         case RemoteSimulationDataColumnId_Particles:
-            delta = (leftImpl->particles - rightImpl->particles);
+            delta = leftImpl->particles - rightImpl->particles;
             break;
         case RemoteSimulationDataColumnId_FileSize:
             delta = static_cast<int>(leftImpl->contentSize / 1024) - static_cast<int>(rightImpl->contentSize / 1024);
@@ -67,9 +68,6 @@ bool RemoteSimulationData::matchWithFilter(std::string const& filter) const
     if (simName.find(filter) != std::string::npos) {
         match = true;
     }
-    if (std::to_string(likes).find(filter) != std::string::npos) {
-        match = true;
-    }
     if (std::to_string(numDownloads).find(filter) != std::string::npos) {
         match = true;
     }
@@ -92,4 +90,13 @@ bool RemoteSimulationData::matchWithFilter(std::string const& filter) const
         match = true;
     }
     return match;
+}
+
+int RemoteSimulationData::getTotalLikes() const
+{
+    int result = 0;
+    for (auto const& numReactions : numLikesByLikeType | std::views::values) {
+        result += numReactions;
+    }
+    return result;
 }

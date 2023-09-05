@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <map>
 
 class ImGuiTableSortSpecs;
 
@@ -27,7 +28,7 @@ public:
     std::string timestamp;
     std::string userName;
     std::string simName;
-    int likes;
+    std::map<int, int> numLikesByLikeType;
     int numDownloads;
     int width;
     int height;
@@ -39,4 +40,6 @@ public:
 
     static int compare(void const* left, void const* right, ImGuiTableSortSpecs const* specs);
     bool matchWithFilter(std::string const& filter) const;
+
+    int getTotalLikes() const;
 };
