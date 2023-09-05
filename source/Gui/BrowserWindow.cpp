@@ -1,5 +1,7 @@
 #include "BrowserWindow.h"
 
+#include <ranges>
+
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/range/adaptor/indexed.hpp>
@@ -504,11 +506,30 @@ void _BrowserWindow::processEmojiWindow()
 
 void _BrowserWindow::processEmojiList(RemoteSimulationData* sim)
 {
+    std::map<int, int> remap;
+    std::set<int> processedLikeTypes;
 
+    int index = 0;
+    while (processedLikeTypes.size() < sim->numLikesByLikeType.size()) {
+        int maxLikes = 0;
+        std::optional<int> maxLikeType;
+        for (auto const& [likeType, numLikes] : sim->numLikesByLikeType) {
+            if (!processedLikeTypes.contains(likeType) && numLikes > maxLikes) {
+                maxLikes = numLikes;
+                maxLikeType = likeType;
+            }
+        }
+        processedLikeTypes.insert(*maxLikeType);
+        remap.emplace(index, *maxLikeType);
+        ++index;
+    }
 
     int counter = 0;
     std::optional<int> toggleLikeType;
-    for (auto const& [likeType, numLikes] : sim->numLikesByLikeType) {
+    for (auto const& likeType : remap | std::views::values) {
+        //auto likeType = remap.at(index);
+        auto numLikes = sim->numLikesByLikeType.at(likeType);
+
         AlienImGui::Text(std::to_string(numLikes));
         ImGui::SameLine();
         if (likeType < _emojis.size()) {
