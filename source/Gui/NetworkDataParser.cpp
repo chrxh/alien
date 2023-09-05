@@ -15,7 +15,18 @@ std::vector<RemoteSimulationData> NetworkDataParser::decodeRemoteSimulationData(
         entry.version = subTree.get<std::string>("version");
         entry.timestamp = subTree.get<std::string>("timestamp");
         entry.contentSize = std::stoll(subTree.get<std::string>("contentSize"));
-        entry.likes = subTree.get<int>("likes");
+
+        bool isArray = false;
+        int counter = 0;
+        for (auto const& [likeTypeString, numLikesString] : subTree.get_child("likesByType")) {
+            auto likes = std::stoi(numLikesString.data());
+            if (likeTypeString.empty()) {
+                isArray = true;
+            }
+            auto likeType = isArray ? counter : std::stoi(likeTypeString);
+            entry.numLikesByLikeType[likeType] = likes;
+            ++counter;
+        }
         entry.numDownloads = subTree.get<int>("numDownloads");
         entry.fromRelease = subTree.get<int>("fromRelease") == 1;
         result.emplace_back(entry);

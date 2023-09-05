@@ -2,6 +2,8 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
+#include <boost/range/adaptor/indexed.hpp>
+
 #include <imgui.h>
 
 #include "Fonts/IconsFontAwesome5.h"
@@ -23,6 +25,7 @@
 #include "LoginDialog.h"
 #include "UploadSimulationDialog.h"
 #include "DelayedExecutionController.h"
+#include "OpenGLHelper.h"
 #include "OverlayMessageController.h"
 #include "VersionChecker.h"
 
@@ -31,6 +34,9 @@ namespace
     auto constexpr UserTableWidth = 200.0f;
     auto constexpr BrowserBottomHeight = 68.0f;
     auto constexpr RowHeight = 25.0f;
+
+    auto constexpr NumEmojis = 16;
+    auto constexpr NumEmojisPerRow = 6;
 }
 
 _BrowserWindow::_BrowserWindow(
@@ -48,6 +54,10 @@ _BrowserWindow::_BrowserWindow(
 {
     _showCommunityCreations = GlobalSettings::getInstance().getBoolState("windows.browser.show community creations", _showCommunityCreations);
     _userTableWidth = GlobalSettings::getInstance().getFloatState("windows.browser.user table width", scale(UserTableWidth));
+
+    for (int i = 1; i <= NumEmojis; ++i) {
+        _emojis.emplace_back(OpenGLHelper::loadTexture(Const::BasePath + "emoji" + std::to_string(i) + ".png"));
+    }
 }
 
 _BrowserWindow::~_BrowserWindow()
@@ -74,7 +84,7 @@ void _BrowserWindow::onRefresh()
 void _BrowserWindow::refreshIntern(bool withRetry)
 {
     try {
-        bool success = _networkController->getSimulationDataList(_remoteSimulationList, withRetry);
+        bool success = _networkController->getRemoteSimulationList(_rawRemoteSimulationList, withRetry);
         success &= _networkController->getUserList(_userList, withRetry);
 
         if (!success) {
@@ -85,13 +95,11 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         calcFilteredSimulationDatas();
 
         if (_networkController->getLoggedInUserName()) {
-            std::vector<std::string> likedIds;
-            if (!_networkController->getLikedSimulationIdList(likedIds)) {
+            if (!_networkController->getLikeTypeBySimId(_ownLikeTypeBySimId)) {
                 MessageDialog::getInstance().show("Error", "Failed to retrieve browser data. Please try again.");
             }
-            _likedIds = std::unordered_set<std::string>(likedIds.begin(), likedIds.end());
         } else {
-            _likedIds.clear();
+            _ownLikeTypeBySimId.clear();
         }
 
         sortSimulationList();
@@ -140,6 +148,8 @@ void _BrowserWindow::processIntern()
 
     processStatus();
     processFilter();
+    processEmojiWindow();
+
     if(_scheduleRefresh) {
         onRefresh();
         _scheduleRefresh = false;
@@ -226,7 +236,7 @@ void _BrowserWindow::processSimulationTable()
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
             RemoteSimulationDataColumnId_Description);
-        ImGui::TableSetupColumn("Stars", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Likes);
+        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Likes);
         ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_NumDownloads);
         ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Width);
         ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Height);
@@ -247,7 +257,6 @@ void _BrowserWindow::processSimulationTable()
                 sortSpecs->SpecsDirty = false;
             }
         }
-
         ImGuiListClipper clipper;
         clipper.Begin(_filteredRemoteSimulationList.size());
         while (clipper.Step())
@@ -270,11 +279,13 @@ void _BrowserWindow::processSimulationTable()
                     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeTextColor);
                 }
                 if (processActionButton(ICON_FA_STAR)) {
-                    if (_networkController->getLoggedInUserName()) {
-                        onToggleLike(*item);
-                    } else {
-                        _loginDialog.lock()->open();
-                    }
+                    //if (_networkController->getLoggedInUserName()) {
+                    //    onToggleLike(*item);
+                    //} else {
+                    //    _loginDialog.lock()->open();
+                    //}
+                    _activateEmojiPopup = true;
+                    _simIndexOfEmojiPopup = row;
                 }
                 AlienImGui::Tooltip("Give a star");
 
@@ -301,12 +312,12 @@ void _BrowserWindow::processSimulationTable()
                 ImGui::TableNextColumn();
                 processShortenedText(item->description);
                 ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(item->likes));
-                if(item->likes > 0) {
-                    ImGui::SameLine();
-                    processDetailButton();
-                    AlienImGui::Tooltip([&] { return getUserLikes(item->id); }, false);
-                }
+                processEmojiList(item);
+
+                //if (item->getTotalLikes() > 0) {
+                //    processDetailButton();
+                //    AlienImGui::Tooltip([&] { return getUserLikes(item->id); }, false);
+                //}
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->numDownloads));
                 ImGui::TableNextColumn();
@@ -357,8 +368,8 @@ void _BrowserWindow::processUserTable()
             styleRepository.scale(200.0f));
         ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
         ImGui::TableSetupColumn(
-            "Stars received", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(100.0f));
-        ImGui::TableSetupColumn("Stars given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
+            "Reactions received", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(120.0f));
+        ImGui::TableSetupColumn("Reactions given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
@@ -415,7 +426,7 @@ void _BrowserWindow::processStatus()
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
         std::string statusText;
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-        statusText += std::to_string(_remoteSimulationList.size()) + " simulations found";
+        statusText += std::to_string(_rawRemoteSimulationList.size()) + " simulations found";
 
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
         statusText += std::to_string(_userList.size()) + " simulators found";
@@ -446,6 +457,94 @@ void _BrowserWindow::processFilter()
     ImGui::SameLine();
     if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter"), _filter)) {
         calcFilteredSimulationDatas();
+    }
+}
+
+
+void _BrowserWindow::processEmojiWindow()
+{
+    if (_activateEmojiPopup) {
+        ImGui::OpenPopup("emoji");
+        _activateEmojiPopup = false;
+    }
+    if (ImGui::BeginPopup("emoji")) {
+        ImGui::Text("Choose a reaction");
+        ImGui::Spacing();
+        ImGui::Spacing();
+        for (auto const& [likeType, emoji] : _emojis | boost::adaptors::indexed(0)) {
+            if (likeType % NumEmojisPerRow != 0) {
+                ImGui::SameLine();
+            }
+            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(Const::ToolbarButtonHoveredColor));
+            auto cursorPos = ImGui::GetCursorScreenPos();
+            auto emojiWidth = scale(toFloat(emoji.width));
+            auto emojiHeight = scale(toFloat(emoji.height));
+            auto& sim = _filteredRemoteSimulationList.at(_simIndexOfEmojiPopup);
+            if (ImGui::ImageButton((void*)(intptr_t)emoji.textureId, {emojiWidth, emojiHeight}, {0, 0}, {1.0f, 1.0f})) {
+                onToggleLike(sim, toInt(likeType));
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::PopStyleColor(2);
+
+            bool isLiked = _ownLikeTypeBySimId.contains(sim.id) && _ownLikeTypeBySimId.at(sim.id) == likeType;
+            if (isLiked) {
+                ImDrawList* drawList = ImGui::GetWindowDrawList();
+                auto& style = ImGui::GetStyle();
+                drawList->AddRect(
+                    ImVec2(cursorPos.x, cursorPos.y),
+                    ImVec2(cursorPos.x + emojiWidth + style.FramePadding.x * 2, cursorPos.y + emojiHeight + style.FramePadding.y * 2),
+                    (ImU32)ImColor::HSV(0, 0, 1, 0.5f),
+                    1.0f);
+            }
+        }
+        ImGui::EndPopup();
+    }
+}
+
+void _BrowserWindow::processEmojiList(RemoteSimulationData* sim)
+{
+
+
+    int counter = 0;
+    std::optional<int> toggleLikeType;
+    for (auto const& [likeType, numLikes] : sim->numLikesByLikeType) {
+        AlienImGui::Text(std::to_string(numLikes));
+        ImGui::SameLine();
+        if (likeType < _emojis.size()) {
+            auto const& emoji = _emojis.at(likeType);
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(7.0f));
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(1.0f));
+            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(Const::ToolbarButtonHoveredColor));
+            auto cursorPos = ImGui::GetCursorScreenPos();
+            auto emojiWidth = scale(toFloat(emoji.width) / 2.5f);
+            auto emojiHeight = scale(toFloat(emoji.height) / 2.5f);
+            if (ImGui::ImageButton((void*)(intptr_t)emoji.textureId, {emojiWidth, emojiHeight},
+                    ImVec2(0, 0),
+                    ImVec2(1, 1),
+                    0)) {
+                toggleLikeType = likeType;
+            }
+            bool isLiked = _ownLikeTypeBySimId.contains(sim->id) && _ownLikeTypeBySimId.at(sim->id) == likeType;
+            if (isLiked) {
+                ImDrawList* drawList = ImGui::GetWindowDrawList();
+                drawList->AddRect(
+                    ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x + emojiWidth, cursorPos.y + emojiHeight), (ImU32)ImColor::HSV(0, 0, 1, 0.5f), 1.0f);
+            }
+            ImGui::PopStyleColor(2);
+        }
+
+        //separator except for last element
+        if (++counter < sim->numLikesByLikeType.size()) {
+            //ImGui::SameLine();
+            //AlienImGui::VerticalSeparator(20.0f);
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
+        }
+    }
+    if (toggleLikeType) {
+        onToggleLike(*sim, *toggleLikeType);
     }
 }
 
@@ -517,16 +616,16 @@ void _BrowserWindow::sortSimulationList()
 
 void _BrowserWindow::sortUserList()
 {
-    std::sort(_userList.begin(), _userList.end(), [&](auto const& left, auto const& right) { return UserData::compare(left, right) > 0; });
+    std::sort(_userList.begin(), _userList.end(), [&](auto const& left, auto const& right) { return UserData::compareOnlineAndTimestamp(left, right) > 0; });
 }
 
-void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
+void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* sim)
 {
     printOverlayMessage("Downloading ...");
 
     delayedExecution([=, this] {
         SerializedSimulation serializedSim;
-        if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, remoteData->id)) {
+        if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, sim->id)) {
             MessageDialog::getInstance().show("Error", "Failed to download simulation.");
             return;
         }
@@ -562,7 +661,7 @@ void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
         _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
         _temporalControlWindow->onSnapshot();
 
-        if (VersionChecker::isVersionNewer(remoteData->version)) {
+        if (VersionChecker::isVersionNewer(sim->version)) {
             MessageDialog::getInstance().show(
                 "Warning",
                 "The download was successful but the simulation was generated using a more recent\n"
@@ -572,11 +671,11 @@ void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* remoteData)
     });
 }
 
-void _BrowserWindow::onDeleteSimulation(RemoteSimulationData* remoteData)
+void _BrowserWindow::onDeleteSimulation(RemoteSimulationData* sim)
 {
     printOverlayMessage("Deleting ...");
 
-    delayedExecution([remoteData = remoteData, this] {
+    delayedExecution([remoteData = sim, this] {
         if (!_networkController->deleteSimulation(remoteData->id)) {
             MessageDialog::getInstance().show("Error", "Failed to delete simulation. Please try again later.");
             return;
@@ -585,39 +684,59 @@ void _BrowserWindow::onDeleteSimulation(RemoteSimulationData* remoteData)
     });
 }
 
-void _BrowserWindow::onToggleLike(RemoteSimulationData& entry)
+void _BrowserWindow::onToggleLike(RemoteSimulationData& sim, int likeType)
 {
-    auto findResult = _likedIds.find(entry.id);
-    if (findResult != _likedIds.end()) {
-        _likedIds.erase(findResult);
-        --entry.likes;
+    if (_networkController->getLoggedInUserName()) {
+
+        //remove existing like
+        auto findResult = _ownLikeTypeBySimId.find(sim.id);
+        auto onlyRemoveLike = false;
+        if (findResult != _ownLikeTypeBySimId.end()) {
+            auto origLikeType = findResult->second;
+            if (--sim.numLikesByLikeType[origLikeType] == 0) {
+                sim.numLikesByLikeType.erase(origLikeType);
+            }
+            _ownLikeTypeBySimId.erase(findResult);
+            //_userNamesByLikeTypeBySimIdCache.erase(std::make_pair(entry.id, origLikeType));  //invalidate cache entry
+            onlyRemoveLike = origLikeType == likeType;  //remove like if same like icon has been clicked
+        }
+
+        //create new like
+        if (!onlyRemoveLike) {
+            _ownLikeTypeBySimId[sim.id] = likeType;
+            if (sim.numLikesByLikeType.contains(likeType)) {
+                ++sim.numLikesByLikeType[likeType];
+            } else {
+                sim.numLikesByLikeType[likeType] = 1;
+            }
+        }
+
+        //_userNamesByLikeTypeBySimIdCache.erase(std::make_pair(entry.id, likeType));  //invalidate cache entry
+        _networkController->toggleLikeSimulation(sim.id, likeType);
+        sortSimulationList();
     } else {
-        _likedIds.insert(entry.id);
-        ++entry.likes;
+        _loginDialog.lock()->open();
     }
-    _userLikesByIdCache.erase(entry.id); //invalidate cache entry
-    _networkController->toggleLikeSimulation(entry.id);
-    sortSimulationList();
 }
 
-bool _BrowserWindow::isLiked(std::string const& id)
+bool _BrowserWindow::isLiked(std::string const& simId)
 {
-    return _likedIds.find(id) != _likedIds.end();
+    return _ownLikeTypeBySimId.contains(simId);
 }
 
-std::string _BrowserWindow::getUserLikes(std::string const& id)
+std::string _BrowserWindow::getUserNamesToLikeType(std::string const& simId, int likeType)
 {
-    std::set<std::string> userLikes;
+    std::set<std::string> userNames;
 
-    auto findResult = _userLikesByIdCache.find(id);
-    if (findResult != _userLikesByIdCache.end()) {
-        userLikes = findResult->second;
-    } else {
-        _networkController->getUserLikesForSimulation(userLikes, id);
-        _userLikesByIdCache.emplace(id, userLikes);
-    }
+    //auto findResult = _userNamesByLikeTypeBySimIdCache.find(std::make_pair(simId, likeType));
+    //if (findResult != _userNamesByLikeTypeBySimIdCache.end()) {
+    //    userNames = findResult->second;
+    //} else {
+    //    _networkController->getUserNamesForSimulationAndLikeType(userNames, simId, likeType);
+    //    _userNamesByLikeTypeBySimIdCache.emplace(std::make_pair(simId, likeType), userNames);
+    //}
 
-    return boost::algorithm::join(userLikes, ", ");
+    return boost::algorithm::join(userNames, ", ");
 }
 
 void _BrowserWindow::pushTextColor(RemoteSimulationData const& entry)
@@ -634,8 +753,8 @@ void _BrowserWindow::pushTextColor(RemoteSimulationData const& entry)
 void _BrowserWindow::calcFilteredSimulationDatas()
 {
     _filteredRemoteSimulationList.clear();
-    _filteredRemoteSimulationList.reserve(_remoteSimulationList.size());
-    for (auto const& simData : _remoteSimulationList) {
+    _filteredRemoteSimulationList.reserve(_rawRemoteSimulationList.size());
+    for (auto const& simData : _rawRemoteSimulationList) {
         if (simData.matchWithFilter(_filter) &&_showCommunityCreations != simData.fromRelease) {
             _filteredRemoteSimulationList.emplace_back(simData);
         }

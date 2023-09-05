@@ -272,7 +272,7 @@ bool _NetworkController::setNewPassword(std::string const& userName, std::string
     }
 }
 
-bool _NetworkController::getSimulationDataList(std::vector<RemoteSimulationData>& result, bool withRetry) const
+bool _NetworkController::getRemoteSimulationList(std::vector<RemoteSimulationData>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get simulation list");
 
@@ -283,7 +283,7 @@ bool _NetworkController::getSimulationDataList(std::vector<RemoteSimulationData>
     params.emplace("version", Const::ProgramVersion);
 
     try {
-        auto postResult = executeRequest([&] { return client.Post("/alien-server/getversionedsimulationlist.php", params); }, withRetry);
+        auto postResult = executeRequest([&] { return client.Post("/alien-server/getversionedsimulationlist2.php", params); }, withRetry);
 
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
@@ -323,7 +323,7 @@ bool _NetworkController::getUserList(std::vector<UserData>& result, bool withRet
     }
 }
 
-bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& result) const
+bool _NetworkController::getLikeTypeBySimId(std::unordered_map<std::string, int>& result) const
 {
     log(Priority::Important, "network: get liked simulations");
 
@@ -335,7 +335,7 @@ bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& resu
     params.emplace("password", *_password);
 
     try {
-        auto postResult = executeRequest([&] { return client.Post("/alien-server/getlikedsimulations.php", params); });
+        auto postResult = executeRequest([&] { return client.Post("/alien-server/getlikedsimulations2.php", params); });
 
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
@@ -343,7 +343,7 @@ bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& resu
 
         result.clear();
         for (auto const& [key, subTree] : tree) {
-            result.emplace_back(subTree.get<std::string>("id"));
+            result.emplace(subTree.get<std::string>("id"), subTree.get<int>("likeType"));
         }
         return true;
     } catch (...) {
@@ -352,35 +352,35 @@ bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& resu
     }
 }
 
-bool _NetworkController::getUserLikesForSimulation(std::set<std::string>& result, std::string const& simId)
-{
-    log(Priority::Important, "network: get user likes for simulation with id=" + simId);
+//bool _NetworkController::getUserNamesForSimulationAndLikeType(std::set<std::string>& result, std::string const& simId, int likeType)
+//{
+//    log(Priority::Important, "network: get user likes for simulation with id=" + simId);
+//
+//    httplib::SSLClient client(_serverAddress);
+//    configureClient(client);
+//
+//    httplib::Params params;
+//    params.emplace("simId", simId);
+//
+//    try {
+//        auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlikes.php", params); });
+//
+//        std::stringstream stream(postResult->body);
+//        boost::property_tree::ptree tree;
+//        boost::property_tree::read_json(stream, tree);
+//
+//        result.clear();
+//        for (auto const& [key, subTree] : tree) {
+//            result.insert(subTree.get<std::string>("userName"));
+//        }
+//        return true;
+//    } catch (...) {
+//        logNetworkError();
+//        return false;
+//    }
+//}
 
-    httplib::SSLClient client(_serverAddress);
-    configureClient(client);
-
-    httplib::Params params;
-    params.emplace("simId", simId);
-
-    try {
-        auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlikes.php", params); });
-
-        std::stringstream stream(postResult->body);
-        boost::property_tree::ptree tree;
-        boost::property_tree::read_json(stream, tree);
-
-        result.clear();
-        for (auto const& [key, subTree] : tree) {
-            result.insert(subTree.get<std::string>("userName"));
-        }
-        return true;
-    } catch (...) {
-        logNetworkError();
-        return false;
-    }
-}
-
-bool _NetworkController::toggleLikeSimulation(std::string const& simId)
+bool _NetworkController::toggleLikeSimulation(std::string const& simId, int likeType)
 {
     log(Priority::Important, "network: toggle like for simulation with id=" + simId);
 
@@ -391,9 +391,11 @@ bool _NetworkController::toggleLikeSimulation(std::string const& simId)
     params.emplace("userName", *_loggedInUserName);
     params.emplace("password", *_password);
     params.emplace("simId", simId);
+    params.emplace("likeType", std::to_string(likeType));
+
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/togglelikesimulation.php", params); });
+        auto result = executeRequest([&] { return client.Post("/alien-server/togglelikesimulation2.php", params); });
         return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
