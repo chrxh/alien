@@ -2,6 +2,7 @@
 
 #include <tuple>
 #include <bit>
+#include <functional>
 
 namespace std
 {
