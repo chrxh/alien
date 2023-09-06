@@ -95,7 +95,7 @@ bool RemoteSimulationData::matchWithFilter(std::string const& filter) const
 int RemoteSimulationData::getTotalLikes() const
 {
     int result = 0;
-    for (auto const& numReactions : numLikesByLikeType | std::views::values) {
+    for (auto const& numReactions : numLikesByEmojiType | std::views::values) {
         result += numReactions;
     }
     return result;

@@ -42,8 +42,8 @@ public:
 
     bool getRemoteSimulationList(std::vector<RemoteSimulationData>& result, bool withRetry) const;
     bool getUserList(std::vector<UserData>& result, bool withRetry) const;
-    bool getLikeTypeBySimId(std::unordered_map<std::string, int>& result) const;
-    bool getUserNamesForSimulationAndLikeType(std::set<std::string>& result, std::string const& simId, int likeType);
+    bool getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const;
+    bool getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
     bool toggleLikeSimulation(std::string const& simId, int likeType);
 
     bool uploadSimulation(

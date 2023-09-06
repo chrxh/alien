@@ -15,7 +15,7 @@
 
 namespace
 {
-    std::chrono::milliseconds::rep const LogoDuration = 3000;
+    std::chrono::milliseconds::rep const LogoDuration = 0;
     std::chrono::milliseconds::rep const FadeOutDuration = 1500;
     std::chrono::milliseconds::rep const FadeInDuration = 500;
 

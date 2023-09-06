@@ -28,7 +28,7 @@ public:
     std::string timestamp;
     std::string userName;
     std::string simName;
-    std::map<int, int> numLikesByLikeType;
+    std::map<int, int> numLikesByEmojiType;
     int numDownloads;
     int width;
     int height;
