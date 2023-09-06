@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Base/Hashes.h"
 #include "EngineInterface/Definitions.h"
 
 #include "AlienWindow.h"
@@ -63,7 +64,7 @@ private:
     float _userTableWidth = 0;
     std::unordered_set<std::string> _selectionIds;
     std::unordered_map<std::string, int> _ownLikeTypeBySimId;
-//    std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByLikeTypeBySimIdCache;
+    std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByLikeTypeBySimIdCache;
     std::vector<RemoteSimulationData> _rawRemoteSimulationList;
     std::vector<RemoteSimulationData> _filteredRemoteSimulationList;
     std::vector<UserData> _userList;

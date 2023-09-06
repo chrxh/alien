@@ -238,7 +238,11 @@ void _BrowserWindow::processSimulationTable()
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
             RemoteSimulationDataColumnId_Description);
-        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Likes);
+        ImGui::TableSetupColumn(
+            "Reactions",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scale(120.0f),
+            RemoteSimulationDataColumnId_Likes);
         ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_NumDownloads);
         ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Width);
         ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Height);
@@ -316,10 +320,6 @@ void _BrowserWindow::processSimulationTable()
                 ImGui::TableNextColumn();
                 processEmojiList(item);
 
-                //if (item->getTotalLikes() > 0) {
-                //    processDetailButton();
-                //    AlienImGui::Tooltip([&] { return getUserLikes(item->id); }, false);
-                //}
                 ImGui::TableNextColumn();
                 AlienImGui::Text(std::to_string(item->numDownloads));
                 ImGui::TableNextColumn();
@@ -506,6 +506,7 @@ void _BrowserWindow::processEmojiWindow()
 
 void _BrowserWindow::processEmojiList(RemoteSimulationData* sim)
 {
+    //calc remap which allows to show most frequent like type first
     std::map<int, int> remap;
     std::set<int> processedLikeTypes;
 
@@ -524,10 +525,10 @@ void _BrowserWindow::processEmojiList(RemoteSimulationData* sim)
         ++index;
     }
 
+    //show like types with count
     int counter = 0;
     std::optional<int> toggleLikeType;
     for (auto const& likeType : remap | std::views::values) {
-        //auto likeType = remap.at(index);
         auto numLikes = sim->numLikesByLikeType.at(likeType);
 
         AlienImGui::Text(std::to_string(numLikes));
@@ -554,12 +555,11 @@ void _BrowserWindow::processEmojiList(RemoteSimulationData* sim)
                     ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x + emojiWidth, cursorPos.y + emojiHeight), (ImU32)ImColor::HSV(0, 0, 1, 0.5f), 1.0f);
             }
             ImGui::PopStyleColor(2);
+            AlienImGui::Tooltip([=] { return getUserNamesToLikeType(sim->id, likeType); }, false);
         }
 
         //separator except for last element
         if (++counter < sim->numLikesByLikeType.size()) {
-            //ImGui::SameLine();
-            //AlienImGui::VerticalSeparator(20.0f);
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
         }
@@ -718,7 +718,7 @@ void _BrowserWindow::onToggleLike(RemoteSimulationData& sim, int likeType)
                 sim.numLikesByLikeType.erase(origLikeType);
             }
             _ownLikeTypeBySimId.erase(findResult);
-            //_userNamesByLikeTypeBySimIdCache.erase(std::make_pair(entry.id, origLikeType));  //invalidate cache entry
+            _userNamesByLikeTypeBySimIdCache.erase(std::make_pair(sim.id, origLikeType));  //invalidate cache entry
             onlyRemoveLike = origLikeType == likeType;  //remove like if same like icon has been clicked
         }
 
@@ -732,7 +732,7 @@ void _BrowserWindow::onToggleLike(RemoteSimulationData& sim, int likeType)
             }
         }
 
-        //_userNamesByLikeTypeBySimIdCache.erase(std::make_pair(entry.id, likeType));  //invalidate cache entry
+        _userNamesByLikeTypeBySimIdCache.erase(std::make_pair(sim.id, likeType));  //invalidate cache entry
         _networkController->toggleLikeSimulation(sim.id, likeType);
         sortSimulationList();
     } else {
@@ -749,13 +749,13 @@ std::string _BrowserWindow::getUserNamesToLikeType(std::string const& simId, int
 {
     std::set<std::string> userNames;
 
-    //auto findResult = _userNamesByLikeTypeBySimIdCache.find(std::make_pair(simId, likeType));
-    //if (findResult != _userNamesByLikeTypeBySimIdCache.end()) {
-    //    userNames = findResult->second;
-    //} else {
-    //    _networkController->getUserNamesForSimulationAndLikeType(userNames, simId, likeType);
-    //    _userNamesByLikeTypeBySimIdCache.emplace(std::make_pair(simId, likeType), userNames);
-    //}
+    auto findResult = _userNamesByLikeTypeBySimIdCache.find(std::make_pair(simId, likeType));
+    if (findResult != _userNamesByLikeTypeBySimIdCache.end()) {
+        userNames = findResult->second;
+    } else {
+        _networkController->getUserNamesForSimulationAndLikeType(userNames, simId, likeType);
+        _userNamesByLikeTypeBySimIdCache.emplace(std::make_pair(simId, likeType), userNames);
+    }
 
     return boost::algorithm::join(userNames, ", ");
 }
