@@ -352,33 +352,34 @@ bool _NetworkController::getLikeTypeBySimId(std::unordered_map<std::string, int>
     }
 }
 
-//bool _NetworkController::getUserNamesForSimulationAndLikeType(std::set<std::string>& result, std::string const& simId, int likeType)
-//{
-//    log(Priority::Important, "network: get user likes for simulation with id=" + simId);
-//
-//    httplib::SSLClient client(_serverAddress);
-//    configureClient(client);
-//
-//    httplib::Params params;
-//    params.emplace("simId", simId);
-//
-//    try {
-//        auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlikes.php", params); });
-//
-//        std::stringstream stream(postResult->body);
-//        boost::property_tree::ptree tree;
-//        boost::property_tree::read_json(stream, tree);
-//
-//        result.clear();
-//        for (auto const& [key, subTree] : tree) {
-//            result.insert(subTree.get<std::string>("userName"));
-//        }
-//        return true;
-//    } catch (...) {
-//        logNetworkError();
-//        return false;
-//    }
-//}
+bool _NetworkController::getUserNamesForSimulationAndLikeType(std::set<std::string>& result, std::string const& simId, int likeType)
+{
+    log(Priority::Important, "network: get user likes for simulation with id=" + simId + " and likeType=" + std::to_string(likeType));
+
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("simId", simId);
+    params.emplace("likeType", std::to_string(likeType));
+
+    try {
+        auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlikes2.php", params); });
+
+        std::stringstream stream(postResult->body);
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_json(stream, tree);
+
+        result.clear();
+        for (auto const& [key, subTree] : tree) {
+            result.insert(subTree.get<std::string>("userName"));
+        }
+        return true;
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
+}
 
 bool _NetworkController::toggleLikeSimulation(std::string const& simId, int likeType)
 {
