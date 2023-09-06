@@ -33,11 +33,12 @@
 
 namespace
 {
-    auto constexpr UserTableWidth = 200.0f;
+    auto constexpr UserTableWidth = 300.0f;
     auto constexpr BrowserBottomHeight = 68.0f;
     auto constexpr RowHeight = 25.0f;
 
-    auto constexpr NumEmojis = 25;
+    auto constexpr NumEmojiBlocks = 4;
+    int const NumEmojisPerBlock[] = {19, 14, 10, 4};
     auto constexpr NumEmojisPerRow = 6;
 }
 
@@ -57,7 +58,11 @@ _BrowserWindow::_BrowserWindow(
     _showCommunityCreations = GlobalSettings::getInstance().getBoolState("windows.browser.show community creations", _showCommunityCreations);
     _userTableWidth = GlobalSettings::getInstance().getFloatState("windows.browser.user table width", scale(UserTableWidth));
 
-    for (int i = 1; i <= NumEmojis; ++i) {
+    int numEmojis = 0;
+    for (int i = 0; i < NumEmojiBlocks; ++i) {
+        numEmojis += NumEmojisPerBlock[i];
+    }
+    for (int i = 1; i <= numEmojis; ++i) {
         _emojis.emplace_back(OpenGLHelper::loadTexture(Const::BasePath + "emoji" + std::to_string(i) + ".png"));
     }
 }
@@ -480,26 +485,38 @@ void _BrowserWindow::processEmojiWindow()
         ImGui::Spacing();
         ImGui::Spacing();
         if (_showAllEmojis) {
-            for (int i = 0; i < NumEmojis; ++i) {
-                if (i % NumEmojisPerRow != 0) {
-                    ImGui::SameLine();
+            if (ImGui::BeginChild("##emojichild", ImVec2(scale(335), scale(300)), false)) {
+                int offset = 0;
+                for (int i = 0; i < 4; ++i) {
+                    for (int j = 0; j < NumEmojisPerBlock[i]; ++j) {
+                        if (j % NumEmojisPerRow != 0) {
+                            ImGui::SameLine();
+                        }
+                        processEmojiButton(offset + j);
+                    }
+                    AlienImGui::Separator();
+                    offset += NumEmojisPerBlock[i];
                 }
-                processEmojiButton(i);
             }
+            ImGui::EndChild();
         } else {
-            for (int i = 0; i < NumEmojisPerRow - 1; ++i) {
-                if (i % NumEmojisPerRow != 0) {
-                    ImGui::SameLine();
+            if (ImGui::BeginChild("##emojichild", ImVec2(scale(335), scale(90)), false)) {
+                for (int i = 0; i < NumEmojisPerRow - 1; ++i) {
+                    if (i % NumEmojisPerRow != 0) {
+                        ImGui::SameLine();
+                    }
+                    processEmojiButton(i);
                 }
-                processEmojiButton(i);
-            }
-            ImGui::SameLine();
+                //            ImGui::SameLine();
 
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(8.0f));
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(8.0f));
 
-            if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
-                _showAllEmojis = true;
+                //            if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
+                if (AlienImGui::Button("More", ImGui::GetContentRegionAvailWidth())) {
+                    _showAllEmojis = true;
+                }
             }
+            ImGui::EndChild();
         }
         ImGui::EndPopup();
     } else {
