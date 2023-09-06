@@ -22,7 +22,8 @@
 
     $response = $db->query(
         "SELECT 
-            SIMULATION_ID as id
+            SIMULATION_ID as id,
+            TYPE as likeType
         FROM
             userlike
         WHERE
@@ -32,7 +33,8 @@
     $result = array();
     while($obj = $response->fetch_object()){
         $result[] = [
-            "id" => (int)$obj->id
+            "id" => (int)$obj->id,
+            "likeType" => (int)$obj->likeType
         ];
     }
     
