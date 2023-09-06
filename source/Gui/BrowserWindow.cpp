@@ -602,7 +602,7 @@ void _BrowserWindow::processEmojiList(RemoteSimulationData* sim)
                     ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x + emojiWidth, cursorPos.y + emojiHeight), (ImU32)ImColor::HSV(0, 0, 1, 0.5f), 1.0f);
             }
             ImGui::PopStyleColor(2);
-            AlienImGui::Tooltip([=] { return getUserNamesToEmojiType(sim->id, emojiType); }, false);
+            AlienImGui::Tooltip([=, this] { return getUserNamesToEmojiType(sim->id, emojiType); }, false);
         }
 
         //separator except for last element
