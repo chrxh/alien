@@ -323,7 +323,7 @@ bool _NetworkController::getUserList(std::vector<UserData>& result, bool withRet
     }
 }
 
-bool _NetworkController::getLikeTypeBySimId(std::unordered_map<std::string, int>& result) const
+bool _NetworkController::getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const
 {
     log(Priority::Important, "network: get liked simulations");
 
@@ -352,7 +352,7 @@ bool _NetworkController::getLikeTypeBySimId(std::unordered_map<std::string, int>
     }
 }
 
-bool _NetworkController::getUserNamesForSimulationAndLikeType(std::set<std::string>& result, std::string const& simId, int likeType)
+bool _NetworkController::getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
 {
     log(Priority::Important, "network: get user likes for simulation with id=" + simId + " and likeType=" + std::to_string(likeType));
 

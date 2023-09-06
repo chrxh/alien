@@ -37,7 +37,7 @@ namespace
     auto constexpr BrowserBottomHeight = 68.0f;
     auto constexpr RowHeight = 25.0f;
 
-    auto constexpr NumEmojis = 16;
+    auto constexpr NumEmojis = 25;
     auto constexpr NumEmojisPerRow = 6;
 }
 
@@ -97,11 +97,11 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         calcFilteredSimulationDatas();
 
         if (_networkController->getLoggedInUserName()) {
-            if (!_networkController->getLikeTypeBySimId(_ownLikeTypeBySimId)) {
+            if (!_networkController->getEmojiTypeBySimId(_ownEmojiTypeBySimId)) {
                 MessageDialog::getInstance().show("Error", "Failed to retrieve browser data. Please try again.");
             }
         } else {
-            _ownLikeTypeBySimId.clear();
+            _ownEmojiTypeBySimId.clear();
         }
 
         sortSimulationList();
@@ -274,33 +274,39 @@ void _BrowserWindow::processSimulationTable()
                 ImGui::TableNextRow(0, scale(RowHeight));
 
                 ImGui::TableNextColumn();
-                if (processActionButton(ICON_FA_DOWNLOAD)) {
-                    onDownloadSimulation(item);
-                }
-                AlienImGui::Tooltip("Download");
 
-                ImGui::SameLine();
+                //like button
                 auto liked = isLiked(item->id);
                 if (liked) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeTextColor);
+                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeButtonTextColor);
+                } else {
+                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::NoLikeButtonTextColor);
                 }
-                if (processActionButton(ICON_FA_STAR)) {
-                    //if (_networkController->getLoggedInUserName()) {
-                    //    onToggleLike(*item);
-                    //} else {
-                    //    _loginDialog.lock()->open();
-                    //}
+                auto likeButtonResult = processActionButton(ICON_FA_SMILE);
+                ImGui::PopStyleColor();
+                if (likeButtonResult) {
                     _activateEmojiPopup = true;
                     _simIndexOfEmojiPopup = row;
                 }
-                AlienImGui::Tooltip("Give a star");
-
-                if (liked) {
-                    ImGui::PopStyleColor(1);
-                }
+                AlienImGui::Tooltip("Choose a reaction");
                 ImGui::SameLine();
+
+                //download button
+                ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
+                auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
+                ImGui::PopStyleColor();
+                if (downloadButtonResult) {
+                    onDownloadSimulation(item);
+                }
+                AlienImGui::Tooltip("Download");
+                ImGui::SameLine();
+
+                //delete color
                 ImGui::BeginDisabled(item->userName != _networkController->getLoggedInUserName().value_or(""));
-                if (processActionButton(ICON_FA_TRASH)) {
+                ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DeleteButtonTextColor);
+                auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
+                ImGui::PopStyleColor();
+                if (deleteButtonResult) {
                     onDeleteSimulation(item);
                 }
                 ImGui::EndDisabled();
@@ -473,34 +479,58 @@ void _BrowserWindow::processEmojiWindow()
         ImGui::Text("Choose a reaction");
         ImGui::Spacing();
         ImGui::Spacing();
-        for (auto const& [likeType, emoji] : _emojis | boost::adaptors::indexed(0)) {
-            if (likeType % NumEmojisPerRow != 0) {
-                ImGui::SameLine();
+        if (_showAllEmojis) {
+            for (int i = 0; i < NumEmojis; ++i) {
+                if (i % NumEmojisPerRow != 0) {
+                    ImGui::SameLine();
+                }
+                processEmojiButton(i);
             }
-            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(Const::ToolbarButtonHoveredColor));
-            auto cursorPos = ImGui::GetCursorScreenPos();
-            auto emojiWidth = scale(toFloat(emoji.width));
-            auto emojiHeight = scale(toFloat(emoji.height));
-            auto& sim = _filteredRemoteSimulationList.at(_simIndexOfEmojiPopup);
-            if (ImGui::ImageButton((void*)(intptr_t)emoji.textureId, {emojiWidth, emojiHeight}, {0, 0}, {1.0f, 1.0f})) {
-                onToggleLike(sim, toInt(likeType));
-                ImGui::CloseCurrentPopup();
+        } else {
+            for (int i = 0; i < NumEmojisPerRow - 1; ++i) {
+                if (i % NumEmojisPerRow != 0) {
+                    ImGui::SameLine();
+                }
+                processEmojiButton(i);
             }
-            ImGui::PopStyleColor(2);
+            ImGui::SameLine();
 
-            bool isLiked = _ownLikeTypeBySimId.contains(sim.id) && _ownLikeTypeBySimId.at(sim.id) == likeType;
-            if (isLiked) {
-                ImDrawList* drawList = ImGui::GetWindowDrawList();
-                auto& style = ImGui::GetStyle();
-                drawList->AddRect(
-                    ImVec2(cursorPos.x, cursorPos.y),
-                    ImVec2(cursorPos.x + emojiWidth + style.FramePadding.x * 2, cursorPos.y + emojiHeight + style.FramePadding.y * 2),
-                    (ImU32)ImColor::HSV(0, 0, 1, 0.5f),
-                    1.0f);
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(8.0f));
+
+            if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
+                _showAllEmojis = true;
             }
         }
         ImGui::EndPopup();
+    } else {
+        _showAllEmojis = false;
+    }
+}
+
+void _BrowserWindow::processEmojiButton(int emojiType)
+{
+    auto const& emoji = _emojis.at(emojiType);
+    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(Const::ToolbarButtonHoveredColor));
+    auto cursorPos = ImGui::GetCursorScreenPos();
+    auto emojiWidth = scale(toFloat(emoji.width));
+    auto emojiHeight = scale(toFloat(emoji.height));
+    auto& sim = _filteredRemoteSimulationList.at(_simIndexOfEmojiPopup);
+    if (ImGui::ImageButton((void*)(intptr_t)emoji.textureId, {emojiWidth, emojiHeight}, {0, 0}, {1.0f, 1.0f})) {
+        onToggleLike(sim, toInt(emojiType));
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::PopStyleColor(2);
+
+    bool isLiked = _ownEmojiTypeBySimId.contains(sim.id) && _ownEmojiTypeBySimId.at(sim.id) == emojiType;
+    if (isLiked) {
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        auto& style = ImGui::GetStyle();
+        drawList->AddRect(
+            ImVec2(cursorPos.x, cursorPos.y),
+            ImVec2(cursorPos.x + emojiWidth + style.FramePadding.x * 2, cursorPos.y + emojiHeight + style.FramePadding.y * 2),
+            (ImU32)ImColor::HSV(0, 0, 1, 0.5f),
+            1.0f);
     }
 }
 
@@ -508,33 +538,33 @@ void _BrowserWindow::processEmojiList(RemoteSimulationData* sim)
 {
     //calc remap which allows to show most frequent like type first
     std::map<int, int> remap;
-    std::set<int> processedLikeTypes;
+    std::set<int> processedEmojiTypes;
 
     int index = 0;
-    while (processedLikeTypes.size() < sim->numLikesByLikeType.size()) {
+    while (processedEmojiTypes.size() < sim->numLikesByEmojiType.size()) {
         int maxLikes = 0;
-        std::optional<int> maxLikeType;
-        for (auto const& [likeType, numLikes] : sim->numLikesByLikeType) {
-            if (!processedLikeTypes.contains(likeType) && numLikes > maxLikes) {
+        std::optional<int> maxEmojiType;
+        for (auto const& [emojiType, numLikes] : sim->numLikesByEmojiType) {
+            if (!processedEmojiTypes.contains(emojiType) && numLikes > maxLikes) {
                 maxLikes = numLikes;
-                maxLikeType = likeType;
+                maxEmojiType = emojiType;
             }
         }
-        processedLikeTypes.insert(*maxLikeType);
-        remap.emplace(index, *maxLikeType);
+        processedEmojiTypes.insert(*maxEmojiType);
+        remap.emplace(index, *maxEmojiType);
         ++index;
     }
 
     //show like types with count
     int counter = 0;
-    std::optional<int> toggleLikeType;
-    for (auto const& likeType : remap | std::views::values) {
-        auto numLikes = sim->numLikesByLikeType.at(likeType);
+    std::optional<int> toggleEmojiType;
+    for (auto const& emojiType : remap | std::views::values) {
+        auto numLikes = sim->numLikesByEmojiType.at(emojiType);
 
         AlienImGui::Text(std::to_string(numLikes));
         ImGui::SameLine();
-        if (likeType < _emojis.size()) {
-            auto const& emoji = _emojis.at(likeType);
+        if (emojiType < _emojis.size()) {
+            auto const& emoji = _emojis.at(emojiType);
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(7.0f));
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(1.0f));
             ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
@@ -546,26 +576,26 @@ void _BrowserWindow::processEmojiList(RemoteSimulationData* sim)
                     ImVec2(0, 0),
                     ImVec2(1, 1),
                     0)) {
-                toggleLikeType = likeType;
+                toggleEmojiType = emojiType;
             }
-            bool isLiked = _ownLikeTypeBySimId.contains(sim->id) && _ownLikeTypeBySimId.at(sim->id) == likeType;
+            bool isLiked = _ownEmojiTypeBySimId.contains(sim->id) && _ownEmojiTypeBySimId.at(sim->id) == emojiType;
             if (isLiked) {
                 ImDrawList* drawList = ImGui::GetWindowDrawList();
                 drawList->AddRect(
                     ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x + emojiWidth, cursorPos.y + emojiHeight), (ImU32)ImColor::HSV(0, 0, 1, 0.5f), 1.0f);
             }
             ImGui::PopStyleColor(2);
-            AlienImGui::Tooltip([=] { return getUserNamesToLikeType(sim->id, likeType); }, false);
+            AlienImGui::Tooltip([=] { return getUserNamesToEmojiType(sim->id, emojiType); }, false);
         }
 
         //separator except for last element
-        if (++counter < sim->numLikesByLikeType.size()) {
+        if (++counter < sim->numLikesByEmojiType.size()) {
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
         }
     }
-    if (toggleLikeType) {
-        onToggleLike(*sim, *toggleLikeType);
+    if (toggleEmojiType) {
+        onToggleLike(*sim, *toggleEmojiType);
     }
 }
 
@@ -607,8 +637,9 @@ void _BrowserWindow::processShortenedText(std::string const& text, bool bold) {
 bool _BrowserWindow::processActionButton(std::string const& text)
 {
     ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImU32)Const::ToolbarButtonHoveredColor);
     auto result = ImGui::Button(text.c_str());
-    ImGui::PopStyleColor();
+    ImGui::PopStyleColor(2);
    
     return result;
 }
@@ -705,35 +736,35 @@ void _BrowserWindow::onDeleteSimulation(RemoteSimulationData* sim)
     });
 }
 
-void _BrowserWindow::onToggleLike(RemoteSimulationData& sim, int likeType)
+void _BrowserWindow::onToggleLike(RemoteSimulationData& sim, int emojiType)
 {
     if (_networkController->getLoggedInUserName()) {
 
         //remove existing like
-        auto findResult = _ownLikeTypeBySimId.find(sim.id);
+        auto findResult = _ownEmojiTypeBySimId.find(sim.id);
         auto onlyRemoveLike = false;
-        if (findResult != _ownLikeTypeBySimId.end()) {
-            auto origLikeType = findResult->second;
-            if (--sim.numLikesByLikeType[origLikeType] == 0) {
-                sim.numLikesByLikeType.erase(origLikeType);
+        if (findResult != _ownEmojiTypeBySimId.end()) {
+            auto origEmojiType = findResult->second;
+            if (--sim.numLikesByEmojiType[origEmojiType] == 0) {
+                sim.numLikesByEmojiType.erase(origEmojiType);
             }
-            _ownLikeTypeBySimId.erase(findResult);
-            _userNamesByLikeTypeBySimIdCache.erase(std::make_pair(sim.id, origLikeType));  //invalidate cache entry
-            onlyRemoveLike = origLikeType == likeType;  //remove like if same like icon has been clicked
+            _ownEmojiTypeBySimId.erase(findResult);
+            _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(sim.id, origEmojiType));  //invalidate cache entry
+            onlyRemoveLike = origEmojiType == emojiType;  //remove like if same like icon has been clicked
         }
 
         //create new like
         if (!onlyRemoveLike) {
-            _ownLikeTypeBySimId[sim.id] = likeType;
-            if (sim.numLikesByLikeType.contains(likeType)) {
-                ++sim.numLikesByLikeType[likeType];
+            _ownEmojiTypeBySimId[sim.id] = emojiType;
+            if (sim.numLikesByEmojiType.contains(emojiType)) {
+                ++sim.numLikesByEmojiType[emojiType];
             } else {
-                sim.numLikesByLikeType[likeType] = 1;
+                sim.numLikesByEmojiType[emojiType] = 1;
             }
         }
 
-        _userNamesByLikeTypeBySimIdCache.erase(std::make_pair(sim.id, likeType));  //invalidate cache entry
-        _networkController->toggleLikeSimulation(sim.id, likeType);
+        _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(sim.id, emojiType));  //invalidate cache entry
+        _networkController->toggleLikeSimulation(sim.id, emojiType);
         sortSimulationList();
     } else {
         _loginDialog.lock()->open();
@@ -742,19 +773,19 @@ void _BrowserWindow::onToggleLike(RemoteSimulationData& sim, int likeType)
 
 bool _BrowserWindow::isLiked(std::string const& simId)
 {
-    return _ownLikeTypeBySimId.contains(simId);
+    return _ownEmojiTypeBySimId.contains(simId);
 }
 
-std::string _BrowserWindow::getUserNamesToLikeType(std::string const& simId, int likeType)
+std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& simId, int emojiType)
 {
     std::set<std::string> userNames;
 
-    auto findResult = _userNamesByLikeTypeBySimIdCache.find(std::make_pair(simId, likeType));
-    if (findResult != _userNamesByLikeTypeBySimIdCache.end()) {
+    auto findResult = _userNamesByEmojiTypeBySimIdCache.find(std::make_pair(simId, emojiType));
+    if (findResult != _userNamesByEmojiTypeBySimIdCache.end()) {
         userNames = findResult->second;
     } else {
-        _networkController->getUserNamesForSimulationAndLikeType(userNames, simId, likeType);
-        _userNamesByLikeTypeBySimIdCache.emplace(std::make_pair(simId, likeType), userNames);
+        _networkController->getUserNamesForSimulationAndEmojiType(userNames, simId, emojiType);
+        _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(simId, emojiType), userNames);
     }
 
     return boost::algorithm::join(userNames, ", ");

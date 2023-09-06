@@ -24,7 +24,7 @@ std::vector<RemoteSimulationData> NetworkDataParser::decodeRemoteSimulationData(
                 isArray = true;
             }
             auto likeType = isArray ? counter : std::stoi(likeTypeString);
-            entry.numLikesByLikeType[likeType] = likes;
+            entry.numLikesByEmojiType[likeType] = likes;
             ++counter;
         }
         entry.numDownloads = subTree.get<int>("numDownloads");
