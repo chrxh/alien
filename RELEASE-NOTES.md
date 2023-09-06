@@ -1,5 +1,13 @@
 # Release notes
 
+## [4.1.0] - 2023-09-06
+### Added
+- gui/browser: user can react with various emoji types
+- gui/browser: clicking on an other user's emoji adds same reaction
+
+### Changed
+- gui/browser: different colors for the action buttons
+
 ## [4.0.2] - 2023-09-03
 ### Added
 - gui/browser: show online since last day status
