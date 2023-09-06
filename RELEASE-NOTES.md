@@ -2,7 +2,7 @@
 
 ## [4.1.0] - 2023-09-06
 ### Added
-- gui/browser: user can react with various emoji types
+- gui/browser: user can open a emoji window in order to react with various emoji types
 - gui/browser: clicking on an other user's emoji adds same reaction
 
 ### Changed
