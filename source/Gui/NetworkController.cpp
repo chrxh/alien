@@ -283,7 +283,7 @@ bool _NetworkController::getRemoteSimulationList(std::vector<RemoteSimulationDat
     params.emplace("version", Const::ProgramVersion);
 
     try {
-        auto postResult = executeRequest([&] { return client.Post("/alien-server/getversionedsimulationlist2.php", params); }, withRetry);
+        auto postResult = executeRequest([&] { return client.Post("/alien-server/getversionedsimulationlist.php", params); }, withRetry);
 
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
@@ -335,7 +335,7 @@ bool _NetworkController::getLikeTypeBySimId(std::unordered_map<std::string, int>
     params.emplace("password", *_password);
 
     try {
-        auto postResult = executeRequest([&] { return client.Post("/alien-server/getlikedsimulations2.php", params); });
+        auto postResult = executeRequest([&] { return client.Post("/alien-server/getlikedsimulations.php", params); });
 
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
@@ -364,7 +364,7 @@ bool _NetworkController::getUserNamesForSimulationAndLikeType(std::set<std::stri
     params.emplace("likeType", std::to_string(likeType));
 
     try {
-        auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlikes2.php", params); });
+        auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlikes.php", params); });
 
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
@@ -396,7 +396,7 @@ bool _NetworkController::toggleLikeSimulation(std::string const& simId, int like
 
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/togglelikesimulation2.php", params); });
+        auto result = executeRequest([&] { return client.Post("/alien-server/togglelikesimulation.php", params); });
         return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
