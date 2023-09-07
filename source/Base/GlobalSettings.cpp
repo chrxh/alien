@@ -12,6 +12,8 @@
 #include "Base/LoggingService.h"
 #include "Base/Resources.h"
 
+#include "JsonParser.h"
+
 #ifdef _WIN32
 namespace
 {
