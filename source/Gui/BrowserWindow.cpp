@@ -38,8 +38,8 @@ namespace
     auto constexpr RowHeight = 25.0f;
 
     auto constexpr NumEmojiBlocks = 4;
-    int const NumEmojisPerBlock[] = {19, 14, 10, 4};
-    auto constexpr NumEmojisPerRow = 6;
+    int const NumEmojisPerBlock[] = {19, 14, 10, 6};
+    auto constexpr NumEmojisPerRow = 5;
 }
 
 _BrowserWindow::_BrowserWindow(
@@ -487,7 +487,7 @@ void _BrowserWindow::processEmojiWindow()
         if (_showAllEmojis) {
             if (ImGui::BeginChild("##emojichild", ImVec2(scale(335), scale(300)), false)) {
                 int offset = 0;
-                for (int i = 0; i < 4; ++i) {
+                for (int i = 0; i < NumEmojiBlocks; ++i) {
                     for (int j = 0; j < NumEmojisPerBlock[i]; ++j) {
                         if (j % NumEmojisPerRow != 0) {
                             ImGui::SameLine();
@@ -501,7 +501,7 @@ void _BrowserWindow::processEmojiWindow()
             ImGui::EndChild();
         } else {
             if (ImGui::BeginChild("##emojichild", ImVec2(scale(335), scale(90)), false)) {
-                for (int i = 0; i < NumEmojisPerRow - 1; ++i) {
+                for (int i = 0; i < NumEmojisPerRow; ++i) {
                     if (i % NumEmojisPerRow != 0) {
                         ImGui::SameLine();
                     }
