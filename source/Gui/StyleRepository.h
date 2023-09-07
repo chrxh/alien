@@ -54,7 +54,7 @@ namespace Const
     ImColor const InspectorRectColor = ImColor::HSV(0.54f, 0.0f, 0.5f, 1.0f);
 
     ImColor const LikeButtonTextColor = ImColor::HSV(0.16f, 1.0f, 1.0f, 1.0f);
-    ImColor const NoLikeButtonTextColor = ImColor::HSV(0.16f, 0.7f, 0.7f, 1.0f);
+    ImColor const NoLikeButtonTextColor = ImColor::HSV(0.16f, 0.5f, 0.5f, 1.0f);
     ImColor const DownloadButtonTextColor = ImColor::HSV(0.55f, 0.6f, 1.0f, 1.0f);
     ImColor const DeleteButtonTextColor = ImColor::HSV(0.0f, 0.6f, 0.8f, 1.0f);
 

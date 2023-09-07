@@ -307,15 +307,15 @@ void _BrowserWindow::processSimulationTable()
                 ImGui::SameLine();
 
                 //delete color
-                ImGui::BeginDisabled(item->userName != _networkController->getLoggedInUserName().value_or(""));
-                ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DeleteButtonTextColor);
-                auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
-                ImGui::PopStyleColor();
-                if (deleteButtonResult) {
-                    onDeleteSimulation(item);
+                if (item->userName == _networkController->getLoggedInUserName().value_or("")) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DeleteButtonTextColor);
+                    auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
+                    ImGui::PopStyleColor();
+                    if (deleteButtonResult) {
+                        onDeleteSimulation(item);
+                    }
+                    AlienImGui::Tooltip("Delete");
                 }
-                ImGui::EndDisabled();
-                AlienImGui::Tooltip("Delete");
 
                 ImGui::TableNextColumn();
 
@@ -507,11 +507,8 @@ void _BrowserWindow::processEmojiWindow()
                     }
                     processEmojiButton(i);
                 }
-                //            ImGui::SameLine();
-
                 ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(8.0f));
 
-                //            if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
                 if (AlienImGui::Button("More", ImGui::GetContentRegionAvailWidth())) {
                     _showAllEmojis = true;
                 }
