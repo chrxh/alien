@@ -7,6 +7,7 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
+#include "Base/GlobalSettings.h"
 #include "Base/StringHelper.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/GenomeDescriptionConverter.h"
@@ -20,12 +21,11 @@
 #include "CellFunctionStrings.h"
 #include "EditorModel.h"
 #include "GenericFileDialogs.h"
-#include "GlobalSettings.h"
 #include "MessageDialog.h"
 #include "OverlayMessageController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "Tooltips.h"
+#include "HelpStrings.h"
 
 namespace
 {

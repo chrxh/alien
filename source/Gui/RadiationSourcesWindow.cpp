@@ -5,7 +5,6 @@
 #include "EngineInterface/SimulationController.h"
 
 #include "RadiationSourcesWindow.h"
-#include "GlobalSettings.h"
 #include "StyleRepository.h"
 
 namespace

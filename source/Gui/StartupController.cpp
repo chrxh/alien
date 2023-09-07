@@ -3,9 +3,11 @@
 #include <imgui.h>
 
 #include "Base/Definitions.h"
+#include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
+
 #include "OpenGLHelper.h"
 #include "Viewport.h"
 #include "StyleRepository.h"
@@ -159,6 +161,15 @@ void _StartupController::processWindow()
         {center.x - scale(toFloat(versionString.size()) * 2.8f), bottom - scale(140)},
         textColor,
         versionString.c_str());
+
+    if (GlobalSettings::getInstance().isDebugMode()) {
+        drawList->AddText(
+            styleRep.getReefMediumFont(),
+            scale(24.0f),
+            {center.x - scale(12.0f),  bottom - scale(100)},
+            textColor,
+            "DEBUG");
+    }
 }
 
 namespace

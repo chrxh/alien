@@ -17,7 +17,7 @@
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
 #include "GenomeEditorWindow.h"
-#include "Tooltips.h"
+#include "HelpStrings.h"
 #include "OverlayMessageController.h"
 
 using namespace std::string_literals;

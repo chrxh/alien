@@ -10,13 +10,13 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
+#include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
-#include "GlobalSettings.h"
 #include "StyleRepository.h"
 #include "NetworkDataParser.h"
 #include "NetworkController.h"

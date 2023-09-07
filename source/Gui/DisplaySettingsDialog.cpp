@@ -8,7 +8,6 @@
 #include "Base/LoggingService.h"
 
 #include "AlienImGui.h"
-#include "GlobalSettings.h"
 #include "WindowController.h"
 #include "StyleRepository.h"
 

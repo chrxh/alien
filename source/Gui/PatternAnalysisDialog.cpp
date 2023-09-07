@@ -7,10 +7,11 @@
 
 #include <ImFileDialog.h>
 
+#include "Base/GlobalSettings.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
-#include "GlobalSettings.h"
+
 #include "MessageDialog.h"
 
 

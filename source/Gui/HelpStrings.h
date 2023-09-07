@@ -8,6 +8,19 @@
 
 namespace Const
 {
+    std::string const GeneralInformation =
+        "Please make sure that:\n\n1) You have an NVIDIA graphics card with compute capability 6.0 or higher (for example "
+        "GeForce 10 series).\n\n2) You have the latest NVIDIA graphics driver installed.\n\n3) The name of the "
+        "installation directory (including the parent directories) should not contain non-English characters. If this is not fulfilled, "
+        "please re-install ALIEN to a suitable directory. Do not move the files manually.\n\n4) ALIEN needs write access to its own "
+        "directory. This should normally be the case.\n\n5) If you have multiple graphics cards, please check that your primary monitor is "
+        "connected to the CUDA-powered card. ALIEN uses the same graphics card for computation as well as rendering and chooses the one "
+        "with the highest compute capability.\n\n6) If you possess both integrated and dedicated graphics cards, please ensure that the alien-executable is "
+        "configured to use your high-performance graphics card. On Windows you need to access the 'Graphics settings,' add 'alien.exe' to the list, click "
+        "'Options,' and choose 'High performance'.\n\nIf these conditions are not met, ALIEN may crash unexpectedly.\n\n"
+        "If the conditions are met and the error still occurs, please start ALIEN with the command line parameter '-debug', try to reproduce the error and "
+        "then create a GitHub issue on https://github.com/chrxh/alien/issues where the log.txt is attached.";
+
     std::string const NeuronTooltip =
         "This function equips the cell with a small network of 8 neurons with 8x8 configurable weights and 8 bias values. It "
         "processes the input from channel #0 to #7 and provides the output to those channels. Each neuron uses a type of sigmoid as a "

@@ -9,10 +9,6 @@
 #include <imgui_freetype.h>
 #include <implot.h>
 
-#include "GlobalSettings.h"
-#include "WindowController.h"
-#include "Base/Resources.h"
-
 #include "Fonts/DroidSans.h"
 #include "Fonts/DroidSansBold.h"
 #include "Fonts/Cousine-Regular.h"
@@ -20,6 +16,8 @@
 #include "Fonts/FontAwesomeSolid.h"
 #include "Fonts/IconsFontAwesome5.h"
 #include "Fonts/Reef.h"
+
+#include "WindowController.h"
 
 StyleRepository& StyleRepository::getInstance()
 {

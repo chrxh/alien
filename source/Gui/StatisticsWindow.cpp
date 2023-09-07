@@ -8,11 +8,12 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
+#include "Base/GlobalSettings.h"
 #include "Base/StringHelper.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationController.h"
+
 #include "StyleRepository.h"
-#include "GlobalSettings.h"
 #include "AlienImGui.h"
 #include "GenericFileDialogs.h"
 #include "MessageDialog.h"
