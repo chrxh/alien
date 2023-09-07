@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <cstring>
 
 #include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
