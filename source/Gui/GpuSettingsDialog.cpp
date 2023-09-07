@@ -2,11 +2,12 @@
 
 #include <imgui.h>
 
+#include "Base/GlobalSettings.h"
 #include "Base/StringHelper.h"
 #include "EngineInterface/SimulationController.h"
+
 #include "StyleRepository.h"
 #include "AlienImGui.h"
-#include "GlobalSettings.h"
 
 namespace
 {

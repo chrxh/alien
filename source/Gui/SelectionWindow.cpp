@@ -4,7 +4,6 @@
 
 #include "Base/StringHelper.h"
 #include "StyleRepository.h"
-#include "GlobalSettings.h"
 #include "EditorModel.h"
 
 _SelectionWindow::_SelectionWindow(EditorModel const& editorModel)

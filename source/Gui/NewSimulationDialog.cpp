@@ -2,12 +2,13 @@
 
 #include <imgui.h>
 
+#include "Base/GlobalSettings.h"
 #include "EngineInterface/SimulationController.h"
+
 #include "Viewport.h"
 #include "StatisticsWindow.h"
 #include "TemporalControlWindow.h"
 #include "AlienImGui.h"
-#include "GlobalSettings.h"
 
 namespace
 {

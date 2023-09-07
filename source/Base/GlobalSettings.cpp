@@ -131,6 +131,7 @@ namespace
 struct GlobalSettingsImpl
 {
     boost::property_tree::ptree _tree;
+    bool _debugMode = true;
 };
 
 
@@ -138,6 +139,16 @@ GlobalSettings& GlobalSettings::getInstance()
 {
     static GlobalSettings instance;
     return instance;
+}
+
+bool GlobalSettings::isDebugMode() const
+{
+    return _impl->_debugMode;
+}
+
+void GlobalSettings::setDebugMode(bool value) const
+{
+    _impl->_debugMode = value;
 }
 
 bool GlobalSettings::getBoolState(std::string const& key, bool defaultValue)
@@ -222,9 +233,9 @@ void GlobalSettings::setStringState(std::string const& key, std::string value)
 
 GlobalSettings::GlobalSettings()
 {
+    _impl = std::make_shared<GlobalSettingsImpl>();
 #ifndef _WIN32
     try {
-        _impl = std::make_shared<GlobalSettingsImpl>();
         std::ifstream stream(Const::SettingsFilename, std::ios::binary);
         if (!stream) {
             return;

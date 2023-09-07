@@ -1,7 +1,8 @@
 #include "ShaderWindow.h"
 
+#include "Base/GlobalSettings.h"
+
 #include "AlienImGui.h"
-#include "GlobalSettings.h"
 #include "SimulationView.h"
 
 namespace

@@ -1,12 +1,12 @@
 #include "WindowController.h"
 
+#include <sstream>
 #include <GLFW/glfw3.h>
 
 #include <boost/algorithm/string.hpp>
 
+#include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
-
-#include "GlobalSettings.h"
 
 namespace
 {

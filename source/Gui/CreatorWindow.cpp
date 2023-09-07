@@ -14,12 +14,11 @@
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
 
-#include "GlobalSettings.h"
 #include "StyleRepository.h"
 #include "AlienImGui.h"
 #include "Viewport.h"
 #include "EditorModel.h"
-#include "Tooltips.h"
+#include "HelpStrings.h"
 
 namespace
 {

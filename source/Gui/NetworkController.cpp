@@ -5,10 +5,10 @@
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <cpp-httplib/httplib.h>
 
-#include "Base/Resources.h"
+#include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
+#include "Base/Resources.h"
 
-#include "GlobalSettings.h"
 #include "MessageDialog.h"
 #include "NetworkDataParser.h"
 

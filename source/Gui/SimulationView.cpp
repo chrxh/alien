@@ -4,16 +4,16 @@
 #include <imgui.h>
 #include <cmath>
 
-#include "AlienImGui.h"
+#include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
 #include "EngineInterface/SimulationController.h"
 
+#include "AlienImGui.h"
 #include "Shader.h"
 #include "SimulationScrollbar.h"
 #include "Viewport.h"
 #include "ModeController.h"
 #include "StyleRepository.h"
-#include "GlobalSettings.h"
 #include "CellFunctionStrings.h"
 #include "EditorModel.h"
 #include "EngineInterface/Colors.h"

@@ -16,7 +16,7 @@
 
 #include "CellFunctionStrings.h"
 #include "StyleRepository.h"
-#include "Tooltips.h"
+#include "HelpStrings.h"
 
 namespace
 {

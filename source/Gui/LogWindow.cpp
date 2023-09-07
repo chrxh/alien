@@ -4,9 +4,10 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
+#include "Base/GlobalSettings.h"
+
 #include "StyleRepository.h"
 #include "SimpleLogger.h"
-#include "GlobalSettings.h"
 #include "AlienImGui.h"
 
 _LogWindow::_LogWindow(SimpleLogger const& logger)
