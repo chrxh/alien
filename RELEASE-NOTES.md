@@ -2,7 +2,7 @@
 
 ## [4.1.0] - 2023-09-07
 ### Added
-- gui/browser: user can open a emoji window in order to react with various emoji types
+- gui/browser: user can open an emoji window in order to react with various emoji types
 - gui/browser: list of emojis and counts are shown for each simulation entry
 - gui/browser: clicking on an other user's emoji adds same reaction
 - global: debug mode added that provides more accurate error messages and can be activated with the '-debug' parameter
