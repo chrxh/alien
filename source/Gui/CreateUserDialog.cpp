@@ -4,7 +4,6 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "AlienImGui.h"
-#include "GlobalSettings.h"
 #include "MessageDialog.h"
 #include "NetworkController.h"
 #include "ActivateUserDialog.h"

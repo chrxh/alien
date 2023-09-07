@@ -2,7 +2,7 @@
 
 namespace Const
 {
-    std::string const ProgramVersion = "4.0.0";
+    std::string const ProgramVersion = "4.1.0";
 
     std::string const BasePath = "resources/";
 
@@ -16,17 +16,6 @@ namespace Const
 
     auto const EditorOnFilename = BasePath + "editor on.png";
     auto const EditorOffFilename = BasePath + "editor off.png";
-
-    auto const RunFilename = BasePath + "run.png";
-    auto const PauseFilename = BasePath + "pause.png";
-    auto const StepBackwardFilename = BasePath + "step backward.png";
-    auto const StepForwardFilename = BasePath + "step forward.png";
-    auto const SnapshotFilename = BasePath + "snapshot.png";
-    auto const RestoreFilename = BasePath + "restore.png";
-
-    auto const ZoomInFilename = BasePath + "zoom in.png";
-    auto const ZoomOutFilename = BasePath + "zoom out.png";
-    auto const ResizeFilename = BasePath + "resize.png";
 
     auto const LogoFilename = BasePath + "logo.png";
 }

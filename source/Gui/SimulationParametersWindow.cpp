@@ -4,13 +4,12 @@
 #include <imgui.h>
 #include <Fonts/IconsFontAwesome5.h>
 
+#include "Base/GlobalSettings.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
 #include "GenericFileDialogs.h"
-#include "StyleRepository.h"
-#include "GlobalSettings.h"
 #include "MessageDialog.h"
 #include "RadiationSourcesWindow.h"
 #include "BalancerController.h"
@@ -996,7 +995,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0.1f)
-                    .max(3.0f)
+                    .max(4.0f)
                     .defaultValue(origSimParameters.cellFunctionInjectorRadius)
                     .tooltip("The maximum distance over which an injector cell can infect another cell."),
                 simParameters.cellFunctionInjectorRadius);

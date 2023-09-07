@@ -6,15 +6,16 @@
 #include <ImFileDialog.h>
 
 #include "Base/Definitions.h"
+#include "Base/GlobalSettings.h"
 #include "Base/NumberGenerator.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/Colors.h"
+
 #include "AlienImGui.h"
 #include "Viewport.h"
 #include "GenericFileDialogs.h"
-#include "GlobalSettings.h"
 
 
 _ImageToPatternDialog::_ImageToPatternDialog(Viewport const& viewport, SimulationController const& simController)

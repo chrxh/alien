@@ -123,6 +123,9 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             activity.channels[1] = static_cast<float>((lookupResult >> 40) & 0xff) / 256;  //density
             activity.channels[2] = static_cast<float>(lookupResult >> 48) / 256;  //distance
             activity.channels[3] = convertDataToAngle(static_cast<int8_t>((lookupResult >> 32) & 0xff)) / 360.0f;  //angle: between -0.5 and 0.5
+            cell->cellFunctionData.sensor.memoryChannel1 = activity.channels[1];
+            cell->cellFunctionData.sensor.memoryChannel2 = activity.channels[2];
+            cell->cellFunctionData.sensor.memoryChannel3 = activity.channels[3];
             auto targetCreatureId = lookupResult & 0xffffffff;
             if (targetCreatureId != 0xffffffff) {
                 cell->cellFunctionData.sensor.targetedCreatureId = toInt(targetCreatureId);
@@ -130,6 +133,9 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             statistics.incNumSensorMatches(cell->color);
         } else {
             activity.channels[0] = 0;  //nothing found
+            activity.channels[1] = cell->cellFunctionData.sensor.memoryChannel1;
+            activity.channels[2] = cell->cellFunctionData.sensor.memoryChannel2;
+            activity.channels[3] = cell->cellFunctionData.sensor.memoryChannel3;
         }
     }
     __syncthreads();

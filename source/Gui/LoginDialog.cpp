@@ -2,10 +2,10 @@
 
 #include <imgui.h>
 
+#include "Base/GlobalSettings.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
-#include "GlobalSettings.h"
 #include "NetworkController.h"
 #include "MessageDialog.h"
 #include "CreateUserDialog.h"
@@ -13,7 +13,7 @@
 #include "ResetPasswordDialog.h"
 #include "ActivateUserDialog.h"
 #include "StyleRepository.h"
-#include "Tooltips.h"
+#include "HelpStrings.h"
 
 _LoginDialog::_LoginDialog(
     SimulationController const& simController,

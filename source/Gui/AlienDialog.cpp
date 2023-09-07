@@ -1,7 +1,6 @@
 #include <imgui.h>
 
 #include "AlienDialog.h"
-#include "GlobalSettings.h"
 #include "StyleRepository.h"
 #include "WindowController.h"
 

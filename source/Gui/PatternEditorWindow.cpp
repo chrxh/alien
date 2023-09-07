@@ -5,6 +5,7 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
+#include "Base/GlobalSettings.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/DescriptionHelper.h"
@@ -12,7 +13,6 @@
 
 #include "EditorModel.h"
 #include "StyleRepository.h"
-#include "GlobalSettings.h"
 #include "AlienImGui.h"
 #include "EditorController.h"
 #include "GenericFileDialogs.h"

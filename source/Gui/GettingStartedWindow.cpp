@@ -3,7 +3,6 @@
 #include <imgui.h>
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "GlobalSettings.h"
 #include "StyleRepository.h"
 #include "AlienImGui.h"
 

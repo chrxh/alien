@@ -84,8 +84,9 @@ public:
     template <typename ConstructorOrInjector>
     __inline__ __device__ static bool containsSelfReplication(ConstructorOrInjector const& cellFunction);
 
-    template <typename GenomeHolderSource, typename GenomeHolderTarget>
-    __inline__ __device__ static void copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target);
+    template <typename CellFunctionSource, typename CellFunctionTarget>
+    __inline__ __device__ static void copyGenome(SimulationData& data, CellFunctionSource& source, CellFunctionTarget& target);
+
     __inline__ __device__ static GenomeHeader readGenomeHeader(ConstructorFunction const& constructor);
     __inline__ __device__ static int readWord(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static void writeWord(uint8_t* genome, int address, int word);
@@ -163,8 +164,8 @@ __inline__ __device__ bool GenomeDecoder::isFinished(ConstructorFunction const& 
     return constructor.genomeReadPosition >= constructor.genomeSize;
 }
 
-template <typename GenomeHolderSource, typename GenomeHolderTarget>
-__inline__ __device__ void GenomeDecoder::copyGenome(SimulationData& data, GenomeHolderSource& source, GenomeHolderTarget& target)
+template <typename CellFunctionSource, typename CellFunctionTarget>
+__inline__ __device__ void GenomeDecoder::copyGenome(SimulationData& data, CellFunctionSource& source, CellFunctionTarget& target)
 {
     bool makeGenomeCopy = readBool(source);
     if (!makeGenomeCopy) {

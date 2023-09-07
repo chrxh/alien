@@ -85,7 +85,7 @@ enum ConstructorAlignment_
 using InjectorMode = int;
 enum InjectorMode_
 {
-    InjectorMode_InjectOnlyUnderConstruction,
+    InjectorMode_InjectOnlyEmptyCells,
     InjectorMode_InjectAll,
     InjectorMode_Count
 };

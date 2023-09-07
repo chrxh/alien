@@ -9,10 +9,6 @@
 #include <imgui_freetype.h>
 #include <implot.h>
 
-#include "GlobalSettings.h"
-#include "WindowController.h"
-#include "Base/Resources.h"
-
 #include "Fonts/DroidSans.h"
 #include "Fonts/DroidSansBold.h"
 #include "Fonts/Cousine-Regular.h"
@@ -20,6 +16,8 @@
 #include "Fonts/FontAwesomeSolid.h"
 #include "Fonts/IconsFontAwesome5.h"
 #include "Fonts/Reef.h"
+
+#include "WindowController.h"
 
 StyleRepository& StyleRepository::getInstance()
 {
@@ -35,20 +33,19 @@ void StyleRepository::init()
     style.ScaleAllSizes(scaleFactor);
 
 
+    ImFontConfig configMerge;
+    configMerge.MergeMode = true;
+    configMerge.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_LightHinting;
+
     ImGuiIO& io = ImGui::GetIO();
 
     //default font (small with icons)
     io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 16.0f * scaleFactor);
-
-    ImFontConfig configMerge;
-    configMerge.MergeMode = true;
-    configMerge.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_LightHinting;
-    static const ImWchar rangesIcons[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-    io.Fonts->AddFontFromMemoryCompressedTTF(
-        FontAwesomeSolid_compressed_data,
-        FontAwesomeSolid_compressed_size, 16.0f * scaleFactor,
-        &configMerge,
-        rangesIcons);
+    {
+        static const ImWchar rangesIcons[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+        io.Fonts->AddFontFromMemoryCompressedTTF(
+            FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 16.0f * scaleFactor, &configMerge, rangesIcons);
+    }
 
     //small bold font
     _smallBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 16.0f * scaleFactor);
@@ -64,11 +61,12 @@ void StyleRepository::init()
 
     //icon font
     _iconFont = io.Fonts->AddFontFromMemoryCompressedTTF(AlienIconFont_compressed_data, AlienIconFont_compressed_size, 24.0f * scaleFactor);
-
-    static const ImWchar rangesIcons2[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-    io.Fonts->AddFontFromMemoryCompressedTTF(
-        FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 28.0f * scaleFactor, &configMerge, rangesIcons2);
-    io.Fonts->Build();
+    {
+        static const ImWchar rangesIcons[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+        io.Fonts->AddFontFromMemoryCompressedTTF(
+            FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 28.0f * scaleFactor, &configMerge, rangesIcons);
+        io.Fonts->Build();
+    }
 
     //monospace medium font
     _monospaceMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 14.0f * scaleFactor);

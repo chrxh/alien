@@ -47,10 +47,9 @@ PUBLIC
     GenomeEditorWindow.h
     GettingStartedWindow.cpp
     GettingStartedWindow.h
-    GlobalSettings.cpp
-    GlobalSettings.h
     GpuSettingsDialog.cpp
     GpuSettingsDialog.h
+    HelpStrings.h
     ImageToPatternDialog.cpp
     ImageToPatternDialog.h
     InspectorWindow.cpp
@@ -120,7 +119,6 @@ PUBLIC
     StyleRepository.h
     TemporalControlWindow.cpp
     TemporalControlWindow.h
-    Tooltips.h
     UiController.cpp
     UiController.h
     UploadSimulationDialog.cpp

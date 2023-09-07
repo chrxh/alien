@@ -8,6 +8,19 @@
 
 namespace Const
 {
+    std::string const GeneralInformation =
+        "Please make sure that:\n\n1) You have an NVIDIA graphics card with compute capability 6.0 or higher (for example "
+        "GeForce 10 series).\n\n2) You have the latest NVIDIA graphics driver installed.\n\n3) The name of the "
+        "installation directory (including the parent directories) should not contain non-English characters. If this is not fulfilled, "
+        "please re-install ALIEN to a suitable directory. Do not move the files manually.\n\n4) ALIEN needs write access to its own "
+        "directory. This should normally be the case.\n\n5) If you have multiple graphics cards, please check that your primary monitor is "
+        "connected to the CUDA-powered card. ALIEN uses the same graphics card for computation as well as rendering and chooses the one "
+        "with the highest compute capability.\n\n6) If you possess both integrated and dedicated graphics cards, please ensure that the alien-executable is "
+        "configured to use your high-performance graphics card. On Windows you need to access the 'Graphics settings,' add 'alien.exe' to the list, click "
+        "'Options,' and choose 'High performance'.\n\nIf these conditions are not met, ALIEN may crash unexpectedly.\n\n"
+        "If the conditions are met and the error still occurs, please start ALIEN with the command line parameter '-debug', try to reproduce the error and "
+        "then create a GitHub issue on https://github.com/chrxh/alien/issues where the log.txt is attached.";
+
     std::string const NeuronTooltip =
         "This function equips the cell with a small network of 8 neurons with 8x8 configurable weights and 8 bias values. It "
         "processes the input from channel #0 to #7 and provides the output to those channels. Each neuron uses a type of sigmoid as a "
@@ -31,8 +44,8 @@ namespace Const
     std::string const SensorTooltip =
         "Sensor cells scan their environment for concentrations of cells of a certain color and provide distance and angle to the "
         "closest match.\n\n" ICON_FA_CHEVRON_RIGHT " Input channel #0: abs(value) > threshold activates sensor\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: "
-        "0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #1: density of the match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #2: distance "
-        "of the match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of the match";
+        "0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #1: density of the last match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #2: distance "
+        "of the last match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of the last match";
 
     std::string const NerveTooltip =
         "By default, a nerve cell forwards activity states by receiving activity as input from connected cells (and summing it if "
@@ -46,8 +59,8 @@ namespace Const
         "attacker\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: a value which is proportional to the gained energy";
 
     std::string const InjectorTooltip =
-        "Injector cellscan copy their genome into other constructor or injector cells. To do this, they need to be activated, remain in "
-        "close proximity to the target cell for a certain minimum duration, and, in the case of target constructor cell, its construction process "
+        "Injector cells can override the genome of other constructor or injector cells by their own. To do this, they need to be activated, remain in "
+        "close proximity to the target cell for a certain minimum duration, and, in the case of a target constructor cell, its construction process "
         "must not have started yet.\n\n" ICON_FA_CHEVRON_RIGHT " Input channel #0: abs(value) > threshold activates injector\n\n" ICON_FA_CHEVRON_RIGHT
         " Output channel #0: 0 (no cells found) or 1 (injection in process or completed)";
 
@@ -55,7 +68,9 @@ namespace Const
         "Muscle cells can perform different movements and deformations based on input and configuration.\n\n" ICON_FA_CHEVRON_RIGHT " Input channel "
         "#0: The strength of the movement, bending or expansion/contraction. A negative sign corresponds to the opposite "
         "action.\n\n" ICON_FA_CHEVRON_RIGHT " Input channel #1: This channel is solely utilized for acceleration due to bending. If the sign of channel #1 "
-        "differs from the sign of channel #0, no acceleration will be obtained during the bending process.";
+        "differs from the sign of channel #0, no acceleration will be obtained during the bending process.\n\n " ICON_FA_CHEVRON_RIGHT
+        " Input channel #3: This channel is used for muscles in movement mode. It allows to determine the relative angle of the movement. A value of -0.5 "
+        "correspond to -180 deg and +0.5 to +180 deg.";
 
     std::string const DefenderTooltip =
         "A defender cell does not need to be activated. Its presence reduces the strength of an enemy attack involving attacker "
@@ -184,9 +199,10 @@ namespace Const
         "over greater distances, for example, from attacker cells to constructor cells.";
 
     std::string const GenomeInjectorModeTooltip = ICON_FA_CHEVRON_RIGHT
-        " Cells under construction: Only cells which are under construction can be infected. This mode is useful when an organism wants to "
-        "inject its genome into another own constructor cell (e.g. to build a spore).\n\n" ICON_FA_CHEVRON_RIGHT
-        " All Cells: In this mode there are no restrictions, e.g. any other constructor or injector cell can be infected.";
+        " Only empty cells: Only cells which possess an empty genome can be infected. This mode is useful when an organism wants to "
+        "inject its genome into another own constructor cell (e.g. to build a spore). In this mode the injection process does not take any "
+        "time.\n\n" ICON_FA_CHEVRON_RIGHT " All Cells: In this mode there are no restrictions, e.g. any other constructor or injector cell can be infected. "
+        "The duration of the injection process depends on the simulation parameter 'Injection time'.";
 
     std::string const GenomeMuscleModeTooltip = ICON_FA_CHEVRON_RIGHT
         " Movement: Results in movement in the direction (or counter-direction) determined by the path from the "
@@ -315,9 +331,9 @@ namespace Const
         "constructor next cell, e.g. no energy, required connection check failed, completeness check failed), 1 (next cell construction "
         "successful)\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: 0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Attacker: a value which is proportional to the gained "
         "energy\n\n" ICON_FA_CHEVRON_RIGHT " Injector: 0 (no cells found) or 1 (injection in process or completed)",
-        "The following cell functions write their output to channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: density of the match",
-        "The following cell functions write their output to channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: distance of the match",
-        "The following cell functions write their output to channel #3:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: angle of the match",
+        "The following cell functions write their output to channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: density of the last match",
+        "The following cell functions write their output to channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: distance of the last match",
+        "The following cell functions write their output to channel #3:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: angle of the last match",
         "The following cell functions write their output to channel #4:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions write their output to channel #5:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions write their output to channel #6:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
@@ -334,7 +350,9 @@ namespace Const
         "solely utilized for acceleration due to bending. If the sign of channel #1 differs from the sign of channel #0, no acceleration will be obtained "
         "during the bending process.",
         "The following cell functions obtain their input from channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
-        "The following cell functions obtain their input from channel #3:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
+        "The following cell functions obtain their input from channel #3:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT
+        " Muscle: This channel is used for muscles in movement mode. It allows to determine the relative angle of the movement. A value of -0.5 correspond to "
+        "-180 deg and +0.5 to +180 deg.",
         "The following cell functions obtain their input from channel #4:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions obtain their input from channel #5:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions obtain their input from channel #6:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",

@@ -54,7 +54,7 @@ private:
     SimulationController _simController;
     Viewport _viewport;
 
-    float _previewHeight = 200.0f;
+    float _previewHeight = 0;
 
     mutable int _tabSequenceNumber = 0;
     std::vector<TabData> _tabDatas;

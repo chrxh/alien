@@ -90,6 +90,9 @@ namespace
     auto constexpr Id_Sensor_MinDensity = 1;
     auto constexpr Id_Sensor_Color = 2;
     auto constexpr Id_Sensor_TargetedCreatureId = 3;
+    auto constexpr Id_Sensor_MemoryChannel1 = 4;
+    auto constexpr Id_Sensor_MemoryChannel2 = 5;
+    auto constexpr Id_Sensor_MemoryChannel3 = 6;
 
     auto constexpr Id_Transmitter_Mode = 0;
 
@@ -519,6 +522,9 @@ namespace cereal
         loadSave<float>(task, auxiliaries, Id_Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
         loadSave<int>(task, auxiliaries, Id_Sensor_Color, data.color, defaultObject.color);
         loadSave<int>(task, auxiliaries, Id_Sensor_TargetedCreatureId, data.targetedCreatureId, defaultObject.targetedCreatureId);
+        loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel1, data.memoryChannel1, defaultObject.memoryChannel1);
+        loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel2, data.memoryChannel2, defaultObject.memoryChannel2);
+        loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel3, data.memoryChannel3, defaultObject.memoryChannel3);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SensorDescription)

@@ -6,7 +6,6 @@
 
 #include "AlienImGui.h"
 #include "BrowserWindow.h"
-#include "GlobalSettings.h"
 #include "MessageDialog.h"
 #include "NetworkController.h"
 

@@ -69,7 +69,7 @@ Further information and artwork:
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 # Installer
-An installer for Windows: [download link](https://alien-project.org/media/files/alien-installer.zip) (Updated: 2023-08-30)
+An installer for Windows: [download link](https://alien-project.org/media/files/alien-installer.zip) (Updated: 2023-09-07)
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
 
@@ -123,6 +123,7 @@ A short architectural overview of the source code can be found in the [documenta
 - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
 - [googletest](https://github.com/google/googletest)
 - [vcpkg](https://vcpkg.io/en/index.html)
+- [WinReg](https://github.com/GiovanniDicanio/WinReg)
 
 # Screenshots
 #### Different plant-like populations around a radiation source

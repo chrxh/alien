@@ -626,6 +626,8 @@ void EngineWorker::slowdownTPS()
 EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::chrono::milliseconds> const& maxDuration)
     : _worker(worker)
 {
+    checkForException(worker->_exceptionData);
+
     worker->_accessState = 1;
 
     auto startTimepoint = std::chrono::steady_clock::now();
@@ -636,14 +638,13 @@ EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::ch
                 break;
             }
         } else {
-            if (timePassed > std::chrono::seconds(5)) {
+            if (timePassed > std::chrono::seconds(7)) {
                 _isTimeout = true;
-                throw std::runtime_error("GPU Timeout");
+                throw std::runtime_error("GPU worker thread is not reachable.");
             }
         }
     }
 
-    checkForException(worker->_exceptionData);
 }
 
 EngineWorkerGuard::~EngineWorkerGuard()
@@ -660,6 +661,6 @@ void EngineWorkerGuard::checkForException(ExceptionData const& exceptionData)
 {
     std::unique_lock<std::mutex> uniqueLock(exceptionData.mutex);
     if (exceptionData.errorMessage) {
-        throw std::runtime_error(*exceptionData.errorMessage);
+        throw std::runtime_error("GPU worker thread is in an invalid state.");
     }
 }

@@ -3,8 +3,6 @@
 #include <imgui.h>
 
 #include "AlienImGui.h"
-#include "GlobalSettings.h"
-#include "StyleRepository.h"
 #include "NetworkController.h"
 #include "BrowserWindow.h"
 
