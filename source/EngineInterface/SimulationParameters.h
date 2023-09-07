@@ -80,7 +80,7 @@ struct SimulationParameters
     bool cellFunctionConstructorMutationPreventDepthIncrease = false;
     bool cellFunctionConstructorMutationSelfReplication = false;
 
-    ColorVector<float> cellFunctionInjectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
+    ColorVector<float> cellFunctionInjectorRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
     ColorMatrix<int> cellFunctionInjectorDurationColorMatrix = {
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
@@ -98,13 +98,13 @@ struct SimulationParameters
     ColorVector<float> cellFunctionAttackerEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
     ColorVector<float> cellFunctionAttackerColorInhomogeneityFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorMatrix<float> cellFunctionAttackerGenomeSizeBonus = {
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
+        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
+        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
+        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
+        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
+        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
+        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
+        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f}
     };
     ColorMatrix<float> cellFunctionAttackerSameMutantPenalty = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},

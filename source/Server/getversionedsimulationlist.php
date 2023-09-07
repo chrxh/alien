@@ -2,11 +2,21 @@
     require './helpers.php';
 
     $db = connectToDB();
-    $response = $db->query("SELECT SIMULATION_ID as id, count(1) as likes FROM userlike GROUP BY SIMULATION_ID");
+    $response = $db->query("SELECT SIMULATION_ID as id, TYPE as likeType, count(1) as likes FROM userlike GROUP BY SIMULATION_ID, TYPE");
 
-    $likesBySimulation = array();
+    $likesBySimulationByType = array();
     while($obj = $response->fetch_object()){
-        $likesBySimulation[$obj->id] = (int)$obj->likes;
+        $likeType = is_null($obj->likeType) ? 0 : (int)$obj->likeType;
+
+        if (!isset($likesBySimulationByType[$obj->id])) {
+            $likesBySimulationByType[$obj->id] = array();
+        }
+        if (array_key_exists($likeType, $likesBySimulationByType[$obj->id])) {
+            $likesBySimulationByType[$obj->id][$likeType] += (int)$obj->likes;
+        }
+        else {
+            $likesBySimulationByType[$obj->id][$likeType] = (int)$obj->likes;
+        }
     }
 
     $response = $db->query(
@@ -32,7 +42,16 @@
 
     $result = array();
     while($obj = $response->fetch_object()){
-        $likes = is_null($likesBySimulation[$obj->id]) ? 0 : $likesBySimulation[$obj->id];
+        $totalLikes = 0;
+
+        $likesByType = array();
+        if (isset($likesBySimulationByType[$obj->id])) {
+            foreach($likesBySimulationByType[$obj->id] as $likeType => $likes) {
+                $totalLikes += $likes;
+                $likeType2 = is_null($likeType) ? 0 : $likeType;
+                $likesByType[$likeType2] = $likes;
+            }
+        }
         $result[] = [
             "id" => (int)$obj->id, 
             "simulationName" => htmlspecialchars($obj->simulationName), 
@@ -44,7 +63,8 @@
             "version" => $obj->version,
             "timestamp" => $obj->timestamp,
             "contentSize" => $obj->contentSize,
-            "likes" => $likes,
+            "likes" => $totalLikes,
+            "likesByType" => $likesByType,
             "numDownloads" => (int)$obj->numDownloads,
             "fromRelease" => (int)$obj->fromRelease
         ];

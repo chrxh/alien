@@ -3,10 +3,10 @@
 #include <imgui.h>
 
 #include "Base/Resources.h"
+#include "Base/GlobalSettings.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 
-#include "GlobalSettings.h"
 #include "Viewport.h"
 #include "DelayedExecutionController.h"
 #include "OverlayMessageController.h"

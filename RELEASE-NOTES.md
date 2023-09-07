@@ -1,5 +1,24 @@
 # Release notes
 
+## [4.1.0] - 2023-09-07
+### Added
+- gui/browser: user can open a emoji window in order to react with various emoji types
+- gui/browser: list of emojis and counts are shown for each simulation entry
+- gui/browser: clicking on an other user's emoji adds same reaction
+- global: debug mode added that provides more accurate error messages and can be activated with the '-debug' parameter
+
+### Changed
+- gui/browser: different colors for the action buttons
+
+## [4.0.2] - 2023-09-03
+### Added
+- gui/browser: show online since last day status
+- gui/browser: show number of simulators
+
+### Changed
+- engine: injection mode 'Cells under construction' is replaced by 'Only empty cells'
+- engine: scanner cells return data (angel, distance) of last match if no match was found
+
 ## [4.0.0] - 2023-08-30
 ### Added
 - engine: support for dynamic simulation parameter zones, barriers and particle sources: they can move with a fixed velocity
@@ -35,14 +54,14 @@
 - new startup simulation featuring sensor-equipped consumer and plant ecosystem
 
 ### Removed
-- simulation files in folder 'examples' (they are available in the sim browser instead)
+- simulation files in folder 'examples' removed (they are available in the sim browser instead)
 - simulation parameter 'Same color energy distribution' for attackers removed
 
 ### Fixed
 - display an error message if GPU memory allocation failed and allow to continue
 - fixed wrong parameter calculation in case of overlapping parameter zones
 - plots for accumulated and averaged values have been corrected
-- loopholes anbd timeout bug for completeness check fixed
+- loopholes and timeout bug for completeness check fixed
 - fetching simulation list optimized
 - unwanted conversion to lower case in input fields removed
 

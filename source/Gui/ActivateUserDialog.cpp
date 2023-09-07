@@ -5,7 +5,6 @@
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
-#include "GlobalSettings.h"
 #include "MessageDialog.h"
 #include "NetworkController.h"
 #include "BrowserWindow.h"

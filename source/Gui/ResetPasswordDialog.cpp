@@ -3,7 +3,6 @@
 #include <imgui.h>
 
 #include "AlienImGui.h"
-#include "GlobalSettings.h"
 #include "MessageDialog.h"
 #include "NewPasswordDialog.h"
 

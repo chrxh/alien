@@ -5,10 +5,10 @@
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <cpp-httplib/httplib.h>
 
-#include "Base/Resources.h"
+#include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
+#include "Base/Resources.h"
 
-#include "GlobalSettings.h"
 #include "MessageDialog.h"
 #include "NetworkDataParser.h"
 
@@ -272,7 +272,7 @@ bool _NetworkController::setNewPassword(std::string const& userName, std::string
     }
 }
 
-bool _NetworkController::getSimulationDataList(std::vector<RemoteSimulationData>& result, bool withRetry) const
+bool _NetworkController::getRemoteSimulationList(std::vector<RemoteSimulationData>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get simulation list");
 
@@ -323,7 +323,7 @@ bool _NetworkController::getUserList(std::vector<UserData>& result, bool withRet
     }
 }
 
-bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& result) const
+bool _NetworkController::getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const
 {
     log(Priority::Important, "network: get liked simulations");
 
@@ -343,7 +343,7 @@ bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& resu
 
         result.clear();
         for (auto const& [key, subTree] : tree) {
-            result.emplace_back(subTree.get<std::string>("id"));
+            result.emplace(subTree.get<std::string>("id"), subTree.get<int>("likeType"));
         }
         return true;
     } catch (...) {
@@ -352,15 +352,16 @@ bool _NetworkController::getLikedSimulationIdList(std::vector<std::string>& resu
     }
 }
 
-bool _NetworkController::getUserLikesForSimulation(std::set<std::string>& result, std::string const& simId)
+bool _NetworkController::getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
 {
-    log(Priority::Important, "network: get user likes for simulation with id=" + simId);
+    log(Priority::Important, "network: get user likes for simulation with id=" + simId + " and likeType=" + std::to_string(likeType));
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
     httplib::Params params;
     params.emplace("simId", simId);
+    params.emplace("likeType", std::to_string(likeType));
 
     try {
         auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlikes.php", params); });
@@ -380,7 +381,7 @@ bool _NetworkController::getUserLikesForSimulation(std::set<std::string>& result
     }
 }
 
-bool _NetworkController::toggleLikeSimulation(std::string const& simId)
+bool _NetworkController::toggleLikeSimulation(std::string const& simId, int likeType)
 {
     log(Priority::Important, "network: toggle like for simulation with id=" + simId);
 
@@ -391,6 +392,8 @@ bool _NetworkController::toggleLikeSimulation(std::string const& simId)
     params.emplace("userName", *_loggedInUserName);
     params.emplace("password", *_password);
     params.emplace("simId", simId);
+    params.emplace("likeType", std::to_string(likeType));
+
 
     try {
         auto result = executeRequest([&] { return client.Post("/alien-server/togglelikesimulation.php", params); });

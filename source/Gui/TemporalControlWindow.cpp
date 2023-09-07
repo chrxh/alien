@@ -11,7 +11,6 @@
 
 #include "StyleRepository.h"
 #include "StatisticsWindow.h"
-#include "GlobalSettings.h"
 #include "AlienImGui.h"
 #include "OverlayMessageController.h"
 

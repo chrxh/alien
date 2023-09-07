@@ -3,6 +3,9 @@ add_library(alien_base_lib
     Definitions.cpp
     Definitions.h
     Exceptions.h
+    GlobalSettings.cpp
+    GlobalSettings.h
+    Hashes.h
     JsonParser.h
     LoggingService.cpp
     LoggingService.h

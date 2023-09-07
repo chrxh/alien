@@ -154,6 +154,11 @@ struct SensorDescription
     int color = 0;
     int targetedCreatureId = 0;
 
+    //process data
+    float memoryChannel1 = 0;
+    float memoryChannel2 = 0;
+    float memoryChannel3 = 0;
+
     auto operator<=>(SensorDescription const&) const = default;
 
     SensorMode getSensorMode() const { return fixedAngle.has_value() ? SensorMode_FixedAngle : SensorMode_Neighborhood; }

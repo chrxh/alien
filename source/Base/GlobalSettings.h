@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Base/JsonParser.h"
-#include "EngineInterface/GpuSettings.h"
-
-#include "Definitions.h"
+#include <memory>
+#include <string>
 
 struct GlobalSettingsImpl;
 
@@ -11,6 +9,9 @@ class GlobalSettings
 {
 public:
     static GlobalSettings& getInstance();
+
+    bool isDebugMode() const;
+    void setDebugMode(bool value) const;
 
     GlobalSettings(GlobalSettings const&) = delete;
     void operator=(GlobalSettings const&) = delete;

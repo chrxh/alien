@@ -2,7 +2,8 @@
 
 #include <imgui.h>
 
-#include "GlobalSettings.h"
+#include "Base/GlobalSettings.h"
+
 #include "StyleRepository.h"
 #include "WindowController.h"
 
