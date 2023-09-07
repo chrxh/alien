@@ -55,8 +55,7 @@ https://user-images.githubusercontent.com/73127001/229569056-0db6562b-0147-43c8-
 
 # Documentation
 A documentation for the previous major version, which introduces the reader to the simulator with tutorial-like articles, can be found at [alien-project.gitbook.io/docs](https://alien-project.gitbook.io/docs). Please notice that many of the information therein are no longer up to date.
-
-A new documentation is currently under construction. However a lot of useful information is provided in the program itself via help windows and tooltips.
+The latest version includes a brief documentation and user guidance in the program itself via help windows and tooltips.
 
 Further information and artwork:
 * [Website](https://alien-project.org)
