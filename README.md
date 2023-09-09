@@ -142,6 +142,3 @@ A short architectural overview of the source code can be found in the [documenta
 
 #### Genome editor
 ![Screenshot3b](https://user-images.githubusercontent.com/73127001/229313813-c9ce70e2-d61f-4745-b64f-ada0b6758901.jpg)
-
-# License
-ALIEN is licensed under the [GPLv3](LICENSE).
