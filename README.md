@@ -122,10 +122,10 @@ A short architectural overview of the source code can be found in the [documenta
 - [googletest](https://github.com/google/googletest)
 - [vcpkg](https://vcpkg.io/en/index.html)
 - [WinReg](https://github.com/GiovanniDicanio/WinReg)
-- Free icons and icon font from
+- Free icons and icon font:
   - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
-  - [Iconduck](https://iconduck.com)
-  - [Iconfinder](https://www.iconfinder.com)
+  - [Iconduck](https://iconduck.com) (Noto Emoji by Google, [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt))
+  - [Iconfinder](https://www.iconfinder.com) (Bogdan Rosu Creative, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0))
 
 # Screenshots
 #### Different plant-like populations around a radiation source
