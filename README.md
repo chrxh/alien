@@ -94,39 +94,6 @@ cmake --build . --config Release -j8
 ```
 If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
 
-# Contributing to the project
-Contributions to the project are very welcome. The most convenient way is to communicate via [GitHub Issues](https://github.com/chrxh/alien/issues), [Pull requests](https://github.com/chrxh/alien/pulls) or the [Discussion forum](https://github.com/chrxh/alien/discussions) depending on the subject. For example, it could be
-- Providing new content (simulation or genome files)
-- Producing or sharing media files
-- Reporting of bugs, wanted features, questions or feedback via GitHub Issues or in the Discussion forum.
-- Pull requests for bug fixes, code cleanings, optimizations or minor tweaks. If you want to implement new features, refactorings or other major changes, please use the [Discussion forum](https://github.com/chrxh/alien/discussions) for consultation and coordination in advance.
-- Extensions or corrections to the [alien-docs](https://alien-project.gitbook.io/docs). It has its [own repository](https://github.com/chrxh/alien-docs).
-
-A short architectural overview of the source code can be found in the [documentation](https://alien-project.gitbook.io/docs/under-the-hood).
-
-# Dependency list
-- [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
-- [Dear ImGui](https://github.com/ocornut/imgui)
-- [ImPlot](https://github.com/epezent/implot)
-- [ImFileDialog](https://github.com/dfranx/ImFileDialog)
-- [boost](https://www.boost.org)
-- [Glad](https://glad.dav1d.de)
-- [GLFW](https://www.glfw.org)
-- [glew](https://github.com/nigels-com/glew)
-- [stb](https://github.com/nothings/stb)
-- [cereal](https://github.com/USCiLab/cereal)
-- [zlib](https://www.zlib.net)
-- [zstr](https://github.com/mateidavid/zstr)
-- [OpenSSL](https://github.com/openssl/openssl)
-- [cpp-httplib](https://github.com/yhirose/cpp-httplib)
-- [googletest](https://github.com/google/googletest)
-- [vcpkg](https://vcpkg.io/en/index.html)
-- [WinReg](https://github.com/GiovanniDicanio/WinReg)
-- Free icons and icon font:
-  - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
-  - [Iconduck](https://iconduck.com) (Noto Emoji by Google, [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt))
-  - [Iconfinder](https://www.iconfinder.com) (Bogdan Rosu Creative, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0))
-
 # Screenshots
 #### Different plant-like populations around a radiation source
 ![Screenshot1](https://user-images.githubusercontent.com/73127001/229311601-839649a6-c60c-4723-99b3-26086e3e4340.jpg)
@@ -145,3 +112,44 @@ A short architectural overview of the source code can be found in the [documenta
 
 #### Genome editor
 ![Screenshot3b](https://user-images.githubusercontent.com/73127001/229313813-c9ce70e2-d61f-4745-b64f-ada0b6758901.jpg)
+
+# Contributing to the project
+Contributions to the project are very welcome. The most convenient way is to communicate via [GitHub Issues](https://github.com/chrxh/alien/issues), [Pull requests](https://github.com/chrxh/alien/pulls) or the [Discussion forum](https://github.com/chrxh/alien/discussions) depending on the subject. For example, it could be
+- Providing new content (simulation or genome files)
+- Producing or sharing media files
+- Reporting of bugs, wanted features, questions or feedback via GitHub Issues or in the Discussion forum.
+- Pull requests for bug fixes, code cleanings, optimizations or minor tweaks. If you want to implement new features, refactorings or other major changes, please use the [Discussion forum](https://github.com/chrxh/alien/discussions) for consultation and coordination in advance.
+- Extensions or corrections to the [alien-docs](https://alien-project.gitbook.io/docs). It has its [own repository](https://github.com/chrxh/alien-docs).
+
+A short architectural overview of the source code can be found in the [documentation](https://alien-project.gitbook.io/docs/under-the-hood).
+
+# 💎 Credits and dependencies
+
+ALIEN has been mainly developed and maintained by [Christian Heinemann](mailto:heinemann.christian@gmail.com). Contributions to the project have been made by
+- [tlemo](https://github.com/tlemo)
+- [mpersano](https://github.com/mpersano)
+- [dguerizec](https://github.com/dguerizec)
+
+The following external libraries are used:
+- [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
+- [Dear ImGui](https://github.com/ocornut/imgui)
+- [ImPlot](https://github.com/epezent/implot)
+- [ImFileDialog](https://github.com/dfranx/ImFileDialog)
+- [boost](https://www.boost.org)
+- [Glad](https://glad.dav1d.de)
+- [GLFW](https://www.glfw.org)
+- [glew](https://github.com/nigels-com/glew)
+- [stb](https://github.com/nothings/stb)
+- [cereal](https://github.com/USCiLab/cereal)
+- [zlib](https://www.zlib.net)
+- [zstr](https://github.com/mateidavid/zstr)
+- [OpenSSL](https://github.com/openssl/openssl)
+- [cpp-httplib](https://github.com/yhirose/cpp-httplib)
+- [googletest](https://github.com/google/googletest)
+- [vcpkg](https://vcpkg.io/en/index.html)
+- [WinReg](https://github.com/GiovanniDicanio/WinReg)
+
+Free icons and icon font:
+  - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
+  - [Iconduck](https://iconduck.com) (Noto Emoji by Google, [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt))
+  - [Iconfinder](https://www.iconfinder.com) (Bogdan Rosu Creative, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0))
