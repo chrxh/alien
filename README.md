@@ -119,10 +119,13 @@ A short architectural overview of the source code can be found in the [documenta
 - [zstr](https://github.com/mateidavid/zstr)
 - [OpenSSL](https://github.com/openssl/openssl)
 - [cpp-httplib](https://github.com/yhirose/cpp-httplib)
-- [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
 - [googletest](https://github.com/google/googletest)
 - [vcpkg](https://vcpkg.io/en/index.html)
 - [WinReg](https://github.com/GiovanniDicanio/WinReg)
+- Free icons and icon font from
+  - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
+  - [Iconduck](https://iconduck.com)
+  - [Iconfinder](https://www.iconfinder.com)
 
 # Screenshots
 #### Different plant-like populations around a radiation source
