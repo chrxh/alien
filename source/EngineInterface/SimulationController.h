@@ -17,8 +17,8 @@ public:
     virtual std::string getGpuName() const = 0;
 
     /**
-     * Draws section of simulation to registered texture.
-     * If the GPU is busy for specific time, the texture will not be updated.
+     * Draws a section of simulation to a registered texture.
+     * If the GPU is busy for a specified duration, the texture will not be updated.
      */
     virtual void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom) = 0;
     virtual std::optional<OverlayDescription>
