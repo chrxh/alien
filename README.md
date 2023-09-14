@@ -67,7 +67,7 @@ Further information and artwork:
 # Minimal system requirements
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
-# Download
+# Installer
 Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (Updated: 2023-09-14)
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
@@ -123,9 +123,6 @@ Contributions to the project are very welcome. The most convenient way is to com
 
 A short architectural overview of the source code can be found in the [documentation](https://alien-project.gitbook.io/docs/under-the-hood).
 
-# License
-ALIEN is licensed under the [BSD 3-Clause](LICENSE) license.
-
 # 💎 Credits and dependencies
 
 ALIEN has been initiated, mainly developed and maintained by [Christian Heinemann](mailto:heinemann.christian@gmail.com). Contributions to the project have been made by
@@ -156,3 +153,6 @@ Free icons and icon font:
   - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
   - [Iconduck](https://iconduck.com) (Noto Emoji by Google, [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt))
   - [Iconfinder](https://www.iconfinder.com) (Bogdan Rosu Creative, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0))
+
+# License
+ALIEN is licensed under the [BSD 3-Clause](LICENSE) license.
