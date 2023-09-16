@@ -5,7 +5,7 @@
 - show confirmation dialog for deleting a simulation
 
 ### Changed
-- hide trash icon for simulation from other users
+- hide trash icon for simulations from other users
 
 ## [4.1.0] - 2023-09-07
 ### Added
