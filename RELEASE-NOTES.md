@@ -1,5 +1,12 @@
 # Release notes
 
+## [4.1.1] - 2023-09-16
+### Added
+- show confirmation dialog for deleting a simulation
+
+### Changed
+- hide trash icon for simulation from other users
+
 ## [4.1.0] - 2023-09-07
 ### Added
 - gui/browser: user can open an emoji window in order to react with various emoji types
