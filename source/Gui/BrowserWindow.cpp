@@ -96,14 +96,14 @@ void _BrowserWindow::refreshIntern(bool withRetry)
 
         if (!success) {
             if (withRetry) {
-                MessageDialog::getInstance().show("Error", "Failed to retrieve browser data. Please try again.");
+                MessageDialog::getInstance().information("Error", "Failed to retrieve browser data. Please try again.");
             }
         }
         calcFilteredSimulationDatas();
 
         if (_networkController->getLoggedInUserName()) {
             if (!_networkController->getEmojiTypeBySimId(_ownEmojiTypeBySimId)) {
-                MessageDialog::getInstance().show("Error", "Failed to retrieve browser data. Please try again.");
+                MessageDialog::getInstance().information("Error", "Failed to retrieve browser data. Please try again.");
             }
         } else {
             _ownEmojiTypeBySimId.clear();
@@ -113,7 +113,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         sortUserList();
     } catch (std::exception const& e) {
         if (withRetry) {
-            MessageDialog::getInstance().show("Error", e.what());
+            MessageDialog::getInstance().information("Error", e.what());
         }
     }
 }
@@ -692,13 +692,13 @@ void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* sim)
     delayedExecution([=, this] {
         SerializedSimulation serializedSim;
         if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, sim->id)) {
-            MessageDialog::getInstance().show("Error", "Failed to download simulation.");
+            MessageDialog::getInstance().information("Error", "Failed to download simulation.");
             return;
         }
 
         DeserializedSimulation deserializedSim;
         if (!Serializer::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
-            MessageDialog::getInstance().show("Error", "Failed to load simulation. Your program version may not match.");
+            MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
             return;
         }
 
@@ -728,7 +728,7 @@ void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* sim)
         _temporalControlWindow->onSnapshot();
 
         if (VersionChecker::isVersionNewer(sim->version)) {
-            MessageDialog::getInstance().show(
+            MessageDialog::getInstance().information(
                 "Warning",
                 "The download was successful but the simulation was generated using a more recent\n"
                 "version of ALIEN. Consequently, the simulation might not function as expected.\n"
@@ -739,14 +739,16 @@ void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* sim)
 
 void _BrowserWindow::onDeleteSimulation(RemoteSimulationData* sim)
 {
-    printOverlayMessage("Deleting ...");
+    MessageDialog::getInstance().yesNo("Delete simulation", "Do you really want to delete the simulation?", [sim, this]() {
+        printOverlayMessage("Deleting ...");
 
-    delayedExecution([remoteData = sim, this] {
-        if (!_networkController->deleteSimulation(remoteData->id)) {
-            MessageDialog::getInstance().show("Error", "Failed to delete simulation. Please try again later.");
-            return;
-        }
-        _scheduleRefresh = true;
+        delayedExecution([remoteData = sim, this] {
+            if (!_networkController->deleteSimulation(remoteData->id)) {
+                MessageDialog::getInstance().information("Error", "Failed to delete simulation. Please try again later.");
+                return;
+            }
+            _scheduleRefresh = true;
+        });
     });
 }
 

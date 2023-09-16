@@ -42,7 +42,7 @@ _LoginDialog::_LoginDialog(
             LoginErrorCode errorCode;
             if (!_networkController->login(errorCode, _userName, _password, getUserInfo())) {
                 if (errorCode != LoginErrorCode_UnconfirmedUser) {
-                    MessageDialog::getInstance().show("Error", "Login failed.");
+                    MessageDialog::getInstance().information("Error", "Login failed.");
                 }
             }
         }
@@ -136,7 +136,7 @@ void _LoginDialog::onLogin()
             _activateUserDialog->open(_userName, _password, userInfo);
         } break;
         default: {
-            MessageDialog::getInstance().show("Error", "Login failed.");
+            MessageDialog::getInstance().information("Error", "Login failed.");
         } break;
         }
         return;

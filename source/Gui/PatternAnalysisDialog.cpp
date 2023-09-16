@@ -57,7 +57,7 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
     std::ofstream file;
     file.open(filename, std::ios_base::out);
     if (!file) {
-        MessageDialog::getInstance().show("Pattern analysis", "The analysis result could not be saved to the specified file.");
+        MessageDialog::getInstance().information("Pattern analysis", "The analysis result could not be saved to the specified file.");
         return;
     }
 
@@ -95,7 +95,7 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
         messageStream << "Representative cell networks are save from `cluster" << std::setfill('0') << std::setw(6) << 0 << ".sim` to `cluster" << std::setfill('0')
                       << std::setw(6) << partitionData.size() - 1 << ".sim`.";
     }
-    MessageDialog::getInstance().show("Analysis result", messageStream.str());
+    MessageDialog::getInstance().information("Analysis result", messageStream.str());
 }
 
 auto _PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalysisDescription, PartitionClassData>

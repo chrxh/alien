@@ -161,7 +161,7 @@ void _MultiplierWindow::onBuild()
             auto result = DescriptionHelper::randomMultiply(
                 _origSelection, _randomParameters, _simController->getWorldSize(), std::move(data), overlappingCheckSuccessful);
             if (!overlappingCheckSuccessful) {
-                MessageDialog::getInstance().show("Random multiplication", "Non-overlapping copies could not be created.");
+                MessageDialog::getInstance().information("Random multiplication", "Non-overlapping copies could not be created.");
             }
             return result;
         }

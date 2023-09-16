@@ -66,9 +66,9 @@ void _NewPasswordDialog::onNewPassword()
         result |= _networkController->login(errorCode, _userName, _newPassword, _userInfo);
     }
     if (!result) {
-        MessageDialog::getInstance().show("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to reset the password again.");
+        MessageDialog::getInstance().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to reset the password again.");
         return;
     }
-    MessageDialog::getInstance().show("Information", "The password has been successfully set.\nYou are logged in.");
+    MessageDialog::getInstance().information("Information", "The password has been successfully set.\nYou are logged in.");
     _browserWindow->onRefresh();
 }

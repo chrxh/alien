@@ -515,7 +515,7 @@ void _StatisticsWindow::onSaveStatistics()
             std::ofstream file;
             file.open(firstFilename.string(), std::ios_base::out);
             if (!file) {
-                MessageDialog::getInstance().show("Export statistics", "The statistics could not be saved to the specified file.");
+                MessageDialog::getInstance().information("Export statistics", "The statistics could not be saved to the specified file.");
                 return;
             }
 
