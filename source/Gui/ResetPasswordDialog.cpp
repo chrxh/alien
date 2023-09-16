@@ -56,7 +56,7 @@ void _ResetPasswordDialog::onResetPassword()
     if (_networkController->resetPassword(_userName, _email)) {
         _newPasswordDialog->open(_userName, _userInfo);
     } else {
-        MessageDialog::getInstance().show(
+        MessageDialog::getInstance().information(
             "Error", "An error occurred on the server. This could be related to the fact that the\nemail address is wrong.");
     }
 }

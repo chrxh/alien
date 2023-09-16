@@ -341,7 +341,7 @@ void _PatternEditorWindow::onOpenPattern()
                 _simController->addAndSelectSimulationData(DataDescription(content));
                 _editorModel->update();
             } else {
-                MessageDialog::getInstance().show("Open pattern", "The selected file could not be opened.");
+                MessageDialog::getInstance().information("Open pattern", "The selected file could not be opened.");
             }
         });
 }
@@ -356,7 +356,7 @@ void _PatternEditorWindow::onSavePattern()
 
             auto content = _simController->getSelectedClusteredSimulationData(_editorModel->isRolloutToClusters());
             if (!Serializer::serializeContentToFile(firstFilename.string(), content)) {
-                MessageDialog::getInstance().show("Save pattern", "The selected pattern could not be saved to the specified file.");
+                MessageDialog::getInstance().information("Save pattern", "The selected pattern could not be saved to the specified file.");
             }
         });
 }

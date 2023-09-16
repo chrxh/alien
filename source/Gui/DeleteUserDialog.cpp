@@ -31,7 +31,7 @@ void _DeleteUserDialog::processIntern()
         if (_reenteredPassword == *_networkController->getPassword()) {
             onDelete();
         } else {
-            MessageDialog::getInstance().show("Error", "The password does not match.");
+            MessageDialog::getInstance().information("Error", "The password does not match.");
         }
         _reenteredPassword.clear();
     }
@@ -50,8 +50,8 @@ void _DeleteUserDialog::onDelete()
     auto userName = *_networkController->getLoggedInUserName();
     if (_networkController->deleteUser()) {
         _browserWindow->onRefresh();
-        MessageDialog::getInstance().show("Information", "The user '" + userName + "' has been deleted.\nYou are logged out.");
+        MessageDialog::getInstance().information("Information", "The user '" + userName + "' has been deleted.\nYou are logged out.");
     } else {
-        MessageDialog::getInstance().show("Error", "An error occurred on the server.");
+        MessageDialog::getInstance().information("Error", "An error occurred on the server.");
     }
 }
