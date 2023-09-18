@@ -125,7 +125,7 @@ A short architectural overview of the source code can be found in the [documenta
 
 # 💎 Credits and dependencies
 
-ALIEN has been initiated, mainly developed and maintained by [Christian Heinemann](mailto:heinemann.christian@gmail.com). Contributions to the project have been made by
+ALIEN has been initiated, mainly developed and maintained by [Christian Heinemann](mailto:heinemann.christian@gmail.com). Thanks to all the others who contributed to this repository:
 - [tlemo](https://github.com/tlemo)
 - [mpersano](https://github.com/mpersano)
 - [dguerizec](https://github.com/dguerizec)
