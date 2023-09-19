@@ -818,7 +818,7 @@ void _MainWindow::onSaveSimulation()
                 sim.mainData = _simController->getClusteredSimulationData();
 
                 if (!Serializer::serializeSimulationToFiles(firstFilename.string(), sim)) {
-                    MessageDialog::getInstance().show("Save simulation", "The simulation could not be saved to the specified file.");
+                    MessageDialog::getInstance().information("Save simulation", "The simulation could not be saved to the specified file.");
                 }
             });
         });

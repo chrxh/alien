@@ -64,7 +64,7 @@ void _CreateUserDialog::onCreateUser()
     if (_networkController->createUser(_userName, _password, _email)) {
         _activateUserDialog->open(_userName, _password, _userInfo);
     } else {
-        MessageDialog::getInstance().show(
+        MessageDialog::getInstance().information(
             "Error",
             "An error occurred on the server. This could be related to the fact that\n" ICON_FA_CARET_RIGHT
             " your user name or email address is already in use,\n" ICON_FA_CARET_RIGHT " or your user "

@@ -1769,7 +1769,7 @@ void _SimulationParametersWindow::onOpenParameters()
 
         SimulationParameters parameters;
         if (!Serializer::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
-            MessageDialog::getInstance().show("Open simulation parameters", "The selected file could not be opened.");
+            MessageDialog::getInstance().information("Open simulation parameters", "The selected file could not be opened.");
         } else {
             _simController->setSimulationParameters(parameters);
         }
@@ -1786,7 +1786,7 @@ void _SimulationParametersWindow::onSaveParameters()
 
         auto parameters = _simController->getSimulationParameters();
         if (!Serializer::serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
-            MessageDialog::getInstance().show("Save simulation parameters", "The selected file could not be saved.");
+            MessageDialog::getInstance().information("Save simulation parameters", "The selected file could not be saved.");
         }
     });
 }
