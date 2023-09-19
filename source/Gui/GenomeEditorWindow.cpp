@@ -769,7 +769,7 @@ void _GenomeEditorWindow::onOpenGenome()
 
         std::vector<uint8_t> genomeData;
         if (!Serializer::deserializeGenomeFromFile(genomeData, firstFilename.string())) {
-            MessageDialog::getInstance().show("Open genome", "The selected file could not be opened.");
+            MessageDialog::getInstance().information("Open genome", "The selected file could not be opened.");
         } else {
             openTab(GenomeDescriptionConverter::convertBytesToDescription(genomeData));
         }
@@ -787,7 +787,7 @@ void _GenomeEditorWindow::onSaveGenome()
             auto const& selectedTab = _tabDatas.at(_selectedTabIndex);
             auto genomeData = GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome);
             if (!Serializer::serializeGenomeToFile(firstFilename.string(), genomeData)) {
-                MessageDialog::getInstance().show("Save genome", "The selected file could not be saved.");
+                MessageDialog::getInstance().information("Save genome", "The selected file could not be saved.");
             }
         });
 }

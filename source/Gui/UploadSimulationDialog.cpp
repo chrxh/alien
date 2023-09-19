@@ -92,7 +92,7 @@ void _UploadSimulationDialog::onUpload()
 
         SerializedSimulation serializedSim;
         if (!Serializer::serializeSimulationToStrings(serializedSim, deserializedSim)) {
-            MessageDialog::getInstance().show("Save simulation", "The simulation could not be uploaded.");
+            MessageDialog::getInstance().information("Save simulation", "The simulation could not be uploaded.");
             return;
         }
 
@@ -103,7 +103,7 @@ void _UploadSimulationDialog::onUpload()
                 deserializedSim.mainData.getNumberOfCellAndParticles(),
                 serializedSim.mainData,
                 serializedSim.auxiliaryData)) {
-            MessageDialog::getInstance().show("Error", "Failed to upload simulation.");
+            MessageDialog::getInstance().information("Error", "Failed to upload simulation.");
             return;
         }
         _browserWindow->onRefresh();
