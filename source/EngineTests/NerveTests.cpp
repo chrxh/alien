@@ -30,7 +30,7 @@ TEST_F(NerveTests, noInput_execution)
     });
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualCellById = getCellById(actualData);
@@ -53,7 +53,7 @@ TEST_F(NerveTests, noInput_noExecution)
     });
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualCellById = getCellById(actualData);
@@ -84,7 +84,7 @@ TEST_F(NerveTests, inputBlocked)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     {
         auto actualData = _simController->getSimulationData();
@@ -120,7 +120,7 @@ TEST_F(NerveTests, outputBlocked)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     {
         auto actualData = _simController->getSimulationData();
@@ -156,7 +156,7 @@ TEST_F(NerveTests, underConstruction1)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     {
         auto actualData = _simController->getSimulationData();
@@ -192,7 +192,7 @@ TEST_F(NerveTests, underConstruction2)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     {
         auto actualData = _simController->getSimulationData();
@@ -235,7 +235,7 @@ TEST_F(NerveTests, transfer)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     {
         auto actualData = _simController->getSimulationData();
@@ -246,7 +246,7 @@ TEST_F(NerveTests, transfer)
         EXPECT_EQ(ActivityDescription(), actualCellById.at(3).activity);
     }
 
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
     {
         auto actualData = _simController->getSimulationData();
         auto actualCellById = getCellById(actualData);
@@ -255,7 +255,7 @@ TEST_F(NerveTests, transfer)
         EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
         EXPECT_EQ(activity, actualCellById.at(3).activity);
     }
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
     {
         auto actualData = _simController->getSimulationData();
         auto actualCellById = getCellById(actualData);
@@ -309,7 +309,7 @@ TEST_F(NerveTests, cycle)
 
     _simController->setSimulationData(data);
 
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
     {
         auto actualData = _simController->getSimulationData();
         auto actualCellById = getCellById(actualData);
@@ -320,7 +320,7 @@ TEST_F(NerveTests, cycle)
         EXPECT_EQ(ActivityDescription(), actualCellById.at(4).activity);
     }
 
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
     {
         auto actualData = _simController->getSimulationData();
         auto actualCellById = getCellById(actualData);
@@ -331,7 +331,7 @@ TEST_F(NerveTests, cycle)
         EXPECT_EQ(ActivityDescription(), actualCellById.at(4).activity);
     }
 
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
     {
         auto actualData = _simController->getSimulationData();
         auto actualCellById = getCellById(actualData);
@@ -343,7 +343,7 @@ TEST_F(NerveTests, cycle)
     }
 
     for (int i = 0; i < 3; ++i) {
-        _simController->calcSingleTimestep();
+        _simController->calcTimesteps(1);
     }
     {
         auto actualData = _simController->getSimulationData();
@@ -355,7 +355,7 @@ TEST_F(NerveTests, cycle)
         EXPECT_EQ(activity, actualCellById.at(4).activity);
     }
 
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
     {
         auto actualData = _simController->getSimulationData();
         auto actualCellById = getCellById(actualData);
@@ -399,7 +399,7 @@ TEST_F(NerveTests, fork)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     {
         auto actualData = _simController->getSimulationData();
@@ -437,7 +437,7 @@ TEST_F(NerveTests, noFork)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     {
         auto actualData = _simController->getSimulationData();
@@ -483,7 +483,7 @@ TEST_F(NerveTests, merge)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     {
         auto actualData = _simController->getSimulationData();
@@ -519,7 +519,7 @@ TEST_F(NerveTests, sameExecutionOrderNumber)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     {
         auto actualData = _simController->getSimulationData();
@@ -553,7 +553,7 @@ TEST_F(NerveTests, constantPulse)
     _simController->setSimulationData(data);
 
     for (int i = 0; i <= 18; ++i) {
-        _simController->calcSingleTimestep();
+        _simController->calcTimesteps(1);
 
         auto actualData = _simController->getSimulationData();
         auto actualCellById = getCellById(actualData);
@@ -586,7 +586,7 @@ TEST_F(NerveTests, alternatingPulse)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
     {
         auto actualCellById = getCellById(_simController->getSimulationData());
         EXPECT_EQ(ActivityDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).activity);
@@ -594,7 +594,7 @@ TEST_F(NerveTests, alternatingPulse)
 
     for (int pulse = 0; pulse < 3; ++pulse) {
         for (int i = 0; i < 6*3; ++i) {
-            _simController->calcSingleTimestep();
+            _simController->calcTimesteps(1);
         }
         auto actualCellById = getCellById(_simController->getSimulationData());
         EXPECT_EQ(ActivityDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).activity);
@@ -602,14 +602,14 @@ TEST_F(NerveTests, alternatingPulse)
 
     for (int pulse = 0; pulse < 4; ++pulse) {
         for (int i = 0; i < 6*3; ++i) {
-            _simController->calcSingleTimestep();
+            _simController->calcTimesteps(1);
         }
         auto actualCellById = getCellById(_simController->getSimulationData());
         EXPECT_EQ(ActivityDescription().setChannels({-1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).activity);
     }
     for (int pulse = 0; pulse < 4; ++pulse) {
         for (int i = 0; i < 6*3; ++i) {
-            _simController->calcSingleTimestep();
+            _simController->calcTimesteps(1);
         }
         auto actualCellById = getCellById(_simController->getSimulationData());
         EXPECT_EQ(ActivityDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).activity);

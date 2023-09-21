@@ -13,6 +13,7 @@
 #include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
+#include "Base/VersionChecker.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 
@@ -29,7 +30,6 @@
 #include "DelayedExecutionController.h"
 #include "OpenGLHelper.h"
 #include "OverlayMessageController.h"
-#include "VersionChecker.h"
 
 namespace
 {

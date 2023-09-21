@@ -149,7 +149,7 @@ void _TemporalControlWindow::processStepForwardButton()
     ImGui::BeginDisabled(_simController->isSimulationRunning());
     if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_RIGHT)) {
         _history.emplace_back(createSnapshot());
-        _simController->calcSingleTimestep();
+        _simController->calcTimesteps(1);
     }
     ImGui::EndDisabled();
 }

@@ -17,7 +17,7 @@ namespace
 {
     bool isInDebugMode(int argc, char** argv)
     {
-        return argc == 2 && strcmp(argv[1], "-debug") == 0;
+        return argc == 2 && strcmp(argv[1], "-d") == 0;
     }
 }
 
@@ -25,12 +25,13 @@ int main(int argc, char** argv)
 {
     auto inDebugMode = isInDebugMode(argc, argv);
     GlobalSettings::getInstance().setDebugMode(inDebugMode);
-    if (inDebugMode) {
-        log(Priority::Important, "DEBUG mode");
-    }
 
     SimpleLogger logger = std::make_shared<_SimpleLogger>();
     FileLogger fileLogger = std::make_shared<_FileLogger>();
+
+    if (inDebugMode) {
+        log(Priority::Important, "DEBUG mode");
+    }
 
     SimulationController simController;
     MainWindow mainWindow;

@@ -124,8 +124,6 @@ PUBLIC
     UploadSimulationDialog.cpp
     UploadSimulationDialog.h
     UserData.h
-    VersionChecker.cpp
-    VersionChecker.h
     Viewport.cpp
     Viewport.h
     WindowController.cpp

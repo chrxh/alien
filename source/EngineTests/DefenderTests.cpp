@@ -66,7 +66,7 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
     data.addConnection(3, 4);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttacker = getCell(actualData, 1);
@@ -109,7 +109,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     data.addConnection(3, 4);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttacker = getCell(actualData, 1);
@@ -155,7 +155,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 1 + 6 * 3; ++i) {
-        _simController->calcSingleTimestep();
+        _simController->calcTimesteps(1);
     }
 
     auto actualData = _simController->getSimulationData();
@@ -207,7 +207,7 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 1 + 6 * 3; ++i) {
-        _simController->calcSingleTimestep();
+        _simController->calcTimesteps(1);
     }
 
     auto actualData = _simController->getSimulationData();

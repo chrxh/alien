@@ -19,7 +19,9 @@ add_library(alien_base_lib
     StringHelper.cpp
     StringHelper.h
     Vector2D.cpp
-    Vector2D.h)
+    Vector2D.h
+    VersionChecker.cpp
+    VersionChecker.h)
 
 target_link_libraries(alien_base_lib Boost::boost)
 

@@ -160,7 +160,7 @@ void _StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::averageGenomeNodes, 2);
+        processPlot(row++, &DataPointCollection::averageGenomeCells, 2);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Average genome size");
 
@@ -519,7 +519,7 @@ void _StatisticsWindow::onSaveStatistics()
                 return;
             }
 
-            file << "time step";
+            file << "Time step";
             auto writeLabelAllColors = [&file](auto const& name) {
                 for (int i = 0; i < MAX_COLORS; ++i) {
                     file << ", " << name << " (color " << i << ")";
@@ -531,6 +531,7 @@ void _StatisticsWindow::onSaveStatistics()
             writeLabelAllColors("Cell connections");
             writeLabelAllColors("Energy particles");
             writeLabelAllColors("Total energy");
+            writeLabelAllColors("Genome size");
             writeLabelAllColors("Created cells");
             writeLabelAllColors("Attacks");
             writeLabelAllColors("Muscle activities");
@@ -551,7 +552,7 @@ void _StatisticsWindow::onSaveStatistics()
             };
             auto writeDoubleValueAllColors = [&file](DataPoint const& dataPoint) {
                 for (int i = 0; i < MAX_COLORS; ++i) {
-                    file << ", " << StringHelper::format(toFloat(dataPoint.values[i]), 8);
+                    file << ", " << dataPoint.values[i];
                 }
             };
             for (auto const& dataPointCollection : _longtermStatistics.dataPointCollectionHistory) {
@@ -562,11 +563,12 @@ void _StatisticsWindow::onSaveStatistics()
                 writeIntValueAllColors(dataPointCollection.numConnections);
                 writeIntValueAllColors(dataPointCollection.numParticles);
                 writeDoubleValueAllColors(dataPointCollection.totalEnergy);
+                writeDoubleValueAllColors(dataPointCollection.averageGenomeCells);
                 writeDoubleValueAllColors(dataPointCollection.numCreatedCells);
                 writeDoubleValueAllColors(dataPointCollection.numAttacks);
                 writeDoubleValueAllColors(dataPointCollection.numMuscleActivities);
-                writeDoubleValueAllColors(dataPointCollection.numDefenderActivities);
                 writeDoubleValueAllColors(dataPointCollection.numTransmitterActivities);
+                writeDoubleValueAllColors(dataPointCollection.numDefenderActivities);
                 writeDoubleValueAllColors(dataPointCollection.numInjectionActivities);
                 writeDoubleValueAllColors(dataPointCollection.numCompletedInjections);
                 writeDoubleValueAllColors(dataPointCollection.numNervePulses);

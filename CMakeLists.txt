@@ -44,6 +44,7 @@ add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:--Werror=all-warnings>)
 
 add_executable(alien)
 add_executable(tests)
+add_executable(cli)
 
 find_package(CUDAToolkit)
 find_package(Boost REQUIRED)
@@ -57,6 +58,7 @@ find_package(glad CONFIG REQUIRED)
 find_package(GTest REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(CLI11 CONFIG REQUIRED)
 
 add_subdirectory(external/ImFileDialog)
 add_subdirectory(source/Base)
@@ -65,6 +67,7 @@ add_subdirectory(source/EngineImpl)
 add_subdirectory(source/EngineInterface)
 add_subdirectory(source/EngineTests)
 add_subdirectory(source/Gui)
+add_subdirectory(source/Cli)
 
 # Copy resources to the build location
 add_custom_command(

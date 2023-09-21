@@ -68,6 +68,9 @@
     {
       "name": "openssl",
       "version>=": "1.1.1l"
+    },
+    {
+      "name": "cli11"
     }
   ],
   "builtin-baseline": "d48ac9aa527620d43fb3b3327d0b9e054de203c2"
