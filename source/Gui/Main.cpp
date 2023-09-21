@@ -17,7 +17,7 @@ namespace
 {
     bool isInDebugMode(int argc, char** argv)
     {
-        return argc == 2 && strcmp(argv[1], "-debug") == 0;
+        return argc == 2 && strcmp(argv[1], "-d") == 0;
     }
 }
 
