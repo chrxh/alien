@@ -315,11 +315,13 @@ void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
     _cudaSimulation->changeInspectedSimulationData(dataTO);
 }
 
-void EngineWorker::calcSingleTimestep()
+void EngineWorker::calcTimesteps(uint64_t timesteps)
 {
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->calcTimestep();
+    for (uint64_t i = 0; i < timesteps; ++i) {
+        _cudaSimulation->calcTimestep();
+    }
     updateStatistics();
 }
 
@@ -562,7 +564,7 @@ void EngineWorker::syncSimulationWithRenderingIfDesired()
 {
     if (_syncSimulationWithRendering && _isSimulationRunning) {
         for (int i = 0; i < _syncSimulationWithRenderingRatio; ++i) {
-            calcSingleTimestep();
+            calcTimesteps(1);
             measureTPS();
             slowdownTPS();
         }

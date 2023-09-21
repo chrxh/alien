@@ -70,7 +70,7 @@ public:
     void changeCell(CellDescription const& changedCell);
     void changeParticle(ParticleDescription const& changedParticle);
 
-    void calcSingleTimestep();
+    void calcTimesteps(uint64_t timesteps);
     void applyCataclysm(int power);
 
     void beginShutdown(); //caller should wait for termination of thread

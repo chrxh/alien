@@ -46,7 +46,7 @@ TEST_F(AttackerTests, nothingFound)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -81,7 +81,7 @@ TEST_F(AttackerTests, successNoTransmitter)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
 
@@ -122,7 +122,7 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -166,7 +166,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -208,7 +208,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -251,7 +251,7 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -291,7 +291,7 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -332,7 +332,7 @@ TEST_F(AttackerTests, successTwoTargets)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
 

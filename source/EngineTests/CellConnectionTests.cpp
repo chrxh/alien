@@ -25,7 +25,7 @@ TEST_F(CellConnectionTests, decay)
 
     _simController->setSimulationData(origData);
     for (int i = 0; i < 1000; ++i) {
-        _simController->calcSingleTimestep();
+        _simController->calcTimesteps(1);
     }
 
     auto data = _simController->getSimulationData();

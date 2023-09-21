@@ -41,7 +41,7 @@ public:
     __inline__ __device__ void addEnergy(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.totalEnergy[color], valueToAdd); }
     __inline__ __device__ void addNumGenomeNodes(int color, uint64_t valueToAdd)
     {
-        alienAtomicAdd64(&_data->timeline.timestep.numGenomeNodes[color], valueToAdd);
+        alienAtomicAdd64(&_data->timeline.timestep.numGenomeCells[color], valueToAdd);
     }
     __inline__ __device__ void halveNumConnections()
     {

@@ -169,9 +169,9 @@ void _SimulationControllerImpl::changeParticle(ParticleDescription const& change
     _worker.changeParticle(changedParticle);
 }
 
-void _SimulationControllerImpl::calcSingleTimestep()
+void _SimulationControllerImpl::calcTimesteps(uint64_t timesteps)
 {
-    _worker.calcSingleTimestep();
+    _worker.calcTimesteps(timesteps);
     _selectionNeedsUpdate = true;
 }
 
