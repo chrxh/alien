@@ -104,7 +104,7 @@ int main(int argc, char** argv)
         CLI11_PARSE(app, argc, argv);
 
         //read input
-        std::cout << "Reading simulation" << std::endl;
+        std::cout << "Reading input" << std::endl;
         if (inputFilename.empty()) {
             std::cout << "No input file given." << std::endl;
             return 1;
@@ -116,13 +116,19 @@ int main(int argc, char** argv)
         }
 
         //run simulation
-        std::cout << "Run simulation" << std::endl;
+        auto startTimepoint = std::chrono::steady_clock::now();
+
         auto simController = std::make_shared<_SimulationControllerImpl>();
         simController->newSimulation(simData.auxiliaryData.timestep, simData.auxiliaryData.generalSettings, simData.auxiliaryData.simulationParameters);
         simController->setClusteredSimulationData(simData.mainData);
-        for (int i = 0; i < timesteps; ++i) {
-            simController->calcSingleTimestep();
-        }
+
+        std::cout << "Use " << simController->getGpuName() << std::endl;
+        std::cout << "Start simulation" << std::endl;
+        simController->calcTimesteps(timesteps);
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint).count();
+        auto tps = ms != 0 ? 1000.0f * toFloat(timesteps) / toFloat(ms) : 0.0f; 
+        std::cout << "Simulation finished: " << StringHelper::format(ms) << " ms, " << tps << " TPS" << std::endl;
+        
 
         //write output simulation file
         std::cout << "Writing output" << std::endl;

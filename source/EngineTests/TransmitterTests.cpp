@@ -53,7 +53,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
 
@@ -101,7 +101,7 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardActivity)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
 
@@ -147,7 +147,7 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
 
@@ -185,7 +185,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
 
@@ -230,7 +230,7 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
 
@@ -268,7 +268,7 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
 

@@ -53,7 +53,7 @@ TEST_F(InjectorTests, nothingFound)
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 6 * 4; ++i) {
-        _simController->calcSingleTimestep();
+        _simController->calcTimesteps(1);
     }
 
     auto actualData = _simController->getSimulationData();
@@ -94,7 +94,7 @@ TEST_F(InjectorTests, matchButNoInjection)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualCell = getCell(actualData, 1);
@@ -136,7 +136,7 @@ TEST_F(InjectorTests, injection)
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 1 + 6*3; ++i) {
-        _simController->calcSingleTimestep();
+        _simController->calcTimesteps(1);
     }
 
     auto actualData = _simController->getSimulationData();
@@ -179,7 +179,7 @@ TEST_F(InjectorTests, injectOnlyUnderConstruction_failed)
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 1 + 6 * 3; ++i) {
-        _simController->calcSingleTimestep();
+        _simController->calcTimesteps(1);
     }
 
     auto actualData = _simController->getSimulationData();
@@ -225,7 +225,7 @@ TEST_F(InjectorTests, injectOnlyUnderConstruction_success)
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 1 + 6 * 3; ++i) {
-        _simController->calcSingleTimestep();
+        _simController->calcTimesteps(1);
     }
 
     auto actualData = _simController->getSimulationData();

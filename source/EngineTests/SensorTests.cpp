@@ -46,7 +46,7 @@ TEST_F(SensorTests, scanNeighborhood_noActivity)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -76,7 +76,7 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -107,7 +107,7 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
     data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -138,7 +138,7 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
     data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -169,7 +169,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
     data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -205,7 +205,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
     data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -241,7 +241,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
     data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -277,7 +277,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
     data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({190.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -314,7 +314,7 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
     data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 200.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -350,7 +350,7 @@ TEST_F(SensorTests, scanByAngle_found)
     data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
@@ -384,7 +384,7 @@ TEST_F(SensorTests, scanByAngle_wrongAngle)
     data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
