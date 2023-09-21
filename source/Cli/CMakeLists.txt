@@ -17,6 +17,7 @@ target_link_libraries(cli glad::glad)
 target_link_libraries(cli GTest::GTest GTest::Main)
 target_link_libraries(cli glad::glad)
 target_link_libraries(cli CLI11::CLI11)
+target_link_libraries(cli ZLIB::ZLIB)
 
 if (MSVC)
     target_compile_options(cli PRIVATE "/MP")
