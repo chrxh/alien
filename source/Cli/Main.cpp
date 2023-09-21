@@ -127,7 +127,8 @@ int main(int argc, char** argv)
         simController->calcTimesteps(timesteps);
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint).count();
         auto tps = ms != 0 ? 1000.0f * toFloat(timesteps) / toFloat(ms) : 0.0f; 
-        std::cout << "Simulation finished: " << StringHelper::format(ms) << " ms, " << tps << " TPS" << std::endl;
+        std::cout << "Simulation finished: " << StringHelper::format(timesteps) << " time steps, " << StringHelper::format(ms) << " ms, "
+                  << StringHelper::format(tps, 1) << " TPS" << std::endl;
         
 
         //write output simulation file

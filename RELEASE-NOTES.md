@@ -1,5 +1,13 @@
 # Release notes
 
+## [4.2.0] - 2023-09-21
+### Added
+- command-line interface for running simulation files for a specified number of time steps
+- statistics can be exported with CLI
+
+### Fixed
+- csv-file in statistics export corrected
+
 ## [4.1.1] - 2023-09-16
 ### Added
 - show confirmation dialog for deleting a simulation
