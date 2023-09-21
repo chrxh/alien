@@ -24,7 +24,7 @@ struct DataPointCollection
     DataPoint numViruses;
     DataPoint numConnections;
     DataPoint numParticles;
-    DataPoint averageGenomeNodes;
+    DataPoint averageGenomeCells;
     DataPoint totalEnergy;
 
     DataPoint numCreatedCells;

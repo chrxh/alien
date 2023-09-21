@@ -34,7 +34,7 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
     result.numViruses = numViruses + other.numViruses;
     result.numConnections = numConnections + other.numConnections;
     result.numParticles = numParticles + other.numParticles;
-    result.averageGenomeNodes = averageGenomeNodes + other.averageGenomeNodes;
+    result.averageGenomeCells = averageGenomeCells + other.averageGenomeCells;
     result.totalEnergy = totalEnergy + other.totalEnergy;
     result.numCreatedCells = numCreatedCells + other.numCreatedCells;
     result.numAttacks = numAttacks + other.numAttacks;
@@ -59,7 +59,7 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
     result.numViruses = numViruses / divisor;
     result.numConnections = numConnections / divisor;
     result.numParticles = numParticles / divisor;
-    result.averageGenomeNodes = averageGenomeNodes / divisor;
+    result.averageGenomeCells = averageGenomeCells / divisor;
     result.totalEnergy = totalEnergy / divisor;
     result.numCreatedCells = numCreatedCells / divisor;
     result.numAttacks = numAttacks / divisor;
@@ -149,7 +149,7 @@ namespace
         result.numViruses = getDataPointForTimestepProperty(data.timestep.numViruses);
         result.numConnections = getDataPointForTimestepProperty(data.timestep.numConnections);
         result.numParticles = getDataPointForTimestepProperty(data.timestep.numParticles);
-        result.averageGenomeNodes = getDataPointForAverageGenomeNodes(data.timestep.numGenomeNodes, data.timestep.numSelfReplicators);
+        result.averageGenomeCells = getDataPointForAverageGenomeNodes(data.timestep.numGenomeCells, data.timestep.numSelfReplicators);
         result.totalEnergy = getDataPointForTimestepProperty(data.timestep.totalEnergy);
 
         auto deltaTimesteps = lastTimestep ? toDouble(timestep) - toDouble(*lastTimestep) : 1.0;
