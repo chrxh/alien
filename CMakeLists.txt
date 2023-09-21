@@ -58,7 +58,7 @@ find_package(glad CONFIG REQUIRED)
 find_package(GTest REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
-find_package(cli11 REQUIRED)
+find_package(CLI11 CONFIG REQUIRED)
 
 add_subdirectory(external/ImFileDialog)
 add_subdirectory(source/Base)
