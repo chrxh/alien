@@ -94,6 +94,16 @@ cmake --build . --config Release -j8
 ```
 If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
 
+# ⌨️ Command-line interface
+
+This repository also contains a CLI for ALIEN. It can be used to run simulations without using a GUI. This is useful for performance measurements as well as for automatic execution and evaluation of simulations for different parameters.
+The CLI takes the simulation file, along with its parameters and the number of time steps, as input. It then provides the resulting simulation file and the statistics (as a CSV file) as output.
+For example,
+```
+.\cli.exe -i example.sim -o output.sim -t 1000 -s statistics.csv
+```
+runs the simulation file `example.sim` for 1000 time steps.
+
 # 🌌 Screenshots
 #### Different plant-like populations around a radiation source
 ![Screenshot1](https://user-images.githubusercontent.com/73127001/229311601-839649a6-c60c-4723-99b3-26086e3e4340.jpg)
@@ -148,6 +158,7 @@ The following external libraries are used:
 - [googletest](https://github.com/google/googletest)
 - [vcpkg](https://vcpkg.io/en/index.html)
 - [WinReg](https://github.com/GiovanniDicanio/WinReg)
+- [CLI11](https://github.com/CLIUtils/CLI11)
 
 Free icons and icon font:
   - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
