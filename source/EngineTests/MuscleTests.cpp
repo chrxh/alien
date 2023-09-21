@@ -49,7 +49,7 @@ TEST_F(MuscleTests, doNothing)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
@@ -85,7 +85,7 @@ TEST_F(MuscleTests, moveForward)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
@@ -121,7 +121,7 @@ TEST_F(MuscleTests, moveBackward)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
@@ -165,7 +165,7 @@ TEST_F(MuscleTests, multipleMovementDirections)
     data.addConnection(1, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
@@ -198,7 +198,7 @@ TEST_F(MuscleTests, expansion)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
@@ -235,7 +235,7 @@ TEST_F(MuscleTests, expansionNotPossible)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
@@ -268,7 +268,7 @@ TEST_F(MuscleTests, contraction)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
@@ -311,7 +311,7 @@ TEST_F(MuscleTests, multipleContraction)
     data.addConnection(1, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
@@ -346,7 +346,7 @@ TEST_F(MuscleTests, contractionNotPossible)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
@@ -380,7 +380,7 @@ TEST_F(MuscleTests, bendClockwise)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 2);
@@ -421,7 +421,7 @@ TEST_F(MuscleTests, bendCounterClockwise)
     data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 2);

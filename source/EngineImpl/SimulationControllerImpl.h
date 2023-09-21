@@ -63,7 +63,7 @@ public:
     void changeCell(CellDescription const& changedCell) override;
     void changeParticle(ParticleDescription const& changedParticle) override;
 
-    void calcSingleTimestep() override;
+    void calcTimesteps(uint64_t timesteps) override;
     void runSimulation() override;
     void pauseSimulation() override;
     void applyCataclysm(int power) override;

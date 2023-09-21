@@ -27,7 +27,7 @@ TEST_F(NeuronTests, bias)
     auto data = DataDescription().addCells({CellDescription().setId(1).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualCellById = getCellById(actualData);
@@ -58,7 +58,7 @@ TEST_F(NeuronTests, weight)
     data.addConnection(1, 2);
 
     _simController->setSimulationData(data);
-    _simController->calcSingleTimestep();
+    _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
     auto actualCellById = getCellById(actualData);

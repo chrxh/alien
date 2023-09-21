@@ -115,9 +115,10 @@ void _CudaSimulationFacade::calcTimestep()
 
     Settings settings = [this] {
         std::lock_guard lock(_mutexForSimulationParameters);
-        _simulationKernels->calcSimulationParametersForNextTimestep(_settings);
-        CHECK_FOR_CUDA_ERROR(
-            cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+        if (_simulationKernels->calcSimulationParametersForNextTimestep(_settings)) {
+            CHECK_FOR_CUDA_ERROR(
+                cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+        }
         return _settings;
     }();
 
