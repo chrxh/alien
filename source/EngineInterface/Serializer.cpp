@@ -19,13 +19,14 @@
 #include <zstr.hpp>
 
 #include "Base/Resources.h"
+#include "Base/VersionChecker.h"
+
 #include "Descriptions.h"
 #include "SimulationParameters.h"
 #include "AuxiliaryDataParser.h"
 #include "GenomeConstants.h"
 #include "GenomeDescriptions.h"
 #include "GenomeDescriptionConverter.h"
-#include "Gui/VersionChecker.h"
 
 #define SPLIT_SERIALIZATION(Classname) \
     template <class Archive> \

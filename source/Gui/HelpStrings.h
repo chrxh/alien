@@ -18,7 +18,7 @@ namespace Const
         "with the highest compute capability.\n\n6) If you possess both integrated and dedicated graphics cards, please ensure that the alien-executable is "
         "configured to use your high-performance graphics card. On Windows you need to access the 'Graphics settings,' add 'alien.exe' to the list, click "
         "'Options,' and choose 'High performance'.\n\nIf these conditions are not met, ALIEN may crash unexpectedly.\n\n"
-        "If the conditions are met and the error still occurs, please start ALIEN with the command line parameter '-debug', try to reproduce the error and "
+        "If the conditions are met and the error still occurs, please start ALIEN with the command line parameter '-d', try to reproduce the error and "
         "then create a GitHub issue on https://github.com/chrxh/alien/issues where the log.txt is attached.";
 
     std::string const NeuronTooltip =
