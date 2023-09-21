@@ -100,8 +100,8 @@ int main(int argc, char** argv)
         int timesteps = 0;
         app.add_option(
             "-i", inputFilename, "Specifies the name of the input file for the simulation to run. The corresponding .settings.json should also be available.");
-        app.add_option("-o", outputFilename, "Specifies the name of the output file for the simulation to run.");
-        app.add_option("-t", timesteps, "Number of time steps to calculate");
+        app.add_option("-o", outputFilename, "Specifies the name of the output file for the simulation.");
+        app.add_option("-t", timesteps, "The number of time steps to be calculated.");
         app.add_option("-s", statisticsFilename, "Specifies the name of the csv-file containing the statistics.");
         CLI11_PARSE(app, argc, argv);
 
