@@ -519,7 +519,7 @@ void _StatisticsWindow::onSaveStatistics()
                 return;
             }
 
-            file << "time step";
+            file << "Time step";
             auto writeLabelAllColors = [&file](auto const& name) {
                 for (int i = 0; i < MAX_COLORS; ++i) {
                     file << ", " << name << " (color " << i << ")";
@@ -552,7 +552,7 @@ void _StatisticsWindow::onSaveStatistics()
             };
             auto writeDoubleValueAllColors = [&file](DataPoint const& dataPoint) {
                 for (int i = 0; i < MAX_COLORS; ++i) {
-                    file << ", " << StringHelper::format(toFloat(dataPoint.values[i]), 8);
+                    file << ", " << dataPoint.values[i];
                 }
             };
             for (auto const& dataPointCollection : _longtermStatistics.dataPointCollectionHistory) {

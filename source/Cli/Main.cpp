@@ -27,6 +27,7 @@ namespace
                 file << ", " << name << " (color " << i << ")";
             }
         };
+        file << "Time step";
         writeLabelAllColors("Cells");
         writeLabelAllColors("Self-replicators");
         writeLabelAllColors("Viruses");
@@ -59,9 +60,10 @@ namespace
         };
         auto writeFloatValueAllColors = [&file](ColorVector<float> const& values) {
             for (int i = 0; i < MAX_COLORS; ++i) {
-                file << ", " << StringHelper::format(values[i], 8);
+                file << ", " << values[i];
             }
         };
+        file << simController->getCurrentTimestep();
         writeIntValueAllColors(statistics.timeline.timestep.numCells);
         writeIntValueAllColors(statistics.timeline.timestep.numSelfReplicators);
         writeIntValueAllColors(statistics.timeline.timestep.numViruses);
@@ -122,7 +124,7 @@ int main(int argc, char** argv)
         simController->newSimulation(simData.auxiliaryData.timestep, simData.auxiliaryData.generalSettings, simData.auxiliaryData.simulationParameters);
         simController->setClusteredSimulationData(simData.mainData);
 
-        std::cout << "Use " << simController->getGpuName() << std::endl;
+        std::cout << "Device: " << simController->getGpuName() << std::endl;
         std::cout << "Start simulation" << std::endl;
         simController->calcTimesteps(timesteps);
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint).count();
