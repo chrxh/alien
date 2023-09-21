@@ -158,6 +158,7 @@ The following external libraries are used:
 - [googletest](https://github.com/google/googletest)
 - [vcpkg](https://vcpkg.io/en/index.html)
 - [WinReg](https://github.com/GiovanniDicanio/WinReg)
+- [CLI11](https://github.com/CLIUtils/CLI11)
 
 Free icons and icon font:
   - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
