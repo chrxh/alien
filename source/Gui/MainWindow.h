@@ -6,7 +6,7 @@
 class _MainWindow
 {
 public:
-    _MainWindow(SimulationController const& simController, SimpleLogger const& logger);
+    _MainWindow(SimulationController const& simController, GuiLogger const& logger);
     void mainLoop();
     void shutdown();
 
@@ -35,7 +35,7 @@ private:
     void reset();
 
     GLFWwindow* _window;
-    SimpleLogger _logger;
+    GuiLogger _logger;
 
     Viewport _viewport;
 

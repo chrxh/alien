@@ -7,10 +7,10 @@
 #include "Base/GlobalSettings.h"
 
 #include "StyleRepository.h"
-#include "SimpleLogger.h"
+#include "GuiLogger.h"
 #include "AlienImGui.h"
 
-_LogWindow::_LogWindow(SimpleLogger const& logger)
+_LogWindow::_LogWindow(GuiLogger const& logger)
     : _AlienWindow("Log", "windows.log", false)
     , _logger(logger)
 {

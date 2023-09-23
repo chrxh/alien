@@ -58,11 +58,8 @@ using MassOperationsDialog = std::shared_ptr<_MassOperationsDialog>;
 class _LogWindow;
 using LogWindow = std::shared_ptr<_LogWindow>;
 
-class _SimpleLogger;
-using SimpleLogger = std::shared_ptr<_SimpleLogger>;
-
-class _FileLogger;
-using FileLogger = std::shared_ptr<_FileLogger>;
+class _GuiLogger;
+using GuiLogger = std::shared_ptr<_GuiLogger>;
 
 class _UiController;
 using UiController = std::shared_ptr<_UiController>;
