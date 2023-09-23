@@ -12,6 +12,8 @@ public:
     _GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController, Viewport const& viewport);
     ~_GenomeEditorWindow() override;
 
+    void registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
+
     void openTab(GenomeDescription const& genome);
     GenomeDescription const& getCurrentGenome() const;
 
@@ -35,6 +37,7 @@ private:
 
     void onOpenGenome();
     void onSaveGenome();
+    void onUploadGenome();
     void onAddNode();
     void onDeleteNode();
     void onNodeDecreaseSequenceNumber();
@@ -49,10 +52,6 @@ private:
     void scheduleAddTab(GenomeDescription const& genome);
 
     void updateGeometry(GenomeDescription& genome, ConstructionShape shape);
-
-    EditorModel _editorModel;
-    SimulationController _simController;
-    Viewport _viewport;
 
     float _previewHeight = 0;
 
@@ -71,4 +70,8 @@ private:
     std::optional<TabData> _tabToAdd;
     std::optional<bool> _expandNodes;
 
+    EditorModel _editorModel;
+    SimulationController _simController;
+    Viewport _viewport;
+    UploadSimulationDialogWeakPtr _uploadSimulationDialog;
 };

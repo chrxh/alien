@@ -221,13 +221,7 @@ void _BrowserWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_SHARE_ALT)) {
-        if (_networkController->getLoggedInUserName()) {
-            if (auto uploadSimulationDialog = _uploadSimulationDialog.lock()) {
-                uploadSimulationDialog->open(_selectedDataType);
-            }
-        } else {
-            _loginDialog.lock()->open();
-        }
+        _uploadSimulationDialog.lock()->open(_selectedDataType);
     }
     std::string dataType = _selectedDataType == DataType_Simulation
         ? "simulation"

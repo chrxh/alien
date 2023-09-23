@@ -9,6 +9,7 @@ class _UploadSimulationDialog : public _AlienDialog
 public:
     _UploadSimulationDialog(
         BrowserWindow const& browserWindow,
+        LoginDialog const& loginDialog,
         SimulationController const& simController,
         NetworkController const& networkController,
         Viewport const& viewport,
@@ -32,6 +33,7 @@ private:
     DataType _dataType = DataType_Simulation;
 
     BrowserWindow _browserWindow;
+    LoginDialog _loginDialog;
     SimulationController _simController;
     Viewport _viewport;
     NetworkController _networkController;
