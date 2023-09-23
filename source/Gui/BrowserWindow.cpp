@@ -741,8 +741,8 @@ namespace
 {
     std::vector<std::string> splitString(const std::string& str)
     {
-        std::vector<std::string> tokens;
-        boost::algorithm::split_regex(tokens, str, boost::regex("(\r\n)+"));
+        std::vector<std::string> tokens; 
+        boost::algorithm::split_regex(tokens, str, boost::regex("(\n)+"));
         return tokens;
     }
 }

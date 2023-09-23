@@ -8,7 +8,7 @@
 - cli: file logger added (creates log.txt)
 
 ### Fixed
-- layout problem in delete user dialog fixed
+- gui/browser: layout problem for multiline descriptions
 
 ## [4.2.0] - 2023-09-21
 ### Added
