@@ -156,7 +156,8 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simController, _browserWindow, _networkController);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog, _networkController);
     _loginDialog = std::make_shared<_LoginDialog>(_simController, _browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog, _networkController);
-    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController, _viewport, _editorController->getGenomeEditorWindow());
+    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(
+        _browserWindow, _loginDialog, _simController, _networkController, _viewport, _editorController->getGenomeEditorWindow());
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_viewport, _simController);
@@ -165,6 +166,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog);
     _activateUserDialog->registerCyclicReferences(_createUserDialog);
+    _editorController->registerCyclicReferences(_uploadSimulationDialog);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;

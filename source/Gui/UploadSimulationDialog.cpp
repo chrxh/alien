@@ -16,6 +16,7 @@
 #include "OverlayMessageController.h"
 #include "Viewport.h"
 #include "GenomeEditorWindow.h"
+#include "LoginDialog.h"
 
 namespace
 {
@@ -29,14 +30,16 @@ namespace
 
 _UploadSimulationDialog::_UploadSimulationDialog(
     BrowserWindow const& browserWindow,
+    LoginDialog const& loginDialog,
     SimulationController const& simController,
     NetworkController const& networkController,
     Viewport const& viewport,
     GenomeEditorWindow const& genomeEditorWindow)
     : _AlienDialog("")
-    ,_simController(simController)
+    , _simController(simController)
     , _networkController(networkController)
     , _browserWindow(browserWindow)
+    , _loginDialog(loginDialog)
     , _viewport(viewport)
     , _genomeEditorWindow(genomeEditorWindow)
 {
@@ -54,9 +57,13 @@ _UploadSimulationDialog::~_UploadSimulationDialog()
 
 void _UploadSimulationDialog::open(DataType dataType)
 {
-    changeTitle("Upload " + BrowserDataTypeToLowerString.at(dataType));
-    _dataType = dataType;
-    _AlienDialog::open();
+    if (_networkController->getLoggedInUserName()) {
+        changeTitle("Upload " + BrowserDataTypeToLowerString.at(dataType));
+        _dataType = dataType;
+        _AlienDialog::open();
+    } else {
+        _loginDialog->open();
+    }
 }
 
 void _UploadSimulationDialog::processIntern()

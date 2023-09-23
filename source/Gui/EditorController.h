@@ -10,6 +10,8 @@ class _EditorController
 public:
     _EditorController(SimulationController const& simController, Viewport const& viewport);
 
+    void registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
+
     bool isOn() const;
     void setOn(bool value);
 

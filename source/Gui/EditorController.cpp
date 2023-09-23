@@ -34,6 +34,11 @@ _EditorController::_EditorController(SimulationController const& simController, 
     _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simController, _viewport);
 }
 
+void _EditorController::registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog)
+{
+    _genomeEditorWindow->registerCyclicReferences(uploadSimulationDialog);
+}
+
 bool _EditorController::isOn() const
 {
     return _on;
