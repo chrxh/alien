@@ -424,14 +424,14 @@ void _MainWindow::processMenubar()
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
-            if (ImGui::MenuItem("Upload genome", "")) {
+            if (ImGui::MenuItem("Upload genome", "ALT+Q")) {
                 _uploadSimulationDialog->open(DataType_Genome);
             }
             ImGui::EndDisabled();
 
             ImGui::Separator();
             ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
-            if (ImGui::MenuItem("Delete", "ALT+J")) {
+            if (ImGui::MenuItem("Delete user", "ALT+J")) {
                 _deleteUserDialog->open();
             }
             ImGui::EndDisabled();
@@ -610,6 +610,9 @@ void _MainWindow::processMenubar()
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_D) && _networkController->getLoggedInUserName()) {
             _uploadSimulationDialog->open(DataType_Simulation);
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_Q) && _networkController->getLoggedInUserName()) {
+            _uploadSimulationDialog->open(DataType_Genome);
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_J) && _networkController->getLoggedInUserName()) {
             _deleteUserDialog->open();
