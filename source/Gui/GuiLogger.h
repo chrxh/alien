@@ -3,11 +3,11 @@
 #include "Base/LoggingService.h"
 #include "Definitions.h"
 
-class _SimpleLogger : public LoggingCallBack
+class _GuiLogger : public LoggingCallBack
 {
 public:
-    _SimpleLogger();
-    virtual ~_SimpleLogger();
+    _GuiLogger();
+    virtual ~_GuiLogger();
 
     std::vector<std::string> const& getMessages(Priority minPriority) const;
 

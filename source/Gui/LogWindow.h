@@ -6,7 +6,7 @@
 class _LogWindow : public _AlienWindow
 {
 public:
-    _LogWindow(SimpleLogger const& logger);
+    _LogWindow(GuiLogger const& logger);
     ~_LogWindow();
 
 private:
@@ -14,5 +14,5 @@ private:
 
     bool _verbose = false;
 
-    SimpleLogger _logger;
+    GuiLogger _logger;
 };

@@ -39,7 +39,7 @@
 #include "AboutDialog.h"
 #include "MassOperationsDialog.h"
 #include "LogWindow.h"
-#include "SimpleLogger.h"
+#include "GuiLogger.h"
 #include "UiController.h"
 #include "AutosaveController.h"
 #include "GettingStartedWindow.h"
@@ -90,7 +90,7 @@ namespace
     }
 }
 
-_MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger const& logger)
+_MainWindow::_MainWindow(SimulationController const& simController, GuiLogger const& logger)
 {
     _logger = logger;
     _simController = simController;
