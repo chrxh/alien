@@ -7,6 +7,7 @@
 #include "Base/LoggingService.h"
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
+#include "Base/FileLogger.h"
 #include "EngineImpl/SimulationControllerImpl.h"
 #include "EngineInterface/Serializer.h"
 
@@ -91,6 +92,8 @@ namespace
 int main(int argc, char** argv)
 {
     try {
+        FileLogger fileLogger = std::make_shared<_FileLogger>();
+
         CLI::App app{"Command-line interface for ALIEN v" + Const::ProgramVersion};
 
         //parse command line arguments

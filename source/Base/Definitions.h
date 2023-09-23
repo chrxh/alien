@@ -20,6 +20,9 @@ using std::int64_t;
 using std::uint32_t;
 using std::uint64_t;
 
+class _FileLogger;
+using FileLogger = std::shared_ptr<_FileLogger>;
+
 constexpr float NEAR_ZERO = 1.0e-4f;
 
 template <typename T>

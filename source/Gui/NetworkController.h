@@ -52,7 +52,8 @@ public:
         IntVector2D const& size,
         int particles,
         std::string const& data,
-        std::string const& auxiliaryData);
+        std::string const& auxiliaryData,
+        RemoteDataType type);
     bool downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string const& simId);
     bool deleteSimulation(std::string const& simId);
 

@@ -19,6 +19,7 @@
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
+#include "DelayedExecutionController.h"
 #include "EditorModel.h"
 #include "GenericFileDialogs.h"
 #include "MessageDialog.h"
@@ -26,6 +27,7 @@
 #include "StyleRepository.h"
 #include "Viewport.h"
 #include "HelpStrings.h"
+#include "UploadSimulationDialog.h"
 
 namespace
 {
@@ -58,9 +60,15 @@ _GenomeEditorWindow::~_GenomeEditorWindow()
     GlobalSettings::getInstance().setFloatState("windows.genome editor.preview height", _previewHeight);
 }
 
+void _GenomeEditorWindow::registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog)
+{
+    _uploadSimulationDialog = uploadSimulationDialog;
+}
+
 void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
 {
-    setOn(true);
+    setOn(false);
+    delayedExecution([this] { setOn(true); });
     if (_tabDatas.size() == 1 && _tabDatas.front().genome.cells.empty()) {
         _tabDatas.clear();
     }
@@ -121,6 +129,12 @@ void _GenomeEditorWindow::processToolbar()
         onSaveGenome();
     }
     AlienImGui::Tooltip("Save genome to file");
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_SHARE_ALT)) {
+        onUploadGenome();
+    }
+    AlienImGui::Tooltip("Share your genome with other users:\nYour current genome will be uploaded to the server and made visible in the browser.");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
@@ -790,6 +804,11 @@ void _GenomeEditorWindow::onSaveGenome()
                 MessageDialog::getInstance().information("Save genome", "The selected file could not be saved.");
             }
         });
+}
+
+void _GenomeEditorWindow::onUploadGenome()
+{
+    _uploadSimulationDialog.lock()->open(DataType_Genome);
 }
 
 void _GenomeEditorWindow::onAddNode()

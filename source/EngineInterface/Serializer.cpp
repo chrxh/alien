@@ -764,7 +764,9 @@ bool Serializer::serializeGenomeToFile(std::string const& filename, std::vector<
     try {
         //wrap constructor cell around genome
         ClusteredDataDescription data;
-        data.addCluster(ClusterDescription().addCell(CellDescription().setCellFunction(ConstructorDescription().setGenome(genome))));
+        if (!wrapGenome(data, genome)) {
+            return false;
+        }
 
         zstr::ofstream stream(filename, std::ios::binary);
         if (!stream) {
@@ -781,24 +783,57 @@ bool Serializer::serializeGenomeToFile(std::string const& filename, std::vector<
 bool Serializer::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::string const& filename)
 {
     try {
-        //constructor cell is wrapped around genome
         ClusteredDataDescription data;
         if (!deserializeDataDescription(data, filename)) {
             return false;
         }
-        if (data.clusters.size() != 1) {
+        if (!unwrapGenome(genome, data)) {
             return false;
         }
-        auto cluster = data.clusters.front();
-        if (cluster.cells.size() != 1) {
-            return false;
-        }
-        auto cell = cluster.cells.front();
-        if (cell.getCellFunctionType() != CellFunction_Constructor) {
-            return false;
-        }
-        genome = std::get<ConstructorDescription>(*cell.cellFunction).genome;
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
 
+bool Serializer::serializeGenomeToString(std::string& output, std::vector<uint8_t> const& input)
+{
+    try {
+        std::stringstream stdStream;
+        zstr::ostream stream(stdStream, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+
+        ClusteredDataDescription data;
+        if (!wrapGenome(data, input)) {
+            return false;
+        }
+
+        serializeDataDescription(data, stream);
+        stream.flush();
+        output = stdStream.str();
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool Serializer::deserializeGenomeFromString(std::vector<uint8_t>& output, std::string const& input)
+{
+    try {
+        std::stringstream stdStream(input);
+        zstr::istream stream(stdStream, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+
+        ClusteredDataDescription data;
+        deserializeDataDescription(data, stream);
+
+        if (!unwrapGenome(output, data)) {
+            return false;
+        }
         return true;
     } catch (...) {
         return false;
@@ -918,3 +953,27 @@ void Serializer::deserializeSimulationParameters(SimulationParameters& parameter
     parameters = AuxiliaryDataParser::decodeSimulationParameters(tree);
 }
 
+bool Serializer::wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input)
+{
+    output.clear();
+    output.addCluster(ClusterDescription().addCell(CellDescription().setCellFunction(ConstructorDescription().setGenome(input))));
+    return true;
+}
+
+
+bool Serializer::unwrapGenome(std::vector<uint8_t>& output, ClusteredDataDescription const& input)
+{
+    if (input.clusters.size() != 1) {
+        return false;
+    }
+    auto cluster = input.clusters.front();
+    if (cluster.cells.size() != 1) {
+        return false;
+    }
+    auto cell = cluster.cells.front();
+    if (cell.getCellFunctionType() != CellFunction_Constructor) {
+        return false;
+    }
+    output = std::get<ConstructorDescription>(*cell.cellFunction).genome;
+    return true;
+}

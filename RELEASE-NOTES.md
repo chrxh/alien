@@ -1,5 +1,15 @@
 # Release notes
 
+## [4.3.0] - 2023-09-23
+### Added
+- gui/browser: tab widget added to show the uploaded genomes and simulations from server
+- gui/browser: possibility to upload and download genomes
+- gui/genome editor: toolbar button added to upload current genome
+- cli: file logger added (creates log.txt)
+
+### Fixed
+- gui/browser: layout problem for multiline descriptions
+
 ## [4.2.0] - 2023-09-21
 ### Added
 - command-line interface for running simulation files for a specified number of time steps

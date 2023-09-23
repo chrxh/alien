@@ -31,11 +31,13 @@
     $settings = $_POST['settings'];
     $symbolMap = $_POST['symbolMap'];
     $size = strlen($content);
+    $type = array_key_exists("type", $_POST) ? $_POST['type'] : 0;
+
     if ($db->query("INSERT INTO
-                        simulation (ID, USER_ID, NAME, WIDTH, HEIGHT, PARTICLES, VERSION, DESCRIPTION, CONTENT, SETTINGS, SYMBOL_MAP, PICTURE, TIMESTAMP, SIZE)
+                        simulation (ID, USER_ID, NAME, WIDTH, HEIGHT, PARTICLES, VERSION, DESCRIPTION, CONTENT, SETTINGS, SYMBOL_MAP, PICTURE, TIMESTAMP, SIZE, TYPE)
                     VALUES
                         (NULL, {$obj->id}, '" . addslashes($simName) . "', $width, $height, $particles, '" . addslashes($version) . "', '"
-                        . addslashes($simDesc) . "', '" . addslashes($content) . "', '" . addslashes($settings) . "', '" . addslashes($symbolMap) . "', 'a', NULL, $size)")) {
+                        . addslashes($simDesc) . "', '" . addslashes($content) . "', '" . addslashes($settings) . "', '" . addslashes($symbolMap) . "', 'a', NULL, $size, $type)")) {
         $success = true;
     }
 
