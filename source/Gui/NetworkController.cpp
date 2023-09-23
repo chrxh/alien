@@ -410,7 +410,8 @@ bool _NetworkController::uploadSimulation(
     IntVector2D const& size,
     int particles,
     std::string const& mainData,
-    std::string const& auxiliaryData)
+    std::string const& auxiliaryData,
+    RemoteDataType type)
 {
     log(Priority::Important, "network: upload simulation with name='" + simulationName + "'");
 
@@ -429,6 +430,7 @@ bool _NetworkController::uploadSimulation(
         {"content", mainData, "", "application/octet-stream"},
         {"settings", auxiliaryData, "", ""},
         {"symbolMap", "", "", ""},
+        {"type", std::to_string(type), "", ""},
     };
 
     try {

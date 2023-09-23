@@ -16,7 +16,8 @@ public:
         NetworkController const& networkController,
         StatisticsWindow const& statisticsWindow,
         Viewport const& viewport,
-        TemporalControlWindow const& temporalControlWindow);
+        TemporalControlWindow const& temporalControlWindow,
+        EditorController const& editorController);
     ~_BrowserWindow();
 
     void registerCyclicReferences(LoginDialogWeakPtr const& loginDialog, UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
@@ -28,8 +29,9 @@ private:
 
     void processIntern() override;
 
-    void processSimulationTable();
-    void processUserTable();
+    void processSimulationList();
+    void processGenomeList();
+    void processUserList();
 
     void processStatus();
     void processFilter();
@@ -38,6 +40,8 @@ private:
     void processEmojiWindow();
     void processEmojiButton(int emojiType);
     void processEmojiList(RemoteSimulationData* sim);
+
+    void processActionButtons(RemoteSimulationData* simData);
 
     void processShortenedText(std::string const& text, bool bold = false);
     bool processActionButton(std::string const& text);
@@ -48,16 +52,17 @@ private:
     void sortSimulationList();
     void sortUserList();
 
-    void onDownloadSimulation(RemoteSimulationData* sim);
-    void onDeleteSimulation(RemoteSimulationData* sim);
-    void onToggleLike(RemoteSimulationData& sim, int emojiType);
+    void onDownloadItem(RemoteSimulationData* sim);
+    void onDeleteItem(RemoteSimulationData* sim);
+    void onToggleLike(RemoteSimulationData* sim, int emojiType);
 
     bool isLiked(std::string const& simId);
     std::string getUserNamesToEmojiType(std::string const& simId, int emojiType);
 
     void pushTextColor(RemoteSimulationData const& entry);
-    void calcFilteredSimulationDatas();
+    void calcFilteredSimulationAndGenomeLists();
 
+    DataType _selectedDataType = DataType_Simulation; 
     bool _scheduleRefresh = false;
     bool _scheduleSort = false;
     std::string _filter;
@@ -66,15 +71,20 @@ private:
     std::unordered_set<std::string> _selectionIds;
     std::unordered_map<std::string, int> _ownEmojiTypeBySimId;
     std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByEmojiTypeBySimIdCache;
-    std::vector<RemoteSimulationData> _rawRemoteSimulationList;
+
+    int _numSimulations = 0;
+    int _numGenomes = 0;
+    std::vector<RemoteSimulationData> _rawRemoteDataList;
     std::vector<RemoteSimulationData> _filteredRemoteSimulationList;
+    std::vector<RemoteSimulationData> _filteredRemoteGenomeList;
+
     std::vector<UserData> _userList;
 
     std::vector<TextureData> _emojis;
 
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
-    int _simIndexOfEmojiPopup = 0;  //index in _filteredRemoteSimulationList
+    RemoteSimulationData* _simOfEmojiPopup = nullptr;
 
     SimulationController _simController;
     NetworkController _networkController;
@@ -82,5 +92,6 @@ private:
     Viewport _viewport;
     TemporalControlWindow _temporalControlWindow;
     LoginDialogWeakPtr _loginDialog;
+    EditorController _editorController;
     UploadSimulationDialogWeakPtr _uploadSimulationDialog;
 };

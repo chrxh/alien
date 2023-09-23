@@ -30,7 +30,7 @@ private:
     std::function<void()> _execFunction;
 };
 
-inline void printMessage(std::string const& title, std::string const& message)
+inline void showMessage(std::string const& title, std::string const& message)
 {
     MessageDialog::getInstance().information(title, message);
 }

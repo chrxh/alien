@@ -48,9 +48,10 @@ void MessageDialog::yesNo(std::string const& title, std::string const& message, 
 
 void MessageDialog::processInformation()
 {
-    ImGui::OpenPopup(_title.c_str());
+    auto title = (_title + "##msg").c_str();
+    ImGui::OpenPopup(title);
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (ImGui::BeginPopupModal(_title.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (ImGui::BeginPopupModal(title, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         if (!_sizeInitialized) {
             auto size = ImGui::GetWindowSize();
             auto& windowController = WindowController::getInstance();

@@ -32,7 +32,8 @@
             sim.TIMESTAMP as timestamp,
             sim.NUM_DOWNLOADS as numDownloads,
             sim.SIZE as contentSize,
-            sim.FROM_RELEASE as fromRelease
+            sim.FROM_RELEASE as fromRelease,
+            sim.TYPE as type
         FROM simulation sim
         LEFT JOIN
             user u
@@ -66,7 +67,8 @@
             "likes" => $totalLikes,
             "likesByType" => $likesByType,
             "numDownloads" => (int)$obj->numDownloads,
-            "fromRelease" => (int)$obj->fromRelease
+            "fromRelease" => (int)$obj->fromRelease,
+            "type" => is_null($obj->type) ? 0 : $obj->type
         ];
     }
 

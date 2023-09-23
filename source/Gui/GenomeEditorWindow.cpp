@@ -19,6 +19,7 @@
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
+#include "DelayedExecutionController.h"
 #include "EditorModel.h"
 #include "GenericFileDialogs.h"
 #include "MessageDialog.h"
@@ -60,7 +61,8 @@ _GenomeEditorWindow::~_GenomeEditorWindow()
 
 void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
 {
-    setOn(true);
+    setOn(false);
+    delayedExecution([this] { setOn(true); });
     if (_tabDatas.size() == 1 && _tabDatas.front().genome.cells.empty()) {
         _tabDatas.clear();
     }
