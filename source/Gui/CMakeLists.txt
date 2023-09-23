@@ -37,8 +37,6 @@ PUBLIC
     EditorModel.h
     ExitDialog.cpp
     ExitDialog.h
-    FileLogger.cpp
-    FileLogger.h
     FpsController.cpp
     FpsController.h
     GenericFileDialogs.cpp
@@ -49,6 +47,8 @@ PUBLIC
     GettingStartedWindow.h
     GpuSettingsDialog.cpp
     GpuSettingsDialog.h
+    GuiLogger.cpp
+    GuiLogger.h
     HelpStrings.h
     ImageToPatternDialog.cpp
     ImageToPatternDialog.h
@@ -101,8 +101,6 @@ PUBLIC
     Shader.h
     ShaderWindow.cpp
     ShaderWindow.h
-    SimpleLogger.cpp
-    SimpleLogger.h
     SimulationParametersWindow.cpp
     SimulationParametersWindow.h
     SimulationScrollbar.cpp

@@ -3,6 +3,8 @@ add_library(alien_base_lib
     Definitions.cpp
     Definitions.h
     Exceptions.h
+    FileLogger.cpp
+    FileLogger.h
     GlobalSettings.cpp
     GlobalSettings.h
     Hashes.h

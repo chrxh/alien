@@ -5,6 +5,7 @@
 #include "Base/Definitions.h"
 #include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
+#include "Base/LoggingService.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 
@@ -32,6 +33,7 @@ _StartupController::_StartupController(
     , _temporalControlWindow(temporalControlWindow)
     , _viewport(viewport)
 {
+    log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
     _lineDistance = scale(InitialLineDistance);
     _startupTimepoint = std::chrono::steady_clock::now();

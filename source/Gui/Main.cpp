@@ -4,13 +4,13 @@
 
 #include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
+#include "Base/Resources.h"
+#include "Base/FileLogger.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineImpl/SimulationControllerImpl.h"
-#include "Base/Resources.h"
 
 #include "MainWindow.h"
-#include "SimpleLogger.h"
-#include "FileLogger.h"
+#include "GuiLogger.h"
 #include "HelpStrings.h"
 
 namespace
@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     auto inDebugMode = isInDebugMode(argc, argv);
     GlobalSettings::getInstance().setDebugMode(inDebugMode);
 
-    SimpleLogger logger = std::make_shared<_SimpleLogger>();
+    GuiLogger logger = std::make_shared<_GuiLogger>();
     FileLogger fileLogger = std::make_shared<_FileLogger>();
 
     if (inDebugMode) {

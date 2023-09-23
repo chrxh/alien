@@ -1,18 +1,18 @@
-#include "SimpleLogger.h"
+#include "GuiLogger.h"
 
 #include "Base/LoggingService.h"
 
-_SimpleLogger::_SimpleLogger()
+_GuiLogger::_GuiLogger()
 {
     LoggingService::getInstance().registerCallBack(this);
 }
 
-_SimpleLogger::~_SimpleLogger()
+_GuiLogger::~_GuiLogger()
 {
     LoggingService::getInstance().unregisterCallBack(this);
 }
 
-std::vector<std::string> const& _SimpleLogger::getMessages(Priority minPriority) const
+std::vector<std::string> const& _GuiLogger::getMessages(Priority minPriority) const
 {
     if (Priority::Important == minPriority) {
         return _importantLogMessages;
@@ -20,7 +20,7 @@ std::vector<std::string> const& _SimpleLogger::getMessages(Priority minPriority)
     return _allLogMessages;
 }
 
-void _SimpleLogger::newLogMessage(Priority priority, std::string const& message)
+void _GuiLogger::newLogMessage(Priority priority, std::string const& message)
 {
     _allLogMessages.emplace_back(message);
     if (Priority::Important == priority) {

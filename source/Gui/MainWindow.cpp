@@ -39,7 +39,7 @@
 #include "AboutDialog.h"
 #include "MassOperationsDialog.h"
 #include "LogWindow.h"
-#include "SimpleLogger.h"
+#include "GuiLogger.h"
 #include "UiController.h"
 #include "AutosaveController.h"
 #include "GettingStartedWindow.h"
@@ -90,7 +90,7 @@ namespace
     }
 }
 
-_MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger const& logger)
+_MainWindow::_MainWindow(SimulationController const& simController, GuiLogger const& logger)
 {
     _logger = logger;
     _simController = simController;
@@ -149,13 +149,15 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
-    _browserWindow = std::make_shared<_BrowserWindow>(_simController, _networkController, _statisticsWindow, _viewport, _temporalControlWindow);
+    _browserWindow =
+        std::make_shared<_BrowserWindow>(_simController, _networkController, _statisticsWindow, _viewport, _temporalControlWindow, _editorController);
     _activateUserDialog = std::make_shared<_ActivateUserDialog>(_simController, _browserWindow, _networkController);
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog, _networkController);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simController, _browserWindow, _networkController);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog, _networkController);
     _loginDialog = std::make_shared<_LoginDialog>(_simController, _browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog, _networkController);
-    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_browserWindow, _simController, _networkController, _viewport);
+    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(
+        _browserWindow, _loginDialog, _simController, _networkController, _viewport, _editorController->getGenomeEditorWindow());
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkController);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkController);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_viewport, _simController);
@@ -164,6 +166,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, SimpleLogger
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog);
     _activateUserDialog->registerCyclicReferences(_createUserDialog);
+    _editorController->registerCyclicReferences(_uploadSimulationDialog);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -416,14 +419,19 @@ void _MainWindow::processMenubar()
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
-            if (ImGui::MenuItem("Upload", "ALT+D")) {
-                _uploadSimulationDialog->open();
+            if (ImGui::MenuItem("Upload simulation", "ALT+D")) {
+                _uploadSimulationDialog->open(DataType_Simulation);
+            }
+            ImGui::EndDisabled();
+            ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
+            if (ImGui::MenuItem("Upload genome", "ALT+Q")) {
+                _uploadSimulationDialog->open(DataType_Genome);
             }
             ImGui::EndDisabled();
 
             ImGui::Separator();
             ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
-            if (ImGui::MenuItem("Delete", "ALT+J")) {
+            if (ImGui::MenuItem("Delete user", "ALT+J")) {
                 _deleteUserDialog->open();
             }
             ImGui::EndDisabled();
@@ -601,7 +609,10 @@ void _MainWindow::processMenubar()
             _browserWindow->onRefresh();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_D) && _networkController->getLoggedInUserName()) {
-            _uploadSimulationDialog->open();
+            _uploadSimulationDialog->open(DataType_Simulation);
+        }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_Q) && _networkController->getLoggedInUserName()) {
+            _uploadSimulationDialog->open(DataType_Genome);
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_J) && _networkController->getLoggedInUserName()) {
             _deleteUserDialog->open();
@@ -781,7 +792,7 @@ void _MainWindow::onOpenSimulation()
                     }
 
                     if (errorMessage) {
-                        printMessage("Error", *errorMessage);
+                        showMessage("Error", *errorMessage);
                         _simController->closeSimulation();
                         _simController->newSimulation(
                             deserializedData.auxiliaryData.timestep,
@@ -795,7 +806,7 @@ void _MainWindow::onOpenSimulation()
                     printOverlayMessage(firstFilename.filename().string());
                 });
             } else {
-                printMessage("Open simulation", "The selected file could not be opened.");
+                showMessage("Open simulation", "The selected file could not be opened.");
             }
         });
 }

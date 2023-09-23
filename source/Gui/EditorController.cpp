@@ -34,6 +34,11 @@ _EditorController::_EditorController(SimulationController const& simController, 
     _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simController, _viewport);
 }
 
+void _EditorController::registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog)
+{
+    _genomeEditorWindow->registerCyclicReferences(uploadSimulationDialog);
+}
+
 bool _EditorController::isOn() const
 {
     return _on;
@@ -124,7 +129,7 @@ void _EditorController::onInspectSelectedObjects()
         DataDescription selectedData = _simController->getSelectedSimulationData(false);
         onInspectObjects(DescriptionHelper::getObjects(selectedData), false);
     } else {
-        printMessage(
+        showMessage(
             "Inspection not possible",
             "Too many objects are selected for inspection. A maximum of " + std::to_string(MaxInspectorWindowsToAdd)
                 + " objects are allowed.");

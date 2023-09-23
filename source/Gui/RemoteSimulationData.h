@@ -21,6 +21,13 @@ enum RemoteSimulationDataColumnId
     RemoteSimulationDataColumnId_Actions
 };
 
+using RemoteDataType = int;
+enum RemoteDataType_
+{
+    RemoteDataType_Simulation,
+    RemoteDataType_Genome
+};
+
 class RemoteSimulationData
 {
 public:
@@ -37,6 +44,7 @@ public:
     std::string description;
     std::string version;
     bool fromRelease;
+    RemoteDataType type;
 
     static int compare(void const* left, void const* right, ImGuiTableSortSpecs const* specs);
     bool matchWithFilter(std::string const& filter) const;

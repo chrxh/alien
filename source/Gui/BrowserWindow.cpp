@@ -14,6 +14,7 @@
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "Base/VersionChecker.h"
+#include "EngineInterface/GenomeDescriptionConverter.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 
@@ -28,8 +29,10 @@
 #include "LoginDialog.h"
 #include "UploadSimulationDialog.h"
 #include "DelayedExecutionController.h"
+#include "EditorController.h"
 #include "OpenGLHelper.h"
 #include "OverlayMessageController.h"
+#include "GenomeEditorWindow.h"
 
 namespace
 {
@@ -47,13 +50,15 @@ _BrowserWindow::_BrowserWindow(
     NetworkController const& networkController,
     StatisticsWindow const& statisticsWindow,
     Viewport const& viewport,
-    TemporalControlWindow const& temporalControlWindow)
+    TemporalControlWindow const& temporalControlWindow,
+    EditorController const& editorController)
     : _AlienWindow("Browser", "windows.browser", true)
     , _simController(simController)
     , _networkController(networkController)
     , _statisticsWindow(statisticsWindow)
     , _viewport(viewport)
     , _temporalControlWindow(temporalControlWindow)
+    , _editorController(editorController)
 {
     _showCommunityCreations = GlobalSettings::getInstance().getBoolState("windows.browser.show community creations", _showCommunityCreations);
     _userTableWidth = GlobalSettings::getInstance().getFloatState("windows.browser.user table width", scale(UserTableWidth));
@@ -91,15 +96,25 @@ void _BrowserWindow::onRefresh()
 void _BrowserWindow::refreshIntern(bool withRetry)
 {
     try {
-        bool success = _networkController->getRemoteSimulationList(_rawRemoteSimulationList, withRetry);
+        bool success = _networkController->getRemoteSimulationList(_rawRemoteDataList, withRetry);
         success &= _networkController->getUserList(_userList, withRetry);
 
         if (!success) {
             if (withRetry) {
                 MessageDialog::getInstance().information("Error", "Failed to retrieve browser data. Please try again.");
             }
+        } else {
+            _numSimulations = 0;
+            _numGenomes = 0;
+            for (auto const& entry : _rawRemoteDataList) {
+                if (entry.type == DataType_Simulation) {
+                    ++_numSimulations;
+                } else {
+                    ++_numGenomes;
+                }
+            }
         }
-        calcFilteredSimulationDatas();
+        calcFilteredSimulationAndGenomeLists();
 
         if (_networkController->getLoggedInUserName()) {
             if (!_networkController->getEmojiTypeBySimId(_ownEmojiTypeBySimId)) {
@@ -129,7 +144,17 @@ void _BrowserWindow::processIntern()
                 ImVec2(sizeAvailable.x - scale(_userTableWidth), sizeAvailable.y - scale(BrowserBottomHeight)),
                 false,
                 ImGuiWindowFlags_HorizontalScrollbar)) {
-            processSimulationTable();
+            if (ImGui::BeginTabBar("##Type", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+                if (ImGui::BeginTabItem("Simulations", nullptr, ImGuiTabItemFlags_None)) {
+                    processSimulationList();
+                    ImGui::EndTabItem();
+                }
+                if (ImGui::BeginTabItem("Genomes", nullptr, ImGuiTabItemFlags_None)) {
+                    processGenomeList();
+                    ImGui::EndTabItem();
+                }
+                ImGui::EndTabBar();
+            }
         }
         ImGui::EndChild();
     }
@@ -148,7 +173,7 @@ void _BrowserWindow::processIntern()
         auto sizeAvailable = ImGui::GetContentRegionAvail();
         if (ImGui::BeginChild(
                 "##2", ImVec2(sizeAvailable.x, sizeAvailable.y - scale(BrowserBottomHeight)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            processUserTable();
+            processUserList();
         }
         ImGui::EndChild();
     }
@@ -196,27 +221,25 @@ void _BrowserWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_SHARE_ALT)) {
-        if (_networkController->getLoggedInUserName()) {
-            if (auto uploadSimulationDialog = _uploadSimulationDialog.lock()) {
-                uploadSimulationDialog->open();
-            }
-        } else {
-            _loginDialog.lock()->open();
-        }
+        _uploadSimulationDialog.lock()->open(_selectedDataType);
     }
-    AlienImGui::Tooltip("Share your simulation with other users:\nYour current simulation will be uploaded to the server and made visible in the browser.");
+    std::string dataType = _selectedDataType == DataType_Simulation
+        ? "simulation"
+        : "genome";
+    AlienImGui::Tooltip(
+        "Share your " + dataType + " with other users:\nYour current " + dataType + " will be uploaded to the server and made visible in the browser.");
     AlienImGui::Separator();
 }
 
-void _BrowserWindow::processSimulationTable()
+void _BrowserWindow::processSimulationList()
 {
-    ImGui::PushID("SimTable");
+    ImGui::PushID("SimulationList");
+    _selectedDataType = DataType_Simulation;
     auto styleRepository = StyleRepository::getInstance();
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    AlienImGui::Group("Simulations");
     if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn(
             "Actions",
@@ -279,48 +302,9 @@ void _BrowserWindow::processSimulationTable()
                 ImGui::TableNextRow(0, scale(RowHeight));
 
                 ImGui::TableNextColumn();
-
-                //like button
-                auto liked = isLiked(item->id);
-                if (liked) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeButtonTextColor);
-                } else {
-                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::NoLikeButtonTextColor);
-                }
-                auto likeButtonResult = processActionButton(ICON_FA_SMILE);
-                ImGui::PopStyleColor();
-                if (likeButtonResult) {
-                    _activateEmojiPopup = true;
-                    _simIndexOfEmojiPopup = row;
-                }
-                AlienImGui::Tooltip("Choose a reaction");
-                ImGui::SameLine();
-
-                //download button
-                ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
-                auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
-                ImGui::PopStyleColor();
-                if (downloadButtonResult) {
-                    onDownloadSimulation(item);
-                }
-                AlienImGui::Tooltip("Download");
-                ImGui::SameLine();
-
-                //delete color
-                if (item->userName == _networkController->getLoggedInUserName().value_or("")) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DeleteButtonTextColor);
-                    auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
-                    ImGui::PopStyleColor();
-                    if (deleteButtonResult) {
-                        onDeleteSimulation(item);
-                    }
-                    AlienImGui::Tooltip("Delete");
-                }
-
+                processActionButtons(item);
                 ImGui::TableNextColumn();
-
                 pushTextColor(*item);
-
                 AlienImGui::Text(item->timestamp);
                 ImGui::TableNextColumn();
                 processShortenedText(item->userName);
@@ -352,6 +336,103 @@ void _BrowserWindow::processSimulationTable()
     ImGui::PopID();
 }
 
+void _BrowserWindow::processGenomeList()
+{
+    ImGui::PushID("GenomeList");
+    _selectedDataType = DataType_Genome;
+    auto styleRepository = StyleRepository::getInstance();
+    static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
+        | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
+        | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
+
+    if (ImGui::BeginTable("Browser", 10, flags, ImVec2(0, 0), 0.0f)) {
+        ImGui::TableSetupColumn(
+            "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f), RemoteSimulationDataColumnId_Actions);
+        ImGui::TableSetupColumn(
+            "Timestamp",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
+            scale(135.0f),
+            RemoteSimulationDataColumnId_Timestamp);
+        ImGui::TableSetupColumn(
+            "User name",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scale(120.0f),
+            RemoteSimulationDataColumnId_UserName);
+        ImGui::TableSetupColumn(
+            "Genome name",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scale(160.0f),
+            RemoteSimulationDataColumnId_SimulationName);
+        ImGui::TableSetupColumn(
+            "Description",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scale(120.0f),
+            RemoteSimulationDataColumnId_Description);
+        ImGui::TableSetupColumn(
+            "Reactions",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scale(120.0f),
+            RemoteSimulationDataColumnId_Likes);
+        ImGui::TableSetupColumn(
+            "Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_NumDownloads);
+        ImGui::TableSetupColumn("Cells", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Particles);
+        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_FileSize);
+        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Version);
+        ImGui::TableSetupScrollFreeze(0, 1);
+        ImGui::TableHeadersRow();
+
+        //sort our data if sort specs have been changed!
+        if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
+            if (sortSpecs->SpecsDirty || _scheduleSort) {
+                if (_filteredRemoteGenomeList.size() > 1) {
+                    std::sort(_filteredRemoteGenomeList.begin(), _filteredRemoteGenomeList.end(), [&](auto const& left, auto const& right) {
+                        return RemoteSimulationData::compare(&left, &right, sortSpecs) < 0;
+                    });
+                }
+                sortSpecs->SpecsDirty = false;
+            }
+        }
+        ImGuiListClipper clipper;
+        clipper.Begin(_filteredRemoteGenomeList.size());
+        while (clipper.Step())
+            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
+
+                RemoteSimulationData* item = &_filteredRemoteGenomeList[row];
+
+                ImGui::PushID(row);
+                ImGui::TableNextRow(0, scale(RowHeight));
+
+                ImGui::TableNextColumn();
+                processActionButtons(item);
+                ImGui::TableNextColumn();
+                pushTextColor(*item);
+                AlienImGui::Text(item->timestamp);
+                ImGui::TableNextColumn();
+                processShortenedText(item->userName);
+                ImGui::TableNextColumn();
+                processShortenedText(item->simName);
+                ImGui::TableNextColumn();
+                processShortenedText(item->description);
+                ImGui::TableNextColumn();
+                processEmojiList(item);
+
+                ImGui::TableNextColumn();
+                AlienImGui::Text(std::to_string(item->numDownloads));
+                ImGui::TableNextColumn();
+                AlienImGui::Text(StringHelper::format(item->particles));
+                ImGui::TableNextColumn();
+                AlienImGui::Text(StringHelper::format(item->contentSize) + " Bytes");
+                ImGui::TableNextColumn();
+                AlienImGui::Text(item->version);
+
+                ImGui::PopStyleColor();
+                ImGui::PopID();
+            }
+        ImGui::EndTable();
+    }
+    ImGui::PopID();
+}
+
 namespace
 {
     std::string getGpuString(std::string const& gpu)
@@ -363,7 +444,7 @@ namespace
     }
 }
 
-void _BrowserWindow::processUserTable()
+void _BrowserWindow::processUserList()
 {
     ImGui::PushID("UserTable");
     auto styleRepository = StyleRepository::getInstance();
@@ -439,7 +520,10 @@ void _BrowserWindow::processStatus()
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
         std::string statusText;
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-        statusText += std::to_string(_rawRemoteSimulationList.size()) + " simulations found";
+        statusText += std::to_string(_numSimulations) + " simulations found";
+
+        statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
+        statusText += std::to_string(_numGenomes) + " genomes found";
 
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
         statusText += std::to_string(_userList.size()) + " simulators found";
@@ -465,11 +549,11 @@ void _BrowserWindow::processFilter()
 {
     ImGui::Spacing();
     if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Community creations"), _showCommunityCreations)) {
-        calcFilteredSimulationDatas();
+        calcFilteredSimulationAndGenomeLists();
     }
     ImGui::SameLine();
     if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter"), _filter)) {
-        calcFilteredSimulationDatas();
+        calcFilteredSimulationAndGenomeLists();
     }
 }
 
@@ -529,14 +613,14 @@ void _BrowserWindow::processEmojiButton(int emojiType)
     auto cursorPos = ImGui::GetCursorScreenPos();
     auto emojiWidth = scale(toFloat(emoji.width));
     auto emojiHeight = scale(toFloat(emoji.height));
-    auto& sim = _filteredRemoteSimulationList.at(_simIndexOfEmojiPopup);
+    auto const& sim = _simOfEmojiPopup;
     if (ImGui::ImageButton((void*)(intptr_t)emoji.textureId, {emojiWidth, emojiHeight}, {0, 0}, {1.0f, 1.0f})) {
         onToggleLike(sim, toInt(emojiType));
         ImGui::CloseCurrentPopup();
     }
     ImGui::PopStyleColor(2);
 
-    bool isLiked = _ownEmojiTypeBySimId.contains(sim.id) && _ownEmojiTypeBySimId.at(sim.id) == emojiType;
+    bool isLiked = _ownEmojiTypeBySimId.contains(sim->id) && _ownEmojiTypeBySimId.at(sim->id) == emojiType;
     if (isLiked) {
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         auto& style = ImGui::GetStyle();
@@ -609,7 +693,47 @@ void _BrowserWindow::processEmojiList(RemoteSimulationData* sim)
         }
     }
     if (toggleEmojiType) {
-        onToggleLike(*sim, *toggleEmojiType);
+        onToggleLike(sim, *toggleEmojiType);
+    }
+}
+
+void _BrowserWindow::processActionButtons(RemoteSimulationData* simData)
+{
+    //like button
+    auto liked = isLiked(simData->id);
+    if (liked) {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeButtonTextColor);
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::NoLikeButtonTextColor);
+    }
+    auto likeButtonResult = processActionButton(ICON_FA_SMILE);
+    ImGui::PopStyleColor();
+    if (likeButtonResult) {
+        _activateEmojiPopup = true;
+        _simOfEmojiPopup = simData;
+    }
+    AlienImGui::Tooltip("Choose a reaction");
+    ImGui::SameLine();
+
+    //download button
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
+    auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
+    ImGui::PopStyleColor();
+    if (downloadButtonResult) {
+        onDownloadItem(simData);
+    }
+    AlienImGui::Tooltip("Download");
+    ImGui::SameLine();
+
+    //delete button
+    if (simData->userName == _networkController->getLoggedInUserName().value_or("")) {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DeleteButtonTextColor);
+        auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
+        ImGui::PopStyleColor();
+        if (deleteButtonResult) {
+            onDeleteItem(simData);
+        }
+        AlienImGui::Tooltip("Delete");
     }
 }
 
@@ -617,8 +741,8 @@ namespace
 {
     std::vector<std::string> splitString(const std::string& str)
     {
-        std::vector<std::string> tokens;
-        boost::algorithm::split_regex(tokens, str, boost::regex("(\r\n)+"));
+        std::vector<std::string> tokens; 
+        boost::algorithm::split_regex(tokens, str, boost::regex("(\n)+"));
         return tokens;
     }
 }
@@ -685,66 +809,77 @@ void _BrowserWindow::sortUserList()
     std::sort(_userList.begin(), _userList.end(), [&](auto const& left, auto const& right) { return UserData::compareOnlineAndTimestamp(left, right) > 0; });
 }
 
-void _BrowserWindow::onDownloadSimulation(RemoteSimulationData* sim)
+void _BrowserWindow::onDownloadItem(RemoteSimulationData* sim)
 {
     printOverlayMessage("Downloading ...");
 
     delayedExecution([=, this] {
+        std::string dataTypeString = _selectedDataType == DataType_Simulation ? "simulation" : "genome";
         SerializedSimulation serializedSim;
         if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, sim->id)) {
-            MessageDialog::getInstance().information("Error", "Failed to download simulation.");
+            MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
             return;
         }
 
-        DeserializedSimulation deserializedSim;
-        if (!Serializer::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
-            MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
-            return;
-        }
+        if (_selectedDataType == DataType_Simulation) {
+            DeserializedSimulation deserializedSim;
+            if (!Serializer::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
+                MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
+                return;
+            }
 
-        _simController->closeSimulation();
-        _statisticsWindow->reset();
-
-        std::optional<std::string> errorMessage;
-        try {
-            _simController->newSimulation(
-                deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
-            _simController->setClusteredSimulationData(deserializedSim.mainData);
-        } catch (CudaMemoryAllocationException const& exception) {
-            errorMessage = exception.what();
-        } catch (...) {
-            errorMessage = "Failed to load simulation.";
-        }
-
-        if (errorMessage) {
-            printMessage("Error", *errorMessage);
             _simController->closeSimulation();
-            _simController->newSimulation(
-                deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+            _statisticsWindow->reset();
+
+            std::optional<std::string> errorMessage;
+            try {
+                _simController->newSimulation(
+                    deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+                _simController->setClusteredSimulationData(deserializedSim.mainData);
+            } catch (CudaMemoryAllocationException const& exception) {
+                errorMessage = exception.what();
+            } catch (...) {
+                errorMessage = "Failed to load simulation.";
+            }
+
+            if (errorMessage) {
+                showMessage("Error", *errorMessage);
+                _simController->closeSimulation();
+                _simController->newSimulation(
+                    deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+            }
+
+            _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+            _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
+            _temporalControlWindow->onSnapshot();
+
+        } else {
+            std::vector<uint8_t> genome;
+            if (!Serializer::deserializeGenomeFromString(genome, serializedSim.mainData)) {
+                MessageDialog::getInstance().information("Error", "Failed to load genome. Your program version may not match.");
+                return;
+            }
+            _editorController->setOn(true);
+            _editorController->getGenomeEditorWindow()->openTab(GenomeDescriptionConverter::convertBytesToDescription(genome));
         }
-
-        _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
-        _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
-        _temporalControlWindow->onSnapshot();
-
         if (VersionChecker::isVersionNewer(sim->version)) {
             MessageDialog::getInstance().information(
                 "Warning",
-                "The download was successful but the simulation was generated using a more recent\n"
-                "version of ALIEN. Consequently, the simulation might not function as expected.\n"
+                "The download was successful but the " + dataTypeString +" was generated using a more recent\n"
+                "version of ALIEN. Consequently, the " + dataTypeString + "might not function as expected.\n"
                 "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
         }
     });
 }
 
-void _BrowserWindow::onDeleteSimulation(RemoteSimulationData* sim)
+void _BrowserWindow::onDeleteItem(RemoteSimulationData* sim)
 {
-    MessageDialog::getInstance().yesNo("Delete simulation", "Do you really want to delete the simulation?", [sim, this]() {
+    MessageDialog::getInstance().yesNo("Delete item", "Do you really want to delete the selected item?", [sim, this]() {
         printOverlayMessage("Deleting ...");
 
         delayedExecution([remoteData = sim, this] {
             if (!_networkController->deleteSimulation(remoteData->id)) {
-                MessageDialog::getInstance().information("Error", "Failed to delete simulation. Please try again later.");
+                MessageDialog::getInstance().information("Error", "Failed to delete item. Please try again later.");
                 return;
             }
             _scheduleRefresh = true;
@@ -752,35 +887,35 @@ void _BrowserWindow::onDeleteSimulation(RemoteSimulationData* sim)
     });
 }
 
-void _BrowserWindow::onToggleLike(RemoteSimulationData& sim, int emojiType)
+void _BrowserWindow::onToggleLike(RemoteSimulationData* sim, int emojiType)
 {
     if (_networkController->getLoggedInUserName()) {
 
         //remove existing like
-        auto findResult = _ownEmojiTypeBySimId.find(sim.id);
+        auto findResult = _ownEmojiTypeBySimId.find(sim->id);
         auto onlyRemoveLike = false;
         if (findResult != _ownEmojiTypeBySimId.end()) {
             auto origEmojiType = findResult->second;
-            if (--sim.numLikesByEmojiType[origEmojiType] == 0) {
-                sim.numLikesByEmojiType.erase(origEmojiType);
+            if (--sim->numLikesByEmojiType[origEmojiType] == 0) {
+                sim->numLikesByEmojiType.erase(origEmojiType);
             }
             _ownEmojiTypeBySimId.erase(findResult);
-            _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(sim.id, origEmojiType));  //invalidate cache entry
+            _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(sim->id, origEmojiType));  //invalidate cache entry
             onlyRemoveLike = origEmojiType == emojiType;  //remove like if same like icon has been clicked
         }
 
         //create new like
         if (!onlyRemoveLike) {
-            _ownEmojiTypeBySimId[sim.id] = emojiType;
-            if (sim.numLikesByEmojiType.contains(emojiType)) {
-                ++sim.numLikesByEmojiType[emojiType];
+            _ownEmojiTypeBySimId[sim->id] = emojiType;
+            if (sim->numLikesByEmojiType.contains(emojiType)) {
+                ++sim->numLikesByEmojiType[emojiType];
             } else {
-                sim.numLikesByEmojiType[emojiType] = 1;
+                sim->numLikesByEmojiType[emojiType] = 1;
             }
         }
 
-        _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(sim.id, emojiType));  //invalidate cache entry
-        _networkController->toggleLikeSimulation(sim.id, emojiType);
+        _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(sim->id, emojiType));  //invalidate cache entry
+        _networkController->toggleLikeSimulation(sim->id, emojiType);
         sortSimulationList();
     } else {
         _loginDialog.lock()->open();
@@ -818,13 +953,19 @@ void _BrowserWindow::pushTextColor(RemoteSimulationData const& entry)
     }
 }
 
-void _BrowserWindow::calcFilteredSimulationDatas()
+void _BrowserWindow::calcFilteredSimulationAndGenomeLists()
 {
     _filteredRemoteSimulationList.clear();
-    _filteredRemoteSimulationList.reserve(_rawRemoteSimulationList.size());
-    for (auto const& simData : _rawRemoteSimulationList) {
+    _filteredRemoteSimulationList.reserve(_rawRemoteDataList.size());
+    _filteredRemoteGenomeList.clear();
+    _filteredRemoteGenomeList.reserve(_filteredRemoteGenomeList.size());
+    for (auto const& simData : _rawRemoteDataList) {
         if (simData.matchWithFilter(_filter) &&_showCommunityCreations != simData.fromRelease) {
-            _filteredRemoteSimulationList.emplace_back(simData);
+            if (simData.type == RemoteDataType_Simulation) {
+                _filteredRemoteSimulationList.emplace_back(simData);
+            } else {
+                _filteredRemoteGenomeList.emplace_back(simData);
+            }
         }
     }
 }
