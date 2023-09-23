@@ -29,6 +29,7 @@ std::vector<RemoteSimulationData> NetworkDataParser::decodeRemoteSimulationData(
         }
         entry.numDownloads = subTree.get<int>("numDownloads");
         entry.fromRelease = subTree.get<int>("fromRelease") == 1;
+        entry.type = subTree.get<RemoteDataType>("type");
         result.emplace_back(entry);
     }
     return result;

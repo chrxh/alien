@@ -124,7 +124,7 @@ void _EditorController::onInspectSelectedObjects()
         DataDescription selectedData = _simController->getSelectedSimulationData(false);
         onInspectObjects(DescriptionHelper::getObjects(selectedData), false);
     } else {
-        printMessage(
+        showMessage(
             "Inspection not possible",
             "Too many objects are selected for inspection. A maximum of " + std::to_string(MaxInspectorWindowsToAdd)
                 + " objects are allowed.");

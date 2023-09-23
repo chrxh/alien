@@ -30,6 +30,9 @@ public:
     static bool serializeGenomeToFile(std::string const& filename, std::vector<uint8_t> const& genome);
     static bool deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::string const& filename);
 
+    static bool serializeGenomeToString(std::string& output, std::vector<uint8_t> const& input);
+    static bool deserializeGenomeFromString(std::vector<uint8_t>& output, std::string const& input);
+
     static bool serializeSimulationParametersToFile(std::string const& filename, SimulationParameters const& parameters);
     static bool deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::string const& filename);
 
@@ -46,4 +49,7 @@ private:
 
     static void serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream);
     static void deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream);
+
+    static bool wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input);
+    static bool unwrapGenome(std::vector<uint8_t>& output, ClusteredDataDescription const& input);
 };

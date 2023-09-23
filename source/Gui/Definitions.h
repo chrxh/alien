@@ -173,3 +173,10 @@ struct TextureData
     int width;
     int height;
 };
+
+using DataType = int;
+enum DataType_
+{
+    DataType_Simulation,
+    DataType_Genome
+};
