@@ -411,7 +411,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                 ImGui::TreePop();
             }
 
-            if (ImGui::TreeNodeEx("Properties (responsible genome part)", TreeNodeFlags)) {
+            if (ImGui::TreeNodeEx("Properties (principal genome part)", TreeNodeFlags)) {
                 auto numNodes = toFloat(GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, toInt(desc.genome.size())));
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters()
