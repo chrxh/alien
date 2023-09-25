@@ -83,11 +83,13 @@ DataDescription _SimulationControllerImpl::getSimulationData()
 
 ClusteredDataDescription _SimulationControllerImpl::getSelectedClusteredSimulationData(bool includeClusters)
 {
+    _worker.updateSelection();
     return _worker.getSelectedClusteredSimulationData(includeClusters);
 }
 
 DataDescription _SimulationControllerImpl::getSelectedSimulationData(bool includeClusters)
 {
+    _worker.updateSelection();
     return _worker.getSelectedSimulationData(includeClusters);
 }
 
