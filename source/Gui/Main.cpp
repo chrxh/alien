@@ -1,10 +1,8 @@
 #include <iostream>
-#include <algorithm>
 #include <cstring>
 
 #include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
-#include "Base/Resources.h"
 #include "Base/FileLogger.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineImpl/SimulationControllerImpl.h"
