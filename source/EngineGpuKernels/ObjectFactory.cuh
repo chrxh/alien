@@ -25,7 +25,7 @@ public:
     __inline__ __device__ Cell* createCell();
 
 private:
-    __inline__ __device__ void createAuxiliaryData(uint64_t sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, uint64_t& targetSize, uint8_t*& target);
+    __inline__ __device__ void createAuxiliaryData(int sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, int& targetSize, uint8_t*& target);
     __inline__ __device__ void createAuxiliaryDataWithFixedSize(uint64_t size, uint64_t sourceIndex, uint8_t* auxiliaryData, uint8_t*& target);
 
     BaseMap _map;
@@ -196,7 +196,7 @@ __inline__ __device__ void ObjectFactory::changeParticleFromTO(ParticleTO const&
 }
 
 __inline__ __device__ void
-ObjectFactory::createAuxiliaryData(uint64_t sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, uint64_t& targetSize, uint8_t*& target)
+ObjectFactory::createAuxiliaryData(int sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, int& targetSize, uint8_t*& target)
 {
     targetSize = sourceSize;
     createAuxiliaryDataWithFixedSize(sourceSize, sourceIndex, auxiliaryData, target);

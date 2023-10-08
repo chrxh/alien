@@ -3,11 +3,11 @@
 namespace
 {
     __device__ void
-    copyAuxiliaryData(uint64_t sourceSize, uint8_t* source, uint64_t& targetSize, uint64_t& targetIndex, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
+    copyAuxiliaryData(int sourceSize, uint8_t* source, int& targetSize, uint64_t& targetIndex, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
     {
         targetSize = sourceSize;
         if (sourceSize > 0) {
-            targetIndex = alienAtomicAdd64(&auxiliaryDataSize, sourceSize);
+            targetIndex = alienAtomicAdd64(&auxiliaryDataSize, static_cast<uint64_t>(sourceSize));
             for (int i = 0; i < sourceSize; ++i) {
                 auxiliaryData[targetIndex + i] = source[i];
             }
@@ -67,7 +67,7 @@ namespace
 
         switch (cell->cellFunction) {
         case CellFunction_Neuron: {
-            uint64_t targetSize;    //not used
+            int targetSize;    //not used
             copyAuxiliaryData(
                 sizeof(NeuronFunction::NeuronState),
                 reinterpret_cast<uint8_t*>(cell->cellFunctionData.neuron.neuronState),

@@ -37,7 +37,7 @@ namespace
     }
 
     template<typename Container>
-    void convert(DataTO const& dataTO, Container const& source, uint64_t& targetSize, uint64_t& targetIndex)
+    void convert(DataTO const& dataTO, Container const& source, int& targetSize, uint64_t& targetIndex)
     {
         targetSize = source.size();
         if (targetSize > 0) {
@@ -51,7 +51,7 @@ namespace
     }
 
     template <>
-    void convert(DataTO const& dataTO, std::vector<float> const& source, uint64_t& targetSize, uint64_t& targetIndex)
+    void convert(DataTO const& dataTO, std::vector<float> const& source, int& targetSize, uint64_t& targetIndex)
     {
         BytesAsFloat bytesAsFloat;
         targetSize = source.size() * 4;
@@ -524,7 +524,7 @@ void DescriptionConverter::addCell(
         NeuronTO neuronTO;
         auto const& neuronDesc = std::get<NeuronDescription>(*cellDesc.cellFunction);
         std::vector<float> weigthsAndBias = unitWeightsAndBias(neuronDesc.weights, neuronDesc.biases);
-        uint64_t targetSize;
+        int targetSize;
         convert(dataTO, weigthsAndBias, targetSize, neuronTO.weightsAndBiasesDataIndex);
         CHECK(targetSize == sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1));
         cellTO.cellFunctionData.neuron = neuronTO;
