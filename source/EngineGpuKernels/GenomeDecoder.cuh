@@ -3,7 +3,7 @@
 #include "EngineInterface/CellFunctionConstants.h"
 #include "EngineInterface/GenomeConstants.h"
 #include "Base.cuh"
-#include "Cell.cuh"
+#include "Object.cuh"
 
 struct GenomeHeader
 {

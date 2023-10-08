@@ -3,7 +3,7 @@
 
 #include "EngineInterface/CellFunctionConstants.h"
 
-#include "Cell.cuh"
+#include "Object.cuh"
 #include "CellFunctionProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
