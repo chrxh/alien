@@ -293,7 +293,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
                 genome[i] = _data->numberGen1.randomByte();
             }
             cell->cellFunctionData.constructor.genomeCurrentNodeIndex = 0;
-            cell->cellFunctionData.constructor.genomeCurrentNodeIndex = false;
+            cell->cellFunctionData.constructor.hasGenomeAlreadyRead = false;
             cell->cellFunctionData.constructor.genomeGeneration = 0;
             cell->cellFunctionData.constructor.constructionAngle1 = 0;
             cell->cellFunctionData.constructor.constructionAngle2 = 0;

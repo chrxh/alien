@@ -315,7 +315,7 @@ __inline__ __device__ void GenomeDecoder::copyGenome(SimulationData& data, CellF
         target.genome = data.objects.auxiliaryData.getAlignedSubArray(size);
         //#TODO can be optimized
         for (int i = 0; i < size; ++i) {
-            target.genome[i] = readByte(source, genomeBytePosition);
+            target.genome[i] = source.genome[genomeBytePosition + i];
         }
     } else {
         auto size = source.genomeSize;
