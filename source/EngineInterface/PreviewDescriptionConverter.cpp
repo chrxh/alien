@@ -102,16 +102,16 @@ namespace
         RealVector2D pos;
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
         int index = 0;
-        auto shapeGenerator = ShapeGeneratorFactory::create(genome.info.shape);
+        auto shapeGenerator = ShapeGeneratorFactory::create(genome.header.shape);
         for (auto const& node : genome.cells) {
             if (index > 0) {
-                pos += result.direction * genome.info.connectionDistance;
+                pos += result.direction * genome.header.connectionDistance;
             }
 
             ShapeGeneratorResult shapeResult;
             shapeResult.angle = node.referenceAngle;
             shapeResult.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
-            if (genome.info.shape != ConstructionShape_Custom) {
+            if (genome.header.shape != ConstructionShape_Custom) {
                 shapeResult = shapeGenerator->generateNextConstructionData();
             }
             if (lastReferenceAngle.has_value() && index == genome.cells.size() - 1) {
@@ -251,7 +251,7 @@ namespace
                     subGenome, cellIntern.nodeIndex, constructor.constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
                 insert(result, previewPart);
                 indexOffset += previewPart.size();
-                if (!subGenome.info.separateConstruction) {
+                if (!subGenome.header.separateConstruction) {
                     auto cellIndex1 = previewPart.size() - 1;
                     auto cellIndex2 = index + indexOffset;
                     result.at(cellIndex1).connectionIndices.insert(toInt(cellIndex2));

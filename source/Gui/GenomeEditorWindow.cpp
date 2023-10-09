@@ -323,10 +323,10 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
     DynamicTableLayout table;
     if (table.begin()) {
         std::vector ShapeStrings = {"Custom"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s, "Tube"s, "Lolli"s, "Small lolli"s, "Zigzag"s};
-        auto origShape = tab.genome.info.shape;
+        auto origShape = tab.genome.header.shape;
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters().name("Geometry").values(ShapeStrings).textWidth(ContentTextWidth).tooltip(Const::GenomeGeometryTooltip),
-                tab.genome.info.shape)) {
+                tab.genome.header.shape)) {
             updateGeometry(tab.genome, origShape);
         }
         table.next();
@@ -337,28 +337,28 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
                 .step(0.05f)
                 .textWidth(ContentTextWidth)
                 .tooltip(Const::GenomeConnectionDistanceTooltip),
-            tab.genome.info.connectionDistance);
+            tab.genome.header.connectionDistance);
         table.next();
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth).tooltip(Const::GenomeStiffnessTooltip),
-            tab.genome.info.stiffness);
-        if (tab.genome.info.shape == ConstructionShape_Custom) {
+            tab.genome.header.stiffness);
+        if (tab.genome.header.shape == ConstructionShape_Custom) {
             table.next();
             AlienImGui::AngleAlignmentCombo(
                 AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(ContentTextWidth).tooltip(Const::GenomeAngleAlignmentTooltip),
-                tab.genome.info.angleAlignment);
+                tab.genome.header.angleAlignment);
         }
         table.next();
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters().name("Single construction").textWidth(ContentTextWidth).tooltip(Const::GenomeSingleConstructionTooltip),
-            tab.genome.info.singleConstruction);
+            tab.genome.header.singleConstruction);
         table.next();
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters().name("Separate construction").textWidth(ContentTextWidth).tooltip(Const::GenomeSeparationConstructionTooltip),
-            tab.genome.info.separateConstruction);
+            tab.genome.header.separateConstruction);
         table.end();
     }
-    validationAndCorrection(tab.genome.info);
+    validationAndCorrection(tab.genome.header);
 }
 
 namespace 
@@ -407,7 +407,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 {
     int index = 0;
 
-    auto shapeGenerator = ShapeGeneratorFactory::create(tab.genome.info.shape);
+    auto shapeGenerator = ShapeGeneratorFactory::create(tab.genome.header.shape);
     for (auto& cell : tab.genome.cells) {
         auto isFirstOrLast = index == 0 || index == tab.genome.cells.size() - 1;
         std::optional<ShapeGeneratorResult> shapeGeneratorResult =
@@ -479,8 +479,8 @@ void _GenomeEditorWindow::processNode(
             auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell.referenceAngle;
             if (AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::GenomeAngleTooltip), referenceAngle)) {
-                updateGeometry(tab.genome, tab.genome.info.shape);
-                tab.genome.info.shape = ConstructionShape_Custom;
+                updateGeometry(tab.genome, tab.genome.header.shape);
+                tab.genome.header.shape = ConstructionShape_Custom;
             }
             cell.referenceAngle = referenceAngle;
         }
@@ -504,8 +504,8 @@ void _GenomeEditorWindow::processNode(
         if (AlienImGui::InputOptionalInt(
                 AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::GenomeRequiredConnectionsTooltip),
                 numRequiredAdditionalConnections)) {
-            updateGeometry(tab.genome, tab.genome.info.shape);
-            tab.genome.info.shape = ConstructionShape_Custom;
+            updateGeometry(tab.genome, tab.genome.header.shape);
+            tab.genome.header.shape = ConstructionShape_Custom;
         }
         cell.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
 
@@ -955,7 +955,7 @@ void _GenomeEditorWindow::updateGeometry(GenomeDescription& genome, Construction
     if (!shapeGenerator) {
         return;
     }
-    genome.info.angleAlignment = shapeGenerator->getConstructorAngleAlignment();
+    genome.header.angleAlignment = shapeGenerator->getConstructorAngleAlignment();
     for (auto& cell : genome.cells) {
         auto shapeGenerationResult = shapeGenerator->generateNextConstructionData();
         cell.referenceAngle = shapeGenerationResult.angle;

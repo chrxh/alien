@@ -137,7 +137,7 @@ protected:
         }
         auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
         auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
-        if (expectedGenome.info.shape != actualGenome.info.shape) {
+        if (expectedGenome.header.shape != actualGenome.header.shape) {
             return false;
         }
         if (expectedGenome.cells.size() != actualGenome.cells.size()) {
@@ -198,7 +198,7 @@ protected:
         }
         auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
         auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
-        if (expectedGenome.info != actualGenome.info) {
+        if (expectedGenome.header != actualGenome.header) {
             return false;
         }
         if (expectedGenome.cells.size() != actualGenome.cells.size()) {
@@ -314,9 +314,9 @@ protected:
         }
         auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
         auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
-        expectedGenome.info.shape = ConstructionShape_Custom; //compare all expect shape
-        actualGenome.info.shape = ConstructionShape_Custom;
-        if (expectedGenome.info != actualGenome.info) {
+        expectedGenome.header.shape = ConstructionShape_Custom; //compare all expect shape
+        actualGenome.header.shape = ConstructionShape_Custom;
+        if (expectedGenome.header != actualGenome.header) {
             return false;
         }
         if (expectedGenome.cells.size() != actualGenome.cells.size()) {
@@ -380,7 +380,7 @@ protected:
     {
         auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
         auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
-        if (expectedGenome.info != actualGenome.info) {
+        if (expectedGenome.header != actualGenome.header) {
             return false;
         }
         if (expectedGenome.cells.size() != actualGenome.cells.size()) {
@@ -416,7 +416,7 @@ protected:
     {
         auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
         auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
-        if (afterGenome.info != beforeGenome.info) {
+        if (afterGenome.header != beforeGenome.header) {
             return false;
         }
         std::set<CellGenomeDescription> afterGenomeRollout;
@@ -464,7 +464,7 @@ protected:
     {
         auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
         auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
-        if (afterGenome.info != beforeGenome.info) {
+        if (afterGenome.header != beforeGenome.header) {
             return false;
         }
         std::set<CellGenomeDescription> afterGenomeRollout;
@@ -525,7 +525,7 @@ protected:
     {
         auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
         auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
-        if (afterGenome.info != beforeGenome.info) {
+        if (afterGenome.header != beforeGenome.header) {
             return false;
         }
 
@@ -565,7 +565,7 @@ protected:
     {
         auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
         auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
-        if (afterGenome.info != beforeGenome.info) {
+        if (afterGenome.header != beforeGenome.header) {
             return false;
         }
 
@@ -617,7 +617,7 @@ TEST_F(MutationTests, propertiesMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(comparePropertiesMutation(genome, actualConstructor.genome));
-    EXPECT_EQ(byteIndex, actualConstructor.genomeReadPosition);
+    EXPECT_EQ(byteIndex, actualConstructor.genomeCurrentNodeIndex);
 }
 
 TEST_F(MutationTests, neuronDataMutation)
@@ -638,7 +638,7 @@ TEST_F(MutationTests, neuronDataMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareNeuronDataMutation(genome, actualConstructor.genome));
-    EXPECT_EQ(byteIndex, actualConstructor.genomeReadPosition);
+    EXPECT_EQ(byteIndex, actualConstructor.genomeCurrentNodeIndex);
 }
 
 TEST_F(MutationTests, geometryMutation)
@@ -659,7 +659,7 @@ TEST_F(MutationTests, geometryMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareGeometryMutation(genome, actualConstructor.genome));
-    EXPECT_EQ(byteIndex, actualConstructor.genomeReadPosition);
+    EXPECT_EQ(byteIndex, actualConstructor.genomeCurrentNodeIndex);
 }
 
 TEST_F(MutationTests, individualGeometryMutation)
@@ -680,7 +680,7 @@ TEST_F(MutationTests, individualGeometryMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareIndividualGeometryMutation(genome, actualConstructor.genome));
-    EXPECT_EQ(byteIndex, actualConstructor.genomeReadPosition);
+    EXPECT_EQ(byteIndex, actualConstructor.genomeCurrentNodeIndex);
 }
 
 TEST_F(MutationTests, cellFunctionMutation)
@@ -702,7 +702,7 @@ TEST_F(MutationTests, cellFunctionMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareCellFunctionMutation(genome, actualConstructor.genome));
-    auto actualCellIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(actualConstructor.genome, actualConstructor.genomeReadPosition);
+    auto actualCellIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(actualConstructor.genome, actualConstructor.genomeCurrentNodeIndex);
     EXPECT_EQ(cellIndex, actualCellIndex);
 }
 
@@ -746,7 +746,7 @@ TEST_F(MutationTests, insertMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareInsertMutation(genome, actualConstructor.genome));
-    EXPECT_EQ(0, actualConstructor.genomeReadPosition);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
 
 TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
@@ -766,7 +766,7 @@ TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_EQ(GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor.genome.size());
-    EXPECT_EQ(0, actualConstructor.genomeReadPosition);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
 
 TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
@@ -793,7 +793,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
         auto cellFunctionType = cell.getCellFunctionType();
         EXPECT_TRUE(cellFunctionType == CellFunction_Constructor || cellFunctionType == CellFunction_Injector);
     }
-    EXPECT_EQ(0, actualConstructor.genomeReadPosition);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
 
 TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
@@ -817,7 +817,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
 
     EXPECT_EQ(GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor.genome.size());
-    EXPECT_EQ(0, actualConstructor.genomeReadPosition);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
 
 TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
@@ -837,7 +837,7 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareDeleteMutation(genome, actualConstructor.genome));
-    EXPECT_EQ(0, actualConstructor.genomeReadPosition);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
 
 TEST_F(MutationTests, duplicateMutation)
@@ -857,7 +857,7 @@ TEST_F(MutationTests, duplicateMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareInsertMutation(genome, actualConstructor.genome));
-    EXPECT_EQ(0, actualConstructor.genomeReadPosition);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
 
 TEST_F(MutationTests, translateMutation)

@@ -423,7 +423,8 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
-        constructor.genomeReadPosition = toInt(cellTO.cellFunctionData.constructor.genomeReadPosition);
+        constructor.genomeCurrentNodeIndex = toInt(cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex);
+        constructor.hasGenomeAlreadyRead = toInt(cellTO.cellFunctionData.constructor.hasGenomeAlreadyRead);
         constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
         constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
         constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
@@ -541,7 +542,8 @@ void DescriptionConverter::addCell(
         constructorTO.activationMode = constructorDesc.activationMode;
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
-        constructorTO.genomeReadPosition = constructorDesc.genomeReadPosition;
+        constructorTO.genomeCurrentNodeIndex = constructorDesc.genomeCurrentNodeIndex;
+        constructorTO.hasGenomeAlreadyRead = constructorDesc.hasGenomeAlreadyRead;
         constructorTO.offspringCreatureId = constructorDesc.offspringCreatureId;
         constructorTO.offspringMutationId = constructorDesc.offspringMutationId;
         constructorTO.genomeGeneration = constructorDesc.genomeGeneration;

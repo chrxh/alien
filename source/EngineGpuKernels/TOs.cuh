@@ -60,7 +60,8 @@ struct ConstructorTO
     float constructionAngle2;
 
     //process data
-    int genomeReadPosition;
+    int genomeCurrentNodeIndex;
+    bool hasGenomeAlreadyRead;
     int offspringCreatureId;
     int offspringMutationId;
 };

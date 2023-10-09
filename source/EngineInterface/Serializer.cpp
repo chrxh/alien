@@ -63,13 +63,14 @@ namespace
     auto constexpr Id_Constructor_AngleAlignment = 4;
     auto constexpr Id_Constructor_Stiffness = 5;
     auto constexpr Id_Constructor_ConstructionActivationTime = 6;
-    auto constexpr Id_Constructor_GenomeReadPosition = 7;
+    auto constexpr Id_Constructor_GenomeCurrentNodeIndex = 7;
     auto constexpr Id_Constructor_GenomeGeneration = 9;
     auto constexpr Id_Constructor_GenomeHeader = 10;
     auto constexpr Id_Constructor_ConstructionAngle1 = 11;
     auto constexpr Id_Constructor_ConstructionAngle2 = 12;
     auto constexpr Id_Constructor_OffspringCreatureId = 13;
     auto constexpr Id_Constructor_OffspringMutationId = 14;
+    auto constexpr Id_Constructor_HasGenomeAlreadyRead = 15;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -103,6 +104,7 @@ namespace
     auto constexpr Id_GenomeHeader_AngleAlignment = 3;
     auto constexpr Id_GenomeHeader_Stiffness = 4;
     auto constexpr Id_GenomeHeader_ConnectionDistance = 5;
+    auto constexpr Id_GenomeHeader_NumRepetitions = 6;
 
     auto constexpr Id_CellGenome_ReferenceAngle = 1;
     auto constexpr Id_CellGenome_Energy = 7;
@@ -254,10 +256,10 @@ namespace cereal
                 else {
                     GenomeDescription genomeDesc;
                     genomeDesc.cells = std::get<std::vector<CellGenomeDescription>>(genomeData);
-                    genomeDesc.info.singleConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SingleConstruction));
-                    genomeDesc.info.separateConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SeparateConstruction));
-                    genomeDesc.info.angleAlignment = std::get<int>(auxiliaries.at(Id_ConstructorGenome_AngleAlignment));
-                    genomeDesc.info.stiffness = std::get<float>(auxiliaries.at(Id_ConstructorGenome_Stiffness));
+                    genomeDesc.header.singleConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SingleConstruction));
+                    genomeDesc.header.separateConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SeparateConstruction));
+                    genomeDesc.header.angleAlignment = std::get<int>(auxiliaries.at(Id_ConstructorGenome_AngleAlignment));
+                    genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_ConstructorGenome_Stiffness));
                     data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
                     if (!genomeDesc.cells.empty()) {
                         data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;
@@ -412,6 +414,7 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_GenomeHeader_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
         loadSave<float>(task, auxiliaries, Id_GenomeHeader_Stiffness, data.stiffness, defaultObject.stiffness);
         loadSave<float>(task, auxiliaries, Id_GenomeHeader_ConnectionDistance, data.connectionDistance, defaultObject.connectionDistance);
+        loadSave<int>(task, auxiliaries, Id_GenomeHeader_NumRepetitions, data.numRepetitions, defaultObject.numRepetitions);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(GenomeHeaderDescription)
@@ -419,7 +422,7 @@ namespace cereal
     template <class Archive>
     void serialize(Archive& ar, GenomeDescription& data)
     {
-        ar(data.info, data.cells);
+        ar(data.header, data.cells);
     }
 
     template <class Archive>
@@ -466,7 +469,8 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
         loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
-        loadSave<int>(task, auxiliaries, Id_Constructor_GenomeReadPosition, data.genomeReadPosition, defaultObject.genomeReadPosition);
+        loadSave<int>(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data.genomeCurrentNodeIndex, defaultObject.genomeCurrentNodeIndex);
+        loadSave<bool>(task, auxiliaries, Id_Constructor_HasGenomeAlreadyRead, data.hasGenomeAlreadyRead, defaultObject.hasGenomeAlreadyRead);
         loadSave<int>(task, auxiliaries, Id_Constructor_OffspringCreatureId, data.offspringCreatureId, defaultObject.offspringCreatureId);
         loadSave<int>(task, auxiliaries, Id_Constructor_OffspringMutationId, data.offspringMutationId, defaultObject.offspringMutationId);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
@@ -490,16 +494,16 @@ namespace cereal
             else {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc.cells);
-                genomeDesc.info.singleConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction));
-                genomeDesc.info.separateConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SeparateConstruction));
-                genomeDesc.info.angleAlignment = std::get<int>(auxiliaries.at(Id_Constructor_AngleAlignment));
-                genomeDesc.info.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
+                genomeDesc.header.singleConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction));
+                genomeDesc.header.separateConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SeparateConstruction));
+                genomeDesc.header.angleAlignment = std::get<int>(auxiliaries.at(Id_Constructor_AngleAlignment));
+                genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
                 data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
 
-                //heuristic to obtain a valid genomeReadPosition
-                data.genomeReadPosition += Const::GenomeHeaderSize;
-                auto cellIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(data.genome, data.genomeReadPosition);
-                data.genomeReadPosition = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(data.genome, cellIndex);
+                //heuristic to obtain a valid genomeCurrentNodeIndex
+                data.genomeCurrentNodeIndex += Const::GenomeHeaderSize;
+                auto cellIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(data.genome, data.genomeCurrentNodeIndex);
+                data.genomeCurrentNodeIndex = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(data.genome, cellIndex);
 
                 if (!genomeDesc.cells.empty()) {
                     data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;

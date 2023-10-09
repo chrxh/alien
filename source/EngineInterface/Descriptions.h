@@ -103,7 +103,8 @@ struct ConstructorDescription
     float constructionAngle2 = 0;
 
     //process data
-    int genomeReadPosition = 0;
+    int genomeCurrentNodeIndex = 0;
+    bool hasGenomeAlreadyRead = false;
     int offspringCreatureId = 0;
     int offspringMutationId = 0;
 
@@ -127,7 +128,7 @@ struct ConstructorDescription
     }
     ConstructorDescription& setGenomeReadPosition(int value)
     {
-        genomeReadPosition = value;
+        genomeCurrentNodeIndex = value;
         return *this;
     }
     ConstructorDescription& setGenomeGeneration(int value)

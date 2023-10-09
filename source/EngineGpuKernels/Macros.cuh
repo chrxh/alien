@@ -62,6 +62,12 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 
 #define NEAR_ZERO 0.00001f
 
+#define CHECK(condition) \
+    if (!(condition)) { \
+        printf("Check failed. File: %s, Line: %d\n", __FILE__, __LINE__); \
+        ABORT(); \
+    }
+
 #define CUDA_THROW_NOT_IMPLEMENTED() \
     printf("Not implemented error. File: %s, Line: %d\n", __FILE__, __LINE__); \
     ABORT();
