@@ -22,6 +22,7 @@ private:
         GenomeHeader genomeHeader;
 
         int genomeCurrentBytePosition;
+        bool isLastNode;
 
         float angle;
         float energy;
@@ -160,20 +161,13 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             if (tryConstructCell(data, statistics, cell, constructionData)) {
                 cellBuilt = true;
             } 
-            if (GenomeDecoder::isFinished(constructor)) {
-                if (!constructionData.genomeHeader.singleConstruction) {
-                    constructor.genomeCurrentNodeIndex = 0;
-                }
-            }
         }
 
         if (cellBuilt) {
             activity.channels[0] = 1;
-            if (GenomeDecoder::isAtLastNode(constructor)) {
+            if (constructionData.isLastNode) {
                 constructor.genomeCurrentNodeIndex = 0;
-                if (GenomeDecoder::isSingleConstruction(constructor)) {
-                    constructor.hasGenomeAlreadyRead = true;
-                }
+                constructor.hasGenomeAlreadyRead = true;
             } else {
                 ++constructor.genomeCurrentNodeIndex;
             }
@@ -191,6 +185,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     ConstructionData result;
     result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
     result.genomeCurrentBytePosition = GenomeDecoder::getNodeAddress(constructor.genome, constructor.genomeSize, constructor.genomeCurrentNodeIndex);
+    result.isLastNode = GenomeDecoder::isAtLastNode(constructor);
 
     ShapeGenerator shapeGenerator;
     auto shape = result.genomeHeader.shape % ConstructionShape_Count;
@@ -223,11 +218,10 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     }
 
     auto isAtFirstNode = GenomeDecoder::isAtFirstNode(constructor);
-    auto isAtLastNode = GenomeDecoder::isAtLastNode(constructor);
     if (isAtFirstNode) {
         result.angle = constructor.constructionAngle1;
     }
-    if (isAtLastNode) {
+    if (result.isLastNode) {
         result.angle = constructor.constructionAngle2;
     }
     return result;
@@ -439,10 +433,10 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
     //possibly connect newCell to hostCell
     bool adaptReferenceAngle = false;
-    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !constructionData.genomeHeader.separateConstruction) {
+    if (!constructionData.isLastNode || !constructionData.genomeHeader.separateConstruction) {
 
         //move connection
-        auto distance = GenomeDecoder::isFinished(constructor) && !constructionData.genomeHeader.separateConstruction
+        auto distance = constructionData.isLastNode && !constructionData.genomeHeader.separateConstruction
             ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
         for (int i = 0; i < hostCell->numConnections; ++i) {
