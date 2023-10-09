@@ -56,8 +56,9 @@ struct ConstructorFunction
     float constructionAngle2;
 
     //process data
-    int genomeReadPosition;
-    int offspringCreatureId;    //will be filled when self-replication starts
+    int genomeCurrentNodeIndex;
+    bool hasGenomeAlreadyRead;
+    int offspringCreatureId;  //will be filled when self-replication starts
     int offspringMutationId;
 
     //temp

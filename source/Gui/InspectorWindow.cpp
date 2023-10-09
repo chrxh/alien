@@ -378,7 +378,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                     printOverlayMessage("Genome injected");
                     desc.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
                     if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                        desc.genomeReadPosition = 0;
+                        desc.genomeCurrentNodeIndex = 0;
                     }
                 }
                 ImGui::TreePop();
@@ -423,10 +423,10 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                     numNodes);
 
                 if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                    auto entry = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, desc.genomeReadPosition);
+                    auto entry = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, desc.genomeCurrentNodeIndex);
                     AlienImGui::InputInt(
                         AlienImGui::InputIntParameters().name("Current cell").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip), entry);
-                    desc.genomeReadPosition = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(desc.genome, entry);
+                    desc.genomeCurrentNodeIndex = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(desc.genome, entry);
                 }
                 ImGui::TreePop();
             }
@@ -701,8 +701,8 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
     switch (cell.getCellFunctionType()) {
     case CellFunction_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
-        if (constructor.genomeReadPosition < 0) {
-            constructor.genomeReadPosition = 0;
+        if (constructor.genomeCurrentNodeIndex < 0) {
+            constructor.genomeCurrentNodeIndex = 0;
         }
         if (constructor.constructionActivationTime < 0) {
             constructor.constructionActivationTime = 0;

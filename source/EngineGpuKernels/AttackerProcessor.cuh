@@ -259,8 +259,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
                 return false;
             }
             if (otherCell->cellFunction == CellFunction_Constructor) {
-                auto isFinished = GenomeDecoder::isFinishedSingleConstruction(otherCell->cellFunctionData.constructor);
-                if (!isFinished && otherCell->creatureId == cell->creatureId) {
+                if (!GenomeDecoder::isFinished(otherCell->cellFunctionData.constructor) && otherCell->creatureId == cell->creatureId) {
                     return true;
                 }
             }

@@ -610,7 +610,7 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
                       && !GenomeDecoder::isSeparating(constructor))) {
                     atomicExch(&connectedCell->livingState, LivingState_Dying);
                 } else {
-                    constructor.genomeReadPosition = constructor.genomeSize;
+                    constructor.genomeCurrentNodeIndex = constructor.genomeSize;
                 }
             }
         }
