@@ -423,10 +423,9 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                     numNodes);
 
                 if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                    auto entry = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, desc.genomeCurrentNodeIndex);
                     AlienImGui::InputInt(
-                        AlienImGui::InputIntParameters().name("Current cell").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip), entry);
-                    desc.genomeCurrentNodeIndex = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(desc.genome, entry);
+                        AlienImGui::InputIntParameters().name("Current cell").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
+                        desc.genomeCurrentNodeIndex);
                 }
                 ImGui::TreePop();
             }
@@ -701,9 +700,9 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
     switch (cell.getCellFunctionType()) {
     case CellFunction_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
-        if (constructor.genomeCurrentNodeIndex < 0) {
-            constructor.genomeCurrentNodeIndex = 0;
-        }
+        auto numNodes = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(constructor.genome, toInt(constructor.genome.size()));
+        constructor.genomeCurrentNodeIndex = ((constructor.genomeCurrentNodeIndex % numNodes) + numNodes) % numNodes;
+
         if (constructor.constructionActivationTime < 0) {
             constructor.constructionActivationTime = 0;
         }

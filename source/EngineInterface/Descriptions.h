@@ -126,7 +126,7 @@ struct ConstructorDescription
         genome = value;
         return *this;
     }
-    ConstructorDescription& setGenomeReadPosition(int value)
+    ConstructorDescription& setGenomeCurrentNodeIndex(int value)
     {
         genomeCurrentNodeIndex = value;
         return *this;

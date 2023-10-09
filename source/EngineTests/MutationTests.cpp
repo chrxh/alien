@@ -605,7 +605,7 @@ TEST_F(MutationTests, propertiesMutation)
     int byteIndex = 0;
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(byteIndex)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -626,7 +626,7 @@ TEST_F(MutationTests, neuronDataMutation)
     int byteIndex = 0;
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(byteIndex)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -647,7 +647,7 @@ TEST_F(MutationTests, geometryMutation)
     int byteIndex = 0;
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(byteIndex)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -668,7 +668,7 @@ TEST_F(MutationTests, individualGeometryMutation)
     int byteIndex = 0;
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(byteIndex)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -690,7 +690,7 @@ TEST_F(MutationTests, cellFunctionMutation)
     int byteIndex = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(genome, cellIndex);
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(byteIndex)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -732,7 +732,7 @@ TEST_F(MutationTests, insertMutation)
 
     auto data = DataDescription().addCells({CellDescription()
                                                 .setId(1)
-                                                .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(0))
+                                                .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))
                                                 .setExecutionOrderNumber(0)
                                                 .setColor(genomeCellColors[0])});
 
@@ -756,7 +756,7 @@ TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
     }));
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(0)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     _simController->testOnly_mutate(1, MutationType::Deletion);
@@ -774,7 +774,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(0)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -804,7 +804,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(0)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -825,7 +825,7 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(0)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -845,7 +845,7 @@ TEST_F(MutationTests, duplicateMutation)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(0)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -865,7 +865,7 @@ TEST_F(MutationTests, translateMutation)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(0)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -893,7 +893,7 @@ TEST_F(MutationTests, colorMutation)
     auto genome = createGenomeWithUniformColorPerSubgenome();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(0)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -923,7 +923,7 @@ TEST_F(MutationTests, uniformColorMutation)
     auto genome = createGenomeWithUniformColor();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeReadPosition(0)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
