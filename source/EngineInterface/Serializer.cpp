@@ -483,6 +483,8 @@ namespace cereal
 
         if (task == SerializationTask::Load) {
             auto hasGenomeHeader = auxiliaries.contains(Id_Constructor_GenomeHeader);
+            auto useNewGenomeIndex = auxiliaries.contains(Id_Constructor_HasGenomeAlreadyRead);
+
             if (hasGenomeHeader) {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc);
@@ -491,7 +493,7 @@ namespace cereal
 
             //compatibility with older versions
             //>>>
-            else {
+            if (!hasGenomeHeader) {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc.cells);
                 genomeDesc.header.singleConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction));
@@ -502,15 +504,19 @@ namespace cereal
 
                 //heuristic to obtain a valid genomeCurrentNodeIndex
                 data.genomeCurrentNodeIndex += Const::GenomeHeaderSize;
-                auto cellIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(data.genome, data.genomeCurrentNodeIndex);
-                data.genomeCurrentNodeIndex = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(data.genome, cellIndex);
+                data.genomeCurrentNodeIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(data.genome, data.genomeCurrentNodeIndex);
 
                 if (!genomeDesc.cells.empty()) {
                     data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;
                     data.constructionAngle2 = genomeDesc.cells.back().referenceAngle;
                 }
             }
+
+            if (hasGenomeHeader && !useNewGenomeIndex) {
+                data.genomeCurrentNodeIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(data.genome, data.genomeCurrentNodeIndex);
+            }
             //<<<
+
         } else {
             GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
             ar(genomeDesc);

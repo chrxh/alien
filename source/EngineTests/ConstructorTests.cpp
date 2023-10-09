@@ -78,7 +78,7 @@ TEST_F(ConstructorTests, alreadyFinished)
         GenomeDescription().setHeader(GenomeHeaderDescription().setSingleConstruction(true)).setCells({CellGenomeDescription()}));
 
     auto constructor = ConstructorDescription().setGenome(genome);
-    constructor.setGenomeReadPosition(constructor.genome.size());
+    constructor.setGenomeCurrentNodeIndex(constructor.genome.size());
 
     data.addCell(
         CellDescription()
@@ -223,7 +223,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_notReady)
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(4)
-            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setGenomeReadPosition(Const::GenomeHeaderSize)),
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setGenomeCurrentNodeIndex(Const::GenomeHeaderSize)),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -260,7 +260,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_ready)
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(4)
-            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setGenomeReadPosition(toInt(otherGenome.size()))),
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setGenomeCurrentNodeIndex(toInt(otherGenome.size()))),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
