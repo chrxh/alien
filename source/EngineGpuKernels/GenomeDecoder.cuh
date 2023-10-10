@@ -300,7 +300,7 @@ __inline__ __device__ bool GenomeDecoder::isFinished(ConstructorFunction const& 
         return true;
     }
     if (isSingleConstruction(constructor)) {
-        return constructor.hasGenomeAlreadyRead;
+        return constructor.isConstructionBuilt;
     }
     return false;
 }

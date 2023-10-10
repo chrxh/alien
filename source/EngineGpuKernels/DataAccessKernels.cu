@@ -90,7 +90,7 @@ namespace
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
             cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex = cell->cellFunctionData.constructor.genomeCurrentNodeIndex;
-            cellTO.cellFunctionData.constructor.hasGenomeAlreadyRead = cell->cellFunctionData.constructor.hasGenomeAlreadyRead;
+            cellTO.cellFunctionData.constructor.isConstructionBuilt = cell->cellFunctionData.constructor.isConstructionBuilt;
             cellTO.cellFunctionData.constructor.offspringCreatureId = cell->cellFunctionData.constructor.offspringCreatureId;
             cellTO.cellFunctionData.constructor.offspringMutationId = cell->cellFunctionData.constructor.offspringMutationId;
             cellTO.cellFunctionData.constructor.genomeGeneration = cell->cellFunctionData.constructor.genomeGeneration;

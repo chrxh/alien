@@ -70,7 +70,7 @@ namespace
     auto constexpr Id_Constructor_ConstructionAngle2 = 12;
     auto constexpr Id_Constructor_OffspringCreatureId = 13;
     auto constexpr Id_Constructor_OffspringMutationId = 14;
-    auto constexpr Id_Constructor_HasGenomeAlreadyRead = 15;
+    auto constexpr Id_Constructor_IsConstructionBuilt = 15;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -470,7 +470,7 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
         loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data.genomeCurrentNodeIndex, defaultObject.genomeCurrentNodeIndex);
-        loadSave<bool>(task, auxiliaries, Id_Constructor_HasGenomeAlreadyRead, data.hasGenomeAlreadyRead, defaultObject.hasGenomeAlreadyRead);
+        loadSave<bool>(task, auxiliaries, Id_Constructor_IsConstructionBuilt, data.isConstructionBuilt, defaultObject.isConstructionBuilt);
         loadSave<int>(task, auxiliaries, Id_Constructor_OffspringCreatureId, data.offspringCreatureId, defaultObject.offspringCreatureId);
         loadSave<int>(task, auxiliaries, Id_Constructor_OffspringMutationId, data.offspringMutationId, defaultObject.offspringMutationId);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
@@ -483,7 +483,7 @@ namespace cereal
 
         if (task == SerializationTask::Load) {
             auto hasGenomeHeader = auxiliaries.contains(Id_Constructor_GenomeHeader);
-            auto useNewGenomeIndex = auxiliaries.contains(Id_Constructor_HasGenomeAlreadyRead);
+            auto useNewGenomeIndex = auxiliaries.contains(Id_Constructor_IsConstructionBuilt);
 
             if (hasGenomeHeader) {
                 GenomeDescription genomeDesc;
@@ -502,7 +502,7 @@ namespace cereal
                 genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
                 data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
 
-                data.hasGenomeAlreadyRead = toInt(data.genome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
+                data.isConstructionBuilt = toInt(data.genome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
                 data.genomeCurrentNodeIndex = 0;
 
                 if (!genomeDesc.cells.empty()) {
@@ -512,7 +512,7 @@ namespace cereal
             }
 
             if (hasGenomeHeader && !useNewGenomeIndex) {
-                data.hasGenomeAlreadyRead = toInt(data.genome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
+                data.isConstructionBuilt = toInt(data.genome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
                 data.genomeCurrentNodeIndex = 0;
             }
             //<<<

@@ -57,7 +57,7 @@ struct ConstructorFunction
 
     //process data
     int genomeCurrentNodeIndex;
-    bool hasGenomeAlreadyRead;
+    bool isConstructionBuilt;
     int offspringCreatureId;  //will be filled when self-replication starts
     int offspringMutationId;
 
