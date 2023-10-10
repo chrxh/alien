@@ -23,9 +23,7 @@ public:
     __inline__ __device__ static void clearDensityMap(SimulationData& data);
     __inline__ __device__ static void fillDensityMap(SimulationData& data);
 
-    __inline__ __device__ static void correctOverlap(SimulationData& data);
     __inline__ __device__ static void calcFluidForces_reconnectCells_correctOverlap(SimulationData& data);
-
     __inline__ __device__ static void calcCollisions_reconnectCells_correctOverlap(SimulationData& data);
     __inline__ __device__ static void checkForces(SimulationData& data);
     __inline__ __device__ static void applyForces(SimulationData& data);  //prerequisite: data from calcCollisions_reconnectCells_correctOverlap

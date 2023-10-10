@@ -326,14 +326,13 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         return false;
     }
 
-    if (!GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor) || !constructionData.genomeHeader.separateConstruction) {
-        auto distance =
-            GenomeDecoder::isFinished(constructor) && !constructionData.genomeHeader.separateConstruction && constructionData.genomeHeader.singleConstruction
+    if (!constructionData.isLastNode || !constructionData.genomeHeader.separateConstruction) {
+        auto distance = constructionData.isLastNode && !constructionData.genomeHeader.separateConstruction && constructionData.genomeHeader.singleConstruction
             ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
         CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
     }
-    if (GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)) {
+    if (constructionData.isLastNode) {
         newCell->livingState = LivingState_JustReady;
     }
     hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
@@ -418,8 +417,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         newCell->livingState = LivingState_Dying;
     }
 
-    auto const& constructor = hostCell->cellFunctionData.constructor;
-    if (GenomeDecoder::isFinished(constructor)) {
+    if (constructionData.isLastNode) {
         newCell->livingState = LivingState_JustReady;
     }
 
