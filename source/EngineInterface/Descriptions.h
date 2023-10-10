@@ -104,7 +104,7 @@ struct ConstructorDescription
 
     //process data
     int genomeCurrentNodeIndex = 0;
-    bool hasGenomeAlreadyRead = false;
+    bool isConstructionBuilt = false;
     int offspringCreatureId = 0;
     int offspringMutationId = 0;
 

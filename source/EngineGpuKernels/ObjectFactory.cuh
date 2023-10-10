@@ -140,7 +140,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cell->cellFunctionData.constructor.genomeSize,
             cell->cellFunctionData.constructor.genome);
         cell->cellFunctionData.constructor.genomeCurrentNodeIndex = cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex;
-        cell->cellFunctionData.constructor.hasGenomeAlreadyRead = cellTO.cellFunctionData.constructor.hasGenomeAlreadyRead;
+        cell->cellFunctionData.constructor.isConstructionBuilt = cellTO.cellFunctionData.constructor.isConstructionBuilt;
         cell->cellFunctionData.constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
         cell->cellFunctionData.constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
         cell->cellFunctionData.constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
@@ -293,7 +293,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
                 genome[i] = _data->numberGen1.randomByte();
             }
             cell->cellFunctionData.constructor.genomeCurrentNodeIndex = 0;
-            cell->cellFunctionData.constructor.hasGenomeAlreadyRead = false;
+            cell->cellFunctionData.constructor.isConstructionBuilt = false;
             cell->cellFunctionData.constructor.genomeGeneration = 0;
             cell->cellFunctionData.constructor.constructionAngle1 = 0;
             cell->cellFunctionData.constructor.constructionAngle2 = 0;

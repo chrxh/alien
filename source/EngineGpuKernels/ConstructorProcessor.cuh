@@ -167,7 +167,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             activity.channels[0] = 1;
             if (constructionData.isLastNode) {
                 constructor.genomeCurrentNodeIndex = 0;
-                constructor.hasGenomeAlreadyRead = true;
+                constructor.isConstructionBuilt = true;
             } else {
                 ++constructor.genomeCurrentNodeIndex;
             }
@@ -605,7 +605,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.activationMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor, genomeCurrentBytePosition);
         newConstructor.genomeCurrentNodeIndex = 0;
-        newConstructor.hasGenomeAlreadyRead = false;
+        newConstructor.isConstructionBuilt = false;
         newConstructor.constructionAngle1 = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
         newConstructor.constructionAngle2 = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
         GenomeDecoder::copyGenome(data, constructor, genomeCurrentBytePosition, newConstructor);
@@ -689,5 +689,5 @@ __inline__ __device__ bool ConstructorProcessor::hasGenomeAlreadyRead(Cell* cell
     if (cell->cellFunction != CellFunction_Constructor) {
         return false;
     }
-    return GenomeDecoder::hasEmptyGenome(cell->cellFunctionData.constructor) || cell->cellFunctionData.constructor.hasGenomeAlreadyRead;
+    return GenomeDecoder::hasEmptyGenome(cell->cellFunctionData.constructor) || cell->cellFunctionData.constructor.isConstructionBuilt;
 }

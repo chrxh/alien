@@ -61,7 +61,7 @@ struct ConstructorTO
 
     //process data
     int genomeCurrentNodeIndex;
-    bool hasGenomeAlreadyRead;
+    bool isConstructionBuilt;
     int offspringCreatureId;
     int offspringMutationId;
 };
