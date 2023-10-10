@@ -14,7 +14,7 @@ public:
 
     void registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
 
-    void openTab(GenomeDescription const& genome);
+    void openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed = true);
     GenomeDescription const& getCurrentGenome() const;
 
 private:
