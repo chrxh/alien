@@ -65,10 +65,12 @@ void _GenomeEditorWindow::registerCyclicReferences(UploadSimulationDialogWeakPtr
     _uploadSimulationDialog = uploadSimulationDialog;
 }
 
-void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
+void _GenomeEditorWindow::openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed)
 {
-    setOn(false);
-    delayedExecution([this] { setOn(true); });
+    if (openGenomeEditorIfClosed) {
+        setOn(false);
+        delayedExecution([this] { setOn(true); });
+    }
     if (_tabDatas.size() == 1 && _tabDatas.front().genome.cells.empty()) {
         _tabDatas.clear();
     }
@@ -763,7 +765,7 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
             auto genomeToOpen = desc.isMakeGenomeCopy()
                 ? tab.genome
                 : GenomeDescriptionConverter::convertBytesToDescription(desc.getGenomeData());
-            openTab(genomeToOpen);
+            openTab(genomeToOpen, false);
         }
         ImGui::SameLine();
         if (AlienImGui::Button("Set self-copy")) {
@@ -785,7 +787,7 @@ void _GenomeEditorWindow::onOpenGenome()
         if (!Serializer::deserializeGenomeFromFile(genomeData, firstFilename.string())) {
             MessageDialog::getInstance().information("Open genome", "The selected file could not be opened.");
         } else {
-            openTab(GenomeDescriptionConverter::convertBytesToDescription(genomeData));
+            openTab(GenomeDescriptionConverter::convertBytesToDescription(genomeData), false);
         }
     });
 }
