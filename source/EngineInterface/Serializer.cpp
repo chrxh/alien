@@ -502,9 +502,8 @@ namespace cereal
                 genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
                 data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
 
-                //heuristic to obtain a valid genomeCurrentNodeIndex
-                data.genomeCurrentNodeIndex += Const::GenomeHeaderSize;
-                data.genomeCurrentNodeIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(data.genome, data.genomeCurrentNodeIndex);
+                data.hasGenomeAlreadyRead = toInt(data.genome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
+                data.genomeCurrentNodeIndex = 0;
 
                 if (!genomeDesc.cells.empty()) {
                     data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;
@@ -513,7 +512,8 @@ namespace cereal
             }
 
             if (hasGenomeHeader && !useNewGenomeIndex) {
-                data.genomeCurrentNodeIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(data.genome, data.genomeCurrentNodeIndex);
+                data.hasGenomeAlreadyRead = toInt(data.genome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
+                data.genomeCurrentNodeIndex = 0;
             }
             //<<<
 
