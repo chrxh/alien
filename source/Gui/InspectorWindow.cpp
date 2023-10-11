@@ -165,6 +165,7 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(BaseTabTextWidth).tooltip(Const::CellEnergyTooltip),
                     cell.energy);
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Age").textWidth(BaseTabTextWidth).tooltip(Const::CellAgeTooltip), cell.age);
                 AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position X").format("%.2f").textWidth(BaseTabTextWidth), cell.pos.x);
                 AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(BaseTabTextWidth), cell.pos.y);
                 AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity X").format("%.2f").textWidth(BaseTabTextWidth), cell.vel.x);
@@ -257,7 +258,6 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                     }
                 }
 
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Age").textWidth(CellFunctionBaseTabTextWidth).tooltip(Const::CellAgeTooltip), cell.age);
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Mutation id").textWidth(CellFunctionBaseTabTextWidth).tooltip(Const::CellMutationIdTooltip),
                     cell.mutationId);
@@ -715,7 +715,11 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
     case CellFunction_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
         auto numNodes = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(constructor.genome, toInt(constructor.genome.size()));
-        constructor.genomeCurrentNodeIndex = ((constructor.genomeCurrentNodeIndex % numNodes) + numNodes) % numNodes;
+        if (numNodes > 0) {
+            constructor.genomeCurrentNodeIndex = ((constructor.genomeCurrentNodeIndex % numNodes) + numNodes) % numNodes;
+        } else {
+            constructor.genomeCurrentNodeIndex = 0;
+        }
 
         if (constructor.constructionActivationTime < 0) {
             constructor.constructionActivationTime = 0;
