@@ -112,10 +112,11 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
             auto nextCell = currentCell->connections[connectionIndex].cell;
             if (!visitedCells.contains(nextCell)) {
                 visitedCells.insert(nextCell);
-                if (isSelfReplicator(nextCell)) {
+                if (nextCell->creatureId != cell->creatureId) {
                     goBack = true;
                 } else {
-                    if (!isConstructionBuild(nextCell)) {
+                    if (nextCell->cellFunction == CellFunction_Constructor && !GenomeDecoder::hasEmptyGenome(nextCell->cellFunctionData.constructor)
+                        && !nextCell->cellFunctionData.constructor.isConstructionBuilt) {
                         constructor.isComplete = false;
                         return;
                     }
@@ -256,8 +257,12 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
             hostCell->releaseLock();
             return false;
         }
-
         auto success = continueConstruction(data, statistics, hostCell, underConstructionCell, constructionData);
+        if (success) {
+            if (hostCell->cellFunctionData.constructor.genomeCurrentNodeIndex == 0) {
+                underConstructionCell->livingState = LivingState_JustReady;
+            }
+        }
 
         underConstructionCell->releaseLock();
         hostCell->releaseLock();
@@ -691,8 +696,5 @@ __inline__ __device__ bool ConstructorProcessor::isSelfReplicator(Cell* cell)
 
 __inline__ __device__ bool ConstructorProcessor::isConstructionBuild(Cell* cell)
 {
-    if (cell->cellFunction != CellFunction_Constructor) {
-        return false;
-    }
     return GenomeDecoder::hasEmptyGenome(cell->cellFunctionData.constructor) || cell->cellFunctionData.constructor.isConstructionBuilt;
 }
