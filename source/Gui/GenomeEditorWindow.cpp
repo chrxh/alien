@@ -54,12 +54,14 @@ _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, Simula
     }
     _startingPath = GlobalSettings::getInstance().getStringState("windows.genome editor.starting path", path.string());
     _previewHeight = GlobalSettings::getInstance().getFloatState("windows.genome editor.preview height", scale(PreviewHeight));
+    _previewZoom = GlobalSettings::getInstance().getFloatState("windows.genome editor.preview zoom", _previewZoom);
 }
 
 _GenomeEditorWindow::~_GenomeEditorWindow()
 {
     GlobalSettings::getInstance().setStringState("windows.genome editor.starting path", _startingPath);
     GlobalSettings::getInstance().setFloatState("windows.genome editor.preview height", _previewHeight);
+    GlobalSettings::getInstance().setFloatState("windows.genome editor.preview zoom", _previewZoom);
 }
 
 void _GenomeEditorWindow::registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog)
