@@ -935,6 +935,7 @@ void _GenomeEditorWindow::validationAndCorrection(GenomeHeaderDescription& info)
 {
     info.stiffness = std::max(0.0f, std::min(1.0f, info.stiffness));
     info.connectionDistance = std::max(0.5f, std::min(1.5f, info.connectionDistance));
+    info.numRepetitions = std::max(1, info.numRepetitions);
 }
 
 void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const
