@@ -15,7 +15,7 @@ public:
     static float length(RealVector2D const& v);
     static float angleOfVector(RealVector2D const& v);
     static RealVector2D rotateQuarterCounterClockwise(RealVector2D v);
-    static RealVector2D unitVectorOfAngle(double angleInDeg);
+    static RealVector2D unitVectorOfAngle(float angleInDeg);
     static RealMatrix2D calcRotationMatrix(float angleInDeg);  //rotation is clockwise
     static RealVector2D rotateClockwise(RealVector2D const& v, float angle);
     static void normalize(RealVector2D& v);

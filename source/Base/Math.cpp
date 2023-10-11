@@ -31,7 +31,7 @@ RealVector2D Math::rotateQuarterCounterClockwise(RealVector2D v)
     return v;
 }
 
-RealVector2D Math::unitVectorOfAngle(double angle)
+RealVector2D Math::unitVectorOfAngle(float angle)
 {
     return {sinf(angle * Const::DegToRad), -cosf(angle * Const::DegToRad)};
 }

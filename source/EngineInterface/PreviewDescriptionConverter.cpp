@@ -90,7 +90,7 @@ namespace
         std::vector<CellPreviewDescriptionIntern> cellsIntern;
         RealVector2D direction;
     };
-    ProcessedGenomeDescriptionResult processMainGenomeDescription(
+    ProcessedGenomeDescriptionResult processPrincipalPartOfGenomeDescription(
         GenomeDescription const& genome,
         std::optional<int> const& uniformNodeIndex,
         std::optional<float> const& lastReferenceAngle,
@@ -101,85 +101,92 @@ namespace
 
         RealVector2D pos;
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
-        int index = 0;
-        auto shapeGenerator = ShapeGeneratorFactory::create(genome.header.shape);
-        for (auto const& node : genome.cells) {
-            if (index > 0) {
-                pos += result.direction * genome.header.connectionDistance;
-            }
 
-            ShapeGeneratorResult shapeResult;
-            shapeResult.angle = node.referenceAngle;
-            shapeResult.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
-            if (genome.header.shape != ConstructionShape_Custom) {
-                shapeResult = shapeGenerator->generateNextConstructionData();
-            }
-            if (lastReferenceAngle.has_value() && index == genome.cells.size() - 1) {
-                shapeResult.angle = *lastReferenceAngle;
-            }
+        auto index = 0;
+        for (auto repetition = 0; repetition < genome.header.numRepetitions; ++repetition) {
 
-            if (index > 0) {
-                result.direction = Math::rotateClockwise(-result.direction, (180.0f + shapeResult.angle));
-            }
+            auto shapeGenerator = ShapeGeneratorFactory::create(genome.header.shape);
+            auto partIndex = 0;
+            for (auto const& node : genome.cells) {
+                if (index > 0) {
+                    pos += result.direction * genome.header.connectionDistance;
+                }
 
-            //create cell description intern
-            CellPreviewDescriptionIntern cellIntern;
-            cellIntern.color = node.color;
-            cellIntern.inputExecutionOrderNumber = node.inputExecutionOrderNumber;
-            cellIntern.outputBlocked = node.outputBlocked;
-            cellIntern.executionOrderNumber = node.executionOrderNumber;
-            cellIntern.nodeIndex = uniformNodeIndex ? *uniformNodeIndex : index;
-            cellIntern.pos = pos;
-            if (index > 0) {
-                cellIntern.connectionIndices.insert(index - 1);
-            }
-            if (index < genome.cells.size() - 1) {
-                cellIntern.connectionIndices.insert(index + 1);
-            }
+                ShapeGeneratorResult shapeResult;
+                shapeResult.angle = node.referenceAngle;
+                shapeResult.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
+                if (genome.header.shape != ConstructionShape_Custom) {
+                    shapeResult = shapeGenerator->generateNextConstructionData();
+                }
+                if (lastReferenceAngle.has_value() && partIndex == toInt(genome.cells.size()) - 1 && repetition == genome.header.numRepetitions - 1) {
+                    shapeResult.angle = *lastReferenceAngle;
+                }
 
-            //find nearby cells
-            std::vector<int> nearbyCellIndices;
-            IntVector2D intPos{toInt(pos.x), toInt(pos.y)};
-            auto radius = toInt(parameters.cellFunctionConstructorConnectingCellMaxDistance[node.color]) + 1;
-            for (int dx = -radius; dx <= radius; ++dx) {
-                for (int dy = -radius; dy <= radius; ++dy) {
-                    auto const& findResult = cellInternIndicesBySlot.find({intPos.x + dx, intPos.y + dy});
-                    if (findResult != cellInternIndicesBySlot.end()) {
-                        for (auto const& otherCellIndex : findResult->second) {
-                            auto& otherCell = result.cellsIntern.at(otherCellIndex);
-                            if (otherCellIndex != index && otherCellIndex != index - 1
-                                && Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance[node.color]) {
-                                if (otherCell.connectionIndices.size() < MAX_CELL_BONDS && cellIntern.connectionIndices.size() < MAX_CELL_BONDS) {
-                                    nearbyCellIndices.emplace_back(otherCellIndex);
+                if (index > 0) {
+                    result.direction = Math::rotateClockwise(-result.direction, (180.0f + shapeResult.angle));
+                }
+
+                //create cell description intern
+                CellPreviewDescriptionIntern cellIntern;
+                cellIntern.color = node.color;
+                cellIntern.inputExecutionOrderNumber = node.inputExecutionOrderNumber;
+                cellIntern.outputBlocked = node.outputBlocked;
+                cellIntern.executionOrderNumber = node.executionOrderNumber;
+                cellIntern.nodeIndex = uniformNodeIndex ? *uniformNodeIndex : index;
+                cellIntern.pos = pos;
+                if (index > 0) {
+                    cellIntern.connectionIndices.insert(index - 1);
+                }
+                if (index < toInt(genome.cells.size()) * genome.header.numRepetitions - 1) {
+                    cellIntern.connectionIndices.insert(index + 1);
+                }
+
+                //find nearby cells
+                std::vector<int> nearbyCellIndices;
+                IntVector2D intPos{toInt(pos.x), toInt(pos.y)};
+                auto radius = toInt(parameters.cellFunctionConstructorConnectingCellMaxDistance[node.color]) + 1;
+                for (int dx = -radius; dx <= radius; ++dx) {
+                    for (int dy = -radius; dy <= radius; ++dy) {
+                        auto const& findResult = cellInternIndicesBySlot.find({intPos.x + dx, intPos.y + dy});
+                        if (findResult != cellInternIndicesBySlot.end()) {
+                            for (auto const& otherCellIndex : findResult->second) {
+                                auto& otherCell = result.cellsIntern.at(otherCellIndex);
+                                if (otherCellIndex != index && otherCellIndex != index - 1
+                                    && Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance[node.color]) {
+                                    if (otherCell.connectionIndices.size() < MAX_CELL_BONDS && cellIntern.connectionIndices.size() < MAX_CELL_BONDS) {
+                                        nearbyCellIndices.emplace_back(otherCellIndex);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            //sort by distance
-            std::sort(nearbyCellIndices.begin(), nearbyCellIndices.end(), [&](int index1, int index2) {
-                auto const& otherCell1 = result.cellsIntern.at(index1);
-                auto const& otherCell2 = result.cellsIntern.at(index2);
-                return Math::length(otherCell1.pos - pos) < Math::length(otherCell2.pos - pos);
-            });
+                //sort by distance
+                std::sort(nearbyCellIndices.begin(), nearbyCellIndices.end(), [&](int index1, int index2) {
+                    auto const& otherCell1 = result.cellsIntern.at(index1);
+                    auto const& otherCell2 = result.cellsIntern.at(index2);
+                    return Math::length(otherCell1.pos - pos) < Math::length(otherCell2.pos - pos);
+                });
 
-            //add connections
-            for (auto const& [otherIndex, otherCellIndex] : nearbyCellIndices | boost::adaptors::indexed(0)) {
-                if (shapeResult.numRequiredAdditionalConnections.has_value() && otherIndex >= *shapeResult.numRequiredAdditionalConnections) {
-                    continue;
+                //add connections
+                for (auto const& [otherIndex, otherCellIndex] : nearbyCellIndices | boost::adaptors::indexed(0)) {
+                    if (shapeResult.numRequiredAdditionalConnections.has_value() && otherIndex >= *shapeResult.numRequiredAdditionalConnections) {
+                        continue;
+                    }
+                    auto& otherCell = result.cellsIntern.at(otherCellIndex);
+                    if (isThereNoOverlappingConnection(result.cellsIntern, cellIntern, otherCell)
+                        && isThereNoOverlappingConnection(result.cellsIntern, otherCell, cellIntern)) {
+                        cellIntern.connectionIndices.insert(otherCellIndex);
+                        otherCell.connectionIndices.insert(index);
+                    }
                 }
-                auto& otherCell = result.cellsIntern.at(otherCellIndex);
-                if (isThereNoOverlappingConnection(result.cellsIntern, cellIntern, otherCell) && isThereNoOverlappingConnection(result.cellsIntern, otherCell, cellIntern)) {
-                    cellIntern.connectionIndices.insert(otherCellIndex);
-                    otherCell.connectionIndices.insert(index);
-                }
-            }
 
-            cellInternIndicesBySlot[intPos].emplace_back(toInt(result.cellsIntern.size()));
-            result.cellsIntern.emplace_back(cellIntern);
-            ++index;
+                cellInternIndicesBySlot[intPos].emplace_back(toInt(result.cellsIntern.size()));
+                result.cellsIntern.emplace_back(cellIntern);
+                ++index;
+                ++partIndex;
+            }
         }
         return result;
     }
@@ -196,69 +203,73 @@ namespace
             return {};
         }
 
-        ProcessedGenomeDescriptionResult processedGenome = processMainGenomeDescription(genome, uniformNodeIndex, lastReferenceAngle, parameters);
+        ProcessedGenomeDescriptionResult processedGenome = processPrincipalPartOfGenomeDescription(genome, uniformNodeIndex, lastReferenceAngle, parameters);
 
         std::vector<CellPreviewDescriptionIntern> result = processedGenome.cellsIntern;
 
         //process sub genomes
         size_t indexOffset = 0;
         int index = 0;
-        for (auto const& [node, cellIntern] : boost::combine(genome.cells, processedGenome.cellsIntern)) {
-            if (node.getCellFunctionType() == CellFunction_Constructor) {
-                auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
-                if (constructor.isMakeGenomeCopy()) {
-                    ++index;
-                    continue;
-                }
-                auto data = constructor.getGenomeData();
-                if (data.size() <= Const::GenomeHeaderSize) {
-                    ++index;
-                    continue;
-                }
-                auto subGenome = GenomeDescriptionConverter::convertBytesToDescription(data);
+        for (auto repetition = 0; repetition < genome.header.numRepetitions; ++repetition) {
+            for (auto const& node : genome.cells) {
+                auto cellIntern = processedGenome.cellsIntern.at(index);
 
-                //angles of connected cells
-                std::vector<float> angles;
-                for (auto const& connectedCellIndex : cellIntern.connectionIndices) {
-                    auto connectedCellIntern = processedGenome.cellsIntern.at(connectedCellIndex);
-                    angles.emplace_back(Math::angleOfVector(connectedCellIntern.pos - cellIntern.pos));
-                }
-                std::ranges::sort(angles);
+                if (node.getCellFunctionType() == CellFunction_Constructor) {
+                    auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
+                    if (constructor.isMakeGenomeCopy()) {
+                        ++index;
+                        continue;
+                    }
+                    auto data = constructor.getGenomeData();
+                    if (data.size() <= Const::GenomeHeaderSize) {
+                        ++index;
+                        continue;
+                    }
 
-                //find largest diff
-                float targetAngle = 0;
-                if (angles.size() > 1) {
-                    std::optional<float> largestAngleDiff;
-                    int pos = 0;
-                    int numAngles = toInt(angles.size());
-                    do {
-                        auto angle0 = angles.at(pos % numAngles);
-                        auto angle1 = angles.at((pos + 1) % numAngles);
-                        auto angleDiff = Math::subtractAngle(angle1, angle0);
-                        if (!largestAngleDiff.has_value() || (angleDiff > *largestAngleDiff)) {
-                            largestAngleDiff = angleDiff;
-                            targetAngle = angle0 + angleDiff / 2;
-                        }
-                        ++pos;
-                    } while (pos <= numAngles);
+                    //angles of connected cells
+                    std::vector<float> angles;
+                    for (auto const& connectedCellIndex : cellIntern.connectionIndices) {
+                        auto connectedCellIntern = processedGenome.cellsIntern.at(connectedCellIndex);
+                        angles.emplace_back(Math::angleOfVector(connectedCellIntern.pos - cellIntern.pos));
+                    }
+                    std::ranges::sort(angles);
+
+                    //find largest diff
+                    float targetAngle = 0;
+                    if (angles.size() > 1) {
+                        std::optional<float> largestAngleDiff;
+                        int pos = 0;
+                        int numAngles = toInt(angles.size());
+                        do {
+                            auto angle0 = angles.at(pos % numAngles);
+                            auto angle1 = angles.at((pos + 1) % numAngles);
+                            auto angleDiff = Math::subtractAngle(angle1, angle0);
+                            if (!largestAngleDiff.has_value() || (angleDiff > *largestAngleDiff)) {
+                                largestAngleDiff = angleDiff;
+                                targetAngle = angle0 + angleDiff / 2;
+                            }
+                            ++pos;
+                        } while (pos <= numAngles);
+                    }
+                    if (angles.size() == 1) {
+                        targetAngle = angles.front() + 180.0f;
+                    }
+                    targetAngle += constructor.constructionAngle1;
+                    auto direction = Math::unitVectorOfAngle(targetAngle);
+                    auto subGenome = GenomeDescriptionConverter::convertBytesToDescription(data);
+                    auto previewPart = convertToPreviewDescriptionIntern(
+                        subGenome, cellIntern.nodeIndex, constructor.constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
+                    insert(result, previewPart);
+                    indexOffset += previewPart.size();
+                    if (!subGenome.header.separateConstruction) {
+                        auto cellIndex1 = previewPart.size() - 1;
+                        auto cellIndex2 = index + indexOffset;
+                        result.at(cellIndex1).connectionIndices.insert(toInt(cellIndex2));
+                        result.at(cellIndex2).connectionIndices.insert(toInt(cellIndex1));
+                    }
                 }
-                if (angles.size() == 1) {
-                    targetAngle = angles.front() + 180.0f;
-                }
-                targetAngle += constructor.constructionAngle1;
-                auto direction = Math::unitVectorOfAngle(targetAngle);
-                auto previewPart = convertToPreviewDescriptionIntern(
-                    subGenome, cellIntern.nodeIndex, constructor.constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
-                insert(result, previewPart);
-                indexOffset += previewPart.size();
-                if (!subGenome.header.separateConstruction) {
-                    auto cellIndex1 = previewPart.size() - 1;
-                    auto cellIndex2 = index + indexOffset;
-                    result.at(cellIndex1).connectionIndices.insert(toInt(cellIndex2));
-                    result.at(cellIndex2).connectionIndices.insert(toInt(cellIndex1));
-                }
+                ++index;
             }
-            ++index;
         }
 
         //transform to desired position and angle
