@@ -309,7 +309,7 @@ struct CellDescription
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
     int activationTime = 0;
-    int genomeSize = 0;
+    int genomeNumNodes = 0;
 
     CellMetadataDescription metadata;
 

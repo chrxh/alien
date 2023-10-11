@@ -158,7 +158,7 @@ struct CellTO
     CellFunctionTO cellFunctionData;
     ActivityTO activity;
     int activationTime;
-    int genomeSize;
+    int genomeNumNodes;
 
     CellMetadataTO metadata;
 

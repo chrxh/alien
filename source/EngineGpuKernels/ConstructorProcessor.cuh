@@ -318,7 +318,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
 
     if (GenomeDecoder::containsSelfReplication(constructor)) {
         constructor.offspringCreatureId = 1 + data.numberGen1.random(65535);
-        hostCell->genomeSize = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
+        hostCell->genomeNumNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
     } else {
         constructor.offspringCreatureId = hostCell->creatureId;
     }
@@ -587,7 +587,7 @@ ConstructorProcessor::constructCellIntern(
     result->outputBlocked = constructionData.outputBlocked;
 
     result->activationTime = constructor.constructionActivationTime;
-    result->genomeSize = hostCell->genomeSize;
+    result->genomeNumNodes = hostCell->genomeNumNodes;
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
     switch (constructionData.cellFunction) {
