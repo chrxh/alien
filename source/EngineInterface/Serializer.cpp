@@ -71,6 +71,7 @@ namespace
     auto constexpr Id_Constructor_OffspringCreatureId = 13;
     auto constexpr Id_Constructor_OffspringMutationId = 14;
     auto constexpr Id_Constructor_IsConstructionBuilt = 15;
+    auto constexpr Id_Constructor_GenomeCurrentCopy = 16;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -470,6 +471,7 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
         loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data.genomeCurrentNodeIndex, defaultObject.genomeCurrentNodeIndex);
+        loadSave<int>(task, auxiliaries, Id_Constructor_GenomeCurrentCopy, data.genomeCurrentRepetition, defaultObject.genomeCurrentRepetition);
         loadSave<bool>(task, auxiliaries, Id_Constructor_IsConstructionBuilt, data.isConstructionBuilt, defaultObject.isConstructionBuilt);
         loadSave<int>(task, auxiliaries, Id_Constructor_OffspringCreatureId, data.offspringCreatureId, defaultObject.offspringCreatureId);
         loadSave<int>(task, auxiliaries, Id_Constructor_OffspringMutationId, data.offspringMutationId, defaultObject.offspringMutationId);

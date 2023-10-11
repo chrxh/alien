@@ -31,7 +31,7 @@ namespace
     auto const CellFunctionDefenderWidth = 100.0f;
     auto const CellFunctionBaseTabTextWidth = 150.0f;
     auto const ActivityTextWidth = 100.0f;
-    auto const GenomeTabTextWidth = 140.0f;
+    auto const GenomeTabTextWidth = 160.0f;
     auto const CellMetadataContentTextWidth = 80.0f;
     auto const ParticleContentTextWidth = 80.0f;
 
@@ -228,7 +228,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                         cell.cellFunction = TransmitterDescription();
                     } break;
                     case CellFunction_Constructor: {
-                        cell.cellFunction = ConstructorDescription();
+                        cell.cellFunction = ConstructorDescription().setGenome(GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()));
                     } break;
                     case CellFunction_Sensor: {
                         cell.cellFunction = SensorDescription();
@@ -240,7 +240,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                         cell.cellFunction = AttackerDescription();
                     } break;
                     case CellFunction_Injector: {
-                        cell.cellFunction = InjectorDescription();
+                        cell.cellFunction = InjectorDescription().setGenome(GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()));
                     } break;
                     case CellFunction_Muscle: {
                         cell.cellFunction = MuscleDescription();
@@ -392,7 +392,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                         .textWidth(GenomeTabTextWidth)
                         .format("%.0f")
                         .readOnly(true)
-                        .tooltip(Const::GenomeNumberOfCellsRecursivelyTooltip),
+                        .tooltip(Const::GenomeNumCellsRecursivelyTooltip),
                     numNodes);
 
                 auto numBytes = toFloat(desc.genome.size() + 0.5f);
@@ -412,20 +412,34 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             }
 
             if (ImGui::TreeNodeEx("Properties (principal genome part)", TreeNodeFlags)) {
-                auto numNodes = toFloat(GenomeDescriptionConverter::convertNodeAddressToNodeIndex(desc.genome, toInt(desc.genome.size())));
+
+                auto genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome);
+                auto numNodes = toFloat(genomeDesc.cells.size());
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters()
                         .name("Number of cells")
                         .textWidth(GenomeTabTextWidth)
                         .format("%.0f")
                         .readOnly(true)
-                        .tooltip(Const::GenomeNumberOfCellsTooltip),
+                        .tooltip(Const::GenomeNumCellsTooltip),
                     numNodes);
+                auto numRepetitions = toFloat(genomeDesc.header.numRepetitions);
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters()
+                        .name("Number of copies")
+                        .textWidth(GenomeTabTextWidth)
+                        .format("%.0f")
+                        .readOnly(true)
+                        .tooltip(Const::GenomeRepetitionsPerConstructionTooltip),
+                    numRepetitions);
 
                 if constexpr (std::is_same<Description, ConstructorDescription>()) {
                     AlienImGui::InputInt(
-                        AlienImGui::InputIntParameters().name("Current cell").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
+                        AlienImGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
                         desc.genomeCurrentNodeIndex);
+                    AlienImGui::InputInt(
+                        AlienImGui::InputIntParameters().name("Current copy index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentRepetitionTooltip),
+                        desc.genomeCurrentRepetition);
                 }
                 ImGui::TreePop();
             }
