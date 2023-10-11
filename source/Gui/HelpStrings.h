@@ -244,8 +244,8 @@ namespace Const
         "This flag specifies whether the construction described by the genome should be built multiple times or not";
 
     std::string const GenomeRepetitionsPerConstructionTooltip =
-        "This value specifies how many times the cell network described in the genome should be built consecutively for each construction. For a value greater "
-        "than 1, the cell network geometry has to fulfill certain requirements (rectangle, hexagon, loop and lolli geometries are not supported).";
+        "This value specifies how many times the cell network described in the genome should be concatenated for each construction. For a value greater "
+        "than 1, the cell network geometry has to fulfill certain requirements (rectangle, hexagon, loop and lolli geometries are not suitable for concatenation).";
 
     std::string const GenomeSeparationConstructionTooltip =
         "Here, one can configure whether the encoded cell network in the genome should be detached from the constructor cell once it has been "
