@@ -157,7 +157,7 @@ struct Cell
     CellFunctionData cellFunctionData;
     Activity activity;
     int activationTime;
-    int genomeSize;
+    int genomeNumNodes;
 
     CellMetadataDescription metadata;
 

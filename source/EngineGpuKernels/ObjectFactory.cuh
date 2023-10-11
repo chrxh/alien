@@ -103,7 +103,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->age = cellTO.age;
     cell->color = cellTO.color;
     cell->activationTime = cellTO.activationTime;
-    cell->genomeSize = cellTO.genomeSize;
+    cell->genomeNumNodes = cellTO.genomeNumNodes;
 
     createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
 
@@ -256,7 +256,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->barrier = false;
     cell->age = 0;
     cell->activationTime = 0;
-    cell->genomeSize = 0;
+    cell->genomeNumNodes = 0;
     cell->inputExecutionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellNumExecutionOrderNumbers - 1);
     cell->outputBlocked = _data->numberGen1.randomBool();
     for (int i = 0; i < MAX_CHANNELS; ++i) {
