@@ -32,7 +32,9 @@
 namespace
 {
     auto const PreviewHeight = 300.0f;
+    auto const ContentHeaderTextWidth = 215.0f;
     auto const ContentTextWidth = 190.0f;
+    auto const DynamicTableHeaderColumnWidth = 325.0f;
     auto const DynamicTableColumnWidth = 300.0f;
     auto const WeightsAndBiasTextWidth = 100.0f;
     auto const WeightsAndBiasSelectionTextWidth = 400.0f;
@@ -266,9 +268,13 @@ namespace
     class DynamicTableLayout
     {
     public:
+        DynamicTableLayout(float columnWidth)
+            : _columnWidth(columnWidth)
+        {}
+
         bool begin()
         {
-            _columns = std::max(toInt(ImGui::GetContentRegionAvail().x / scale(DynamicTableColumnWidth)), 1);
+            _columns = std::max(toInt(ImGui::GetContentRegionAvail().x / scale(_columnWidth)), 1);
             auto result = ImGui::BeginTable("##", _columns, ImGuiTableFlags_None);
             if (result) {
                 ImGui::TableNextRow();
@@ -292,6 +298,7 @@ namespace
         }
 
     private:
+        float _columnWidth = 0;
         int _columns = 0;
         int _elementNumber = 0;
     };
@@ -322,12 +329,12 @@ void _GenomeEditorWindow::processTab(TabData& tab)
 
 void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
 {
-    DynamicTableLayout table;
+    DynamicTableLayout table(DynamicTableHeaderColumnWidth);
     if (table.begin()) {
         std::vector ShapeStrings = {"Custom"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s, "Tube"s, "Lolli"s, "Small lolli"s, "Zigzag"s};
         auto origShape = tab.genome.header.shape;
         if (AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Geometry").values(ShapeStrings).textWidth(ContentTextWidth).tooltip(Const::GenomeGeometryTooltip),
+                AlienImGui::ComboParameters().name("Geometry").values(ShapeStrings).textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeGeometryTooltip),
                 tab.genome.header.shape)) {
             updateGeometry(tab.genome, origShape);
         }
@@ -337,26 +344,43 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
                 .name("Connection distance")
                 .format("%.2f")
                 .step(0.05f)
-                .textWidth(ContentTextWidth)
+                .textWidth(ContentHeaderTextWidth)
                 .tooltip(Const::GenomeConnectionDistanceTooltip),
             tab.genome.header.connectionDistance);
         table.next();
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth).tooltip(Const::GenomeStiffnessTooltip),
+            AlienImGui::InputFloatParameters()
+                .name("Stiffness")
+                .format("%.2f")
+                .step(0.05f)
+                .textWidth(ContentHeaderTextWidth)
+                .tooltip(Const::GenomeStiffnessTooltip),
             tab.genome.header.stiffness);
         if (tab.genome.header.shape == ConstructionShape_Custom) {
             table.next();
             AlienImGui::AngleAlignmentCombo(
-                AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(ContentTextWidth).tooltip(Const::GenomeAngleAlignmentTooltip),
+                AlienImGui::AngleAlignmentComboParameters()
+                    .name("Angle alignment")
+                    .textWidth(ContentHeaderTextWidth)
+                    .tooltip(Const::GenomeAngleAlignmentTooltip),
                 tab.genome.header.angleAlignment);
         }
         table.next();
+        auto multipleBranches = !tab.genome.header.singleConstruction;
         AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Single construction").textWidth(ContentTextWidth).tooltip(Const::GenomeSingleConstructionTooltip),
-            tab.genome.header.singleConstruction);
+            AlienImGui::CheckboxParameters().name("Multiple constructions").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeMultipleConstructionsTooltip),
+            multipleBranches);
+        tab.genome.header.singleConstruction = !multipleBranches;
+        table.next();
+        AlienImGui::InputInt(
+            AlienImGui::InputIntParameters()
+                .name("Repetitions per construction")
+                .textWidth(ContentHeaderTextWidth)
+                .tooltip(Const::GenomeRepetitionsPerConstructionTooltip),
+            tab.genome.header.numRepetitions);
         table.next();
         AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Separate construction").textWidth(ContentTextWidth).tooltip(Const::GenomeSeparationConstructionTooltip),
+            AlienImGui::CheckboxParameters().name("Separation").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeSeparationConstructionTooltip),
             tab.genome.header.separateConstruction);
         table.end();
     }
@@ -468,7 +492,7 @@ void _GenomeEditorWindow::processNode(
 {
     auto type = cell.getCellFunctionType();
 
-    DynamicTableLayout table;
+    DynamicTableLayout table(DynamicTableColumnWidth);
     if (table.begin()) {
         if (AlienImGui::CellFunctionCombo(
                 AlienImGui::CellFunctionComboParameters().name("Function").textWidth(ContentTextWidth).tooltip(Const::getCellFunctionTooltip(type)), type)) {
@@ -702,7 +726,7 @@ void _GenomeEditorWindow::processNode(
                     neuron.biases,
                     _selectedInput,
                     _selectedOutput);
-                DynamicTableLayout table;
+                DynamicTableLayout table(DynamicTableColumnWidth);
                 if (table.begin()) {
                     AlienImGui::InputFloat(
                         AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(WeightsAndBiasTextWidth),
@@ -881,9 +905,11 @@ void _GenomeEditorWindow::onCreateSpore()
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
 
     auto parameter = _simController->getSimulationParameters();
+    auto energy =
+        parameter.cellNormalEnergy[_editorModel->getDefaultColorCode()] * toFloat(toInt(genomeDesc.cells.size()) * genomeDesc.header.numRepetitions * 2 + 1);
     auto cell = CellDescription()
                     .setPos(pos)
-                    .setEnergy(parameter.cellNormalEnergy[_editorModel->getDefaultColorCode()] * (genomeDesc.cells.size() * 2 + 1))
+                    .setEnergy(energy)
                     .setStiffness(1.0f)
                     .setMaxConnections(6)
                     .setExecutionOrderNumber(0)

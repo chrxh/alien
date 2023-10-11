@@ -24,6 +24,7 @@ public:
     __inline__ __device__ static void executeForEachNode(uint8_t* genome, int genomeSize, Func func);
     template <typename Func>
     __inline__ __device__ static void executeForEachNodeRecursively(uint8_t* genome, int genomeSize, Func func);
+    __inline__ __device__ static GenomeHeader readGenomeHeader(ConstructorFunction const& constructor);
     __inline__ __device__ static int getGenomeDepth(uint8_t* genome, int genomeSize);
     __inline__ __device__ static int getNumNodesRecursively(uint8_t* genome, int genomeSize);
     __inline__ __device__ static int getRandomGenomeNodeAddress(
@@ -36,17 +37,19 @@ public:
         int randomRefIndex = 0);
     __inline__ __device__ static int getNumNodes(uint8_t* genome, int genomeSize);
     __inline__ __device__ static int getNodeAddress(uint8_t* genome, int genomeSize, int nodeIndex);
-    __inline__ __device__ static bool isAtFirstNode(ConstructorFunction const& constructor);
-    __inline__ __device__ static bool isAtLastNode(ConstructorFunction const& constructor);
-    __inline__ __device__ static bool hasEmptyGenome(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool isFirstNode(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool isLastNode(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool isLastRepetition(ConstructorFunction const& constructor);
+    __inline__ __device__
+        static bool hasEmptyGenome(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isFinished(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isSeparating(ConstructorFunction const& constructor);
+    __inline__ __device__ static int getNumRepetitions(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isSingleConstruction(ConstructorFunction const& constructor);
     template <typename ConstructorOrInjector>
     __inline__ __device__ static bool containsSelfReplication(ConstructorOrInjector const& cellFunction);
     template <typename CellFunctionSource, typename CellFunctionTarget>
     __inline__ __device__ static void copyGenome(SimulationData& data, CellFunctionSource& source, int genomeBytePosition, CellFunctionTarget& target);
-    __inline__ __device__ static GenomeHeader readGenomeHeader(ConstructorFunction const& constructor);
 
     //node-wide methods
     __inline__ __device__ static int getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeAddress, bool withSubgenomes = true);
@@ -269,12 +272,12 @@ __inline__ __device__ float GenomeDecoder::readAngle(ConstructorFunction& constr
     return static_cast<float>(static_cast<int8_t>(readByte(constructor, genomeBytePosition))) / 120 * 180;
 }
 
-__inline__ __device__ bool GenomeDecoder::isAtFirstNode(ConstructorFunction const& constructor)
+__inline__ __device__ bool GenomeDecoder::isFirstNode(ConstructorFunction const& constructor)
 {
     return constructor.genomeCurrentNodeIndex == 0;
 }
 
-__inline__ __device__ bool GenomeDecoder::isAtLastNode(ConstructorFunction const& constructor)
+__inline__ __device__ bool GenomeDecoder::isLastNode(ConstructorFunction const& constructor)
 {
     if (hasEmptyGenome(constructor)) {
         return true;
@@ -282,6 +285,11 @@ __inline__ __device__ bool GenomeDecoder::isAtLastNode(ConstructorFunction const
     auto nodeAddress = GenomeDecoder::getNodeAddress(constructor.genome, constructor.genomeSize, constructor.genomeCurrentNodeIndex);
     auto nextNodeBytes = Const::CellBasicBytes + getNextCellFunctionDataSize(constructor.genome, constructor.genomeSize, nodeAddress);
     return nodeAddress + nextNodeBytes >= constructor.genomeSize;
+}
+
+__inline__ __device__ bool GenomeDecoder::isLastRepetition(ConstructorFunction const& constructor)
+{
+    return getNumRepetitions(constructor) - 1 == constructor.genomeCurrentRepetition;
 }
 
 __inline__ __device__ bool GenomeDecoder::hasEmptyGenome(ConstructorFunction const& constructor)
@@ -338,6 +346,11 @@ __inline__ __device__ bool GenomeDecoder::isSingleConstruction(ConstructorFuncti
     return GenomeDecoder::convertByteToBool(constructor.genome[Const::GenomeHeaderSingleConstruction]);
 }
 
+__inline__ __device__ int GenomeDecoder::getNumRepetitions(ConstructorFunction const& constructor)
+{
+    return max(1, constructor.genome[Const::GenomeHeaderNumRepetitions]);
+}
+
 template <typename ConstructorOrInjector>
 __inline__ __device__ bool GenomeDecoder::containsSelfReplication(ConstructorOrInjector const& cellFunction)
 {
@@ -363,7 +376,7 @@ __inline__ __device__ GenomeHeader GenomeDecoder::readGenomeHeader(ConstructorFu
     result.angleAlignment = constructor.genome[Const::GenomeHeaderAlignmentPos] % ConstructorAngleAlignment_Count;
     result.stiffness = toFloat(constructor.genome[Const::GenomeHeaderStiffness]) / 255;
     result.connectionDistance = toFloat(constructor.genome[Const::GenomeHeaderConstructionDistance]) / 255 + 0.5f;
-    result.numRepetitions = min(1, constructor.genome[Const::GenomeHeaderNumRepetitions]);
+    result.numRepetitions = getNumRepetitions(constructor);
     return result;
 }
 

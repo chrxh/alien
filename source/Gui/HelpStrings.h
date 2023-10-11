@@ -240,9 +240,12 @@ namespace Const
         "be multiples of certain values. This allows for greater stability of the created networks, as the angles would otherwise be more susceptible to "
         "external influences. Choosing 60 degrees is recommended here, as it allows for the accurate representation of most geometries.";
 
-    std::string const GenomeSingleConstructionTooltip =
-        "This determines whether the encoded cell network in the genome should be constructed by the corresponding "
-        "constructor cell only once or multiple times.";
+    std::string const GenomeMultipleConstructionsTooltip =
+        "This flag specifies whether the construction described by the genome should be built multiple times or not";
+
+    std::string const GenomeRepetitionsPerConstructionTooltip =
+        "This value specifies how many times the cell network described in the genome should be built consecutively for each construction. For a value greater "
+        "than 1, the cell network geometry has to fulfill certain requirements (rectangle, hexagon, loop and lolli geometries are not supported).";
 
     std::string const GenomeSeparationConstructionTooltip =
         "Here, one can configure whether the encoded cell network in the genome should be detached from the constructor cell once it has been "
@@ -310,15 +313,18 @@ namespace Const
         }
     };
 
-    std::string const GenomeNumberOfCellsRecursivelyTooltip = "The number of all encoded cells in the genome including its sub-genomes.";
+    std::string const GenomeNumCellsRecursivelyTooltip = "The number of all encoded cells in the genome including its sub-genomes.";
 
     std::string const GenomeBytesTooltip = "The length of the genome in bytes.";
 
     std::string const GenomeGenerationTooltip = "This value indicates the number of times this genome has been inherited by offspring.";
 
-    std::string const GenomeNumberOfCellsTooltip = "The number of all encoded cells in the genome excluding its sub-genomes.";
+    std::string const GenomeNumCellsTooltip = "The number of all encoded cells in the genome excluding its sub-genomes.";
 
     std::string const GenomeCurrentCellTooltip = "The sequence number of the cell in the genome that will be constructed next.";
+
+    std::string const GenomeCurrentRepetitionTooltip = "The cell network encoded in the genome can be repeated in a single construction by specifying a number of "
+                                                 "copies. This value indicates the index of the current copy.";
 
     std::string const CellInjectorCounterTooltip =
         "When a genome injection is initiated, the counter increments after each consecutive successful activation of the injector. Once the counter reaches a "

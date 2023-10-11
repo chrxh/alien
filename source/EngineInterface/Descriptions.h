@@ -104,6 +104,7 @@ struct ConstructorDescription
 
     //process data
     int genomeCurrentNodeIndex = 0;
+    int genomeCurrentRepetition = 0;
     bool isConstructionBuilt = false;
     int offspringCreatureId = 0;
     int offspringMutationId = 0;
@@ -340,7 +341,7 @@ struct CellDescription
         stiffness = value;
         return *this;
     }
-    CellDescription& setColor(unsigned char value)
+    CellDescription& setColor(int value)
     {
         color = value;
         return *this;

@@ -6,6 +6,7 @@
 #include "Base/NumberGenerator.h"
 #include "Base/Exceptions.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/GenomeConstants.h"
 
 
 namespace
@@ -424,6 +425,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
         constructor.genomeCurrentNodeIndex = toInt(cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex);
+        constructor.genomeCurrentRepetition = toInt(cellTO.cellFunctionData.constructor.genomeCurrentRepetition);
         constructor.isConstructionBuilt = toInt(cellTO.cellFunctionData.constructor.isConstructionBuilt);
         constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
         constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
@@ -541,8 +543,10 @@ void DescriptionConverter::addCell(
         ConstructorTO constructorTO;
         constructorTO.activationMode = constructorDesc.activationMode;
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
+        CHECK(constructorDesc.genome.size() >= Const::GenomeHeaderSize)
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
         constructorTO.genomeCurrentNodeIndex = constructorDesc.genomeCurrentNodeIndex;
+        constructorTO.genomeCurrentRepetition = constructorDesc.genomeCurrentRepetition;
         constructorTO.isConstructionBuilt = constructorDesc.isConstructionBuilt;
         constructorTO.offspringCreatureId = constructorDesc.offspringCreatureId;
         constructorTO.offspringMutationId = constructorDesc.offspringMutationId;
@@ -582,6 +586,7 @@ void DescriptionConverter::addCell(
         InjectorTO injectorTO;
         injectorTO.mode = injectorDesc.mode;
         injectorTO.counter = injectorDesc.counter;
+        CHECK(injectorDesc.genome.size() >= Const::GenomeHeaderSize)
         convert(dataTO, injectorDesc.genome, injectorTO.genomeSize, injectorTO.genomeDataIndex);
         injectorTO.genomeGeneration = injectorDesc.genomeGeneration;
         cellTO.cellFunctionData.injector = injectorTO;
