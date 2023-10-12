@@ -489,7 +489,7 @@ namespace cereal
             auto hasGenomeHeader = auxiliaries.contains(Id_Constructor_GenomeHeader);
             auto useNewGenomeIndex = auxiliaries.contains(Id_Constructor_IsConstructionBuilt);
 
-            if (hasGenomeHeader) {
+            if (hasGenomeHeader && useNewGenomeIndex) {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc);
                 data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
@@ -516,8 +516,17 @@ namespace cereal
             }
 
             if (hasGenomeHeader && !useNewGenomeIndex) {
-                data.isConstructionBuilt = toInt(data.genome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
-                data.genomeCurrentNodeIndex = 0;
+                GenomeDescription genomeDesc;
+                ar(genomeDesc);
+                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+
+                auto oldVersionSpec = GenomeDescriptionConverter::EncodingSpecification().numRepetitions(false);
+                auto oldGenome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc, oldVersionSpec);
+                data.isConstructionBuilt = toInt(oldGenome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
+                data.genomeCurrentNodeIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(oldGenome, data.genomeCurrentNodeIndex, oldVersionSpec);
+                if (data.genomeCurrentNodeIndex >= toInt(genomeDesc.cells.size())) {
+                    data.genomeCurrentNodeIndex = 0;
+                }
             }
             //<<<
 
