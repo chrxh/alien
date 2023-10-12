@@ -21,32 +21,45 @@ namespace
         std::set<int> connectionIndices;
     };
 
-    void insert(std::vector<CellPreviewDescriptionIntern>& target, std::vector<CellPreviewDescriptionIntern> const& source)
+    struct PreviewDescriptionIntern
     {
-        auto offset = toInt(source.size());
-        for (auto& cell : target) {
+        std::vector<CellPreviewDescriptionIntern> cells;
+        std::vector<InfinitySymbolDescription> infinitySymbols;
+    };
+
+    void insert(PreviewDescriptionIntern& target, PreviewDescriptionIntern const& source)
+    {
+        auto offset = toInt(source.cells.size());
+        for (auto& cell : target.cells) {
             std::set<int> newConnectionIndices;
             for (auto const& connectionIndex : cell.connectionIndices) {
                 newConnectionIndices.insert(connectionIndex + offset);
             }
             cell.connectionIndices = newConnectionIndices;
         }
-        target.insert(target.begin(), source.begin(), source.end());
+        target.cells.insert(target.cells.begin(), source.cells.begin(), source.cells.end());
+        target.infinitySymbols.insert(target.infinitySymbols.begin(), source.infinitySymbols.begin(), source.infinitySymbols.end());
     }
 
-    void rotate(std::vector<CellPreviewDescriptionIntern>& cells, RealVector2D const& center, float angle)
+    void rotate(PreviewDescriptionIntern& previewIntern, RealVector2D const& center, float angle)
     {
         auto rotMatrix = Math::calcRotationMatrix(angle);
 
-        for (auto& cell : cells) {
+        for (auto& cell : previewIntern.cells) {
             cell.pos = rotMatrix * (cell.pos - center) + center;
+        }
+        for (auto& symbol : previewIntern.infinitySymbols) {
+            symbol.pos = rotMatrix * (symbol.pos - center) + center;
         }
     }
 
-    void translate(std::vector<CellPreviewDescriptionIntern>& cells, RealVector2D const& delta)
+    void translate(PreviewDescriptionIntern& previewIntern, RealVector2D const& delta)
     {
-        for (auto& cell : cells) {
+        for (auto& cell : previewIntern.cells) {
             cell.pos += delta;
+        }
+        for (auto& symbol : previewIntern.infinitySymbols) {
+            symbol.pos += delta;
         }
     }
 
@@ -191,7 +204,7 @@ namespace
         return result;
     }
 
-    std::vector<CellPreviewDescriptionIntern> convertToPreviewDescriptionIntern(
+    PreviewDescriptionIntern convertToPreviewDescriptionIntern(
         GenomeDescription const& genome,
         std::optional<int> const& uniformNodeIndex,
         std::optional<float> const& lastReferenceAngle,
@@ -205,7 +218,8 @@ namespace
 
         ProcessedGenomeDescriptionResult processedGenome = processPrincipalPartOfGenomeDescription(genome, uniformNodeIndex, lastReferenceAngle, parameters);
 
-        std::vector<CellPreviewDescriptionIntern> result = processedGenome.cellsIntern;
+        PreviewDescriptionIntern result;
+        result.cells = processedGenome.cellsIntern;
 
         //process sub genomes
         size_t indexOffset = 0;
@@ -260,12 +274,12 @@ namespace
                     auto previewPart = convertToPreviewDescriptionIntern(
                         subGenome, cellIntern.nodeIndex, constructor.constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
                     insert(result, previewPart);
-                    indexOffset += previewPart.size();
+                    indexOffset += previewPart.cells.size();
                     if (!subGenome.header.separateConstruction) {
-                        auto cellIndex1 = previewPart.size() - 1;
+                        auto cellIndex1 = previewPart.cells.size() - 1;
                         auto cellIndex2 = index + indexOffset;
-                        result.at(cellIndex1).connectionIndices.insert(toInt(cellIndex2));
-                        result.at(cellIndex2).connectionIndices.insert(toInt(cellIndex1));
+                        result.cells.at(cellIndex1).connectionIndices.insert(toInt(cellIndex2));
+                        result.cells.at(cellIndex2).connectionIndices.insert(toInt(cellIndex1));
                     }
                 }
                 ++index;
@@ -276,24 +290,24 @@ namespace
         if (desiredEndAngle) {
             auto actualEndAngle = Math::angleOfVector(processedGenome.direction);
             auto angleDiff = Math::subtractAngle(*desiredEndAngle, actualEndAngle);
-            rotate(result, result.back().pos, angleDiff + 180.0f);
+            rotate(result, result.cells.back().pos, angleDiff + 180.0f);
         }
         if (desiredEndPos) {
-            translate(result, *desiredEndPos - result.back().pos);
+            translate(result, *desiredEndPos - result.cells.back().pos);
         }
         return result;
     }
 
-    PreviewDescription createPreviewDescription(std::vector<CellPreviewDescriptionIntern> const& cells, SimulationParameters const& parameters)
+    PreviewDescription createPreviewDescription(PreviewDescriptionIntern const& previewIntern, SimulationParameters const& parameters)
     {
         PreviewDescription result;
         std::map<std::pair<int, int>, int> cellIndicesToCreatedConnectionIndex;
         int index = 0;
-        for (auto const& cell : cells) {
+        for (auto const& cell : previewIntern.cells) {
             CellPreviewDescription cellPreview{.pos = cell.pos, .executionOrderNumber = cell.executionOrderNumber, .color = cell.color, .nodeIndex = cell.nodeIndex};
             result.cells.emplace_back(cellPreview);
             for (auto const& connectionIndex : cell.connectionIndices) {
-                auto const& otherCell = cells.at(connectionIndex);
+                auto const& otherCell = previewIntern.cells.at(connectionIndex);
                 auto findResult = cellIndicesToCreatedConnectionIndex.find(std::pair(index, connectionIndex));
                 auto inputExecutionOrderNumber = cell.inputExecutionOrderNumber.value_or(-1);
                 if (findResult == cellIndicesToCreatedConnectionIndex.end()) {
@@ -312,6 +326,7 @@ namespace
             }
             ++index;
         }
+        result.infinitySymbols = previewIntern.infinitySymbols;
         return result;
     }
 }

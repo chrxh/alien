@@ -954,13 +954,17 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
             }
 
             if (selectedNode && cell.nodeIndex == *selectedNode) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
+                if (zoom > ZoomLevelForLabels) {
+                    drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
+                } else {
+                    drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor::HSV(h, s * 0.8f, v * 1.2f));
+                }
             }
 
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
                 auto mousePos = ImGui::GetMousePos();
-                if (mousePos.x >= cellPos.x - cellSize / 3 && mousePos.y >= cellPos.y - cellSize / 3 && mousePos.x <= cellPos.x + cellSize / 3
-                    && mousePos.y <= cellPos.y + cellSize / 3) {
+                if (mousePos.x >= cellPos.x - cellSize / 2 && mousePos.y >= cellPos.y - cellSize / 2 && mousePos.x <= cellPos.x + cellSize / 2
+                    && mousePos.y <= cellPos.y + cellSize / 2) {
                     selectedNode = cell.nodeIndex;
                     result = true;
                 }

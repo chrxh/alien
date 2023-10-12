@@ -17,8 +17,14 @@ struct ConnectionPreviewDescription
     bool arrowToCell2 = false;
 };
 
+struct InfinitySymbolDescription
+{
+    RealVector2D pos;
+};
+
 struct PreviewDescription
 {
     std::vector<CellPreviewDescription> cells;
     std::vector<ConnectionPreviewDescription> connections;
+    std::vector<InfinitySymbolDescription> infinitySymbols;
 };
