@@ -26,5 +26,5 @@ struct PreviewDescription
 {
     std::vector<CellPreviewDescription> cells;
     std::vector<ConnectionPreviewDescription> connections;
-    std::vector<InfinitySymbolDescription> infinitySymbols;
+    std::vector<InfinitySymbolDescription> symbols;
 };

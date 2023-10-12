@@ -10,6 +10,8 @@
 
 namespace
 {
+    auto constexpr MaxRepetitions = 10;
+
     struct CellPreviewDescriptionIntern
     {
         RealVector2D pos;
@@ -24,7 +26,7 @@ namespace
     struct PreviewDescriptionIntern
     {
         std::vector<CellPreviewDescriptionIntern> cells;
-        std::vector<InfinitySymbolDescription> infinitySymbols;
+        std::vector<InfinitySymbolDescription> symbols;
     };
 
     void insert(PreviewDescriptionIntern& target, PreviewDescriptionIntern const& source)
@@ -38,7 +40,7 @@ namespace
             cell.connectionIndices = newConnectionIndices;
         }
         target.cells.insert(target.cells.begin(), source.cells.begin(), source.cells.end());
-        target.infinitySymbols.insert(target.infinitySymbols.begin(), source.infinitySymbols.begin(), source.infinitySymbols.end());
+        target.symbols.insert(target.symbols.begin(), source.symbols.begin(), source.symbols.end());
     }
 
     void rotate(PreviewDescriptionIntern& previewIntern, RealVector2D const& center, float angle)
@@ -48,7 +50,7 @@ namespace
         for (auto& cell : previewIntern.cells) {
             cell.pos = rotMatrix * (cell.pos - center) + center;
         }
-        for (auto& symbol : previewIntern.infinitySymbols) {
+        for (auto& symbol : previewIntern.symbols) {
             symbol.pos = rotMatrix * (symbol.pos - center) + center;
         }
     }
@@ -58,7 +60,7 @@ namespace
         for (auto& cell : previewIntern.cells) {
             cell.pos += delta;
         }
-        for (auto& symbol : previewIntern.infinitySymbols) {
+        for (auto& symbol : previewIntern.symbols) {
             symbol.pos += delta;
         }
     }
@@ -100,7 +102,7 @@ namespace
 
     struct ProcessedGenomeDescriptionResult
     {
-        std::vector<CellPreviewDescriptionIntern> cellsIntern;
+        PreviewDescriptionIntern previewDescription;
         RealVector2D direction;
     };
     ProcessedGenomeDescriptionResult processPrincipalPartOfGenomeDescription(
@@ -115,8 +117,16 @@ namespace
         RealVector2D pos;
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
 
+        if (MaxRepetitions < genome.header.numRepetitions) {
+            result.previewDescription.symbols.emplace_back(pos + result.direction * 1);
+            result.previewDescription.symbols.emplace_back(pos + result.direction * 2);
+            result.previewDescription.symbols.emplace_back(pos + result.direction * 3);
+            pos += result.direction * 4;
+        }
+
         auto index = 0;
-        for (auto repetition = 0; repetition < genome.header.numRepetitions; ++repetition) {
+        auto numRepetitionsTruncated = std::min(MaxRepetitions, genome.header.numRepetitions);
+        for (auto repetition = 0; repetition < numRepetitionsTruncated; ++repetition) {
 
             auto shapeGenerator = ShapeGeneratorFactory::create(genome.header.shape);
             auto partIndex = 0;
@@ -150,7 +160,7 @@ namespace
                 if (index > 0) {
                     cellIntern.connectionIndices.insert(index - 1);
                 }
-                if (index < toInt(genome.cells.size()) * genome.header.numRepetitions - 1) {
+                if (index < toInt(genome.cells.size()) * numRepetitionsTruncated - 1) {
                     cellIntern.connectionIndices.insert(index + 1);
                 }
 
@@ -163,7 +173,7 @@ namespace
                         auto const& findResult = cellInternIndicesBySlot.find({intPos.x + dx, intPos.y + dy});
                         if (findResult != cellInternIndicesBySlot.end()) {
                             for (auto const& otherCellIndex : findResult->second) {
-                                auto& otherCell = result.cellsIntern.at(otherCellIndex);
+                                auto& otherCell = result.previewDescription.cells.at(otherCellIndex);
                                 if (otherCellIndex != index && otherCellIndex != index - 1
                                     && Math::length(otherCell.pos - pos) < parameters.cellFunctionConstructorConnectingCellMaxDistance[node.color]) {
                                     if (otherCell.connectionIndices.size() < MAX_CELL_BONDS && cellIntern.connectionIndices.size() < MAX_CELL_BONDS) {
@@ -177,8 +187,8 @@ namespace
 
                 //sort by distance
                 std::sort(nearbyCellIndices.begin(), nearbyCellIndices.end(), [&](int index1, int index2) {
-                    auto const& otherCell1 = result.cellsIntern.at(index1);
-                    auto const& otherCell2 = result.cellsIntern.at(index2);
+                    auto const& otherCell1 = result.previewDescription.cells.at(index1);
+                    auto const& otherCell2 = result.previewDescription.cells.at(index2);
                     return Math::length(otherCell1.pos - pos) < Math::length(otherCell2.pos - pos);
                 });
 
@@ -187,16 +197,16 @@ namespace
                     if (shapeResult.numRequiredAdditionalConnections.has_value() && otherIndex >= *shapeResult.numRequiredAdditionalConnections) {
                         continue;
                     }
-                    auto& otherCell = result.cellsIntern.at(otherCellIndex);
-                    if (isThereNoOverlappingConnection(result.cellsIntern, cellIntern, otherCell)
-                        && isThereNoOverlappingConnection(result.cellsIntern, otherCell, cellIntern)) {
+                    auto& otherCell = result.previewDescription.cells.at(otherCellIndex);
+                    if (isThereNoOverlappingConnection(result.previewDescription.cells, cellIntern, otherCell)
+                        && isThereNoOverlappingConnection(result.previewDescription.cells, otherCell, cellIntern)) {
                         cellIntern.connectionIndices.insert(otherCellIndex);
                         otherCell.connectionIndices.insert(index);
                     }
                 }
 
-                cellInternIndicesBySlot[intPos].emplace_back(toInt(result.cellsIntern.size()));
-                result.cellsIntern.emplace_back(cellIntern);
+                cellInternIndicesBySlot[intPos].emplace_back(toInt(result.previewDescription.cells.size()));
+                result.previewDescription.cells.emplace_back(cellIntern);
                 ++index;
                 ++partIndex;
             }
@@ -218,15 +228,15 @@ namespace
 
         ProcessedGenomeDescriptionResult processedGenome = processPrincipalPartOfGenomeDescription(genome, uniformNodeIndex, lastReferenceAngle, parameters);
 
-        PreviewDescriptionIntern result;
-        result.cells = processedGenome.cellsIntern;
+        PreviewDescriptionIntern result = processedGenome.previewDescription;
 
         //process sub genomes
         size_t indexOffset = 0;
         int index = 0;
-        for (auto repetition = 0; repetition < genome.header.numRepetitions; ++repetition) {
+        auto numRepetitionsTruncated = std::min(MaxRepetitions, genome.header.numRepetitions);
+        for (auto repetition = 0; repetition < numRepetitionsTruncated; ++repetition) {
             for (auto const& node : genome.cells) {
-                auto cellIntern = processedGenome.cellsIntern.at(index);
+                auto cellIntern = processedGenome.previewDescription.cells.at(index);
 
                 if (node.getCellFunctionType() == CellFunction_Constructor) {
                     auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
@@ -243,7 +253,7 @@ namespace
                     //angles of connected cells
                     std::vector<float> angles;
                     for (auto const& connectedCellIndex : cellIntern.connectionIndices) {
-                        auto connectedCellIntern = processedGenome.cellsIntern.at(connectedCellIndex);
+                        auto connectedCellIntern = processedGenome.previewDescription.cells.at(connectedCellIndex);
                         angles.emplace_back(Math::angleOfVector(connectedCellIntern.pos - cellIntern.pos));
                     }
                     std::ranges::sort(angles);
@@ -326,7 +336,7 @@ namespace
             }
             ++index;
         }
-        result.infinitySymbols = previewIntern.infinitySymbols;
+        result.symbols = previewIntern.symbols;
         return result;
     }
 }

@@ -972,6 +972,11 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
 
         }
 
+        for (auto const& symbol : desc.symbols) {
+            auto pos = (symbol.pos - upperLeft) * cellSize + offset;
+            drawList->AddCircleFilled({pos.x, pos.y}, cellSize / 3, Const::GenomePreviewSymbolColor);
+        }
+
         if (zoom > ZoomLevelForConnections) {
             for (auto const& connection : desc.connections) {
                 auto cellPos1 = (connection.cell1 - upperLeft) * cellSize + offset;
