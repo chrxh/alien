@@ -325,7 +325,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeCurrentNodeIndex);
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0] * 2, actualHostCell.energy));
     EXPECT_TRUE(approxCompare(1.0f, actualHostCell.activity.channels[0]));
-    EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
+    EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
 
     EXPECT_EQ(1, actualConstructedCell.connections.size());
     EXPECT_EQ(1, actualConstructedCell.maxConnections);
@@ -397,7 +397,7 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
     EXPECT_EQ(0, actualConstructedCell.maxConnections);
-    EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
+    EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
 }
 
 TEST_F(ConstructorTests, constructFirstCell_singleConstruction)
@@ -426,7 +426,7 @@ TEST_F(ConstructorTests, constructFirstCell_singleConstruction)
     EXPECT_EQ(constructor.genome.size(), constructor.genomeCurrentNodeIndex);
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
-    EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
+    EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
 }
 
 TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
@@ -466,7 +466,7 @@ TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
     EXPECT_EQ(1, actualHostCell.connections.size());
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
-    EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
+    EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
 
     EXPECT_TRUE(approxCompare(10.0f - 1.0f, actualConstructedCell.pos.x));
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.y));
@@ -904,7 +904,7 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
     EXPECT_TRUE(lowPrecisionCompare(1.0f, actualPrevConstructedCell.connections[0].distance));
 
     ASSERT_EQ(1, actualConstructedCell.connections.size());
-    EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
+    EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
     EXPECT_TRUE(lowPrecisionCompare(1.0f, actualConstructedCell.connections[0].distance));
 }
 
@@ -945,7 +945,7 @@ TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
         auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
         EXPECT_EQ(LivingState_Ready, actualHostCell.livingState);
-        EXPECT_EQ(LivingState_JustReady, actualPrevConstructedCell.livingState);
+        EXPECT_EQ(LivingState_Activating, actualPrevConstructedCell.livingState);
         EXPECT_EQ(LivingState_Ready, actualConstructedCell.livingState);
     }
     _simController->calcTimesteps(1);
@@ -1002,7 +1002,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
     EXPECT_TRUE(lowPrecisionCompare(1.0f, actualPrevConstructedCell.connections[0].distance));
 
     ASSERT_EQ(2, actualConstructedCell.connections.size());
-    EXPECT_EQ(LivingState_JustReady, actualConstructedCell.livingState);
+    EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
     std::map<uint64_t, ConnectionDescription> connectionById;
     for (auto const& connection : actualConstructedCell.connections) {
         connectionById.emplace(connection.cellId, connection);

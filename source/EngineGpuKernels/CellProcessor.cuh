@@ -592,11 +592,11 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        auto livingState = atomicCAS(&cell->livingState, LivingState_JustReady, LivingState_Ready);
-        if (livingState == LivingState_JustReady) {
+        auto livingState = atomicCAS(&cell->livingState, LivingState_Activating, LivingState_Ready);
+        if (livingState == LivingState_Activating) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectedCell = cell->connections[i].cell;
-                atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_JustReady);
+                atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_Activating);
             }
         }
         if (livingState == LivingState_Dying) {

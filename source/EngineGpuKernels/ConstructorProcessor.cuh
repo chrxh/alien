@@ -348,7 +348,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
     }
     if (constructionData.isLastNodeOfLastRepetition) {
-        newCell->livingState = LivingState_JustReady;
+        newCell->livingState = LivingState_Activating;
     }
     hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
     newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
@@ -433,7 +433,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     }
 
     if (constructionData.isLastNode) {
-        newCell->livingState = LivingState_JustReady;
+        newCell->livingState = LivingState_Activating;
     }
 
     float angleFromPreviousForUnderConstructionCell;

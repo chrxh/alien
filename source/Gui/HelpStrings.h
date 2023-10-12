@@ -286,7 +286,7 @@ namespace Const
 
     std::string const CellLivingStateTooltip =
         "Cells can exist in various states. When a cell network is being constructed, its cells are in the 'Under construction' state. Once the cell network "
-        "is completed by the constructor, the cells briefly enter the 'Just ready' state before transitioning to the 'Ready' state shortly after. If a cell "
+        "is completed by the constructor, the cells briefly enter the 'Activating' state before transitioning to the 'Ready' state shortly after. If a cell "
         "network is in the process of dying, its cells are in the 'Dying' state.";
 
     inline std::string getCellFunctionTooltip(CellFunction cellFunction)
