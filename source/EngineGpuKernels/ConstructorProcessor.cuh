@@ -285,20 +285,16 @@ __inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite
 
     //for compatibility with older simulations in case that lastConstructedCellId is not set yet
     else {
-        
-        Cell* result = nullptr;
         for (int i = 0; i < hostCell->numConnections; ++i) {
             auto const& connectedCell = hostCell->connections[i].cell;
             if (connectedCell->livingState == LivingState_UnderConstruction) {
-                return result;
+                return connectedCell;
             }
         }
-        if (!result) {
-            for (int i = 0; i < hostCell->numConnections; ++i) {
-                auto const& connectedCell = hostCell->connections[i].cell;
-                if (connectedCell->livingState == LivingState_Dying) {
-                    return connectedCell;
-                }
+        for (int i = 0; i < hostCell->numConnections; ++i) {
+            auto const& connectedCell = hostCell->connections[i].cell;
+            if (connectedCell->livingState == LivingState_Dying) {
+                return connectedCell;
             }
         }
     }
