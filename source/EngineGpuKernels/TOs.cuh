@@ -60,6 +60,7 @@ struct ConstructorTO
     float constructionAngle2;
 
     //process data
+    uint64_t lastConstructedCellId;
     int genomeCurrentNodeIndex;
     int genomeCurrentRepetition;
     bool isConstructionBuilt;

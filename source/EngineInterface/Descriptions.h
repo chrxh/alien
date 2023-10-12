@@ -103,6 +103,7 @@ struct ConstructorDescription
     float constructionAngle2 = 0;
 
     //process data
+    uint64_t lastConstructedCellId = 0;
     int genomeCurrentNodeIndex = 0;
     int genomeCurrentRepetition = 0;
     bool isConstructionBuilt = false;

@@ -424,9 +424,10 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
-        constructor.genomeCurrentNodeIndex = toInt(cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex);
-        constructor.genomeCurrentRepetition = toInt(cellTO.cellFunctionData.constructor.genomeCurrentRepetition);
-        constructor.isConstructionBuilt = toInt(cellTO.cellFunctionData.constructor.isConstructionBuilt);
+        constructor.lastConstructedCellId = cellTO.cellFunctionData.constructor.lastConstructedCellId;
+        constructor.genomeCurrentNodeIndex = cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex;
+        constructor.genomeCurrentRepetition = cellTO.cellFunctionData.constructor.genomeCurrentRepetition;
+        constructor.isConstructionBuilt = cellTO.cellFunctionData.constructor.isConstructionBuilt;
         constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
         constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
         constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
@@ -545,6 +546,7 @@ void DescriptionConverter::addCell(
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
         CHECK(constructorDesc.genome.size() >= Const::GenomeHeaderSize)
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
+        constructorTO.lastConstructedCellId = constructorDesc.lastConstructedCellId;
         constructorTO.genomeCurrentNodeIndex = constructorDesc.genomeCurrentNodeIndex;
         constructorTO.genomeCurrentRepetition = constructorDesc.genomeCurrentRepetition;
         constructorTO.isConstructionBuilt = constructorDesc.isConstructionBuilt;

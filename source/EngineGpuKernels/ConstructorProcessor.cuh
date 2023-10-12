@@ -22,6 +22,7 @@ private:
         GenomeHeader genomeHeader;
 
         int genomeCurrentBytePosition;
+        bool isLastNode;
         bool isLastNodeOfLastRepetition;
 
         float angle;
@@ -189,7 +190,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     ConstructionData result;
     result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
     result.genomeCurrentBytePosition = GenomeDecoder::getNodeAddress(constructor.genome, constructor.genomeSize, constructor.genomeCurrentNodeIndex);
-    result.isLastNodeOfLastRepetition = GenomeDecoder::isLastNode(constructor) && GenomeDecoder::isLastRepetition(constructor);
+    result.isLastNode = GenomeDecoder::isLastNode(constructor);
+    result.isLastNodeOfLastRepetition = result.isLastNode && GenomeDecoder::isLastRepetition(constructor);
 
     ShapeGenerator shapeGenerator;
     auto shape = result.genomeHeader.shape % ConstructionShape_Count;
@@ -258,11 +260,6 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
             return false;
         }
         auto success = continueConstruction(data, statistics, hostCell, underConstructionCell, constructionData);
-        if (success) {
-            if (hostCell->cellFunctionData.constructor.genomeCurrentNodeIndex == 0) {
-                underConstructionCell->livingState = LivingState_JustReady;
-            }
-        }
 
         underConstructionCell->releaseLock();
         hostCell->releaseLock();
@@ -277,22 +274,35 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
 
 __inline__ __device__ Cell* ConstructorProcessor::getFirstCellOfConstructionSite(Cell* hostCell)
 {
-    Cell* result = nullptr;
-    for (int i = 0; i < hostCell->numConnections; ++i) {
-        auto const& connectedCell = hostCell->connections[i].cell;
-        if (connectedCell->livingState == LivingState_UnderConstruction) {
-            result = connectedCell;
-        }
-    }
-    if (!result) {
+    if (hostCell->cellFunctionData.constructor.lastConstructedCellId != 0) {
         for (int i = 0; i < hostCell->numConnections; ++i) {
             auto const& connectedCell = hostCell->connections[i].cell;
-            if (connectedCell->livingState == LivingState_Dying) {
+            if (connectedCell->id == hostCell->cellFunctionData.constructor.lastConstructedCellId) {
                 return connectedCell;
             }
         }
     }
-    return result;
+
+    //for compatibility with older simulations in case that lastConstructedCellId is not set yet
+    else {
+        
+        Cell* result = nullptr;
+        for (int i = 0; i < hostCell->numConnections; ++i) {
+            auto const& connectedCell = hostCell->connections[i].cell;
+            if (connectedCell->livingState == LivingState_UnderConstruction) {
+                return result;
+            }
+        }
+        if (!result) {
+            for (int i = 0; i < hostCell->numConnections; ++i) {
+                auto const& connectedCell = hostCell->connections[i].cell;
+                if (connectedCell->livingState == LivingState_Dying) {
+                    return connectedCell;
+                }
+            }
+        }
+    }
+    return nullptr;
 }
 
 __inline__ __device__ bool
@@ -426,7 +436,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         newCell->livingState = LivingState_Dying;
     }
 
-    if (constructionData.isLastNodeOfLastRepetition) {
+    if (constructionData.isLastNode) {
         newCell->livingState = LivingState_JustReady;
     }
 
@@ -577,6 +587,7 @@ ConstructorProcessor::constructCellIntern(
     factory.init(&data);
 
     Cell * result = factory.createCell();
+    constructor.lastConstructedCellId = result->id;
     result->energy = constructionData.energy;
     result->stiffness = constructionData.genomeHeader.stiffness;
     result->pos = posOfNewCell;
@@ -613,6 +624,7 @@ ConstructorProcessor::constructCellIntern(
         auto& newConstructor = result->cellFunctionData.constructor;
         newConstructor.activationMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor, genomeCurrentBytePosition);
+        newConstructor.lastConstructedCellId = 0;
         newConstructor.genomeCurrentNodeIndex = 0;
         newConstructor.genomeCurrentRepetition = 0;
         newConstructor.isConstructionBuilt = false;
