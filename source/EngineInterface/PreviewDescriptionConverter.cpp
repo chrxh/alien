@@ -132,7 +132,7 @@ namespace
                 cellIntern.inputExecutionOrderNumber = node.inputExecutionOrderNumber;
                 cellIntern.outputBlocked = node.outputBlocked;
                 cellIntern.executionOrderNumber = node.executionOrderNumber;
-                cellIntern.nodeIndex = uniformNodeIndex ? *uniformNodeIndex : index;
+                cellIntern.nodeIndex = uniformNodeIndex ? *uniformNodeIndex : partIndex;
                 cellIntern.pos = pos;
                 if (index > 0) {
                     cellIntern.connectionIndices.insert(index - 1);
