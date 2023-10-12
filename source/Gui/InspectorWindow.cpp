@@ -31,7 +31,7 @@ namespace
     auto const CellFunctionDefenderWidth = 100.0f;
     auto const CellFunctionBaseTabTextWidth = 150.0f;
     auto const ActivityTextWidth = 100.0f;
-    auto const GenomeTabTextWidth = 160.0f;
+    auto const GenomeTabTextWidth = 195.0f;
     auto const CellMetadataContentTextWidth = 80.0f;
     auto const ParticleContentTextWidth = 80.0f;
 
@@ -432,7 +432,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                 auto numRepetitions = toFloat(genomeDesc.header.numRepetitions);
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters()
-                        .name("Number of copies")
+                        .name("Number of repetitions")
                         .textWidth(GenomeTabTextWidth)
                         .format("%.0f")
                         .readOnly(true)
@@ -444,7 +444,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                         AlienImGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
                         desc.genomeCurrentNodeIndex);
                     AlienImGui::InputInt(
-                        AlienImGui::InputIntParameters().name("Current copy index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentRepetitionTooltip),
+                        AlienImGui::InputIntParameters().name("Current repetition index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentRepetitionTooltip),
                         desc.genomeCurrentRepetition);
                 }
                 ImGui::TreePop();

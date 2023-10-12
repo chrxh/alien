@@ -26,7 +26,7 @@ public:
     __inline__ __device__ static void executeForEachNodeRecursively(uint8_t* genome, int genomeSize, Func func);
     __inline__ __device__ static GenomeHeader readGenomeHeader(ConstructorFunction const& constructor);
     __inline__ __device__ static int getGenomeDepth(uint8_t* genome, int genomeSize);
-    __inline__ __device__ static int getNumNodesRecursively(uint8_t* genome, int genomeSize);
+    __inline__ __device__ static int getNumNodesRecursively(uint8_t* genome, int genomeSize, bool includeRepetitions);
     __inline__ __device__ static int getRandomGenomeNodeAddress(
         SimulationData& data,
         uint8_t* genome,
@@ -119,9 +119,10 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
     }
     int subGenomeEndAddresses[MAX_SUBGENOME_RECURSION_DEPTH];
     int depth = 0;
+    int repetition = genome[Const::GenomeHeaderNumRepetitions];
     for (auto nodeAddress = Const::GenomeHeaderSize; nodeAddress < genomeSize;) {
         auto cellFunction = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
-        func(depth, nodeAddress);
+        func(depth, nodeAddress, repetition);
 
         bool goToNextSibling = true;
         if (cellFunction == CellFunction_Constructor || cellFunction == CellFunction_Injector) {
@@ -131,6 +132,7 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
                 auto subGenomeSize = GenomeDecoder::getNextSubGenomeSize(genome, genomeSize, nodeAddress);
                 nodeAddress += Const::CellBasicBytes + cellFunctionFixedBytes + 3;
                 subGenomeEndAddresses[depth++] = nodeAddress + subGenomeSize;
+                repetition = genome[nodeAddress + Const::GenomeHeaderNumRepetitions];
                 nodeAddress += Const::GenomeHeaderSize;
                 goToNextSibling = false;
             }
@@ -153,14 +155,18 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
 __inline__ __device__ int GenomeDecoder::getGenomeDepth(uint8_t* genome, int genomeSize)
 {
     auto result = 0;
-    executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress) { result = max(result, depth); });
+    executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress, int repetition) { result = max(result, depth); });
     return result;
 }
 
-__inline__ __device__ int GenomeDecoder::getNumNodesRecursively(uint8_t* genome, int genomeSize)
+__inline__ __device__ int GenomeDecoder::getNumNodesRecursively(uint8_t* genome, int genomeSize, bool includeRepetitions)
 {
     auto result = 0;
-    executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress) { ++result; });
+    if (!includeRepetitions) {
+        executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress, int repetition) { ++result; });
+    } else {
+        executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress, int repetition) { result += repetition; });
+    }
     return result;
 }
 

@@ -326,7 +326,7 @@ namespace Const
     std::string const GenomeCurrentCellTooltip = "The sequence number of the cell in the genome that will be constructed next.";
 
     std::string const GenomeCurrentRepetitionTooltip = "The cell network encoded in the genome can be repeated in a single construction by specifying a number of "
-                                                 "copies. This value indicates the index of the current copy.";
+                                                 "repetitions. This value indicates the index of the current repetition.";
 
     std::string const CellInjectorCounterTooltip =
         "When a genome injection is initiated, the counter increments after each consecutive successful activation of the injector. Once the counter reaches a "
