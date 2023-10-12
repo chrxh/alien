@@ -24,7 +24,7 @@ enum LivingState_
 {
     LivingState_Ready,
     LivingState_UnderConstruction,
-    LivingState_JustReady,
+    LivingState_Activating,
     LivingState_Dying,
     LivingState_Count
 };

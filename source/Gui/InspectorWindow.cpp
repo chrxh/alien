@@ -286,7 +286,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                     AlienImGui::ComboParameters()
                         .name("Living state")
                         .textWidth(CellFunctionBaseTabTextWidth)
-                        .values({"Ready", "Under construction", "Just ready", "Dying"})
+                        .values({"Ready", "Under construction", "Activating", "Dying"})
                         .tooltip(Const::CellLivingStateTooltip),
                     cell.livingState);
                 ImGui::TreePop();
