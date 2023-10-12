@@ -935,7 +935,7 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
             AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
 
             auto cellRadiusFactor = zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
-            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * cellRadiusFactor, ImColor::HSV(h, s * 0.7f, v * 0.7f));
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * cellRadiusFactor, ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
             if (zoom > ZoomLevelForLabels) {
                 RealVector2D textPos(cellPos.x - cellSize / 8, cellPos.y - cellSize / 4);

@@ -24,9 +24,10 @@ private:
 
     struct TabData
     {
-        int id;
+        int id = 0;
         GenomeDescription genome;
         std::optional<int> selectedNode;
+        float previewZoom = 30.0f;
     };
     void processTab(TabData& tab);
     void processGenomeHeader(TabData& tab);
@@ -60,7 +61,6 @@ private:
     int _selectedTabIndex = 0;
     int _selectedInput = 0;
     int _selectedOutput = 0;
-    float _previewZoom = 30.0f;
     std::optional<std::vector<uint8_t>> _copiedGenome;
     std::string _startingPath;
 
