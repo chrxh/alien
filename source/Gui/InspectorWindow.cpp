@@ -178,7 +178,19 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
                     AlienImGui::CheckboxParameters().name("Indestructible").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip), cell.barrier);
                 ImGui::TreePop();
             }
+            if (ImGui::TreeNodeEx("Ids##Base", TreeNodeFlags)) {
+                std::stringstream ss;
+                ss << std::hex << cell.id;
+                auto cellId = ss.str();
 
+                AlienImGui::InputText(
+                    AlienImGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters().name("Mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellMutationIdTooltip), cell.mutationId);
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellCreatureIdTooltip), cell.creatureId);
+                ImGui::TreePop();
+            }
             if (ImGui::TreeNodeEx("Connections to other cells", TreeNodeFlags)) {
                 for (auto const& [index, connection] : cell.connections | boost::adaptors::indexed(0)) {
                     if (ImGui::TreeNodeEx(("Connection [" + std::to_string(index) + "]").c_str(), ImGuiTreeNodeFlags_None)) {
@@ -258,12 +270,6 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                     }
                 }
 
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Mutation id").textWidth(CellFunctionBaseTabTextWidth).tooltip(Const::CellMutationIdTooltip),
-                    cell.mutationId);
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Creature id").textWidth(CellFunctionBaseTabTextWidth).tooltip(Const::CellCreatureIdTooltip),
-                    cell.creatureId);
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters()
                         .name("Activation time")

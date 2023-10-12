@@ -271,10 +271,12 @@ namespace Const
     std::string const CellReferenceAngleTooltip =
         "The reference angle defines an angle between two cell connections. If the actual angle is larger, tangential forces act on the connected cells, "
         "aiming to reduce the angle. Conversely, if the actual angle is smaller, the tangential forces tend to enlarge this angle. With this type of force "
-        "cell "
-        "networks can fold back into a desired shape after deformation.";
+        "cell networks can fold back into a desired shape after deformation.";
 
     std::string const CellAgeTooltip = "The age of the cell in time steps.";
+
+    std::string const CellIdTooltip = "The id of the cell is a unique 64 bit number which identifies the cell in the entire world and cannot be changed. The "
+                                      "cell id is displayed here in hexadecimal notation.";
 
     std::string const CellMutationIdTooltip =
         "The mutation id is a value to distinguish mutants. After most mutations (except neural network and cell properties) the mutation id changes.";
