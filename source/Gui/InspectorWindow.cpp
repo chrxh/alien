@@ -124,9 +124,9 @@ std::string _InspectorWindow::generateTitle() const
     auto entity = _editorModel->getInspectedEntity(_entityId);
     std::stringstream ss;
     if (isCell()) {
-        ss << "Cell #" << std::hex << _entityId;
+        ss << "Cell #" << std::hex << std::uppercase << _entityId;
     } else {
-        ss << "Energy particle #" << std::hex << _entityId;
+        ss << "Energy particle #" << std::hex << std::uppercase << _entityId;
     }
     return ss.str();
 }
@@ -180,7 +180,7 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
             }
             if (ImGui::TreeNodeEx("Ids##Base", TreeNodeFlags)) {
                 std::stringstream ss;
-                ss << std::hex << cell.id;
+                ss << std::hex << std::uppercase << cell.id;
                 auto cellId = ss.str();
 
                 AlienImGui::InputText(
