@@ -89,6 +89,7 @@ namespace
                 cellTO.cellFunctionData.constructor.genomeDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
+            cellTO.cellFunctionData.constructor.lastConstructedCellId = cell->cellFunctionData.constructor.lastConstructedCellId;
             cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex = cell->cellFunctionData.constructor.genomeCurrentNodeIndex;
             cellTO.cellFunctionData.constructor.genomeCurrentRepetition = cell->cellFunctionData.constructor.genomeCurrentRepetition;
             cellTO.cellFunctionData.constructor.isConstructionBuilt = cell->cellFunctionData.constructor.isConstructionBuilt;
