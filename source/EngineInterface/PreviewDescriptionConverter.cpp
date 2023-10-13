@@ -16,6 +16,8 @@ namespace
     {
         RealVector2D pos;
         int nodeIndex = 0;
+        CellPreviewDescription::NodePos nodePos = CellPreviewDescription::NodePos::Intermediate;
+
         int executionOrderNumber = 0;
         std::optional<int> inputExecutionOrderNumber;
         bool outputBlocked = false;
@@ -174,6 +176,13 @@ namespace
                 if (index < toInt(genome.cells.size()) * numRepetitionsTruncated - 1) {
                     cellIntern.connectionIndices.insert(index + 1);
                 }
+                if (partIndex == 0) {
+                    cellIntern.nodePos = index == 0 ? CellPreviewDescription::NodePos::Start : CellPreviewDescription::NodePos::StartRepetition;
+                }
+                if (partIndex == toInt(genome.cells.size()) - 1) {
+                    cellIntern.nodePos =
+                        repetition == genome.header.numRepetitions - 1 ? CellPreviewDescription::NodePos::End : CellPreviewDescription::NodePos::EndRepetition;
+                }
 
                 //find nearby cells
                 std::vector<int> nearbyCellIndices;
@@ -327,7 +336,8 @@ namespace
         std::map<std::pair<int, int>, int> cellIndicesToCreatedConnectionIndex;
         int index = 0;
         for (auto const& cell : previewIntern.cells) {
-            CellPreviewDescription cellPreview{.pos = cell.pos, .executionOrderNumber = cell.executionOrderNumber, .color = cell.color, .nodeIndex = cell.nodeIndex};
+            CellPreviewDescription cellPreview{
+                .pos = cell.pos, .executionOrderNumber = cell.executionOrderNumber, .color = cell.color, .nodeIndex = cell.nodeIndex, .nodePos = cell.nodePos};
             result.cells.emplace_back(cellPreview);
             for (auto const& connectionIndex : cell.connectionIndices) {
                 auto const& otherCell = previewIntern.cells.at(connectionIndex);

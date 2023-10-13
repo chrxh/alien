@@ -951,6 +951,19 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
                     {textPos.x + 1, textPos.y + 1},
                     Const::BranchNumberOverlayColor,
                     std::to_string(cell.executionOrderNumber).c_str());
+
+                if (cell.nodePos != CellPreviewDescription::NodePos::Intermediate) {
+                    auto color = cell.nodePos == CellPreviewDescription::NodePos::Start || cell.nodePos == CellPreviewDescription::NodePos::StartRepetition
+                        ? ImColor::HSV(0.58f, 0.8f, 1.0f, 1.0f)
+                        : ImColor::HSV(0.0f, 0.8f, 1.0f, 1.0f);
+
+                    auto length = cellSize / 4;
+                    drawList->AddTriangleFilled(
+                        {cellPos.x + length, cellPos.y},
+                        {cellPos.x + length * 2, cellPos.y - length / 2},
+                        {cellPos.x + length * 2, cellPos.y + length / 2},
+                        color);
+                }
             }
 
             if (selectedNode && cell.nodeIndex == *selectedNode) {
@@ -1014,6 +1027,25 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
                 }
             }
         }
+
+        if (zoom > ZoomLevelForLabels) {
+            for (auto const& cell : desc.cells) {
+                if (cell.nodePos != CellPreviewDescription::NodePos::Intermediate) {
+                    auto cellPos = (cell.pos - upperLeft) * cellSize + offset;
+                    auto color = cell.nodePos == CellPreviewDescription::NodePos::Start || cell.nodePos == CellPreviewDescription::NodePos::StartRepetition
+                        ? ImColor::HSV(0.58f, 0.8f, 1.0f, 1.0f)
+                        : ImColor::HSV(0.0f, 0.8f, 1.0f, 1.0f);
+
+                    auto length = cellSize / 4;
+                    drawList->AddTriangleFilled(
+                        {cellPos.x + length, cellPos.y},
+                        {cellPos.x + length * 2, cellPos.y - length / 2},
+                        {cellPos.x + length * 2, cellPos.y + length / 2},
+                        color);
+                }
+            }
+        }
+
     }
     ImGui::EndChild();
 

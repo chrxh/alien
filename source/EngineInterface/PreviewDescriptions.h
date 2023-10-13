@@ -7,6 +7,15 @@ struct CellPreviewDescription
     int executionOrderNumber = 0;
     int color = 0;
     int nodeIndex = 0;
+
+    enum class NodePos
+    {
+        Start,
+        StartRepetition,
+        Intermediate,
+        EndRepetition,
+        End
+    } nodePos = NodePos::Intermediate;
 };
 
 struct ConnectionPreviewDescription
