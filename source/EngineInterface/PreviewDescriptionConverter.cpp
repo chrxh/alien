@@ -254,18 +254,20 @@ namespace
 
                     //angles of connected cells
                     std::vector<float> angles;
+                    auto epsilon = 0.0f;
                     for (auto const& connectedCellIndex : cellIntern.connectionIndices) {
                         auto connectedCellIntern = processedGenome.previewDescription.cells.at(connectedCellIndex);
-                        angles.emplace_back(Math::angleOfVector(connectedCellIntern.pos - cellIntern.pos));
+                        angles.emplace_back(Math::angleOfVector(connectedCellIntern.pos - cellIntern.pos) + epsilon);
+                        epsilon += NEAR_ZERO;   //workaround to obtain deterministic results if two angles are the same
                     }
                     std::ranges::sort(angles);
 
                     //find largest diff
-                    float targetAngle = 0;
+                    auto targetAngle = 0.0f;
                     if (angles.size() > 1) {
                         std::optional<float> largestAngleDiff;
-                        int pos = 0;
-                        int numAngles = toInt(angles.size());
+                        auto pos = 0;
+                        auto numAngles = toInt(angles.size());
                         do {
                             auto angle0 = angles.at(pos % numAngles);
                             auto angle1 = angles.at((pos + 1) % numAngles);
