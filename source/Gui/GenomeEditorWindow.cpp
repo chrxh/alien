@@ -382,11 +382,20 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
             table.next();
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters()
-                    .name("Intermediate angle")
+                    .name("Intermediate angle #1")
+                    .format("%.1f")
+                    .textWidth(ContentHeaderTextWidth)
+                //    .tooltip(Const::GenomeIntermediateAngle)
+                ,
+                tab.genome.header.intermediateAngle1);
+            table.next();
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters()
+                    .name("Intermediate angle #2")
                     .format("%.1f")
                     .textWidth(ContentHeaderTextWidth)
                     .tooltip(Const::GenomeIntermediateAngle),
-                tab.genome.header.intermediateAngle);
+                tab.genome.header.intermediateAngle2);
         }
         table.next();
         AlienImGui::Checkbox(

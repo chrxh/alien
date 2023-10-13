@@ -12,7 +12,8 @@ public:
     struct EncodingSpecification
     {
         MEMBER_DECLARATION(EncodingSpecification, bool, numRepetitions, true);
-        MEMBER_DECLARATION(EncodingSpecification, bool, intermediateAngle, true);
+        MEMBER_DECLARATION(EncodingSpecification, bool, intermediateAngle1, true);
+        MEMBER_DECLARATION(EncodingSpecification, bool, intermediateAngle2, true);
     };
 
     static std::vector<uint8_t> convertDescriptionToBytes(GenomeDescription const& genome, EncodingSpecification const& spec = EncodingSpecification());

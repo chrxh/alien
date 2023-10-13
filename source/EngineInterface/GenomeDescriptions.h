@@ -388,7 +388,8 @@ struct GenomeHeaderDescription
     float stiffness = 1.0f;
     float connectionDistance = 1.0f;
     int numRepetitions = 1;
-    float intermediateAngle = 0;
+    float intermediateAngle1 = 0;
+    float intermediateAngle2 = 0;
 
     auto operator<=>(GenomeHeaderDescription const&) const = default;
 
