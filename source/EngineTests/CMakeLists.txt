@@ -14,6 +14,7 @@ PUBLIC
     NerveTests.cpp
     NeuronTests.cpp
     SensorTests.cpp
+    StatisticsTests.cpp
     Testsuite.cpp
     TransmitterTests.cpp)
 

@@ -19,5 +19,5 @@ public:
 
     static int convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress, EncodingSpecification const& spec = EncodingSpecification());
     static int convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex, EncodingSpecification const& spec = EncodingSpecification());
-    static int getNumNodesRecursively(std::vector<uint8_t> const& data, EncodingSpecification const& spec = EncodingSpecification());
+    static int getNumNodesRecursively(std::vector<uint8_t> const& data, bool includeRepetitions, EncodingSpecification const& spec = EncodingSpecification());
 };

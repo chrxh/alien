@@ -143,7 +143,7 @@ void _UploadSimulationDialog::onUpload()
                 return;
             }
             auto genomeData = GenomeDescriptionConverter::convertDescriptionToBytes(genome);
-            numObjects = GenomeDescriptionConverter::getNumNodesRecursively(genomeData);
+            numObjects = GenomeDescriptionConverter::getNumNodesRecursively(genomeData, true);
 
             if (!Serializer::serializeGenomeToString(mainData, genomeData)) {
                 showMessage("Upload genome", "The genome could not be serialized for uploading.");

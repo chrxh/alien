@@ -391,7 +391,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             }
 
             if (ImGui::TreeNodeEx("Properties (entire genome)", TreeNodeFlags)) {
-                auto numNodes = toFloat(GenomeDescriptionConverter::getNumNodesRecursively(desc.genome));
+                auto numNodes = toFloat(GenomeDescriptionConverter::getNumNodesRecursively(desc.genome, true));
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters()
                         .name("Number of cells")
