@@ -148,6 +148,9 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
     if (spec._numRepetitions) {
         writeByte(result, genome.header.numRepetitions);
     }
+    if (spec._intermediateAngle) {
+        writeAngle(result, genome.header.intermediateAngle);
+    }
 
     for (auto const& cell : cells) {
         writeByte(result, cell.getCellFunctionType());
@@ -246,6 +249,9 @@ namespace
         result.genome.header.connectionDistance = readDistance(data, bytePosition);
         if (spec._numRepetitions) {
             result.genome.header.numRepetitions = readByte(data, bytePosition);
+        }
+        if (spec._intermediateAngle) {
+            result.genome.header.intermediateAngle = readAngle(data, bytePosition);
         }
         
         while (bytePosition < maxBytePosition && nodeIndex < maxEntries) {

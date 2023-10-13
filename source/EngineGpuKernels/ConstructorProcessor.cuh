@@ -19,12 +19,16 @@ public:
 private:
     struct ConstructionData
     {
+        //genome-wide data
         GenomeHeader genomeHeader;
 
+        //node position data
         int genomeCurrentBytePosition;
+        bool isFirstNode;
         bool isLastNode;
         bool isLastNodeOfLastRepetition;
 
+        //node data
         float angle;
         float energy;
         int numRequiredAdditionalConnections;
@@ -45,14 +49,12 @@ private:
 
     __inline__ __device__ static Cell* getFirstCellOfConstructionSite(Cell* hostCell);
     __inline__ __device__ static bool startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
-    __inline__ __device__ static bool
-    continueConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, Cell* firstConstructedCell,
+    __inline__ __device__ static bool continueConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, Cell* firstConstructedCell,
         ConstructionData const& constructionData);
 
     __inline__ __device__ static bool isConnectable(int numConnections, int maxConnections, bool adaptMaxConnections);
 
-    __inline__ __device__ static Cell*
-    constructCellIntern(SimulationData& data, Cell* hostCell, float2 const& newCellPos, int maxConnections, ConstructionData const& constructionData);
+    __inline__ __device__ static Cell* constructCellIntern(SimulationData& data, Cell* hostCell, float2 const& newCellPos, int maxConnections, ConstructionData const& constructionData);
 
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
 
@@ -190,6 +192,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     ConstructionData result;
     result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
     result.genomeCurrentBytePosition = GenomeDecoder::getNodeAddress(constructor.genome, constructor.genomeSize, constructor.genomeCurrentNodeIndex);
+    result.isFirstNode = GenomeDecoder::isFirstNode(constructor);
     result.isLastNode = GenomeDecoder::isLastNode(constructor);
     result.isLastNodeOfLastRepetition = result.isLastNode && GenomeDecoder::isLastRepetition(constructor);
 
@@ -472,7 +475,8 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     }
 
     //connect newCell to underConstructionCell
-    auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
+    auto nextRefAngle = constructionData.isFirstNode ? constructionData.genomeHeader.intermediateAngle : constructionData.angle;
+    auto angleFromPreviousForNewCell = 180.0f - nextRefAngle;
     if (!CellConnectionProcessor::tryAddConnections(
         data, newCell, underConstructionCell, /*angleFromPreviousForNewCell*/0, angleFromPreviousForUnderConstructionCell, desiredDistance)) {
         adaptReferenceAngle = false;

@@ -5,17 +5,6 @@
 #include "Base.cuh"
 #include "Object.cuh"
 
-struct GenomeHeader
-{
-    ConstructionShape shape;
-    bool singleConstruction;
-    bool separateConstruction;
-    ConstructorAngleAlignment angleAlignment;
-    float stiffness;
-    float connectionDistance;
-    int numRepetitions;
-};
-
 class GenomeDecoder
 {
 public:
@@ -90,6 +79,7 @@ public:
     __inline__ __device__ static int convertBytesToWord(uint8_t b1, uint8_t b2);
     __inline__ __device__ static void convertWordToBytes(int word, uint8_t& b1, uint8_t& b2);
     __inline__ __device__ static uint8_t convertAngleToByte(float angle);
+    __inline__ __device__ static float convertByteToAngle(uint8_t b);
     __inline__ __device__ static uint8_t convertOptionalByteToByte(int value);
 
     static auto constexpr MAX_SUBGENOME_RECURSION_DEPTH = 30;
@@ -274,7 +264,7 @@ __inline__ __device__ float GenomeDecoder::readEnergy(ConstructorFunction& const
 
 __inline__ __device__ float GenomeDecoder::readAngle(ConstructorFunction& constructor, int& genomeBytePosition)
 {
-    return static_cast<float>(static_cast<int8_t>(readByte(constructor, genomeBytePosition))) / 120 * 180;
+    return convertByteToAngle(readByte(constructor, genomeBytePosition));
 }
 
 __inline__ __device__ bool GenomeDecoder::isFirstNode(ConstructorFunction const& constructor)
@@ -381,6 +371,7 @@ __inline__ __device__ GenomeHeader GenomeDecoder::readGenomeHeader(ConstructorFu
     result.stiffness = toFloat(constructor.genome[Const::GenomeHeaderStiffness]) / 255;
     result.connectionDistance = toFloat(constructor.genome[Const::GenomeHeaderConstructionDistance]) / 255 + 0.5f;
     result.numRepetitions = getNumRepetitions(constructor);
+    result.intermediateAngle = convertByteToAngle(constructor.genome[Const::GenomeHeaderIntermediateAngle]);
     return result;
 }
 
@@ -424,6 +415,11 @@ __inline__ __device__ uint8_t GenomeDecoder::convertAngleToByte(float angle)
         angle += 360.0f;
     }
     return static_cast<uint8_t>(static_cast<int8_t>(angle / 180 * 120));
+}
+
+__inline__ __device__ float GenomeDecoder::convertByteToAngle(uint8_t b)
+{
+    return static_cast<float>(static_cast<int8_t>(b)) / 120 * 180;
 }
 
 __inline__ __device__ uint8_t GenomeDecoder::convertOptionalByteToByte(int value)
