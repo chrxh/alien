@@ -399,8 +399,8 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance[hostCell->color],
         hostCell->detached,
         [&](Cell* const& otherCell) {
-            if (otherCell == underConstructionCell || otherCell == hostCell || otherCell->livingState != LivingState_UnderConstruction
-                || otherCell->creatureId != hostCell->cellFunctionData.constructor.offspringCreatureId) {
+            if (otherCell == underConstructionCell || otherCell == hostCell || (otherCell->livingState != LivingState_UnderConstruction
+                && otherCell->activationTime == 0) || otherCell->creatureId != hostCell->cellFunctionData.constructor.offspringCreatureId) {
                 return false;
             }
             return true;
@@ -426,7 +426,6 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             return false;
         }
     }
-
 
     if (!checkAndReduceHostEnergy(data, hostCell, constructionData)) {
         return false;
