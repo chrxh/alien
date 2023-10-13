@@ -4,15 +4,16 @@ namespace Const
 {
     auto constexpr CellFunctionMutationMaxGenomeSize = 200;
 
-    auto constexpr GenomeHeaderSize = 8;
+    auto constexpr GenomeHeaderSize = 9;
     auto constexpr GenomeHeaderShapePos = 0;
     auto constexpr GenomeHeaderSingleConstruction = 1;
     auto constexpr GenomeHeaderSeparationPos = 2;
     auto constexpr GenomeHeaderAlignmentPos = 3;
-    auto constexpr GenomeHeaderStiffness = 4;
-    auto constexpr GenomeHeaderConstructionDistance = 5;
-    auto constexpr GenomeHeaderNumRepetitions = 6;
-    auto constexpr GenomeHeaderIntermediateAngle = 7;
+    auto constexpr GenomeHeaderStiffnessPos = 4;
+    auto constexpr GenomeHeaderConstructionDistancePos = 5;
+    auto constexpr GenomeHeaderNumRepetitionsPos = 6;
+    auto constexpr GenomeHeaderIntermediateAngle1Pos = 7;
+    auto constexpr GenomeHeaderIntermediateAngle2Pos = 8;
 
     auto constexpr CellAnglePos = 1;
     auto constexpr CellRequiredConnectionsPos = 3;

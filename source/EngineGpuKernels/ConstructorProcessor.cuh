@@ -24,7 +24,6 @@ private:
 
         //node position data
         int genomeCurrentBytePosition;
-        bool isFirstNode;
         bool isLastNode;
         bool isLastNodeOfLastRepetition;
 
@@ -192,7 +191,6 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     ConstructionData result;
     result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
     result.genomeCurrentBytePosition = GenomeDecoder::getNodeAddress(constructor.genome, constructor.genomeSize, constructor.genomeCurrentNodeIndex);
-    result.isFirstNode = GenomeDecoder::isFirstNode(constructor);
     result.isLastNode = GenomeDecoder::isLastNode(constructor);
     result.isLastNodeOfLastRepetition = result.isLastNode && GenomeDecoder::isLastRepetition(constructor);
 
@@ -228,10 +226,18 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 
     auto isAtFirstNode = GenomeDecoder::isFirstNode(constructor);
     if (isAtFirstNode) {
-        result.angle = constructor.constructionAngle1;
+        if (GenomeDecoder::isFirstRepetition(constructor)) {
+            result.angle = constructor.constructionAngle1;
+        } else {
+            result.angle = result.genomeHeader.intermediateAngle1;
+        }
     }
-    if (result.isLastNodeOfLastRepetition) {
-        result.angle = constructor.constructionAngle2;
+    if (result.isLastNode) {
+        if (result.isLastNodeOfLastRepetition) {
+            result.angle = constructor.constructionAngle2;
+        } else {
+            result.angle = result.genomeHeader.intermediateAngle2;
+        }
     }
     return result;
 }
@@ -475,8 +481,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     }
 
     //connect newCell to underConstructionCell
-    auto nextRefAngle = constructionData.isFirstNode ? constructionData.genomeHeader.intermediateAngle : constructionData.angle;
-    auto angleFromPreviousForNewCell = 180.0f - nextRefAngle;
+    auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
     if (!CellConnectionProcessor::tryAddConnections(
         data, newCell, underConstructionCell, /*angleFromPreviousForNewCell*/0, angleFromPreviousForUnderConstructionCell, desiredDistance)) {
         adaptReferenceAngle = false;

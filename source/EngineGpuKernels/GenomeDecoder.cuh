@@ -27,6 +27,7 @@ public:
     __inline__ __device__ static int getNumNodes(uint8_t* genome, int genomeSize);
     __inline__ __device__ static int getNodeAddress(uint8_t* genome, int genomeSize, int nodeIndex);
     __inline__ __device__ static bool isFirstNode(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool isFirstRepetition(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isLastNode(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isLastRepetition(ConstructorFunction const& constructor);
     __inline__ __device__
@@ -109,7 +110,7 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
     int subGenomeEndAddresses[MAX_SUBGENOME_RECURSION_DEPTH];
     int subGenomeNumRepetitions[MAX_SUBGENOME_RECURSION_DEPTH + 1];
     int depth = 0;
-    subGenomeNumRepetitions[0] = genome[Const::GenomeHeaderNumRepetitions];
+    subGenomeNumRepetitions[0] = genome[Const::GenomeHeaderNumRepetitionsPos];
     for (auto nodeAddress = Const::GenomeHeaderSize; nodeAddress < genomeSize;) {
         auto cellFunction = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
         func(depth, nodeAddress, subGenomeNumRepetitions[depth]);
@@ -122,7 +123,7 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
                 auto subGenomeSize = GenomeDecoder::getNextSubGenomeSize(genome, genomeSize, nodeAddress);
                 nodeAddress += Const::CellBasicBytes + cellFunctionFixedBytes + 3;
                 subGenomeEndAddresses[depth++] = nodeAddress + subGenomeSize;
-                subGenomeNumRepetitions[depth] = subGenomeNumRepetitions[depth - 1] * genome[nodeAddress + Const::GenomeHeaderNumRepetitions];
+                subGenomeNumRepetitions[depth] = subGenomeNumRepetitions[depth - 1] * genome[nodeAddress + Const::GenomeHeaderNumRepetitionsPos];
                 nodeAddress += Const::GenomeHeaderSize;
                 goToNextSibling = false;
             }
@@ -272,6 +273,11 @@ __inline__ __device__ bool GenomeDecoder::isFirstNode(ConstructorFunction const&
     return constructor.genomeCurrentNodeIndex == 0;
 }
 
+__inline__ __device__ bool GenomeDecoder::isFirstRepetition(ConstructorFunction const& constructor)
+{
+    return constructor.genomeCurrentRepetition == 0;
+}
+
 __inline__ __device__ bool GenomeDecoder::isLastNode(ConstructorFunction const& constructor)
 {
     if (hasEmptyGenome(constructor)) {
@@ -343,7 +349,7 @@ __inline__ __device__ bool GenomeDecoder::isSingleConstruction(ConstructorFuncti
 
 __inline__ __device__ int GenomeDecoder::getNumRepetitions(ConstructorFunction const& constructor)
 {
-    return max(1, constructor.genome[Const::GenomeHeaderNumRepetitions]);
+    return max(1, constructor.genome[Const::GenomeHeaderNumRepetitionsPos]);
 }
 
 template <typename ConstructorOrInjector>
@@ -368,10 +374,11 @@ __inline__ __device__ GenomeHeader GenomeDecoder::readGenomeHeader(ConstructorFu
     result.singleConstruction = isSingleConstruction(constructor);
     result.separateConstruction = isSeparating(constructor);
     result.angleAlignment = constructor.genome[Const::GenomeHeaderAlignmentPos] % ConstructorAngleAlignment_Count;
-    result.stiffness = toFloat(constructor.genome[Const::GenomeHeaderStiffness]) / 255;
-    result.connectionDistance = toFloat(constructor.genome[Const::GenomeHeaderConstructionDistance]) / 255 + 0.5f;
+    result.stiffness = toFloat(constructor.genome[Const::GenomeHeaderStiffnessPos]) / 255;
+    result.connectionDistance = toFloat(constructor.genome[Const::GenomeHeaderConstructionDistancePos]) / 255 + 0.5f;
     result.numRepetitions = getNumRepetitions(constructor);
-    result.intermediateAngle = convertByteToAngle(constructor.genome[Const::GenomeHeaderIntermediateAngle]);
+    result.intermediateAngle1 = convertByteToAngle(constructor.genome[Const::GenomeHeaderIntermediateAngle1Pos]);
+    result.intermediateAngle2 = convertByteToAngle(constructor.genome[Const::GenomeHeaderIntermediateAngle2Pos]);
     return result;
 }
 
