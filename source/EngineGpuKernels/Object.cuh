@@ -5,6 +5,18 @@
 
 #include "Base.cuh"
 
+struct GenomeHeader
+{
+    ConstructionShape shape;
+    bool singleConstruction;
+    bool separateConstruction;
+    ConstructorAngleAlignment angleAlignment;
+    float stiffness;
+    float connectionDistance;
+    int numRepetitions;
+    float intermediateAngle;
+};
+
 struct CellMetadataDescription
 {
     int nameSize;

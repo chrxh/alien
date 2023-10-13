@@ -378,6 +378,16 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
                 .textWidth(ContentHeaderTextWidth)
                 .tooltip(Const::GenomeRepetitionsPerConstructionTooltip),
             tab.genome.header.numRepetitions);
+        if (tab.genome.header.numRepetitions > 1) {
+            table.next();
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters()
+                    .name("Intermediate angle")
+                    .format("%.1f")
+                    .textWidth(ContentHeaderTextWidth)
+                    .tooltip(Const::GenomeIntermediateAngle),
+                tab.genome.header.intermediateAngle);
+        }
         table.next();
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters().name("Separation").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeSeparationConstructionTooltip),

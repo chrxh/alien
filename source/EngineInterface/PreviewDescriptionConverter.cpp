@@ -144,7 +144,9 @@ namespace
                 if (lastReferenceAngle.has_value() && partIndex == toInt(genome.cells.size()) - 1 && repetition == genome.header.numRepetitions - 1) {
                     shapeResult.angle = *lastReferenceAngle;
                 }
-
+                if (repetition > 0 && partIndex == 0) {
+                    shapeResult.angle = genome.header.intermediateAngle;
+                }
                 if (index > 0) {
                     result.direction = Math::rotateClockwise(-result.direction, (180.0f + shapeResult.angle));
                 }
