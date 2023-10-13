@@ -416,6 +416,11 @@ struct GenomeHeaderDescription
         connectionDistance = value;
         return *this;
     }
+    GenomeHeaderDescription& setNumRepetitions(int value)
+    {
+        numRepetitions = value;
+        return *this;
+    }
 };
 
 struct GenomeDescription

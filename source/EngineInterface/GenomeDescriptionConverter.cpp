@@ -354,14 +354,14 @@ int GenomeDescriptionConverter::convertNodeIndexToNodeAddress(std::vector<uint8_
     return convertBytesToDescriptionIntern(data, data.size(), nodeIndex, spec).lastBytePosition;
 }
 
-int GenomeDescriptionConverter::getNumNodesRecursively(std::vector<uint8_t> const& data, EncodingSpecification const& spec)
+int GenomeDescriptionConverter::getNumNodesRecursively(std::vector<uint8_t> const& data, bool includeRepetitions, EncodingSpecification const& spec)
 {
     auto genome = convertBytesToDescriptionIntern(data, data.size(), data.size(), spec).genome;
     auto result = toInt(genome.cells.size());
     for (auto const& node : genome.cells) {
         if (auto subgenome = node.getGenome()) {
-            result += getNumNodesRecursively(*subgenome, spec);
+            result += getNumNodesRecursively(*subgenome, includeRepetitions, spec);
         }
     }
-    return result;
+    return includeRepetitions ? result * genome.header.numRepetitions : result;
 }

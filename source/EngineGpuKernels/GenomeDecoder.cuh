@@ -114,15 +114,15 @@ __inline__ __device__ void GenomeDecoder::executeForEachNode(uint8_t* genome, in
 template <typename Func>
 __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t* genome, int genomeSize, Func func)
 {
-    if (genomeSize < Const::GenomeHeaderSize) {
-        CUDA_THROW_NOT_IMPLEMENTED();
-    }
+    CHECK(genomeSize >= Const::GenomeHeaderSize)
+
     int subGenomeEndAddresses[MAX_SUBGENOME_RECURSION_DEPTH];
+    int subGenomeNumRepetitions[MAX_SUBGENOME_RECURSION_DEPTH + 1];
     int depth = 0;
-    int repetition = genome[Const::GenomeHeaderNumRepetitions];
+    subGenomeNumRepetitions[0] = genome[Const::GenomeHeaderNumRepetitions];
     for (auto nodeAddress = Const::GenomeHeaderSize; nodeAddress < genomeSize;) {
         auto cellFunction = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
-        func(depth, nodeAddress, repetition);
+        func(depth, nodeAddress, subGenomeNumRepetitions[depth]);
 
         bool goToNextSibling = true;
         if (cellFunction == CellFunction_Constructor || cellFunction == CellFunction_Injector) {
@@ -132,7 +132,7 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
                 auto subGenomeSize = GenomeDecoder::getNextSubGenomeSize(genome, genomeSize, nodeAddress);
                 nodeAddress += Const::CellBasicBytes + cellFunctionFixedBytes + 3;
                 subGenomeEndAddresses[depth++] = nodeAddress + subGenomeSize;
-                repetition = genome[nodeAddress + Const::GenomeHeaderNumRepetitions];
+                subGenomeNumRepetitions[depth] = subGenomeNumRepetitions[depth - 1] * genome[nodeAddress + Const::GenomeHeaderNumRepetitions];
                 nodeAddress += Const::GenomeHeaderSize;
                 goToNextSibling = false;
             }
@@ -163,9 +163,9 @@ __inline__ __device__ int GenomeDecoder::getNumNodesRecursively(uint8_t* genome,
 {
     auto result = 0;
     if (!includeRepetitions) {
-        executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress, int repetition) { ++result; });
+        executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress, int repetitions) { ++result; });
     } else {
-        executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress, int repetition) { result += repetition; });
+        executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress, int repetitions) { result += repetitions; });
     }
     return result;
 }
@@ -182,9 +182,8 @@ __inline__ __device__ int GenomeDecoder::getRandomGenomeNodeAddress(
     if (numSubGenomesSizeIndices) {
         *numSubGenomesSizeIndices = 0;
     }
-    if (genomeSize < Const::GenomeHeaderSize) {
-        CUDA_THROW_NOT_IMPLEMENTED();
-    }
+    CHECK(genomeSize >= Const::GenomeHeaderSize)
+
     if (genomeSize == Const::GenomeHeaderSize) {
         return Const::GenomeHeaderSize;
     }
@@ -372,10 +371,9 @@ __inline__ __device__ bool GenomeDecoder::containsSelfReplication(ConstructorOrI
 
 __inline__ __device__ GenomeHeader GenomeDecoder::readGenomeHeader(ConstructorFunction const& constructor)
 {
-    GenomeHeader result;
-    if (constructor.genomeSize < Const::GenomeHeaderSize) {
-        CUDA_THROW_NOT_IMPLEMENTED();
-    }
+    CHECK(constructor.genomeSize >= Const::GenomeHeaderSize)
+
+    GenomeHeader result;    
     result.shape = constructor.genome[Const::GenomeHeaderShapePos] % ConstructionShape_Count;
     result.singleConstruction = isSingleConstruction(constructor);
     result.separateConstruction = isSeparating(constructor);
