@@ -148,11 +148,11 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
     if (spec._numRepetitions) {
         writeByte(result, genome.header.numRepetitions);
     }
-    if (spec._intermediateAngle1) {
-        writeAngle(result, genome.header.intermediateAngle1);
+    if (spec._concatenationAngle1) {
+        writeAngle(result, genome.header.concatenationAngle1);
     }
-    if (spec._intermediateAngle2) {
-        writeAngle(result, genome.header.intermediateAngle2);
+    if (spec._concatenationAngle2) {
+        writeAngle(result, genome.header.concatenationAngle2);
     }
 
     for (auto const& cell : cells) {
@@ -253,11 +253,11 @@ namespace
         if (spec._numRepetitions) {
             result.genome.header.numRepetitions = readByte(data, bytePosition);
         }
-        if (spec._intermediateAngle1) {
-            result.genome.header.intermediateAngle1 = readAngle(data, bytePosition);
+        if (spec._concatenationAngle1) {
+            result.genome.header.concatenationAngle1 = readAngle(data, bytePosition);
         }
-        if (spec._intermediateAngle2) {
-            result.genome.header.intermediateAngle2 = readAngle(data, bytePosition);
+        if (spec._concatenationAngle2) {
+            result.genome.header.concatenationAngle2 = readAngle(data, bytePosition);
         }
         
         while (bytePosition < maxBytePosition && nodeIndex < maxEntries) {

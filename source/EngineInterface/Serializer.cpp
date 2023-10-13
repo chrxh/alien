@@ -107,8 +107,8 @@ namespace
     auto constexpr Id_GenomeHeader_Stiffness = 4;
     auto constexpr Id_GenomeHeader_ConnectionDistance = 5;
     auto constexpr Id_GenomeHeader_NumRepetitions = 6;
-    auto constexpr Id_GenomeHeader_IntermediateAngle1 = 7;
-    auto constexpr Id_GenomeHeader_IntermediateAngle2 = 8;
+    auto constexpr Id_GenomeHeader_ConcatenationAngle1 = 7;
+    auto constexpr Id_GenomeHeader_ConcatenationAngle2 = 8;
 
     auto constexpr Id_CellGenome_ReferenceAngle = 1;
     auto constexpr Id_CellGenome_Energy = 7;
@@ -419,8 +419,8 @@ namespace cereal
         loadSave<float>(task, auxiliaries, Id_GenomeHeader_Stiffness, data.stiffness, defaultObject.stiffness);
         loadSave<float>(task, auxiliaries, Id_GenomeHeader_ConnectionDistance, data.connectionDistance, defaultObject.connectionDistance);
         loadSave<int>(task, auxiliaries, Id_GenomeHeader_NumRepetitions, data.numRepetitions, defaultObject.numRepetitions);
-        loadSave<float>(task, auxiliaries, Id_GenomeHeader_IntermediateAngle1, data.intermediateAngle1, defaultObject.intermediateAngle1);
-        loadSave<float>(task, auxiliaries, Id_GenomeHeader_IntermediateAngle2, data.intermediateAngle2, defaultObject.intermediateAngle2);
+        loadSave<float>(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle1, data.concatenationAngle1, defaultObject.concatenationAngle1);
+        loadSave<float>(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle2, data.concatenationAngle2, defaultObject.concatenationAngle2);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(GenomeHeaderDescription)
@@ -525,7 +525,7 @@ namespace cereal
                 data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
 
                 auto oldVersionSpec =
-                    GenomeDescriptionConverter::EncodingSpecification().numRepetitions(false).intermediateAngle1(false).intermediateAngle2(false);
+                    GenomeDescriptionConverter::EncodingSpecification().numRepetitions(false).concatenationAngle1(false).concatenationAngle2(false);
                 auto oldGenome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc, oldVersionSpec);
                 data.isConstructionBuilt = toInt(oldGenome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
                 data.genomeCurrentNodeIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(oldGenome, data.genomeCurrentNodeIndex, oldVersionSpec);

@@ -146,13 +146,13 @@ namespace
                 }
 
                 if (partIndex == 0 && repetition > 0) {
-                    shapeResult.angle = genome.header.intermediateAngle1;
+                    shapeResult.angle = genome.header.concatenationAngle1;
                 }
                 if (partIndex == toInt(genome.cells.size()) - 1) {
                     if (lastReferenceAngle.has_value() && repetition == genome.header.numRepetitions - 1) {
                         shapeResult.angle = *lastReferenceAngle;
                     } else {
-                        shapeResult.angle = genome.header.intermediateAngle2;
+                        shapeResult.angle = genome.header.concatenationAngle2;
                     }
                 }
 

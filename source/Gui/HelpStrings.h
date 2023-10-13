@@ -247,8 +247,11 @@ namespace Const
         "This value specifies how many times the cell network described in the genome should be concatenated for each construction. For a value greater "
         "than 1, the cell network geometry has to fulfill certain requirements (e.g. rectangle, hexagon, loop and lolli geometries are not suitable for concatenation).";
 
-    std::string const GenomeIntermediateAngle =
-        "If two or more repeated cell networks are concatenated, this value describes the reference angle between two of them.";
+    std::string const GenomeConcatenationAngle1 =
+        "This value describes the angle between two concatenated cell networks viewed from the first cell of the subsequent cell network.";
+
+    std::string const GenomeConcatenationAngle2 =
+        "This value describes the angle between two concatenated cell networks viewed from the last cell of the previous cell network.";
 
     std::string const GenomeSeparationConstructionTooltip =
         "Here, one can configure whether the encoded cell network in the genome should be detached from the constructor cell once it has been "

@@ -12,8 +12,8 @@ namespace Const
     auto constexpr GenomeHeaderStiffnessPos = 4;
     auto constexpr GenomeHeaderConstructionDistancePos = 5;
     auto constexpr GenomeHeaderNumRepetitionsPos = 6;
-    auto constexpr GenomeHeaderIntermediateAngle1Pos = 7;
-    auto constexpr GenomeHeaderIntermediateAngle2Pos = 8;
+    auto constexpr GenomeHeaderConcatenationAngle1Pos = 7;
+    auto constexpr GenomeHeaderConcatenationAngle2Pos = 8;
 
     auto constexpr CellAnglePos = 1;
     auto constexpr CellRequiredConnectionsPos = 3;

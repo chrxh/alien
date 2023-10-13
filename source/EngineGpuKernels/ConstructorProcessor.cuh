@@ -229,14 +229,14 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
         if (GenomeDecoder::isFirstRepetition(constructor)) {
             result.angle = constructor.constructionAngle1;
         } else {
-            result.angle = result.genomeHeader.intermediateAngle1;
+            result.angle = result.genomeHeader.concatenationAngle1;
         }
     }
     if (result.isLastNode) {
         if (result.isLastNodeOfLastRepetition) {
             result.angle = constructor.constructionAngle2;
         } else {
-            result.angle = result.genomeHeader.intermediateAngle2;
+            result.angle = result.genomeHeader.concatenationAngle2;
         }
     }
     return result;
