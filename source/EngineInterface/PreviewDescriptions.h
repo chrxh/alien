@@ -7,6 +7,7 @@ struct CellPreviewDescription
     int executionOrderNumber = 0;
     int color = 0;
     int nodeIndex = 0;
+    bool multipleConstructor = false;
 
     enum class NodePos
     {
@@ -26,7 +27,7 @@ struct ConnectionPreviewDescription
     bool arrowToCell2 = false;
 };
 
-struct InfinitySymbolDescription
+struct UndefinedCellPreviewDescription
 {
     RealVector2D pos;
 };
@@ -35,5 +36,5 @@ struct PreviewDescription
 {
     std::vector<CellPreviewDescription> cells;
     std::vector<ConnectionPreviewDescription> connections;
-    std::vector<InfinitySymbolDescription> symbols;
+    std::vector<UndefinedCellPreviewDescription> undefinedCells;
 };

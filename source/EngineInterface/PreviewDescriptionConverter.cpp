@@ -17,6 +17,7 @@ namespace
         RealVector2D pos;
         int nodeIndex = 0;
         CellPreviewDescription::NodePos nodePos = CellPreviewDescription::NodePos::Intermediate;
+        bool multipleConstructor = false;
 
         int executionOrderNumber = 0;
         std::optional<int> inputExecutionOrderNumber;
@@ -28,7 +29,7 @@ namespace
     struct PreviewDescriptionIntern
     {
         std::vector<CellPreviewDescriptionIntern> cells;
-        std::vector<InfinitySymbolDescription> symbols;
+        std::vector<UndefinedCellPreviewDescription> undefinedCells;
     };
 
     void insert(PreviewDescriptionIntern& target, PreviewDescriptionIntern const& source)
@@ -42,7 +43,7 @@ namespace
             cell.connectionIndices = newConnectionIndices;
         }
         target.cells.insert(target.cells.begin(), source.cells.begin(), source.cells.end());
-        target.symbols.insert(target.symbols.begin(), source.symbols.begin(), source.symbols.end());
+        target.undefinedCells.insert(target.undefinedCells.begin(), source.undefinedCells.begin(), source.undefinedCells.end());
     }
 
     void rotate(PreviewDescriptionIntern& previewIntern, RealVector2D const& center, float angle)
@@ -52,7 +53,7 @@ namespace
         for (auto& cell : previewIntern.cells) {
             cell.pos = rotMatrix * (cell.pos - center) + center;
         }
-        for (auto& symbol : previewIntern.symbols) {
+        for (auto& symbol : previewIntern.undefinedCells) {
             symbol.pos = rotMatrix * (symbol.pos - center) + center;
         }
     }
@@ -62,7 +63,7 @@ namespace
         for (auto& cell : previewIntern.cells) {
             cell.pos += delta;
         }
-        for (auto& symbol : previewIntern.symbols) {
+        for (auto& symbol : previewIntern.undefinedCells) {
             symbol.pos += delta;
         }
     }
@@ -120,9 +121,9 @@ namespace
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
 
         if (MaxRepetitions < genome.header.numRepetitions) {
-            result.previewDescription.symbols.emplace_back(pos + result.direction * 1);
-            result.previewDescription.symbols.emplace_back(pos + result.direction * 2);
-            result.previewDescription.symbols.emplace_back(pos + result.direction * 3);
+            result.previewDescription.undefinedCells.emplace_back(pos + result.direction * 1);
+            result.previewDescription.undefinedCells.emplace_back(pos + result.direction * 2);
+            result.previewDescription.undefinedCells.emplace_back(pos + result.direction * 3);
             pos += result.direction * 4;
         }
 
@@ -307,11 +308,15 @@ namespace
                         subGenome, cellIntern.nodeIndex, constructor.constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
                     insert(result, previewPart);
                     indexOffset += previewPart.cells.size();
+
+                    auto cellIndex1 = previewPart.cells.size() - 1;
+                    auto cellIndex2 = index + indexOffset;
                     if (!subGenome.header.separateConstruction) {
-                        auto cellIndex1 = previewPart.cells.size() - 1;
-                        auto cellIndex2 = index + indexOffset;
                         result.cells.at(cellIndex1).connectionIndices.insert(toInt(cellIndex2));
                         result.cells.at(cellIndex2).connectionIndices.insert(toInt(cellIndex1));
+                    }
+                    if (!subGenome.header.singleConstruction) {
+                        result.cells.at(cellIndex2).multipleConstructor = true;
                     }
                 }
                 ++index;
@@ -337,7 +342,12 @@ namespace
         int index = 0;
         for (auto const& cell : previewIntern.cells) {
             CellPreviewDescription cellPreview{
-                .pos = cell.pos, .executionOrderNumber = cell.executionOrderNumber, .color = cell.color, .nodeIndex = cell.nodeIndex, .nodePos = cell.nodePos};
+                .pos = cell.pos,
+                .executionOrderNumber = cell.executionOrderNumber,
+                .color = cell.color,
+                .nodeIndex = cell.nodeIndex,
+                .multipleConstructor = cell.multipleConstructor,
+                .nodePos = cell.nodePos};
             result.cells.emplace_back(cellPreview);
             for (auto const& connectionIndex : cell.connectionIndices) {
                 auto const& otherCell = previewIntern.cells.at(connectionIndex);
@@ -359,7 +369,7 @@ namespace
             }
             ++index;
         }
-        result.symbols = previewIntern.symbols;
+        result.undefinedCells = previewIntern.undefinedCells;
         return result;
     }
 }
