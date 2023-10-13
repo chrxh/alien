@@ -377,8 +377,8 @@ __inline__ __device__ GenomeHeader GenomeDecoder::readGenomeHeader(ConstructorFu
     result.stiffness = toFloat(constructor.genome[Const::GenomeHeaderStiffnessPos]) / 255;
     result.connectionDistance = toFloat(constructor.genome[Const::GenomeHeaderConstructionDistancePos]) / 255 + 0.5f;
     result.numRepetitions = getNumRepetitions(constructor);
-    result.intermediateAngle1 = convertByteToAngle(constructor.genome[Const::GenomeHeaderIntermediateAngle1Pos]);
-    result.intermediateAngle2 = convertByteToAngle(constructor.genome[Const::GenomeHeaderIntermediateAngle2Pos]);
+    result.concatenationAngle1 = convertByteToAngle(constructor.genome[Const::GenomeHeaderConcatenationAngle1Pos]);
+    result.concatenationAngle2 = convertByteToAngle(constructor.genome[Const::GenomeHeaderConcatenationAngle2Pos]);
     return result;
 }
 

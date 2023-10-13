@@ -14,8 +14,8 @@ struct GenomeHeader
     float stiffness;
     float connectionDistance;
     int numRepetitions;
-    float intermediateAngle1;
-    float intermediateAngle2;
+    float concatenationAngle1;
+    float concatenationAngle2;
 };
 
 struct CellMetadataDescription
