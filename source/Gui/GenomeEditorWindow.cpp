@@ -34,7 +34,7 @@ namespace
     auto const PreviewHeight = 300.0f;
     auto const ContentHeaderTextWidth = 215.0f;
     auto const ContentTextWidth = 190.0f;
-    auto const DynamicTableHeaderColumnWidth = 325.0f;
+    auto const DynamicTableHeaderColumnWidth = 335.0f;
     auto const DynamicTableColumnWidth = 300.0f;
     auto const WeightsAndBiasTextWidth = 100.0f;
     auto const WeightsAndBiasSelectionTextWidth = 400.0f;
@@ -375,6 +375,7 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
                 .name("Repetitions per construction")
+                .infinity(true)
                 .textWidth(ContentHeaderTextWidth)
                 .tooltip(Const::GenomeRepetitionsPerConstructionTooltip),
             tab.genome.header.numRepetitions);
