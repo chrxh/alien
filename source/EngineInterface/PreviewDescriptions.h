@@ -7,14 +7,9 @@ struct CellPreviewDescription
     int executionOrderNumber = 0;
     int color = 0;
     int nodeIndex = 0;
+    bool partStart = false;
+    bool partEnd = false;
     bool multipleConstructor = false;
-
-    enum class NodePos
-    {
-        Start,
-        Intermediate,
-        End
-    } nodePos = NodePos::Intermediate;
 };
 
 struct ConnectionPreviewDescription
