@@ -37,8 +37,8 @@ namespace Const
 
     ImColor const CellFunctionOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
     ImColor const CellFunctionOverlayShadowColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.7f);
-    ImColor const BranchNumberOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.8f);
-    ImColor const BranchNumberOverlayShadowColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.7f);
+    ImColor const ExecutionNumberOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.8f);
+    ImColor const ExecutionNumberOverlayShadowColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.7f);
 
     ImColor const SelectedCellOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
 
@@ -66,7 +66,8 @@ namespace Const
     ImColor const VersionNewerColor = ImColor::HSV(0.0f, 0.2f, 1.0f);
 
     ImColor const GenomePreviewConnectionColor = ImColor::HSV(0, 0, 0.5f);
-    ImColor const GenomePreviewDotSymbolColor = ImColor::HSV(0, 0, 1);
+    ImColor const GenomePreviewDotSymbolColor = ImColor::HSV(0, 0, 0.5f);
+    ImColor const GenomePreviewInfinitySymbolColor = ImColor::HSV(0, 0, 0.5f);
     ImColor const GenomePreviewStartColor = ImColor::HSV(0.58f, 0.8f, 1.0f, 1.0f);
     ImColor const GenomePreviewEndColor = ImColor::HSV(0.0f, 0.8f, 1.0f, 1.0f);
     ImColor const GenomePreviewMultipleConstructorColor = ImColor::HSV(0.375f, 0.8f, 1.0f, 1.0f);

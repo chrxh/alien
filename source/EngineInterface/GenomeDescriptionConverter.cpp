@@ -8,10 +8,17 @@
 
 namespace
 {
-    void writeByte(std::vector<uint8_t>& data, int value) {data.emplace_back(static_cast<uint8_t>(value)); }
+    void writeByte(std::vector<uint8_t>& data, int value)
+    {
+        data.emplace_back(static_cast<uint8_t>(value));
+    }
     void writeOptionalByte(std::vector<uint8_t>& data, std::optional<int> value)
     {
         data.emplace_back(static_cast<uint8_t>(value.value_or(-1)));
+    }
+    void writeByteWithInfinity(std::vector<uint8_t>& data, int value)
+    {
+        data.emplace_back(static_cast<uint8_t>(std::min(255, value)));
     }
     void writeBool(std::vector<uint8_t>& data, bool value)
     {
@@ -74,6 +81,11 @@ namespace
     {
         auto value = static_cast<int>(readByte(data, pos));
         return value > 127 ? std::nullopt : std::make_optional(value % moduloValue);
+    }
+    int readByteWithInfinity(std::vector<uint8_t> const& data, int& pos)
+    {
+        auto b = readByte(data, pos);
+        return b == 255 ? std::numeric_limits<int>::max() : b;
     }
     bool readBool(std::vector<uint8_t> const& data, int& pos)
     {
@@ -146,7 +158,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
     writeStiffness(result, genome.header.stiffness);
     writeDistance(result, genome.header.connectionDistance);
     if (spec._numRepetitions) {
-        writeByte(result, genome.header.numRepetitions);
+        writeByteWithInfinity(result, genome.header.numRepetitions);
     }
     if (spec._concatenationAngle1) {
         writeAngle(result, genome.header.concatenationAngle1);
@@ -251,7 +263,7 @@ namespace
         result.genome.header.stiffness = readStiffness(data, bytePosition);
         result.genome.header.connectionDistance = readDistance(data, bytePosition);
         if (spec._numRepetitions) {
-            result.genome.header.numRepetitions = readByte(data, bytePosition);
+            result.genome.header.numRepetitions = readByteWithInfinity(data, bytePosition);
         }
         if (spec._concatenationAngle1) {
             result.genome.header.concatenationAngle1 = readAngle(data, bytePosition);

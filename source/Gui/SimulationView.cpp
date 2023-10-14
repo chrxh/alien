@@ -404,13 +404,13 @@ void _SimulationView::updateImageFromSimulation()
                         StyleRepository::getInstance().getLargeFont(),
                         fontSize,
                         {viewPos.x, viewPos.y},
-                        Const::BranchNumberOverlayShadowColor,
+                        Const::ExecutionNumberOverlayShadowColor,
                         std::to_string(overlayElement.executionOrderNumber).c_str());
                     drawList->AddText(
                         StyleRepository::getInstance().getLargeFont(),
                         fontSize,
                         {viewPos.x + 1, viewPos.y + 1},
-                        Const::BranchNumberOverlayColor,
+                        Const::ExecutionNumberOverlayColor,
                         std::to_string(overlayElement.executionOrderNumber).c_str());
                 }
             }

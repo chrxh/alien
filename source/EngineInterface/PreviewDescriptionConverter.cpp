@@ -30,7 +30,7 @@ namespace
     struct PreviewDescriptionIntern
     {
         std::vector<CellPreviewDescriptionIntern> cells;
-        std::vector<UndefinedCellPreviewDescription> undefinedCells;
+        std::vector<SymbolPreviewDescription> symbols;
     };
 
     void insert(PreviewDescriptionIntern& target, PreviewDescriptionIntern const& source)
@@ -44,7 +44,7 @@ namespace
             cell.connectionIndices = newConnectionIndices;
         }
         target.cells.insert(target.cells.begin(), source.cells.begin(), source.cells.end());
-        target.undefinedCells.insert(target.undefinedCells.begin(), source.undefinedCells.begin(), source.undefinedCells.end());
+        target.symbols.insert(target.symbols.begin(), source.symbols.begin(), source.symbols.end());
     }
 
     void rotate(PreviewDescriptionIntern& previewIntern, RealVector2D const& center, float angle)
@@ -54,7 +54,7 @@ namespace
         for (auto& cell : previewIntern.cells) {
             cell.pos = rotMatrix * (cell.pos - center) + center;
         }
-        for (auto& symbol : previewIntern.undefinedCells) {
+        for (auto& symbol : previewIntern.symbols) {
             symbol.pos = rotMatrix * (symbol.pos - center) + center;
         }
     }
@@ -64,7 +64,7 @@ namespace
         for (auto& cell : previewIntern.cells) {
             cell.pos += delta;
         }
-        for (auto& symbol : previewIntern.undefinedCells) {
+        for (auto& symbol : previewIntern.symbols) {
             symbol.pos += delta;
         }
     }
@@ -121,15 +121,20 @@ namespace
         RealVector2D pos;
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
 
+        auto hasInfiniteRepetitions = genome.header.numRepetitions == std::numeric_limits<int>::max();
         if (MaxRepetitions < genome.header.numRepetitions) {
-            result.previewDescription.undefinedCells.emplace_back(pos + result.direction * 1);
-            result.previewDescription.undefinedCells.emplace_back(pos + result.direction * 2);
-            result.previewDescription.undefinedCells.emplace_back(pos + result.direction * 3);
-            pos += result.direction * 4;
+            if (hasInfiniteRepetitions) {
+                result.previewDescription.symbols.emplace_back(SymbolPreviewDescription::Type::Infinity, pos);
+                pos += result.direction;
+            }
+            result.previewDescription.symbols.emplace_back(SymbolPreviewDescription::Type::Dot, pos);
+            result.previewDescription.symbols.emplace_back(SymbolPreviewDescription::Type::Dot, pos + result.direction * 1);
+            result.previewDescription.symbols.emplace_back(SymbolPreviewDescription::Type::Dot, pos + result.direction * 2);
+            pos += result.direction * 3;
         }
 
         auto index = 0;
-        auto numRepetitionsTruncated = std::min(MaxRepetitions, genome.header.numRepetitions);
+        auto numRepetitionsTruncated = hasInfiniteRepetitions ? 1 : std::min(MaxRepetitions, genome.header.numRepetitions);
         for (auto repetition = 0; repetition < numRepetitionsTruncated; ++repetition) {
 
             auto shapeGenerator = ShapeGeneratorFactory::create(genome.header.shape);
@@ -254,7 +259,8 @@ namespace
         //process sub genomes
         size_t indexOffset = 0;
         int index = 0;
-        auto numRepetitionsTruncated = std::min(MaxRepetitions, genome.header.numRepetitions);
+        auto hasInfiniteRepetitions = genome.header.numRepetitions == std::numeric_limits<int>::max();
+        auto numRepetitionsTruncated = hasInfiniteRepetitions ? 1 : std::min(MaxRepetitions, genome.header.numRepetitions);
         for (auto repetition = 0; repetition < numRepetitionsTruncated; ++repetition) {
             for (auto const& node : genome.cells) {
                 auto cellIntern = processedGenome.previewDescription.cells.at(index);
@@ -371,7 +377,7 @@ namespace
             }
             ++index;
         }
-        result.undefinedCells = previewIntern.undefinedCells;
+        result.symbols = previewIntern.symbols;
         return result;
     }
 }
