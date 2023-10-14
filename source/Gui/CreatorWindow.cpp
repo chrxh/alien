@@ -23,12 +23,12 @@
 namespace
 {
     auto const ModeText = std::unordered_map<CreationMode, std::string>{
-        {CreationMode::CreateParticle, "Create a single energy particle"},
-        {CreationMode::CreateCell, "Create a single cell"},
-        {CreationMode::CreateRectangle, "Create a rectangular cell network"},
-        {CreationMode::CreateHexagon, "Create a hexagonal cell network"},
-        {CreationMode::CreateDisc, "Create a disc-shaped cell network"},
-        {CreationMode::Drawing, "Draw freehand cell network"},
+        {CreationMode_CreateParticle, "Create a single energy particle"},
+        {CreationMode_CreateCell, "Create a single cell"},
+        {CreationMode_CreateRectangle, "Create a rectangular cell network"},
+        {CreationMode_CreateHexagon, "Create a hexagonal cell network"},
+        {CreationMode_CreateDisc, "Create a disc-shaped cell network"},
+        {CreationMode_Drawing, "Draw freehand cell network"},
     };
 
     auto const RightColumnWidth = 160.0f;
@@ -43,40 +43,28 @@ _CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationControl
 
 void _CreatorWindow::processIntern()
 {
-    if (AlienImGui::ToolbarButton(ICON_FA_SUN)) {
-        _mode = CreationMode::CreateParticle;
-    }
-    AlienImGui::Tooltip(ModeText.at(CreationMode::CreateParticle));
+    AlienImGui::SelectableToolbarButton(ICON_FA_SUN, _mode, CreationMode_CreateParticle, CreationMode_CreateParticle);
+    AlienImGui::Tooltip(ModeText.at(CreationMode_CreateParticle));
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_DOT)) {
-        _mode = CreationMode::CreateCell;
-    }
-    AlienImGui::Tooltip(ModeText.at(CreationMode::CreateCell));
+    AlienImGui::SelectableToolbarButton(ICON_DOT, _mode, CreationMode_CreateCell, CreationMode_CreateCell);
+    AlienImGui::Tooltip(ModeText.at(CreationMode_CreateCell));
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_RECTANGLE)) {
-        _mode = CreationMode::CreateRectangle;
-    }
-    AlienImGui::Tooltip(ModeText.at(CreationMode::CreateRectangle));
+    AlienImGui::SelectableToolbarButton(ICON_RECTANGLE, _mode, CreationMode_CreateRectangle, CreationMode_CreateRectangle);
+    AlienImGui::Tooltip(ModeText.at(CreationMode_CreateRectangle));
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_HEXAGON)) {
-        _mode = CreationMode::CreateHexagon;
-    }
-    AlienImGui::Tooltip(ModeText.at(CreationMode::CreateHexagon));
+    AlienImGui::SelectableToolbarButton(ICON_HEXAGON, _mode, CreationMode_CreateHexagon, CreationMode_CreateHexagon);
+    AlienImGui::Tooltip(ModeText.at(CreationMode_CreateHexagon));
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_DISC)) {
-        _mode = CreationMode::CreateDisc;
-    }
-    AlienImGui::Tooltip(ModeText.at(CreationMode::CreateDisc));
+    AlienImGui::SelectableToolbarButton(ICON_DISC, _mode, CreationMode_CreateDisc, CreationMode_CreateDisc);
+    AlienImGui::Tooltip(ModeText.at(CreationMode_CreateDisc));
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_PAINT_BRUSH)) {
-        _mode = CreationMode::Drawing;
-    }
-    AlienImGui::Tooltip(ModeText.at(CreationMode::Drawing));
+    AlienImGui::SelectableToolbarButton(ICON_FA_PAINT_BRUSH, _mode, CreationMode_Drawing, CreationMode_Drawing);
+    AlienImGui::Tooltip(ModeText.at(CreationMode_Drawing));
 
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         AlienImGui::Group(ModeText.at(_mode));
@@ -84,7 +72,7 @@ void _CreatorWindow::processIntern()
         auto color = _editorModel->getDefaultColorCode();
         AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(RightColumnWidth).tooltip(Const::GenomeColorTooltip), color);
         _editorModel->setDefaultColorCode(color);
-        if (_mode == CreationMode::Drawing) {
+        if (_mode == CreationMode_Drawing) {
             auto pencilWidth = _editorModel->getPencilWidth();
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -99,13 +87,13 @@ void _CreatorWindow::processIntern()
         }
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
-        if (_mode != CreationMode::CreateParticle) {
+        if (_mode != CreationMode_CreateParticle) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
                 &_stiffness);
         }
         
-        if (_mode == CreationMode::CreateCell) {
+        if (_mode == CreationMode_CreateCell) {
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
                     .name("Max connections")
@@ -120,7 +108,7 @@ void _CreatorWindow::processIntern()
                     .tooltip(Const::CreatorAscendingExecutionOrderNumberTooltip),
                 _ascendingExecutionNumbers);
         }
-        if (_mode == CreationMode::CreateRectangle) {
+        if (_mode == CreationMode_CreateRectangle) {
             AlienImGui::InputInt(
                 AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleWidthTooltip),
                 _rectHorizontalCells);
@@ -128,11 +116,11 @@ void _CreatorWindow::processIntern()
                 AlienImGui::InputIntParameters().name("Vertical cells").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleHeightTooltip),
                 _rectVerticalCells);
         }
-        if (_mode == CreationMode::CreateHexagon) {
+        if (_mode == CreationMode_CreateHexagon) {
             AlienImGui::InputInt(
                 AlienImGui::InputIntParameters().name("Layers").textWidth(RightColumnWidth).tooltip(Const::CreatorHexagonLayersTooltip), _layers);
         }
-        if (_mode == CreationMode::CreateDisc) {
+        if (_mode == CreationMode_CreateDisc) {
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Outer radius").textWidth(RightColumnWidth).format("%.2f").tooltip(Const::CreatorDiscOuterRadiusTooltip),
                 _outerRadius);
@@ -140,7 +128,7 @@ void _CreatorWindow::processIntern()
                 AlienImGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.2f").tooltip(Const::CreatorDiscInnerRadiusTooltip),
                 _innerRadius);
         }
-        if (_mode == CreationMode::CreateRectangle || _mode == CreationMode::CreateHexagon || _mode == CreationMode::CreateDisc) {
+        if (_mode == CreationMode_CreateRectangle || _mode == CreationMode_CreateHexagon || _mode == CreationMode_CreateDisc) {
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters()
                     .name("Cell distance")
@@ -150,7 +138,7 @@ void _CreatorWindow::processIntern()
                     .tooltip(Const::CreatorDistanceTooltip),
                 _cellDistance);
         }
-        if (_mode != CreationMode::CreateParticle & _mode != CreationMode::CreateCell) {
+        if (_mode != CreationMode_CreateParticle & _mode != CreationMode_CreateCell) {
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
         }
         AlienImGui::Checkbox(
@@ -159,7 +147,7 @@ void _CreatorWindow::processIntern()
     ImGui::EndChild();
 
     AlienImGui::Separator();
-    if (_mode == CreationMode::Drawing) {
+    if (_mode == CreationMode_Drawing) {
         auto text = _editorModel->isDrawMode() ? "End drawing" : "Start drawing";
         if (AlienImGui::Button(text)) {
             _editorModel->setDrawMode(!_editorModel->isDrawMode());
@@ -167,19 +155,19 @@ void _CreatorWindow::processIntern()
     } else {
         _editorModel->setDrawMode(false);
         if (AlienImGui::Button("Build")) {
-            if (_mode == CreationMode::CreateCell) {
+            if (_mode == CreationMode_CreateCell) {
                 createCell();
             }
-            if (_mode == CreationMode::CreateParticle) {
+            if (_mode == CreationMode_CreateParticle) {
                 createParticle();
             }
-            if (_mode == CreationMode::CreateRectangle) {
+            if (_mode == CreationMode_CreateRectangle) {
                 createRectangle();
             }
-            if (_mode == CreationMode::CreateHexagon) {
+            if (_mode == CreationMode_CreateHexagon) {
                 createHexagon();
             }
-            if (_mode == CreationMode::CreateDisc) {
+            if (_mode == CreationMode_CreateDisc) {
                 createDisc();
             }
             _editorModel->update();
