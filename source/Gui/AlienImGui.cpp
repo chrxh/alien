@@ -893,6 +893,10 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
 
 bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode)
 {
+    auto constexpr ZoomLevelForLabels = 16.0f;
+    auto constexpr ZoomLevelForConnections = 8.0f;
+    auto const LineThickness = scale(2.0f);
+
     auto result = false;
 
     auto color = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
@@ -926,34 +930,44 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
         RealVector2D offset{windowPos.x + cellSize, windowPos.y + cellSize};
 
         ImGui::SetCursorPos({previewSize.x - 1, previewSize.y - 1});
+
+        //draw cells
         for (auto const& cell : desc.cells) {
             auto cellPos = (cell.pos - upperLeft) * cellSize + offset;
             float h, s, v;
             AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
-            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize / 4, ImColor::HSV(h, s * 0.7f, v * 0.7f));
 
-            RealVector2D textPos(cellPos.x - cellSize / 8, cellPos.y - cellSize / 4);
-            drawList->AddText(
-                StyleRepository::getInstance().getLargeFont(),
-                cellSize / 2,
-                {textPos.x, textPos.y},
-                Const::BranchNumberOverlayShadowColor,
-                std::to_string(cell.executionOrderNumber).c_str());
-            drawList->AddText(
-                StyleRepository::getInstance().getLargeFont(),
-                cellSize / 2,
-                {textPos.x + 1, textPos.y + 1},
-                Const::BranchNumberOverlayColor,
-                std::to_string(cell.executionOrderNumber).c_str());
+            auto cellRadiusFactor = zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * cellRadiusFactor, ImColor::HSV(h, s * 1.2f, v * 1.0f));
+
+            if (zoom > ZoomLevelForLabels) {
+                RealVector2D textPos(cellPos.x - cellSize / 8, cellPos.y - cellSize / 4);
+                drawList->AddText(
+                    StyleRepository::getInstance().getLargeFont(),
+                    cellSize / 2,
+                    {textPos.x, textPos.y},
+                    Const::BranchNumberOverlayShadowColor,
+                    std::to_string(cell.executionOrderNumber).c_str());
+                drawList->AddText(
+                    StyleRepository::getInstance().getLargeFont(),
+                    cellSize / 2,
+                    {textPos.x + 1, textPos.y + 1},
+                    Const::BranchNumberOverlayColor,
+                    std::to_string(cell.executionOrderNumber).c_str());
+            }
 
             if (selectedNode && cell.nodeIndex == *selectedNode) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
+                if (zoom > ZoomLevelForLabels) {
+                    drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
+                } else {
+                    drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor::HSV(h, s * 0.8f, v * 1.2f));
+                }
             }
 
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
                 auto mousePos = ImGui::GetMousePos();
-                if (mousePos.x >= cellPos.x - cellSize / 3 && mousePos.y >= cellPos.y - cellSize / 3 && mousePos.x <= cellPos.x + cellSize / 3
-                    && mousePos.y <= cellPos.y + cellSize / 3) {
+                if (mousePos.x >= cellPos.x - cellSize / 2 && mousePos.y >= cellPos.y - cellSize / 2 && mousePos.x <= cellPos.x + cellSize / 2
+                    && mousePos.y <= cellPos.y + cellSize / 2) {
                     selectedNode = cell.nodeIndex;
                     result = true;
                 }
@@ -961,37 +975,90 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
 
         }
 
-        for (auto const& connection : desc.connections) {
-            auto cellPos1 = (connection.cell1 - upperLeft) * cellSize + offset;
-            auto cellPos2 = (connection.cell2 - upperLeft) * cellSize + offset;
+        //draw undefined cells
+        for (auto const& symbol : desc.undefinedCells) {
+            auto pos = (symbol.pos - upperLeft) * cellSize + offset;
+            auto cellRadiusFactor = zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
+            drawList->AddCircleFilled({pos.x, pos.y}, cellSize * cellRadiusFactor, Const::GenomePreviewDotSymbolColor);
+        }
 
-            auto direction = cellPos1 - cellPos2;
+        //draw cell connections
+        if (zoom > ZoomLevelForConnections) {
+            for (auto const& connection : desc.connections) {
+                auto cellPos1 = (connection.cell1 - upperLeft) * cellSize + offset;
+                auto cellPos2 = (connection.cell2 - upperLeft) * cellSize + offset;
 
-            Math::normalize(direction);
-            auto connectionStartPos = cellPos1 - direction * cellSize / 4;
-            auto connectionEndPos = cellPos2 + direction * cellSize / 4;
-            drawList->AddLine({connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+                auto direction = cellPos1 - cellPos2;
 
-            if (connection.arrowToCell1) {
-                auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
-                auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8;
-                drawList->AddLine({arrowPartStart1.x, arrowPartStart1.y}, {connectionStartPos.x, connectionStartPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+                Math::normalize(direction);
+                auto connectionStartPos = cellPos1 - direction * cellSize / 4;
+                auto connectionEndPos = cellPos2 + direction * cellSize / 4;
+                drawList->AddLine(
+                    {connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 
-                auto arrowPartDirection2 = RealVector2D{-direction.x - direction.y, direction.x - direction.y};
-                auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 8;
-                drawList->AddLine({arrowPartStart2.x, arrowPartStart2.y}, {connectionStartPos.x, connectionStartPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
-            }
+                if (connection.arrowToCell1) {
+                    auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
+                    auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8;
+                    drawList->AddLine(
+                        {arrowPartStart1.x, arrowPartStart1.y},
+                        {connectionStartPos.x, connectionStartPos.y},
+                        Const::GenomePreviewConnectionColor,
+                        LineThickness);
 
-            if (connection.arrowToCell2) {
-                auto arrowPartDirection1 = RealVector2D{direction.x - direction.y, direction.x + direction.y};
-                auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 8;
-                drawList->AddLine({arrowPartStart1.x, arrowPartStart1.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+                    auto arrowPartDirection2 = RealVector2D{-direction.x - direction.y, direction.x - direction.y};
+                    auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 8;
+                    drawList->AddLine(
+                        {arrowPartStart2.x, arrowPartStart2.y},
+                        {connectionStartPos.x, connectionStartPos.y},
+                        Const::GenomePreviewConnectionColor,
+                        LineThickness);
+                }
 
-                auto arrowPartDirection2 = RealVector2D{direction.x + direction.y, -direction.x + direction.y};
-                auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * cellSize / 8;
-                drawList->AddLine({arrowPartStart2.x, arrowPartStart2.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+                if (connection.arrowToCell2) {
+                    auto arrowPartDirection1 = RealVector2D{direction.x - direction.y, direction.x + direction.y};
+                    auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 8;
+                    drawList->AddLine(
+                        {arrowPartStart1.x, arrowPartStart1.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
+
+                    auto arrowPartDirection2 = RealVector2D{direction.x + direction.y, -direction.x + direction.y};
+                    auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * cellSize / 8;
+                    drawList->AddLine(
+                        {arrowPartStart2.x, arrowPartStart2.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
+                }
             }
         }
+
+        //draw cell infos (start/end marks and multiple constructor marks)
+        if (zoom > ZoomLevelForLabels) {
+            for (auto const& cell : desc.cells) {
+                auto cellPos = (cell.pos - upperLeft) * cellSize + offset;
+                auto length = cellSize / 4;
+                if (cell.nodePos != CellPreviewDescription::NodePos::Intermediate) {
+                    auto color = cell.nodePos == CellPreviewDescription::NodePos::Start
+                        ? Const::GenomePreviewStartColor
+                        : Const::GenomePreviewEndColor;
+
+                    drawList->AddTriangleFilled(
+                        {cellPos.x + length, cellPos.y},
+                        {cellPos.x + length * 2, cellPos.y - length / 2},
+                        {cellPos.x + length * 2, cellPos.y + length / 2},
+                        color);
+                }
+                if (cell.multipleConstructor) {
+                    drawList->AddLine(
+                        {cellPos.x + length, cellPos.y + length},
+                        {cellPos.x + length * 2, cellPos.y + length},
+                        Const::GenomePreviewMultipleConstructorColor,
+                        LineThickness);
+                    drawList->AddLine(
+                        {cellPos.x + length * 1.5f, cellPos.y + length / 2},
+                        {cellPos.x + length * 1.5f, cellPos.y + length * 1.5f},
+                        Const::GenomePreviewMultipleConstructorColor,
+                        LineThickness);
+                }
+            }
+        }
+
     }
     ImGui::EndChild();
 

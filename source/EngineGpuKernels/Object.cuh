@@ -5,12 +5,25 @@
 
 #include "Base.cuh"
 
+struct GenomeHeader
+{
+    ConstructionShape shape;
+    bool singleConstruction;
+    bool separateConstruction;
+    ConstructorAngleAlignment angleAlignment;
+    float stiffness;
+    float connectionDistance;
+    int numRepetitions;
+    float concatenationAngle1;
+    float concatenationAngle2;
+};
+
 struct CellMetadataDescription
 {
-    uint64_t nameSize;
+    int nameSize;
     uint8_t* name;
 
-    uint64_t descriptionSize;
+    int descriptionSize;
     uint8_t* description;
 };
 
@@ -49,15 +62,18 @@ struct ConstructorFunction
     int constructionActivationTime;
 
     //genome
-    uint64_t genomeSize;
+    int genomeSize;
     uint8_t* genome;
     int genomeGeneration;
     float constructionAngle1;
     float constructionAngle2;
 
     //process data
-    uint64_t genomeReadPosition;
-    int offspringCreatureId;    //will be filled when self-replication starts
+    uint64_t lastConstructedCellId;
+    int genomeCurrentNodeIndex;
+    int genomeCurrentRepetition;
+    bool isConstructionBuilt;
+    int offspringCreatureId;  //will be filled when self-replication starts
     int offspringMutationId;
 
     //temp
@@ -93,7 +109,7 @@ struct InjectorFunction
 {
     InjectorMode mode;
     int counter;
-    uint64_t genomeSize;
+    int genomeSize;
     uint8_t* genome;
     int genomeGeneration;
 };
@@ -155,7 +171,7 @@ struct Cell
     CellFunctionData cellFunctionData;
     Activity activity;
     int activationTime;
-    int genomeSize;
+    int genomeNumNodes;
 
     CellMetadataDescription metadata;
 

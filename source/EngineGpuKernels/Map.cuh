@@ -3,7 +3,7 @@
 #include "cuda_runtime_api.h"
 
 #include "Base.cuh"
-#include "Cell.cuh"
+#include "Object.cuh"
 #include "Particle.cuh"
 #include "Math.cuh"
 #include "Array.cuh"

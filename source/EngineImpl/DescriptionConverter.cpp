@@ -6,6 +6,7 @@
 #include "Base/NumberGenerator.h"
 #include "Base/Exceptions.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/GenomeConstants.h"
 
 
 namespace
@@ -37,7 +38,7 @@ namespace
     }
 
     template<typename Container>
-    void convert(DataTO const& dataTO, Container const& source, uint64_t& targetSize, uint64_t& targetIndex)
+    void convert(DataTO const& dataTO, Container const& source, int& targetSize, uint64_t& targetIndex)
     {
         targetSize = source.size();
         if (targetSize > 0) {
@@ -51,7 +52,7 @@ namespace
     }
 
     template <>
-    void convert(DataTO const& dataTO, std::vector<float> const& source, uint64_t& targetSize, uint64_t& targetIndex)
+    void convert(DataTO const& dataTO, std::vector<float> const& source, int& targetSize, uint64_t& targetIndex)
     {
         BytesAsFloat bytesAsFloat;
         targetSize = source.size() * 4;
@@ -390,7 +391,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.barrier = cellTO.barrier;
     result.age = cellTO.age;
     result.color = cellTO.color;
-    result.genomeSize = cellTO.genomeSize;
+    result.genomeNumNodes = cellTO.genomeNumNodes;
 
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
@@ -423,7 +424,10 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
-        constructor.genomeReadPosition = toInt(cellTO.cellFunctionData.constructor.genomeReadPosition);
+        constructor.lastConstructedCellId = cellTO.cellFunctionData.constructor.lastConstructedCellId;
+        constructor.genomeCurrentNodeIndex = cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex;
+        constructor.genomeCurrentRepetition = cellTO.cellFunctionData.constructor.genomeCurrentRepetition;
+        constructor.isConstructionBuilt = cellTO.cellFunctionData.constructor.isConstructionBuilt;
         constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
         constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
         constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
@@ -524,7 +528,7 @@ void DescriptionConverter::addCell(
         NeuronTO neuronTO;
         auto const& neuronDesc = std::get<NeuronDescription>(*cellDesc.cellFunction);
         std::vector<float> weigthsAndBias = unitWeightsAndBias(neuronDesc.weights, neuronDesc.biases);
-        uint64_t targetSize;
+        int targetSize;
         convert(dataTO, weigthsAndBias, targetSize, neuronTO.weightsAndBiasesDataIndex);
         CHECK(targetSize == sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1));
         cellTO.cellFunctionData.neuron = neuronTO;
@@ -540,8 +544,12 @@ void DescriptionConverter::addCell(
         ConstructorTO constructorTO;
         constructorTO.activationMode = constructorDesc.activationMode;
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
+        CHECK(constructorDesc.genome.size() >= Const::GenomeHeaderSize)
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
-        constructorTO.genomeReadPosition = constructorDesc.genomeReadPosition;
+        constructorTO.lastConstructedCellId = constructorDesc.lastConstructedCellId;
+        constructorTO.genomeCurrentNodeIndex = constructorDesc.genomeCurrentNodeIndex;
+        constructorTO.genomeCurrentRepetition = constructorDesc.genomeCurrentRepetition;
+        constructorTO.isConstructionBuilt = constructorDesc.isConstructionBuilt;
         constructorTO.offspringCreatureId = constructorDesc.offspringCreatureId;
         constructorTO.offspringMutationId = constructorDesc.offspringMutationId;
         constructorTO.genomeGeneration = constructorDesc.genomeGeneration;
@@ -580,6 +588,7 @@ void DescriptionConverter::addCell(
         InjectorTO injectorTO;
         injectorTO.mode = injectorDesc.mode;
         injectorTO.counter = injectorDesc.counter;
+        CHECK(injectorDesc.genome.size() >= Const::GenomeHeaderSize)
         convert(dataTO, injectorDesc.genome, injectorTO.genomeSize, injectorTO.genomeDataIndex);
         injectorTO.genomeGeneration = injectorDesc.genomeGeneration;
         cellTO.cellFunctionData.injector = injectorTO;
@@ -612,7 +621,7 @@ void DescriptionConverter::addCell(
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;
     cellTO.color = cellDesc.color;
-    cellTO.genomeSize = cellDesc.genomeSize;
+    cellTO.genomeNumNodes = cellDesc.genomeNumNodes;
     convert(dataTO, cellDesc.metadata.name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
     convert(dataTO, cellDesc.metadata.description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);

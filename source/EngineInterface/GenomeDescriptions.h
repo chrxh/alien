@@ -387,6 +387,9 @@ struct GenomeHeaderDescription
     ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
     float stiffness = 1.0f;
     float connectionDistance = 1.0f;
+    int numRepetitions = 1;
+    float concatenationAngle1 = 0;
+    float concatenationAngle2 = 0;
 
     auto operator<=>(GenomeHeaderDescription const&) const = default;
 
@@ -415,18 +418,23 @@ struct GenomeHeaderDescription
         connectionDistance = value;
         return *this;
     }
+    GenomeHeaderDescription& setNumRepetitions(int value)
+    {
+        numRepetitions = value;
+        return *this;
+    }
 };
 
 struct GenomeDescription
 {
-    GenomeHeaderDescription info;
+    GenomeHeaderDescription header;
     std::vector<CellGenomeDescription> cells;
 
     auto operator<=>(GenomeDescription const&) const = default;
 
-    GenomeDescription& setInfo(GenomeHeaderDescription const& value)
+    GenomeDescription& setHeader(GenomeHeaderDescription const& value)
     {
-        info = value;
+        header = value;
         return *this;
     }
 

@@ -2,7 +2,7 @@
 
 #include "EngineInterface/SelectionShallowData.h"
 #include "Definitions.cuh"
-#include "Cell.cuh"
+#include "Object.cuh"
 
 class SelectionResult
 {

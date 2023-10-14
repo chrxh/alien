@@ -98,13 +98,13 @@ struct SimulationParameters
     ColorVector<float> cellFunctionAttackerEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
     ColorVector<float> cellFunctionAttackerColorInhomogeneityFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorMatrix<float> cellFunctionAttackerGenomeSizeBonus = {
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f}
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
     };
     ColorMatrix<float> cellFunctionAttackerSameMutantPenalty = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},

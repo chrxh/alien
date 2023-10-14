@@ -4,6 +4,8 @@
 
 #include "Base/Definitions.h"
 
+#include "GenomeConstants.h"
+
 namespace
 {
     void writeByte(std::vector<uint8_t>& data, int value) {data.emplace_back(static_cast<uint8_t>(value)); }
@@ -132,17 +134,26 @@ namespace
     }
 }
 
-std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription const& genome)
+std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription const& genome, EncodingSpecification const& spec)
 {
     auto const& cells = genome.cells;
     std::vector<uint8_t> result;
-    result.reserve(cells.size() * 12 + 5);
-    writeByte(result, genome.info.shape);
-    writeBool(result, genome.info.singleConstruction);
-    writeBool(result, genome.info.separateConstruction);
-    writeByte(result, genome.info.angleAlignment);
-    writeStiffness(result, genome.info.stiffness);
-    writeDistance(result, genome.info.connectionDistance);
+    result.reserve(cells.size() * (Const::CellBasicBytes + Const::ConstructorFixedBytes) + Const::GenomeHeaderSize);
+    writeByte(result, genome.header.shape);
+    writeBool(result, genome.header.singleConstruction);
+    writeBool(result, genome.header.separateConstruction);
+    writeByte(result, genome.header.angleAlignment);
+    writeStiffness(result, genome.header.stiffness);
+    writeDistance(result, genome.header.connectionDistance);
+    if (spec._numRepetitions) {
+        writeByte(result, genome.header.numRepetitions);
+    }
+    if (spec._concatenationAngle1) {
+        writeAngle(result, genome.header.concatenationAngle1);
+    }
+    if (spec._concatenationAngle2) {
+        writeAngle(result, genome.header.concatenationAngle2);
+    }
 
     for (auto const& cell : cells) {
         writeByte(result, cell.getCellFunctionType());
@@ -221,11 +232,11 @@ namespace
         int lastBytePosition = 0;
     };
     
-    ConversionResult
-    convertBytesToDescriptionIntern(
+    ConversionResult convertBytesToDescriptionIntern(
         std::vector<uint8_t> const& data,
         size_t maxBytePosition,
-        size_t maxEntries)
+        size_t maxEntries,
+        GenomeDescriptionConverter::EncodingSpecification const& spec)
     {
         SimulationParameters parameters;
         ConversionResult result;
@@ -233,12 +244,21 @@ namespace
         int nodeIndex = 0;
         auto& bytePosition = result.lastBytePosition;
 
-        result.genome.info.shape = readByte(data, bytePosition) % ConstructionShape_Count;
-        result.genome.info.singleConstruction = readBool(data, bytePosition);
-        result.genome.info.separateConstruction = readBool(data, bytePosition);
-        result.genome.info.angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;
-        result.genome.info.stiffness = readStiffness(data, bytePosition);
-        result.genome.info.connectionDistance = readDistance(data, bytePosition);
+        result.genome.header.shape = readByte(data, bytePosition) % ConstructionShape_Count;
+        result.genome.header.singleConstruction = readBool(data, bytePosition);
+        result.genome.header.separateConstruction = readBool(data, bytePosition);
+        result.genome.header.angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;
+        result.genome.header.stiffness = readStiffness(data, bytePosition);
+        result.genome.header.connectionDistance = readDistance(data, bytePosition);
+        if (spec._numRepetitions) {
+            result.genome.header.numRepetitions = readByte(data, bytePosition);
+        }
+        if (spec._concatenationAngle1) {
+            result.genome.header.concatenationAngle1 = readAngle(data, bytePosition);
+        }
+        if (spec._concatenationAngle2) {
+            result.genome.header.concatenationAngle2 = readAngle(data, bytePosition);
+        }
         
         while (bytePosition < maxBytePosition && nodeIndex < maxEntries) {
             CellFunction cellFunction = readByte(data, bytePosition) % CellFunction_Count;
@@ -329,31 +349,31 @@ namespace
 
 }
 
-GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vector<uint8_t> const& data)
+GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vector<uint8_t> const& data, EncodingSpecification const& spec)
 {
-    return convertBytesToDescriptionIntern(data, data.size(), data.size()).genome;
+    return convertBytesToDescriptionIntern(data, data.size(), data.size(), spec).genome;
 }
 
-int GenomeDescriptionConverter::convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress)
+int GenomeDescriptionConverter::convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress, EncodingSpecification const& spec)
 {
     //wasteful approach but sufficient for GUI
-    return convertBytesToDescriptionIntern(data, nodeAddress, data.size()).genome.cells.size();
+    return convertBytesToDescriptionIntern(data, nodeAddress, data.size(), spec).genome.cells.size();
 }
 
-int GenomeDescriptionConverter::convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex)
+int GenomeDescriptionConverter::convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex, EncodingSpecification const& spec)
 {
     //wasteful approach but sufficient for GUI
-    return convertBytesToDescriptionIntern(data, data.size(), nodeIndex).lastBytePosition;
+    return convertBytesToDescriptionIntern(data, data.size(), nodeIndex, spec).lastBytePosition;
 }
 
-int GenomeDescriptionConverter::getNumNodesRecursively(std::vector<uint8_t> const& data)
+int GenomeDescriptionConverter::getNumNodesRecursively(std::vector<uint8_t> const& data, bool includeRepetitions, EncodingSpecification const& spec)
 {
-    auto genome = convertBytesToDescriptionIntern(data, data.size(), data.size()).genome;
+    auto genome = convertBytesToDescriptionIntern(data, data.size(), data.size(), spec).genome;
     auto result = toInt(genome.cells.size());
     for (auto const& node : genome.cells) {
         if (auto subgenome = node.getGenome()) {
-            result += getNumNodesRecursively(*subgenome);
+            result += getNumNodesRecursively(*subgenome, includeRepetitions, spec);
         }
     }
-    return result;
+    return includeRepetitions ? result * genome.header.numRepetitions : result;
 }

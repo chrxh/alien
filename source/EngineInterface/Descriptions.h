@@ -103,7 +103,10 @@ struct ConstructorDescription
     float constructionAngle2 = 0;
 
     //process data
-    int genomeReadPosition = 0;
+    uint64_t lastConstructedCellId = 0;
+    int genomeCurrentNodeIndex = 0;
+    int genomeCurrentRepetition = 0;
+    bool isConstructionBuilt = false;
     int offspringCreatureId = 0;
     int offspringMutationId = 0;
 
@@ -125,9 +128,9 @@ struct ConstructorDescription
         genome = value;
         return *this;
     }
-    ConstructorDescription& setGenomeReadPosition(int value)
+    ConstructorDescription& setGenomeCurrentNodeIndex(int value)
     {
-        genomeReadPosition = value;
+        genomeCurrentNodeIndex = value;
         return *this;
     }
     ConstructorDescription& setGenomeGeneration(int value)
@@ -307,7 +310,7 @@ struct CellDescription
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
     int activationTime = 0;
-    int genomeSize = 0;
+    int genomeNumNodes = 0;
 
     CellMetadataDescription metadata;
 
@@ -339,7 +342,7 @@ struct CellDescription
         stiffness = value;
         return *this;
     }
-    CellDescription& setColor(unsigned char value)
+    CellDescription& setColor(int value)
     {
         color = value;
         return *this;
