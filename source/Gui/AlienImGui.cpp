@@ -75,7 +75,9 @@ void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, 
 
 bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool* enabled)
 {
-    auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
+    auto textWidth = scale(parameters._textWidth);
+    auto infinityButtonWidth = scale(30);
+    auto isInfinity = value == std::numeric_limits<int>::max();
 
     if (enabled) {
         ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
@@ -86,8 +88,20 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
         ImGui::SameLine();
     }
 
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
-    auto result = ImGui::InputInt(("##" + parameters._name).c_str(), &value);
+    auto inputWidth = ImGui::GetContentRegionAvail().x - textWidth;
+    if (parameters._infinity) {
+        inputWidth -= infinityButtonWidth + ImGui::GetStyle().FramePadding.x;
+    }
+
+    auto result = false;
+    if (!isInfinity) {
+        ImGui::SetNextItemWidth(inputWidth);
+        result = ImGui::InputInt(("##" + parameters._name).c_str(), &value);
+    } else {
+        std::string text = "infinity";
+        result = InputText(InputTextParameters().readOnly(true).width(inputWidth).textWidth(0), text);
+    }
+    ImGuiInputTextFlags flags = isInfinity ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
@@ -97,6 +111,17 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
         }
         ImGui::EndDisabled();
     }
+    if (parameters._infinity) {
+        ImGui::SameLine();
+        if (CheckButton(CheckButtonParameters().name(ICON_FA_INFINITY).tooltip(parameters._tooltip).width(infinityButtonWidth), isInfinity)) {
+            if (isInfinity) {
+                value = std::numeric_limits<int>::max();
+            } else {
+                value = 1;
+            }
+        }
+    }
+
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
     if (enabled) {
@@ -231,8 +256,8 @@ void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& pa
 
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
-    auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
+    auto width = parameters._width != 0.0f ? parameters._width : ImGui::GetContentRegionAvail().x;
+    ImGui::SetNextItemWidth(width - scale(parameters._textWidth));
     if (parameters._monospaceFont) {
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
     }
@@ -260,8 +285,10 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
         }
         ImGui::EndDisabled();
     }
-    ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    if (!parameters._name.empty()) {
+        ImGui::SameLine();
+        ImGui::TextUnformatted(parameters._name.c_str());
+    }
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
@@ -536,6 +563,29 @@ bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
+
+    return result;
+}
+
+bool AlienImGui::CheckButton(CheckButtonParameters const& parameters, bool& value)
+{
+    auto buttonColor = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Button]);
+    auto buttonColorHovered = ImColor(ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered]);
+    auto buttonColorActive = ImColor(ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
+    if (value) {
+        buttonColor = buttonColorActive;
+    }
+
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)buttonColor);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)buttonColorHovered);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)buttonColorActive);
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    ImGui::SetCursorScreenPos(ImVec2(pos.x - ImGui::GetStyle().FramePadding.x, pos.y));
+    auto result = ImGui::Button(parameters._name.c_str(), {parameters._width, 0});
+    if (result) {
+        value = !value;
+    }
+    ImGui::PopStyleColor(3);
 
     return result;
 }
