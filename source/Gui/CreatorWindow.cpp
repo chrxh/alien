@@ -31,7 +31,7 @@ namespace
         {CreationMode::Drawing, "Draw freehand cell network"},
     };
 
-    auto const RightColumnWidth = 210.0f;
+    auto const RightColumnWidth = 160.0f;
 }
 
 _CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport)
@@ -115,7 +115,7 @@ void _CreatorWindow::processIntern()
                 &_maxConnections);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Ascending execution order")
+                    .name("Set execution order")
                     .textWidth(RightColumnWidth)
                     .tooltip(Const::CreatorAscendingExecutionOrderNumberTooltip),
                 _ascendingExecutionNumbers);

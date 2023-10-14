@@ -1,5 +1,7 @@
 #pragma once
 
+#include <nppdefs.h>
+
 #include "EngineInterface/CellFunctionConstants.h"
 
 #include "CellFunctionProcessor.cuh"
@@ -170,9 +172,12 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             activity.channels[0] = 1;
             if (GenomeDecoder::isLastNode(constructor)) {
                 constructor.genomeCurrentNodeIndex = 0;
-                if (++constructor.genomeCurrentRepetition == constructionData.genomeHeader.numRepetitions) {
-                    constructor.isConstructionBuilt = true;
-                    constructor.genomeCurrentRepetition = 0;
+                if (constructionData.genomeHeader.numRepetitions != NPP_MAX_32S) {
+                    ++constructor.genomeCurrentRepetition;
+                    if (constructor.genomeCurrentRepetition == constructionData.genomeHeader.numRepetitions) {
+                        constructor.isConstructionBuilt = true;
+                        constructor.genomeCurrentRepetition = 0;
+                    }
                 }
             } else {
                 ++constructor.genomeCurrentNodeIndex;
