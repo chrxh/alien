@@ -16,7 +16,8 @@ namespace
     {
         RealVector2D pos;
         int nodeIndex = 0;
-        CellPreviewDescription::NodePos nodePos = CellPreviewDescription::NodePos::Intermediate;
+        bool partStart = false;
+        bool partEnd = false;
         bool constructorWithMultiConstruction = false;
 
         int executionOrderNumber = 0;
@@ -178,10 +179,10 @@ namespace
                     cellIntern.connectionIndices.insert(index + 1);
                 }
                 if (partIndex == 0) {
-                    cellIntern.nodePos = CellPreviewDescription::NodePos::Start;
+                    cellIntern.partStart = true;
                 }
                 if (partIndex == toInt(genome.cells.size()) - 1) {
-                    cellIntern.nodePos = CellPreviewDescription::NodePos::End;
+                    cellIntern.partEnd = true;
                 }
 
                 //find nearby cells
@@ -345,8 +346,10 @@ namespace
                 .executionOrderNumber = cell.executionOrderNumber,
                 .color = cell.color,
                 .nodeIndex = cell.nodeIndex,
+                .partStart = cell.partStart,
+                .partEnd = cell.partEnd,
                 .multipleConstructor = cell.constructorWithMultiConstruction,
-                .nodePos = cell.nodePos};
+            };
             result.cells.emplace_back(cellPreview);
             for (auto const& connectionIndex : cell.connectionIndices) {
                 auto const& otherCell = previewIntern.cells.at(connectionIndex);

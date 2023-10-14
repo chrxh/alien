@@ -1033,16 +1033,24 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
             for (auto const& cell : desc.cells) {
                 auto cellPos = (cell.pos - upperLeft) * cellSize + offset;
                 auto length = cellSize / 4;
-                if (cell.nodePos != CellPreviewDescription::NodePos::Intermediate) {
-                    auto color = cell.nodePos == CellPreviewDescription::NodePos::Start
-                        ? Const::GenomePreviewStartColor
-                        : Const::GenomePreviewEndColor;
-
+                if (cell.partStart !=  cell.partEnd) {
                     drawList->AddTriangleFilled(
                         {cellPos.x + length, cellPos.y},
                         {cellPos.x + length * 2, cellPos.y - length / 2},
                         {cellPos.x + length * 2, cellPos.y + length / 2},
-                        color);
+                        cell.partStart ? Const::GenomePreviewStartColor : Const::GenomePreviewEndColor);
+                }
+                if (cell.partStart && cell.partEnd) {
+                    drawList->AddTriangleFilled(
+                        {cellPos.x + length, cellPos.y - length},
+                        {cellPos.x + length * 2, cellPos.y - length * 3  / 2},
+                        {cellPos.x + length * 2, cellPos.y - length / 2},
+                        Const::GenomePreviewStartColor);
+                    drawList->AddTriangleFilled(
+                        {cellPos.x + length, cellPos.y + length},
+                        {cellPos.x + length * 2, cellPos.y + length / 2},
+                        {cellPos.x + length * 2, cellPos.y + length * 3 / 2},
+                        Const::GenomePreviewEndColor);
                 }
                 if (cell.multipleConstructor) {
                     drawList->AddLine(
