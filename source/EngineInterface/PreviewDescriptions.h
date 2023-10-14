@@ -20,8 +20,13 @@ struct ConnectionPreviewDescription
     bool arrowToCell2 = false;
 };
 
-struct UndefinedCellPreviewDescription
+struct SymbolPreviewDescription
 {
+    enum class Type
+    {
+        Dot,
+        Infinity
+    } type;
     RealVector2D pos;
 };
 
@@ -29,5 +34,5 @@ struct PreviewDescription
 {
     std::vector<CellPreviewDescription> cells;
     std::vector<ConnectionPreviewDescription> connections;
-    std::vector<UndefinedCellPreviewDescription> undefinedCells;
+    std::vector<SymbolPreviewDescription> symbols;
 };

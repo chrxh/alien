@@ -987,12 +987,19 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
     auto constexpr ZoomLevelForConnections = 8.0f;
     auto const LineThickness = scale(2.0f);
 
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    auto const cellSize = scale(zoom);
+
+    auto drawTextWithShadow = [&drawList, &cellSize](std::string const& text, float posX, float posY, ImU32 const& color, bool iconFont = false) {
+        auto font = iconFont ? StyleRepository::getInstance().getIconFont() : StyleRepository::getInstance().getLargeFont();
+        drawList->AddText(font, cellSize / 2, {posX, posY}, color, text.c_str());
+        drawList->AddText(font, cellSize / 2, {posX + 1.0f, posY + 1.0f}, color, text.c_str());
+    };
+
     auto result = false;
 
     auto color = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
     auto windowSize = ImGui::GetWindowSize();
-
-    auto const cellSize = scale(zoom);
 
     RealVector2D upperLeft;
     RealVector2D lowerRight;
@@ -1015,7 +1022,6 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
     ImGui::SetCursorPos({std::max(0.0f, windowSize.x - previewSize.x) / 2, std::max(0.0f, windowSize.y - previewSize.y) / 2});
     if (ImGui::BeginChild("##genome", ImVec2(previewSize.x, previewSize.y), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
-        ImDrawList* drawList = ImGui::GetWindowDrawList();
         auto windowPos = ImGui::GetWindowPos();
         RealVector2D offset{windowPos.x + cellSize, windowPos.y + cellSize};
 
@@ -1032,18 +1038,7 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
 
             if (zoom > ZoomLevelForLabels) {
                 RealVector2D textPos(cellPos.x - cellSize / 8, cellPos.y - cellSize / 4);
-                drawList->AddText(
-                    StyleRepository::getInstance().getLargeFont(),
-                    cellSize / 2,
-                    {textPos.x, textPos.y},
-                    Const::BranchNumberOverlayShadowColor,
-                    std::to_string(cell.executionOrderNumber).c_str());
-                drawList->AddText(
-                    StyleRepository::getInstance().getLargeFont(),
-                    cellSize / 2,
-                    {textPos.x + 1, textPos.y + 1},
-                    Const::BranchNumberOverlayColor,
-                    std::to_string(cell.executionOrderNumber).c_str());
+                drawTextWithShadow(std::to_string(cell.executionOrderNumber), textPos.x, textPos.y, Const::ExecutionNumberOverlayShadowColor);
             }
 
             if (selectedNode && cell.nodeIndex == *selectedNode) {
@@ -1065,11 +1060,20 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
 
         }
 
-        //draw undefined cells
-        for (auto const& symbol : desc.undefinedCells) {
+        //draw symbols
+        for (auto const& symbol : desc.symbols) {
             auto pos = (symbol.pos - upperLeft) * cellSize + offset;
-            auto cellRadiusFactor = zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
-            drawList->AddCircleFilled({pos.x, pos.y}, cellSize * cellRadiusFactor, Const::GenomePreviewDotSymbolColor);
+            switch (symbol.type) {
+            case SymbolPreviewDescription::Type::Dot: {
+                auto cellRadiusFactor = zoom > ZoomLevelForConnections ? 0.15f : 0.35f;
+                drawList->AddCircleFilled({pos.x, pos.y}, cellSize * cellRadiusFactor, Const::GenomePreviewDotSymbolColor);
+            } break;
+            case SymbolPreviewDescription::Type::Infinity: {
+                if (zoom > ZoomLevelForConnections) {
+                    drawTextWithShadow(ICON_FA_INFINITY, pos.x - cellSize * 0.4f, pos.y - cellSize * 0.2f, Const::GenomePreviewInfinitySymbolColor, true);
+                }
+            } break;
+            }
         }
 
         //draw cell connections
