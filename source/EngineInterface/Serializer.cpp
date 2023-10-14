@@ -525,7 +525,7 @@ namespace cereal
                 data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
 
                 auto oldVersionSpec =
-                    GenomeDescriptionConverter::EncodingSpecification().numRepetitions(false).concatenationAngle1(false).concatenationAngle2(false);
+                    GenomeEncodingSpecification().numRepetitions(false).concatenationAngle1(false).concatenationAngle2(false);
                 auto oldGenome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc, oldVersionSpec);
                 data.isConstructionBuilt = toInt(oldGenome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
                 data.genomeCurrentNodeIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(oldGenome, data.genomeCurrentNodeIndex, oldVersionSpec);

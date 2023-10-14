@@ -134,7 +134,7 @@ namespace
     }
 }
 
-std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription const& genome, EncodingSpecification const& spec)
+std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription const& genome, GenomeEncodingSpecification const& spec)
 {
     auto const& cells = genome.cells;
     std::vector<uint8_t> result;
@@ -236,7 +236,7 @@ namespace
         std::vector<uint8_t> const& data,
         size_t maxBytePosition,
         size_t maxEntries,
-        GenomeDescriptionConverter::EncodingSpecification const& spec)
+        GenomeEncodingSpecification const& spec)
     {
         SimulationParameters parameters;
         ConversionResult result;
@@ -349,24 +349,24 @@ namespace
 
 }
 
-GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vector<uint8_t> const& data, EncodingSpecification const& spec)
+GenomeDescription GenomeDescriptionConverter::convertBytesToDescription(std::vector<uint8_t> const& data, GenomeEncodingSpecification const& spec)
 {
     return convertBytesToDescriptionIntern(data, data.size(), data.size(), spec).genome;
 }
 
-int GenomeDescriptionConverter::convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress, EncodingSpecification const& spec)
+int GenomeDescriptionConverter::convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress, GenomeEncodingSpecification const& spec)
 {
     //wasteful approach but sufficient for GUI
     return convertBytesToDescriptionIntern(data, nodeAddress, data.size(), spec).genome.cells.size();
 }
 
-int GenomeDescriptionConverter::convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex, EncodingSpecification const& spec)
+int GenomeDescriptionConverter::convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex, GenomeEncodingSpecification const& spec)
 {
     //wasteful approach but sufficient for GUI
     return convertBytesToDescriptionIntern(data, data.size(), nodeIndex, spec).lastBytePosition;
 }
 
-int GenomeDescriptionConverter::getNumNodesRecursively(std::vector<uint8_t> const& data, bool includeRepetitions, EncodingSpecification const& spec)
+int GenomeDescriptionConverter::getNumNodesRecursively(std::vector<uint8_t> const& data, bool includeRepetitions, GenomeEncodingSpecification const& spec)
 {
     auto genome = convertBytesToDescriptionIntern(data, data.size(), data.size(), spec).genome;
     auto result = toInt(genome.cells.size());
