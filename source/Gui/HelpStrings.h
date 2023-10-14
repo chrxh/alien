@@ -240,9 +240,18 @@ namespace Const
         "be multiples of certain values. This allows for greater stability of the created networks, as the angles would otherwise be more susceptible to "
         "external influences. Choosing 60 degrees is recommended here, as it allows for the accurate representation of most geometries.";
 
-    std::string const GenomeSingleConstructionTooltip =
-        "This determines whether the encoded cell network in the genome should be constructed by the corresponding "
-        "constructor cell only once or multiple times.";
+    std::string const GenomeMultipleConstructionsTooltip =
+        "This flag specifies whether the construction described by the genome (repetitions included) should be built multiple times or not.";
+
+    std::string const GenomeRepetitionsPerConstructionTooltip =
+        "This value specifies how many times the cell network described in the genome should be concatenated for each construction. For a value greater "
+        "than 1, the cell network geometry has to fulfill certain requirements (e.g. rectangle, hexagon, loop and lolli geometries are not suitable for concatenation).";
+
+    std::string const GenomeConcatenationAngle1 =
+        "This value describes the angle between two concatenated cell networks viewed from the first cell of the subsequent cell network.";
+
+    std::string const GenomeConcatenationAngle2 =
+        "This value describes the angle between two concatenated cell networks viewed from the last cell of the previous cell network.";
 
     std::string const GenomeSeparationConstructionTooltip =
         "Here, one can configure whether the encoded cell network in the genome should be detached from the constructor cell once it has been "
@@ -268,10 +277,12 @@ namespace Const
     std::string const CellReferenceAngleTooltip =
         "The reference angle defines an angle between two cell connections. If the actual angle is larger, tangential forces act on the connected cells, "
         "aiming to reduce the angle. Conversely, if the actual angle is smaller, the tangential forces tend to enlarge this angle. With this type of force "
-        "cell "
-        "networks can fold back into a desired shape after deformation.";
+        "cell networks can fold back into a desired shape after deformation.";
 
     std::string const CellAgeTooltip = "The age of the cell in time steps.";
+
+    std::string const CellIdTooltip = "The id of the cell is a unique 64 bit number which identifies the cell in the entire world and cannot be changed. The "
+                                      "cell id is displayed here in hexadecimal notation.";
 
     std::string const CellMutationIdTooltip =
         "The mutation id is a value to distinguish mutants. After most mutations (except neural network and cell properties) the mutation id changes.";
@@ -281,7 +292,7 @@ namespace Const
 
     std::string const CellLivingStateTooltip =
         "Cells can exist in various states. When a cell network is being constructed, its cells are in the 'Under construction' state. Once the cell network "
-        "is completed by the constructor, the cells briefly enter the 'Just ready' state before transitioning to the 'Ready' state shortly after. If a cell "
+        "is completed by the constructor, the cells briefly enter the 'Activating' state before transitioning to the 'Ready' state shortly after. If a cell "
         "network is in the process of dying, its cells are in the 'Dying' state.";
 
     inline std::string getCellFunctionTooltip(CellFunction cellFunction)
@@ -310,15 +321,18 @@ namespace Const
         }
     };
 
-    std::string const GenomeNumberOfCellsRecursivelyTooltip = "The number of all encoded cells in the genome including its sub-genomes.";
+    std::string const GenomeNumCellsRecursivelyTooltip = "The number of all encoded cells in the genome including its sub-genomes.";
 
     std::string const GenomeBytesTooltip = "The length of the genome in bytes.";
 
     std::string const GenomeGenerationTooltip = "This value indicates the number of times this genome has been inherited by offspring.";
 
-    std::string const GenomeNumberOfCellsTooltip = "The number of all encoded cells in the genome excluding its sub-genomes.";
+    std::string const GenomeNumCellsTooltip = "The number of all encoded cells in the genome excluding its sub-genomes.";
 
     std::string const GenomeCurrentCellTooltip = "The sequence number of the cell in the genome that will be constructed next.";
+
+    std::string const GenomeCurrentRepetitionTooltip = "The cell network encoded in the genome can be repeated in a single construction by specifying a number of "
+                                                 "repetitions. This value indicates the index of the current repetition.";
 
     std::string const CellInjectorCounterTooltip =
         "When a genome injection is initiated, the counter increments after each consecutive successful activation of the injector. Once the counter reaches a "

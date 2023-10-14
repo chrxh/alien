@@ -3,7 +3,7 @@
 
 #include "EngineInterface/CellFunctionConstants.h"
 
-#include "Cell.cuh"
+#include "Object.cuh"
 #include "CellFunctionProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
@@ -94,9 +94,9 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 atomicAdd(&otherCell->activity.channels[7], 1.0f);
             }
 
-            if (otherCell->genomeSize > cell->genomeSize) {
+            if (otherCell->genomeNumNodes > cell->genomeNumNodes) {
                 auto genomeSizeBonus = cudaSimulationParameters.cellFunctionAttackerGenomeSizeBonus[cell->color][otherCell->color];
-                energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<float>(otherCell->genomeSize - cell->genomeSize));
+                energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<float>(otherCell->genomeNumNodes - cell->genomeNumNodes));
             }
             if (otherCell->mutationId == cell->mutationId) {
                 auto sameMutantPenalty =
@@ -259,8 +259,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
                 return false;
             }
             if (otherCell->cellFunction == CellFunction_Constructor) {
-                auto isFinished = GenomeDecoder::isFinishedSingleConstruction(otherCell->cellFunctionData.constructor);
-                if (!isFinished && otherCell->creatureId == cell->creatureId) {
+                if (!GenomeDecoder::isFinished(otherCell->cellFunctionData.constructor) && otherCell->creatureId == cell->creatureId) {
                     return true;
                 }
             }

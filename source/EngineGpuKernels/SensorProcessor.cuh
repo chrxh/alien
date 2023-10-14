@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cell.cuh"
+#include "Object.cuh"
 #include "SimulationData.cuh"
 #include "CellFunctionProcessor.cuh"
 

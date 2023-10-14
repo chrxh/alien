@@ -2,7 +2,7 @@
 
 #include "EngineInterface/CellFunctionConstants.h"
 
-#include "Cell.cuh"
+#include "Object.cuh"
 #include "CellFunctionProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
@@ -57,8 +57,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             continue;
         }
         if (connectedCell->cellFunction == CellFunction_Constructor) {
-            auto constructor = connectedCell->cellFunctionData.constructor;
-            if (!GenomeDecoder::isFinishedSingleConstruction(constructor)) {
+            if (!GenomeDecoder::isFinished(connectedCell->cellFunctionData.constructor)) {
                 continue;
             }
         }
@@ -107,8 +106,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
                 return false;
             }
             if (otherCell->cellFunction == CellFunction_Constructor) {
-                auto isFinished = GenomeDecoder::isFinishedSingleConstruction(otherCell->cellFunctionData.constructor);
-                if (!isFinished
+                if (!GenomeDecoder::isFinished(otherCell->cellFunctionData.constructor)
                     && (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId)) {
                     return true;
                 }

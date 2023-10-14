@@ -3,7 +3,7 @@
 #include "Base.cuh"
 #include "CudaMemoryManager.cuh"
 #include "Array.cuh"
-#include "Cell.cuh"
+#include "Object.cuh"
 
 class DensityMap
 {

@@ -19,10 +19,10 @@ struct ParticleTO
 
 struct CellMetadataTO
 {
-    uint64_t nameSize;
+    int nameSize;
     uint64_t nameDataIndex;
 
-    uint64_t descriptionSize;
+    int descriptionSize;
     uint64_t descriptionDataIndex;
 };
 
@@ -53,14 +53,17 @@ struct ConstructorTO
     int activationMode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     int constructionActivationTime;
 
-    uint64_t genomeSize;
+    int genomeSize;
     uint64_t genomeDataIndex;
     int genomeGeneration;
     float constructionAngle1;
     float constructionAngle2;
 
     //process data
-    uint64_t genomeReadPosition;
+    uint64_t lastConstructedCellId;
+    int genomeCurrentNodeIndex;
+    int genomeCurrentRepetition;
+    bool isConstructionBuilt;
     int offspringCreatureId;
     int offspringMutationId;
 };
@@ -94,7 +97,7 @@ struct InjectorTO
 {
     InjectorMode mode;
     int counter;
-    uint64_t genomeSize;
+    int genomeSize;
     uint64_t genomeDataIndex;
     int genomeGeneration;
 };
@@ -156,7 +159,7 @@ struct CellTO
     CellFunctionTO cellFunctionData;
     ActivityTO activity;
     int activationTime;
-    int genomeSize;
+    int genomeNumNodes;
 
     CellMetadataTO metadata;
 

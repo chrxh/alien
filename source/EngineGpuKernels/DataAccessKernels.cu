@@ -3,11 +3,11 @@
 namespace
 {
     __device__ void
-    copyAuxiliaryData(uint64_t sourceSize, uint8_t* source, uint64_t& targetSize, uint64_t& targetIndex, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
+    copyAuxiliaryData(int sourceSize, uint8_t* source, int& targetSize, uint64_t& targetIndex, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
     {
         targetSize = sourceSize;
         if (sourceSize > 0) {
-            targetIndex = alienAtomicAdd64(&auxiliaryDataSize, sourceSize);
+            targetIndex = alienAtomicAdd64(&auxiliaryDataSize, static_cast<uint64_t>(sourceSize));
             for (int i = 0; i < sourceSize; ++i) {
                 auxiliaryData[targetIndex + i] = source[i];
             }
@@ -31,7 +31,7 @@ namespace
         cellTO.livingState = cell->livingState;
         cellTO.creatureId = cell->creatureId;
         cellTO.mutationId = cell->mutationId;
-        cellTO.genomeSize = cell->genomeSize;
+        cellTO.genomeNumNodes = cell->genomeNumNodes;
         cellTO.inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
         cellTO.outputBlocked = cell->outputBlocked;
         cellTO.cellFunction = cell->cellFunction;
@@ -67,7 +67,7 @@ namespace
 
         switch (cell->cellFunction) {
         case CellFunction_Neuron: {
-            uint64_t targetSize;    //not used
+            int targetSize;    //not used
             copyAuxiliaryData(
                 sizeof(NeuronFunction::NeuronState),
                 reinterpret_cast<uint8_t*>(cell->cellFunctionData.neuron.neuronState),
@@ -89,7 +89,10 @@ namespace
                 cellTO.cellFunctionData.constructor.genomeDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
-            cellTO.cellFunctionData.constructor.genomeReadPosition = cell->cellFunctionData.constructor.genomeReadPosition;
+            cellTO.cellFunctionData.constructor.lastConstructedCellId = cell->cellFunctionData.constructor.lastConstructedCellId;
+            cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex = cell->cellFunctionData.constructor.genomeCurrentNodeIndex;
+            cellTO.cellFunctionData.constructor.genomeCurrentRepetition = cell->cellFunctionData.constructor.genomeCurrentRepetition;
+            cellTO.cellFunctionData.constructor.isConstructionBuilt = cell->cellFunctionData.constructor.isConstructionBuilt;
             cellTO.cellFunctionData.constructor.offspringCreatureId = cell->cellFunctionData.constructor.offspringCreatureId;
             cellTO.cellFunctionData.constructor.offspringMutationId = cell->cellFunctionData.constructor.offspringMutationId;
             cellTO.cellFunctionData.constructor.genomeGeneration = cell->cellFunctionData.constructor.genomeGeneration;

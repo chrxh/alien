@@ -2,7 +2,6 @@
 
 #include "CellFunctionProcessor.cuh"
 #include "SimulationData.cuh"
-#include "sm_60_atomic_functions.h"
 
 class InjectorProcessor
 {
@@ -52,7 +51,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             //if (otherCell->livingState == LivingState_UnderConstruction) {
             //    return;
             //}
-            if (otherCell->cellFunctionData.constructor.genomeReadPosition != 0) {
+            if (otherCell->cellFunctionData.constructor.genomeCurrentNodeIndex != 0) {
                 return;
             }
             if (!otherCell->tryLock()) {
