@@ -429,12 +429,12 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                         .readOnly(true)
                         .tooltip(Const::GenomeNumCellsTooltip),
                     numNodes);
-                auto numRepetitions = toFloat(genomeDesc.header.numRepetitions);
-                AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters()
+                auto numRepetitions = genomeDesc.header.numRepetitions;
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters()
                         .name("Number of repetitions")
                         .textWidth(GenomeTabTextWidth)
-                        .format("%.0f")
+                        .infinity(true)
                         .readOnly(true)
                         .tooltip(Const::GenomeRepetitionsPerConstructionTooltip),
                     numRepetitions);

@@ -65,6 +65,7 @@ public:
         MEMBER_DECLARATION(InputIntParameters, bool, infinity, false);
         MEMBER_DECLARATION(InputIntParameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER_DECLARATION(InputIntParameters, std::optional<int>, disabledValue, std::nullopt);
+        MEMBER_DECLARATION(InputIntParameters, bool, readOnly, false);
     };
     static bool InputInt(InputIntParameters const& parameters, int& value, bool* enabled = nullptr);
     static bool InputOptionalInt(InputIntParameters const& parameters, std::optional<int>& value);

@@ -387,5 +387,7 @@ int GenomeDescriptionConverter::getNumNodesRecursively(std::vector<uint8_t> cons
             result += getNumNodesRecursively(*subgenome, includeRepetitions, spec);
         }
     }
-    return includeRepetitions ? result * genome.header.numRepetitions : result;
+
+    auto numRepetitions = genome.header.numRepetitions == std::numeric_limits<int>::max() ? 1 : genome.header.numRepetitions;
+    return includeRepetitions ? result * numRepetitions : result;
 }
