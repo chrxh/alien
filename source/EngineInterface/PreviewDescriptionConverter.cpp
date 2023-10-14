@@ -17,7 +17,7 @@ namespace
         RealVector2D pos;
         int nodeIndex = 0;
         CellPreviewDescription::NodePos nodePos = CellPreviewDescription::NodePos::Intermediate;
-        bool multipleConstructor = false;
+        bool constructorWithMultiConstruction = false;
 
         int executionOrderNumber = 0;
         std::optional<int> inputExecutionOrderNumber;
@@ -178,11 +178,10 @@ namespace
                     cellIntern.connectionIndices.insert(index + 1);
                 }
                 if (partIndex == 0) {
-                    cellIntern.nodePos = index == 0 ? CellPreviewDescription::NodePos::Start : CellPreviewDescription::NodePos::StartRepetition;
+                    cellIntern.nodePos = CellPreviewDescription::NodePos::Start;
                 }
                 if (partIndex == toInt(genome.cells.size()) - 1) {
-                    cellIntern.nodePos =
-                        repetition == genome.header.numRepetitions - 1 ? CellPreviewDescription::NodePos::End : CellPreviewDescription::NodePos::EndRepetition;
+                    cellIntern.nodePos = CellPreviewDescription::NodePos::End;
                 }
 
                 //find nearby cells
@@ -316,7 +315,7 @@ namespace
                         result.cells.at(cellIndex2).connectionIndices.insert(toInt(cellIndex1));
                     }
                     if (!subGenome.header.singleConstruction) {
-                        result.cells.at(cellIndex2).multipleConstructor = true;
+                        result.cells.at(cellIndex2).constructorWithMultiConstruction = true;
                     }
                 }
                 ++index;
@@ -346,7 +345,7 @@ namespace
                 .executionOrderNumber = cell.executionOrderNumber,
                 .color = cell.color,
                 .nodeIndex = cell.nodeIndex,
-                .multipleConstructor = cell.multipleConstructor,
+                .multipleConstructor = cell.constructorWithMultiConstruction,
                 .nodePos = cell.nodePos};
             result.cells.emplace_back(cellPreview);
             for (auto const& connectionIndex : cell.connectionIndices) {

@@ -12,9 +12,7 @@ struct CellPreviewDescription
     enum class NodePos
     {
         Start,
-        StartRepetition,
         Intermediate,
-        EndRepetition,
         End
     } nodePos = NodePos::Intermediate;
 };

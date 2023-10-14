@@ -1034,7 +1034,7 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
                 auto cellPos = (cell.pos - upperLeft) * cellSize + offset;
                 auto length = cellSize / 4;
                 if (cell.nodePos != CellPreviewDescription::NodePos::Intermediate) {
-                    auto color = cell.nodePos == CellPreviewDescription::NodePos::Start || cell.nodePos == CellPreviewDescription::NodePos::StartRepetition
+                    auto color = cell.nodePos == CellPreviewDescription::NodePos::Start
                         ? Const::GenomePreviewStartColor
                         : Const::GenomePreviewEndColor;
 
