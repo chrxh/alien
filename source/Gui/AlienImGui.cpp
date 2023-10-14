@@ -78,6 +78,7 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
     auto textWidth = scale(parameters._textWidth);
     auto infinityButtonWidth = scale(30);
     auto isInfinity = value == std::numeric_limits<int>::max();
+    auto showInfinity = parameters._infinity && (!parameters._readOnly || isInfinity);
 
     if (enabled) {
         ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
@@ -89,19 +90,19 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
     }
 
     auto inputWidth = ImGui::GetContentRegionAvail().x - textWidth;
-    if (parameters._infinity) {
+    if (showInfinity) {
         inputWidth -= infinityButtonWidth + ImGui::GetStyle().FramePadding.x;
     }
 
     auto result = false;
     if (!isInfinity) {
         ImGui::SetNextItemWidth(inputWidth);
-        result = ImGui::InputInt(("##" + parameters._name).c_str(), &value);
+        ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
+        result = ImGui::InputInt(("##" + parameters._name).c_str(), &value, 1, 100, flags);
     } else {
         std::string text = "infinity";
         result = InputText(InputTextParameters().readOnly(true).width(inputWidth).textWidth(0), text);
     }
-    ImGuiInputTextFlags flags = isInfinity ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
@@ -111,8 +112,9 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
         }
         ImGui::EndDisabled();
     }
-    if (parameters._infinity) {
+    if (showInfinity) {
         ImGui::SameLine();
+        ImGui::BeginDisabled(parameters._readOnly);
         if (SelectableButton(CheckButtonParameters().name(ICON_FA_INFINITY).tooltip(parameters._tooltip).width(infinityButtonWidth), isInfinity)) {
             if (isInfinity) {
                 value = std::numeric_limits<int>::max();
@@ -120,6 +122,7 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
                 value = 1;
             }
         }
+        ImGui::EndDisabled();
     }
 
     ImGui::SameLine();
