@@ -1,5 +1,7 @@
 #pragma once
 
+#include <nppdefs.h>
+
 #include "EngineInterface/CellFunctionConstants.h"
 #include "EngineInterface/GenomeConstants.h"
 #include "Base.cuh"
@@ -349,7 +351,8 @@ __inline__ __device__ bool GenomeDecoder::isSingleConstruction(ConstructorFuncti
 
 __inline__ __device__ int GenomeDecoder::getNumRepetitions(ConstructorFunction const& constructor)
 {
-    return max(1, constructor.genome[Const::GenomeHeaderNumRepetitionsPos]);
+    int result = max(1, toInt(constructor.genome[Const::GenomeHeaderNumRepetitionsPos]));
+    return result == 255 ? NPP_MAX_32S : result;
 }
 
 template <typename ConstructorOrInjector>
