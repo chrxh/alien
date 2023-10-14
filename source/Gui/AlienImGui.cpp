@@ -113,7 +113,7 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
     }
     if (parameters._infinity) {
         ImGui::SameLine();
-        if (CheckButton(CheckButtonParameters().name(ICON_FA_INFINITY).tooltip(parameters._tooltip).width(infinityButtonWidth), isInfinity)) {
+        if (SelectableButton(CheckButtonParameters().name(ICON_FA_INFINITY).tooltip(parameters._tooltip).width(infinityButtonWidth), isInfinity)) {
             if (isInfinity) {
                 value = std::numeric_limits<int>::max();
             } else {
@@ -567,7 +567,7 @@ bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
     return result;
 }
 
-bool AlienImGui::CheckButton(CheckButtonParameters const& parameters, bool& value)
+bool AlienImGui::SelectableButton(CheckButtonParameters const& parameters, bool& value)
 {
     auto buttonColor = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Button]);
     auto buttonColorHovered = ImColor(ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered]);

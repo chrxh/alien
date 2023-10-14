@@ -52,7 +52,7 @@ public:
         MEMBER_DECLARATION(SliderInputFloatParameters, float, min, 0);
         MEMBER_DECLARATION(SliderInputFloatParameters, float, max, 0);
         MEMBER_DECLARATION(SliderInputFloatParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(SliderInputFloatParameters, int, inputWidth, 50);
+        MEMBER_DECLARATION(SliderInputFloatParameters, float, inputWidth, 50);
         MEMBER_DECLARATION(SliderInputFloatParameters, std::string, format, "%.3f");
     };
     static void SliderInputFloat(SliderInputFloatParameters const& parameters, float& value);
@@ -74,7 +74,7 @@ public:
         MEMBER_DECLARATION(InputFloatParameters, std::string, name, "");
         MEMBER_DECLARATION(InputFloatParameters, float, step, 1.0f);
         MEMBER_DECLARATION(InputFloatParameters, std::string, format, "%.3f");
-        MEMBER_DECLARATION(InputFloatParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(InputFloatParameters, float, textWidth, 100.0f);
         MEMBER_DECLARATION(InputFloatParameters, std::optional<float>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(InputFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER_DECLARATION(InputFloatParameters, bool, readOnly, false);
@@ -219,7 +219,7 @@ public:
         MEMBER_DECLARATION(CheckButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER_DECLARATION(CheckButtonParameters, float, width, 0);
     };
-    static bool CheckButton(CheckButtonParameters const& parameters, bool& value);
+    static bool SelectableButton(CheckButtonParameters const& parameters, bool& value);
 
     static void Text(std::string const& text);
     static void BoldText(std::string const& text);

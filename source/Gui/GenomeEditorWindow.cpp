@@ -925,8 +925,8 @@ void _GenomeEditorWindow::onCreateSpore()
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
 
     auto parameter = _simController->getSimulationParameters();
-    auto energy =
-        parameter.cellNormalEnergy[_editorModel->getDefaultColorCode()] * toFloat(toInt(genomeDesc.cells.size()) * genomeDesc.header.numRepetitions * 2 + 1);
+    auto energy = parameter.cellNormalEnergy[_editorModel->getDefaultColorCode()]
+        * toFloat(toInt(genomeDesc.cells.size()) * std::min(1000, genomeDesc.header.numRepetitions) * 2 + 1);
     auto cell = CellDescription()
                     .setPos(pos)
                     .setEnergy(energy)
