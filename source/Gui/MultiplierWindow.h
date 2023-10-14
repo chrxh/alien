@@ -7,10 +7,11 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-enum class MultiplierMode
+using MultiplierMode = int;
+enum MultiplierMode_
 {
-    Grid,
-    Random
+    MultiplierMode_Grid,
+    MultiplierMode_Random
 };
 
 class _MultiplierWindow : public _AlienWindow
@@ -32,7 +33,7 @@ private:
     SimulationController _simController;
     Viewport _viewport;
 
-    MultiplierMode _mode = MultiplierMode::Grid;
+    MultiplierMode _mode = MultiplierMode_Grid;
 
     DescriptionHelper::GridMultiplyParameters _gridParameters;
     DescriptionHelper::RandomMultiplyParameters _randomParameters;

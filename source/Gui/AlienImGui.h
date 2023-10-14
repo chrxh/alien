@@ -243,6 +243,8 @@ public:
     static void Group(std::string const& text);
 
     static bool ToolbarButton(std::string const& text);
+    static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);
+
     static void VerticalSeparator(float length = 23.0f);
     static void ToolbarSeparator();
     static bool Button(std::string const& text, float size = 0);

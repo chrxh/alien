@@ -574,6 +574,7 @@ bool AlienImGui::SelectableButton(CheckButtonParameters const& parameters, bool&
     auto buttonColorActive = ImColor(ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
     if (value) {
         buttonColor = buttonColorActive;
+        buttonColorHovered = buttonColorActive;
     }
 
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)buttonColor);
@@ -812,6 +813,45 @@ bool AlienImGui::ToolbarButton(std::string const& text)
     ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4> (Const::ToolbarButtonTextColor));
     auto buttonSize = scale(40.0f);
     auto result = ImGui::Button(text.c_str(), {buttonSize, buttonSize});
+
+    ImGui::PopStyleColor(4);
+    ImGui::PopStyleVar();
+    ImGui::PopFont();
+    return result;
+}
+
+bool AlienImGui::SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue)
+{
+    auto id = std::to_string(ImGui::GetID(text.c_str()));
+
+    ImGui::PushFont(StyleRepository::getInstance().getIconFont());
+    ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
+    auto color = Const::ToolbarButtonTextColor;
+    float h, s, v;
+    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
+
+    auto buttonColor = Const::ToolbarButtonBackgroundColor;
+    auto buttonColorHovered = ImColor::HSV(h, s, v * 0.3f);
+    auto buttonColorActive = ImColor::HSV(h, s, v * 0.45f);
+    if (value == selectionValue) {
+        buttonColor = buttonColorActive;
+        buttonColorHovered = buttonColorActive;
+    }
+
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)buttonColor);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)buttonColorHovered);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)buttonColorActive);
+
+    ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4>(Const::ToolbarButtonTextColor));
+    auto buttonSize = scale(40.0f);
+    auto result = ImGui::Button(text.c_str(), {buttonSize, buttonSize});
+    if (result) {
+        if (value == selectionValue) {
+            value = deselectionValue;
+        } else {
+            value = selectionValue;
+        }
+    }
 
     ImGui::PopStyleColor(4);
     ImGui::PopStyleVar();
