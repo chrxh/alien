@@ -391,22 +391,20 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             }
 
             if (ImGui::TreeNodeEx("Properties (entire genome)", TreeNodeFlags)) {
-                auto numNodes = toFloat(GenomeDescriptionConverter::getNumNodesRecursively(desc.genome, true));
-                AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters()
+                auto numNodes = toInt(GenomeDescriptionConverter::getNumNodesRecursively(desc.genome, true));
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters()
                         .name("Number of cells")
                         .textWidth(GenomeTabTextWidth)
-                        .format("%.0f")
                         .readOnly(true)
                         .tooltip(Const::GenomeNumCellsRecursivelyTooltip),
                     numNodes);
 
-                auto numBytes = toFloat(desc.genome.size() + 0.5f);
-                AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters()
+                auto numBytes = toInt(desc.genome.size());
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters()
                         .name("Bytes")
                         .textWidth(GenomeTabTextWidth)
-                        .format("%.0f")
                         .readOnly(true)
                         .tooltip(Const::GenomeBytesTooltip),
                     numBytes);
@@ -420,12 +418,11 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             if (ImGui::TreeNodeEx("Properties (principal genome part)", TreeNodeFlags)) {
 
                 auto genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome);
-                auto numNodes = toFloat(genomeDesc.cells.size());
-                AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters()
+                auto numNodes = toInt(genomeDesc.cells.size());
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters()
                         .name("Number of cells")
                         .textWidth(GenomeTabTextWidth)
-                        .format("%.0f")
                         .readOnly(true)
                         .tooltip(Const::GenomeNumCellsTooltip),
                     numNodes);
@@ -725,6 +722,13 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
             constructor.genomeCurrentNodeIndex = ((constructor.genomeCurrentNodeIndex % numNodes) + numNodes) % numNodes;
         } else {
             constructor.genomeCurrentNodeIndex = 0;
+        }
+
+        auto numRepetitions = GenomeDescriptionConverter::getNumRepetitions(constructor.genome);
+        if (numRepetitions != std::numeric_limits<int>::max()) {
+            constructor.genomeCurrentRepetition = ((constructor.genomeCurrentRepetition % numRepetitions) + numRepetitions) % numRepetitions;
+        } else {
+            constructor.genomeCurrentRepetition = 0;
         }
 
         if (constructor.constructionActivationTime < 0) {
