@@ -82,10 +82,15 @@ namespace
         auto value = static_cast<int>(readByte(data, pos));
         return value > 127 ? std::nullopt : std::make_optional(value % moduloValue);
     }
+
+    int convertByteToByteWithInfinity(uint8_t const& b)
+    {
+        return b == 255 ? std::numeric_limits<int>::max() : b;
+
+    }
     int readByteWithInfinity(std::vector<uint8_t> const& data, int& pos)
     {
-        auto b = readByte(data, pos);
-        return b == 255 ? std::numeric_limits<int>::max() : b;
+        return convertByteToByteWithInfinity(readByte(data, pos));
     }
     bool readBool(std::vector<uint8_t> const& data, int& pos)
     {
@@ -390,4 +395,9 @@ int GenomeDescriptionConverter::getNumNodesRecursively(std::vector<uint8_t> cons
 
     auto numRepetitions = genome.header.numRepetitions == std::numeric_limits<int>::max() ? 1 : genome.header.numRepetitions;
     return includeRepetitions ? result * numRepetitions : result;
+}
+
+int GenomeDescriptionConverter::getNumRepetitions(std::vector<uint8_t> const& data)
+{
+    return convertByteToByteWithInfinity(data.at(Const::GenomeHeaderNumRepetitionsPos));
 }
