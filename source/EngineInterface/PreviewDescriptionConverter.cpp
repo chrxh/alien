@@ -18,7 +18,8 @@ namespace
         int nodeIndex = 0;
         bool partStart = false;
         bool partEnd = false;
-        bool constructorWithMultiConstruction = false;
+        bool multipleConstructor = false;
+        bool selfReplicator = false;
 
         int executionOrderNumber = 0;
         std::optional<int> inputExecutionOrderNumber;
@@ -268,6 +269,7 @@ namespace
                 if (node.getCellFunctionType() == CellFunction_Constructor) {
                     auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
                     if (constructor.isMakeGenomeCopy()) {
+                        result.cells.at(index + indexOffset).selfReplicator = true;
                         ++index;
                         continue;
                     }
@@ -322,7 +324,7 @@ namespace
                         result.cells.at(cellIndex2).connectionIndices.insert(toInt(cellIndex1));
                     }
                     if (!subGenome.header.singleConstruction) {
-                        result.cells.at(cellIndex2).constructorWithMultiConstruction = true;
+                        result.cells.at(cellIndex2).multipleConstructor = true;
                     }
                 }
                 ++index;
@@ -354,7 +356,8 @@ namespace
                 .nodeIndex = cell.nodeIndex,
                 .partStart = cell.partStart,
                 .partEnd = cell.partEnd,
-                .multipleConstructor = cell.constructorWithMultiConstruction,
+                .multipleConstructor = cell.multipleConstructor,
+                .selfReplicator =  cell.selfReplicator
             };
             result.cells.emplace_back(cellPreview);
             for (auto const& connectionIndex : cell.connectionIndices) {

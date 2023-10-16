@@ -10,6 +10,7 @@ struct CellPreviewDescription
     bool partStart = false;
     bool partEnd = false;
     bool multipleConstructor = false;
+    bool selfReplicator = false;
 };
 
 struct ConnectionPreviewDescription
