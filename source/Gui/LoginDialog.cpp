@@ -74,6 +74,7 @@ void _LoginDialog::processIntern()
 
     AlienImGui::InputText(AlienImGui::InputTextParameters().hint("User name").textWidth(0), _userName);
     AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Password").password(true).textWidth(0), _password);
+    AlienImGui::Separator();
     ImGui::Spacing();
     AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Remember").tooltip(Const::LoginRememberTooltip), _remember);
     AlienImGui::ToggleButton(

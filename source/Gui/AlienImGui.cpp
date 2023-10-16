@@ -280,8 +280,8 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     if (parameters._monospaceFont) {
         ImGui::PopFont();
     }
-    ImGui::SameLine();
     if (parameters._defaultValue) {
+        ImGui::SameLine();
         ImGui::BeginDisabled(std::string(buffer) == *parameters._defaultValue);
         if (revertButton(parameters._name)) {
             StringHelper::copy(buffer, bufferSize, *parameters._defaultValue);
