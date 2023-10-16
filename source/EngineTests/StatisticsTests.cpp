@@ -28,7 +28,7 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({
                 CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)),
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeGenomeCopy()),
+                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
             }));
 
     DataDescription data;
@@ -53,7 +53,7 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({
                 CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)),
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeGenomeCopy()),
+                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
             }));
 
     DataDescription data;

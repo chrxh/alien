@@ -68,7 +68,7 @@ struct ConstructorGenomeDescription
     }
     bool isMakeGenomeCopy() const { return std::holds_alternative<MakeGenomeCopy>(genome); }
     std::vector<uint8_t> getGenomeData() const { return std::get<std::vector<uint8_t>>(genome); }
-    ConstructorGenomeDescription& setMakeGenomeCopy()
+    ConstructorGenomeDescription& setMakeSelfCopy()
     {
         genome = MakeGenomeCopy();
         return *this;
