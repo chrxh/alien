@@ -813,7 +813,7 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
         }
         ImGui::SameLine();
         if (AlienImGui::Button("Set self-copy")) {
-            desc.setMakeGenomeCopy();
+            desc.setMakeSelfCopy();
         }
     }
     ImGui::EndChild();

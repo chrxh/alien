@@ -130,7 +130,6 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
                     connectionIndex = 0;
                     ++depth;
                     if (depth >= ContainerSize) {
-                        //goBack = true;
                         constructor.isComplete = true;
                         return;
                     }
@@ -178,6 +177,9 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                         constructor.isConstructionBuilt = true;
                         constructor.genomeCurrentRepetition = 0;
                     }
+                }
+                else {
+                    constructor.isConstructionBuilt = true;
                 }
             } else {
                 ++constructor.genomeCurrentNodeIndex;

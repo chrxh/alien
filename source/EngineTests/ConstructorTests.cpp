@@ -202,7 +202,7 @@ TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
 
 TEST_F(ConstructorTests, constructFirstCell_completenessCheck_notReady)
 {
-    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeGenomeCopy();
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
     auto genome =
         GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructorGenome)}));
     auto otherGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
@@ -239,7 +239,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_notReady)
 
 TEST_F(ConstructorTests, constructFirstCell_completenessCheck_ready)
 {
-    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeGenomeCopy();
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
     auto genome =
         GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructorGenome)}));
     auto otherGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
@@ -279,7 +279,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
     auto constexpr RectLength = 50;
     auto rect = DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().height(RectLength).width(RectLength));
 
-    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeGenomeCopy();
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
     auto genome =
         GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructorGenome)}));
     auto otherGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
@@ -836,7 +836,7 @@ TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
 
 TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
 {
-    auto constructedConstructor = ConstructorGenomeDescription().setMode(0).setMakeGenomeCopy();
+    auto constructedConstructor = ConstructorGenomeDescription().setMode(0).setMakeSelfCopy();
 
     auto genome =
         GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructedConstructor)}));
