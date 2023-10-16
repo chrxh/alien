@@ -423,6 +423,11 @@ struct GenomeHeaderDescription
         numRepetitions = value;
         return *this;
     }
+    GenomeHeaderDescription& setInfiniteRepetitions()
+    {
+        numRepetitions = std::numeric_limits<int>::max();
+        return *this;
+    }
 };
 
 struct GenomeDescription
