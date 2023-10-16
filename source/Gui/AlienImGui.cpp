@@ -993,10 +993,10 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     auto const cellSize = scale(zoom);
 
-    auto drawTextWithShadow = [&drawList, &cellSize](std::string const& text, float posX, float posY, ImU32 const& color, bool iconFont = false) {
-        auto font = iconFont ? StyleRepository::getInstance().getIconFont() : StyleRepository::getInstance().getLargeFont();
-        drawList->AddText(font, cellSize / 2, {posX, posY}, color, text.c_str());
-        drawList->AddText(font, cellSize / 2, {posX + 1.0f, posY + 1.0f}, color, text.c_str());
+    auto drawTextWithShadow = [&drawList, &cellSize](std::string const& text, float posX, float posY) {
+        drawList->AddText(
+            StyleRepository::getInstance().getLargeFont(), cellSize / 2, {posX + 1.0f, posY + 1.0f}, Const::ExecutionNumberOverlayShadowColor, text.c_str());
+        drawList->AddText(StyleRepository::getInstance().getLargeFont(), cellSize / 2, {posX, posY}, Const::ExecutionNumberOverlayColor, text.c_str());
     };
 
     auto result = false;
@@ -1041,7 +1041,7 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
 
             if (zoom > ZoomLevelForLabels) {
                 RealVector2D textPos(cellPos.x - cellSize / 8, cellPos.y - cellSize / 4);
-                drawTextWithShadow(std::to_string(cell.executionOrderNumber), textPos.x, textPos.y, Const::ExecutionNumberOverlayShadowColor);
+                drawTextWithShadow(std::to_string(cell.executionOrderNumber), textPos.x, textPos.y);
             }
 
             if (selectedNode && cell.nodeIndex == *selectedNode) {
@@ -1073,7 +1073,12 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
             } break;
             case SymbolPreviewDescription::Type::Infinity: {
                 if (zoom > ZoomLevelForConnections) {
-                    drawTextWithShadow(ICON_FA_INFINITY, pos.x - cellSize * 0.4f, pos.y - cellSize * 0.2f, Const::GenomePreviewInfinitySymbolColor, true);
+                    drawList->AddText(
+                        StyleRepository::getInstance().getIconFont(),
+                        cellSize / 2,
+                        {pos.x - cellSize * 0.4f, pos.y - cellSize * 0.2f},
+                        Const::GenomePreviewInfinitySymbolColor,
+                        ICON_FA_INFINITY);
                 }
             } break;
             }
@@ -1160,6 +1165,14 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
                         {cellPos.x + length * 1.5f, cellPos.y + length * 1.5f},
                         Const::GenomePreviewMultipleConstructorColor,
                         LineThickness);
+                }
+                if (cell.selfReplicator) {
+                    drawList->AddText(
+                        StyleRepository::getInstance().getIconFont(),
+                        cellSize / 4,
+                        {cellPos.x - length * 2, cellPos.y + length},
+                        Const::GenomePreviewSelfReplicatorColor,
+                        ICON_FA_CLONE);
                 }
             }
         }
