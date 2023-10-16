@@ -1,5 +1,7 @@
 #pragma once
 
+#include <nppdefs.h>
+
 #include "EngineInterface/FundamentalConstants.h"
 #include "EngineInterface/CellFunctionConstants.h"
 
@@ -16,6 +18,8 @@ struct GenomeHeader
     int numRepetitions;
     float concatenationAngle1;
     float concatenationAngle2;
+
+    __inline__ __device__ bool hasInfiniteRepetitions() const { return numRepetitions == NPP_MAX_32S; }
 };
 
 struct CellMetadataDescription

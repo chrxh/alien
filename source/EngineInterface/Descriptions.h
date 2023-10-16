@@ -133,6 +133,11 @@ struct ConstructorDescription
         genomeCurrentNodeIndex = value;
         return *this;
     }
+    ConstructorDescription& setIsConstructionBuilt(bool value)
+    {
+        isConstructionBuilt = value;
+        return *this;
+    }
     ConstructorDescription& setGenomeGeneration(int value)
     {
         genomeGeneration = value;

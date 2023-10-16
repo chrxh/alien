@@ -156,7 +156,7 @@ struct InjectorGenomeDescription
     }
     bool isMakeGenomeCopy() const { return std::holds_alternative<MakeGenomeCopy>(genome); }
     std::vector<uint8_t> getGenomeData() const { return std::get<std::vector<uint8_t>>(genome); }
-    InjectorGenomeDescription& setMakeGenomeCopy()
+    InjectorGenomeDescription& setMakeSelfCopy()
     {
         genome = MakeGenomeCopy();
         return *this;
