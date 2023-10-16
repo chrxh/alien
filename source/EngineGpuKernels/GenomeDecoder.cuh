@@ -35,13 +35,13 @@ public:
     __inline__ __device__
         static bool hasEmptyGenome(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isFinished(ConstructorFunction const& constructor);
-    __inline__ __device__ static bool isSeparating(ConstructorFunction const& constructor);
-    __inline__ __device__ static int getNumRepetitions(ConstructorFunction const& constructor);
-    __inline__ __device__ static bool isSingleConstruction(ConstructorFunction const& constructor);
     template <typename ConstructorOrInjector>
     __inline__ __device__ static bool containsSelfReplication(ConstructorOrInjector const& cellFunction);
     template <typename CellFunctionSource, typename CellFunctionTarget>
     __inline__ __device__ static void copyGenome(SimulationData& data, CellFunctionSource& source, int genomeBytePosition, CellFunctionTarget& target);
+    __inline__ __device__ static bool isSeparating(uint8_t* genome);
+    __inline__ __device__ static int getNumRepetitions(uint8_t* genome, bool countInfinityAsOne = false);
+    __inline__ __device__ static bool isSingleConstruction(uint8_t* genome);
 
     //node-wide methods
     __inline__ __device__ static int getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeAddress, bool withSubgenomes = true);
@@ -112,7 +112,7 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
     int subGenomeEndAddresses[MAX_SUBGENOME_RECURSION_DEPTH];
     int subGenomeNumRepetitions[MAX_SUBGENOME_RECURSION_DEPTH + 1];
     int depth = 0;
-    subGenomeNumRepetitions[0] = genome[Const::GenomeHeaderNumRepetitionsPos];
+    subGenomeNumRepetitions[0] = getNumRepetitions(genome, true);
     for (auto nodeAddress = Const::GenomeHeaderSize; nodeAddress < genomeSize;) {
         auto cellFunction = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
         func(depth, nodeAddress, subGenomeNumRepetitions[depth]);
@@ -125,7 +125,9 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
                 auto subGenomeSize = GenomeDecoder::getNextSubGenomeSize(genome, genomeSize, nodeAddress);
                 nodeAddress += Const::CellBasicBytes + cellFunctionFixedBytes + 3;
                 subGenomeEndAddresses[depth++] = nodeAddress + subGenomeSize;
-                subGenomeNumRepetitions[depth] = subGenomeNumRepetitions[depth - 1] * genome[nodeAddress + Const::GenomeHeaderNumRepetitionsPos];
+
+                auto repetitions = getNumRepetitions(genome + nodeAddress, true);
+                subGenomeNumRepetitions[depth] = subGenomeNumRepetitions[depth - 1] * repetitions;
                 nodeAddress += Const::GenomeHeaderSize;
                 goToNextSibling = false;
             }
@@ -292,7 +294,7 @@ __inline__ __device__ bool GenomeDecoder::isLastNode(ConstructorFunction const& 
 
 __inline__ __device__ bool GenomeDecoder::isLastRepetition(ConstructorFunction const& constructor)
 {
-    return getNumRepetitions(constructor) - 1 == constructor.genomeCurrentRepetition;
+    return getNumRepetitions(constructor.genome) - 1 == constructor.genomeCurrentRepetition;
 }
 
 __inline__ __device__ bool GenomeDecoder::hasEmptyGenome(ConstructorFunction const& constructor)
@@ -310,7 +312,7 @@ __inline__ __device__ bool GenomeDecoder::isFinished(ConstructorFunction const& 
     if (hasEmptyGenome(constructor)) {
         return true;
     }
-    if (isSingleConstruction(constructor)) {
+    if (isSingleConstruction(constructor.genome)) {
         return constructor.isConstructionBuilt;
     }
     return false;
@@ -339,20 +341,24 @@ __inline__ __device__ void GenomeDecoder::copyGenome(SimulationData& data, CellF
     }
 }
 
-__inline__ __device__ bool GenomeDecoder::isSeparating(ConstructorFunction const& constructor)
+__inline__ __device__ bool GenomeDecoder::isSeparating(uint8_t* genome)
 {
-    return GenomeDecoder::convertByteToBool(constructor.genome[Const::GenomeHeaderSeparationPos]);
+    return GenomeDecoder::convertByteToBool(genome[Const::GenomeHeaderSeparationPos]);
 }
 
-__inline__ __device__ bool GenomeDecoder::isSingleConstruction(ConstructorFunction const& constructor)
+__inline__ __device__ bool GenomeDecoder::isSingleConstruction(uint8_t* genome)
 {
-    return GenomeDecoder::convertByteToBool(constructor.genome[Const::GenomeHeaderSingleConstruction]);
+    return GenomeDecoder::convertByteToBool(genome[Const::GenomeHeaderSingleConstruction]);
 }
 
-__inline__ __device__ int GenomeDecoder::getNumRepetitions(ConstructorFunction const& constructor)
+__inline__ __device__ int GenomeDecoder::getNumRepetitions(uint8_t* genome, bool countInfinityAsOne)
 {
-    int result = max(1, toInt(constructor.genome[Const::GenomeHeaderNumRepetitionsPos]));
-    return result == 255 ? NPP_MAX_32S : result;
+    int result = max(1, toInt(genome[Const::GenomeHeaderNumRepetitionsPos]));
+    if (!countInfinityAsOne) {
+        return result == 255 ? NPP_MAX_32S : result;
+    } else {
+        return result == 255 ? 1 : result;
+    }
 }
 
 template <typename ConstructorOrInjector>
@@ -374,12 +380,12 @@ __inline__ __device__ GenomeHeader GenomeDecoder::readGenomeHeader(ConstructorFu
 
     GenomeHeader result;    
     result.shape = constructor.genome[Const::GenomeHeaderShapePos] % ConstructionShape_Count;
-    result.singleConstruction = isSingleConstruction(constructor);
-    result.separateConstruction = isSeparating(constructor);
+    result.singleConstruction = isSingleConstruction(constructor.genome);
+    result.separateConstruction = isSeparating(constructor.genome);
     result.angleAlignment = constructor.genome[Const::GenomeHeaderAlignmentPos] % ConstructorAngleAlignment_Count;
     result.stiffness = toFloat(constructor.genome[Const::GenomeHeaderStiffnessPos]) / 255;
     result.connectionDistance = toFloat(constructor.genome[Const::GenomeHeaderConstructionDistancePos]) / 255 + 0.5f;
-    result.numRepetitions = getNumRepetitions(constructor);
+    result.numRepetitions = getNumRepetitions(constructor.genome);
     result.concatenationAngle1 = convertByteToAngle(constructor.genome[Const::GenomeHeaderConcatenationAngle1Pos]);
     result.concatenationAngle2 = convertByteToAngle(constructor.genome[Const::GenomeHeaderConcatenationAngle2Pos]);
     return result;
