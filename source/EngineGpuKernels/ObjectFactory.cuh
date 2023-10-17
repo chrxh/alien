@@ -134,7 +134,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         cell->cellFunctionData.constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         createAuxiliaryData(
-            cellTO.cellFunctionData.constructor.genomeSize % MAX_GENOME_BYTES,
+            cellTO.cellFunctionData.constructor.genomeSize,
             cellTO.cellFunctionData.constructor.genomeDataIndex,
             dataTO.auxiliaryData,
             cell->cellFunctionData.constructor.genomeSize,
