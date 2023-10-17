@@ -4,6 +4,7 @@
 #include <vector>
 #include <optional>
 #include <variant>
+#include <limits>
 
 #include "Base/Definitions.h"
 #include "FundamentalConstants.h"
