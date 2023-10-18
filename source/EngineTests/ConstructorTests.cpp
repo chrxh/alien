@@ -360,6 +360,51 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
     ASSERT_EQ(RectLength * RectLength + 1, actualData.cells.size());
 }
 
+TEST_F(ConstructorTests, constructFirstCell_completenessCheck_underConstruction)
+{
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
+    auto genome =
+        GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructorGenome)}));
+    auto otherGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setEnergy(100)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(4)
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setIsConstructionBuilt(true)),
+        CellDescription()
+            .setId(3)
+            .setPos({12.0f, 10.0f})
+            .setEnergy(100)
+            .setMaxConnections(2)
+            .setLivingState(LivingState_UnderConstruction)
+            .setExecutionOrderNumber(4)
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setIsConstructionBuilt(false)),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
+    _simController->setSimulationParameters(_parameters);
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(4, actualData.cells.size());
+}
+
+
 TEST_F(ConstructorTests, constructFirstCell_noSeparation)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
