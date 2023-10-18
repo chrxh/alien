@@ -93,6 +93,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release -j8
 ```
 If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
+It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
 
 # ⌨️ Command-line interface
 
