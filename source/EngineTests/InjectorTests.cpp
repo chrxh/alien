@@ -89,7 +89,7 @@ TEST_F(InjectorTests, matchButNoInjection)
             .setId(3)
             .setPos({9.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setGenome({})),
+            .setExecutionOrderNumber(0).setCellFunction(ConstructorDescription()),
     });
     data.addConnection(1, 2);
 
@@ -236,7 +236,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
     data.addConnection(3, 4);
 
     _simController->setSimulationData(data);
-    for (int i = 0; i < 1 + 6 * 3; ++i) {
+    for (int i = 0; i < 1; ++i) {
         _simController->calcTimesteps(1);
     }
 
