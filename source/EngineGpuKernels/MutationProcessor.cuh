@@ -384,10 +384,6 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
 __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    if (GenomeDecoder::hasEmptyGenome(constructor)) {
-        return;
-    }
-
     auto& genome = constructor.genome;
     auto const& genomeSize = constructor.genomeSize;
 
