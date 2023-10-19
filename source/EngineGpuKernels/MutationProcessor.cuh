@@ -233,6 +233,21 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
     }
 
     auto delta = data.numberGen1.random(Const::GenomeHeaderSize - 1);
+
+    if (delta == Const::GenomeHeaderNumRepetitionsPos) {
+        auto choice = data.numberGen1.random(250);
+        if (choice < 230) {
+            subgenome[delta] = static_cast<uint8_t>(1 + data.numberGen1.random(2));
+        } else if (choice < 240) {
+            subgenome[delta] = static_cast<uint8_t>(1 + data.numberGen1.random(10));
+        } else if (choice == 240) {
+            subgenome[delta] = static_cast<uint8_t>(1 + data.numberGen1.random(255));
+        } else {
+            subgenome[delta] = 255;
+        }
+        return;
+    }
+
     auto mutatedByte = data.numberGen1.randomByte();
     if (delta == Const::GenomeHeaderSeparationPos && GenomeDecoder::convertByteToBool(mutatedByte)) {
         return;
