@@ -131,7 +131,7 @@ struct DefenderFunction
     DefenderMode mode;
 };
 
-struct PlaceHolderFunction
+struct ReconnectorFunction
 {};
 
 union CellFunctionData
@@ -145,7 +145,7 @@ union CellFunctionData
     InjectorFunction injector;
     MuscleFunction muscle;
     DefenderFunction defender;
-    PlaceHolderFunction placeHolder;
+    ReconnectorFunction reconnector;
 };
 
 struct Cell

@@ -137,7 +137,7 @@ namespace
         case CellFunction_Defender: {
             cellTO.cellFunctionData.defender.mode = cell->cellFunctionData.defender.mode;
         } break;
-        case CellFunction_Placeholder: {
+        case CellFunction_Reconnector: {
         } break;
         }
     }

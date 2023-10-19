@@ -190,9 +190,9 @@ struct DefenderGenomeDescription
     }
 };
 
-struct PlaceHolderGenomeDescription
+struct ReconnectorGenomeDescription
 {
-    auto operator<=>(PlaceHolderGenomeDescription const&) const = default;
+    auto operator<=>(ReconnectorGenomeDescription const&) const = default;
 };
 
 using CellFunctionGenomeDescription = std::optional<std::variant<
@@ -205,7 +205,7 @@ using CellFunctionGenomeDescription = std::optional<std::variant<
     InjectorGenomeDescription,
     MuscleGenomeDescription,
     DefenderGenomeDescription,
-    PlaceHolderGenomeDescription>>;
+    ReconnectorGenomeDescription>>;
 
 struct CellGenomeDescription
 {
@@ -367,8 +367,8 @@ struct CellGenomeDescription
         if (std::holds_alternative<DefenderGenomeDescription>(*cellFunction)) {
             return CellFunction_Defender;
         }
-        if (std::holds_alternative<PlaceHolderGenomeDescription>(*cellFunction)) {
-            return CellFunction_Placeholder;
+        if (std::holds_alternative<ReconnectorGenomeDescription>(*cellFunction)) {
+            return CellFunction_Reconnector;
         }
         return CellFunction_None;
     }

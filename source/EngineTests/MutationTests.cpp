@@ -51,7 +51,7 @@ protected:
             CellGenomeDescription().setCellFunction(InjectorGenomeDescription().setGenome(subGenome)).setColor(genomeCellColors[0]),
             CellGenomeDescription().setCellFunction(MuscleGenomeDescription()).setColor(genomeCellColors[2]),
             CellGenomeDescription().setCellFunction(DefenderGenomeDescription()).setColor(genomeCellColors[2]),
-            CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellFunction(ReconnectorGenomeDescription()).setColor(genomeCellColors[0]),
         }));
     }
 
@@ -82,7 +82,7 @@ protected:
             CellGenomeDescription().setCellFunction(InjectorGenomeDescription().setGenome(subGenome)).setColor(genomeCellColors[0]),
             CellGenomeDescription().setCellFunction(MuscleGenomeDescription()).setColor(genomeCellColors[0]),
             CellGenomeDescription().setCellFunction(DefenderGenomeDescription()).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellFunction(ReconnectorGenomeDescription()).setColor(genomeCellColors[0]),
         }));
     }
 
@@ -111,7 +111,7 @@ protected:
             CellGenomeDescription().setCellFunction(InjectorGenomeDescription().setGenome(subGenome)).setColor(color),
             CellGenomeDescription().setCellFunction(MuscleGenomeDescription()).setColor(color),
             CellGenomeDescription().setCellFunction(DefenderGenomeDescription()).setColor(color),
-            CellGenomeDescription().setCellFunction(PlaceHolderGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellFunction(ReconnectorGenomeDescription()).setColor(color),
         }));
     }
 

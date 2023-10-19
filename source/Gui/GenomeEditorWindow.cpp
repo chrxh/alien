@@ -439,8 +439,8 @@ namespace
         case CellFunction_Defender: {
             cell.cellFunction = DefenderGenomeDescription();
         } break;
-        case CellFunction_Placeholder: {
-            cell.cellFunction = PlaceHolderGenomeDescription();
+        case CellFunction_Reconnector: {
+            cell.cellFunction = ReconnectorGenomeDescription();
         } break;
         case CellFunction_None: {
             cell.cellFunction.reset();
@@ -728,7 +728,7 @@ void _GenomeEditorWindow::processNode(
                     .tooltip(Const::GenomeDefenderModeTooltip),
                 defender.mode);
         } break;
-        case CellFunction_Placeholder: {
+        case CellFunction_Reconnector: {
         } break;
         case CellFunction_None: {
         } break;

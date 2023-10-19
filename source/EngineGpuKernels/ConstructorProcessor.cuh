@@ -673,7 +673,7 @@ ConstructorProcessor::constructCellIntern(
     case CellFunction_Defender: {
         result->cellFunctionData.defender.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % DefenderMode_Count;
     } break;
-    case CellFunction_Placeholder: {
+    case CellFunction_Reconnector: {
     } break;
     }
 
