@@ -11,6 +11,11 @@ ConstructorDescription::ConstructorDescription()
     genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription());
 }
 
+InjectorDescription::InjectorDescription()
+{
+    genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription());
+}
+
 CellFunction CellDescription::getCellFunctionType() const
 {
     if (!cellFunction) {

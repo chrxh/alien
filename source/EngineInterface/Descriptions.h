@@ -231,6 +231,7 @@ struct InjectorDescription
     std::vector<uint8_t> genome;
     int genomeGeneration = 0;
 
+    InjectorDescription();
     auto operator<=>(InjectorDescription const&) const = default;
     InjectorDescription& setMode(InjectorMode value)
     {
