@@ -64,8 +64,8 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             float defendStrength =
                 numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.cellFunctionDefenderAgainstInjectorStrength[cell->color], numDefenderCells);
             injectorDuration = toInt(toFloat(injectorDuration) * defendStrength);
-
             if (injector.counter < injectorDuration) {
+                otherCell->releaseLock();
                 return;
             }
 
@@ -129,10 +129,10 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
         } else {
             ++injector.counter;
         }
-        activity.channels[0] = 1.0;
+        activity.channels[0] = 1;
     } else {
         injector.counter = 0;
-        activity.channels[0] = 0.0;
+        activity.channels[0] = 0;
     }
 
     CellFunctionProcessor::setActivity(cell, activity);

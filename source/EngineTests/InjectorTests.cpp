@@ -130,7 +130,7 @@ TEST_F(InjectorTests, injection)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
             .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setGenome({})),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription()),
     });
     data.addConnection(1, 2);
 
@@ -153,9 +153,10 @@ TEST_F(InjectorTests, injection)
     EXPECT_EQ(origInjector.genome, actualTargetConstructor.genome);
 }
 
-TEST_F(InjectorTests, injectOnlyUnderConstruction_failed)
+TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto otherGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription(), CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -173,7 +174,12 @@ TEST_F(InjectorTests, injectOnlyUnderConstruction_failed)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
             .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setGenome({})),
+        CellDescription()
+            .setId(3)
+            .setPos({9.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome)),
     });
     data.addConnection(1, 2);
 
@@ -196,9 +202,10 @@ TEST_F(InjectorTests, injectOnlyUnderConstruction_failed)
     EXPECT_EQ(origTargetConstructor.genome, actualTargetConstructor.genome);
 }
 
-TEST_F(InjectorTests, injectOnlyUnderConstruction_success)
+TEST_F(InjectorTests, injectOnlyEmptyCells_success)
 {
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto otherGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription(), CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -216,12 +223,17 @@ TEST_F(InjectorTests, injectOnlyUnderConstruction_success)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
             .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setGenome({})),
-        CellDescription().setId(4).setPos({7.0f, 10.0f}).setLivingState(LivingState_UnderConstruction).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setGenome({})),
+        CellDescription()
+            .setId(3)
+            .setPos({9.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome)),
+        CellDescription().setId(4).setPos({7.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription()),
     });
     data.addConnection(1, 2);
-    data.addConnection(3, 1);
-    data.addConnection(4, 3);
+    data.addConnection(1, 3);
+    data.addConnection(3, 4);
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 1 + 6 * 3; ++i) {
