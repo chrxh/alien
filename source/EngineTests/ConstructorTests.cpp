@@ -570,7 +570,9 @@ TEST_F(ConstructorTests, constructFirstCell_singleConstruction)
 
     EXPECT_EQ(0, actualHostCell.connections.size());
     auto const& constructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
-    EXPECT_EQ(constructor.genome.size(), constructor.genomeCurrentNodeIndex);
+    EXPECT_EQ(0, constructor.genomeCurrentNodeIndex);
+    EXPECT_EQ(0, constructor.genomeCurrentRepetition);
+    EXPECT_TRUE(constructor.isConstructionBuilt);
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
     EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
