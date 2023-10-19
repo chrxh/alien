@@ -241,7 +241,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                         cell.cellFunction = TransmitterDescription();
                     } break;
                     case CellFunction_Constructor: {
-                        cell.cellFunction = ConstructorDescription().setGenome(GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()));
+                        cell.cellFunction = ConstructorDescription();
                     } break;
                     case CellFunction_Sensor: {
                         cell.cellFunction = SensorDescription();
@@ -253,7 +253,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                         cell.cellFunction = AttackerDescription();
                     } break;
                     case CellFunction_Injector: {
-                        cell.cellFunction = InjectorDescription().setGenome(GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()));
+                        cell.cellFunction = InjectorDescription();
                     } break;
                     case CellFunction_Muscle: {
                         cell.cellFunction = MuscleDescription();
