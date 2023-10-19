@@ -686,11 +686,9 @@ TEST_F(MutationTests, individualGeometryMutation)
 TEST_F(MutationTests, cellFunctionMutation)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
-    auto cellIndex = 7;
-    int byteIndex = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(genome, cellIndex);
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex)).setExecutionOrderNumber(0)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(3)).setExecutionOrderNumber(0)});
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -702,16 +700,14 @@ TEST_F(MutationTests, cellFunctionMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareCellFunctionMutation(genome, actualConstructor.genome));
-    auto actualCellIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(actualConstructor.genome, actualConstructor.genomeCurrentNodeIndex);
-    EXPECT_EQ(cellIndex, actualCellIndex);
+    EXPECT_EQ(3, actualConstructor.genomeCurrentNodeIndex);
 }
 
 TEST_F(MutationTests, insertMutation_emptyGenome)
 {
     auto cellColor = 3;
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription());
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome)).setExecutionOrderNumber(0).setColor(cellColor)});
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription()).setExecutionOrderNumber(0).setColor(cellColor)});
 
     _simController->setSimulationData(data);
     _simController->testOnly_mutate(1, MutationType::Insertion);
