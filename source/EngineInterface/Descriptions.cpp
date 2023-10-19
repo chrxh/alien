@@ -43,8 +43,8 @@ CellFunction CellDescription::getCellFunctionType() const
     if (std::holds_alternative<DefenderDescription>(*cellFunction)) {
         return CellFunction_Defender;
     }
-    if (std::holds_alternative<PlaceHolderDescription>(*cellFunction)) {
-        return CellFunction_Placeholder;
+    if (std::holds_alternative<ReconnectorDescription>(*cellFunction)) {
+        return CellFunction_Reconnector;
     }
     return CellFunction_None;
 }

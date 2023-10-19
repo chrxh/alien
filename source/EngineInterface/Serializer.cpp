@@ -382,12 +382,12 @@ namespace cereal
     SPLIT_SERIALIZATION(DefenderGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, PlaceHolderGenomeDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ReconnectorGenomeDescription& data)
     {
         auto auxiliaries = getLoadSaveMap(task, ar);
         setLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(PlaceHolderGenomeDescription)
+    SPLIT_SERIALIZATION(ReconnectorGenomeDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellGenomeDescription& data)
@@ -633,12 +633,12 @@ namespace cereal
     SPLIT_SERIALIZATION(DefenderDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, PlaceHolderDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ReconnectorDescription& data)
     {
         auto auxiliaries = getLoadSaveMap(task, ar);
         setLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(PlaceHolderDescription)
+    SPLIT_SERIALIZATION(ReconnectorDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellDescription& data)

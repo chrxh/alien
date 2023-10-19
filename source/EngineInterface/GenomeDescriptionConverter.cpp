@@ -234,7 +234,7 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             auto const& defender = std::get<DefenderGenomeDescription>(*cell.cellFunction);
             writeByte(result, defender.mode);
         } break;
-        case CellFunction_Placeholder: {
+        case CellFunction_Reconnector: {
         } break;
         }
     }
@@ -354,8 +354,8 @@ namespace
                 defender.mode = readByte(data, bytePosition) % DefenderMode_Count;
                 cell.cellFunction = defender;
             } break;
-            case CellFunction_Placeholder: {
-                cell.cellFunction = PlaceHolderGenomeDescription();
+            case CellFunction_Reconnector: {
+                cell.cellFunction = ReconnectorGenomeDescription();
             } break;
             }
             result.genome.cells.emplace_back(cell);

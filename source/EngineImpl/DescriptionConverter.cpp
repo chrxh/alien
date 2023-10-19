@@ -299,7 +299,7 @@ void DescriptionConverter::addAdditionalDataSizeForCell(CellDescription const& c
         break;
     case CellFunction_Defender:
         break;
-    case CellFunction_Placeholder:
+    case CellFunction_Reconnector:
         break;
     }
 }    
@@ -480,9 +480,9 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         defender.mode = cellTO.cellFunctionData.defender.mode;
         result.cellFunction = defender;
     } break;
-    case CellFunction_Placeholder: {
-        PlaceHolderDescription placeHolder;
-        result.cellFunction = placeHolder;
+    case CellFunction_Reconnector: {
+        ReconnectorDescription reconnector;
+        result.cellFunction = reconnector;
     } break;
     }
 
@@ -608,9 +608,9 @@ void DescriptionConverter::addCell(
         defenderTO.mode = defenderDesc.mode;
         cellTO.cellFunctionData.defender = defenderTO;
     } break;
-    case CellFunction_Placeholder: {
-        PlaceHolderTO placeHolderTO;
-        cellTO.cellFunctionData.placeHolder = placeHolderTO;
+    case CellFunction_Reconnector: {
+        ReconnectorTO reconnectorTO;
+        cellTO.cellFunctionData.reconnector = reconnectorTO;
     } break;
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {

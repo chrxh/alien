@@ -115,7 +115,7 @@ struct DefenderTO
     DefenderMode mode;
 };
 
-struct PlaceHolderTO
+struct ReconnectorTO
 {};
 
 union CellFunctionTO
@@ -129,7 +129,7 @@ union CellFunctionTO
     InjectorTO injector;
     MuscleTO muscle;
     DefenderTO defender;
-    PlaceHolderTO placeHolder;
+    ReconnectorTO reconnector;
 };
 
 struct CellTO

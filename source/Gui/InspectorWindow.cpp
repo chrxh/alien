@@ -261,8 +261,8 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                     case CellFunction_Defender: {
                         cell.cellFunction = DefenderDescription();
                     } break;
-                    case CellFunction_Placeholder: {
-                        cell.cellFunction = PlaceHolderDescription();
+                    case CellFunction_Reconnector: {
+                        cell.cellFunction = ReconnectorDescription();
                     } break;
                     case CellFunction_None: {
                         cell.cellFunction.reset();
@@ -345,7 +345,7 @@ void _InspectorWindow::processCellFunctionPropertiesTab(CellDescription& cell)
             case CellFunction_Defender: {
                 processDefenderContent(std::get<DefenderDescription>(*cell.cellFunction));
             } break;
-            case CellFunction_Placeholder: {
+            case CellFunction_Reconnector: {
             } break;
             }
         }

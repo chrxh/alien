@@ -12,7 +12,7 @@ enum CellFunction_
     CellFunction_Injector,
     CellFunction_Muscle,
     CellFunction_Defender,
-    CellFunction_Placeholder,
+    CellFunction_Reconnector,
     CellFunction_WithoutNoneCount,
 
     CellFunction_None = CellFunction_WithoutNoneCount,

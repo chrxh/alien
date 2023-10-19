@@ -278,9 +278,9 @@ struct DefenderDescription
     }
 };
 
-struct PlaceHolderDescription
+struct ReconnectorDescription
 {
-    auto operator<=>(PlaceHolderDescription const&) const = default;
+    auto operator<=>(ReconnectorDescription const&) const = default;
 };
 
 using CellFunctionDescription = std::optional<std::variant<
@@ -293,7 +293,7 @@ using CellFunctionDescription = std::optional<std::variant<
     InjectorDescription,
     MuscleDescription,
     DefenderDescription,
-    PlaceHolderDescription>>;
+    ReconnectorDescription>>;
 
 struct CellDescription
 {
