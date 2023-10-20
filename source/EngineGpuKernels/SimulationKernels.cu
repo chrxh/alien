@@ -128,7 +128,7 @@ __global__ void cudaNextTimestep_cellFunction_sensor(SimulationData data, Simula
     SensorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_reconector(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellFunction_reconnector(SimulationData data, SimulationStatistics statistics)
 {
     ReconnectorProcessor::process(data, statistics);
 }

@@ -69,7 +69,7 @@ ReconnectorProcessor::tryEstablishConnection(SimulationData& data, SimulationSta
         }
     });
 
-    activity.channels[1] = 0;
+    activity.channels[0] = 0;
     if (closestCell) {
         SystemDoubleLock lock;
         lock.init(&cell->locked, &closestCell->locked);
@@ -78,18 +78,20 @@ ReconnectorProcessor::tryEstablishConnection(SimulationData& data, SimulationSta
             cell->maxConnections = min(max(cell->maxConnections, cell->numConnections + 1), MAX_CELL_BONDS);
             CellConnectionProcessor::scheduleAddConnectionPair(data, cell, closestCell);
             lock.releaseLock();
-            activity.channels[1] = 1;
+            activity.channels[0] = 1;
         }
     }
 }
 
 __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
 {
+    activity.channels[0] = 0;
     if (cell->tryLock()) {
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
             if (connectedCell->creatureId != cell->creatureId) {
                 CellConnectionProcessor::scheduleDeleteConnectionPair(data, cell, connectedCell);
+                activity.channels[0] = 1;
             }
         }
         cell->releaseLock();
