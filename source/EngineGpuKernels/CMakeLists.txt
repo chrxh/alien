@@ -56,6 +56,7 @@ add_library(alien_engine_gpu_kernels_lib
     ParticleProcessor.cuh
     Physics.cuh
     ProprocessedCellFunctionData.cuh
+    ReconnectorProcessor.cuh
     RenderingData.cu
     RenderingData.cuh
     RenderingKernels.cu

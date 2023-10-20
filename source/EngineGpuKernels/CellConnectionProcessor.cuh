@@ -33,8 +33,9 @@ public:
 
     __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached);
     __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos);
+    __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
 
-private:
+        private:
     static int constexpr MaxOperationsPerCell = 30;
 
     __inline__ __device__ static bool scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex);
@@ -464,6 +465,33 @@ __inline__ __device__ bool CellConnectionProcessor::wouldResultInOverlappingConn
         }
     }
     return false;
+}
+
+__inline__ __device__ bool CellConnectionProcessor::isConnectedConnected(Cell* cell, Cell* otherCell)
+{
+    if (cell == otherCell) {
+        return true;
+    }
+    bool result = false;
+    for (int i = 0; i < otherCell->numConnections; ++i) {
+        auto const& connectedCell = otherCell->connections[i].cell;
+        if (connectedCell == cell) {
+            result = true;
+            break;
+        }
+
+        for (int j = 0; j < connectedCell->numConnections; ++j) {
+            auto const& connectedConnectedCell = connectedCell->connections[j].cell;
+            if (connectedConnectedCell == cell) {
+                result = true;
+                break;
+            }
+        }
+        if (result) {
+            return true;
+        }
+    }
+    return result;
 }
 
 __inline__ __device__ bool CellConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex)

@@ -13,9 +13,9 @@ enum CellFunction_
     CellFunction_Muscle,
     CellFunction_Defender,
     CellFunction_Reconnector,
-    CellFunction_WithoutNoneCount,
+    CellFunction_WithoutNone_Count,
 
-    CellFunction_None = CellFunction_WithoutNoneCount,
+    CellFunction_None = CellFunction_WithoutNone_Count,
     CellFunction_Count,
 };
 
