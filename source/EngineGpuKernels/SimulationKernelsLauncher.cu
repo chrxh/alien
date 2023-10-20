@@ -100,6 +100,7 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_cellFunction_transmitter, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_muscle, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_sensor, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellFunction_reconector, data, statistics);
 
     if (considerInnerFriction) {
         KERNEL_CALL(cudaNextTimestep_physics_substep7_innerFriction, data);
