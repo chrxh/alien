@@ -12,6 +12,7 @@
 #include "SensorProcessor.cuh"
 #include "CellProcessor.cuh"
 #include "ParticleProcessor.cuh"
+#include "ReconnectorProcessor.cuh"
 
 __global__ void cudaNextTimestep_prepare(SimulationData data, SimulationStatistics statistics)
 {
@@ -129,7 +130,7 @@ __global__ void cudaNextTimestep_cellFunction_sensor(SimulationData data, Simula
 
 __global__ void cudaNextTimestep_cellFunction_reconector(SimulationData data, SimulationStatistics statistics)
 {
-    ConstructorProcessor::process(data, statistics);
+    ReconnectorProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_physics_substep7_innerFriction(SimulationData data)

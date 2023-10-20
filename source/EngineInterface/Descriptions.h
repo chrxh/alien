@@ -435,6 +435,12 @@ struct CellDescription
         activationTime = value;
         return *this;
     }
+    CellDescription& setCreatureId(int value)
+    {
+        creatureId = value;
+        return *this;
+    }
+
 
     bool hasGenome() const;
     std::vector<uint8_t>& getGenomeRef();

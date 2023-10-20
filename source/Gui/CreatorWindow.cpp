@@ -237,6 +237,8 @@ void _CreatorWindow::finishDrawing()
 
 void _CreatorWindow::createCell()
 {
+    auto creatureId = toInt(NumberGenerator::getInstance().getRandomInt(std::numeric_limits<int>::max()));
+
     auto cell = CellDescription()
                     .setPos(getRandomPos())
                     .setEnergy(_energy)
@@ -244,7 +246,8 @@ void _CreatorWindow::createCell()
                     .setMaxConnections(_maxConnections)
                     .setExecutionOrderNumber(_lastExecutionNumber)
                     .setColor(_editorModel->getDefaultColorCode())
-                    .setBarrier(_barrier);
+                    .setBarrier(_barrier)
+                    .setCreatureId(creatureId);
     if (_ascendingExecutionNumbers) {
         cell.setInputExecutionOrderNumber((_lastExecutionNumber + 5) % 6);
     }

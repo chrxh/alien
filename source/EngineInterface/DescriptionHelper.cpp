@@ -13,6 +13,7 @@
 DataDescription DescriptionHelper::createRect(CreateRectParameters const& parameters)
 {
     DataDescription result;
+    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::getInstance().getRandomInt(std::numeric_limits<int>::max())) : 0;
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
             result.addCell(CellDescription()
@@ -22,7 +23,8 @@ DataDescription DescriptionHelper::createRect(CreateRectParameters const& parame
                                .setStiffness(parameters._stiffness)
                                .setMaxConnections(parameters._maxConnections)
                                .setColor(parameters._color)
-                               .setBarrier(parameters._barrier));
+                               .setBarrier(parameters._barrier)
+                               .setCreatureId(creatureId));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
@@ -36,6 +38,7 @@ DataDescription DescriptionHelper::createRect(CreateRectParameters const& parame
 DataDescription DescriptionHelper::createHex(CreateHexParameters const& parameters)
 {
     DataDescription result;
+    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::getInstance().getRandomInt(std::numeric_limits<int>::max())) : 0;
     auto incY = sqrt(3.0) * parameters._cellDistance / 2.0;
     for (int j = 0; j < parameters._layers; ++j) {
         for (int i = -(parameters._layers - 1); i < parameters._layers - j; ++i) {
@@ -48,7 +51,8 @@ DataDescription DescriptionHelper::createHex(CreateHexParameters const& paramete
                                .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
                                .setMaxConnections(parameters._maxConnections)
                                .setColor(parameters._color)
-                               .setBarrier(parameters._barrier));
+                               .setBarrier(parameters._barrier)
+                               .setCreatureId(creatureId));
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
@@ -59,7 +63,8 @@ DataDescription DescriptionHelper::createHex(CreateHexParameters const& paramete
                                    .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
                                    .setMaxConnections(parameters._maxConnections)
                                    .setColor(parameters._color)
-                                   .setBarrier(parameters._barrier));
+                                   .setBarrier(parameters._barrier)
+                                   .setCreatureId(creatureId));
             }
         }
     }
@@ -76,6 +81,7 @@ DataDescription DescriptionHelper::createHex(CreateHexParameters const& paramete
 DataDescription DescriptionHelper::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters)
 {
     DataDescription result;
+    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::getInstance().getRandomInt(std::numeric_limits<int>::max())) : 0;
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result.addCell(CellDescription()
@@ -85,7 +91,8 @@ DataDescription DescriptionHelper::createUnconnectedCircle(CreateUnconnectedCirc
                            .setStiffness(parameters._stiffness)
                            .setMaxConnections(parameters._maxConnections)
                            .setColor(parameters._color)
-                           .setBarrier(parameters._barrier));
+                           .setBarrier(parameters._barrier)
+                           .setCreatureId(creatureId));
         return result;
     }
 
@@ -109,7 +116,8 @@ DataDescription DescriptionHelper::createUnconnectedCircle(CreateUnconnectedCirc
                                .setPos({parameters._center.x + dxMod, parameters._center.y + dy})
                                .setMaxConnections(parameters._maxConnections)
                                .setColor(parameters._color)
-                               .setBarrier(parameters._barrier));
+                               .setBarrier(parameters._barrier)
+                               .setCreatureId(creatureId));
 
         }
     }
