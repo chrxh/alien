@@ -187,6 +187,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.defender.mode = cellTO.cellFunctionData.defender.mode;
     } break;
     case CellFunction_Reconnector: {
+        cell->cellFunctionData.reconnector.color = cellTO.cellFunctionData.reconnector.color;
     } break;
     }
 }
@@ -338,6 +339,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.defender.mode = _data->numberGen1.random(DefenderMode_Count - 1);
         } break;
         case CellFunction_Reconnector: {
+            cell->cellFunctionData.reconnector.color = 0;
         } break;
         }
 

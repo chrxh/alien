@@ -482,6 +482,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     case CellFunction_Reconnector: {
         ReconnectorDescription reconnector;
+        reconnector.color = cellTO.cellFunctionData.reconnector.color;
         result.cellFunction = reconnector;
     } break;
     }
@@ -609,7 +610,9 @@ void DescriptionConverter::addCell(
         cellTO.cellFunctionData.defender = defenderTO;
     } break;
     case CellFunction_Reconnector: {
+        auto const& reconnectorDesc = std::get<ReconnectorDescription>(*cellDesc.cellFunction);
         ReconnectorTO reconnectorTO;
+        reconnectorTO.color = reconnectorDesc.color;
         cellTO.cellFunctionData.reconnector = reconnectorTO;
     } break;
     }
