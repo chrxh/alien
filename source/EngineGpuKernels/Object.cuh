@@ -132,7 +132,9 @@ struct DefenderFunction
 };
 
 struct ReconnectorFunction
-{};
+{
+    int color;
+};
 
 union CellFunctionData
 {

@@ -145,6 +145,8 @@ namespace
     auto constexpr Id_SensorGenome_MinDensity = 1;
     auto constexpr Id_SensorGenome_Color = 2;
 
+    auto constexpr Id_Reconnector_Color = 0;
+
 }
 
 namespace cereal
@@ -635,7 +637,9 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ReconnectorDescription& data)
     {
+        ReconnectorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Id_Reconnector_Color, data.color, defaultObject.color);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ReconnectorDescription)

@@ -281,6 +281,8 @@ struct DefenderDescription
 
 struct ReconnectorDescription
 {
+    int color = 0;
+
     auto operator<=>(ReconnectorDescription const&) const = default;
 };
 

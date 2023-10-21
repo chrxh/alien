@@ -138,6 +138,7 @@ namespace
             cellTO.cellFunctionData.defender.mode = cell->cellFunctionData.defender.mode;
         } break;
         case CellFunction_Reconnector: {
+            cellTO.cellFunctionData.reconnector.color = cell->cellFunctionData.reconnector.color;
         } break;
         }
     }

@@ -116,7 +116,9 @@ struct DefenderTO
 };
 
 struct ReconnectorTO
-{};
+{
+    int color;
+};
 
 union CellFunctionTO
 {
