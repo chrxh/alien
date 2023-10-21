@@ -57,6 +57,45 @@ TEST_F(ReconnectorTests, establishConnection_nothingFound)
     EXPECT_TRUE(std::abs(actualReconnectorCell.activity.channels[0]) < NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(0.0f, actualReconnectorCell.activity.channels[0]));
+    EXPECT_EQ(1, actualReconnectorCell.connections.size());
+}
+
+TEST_F(ReconnectorTests, establishConnection_wrongColor)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setColor(1)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(std::abs(actualReconnectorCell.activity.channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell.connections.size());
+    EXPECT_EQ(0, actualTargetCell.connections.size());
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
 TEST_F(ReconnectorTests, establishConnection_success)

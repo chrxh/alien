@@ -56,10 +56,13 @@ ReconnectorProcessor::tryEstablishConnection(SimulationData& data, SimulationSta
         if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
             return;
         }
-        if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {
+        if (otherCell->barrier) {
             return;
         }
-        if (otherCell->barrier) {
+        if (otherCell->color != cell->cellFunctionData.reconnector.color) {
+            return;
+        }
+        if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {
             return;
         }
         auto distance = data.cellMap.getDistance(cell->pos, otherCell->pos);
