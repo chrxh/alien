@@ -687,7 +687,7 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         AlienImGui::ComboColor(
-            AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
+            AlienImGui::ComboColorParameters().name("Target color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeReconnectorTargetColorTooltip),
             reconnector.color);
         ImGui::TreePop();
     }

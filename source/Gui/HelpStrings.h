@@ -214,6 +214,8 @@ namespace Const
         ICON_FA_CHEVRON_RIGHT " Anti-attacker: reduces the attack strength of an enemy attacker cell\n\n" ICON_FA_CHEVRON_RIGHT
                               "Anti-injector: increases the injection duration of an enemy injector cell";
 
+    std::string const GenomeReconnectorTargetColorTooltip = "Specifies the color of the cells where connections are to be established or destroyed.";
+
     std::string const SubGenomeTooltip =
         "If a constructor or injector cell is encoded in a genome, that cell can itself contain another genome. This sub-genome can "
         "describe additional body parts or branching of the creature, for instance. Furthermore, sub-genomes can in turn possess further "
