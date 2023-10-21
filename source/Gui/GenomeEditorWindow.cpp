@@ -729,6 +729,11 @@ void _GenomeEditorWindow::processNode(
                 defender.mode);
         } break;
         case CellFunction_Reconnector: {
+            auto& reconnector = std::get<ReconnectorGenomeDescription>(*cell.cellFunction);
+            table.next();
+            AlienImGui::ComboColor(
+                AlienImGui::ComboColorParameters().name("Target color").textWidth(ContentTextWidth).tooltip(Const::GenomeReconnectorTargetColorTooltip),
+                reconnector.color);
         } break;
         case CellFunction_None: {
         } break;
