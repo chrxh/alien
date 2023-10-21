@@ -811,7 +811,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0)
-                    .max(2.5f)
+                    .max(3.0f)
                     .defaultValue(origSimParameters.cellFunctionAttackerRadius)
                     .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                 simParameters.cellFunctionAttackerRadius);
@@ -1071,7 +1071,7 @@ void _SimulationParametersWindow::processBase(
         if (ImGui::TreeNodeEx("Cell function: Sensor", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Range")
+                    .name("Radius")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(10.0f)
@@ -1113,6 +1113,23 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionSameCreature)
                     .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells belonging to the same creature."),
                 simParameters.cellFunctionTransmitterEnergyDistributionSameCreature);
+            ImGui::TreePop();
+        }
+
+        /**
+         * Reconnector
+         */
+        if (ImGui::TreeNodeEx("Cell function: Reconnector", flags)) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Radius")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0.0f)
+                    .max(3.0f)
+                    .defaultValue(origSimParameters.cellFunctionReconnectorRadius)
+                    .tooltip("The maximum radius in which a reconnector cell can establish or destroy connections to other cells."),
+                simParameters.cellFunctionReconnectorRadius);
             ImGui::TreePop();
         }
 
