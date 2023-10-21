@@ -135,6 +135,9 @@ struct SimulationParameters
     ColorVector<float> cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
     float cellFunctionSensorActivityThreshold = 0.1f;
 
+    ColorVector<float> cellFunctionReconnectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
+    float cellFunctionReconnectorActivityThreshold = 0.1f;
+
     //particle sources
     int numParticleSources = 0;
     RadiationSource particleSources[MAX_PARTICLE_SOURCES];
