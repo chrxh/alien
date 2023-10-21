@@ -398,6 +398,10 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
     ASSERT_EQ(RectLength * RectLength + 1, actualData.cells.size());
 }
 
+/**
+ * Completeness check needs to inspect cells under construction because when a constructor is finished its construction
+ * is still in state "under construction" for some time steps but needs to be inspected
+ */
 TEST_F(ConstructorTests, constructFirstCell_completenessCheck_underConstruction)
 {
     auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
@@ -439,7 +443,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_underConstruction)
     _simController->calcTimesteps(1);
     auto actualData = _simController->getSimulationData();
 
-    ASSERT_EQ(4, actualData.cells.size());
+    ASSERT_EQ(3, actualData.cells.size());
 }
 
 
