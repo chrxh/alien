@@ -542,6 +542,8 @@ __inline__ __device__ int GenomeDecoder::getNextCellFunctionDataSize(uint8_t* ge
         return Const::MuscleBytes;
     case CellFunction_Defender:
         return Const::DefenderBytes;
+    case CellFunction_Reconnector:
+        return Const::ReconnectorBytes;
     default:
         return 0;
     }
@@ -634,6 +636,8 @@ __inline__ __device__ int GenomeDecoder::getCellFunctionDataSize(CellFunction ce
         return Const::MuscleBytes;
     case CellFunction_Defender:
         return Const::DefenderBytes;
+    case CellFunction_Reconnector:
+        return Const::ReconnectorBytes;
     default:
         return 0;
     }

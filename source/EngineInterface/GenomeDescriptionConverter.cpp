@@ -235,6 +235,8 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             writeByte(result, defender.mode);
         } break;
         case CellFunction_Reconnector: {
+            auto const& reconnector = std::get<ReconnectorGenomeDescription>(*cell.cellFunction);
+            writeByte(result, reconnector.color);
         } break;
         }
     }
@@ -355,7 +357,9 @@ namespace
                 cell.cellFunction = defender;
             } break;
             case CellFunction_Reconnector: {
-                cell.cellFunction = ReconnectorGenomeDescription();
+                ReconnectorGenomeDescription reconnector;
+                reconnector.color = readByte(data, bytePosition) % MAX_COLORS;
+                cell.cellFunction = reconnector;
             } break;
             }
             result.genome.cells.emplace_back(cell);
