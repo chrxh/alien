@@ -77,12 +77,14 @@ ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatis
         SystemDoubleLock lock;
         lock.init(&cell->locked, &closestCell->locked);
         if (lock.tryLock()) {
-            closestCell->maxConnections = min(max(closestCell->maxConnections, closestCell->numConnections + 1), MAX_CELL_BONDS);
-            cell->maxConnections = min(max(cell->maxConnections, cell->numConnections + 1), MAX_CELL_BONDS);
-            CellConnectionProcessor::scheduleAddConnectionPair(data, cell, closestCell);
+            if (cell->numConnections < MAX_CELL_BONDS && closestCell->numConnections < MAX_CELL_BONDS) {
+                closestCell->maxConnections = min(max(closestCell->maxConnections, closestCell->numConnections + 1), MAX_CELL_BONDS);
+                cell->maxConnections = min(max(cell->maxConnections, cell->numConnections + 1), MAX_CELL_BONDS);
+                CellConnectionProcessor::scheduleAddConnectionPair(data, cell, closestCell);
+                activity.channels[0] = 1;
+                statistics.incNumReconnectorCreated(cell->color);
+            }
             lock.releaseLock();
-            activity.channels[0] = 1;
-            statistics.incNumReconnectorCreated(cell->color);
         }
     }
 }
