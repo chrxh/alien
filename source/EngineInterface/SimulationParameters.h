@@ -255,6 +255,9 @@ struct SimulationParameters
             if (radiationMinCellAge[i] != other.radiationMinCellAge[i]) {
                 return false;
             }
+            if (cellFunctionReconnectorRadius[i] != other.cellFunctionReconnectorRadius[i]) {
+                return false;
+            }
         }
         if (numParticleSources != other.numParticleSources) {
             return false;
@@ -313,6 +316,7 @@ struct SimulationParameters
             && cellFunctionConstructorMutationPreventDepthIncrease == other.cellFunctionConstructorMutationPreventDepthIncrease
             && cellFunctionConstructorCheckCompletenessForSelfReplication == other.cellFunctionConstructorCheckCompletenessForSelfReplication
             && cellFunctionAttackerDestroyCells == other.cellFunctionAttackerDestroyCells
+            && cellFunctionReconnectorActivityThreshold == other.cellFunctionReconnectorActivityThreshold
         ;
     }
 
