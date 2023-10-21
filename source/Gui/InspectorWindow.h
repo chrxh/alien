@@ -46,6 +46,7 @@ private:
     void processTransmitterContent(TransmitterDescription& transmitter);
     void processMuscleContent(MuscleDescription& muscle);
     void processSensorContent(SensorDescription& sensor);
+    void processReconnectorContent(ReconnectorDescription& reconnector);
 
     void processParticle(ParticleDescription particle);
 
