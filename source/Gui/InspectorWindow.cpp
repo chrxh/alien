@@ -346,6 +346,7 @@ void _InspectorWindow::processCellFunctionPropertiesTab(CellDescription& cell)
                 processDefenderContent(std::get<DefenderDescription>(*cell.cellFunction));
             } break;
             case CellFunction_Reconnector: {
+                processReconnectorContent(std::get<ReconnectorDescription>(*cell.cellFunction));
             } break;
             }
         }
@@ -678,6 +679,16 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters().name("Target creature id").textWidth(CellFunctionTextWidth).tooltip(Const::CellSensorTargetCreatureIdTooltip),
             sensor.targetedCreatureId);
+        ImGui::TreePop();
+    }
+}
+
+void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconnector)
+{
+    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+        AlienImGui::ComboColor(
+            AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
+            reconnector.color);
         ImGui::TreePop();
     }
 }
