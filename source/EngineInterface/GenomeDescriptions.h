@@ -192,6 +192,8 @@ struct DefenderGenomeDescription
 
 struct ReconnectorGenomeDescription
 {
+    int color = 0;
+
     auto operator<=>(ReconnectorGenomeDescription const&) const = default;
 };
 
