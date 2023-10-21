@@ -241,7 +241,7 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
         } else if (choice < 240) {
             subgenome[delta] = static_cast<uint8_t>(1 + data.numberGen1.random(10));
         } else if (choice == 240) {
-            subgenome[delta] = static_cast<uint8_t>(1 + data.numberGen1.random(255));
+            subgenome[delta] = static_cast<uint8_t>(1 + data.numberGen1.random(254));
         } else {
             subgenome[delta] = 255;
         }
@@ -349,7 +349,7 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
     auto sizeDelta = newCellFunctionSize - origCellFunctionSize;
 
     if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
-        if (GenomeDecoder::hasSelfCopy(genome + nodeAddress, Const::CellBasicBytes + origCellFunctionSize)) {
+        if (GenomeDecoder::containsSectionSelfReplication(genome + nodeAddress, Const::CellBasicBytes + origCellFunctionSize)) {
             return;
         }
     }
@@ -397,7 +397,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
         int numConstructorsWithSubgenome = 0;
         GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, [&](int depth, int nodeAddressIntern, int repetition) {
             auto cellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddressIntern);
-            if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfCopy(genome, nodeAddressIntern)) {
+            if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfReplication(genome, nodeAddressIntern)) {
                 ++numConstructorsWithSubgenome;
             }
         });
@@ -406,7 +406,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
             int counter = 0;
             GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, [&](int depth, int nodeAddressIntern, int repetition) {
                 auto cellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddressIntern);
-                if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfCopy(genome, nodeAddressIntern)) {
+                if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfReplication(genome, nodeAddressIntern)) {
                     if (randomIndex == counter) {
                         nodeAddress = nodeAddressIntern + Const::CellBasicBytes + Const::ConstructorFixedBytes + 3 + 1;
                     }
@@ -483,7 +483,7 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
     auto deleteSize = Const::CellBasicBytes + origCellFunctionSize;
 
     if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
-        if (GenomeDecoder::hasSelfCopy(genome + nodeAddress, deleteSize)) {
+        if (GenomeDecoder::containsSectionSelfReplication(genome + nodeAddress, deleteSize)) {
             return;
         }
     }
@@ -661,7 +661,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     }
     auto sizeDelta = endSourceIndex - startSourceIndex;
     if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
-        if (GenomeDecoder::hasSelfCopy(genome + startSourceIndex, sizeDelta)) {
+        if (GenomeDecoder::containsSectionSelfReplication(genome + startSourceIndex, sizeDelta)) {
             return;
         }
     }

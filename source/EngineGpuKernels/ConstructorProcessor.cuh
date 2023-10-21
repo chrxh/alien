@@ -114,11 +114,14 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
             auto nextCell = currentCell->connections[connectionIndex].cell;
             if (!visitedCells.contains(nextCell)) {
                 visitedCells.insert(nextCell);
-                if (nextCell->creatureId != cell->creatureId || nextCell->livingState == LivingState_UnderConstruction) {
+                if (nextCell->creatureId != cell->creatureId) {
                     goBack = true;
                 } else {
                     if (nextCell->cellFunction == CellFunction_Constructor && !GenomeDecoder::hasEmptyGenome(nextCell->cellFunctionData.constructor)
-                        && !nextCell->cellFunctionData.constructor.isConstructionBuilt) {
+                        && !nextCell->cellFunctionData.constructor.isConstructionBuilt
+                        && !GenomeDecoder::containsSectionSelfReplication(
+                            nextCell->cellFunctionData.constructor.genome + Const::GenomeHeaderSize,
+                            nextCell->cellFunctionData.constructor.genomeSize - Const::GenomeHeaderSize)) {
                         constructor.isComplete = false;
                         return;
                     }
