@@ -28,6 +28,8 @@ struct AccumulatedStatistics
     ColorVector<uint64_t> numNeuronActivities = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numSensorActivities = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numSensorMatches = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numReconnectorCreated = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numReconnectorRemoved = {0, 0, 0, 0, 0, 0, 0};
 };
 
 struct TimelineStatistics

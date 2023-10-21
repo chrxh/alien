@@ -19,7 +19,7 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static void tryEstablishConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity);
+    __inline__ __device__ static void tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity);
     __inline__ __device__ static void removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity);
 };
 
@@ -40,7 +40,7 @@ __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& dat
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
     if (activity.channels[0] >= cudaSimulationParameters.cellFunctionReconnectorActivityThreshold) {
-        tryEstablishConnection(data, statistics, cell, activity);
+        tryCreateConnection(data, statistics, cell, activity);
     } else if (activity.channels[0] <= -cudaSimulationParameters.cellFunctionReconnectorActivityThreshold) {
         removeConnections(data, statistics, cell, activity);
     }
@@ -48,7 +48,7 @@ __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& dat
 }
 
 __inline__ __device__ void
-ReconnectorProcessor::tryEstablishConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
+ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
 {
     Cell* closestCell = nullptr;
     float closestDistance = 0;
@@ -82,6 +82,7 @@ ReconnectorProcessor::tryEstablishConnection(SimulationData& data, SimulationSta
             CellConnectionProcessor::scheduleAddConnectionPair(data, cell, closestCell);
             lock.releaseLock();
             activity.channels[0] = 1;
+            statistics.incNumReconnectorCreated(cell->color);
         }
     }
 }
@@ -95,6 +96,7 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
             if (connectedCell->creatureId != cell->creatureId) {
                 CellConnectionProcessor::scheduleDeleteConnectionPair(data, cell, connectedCell);
                 activity.channels[0] = 1;
+                statistics.incNumReconnectorRemoved(cell->color);
             }
         }
         cell->releaseLock();

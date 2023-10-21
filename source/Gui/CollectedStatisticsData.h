@@ -38,6 +38,8 @@ struct DataPointCollection
     DataPoint numNeuronActivities;
     DataPoint numSensorActivities;
     DataPoint numSensorMatches;
+    DataPoint numReconnectorCreated;
+    DataPoint numReconnectorRemoved;
 
     DataPointCollection operator+(DataPointCollection const& other) const;
     DataPointCollection operator/(double divisor) const;

@@ -250,6 +250,18 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Completed injections");
 
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::numReconnectorCreated, 6);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Reconnector creations");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::numReconnectorRemoved, 6);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Reconnector deletions");
+
         ImPlot::PopColormap();
         ImGui::EndTable();
     }
