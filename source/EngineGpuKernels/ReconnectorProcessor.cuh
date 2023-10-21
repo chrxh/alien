@@ -39,9 +39,9 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
-    if (activity.channels[0] >= 0.1f) {
+    if (activity.channels[0] >= cudaSimulationParameters.cellFunctionReconnectorActivityThreshold) {
         tryEstablishConnection(data, statistics, cell, activity);
-    } else if (activity.channels[0] <= -0.1f) {
+    } else if (activity.channels[0] <= -cudaSimulationParameters.cellFunctionReconnectorActivityThreshold) {
         removeConnections(data, statistics, cell, activity);
     }
     CellFunctionProcessor::setActivity(cell, activity);
@@ -52,7 +52,7 @@ ReconnectorProcessor::tryEstablishConnection(SimulationData& data, SimulationSta
 {
     Cell* closestCell = nullptr;
     float closestDistance = 0;
-    data.cellMap.executeForEach(cell->pos, 2.0f, cell->detached, [&](auto const& otherCell) {
+    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellFunctionReconnectorRadius[cell->color], cell->detached, [&](auto const& otherCell) {
         if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
             return;
         }

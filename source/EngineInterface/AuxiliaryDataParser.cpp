@@ -587,6 +587,19 @@ namespace
             "simulation parameters.cell.function.sensor.activity threshold",
             parserTask);
 
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionReconnectorRadius,
+            defaultParameters.cellFunctionReconnectorRadius,
+            "simulation parameters.cell.function.reconnector.radius",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionReconnectorActivityThreshold,
+            defaultParameters.cellFunctionReconnectorActivityThreshold,
+            "simulation parameters.cell.function.reconnector.activity threshold",
+            parserTask);
+
         //particle sources
         encodeDecodeProperty(
             tree, parameters.numParticleSources, defaultParameters.numParticleSources, "simulation parameters.particle sources.num sources", parserTask);
