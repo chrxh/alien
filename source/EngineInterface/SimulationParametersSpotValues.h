@@ -15,7 +15,7 @@ struct SimulationParametersSpotValues
     ColorVector<float> radiationCellAgeStrength = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f};
     float cellMaxForce = 0.8f;
     ColorVector<float> cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
-    float cellFusionVelocity = 0.4f;
+    float cellFusionVelocity = 0.6f;
     float cellMaxBindingEnergy = Infinity<float>::value;
     ColorVector<int> cellColorTransitionDuration = {
         Infinity<int>::value,
