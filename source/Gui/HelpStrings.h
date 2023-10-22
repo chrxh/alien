@@ -346,7 +346,8 @@ namespace Const
         "The following cell functions write their output to channel #0:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Constructor: 0 (could not "
         "constructor next cell, e.g. no energy, required connection check failed, completeness check failed), 1 (next cell construction "
         "successful)\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: 0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Attacker: a value which is proportional to the gained "
-        "energy\n\n" ICON_FA_CHEVRON_RIGHT " Injector: 0 (no cells found) or 1 (injection in process or completed)",
+        "energy\n\n" ICON_FA_CHEVRON_RIGHT " Injector: 0 (no cells found) or 1 (injection in process or completed)" ICON_FA_CHEVRON_RIGHT
+        " Reconnector: 0 (no connection created/removed) or 1 (connection created/removed)",
         "The following cell functions write their output to channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: density of the last match",
         "The following cell functions write their output to channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: distance of the last match",
         "The following cell functions write their output to channel #3:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: angle of the last match",
@@ -361,7 +362,7 @@ namespace Const
         "threshold activates constructor (only necessary in 'Manual' mode)\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: abs(value) > threshold activates "
         "sensor\n\n" ICON_FA_CHEVRON_RIGHT " Attacker: abs(value) > threshold activates attacker\n\n" ICON_FA_CHEVRON_RIGHT " Injector: abs(value) > threshold "
         "activates injector\n\n" ICON_FA_CHEVRON_RIGHT " Muscle: The strength of the movement, bending or expansion/contraction. A negative sign corresponds to "
-        "the opposite action.",
+        "the opposite action." ICON_FA_CHEVRON_RIGHT " Reconnector: value > threshold triggers creation of a bond, value < -threshold triggers destruction of a bond",
         "The following cell functions obtain their input from channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Muscle: This channel is "
         "solely utilized for acceleration due to bending. If the sign of channel #1 differs from the sign of channel #0, no acceleration will be obtained "
         "during the bending process.",

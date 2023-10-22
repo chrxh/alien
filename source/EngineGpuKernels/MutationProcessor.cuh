@@ -241,7 +241,7 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
         } else if (choice < 240) {
             subgenome[delta] = static_cast<uint8_t>(1 + data.numberGen1.random(10));
         } else if (choice == 240) {
-            subgenome[delta] = static_cast<uint8_t>(1 + data.numberGen1.random(254));
+            subgenome[delta] = static_cast<uint8_t>(1 + data.numberGen1.random(20));
         } else {
             subgenome[delta] = 255;
         }

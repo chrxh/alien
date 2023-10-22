@@ -195,6 +195,12 @@ struct ReconnectorGenomeDescription
     int color = 0;
 
     auto operator<=>(ReconnectorGenomeDescription const&) const = default;
+
+    ReconnectorGenomeDescription& setColor(int value)
+    {
+        color = value;
+        return *this;
+    }
 };
 
 using CellFunctionGenomeDescription = std::optional<std::variant<
