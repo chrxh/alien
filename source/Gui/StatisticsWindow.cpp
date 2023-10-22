@@ -555,6 +555,8 @@ void _StatisticsWindow::onSaveStatistics()
             writeLabelAllColors("Neuron activities");
             writeLabelAllColors("Sensor activities");
             writeLabelAllColors("Sensor matches");
+            writeLabelAllColors("Reconnector created");
+            writeLabelAllColors("Reconnector removed");
             file << std::endl;
 
             auto writeIntValueAllColors = [&file](DataPoint const& dataPoint) {
@@ -587,6 +589,8 @@ void _StatisticsWindow::onSaveStatistics()
                 writeDoubleValueAllColors(dataPointCollection.numNeuronActivities);
                 writeDoubleValueAllColors(dataPointCollection.numSensorActivities);
                 writeDoubleValueAllColors(dataPointCollection.numSensorMatches);
+                writeDoubleValueAllColors(dataPointCollection.numReconnectorCreated);
+                writeDoubleValueAllColors(dataPointCollection.numReconnectorRemoved);
                 file << std::endl;
             }
             file.close();

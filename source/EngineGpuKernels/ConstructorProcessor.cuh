@@ -447,7 +447,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         newCell->livingState = LivingState_Dying;
     }
 
-    if (constructionData.isLastNode) {
+    if (constructionData.isLastNodeOfLastRepetition) {
         newCell->livingState = LivingState_Activating;
     }
 
