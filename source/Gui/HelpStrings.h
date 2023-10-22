@@ -76,6 +76,11 @@ namespace Const
         "A defender cell does not need to be activated. Its presence reduces the strength of an enemy attack involving attacker "
         "cells or extends the injection duration for injector cells.";
 
+    std::string const ReconnectorTooltip =
+        "A reconnector cell can make or break a cell connection to an other cell (with a different creature id) with a specified color. \n\n" ICON_FA_CHEVRON_RIGHT
+        " Input channel #0: value > threshold triggers creation of a bond to a cell in the vicinity, value < -threshold triggers destruction of a bond\n\n" ICON_FA_CHEVRON_RIGHT
+        " Output channel #0: 0 (no connection created/removed) or 1 (connection created/removed)";
+
     std::string const CellFunctionTooltip =
         "Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
         "take action. All cell functions have in common that they obtain the input from connected cells whose execution number matches the input "
@@ -318,6 +323,8 @@ namespace Const
             return Const::MuscleTooltip;
         case CellFunction_Defender:
             return Const::DefenderTooltip;
+        case CellFunction_Reconnector:
+            return Const::ReconnectorTooltip;
         default:
             return Const::CellFunctionTooltip;
         }
@@ -346,7 +353,7 @@ namespace Const
         "The following cell functions write their output to channel #0:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Constructor: 0 (could not "
         "constructor next cell, e.g. no energy, required connection check failed, completeness check failed), 1 (next cell construction "
         "successful)\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: 0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Attacker: a value which is proportional to the gained "
-        "energy\n\n" ICON_FA_CHEVRON_RIGHT " Injector: 0 (no cells found) or 1 (injection in process or completed)" ICON_FA_CHEVRON_RIGHT
+        "energy\n\n" ICON_FA_CHEVRON_RIGHT " Injector: 0 (no cells found) or 1 (injection in process or completed)\n\n" ICON_FA_CHEVRON_RIGHT
         " Reconnector: 0 (no connection created/removed) or 1 (connection created/removed)",
         "The following cell functions write their output to channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: density of the last match",
         "The following cell functions write their output to channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: distance of the last match",
@@ -362,7 +369,7 @@ namespace Const
         "threshold activates constructor (only necessary in 'Manual' mode)\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: abs(value) > threshold activates "
         "sensor\n\n" ICON_FA_CHEVRON_RIGHT " Attacker: abs(value) > threshold activates attacker\n\n" ICON_FA_CHEVRON_RIGHT " Injector: abs(value) > threshold "
         "activates injector\n\n" ICON_FA_CHEVRON_RIGHT " Muscle: The strength of the movement, bending or expansion/contraction. A negative sign corresponds to "
-        "the opposite action." ICON_FA_CHEVRON_RIGHT " Reconnector: value > threshold triggers creation of a bond, value < -threshold triggers destruction of a bond",
+        "the opposite action.\n\n" ICON_FA_CHEVRON_RIGHT " Reconnector: value > threshold triggers creation of a bond to a cell in the vicinity, value < -threshold triggers destruction of a bond",
         "The following cell functions obtain their input from channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Muscle: This channel is "
         "solely utilized for acceleration due to bending. If the sign of channel #1 differs from the sign of channel #0, no acceleration will be obtained "
         "during the bending process.",

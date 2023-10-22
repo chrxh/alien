@@ -183,6 +183,7 @@ void _GettingStartedWindow::processIntern()
         drawItemText("Defender: It reduces the attack strength when another cell in the vicinity performs an attack.");
         drawItemText("Muscle: When a muscle cell is activated, it can produce either a movement, a bending or a change in length of the cell connection.");
         drawItemText("Sensor: If activated, it performs a long-range scan for the concentration of cells with a certain color.");
+        drawItemText("Reconnector: Has the ability to dynamically create or destroy connections to other cells with a specified color.");
 
         ImGui::Spacing();
         drawHeading2("Activity states");
