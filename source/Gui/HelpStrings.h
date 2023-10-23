@@ -45,7 +45,7 @@ namespace Const
         "Sensor cells scan their environment for concentrations of cells of a certain color and provide distance and angle to the "
         "closest match.\n\n" ICON_FA_CHEVRON_RIGHT " Input channel #0: abs(value) > threshold activates sensor\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: "
         "0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #1: density of the last match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #2: distance "
-        "of the last match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of the last match";
+        "of the last match (0 = far away, 1 = close)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of the last match";
 
     std::string const NerveTooltip =
         "By default, a nerve cell forwards activity states by receiving activity as input from connected cells (and summing it if "
@@ -360,7 +360,7 @@ namespace Const
         "energy\n\n" ICON_FA_CHEVRON_RIGHT " Injector: 0 (no cells found) or 1 (injection in process or completed)\n\n" ICON_FA_CHEVRON_RIGHT
         " Reconnector: 0 (no connection created/removed) or 1 (connection created/removed)",
         "The following cell functions write their output to channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: density of the last match",
-        "The following cell functions write their output to channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: distance of the last match",
+        "The following cell functions write their output to channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: distance of the last match (0 = far away, 1 = close)",
         "The following cell functions write their output to channel #3:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: angle of the last match",
         "The following cell functions write their output to channel #4:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions write their output to channel #5:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
