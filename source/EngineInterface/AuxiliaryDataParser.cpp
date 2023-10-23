@@ -600,6 +600,19 @@ namespace
             "simulation parameters.cell.function.reconnector.activity threshold",
             parserTask);
 
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionDetonatorRadius,
+            defaultParameters.cellFunctionDetonatorRadius,
+            "simulation parameters.cell.function.detonator.radius",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionDetonatorActivityThreshold,
+            defaultParameters.cellFunctionDetonatorActivityThreshold,
+            "simulation parameters.cell.function.detonator.activity threshold",
+            parserTask);
+
         //particle sources
         encodeDecodeProperty(
             tree, parameters.numParticleSources, defaultParameters.numParticleSources, "simulation parameters.particle sources.num sources", parserTask);

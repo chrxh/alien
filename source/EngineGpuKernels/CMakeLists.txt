@@ -24,6 +24,7 @@ add_library(alien_engine_gpu_kernels_lib
     Definitions.cuh
     Definitions.h
     DensityMap.cuh
+    DetonatorProcessor.cuh
     EditKernels.cu
     EditKernels.cuh
     EditKernelsLauncher.cu
