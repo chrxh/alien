@@ -25,7 +25,7 @@ private:
 
 __device__ __inline__ void DetonatorProcessor::process(SimulationData& data, SimulationStatistics& result)
 {
-    auto& operations = data.cellFunctionOperations[CellFunction_Reconnector];
+    auto& operations = data.cellFunctionOperations[CellFunction_Detonator];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, result, operations.at(i).cell);
@@ -35,7 +35,29 @@ __device__ __inline__ void DetonatorProcessor::process(SimulationData& data, Sim
 __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
-    if (activity.channels[0] >= abs(cudaSimulationParameters.cellFunctionDetonatorActivityThreshold)) {
+    auto& detonator = cell->cellFunctionData.detonator;
+    if (activity.channels[0] >= abs(cudaSimulationParameters.cellFunctionDetonatorActivityThreshold) && detonator.state == DetonatorState_Ready) {
+        detonator.state = DetonatorState_Activated;
+    }
+    if (detonator.state == DetonatorState_Activated) {
+        if (detonator.countdown > 0) {
+            --detonator.countdown;
+        }
+        if (detonator.countdown == 0) {
+            data.cellMap.executeForEach(
+                cell->pos, cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color], cell->detached, [&](auto const& otherCell) {
+                    if (otherCell->barrier) {
+                        return;
+                    }
+                    auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - cell->pos);
+                    auto lengthSquared = Math::lengthSquared(delta);
+                    if (lengthSquared > NEAR_ZERO) {
+                        auto force = delta / lengthSquared * cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color] * 2;
+                        otherCell->vel += force;
+                    }
+                });
+            detonator.state = DetonatorState_Exploded;
+        }
     }
     CellFunctionProcessor::setActivity(cell, activity);
 }

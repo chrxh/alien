@@ -14,19 +14,19 @@
 #include "Swap.cuh"
 
 template<typename T>
-__device__ inline float toFloat(T value)
+__device__ __host__ inline float toFloat(T value)
 {
     return static_cast<float>(value);
 }
 
 template <typename T>
-__device__ inline int toInt(T value)
+__device__ __host__ inline int toInt(T value)
 {
     return static_cast<int>(value);
 }
 
 template <typename T>
-__device__ inline uint64_t toUInt64(T value)
+__device__ __host__ inline uint64_t toUInt64(T value)
 {
     return static_cast<uint64_t>(value);
 }

@@ -81,7 +81,8 @@ namespace Const
         " Input channel #0: value > threshold triggers creation of a bond to a cell in the vicinity, value < -threshold triggers destruction of a bond\n\n" ICON_FA_CHEVRON_RIGHT
         " Output channel #0: 0 (no connection created/removed) or 1 (connection created/removed)";
 
-    std::string const DetonatorTooltip = "";
+    std::string const DetonatorTooltip = "A detonator cell will be activated if it receives an input on channel #0 with abs(value) > threshold. Then a counter "
+                                         "is decreasing until it reaches 0. After that the detonator cell will explode.";
 
     std::string const CellFunctionTooltip =
         "Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
@@ -222,6 +223,13 @@ namespace Const
                               "Anti-injector: increases the injection duration of an enemy injector cell";
 
     std::string const GenomeReconnectorTargetColorTooltip = "Specifies the color of the cells where connections are to be established or destroyed.";
+
+    std::string const DetonatorStateTooltip =
+        ICON_FA_CHEVRON_RIGHT " Ready: The detonator cell waits for input on channel #0. If abs(value) > threshold, the detonator will be activated.\n\n"
+        ICON_FA_CHEVRON_RIGHT " Activated: The countdown is decreased until 0 each time the detonator is executed. If the countdown is 0, the detonator will explode.\n\n"
+        ICON_FA_CHEVRON_RIGHT " Exploded: The detonator is already exploded.";
+
+    std::string const GenomeDetonatorCountdownTooltip = "The countdown specifies the cycles (in 6 time steps) until the detonator will explode.";
 
     std::string const SubGenomeTooltip =
         "If a constructor or injector cell is encoded in a genome, that cell can itself contain another genome. This sub-genome can "

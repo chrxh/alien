@@ -141,8 +141,8 @@ namespace
             cellTO.cellFunctionData.reconnector.color = cell->cellFunctionData.reconnector.color;
         } break;
         case CellFunction_Detonator: {
+            cellTO.cellFunctionData.detonator.state = cell->cellFunctionData.detonator.state;
             cellTO.cellFunctionData.detonator.countdown = cell->cellFunctionData.detonator.countdown;
-            cellTO.cellFunctionData.detonator.activated = cell->cellFunctionData.detonator.activated;
         } break;
         }
     }
