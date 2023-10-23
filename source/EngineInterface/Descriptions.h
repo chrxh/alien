@@ -294,8 +294,8 @@ struct ReconnectorDescription
 
 struct DetonatorDescription
 {
+    DetonatorState state = DetonatorState_Ready;
     int countdown = 10;
-    bool activated = false;
 
     auto operator<=>(DetonatorDescription const&) const = default;
 };

@@ -106,3 +106,11 @@ enum ConstructionShape_
     ConstructionShape_Zigzag,
     ConstructionShape_Count
 };
+
+using DetonatorState = int;
+enum DetonatorState_
+{
+    DetonatorState_Ready,
+    DetonatorState_Activated,
+    DetonatorState_Exploded
+};

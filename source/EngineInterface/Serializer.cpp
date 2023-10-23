@@ -152,8 +152,8 @@ namespace
 
     auto constexpr Id_Reconnector_Color = 0;
 
+    auto constexpr Id_Detonator_State = 0;
     auto constexpr Id_Detonator_Countdown = 0;
-    auto constexpr Id_Detonator_Activated = 0;
 }
 
 namespace cereal
@@ -668,8 +668,8 @@ namespace cereal
     {
         DetonatorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Id_Detonator_State, data.state, defaultObject.state);
         loadSave<int>(task, auxiliaries, Id_Detonator_Countdown, data.countdown, defaultObject.countdown);
-        loadSave<bool>(task, auxiliaries, Id_Detonator_Activated, data.activated, defaultObject.activated);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DetonatorDescription)

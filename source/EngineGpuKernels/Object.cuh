@@ -138,8 +138,8 @@ struct ReconnectorFunction
 
 struct DetonatorFunction
 {
+    DetonatorState state;
     int countdown;
-    bool activated;
 };
 
 union CellFunctionData

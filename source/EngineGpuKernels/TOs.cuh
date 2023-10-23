@@ -122,8 +122,8 @@ struct ReconnectorTO
 
 struct DetonatorTO
 {
+    DetonatorState state;
     int countdown;
-    bool activated;
 };
 
 union CellFunctionTO

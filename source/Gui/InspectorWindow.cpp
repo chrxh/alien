@@ -702,6 +702,17 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
 void _InspectorWindow::processDetonatorContent(DetonatorDescription& detonator)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters()
+                .name("State")
+                .values({"Ready", "Activated", "Exploded"})
+                .textWidth(CellFunctionTextWidth)
+                .tooltip(Const::DetonatorStateTooltip),
+            detonator.state);
+
+        AlienImGui::InputInt(
+            AlienImGui::InputIntParameters().name("Countdown").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeDetonatorCountdownTooltip),
+            detonator.countdown);
         ImGui::TreePop();
     }
 }

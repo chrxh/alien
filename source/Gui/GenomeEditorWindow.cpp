@@ -739,8 +739,11 @@ void _GenomeEditorWindow::processNode(
                 reconnector.color);
         } break;
         case CellFunction_Detonator: {
-        } break;
-        case CellFunction_None: {
+            table.next();
+            auto& detonator = std::get<DetonatorGenomeDescription>(*cell.cellFunction);
+            AlienImGui::InputInt(
+                AlienImGui::InputIntParameters().name("Countdown").textWidth(ContentTextWidth).tooltip(Const::GenomeDetonatorCountdownTooltip),
+                detonator.countdown);
         } break;
         }
 

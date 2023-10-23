@@ -489,8 +489,8 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     case CellFunction_Detonator: {
         DetonatorDescription detonator;
+        detonator.state = cellTO.cellFunctionData.detonator.state;
         detonator.countdown = cellTO.cellFunctionData.detonator.countdown;
-        detonator.activated = cellTO.cellFunctionData.detonator.activated;
         result.cellFunction = detonator;
     } break;
     }
@@ -626,8 +626,8 @@ void DescriptionConverter::addCell(
     case CellFunction_Detonator: {
         auto const& detonatorDesc = std::get<DetonatorDescription>(*cellDesc.cellFunction);
         DetonatorTO detonatorTO;
+        detonatorTO.state = detonatorDesc.state;
         detonatorTO.countdown = detonatorDesc.countdown;
-        detonatorTO.activated = detonatorDesc.activated;
         cellTO.cellFunctionData.detonator = detonatorTO;
     } break;
     }
