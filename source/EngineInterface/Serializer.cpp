@@ -90,7 +90,6 @@ namespace
     auto constexpr Id_ReconnectorGenome_Color = 0;
 
     auto constexpr Id_DetonatorGenome_Countdown = 0;
-    auto constexpr Id_DetonatorGenome_Activated = 0;
 
 
     auto constexpr Id_Particle_Color = 0;
@@ -407,7 +406,6 @@ namespace cereal
         DetonatorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_DetonatorGenome_Countdown, data.countdown, defaultObject.countdown);
-        loadSave<bool>(task, auxiliaries, Id_DetonatorGenome_Activated, data.activated, defaultObject.activated);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DetonatorGenomeDescription)

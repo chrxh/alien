@@ -982,6 +982,32 @@ TEST_F(ConstructorTests, constructReconnectorCell)
     EXPECT_EQ(reconnectorDesc.color, actualReconnector.color);
 }
 
+TEST_F(ConstructorTests, constructDetonatorCell)
+{
+    auto detonatorDesc = DetonatorGenomeDescription().setCountDown(25);
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(detonatorDesc)}));
+
+    DataDescription data;
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
+                     .setMaxConnections(1)
+                     .setExecutionOrderNumber(0)
+                     .setCellFunction(ConstructorDescription().setGenome(genome)));
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(2, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, 1);
+
+    EXPECT_EQ(CellFunction_Detonator, actualConstructedCell.getCellFunctionType());
+
+    auto actualDetonator = std::get<DetonatorDescription>(*actualConstructedCell.cellFunction);
+    EXPECT_EQ(detonatorDesc.countdown, actualDetonator.countdown);
+}
+
 TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
 {
     auto constructedConstructor = ConstructorGenomeDescription().setMode(0).setGenome(createRandomGenome(MAX_GENOME_BYTES));
