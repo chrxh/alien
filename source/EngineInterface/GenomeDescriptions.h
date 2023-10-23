@@ -206,9 +206,14 @@ struct ReconnectorGenomeDescription
 struct DetonatorGenomeDescription
 {
     int countdown = 10;
-    bool activated = false;
 
     auto operator<=>(DetonatorGenomeDescription const&) const = default;
+
+    DetonatorGenomeDescription& setCountDown(int value)
+    {
+        countdown = value;
+        return *this;
+    }
 };
 
 using CellFunctionGenomeDescription = std::optional<std::variant<

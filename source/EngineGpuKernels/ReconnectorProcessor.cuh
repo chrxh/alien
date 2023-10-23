@@ -1,15 +1,14 @@
 #pragma once
 
 
-#include "EngineInterface/CellFunctionConstants.h"
-
+#include "CellConnectionProcessor.cuh"
 #include "CellFunctionProcessor.cuh"
 #include "ConstantMemory.cuh"
+#include "EngineInterface/CellFunctionConstants.h"
 #include "Object.cuh"
 #include "ParticleProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
-#include "CellConnectionProcessor.cuh"
 
 class ReconnectorProcessor
 {
@@ -47,8 +46,7 @@ __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& dat
     CellFunctionProcessor::setActivity(cell, activity);
 }
 
-__inline__ __device__ void
-ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
+__inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
 {
     Cell* closestCell = nullptr;
     float closestDistance = 0;
@@ -104,4 +102,3 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
         cell->releaseLock();
     }
 }
-
