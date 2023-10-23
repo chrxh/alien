@@ -139,6 +139,9 @@ struct SimulationParameters
     ColorVector<float> cellFunctionReconnectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
     float cellFunctionReconnectorActivityThreshold = 0.1f;
 
+    ColorVector<float> cellFunctionDetonatorRadius = {5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f};
+    float cellFunctionDetonatorActivityThreshold = 0.1f;
+
     //particle sources
     int numParticleSources = 0;
     RadiationSource particleSources[MAX_PARTICLE_SOURCES];
@@ -259,6 +262,9 @@ struct SimulationParameters
             if (cellFunctionReconnectorRadius[i] != other.cellFunctionReconnectorRadius[i]) {
                 return false;
             }
+            if (cellFunctionDetonatorRadius[i] != other.cellFunctionDetonatorRadius[i]) {
+                return false;
+            }
         }
         if (numParticleSources != other.numParticleSources) {
             return false;
@@ -318,7 +324,7 @@ struct SimulationParameters
             && cellFunctionConstructorCheckCompletenessForSelfReplication == other.cellFunctionConstructorCheckCompletenessForSelfReplication
             && cellFunctionAttackerDestroyCells == other.cellFunctionAttackerDestroyCells
             && cellFunctionReconnectorActivityThreshold == other.cellFunctionReconnectorActivityThreshold
-        ;
+            && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold;
     }
 
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }

@@ -1135,6 +1135,23 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
+         * Detonator
+         */
+        if (ImGui::TreeNodeEx("Cell function: Detonator", flags)) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Blast radius")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0.0f)
+                    .max(10.0f)
+                    .defaultValue(origSimParameters.cellFunctionDetonatorRadius)
+                    .tooltip("The radius of the detonation."),
+                simParameters.cellFunctionDetonatorRadius);
+            ImGui::TreePop();
+        }
+
+        /**
          * Cell color transition rules
          */
         if (ImGui::TreeNodeEx("Cell color transition rules", flags)) {
