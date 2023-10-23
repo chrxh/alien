@@ -153,7 +153,7 @@ namespace
     auto constexpr Id_Reconnector_Color = 0;
 
     auto constexpr Id_Detonator_State = 0;
-    auto constexpr Id_Detonator_Countdown = 0;
+    auto constexpr Id_Detonator_Countdown = 1;
 }
 
 namespace cereal
