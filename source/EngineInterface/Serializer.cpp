@@ -42,6 +42,57 @@
 
 namespace
 {
+    auto constexpr Id_GenomeHeader_Shape = 0;
+    auto constexpr Id_GenomeHeader_SingleConstruction = 1;
+    auto constexpr Id_GenomeHeader_SeparateConstruction = 2;
+    auto constexpr Id_GenomeHeader_AngleAlignment = 3;
+    auto constexpr Id_GenomeHeader_Stiffness = 4;
+    auto constexpr Id_GenomeHeader_ConnectionDistance = 5;
+    auto constexpr Id_GenomeHeader_NumRepetitions = 6;
+    auto constexpr Id_GenomeHeader_ConcatenationAngle1 = 7;
+    auto constexpr Id_GenomeHeader_ConcatenationAngle2 = 8;
+
+    auto constexpr Id_CellGenome_ReferenceAngle = 1;
+    auto constexpr Id_CellGenome_Energy = 7;
+    auto constexpr Id_CellGenome_Color = 2;
+    auto constexpr Id_CellGenome_NumRequiredAdditionalConnections = 9;
+    auto constexpr Id_CellGenome_ExecutionOrderNumber = 4;
+    auto constexpr Id_CellGenome_InputExecutionOrderNumber = 8;
+    auto constexpr Id_CellGenome_OutputBlocked = 6;
+
+    auto constexpr Id_TransmitterGenome_Mode = 0;
+
+    auto constexpr Id_ConstructorGenome_Mode = 0;
+    auto constexpr Id_ConstructorGenome_SingleConstruction = 1;
+    auto constexpr Id_ConstructorGenome_SeparateConstruction = 2;
+    auto constexpr Id_ConstructorGenome_AngleAlignment = 4;
+    auto constexpr Id_ConstructorGenome_Stiffness = 5;
+    auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 6;
+    auto constexpr Id_ConstructorGenome_GenomeHeader = 8;
+    auto constexpr Id_ConstructorGenome_ConstructionAngle1 = 9;
+    auto constexpr Id_ConstructorGenome_ConstructionAngle2 = 10;
+
+    auto constexpr Id_DefenderGenome_Mode = 0;
+
+    auto constexpr Id_MuscleGenome_Mode = 0;
+
+    auto constexpr Id_InjectorGenome_Mode = 0;
+
+    auto constexpr Id_AttackerGenome_Mode = 0;
+
+    auto constexpr Id_NerveGenome_PulseMode = 0;
+    auto constexpr Id_NerveGenome_AlternationMode = 1;
+
+    auto constexpr Id_SensorGenome_FixedAngle = 0;
+    auto constexpr Id_SensorGenome_MinDensity = 1;
+    auto constexpr Id_SensorGenome_Color = 2;
+
+    auto constexpr Id_ReconnectorGenome_Color = 0;
+
+    auto constexpr Id_DetonatorGenome_Countdown = 0;
+    auto constexpr Id_DetonatorGenome_Activated = 0;
+
+
     auto constexpr Id_Particle_Color = 0;
 
     auto constexpr Id_Cell_Stiffness = 0;
@@ -102,52 +153,8 @@ namespace
 
     auto constexpr Id_Reconnector_Color = 0;
 
-    auto constexpr Id_GenomeHeader_Shape = 0;
-    auto constexpr Id_GenomeHeader_SingleConstruction = 1;
-    auto constexpr Id_GenomeHeader_SeparateConstruction = 2;
-    auto constexpr Id_GenomeHeader_AngleAlignment = 3;
-    auto constexpr Id_GenomeHeader_Stiffness = 4;
-    auto constexpr Id_GenomeHeader_ConnectionDistance = 5;
-    auto constexpr Id_GenomeHeader_NumRepetitions = 6;
-    auto constexpr Id_GenomeHeader_ConcatenationAngle1 = 7;
-    auto constexpr Id_GenomeHeader_ConcatenationAngle2 = 8;
-
-    auto constexpr Id_CellGenome_ReferenceAngle = 1;
-    auto constexpr Id_CellGenome_Energy = 7;
-    auto constexpr Id_CellGenome_Color = 2;
-    auto constexpr Id_CellGenome_NumRequiredAdditionalConnections = 9;
-    auto constexpr Id_CellGenome_ExecutionOrderNumber = 4;
-    auto constexpr Id_CellGenome_InputExecutionOrderNumber = 8;
-    auto constexpr Id_CellGenome_OutputBlocked = 6;
-
-    auto constexpr Id_TransmitterGenome_Mode = 0;
-
-    auto constexpr Id_ConstructorGenome_Mode = 0;
-    auto constexpr Id_ConstructorGenome_SingleConstruction = 1;
-    auto constexpr Id_ConstructorGenome_SeparateConstruction = 2;
-    auto constexpr Id_ConstructorGenome_AngleAlignment = 4;
-    auto constexpr Id_ConstructorGenome_Stiffness = 5;
-    auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 6;
-    auto constexpr Id_ConstructorGenome_GenomeHeader = 8;
-    auto constexpr Id_ConstructorGenome_ConstructionAngle1 = 9;
-    auto constexpr Id_ConstructorGenome_ConstructionAngle2 = 10;
-
-    auto constexpr Id_DefenderGenome_Mode = 0;
-
-    auto constexpr Id_MuscleGenome_Mode = 0;
-
-    auto constexpr Id_InjectorGenome_Mode = 0;
-
-    auto constexpr Id_AttackerGenome_Mode = 0;
-
-    auto constexpr Id_NerveGenome_PulseMode = 0;
-    auto constexpr Id_NerveGenome_AlternationMode = 1;
-
-    auto constexpr Id_SensorGenome_FixedAngle = 0;
-    auto constexpr Id_SensorGenome_MinDensity = 1;
-    auto constexpr Id_SensorGenome_Color = 2;
-
-    auto constexpr Id_ReconnectorGenome_Color = 0;
+    auto constexpr Id_Detonator_Countdown = 0;
+    auto constexpr Id_Detonator_Activated = 0;
 }
 
 namespace cereal
@@ -397,8 +404,10 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetonatorGenomeDescription& data)
     {
-        //DetonatorGenomeDescription defaultObject;
+        DetonatorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Id_DetonatorGenome_Countdown, data.countdown, defaultObject.countdown);
+        loadSave<bool>(task, auxiliaries, Id_DetonatorGenome_Activated, data.activated, defaultObject.activated);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DetonatorGenomeDescription)
@@ -659,8 +668,10 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetonatorDescription& data)
     {
-        //ReconnectorDescription defaultObject;
+        DetonatorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Id_Detonator_Countdown, data.countdown, defaultObject.countdown);
+        loadSave<bool>(task, auxiliaries, Id_Detonator_Activated, data.activated, defaultObject.activated);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DetonatorDescription)

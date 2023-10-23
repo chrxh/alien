@@ -239,7 +239,8 @@ std::vector<uint8_t> GenomeDescriptionConverter::convertDescriptionToBytes(Genom
             writeByte(result, reconnector.color);
         } break;
         case CellFunction_Detonator: {
-            //auto const& detonator = std::get<DetonatorGenomeDescription>(*cell.cellFunction);
+            auto const& detonator = std::get<DetonatorGenomeDescription>(*cell.cellFunction);
+            writeWord(result, detonator.countdown);
         } break;
         }
     }
@@ -366,6 +367,7 @@ namespace
             } break;
             case CellFunction_Detonator: {
                 DetonatorGenomeDescription detonator;
+                detonator.countdown = readWord(data, bytePosition);
                 cell.cellFunction = detonator;
             } break;
             }

@@ -680,6 +680,8 @@ ConstructorProcessor::constructCellIntern(
         result->cellFunctionData.reconnector.color = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % MAX_COLORS;
     } break;
     case CellFunction_Detonator: {
+        result->cellFunctionData.detonator.countdown = GenomeDecoder::readWord(constructor, genomeCurrentBytePosition);
+        result->cellFunctionData.detonator.activated = false;
     } break;
     }
 
