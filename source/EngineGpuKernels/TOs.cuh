@@ -120,6 +120,10 @@ struct ReconnectorTO
     int color;
 };
 
+struct DetonatorTO
+{
+};
+
 union CellFunctionTO
 {
     NeuronTO neuron;
@@ -132,6 +136,7 @@ union CellFunctionTO
     MuscleTO muscle;
     DefenderTO defender;
     ReconnectorTO reconnector;
+    DetonatorTO detonator;
 };
 
 struct CellTO

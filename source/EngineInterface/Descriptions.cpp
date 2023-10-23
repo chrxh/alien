@@ -51,6 +51,9 @@ CellFunction CellDescription::getCellFunctionType() const
     if (std::holds_alternative<ReconnectorDescription>(*cellFunction)) {
         return CellFunction_Reconnector;
     }
+    if (std::holds_alternative<DetonatorDescription>(*cellFunction)) {
+        return CellFunction_Detonator;
+    }
     return CellFunction_None;
 }
 

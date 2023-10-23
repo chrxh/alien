@@ -189,6 +189,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     case CellFunction_Reconnector: {
         cell->cellFunctionData.reconnector.color = cellTO.cellFunctionData.reconnector.color;
     } break;
+    case CellFunction_Detonator: {
+    } break;
     }
 }
 
@@ -340,6 +342,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
         } break;
         case CellFunction_Reconnector: {
             cell->cellFunctionData.reconnector.color = 0;
+        } break;
+        case CellFunction_Detonator: {
         } break;
         }
 

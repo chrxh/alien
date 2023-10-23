@@ -81,6 +81,8 @@ namespace Const
         " Input channel #0: value > threshold triggers creation of a bond to a cell in the vicinity, value < -threshold triggers destruction of a bond\n\n" ICON_FA_CHEVRON_RIGHT
         " Output channel #0: 0 (no connection created/removed) or 1 (connection created/removed)";
 
+    std::string const DetonatorTooltip = "";
+
     std::string const CellFunctionTooltip =
         "Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
         "take action. All cell functions have in common that they obtain the input from connected cells whose execution number matches the input "
@@ -325,6 +327,8 @@ namespace Const
             return Const::DefenderTooltip;
         case CellFunction_Reconnector:
             return Const::ReconnectorTooltip;
+        case CellFunction_Detonator:
+            return Const::DetonatorTooltip;
         default:
             return Const::CellFunctionTooltip;
         }

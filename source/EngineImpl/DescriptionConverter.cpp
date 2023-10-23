@@ -301,6 +301,8 @@ void DescriptionConverter::addAdditionalDataSizeForCell(CellDescription const& c
         break;
     case CellFunction_Reconnector:
         break;
+    case CellFunction_Detonator:
+        break;
     }
 }    
 
@@ -485,6 +487,10 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         reconnector.color = cellTO.cellFunctionData.reconnector.color;
         result.cellFunction = reconnector;
     } break;
+    case CellFunction_Detonator: {
+        DetonatorDescription detonator;
+        result.cellFunction = detonator;
+    } break;
     }
 
     for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -614,6 +620,11 @@ void DescriptionConverter::addCell(
         ReconnectorTO reconnectorTO;
         reconnectorTO.color = reconnectorDesc.color;
         cellTO.cellFunctionData.reconnector = reconnectorTO;
+    } break;
+    case CellFunction_Detonator: {
+        //auto const& detonatorDesc = std::get<DetonatorDescription>(*cellDesc.cellFunction);
+        DetonatorTO detonatorTO;
+        cellTO.cellFunctionData.detonator = detonatorTO;
     } break;
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {

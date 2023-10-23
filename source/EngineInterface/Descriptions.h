@@ -292,6 +292,11 @@ struct ReconnectorDescription
     }
 };
 
+struct DetonatorDescription
+{
+    auto operator<=>(DetonatorDescription const&) const = default;
+};
+
 using CellFunctionDescription = std::optional<std::variant<
     NeuronDescription,
     TransmitterDescription,
@@ -302,7 +307,8 @@ using CellFunctionDescription = std::optional<std::variant<
     InjectorDescription,
     MuscleDescription,
     DefenderDescription,
-    ReconnectorDescription>>;
+    ReconnectorDescription,
+    DetonatorDescription>>;
 
 struct CellDescription
 {

@@ -442,6 +442,9 @@ namespace
         case CellFunction_Reconnector: {
             cell.cellFunction = ReconnectorGenomeDescription();
         } break;
+        case CellFunction_Detonator: {
+            cell.cellFunction = DetonatorGenomeDescription();
+        } break;
         case CellFunction_None: {
             cell.cellFunction.reset();
         } break;
@@ -734,6 +737,8 @@ void _GenomeEditorWindow::processNode(
             AlienImGui::ComboColor(
                 AlienImGui::ComboColorParameters().name("Target color").textWidth(ContentTextWidth).tooltip(Const::GenomeReconnectorTargetColorTooltip),
                 reconnector.color);
+        } break;
+        case CellFunction_Detonator: {
         } break;
         case CellFunction_None: {
         } break;

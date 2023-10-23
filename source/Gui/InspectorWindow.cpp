@@ -264,6 +264,9 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                     case CellFunction_Reconnector: {
                         cell.cellFunction = ReconnectorDescription();
                     } break;
+                    case CellFunction_Detonator: {
+                        cell.cellFunction = DetonatorDescription();
+                    } break;
                     case CellFunction_None: {
                         cell.cellFunction.reset();
                     } break;
@@ -347,6 +350,9 @@ void _InspectorWindow::processCellFunctionPropertiesTab(CellDescription& cell)
             } break;
             case CellFunction_Reconnector: {
                 processReconnectorContent(std::get<ReconnectorDescription>(*cell.cellFunction));
+            } break;
+            case CellFunction_Detonator: {
+                processDetonatorContent(std::get<DetonatorDescription>(*cell.cellFunction));
             } break;
             }
         }
@@ -689,6 +695,13 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
         AlienImGui::ComboColor(
             AlienImGui::ComboColorParameters().name("Target color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeReconnectorTargetColorTooltip),
             reconnector.color);
+        ImGui::TreePop();
+    }
+}
+
+void _InspectorWindow::processDetonatorContent(DetonatorDescription& detonator)
+{
+    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         ImGui::TreePop();
     }
 }
