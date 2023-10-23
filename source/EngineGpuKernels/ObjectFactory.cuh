@@ -190,6 +190,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.reconnector.color = cellTO.cellFunctionData.reconnector.color;
     } break;
     case CellFunction_Detonator: {
+        cell->cellFunctionData.detonator.countdown = cellTO.cellFunctionData.detonator.countdown;
+        cell->cellFunctionData.detonator.activated = cellTO.cellFunctionData.detonator.activated;
     } break;
     }
 }
@@ -344,6 +346,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.reconnector.color = 0;
         } break;
         case CellFunction_Detonator: {
+            cell->cellFunctionData.detonator.countdown = 10;
+            cell->cellFunctionData.detonator.activated = false;
         } break;
         }
 

@@ -205,6 +205,9 @@ struct ReconnectorGenomeDescription
 
 struct DetonatorGenomeDescription
 {
+    int countdown = 10;
+    bool activated = false;
+
     auto operator<=>(DetonatorGenomeDescription const&) const = default;
 };
 
