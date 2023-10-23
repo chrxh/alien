@@ -121,7 +121,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
         if (lookupResult != 0xffffffffffffffff) {
             activity.channels[0] = 1;                                                     //something found
             activity.channels[1] = static_cast<float>((lookupResult >> 40) & 0xff) / 256;  //density
-            activity.channels[2] = static_cast<float>(lookupResult >> 48) / 256;  //distance
+            activity.channels[2] = 1.0f - min(1.0f, static_cast<float>(lookupResult >> 48) / 256);  //distance: 1 = close, 0 = far away
             activity.channels[3] = convertDataToAngle(static_cast<int8_t>((lookupResult >> 32) & 0xff)) / 360.0f;  //angle: between -0.5 and 0.5
             cell->cellFunctionData.sensor.memoryChannel1 = activity.channels[1];
             cell->cellFunctionData.sensor.memoryChannel2 = activity.channels[2];
