@@ -223,10 +223,11 @@ void _SimulationParametersWindow::processBase(
                     .name("Cell coloring")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellColorization)
-                    .values({"None", "Standard cell colors", "Mutants"})
+                    .values({"None", "Standard cell colors", "Mutants", "Cell state"})
                     .tooltip("Here one can set how the cells are to be colored during rendering. In addition to coloring according to the 7 cell colors, there "
-                             "is also the option of coloring mutations. Most of the mutations (except changes in the neuronal networks and cell properties) in "
-                             "the genome of a creature are represented by a different color."),
+                             "is also the option of\n\n" ICON_FA_CHEVRON_RIGHT
+                             " Mutant coloring: Different mutants are represented by different colors (except changes in the neuronal networks and cell "
+                             "properties).\n\n" ICON_FA_CHEVRON_RIGHT " Cell state: green = under construction, blue = ready, red = dying"),
                 simParameters.cellColorization);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()

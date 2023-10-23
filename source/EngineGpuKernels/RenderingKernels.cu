@@ -116,6 +116,22 @@ namespace
             auto rgb = convertHSVtoRGB(h, s, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
+        if (cudaSimulationParameters.cellColorization == CellColorization_LivingState) {
+            switch (cell->livingState) {
+            case LivingState_Ready:
+                cellColor = 0x0000ff;
+                break;
+            case LivingState_UnderConstruction:
+                cellColor = 0x00ff00;
+                break;
+            case LivingState_Activating:
+                cellColor = 0xffffff;
+                break;
+            case LivingState_Dying:
+                cellColor = 0xff0000;
+                break;
+            }
+        }
 
         float factor = min(300.0f, cell->energy) / 320.0f;
         if (1 == selected) {
