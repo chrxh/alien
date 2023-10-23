@@ -77,8 +77,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setSingleConstruction(true)).setCells({CellGenomeDescription()}));
 
-    auto constructor = ConstructorDescription().setGenome(genome);
-    constructor.setGenomeCurrentNodeIndex(constructor.genome.size());
+    auto constructor = ConstructorDescription().setGenome(genome).setIsConstructionBuilt(true);
 
     data.addCell(
         CellDescription()
@@ -96,7 +95,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
     EXPECT_EQ(0, actualHostCell.connections.size());
-    EXPECT_EQ(actualConstructor.genome.size(), actualConstructor.genomeCurrentNodeIndex);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
 }
 
@@ -695,6 +694,44 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
 
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.x));
     EXPECT_TRUE(approxCompare(10.0f + 1.0f, actualConstructedCell.pos.y));
+}
+
+TEST_F(ConstructorTests, constructFirstCellIfNoLastConstructedCellFound)
+{
+    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()
+                                                                  .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
+                                                                  .setCells({CellGenomeDescription(), CellGenomeDescription(), CellGenomeDescription()}));
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(1).setGenomeCurrentRepetition(1)),
+        CellDescription()
+            .setId(2)
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
+            .setEnergy(100)
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(3, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
+    EXPECT_EQ(1, actualConstructor.genomeCurrentNodeIndex);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentRepetition);
 }
 
 TEST_F(ConstructorTests, constructNeuronCell)
