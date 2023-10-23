@@ -395,6 +395,15 @@ namespace cereal
     SPLIT_SERIALIZATION(ReconnectorGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetonatorGenomeDescription& data)
+    {
+        //DetonatorGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetonatorGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellGenomeDescription& data)
     {
         CellGenomeDescription defaultObject;
@@ -646,6 +655,15 @@ namespace cereal
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ReconnectorDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetonatorDescription& data)
+    {
+        //ReconnectorDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetonatorDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellDescription& data)

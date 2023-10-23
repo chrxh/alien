@@ -47,6 +47,7 @@ private:
     void processMuscleContent(MuscleDescription& muscle);
     void processSensorContent(SensorDescription& sensor);
     void processReconnectorContent(ReconnectorDescription& reconnector);
+    void processDetonatorContent(DetonatorDescription& detonator);
 
     void processParticle(ParticleDescription particle);
 

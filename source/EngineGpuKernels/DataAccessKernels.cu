@@ -140,6 +140,8 @@ namespace
         case CellFunction_Reconnector: {
             cellTO.cellFunctionData.reconnector.color = cell->cellFunctionData.reconnector.color;
         } break;
+        case CellFunction_Detonator: {
+        } break;
         }
     }
 

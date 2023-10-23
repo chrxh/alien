@@ -136,6 +136,10 @@ struct ReconnectorFunction
     int color;
 };
 
+struct DetonatorFunction
+{
+};
+
 union CellFunctionData
 {
     NeuronFunction neuron;
@@ -148,6 +152,7 @@ union CellFunctionData
     MuscleFunction muscle;
     DefenderFunction defender;
     ReconnectorFunction reconnector;
+    DetonatorFunction detonator;
 };
 
 struct Cell

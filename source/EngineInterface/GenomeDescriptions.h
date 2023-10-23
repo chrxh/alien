@@ -203,6 +203,11 @@ struct ReconnectorGenomeDescription
     }
 };
 
+struct DetonatorGenomeDescription
+{
+    auto operator<=>(DetonatorGenomeDescription const&) const = default;
+};
+
 using CellFunctionGenomeDescription = std::optional<std::variant<
     NeuronGenomeDescription,
     TransmitterGenomeDescription,
@@ -213,7 +218,8 @@ using CellFunctionGenomeDescription = std::optional<std::variant<
     InjectorGenomeDescription,
     MuscleGenomeDescription,
     DefenderGenomeDescription,
-    ReconnectorGenomeDescription>>;
+    ReconnectorGenomeDescription,
+    DetonatorGenomeDescription>>;
 
 struct CellGenomeDescription
 {
@@ -377,6 +383,9 @@ struct CellGenomeDescription
         }
         if (std::holds_alternative<ReconnectorGenomeDescription>(*cellFunction)) {
             return CellFunction_Reconnector;
+        }
+        if (std::holds_alternative<DetonatorGenomeDescription>(*cellFunction)) {
+            return CellFunction_Detonator;
         }
         return CellFunction_None;
     }
