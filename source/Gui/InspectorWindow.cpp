@@ -425,14 +425,6 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             if (ImGui::TreeNodeEx("Properties (principal genome part)", TreeNodeFlags)) {
 
                 auto genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome);
-                auto numNodes = toInt(genomeDesc.cells.size());
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters()
-                        .name("Number of cells")
-                        .textWidth(GenomeTabTextWidth)
-                        .readOnly(true)
-                        .tooltip(Const::GenomeNumCellsTooltip),
-                    numNodes);
                 auto numRepetitions = genomeDesc.header.numRepetitions;
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters()
@@ -443,13 +435,25 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                         .tooltip(Const::GenomeRepetitionsPerConstructionTooltip),
                     numRepetitions);
 
+                auto numNodes = toInt(genomeDesc.cells.size());
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters()
+                        .name("Number of cells")
+                        .textWidth(GenomeTabTextWidth)
+                        .readOnly(true)
+                        .tooltip(Const::GenomeNumCellsTooltip),
+                    numNodes);
+
                 if constexpr (std::is_same<Description, ConstructorDescription>()) {
+                    AlienImGui::InputInt(
+                        AlienImGui::InputIntParameters()
+                            .name("Current repetition index")
+                            .textWidth(GenomeTabTextWidth)
+                            .tooltip(Const::GenomeCurrentRepetitionTooltip),
+                        desc.genomeCurrentRepetition);
                     AlienImGui::InputInt(
                         AlienImGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
                         desc.genomeCurrentNodeIndex);
-                    AlienImGui::InputInt(
-                        AlienImGui::InputIntParameters().name("Current repetition index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentRepetitionTooltip),
-                        desc.genomeCurrentRepetition);
                 }
                 ImGui::TreePop();
             }
