@@ -456,7 +456,7 @@ void DescriptionHelper::randomizeGenomeColors(ClusteredDataDescription& data, st
 void DescriptionHelper::randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy)
 {
     for (auto& cluster : data.clusters) {
-        auto energy = NumberGenerator::getInstance().getRandomReal(minEnergy, maxEnergy);
+        auto energy = NumberGenerator::getInstance().getRandomReal(toDouble(minEnergy), toDouble(maxEnergy));
         for (auto& cell : cluster.cells) {
             cell.energy = energy;
         }
@@ -466,9 +466,21 @@ void DescriptionHelper::randomizeEnergies(ClusteredDataDescription& data, float 
 void DescriptionHelper::randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge)
 {
     for (auto& cluster : data.clusters) {
-        auto age = NumberGenerator::getInstance().getRandomReal(minAge, maxAge);
+        auto age = NumberGenerator::getInstance().getRandomReal(toDouble(minAge), toDouble(maxAge));
         for (auto& cell : cluster.cells) {
             cell.age = age;
+        }
+    }
+}
+
+void DescriptionHelper::randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue)
+{
+    for (auto& cluster : data.clusters) {
+        auto countdown = NumberGenerator::getInstance().getRandomReal(toDouble(minValue), toDouble(maxValue));
+        for (auto& cell : cluster.cells) {
+            if (cell.getCellFunctionType() == CellFunction_Detonator) {
+                std::get<DetonatorDescription>(*cell.cellFunction).countdown = countdown;
+            }
         }
     }
 }

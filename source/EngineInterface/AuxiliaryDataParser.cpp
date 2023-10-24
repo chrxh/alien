@@ -133,6 +133,7 @@ namespace
             defaultParameters.zoomLevelNeuronalActivity,
             "simulation parameters.zoom level.neural activity",
             parserTask);
+        encodeDecodeProperty(tree, parameters.showDetonations, defaultParameters.showDetonations, "simulation parameters.show detonations", parserTask);
         encodeDecodeProperty(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);
 
         encodeDecodeProperty(tree, parameters.motionType, defaultParameters.motionType, "simulation parameters.motion.type", parserTask);

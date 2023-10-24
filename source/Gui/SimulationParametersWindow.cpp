@@ -210,7 +210,7 @@ void _SimulationParametersWindow::processBase(
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
 
         /**
-         * Colors
+         * Coloring
          */
         if (ImGui::TreeNodeEx("Visualization", flags)) {
             AlienImGui::ColorButtonWithPicker(
@@ -239,6 +239,13 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(&origSimParameters.zoomLevelNeuronalActivity)
                     .tooltip("The zoom level from which the neuronal activities become visible."),
                 &simParameters.zoomLevelNeuronalActivity);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Show detonations")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.showDetonations)
+                    .tooltip("If activated, the explosions of detonator cells will be visualized."),
+                simParameters.showDetonations);
             ImGui::TreePop();
         }
 
