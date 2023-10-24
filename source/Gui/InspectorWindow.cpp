@@ -791,5 +791,9 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
         nerve.pulseMode = std::max(0, nerve.pulseMode);
         nerve.alternationMode = std::max(0, nerve.alternationMode);
     } break;
+    case CellFunction_Detonator: {
+        auto& detonator = std::get<DetonatorDescription>(*cell.cellFunction);
+        detonator.countdown = std::min(65535, std::max(0, detonator.countdown));
+    } break;
     }
 }

@@ -744,6 +744,7 @@ void _GenomeEditorWindow::processNode(
             AlienImGui::InputInt(
                 AlienImGui::InputIntParameters().name("Countdown").textWidth(ContentTextWidth).tooltip(Const::GenomeDetonatorCountdownTooltip),
                 detonator.countdown);
+            detonator.countdown = std::min(65535, std::max(0, detonator.countdown));
         } break;
         }
 
