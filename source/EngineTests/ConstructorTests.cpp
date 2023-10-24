@@ -734,6 +734,45 @@ TEST_F(ConstructorTests, constructFirstCellIfNoLastConstructedCellFound)
     EXPECT_EQ(0, actualConstructor.genomeCurrentRepetition);
 }
 
+TEST_F(ConstructorTests, constructFirstCellIfNoLastConstructedCellHasWrongConnections)
+{
+    auto genome =
+        GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()
+                                                                  .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
+                                                                  .setCells({CellGenomeDescription(), CellGenomeDescription(), CellGenomeDescription()}));
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(1).setGenomeCurrentRepetition(1)),
+        CellDescription()
+            .setId(2)
+            .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
+            .setEnergy(100)
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setLivingState(LivingState_UnderConstruction),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(3, actualData.cells.size());
+    auto actualHostCell = getCell(actualData, 1);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
+    EXPECT_EQ(1, actualConstructor.genomeCurrentNodeIndex);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentRepetition);
+}
+
 TEST_F(ConstructorTests, constructNeuronCell)
 {
     auto neuron = NeuronGenomeDescription();

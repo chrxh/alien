@@ -200,12 +200,18 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 
 
     ConstructionData result;
+    result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
     result.lastConstructionCell = getLastConstructedCell(cell);
     if (!result.lastConstructionCell) {
         constructor.genomeCurrentNodeIndex = 0;
         constructor.genomeCurrentRepetition = 0;
+    } else if (result.lastConstructionCell->numConnections == 1) {
+        int numConstructedCells = constructor.genomeCurrentRepetition * result.genomeHeader.numRepetitions + constructor.genomeCurrentNodeIndex;
+        if (numConstructedCells > 1) {
+            constructor.genomeCurrentNodeIndex = 0;
+            constructor.genomeCurrentRepetition = 0;
+        }
     }
-    result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
     result.genomeCurrentBytePosition = GenomeDecoder::getNodeAddress(constructor.genome, constructor.genomeSize, constructor.genomeCurrentNodeIndex);
     result.isLastNode = GenomeDecoder::isLastNode(constructor);
     result.isLastNodeOfLastRepetition = result.isLastNode && GenomeDecoder::isLastRepetition(constructor);
