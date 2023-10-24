@@ -66,31 +66,28 @@ CellConnectionProcessor::scheduleAddConnectionPair(SimulationData& data, Cell* c
 
 __inline__ __device__ void CellConnectionProcessor::scheduleDeleteAllConnections(SimulationData& data, Cell* cell)
 {
+    auto index = data.structuralOperations.tryGetEntries(cell->numConnections * 2);
+    if (index == -1) {
+        return;
+    }
+
     for (int i = 0; i < cell->numConnections; ++i) {
         auto const& connectedCell = cell->connections[i].cell;
         {
-            StructuralOperation operation;
+            StructuralOperation& operation = data.structuralOperations.at(index);
             operation.type = StructuralOperation::Type::DelConnection;
             operation.data.delConnection.connectedCell = cell;
             operation.nextOperationIndex = -1;
-            auto operationIndex = data.structuralOperations.tryAddEntry(operation);
-            if (operationIndex != -1) {
-                scheduleOperationOnCell(data, connectedCell, operationIndex);
-            } else {
-                CUDA_THROW_NOT_IMPLEMENTED();
-            }
+            scheduleOperationOnCell(data, connectedCell, index);
+            ++index;
         }
         {
-            StructuralOperation operation;
+            StructuralOperation& operation = data.structuralOperations.at(index);
             operation.type = StructuralOperation::Type::DelConnection;
             operation.data.delConnection.connectedCell = connectedCell;
             operation.nextOperationIndex = -1;
-            auto operationIndex = data.structuralOperations.tryAddEntry(operation);
-            if (operationIndex != -1) {
-                scheduleOperationOnCell(data, cell, operationIndex);
-            } else {
-                CUDA_THROW_NOT_IMPLEMENTED();
-            }
+            scheduleOperationOnCell(data, cell, index);
+            ++index;
         }
     }
 }
