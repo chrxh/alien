@@ -287,7 +287,7 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
             }
 
             //draw detonation
-            if (cell->cellFunction == CellFunction_Detonator) {
+            if (cudaSimulationParameters.showDetonations && cell->cellFunction == CellFunction_Detonator) {
                 auto const& detonator = cell->cellFunctionData.detonator;
                 if (detonator.state == DetonatorState_Activated && detonator.countdown < 2) {
                     drawCircle(

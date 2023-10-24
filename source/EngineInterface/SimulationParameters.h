@@ -27,6 +27,7 @@ struct SimulationParameters
     uint32_t backgroundColor = 0x1b0000;
     CellColorization cellColorization = CellColorization_CellColor;
     float zoomLevelNeuronalActivity = 2.0f;
+    bool showDetonations = true;
 
     float timestepSize = 1.0f;
     MotionType motionType = MotionType_Fluid;
@@ -300,7 +301,7 @@ struct SimulationParameters
         }
 
         return backgroundColor == other.backgroundColor && cellColorization == other.cellColorization
-            && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity
+            && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity && showDetonations == other.showDetonations
             && baseValues == other.baseValues
             && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance
             && cellMinDistance == other.cellMinDistance

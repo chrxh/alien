@@ -90,6 +90,16 @@ void _MassOperationsDialog::process()
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Maximum age").textWidth(RightColumnWidth), _maxAge);
         ImGui::EndDisabled();
 
+        AlienImGui::Group("Detonation countdown");
+        ImGui::Checkbox("##countdown", &_randomizeCountdowns);
+        ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
+        posX = ImGui::GetCursorPos().x;
+        ImGui::BeginDisabled(!_randomizeCountdowns);
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Minimum value").textWidth(RightColumnWidth), _minCountdown);
+        ImGui::SetCursorPosX(posX);
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Maximum value").textWidth(RightColumnWidth), _maxCountdown);
+        ImGui::EndDisabled();
+
         AlienImGui::Group("Options");
         ImGui::Checkbox("##restrictToSelectedClusters", &_restrictToSelectedClusters);
         ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
@@ -169,6 +179,9 @@ void _MassOperationsDialog::onExecute()
     if (_randomizeAges) {
         DescriptionHelper::randomizeAges(content, _minAge, _maxAge);
     }
+    if (_randomizeCountdowns) {
+        DescriptionHelper::randomizeCountdowns(content, _minCountdown, _maxCountdown);
+    }
 
     if (_restrictToSelectedClusters) {
         _simController->removeSelectedObjects(true);
@@ -199,15 +212,28 @@ bool _MassOperationsDialog::isOkEnabled()
     if (_randomizeAges) {
         result = true;
     }
+    if (_randomizeCountdowns) {
+        result = true;
+    }
     return result;
 }
 
 void _MassOperationsDialog::validationAndCorrection()
 {
+    _minAge = std::max(0, _minAge);
+    _maxAge = std::max(0, _maxAge);
+    _minEnergy = std::max(0.0f, _minEnergy);
+    _maxEnergy = std::max(0.0f, _maxEnergy);
+    _minCountdown = std::max(0, _minCountdown);
+    _maxCountdown = std::max(0, _maxCountdown);
+
     if (_minAge > _maxAge) {
         _maxAge = _minAge;
     }
     if (_minEnergy > _maxEnergy) {
         _maxEnergy = _minEnergy;
+    }
+    if (_minCountdown> _maxCountdown) {
+        _maxCountdown = _minCountdown;
     }
 }
