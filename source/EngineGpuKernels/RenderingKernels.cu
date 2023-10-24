@@ -286,6 +286,20 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, radius, shadedCells);
             }
 
+            //draw detonation
+            if (cell->cellFunction == CellFunction_Detonator) {
+                auto const& detonator = cell->cellFunctionData.detonator;
+                if (detonator.state == DetonatorState_Activated && detonator.countdown < 2) {
+                    drawCircle(
+                        imageData,
+                        imageSize,
+                        cellImagePos,
+                        float3{0.3f, 0.3f, 0.0f},
+                        2 * cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color] / (1.0f + toFloat(detonator.countdown)) * zoom,
+                        shadedCells);
+                }
+            }
+
             //draw connections
             if (zoom >= ZoomLevelForConnections) {
                 for (int i = 0; i < cell->numConnections; ++i) {
