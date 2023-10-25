@@ -46,7 +46,7 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
         if (detonator.countdown == -1) {
             detonator.countdown = 0;
             data.cellMap.executeForEach(
-                cell->pos, cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color], cell->detached, [&](auto const& otherCell) {
+                cell->pos, cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
                     if (otherCell->barrier) {
                         return;
                     }
@@ -55,6 +55,10 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
                     if (lengthSquared > NEAR_ZERO) {
                         auto force = delta / lengthSquared * cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color] * 2;
                         otherCell->vel += force;
+                    }
+                    if (otherCell->cellFunction == CellFunction_Detonator && otherCell->cellFunctionData.detonator.state != DetonatorState_Exploded) {
+                        otherCell->cellFunctionData.detonator.state = DetonatorState_Activated;
+                        otherCell->cellFunctionData.detonator.countdown = 1;
                     }
                 });
             detonator.state = DetonatorState_Exploded;
