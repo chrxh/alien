@@ -141,7 +141,7 @@ struct SimulationParameters
     ColorVector<float> cellFunctionReconnectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
     float cellFunctionReconnectorActivityThreshold = 0.1f;
 
-    ColorVector<float> cellFunctionDetonatorRadius = {5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f};
+    ColorVector<float> cellFunctionDetonatorRadius = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
     float cellFunctionDetonatorActivityThreshold = 0.1f;
 
     //particle sources

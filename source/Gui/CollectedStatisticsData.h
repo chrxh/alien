@@ -40,6 +40,7 @@ struct DataPointCollection
     DataPoint numSensorMatches;
     DataPoint numReconnectorCreated;
     DataPoint numReconnectorRemoved;
+    DataPoint numDetonations;
 
     DataPointCollection operator+(DataPointCollection const& other) const;
     DataPointCollection operator/(double divisor) const;

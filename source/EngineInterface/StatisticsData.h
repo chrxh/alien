@@ -30,6 +30,7 @@ struct AccumulatedStatistics
     ColorVector<uint64_t> numSensorMatches = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numReconnectorCreated = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numReconnectorRemoved = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numDetonations = {0, 0, 0, 0, 0, 0, 0};
 };
 
 struct TimelineStatistics

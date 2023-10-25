@@ -262,6 +262,12 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Reconnector deletions");
 
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::numDetonations, 6);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Detonations");
+
         ImPlot::PopColormap();
         ImGui::EndTable();
     }
