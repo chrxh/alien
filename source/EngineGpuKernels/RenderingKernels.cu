@@ -64,7 +64,7 @@ namespace
             g_ = 0;
             b_ = c;
         }
-        if (300 <= h && h < 360) {
+        if (300 <= h && h <= 360) {
             r_ = c;
             g_ = 0;
             b_ = x;
@@ -131,6 +131,11 @@ namespace
                 cellColor = 0xff0000;
                 break;
             }
+        }
+
+        if (cudaSimulationParameters.cellColorization == CellColorization_GenomeSize) {
+            auto rgb = convertHSVtoRGB(min(360, 240 + cell->genomeNumNodes),  1.0f, 1.0f);
+            cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
 
         float factor = min(300.0f, cell->energy) / 320.0f;
@@ -260,7 +265,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
     }
 }
 
-__global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
+__global__ void cudaDrawCells(uint64_t timestep, int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
 {
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -290,12 +295,15 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
             if (cudaSimulationParameters.showDetonations && cell->cellFunction == CellFunction_Detonator) {
                 auto const& detonator = cell->cellFunctionData.detonator;
                 if (detonator.state == DetonatorState_Activated && detonator.countdown < 2) {
+                    auto radius = toFloat((timestep - cell->executionOrderNumber + 5) % 6 + (6 - detonator.countdown * 6));
+                    radius *= radius;
+                    radius *=  cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color] * zoom / 36;
                     drawCircle(
                         imageData,
                         imageSize,
                         cellImagePos,
                         float3{0.3f, 0.3f, 0.0f},
-                        2 * cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color] / (1.0f + toFloat(detonator.countdown)) * zoom,
+                        radius,
                         shadedCells);
                 }
             }

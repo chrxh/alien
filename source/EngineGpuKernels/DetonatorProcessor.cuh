@@ -40,10 +40,11 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
         detonator.state = DetonatorState_Activated;
     }
     if (detonator.state == DetonatorState_Activated) {
-        if (detonator.countdown > 0) {
+        if (detonator.countdown >= 0) {
             --detonator.countdown;
         }
-        if (detonator.countdown == 0) {
+        if (detonator.countdown == -1) {
+            detonator.countdown = 0;
             data.cellMap.executeForEach(
                 cell->pos, cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color], cell->detached, [&](auto const& otherCell) {
                     if (otherCell->barrier) {
