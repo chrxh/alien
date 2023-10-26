@@ -298,6 +298,12 @@ struct DetonatorDescription
     int countdown = 10;
 
     auto operator<=>(DetonatorDescription const&) const = default;
+
+    DetonatorDescription& setCountDown(int value)
+    {
+        countdown = value;
+        return *this;
+    }
 };
 
 using CellFunctionDescription = std::optional<std::variant<

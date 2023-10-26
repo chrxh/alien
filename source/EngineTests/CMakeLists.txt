@@ -6,6 +6,7 @@ PUBLIC
     DataTransferTests.cpp
     DefenderTests.cpp
     DescriptionHelperTests.cpp
+    DetonatorTests.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
