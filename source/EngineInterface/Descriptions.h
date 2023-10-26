@@ -299,6 +299,12 @@ struct DetonatorDescription
 
     auto operator<=>(DetonatorDescription const&) const = default;
 
+    DetonatorDescription& setState(DetonatorState value)
+    {
+        state = value;
+        return *this;
+    }
+
     DetonatorDescription& setCountDown(int value)
     {
         countdown = value;
