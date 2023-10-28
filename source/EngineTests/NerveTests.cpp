@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationController.h"
 #include "IntegrationTestFramework.h"

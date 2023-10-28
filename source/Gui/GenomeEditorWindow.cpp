@@ -10,10 +10,10 @@
 #include "Base/GlobalSettings.h"
 #include "Base/StringHelper.h"
 #include "EngineInterface/SimulationController.h"
-#include "EngineInterface/GenomeDescriptionConverter.h"
+#include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/PreviewDescriptionConverter.h"
+#include "EngineInterface/PreviewDescriptionService.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/ShapeGenerator.h"
 
@@ -145,7 +145,7 @@ void _GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
-        _copiedGenome = GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome);
+        _copiedGenome = GenomeDescriptionService::convertDescriptionToBytes(selectedTab.genome);
         printOverlayMessage("Genome copied");
     }
     AlienImGui::Tooltip("Copy genome");
@@ -419,7 +419,7 @@ namespace
             cell.cellFunction = TransmitterGenomeDescription();
         } break;
         case CellFunction_Constructor: {
-            cell.cellFunction = ConstructorGenomeDescription().setGenome(GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()));
+            cell.cellFunction = ConstructorGenomeDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()));
         } break;
         case CellFunction_Sensor: {
             cell.cellFunction = SensorGenomeDescription();
@@ -431,7 +431,7 @@ namespace
             cell.cellFunction = AttackerGenomeDescription();
         } break;
         case CellFunction_Injector: {
-            cell.cellFunction = InjectorGenomeDescription().setGenome(GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()));
+            cell.cellFunction = InjectorGenomeDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()));
         } break;
         case CellFunction_Muscle: {
             cell.cellFunction = MuscleGenomeDescription();
@@ -805,11 +805,11 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
         AlienImGui::MonospaceText(content);
         AlienImGui::HelpMarker(Const::SubGenomeTooltip);
         if (AlienImGui::Button("Clear")) {
-            desc.setGenome(GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()));
+            desc.setGenome(GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()));
         }
         ImGui::SameLine();
         if (AlienImGui::Button("Copy")) {
-            _copiedGenome = desc.isMakeGenomeCopy() ? GenomeDescriptionConverter::convertDescriptionToBytes(tab.genome) : desc.getGenomeData();
+            _copiedGenome = desc.isMakeGenomeCopy() ? GenomeDescriptionService::convertDescriptionToBytes(tab.genome) : desc.getGenomeData();
         }
         ImGui::SameLine();
         ImGui::BeginDisabled(!_copiedGenome.has_value());
@@ -822,7 +822,7 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
         if (AlienImGui::Button("Edit")) {
             auto genomeToOpen = desc.isMakeGenomeCopy()
                 ? tab.genome
-                : GenomeDescriptionConverter::convertBytesToDescription(desc.getGenomeData());
+                : GenomeDescriptionService::convertBytesToDescription(desc.getGenomeData());
             openTab(genomeToOpen, false);
         }
         ImGui::SameLine();
@@ -845,7 +845,7 @@ void _GenomeEditorWindow::onOpenGenome()
         if (!Serializer::deserializeGenomeFromFile(genomeData, firstFilename.string())) {
             MessageDialog::getInstance().information("Open genome", "The selected file could not be opened.");
         } else {
-            openTab(GenomeDescriptionConverter::convertBytesToDescription(genomeData), false);
+            openTab(GenomeDescriptionService::convertBytesToDescription(genomeData), false);
         }
     });
 }
@@ -859,7 +859,7 @@ void _GenomeEditorWindow::onSaveGenome()
             _startingPath = firstFilenameCopy.remove_filename().string();
 
             auto const& selectedTab = _tabDatas.at(_selectedTabIndex);
-            auto genomeData = GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome);
+            auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(selectedTab.genome);
             if (!Serializer::serializeGenomeToFile(firstFilename.string(), genomeData)) {
                 MessageDialog::getInstance().information("Save genome", "The selected file could not be saved.");
             }
@@ -936,7 +936,7 @@ void _GenomeEditorWindow::onCreateSpore()
     pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
 
     auto genomeDesc = getCurrentGenome();
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
 
     auto parameter = _simController->getSimulationParameters();
     auto energy = parameter.cellNormalEnergy[_editorModel->getDefaultColorCode()]
@@ -959,7 +959,7 @@ void _GenomeEditorWindow::onCreateSpore()
 void _GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
-    auto preview = PreviewDescriptionConverter::convert(genome, tab.selectedNode, _simController->getSimulationParameters());
+    auto preview = PreviewDescriptionService::convert(genome, tab.selectedNode, _simController->getSimulationParameters());
     if (AlienImGui::ShowPreviewDescription(preview, tab.previewZoom, tab.selectedNode)) {
         _nodeIndexToJump = tab.selectedNode;
     }

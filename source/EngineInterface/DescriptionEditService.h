@@ -3,7 +3,7 @@
 #include "Base/Definitions.h"
 #include "Descriptions.h"
 
-class DescriptionHelper
+class DescriptionEditService
 {
 public:
     struct CreateRectParameters

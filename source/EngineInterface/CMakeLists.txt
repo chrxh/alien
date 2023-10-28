@@ -2,19 +2,19 @@
 add_library(alien_engine_interface_lib
     ArraySizes.h
     AuxiliaryData.h
-    AuxiliaryDataParser.cpp
-    AuxiliaryDataParser.h
+    AuxiliaryDataParserService.cpp
+    AuxiliaryDataParserService.h
     CellFunctionConstants.h
     Colors.h
     Definitions.h
-    DescriptionHelper.cpp
-    DescriptionHelper.h
+    DescriptionEditService.cpp
+    DescriptionEditService.h
     Descriptions.cpp
     Descriptions.h
     FundamentalConstants.h
     GenomeConstants.h
-    GenomeDescriptionConverter.cpp
-    GenomeDescriptionConverter.h
+    GenomeDescriptionService.cpp
+    GenomeDescriptionService.h
     GenomeDescriptions.h
     GeneralSettings.h
     GpuSettings.h
@@ -22,8 +22,8 @@ add_library(alien_engine_interface_lib
     Motion.h
     MutationType.h
     OverlayDescriptions.h
-    PreviewDescriptionConverter.cpp
-    PreviewDescriptionConverter.h
+    PreviewDescriptionService.cpp
+    PreviewDescriptionService.h
     PreviewDescriptions.h
     RadiationSource.h
     SelectionShallowData.h

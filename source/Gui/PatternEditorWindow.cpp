@@ -8,7 +8,7 @@
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "EditorModel.h"
@@ -391,7 +391,7 @@ void _PatternEditorWindow::onPaste()
     auto data = *_copiedSelection;
     auto center = _viewport->getCenterInWorldPos();
     data.setCenter(center);
-    DescriptionHelper::generateNewCreatureIds(data);
+    DescriptionEditService::generateNewCreatureIds(data);
     _simController->addAndSelectSimulationData(data);
     _editorModel->update();
 }
@@ -414,7 +414,7 @@ void _PatternEditorWindow::onGenerateExecutionOrderNumbers()
     std::unordered_set<uint64_t> cellIds = dataWithoutClusters.getCellIds();
 
     auto parameters = _simController->getSimulationParameters();
-    DescriptionHelper::generateExecutionOrderNumbers(dataWithClusters, cellIds, parameters.cellNumExecutionOrderNumbers);
+    DescriptionEditService::generateExecutionOrderNumbers(dataWithClusters, cellIds, parameters.cellNumExecutionOrderNumbers);
 
     _simController->removeSelectedObjects(true);
     _simController->addAndSelectSimulationData(dataWithClusters);

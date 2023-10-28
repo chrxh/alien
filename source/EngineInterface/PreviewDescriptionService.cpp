@@ -1,4 +1,4 @@
-#include "PreviewDescriptionConverter.h"
+#include "PreviewDescriptionService.h"
 
 #include <boost/range/combine.hpp>
 #include <boost/range/adaptor/indexed.hpp>
@@ -6,7 +6,7 @@
 #include "GenomeConstants.h"
 #include "ShapeGenerator.h"
 #include "Base/Math.h"
-#include "EngineInterface/GenomeDescriptionConverter.h"
+#include "EngineInterface/GenomeDescriptionService.h"
 
 namespace
 {
@@ -311,7 +311,7 @@ namespace
                     }
                     targetAngle += constructor.constructionAngle1;
                     auto direction = Math::unitVectorOfAngle(targetAngle);
-                    auto subGenome = GenomeDescriptionConverter::convertBytesToDescription(data);
+                    auto subGenome = GenomeDescriptionService::convertBytesToDescription(data);
                     auto previewPart = convertToPreviewDescriptionIntern(
                         subGenome, cellIntern.nodeIndex, constructor.constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
                     insert(result, previewPart);
@@ -386,7 +386,7 @@ namespace
 }
 
 PreviewDescription
-PreviewDescriptionConverter::convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters)
+PreviewDescriptionService::convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters)
 {
     auto cellInternDescriptions = convertToPreviewDescriptionIntern(genome, std::nullopt, std::nullopt, std::nullopt, std::nullopt, parameters);
     return createPreviewDescription(cellInternDescriptions, parameters);

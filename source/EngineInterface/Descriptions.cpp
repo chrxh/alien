@@ -2,18 +2,18 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include "GenomeDescriptionConverter.h"
+#include "GenomeDescriptionService.h"
 #include "Base/Math.h"
 #include "Base/Physics.h"
 
 ConstructorDescription::ConstructorDescription()
 {
-    genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription());
+    genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription());
 }
 
 InjectorDescription::InjectorDescription()
 {
-    genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription());
+    genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription());
 }
 
 CellFunction CellDescription::getCellFunctionType() const

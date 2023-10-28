@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationController.h"
 #include "IntegrationTestFramework.h"
@@ -104,7 +104,7 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -135,7 +135,7 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -166,7 +166,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -202,7 +202,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -238,7 +238,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -274,7 +274,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({190.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({190.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -310,8 +310,8 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.8f)));
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 200.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.8f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 200.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -347,7 +347,7 @@ TEST_F(SensorTests, scanByAngle_found)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -381,7 +381,7 @@ TEST_F(SensorTests, scanByAngle_wrongAngle)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);

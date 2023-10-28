@@ -2,7 +2,7 @@
 
 #include "Base/Definitions.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationController.h"
 #include "IntegrationTestFramework.h"
 
@@ -38,11 +38,11 @@ protected:
 
 TEST_F(DescriptionHelperTests, correctConnections)
 {
-    auto data = DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().width(10).height(10).center({50.0f, 99.0f}));
+    auto data = DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().width(10).height(10).center({50.0f, 99.0f}));
     _simController->setSimulationData(data);
     auto clusteredData = _simController->getClusteredSimulationData();
 
-    DescriptionHelper::correctConnections(clusteredData, {100, 100});
+    DescriptionEditService::correctConnections(clusteredData, {100, 100});
 
     EXPECT_TRUE(areAngelsCorrect(clusteredData));
 }

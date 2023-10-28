@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationController.h"
-#include "EngineInterface/GenomeDescriptionConverter.h"
+#include "EngineInterface/GenomeDescriptionService.h"
 
 #include "IntegrationTestFramework.h"
 
@@ -67,7 +67,7 @@ TEST_F(InjectorTests, nothingFound)
 
 TEST_F(InjectorTests, matchButNoInjection)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells(
@@ -112,7 +112,7 @@ TEST_F(InjectorTests, matchButNoInjection)
 
 TEST_F(InjectorTests, injection)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -155,8 +155,8 @@ TEST_F(InjectorTests, injection)
 
 TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
-    auto otherGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription(), CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto otherGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription(), CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -204,8 +204,8 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
 
 TEST_F(InjectorTests, injectOnlyEmptyCells_success)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
-    auto otherGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription(), CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto otherGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription(), CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({

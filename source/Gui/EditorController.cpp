@@ -6,7 +6,7 @@
 #include "Base/Math.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/InspectedEntityIds.h"
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "Viewport.h"
 #include "StyleRepository.h"
 #include "EditorModel.h"
@@ -127,7 +127,7 @@ void _EditorController::onInspectSelectedObjects()
     auto selection = _editorModel->getSelectionShallowData();
     if (selection.numCells + selection.numParticles <= MaxInspectorWindowsToAdd) {
         DataDescription selectedData = _simController->getSelectedSimulationData(false);
-        onInspectObjects(DescriptionHelper::getObjects(selectedData), false);
+        onInspectObjects(DescriptionEditService::getObjects(selectedData), false);
     } else {
         showMessage(
             "Inspection not possible",
@@ -139,7 +139,7 @@ void _EditorController::onInspectSelectedObjects()
 void _EditorController::onInspectSelectedGenomes()
 {
     DataDescription selectedData = _simController->getSelectedSimulationData(true);
-    auto constructors = DescriptionHelper::getConstructorToMainGenomes(selectedData);
+    auto constructors = DescriptionEditService::getConstructorToMainGenomes(selectedData);
     if (constructors.size() > 1) {
         constructors = {constructors.front()};
     }
@@ -157,12 +157,12 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
     }
     auto origInspectedIds = inspectedIds;
     for (auto const& entity : entities) {
-        inspectedIds.insert(DescriptionHelper::getId(entity));
+        inspectedIds.insert(DescriptionEditService::getId(entity));
     }
 
     std::vector<CellOrParticleDescription> newEntities;
     for (auto const& entity : entities) {
-        if (origInspectedIds.find(DescriptionHelper::getId(entity)) == origInspectedIds.end()) {
+        if (origInspectedIds.find(DescriptionEditService::getId(entity)) == origInspectedIds.end()) {
             newEntities.emplace_back(entity);
         }
     }
@@ -175,7 +175,7 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
     RealVector2D center;
     int num = 0;
     for (auto const& entity : entities) {
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity));
         center += entityPos;
         ++num;
     }
@@ -183,7 +183,7 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
 
     float maxDistanceFromCenter = 0;
     for (auto const& entity : entities) {
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity));
         auto distanceFromCenter = toFloat(Math::length(entityPos - center));
         maxDistanceFromCenter = std::max(maxDistanceFromCenter, distanceFromCenter);
     }
@@ -192,9 +192,9 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
     auto factorY = maxDistanceFromCenter == 0 ? 1.0f : viewSize.y / maxDistanceFromCenter / 3.4f;
 
     for (auto const& entity : newEntities) {
-        auto id = DescriptionHelper::getId(entity);
+        auto id = DescriptionEditService::getId(entity);
         _editorModel->addInspectedEntity(entity);
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity));
         auto windowPosX = (entityPos.x - center.x) * factorX + center.x;
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
@@ -344,10 +344,10 @@ void _EditorController::processInspectorWindows()
     }
     std::vector<uint64_t> entityIds;
     for (auto const& entity : inspectedEntities) {
-        entityIds.emplace_back(DescriptionHelper::getId(entity));
+        entityIds.emplace_back(DescriptionEditService::getId(entity));
     }
     auto inspectedData = _simController->getInspectedSimulationData(entityIds);
-    auto newInspectedEntities = DescriptionHelper::getObjects(inspectedData);
+    auto newInspectedEntities = DescriptionEditService::getObjects(inspectedData);
     _editorModel->setInspectedEntities(newInspectedEntities);
 
     inspectorWindows.clear();
