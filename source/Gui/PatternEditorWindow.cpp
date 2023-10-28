@@ -18,7 +18,7 @@
 #include "GenericFileDialogs.h"
 #include "MessageDialog.h"
 #include "Viewport.h"
-#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SerializerService.h"
 
 namespace
 {
@@ -335,7 +335,7 @@ void _PatternEditorWindow::onOpenPattern()
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
             ClusteredDataDescription content;
-            if (Serializer::deserializeContentFromFile(content, firstFilename.string())) {
+            if (SerializerService::deserializeContentFromFile(content, firstFilename.string())) {
                 auto center = _viewport->getCenterInWorldPos();
                 content.setCenter(center);
                 _simController->addAndSelectSimulationData(DataDescription(content));
@@ -355,7 +355,7 @@ void _PatternEditorWindow::onSavePattern()
             _startingPath = firstFilenameCopy.remove_filename().string();
 
             auto content = _simController->getSelectedClusteredSimulationData(_editorModel->isRolloutToClusters());
-            if (!Serializer::serializeContentToFile(firstFilename.string(), content)) {
+            if (!SerializerService::serializeContentToFile(firstFilename.string(), content)) {
                 MessageDialog::getInstance().information("Save pattern", "The selected pattern could not be saved to the specified file.");
             }
         });

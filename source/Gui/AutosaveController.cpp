@@ -4,7 +4,7 @@
 
 #include "Base/Resources.h"
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "Viewport.h"
@@ -68,5 +68,5 @@ void _AutosaveController::onSave()
     sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
     sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
     sim.mainData = _simController->getClusteredSimulationData();
-    Serializer::serializeSimulationToFiles(Const::AutosaveFile, sim);
+    SerializerService::serializeSimulationToFiles(Const::AutosaveFile, sim);
 }

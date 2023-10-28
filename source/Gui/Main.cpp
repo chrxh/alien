@@ -4,7 +4,7 @@
 #include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
 #include "Base/FileLogger.h"
-#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SerializerService.h"
 #include "EngineImpl/SimulationControllerImpl.h"
 
 #include "MainWindow.h"

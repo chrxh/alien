@@ -27,8 +27,8 @@ add_library(alien_engine_interface_lib
     PreviewDescriptions.h
     RadiationSource.h
     SelectionShallowData.h
-    Serializer.cpp
-    Serializer.h
+    SerializerService.cpp
+    SerializerService.h
     Settings.h
     ShallowUpdateSelectionData.h
     ShapeGenerator.cpp

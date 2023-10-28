@@ -21,7 +21,7 @@
 #include "implot.h"
 #include "Fonts/IconsFontAwesome5.h"
 
-#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "ModeController.h"
@@ -772,7 +772,7 @@ void _MainWindow::onOpenSimulation()
             _startingPath = firstFilenameCopy.remove_filename().string();
 
             DeserializedSimulation deserializedData;
-            if (Serializer::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
+            if (SerializerService::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
                 printOverlayMessage("Loading ...");
                 delayedExecution([=, this] {
                     _simController->closeSimulation();
@@ -828,7 +828,7 @@ void _MainWindow::onSaveSimulation()
                 sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
                 sim.mainData = _simController->getClusteredSimulationData();
 
-                if (!Serializer::serializeSimulationToFiles(firstFilename.string(), sim)) {
+                if (!SerializerService::serializeSimulationToFiles(firstFilename.string(), sim)) {
                     MessageDialog::getInstance().information("Save simulation", "The simulation could not be saved to the specified file.");
                 }
             });

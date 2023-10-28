@@ -14,7 +14,7 @@
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/PreviewDescriptionService.h"
-#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SerializerService.h"
 #include "EngineInterface/ShapeGenerator.h"
 
 #include "AlienImGui.h"
@@ -842,7 +842,7 @@ void _GenomeEditorWindow::onOpenGenome()
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         std::vector<uint8_t> genomeData;
-        if (!Serializer::deserializeGenomeFromFile(genomeData, firstFilename.string())) {
+        if (!SerializerService::deserializeGenomeFromFile(genomeData, firstFilename.string())) {
             MessageDialog::getInstance().information("Open genome", "The selected file could not be opened.");
         } else {
             openTab(GenomeDescriptionService::convertBytesToDescription(genomeData), false);
@@ -860,7 +860,7 @@ void _GenomeEditorWindow::onSaveGenome()
 
             auto const& selectedTab = _tabDatas.at(_selectedTabIndex);
             auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(selectedTab.genome);
-            if (!Serializer::serializeGenomeToFile(firstFilename.string(), genomeData)) {
+            if (!SerializerService::serializeGenomeToFile(firstFilename.string(), genomeData)) {
                 MessageDialog::getInstance().information("Save genome", "The selected file could not be saved.");
             }
         });
