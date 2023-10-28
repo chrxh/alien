@@ -414,6 +414,9 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         std::vector<float> weigthsAndBias;
         convert(dataTO, sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1), cellTO.cellFunctionData.neuron.weightsAndBiasesDataIndex, weigthsAndBias);
         std::tie(neuron.weights, neuron.biases) = splitWeightsAndBias(weigthsAndBias);
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            neuron.activationFunctions[i] = cellTO.cellFunctionData.neuron.activationFunctions[i];
+        }
         result.cellFunction = neuron;
     } break;
     case CellFunction_Transmitter: {
@@ -540,6 +543,9 @@ void DescriptionConverter::addCell(
         int targetSize;
         convert(dataTO, weigthsAndBias, targetSize, neuronTO.weightsAndBiasesDataIndex);
         CHECK(targetSize == sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1));
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            neuronTO.activationFunctions[i] = neuronDesc.activationFunctions[i];
+        }
         cellTO.cellFunctionData.neuron = neuronTO;
     } break;
     case CellFunction_Transmitter: {

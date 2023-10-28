@@ -36,7 +36,7 @@ namespace
     auto const ContentTextWidth = 190.0f;
     auto const DynamicTableHeaderColumnWidth = 335.0f;
     auto const DynamicTableColumnWidth = 300.0f;
-    auto const WeightsAndBiasTextWidth = 100.0f;
+    auto const NeuronEditTextWidth = 130.0f;
     auto const WeightsAndBiasSelectionTextWidth = 400.0f;
 }
 
@@ -763,11 +763,15 @@ void _GenomeEditorWindow::processNode(
                 DynamicTableLayout table(DynamicTableColumnWidth);
                 if (table.begin()) {
                     AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(WeightsAndBiasTextWidth),
-                        neuron.weights[_selectedOutput][_selectedInput]);
+                        AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(NeuronEditTextWidth),
+                        neuron.weights.at(_selectedOutput).at(_selectedInput));
                     table.next();
                     AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(WeightsAndBiasTextWidth), neuron.biases[_selectedOutput]);
+                        AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(NeuronEditTextWidth), neuron.biases.at(_selectedOutput));
+                    table.next();
+                    AlienImGui::Combo(
+                        AlienImGui::ComboParameters().name("Activation function").textWidth(NeuronEditTextWidth).values({"Sigmoid", "Binary", "Linear"}),
+                        neuron.activationFunctions.at(_selectedOutput));
                     table.end();
                 }
                 ImGui::TreePop();

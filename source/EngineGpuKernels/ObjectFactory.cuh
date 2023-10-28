@@ -126,6 +126,9 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cellTO.cellFunctionData.neuron.weightsAndBiasesDataIndex,
             dataTO.auxiliaryData,
             reinterpret_cast<uint8_t*&>(cell->cellFunctionData.neuron.neuronState));
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            cell->cellFunctionData.neuron.activationFunctions[i] = cellTO.cellFunctionData.neuron.activationFunctions[i];
+        }
     } break;
     case CellFunction_Transmitter: {
         cell->cellFunctionData.transmitter.mode = cellTO.cellFunctionData.transmitter.mode;
@@ -281,6 +284,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             }
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->cellFunctionData.neuron.neuronState->biases[i] = _data->numberGen1.random(2.0f) - 1.0f;
+                cell->cellFunctionData.neuron.activationFunctions[i] = NeuronActivationFunction_Sigmoid;
             }
         } break;
         case CellFunction_Transmitter: {

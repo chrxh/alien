@@ -30,6 +30,15 @@ enum LivingState_
     LivingState_Count
 };
 
+using NeuronActivationFunction = int;
+enum NeuronActivationFunction_
+{
+    NeuronActivationFunction_Sigmoid,
+    NeuronActivationFunction_Binary,
+    NeuronActivationFunction_Linear,
+    NeuronActivationFunction_Count
+};
+
 using SensorMode = int;
 enum SensorMode_
 {

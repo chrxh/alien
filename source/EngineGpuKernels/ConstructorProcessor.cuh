@@ -645,6 +645,10 @@ ConstructorProcessor::constructCellIntern(
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result->cellFunctionData.neuron.neuronState->biases[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;
         }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            result->cellFunctionData.neuron.activationFunctions[i] =
+                GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % NeuronActivationFunction_Count;
+        }
     } break;
     case CellFunction_Transmitter: {
         result->cellFunctionData.transmitter.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % EnergyDistributionMode_Count;
