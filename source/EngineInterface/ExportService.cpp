@@ -38,6 +38,8 @@ bool ExportService::exportCollectedStatistics(std::vector<DataPointCollection> c
     writeLabelAllColors("Sensor matches");
     writeLabelAllColors("Reconnector creations");
     writeLabelAllColors("Reconnector deletions");
+    writeLabelAllColors("Detonations");
+
     file << std::endl;
 
     auto writeIntValueAllColors = [&file](DataPoint const& dataPoint) {
@@ -72,6 +74,7 @@ bool ExportService::exportCollectedStatistics(std::vector<DataPointCollection> c
         writeDoubleValueAllColors(dataPointCollection.numSensorMatches);
         writeDoubleValueAllColors(dataPointCollection.numReconnectorCreated);
         writeDoubleValueAllColors(dataPointCollection.numReconnectorRemoved);
+        writeDoubleValueAllColors(dataPointCollection.numDetonations);
         file << std::endl;
     }
     file.close();
@@ -110,6 +113,9 @@ bool ExportService::exportStatistics(uint64_t timestep, StatisticsData const& st
     writeLabelAllColors("Neuron activities");
     writeLabelAllColors("Sensor activities");
     writeLabelAllColors("Sensor matches");
+    writeLabelAllColors("Reconnector creations");
+    writeLabelAllColors("Reconnector deletions");
+    writeLabelAllColors("Detonations");
     file << std::endl;
 
     auto writeIntValueAllColors = [&file](ColorVector<int> const& values) {
@@ -146,6 +152,10 @@ bool ExportService::exportStatistics(uint64_t timestep, StatisticsData const& st
     writeInt64ValueAllColors(statisticsData.timeline.accumulated.numNeuronActivities);
     writeInt64ValueAllColors(statisticsData.timeline.accumulated.numSensorActivities);
     writeInt64ValueAllColors(statisticsData.timeline.accumulated.numSensorMatches);
+    writeInt64ValueAllColors(statisticsData.timeline.accumulated.numReconnectorCreated);
+    writeInt64ValueAllColors(statisticsData.timeline.accumulated.numReconnectorRemoved);
+    writeInt64ValueAllColors(statisticsData.timeline.accumulated.numDetonations);
+
     file << std::endl;
     file.close();
     return true;
