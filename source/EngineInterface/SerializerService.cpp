@@ -1,4 +1,4 @@
-#include "Serializer.h"
+#include "SerializerService.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -725,7 +725,7 @@ namespace cereal
     }
 }
 
-bool Serializer::serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data)
+bool SerializerService::serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data)
 {
     try {
 
@@ -753,7 +753,7 @@ bool Serializer::serializeSimulationToFiles(std::string const& filename, Deseria
     }
 }
 
-bool Serializer::deserializeSimulationFromFiles(DeserializedSimulation& data, std::string const& filename)
+bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& data, std::string const& filename)
 {
     try {
         std::filesystem::path settingsFilename(filename);
@@ -776,7 +776,7 @@ bool Serializer::deserializeSimulationFromFiles(DeserializedSimulation& data, st
     }
 }
 
-bool Serializer::serializeSimulationToStrings(SerializedSimulation& output, DeserializedSimulation const& input)
+bool SerializerService::serializeSimulationToStrings(SerializedSimulation& output, DeserializedSimulation const& input)
 {
     try {
         {
@@ -800,7 +800,7 @@ bool Serializer::serializeSimulationToStrings(SerializedSimulation& output, Dese
     }
 }
 
-bool Serializer::deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input)
+bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input)
 {
     try {
         {
@@ -821,7 +821,7 @@ bool Serializer::deserializeSimulationFromStrings(DeserializedSimulation& output
     }
 }
 
-bool Serializer::serializeGenomeToFile(std::string const& filename, std::vector<uint8_t> const& genome)
+bool SerializerService::serializeGenomeToFile(std::string const& filename, std::vector<uint8_t> const& genome)
 {
     try {
         //wrap constructor cell around genome
@@ -842,7 +842,7 @@ bool Serializer::serializeGenomeToFile(std::string const& filename, std::vector<
     }
 }
 
-bool Serializer::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::string const& filename)
+bool SerializerService::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::string const& filename)
 {
     try {
         ClusteredDataDescription data;
@@ -858,7 +858,7 @@ bool Serializer::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::st
     }
 }
 
-bool Serializer::serializeGenomeToString(std::string& output, std::vector<uint8_t> const& input)
+bool SerializerService::serializeGenomeToString(std::string& output, std::vector<uint8_t> const& input)
 {
     try {
         std::stringstream stdStream;
@@ -881,7 +881,7 @@ bool Serializer::serializeGenomeToString(std::string& output, std::vector<uint8_
     }
 }
 
-bool Serializer::deserializeGenomeFromString(std::vector<uint8_t>& output, std::string const& input)
+bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output, std::string const& input)
 {
     try {
         std::stringstream stdStream(input);
@@ -902,7 +902,7 @@ bool Serializer::deserializeGenomeFromString(std::vector<uint8_t>& output, std::
     }
 }
 
-bool Serializer::serializeSimulationParametersToFile(std::string const& filename, SimulationParameters const& parameters)
+bool SerializerService::serializeSimulationParametersToFile(std::string const& filename, SimulationParameters const& parameters)
 {
     try {
         std::ofstream stream(filename, std::ios::binary);
@@ -917,7 +917,7 @@ bool Serializer::serializeSimulationParametersToFile(std::string const& filename
     }
 }
 
-bool Serializer::deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::string const& filename)
+bool SerializerService::deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::string const& filename)
 {
     try {
         std::ifstream stream(filename, std::ios::binary);
@@ -932,7 +932,7 @@ bool Serializer::deserializeSimulationParametersFromFile(SimulationParameters& p
     }
 }
 
-bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
+bool SerializerService::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
 {
     try {
         zstr::ofstream fileStream(filename, std::ios::binary);
@@ -947,7 +947,7 @@ bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDa
     }
 }
 
-bool Serializer::deserializeContentFromFile(ClusteredDataDescription& content, std::string const& filename)
+bool SerializerService::deserializeContentFromFile(ClusteredDataDescription& content, std::string const& filename)
 {
     try {
         if (!deserializeDataDescription(content, filename)) {
@@ -959,14 +959,14 @@ bool Serializer::deserializeContentFromFile(ClusteredDataDescription& content, s
     }
 }
 
-void Serializer::serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream)
+void SerializerService::serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream)
 {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(Const::ProgramVersion);
     archive(data);
 }
 
-bool Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::string const& filename)
+bool SerializerService::deserializeDataDescription(ClusteredDataDescription& data, std::string const& filename)
 {
     zstr::ifstream stream(filename, std::ios::binary);
     if (!stream) {
@@ -976,7 +976,7 @@ bool Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
     return true;
 }
 
-void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream)
+void SerializerService::deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream)
 {
     cereal::PortableBinaryInputArchive archive(stream);
     std::string version;
@@ -991,31 +991,31 @@ void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
     archive(data);
 }
 
-void Serializer::serializeAuxiliaryData(AuxiliaryData const& auxiliaryData, std::ostream& stream)
+void SerializerService::serializeAuxiliaryData(AuxiliaryData const& auxiliaryData, std::ostream& stream)
 {
     boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParserService::encodeAuxiliaryData(auxiliaryData));
 }
 
-void Serializer::deserializeAuxiliaryData(AuxiliaryData& auxiliaryData, std::istream& stream)
+void SerializerService::deserializeAuxiliaryData(AuxiliaryData& auxiliaryData, std::istream& stream)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
     auxiliaryData = AuxiliaryDataParserService::decodeAuxiliaryData(tree);
 }
 
-void Serializer::serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream)
+void SerializerService::serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream)
 {
     boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParserService::encodeSimulationParameters(parameters));
 }
 
-void Serializer::deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream)
+void SerializerService::deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
     parameters = AuxiliaryDataParserService::decodeSimulationParameters(tree);
 }
 
-bool Serializer::wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input)
+bool SerializerService::wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input)
 {
     output.clear();
     output.addCluster(ClusterDescription().addCell(CellDescription().setCellFunction(ConstructorDescription().setGenome(input))));
@@ -1023,7 +1023,7 @@ bool Serializer::wrapGenome(ClusteredDataDescription& output, std::vector<uint8_
 }
 
 
-bool Serializer::unwrapGenome(std::vector<uint8_t>& output, ClusteredDataDescription const& input)
+bool SerializerService::unwrapGenome(std::vector<uint8_t>& output, ClusteredDataDescription const& input)
 {
     if (input.clusters.size() != 1) {
         return false;

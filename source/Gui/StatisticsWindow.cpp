@@ -12,12 +12,12 @@
 #include "Base/StringHelper.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationController.h"
+#include "EngineInterface/ExportService.h"
 
 #include "StyleRepository.h"
 #include "AlienImGui.h"
 #include "GenericFileDialogs.h"
 #include "MessageDialog.h"
-
 
 namespace
 {
@@ -530,76 +530,11 @@ void _StatisticsWindow::onSaveStatistics()
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
-            std::ofstream file;
-            file.open(firstFilename.string(), std::ios_base::out);
-            if (!file) {
+
+            if (!ExportService::exportCollectedStatistics(_longtermStatistics.dataPointCollectionHistory, firstFilename.string())) {
                 MessageDialog::getInstance().information("Export statistics", "The statistics could not be saved to the specified file.");
                 return;
             }
-
-            file << "Time step";
-            auto writeLabelAllColors = [&file](auto const& name) {
-                for (int i = 0; i < MAX_COLORS; ++i) {
-                    file << ", " << name << " (color " << i << ")";
-                }
-            };
-            writeLabelAllColors("Cells");
-            writeLabelAllColors("Self-replicators");
-            writeLabelAllColors("Viruses");
-            writeLabelAllColors("Cell connections");
-            writeLabelAllColors("Energy particles");
-            writeLabelAllColors("Total energy");
-            writeLabelAllColors("Genome size");
-            writeLabelAllColors("Created cells");
-            writeLabelAllColors("Attacks");
-            writeLabelAllColors("Muscle activities");
-            writeLabelAllColors("Transmitter activities");
-            writeLabelAllColors("Defender activities");
-            writeLabelAllColors("Injection activities");
-            writeLabelAllColors("Completed injections");
-            writeLabelAllColors("Nerve pulses");
-            writeLabelAllColors("Neuron activities");
-            writeLabelAllColors("Sensor activities");
-            writeLabelAllColors("Sensor matches");
-            writeLabelAllColors("Reconnector creations");
-            writeLabelAllColors("Reconnector deletions");
-            file << std::endl;
-
-            auto writeIntValueAllColors = [&file](DataPoint const& dataPoint) {
-                for (int i = 0; i < MAX_COLORS; ++i) {
-                    file << ", " << static_cast<uint64_t>(dataPoint.values[i]);
-                }
-            };
-            auto writeDoubleValueAllColors = [&file](DataPoint const& dataPoint) {
-                for (int i = 0; i < MAX_COLORS; ++i) {
-                    file << ", " << dataPoint.values[i];
-                }
-            };
-            for (auto const& dataPointCollection : _longtermStatistics.dataPointCollectionHistory) {
-                file << static_cast<uint64_t>(dataPointCollection.time);
-                writeIntValueAllColors(dataPointCollection.numCells);
-                writeIntValueAllColors(dataPointCollection.numSelfReplicators);
-                writeIntValueAllColors(dataPointCollection.numViruses);
-                writeIntValueAllColors(dataPointCollection.numConnections);
-                writeIntValueAllColors(dataPointCollection.numParticles);
-                writeDoubleValueAllColors(dataPointCollection.totalEnergy);
-                writeDoubleValueAllColors(dataPointCollection.averageGenomeCells);
-                writeDoubleValueAllColors(dataPointCollection.numCreatedCells);
-                writeDoubleValueAllColors(dataPointCollection.numAttacks);
-                writeDoubleValueAllColors(dataPointCollection.numMuscleActivities);
-                writeDoubleValueAllColors(dataPointCollection.numTransmitterActivities);
-                writeDoubleValueAllColors(dataPointCollection.numDefenderActivities);
-                writeDoubleValueAllColors(dataPointCollection.numInjectionActivities);
-                writeDoubleValueAllColors(dataPointCollection.numCompletedInjections);
-                writeDoubleValueAllColors(dataPointCollection.numNervePulses);
-                writeDoubleValueAllColors(dataPointCollection.numNeuronActivities);
-                writeDoubleValueAllColors(dataPointCollection.numSensorActivities);
-                writeDoubleValueAllColors(dataPointCollection.numSensorMatches);
-                writeDoubleValueAllColors(dataPointCollection.numReconnectorCreated);
-                writeDoubleValueAllColors(dataPointCollection.numReconnectorRemoved);
-                file << std::endl;
-            }
-            file.close();
         });
 }
 

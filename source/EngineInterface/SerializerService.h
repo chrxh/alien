@@ -18,7 +18,7 @@ struct SerializedSimulation
     std::string mainData;   //binary
 };
 
-class Serializer
+class SerializerService
 {
 public:
     static bool serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data);
@@ -37,7 +37,7 @@ public:
     static bool deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::string const& filename);
 
     static bool serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content);
-    static bool deserializeContentFromFile(ClusteredDataDescription& content, std::string const& filenam);
+    static bool deserializeContentFromFile(ClusteredDataDescription& content, std::string const& filename);
 
 private:
     static void serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream);

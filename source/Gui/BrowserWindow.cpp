@@ -15,7 +15,7 @@
 #include "Base/StringHelper.h"
 #include "Base/VersionChecker.h"
 #include "EngineInterface/GenomeDescriptionService.h"
-#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
@@ -823,7 +823,7 @@ void _BrowserWindow::onDownloadItem(RemoteSimulationData* sim)
 
         if (_selectedDataType == DataType_Simulation) {
             DeserializedSimulation deserializedSim;
-            if (!Serializer::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
+            if (!SerializerService::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
                 MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
                 return;
             }
@@ -855,7 +855,7 @@ void _BrowserWindow::onDownloadItem(RemoteSimulationData* sim)
 
         } else {
             std::vector<uint8_t> genome;
-            if (!Serializer::deserializeGenomeFromString(genome, serializedSim.mainData)) {
+            if (!SerializerService::deserializeGenomeFromString(genome, serializedSim.mainData)) {
                 MessageDialog::getInstance().information("Error", "Failed to load genome. Your program version may not match.");
                 return;
             }

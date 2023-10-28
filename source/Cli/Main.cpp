@@ -8,86 +8,9 @@
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "Base/FileLogger.h"
+#include "EngineInterface/ExportService.h"
+#include "EngineInterface/SerializerService.h"
 #include "EngineImpl/SimulationControllerImpl.h"
-#include "EngineInterface/Serializer.h"
-
-namespace
-{
-
-    bool writeStatistics(SimulationController const& simController, std::string const& statisticsFilename)
-    {
-        auto statistics = simController->getStatistics();
-        std::ofstream file;
-        file.open(statisticsFilename, std::ios_base::out);
-        if (!file) {
-            return false;
-        }
-
-        auto writeLabelAllColors = [&file](auto const& name) {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                file << ", " << name << " (color " << i << ")";
-            }
-        };
-        file << "Time step";
-        writeLabelAllColors("Cells");
-        writeLabelAllColors("Self-replicators");
-        writeLabelAllColors("Viruses");
-        writeLabelAllColors("Cell connections");
-        writeLabelAllColors("Energy particles");
-        writeLabelAllColors("Total energy");
-        writeLabelAllColors("Total genome cells");
-        writeLabelAllColors("Created cells");
-        writeLabelAllColors("Attacks");
-        writeLabelAllColors("Muscle activities");
-        writeLabelAllColors("Transmitter activities");
-        writeLabelAllColors("Defender activities");
-        writeLabelAllColors("Injection activities");
-        writeLabelAllColors("Completed injections");
-        writeLabelAllColors("Nerve pulses");
-        writeLabelAllColors("Neuron activities");
-        writeLabelAllColors("Sensor activities");
-        writeLabelAllColors("Sensor matches");
-        file << std::endl;
-
-        auto writeIntValueAllColors = [&file](ColorVector<int> const& values) {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                file << ", " << static_cast<uint64_t>(values[i]);
-            }
-        };
-        auto writeInt64ValueAllColors = [&file](ColorVector<uint64_t> const& values) {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                file << ", " << values[i];
-            }
-        };
-        auto writeFloatValueAllColors = [&file](ColorVector<float> const& values) {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                file << ", " << values[i];
-            }
-        };
-        file << simController->getCurrentTimestep();
-        writeIntValueAllColors(statistics.timeline.timestep.numCells);
-        writeIntValueAllColors(statistics.timeline.timestep.numSelfReplicators);
-        writeIntValueAllColors(statistics.timeline.timestep.numViruses);
-        writeIntValueAllColors(statistics.timeline.timestep.numConnections);
-        writeIntValueAllColors(statistics.timeline.timestep.numParticles);
-        writeFloatValueAllColors(statistics.timeline.timestep.totalEnergy);
-        writeInt64ValueAllColors(statistics.timeline.timestep.numGenomeCells);
-        writeInt64ValueAllColors(statistics.timeline.accumulated.numCreatedCells);
-        writeInt64ValueAllColors(statistics.timeline.accumulated.numAttacks);
-        writeInt64ValueAllColors(statistics.timeline.accumulated.numMuscleActivities);
-        writeInt64ValueAllColors(statistics.timeline.accumulated.numTransmitterActivities);
-        writeInt64ValueAllColors(statistics.timeline.accumulated.numDefenderActivities);
-        writeInt64ValueAllColors(statistics.timeline.accumulated.numInjectionActivities);
-        writeInt64ValueAllColors(statistics.timeline.accumulated.numCompletedInjections);
-        writeInt64ValueAllColors(statistics.timeline.accumulated.numNervePulses);
-        writeInt64ValueAllColors(statistics.timeline.accumulated.numNeuronActivities);
-        writeInt64ValueAllColors(statistics.timeline.accumulated.numSensorActivities);
-        writeInt64ValueAllColors(statistics.timeline.accumulated.numSensorMatches);
-        file << std::endl;
-        file.close();
-        return true;
-    }
-}
 
 int main(int argc, char** argv)
 {
@@ -115,7 +38,7 @@ int main(int argc, char** argv)
             return 1;
         }
         DeserializedSimulation simData;
-        if (!Serializer::deserializeSimulationFromFiles(simData, inputFilename)) {
+        if (!SerializerService::deserializeSimulationFromFiles(simData, inputFilename)) {
             std::cout << "Could not read from input files." << std::endl;
             return 1;
         }
@@ -144,14 +67,16 @@ int main(int argc, char** argv)
             std::cout << "No output file given." << std::endl;
             return 1;
         }
-        if (!Serializer::serializeSimulationToFiles(outputFilename, simData)) {
+        if (!SerializerService::serializeSimulationToFiles(outputFilename, simData)) {
             std::cout << "Could not write to output files." << std::endl;
             return 1;
         }
 
         //write output statistics file
         if (!statisticsFilename.empty()) {
-            if (!writeStatistics(simController, statisticsFilename)) {
+            auto timestep = simController->getCurrentTimestep();
+            auto statistics = simController->getStatistics();
+            if (!ExportService::exportStatistics(timestep, statistics, statisticsFilename)) {
                 std::cout << "Could not write to statistics file." << std::endl;
                 return 1;
             }

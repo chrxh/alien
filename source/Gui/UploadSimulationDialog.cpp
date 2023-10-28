@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 
@@ -127,7 +127,7 @@ void _UploadSimulationDialog::onUpload()
             deserializedSim.mainData = _simController->getClusteredSimulationData();
 
             SerializedSimulation serializedSim;
-            if (!Serializer::serializeSimulationToStrings(serializedSim, deserializedSim)) {
+            if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
                 MessageDialog::getInstance().information(
                     "Upload simulation", "The simulation could not be serialized for uploading.");
                 return;
@@ -145,7 +145,7 @@ void _UploadSimulationDialog::onUpload()
             auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(genome);
             numObjects = GenomeDescriptionService::getNumNodesRecursively(genomeData, true);
 
-            if (!Serializer::serializeGenomeToString(mainData, genomeData)) {
+            if (!SerializerService::serializeGenomeToString(mainData, genomeData)) {
                 showMessage("Upload genome", "The genome could not be serialized for uploading.");
                 return;
             }
