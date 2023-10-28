@@ -52,6 +52,7 @@ struct NeuronFunction
     };
 
     NeuronState* neuronState;
+    NeuronActivationFunction activationFunctions[MAX_CHANNELS];
 };
 
 struct TransmitterFunction

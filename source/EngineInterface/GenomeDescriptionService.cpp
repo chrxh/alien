@@ -192,6 +192,9 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 writeNeuronProperty(result, neuron.biases[i]);
             }
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                writeByte(result, neuron.activationFunctions[i]);
+            }
         } break;
         case CellFunction_Transmitter: {
             auto const& transmitter = std::get<TransmitterGenomeDescription>(*cell.cellFunction);
@@ -305,6 +308,9 @@ namespace
                 }
                 for (int i = 0; i < MAX_CHANNELS; ++i) {
                     neuron.biases[i] = readNeuronProperty(data, bytePosition);
+                }
+                for (int i = 0; i < MAX_CHANNELS; ++i) {
+                    neuron.activationFunctions[i] = readByte(data, bytePosition) % NeuronActivationFunction_Count;
                 }
                 cell.cellFunction = neuron;
             } break;

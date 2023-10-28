@@ -25,7 +25,7 @@ namespace Const
     auto constexpr ConstructorSeparation = 2;
 
     auto constexpr CellBasicBytes = 8;
-    auto constexpr NeuronBytes = 72;
+    auto constexpr NeuronBytes = 64 + 8 + 8;
     auto constexpr TransmitterBytes = 1;
     auto constexpr ConstructorFixedBytes = 5;
     auto constexpr SensorBytes = 4;

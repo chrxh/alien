@@ -60,6 +60,8 @@ namespace
     auto constexpr Id_CellGenome_InputExecutionOrderNumber = 8;
     auto constexpr Id_CellGenome_OutputBlocked = 6;
 
+    auto constexpr Id_NeuronGenome_ActivationFunctions = 0;
+
     auto constexpr Id_TransmitterGenome_Mode = 0;
 
     auto constexpr Id_ConstructorGenome_Mode = 0;
@@ -106,7 +108,9 @@ namespace
     auto constexpr Id_Cell_OutputBlocked = 7;
     auto constexpr Id_Cell_ActivationTime = 8;
     auto constexpr Id_Cell_GenomeNumNodes = 13;
-    
+
+    auto constexpr Id_Neuron_ActivationFunctions = 0;
+
     auto constexpr Id_Constructor_ActivationMode = 0;
     auto constexpr Id_Constructor_SingleConstruction = 1;
     auto constexpr Id_Constructor_SeparateConstruction = 2;
@@ -163,7 +167,7 @@ namespace cereal
         Load,
         Save
     };
-    using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>, std::optional<int>>;
+    using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>, std::optional<int>, std::vector<int>>;
 
     template <class Archive>
     std::unordered_map<int, VariantData> getLoadSaveMap(SerializationTask task, Archive& ar)
@@ -213,6 +217,7 @@ namespace cereal
     {
         NeuronGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<std::vector<int>>(task, auxiliaries, Id_NeuronGenome_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
         setLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.weights, data.biases);
@@ -473,6 +478,7 @@ namespace cereal
     {
         NeuronDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<std::vector<int>>(task, auxiliaries, Id_Neuron_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
         setLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.weights, data.biases);

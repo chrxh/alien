@@ -513,8 +513,8 @@ void _InspectorWindow::processNeuronContent(NeuronDescription& neuron)
             _selectedInput,
             _selectedOutput);
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(ActivityTextWidth), neuron.weights[_selectedOutput][_selectedInput]);
-        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(ActivityTextWidth), neuron.biases[_selectedOutput]);
+            AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(ActivityTextWidth), neuron.weights.at(_selectedOutput).at(_selectedInput));
+        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(ActivityTextWidth), neuron.biases.at(_selectedOutput));
         ImGui::TreePop();
     }
 }
