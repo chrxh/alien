@@ -81,8 +81,8 @@ namespace Const
         " Input channel #0: value > threshold triggers creation of a bond to a cell in the vicinity, value < -threshold triggers destruction of a bond\n\n" ICON_FA_CHEVRON_RIGHT
         " Output channel #0: 0 (no connection created/removed) or 1 (connection created/removed)";
 
-    std::string const DetonatorTooltip = "A detonator cell will be activated if it receives an input on channel #0 with abs(value) > threshold. Then a counter "
-                                         "is decreasing until it reaches 0. After that the detonator cell will explode.";
+    std::string const DetonatorTooltip = "A detonator cell will be activated if it receives an input on channel #0 with abs(value) > threshold. Then its counter "
+                                         "is decreasing after each executing until it reaches 0. After that the detonator cell will explode and the surrounding cells are highly accelerated.";
 
     std::string const CellFunctionTooltip =
         "Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
@@ -381,7 +381,8 @@ namespace Const
         "threshold activates constructor (only necessary in 'Manual' mode)\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: abs(value) > threshold activates "
         "sensor\n\n" ICON_FA_CHEVRON_RIGHT " Attacker: abs(value) > threshold activates attacker\n\n" ICON_FA_CHEVRON_RIGHT " Injector: abs(value) > threshold "
         "activates injector\n\n" ICON_FA_CHEVRON_RIGHT " Muscle: The strength of the movement, bending or expansion/contraction. A negative sign corresponds to "
-        "the opposite action.\n\n" ICON_FA_CHEVRON_RIGHT " Reconnector: value > threshold triggers creation of a bond to a cell in the vicinity, value < -threshold triggers destruction of a bond",
+        "the opposite action.\n\n" ICON_FA_CHEVRON_RIGHT " Reconnector: value > threshold triggers creation of a bond to a cell in the vicinity, value < -threshold triggers destruction of a bond\n\n"
+        ICON_FA_CHEVRON_RIGHT " Detonator: abs(value) > threshold activates detonator",
         "The following cell functions obtain their input from channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Muscle: This channel is "
         "solely utilized for acceleration due to bending. If the sign of channel #1 differs from the sign of channel #0, no acceleration will be obtained "
         "during the bending process.",
