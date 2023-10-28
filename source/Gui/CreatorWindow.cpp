@@ -11,7 +11,7 @@
 #include "Base/NumberGenerator.h"
 #include "Base/Math.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "StyleRepository.h"
@@ -189,7 +189,7 @@ void _CreatorWindow::onDrawing()
             pos.x = toFloat(toInt(pos.x));
             pos.y = toFloat(toInt(pos.y));
         }
-        return DescriptionHelper::createUnconnectedCircle(DescriptionHelper::CreateUnconnectedCircleParameters()
+        return DescriptionEditService::createUnconnectedCircle(DescriptionEditService::CreateUnconnectedCircleParameters()
                                                               .center(pos)
                                                               .radius(_editorModel->getPencilWidth())
                                                               .energy(_energy)
@@ -201,7 +201,7 @@ void _CreatorWindow::onDrawing()
     };
 
     if (_drawing.isEmpty()) {
-        DescriptionHelper::addIfSpaceAvailable(_drawing, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simController->getWorldSize());
+        DescriptionEditService::addIfSpaceAvailable(_drawing, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simController->getWorldSize());
         _lastDrawPos = pos;
     } else {
         auto posDelta = Math::length(pos - _lastDrawPos);
@@ -210,15 +210,15 @@ void _CreatorWindow::onDrawing()
             for (float interDelta = 0; interDelta < posDelta; interDelta += 1.0f) {
                 auto drawPos = lastDrawPos + (pos - lastDrawPos) * interDelta / posDelta;
                 auto toAdd = createAlignedCircle(drawPos);
-                DescriptionHelper::addIfSpaceAvailable(_drawing, _drawingOccupancy, toAdd, 0.5f, _simController->getWorldSize());
+                DescriptionEditService::addIfSpaceAvailable(_drawing, _drawingOccupancy, toAdd, 0.5f, _simController->getWorldSize());
                 _lastDrawPos = drawPos;
             }
         }
     }
-    DescriptionHelper::reconnectCells(_drawing, 1.5f);
+    DescriptionEditService::reconnectCells(_drawing, 1.5f);
     if (!_makeSticky) {
         auto origDrawing = _drawing;
-        DescriptionHelper::removeStickiness(_drawing);
+        DescriptionEditService::removeStickiness(_drawing);
         _simController->addAndSelectSimulationData(_drawing);
         _drawing = origDrawing;
     } else {
@@ -270,7 +270,7 @@ void _CreatorWindow::createRectangle()
     }
 
     auto parameters = _simController->getSimulationParameters();
-    auto data = DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters()
+    auto data = DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters()
                                                   .width(_rectHorizontalCells)
                                                   .height(_rectVerticalCells)
                                                   .cellDistance(_cellDistance)
@@ -290,7 +290,7 @@ void _CreatorWindow::createHexagon()
     if (_layers <= 0) {
         return;
     }
-    DataDescription data = DescriptionHelper::createHex(DescriptionHelper::CreateHexParameters()
+    DataDescription data = DescriptionEditService::createHex(DescriptionEditService::CreateHexParameters()
                                                             .layers(_layers)
                                                             .cellDistance(_cellDistance)
                                                             .energy(_energy)
@@ -335,9 +335,9 @@ void _CreatorWindow::createDisc()
         }
     }
 
-    DescriptionHelper::reconnectCells(data, _cellDistance * 1.7f);
+    DescriptionEditService::reconnectCells(data, _cellDistance * 1.7f);
     if (!_makeSticky) {
-        DescriptionHelper::removeStickiness(data);
+        DescriptionEditService::removeStickiness(data);
     }
     data.setCenter(getRandomPos());
     _simController->addAndSelectSimulationData(data);

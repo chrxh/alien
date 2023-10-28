@@ -6,10 +6,10 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/range/adaptor/indexed.hpp>
 
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationController.h"
-#include "EngineInterface/GenomeDescriptionConverter.h"
-#include "EngineInterface/PreviewDescriptionConverter.h"
+#include "EngineInterface/GenomeDescriptionService.h"
+#include "EngineInterface/PreviewDescriptionService.h"
 
 #include "StyleRepository.h"
 #include "Viewport.h"
@@ -78,7 +78,7 @@ void _InspectorWindow::process()
             processParticle(std::get<ParticleDescription>(entity));
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionHelper::getPos(entity));
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity));
         auto factor = StyleRepository::getInstance().scale(1);
 
         drawList->AddLine(
@@ -376,20 +376,20 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 
             if (ImGui::TreeNodeEx("Data", TreeNodeFlags)) {
                 if (ImGui::BeginChild("##child", ImVec2(0, scale(200)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-                    auto genomDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome);
-                    auto previewDesc = PreviewDescriptionConverter::convert(genomDesc, std::nullopt, parameters);
+                    auto genomDesc = GenomeDescriptionService::convertBytesToDescription(desc.genome);
+                    auto previewDesc = PreviewDescriptionService::convert(genomDesc, std::nullopt, parameters);
                     std::optional<int> selectedNodeDummy;
                     AlienImGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
                 }
                 ImGui::EndChild();
                 if (AlienImGui::Button("Edit")) {
-                    _genomeEditorWindow->openTab(GenomeDescriptionConverter::convertBytesToDescription(desc.genome));
+                    _genomeEditorWindow->openTab(GenomeDescriptionService::convertBytesToDescription(desc.genome));
                 }
 
                 ImGui::SameLine();
                 if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Inject from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
                     printOverlayMessage("Genome injected");
-                    desc.genome = GenomeDescriptionConverter::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
+                    desc.genome = GenomeDescriptionService::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
                     if constexpr (std::is_same<Description, ConstructorDescription>()) {
                         desc.genomeCurrentNodeIndex = 0;
                     }
@@ -398,7 +398,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             }
 
             if (ImGui::TreeNodeEx("Properties (entire genome)", TreeNodeFlags)) {
-                auto numNodes = toInt(GenomeDescriptionConverter::getNumNodesRecursively(desc.genome, true));
+                auto numNodes = toInt(GenomeDescriptionService::getNumNodesRecursively(desc.genome, true));
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters()
                         .name("Number of cells")
@@ -424,7 +424,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 
             if (ImGui::TreeNodeEx("Properties (principal genome part)", TreeNodeFlags)) {
 
-                auto genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(desc.genome);
+                auto genomeDesc = GenomeDescriptionService::convertBytesToDescription(desc.genome);
                 auto numRepetitions = genomeDesc.header.numRepetitions;
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters()
@@ -756,14 +756,14 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
     switch (cell.getCellFunctionType()) {
     case CellFunction_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
-        auto numNodes = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(constructor.genome, toInt(constructor.genome.size()));
+        auto numNodes = GenomeDescriptionService::convertNodeAddressToNodeIndex(constructor.genome, toInt(constructor.genome.size()));
         if (numNodes > 0) {
             constructor.genomeCurrentNodeIndex = ((constructor.genomeCurrentNodeIndex % numNodes) + numNodes) % numNodes;
         } else {
             constructor.genomeCurrentNodeIndex = 0;
         }
 
-        auto numRepetitions = GenomeDescriptionConverter::getNumRepetitions(constructor.genome);
+        auto numRepetitions = GenomeDescriptionService::getNumRepetitions(constructor.genome);
         if (numRepetitions != std::numeric_limits<int>::max()) {
             constructor.genomeCurrentRepetition = ((constructor.genomeCurrentRepetition % numRepetitions) + numRepetitions) % numRepetitions;
         } else {

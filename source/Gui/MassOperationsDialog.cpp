@@ -5,7 +5,7 @@
 #include "Base/Definitions.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
@@ -168,19 +168,19 @@ void _MassOperationsDialog::onExecute()
         return result;
     };
     if (_randomizeCellColors) {
-        DescriptionHelper::randomizeCellColors(content, getColorVector(_checkedCellColors));
+        DescriptionEditService::randomizeCellColors(content, getColorVector(_checkedCellColors));
     }
     if (_randomizeGenomeColors) {
-        DescriptionHelper::randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
+        DescriptionEditService::randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
     }
     if (_randomizeEnergies) {
-        DescriptionHelper::randomizeEnergies(content, _minEnergy, _maxEnergy);
+        DescriptionEditService::randomizeEnergies(content, _minEnergy, _maxEnergy);
     }
     if (_randomizeAges) {
-        DescriptionHelper::randomizeAges(content, _minAge, _maxAge);
+        DescriptionEditService::randomizeAges(content, _minAge, _maxAge);
     }
     if (_randomizeCountdowns) {
-        DescriptionHelper::randomizeCountdowns(content, _minCountdown, _maxCountdown);
+        DescriptionEditService::randomizeCountdowns(content, _minCountdown, _maxCountdown);
     }
 
     if (_restrictToSelectedClusters) {

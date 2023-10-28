@@ -12,7 +12,7 @@ struct GenomeEncodingSpecification
     MEMBER_DECLARATION(GenomeEncodingSpecification, bool, concatenationAngle2, true);
 };
 
-class GenomeDescriptionConverter
+class GenomeDescriptionService
 {
 public:
     static std::vector<uint8_t> convertDescriptionToBytes(GenomeDescription const& genome, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());

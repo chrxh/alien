@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SelectionShallowData.h"
 
 #include "Definitions.h"
@@ -35,8 +35,8 @@ private:
 
     MultiplierMode _mode = MultiplierMode_Grid;
 
-    DescriptionHelper::GridMultiplyParameters _gridParameters;
-    DescriptionHelper::RandomMultiplyParameters _randomParameters;
+    DescriptionEditService::GridMultiplyParameters _gridParameters;
+    DescriptionEditService::RandomMultiplyParameters _randomParameters;
 
     DataDescription _origSelection;
     std::optional<SelectionShallowData> _selectionDataAfterMultiplication;

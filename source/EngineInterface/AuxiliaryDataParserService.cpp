@@ -1,4 +1,4 @@
-#include "AuxiliaryDataParser.h"
+#include "AuxiliaryDataParserService.h"
 
 #include "GeneralSettings.h"
 #include "Settings.h"
@@ -883,28 +883,28 @@ namespace
     }
 }
 
-boost::property_tree::ptree AuxiliaryDataParser::encodeAuxiliaryData(AuxiliaryData const& data)
+boost::property_tree::ptree AuxiliaryDataParserService::encodeAuxiliaryData(AuxiliaryData const& data)
 {
     boost::property_tree::ptree tree;
     encodeDecode(tree, const_cast<AuxiliaryData&>(data), ParserTask::Encode);
     return tree;
 }
 
-AuxiliaryData AuxiliaryDataParser::decodeAuxiliaryData(boost::property_tree::ptree tree)
+AuxiliaryData AuxiliaryDataParserService::decodeAuxiliaryData(boost::property_tree::ptree tree)
 {
     AuxiliaryData result;
     encodeDecode(tree, result, ParserTask::Decode);
     return result;
 }
 
-boost::property_tree::ptree AuxiliaryDataParser::encodeSimulationParameters(SimulationParameters const& data)
+boost::property_tree::ptree AuxiliaryDataParserService::encodeSimulationParameters(SimulationParameters const& data)
 {
     boost::property_tree::ptree tree;
     encodeDecode(tree, const_cast<SimulationParameters&>(data), ParserTask::Encode);
     return tree;
 }
 
-SimulationParameters AuxiliaryDataParser::decodeSimulationParameters(boost::property_tree::ptree tree)
+SimulationParameters AuxiliaryDataParserService::decodeSimulationParameters(boost::property_tree::ptree tree)
 {
     SimulationParameters result;
     encodeDecode(tree, result, ParserTask::Decode);

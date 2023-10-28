@@ -8,7 +8,7 @@
 #include "AuxiliaryData.h"
 #include "Definitions.h"
 
-class AuxiliaryDataParser
+class AuxiliaryDataParserService
 {
 public:
     static boost::property_tree::ptree encodeAuxiliaryData(AuxiliaryData const& data);

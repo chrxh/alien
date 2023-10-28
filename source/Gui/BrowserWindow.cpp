@@ -14,7 +14,7 @@
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "Base/VersionChecker.h"
-#include "EngineInterface/GenomeDescriptionConverter.h"
+#include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/Serializer.h"
 #include "EngineInterface/SimulationController.h"
 
@@ -860,7 +860,7 @@ void _BrowserWindow::onDownloadItem(RemoteSimulationData* sim)
                 return;
             }
             _editorController->setOn(true);
-            _editorController->getGenomeEditorWindow()->openTab(GenomeDescriptionConverter::convertBytesToDescription(genome));
+            _editorController->getGenomeEditorWindow()->openTab(GenomeDescriptionService::convertBytesToDescription(genome));
         }
         if (VersionChecker::isVersionNewer(sim->version)) {
             MessageDialog::getInstance().information(

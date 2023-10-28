@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
@@ -61,7 +61,7 @@ private:
 
     //drawing
     DataDescription _drawing;
-    DescriptionHelper::Occupancy _drawingOccupancy;
+    DescriptionEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
 
     CreationMode _mode = CreationMode_Drawing;

@@ -7,10 +7,10 @@
 
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationController.h"
-#include "EngineInterface/GenomeDescriptionConverter.h"
+#include "EngineInterface/GenomeDescriptionService.h"
 
 #include "IntegrationTestFramework.h"
 
@@ -27,9 +27,9 @@ protected:
     std::vector<int> const genomeCellColors = {1, 4, 5};
     std::vector<uint8_t> createGenomeWithMultipleCellsWithDifferentFunctions() const
     {
-        std::vector<uint8_t> subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription());
+        std::vector<uint8_t> subGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription());
         for (int i = 0; i < 15; ++i) {
-            subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
+            subGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({
                 CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
                 CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(genomeCellColors[1]),
                 CellGenomeDescription().setColor(genomeCellColors[2]),
@@ -39,7 +39,7 @@ protected:
                     .setColor(genomeCellColors[0]),
             }));
         }
-        return GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
+        return GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({
             CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
             CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(genomeCellColors[1]),
             CellGenomeDescription().setColor(genomeCellColors[0]),
@@ -57,10 +57,10 @@ protected:
 
     std::vector<uint8_t> createGenomeWithUniformColorPerSubgenome() const
     {
-        std::vector<uint8_t> subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription());
+        std::vector<uint8_t> subGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription());
         for (int i = 0; i < 15; ++i) {
             auto color = genomeCellColors[i % genomeCellColors.size()];
-            subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
+            subGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({
                 CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(color),
                 CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(color),
                 CellGenomeDescription().setColor(color),
@@ -70,7 +70,7 @@ protected:
                     .setColor(color),
             }));
         };
-        return GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
+        return GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({
             CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
             CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(genomeCellColors[0]),
             CellGenomeDescription().setColor(genomeCellColors[0]),
@@ -89,9 +89,9 @@ protected:
     std::vector<uint8_t> createGenomeWithUniformColor() const
     {
         auto color = genomeCellColors[0];
-        std::vector<uint8_t> subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription());
+        std::vector<uint8_t> subGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription());
         for (int i = 0; i < 15; ++i) {
-            subGenome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
+            subGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({
                 CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(color),
                 CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(color),
                 CellGenomeDescription().setColor(color),
@@ -99,7 +99,7 @@ protected:
                 CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome).setMode(std::rand() % 100)).setColor(color),
             }));
         };
-        return GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
+        return GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({
             CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(color),
             CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(color),
             CellGenomeDescription().setColor(color),
@@ -119,7 +119,7 @@ protected:
     {
         for (auto const& cell : input.cells) {
             if (auto subGenomeBytes = cell.getGenome()) {
-                auto subGenome = GenomeDescriptionConverter::convertBytesToDescription(*subGenomeBytes);
+                auto subGenome = GenomeDescriptionService::convertBytesToDescription(*subGenomeBytes);
                 rollout(subGenome, result);
                 auto cellClone = cell;
                 cellClone.setGenome({});
@@ -135,8 +135,8 @@ protected:
         if (expected.size() != actual.size()) {
             return false;
         }
-        auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
-        auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
+        auto expectedGenome = GenomeDescriptionService::convertBytesToDescription(expected);
+        auto actualGenome = GenomeDescriptionService::convertBytesToDescription(actual);
         if (expectedGenome.header.shape != actualGenome.header.shape) {
             return false;
         }
@@ -196,8 +196,8 @@ protected:
         if (expected.size() != actual.size()) {
             return false;
         }
-        auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
-        auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
+        auto expectedGenome = GenomeDescriptionService::convertBytesToDescription(expected);
+        auto actualGenome = GenomeDescriptionService::convertBytesToDescription(actual);
         if (expectedGenome.header != actualGenome.header) {
             return false;
         }
@@ -250,8 +250,8 @@ protected:
         if (expected.size() != actual.size()) {
             return false;
         }
-        auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
-        auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
+        auto expectedGenome = GenomeDescriptionService::convertBytesToDescription(expected);
+        auto actualGenome = GenomeDescriptionService::convertBytesToDescription(actual);
         if (expectedGenome.cells.size() != actualGenome.cells.size()) {
             return false;
         }
@@ -312,8 +312,8 @@ protected:
         if (expected.size() != actual.size()) {
             return false;
         }
-        auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
-        auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
+        auto expectedGenome = GenomeDescriptionService::convertBytesToDescription(expected);
+        auto actualGenome = GenomeDescriptionService::convertBytesToDescription(actual);
         expectedGenome.header.shape = ConstructionShape_Custom; //compare all expect shape
         actualGenome.header.shape = ConstructionShape_Custom;
         if (expectedGenome.header != actualGenome.header) {
@@ -378,8 +378,8 @@ protected:
 
     bool compareCellFunctionMutation(std::vector<uint8_t> const& expected, std::vector<uint8_t> const& actual)
     {
-        auto expectedGenome = GenomeDescriptionConverter::convertBytesToDescription(expected);
-        auto actualGenome = GenomeDescriptionConverter::convertBytesToDescription(actual);
+        auto expectedGenome = GenomeDescriptionService::convertBytesToDescription(expected);
+        auto actualGenome = GenomeDescriptionService::convertBytesToDescription(actual);
         if (expectedGenome.header != actualGenome.header) {
             return false;
         }
@@ -414,8 +414,8 @@ protected:
 
     bool compareInsertMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after)
     {
-        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
-        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
+        auto beforeGenome = GenomeDescriptionService::convertBytesToDescription(before);
+        auto afterGenome = GenomeDescriptionService::convertBytesToDescription(after);
         if (afterGenome.header != beforeGenome.header) {
             return false;
         }
@@ -462,8 +462,8 @@ protected:
 
     bool compareDeleteMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after)
     {
-        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
-        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
+        auto beforeGenome = GenomeDescriptionService::convertBytesToDescription(before);
+        auto afterGenome = GenomeDescriptionService::convertBytesToDescription(after);
         if (afterGenome.header != beforeGenome.header) {
             return false;
         }
@@ -510,8 +510,8 @@ protected:
 
     bool compareTranslateMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after)
     {
-        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
-        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
+        auto beforeGenome = GenomeDescriptionService::convertBytesToDescription(before);
+        auto afterGenome = GenomeDescriptionService::convertBytesToDescription(after);
 
         std::set<CellGenomeDescription> beforeGenomeRollout;
         rollout(beforeGenome, beforeGenomeRollout);
@@ -523,8 +523,8 @@ protected:
 
     bool compareColorMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after, std::set<int> const& allowedColors)
     {
-        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
-        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
+        auto beforeGenome = GenomeDescriptionService::convertBytesToDescription(before);
+        auto afterGenome = GenomeDescriptionService::convertBytesToDescription(after);
         if (afterGenome.header != beforeGenome.header) {
             return false;
         }
@@ -563,8 +563,8 @@ protected:
 
     bool compareUniformColorMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after, std::optional<int> const& allowedColor)
     {
-        auto beforeGenome = GenomeDescriptionConverter::convertBytesToDescription(before);
-        auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(after);
+        auto beforeGenome = GenomeDescriptionService::convertBytesToDescription(before);
+        auto afterGenome = GenomeDescriptionService::convertBytesToDescription(after);
         if (afterGenome.header != beforeGenome.header) {
             return false;
         }
@@ -717,7 +717,7 @@ TEST_F(MutationTests, insertMutation_emptyGenome)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
 
-    auto actualGenomeDescription = GenomeDescriptionConverter::convertBytesToDescription(actualConstructor.genome);
+    auto actualGenomeDescription = GenomeDescriptionService::convertBytesToDescription(actualConstructor.genome);
     EXPECT_EQ(1, actualGenomeDescription.cells.size());
     EXPECT_EQ(cellColor, actualGenomeDescription.cells.front().color);
 }
@@ -747,7 +747,7 @@ TEST_F(MutationTests, insertMutation)
 
 TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({
         CellGenomeDescription().setCellFunction(NeuronGenomeDescription()),
     }));
 
@@ -761,7 +761,7 @@ TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
     auto actualCellById = getCellById(actualData);
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
-    EXPECT_EQ(GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor.genome.size());
+    EXPECT_EQ(GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor.genome.size());
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
 
@@ -781,7 +781,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
     auto actualCellById = getCellById(actualData);
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
-    auto afterGenome = GenomeDescriptionConverter::convertBytesToDescription(actualConstructor.genome);
+    auto afterGenome = GenomeDescriptionService::convertBytesToDescription(actualConstructor.genome);
 
     std::set<CellGenomeDescription> afterGenomeRollout;
     rollout(afterGenome, afterGenomeRollout);
@@ -812,7 +812,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
 
-    EXPECT_EQ(GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor.genome.size());
+    EXPECT_EQ(GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor.genome.size());
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
 
