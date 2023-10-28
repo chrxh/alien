@@ -30,7 +30,7 @@ namespace
     auto const CellFunctionTextWidth = 195.0f;
     auto const CellFunctionDefenderWidth = 100.0f;
     auto const CellFunctionBaseTabTextWidth = 150.0f;
-    auto const ActivityTextWidth = 100.0f;
+    auto const ActivityTextWidth = 130.0f;
     auto const GenomeTabTextWidth = 195.0f;
     auto const CellMetadataContentTextWidth = 80.0f;
     auto const ParticleContentTextWidth = 80.0f;
@@ -515,6 +515,9 @@ void _InspectorWindow::processNeuronContent(NeuronDescription& neuron)
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(ActivityTextWidth), neuron.weights.at(_selectedOutput).at(_selectedInput));
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(ActivityTextWidth), neuron.biases.at(_selectedOutput));
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters().name("Activation function").textWidth(ActivityTextWidth).values({"Sigmoid", "Binary", "Linear"}),
+            neuron.activationFunctions.at(_selectedOutput));
         ImGui::TreePop();
     }
 }
