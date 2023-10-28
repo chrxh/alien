@@ -224,8 +224,8 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellColorization)
                     .values({"None", "Standard cell colors", "Mutants", "Cell state", "Genome size"})
-                    .tooltip("Here, one can set how the cells are to be colored during rendering. In addition to coloring according to the 7 cell colors, there "
-                             "is also the option of\n\n" ICON_FA_CHEVRON_RIGHT
+                    .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
+                            ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
                              " Mutants: Different mutants are represented by different colors (except changes in the neuronal networks and cell "
                              "properties).\n\n" ICON_FA_CHEVRON_RIGHT
                              " Cell state: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT " Genome size: blue = creature with small genome, red = large genome"),
