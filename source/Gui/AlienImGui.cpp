@@ -1260,7 +1260,7 @@ void AlienImGui::NeuronSelection(
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
     };
-    RealVector2D ioButtonSize{scale(100.0f), scale(23.0f)};
+    RealVector2D ioButtonSize{scale(90.0f), scale(23.0f)};
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     auto windowPos = ImGui::GetWindowPos();
     auto rightMargin = StyleRepository::getInstance().scale(parameters._rightMargin);
@@ -1774,18 +1774,18 @@ void AlienImGui::RotateEnd(float angle)
 }
 //<<<<<<<<<<
 
-int DynamicTableLayout::calcNumColumns(float tableWidth, float columnWidth)
+int AlienImGui::DynamicTableLayout::calcNumColumns(float tableWidth, float columnWidth)
 {
     return std::max(toInt(tableWidth / scale(columnWidth)), 1);
 }
 
-DynamicTableLayout::DynamicTableLayout(float columnWidth)
+AlienImGui::DynamicTableLayout::DynamicTableLayout(float columnWidth)
     : _columnWidth(columnWidth)
 {
     _numColumns = calcNumColumns(ImGui::GetContentRegionAvail().x, columnWidth);
 }
 
-bool DynamicTableLayout::begin()
+bool AlienImGui::DynamicTableLayout::begin()
 {
     auto result = ImGui::BeginTable("##", _numColumns, ImGuiTableFlags_None);
     if (result) {
@@ -1794,12 +1794,12 @@ bool DynamicTableLayout::begin()
     }
     return result;
 }
-void DynamicTableLayout::end()
+void AlienImGui::DynamicTableLayout::end()
 {
     ImGui::EndTable();
 }
 
-void DynamicTableLayout::next()
+void AlienImGui::DynamicTableLayout::next()
 {
     auto currentCol = (++_elementNumber) % _numColumns;
     if (currentCol > 0) {

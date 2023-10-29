@@ -36,7 +36,6 @@ namespace
     auto const ContentTextWidth = 190.0f;
     auto const DynamicTableHeaderColumnWidth = 335.0f;
     auto const DynamicTableColumnWidth = 300.0f;
-    auto const NeuronEditTextWidth = 130.0f;
     auto const SubWindowRightMargin = 0.0f;
 }
 
@@ -288,7 +287,7 @@ void _GenomeEditorWindow::processTab(TabData& tab)
 
 void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
 {
-    DynamicTableLayout table(DynamicTableHeaderColumnWidth);
+    AlienImGui::DynamicTableLayout table(DynamicTableHeaderColumnWidth);
     if (table.begin()) {
         std::vector ShapeStrings = {"Custom"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s, "Tube"s, "Lolli"s, "Small lolli"s, "Zigzag"s};
         auto origShape = tab.genome.header.shape;
@@ -474,7 +473,7 @@ void _GenomeEditorWindow::processNode(
 {
     auto type = cell.getCellFunctionType();
 
-    DynamicTableLayout table(DynamicTableColumnWidth);
+    AlienImGui::DynamicTableLayout table(DynamicTableColumnWidth);
     if (table.begin()) {
         if (AlienImGui::CellFunctionCombo(
                 AlienImGui::CellFunctionComboParameters().name("Function").textWidth(ContentTextWidth).tooltip(Const::getCellFunctionTooltip(type)), type)) {

@@ -301,6 +301,23 @@ public:
     static void OnlineSymbol();
     static void LastDayOnlineSymbol();
 
+    class DynamicTableLayout
+    {
+    public:
+        static int calcNumColumns(float tableWidth, float columnWidth);
+
+        DynamicTableLayout(float columnWidth);
+
+        bool begin();
+        void end();
+        void next();
+
+    private:
+        float _columnWidth = 0;
+        int _numColumns = 0;
+        int _elementNumber = 0;
+    };
+
 private:
 
     template <typename Parameter, typename T>
@@ -330,21 +347,4 @@ private:
     static int _rotationStartIndex;
     static std::unordered_map<unsigned int, int> _neuronSelectedInput;
     static std::unordered_map<unsigned int, int> _neuronSelectedOutput;
-};
-
-class DynamicTableLayout
-{
-public:
-    static int calcNumColumns(float tableWidth, float columnWidth);
-
-    DynamicTableLayout(float columnWidth);
-
-    bool begin();
-    void end();
-    void next();
-
-private:
-    float _columnWidth = 0;
-    int _numColumns = 0;
-    int _elementNumber = 0;
 };
