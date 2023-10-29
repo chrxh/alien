@@ -13,7 +13,7 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static float applyActivationFunction(NeuronActivationFunction activationFunction, float z);  // maps to [-1, 1]
+    __inline__ __device__ static float applyActivationFunction(NeuronActivationFunction activationFunction, float x);  // maps to [-1, 1]
 };
 
 /************************************************************************/
@@ -68,18 +68,18 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 }
 
-__inline__ __device__ float NeuronProcessor::applyActivationFunction(NeuronActivationFunction activationFunction, float z)
+__inline__ __device__ float NeuronProcessor::applyActivationFunction(NeuronActivationFunction activationFunction, float x)
 {
     switch (activationFunction) {
     case NeuronActivationFunction_Sigmoid:
-        return 2.0f / (1.0f + __expf(-z)) - 1.0f;
+        return 2.0f / (1.0f + __expf(-x)) - 1.0f;
     case NeuronActivationFunction_BinaryStep:
-        return z >= NEAR_ZERO ? 1.0f : 0.0f;
+        return x >= NEAR_ZERO ? 1.0f : 0.0f;
     case NeuronActivationFunction_Identity:
-        return z;
+        return x;
     case NeuronActivationFunction_Abs:
-        return abs(z);
+        return abs(x);
     case NeuronActivationFunction_Gaussian:
-        return __expf(-2*z);
+        return __expf(-2 * x * x);
     }
 }

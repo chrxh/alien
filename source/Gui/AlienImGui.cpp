@@ -1260,13 +1260,16 @@ void AlienImGui::NeuronSelection(
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
     };
-    RealVector2D ioButtonSize{scale(90.0f), scale(23.0f)};
+    RealVector2D const ioButtonSize{scale(90.0f), scale(23.0f)};
+    RealVector2D const plotSize{scale(50.0f), scale(23.0f)};
+    auto const rightMargin = scale(parameters._rightMargin);
+    auto const biasFieldWidth = ImGui::GetStyle().FramePadding.x * 2;
+
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     auto windowPos = ImGui::GetWindowPos();
-    auto rightMargin = StyleRepository::getInstance().scale(parameters._rightMargin);
+
     RealVector2D inputPos[MAX_CHANNELS];
     RealVector2D outputPos[MAX_CHANNELS];
-    auto biasFieldWidth = ImGui::GetStyle().FramePadding.x * 2;
 
     //draw buttons and save positions to visualize weights
     for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -1285,7 +1288,7 @@ void AlienImGui::NeuronSelection(
         inputPos[i] = RealVector2D(
             windowPos.x - ImGui::GetScrollX() + buttonStartPos.x + ioButtonSize.x, windowPos.y - ImGui::GetScrollY() + buttonStartPos.y + ioButtonSize.y / 2);
 
-        ImGui::SameLine(0, ImGui::GetContentRegionAvail().x - ioButtonSize.x * 2 - rightMargin);
+        ImGui::SameLine(0, ImGui::GetContentRegionAvail().x - ioButtonSize.x * 2 - plotSize.x - ImGui::GetStyle().FramePadding.x - rightMargin);
         buttonStartPos = ImGui::GetCursorPos();
         outputPos[i] = RealVector2D(
             windowPos.x - ImGui::GetScrollX() + buttonStartPos.x - biasFieldWidth - ImGui::GetStyle().FramePadding.x,
@@ -1326,6 +1329,40 @@ void AlienImGui::NeuronSelection(
             }
             auto thickness = std::min(4.0f, std::abs(weights[j][i]));
             drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, calcColor(weights[j][i]), thickness);
+        }
+    }
+
+    //visualize activation functions
+    auto calcPlotPosition = [&](RealVector2D const& refPos, float x, NeuronActivationFunction activationFunction) {
+        float value = 0;
+        switch (activationFunction) {
+        case NeuronActivationFunction_Sigmoid:
+            value = Math::sigmoid(x);
+            break;
+        case NeuronActivationFunction_BinaryStep:
+            value = Math::binaryStep(x);
+            break;
+        case NeuronActivationFunction_Identity:
+            value = x / 4;
+            break;
+        case NeuronActivationFunction_Abs:
+            value = std::abs(x) / 4;
+            break;
+        case NeuronActivationFunction_Gaussian:
+            value = Math::gaussian(x);
+            break;
+        }
+        return RealVector2D{refPos.x + plotSize.x / 2 + x * plotSize.x / 8 + ImGui::GetStyle().FramePadding.x * 2, refPos.y - value * plotSize.y / 2};
+    };
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        std::optional<RealVector2D> lastPos;
+        RealVector2D refPos{outputPos[i].x + ioButtonSize.x + biasFieldWidth, outputPos[i].y};
+        for (float dx = -4.0f; dx < 4.0f; dx += 0.2f) {
+            RealVector2D pos = calcPlotPosition(refPos, dx, activationFunctions[i]);
+            if (lastPos) {
+                drawList->AddLine({lastPos->x, lastPos->y}, {pos.x, pos.y}, ImColor::HSV(0.0f, 0.0f, 1.0f), 1.0f);
+            }
+            lastPos = pos;
         }
     }
 
