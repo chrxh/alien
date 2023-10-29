@@ -21,8 +21,11 @@ public:
     static void normalize(RealVector2D& v);
     static float subtractAngle(float angleMinuend, float angleSubtrahend);
     static bool isAngleInBetween(float angle1, float angle2, float angleBetweenCandidate);
-    static bool
-    crossing(RealVector2D const& segmentStart, RealVector2D const& segmentEnd, RealVector2D const& otherSegmentStart, RealVector2D const& otherSegmentEnd);
+    static bool crossing(RealVector2D const& segmentStart, RealVector2D const& segmentEnd, RealVector2D const& otherSegmentStart, RealVector2D const& otherSegmentEnd);
+
+    static float sigmoid(float x);
+    static float binaryStep(float x);
+    static float gaussian(float x);
 };
 
 RealVector2D operator*(RealMatrix2D const& m, RealVector2D const& v);

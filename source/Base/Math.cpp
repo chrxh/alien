@@ -120,6 +120,21 @@ bool Math::crossing(
     return lambda >= NEAR_ZERO && lambda <= 1 - NEAR_ZERO;
 }
 
+float Math::sigmoid(float x)
+{
+    return 2.0f / (1.0f + expf(-x)) - 1.0f;
+}
+
+float Math::binaryStep(float x)
+{
+    return x >= NEAR_ZERO ? 1.0f : 0.0f;
+}
+
+float Math::gaussian(float x)
+{
+    return expf(-2 * x * x);
+}
+
 RealVector2D operator*(RealMatrix2D const& m, RealVector2D const& v)
 {
     return {m[0][0] * v.x + m[0][1] * v.y, m[1][0] * v.x + m[1][1] * v.y};
