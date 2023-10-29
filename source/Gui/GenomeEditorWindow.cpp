@@ -37,7 +37,7 @@ namespace
     auto const DynamicTableHeaderColumnWidth = 335.0f;
     auto const DynamicTableColumnWidth = 300.0f;
     auto const NeuronEditTextWidth = 130.0f;
-    auto const WeightsAndBiasSelectionTextWidth = 400.0f;
+    auto const SubWindowRightMargin = 0.0f;
 }
 
 _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController, Viewport const& viewport)
@@ -261,47 +261,6 @@ void _GenomeEditorWindow::processEditor()
 
         ImGui::EndTabBar();
     }
-}
-
-namespace
-{
-    class DynamicTableLayout
-    {
-    public:
-        DynamicTableLayout(float columnWidth)
-            : _columnWidth(columnWidth)
-        {}
-
-        bool begin()
-        {
-            _columns = std::max(toInt(ImGui::GetContentRegionAvail().x / scale(_columnWidth)), 1);
-            auto result = ImGui::BeginTable("##", _columns, ImGuiTableFlags_None);
-            if (result) {
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-            }
-            return result;
-        }
-        void end() { ImGui::EndTable(); }
-
-        void next()
-        {
-            auto currentCol = (++_elementNumber) % _columns;
-            if (currentCol > 0) {
-                ImGui::TableSetColumnIndex(currentCol);
-                AlienImGui::VerticalSeparator();
-                ImGui::SameLine();
-            } else {
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-            }
-        }
-
-    private:
-        float _columnWidth = 0;
-        int _columns = 0;
-        int _elementNumber = 0;
-    };
 }
 
 void _GenomeEditorWindow::processTab(TabData& tab)
@@ -755,25 +714,7 @@ void _GenomeEditorWindow::processNode(
             auto& neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
             if (ImGui::TreeNodeEx("Neural network", ImGuiTreeNodeFlags_None)) {
                 AlienImGui::NeuronSelection(
-                    AlienImGui::NeuronSelectionParameters().outputButtonPositionFromRight(WeightsAndBiasSelectionTextWidth),
-                    neuron.weights,
-                    neuron.biases,
-                    _selectedInput,
-                    _selectedOutput);
-                DynamicTableLayout table(DynamicTableColumnWidth);
-                if (table.begin()) {
-                    AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(NeuronEditTextWidth),
-                        neuron.weights.at(_selectedOutput).at(_selectedInput));
-                    table.next();
-                    AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(NeuronEditTextWidth), neuron.biases.at(_selectedOutput));
-                    table.next();
-                    AlienImGui::Combo(
-                        AlienImGui::ComboParameters().name("Activation function").textWidth(NeuronEditTextWidth).values(Const::ActivationFunctions),
-                        neuron.activationFunctions.at(_selectedOutput));
-                    table.end();
-                }
+                    AlienImGui::NeuronSelectionParameters().rightMargin(SubWindowRightMargin), neuron.weights, neuron.biases, neuron.activationFunctions);
                 ImGui::TreePop();
             }
         } break;
@@ -804,7 +745,7 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
             content = "Genome: none";
         }
     }
-    auto width = ImGui::GetContentRegionAvail().x / 2;
+    auto width = ImGui::GetContentRegionAvail().x - scale(SubWindowRightMargin);
     if (ImGui::BeginChild("##", ImVec2(width, scale(60.0f)), true)) {
         AlienImGui::MonospaceText(content);
         AlienImGui::HelpMarker(Const::SubGenomeTooltip);

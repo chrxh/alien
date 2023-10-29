@@ -59,8 +59,6 @@ private:
     mutable int _tabSequenceNumber = 0;
     std::vector<TabData> _tabDatas;
     int _selectedTabIndex = 0;
-    int _selectedInput = 0;
-    int _selectedOutput = 0;
     std::optional<std::vector<uint8_t>> _copiedGenome;
     std::string _startingPath;
 
