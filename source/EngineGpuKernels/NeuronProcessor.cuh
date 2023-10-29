@@ -73,9 +73,13 @@ __inline__ __device__ float NeuronProcessor::applyActivationFunction(NeuronActiv
     switch (activationFunction) {
     case NeuronActivationFunction_Sigmoid:
         return 2.0f / (1.0f + __expf(-z)) - 1.0f;
-    case NeuronActivationFunction_Binary:
+    case NeuronActivationFunction_BinaryStep:
         return z >= 0 ? 1.0f : 0.0f;
     case NeuronActivationFunction_Linear:
         return z;
+    case NeuronActivationFunction_Abs:
+        return abs(z);
+    case NeuronActivationFunction_Gaussian:
+        return __expf(-2*z);
     }
 }
