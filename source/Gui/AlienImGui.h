@@ -2,10 +2,13 @@
 
 #include <functional>
 
+#include <imgui.h>
+
 #include "Base/Definitions.h"
 #include "EngineInterface/FundamentalConstants.h"
 #include "EngineInterface/PreviewDescriptions.h"
 #include "Definitions.h"
+#include "EngineInterface/CellFunctionConstants.h"
 
 class AlienImGui
 {
@@ -287,15 +290,13 @@ public:
         MEMBER_DECLARATION(NeuronSelectionParameters, std::string, name, "");
         MEMBER_DECLARATION(NeuronSelectionParameters, float, step, 0.05f);
         MEMBER_DECLARATION(NeuronSelectionParameters, std::string, format, "%.2f");
-        MEMBER_DECLARATION(NeuronSelectionParameters, int, outputButtonPositionFromRight, 0);
+        MEMBER_DECLARATION(NeuronSelectionParameters, float, rightMargin, 0);
     };
     static void NeuronSelection(
         NeuronSelectionParameters const& parameters,
-        std::vector<std::vector<float>> const& weights,
-        std::vector<float> const& biases,
-        int& selectedInput,
-        int& selectedOutput
-    );
+        std::vector<std::vector<float>>& weights,
+        std::vector<float>& biases,
+        std::vector<NeuronActivationFunction>& activationFunctions);
 
     static void OnlineSymbol();
     static void LastDayOnlineSymbol();
@@ -309,14 +310,14 @@ private:
     template<typename T>
     struct BasicInputColorMatrixParameters
     {
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, T, min, static_cast<T>(0));
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, T, max, static_cast<T>(0));
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, bool, logarithmic, false);
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::string, format, "%.2f");
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::string, name, "");
+        MEMBER_DECLARATION(BasicInputColorMatrixParameters, T, min, static_cast<T>(0));
+        MEMBER_DECLARATION(BasicInputColorMatrixParameters, T, max, static_cast<T>(0));
+        MEMBER_DECLARATION(BasicInputColorMatrixParameters, bool, logarithmic, false);
+        MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::string, format, "%.2f");
+        MEMBER_DECLARATION(BasicInputColorMatrixParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS]);
@@ -325,6 +326,25 @@ private:
     static ImVec2 RotationCenter();
     static void RotateEnd(float angle);
 
-    static std::unordered_set<unsigned int> _isExpanded;
+    static std::unordered_set<unsigned int> _basicSilderExpanded;
     static int _rotationStartIndex;
+    static std::unordered_map<unsigned int, int> _neuronSelectedInput;
+    static std::unordered_map<unsigned int, int> _neuronSelectedOutput;
+};
+
+class DynamicTableLayout
+{
+public:
+    static int calcNumColumns(float tableWidth, float columnWidth);
+
+    DynamicTableLayout(float columnWidth);
+
+    bool begin();
+    void end();
+    void next();
+
+private:
+    float _columnWidth = 0;
+    int _numColumns = 0;
+    int _elementNumber = 0;
 };

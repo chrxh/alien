@@ -67,8 +67,6 @@ private:
     uint64_t _entityId = 0;
     char _cellCode[1024 * 16];
     char _tokenMemory[256];
-    int _selectedInput = 0;
-    int _selectedOutput = 0;
     float _genomeZoom = 20.0f;
     bool _selectGenomeTab = false;
 };

@@ -28,8 +28,11 @@ namespace
     auto constexpr HoveredTimer = 0.5f;
 }
 
-std::unordered_set<unsigned int> AlienImGui::_isExpanded;
+std::unordered_set<unsigned int> AlienImGui::_basicSilderExpanded;
+std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedInput;
+std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedOutput;
 int AlienImGui::_rotationStartIndex;
+
 
 void AlienImGui::HelpMarker(std::string const& text)
 {
@@ -1227,13 +1230,26 @@ bool AlienImGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, 
         AlienImGui::ComboParameters().name(parameters._name).values(AngleAlignmentStrings).textWidth(parameters._textWidth).tooltip(parameters._tooltip), value);
 }
 
+namespace
+{
+    int& getIdBasedValue(std::unordered_map<unsigned int, int>& idToValueMap, int defaultValue = 0)
+    {
+        auto id = ImGui::GetID("");
+        if (!idToValueMap.contains(id)) {
+            idToValueMap[id] = 0;
+        }
+        return idToValueMap.at(id);
+    }
+}
+
 void AlienImGui::NeuronSelection(
     NeuronSelectionParameters const& parameters,
-    std::vector<std::vector<float>> const& weights,
-    std::vector<float> const& biases,
-    int& selectedInput,
-    int& selectedOutput)
+    std::vector<std::vector<float>>& weights,
+    std::vector<float>& biases,
+    std::vector<NeuronActivationFunction>& activationFunctions)
 {
+    auto& selectedInput = getIdBasedValue(_neuronSelectedInput);
+    auto& selectedOutput = getIdBasedValue(_neuronSelectedOutput);
     auto setDefaultColors = [] {
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonHoveredColor);
@@ -1244,9 +1260,10 @@ void AlienImGui::NeuronSelection(
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
     };
+    RealVector2D ioButtonSize{scale(100.0f), scale(23.0f)};
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     auto windowPos = ImGui::GetWindowPos();
-    auto outputButtonPositionFromRight = StyleRepository::getInstance().scale(parameters._outputButtonPositionFromRight);
+    auto rightMargin = StyleRepository::getInstance().scale(parameters._rightMargin);
     RealVector2D inputPos[MAX_CHANNELS];
     RealVector2D outputPos[MAX_CHANNELS];
     auto biasFieldWidth = ImGui::GetStyle().FramePadding.x * 2;
@@ -1254,27 +1271,29 @@ void AlienImGui::NeuronSelection(
     //draw buttons and save positions to visualize weights
     for (int i = 0; i < MAX_CHANNELS; ++i) {
 
-        auto startButtonPos = ImGui::GetCursorPos();
+        auto buttonStartPos = ImGui::GetCursorPos();
 
+        //input button
         i == selectedInput ? setHightlightingColors() : setDefaultColors();
-        if (ImGui::Button(("Input #" + std::to_string(i)).c_str())) {
+        if (ImGui::Button(("Input #" + std::to_string(i)).c_str(), {ioButtonSize.x, ioButtonSize.y})) {
             selectedInput = i;
         }
         ImGui::PopStyleColor(3);
 
         Tooltip(Const::NeuronInputTooltipByChannel[i], false);
 
-        auto buttonSize = ImGui::GetItemRectSize();
         inputPos[i] = RealVector2D(
-            windowPos.x - ImGui::GetScrollX() + startButtonPos.x + buttonSize.x, windowPos.y - ImGui::GetScrollY() + startButtonPos.y + buttonSize.y / 2);
+            windowPos.x - ImGui::GetScrollX() + buttonStartPos.x + ioButtonSize.x, windowPos.y - ImGui::GetScrollY() + buttonStartPos.y + ioButtonSize.y / 2);
 
-        ImGui::SameLine(0, ImGui::GetContentRegionAvail().x - buttonSize.x - outputButtonPositionFromRight + ImGui::GetStyle().FramePadding.x);
-        startButtonPos = ImGui::GetCursorPos();
+        ImGui::SameLine(0, ImGui::GetContentRegionAvail().x - ioButtonSize.x * 2 - rightMargin);
+        buttonStartPos = ImGui::GetCursorPos();
         outputPos[i] = RealVector2D(
-            windowPos.x - ImGui::GetScrollX() + startButtonPos.x - biasFieldWidth, windowPos.y - ImGui::GetScrollY() + startButtonPos.y + buttonSize.y / 2);
+            windowPos.x - ImGui::GetScrollX() + buttonStartPos.x - biasFieldWidth - ImGui::GetStyle().FramePadding.x,
+            windowPos.y - ImGui::GetScrollY() + buttonStartPos.y + ioButtonSize.y / 2);
 
+        //output button
         i == selectedOutput ? setHightlightingColors() : setDefaultColors();
-        if (ImGui::Button(("Output #" + std::to_string(i)).c_str())) {
+        if (ImGui::Button(("Output #" + std::to_string(i)).c_str(), {ioButtonSize.x, ioButtonSize.y})) {
             selectedOutput = i;
         }
         ImGui::PopStyleColor(3);
@@ -1323,6 +1342,32 @@ void AlienImGui::NeuronSelection(
         ImColor::HSV(0.0f, 0.0f, 1.0f, 0.35f));
     drawList->AddLine(
         {inputPos[selectedInput].x, inputPos[selectedInput].y}, {outputPos[selectedOutput].x, outputPos[selectedOutput].y}, ImColor::HSV(0.0f, 0.0f, 1.0f, 0.35f), 8.0f);
+
+    auto const editorWidth = ImGui::GetContentRegionAvail().x - rightMargin;
+    auto const editorColumnWidth = 280.0f;
+    auto const editorColumnTextWidth = 130.0f;
+    auto const numWidgets = 3;
+    auto numColumns = DynamicTableLayout::calcNumColumns(editorWidth - ImGui::GetStyle().FramePadding.x * 4, editorColumnWidth);
+    auto numRows = numWidgets / numColumns;
+    if (numWidgets % numColumns != 0) {
+        ++numRows;
+    }
+    if (ImGui::BeginChild("##", ImVec2(editorWidth, scale(toFloat(numRows) * 27.0f + 18.0f)), true)) {
+        DynamicTableLayout table(editorColumnWidth);
+        if (table.begin()) {
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters().name("Activation function").textWidth(editorColumnTextWidth).values(Const::ActivationFunctions),
+                activationFunctions.at(selectedOutput));
+            table.next();
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(editorColumnTextWidth), weights.at(selectedOutput).at(selectedInput));
+            table.next();
+            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(editorColumnTextWidth), biases.at(selectedOutput));
+            table.end();
+        }
+
+    }
+    ImGui::EndChild();
 }
 
 void AlienImGui::OnlineSymbol()
@@ -1380,14 +1425,14 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
 
     //color dependent button
     auto toggleButtonId = ImGui::GetID("expanded");
-    auto isExpanded = _isExpanded.contains(toggleButtonId);
+    auto isExpanded = _basicSilderExpanded.contains(toggleButtonId);
     if (parameters._colorDependence) {
         auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
         if (buttonResult) {
             if (isExpanded) {
-                _isExpanded.erase(toggleButtonId);
+                _basicSilderExpanded.erase(toggleButtonId);
             } else {
-                _isExpanded.insert(toggleButtonId);
+                _basicSilderExpanded.insert(toggleButtonId);
             }
         }
         ImGui::SameLine();
@@ -1544,13 +1589,13 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
 {
     ImGui::PushID(parameters._name.c_str());
     auto toggleButtonId = ImGui::GetID("expanded");
-    auto isExpanded = _isExpanded.contains(toggleButtonId);
+    auto isExpanded = _basicSilderExpanded.contains(toggleButtonId);
     auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
     if (buttonResult) {
         if (isExpanded) {
-            _isExpanded.erase(toggleButtonId);
+            _basicSilderExpanded.erase(toggleButtonId);
         } else {
-            _isExpanded.insert(toggleButtonId);
+            _basicSilderExpanded.insert(toggleButtonId);
         }
     }
     auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
@@ -1616,7 +1661,7 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
             static bool test = false;
             ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
             if (ImGui::Button("Define matrix", ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-                _isExpanded.insert(toggleButtonId);
+                _basicSilderExpanded.insert(toggleButtonId);
             }
             ImGui::PopStyleVar();
         } else {
@@ -1728,3 +1773,41 @@ void AlienImGui::RotateEnd(float angle)
     }
 }
 //<<<<<<<<<<
+
+int DynamicTableLayout::calcNumColumns(float tableWidth, float columnWidth)
+{
+    return std::max(toInt(tableWidth / scale(columnWidth)), 1);
+}
+
+DynamicTableLayout::DynamicTableLayout(float columnWidth)
+    : _columnWidth(columnWidth)
+{
+    _numColumns = calcNumColumns(ImGui::GetContentRegionAvail().x, columnWidth);
+}
+
+bool DynamicTableLayout::begin()
+{
+    auto result = ImGui::BeginTable("##", _numColumns, ImGuiTableFlags_None);
+    if (result) {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+    }
+    return result;
+}
+void DynamicTableLayout::end()
+{
+    ImGui::EndTable();
+}
+
+void DynamicTableLayout::next()
+{
+    auto currentCol = (++_elementNumber) % _numColumns;
+    if (currentCol > 0) {
+        ImGui::TableSetColumnIndex(currentCol);
+        AlienImGui::VerticalSeparator();
+        ImGui::SameLine();
+    } else {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+    }
+}

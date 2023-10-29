@@ -507,20 +507,7 @@ void _InspectorWindow::processNeuronContent(NeuronDescription& neuron)
 {
     if (ImGui::TreeNodeEx("Neural network", TreeNodeFlags)) {
         AlienImGui::NeuronSelection(
-            AlienImGui::NeuronSelectionParameters().outputButtonPositionFromRight(ActivityTextWidth),
-            neuron.weights,
-            neuron.biases,
-            _selectedInput,
-            _selectedOutput);
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(ActivityTextWidth), neuron.weights.at(_selectedOutput).at(_selectedInput));
-        AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(ActivityTextWidth), neuron.biases.at(_selectedOutput));
-        AlienImGui::Combo(
-            AlienImGui::ComboParameters()
-                .name("Activation function")
-                .textWidth(ActivityTextWidth)
-                .values(Const::ActivationFunctions),
-            neuron.activationFunctions.at(_selectedOutput));
+            AlienImGui::NeuronSelectionParameters().rightMargin(0), neuron.weights, neuron.biases, neuron.activationFunctions);
         ImGui::TreePop();
     }
 }
@@ -528,13 +515,6 @@ void _InspectorWindow::processNeuronContent(NeuronDescription& neuron)
 void _InspectorWindow::processConstructorContent(ConstructorDescription& constructor)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
-        auto parameters = _simController->getSimulationParameters();
-
-        //AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Single construction").textWidth(CellFunctionTextWidth), constructor.singleConstruction);
-        //AlienImGui::Checkbox(
-        //    AlienImGui::CheckboxParameters().name("Separate construction").textWidth(CellFunctionTextWidth), constructor.separateConstruction);
-        //AlienImGui::InputOptionalInt(
-        //    AlienImGui::InputIntParameters().name("Max connections").textWidth(CellFunctionTextWidth), constructor.maxConnections);
         int constructorMode = constructor.activationMode == 0 ? 0 : 1;
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
