@@ -34,8 +34,10 @@ using NeuronActivationFunction = int;
 enum NeuronActivationFunction_
 {
     NeuronActivationFunction_Sigmoid,
-    NeuronActivationFunction_Binary,
+    NeuronActivationFunction_BinaryStep,
     NeuronActivationFunction_Linear,
+    NeuronActivationFunction_Abs,
+    NeuronActivationFunction_Gaussian,
     NeuronActivationFunction_Count
 };
 

@@ -770,7 +770,7 @@ void _GenomeEditorWindow::processNode(
                         AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(NeuronEditTextWidth), neuron.biases.at(_selectedOutput));
                     table.next();
                     AlienImGui::Combo(
-                        AlienImGui::ComboParameters().name("Activation function").textWidth(NeuronEditTextWidth).values({"Sigmoid", "Binary", "Linear"}),
+                        AlienImGui::ComboParameters().name("Activation function").textWidth(NeuronEditTextWidth).values(Const::ActivationFunctions),
                         neuron.activationFunctions.at(_selectedOutput));
                     table.end();
                 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "Fonts/IconsFontAwesome5.h"
 
@@ -433,4 +434,6 @@ namespace Const
         "If this option is enabled, other users will be able to see in the browser window that you have the following graphics card: ";
     std::string const LoginShareGpuInfoTooltip2 =
         "As a result, you will be able to see the GPU information of other registered users who have shared it.";
+
+    std::vector<std::string> const ActivationFunctions = {"Sigmoid", "Binary step", "Linear", "Abs", "Gaussian"};
 }

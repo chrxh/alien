@@ -516,7 +516,10 @@ void _InspectorWindow::processNeuronContent(NeuronDescription& neuron)
             AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(ActivityTextWidth), neuron.weights.at(_selectedOutput).at(_selectedInput));
         AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(ActivityTextWidth), neuron.biases.at(_selectedOutput));
         AlienImGui::Combo(
-            AlienImGui::ComboParameters().name("Activation function").textWidth(ActivityTextWidth).values({"Sigmoid", "Binary", "Linear"}),
+            AlienImGui::ComboParameters()
+                .name("Activation function")
+                .textWidth(ActivityTextWidth)
+                .values(Const::ActivationFunctions),
             neuron.activationFunctions.at(_selectedOutput));
         ImGui::TreePop();
     }
