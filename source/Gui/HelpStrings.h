@@ -435,5 +435,5 @@ namespace Const
     std::string const LoginShareGpuInfoTooltip2 =
         "As a result, you will be able to see the GPU information of other registered users who have shared it.";
 
-    std::vector<std::string> const ActivationFunctions = {"Sigmoid", "Binary step", "Linear", "Abs", "Gaussian"};
+    std::vector<std::string> const ActivationFunctions = {"Sigmoid", "Binary step", "Identity", "Abs", "Gaussian"};
 }
