@@ -35,7 +35,7 @@ enum NeuronActivationFunction_
 {
     NeuronActivationFunction_Sigmoid,
     NeuronActivationFunction_BinaryStep,
-    NeuronActivationFunction_Linear,
+    NeuronActivationFunction_Identity,
     NeuronActivationFunction_Abs,
     NeuronActivationFunction_Gaussian,
     NeuronActivationFunction_Count
