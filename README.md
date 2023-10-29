@@ -166,6 +166,7 @@ Free icons and icon font:
   - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
   - [Iconduck](https://iconduck.com) (Noto Emoji by Google, [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt))
   - [Iconfinder](https://www.iconfinder.com) (Bogdan Rosu Creative, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0))
+  - [People icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/people) ([Flaticon license](https://media.flaticon.com/license/license.pdf))
 
 # 🧾 License
 ALIEN is licensed under the [BSD 3-Clause](LICENSE) license.
