@@ -23,10 +23,9 @@ namespace Const
         "then create a GitHub issue on https://github.com/chrxh/alien/issues where the log.txt is attached.";
 
     std::string const NeuronTooltip =
-        "This function equips the cell with a small network of 8 neurons with 8x8 configurable weights and 8 bias values. It "
-        "processes the input from channel #0 to #7 and provides the output to those channels. Each neuron uses a type of sigmoid as a "
-        "activation function. More precisely\noutput_j := sigmoid(sum_i (input_i * weight_ji) + bias_j)\nwhere\nsigmoid(x) := 2 / "
-        "(1 + exp(x)) - 1 = (1 - exp(x)) / (1 + exp(x))";
+        "This function equips the cell with a small network of 8 neurons with 8x8 configurable weights, 8 bias values and activation functions. It processes "
+        "the input from channel #0 to #7 and provides the output to those channels. More precisely, the output of each neuron calculates as\noutput_j := "
+        "sigma(sum_i (input_i * weight_ji) + bias_j),\nwhere sigma stands for the activation function (different choices are available).";
 
     std::string const TransmitterTooltip =
         "Transmitter cells are designed to transport energy. This is important, for example, to supply constructor cells with energy or to "
@@ -136,6 +135,17 @@ namespace Const
         "to note that the direct predecessor cell is not counted for the 'required connections.' For example, a value of 2 means that the cell to be "
         "constructed will only be created when there are at least 2 already constructed cells (excluding the predecessor cell) available for "
         "potential connections. If the condition is not met, the construction process is postponed.";
+
+    std::string const GenomeNeuronActivationFunctionTooltip =
+        "The activation function is a mapping which will be applied to the accumulated value from all inputs channels"
+        " considering the weights and bias in order to calculate the neuron's output, i.e., output_j = sigma(sum_i (input_i * weight_ji) + bias_j), where sigma"
+        " denotes the activation function. The following choices for sigma are available:\n\n" ICON_FA_CHEVRON_RIGHT
+        " Sigmoid(x) := 2 / (1 + exp(x)) - 1\n\n" ICON_FA_CHEVRON_RIGHT " Binary step(x) := 1 if x >= 0 and 0 if x < 0\n\n" ICON_FA_CHEVRON_RIGHT
+        " Identity(x) := x\n\n" ICON_FA_CHEVRON_RIGHT " Abs(x) := x if x >= 0 and -x if x < 0\n\n" ICON_FA_CHEVRON_RIGHT " Gaussian(x) := exp(-2 * x * x)";
+
+    std::string const GenomeNeuronWeightAndBiasTooltip =
+        "Each neuron has 8 input channels and produces an output by the formula output_j = sigma((sum_i (input_i * weight_ji) + "
+        "bias_j), where sigma denotes the activation function.";
 
     std::string const GenomeTransmitterEnergyDistributionTooltip =
         "There are two ways to control the energy distribution, which is set "

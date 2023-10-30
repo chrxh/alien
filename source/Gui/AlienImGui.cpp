@@ -1391,7 +1391,7 @@ void AlienImGui::NeuronSelection(
 
     auto const editorWidth = ImGui::GetContentRegionAvail().x - rightMargin;
     auto const editorColumnWidth = 280.0f;
-    auto const editorColumnTextWidth = 130.0f;
+    auto const editorColumnTextWidth = 155.0f;
     auto const numWidgets = 3;
     auto numColumns = DynamicTableLayout::calcNumColumns(editorWidth - ImGui::GetStyle().FramePadding.x * 4, editorColumnWidth);
     auto numRows = numWidgets / numColumns;
@@ -1402,13 +1402,20 @@ void AlienImGui::NeuronSelection(
         DynamicTableLayout table(editorColumnWidth);
         if (table.begin()) {
             AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Activation function").textWidth(editorColumnTextWidth).values(Const::ActivationFunctions),
+                AlienImGui::ComboParameters()
+                    .name("Activation function")
+                    .textWidth(editorColumnTextWidth)
+                    .values(Const::ActivationFunctions)
+                    .tooltip(Const::GenomeNeuronActivationFunctionTooltip),
                 activationFunctions.at(selectedOutput));
             table.next();
             AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(editorColumnTextWidth), weights.at(selectedOutput).at(selectedInput));
+                AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(editorColumnTextWidth).tooltip(Const::GenomeNeuronWeightAndBiasTooltip),
+                weights.at(selectedOutput).at(selectedInput));
             table.next();
-            AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(editorColumnTextWidth), biases.at(selectedOutput));
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(editorColumnTextWidth).tooltip(Const::GenomeNeuronWeightAndBiasTooltip),
+                biases.at(selectedOutput));
             table.end();
         }
         if (AlienImGui::Button("Clear")) {
