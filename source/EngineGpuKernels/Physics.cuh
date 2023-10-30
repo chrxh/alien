@@ -190,7 +190,7 @@ __inline__ __device__ float Physics::angularMomentum(float2 const & positionFrom
 
 __inline__ __device__ float Physics::angularVelocity(float angularMomentum, float angularMass)
 {
-	if (std::abs(angularMass) < NEAR_ZERO)
+	if (abs(angularMass) < NEAR_ZERO)
 		return 0;
 	else
 		return angularMomentum / angularMass * Const::RAD_TO_DEG;

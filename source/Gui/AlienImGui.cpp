@@ -1260,7 +1260,7 @@ void AlienImGui::NeuronSelection(
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
     };
-    RealVector2D const ioButtonSize{scale(90.0f), scale(23.0f)};
+    RealVector2D const ioButtonSize{scale(90.0f), scale(26.0f)};
     RealVector2D const plotSize{scale(50.0f), scale(23.0f)};
     auto const rightMargin = scale(parameters._rightMargin);
     auto const biasFieldWidth = ImGui::GetStyle().FramePadding.x * 2;
@@ -1307,7 +1307,7 @@ void AlienImGui::NeuronSelection(
             if (std::abs(weights[j][i]) > NEAR_ZERO) {
                 continue;
             }
-            drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, ImColor::HSV(0.0f, 0.0f, 0.1f), 2.0f);
+            drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, Const::NeuronEditorConnectionColor, 2.0f);
         }
     }
     auto calcColor = [](float value) {
@@ -1352,15 +1352,23 @@ void AlienImGui::NeuronSelection(
             value = Math::gaussian(x);
             break;
         }
-        return RealVector2D{refPos.x + plotSize.x / 2 + x * plotSize.x / 8 + ImGui::GetStyle().FramePadding.x * 2, refPos.y - value * plotSize.y / 2};
+        return RealVector2D{refPos.x + plotSize.x / 2 + x * plotSize.x / 8, refPos.y - value * plotSize.y / 2};
     };
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         std::optional<RealVector2D> lastPos;
-        RealVector2D refPos{outputPos[i].x + ioButtonSize.x + biasFieldWidth, outputPos[i].y};
+        RealVector2D refPos{outputPos[i].x + ioButtonSize.x + biasFieldWidth + ImGui::GetStyle().FramePadding.x * 2, outputPos[i].y};
+        for (float dx = 0; dx <= plotSize.x + NEAR_ZERO; dx += plotSize.x / 8) {
+            auto color = std::abs(dx - plotSize.x / 2) < NEAR_ZERO ? Const::NeuronEditorZeroLinePlotColor : Const::NeuronEditorGridColor;
+            drawList->AddLine({refPos.x + dx, refPos.y - plotSize.y / 2}, {refPos.x + dx, refPos.y + plotSize.y / 2}, color, 1.0f);
+        }
+        for (float dy = -plotSize.y / 2; dy <= plotSize.y / 2 + NEAR_ZERO; dy += plotSize.y / 6) {
+            auto color = std::abs(dy) < NEAR_ZERO ? Const::NeuronEditorZeroLinePlotColor : Const::NeuronEditorGridColor;
+            drawList->AddLine({refPos.x, refPos.y + dy}, {refPos.x + plotSize.x, refPos.y + dy}, color, 1.0f);
+        }
         for (float dx = -4.0f; dx < 4.0f; dx += 0.2f) {
             RealVector2D pos = calcPlotPosition(refPos, dx, activationFunctions[i]);
             if (lastPos) {
-                drawList->AddLine({lastPos->x, lastPos->y}, {pos.x, pos.y}, ImColor::HSV(0.0f, 0.0f, 1.0f), 1.0f);
+                drawList->AddLine({lastPos->x, lastPos->y}, {pos.x, pos.y}, Const::NeuronEditorPlotColor, 1.0f);
             }
             lastPos = pos;
         }
