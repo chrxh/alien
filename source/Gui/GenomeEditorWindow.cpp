@@ -187,15 +187,19 @@ void _GenomeEditorWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_PLUS_SQUARE)) {
+    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
+    if (AlienImGui::ToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
         _expandNodes = true;
     }
+    ImGui::EndDisabled();
     AlienImGui::Tooltip("Expand all cells");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_MINUS_SQUARE)) {
+    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
+    if (AlienImGui::ToolbarButton(ICON_FA_COMPRESS_ARROWS_ALT)) {
         _expandNodes = false;
     }
+    ImGui::EndDisabled();
     AlienImGui::Tooltip("Collapse all cells");
 
     ImGui::SameLine();

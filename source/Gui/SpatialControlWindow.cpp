@@ -101,7 +101,7 @@ void _SpatialControlWindow::processZoomOutButton()
 
 void _SpatialControlWindow::processResizeButton()
 {
-    if (AlienImGui::ToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_EXPAND)) {
         _resizeWorldDialog->open();
     }
     AlienImGui::Tooltip("Resize");
