@@ -17,6 +17,7 @@
 #include "CellFunctionStrings.h"
 #include "StyleRepository.h"
 #include "HelpStrings.h"
+#include "Base/NumberGenerator.h"
 
 namespace
 {
@@ -1397,7 +1398,7 @@ void AlienImGui::NeuronSelection(
     if (numWidgets % numColumns != 0) {
         ++numRows;
     }
-    if (ImGui::BeginChild("##", ImVec2(editorWidth, scale(toFloat(numRows) * 27.0f + 18.0f)), true)) {
+    if (ImGui::BeginChild("##", ImVec2(editorWidth, scale(toFloat(numRows) * 26.0f + 18.0f + 28.0f)), true)) {
         DynamicTableLayout table(editorColumnWidth);
         if (table.begin()) {
             AlienImGui::Combo(
@@ -1410,7 +1411,35 @@ void AlienImGui::NeuronSelection(
             AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(editorColumnTextWidth), biases.at(selectedOutput));
             table.end();
         }
-
+        if (AlienImGui::Button("Clear")) {
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                for (int j = 0; j < MAX_CHANNELS; ++j) {
+                    weights[i][j] = 0;
+                }
+                biases[i] = 0;
+                activationFunctions[i] = NeuronActivationFunction_Sigmoid;
+            }
+        }
+        ImGui::SameLine();
+        if (AlienImGui::Button("Identity")) {
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                for (int j = 0; j < MAX_CHANNELS; ++j) {
+                    weights[i][j] = i == j ? 1.0f : 0.0f;
+                }
+                biases[i] = 0.0f;
+                activationFunctions[i] = NeuronActivationFunction_Identity;
+            }
+        }
+        ImGui::SameLine();
+        if (AlienImGui::Button("Randomize")) {
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                for (int j = 0; j < MAX_CHANNELS; ++j) {
+                    weights[i][j] = NumberGenerator::getInstance().getRandomFloat(-4.0f, 4.0f);
+                }
+                biases[i] = NumberGenerator::getInstance().getRandomFloat(-4.0f, 4.0f);
+                activationFunctions[i] = NumberGenerator::getInstance().getRandomInt(NeuronActivationFunction_Count);
+            }
+        }
     }
     ImGui::EndChild();
 }
