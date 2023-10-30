@@ -187,15 +187,6 @@ void _GenomeEditorWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_SEEDLING)) {
-        onCreateSpore();
-    }
-    AlienImGui::Tooltip("Create a spore with current genome");
-
-    ImGui::SameLine();
-    AlienImGui::ToolbarSeparator();
-
-    ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS_SQUARE)) {
         _expandNodes = true;
     }
@@ -206,6 +197,15 @@ void _GenomeEditorWindow::processToolbar()
         _expandNodes = false;
     }
     AlienImGui::Tooltip("Collapse all cells");
+
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_SEEDLING)) {
+        onCreateSpore();
+    }
+    AlienImGui::Tooltip("Create a spore with current genome");
 
     AlienImGui::Separator();
 }
