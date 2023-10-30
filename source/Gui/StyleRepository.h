@@ -73,6 +73,11 @@ namespace Const
     ImColor const GenomePreviewMultipleConstructorColor = ImColor::HSV(0.375f, 0.8f, 1.0f, 1.0f);
     ImColor const GenomePreviewSelfReplicatorColor = ImColor::HSV(0.79f, 0.8f, 1.0f, 1.0f);
 
+    ImColor const NeuronEditorConnectionColor = ImColor::HSV(0.0f, 0.0f, 0.1f);
+    ImColor const NeuronEditorGridColor = ImColor::HSV(0.0f, 0.0f, 0.2f);
+    ImColor const NeuronEditorZeroLinePlotColor = ImColor::HSV(0.5f, 1.0f, 0.7f);
+    ImColor const NeuronEditorPlotColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
+
     float const WindowAlpha = 0.9f;
     float const SliderBarWidth = 30.0f;
 }
