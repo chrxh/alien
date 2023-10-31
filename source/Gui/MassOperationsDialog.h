@@ -2,7 +2,7 @@
 
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
-#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/EngineConstants.h"
 
 class _MassOperationsDialog
 {

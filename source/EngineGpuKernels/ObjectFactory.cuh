@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellFunctionConstants.h"
 #include "EngineInterface/GenomeConstants.h"
 

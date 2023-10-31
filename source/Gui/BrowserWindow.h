@@ -55,6 +55,7 @@ private:
     void onDownloadItem(RemoteSimulationData* sim);
     void onDeleteItem(RemoteSimulationData* sim);
     void onToggleLike(RemoteSimulationData* sim, int emojiType);
+    void openWeblink(std::string const& link);
 
     bool isLiked(std::string const& simId);
     std::string getUserNamesToEmojiType(std::string const& simId, int emojiType);

@@ -11,9 +11,9 @@ add_library(alien_engine_interface_lib
     DescriptionEditService.h
     Descriptions.cpp
     Descriptions.h
+    EngineConstants.h
     ExportService.cpp
     ExportService.h
-    FundamentalConstants.h
     GenomeConstants.h
     GenomeDescriptionService.cpp
     GenomeDescriptionService.h

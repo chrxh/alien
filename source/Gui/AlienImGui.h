@@ -5,7 +5,7 @@
 #include <imgui.h>
 
 #include "Base/Definitions.h"
-#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/PreviewDescriptions.h"
 #include "Definitions.h"
 #include "EngineInterface/CellFunctionConstants.h"
