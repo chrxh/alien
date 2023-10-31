@@ -384,7 +384,7 @@ namespace Const
         "The following cell functions write their output to channel #4:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions write their output to channel #5:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions write their output to channel #6:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
-        "The following cell functions write their output to channel #7:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron"
+        "The following cell functions write their output to channel #7:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Attacker: 1 if a cell is attacked by an other attacker cell" 
     };
 
     std::string const NeuronOutputTooltipByChannel[8] = {
@@ -445,5 +445,5 @@ namespace Const
     std::string const LoginShareGpuInfoTooltip2 =
         "As a result, you will be able to see the GPU information of other registered users who have shared it.";
 
-    std::vector<std::string> const ActivationFunctions = {"Sigmoid", "Binary step", "Identity", "Abs", "Gaussian"};
+    std::vector<std::string> const ActivationFunctions = {"Sigmoid", "Binary step", "Identity", "Absolute value", "Gaussian"};
 }
