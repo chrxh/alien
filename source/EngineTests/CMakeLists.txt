@@ -10,6 +10,7 @@ PUBLIC
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
+    LivingStateTransitionTests.cpp
     MuscleTests.cpp
     MutationTests.cpp
     NerveTests.cpp

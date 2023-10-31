@@ -203,11 +203,15 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
     result.lastConstructionCell = getLastConstructedCell(cell);
     if (!result.lastConstructionCell) {
+
+        //finished => reset indices
         constructor.genomeCurrentNodeIndex = 0;
         constructor.genomeCurrentRepetition = 0;
     } else if (result.lastConstructionCell->numConnections == 1) {
         int numConstructedCells = constructor.genomeCurrentRepetition * result.genomeHeader.numRepetitions + constructor.genomeCurrentNodeIndex;
         if (numConstructedCells > 1) {
+
+            //construction is broken => reset indices
             constructor.genomeCurrentNodeIndex = 0;
             constructor.genomeCurrentRepetition = 0;
         }
