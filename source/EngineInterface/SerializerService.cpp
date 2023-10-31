@@ -18,6 +18,7 @@
 #include <boost/range/adaptors.hpp>
 #include <zstr.hpp>
 
+#include "Base/LoggingService.h"
 #include "Base/Resources.h"
 #include "Base/VersionChecker.h"
 
@@ -734,7 +735,7 @@ namespace cereal
 bool SerializerService::serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data)
 {
     try {
-
+        log(Priority::Important, "save simulation to " + filename);
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
 
@@ -762,6 +763,7 @@ bool SerializerService::serializeSimulationToFiles(std::string const& filename, 
 bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& data, std::string const& filename)
 {
     try {
+        log(Priority::Important, "load simulation from " + filename);
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
 
@@ -830,6 +832,7 @@ bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation&
 bool SerializerService::serializeGenomeToFile(std::string const& filename, std::vector<uint8_t> const& genome)
 {
     try {
+        log(Priority::Important, "save genome to " + filename);
         //wrap constructor cell around genome
         ClusteredDataDescription data;
         if (!wrapGenome(data, genome)) {
@@ -851,6 +854,7 @@ bool SerializerService::serializeGenomeToFile(std::string const& filename, std::
 bool SerializerService::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::string const& filename)
 {
     try {
+        log(Priority::Important, "load genome from " + filename);
         ClusteredDataDescription data;
         if (!deserializeDataDescription(data, filename)) {
             return false;
@@ -911,6 +915,7 @@ bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output
 bool SerializerService::serializeSimulationParametersToFile(std::string const& filename, SimulationParameters const& parameters)
 {
     try {
+        log(Priority::Important, "save simulation parameters to " + filename);
         std::ofstream stream(filename, std::ios::binary);
         if (!stream) {
             return false;
@@ -926,6 +931,7 @@ bool SerializerService::serializeSimulationParametersToFile(std::string const& f
 bool SerializerService::deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::string const& filename)
 {
     try {
+        log(Priority::Important, "load simulation parameters from " + filename);
         std::ifstream stream(filename, std::ios::binary);
         if (!stream) {
             return false;

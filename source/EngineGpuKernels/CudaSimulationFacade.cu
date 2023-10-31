@@ -435,6 +435,7 @@ void _CudaSimulationFacade::testOnly_mutate(uint64_t cellId, MutationType mutati
 
 void _CudaSimulationFacade::initCuda()
 {
+    log(Priority::Important, "initialize CUDA");
     _gpuInfo = checkAndReturnGpuInfo();
 
     auto result = cudaSetDevice(_gpuInfo.deviceNumber);
@@ -444,9 +445,7 @@ void _CudaSimulationFacade::initCuda()
 
     cudaGetLastError(); //reset error code
 
-    std::stringstream stream;
-    stream << "device " << _gpuInfo.deviceNumber << " is set";
-    log(Priority::Important, stream.str());
+    log(Priority::Important, "CUDA initialized for device " + std::to_string(_gpuInfo.deviceNumber));
 }
 
 auto _CudaSimulationFacade::checkAndReturnGpuInfo() -> GpuInfo

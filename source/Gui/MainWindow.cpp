@@ -92,35 +92,30 @@ namespace
 
 _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger const& logger)
 {
+    IMGUI_CHECKVERSION();
+
     _logger = logger;
     _simController = simController;
-    
+
+    log(Priority::Important, "initialize GLFW and OpenGL");
     auto glfwVersion = initGlfw();
-
     WindowController::getInstance().init();
-
     auto windowData = WindowController::getInstance().getWindowData();
     glfwSetFramebufferSizeCallback(windowData.window, framebuffer_size_callback);
     glfwSwapInterval(1);  //enable vsync
-
-    IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImPlot::CreateContext();
-
-    ImGuiIO& io = ImGui::GetIO();
-
-//     ImGui::StyleColorsDark();
-//     ImGui::StyleColorsLight();
-
-    StyleRepository::getInstance().init();
-
-    // Setup Platform/Renderer back-ends
-    ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);
+    ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);  //setup Platform/Renderer back-ends
     ImGui_ImplOpenGL3_Init(glfwVersion);
+    log(Priority::Important, "GLFW and OpenGL initialized");
 
+    log(Priority::Important, "initialize GLAD");
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         throw std::runtime_error("Failed to initialize GLAD");
     }
+    log(Priority::Important, "GLAD initialized");
+
+    StyleRepository::getInstance().init();
 
     _viewport = std::make_shared<_Viewport>();
     _uiController = std::make_shared<_UiController>();
@@ -189,6 +184,8 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     };
 
     _window = windowData.window;
+
+    log(Priority::Important, "main window initialized");
 }
 
 void _MainWindow::mainLoop()
