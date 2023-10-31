@@ -1673,19 +1673,28 @@ TEST_F(ConstructorTests, constructLastCellLastRepetition)
             .setId(2)
             .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
             .setEnergy(100)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setLivingState(LivingState_UnderConstruction),
+        CellDescription()
+            .setId(3)
+            .setPos({9.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
+            .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
+    data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
     auto actualData = _simController->getSimulationData();
 
-    ASSERT_EQ(3, actualData.cells.size());
-    auto actualConstructedCell = getOtherCell(actualData, {1, 2});
+    ASSERT_EQ(4, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
 
     EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
 }
