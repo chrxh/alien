@@ -60,6 +60,7 @@ void _DisplaySettingsDialog::processIntern()
         WindowController::getInstance().setFps(fps);
     }
 
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50)});
     AlienImGui::Separator();
 
     if (AlienImGui::Button("OK")) {
