@@ -54,7 +54,8 @@ _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, Simula
     }
     _startingPath = GlobalSettings::getInstance().getStringState("windows.genome editor.starting path", path.string());
     _previewHeight = GlobalSettings::getInstance().getFloatState("windows.genome editor.preview height", scale(PreviewHeight));
-    _changeColorDialog = std::make_shared<_ChangeColorDialog>();
+    _changeColorDialog =
+        std::make_shared<_ChangeColorDialog>([&] { return getCurrentGenome(); }, [&](GenomeDescription const& genome) { setCurrentGenome(genome); });
 }
 
 _GenomeEditorWindow::~_GenomeEditorWindow()
@@ -187,14 +188,6 @@ void _GenomeEditorWindow::processToolbar()
     AlienImGui::Tooltip("Increase sequence number of selected cell");
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
-    if (AlienImGui::ToolbarButton(ICON_FA_PALETTE)) {
-        _changeColorDialog->open();
-    }
-    ImGui::EndDisabled();
-    AlienImGui::Tooltip("Change the color of all cells with a specific color");
-
-    ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
@@ -212,6 +205,17 @@ void _GenomeEditorWindow::processToolbar()
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Collapse all cells");
+
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
+    if (AlienImGui::ToolbarButton(ICON_FA_PALETTE)) {
+        _changeColorDialog->open();
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Change the color of all cells with a specific color");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
@@ -983,5 +987,10 @@ void _GenomeEditorWindow::updateGeometry(GenomeDescription& genome, Construction
         cell.referenceAngle = shapeGenerationResult.angle;
         cell.numRequiredAdditionalConnections = shapeGenerationResult.numRequiredAdditionalConnections;
     }
+}
+
+void _GenomeEditorWindow::setCurrentGenome(GenomeDescription const& genome)
+{
+    _tabDatas.at(_selectedTabIndex).genome = genome;
 }
 
