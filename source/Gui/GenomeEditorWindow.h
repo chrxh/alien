@@ -53,6 +53,7 @@ private:
     void scheduleAddTab(GenomeDescription const& genome);
 
     void updateGeometry(GenomeDescription& genome, ConstructionShape shape);
+    void setCurrentGenome(GenomeDescription const& genome);
 
     float _previewHeight = 0;
 
