@@ -216,9 +216,9 @@ bool AlienImGui::ColorField(uint32_t cellColor, float width, float height)
 
     float h, s, v;
     AlienImGui::ConvertRGBtoHSV(cellColor, h, s, v);
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s, v));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s, v));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s, v));
     auto result = ImGui::Button("##button", ImVec2(scale(width), scale(height)));
     ImGui::PopStyleColor(3);
 
@@ -439,8 +439,8 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
     auto textWidth = scale(parameters._textWidth);
     auto comboWidth = width - textWidth;
-    auto colorFieldWidth1 = comboWidth - scale(25);
-    auto colorFieldWidth2 = comboWidth - scale(30);
+    auto colorFieldWidth1 = comboWidth - scale(25.0f);
+    auto colorFieldWidth2 = comboWidth - scale(30.0f);
 
     const char* items[] = { "##1", "##2", "##3", "##4", "##5", "##6", "##7" };
 
@@ -465,13 +465,12 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
     ImGui::SameLine();
 
     ImGuiStyle& style = ImGui::GetStyle();
-    ImDrawList* drawList = ImGui::GetWindowDrawList();
-    auto cursorPos = ImGui::GetCursorScreenPos();
-    auto color = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Border]);
-    drawList->AddRectFilled(
+    float h, s, v;
+    AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[value], h, s, v);
+    ImGui::GetWindowDrawList()->AddRectFilled(
         ImVec2(comboPos.x + style.FramePadding.x, comboPos.y + style.FramePadding.y),
         ImVec2(comboPos.x + style.FramePadding.x + colorFieldWidth2, comboPos.y + style.FramePadding.y + ImGui::GetTextLineHeight()),
-        color);
+        ImColor::HSV(h, s, v));
 
     AlienImGui::Text(parameters._name);
     if (parameters._tooltip) {
