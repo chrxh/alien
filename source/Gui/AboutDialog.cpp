@@ -4,6 +4,7 @@
 
 #include "Base/Resources.h"
 #include "AlienImGui.h"
+#include "StyleRepository.h"
 
 _AboutDialog::_AboutDialog()
     : _AlienDialog("About")
@@ -11,13 +12,10 @@ _AboutDialog::_AboutDialog()
 
 void _AboutDialog::processIntern()
 {
-    ImGui::Text("Artificial Life Environment, version %s\n\nis an open source project initiated by\nChristian Heinemann.", Const::ProgramVersion.c_str());
+    ImGui::Text("Artificial Life Environment, version %s\n\nis an open source project initiated and maintained by\nChristian Heinemann.", Const::ProgramVersion.c_str());
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-    ImGui::Spacing();
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50)});
+    AlienImGui::Separator();
 
     if (AlienImGui::Button("OK")) {
         close();

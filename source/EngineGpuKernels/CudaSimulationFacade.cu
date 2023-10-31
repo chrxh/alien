@@ -445,7 +445,7 @@ void _CudaSimulationFacade::initCuda()
 
     cudaGetLastError(); //reset error code
 
-    log(Priority::Important, "CUDA initialized for device " + std::to_string(_gpuInfo.deviceNumber));
+    log(Priority::Important, "device " + std::to_string(_gpuInfo.deviceNumber) + " selected");
 }
 
 auto _CudaSimulationFacade::checkAndReturnGpuInfo() -> GpuInfo

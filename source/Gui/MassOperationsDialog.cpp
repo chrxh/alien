@@ -9,6 +9,7 @@
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
+#include "StyleRepository.h"
 
 namespace
 {
@@ -105,6 +106,7 @@ void _MassOperationsDialog::process()
         ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
         AlienImGui::Text("Restrict to selected cell networks");
 
+        ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50)});
         AlienImGui::Separator();
 
         ImGui::BeginDisabled(!isOkEnabled());
