@@ -107,13 +107,11 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     ImPlot::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);  //setup Platform/Renderer back-ends
     ImGui_ImplOpenGL3_Init(glfwVersion);
-    log(Priority::Important, "GLFW and OpenGL initialized");
 
     log(Priority::Important, "initialize GLAD");
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         throw std::runtime_error("Failed to initialize GLAD");
     }
-    log(Priority::Important, "GLAD initialized");
 
     StyleRepository::getInstance().init();
 
