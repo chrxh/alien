@@ -603,13 +603,13 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectedCell = cell->connections[i].cell;
                 auto& constructor = connectedCell->cellFunctionData.constructor;
-                if (!(connectedCell->cellFunction == CellFunction_Constructor
+                if (connectedCell->cellFunction == CellFunction_Constructor
                       && GenomeDecoder::containsSelfReplication(constructor)
-                      && !GenomeDecoder::isSeparating(constructor.genome))) {
-                    atomicExch(&connectedCell->livingState, LivingState_Dying);
-                } else {
+                      && !GenomeDecoder::isSeparating(constructor.genome)) {
                     constructor.genomeCurrentNodeIndex = 0;
                     constructor.isConstructionBuilt = true;
+                } else if(connectedCell->creatureId == cell->creatureId) {
+                    atomicExch(&connectedCell->livingState, LivingState_Dying);
                 }
             }
         }
