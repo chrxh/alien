@@ -172,14 +172,14 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
     _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
-    EXPECT_TRUE(actualAttackCell.activity.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 105.0f / 256);
-    EXPECT_TRUE(actualAttackCell.activity.channels[3] > -15.0f / 365);
-    EXPECT_TRUE(actualAttackCell.activity.channels[3] < 15.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
+    EXPECT_TRUE(actualSensorCell.activity.channels[1] > 0.3f);
+    EXPECT_TRUE(actualSensorCell.activity.channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensorCell.activity.channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensorCell.activity.channels[3] > -15.0f / 365);
+    EXPECT_TRUE(actualSensorCell.activity.channels[3] < 15.0f / 365);
 }
 
 TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
@@ -212,8 +212,8 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
     EXPECT_TRUE(actualAttackCell.activity.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 1.0f - 105.0f / 256);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] > 70.0f / 365);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] < 105.0f / 365);
 }
@@ -248,8 +248,8 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
     EXPECT_TRUE(actualAttackCell.activity.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 1.0f - 105.0f / 256);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] < -70.0f / 365);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] > -105.0f / 365);
 }
@@ -284,8 +284,8 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
     EXPECT_TRUE(actualAttackCell.activity.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 1.0f - 105.0f / 256);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] < -165.0f / 365 || actualAttackCell.activity.channels[3] > 165.0f / 365);
 }
 
@@ -321,8 +321,8 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
     EXPECT_TRUE(actualAttackCell.activity.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 1.0f - 105.0f / 256);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] > 70.0f / 365);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] < 105.0f / 365);
 }
