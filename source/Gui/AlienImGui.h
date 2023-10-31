@@ -97,7 +97,7 @@ public:
     };
     static void InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2);
 
-    static bool ColorField(uint32_t cellColor, int width = 0);
+    static bool ColorField(uint32_t cellColor, float width = 0, float height = 0);
 
     struct CheckboxColorMatrixParameters
     {
@@ -180,6 +180,7 @@ public:
     struct ComboColorParameters
     {
         MEMBER_DECLARATION(ComboColorParameters, std::string, name, "");
+        MEMBER_DECLARATION(ComboColorParameters, float, width, 0);
         MEMBER_DECLARATION(ComboColorParameters, float, textWidth, 100);
         MEMBER_DECLARATION(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(ComboColorParameters, std::optional<std::string>, tooltip, std::nullopt);

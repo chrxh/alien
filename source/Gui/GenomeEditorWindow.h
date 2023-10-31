@@ -72,4 +72,5 @@ private:
     SimulationController _simController;
     Viewport _viewport;
     UploadSimulationDialogWeakPtr _uploadSimulationDialog;
+    ChangeColorDialog _changeColorDialog;
 };

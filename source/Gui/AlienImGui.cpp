@@ -204,21 +204,22 @@ void AlienImGui::InputFloat2(InputFloat2Parameters const& parameters, float& val
     }
 }
 
-bool AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
+bool AlienImGui::ColorField(uint32_t cellColor, float width, float height)
 {
     if (width == 0) {
-        width = StyleRepository::getInstance().scale(30);
+        width = 30.0f;
     }
+
+    if (height == 0) {
+        width = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    }
+
     float h, s, v;
     AlienImGui::ConvertRGBtoHSV(cellColor, h, s, v);
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
-/*
-    ImVec2 pos = ImGui::GetCursorScreenPos();
-    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
-*/
-    auto result = ImGui::Button("##button", ImVec2(width, ImGui::GetTextLineHeight()));
+    auto result = ImGui::Button("##button", ImVec2(scale(width), scale(height)));
     ImGui::PopStyleColor(3);
 
     return result;
@@ -263,7 +264,7 @@ void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& pa
 
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
-    auto width = parameters._width != 0.0f ? parameters._width : ImGui::GetContentRegionAvail().x;
+    auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
     ImGui::SetNextItemWidth(width - scale(parameters._textWidth));
     if (parameters._monospaceFont) {
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
@@ -435,15 +436,15 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
 
 bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
 {
-    auto& styleRep = StyleRepository::getInstance();
-    auto textWidth = styleRep.scale(parameters._textWidth);
-    auto comboWidth = !parameters._name.empty() ? ImGui::GetContentRegionAvail().x - textWidth : styleRep.scale(70);
-    auto colorFieldWidth1 = comboWidth - styleRep.scale(40);
-    auto colorFieldWidth2 = comboWidth - styleRep.scale(30);
+    auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
+    auto textWidth = scale(parameters._textWidth);
+    auto comboWidth = width - textWidth;
+    auto colorFieldWidth1 = comboWidth - scale(25);
+    auto colorFieldWidth2 = comboWidth - scale(30);
 
     const char* items[] = { "##1", "##2", "##3", "##4", "##5", "##6", "##7" };
 
-    ImVec2 comboPos = ImGui::GetCursorPos();
+    ImVec2 comboPos = ImGui::GetCursorScreenPos();
 
     ImGui::SetNextItemWidth(comboWidth);
     if (ImGui::BeginCombo(("##" + parameters._name).c_str(), "")) {
@@ -454,9 +455,7 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
                 value = n;
             }
             ImGui::SameLine();
-            ColorField(Const::IndividualCellColors[n], colorFieldWidth1);
-            ImGui::SameLine();
-            ImGui::TextUnformatted(" ");
+            ColorField(Const::IndividualCellColors[n], colorFieldWidth1, ImGui::GetTextLineHeight());
             if (isSelected) {
                 ImGui::SetItemDefaultFocus();
             }
@@ -464,20 +463,20 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
         ImGui::EndCombo();
     }
     ImGui::SameLine();
-    ImVec2 backupPos = ImGui::GetCursorPos();
 
     ImGuiStyle& style = ImGui::GetStyle();
-    ImGui::SetCursorPos(ImVec2(comboPos.x + style.FramePadding.x, comboPos.y + style.FramePadding.y));
-    ColorField(Const::IndividualCellColors[value], colorFieldWidth2);
-
-    ImGui::SetCursorPos({backupPos.x, backupPos.y + style.FramePadding.y});
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    auto cursorPos = ImGui::GetCursorScreenPos();
+    auto color = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Border]);
+    drawList->AddRectFilled(
+        ImVec2(comboPos.x + style.FramePadding.x, comboPos.y + style.FramePadding.y),
+        ImVec2(comboPos.x + style.FramePadding.x + colorFieldWidth2, comboPos.y + style.FramePadding.y + ImGui::GetTextLineHeight()),
+        color);
 
     AlienImGui::Text(parameters._name);
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
-    ImGui::SameLine();
-    ImGui::Dummy(ImVec2(0, ImGui::GetTextLineHeight() + style.FramePadding.y));
 
     return true;
 }
@@ -486,32 +485,22 @@ void AlienImGui::InputColorTransition(InputColorTransitionParameters const& para
 {
     //source color field
     ImGui::PushID(sourceColor);
-    {
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-        ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
-    }
-    AlienImGui::ColorField(Const::IndividualCellColors[sourceColor], 0);
+    AlienImGui::ColorField(Const::IndividualCellColors[sourceColor]);
     ImGui::SameLine();
 
     //combo for target color
-    {
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-        ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y - ImGui::GetStyle().FramePadding.y));
-    }
     AlienImGui::Text(ICON_FA_LONG_ARROW_ALT_RIGHT);
     ImGui::SameLine();
-    ImGui::PushID(1);
-    AlienImGui::ComboColor(AlienImGui::ComboColorParameters(), targetColor);
+    ImGui::PushID("color");
+    AlienImGui::ComboColor(AlienImGui::ComboColorParameters().width(70.0f).textWidth(0), targetColor);
     ImGui::PopID();
 
-    ImGui::SameLine();
-    ImVec2 pos = ImGui::GetCursorPos();
-    ImGui::SetCursorPos({pos.x, pos.y - ImGui::GetStyle().FramePadding.y});
 
     //slider for transition age
     ImGui::PushID(2);
-    auto width = StyleRepository::getInstance().scale(parameters._textWidth);
 
+    ImGui::SameLine();
+    auto width = scale(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
     std::string format = "%d";
     if (parameters._infinity && transitionAge == Infinity<int>::value) {
