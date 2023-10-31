@@ -471,11 +471,4 @@ void _GettingStartedWindow::drawParagraph(std::string const& text)
 {
     AlienImGui::Text(text);
 }
-
-void _GettingStartedWindow::openWeblink(std::string const& link)
-{
-#ifdef _WIN32
-    ShellExecute(NULL, "open", link.c_str(), NULL, NULL, SW_SHOWNORMAL);
-#endif
-}
  

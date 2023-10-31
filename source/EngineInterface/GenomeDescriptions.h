@@ -7,7 +7,7 @@
 #include <limits>
 
 #include "Base/Definitions.h"
-#include "FundamentalConstants.h"
+#include "EngineConstants.h"
 #include "CellFunctionConstants.h"
 
 struct MakeGenomeCopy

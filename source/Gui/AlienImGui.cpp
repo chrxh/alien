@@ -11,7 +11,7 @@
 #include "Base/StringHelper.h"
 #include "Base/Math.h"
 #include "EngineInterface/Colors.h"
-#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/SimulationParameters.h"
 
 #include "CellFunctionStrings.h"

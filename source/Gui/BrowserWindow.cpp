@@ -1,5 +1,9 @@
 #include "BrowserWindow.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <ranges>
 
 #include <boost/algorithm/string/join.hpp>
@@ -228,6 +232,15 @@ void _BrowserWindow::processToolbar()
         : "genome";
     AlienImGui::Tooltip(
         "Share your " + dataType + " with other users:\nYour current " + dataType + " will be uploaded to the server and made visible in the browser.");
+
+#ifdef _WIN32
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_COMMENTS)) {
+        openWeblink(Const::DiscordLink);
+    }
+    AlienImGui::Tooltip("Open ALIEN Discord server");
+#endif
+
     AlienImGui::Separator();
 }
 
@@ -920,6 +933,13 @@ void _BrowserWindow::onToggleLike(RemoteSimulationData* sim, int emojiType)
     } else {
         _loginDialog.lock()->open();
     }
+}
+
+void _BrowserWindow::openWeblink(std::string const& link)
+{
+#ifdef _WIN32
+    ShellExecute(NULL, "open", link.c_str(), NULL, NULL, SW_SHOWNORMAL);
+#endif
 }
 
 bool _BrowserWindow::isLiked(std::string const& simId)
