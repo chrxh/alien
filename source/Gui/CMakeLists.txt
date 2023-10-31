@@ -18,6 +18,8 @@ PUBLIC
     BrowserWindow.cpp
     BrowserWindow.h
     CellFunctionStrings.h
+    ChangeColorDialog.cpp
+    ChangeColorDialog.h
     CollectedStatisticsData.cpp
     CollectedStatisticsData.h
     CreateUserDialog.cpp

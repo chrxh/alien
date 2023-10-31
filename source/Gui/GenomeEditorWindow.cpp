@@ -28,6 +28,7 @@
 #include "Viewport.h"
 #include "HelpStrings.h"
 #include "UploadSimulationDialog.h"
+#include "ChangeColorDialog.h"
 
 namespace
 {
@@ -53,6 +54,7 @@ _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, Simula
     }
     _startingPath = GlobalSettings::getInstance().getStringState("windows.genome editor.starting path", path.string());
     _previewHeight = GlobalSettings::getInstance().getFloatState("windows.genome editor.preview height", scale(PreviewHeight));
+    _changeColorDialog = std::make_shared<_ChangeColorDialog>();
 }
 
 _GenomeEditorWindow::~_GenomeEditorWindow()
@@ -113,6 +115,7 @@ void _GenomeEditorWindow::processIntern()
 {
     processToolbar();
     processEditor();
+    _changeColorDialog->process();
 }
 
 void _GenomeEditorWindow::processToolbar()
@@ -182,6 +185,14 @@ void _GenomeEditorWindow::processToolbar()
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Increase sequence number of selected cell");
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
+    if (AlienImGui::ToolbarButton(ICON_FA_PALETTE)) {
+        _changeColorDialog->open();
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Change the color of all cells with a specific color");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
