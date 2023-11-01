@@ -61,8 +61,10 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
                         otherCell->vel += force;
                     }
                     if (otherCell->cellFunction == CellFunction_Detonator && otherCell->cellFunctionData.detonator.state != DetonatorState_Exploded) {
-                        otherCell->cellFunctionData.detonator.state = DetonatorState_Activated;
-                        otherCell->cellFunctionData.detonator.countdown = 1;
+                        if (data.numberGen1.random() < cudaSimulationParameters.cellFunctionDetonatorChainExplosionProbability[cell->color]) {
+                            otherCell->cellFunctionData.detonator.state = DetonatorState_Activated;
+                            otherCell->cellFunctionData.detonator.countdown = 1;
+                        }
                     }
                 });
             detonator.state = DetonatorState_Exploded;

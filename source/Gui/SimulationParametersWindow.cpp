@@ -1156,6 +1156,16 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.cellFunctionDetonatorRadius)
                     .tooltip("The radius of the detonation."),
                 simParameters.cellFunctionDetonatorRadius);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Chain explostion probability")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .defaultValue(origSimParameters.cellFunctionDetonatorChainExplosionProbability)
+                    .tooltip("The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
+                simParameters.cellFunctionDetonatorChainExplosionProbability);
             ImGui::TreePop();
         }
 
@@ -1846,6 +1856,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
         parameters.cellFunctionConstructorPumpEnergyFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorPumpEnergyFactor[i]));
         parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
+        parameters.cellFunctionDetonatorChainExplosionProbability[i] =
+            std::max(0.0f, std::min(1.0f, parameters.cellFunctionDetonatorChainExplosionProbability[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
