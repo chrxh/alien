@@ -609,6 +609,12 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.cellFunctionDetonatorChainExplosionProbability,
+            defaultParameters.cellFunctionDetonatorChainExplosionProbability,
+            "simulation parameters.cell.function.detonator.chain explosion probability",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.cellFunctionDetonatorActivityThreshold,
             defaultParameters.cellFunctionDetonatorActivityThreshold,
             "simulation parameters.cell.function.detonator.activity threshold",

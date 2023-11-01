@@ -142,6 +142,7 @@ struct SimulationParameters
     float cellFunctionReconnectorActivityThreshold = 0.1f;
 
     ColorVector<float> cellFunctionDetonatorRadius = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
+    ColorVector<float> cellFunctionDetonatorChainExplosionProbability = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     float cellFunctionDetonatorActivityThreshold = 0.1f;
 
     //particle sources
@@ -265,6 +266,9 @@ struct SimulationParameters
                 return false;
             }
             if (cellFunctionDetonatorRadius[i] != other.cellFunctionDetonatorRadius[i]) {
+                return false;
+            }
+            if (cellFunctionDetonatorChainExplosionProbability[i] != other.cellFunctionDetonatorChainExplosionProbability[i]) {
                 return false;
             }
         }
