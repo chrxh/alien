@@ -32,6 +32,7 @@ public:
     __inline__ __device__ static bool isFirstRepetition(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isLastNode(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isLastRepetition(ConstructorFunction const& constructor);
+    __inline__ __device__ static bool hasInfiniteRepetitions(ConstructorFunction const& constructor);
     __inline__ __device__
         static bool hasEmptyGenome(ConstructorFunction const& constructor);
     __inline__ __device__ static bool isFinished(ConstructorFunction const& constructor);
@@ -295,6 +296,11 @@ __inline__ __device__ bool GenomeDecoder::isLastNode(ConstructorFunction const& 
 __inline__ __device__ bool GenomeDecoder::isLastRepetition(ConstructorFunction const& constructor)
 {
     return getNumRepetitions(constructor.genome) - 1 == constructor.genomeCurrentRepetition;
+}
+
+__inline__ __device__ bool GenomeDecoder::hasInfiniteRepetitions(ConstructorFunction const& constructor)
+{
+    return getNumRepetitions(constructor.genome) == NPP_MAX_32S;
 }
 
 __inline__ __device__ bool GenomeDecoder::hasEmptyGenome(ConstructorFunction const& constructor)
