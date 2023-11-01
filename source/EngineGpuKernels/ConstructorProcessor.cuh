@@ -26,6 +26,7 @@ private:
         int genomeCurrentBytePosition;
         bool isLastNode;
         bool isLastNodeOfLastRepetition;
+        bool hasInfiniteRepetitions;
 
         //node data
         float angle;
@@ -219,6 +220,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.genomeCurrentBytePosition = GenomeDecoder::getNodeAddress(constructor.genome, constructor.genomeSize, constructor.genomeCurrentNodeIndex);
     result.isLastNode = GenomeDecoder::isLastNode(constructor);
     result.isLastNodeOfLastRepetition = result.isLastNode && GenomeDecoder::isLastRepetition(constructor);
+    result.hasInfiniteRepetitions = GenomeDecoder::hasInfiniteRepetitions(constructor);
 
     ShapeGenerator shapeGenerator;
     auto shape = result.genomeHeader.shape % ConstructionShape_Count;
@@ -380,7 +382,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
         CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
     }
-    if (constructionData.isLastNodeOfLastRepetition) {
+    if (constructionData.isLastNodeOfLastRepetition || (constructionData.isLastNode && constructionData.hasInfiniteRepetitions)) {
         newCell->livingState = LivingState_Activating;
     }
     hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
@@ -464,7 +466,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         newCell->livingState = LivingState_Dying;
     }
 
-    if (constructionData.isLastNodeOfLastRepetition) {
+    if (constructionData.isLastNodeOfLastRepetition || (constructionData.isLastNode && constructionData.hasInfiniteRepetitions)) {
         newCell->livingState = LivingState_Activating;
     }
 
