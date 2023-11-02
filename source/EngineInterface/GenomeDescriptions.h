@@ -81,7 +81,7 @@ struct ConstructorGenomeDescription
 struct SensorGenomeDescription
 {
     std::optional<float> fixedAngle;   //nullopt = entire neighborhood
-    float minDensity = 0.3f;
+    float minDensity = 0.05f;
     int color = 0;
 
     auto operator<=>(SensorGenomeDescription const&) const = default;

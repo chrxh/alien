@@ -39,4 +39,5 @@ private:
     uint32_t _backupColor;
     std::string _startingPath;
     std::optional<SimulationParameters> _copiedParameters;
+    std::optional<int> _numSpotsLastTime;
 };

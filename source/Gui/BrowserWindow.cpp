@@ -40,6 +40,8 @@
 
 namespace
 {
+    auto constexpr RefreshInterval = 20;  //in minutes
+
     auto constexpr UserTableWidth = 300.0f;
     auto constexpr BrowserBottomHeight = 68.0f;
     auto constexpr RowHeight = 25.0f;
@@ -185,8 +187,20 @@ void _BrowserWindow::processIntern()
     processStatus();
     processFilter();
     processEmojiWindow();
+}
 
-    if(_scheduleRefresh) {
+void _BrowserWindow::processBackground()
+{
+    auto now = std::chrono::steady_clock::now();
+    if (!_lastRefreshTime) {
+        _lastRefreshTime = now;
+    }
+    if (std::chrono::duration_cast<std::chrono::minutes>(now - *_lastRefreshTime).count() >= RefreshInterval) {
+        _lastRefreshTime = now;
+        _scheduleRefresh = true;
+    }
+
+    if (_scheduleRefresh) {
         onRefresh();
         _scheduleRefresh = false;
     }
