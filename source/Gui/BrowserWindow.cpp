@@ -197,7 +197,7 @@ void _BrowserWindow::processBackground()
     }
     if (std::chrono::duration_cast<std::chrono::minutes>(now - *_lastRefreshTime).count() >= RefreshInterval) {
         _lastRefreshTime = now;
-        _scheduleRefresh = true;
+        refreshIntern(false);
     }
 
     if (_scheduleRefresh) {
