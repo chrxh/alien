@@ -79,6 +79,7 @@ void _SimulationParametersWindow::processIntern()
     auto parameters = _simController->getSimulationParameters();
     auto origParameters = _simController->getOriginalSimulationParameters();
     auto lastParameters = parameters;
+    auto focusBaseTab = !_numSpotsLastTime.has_value() || parameters.numSpots != *_numSpotsLastTime;
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
 
@@ -92,13 +93,14 @@ void _SimulationParametersWindow::processIntern()
                     origParameters.spots[index] = createSpot(parameters, index);
                     ++parameters.numSpots;
                     ++origParameters.numSpots;
+                    _numSpotsLastTime = parameters.numSpots;
                     _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
                 AlienImGui::Tooltip("Add parameter zone");
             }
 
-            if (ImGui::BeginTabItem("Base", nullptr, ImGuiTabItemFlags_None)) {
+            if (ImGui::BeginTabItem("Base", nullptr, focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
                 processBase(parameters, origParameters);
                 ImGui::EndTabItem();
             }
@@ -121,6 +123,7 @@ void _SimulationParametersWindow::processIntern()
                     }
                     --parameters.numSpots;
                     --origParameters.numSpots;
+                    _numSpotsLastTime = parameters.numSpots;
                     _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
@@ -134,6 +137,7 @@ void _SimulationParametersWindow::processIntern()
     if (parameters != lastParameters) {
         _simController->setSimulationParameters(parameters);
     }
+    _numSpotsLastTime = parameters.numSpots;
 }
 
 SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
