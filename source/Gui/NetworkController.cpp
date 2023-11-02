@@ -288,7 +288,6 @@ bool _NetworkController::getRemoteSimulationList(std::vector<RemoteSimulationDat
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
-        result.clear();
         result = NetworkDataParser::decodeRemoteSimulationData(tree);
         return true;
     } catch (...) {
