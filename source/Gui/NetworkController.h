@@ -32,7 +32,7 @@ public:
     std::optional<std::string> getPassword() const;
 
     bool createUser(std::string const& userName, std::string const& password, std::string const& email);
-    bool activateUser(std::string const& userName, std::string const& password, std::string const& confirmationCode);
+    bool activateUser(std::string const& userName, std::string const& password, UserInfo const& userInfo, std::string const& confirmationCode);
 
     bool login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo);
     bool logout();

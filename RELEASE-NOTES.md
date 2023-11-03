@@ -1,5 +1,37 @@
 # Release notes
 
+## [4.4.0]
+### Added
+- engine, gui: genomes and sub-genomes contain repetition information and concatenation angles
+- engine, gui: support for infinite repetitions of genome structures
+- engine, gui: reconnector cells (can form and break bonds depending on neural activities)
+- engine, gui: detonator cells (can detonate depending on neural activities)
+- engine, gui: neuron cells extended: 5 different activation functions can be selected for each neuron
+- engine, gui: simulation parameters for reconnectors and detonators
+- gui/sim view: 2 new coloring available: "Cell state" and "Genome size"
+- gui/genome preview: markers for start, end, infinity repetition, multiple construction
+- gui/genome preview: visualization optimized depending on the zoom level
+- gui/genome editor: mass operation for changing colors of cells optionally including sub-genomes
+- gui/neuron editor: reset, identity and randomize function
+- gui/browser: button to open Discord server
+- gui/statistics: plots and exports for reconnections and detonator events
+- logger: more log messages during startup
+
+### Changed
+- engine: allow insert mutations on empty genomes
+- engine: restrict cluster decay on cells which belong to the same creature 
+- gui: toolbar buttons in creator and mulitplier windows are made selectable
+- gui/inspection: show ids (cell, creature, mutation) in base tab
+- gui/genome editor: icons for expanding and collapsing changed
+- gui/sim parameter: focus base tab when opening new simulation with different spots
+
+### Fixed
+- show correct tab when sub-genome is edited
+- completeness check evaluates creatureIds of the cells in order to determinate the creeature's boundaries
+- prevent crash in case of that genomes exceed 8 KB
+- genome editor layout bug fixed when separator is moved out of range 
+- layout problems after resizing in several dialogs (e.g. in display, gpu, network settings) fixed
+
 ## [4.3.0] - 2023-09-23
 ### Added
 - gui/browser: tab widget added to show the uploaded genomes and simulations from server
