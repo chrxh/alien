@@ -54,19 +54,25 @@
 
     // functions for Discord messages
     function createAddSimulationMessage($simName, $userName, $simDesc, $width, $height, $particles) {
+        $particlesString = $particles < 1000 ? "{$particles}" : strval((int)($particles/1000)) . " K";
         return json_encode([
             "username" => "alien-project",
             "avatar_url" => "https://alien-project.org/alien-server/logo.png",
-            "content" => "New simulation added to the database",
+            "content" => "",
             "embeds" => [
                 [
                     "author" => [
-                        "name" => $simName,
+                        "name" => "New simulation added to the database",
                         "icon_url" => "https://alien-project.org/alien-server/galaxy.png"
                     ],
-                    "title" => "By " . $userName,
+                    "title" => $simName,
                     "description" => $simDesc,
                     "fields" => [
+                        [
+                            "name" => "User",
+                            "value" => $userName,
+                            "inline" => true
+                        ],
                         [
                           "name" => "Size",
                           "value" => "{$width} x {$height}",
@@ -74,7 +80,7 @@
                         ],
                         [
                           "name" => "Objects",
-                          "value" => strval((int)($particles/1000)) . " K",
+                          "value" => $particlesString,
                           "inline" => true
                         ]
                     ]
@@ -87,16 +93,21 @@
         return json_encode([
             "username" => "alien-project",
             "avatar_url" => "https://alien-project.org/alien-server/logo.png",
-            "content" => "New genome added to the database",
+            "content" => "",
             "embeds" => [
                 [
                     "author" => [
-                        "name" => $simName,
+                        "name" => "New genome added to the database",
                         "icon_url" => "https://alien-project.org/alien-server/genome.png"
                     ],
-                    "title" => "By " . $userName,
+                    "title" => $simName,
                     "description" => $simDesc,
                     "fields" => [
+                        [
+                            "name" => "User",
+                            "value" => $userName,
+                            "inline" => true
+                        ],
                         [
                           "name" => "Cells",
                           "value" => "{$particles}",
