@@ -214,6 +214,9 @@ void _TemporalControlWindow::restorePosition(MovedObjectType& movedObject, Moved
     auto origMovedObjectClone = origMovedObject;
     auto movedObjectClone = movedObject;
 
-    movedObject.posX = origMovedObject.posX;
-    movedObject.posY = origMovedObject.posY;
+    if (std::abs(movedObject.velX) > NEAR_ZERO || std::abs(movedObject.velY) > NEAR_ZERO || std::abs(origMovedObject.velX) > NEAR_ZERO
+        || std::abs(origMovedObject.velY) > NEAR_ZERO) {
+        movedObject.posX = origMovedObject.posX;
+        movedObject.posY = origMovedObject.posY;
+    }
 }
