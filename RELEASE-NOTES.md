@@ -31,6 +31,7 @@
 - prevent crash in case that a single genome exceeds 8 KB
 - genome editor layout bug fixed when separator is moved out of range 
 - layout problems after resizing in several dialogs fixed (e.g. in display, gpu, network settings)
+- invalid zooming prevented
 
 ## [4.3.0] - 2023-09-23
 ### Added
