@@ -35,7 +35,7 @@ public:
     __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos);
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
 
-        private:
+private:
     static int constexpr MaxOperationsPerCell = 30;
 
     __inline__ __device__ static bool scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex);
@@ -187,6 +187,11 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteConnectionOpera
         auto scheduledOperationIndex = cell->scheduledOperationIndex;
         if (scheduledOperationIndex != -1) {
             for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
+
+                //#TODO should actually never occur
+                if (scheduledOperationIndex < 0 || scheduledOperationIndex >= data.structuralOperations.getNumEntries()) {
+                    break;
+                }
                 auto operation = data.structuralOperations.at(scheduledOperationIndex);
                 switch (operation.type) {
                 case StructuralOperation::Type::DelConnection: {
