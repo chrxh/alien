@@ -51,7 +51,7 @@ void _SpatialControlWindow::processIntern()
         ImGui::Text("Zoom factor");
         ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        ImGui::TextUnformatted(StringHelper::format(_viewport->getZoomFactor(), 1).c_str());
+        ImGui::TextUnformatted(StringHelper::format(_viewport->getZoomFactor(), 2).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 

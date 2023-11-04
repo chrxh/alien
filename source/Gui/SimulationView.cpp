@@ -206,16 +206,7 @@ void _SimulationView::processMouseWheel(IntVector2D const& viewPos)
         auto zoomFactor = powf(calcZoomFactor(_mouseWheelAction->lastTime), 2.2f * _mouseWheelAction->strongness);
         auto now = std::chrono::steady_clock::now();
         _mouseWheelAction->lastTime = now;
-
-
-        auto currentZoom = _viewport->getZoomFactor();
-        if (currentZoom < 200.0f && _mouseWheelAction->up) {
-            _viewport->zoom(viewPos, zoomFactor);
-        }
-        if (currentZoom > 0.05f && !_mouseWheelAction->up) {
-            _viewport->zoom(viewPos, 1.0f / zoomFactor);
-        }
-
+        _viewport->zoom(viewPos, _mouseWheelAction->up ? zoomFactor : 1.0f / zoomFactor);
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - _mouseWheelAction->start).count() > 100) {
             _mouseWheelAction.reset();
         }
