@@ -113,9 +113,10 @@ void _GettingStartedWindow::processIntern()
         drawItemText("Demos/Stormy Night");
 
         drawHeading2("Evolution of self-replicators");
-        drawParagraph("By attaching higher-level functions to particle networks, complex multicellular organisms can be modeled. They can evolve over time as "
+        drawParagraph("By attaching higher-level functions to particle networks, complex multi-cellular organisms can be modeled. They can evolve over time as "
                       "they are subject to mutations. The following examples consist of homogeneous worlds populated by self-replicating agents. Different "
                       "selection pressures control evolution.");
+        drawItemText("Evolution Sandbox/Example");
         drawItemText("Complex Evolution Testbed/Example");
         drawItemText("Diversity/Example");
         drawItemText("Color Niches/Example");
