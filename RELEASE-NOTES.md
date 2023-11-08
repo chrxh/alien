@@ -1,6 +1,6 @@
 # Release notes
 
-## [4.4.0]
+## [4.4.0] - 2023-11-08
 ### Added
 - engine, gui: genomes and sub-genomes contain repetition information and concatenation angles
 - engine, gui: support for infinite repetitions of genome structures
