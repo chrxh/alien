@@ -9,6 +9,7 @@
 #include "StatisticsWindow.h"
 #include "TemporalControlWindow.h"
 #include "AlienImGui.h"
+#include "StyleRepository.h"
 
 namespace
 {
@@ -41,6 +42,7 @@ void _NewSimulationDialog::processIntern()
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters().name("Adopt simulation parameters").textWidth(0), _adoptSimulationParameters);
 
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienImGui::Separator();
     if (AlienImGui::Button("OK")) {
         ImGui::CloseCurrentPopup();

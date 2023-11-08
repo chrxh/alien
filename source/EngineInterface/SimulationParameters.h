@@ -16,7 +16,9 @@ enum CellColorization_
 {
     CellColorization_None,
     CellColorization_CellColor,
-    CellColorization_MutationId
+    CellColorization_MutationId,
+    CellColorization_LivingState,
+    CellColorization_GenomeSize
 };
 
 struct SimulationParameters
@@ -26,6 +28,7 @@ struct SimulationParameters
     uint32_t backgroundColor = 0x1b0000;
     CellColorization cellColorization = CellColorization_CellColor;
     float zoomLevelNeuronalActivity = 2.0f;
+    bool showDetonations = true;
 
     float timestepSize = 1.0f;
     MotionType motionType = MotionType_Fluid;
@@ -98,13 +101,13 @@ struct SimulationParameters
     ColorVector<float> cellFunctionAttackerEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
     ColorVector<float> cellFunctionAttackerColorInhomogeneityFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorMatrix<float> cellFunctionAttackerGenomeSizeBonus = {
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f},
-        {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f}
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
     };
     ColorMatrix<float> cellFunctionAttackerSameMutantPenalty = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
@@ -134,6 +137,13 @@ struct SimulationParameters
 
     ColorVector<float> cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
     float cellFunctionSensorActivityThreshold = 0.1f;
+
+    ColorVector<float> cellFunctionReconnectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
+    float cellFunctionReconnectorActivityThreshold = 0.1f;
+
+    ColorVector<float> cellFunctionDetonatorRadius = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
+    ColorVector<float> cellFunctionDetonatorChainExplosionProbability = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    float cellFunctionDetonatorActivityThreshold = 0.1f;
 
     //particle sources
     int numParticleSources = 0;
@@ -252,6 +262,15 @@ struct SimulationParameters
             if (radiationMinCellAge[i] != other.radiationMinCellAge[i]) {
                 return false;
             }
+            if (cellFunctionReconnectorRadius[i] != other.cellFunctionReconnectorRadius[i]) {
+                return false;
+            }
+            if (cellFunctionDetonatorRadius[i] != other.cellFunctionDetonatorRadius[i]) {
+                return false;
+            }
+            if (cellFunctionDetonatorChainExplosionProbability[i] != other.cellFunctionDetonatorChainExplosionProbability[i]) {
+                return false;
+            }
         }
         if (numParticleSources != other.numParticleSources) {
             return false;
@@ -287,7 +306,7 @@ struct SimulationParameters
         }
 
         return backgroundColor == other.backgroundColor && cellColorization == other.cellColorization
-            && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity
+            && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity && showDetonations == other.showDetonations
             && baseValues == other.baseValues
             && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance
             && cellMinDistance == other.cellMinDistance
@@ -310,7 +329,8 @@ struct SimulationParameters
             && cellFunctionConstructorMutationPreventDepthIncrease == other.cellFunctionConstructorMutationPreventDepthIncrease
             && cellFunctionConstructorCheckCompletenessForSelfReplication == other.cellFunctionConstructorCheckCompletenessForSelfReplication
             && cellFunctionAttackerDestroyCells == other.cellFunctionAttackerDestroyCells
-        ;
+            && cellFunctionReconnectorActivityThreshold == other.cellFunctionReconnectorActivityThreshold
+            && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold;
     }
 
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }

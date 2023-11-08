@@ -81,7 +81,7 @@ void _ActivateUserDialog::processIntern()
 
 void _ActivateUserDialog::onActivateUser()
 {
-    auto result = _networkController->activateUser(_userName, _password, _confirmationCode);
+    auto result = _networkController->activateUser(_userName, _password, _userInfo, _confirmationCode);
     if (result) {
         LoginErrorCode errorCode;
         result |= _networkController->login(errorCode, _userName, _password, _userInfo);

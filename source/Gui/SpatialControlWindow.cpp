@@ -51,7 +51,7 @@ void _SpatialControlWindow::processIntern()
         ImGui::Text("Zoom factor");
         ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        ImGui::TextUnformatted(StringHelper::format(_viewport->getZoomFactor(), 1).c_str());
+        ImGui::TextUnformatted(StringHelper::format(_viewport->getZoomFactor(), 2).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
@@ -101,7 +101,7 @@ void _SpatialControlWindow::processZoomOutButton()
 
 void _SpatialControlWindow::processResizeButton()
 {
-    if (AlienImGui::ToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_CROP_ALT)) {
         _resizeWorldDialog->open();
     }
     AlienImGui::Tooltip("Resize");

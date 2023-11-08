@@ -6,6 +6,7 @@
 #include "Base/NumberGenerator.h"
 #include "Base/Exceptions.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/GenomeConstants.h"
 
 
 namespace
@@ -37,7 +38,7 @@ namespace
     }
 
     template<typename Container>
-    void convert(DataTO const& dataTO, Container const& source, uint64_t& targetSize, uint64_t& targetIndex)
+    void convert(DataTO const& dataTO, Container const& source, int& targetSize, uint64_t& targetIndex)
     {
         targetSize = source.size();
         if (targetSize > 0) {
@@ -51,7 +52,7 @@ namespace
     }
 
     template <>
-    void convert(DataTO const& dataTO, std::vector<float> const& source, uint64_t& targetSize, uint64_t& targetIndex)
+    void convert(DataTO const& dataTO, std::vector<float> const& source, int& targetSize, uint64_t& targetIndex)
     {
         BytesAsFloat bytesAsFloat;
         targetSize = source.size() * 4;
@@ -298,7 +299,9 @@ void DescriptionConverter::addAdditionalDataSizeForCell(CellDescription const& c
         break;
     case CellFunction_Defender:
         break;
-    case CellFunction_Placeholder:
+    case CellFunction_Reconnector:
+        break;
+    case CellFunction_Detonator:
         break;
     }
 }    
@@ -390,7 +393,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.barrier = cellTO.barrier;
     result.age = cellTO.age;
     result.color = cellTO.color;
-    result.genomeSize = cellTO.genomeSize;
+    result.genomeNumNodes = cellTO.genomeNumNodes;
 
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
@@ -411,6 +414,9 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         std::vector<float> weigthsAndBias;
         convert(dataTO, sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1), cellTO.cellFunctionData.neuron.weightsAndBiasesDataIndex, weigthsAndBias);
         std::tie(neuron.weights, neuron.biases) = splitWeightsAndBias(weigthsAndBias);
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            neuron.activationFunctions[i] = cellTO.cellFunctionData.neuron.activationFunctions[i];
+        }
         result.cellFunction = neuron;
     } break;
     case CellFunction_Transmitter: {
@@ -423,7 +429,10 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
-        constructor.genomeReadPosition = toInt(cellTO.cellFunctionData.constructor.genomeReadPosition);
+        constructor.lastConstructedCellId = cellTO.cellFunctionData.constructor.lastConstructedCellId;
+        constructor.genomeCurrentNodeIndex = cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex;
+        constructor.genomeCurrentRepetition = cellTO.cellFunctionData.constructor.genomeCurrentRepetition;
+        constructor.isConstructionBuilt = cellTO.cellFunctionData.constructor.isConstructionBuilt;
         constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
         constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
         constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
@@ -476,9 +485,16 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         defender.mode = cellTO.cellFunctionData.defender.mode;
         result.cellFunction = defender;
     } break;
-    case CellFunction_Placeholder: {
-        PlaceHolderDescription placeHolder;
-        result.cellFunction = placeHolder;
+    case CellFunction_Reconnector: {
+        ReconnectorDescription reconnector;
+        reconnector.color = cellTO.cellFunctionData.reconnector.color;
+        result.cellFunction = reconnector;
+    } break;
+    case CellFunction_Detonator: {
+        DetonatorDescription detonator;
+        detonator.state = cellTO.cellFunctionData.detonator.state;
+        detonator.countdown = cellTO.cellFunctionData.detonator.countdown;
+        result.cellFunction = detonator;
     } break;
     }
 
@@ -524,9 +540,12 @@ void DescriptionConverter::addCell(
         NeuronTO neuronTO;
         auto const& neuronDesc = std::get<NeuronDescription>(*cellDesc.cellFunction);
         std::vector<float> weigthsAndBias = unitWeightsAndBias(neuronDesc.weights, neuronDesc.biases);
-        uint64_t targetSize;
+        int targetSize;
         convert(dataTO, weigthsAndBias, targetSize, neuronTO.weightsAndBiasesDataIndex);
         CHECK(targetSize == sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1));
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            neuronTO.activationFunctions[i] = neuronDesc.activationFunctions[i];
+        }
         cellTO.cellFunctionData.neuron = neuronTO;
     } break;
     case CellFunction_Transmitter: {
@@ -540,8 +559,12 @@ void DescriptionConverter::addCell(
         ConstructorTO constructorTO;
         constructorTO.activationMode = constructorDesc.activationMode;
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
+        CHECK(constructorDesc.genome.size() >= Const::GenomeHeaderSize)
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
-        constructorTO.genomeReadPosition = constructorDesc.genomeReadPosition;
+        constructorTO.lastConstructedCellId = constructorDesc.lastConstructedCellId;
+        constructorTO.genomeCurrentNodeIndex = constructorDesc.genomeCurrentNodeIndex;
+        constructorTO.genomeCurrentRepetition = constructorDesc.genomeCurrentRepetition;
+        constructorTO.isConstructionBuilt = constructorDesc.isConstructionBuilt;
         constructorTO.offspringCreatureId = constructorDesc.offspringCreatureId;
         constructorTO.offspringMutationId = constructorDesc.offspringMutationId;
         constructorTO.genomeGeneration = constructorDesc.genomeGeneration;
@@ -580,6 +603,7 @@ void DescriptionConverter::addCell(
         InjectorTO injectorTO;
         injectorTO.mode = injectorDesc.mode;
         injectorTO.counter = injectorDesc.counter;
+        CHECK(injectorDesc.genome.size() >= Const::GenomeHeaderSize)
         convert(dataTO, injectorDesc.genome, injectorTO.genomeSize, injectorTO.genomeDataIndex);
         injectorTO.genomeGeneration = injectorDesc.genomeGeneration;
         cellTO.cellFunctionData.injector = injectorTO;
@@ -599,9 +623,18 @@ void DescriptionConverter::addCell(
         defenderTO.mode = defenderDesc.mode;
         cellTO.cellFunctionData.defender = defenderTO;
     } break;
-    case CellFunction_Placeholder: {
-        PlaceHolderTO placeHolderTO;
-        cellTO.cellFunctionData.placeHolder = placeHolderTO;
+    case CellFunction_Reconnector: {
+        auto const& reconnectorDesc = std::get<ReconnectorDescription>(*cellDesc.cellFunction);
+        ReconnectorTO reconnectorTO;
+        reconnectorTO.color = reconnectorDesc.color;
+        cellTO.cellFunctionData.reconnector = reconnectorTO;
+    } break;
+    case CellFunction_Detonator: {
+        auto const& detonatorDesc = std::get<DetonatorDescription>(*cellDesc.cellFunction);
+        DetonatorTO detonatorTO;
+        detonatorTO.state = detonatorDesc.state;
+        detonatorTO.countdown = detonatorDesc.countdown;
+        cellTO.cellFunctionData.detonator = detonatorTO;
     } break;
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -612,7 +645,7 @@ void DescriptionConverter::addCell(
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;
     cellTO.color = cellDesc.color;
-    cellTO.genomeSize = cellDesc.genomeSize;
+    cellTO.genomeNumNodes = cellDesc.genomeNumNodes;
     convert(dataTO, cellDesc.metadata.name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
     convert(dataTO, cellDesc.metadata.description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);

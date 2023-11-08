@@ -1,4 +1,4 @@
-#include "Serializer.h"
+#include "SerializerService.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -18,15 +18,16 @@
 #include <boost/range/adaptors.hpp>
 #include <zstr.hpp>
 
+#include "Base/LoggingService.h"
 #include "Base/Resources.h"
 #include "Base/VersionChecker.h"
 
 #include "Descriptions.h"
 #include "SimulationParameters.h"
-#include "AuxiliaryDataParser.h"
+#include "AuxiliaryDataParserService.h"
 #include "GenomeConstants.h"
 #include "GenomeDescriptions.h"
-#include "GenomeDescriptionConverter.h"
+#include "GenomeDescriptionService.h"
 
 #define SPLIT_SERIALIZATION(Classname) \
     template <class Archive> \
@@ -42,67 +43,15 @@
 
 namespace
 {
-    auto constexpr Id_Particle_Color = 0;
-
-    auto constexpr Id_Cell_Stiffness = 0;
-    auto constexpr Id_Cell_Color = 1;
-    auto constexpr Id_Cell_ExecutionOrderNumber = 2;
-    auto constexpr Id_Cell_Barrier = 3;
-    auto constexpr Id_Cell_Age = 4;
-    auto constexpr Id_Cell_LivingState = 5;
-    auto constexpr Id_Cell_CreatureId = 11;
-    auto constexpr Id_Cell_MutationId = 12;
-    auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
-    auto constexpr Id_Cell_OutputBlocked = 7;
-    auto constexpr Id_Cell_ActivationTime = 8;
-    auto constexpr Id_Cell_GenomeSize = 13;
-    
-    auto constexpr Id_Constructor_ActivationMode = 0;
-    auto constexpr Id_Constructor_SingleConstruction = 1;
-    auto constexpr Id_Constructor_SeparateConstruction = 2;
-    auto constexpr Id_Constructor_AngleAlignment = 4;
-    auto constexpr Id_Constructor_Stiffness = 5;
-    auto constexpr Id_Constructor_ConstructionActivationTime = 6;
-    auto constexpr Id_Constructor_GenomeReadPosition = 7;
-    auto constexpr Id_Constructor_GenomeGeneration = 9;
-    auto constexpr Id_Constructor_GenomeHeader = 10;
-    auto constexpr Id_Constructor_ConstructionAngle1 = 11;
-    auto constexpr Id_Constructor_ConstructionAngle2 = 12;
-    auto constexpr Id_Constructor_OffspringCreatureId = 13;
-    auto constexpr Id_Constructor_OffspringMutationId = 14;
-
-    auto constexpr Id_Defender_Mode = 0;
-
-    auto constexpr Id_Muscle_Mode = 0;
-    auto constexpr Id_Muscle_LastBendingDirection = 1;
-    auto constexpr Id_Muscle_LastBendingSourceIndex = 4;
-    auto constexpr Id_Muscle_ConsecutiveBendingAngle = 3;
-
-    auto constexpr Id_Injector_Mode = 0;
-    auto constexpr Id_Injector_Counter = 1;
-    auto constexpr Id_Injector_GenomeHeader = 2;
-
-    auto constexpr Id_Attacker_Mode = 0;
-
-    auto constexpr Id_Nerve_PulseMode = 0;
-    auto constexpr Id_Nerve_AlternationMode = 1;
-
-    auto constexpr Id_Sensor_FixedAngle = 0;
-    auto constexpr Id_Sensor_MinDensity = 1;
-    auto constexpr Id_Sensor_Color = 2;
-    auto constexpr Id_Sensor_TargetedCreatureId = 3;
-    auto constexpr Id_Sensor_MemoryChannel1 = 4;
-    auto constexpr Id_Sensor_MemoryChannel2 = 5;
-    auto constexpr Id_Sensor_MemoryChannel3 = 6;
-
-    auto constexpr Id_Transmitter_Mode = 0;
-
     auto constexpr Id_GenomeHeader_Shape = 0;
     auto constexpr Id_GenomeHeader_SingleConstruction = 1;
     auto constexpr Id_GenomeHeader_SeparateConstruction = 2;
     auto constexpr Id_GenomeHeader_AngleAlignment = 3;
     auto constexpr Id_GenomeHeader_Stiffness = 4;
     auto constexpr Id_GenomeHeader_ConnectionDistance = 5;
+    auto constexpr Id_GenomeHeader_NumRepetitions = 6;
+    auto constexpr Id_GenomeHeader_ConcatenationAngle1 = 7;
+    auto constexpr Id_GenomeHeader_ConcatenationAngle2 = 8;
 
     auto constexpr Id_CellGenome_ReferenceAngle = 1;
     auto constexpr Id_CellGenome_Energy = 7;
@@ -111,6 +60,8 @@ namespace
     auto constexpr Id_CellGenome_ExecutionOrderNumber = 4;
     auto constexpr Id_CellGenome_InputExecutionOrderNumber = 8;
     auto constexpr Id_CellGenome_OutputBlocked = 6;
+
+    auto constexpr Id_NeuronGenome_ActivationFunctions = 0;
 
     auto constexpr Id_TransmitterGenome_Mode = 0;
 
@@ -139,6 +90,75 @@ namespace
     auto constexpr Id_SensorGenome_MinDensity = 1;
     auto constexpr Id_SensorGenome_Color = 2;
 
+    auto constexpr Id_ReconnectorGenome_Color = 0;
+
+    auto constexpr Id_DetonatorGenome_Countdown = 0;
+
+
+    auto constexpr Id_Particle_Color = 0;
+
+    auto constexpr Id_Cell_Stiffness = 0;
+    auto constexpr Id_Cell_Color = 1;
+    auto constexpr Id_Cell_ExecutionOrderNumber = 2;
+    auto constexpr Id_Cell_Barrier = 3;
+    auto constexpr Id_Cell_Age = 4;
+    auto constexpr Id_Cell_LivingState = 5;
+    auto constexpr Id_Cell_CreatureId = 11;
+    auto constexpr Id_Cell_MutationId = 12;
+    auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
+    auto constexpr Id_Cell_OutputBlocked = 7;
+    auto constexpr Id_Cell_ActivationTime = 8;
+    auto constexpr Id_Cell_GenomeNumNodes = 13;
+
+    auto constexpr Id_Neuron_ActivationFunctions = 0;
+
+    auto constexpr Id_Constructor_ActivationMode = 0;
+    auto constexpr Id_Constructor_SingleConstruction = 1;
+    auto constexpr Id_Constructor_SeparateConstruction = 2;
+    auto constexpr Id_Constructor_AngleAlignment = 4;
+    auto constexpr Id_Constructor_Stiffness = 5;
+    auto constexpr Id_Constructor_ConstructionActivationTime = 6;
+    auto constexpr Id_Constructor_GenomeCurrentNodeIndex = 7;
+    auto constexpr Id_Constructor_GenomeGeneration = 9;
+    auto constexpr Id_Constructor_GenomeHeader = 10;
+    auto constexpr Id_Constructor_ConstructionAngle1 = 11;
+    auto constexpr Id_Constructor_ConstructionAngle2 = 12;
+    auto constexpr Id_Constructor_OffspringCreatureId = 13;
+    auto constexpr Id_Constructor_OffspringMutationId = 14;
+    auto constexpr Id_Constructor_IsConstructionBuilt = 15;
+    auto constexpr Id_Constructor_GenomeCurrentCopy = 16;
+    auto constexpr Id_Constructor_LastConstructedCellId = 17;
+
+    auto constexpr Id_Defender_Mode = 0;
+
+    auto constexpr Id_Muscle_Mode = 0;
+    auto constexpr Id_Muscle_LastBendingDirection = 1;
+    auto constexpr Id_Muscle_LastBendingSourceIndex = 4;
+    auto constexpr Id_Muscle_ConsecutiveBendingAngle = 3;
+
+    auto constexpr Id_Injector_Mode = 0;
+    auto constexpr Id_Injector_Counter = 1;
+    auto constexpr Id_Injector_GenomeHeader = 2;
+
+    auto constexpr Id_Attacker_Mode = 0;
+
+    auto constexpr Id_Nerve_PulseMode = 0;
+    auto constexpr Id_Nerve_AlternationMode = 1;
+
+    auto constexpr Id_Sensor_FixedAngle = 0;
+    auto constexpr Id_Sensor_MinDensity = 1;
+    auto constexpr Id_Sensor_Color = 2;
+    auto constexpr Id_Sensor_TargetedCreatureId = 3;
+    auto constexpr Id_Sensor_MemoryChannel1 = 4;
+    auto constexpr Id_Sensor_MemoryChannel2 = 5;
+    auto constexpr Id_Sensor_MemoryChannel3 = 6;
+
+    auto constexpr Id_Transmitter_Mode = 0;
+
+    auto constexpr Id_Reconnector_Color = 0;
+
+    auto constexpr Id_Detonator_State = 0;
+    auto constexpr Id_Detonator_Countdown = 1;
 }
 
 namespace cereal
@@ -148,7 +168,7 @@ namespace cereal
         Load,
         Save
     };
-    using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>, std::optional<int>>;
+    using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>, std::optional<int>, std::vector<int>>;
 
     template <class Archive>
     std::unordered_map<int, VariantData> getLoadSaveMap(SerializationTask task, Archive& ar)
@@ -198,6 +218,7 @@ namespace cereal
     {
         NeuronGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<std::vector<int>>(task, auxiliaries, Id_NeuronGenome_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
         setLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.weights, data.biases);
@@ -240,7 +261,7 @@ namespace cereal
                 if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
                     data.genome = MakeGenomeCopy();
                 } else {
-                    data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                    data.genome = GenomeDescriptionService::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
                 }
             } else {
                 std::variant<MakeGenomeCopy, std::vector<CellGenomeDescription>> genomeData;
@@ -254,11 +275,11 @@ namespace cereal
                 else {
                     GenomeDescription genomeDesc;
                     genomeDesc.cells = std::get<std::vector<CellGenomeDescription>>(genomeData);
-                    genomeDesc.info.singleConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SingleConstruction));
-                    genomeDesc.info.separateConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SeparateConstruction));
-                    genomeDesc.info.angleAlignment = std::get<int>(auxiliaries.at(Id_ConstructorGenome_AngleAlignment));
-                    genomeDesc.info.stiffness = std::get<float>(auxiliaries.at(Id_ConstructorGenome_Stiffness));
-                    data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+                    genomeDesc.header.singleConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SingleConstruction));
+                    genomeDesc.header.separateConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SeparateConstruction));
+                    genomeDesc.header.angleAlignment = std::get<int>(auxiliaries.at(Id_ConstructorGenome_AngleAlignment));
+                    genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_ConstructorGenome_Stiffness));
+                    data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
                     if (!genomeDesc.cells.empty()) {
                         data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;
                         data.constructionAngle2 = genomeDesc.cells.back().referenceAngle;
@@ -271,7 +292,7 @@ namespace cereal
             if (std::holds_alternative<MakeGenomeCopy>(data.genome)) {
                 genomeData = MakeGenomeCopy();
             } else {
-                genomeData = GenomeDescriptionConverter::convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
+                genomeData = GenomeDescriptionService::convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
             }
             ar(genomeData);
         }
@@ -330,7 +351,7 @@ namespace cereal
                 if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
                     data.genome = MakeGenomeCopy();
                 } else {
-                    data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                    data.genome = GenomeDescriptionService::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
                 }
             } else {
                 std::variant<MakeGenomeCopy, std::vector<CellGenomeDescription>> genomeData;
@@ -340,7 +361,7 @@ namespace cereal
                 } else {
                     GenomeDescription genomeDesc;
                     genomeDesc.cells = std::get<std::vector<CellGenomeDescription>>(genomeData);
-                    data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+                    data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
                 }
             }
         } else {
@@ -348,7 +369,7 @@ namespace cereal
             if (std::holds_alternative<MakeGenomeCopy>(data.genome)) {
                 genomeData = MakeGenomeCopy();
             } else {
-                genomeData = GenomeDescriptionConverter::convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
+                genomeData = GenomeDescriptionService::convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
             }
             ar(genomeData);
         }
@@ -376,12 +397,24 @@ namespace cereal
     SPLIT_SERIALIZATION(DefenderGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, PlaceHolderGenomeDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ReconnectorGenomeDescription& data)
     {
+        ReconnectorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Id_ReconnectorGenome_Color, data.color, defaultObject.color);
         setLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(PlaceHolderGenomeDescription)
+    SPLIT_SERIALIZATION(ReconnectorGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetonatorGenomeDescription& data)
+    {
+        DetonatorGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Id_DetonatorGenome_Countdown, data.countdown, defaultObject.countdown);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetonatorGenomeDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellGenomeDescription& data)
@@ -412,6 +445,9 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_GenomeHeader_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
         loadSave<float>(task, auxiliaries, Id_GenomeHeader_Stiffness, data.stiffness, defaultObject.stiffness);
         loadSave<float>(task, auxiliaries, Id_GenomeHeader_ConnectionDistance, data.connectionDistance, defaultObject.connectionDistance);
+        loadSave<int>(task, auxiliaries, Id_GenomeHeader_NumRepetitions, data.numRepetitions, defaultObject.numRepetitions);
+        loadSave<float>(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle1, data.concatenationAngle1, defaultObject.concatenationAngle1);
+        loadSave<float>(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle2, data.concatenationAngle2, defaultObject.concatenationAngle2);
         setLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(GenomeHeaderDescription)
@@ -419,7 +455,7 @@ namespace cereal
     template <class Archive>
     void serialize(Archive& ar, GenomeDescription& data)
     {
-        ar(data.info, data.cells);
+        ar(data.header, data.cells);
     }
 
     template <class Archive>
@@ -443,6 +479,7 @@ namespace cereal
     {
         NeuronDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<std::vector<int>>(task, auxiliaries, Id_Neuron_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
         setLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.weights, data.biases);
@@ -466,7 +503,10 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
         loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
-        loadSave<int>(task, auxiliaries, Id_Constructor_GenomeReadPosition, data.genomeReadPosition, defaultObject.genomeReadPosition);
+        loadSave<uint64_t>(task, auxiliaries, Id_Constructor_LastConstructedCellId, data.lastConstructedCellId, defaultObject.lastConstructedCellId);
+        loadSave<int>(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data.genomeCurrentNodeIndex, defaultObject.genomeCurrentNodeIndex);
+        loadSave<int>(task, auxiliaries, Id_Constructor_GenomeCurrentCopy, data.genomeCurrentRepetition, defaultObject.genomeCurrentRepetition);
+        loadSave<bool>(task, auxiliaries, Id_Constructor_IsConstructionBuilt, data.isConstructionBuilt, defaultObject.isConstructionBuilt);
         loadSave<int>(task, auxiliaries, Id_Constructor_OffspringCreatureId, data.offspringCreatureId, defaultObject.offspringCreatureId);
         loadSave<int>(task, auxiliaries, Id_Constructor_OffspringMutationId, data.offspringMutationId, defaultObject.offspringMutationId);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
@@ -479,36 +519,52 @@ namespace cereal
 
         if (task == SerializationTask::Load) {
             auto hasGenomeHeader = auxiliaries.contains(Id_Constructor_GenomeHeader);
-            if (hasGenomeHeader) {
+            auto useNewGenomeIndex = auxiliaries.contains(Id_Constructor_IsConstructionBuilt);
+
+            if (hasGenomeHeader && useNewGenomeIndex) {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc);
-                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+                data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
             }
 
             //compatibility with older versions
             //>>>
-            else {
+            if (!hasGenomeHeader) {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc.cells);
-                genomeDesc.info.singleConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction));
-                genomeDesc.info.separateConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SeparateConstruction));
-                genomeDesc.info.angleAlignment = std::get<int>(auxiliaries.at(Id_Constructor_AngleAlignment));
-                genomeDesc.info.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
-                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+                genomeDesc.header.singleConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction));
+                genomeDesc.header.separateConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SeparateConstruction));
+                genomeDesc.header.angleAlignment = std::get<int>(auxiliaries.at(Id_Constructor_AngleAlignment));
+                genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
+                data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
 
-                //heuristic to obtain a valid genomeReadPosition
-                data.genomeReadPosition += Const::GenomeHeaderSize;
-                auto cellIndex = GenomeDescriptionConverter::convertNodeAddressToNodeIndex(data.genome, data.genomeReadPosition);
-                data.genomeReadPosition = GenomeDescriptionConverter::convertNodeIndexToNodeAddress(data.genome, cellIndex);
+                data.isConstructionBuilt = toInt(data.genome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
+                data.genomeCurrentNodeIndex = 0;
 
                 if (!genomeDesc.cells.empty()) {
                     data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;
                     data.constructionAngle2 = genomeDesc.cells.back().referenceAngle;
                 }
             }
+
+            if (hasGenomeHeader && !useNewGenomeIndex) {
+                GenomeDescription genomeDesc;
+                ar(genomeDesc);
+                data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
+
+                auto oldVersionSpec =
+                    GenomeEncodingSpecification().numRepetitions(false).concatenationAngle1(false).concatenationAngle2(false);
+                auto oldGenome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc, oldVersionSpec);
+                data.isConstructionBuilt = toInt(oldGenome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
+                data.genomeCurrentNodeIndex = GenomeDescriptionService::convertNodeAddressToNodeIndex(oldGenome, data.genomeCurrentNodeIndex, oldVersionSpec);
+                if (data.genomeCurrentNodeIndex >= toInt(genomeDesc.cells.size())) {
+                    data.genomeCurrentNodeIndex = 0;
+                }
+            }
             //<<<
+
         } else {
-            GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
+            GenomeDescription genomeDesc = GenomeDescriptionService::convertBytesToDescription(data.genome);
             ar(genomeDesc);
         }
     }
@@ -568,14 +624,14 @@ namespace cereal
             if (hasGenomeHeader) {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc);
-                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+                data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
             } else {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc.cells);
-                data.genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+                data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
             }
         } else {
-            GenomeDescription genomeDesc = GenomeDescriptionConverter::convertBytesToDescription(data.genome);
+            GenomeDescription genomeDesc = GenomeDescriptionService::convertBytesToDescription(data.genome);
             ar(genomeDesc);
         }
     }
@@ -605,12 +661,25 @@ namespace cereal
     SPLIT_SERIALIZATION(DefenderDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, PlaceHolderDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ReconnectorDescription& data)
     {
+        ReconnectorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Id_Reconnector_Color, data.color, defaultObject.color);
         setLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(PlaceHolderDescription)
+    SPLIT_SERIALIZATION(ReconnectorDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetonatorDescription& data)
+    {
+        DetonatorDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave<int>(task, auxiliaries, Id_Detonator_State, data.state, defaultObject.state);
+        loadSave<int>(task, auxiliaries, Id_Detonator_Countdown, data.countdown, defaultObject.countdown);
+        setLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetonatorDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellDescription& data)
@@ -629,7 +698,7 @@ namespace cereal
             task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
-        loadSave<int>(task, auxiliaries, Id_Cell_GenomeSize, data.genomeSize, defaultObject.genomeSize);
+        loadSave<int>(task, auxiliaries, Id_Cell_GenomeNumNodes, data.genomeNumNodes, defaultObject.genomeNumNodes);
         setLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
@@ -663,10 +732,10 @@ namespace cereal
     }
 }
 
-bool Serializer::serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data)
+bool SerializerService::serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data)
 {
     try {
-
+        log(Priority::Important, "save simulation to " + filename);
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
 
@@ -691,9 +760,10 @@ bool Serializer::serializeSimulationToFiles(std::string const& filename, Deseria
     }
 }
 
-bool Serializer::deserializeSimulationFromFiles(DeserializedSimulation& data, std::string const& filename)
+bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& data, std::string const& filename)
 {
     try {
+        log(Priority::Important, "load simulation from " + filename);
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
 
@@ -714,7 +784,7 @@ bool Serializer::deserializeSimulationFromFiles(DeserializedSimulation& data, st
     }
 }
 
-bool Serializer::serializeSimulationToStrings(SerializedSimulation& output, DeserializedSimulation const& input)
+bool SerializerService::serializeSimulationToStrings(SerializedSimulation& output, DeserializedSimulation const& input)
 {
     try {
         {
@@ -738,7 +808,7 @@ bool Serializer::serializeSimulationToStrings(SerializedSimulation& output, Dese
     }
 }
 
-bool Serializer::deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input)
+bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input)
 {
     try {
         {
@@ -759,9 +829,10 @@ bool Serializer::deserializeSimulationFromStrings(DeserializedSimulation& output
     }
 }
 
-bool Serializer::serializeGenomeToFile(std::string const& filename, std::vector<uint8_t> const& genome)
+bool SerializerService::serializeGenomeToFile(std::string const& filename, std::vector<uint8_t> const& genome)
 {
     try {
+        log(Priority::Important, "save genome to " + filename);
         //wrap constructor cell around genome
         ClusteredDataDescription data;
         if (!wrapGenome(data, genome)) {
@@ -780,9 +851,10 @@ bool Serializer::serializeGenomeToFile(std::string const& filename, std::vector<
     }
 }
 
-bool Serializer::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::string const& filename)
+bool SerializerService::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::string const& filename)
 {
     try {
+        log(Priority::Important, "load genome from " + filename);
         ClusteredDataDescription data;
         if (!deserializeDataDescription(data, filename)) {
             return false;
@@ -796,7 +868,7 @@ bool Serializer::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::st
     }
 }
 
-bool Serializer::serializeGenomeToString(std::string& output, std::vector<uint8_t> const& input)
+bool SerializerService::serializeGenomeToString(std::string& output, std::vector<uint8_t> const& input)
 {
     try {
         std::stringstream stdStream;
@@ -819,7 +891,7 @@ bool Serializer::serializeGenomeToString(std::string& output, std::vector<uint8_
     }
 }
 
-bool Serializer::deserializeGenomeFromString(std::vector<uint8_t>& output, std::string const& input)
+bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output, std::string const& input)
 {
     try {
         std::stringstream stdStream(input);
@@ -840,9 +912,10 @@ bool Serializer::deserializeGenomeFromString(std::vector<uint8_t>& output, std::
     }
 }
 
-bool Serializer::serializeSimulationParametersToFile(std::string const& filename, SimulationParameters const& parameters)
+bool SerializerService::serializeSimulationParametersToFile(std::string const& filename, SimulationParameters const& parameters)
 {
     try {
+        log(Priority::Important, "save simulation parameters to " + filename);
         std::ofstream stream(filename, std::ios::binary);
         if (!stream) {
             return false;
@@ -855,9 +928,10 @@ bool Serializer::serializeSimulationParametersToFile(std::string const& filename
     }
 }
 
-bool Serializer::deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::string const& filename)
+bool SerializerService::deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::string const& filename)
 {
     try {
+        log(Priority::Important, "load simulation parameters from " + filename);
         std::ifstream stream(filename, std::ios::binary);
         if (!stream) {
             return false;
@@ -870,7 +944,7 @@ bool Serializer::deserializeSimulationParametersFromFile(SimulationParameters& p
     }
 }
 
-bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
+bool SerializerService::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
 {
     try {
         zstr::ofstream fileStream(filename, std::ios::binary);
@@ -885,7 +959,7 @@ bool Serializer::serializeContentToFile(std::string const& filename, ClusteredDa
     }
 }
 
-bool Serializer::deserializeContentFromFile(ClusteredDataDescription& content, std::string const& filename)
+bool SerializerService::deserializeContentFromFile(ClusteredDataDescription& content, std::string const& filename)
 {
     try {
         if (!deserializeDataDescription(content, filename)) {
@@ -897,14 +971,14 @@ bool Serializer::deserializeContentFromFile(ClusteredDataDescription& content, s
     }
 }
 
-void Serializer::serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream)
+void SerializerService::serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream)
 {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(Const::ProgramVersion);
     archive(data);
 }
 
-bool Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::string const& filename)
+bool SerializerService::deserializeDataDescription(ClusteredDataDescription& data, std::string const& filename)
 {
     zstr::ifstream stream(filename, std::ios::binary);
     if (!stream) {
@@ -914,7 +988,7 @@ bool Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
     return true;
 }
 
-void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream)
+void SerializerService::deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream)
 {
     cereal::PortableBinaryInputArchive archive(stream);
     std::string version;
@@ -929,31 +1003,31 @@ void Serializer::deserializeDataDescription(ClusteredDataDescription& data, std:
     archive(data);
 }
 
-void Serializer::serializeAuxiliaryData(AuxiliaryData const& auxiliaryData, std::ostream& stream)
+void SerializerService::serializeAuxiliaryData(AuxiliaryData const& auxiliaryData, std::ostream& stream)
 {
-    boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParser::encodeAuxiliaryData(auxiliaryData));
+    boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParserService::encodeAuxiliaryData(auxiliaryData));
 }
 
-void Serializer::deserializeAuxiliaryData(AuxiliaryData& auxiliaryData, std::istream& stream)
-{
-    boost::property_tree::ptree tree;
-    boost::property_tree::read_json(stream, tree);
-    auxiliaryData = AuxiliaryDataParser::decodeAuxiliaryData(tree);
-}
-
-void Serializer::serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream)
-{
-    boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParser::encodeSimulationParameters(parameters));
-}
-
-void Serializer::deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream)
+void SerializerService::deserializeAuxiliaryData(AuxiliaryData& auxiliaryData, std::istream& stream)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    parameters = AuxiliaryDataParser::decodeSimulationParameters(tree);
+    auxiliaryData = AuxiliaryDataParserService::decodeAuxiliaryData(tree);
 }
 
-bool Serializer::wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input)
+void SerializerService::serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream)
+{
+    boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParserService::encodeSimulationParameters(parameters));
+}
+
+void SerializerService::deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream)
+{
+    boost::property_tree::ptree tree;
+    boost::property_tree::read_json(stream, tree);
+    parameters = AuxiliaryDataParserService::decodeSimulationParameters(tree);
+}
+
+bool SerializerService::wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input)
 {
     output.clear();
     output.addCluster(ClusterDescription().addCell(CellDescription().setCellFunction(ConstructorDescription().setGenome(input))));
@@ -961,7 +1035,7 @@ bool Serializer::wrapGenome(ClusteredDataDescription& output, std::vector<uint8_
 }
 
 
-bool Serializer::unwrapGenome(std::vector<uint8_t>& output, ClusteredDataDescription const& input)
+bool SerializerService::unwrapGenome(std::vector<uint8_t>& output, ClusteredDataDescription const& input)
 {
     if (input.clusters.size() != 1) {
         return false;

@@ -3,7 +3,7 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
-#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellFunctionConstants.h"
 
 struct ParticleTO
@@ -19,10 +19,10 @@ struct ParticleTO
 
 struct CellMetadataTO
 {
-    uint64_t nameSize;
+    int nameSize;
     uint64_t nameDataIndex;
 
-    uint64_t descriptionSize;
+    int descriptionSize;
     uint64_t descriptionDataIndex;
 };
 
@@ -41,6 +41,7 @@ struct ActivityTO
 struct NeuronTO
 {
     uint64_t weightsAndBiasesDataIndex;   //size is always: sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1)
+    NeuronActivationFunction activationFunctions[MAX_CHANNELS];
 };
 
 struct TransmitterTO
@@ -53,14 +54,17 @@ struct ConstructorTO
     int activationMode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     int constructionActivationTime;
 
-    uint64_t genomeSize;
+    int genomeSize;
     uint64_t genomeDataIndex;
     int genomeGeneration;
     float constructionAngle1;
     float constructionAngle2;
 
     //process data
-    uint64_t genomeReadPosition;
+    uint64_t lastConstructedCellId;
+    int genomeCurrentNodeIndex;
+    int genomeCurrentRepetition;
+    bool isConstructionBuilt;
     int offspringCreatureId;
     int offspringMutationId;
 };
@@ -94,7 +98,7 @@ struct InjectorTO
 {
     InjectorMode mode;
     int counter;
-    uint64_t genomeSize;
+    int genomeSize;
     uint64_t genomeDataIndex;
     int genomeGeneration;
 };
@@ -112,8 +116,16 @@ struct DefenderTO
     DefenderMode mode;
 };
 
-struct PlaceHolderTO
-{};
+struct ReconnectorTO
+{
+    int color;
+};
+
+struct DetonatorTO
+{
+    DetonatorState state;
+    int countdown;
+};
 
 union CellFunctionTO
 {
@@ -126,7 +138,8 @@ union CellFunctionTO
     InjectorTO injector;
     MuscleTO muscle;
     DefenderTO defender;
-    PlaceHolderTO placeHolder;
+    ReconnectorTO reconnector;
+    DetonatorTO detonator;
 };
 
 struct CellTO
@@ -156,7 +169,7 @@ struct CellTO
     CellFunctionTO cellFunctionData;
     ActivityTO activity;
     int activationTime;
-    int genomeSize;
+    int genomeNumNodes;
 
     CellMetadataTO metadata;
 

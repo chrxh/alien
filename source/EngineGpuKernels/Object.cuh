@@ -1,16 +1,33 @@
 #pragma once
 
-#include "EngineInterface/FundamentalConstants.h"
+#include <nppdefs.h>
+
+#include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellFunctionConstants.h"
 
 #include "Base.cuh"
 
+struct GenomeHeader
+{
+    ConstructionShape shape;
+    bool singleConstruction;
+    bool separateConstruction;
+    ConstructorAngleAlignment angleAlignment;
+    float stiffness;
+    float connectionDistance;
+    int numRepetitions;
+    float concatenationAngle1;
+    float concatenationAngle2;
+
+    __inline__ __device__ bool hasInfiniteRepetitions() const { return numRepetitions == NPP_MAX_32S; }
+};
+
 struct CellMetadataDescription
 {
-    uint64_t nameSize;
+    int nameSize;
     uint8_t* name;
 
-    uint64_t descriptionSize;
+    int descriptionSize;
     uint8_t* description;
 };
 
@@ -35,6 +52,7 @@ struct NeuronFunction
     };
 
     NeuronState* neuronState;
+    NeuronActivationFunction activationFunctions[MAX_CHANNELS];
 };
 
 struct TransmitterFunction
@@ -49,15 +67,18 @@ struct ConstructorFunction
     int constructionActivationTime;
 
     //genome
-    uint64_t genomeSize;
+    int genomeSize;
     uint8_t* genome;
     int genomeGeneration;
     float constructionAngle1;
     float constructionAngle2;
 
     //process data
-    uint64_t genomeReadPosition;
-    int offspringCreatureId;    //will be filled when self-replication starts
+    uint64_t lastConstructedCellId;
+    int genomeCurrentNodeIndex;
+    int genomeCurrentRepetition;
+    bool isConstructionBuilt;
+    int offspringCreatureId;  //will be filled when self-replication starts
     int offspringMutationId;
 
     //temp
@@ -93,7 +114,7 @@ struct InjectorFunction
 {
     InjectorMode mode;
     int counter;
-    uint64_t genomeSize;
+    int genomeSize;
     uint8_t* genome;
     int genomeGeneration;
 };
@@ -111,8 +132,16 @@ struct DefenderFunction
     DefenderMode mode;
 };
 
-struct PlaceHolderFunction
-{};
+struct ReconnectorFunction
+{
+    int color;
+};
+
+struct DetonatorFunction
+{
+    DetonatorState state;
+    int countdown;
+};
 
 union CellFunctionData
 {
@@ -125,7 +154,8 @@ union CellFunctionData
     InjectorFunction injector;
     MuscleFunction muscle;
     DefenderFunction defender;
-    PlaceHolderFunction placeHolder;
+    ReconnectorFunction reconnector;
+    DetonatorFunction detonator;
 };
 
 struct Cell
@@ -155,7 +185,7 @@ struct Cell
     CellFunctionData cellFunctionData;
     Activity activity;
     int activationTime;
-    int genomeSize;
+    int genomeNumNodes;
 
     CellMetadataDescription metadata;
 

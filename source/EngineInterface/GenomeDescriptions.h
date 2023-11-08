@@ -4,9 +4,10 @@
 #include <vector>
 #include <optional>
 #include <variant>
+#include <limits>
 
 #include "Base/Definitions.h"
-#include "FundamentalConstants.h"
+#include "EngineConstants.h"
 #include "CellFunctionConstants.h"
 
 struct MakeGenomeCopy
@@ -18,11 +19,13 @@ struct NeuronGenomeDescription
 {
     std::vector<std::vector<float>> weights;
     std::vector<float> biases;
+    std::vector<NeuronActivationFunction> activationFunctions;
 
     NeuronGenomeDescription()
     {
         weights.resize(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
         biases.resize(MAX_CHANNELS, 0);
+        activationFunctions.resize(MAX_CHANNELS, 0);
     }
     auto operator<=>(NeuronGenomeDescription const&) const = default;
 };
@@ -68,7 +71,7 @@ struct ConstructorGenomeDescription
     }
     bool isMakeGenomeCopy() const { return std::holds_alternative<MakeGenomeCopy>(genome); }
     std::vector<uint8_t> getGenomeData() const { return std::get<std::vector<uint8_t>>(genome); }
-    ConstructorGenomeDescription& setMakeGenomeCopy()
+    ConstructorGenomeDescription& setMakeSelfCopy()
     {
         genome = MakeGenomeCopy();
         return *this;
@@ -78,7 +81,7 @@ struct ConstructorGenomeDescription
 struct SensorGenomeDescription
 {
     std::optional<float> fixedAngle;   //nullopt = entire neighborhood
-    float minDensity = 0.3f;
+    float minDensity = 0.05f;
     int color = 0;
 
     auto operator<=>(SensorGenomeDescription const&) const = default;
@@ -156,7 +159,7 @@ struct InjectorGenomeDescription
     }
     bool isMakeGenomeCopy() const { return std::holds_alternative<MakeGenomeCopy>(genome); }
     std::vector<uint8_t> getGenomeData() const { return std::get<std::vector<uint8_t>>(genome); }
-    InjectorGenomeDescription& setMakeGenomeCopy()
+    InjectorGenomeDescription& setMakeSelfCopy()
     {
         genome = MakeGenomeCopy();
         return *this;
@@ -189,9 +192,30 @@ struct DefenderGenomeDescription
     }
 };
 
-struct PlaceHolderGenomeDescription
+struct ReconnectorGenomeDescription
 {
-    auto operator<=>(PlaceHolderGenomeDescription const&) const = default;
+    int color = 0;
+
+    auto operator<=>(ReconnectorGenomeDescription const&) const = default;
+
+    ReconnectorGenomeDescription& setColor(int value)
+    {
+        color = value;
+        return *this;
+    }
+};
+
+struct DetonatorGenomeDescription
+{
+    int countdown = 10;
+
+    auto operator<=>(DetonatorGenomeDescription const&) const = default;
+
+    DetonatorGenomeDescription& setCountDown(int value)
+    {
+        countdown = value;
+        return *this;
+    }
 };
 
 using CellFunctionGenomeDescription = std::optional<std::variant<
@@ -204,7 +228,8 @@ using CellFunctionGenomeDescription = std::optional<std::variant<
     InjectorGenomeDescription,
     MuscleGenomeDescription,
     DefenderGenomeDescription,
-    PlaceHolderGenomeDescription>>;
+    ReconnectorGenomeDescription,
+    DetonatorGenomeDescription>>;
 
 struct CellGenomeDescription
 {
@@ -366,8 +391,11 @@ struct CellGenomeDescription
         if (std::holds_alternative<DefenderGenomeDescription>(*cellFunction)) {
             return CellFunction_Defender;
         }
-        if (std::holds_alternative<PlaceHolderGenomeDescription>(*cellFunction)) {
-            return CellFunction_Placeholder;
+        if (std::holds_alternative<ReconnectorGenomeDescription>(*cellFunction)) {
+            return CellFunction_Reconnector;
+        }
+        if (std::holds_alternative<DetonatorGenomeDescription>(*cellFunction)) {
+            return CellFunction_Detonator;
         }
         return CellFunction_None;
     }
@@ -387,6 +415,9 @@ struct GenomeHeaderDescription
     ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
     float stiffness = 1.0f;
     float connectionDistance = 1.0f;
+    int numRepetitions = 1;
+    float concatenationAngle1 = 0;
+    float concatenationAngle2 = 0;
 
     auto operator<=>(GenomeHeaderDescription const&) const = default;
 
@@ -415,18 +446,28 @@ struct GenomeHeaderDescription
         connectionDistance = value;
         return *this;
     }
+    GenomeHeaderDescription& setNumRepetitions(int value)
+    {
+        numRepetitions = value;
+        return *this;
+    }
+    GenomeHeaderDescription& setInfiniteRepetitions()
+    {
+        numRepetitions = std::numeric_limits<int>::max();
+        return *this;
+    }
 };
 
 struct GenomeDescription
 {
-    GenomeHeaderDescription info;
+    GenomeHeaderDescription header;
     std::vector<CellGenomeDescription> cells;
 
     auto operator<=>(GenomeDescription const&) const = default;
 
-    GenomeDescription& setInfo(GenomeHeaderDescription const& value)
+    GenomeDescription& setHeader(GenomeHeaderDescription const& value)
     {
-        info = value;
+        header = value;
         return *this;
     }
 

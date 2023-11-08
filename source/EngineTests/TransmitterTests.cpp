@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationController.h"
 #include "IntegrationTestFramework.h"
-#include "EngineInterface/GenomeDescriptionConverter.h"
+#include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/GenomeDescriptions.h"
 
 class TransmitterTests : public IntegrationTestFramework
@@ -168,6 +168,8 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
 
 TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
 {
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+
     DataDescription data;
     data.addCells({
         CellDescription()
@@ -178,7 +180,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
             .setInputExecutionOrderNumber(5)
             .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy[0] * 2),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(ConstructorDescription()),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(ConstructorDescription().setGenome(genome)),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
     });
     data.addConnection(1, 2);
@@ -206,7 +208,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
 
 TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
 {
-    auto genome = GenomeDescription().setInfo(GenomeHeaderDescription().setSingleConstruction(true));
+    auto genome = GenomeDescription().setHeader(GenomeHeaderDescription().setSingleConstruction(true));
     
     DataDescription data;
     data.addCells({
@@ -223,7 +225,7 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
-            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionConverter::convertDescriptionToBytes(genome))),
+            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(genome))),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
     });
     data.addConnection(1, 2);

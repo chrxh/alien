@@ -3,7 +3,7 @@
 #include <variant>
 
 #include "Base/Definitions.h"
-#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/EngineConstants.h"
 
 #include "Definitions.h"
 
@@ -71,11 +71,13 @@ struct NeuronDescription
 {
     std::vector<std::vector<float>> weights;
     std::vector<float> biases;
+    std::vector<NeuronActivationFunction> activationFunctions;
 
     NeuronDescription()
     {
         weights.resize(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
         biases.resize(MAX_CHANNELS, 0);
+        activationFunctions.resize(MAX_CHANNELS, 0);
     }
     auto operator<=>(NeuronDescription const&) const = default;
 };
@@ -103,7 +105,10 @@ struct ConstructorDescription
     float constructionAngle2 = 0;
 
     //process data
-    int genomeReadPosition = 0;
+    uint64_t lastConstructedCellId = 0;
+    int genomeCurrentNodeIndex = 0;
+    int genomeCurrentRepetition = 0;
+    bool isConstructionBuilt = false;
     int offspringCreatureId = 0;
     int offspringMutationId = 0;
 
@@ -125,9 +130,19 @@ struct ConstructorDescription
         genome = value;
         return *this;
     }
-    ConstructorDescription& setGenomeReadPosition(int value)
+    ConstructorDescription& setGenomeCurrentNodeIndex(int value)
     {
-        genomeReadPosition = value;
+        genomeCurrentNodeIndex = value;
+        return *this;
+    }
+    ConstructorDescription& setGenomeCurrentRepetition(int value)
+    {
+        genomeCurrentRepetition = value;
+        return *this;
+    }
+    ConstructorDescription& setIsConstructionBuilt(bool value)
+    {
+        isConstructionBuilt = value;
         return *this;
     }
     ConstructorDescription& setGenomeGeneration(int value)
@@ -218,6 +233,7 @@ struct InjectorDescription
     std::vector<uint8_t> genome;
     int genomeGeneration = 0;
 
+    InjectorDescription();
     auto operator<=>(InjectorDescription const&) const = default;
     InjectorDescription& setMode(InjectorMode value)
     {
@@ -265,9 +281,37 @@ struct DefenderDescription
     }
 };
 
-struct PlaceHolderDescription
+struct ReconnectorDescription
 {
-    auto operator<=>(PlaceHolderDescription const&) const = default;
+    int color = 0;
+
+    auto operator<=>(ReconnectorDescription const&) const = default;
+
+    ReconnectorDescription& setColor(int value)
+    {
+        color = value;
+        return *this;
+    }
+};
+
+struct DetonatorDescription
+{
+    DetonatorState state = DetonatorState_Ready;
+    int countdown = 10;
+
+    auto operator<=>(DetonatorDescription const&) const = default;
+
+    DetonatorDescription& setState(DetonatorState value)
+    {
+        state = value;
+        return *this;
+    }
+
+    DetonatorDescription& setCountDown(int value)
+    {
+        countdown = value;
+        return *this;
+    }
 };
 
 using CellFunctionDescription = std::optional<std::variant<
@@ -280,7 +324,8 @@ using CellFunctionDescription = std::optional<std::variant<
     InjectorDescription,
     MuscleDescription,
     DefenderDescription,
-    PlaceHolderDescription>>;
+    ReconnectorDescription,
+    DetonatorDescription>>;
 
 struct CellDescription
 {
@@ -307,7 +352,7 @@ struct CellDescription
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
     int activationTime = 0;
-    int genomeSize = 0;
+    int genomeNumNodes = 0;
 
     CellMetadataDescription metadata;
 
@@ -339,7 +384,7 @@ struct CellDescription
         stiffness = value;
         return *this;
     }
-    CellDescription& setColor(unsigned char value)
+    CellDescription& setColor(int value)
     {
         color = value;
         return *this;
@@ -421,6 +466,12 @@ struct CellDescription
         activationTime = value;
         return *this;
     }
+    CellDescription& setCreatureId(int value)
+    {
+        creatureId = value;
+        return *this;
+    }
+
 
     bool hasGenome() const;
     std::vector<uint8_t>& getGenomeRef();

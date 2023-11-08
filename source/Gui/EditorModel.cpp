@@ -1,6 +1,6 @@
 #include "EditorModel.h"
 
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationController.h"
 
 _EditorModel::_EditorModel(SimulationController const& simController)
@@ -47,14 +47,14 @@ CellOrParticleDescription _EditorModel::getInspectedEntity(uint64_t id) const
 
 void _EditorModel::addInspectedEntity(CellOrParticleDescription const& entity)
 {
-    _inspectedEntityById.emplace(DescriptionHelper::getId(entity), entity);
+    _inspectedEntityById.emplace(DescriptionEditService::getId(entity), entity);
 }
 
 void _EditorModel::setInspectedEntities(std::vector<CellOrParticleDescription> const& inspectedEntities)
 {
     _inspectedEntityById.clear();
     for (auto const& entity : inspectedEntities) {
-        _inspectedEntityById.emplace(DescriptionHelper::getId(entity), entity);
+        _inspectedEntityById.emplace(DescriptionEditService::getId(entity), entity);
     }
 }
 

@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/GenomeDescriptionConverter.h"
+#include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/SimulationController.h"
 #include "IntegrationTestFramework.h"
 
@@ -124,7 +124,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
 
 TEST_F(DefenderTests, injectorVsAntiAttacker)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -142,7 +142,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
             .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setGenome({})),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
@@ -176,7 +176,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
 
 TEST_F(DefenderTests, injectorVsAntiInjector)
 {
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -194,7 +194,7 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
             .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setGenome({})),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})

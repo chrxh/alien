@@ -31,7 +31,7 @@ RealVector2D Math::rotateQuarterCounterClockwise(RealVector2D v)
     return v;
 }
 
-RealVector2D Math::unitVectorOfAngle(double angle)
+RealVector2D Math::unitVectorOfAngle(float angle)
 {
     return {sinf(angle * Const::DegToRad), -cosf(angle * Const::DegToRad)};
 }
@@ -118,6 +118,21 @@ bool Math::crossing(
     }
 
     return lambda >= NEAR_ZERO && lambda <= 1 - NEAR_ZERO;
+}
+
+float Math::sigmoid(float x)
+{
+    return 2.0f / (1.0f + expf(-x)) - 1.0f;
+}
+
+float Math::binaryStep(float x)
+{
+    return x >= NEAR_ZERO ? 1.0f : 0.0f;
+}
+
+float Math::gaussian(float x)
+{
+    return expf(-2 * x * x);
 }
 
 RealVector2D operator*(RealMatrix2D const& m, RealVector2D const& v)

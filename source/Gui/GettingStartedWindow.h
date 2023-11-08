@@ -21,8 +21,6 @@ private:
     void drawItemText(std::string const& text);
     void drawParagraph(std::string const& text);
 
-    void openWeblink(std::string const& link);
-
     bool _showAfterStartup = true;
 };
 

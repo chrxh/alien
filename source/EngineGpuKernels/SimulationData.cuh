@@ -32,7 +32,7 @@ struct SimulationData
 
     //scheduled operations
     UnmanagedArray<StructuralOperation> structuralOperations;
-    UnmanagedArray<CellFunctionOperation> cellFunctionOperations[CellFunction_WithoutNoneCount];
+    UnmanagedArray<CellFunctionOperation> cellFunctionOperations[CellFunction_WithoutNone_Count];
 
     //number generators
     CudaNumberGenerator numberGen1;

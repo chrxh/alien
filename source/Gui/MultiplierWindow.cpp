@@ -14,8 +14,8 @@
 namespace
 {
     auto const ModeText = std::unordered_map<MultiplierMode, std::string>{
-        {MultiplierMode::Grid, "Grid multiplier"},
-        {MultiplierMode::Random, "Random multiplier"},
+        {MultiplierMode_Grid, "Grid multiplier"},
+        {MultiplierMode_Random, "Random multiplier"},
     };
 
     auto const RightColumnWidth = 200.0f;
@@ -30,24 +30,20 @@ _MultiplierWindow::_MultiplierWindow(EditorModel const& editorModel, SimulationC
 
 void _MultiplierWindow::processIntern()
 {
-    if (AlienImGui::ToolbarButton(ICON_GRID)) {
-        _mode = MultiplierMode::Grid;
-    }
+    AlienImGui::SelectableToolbarButton(ICON_GRID, _mode, MultiplierMode_Grid, MultiplierMode_Grid);
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_RANDOM)) {
-        _mode = MultiplierMode::Random;
-    }
+    AlienImGui::SelectableToolbarButton(ICON_RANDOM, _mode, MultiplierMode_Random, MultiplierMode_Random);
 
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
 
         AlienImGui::Group(ModeText.at(_mode));
-        if (_mode == MultiplierMode::Grid) {
+        if (_mode == MultiplierMode_Grid) {
             processGridPanel();
         }
-        if (_mode == MultiplierMode::Random) {
+        if (_mode == MultiplierMode_Random) {
             processRandomPanel();
         }
         ImGui::EndDisabled();
@@ -153,12 +149,12 @@ void _MultiplierWindow::onBuild()
 {
     _origSelection = _simController->getSelectedSimulationData(true);
     auto multiplicationResult = [&] {
-        if (_mode == MultiplierMode::Grid) {
-            return DescriptionHelper::gridMultiply(_origSelection, _gridParameters);
+        if (_mode == MultiplierMode_Grid) {
+            return DescriptionEditService::gridMultiply(_origSelection, _gridParameters);
         } else {
             auto data = _simController->getSimulationData();
             auto overlappingCheckSuccessful = true;
-            auto result = DescriptionHelper::randomMultiply(
+            auto result = DescriptionEditService::randomMultiply(
                 _origSelection, _randomParameters, _simController->getWorldSize(), std::move(data), overlappingCheckSuccessful);
             if (!overlappingCheckSuccessful) {
                 MessageDialog::getInstance().information("Random multiplication", "Non-overlapping copies could not be created.");

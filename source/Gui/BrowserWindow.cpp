@@ -1,5 +1,9 @@
 #include "BrowserWindow.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <ranges>
 
 #include <boost/algorithm/string/join.hpp>
@@ -14,8 +18,8 @@
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "Base/VersionChecker.h"
-#include "EngineInterface/GenomeDescriptionConverter.h"
-#include "EngineInterface/Serializer.h"
+#include "EngineInterface/GenomeDescriptionService.h"
+#include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
@@ -36,6 +40,8 @@
 
 namespace
 {
+    auto constexpr RefreshInterval = 20;  //in minutes
+
     auto constexpr UserTableWidth = 300.0f;
     auto constexpr BrowserBottomHeight = 68.0f;
     auto constexpr RowHeight = 25.0f;
@@ -181,8 +187,20 @@ void _BrowserWindow::processIntern()
     processStatus();
     processFilter();
     processEmojiWindow();
+}
 
-    if(_scheduleRefresh) {
+void _BrowserWindow::processBackground()
+{
+    auto now = std::chrono::steady_clock::now();
+    if (!_lastRefreshTime) {
+        _lastRefreshTime = now;
+    }
+    if (std::chrono::duration_cast<std::chrono::minutes>(now - *_lastRefreshTime).count() >= RefreshInterval) {
+        _lastRefreshTime = now;
+        refreshIntern(false);
+    }
+
+    if (_scheduleRefresh) {
         onRefresh();
         _scheduleRefresh = false;
     }
@@ -228,6 +246,15 @@ void _BrowserWindow::processToolbar()
         : "genome";
     AlienImGui::Tooltip(
         "Share your " + dataType + " with other users:\nYour current " + dataType + " will be uploaded to the server and made visible in the browser.");
+
+#ifdef _WIN32
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_COMMENTS)) {
+        openWeblink(Const::DiscordLink);
+    }
+    AlienImGui::Tooltip("Open ALIEN Discord server");
+#endif
+
     AlienImGui::Separator();
 }
 
@@ -823,7 +850,7 @@ void _BrowserWindow::onDownloadItem(RemoteSimulationData* sim)
 
         if (_selectedDataType == DataType_Simulation) {
             DeserializedSimulation deserializedSim;
-            if (!Serializer::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
+            if (!SerializerService::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
                 MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
                 return;
             }
@@ -855,12 +882,12 @@ void _BrowserWindow::onDownloadItem(RemoteSimulationData* sim)
 
         } else {
             std::vector<uint8_t> genome;
-            if (!Serializer::deserializeGenomeFromString(genome, serializedSim.mainData)) {
+            if (!SerializerService::deserializeGenomeFromString(genome, serializedSim.mainData)) {
                 MessageDialog::getInstance().information("Error", "Failed to load genome. Your program version may not match.");
                 return;
             }
             _editorController->setOn(true);
-            _editorController->getGenomeEditorWindow()->openTab(GenomeDescriptionConverter::convertBytesToDescription(genome));
+            _editorController->getGenomeEditorWindow()->openTab(GenomeDescriptionService::convertBytesToDescription(genome));
         }
         if (VersionChecker::isVersionNewer(sim->version)) {
             MessageDialog::getInstance().information(
@@ -920,6 +947,13 @@ void _BrowserWindow::onToggleLike(RemoteSimulationData* sim, int emojiType)
     } else {
         _loginDialog.lock()->open();
     }
+}
+
+void _BrowserWindow::openWeblink(std::string const& link)
+{
+#ifdef _WIN32
+    ShellExecute(NULL, "open", link.c_str(), NULL, NULL, SW_SHOWNORMAL);
+#endif
 }
 
 bool _BrowserWindow::isLiked(std::string const& simId)

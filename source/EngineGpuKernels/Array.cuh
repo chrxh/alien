@@ -251,4 +251,15 @@ public:
             return -1;
         }
     }
+
+    __device__ __inline__ int tryGetEntries(int numEntries)
+    {
+        auto index = atomicAdd(_numEntries, numEntries);
+        if (index < *_size) {
+            return index;
+        } else {
+            atomicSub(_numEntries, numEntries);
+            return -1;
+        }
+    }
 };

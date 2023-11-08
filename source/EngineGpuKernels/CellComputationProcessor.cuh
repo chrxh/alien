@@ -4,7 +4,7 @@
 #include "EngineInterface/CellInstruction.h"
 
 #include "SimulationData.cuh"
-#include "Cell.cuh"
+#include "Object.cuh"
 #include "TOs.cuh"
 
 class CellComputationProcessor

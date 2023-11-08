@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "Base/Hashes.h"
 #include "EngineInterface/Definitions.h"
 
@@ -28,6 +30,7 @@ private:
     void refreshIntern(bool withRetry);
 
     void processIntern() override;
+    void processBackground() override;
 
     void processSimulationList();
     void processGenomeList();
@@ -55,6 +58,7 @@ private:
     void onDownloadItem(RemoteSimulationData* sim);
     void onDeleteItem(RemoteSimulationData* sim);
     void onToggleLike(RemoteSimulationData* sim, int emojiType);
+    void openWeblink(std::string const& link);
 
     bool isLiked(std::string const& simId);
     std::string getUserNamesToEmojiType(std::string const& simId, int emojiType);
@@ -85,6 +89,8 @@ private:
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
     RemoteSimulationData* _simOfEmojiPopup = nullptr;
+
+    std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 
     SimulationController _simController;
     NetworkController _networkController;

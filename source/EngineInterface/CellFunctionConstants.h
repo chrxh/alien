@@ -12,10 +12,11 @@ enum CellFunction_
     CellFunction_Injector,
     CellFunction_Muscle,
     CellFunction_Defender,
-    CellFunction_Placeholder,
-    CellFunction_WithoutNoneCount,
+    CellFunction_Reconnector,
+    CellFunction_Detonator,
+    CellFunction_WithoutNone_Count,
 
-    CellFunction_None = CellFunction_WithoutNoneCount,
+    CellFunction_None = CellFunction_WithoutNone_Count,
     CellFunction_Count,
 };
 
@@ -24,9 +25,20 @@ enum LivingState_
 {
     LivingState_Ready,
     LivingState_UnderConstruction,
-    LivingState_JustReady,
+    LivingState_Activating,
     LivingState_Dying,
     LivingState_Count
+};
+
+using NeuronActivationFunction = int;
+enum NeuronActivationFunction_
+{
+    NeuronActivationFunction_Sigmoid,
+    NeuronActivationFunction_BinaryStep,
+    NeuronActivationFunction_Identity,
+    NeuronActivationFunction_Abs,
+    NeuronActivationFunction_Gaussian,
+    NeuronActivationFunction_Count
 };
 
 using SensorMode = int;
@@ -104,4 +116,12 @@ enum ConstructionShape_
     ConstructionShape_SmallLolli,
     ConstructionShape_Zigzag,
     ConstructionShape_Count
+};
+
+using DetonatorState = int;
+enum DetonatorState_
+{
+    DetonatorState_Ready,
+    DetonatorState_Activated,
+    DetonatorState_Exploded
 };

@@ -1,8 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationController.h"
+#include "EngineInterface/GenomeDescriptionService.h"
+#include "EngineInterface/GenomeDescriptions.h"
+
 #include "IntegrationTestFramework.h"
 
 class AttackerTests : public IntegrationTestFramework
@@ -226,6 +229,8 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
 
 TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
 {
+    auto otherGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+
     DataDescription data;
     data.addCells({
         CellDescription()
@@ -243,7 +248,12 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
             .setCellFunction(NerveDescription())
             .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({12.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
-        CellDescription().setId(4).setPos({11.0f, 9.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(ConstructorDescription()),
+        CellDescription()
+            .setId(4)
+            .setPos({11.0f, 9.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(1)
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome)),
         CellDescription().setId(5).setPos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);

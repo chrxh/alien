@@ -41,9 +41,11 @@ void _Viewport::setViewSize(IntVector2D const& viewSize)
 
 void _Viewport::zoom(IntVector2D const& viewPos, float factor)
 {
-    auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
-    _zoomFactor *= factor;
-    centerTo(worldPos, viewPos);
+    if ((factor > 1.0f && _zoomFactor < 200.0f) || (factor < 1.0f && _zoomFactor > 0.02f)) {
+        auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
+        _zoomFactor *= factor;
+        centerTo(worldPos, viewPos);
+    }
 }
 
 float _Viewport::getZoomSensitivity() const

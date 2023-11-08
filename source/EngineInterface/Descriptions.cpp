@@ -2,13 +2,18 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include "GenomeDescriptionConverter.h"
+#include "GenomeDescriptionService.h"
 #include "Base/Math.h"
 #include "Base/Physics.h"
 
 ConstructorDescription::ConstructorDescription()
 {
-    genome = GenomeDescriptionConverter::convertDescriptionToBytes(GenomeDescription());
+    genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription());
+}
+
+InjectorDescription::InjectorDescription()
+{
+    genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription());
 }
 
 CellFunction CellDescription::getCellFunctionType() const
@@ -43,8 +48,11 @@ CellFunction CellDescription::getCellFunctionType() const
     if (std::holds_alternative<DefenderDescription>(*cellFunction)) {
         return CellFunction_Defender;
     }
-    if (std::holds_alternative<PlaceHolderDescription>(*cellFunction)) {
-        return CellFunction_Placeholder;
+    if (std::holds_alternative<ReconnectorDescription>(*cellFunction)) {
+        return CellFunction_Reconnector;
+    }
+    if (std::holds_alternative<DetonatorDescription>(*cellFunction)) {
+        return CellFunction_Detonator;
     }
     return CellFunction_None;
 }

@@ -6,14 +6,17 @@ PUBLIC
     DataTransferTests.cpp
     DefenderTests.cpp
     DescriptionHelperTests.cpp
+    DetonatorTests.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
+    LivingStateTransitionTests.cpp
     MuscleTests.cpp
     MutationTests.cpp
     NerveTests.cpp
     NeuronTests.cpp
     SensorTests.cpp
+    StatisticsTests.cpp
     Testsuite.cpp
     TransmitterTests.cpp)
 

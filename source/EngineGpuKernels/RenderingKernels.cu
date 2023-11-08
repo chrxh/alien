@@ -64,7 +64,7 @@ namespace
             g_ = 0;
             b_ = c;
         }
-        if (300 <= h && h < 360) {
+        if (300 <= h && h <= 360) {
             r_ = c;
             g_ = 0;
             b_ = x;
@@ -114,6 +114,27 @@ namespace
             auto h = abs((cell->mutationId * 12107) % 360);
             auto s = 0.3f + toFloat(abs(cell->mutationId * 12107) % 700) / 1000;
             auto rgb = convertHSVtoRGB(h, s, 1.0f);
+            cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
+        }
+        if (cudaSimulationParameters.cellColorization == CellColorization_LivingState) {
+            switch (cell->livingState) {
+            case LivingState_Ready:
+                cellColor = 0x0000ff;
+                break;
+            case LivingState_UnderConstruction:
+                cellColor = 0x00ff00;
+                break;
+            case LivingState_Activating:
+                cellColor = 0xffffff;
+                break;
+            case LivingState_Dying:
+                cellColor = 0xff0000;
+                break;
+            }
+        }
+
+        if (cudaSimulationParameters.cellColorization == CellColorization_GenomeSize) {
+            auto rgb = convertHSVtoRGB(min(360, 240 + cell->genomeNumNodes),  1.0f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
 
@@ -244,7 +265,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
     }
 }
 
-__global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
+__global__ void cudaDrawCells(uint64_t timestep, int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
 {
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -268,6 +289,23 @@ __global__ void cudaDrawCells(int2 universeSize, float2 rectUpperLeft, float2 re
             color = color * min((zoom - 1.0f) / 3, 1.0f);
             if (cell->isActive() && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, radius, shadedCells);
+            }
+
+            //draw detonation
+            if (cudaSimulationParameters.showDetonations && cell->cellFunction == CellFunction_Detonator) {
+                auto const& detonator = cell->cellFunctionData.detonator;
+                if (detonator.state == DetonatorState_Activated && detonator.countdown < 2) {
+                    auto radius = toFloat((timestep - cell->executionOrderNumber + 5) % 6 + (6 - detonator.countdown * 6));
+                    radius *= radius;
+                    radius *=  cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color] * zoom / 36;
+                    drawCircle(
+                        imageData,
+                        imageSize,
+                        cellImagePos,
+                        float3{0.3f, 0.3f, 0.0f},
+                        radius,
+                        shadedCells);
+                }
             }
 
             //draw connections

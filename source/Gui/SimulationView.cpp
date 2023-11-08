@@ -206,9 +206,7 @@ void _SimulationView::processMouseWheel(IntVector2D const& viewPos)
         auto zoomFactor = powf(calcZoomFactor(_mouseWheelAction->lastTime), 2.2f * _mouseWheelAction->strongness);
         auto now = std::chrono::steady_clock::now();
         _mouseWheelAction->lastTime = now;
-
         _viewport->zoom(viewPos, _mouseWheelAction->up ? zoomFactor : 1.0f / zoomFactor);
-
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - _mouseWheelAction->start).count() > 100) {
             _mouseWheelAction.reset();
         }
@@ -404,13 +402,13 @@ void _SimulationView::updateImageFromSimulation()
                         StyleRepository::getInstance().getLargeFont(),
                         fontSize,
                         {viewPos.x, viewPos.y},
-                        Const::BranchNumberOverlayShadowColor,
+                        Const::ExecutionNumberOverlayShadowColor,
                         std::to_string(overlayElement.executionOrderNumber).c_str());
                     drawList->AddText(
                         StyleRepository::getInstance().getLargeFont(),
                         fontSize,
                         {viewPos.x + 1, viewPos.y + 1},
-                        Const::BranchNumberOverlayColor,
+                        Const::ExecutionNumberOverlayColor,
                         std::to_string(overlayElement.executionOrderNumber).c_str());
                 }
             }

@@ -21,7 +21,7 @@
 #include "implot.h"
 #include "Fonts/IconsFontAwesome5.h"
 
-#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "ModeController.h"
@@ -92,35 +92,28 @@ namespace
 
 _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger const& logger)
 {
+    IMGUI_CHECKVERSION();
+
     _logger = logger;
     _simController = simController;
-    
+
+    log(Priority::Important, "initialize GLFW and OpenGL");
     auto glfwVersion = initGlfw();
-
     WindowController::getInstance().init();
-
     auto windowData = WindowController::getInstance().getWindowData();
     glfwSetFramebufferSizeCallback(windowData.window, framebuffer_size_callback);
     glfwSwapInterval(1);  //enable vsync
-
-    IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImPlot::CreateContext();
-
-    ImGuiIO& io = ImGui::GetIO();
-
-//     ImGui::StyleColorsDark();
-//     ImGui::StyleColorsLight();
-
-    StyleRepository::getInstance().init();
-
-    // Setup Platform/Renderer back-ends
-    ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);
+    ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);  //setup Platform/Renderer back-ends
     ImGui_ImplOpenGL3_Init(glfwVersion);
 
+    log(Priority::Important, "initialize GLAD");
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         throw std::runtime_error("Failed to initialize GLAD");
     }
+
+    StyleRepository::getInstance().init();
 
     _viewport = std::make_shared<_Viewport>();
     _uiController = std::make_shared<_UiController>();
@@ -189,6 +182,8 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     };
 
     _window = windowData.window;
+
+    log(Priority::Important, "main window initialized");
 }
 
 void _MainWindow::mainLoop()
@@ -772,7 +767,7 @@ void _MainWindow::onOpenSimulation()
             _startingPath = firstFilenameCopy.remove_filename().string();
 
             DeserializedSimulation deserializedData;
-            if (Serializer::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
+            if (SerializerService::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
                 printOverlayMessage("Loading ...");
                 delayedExecution([=, this] {
                     _simController->closeSimulation();
@@ -828,7 +823,7 @@ void _MainWindow::onSaveSimulation()
                 sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
                 sim.mainData = _simController->getClusteredSimulationData();
 
-                if (!Serializer::serializeSimulationToFiles(firstFilename.string(), sim)) {
+                if (!SerializerService::serializeSimulationToFiles(firstFilename.string(), sim)) {
                     MessageDialog::getInstance().information("Save simulation", "The simulation could not be saved to the specified file.");
                 }
             });

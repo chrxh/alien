@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellFunctionConstants.h"
 #include "EngineInterface/GenomeConstants.h"
 
@@ -25,7 +25,7 @@ public:
     __inline__ __device__ Cell* createCell();
 
 private:
-    __inline__ __device__ void createAuxiliaryData(uint64_t sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, uint64_t& targetSize, uint8_t*& target);
+    __inline__ __device__ void createAuxiliaryData(int sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, int& targetSize, uint8_t*& target);
     __inline__ __device__ void createAuxiliaryDataWithFixedSize(uint64_t size, uint64_t sourceIndex, uint8_t* auxiliaryData, uint8_t*& target);
 
     BaseMap _map;
@@ -103,7 +103,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->age = cellTO.age;
     cell->color = cellTO.color;
     cell->activationTime = cellTO.activationTime;
-    cell->genomeSize = cellTO.genomeSize;
+    cell->genomeNumNodes = cellTO.genomeNumNodes;
 
     createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
 
@@ -126,6 +126,9 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cellTO.cellFunctionData.neuron.weightsAndBiasesDataIndex,
             dataTO.auxiliaryData,
             reinterpret_cast<uint8_t*&>(cell->cellFunctionData.neuron.neuronState));
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            cell->cellFunctionData.neuron.activationFunctions[i] = cellTO.cellFunctionData.neuron.activationFunctions[i];
+        }
     } break;
     case CellFunction_Transmitter: {
         cell->cellFunctionData.transmitter.mode = cellTO.cellFunctionData.transmitter.mode;
@@ -134,12 +137,15 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         cell->cellFunctionData.constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         createAuxiliaryData(
-            cellTO.cellFunctionData.constructor.genomeSize % MAX_GENOME_BYTES,
+            cellTO.cellFunctionData.constructor.genomeSize,
             cellTO.cellFunctionData.constructor.genomeDataIndex,
             dataTO.auxiliaryData,
             cell->cellFunctionData.constructor.genomeSize,
             cell->cellFunctionData.constructor.genome);
-        cell->cellFunctionData.constructor.genomeReadPosition = cellTO.cellFunctionData.constructor.genomeReadPosition;
+        cell->cellFunctionData.constructor.lastConstructedCellId = cellTO.cellFunctionData.constructor.lastConstructedCellId;
+        cell->cellFunctionData.constructor.genomeCurrentNodeIndex = cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex;
+        cell->cellFunctionData.constructor.genomeCurrentRepetition = cellTO.cellFunctionData.constructor.genomeCurrentRepetition;
+        cell->cellFunctionData.constructor.isConstructionBuilt = cellTO.cellFunctionData.constructor.isConstructionBuilt;
         cell->cellFunctionData.constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
         cell->cellFunctionData.constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
         cell->cellFunctionData.constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
@@ -183,7 +189,12 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     case CellFunction_Defender: {
         cell->cellFunctionData.defender.mode = cellTO.cellFunctionData.defender.mode;
     } break;
-    case CellFunction_Placeholder: {
+    case CellFunction_Reconnector: {
+        cell->cellFunctionData.reconnector.color = cellTO.cellFunctionData.reconnector.color;
+    } break;
+    case CellFunction_Detonator: {
+        cell->cellFunctionData.detonator.state = cellTO.cellFunctionData.detonator.state;
+        cell->cellFunctionData.detonator.countdown = cellTO.cellFunctionData.detonator.countdown;
     } break;
     }
 }
@@ -196,7 +207,7 @@ __inline__ __device__ void ObjectFactory::changeParticleFromTO(ParticleTO const&
 }
 
 __inline__ __device__ void
-ObjectFactory::createAuxiliaryData(uint64_t sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, uint64_t& targetSize, uint8_t*& target)
+ObjectFactory::createAuxiliaryData(int sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, int& targetSize, uint8_t*& target)
 {
     targetSize = sourceSize;
     createAuxiliaryDataWithFixedSize(sourceSize, sourceIndex, auxiliaryData, target);
@@ -254,7 +265,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->barrier = false;
     cell->age = 0;
     cell->activationTime = 0;
-    cell->genomeSize = 0;
+    cell->genomeNumNodes = 0;
     cell->inputExecutionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellNumExecutionOrderNumbers - 1);
     cell->outputBlocked = _data->numberGen1.randomBool();
     for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -273,6 +284,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             }
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->cellFunctionData.neuron.neuronState->biases[i] = _data->numberGen1.random(2.0f) - 1.0f;
+                cell->cellFunctionData.neuron.activationFunctions[i] = NeuronActivationFunction_Sigmoid;
             }
         } break;
         case CellFunction_Transmitter: {
@@ -291,7 +303,10 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             for (int i = 0; i < cell->cellFunctionData.constructor.genomeSize; ++i) {
                 genome[i] = _data->numberGen1.randomByte();
             }
-            cell->cellFunctionData.constructor.genomeReadPosition = 0;
+            cell->cellFunctionData.constructor.lastConstructedCellId = 0;
+            cell->cellFunctionData.constructor.genomeCurrentNodeIndex = 0;
+            cell->cellFunctionData.constructor.genomeCurrentRepetition = 0;
+            cell->cellFunctionData.constructor.isConstructionBuilt = false;
             cell->cellFunctionData.constructor.genomeGeneration = 0;
             cell->cellFunctionData.constructor.constructionAngle1 = 0;
             cell->cellFunctionData.constructor.constructionAngle2 = 0;
@@ -331,7 +346,12 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
         case CellFunction_Defender: {
             cell->cellFunctionData.defender.mode = _data->numberGen1.random(DefenderMode_Count - 1);
         } break;
-        case CellFunction_Placeholder: {
+        case CellFunction_Reconnector: {
+            cell->cellFunctionData.reconnector.color = 0;
+        } break;
+        case CellFunction_Detonator: {
+            cell->cellFunctionData.detonator.state = DetonatorState_Ready;
+            cell->cellFunctionData.detonator.countdown = 10;
         } break;
         }
 

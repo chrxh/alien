@@ -5,6 +5,7 @@
 #include "AlienImGui.h"
 #include "NetworkController.h"
 #include "BrowserWindow.h"
+#include "StyleRepository.h"
 
 namespace
 {
@@ -23,6 +24,7 @@ void _NetworkSettingsDialog::processIntern()
     AlienImGui::InputText(
         AlienImGui::InputTextParameters().name("Blocks").defaultValue(_origServerAddress).name("Server address").textWidth(RightColumnWidth), _serverAddress);
 
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienImGui::Separator();
 
     if (AlienImGui::Button("OK")) {

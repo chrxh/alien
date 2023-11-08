@@ -26,7 +26,7 @@ void _GettingStartedWindow::processIntern()
 {
     drawTitle();
 
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50)), false)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false)) {
         ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x);
 
         /**
@@ -113,9 +113,10 @@ void _GettingStartedWindow::processIntern()
         drawItemText("Demos/Stormy Night");
 
         drawHeading2("Evolution of self-replicators");
-        drawParagraph("By attaching higher-level functions to particle networks, complex multicellular organisms can be modeled. They can evolve over time as "
+        drawParagraph("By attaching higher-level functions to particle networks, complex multi-cellular organisms can be modeled. They can evolve over time as "
                       "they are subject to mutations. The following examples consist of homogeneous worlds populated by self-replicating agents. Different "
                       "selection pressures control evolution.");
+        drawItemText("Evolution Sandbox/Example");
         drawItemText("Complex Evolution Testbed/Example");
         drawItemText("Diversity/Example");
         drawItemText("Color Niches/Example");
@@ -183,6 +184,9 @@ void _GettingStartedWindow::processIntern()
         drawItemText("Defender: It reduces the attack strength when another cell in the vicinity performs an attack.");
         drawItemText("Muscle: When a muscle cell is activated, it can produce either a movement, a bending or a change in length of the cell connection.");
         drawItemText("Sensor: If activated, it performs a long-range scan for the concentration of cells with a certain color.");
+        drawItemText("Reconnector: Has the ability to dynamically create or destroy connections to other cells with a specified color.");
+        drawItemText(
+            "Detonator: A cell which can explode by an activity signal. It generates a large amount of kinetic energy for the objects in its surroundings.");
 
         ImGui::Spacing();
         drawHeading2("Activity states");
@@ -467,12 +471,5 @@ void _GettingStartedWindow::drawItemText(std::string const& text)
 void _GettingStartedWindow::drawParagraph(std::string const& text)
 {
     AlienImGui::Text(text);
-}
-
-void _GettingStartedWindow::openWeblink(std::string const& link)
-{
-#ifdef _WIN32
-    ShellExecute(NULL, "open", link.c_str(), NULL, NULL, SW_SHOWNORMAL);
-#endif
 }
  
