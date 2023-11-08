@@ -83,6 +83,7 @@ void _LoginDialog::processIntern()
             .tooltip(Const::LoginShareGpuInfoTooltip1 + _simController->getGpuName() + "\n" + Const::LoginShareGpuInfoTooltip2),
         _shareGpuInfo);
 
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50)});
     AlienImGui::Separator();
 
     ImGui::BeginDisabled(_userName.empty() || _password.empty());
