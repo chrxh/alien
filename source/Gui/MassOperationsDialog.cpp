@@ -106,7 +106,7 @@ void _MassOperationsDialog::process()
         ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
         AlienImGui::Text("Restrict to selected cell networks");
 
-        ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50)});
+        ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
         AlienImGui::Separator();
 
         ImGui::BeginDisabled(!isOkEnabled());

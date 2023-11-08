@@ -26,7 +26,7 @@ void _GettingStartedWindow::processIntern()
 {
     drawTitle();
 
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50)), false)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false)) {
         ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x);
 
         /**

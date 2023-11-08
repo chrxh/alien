@@ -178,7 +178,7 @@ void _PatternEditorWindow::processIntern()
             AlienImGui::SliderInputFloatParameters()
                 .name("Angle")
                 .textWidth(RightColumnWidth)
-                .inputWidth(StyleRepository::getInstance().scale(50))
+                .inputWidth(StyleRepository::getInstance().scale(50.0f))
                 .min(-180.0f)
                 .max(180.0f)
                 .format("%.1f"),

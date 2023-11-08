@@ -14,7 +14,7 @@ void _AboutDialog::processIntern()
 {
     ImGui::Text("Artificial Life Environment, version %s\n\nis an open source project initiated and maintained by\nChristian Heinemann.", Const::ProgramVersion.c_str());
 
-    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50)});
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienImGui::Separator();
 
     if (AlienImGui::Button("OK")) {
