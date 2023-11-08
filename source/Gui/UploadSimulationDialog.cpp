@@ -80,7 +80,7 @@ void _UploadSimulationDialog::processIntern()
         AlienImGui::InputTextMultilineParameters()
             .hint("Description (optional)")
             .textWidth(0)
-            .height(ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(50)),
+            .height(ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(50.0f)),
         _simDescription);
 
     AlienImGui::Separator();

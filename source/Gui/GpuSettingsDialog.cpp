@@ -69,7 +69,7 @@ void _GpuSettingsDialog::processIntern()
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
-        ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50)});
+        ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
         AlienImGui::Separator();
 
         if (AlienImGui::Button("OK")) {

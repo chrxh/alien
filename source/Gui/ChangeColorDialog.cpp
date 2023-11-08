@@ -46,7 +46,7 @@ void _ChangeColorDialog::processIntern()
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     AlienImGui::Text("Include sub-genomes");
     
-    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50)});
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienImGui::Separator();
 
     if (AlienImGui::Button("OK")) {
