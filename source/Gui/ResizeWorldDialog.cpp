@@ -2,7 +2,7 @@
 
 #include "ResizeWorldDialog.h"
 
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
@@ -84,9 +84,9 @@ void _ResizeWorldDialog::onResizing()
 
     _simController->newSimulation(timestep, generalSettings, parameters);
 
-    DescriptionHelper::correctConnections(content, {_width, _height});
+    DescriptionEditService::correctConnections(content, {_width, _height});
     if (_scaleContent) {
-        DescriptionHelper::duplicate(content, origWorldSize, {_width, _height});
+        DescriptionEditService::duplicate(content, origWorldSize, {_width, _height});
     }
     _simController->setClusteredSimulationData(content);
 }

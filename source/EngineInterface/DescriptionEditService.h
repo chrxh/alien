@@ -3,7 +3,7 @@
 #include "Base/Definitions.h"
 #include "Descriptions.h"
 
-class DescriptionHelper
+class DescriptionEditService
 {
 public:
     struct CreateRectParameters
@@ -18,6 +18,7 @@ public:
         MEMBER_DECLARATION(CreateRectParameters, int, maxConnections, 6);
         MEMBER_DECLARATION(CreateRectParameters, int, color, 0);
         MEMBER_DECLARATION(CreateRectParameters, bool, barrier, false);
+        MEMBER_DECLARATION(CreateRectParameters, bool, randomCreatureId, true);
     };
     static DataDescription createRect(CreateRectParameters const& parameters);
 
@@ -32,6 +33,7 @@ public:
         MEMBER_DECLARATION(CreateHexParameters, int, maxConnections, 6);
         MEMBER_DECLARATION(CreateHexParameters, int, color, 0);
         MEMBER_DECLARATION(CreateHexParameters, bool, barrier, false);
+        MEMBER_DECLARATION(CreateHexParameters, bool, randomCreatureId, true);
     };
     static DataDescription createHex(CreateHexParameters const& parameters);
 
@@ -45,6 +47,7 @@ public:
         MEMBER_DECLARATION(CreateUnconnectedCircleParameters, int, maxConnections, 6);
         MEMBER_DECLARATION(CreateUnconnectedCircleParameters, int, color, 0);
         MEMBER_DECLARATION(CreateUnconnectedCircleParameters, bool, barrier, false);
+        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, bool, randomCreatureId, true);
     };
     static DataDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters);
 
@@ -99,6 +102,7 @@ public:
     static void randomizeGenomeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
     static void randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy);
     static void randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge);
+    static void randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue);
 
     static void generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers);
 

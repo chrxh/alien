@@ -4,7 +4,7 @@
 #include "sm_60_atomic_functions.h"
 
 #include "SimulationData.cuh"
-#include "Cell.cuh"
+#include "Object.cuh"
 
 __global__ void cudaPreparePointerArraysForCleanup(SimulationData data);
 __global__ void cudaPrepareArraysForCleanup(SimulationData data);

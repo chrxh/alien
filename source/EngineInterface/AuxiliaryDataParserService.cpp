@@ -1,4 +1,4 @@
-#include "AuxiliaryDataParser.h"
+#include "AuxiliaryDataParserService.h"
 
 #include "GeneralSettings.h"
 #include "Settings.h"
@@ -133,6 +133,7 @@ namespace
             defaultParameters.zoomLevelNeuronalActivity,
             "simulation parameters.zoom level.neural activity",
             parserTask);
+        encodeDecodeProperty(tree, parameters.showDetonations, defaultParameters.showDetonations, "simulation parameters.show detonations", parserTask);
         encodeDecodeProperty(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);
 
         encodeDecodeProperty(tree, parameters.motionType, defaultParameters.motionType, "simulation parameters.motion.type", parserTask);
@@ -587,6 +588,38 @@ namespace
             "simulation parameters.cell.function.sensor.activity threshold",
             parserTask);
 
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionReconnectorRadius,
+            defaultParameters.cellFunctionReconnectorRadius,
+            "simulation parameters.cell.function.reconnector.radius",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionReconnectorActivityThreshold,
+            defaultParameters.cellFunctionReconnectorActivityThreshold,
+            "simulation parameters.cell.function.reconnector.activity threshold",
+            parserTask);
+
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionDetonatorRadius,
+            defaultParameters.cellFunctionDetonatorRadius,
+            "simulation parameters.cell.function.detonator.radius",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionDetonatorChainExplosionProbability,
+            defaultParameters.cellFunctionDetonatorChainExplosionProbability,
+            "simulation parameters.cell.function.detonator.chain explosion probability",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionDetonatorActivityThreshold,
+            defaultParameters.cellFunctionDetonatorActivityThreshold,
+            "simulation parameters.cell.function.detonator.activity threshold",
+            parserTask);
+
         //particle sources
         encodeDecodeProperty(
             tree, parameters.numParticleSources, defaultParameters.numParticleSources, "simulation parameters.particle sources.num sources", parserTask);
@@ -856,28 +889,28 @@ namespace
     }
 }
 
-boost::property_tree::ptree AuxiliaryDataParser::encodeAuxiliaryData(AuxiliaryData const& data)
+boost::property_tree::ptree AuxiliaryDataParserService::encodeAuxiliaryData(AuxiliaryData const& data)
 {
     boost::property_tree::ptree tree;
     encodeDecode(tree, const_cast<AuxiliaryData&>(data), ParserTask::Encode);
     return tree;
 }
 
-AuxiliaryData AuxiliaryDataParser::decodeAuxiliaryData(boost::property_tree::ptree tree)
+AuxiliaryData AuxiliaryDataParserService::decodeAuxiliaryData(boost::property_tree::ptree tree)
 {
     AuxiliaryData result;
     encodeDecode(tree, result, ParserTask::Decode);
     return result;
 }
 
-boost::property_tree::ptree AuxiliaryDataParser::encodeSimulationParameters(SimulationParameters const& data)
+boost::property_tree::ptree AuxiliaryDataParserService::encodeSimulationParameters(SimulationParameters const& data)
 {
     boost::property_tree::ptree tree;
     encodeDecode(tree, const_cast<SimulationParameters&>(data), ParserTask::Encode);
     return tree;
 }
 
-SimulationParameters AuxiliaryDataParser::decodeSimulationParameters(boost::property_tree::ptree tree)
+SimulationParameters AuxiliaryDataParserService::decodeSimulationParameters(boost::property_tree::ptree tree)
 {
     SimulationParameters result;
     encodeDecode(tree, result, ParserTask::Decode);

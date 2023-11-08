@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationController.h"
 #include "IntegrationTestFramework.h"
@@ -104,7 +104,7 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -135,7 +135,7 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -166,20 +166,20 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
 
     auto actualData = _simController->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
-    EXPECT_TRUE(actualAttackCell.activity.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 105.0f / 256);
-    EXPECT_TRUE(actualAttackCell.activity.channels[3] > -15.0f / 365);
-    EXPECT_TRUE(actualAttackCell.activity.channels[3] < 15.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
+    EXPECT_TRUE(actualSensorCell.activity.channels[1] > 0.3f);
+    EXPECT_TRUE(actualSensorCell.activity.channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensorCell.activity.channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensorCell.activity.channels[3] > -15.0f / 365);
+    EXPECT_TRUE(actualSensorCell.activity.channels[3] < 15.0f / 365);
 }
 
 TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
@@ -202,7 +202,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -212,8 +212,8 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
     EXPECT_TRUE(actualAttackCell.activity.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 1.0f - 105.0f / 256);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] > 70.0f / 365);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] < 105.0f / 365);
 }
@@ -238,7 +238,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -248,8 +248,8 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
     EXPECT_TRUE(actualAttackCell.activity.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 1.0f - 105.0f / 256);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] < -70.0f / 365);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] > -105.0f / 365);
 }
@@ -274,7 +274,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({190.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({190.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -284,8 +284,8 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
     EXPECT_TRUE(actualAttackCell.activity.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 1.0f - 105.0f / 256);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] < -165.0f / 365 || actualAttackCell.activity.channels[3] > 165.0f / 365);
 }
 
@@ -310,8 +310,8 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.8f)));
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 200.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.8f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 200.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -321,8 +321,8 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
     EXPECT_TRUE(actualAttackCell.activity.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell.activity.channels[2] > 1.0f - 105.0f / 256);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] > 70.0f / 365);
     EXPECT_TRUE(actualAttackCell.activity.channels[3] < 105.0f / 365);
 }
@@ -347,7 +347,7 @@ TEST_F(SensorTests, scanByAngle_found)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -381,7 +381,7 @@ TEST_F(SensorTests, scanByAngle_wrongAngle)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionHelper::createRect(DescriptionHelper::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);

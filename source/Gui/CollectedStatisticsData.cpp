@@ -47,6 +47,9 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
     result.numNeuronActivities = numNeuronActivities + other.numNeuronActivities;
     result.numSensorActivities = numSensorActivities + other.numSensorActivities;
     result.numSensorMatches = numSensorMatches + other.numSensorMatches;
+    result.numReconnectorCreated = numReconnectorCreated + other.numReconnectorCreated;
+    result.numReconnectorRemoved = numReconnectorRemoved + other.numReconnectorRemoved;
+    result.numDetonations = numDetonations + other.numDetonations;
     return result;
 }
 
@@ -72,6 +75,9 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
     result.numNeuronActivities = numNeuronActivities / divisor;
     result.numSensorActivities = numSensorActivities / divisor;
     result.numSensorMatches = numSensorMatches / divisor;
+    result.numReconnectorCreated = numReconnectorCreated / divisor;
+    result.numReconnectorRemoved = numReconnectorRemoved / divisor;
+    result.numDetonations = numDetonations / divisor;
     return result;
 }
 
@@ -179,6 +185,11 @@ namespace
             data.accumulated.numSensorActivities, lastDataValue.accumulated.numSensorActivities, data.timestep.numCells, deltaTimesteps);
         result.numSensorMatches = getDataPointForProcessProperty(
             data.accumulated.numSensorMatches, lastDataValue.accumulated.numSensorMatches, data.timestep.numCells, deltaTimesteps);
+        result.numReconnectorCreated = getDataPointForProcessProperty(
+            data.accumulated.numReconnectorCreated, lastDataValue.accumulated.numReconnectorCreated, data.timestep.numCells, deltaTimesteps);
+        result.numReconnectorRemoved = getDataPointForProcessProperty(
+            data.accumulated.numReconnectorRemoved, lastDataValue.accumulated.numReconnectorRemoved, data.timestep.numCells, deltaTimesteps);
+        result.numDetonations = getDataPointForProcessProperty(data.accumulated.numDetonations, lastDataValue.accumulated.numDetonations, data.timestep.numCells, deltaTimesteps);
 
         return result;
     }

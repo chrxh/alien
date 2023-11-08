@@ -1,19 +1,20 @@
 #pragma once
 
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-enum class CreationMode
+using CreationMode = int;
+enum CreationMode_
 {
-    CreateParticle,
-    CreateCell,
-    CreateRectangle,
-    CreateHexagon,
-    CreateDisc,
-    Drawing
+    CreationMode_CreateParticle,
+    CreationMode_CreateCell,
+    CreationMode_CreateRectangle,
+    CreationMode_CreateHexagon,
+    CreationMode_CreateDisc,
+    CreationMode_Drawing
 };
 
 class _CreatorWindow : public _AlienWindow
@@ -60,10 +61,10 @@ private:
 
     //drawing
     DataDescription _drawing;
-    DescriptionHelper::Occupancy _drawingOccupancy;
+    DescriptionEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
 
-    CreationMode _mode = CreationMode::Drawing;
+    CreationMode _mode = CreationMode_Drawing;
 
     EditorModel _editorModel;
     SimulationController _simController;

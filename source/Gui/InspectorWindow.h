@@ -46,6 +46,8 @@ private:
     void processTransmitterContent(TransmitterDescription& transmitter);
     void processMuscleContent(MuscleDescription& muscle);
     void processSensorContent(SensorDescription& sensor);
+    void processReconnectorContent(ReconnectorDescription& reconnector);
+    void processDetonatorContent(DetonatorDescription& detonator);
 
     void processParticle(ParticleDescription particle);
 
@@ -65,8 +67,6 @@ private:
     uint64_t _entityId = 0;
     char _cellCode[1024 * 16];
     char _tokenMemory[256];
-    int _selectedInput = 0;
-    int _selectedOutput = 0;
     float _genomeZoom = 20.0f;
     bool _selectGenomeTab = false;
 };

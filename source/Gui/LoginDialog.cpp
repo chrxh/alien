@@ -74,6 +74,7 @@ void _LoginDialog::processIntern()
 
     AlienImGui::InputText(AlienImGui::InputTextParameters().hint("User name").textWidth(0), _userName);
     AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Password").password(true).textWidth(0), _password);
+    AlienImGui::Separator();
     ImGui::Spacing();
     AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Remember").tooltip(Const::LoginRememberTooltip), _remember);
     AlienImGui::ToggleButton(
@@ -82,6 +83,7 @@ void _LoginDialog::processIntern()
             .tooltip(Const::LoginShareGpuInfoTooltip1 + _simController->getGpuName() + "\n" + Const::LoginShareGpuInfoTooltip2),
         _shareGpuInfo);
 
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienImGui::Separator();
 
     ImGui::BeginDisabled(_userName.empty() || _password.empty());

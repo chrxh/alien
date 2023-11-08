@@ -157,6 +157,9 @@ using RadiationSourcesWindow = std::shared_ptr<_RadiationSourcesWindow>;
 class _BalancerController;
 using BalancerController = std::shared_ptr<_BalancerController>;
 
+class _ChangeColorDialog;
+using ChangeColorDialog = std::shared_ptr<_ChangeColorDialog>;
+
 struct UserInfo;
 
 struct GLFWvidmode;

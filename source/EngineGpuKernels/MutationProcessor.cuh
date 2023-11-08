@@ -142,11 +142,12 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
 __inline__ __device__ void MutationProcessor::neuronDataMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto& genome = constructor.genome;
-    auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize <= Const::GenomeHeaderSize) {
+    if (GenomeDecoder::hasEmptyGenome(constructor)) {
         return;
     }
+
+    auto& genome = constructor.genome;
+    auto const& genomeSize = constructor.genomeSize;
     auto nodeAddress = GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, false);
 
     auto type = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
@@ -159,16 +160,16 @@ __inline__ __device__ void MutationProcessor::neuronDataMutation(SimulationData&
 __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto& genome = constructor.genome;
-    auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize <= Const::GenomeHeaderSize) {
+    if (GenomeDecoder::hasEmptyGenome(constructor)) {
         return;
     }
 
-    auto numNodes = GenomeDecoder::getNumNodesRecursively(genome, genomeSize);
+    auto& genome = constructor.genome;
+    auto const& genomeSize = constructor.genomeSize;
+    auto numNodes = GenomeDecoder::getNumNodesRecursively(genome, genomeSize, false);
     auto node = data.numberGen1.random(numNodes - 1);
     auto sequenceNumber = 0;
-    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, [&](int depth, int nodeAddress) {
+    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, [&](int depth, int nodeAddress, int repetition) {
         if (sequenceNumber++ != node) {
             return;
         }
@@ -210,11 +211,12 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
 __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto& genome = constructor.genome;
-    auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize < Const::GenomeHeaderSize) {
+    if (GenomeDecoder::hasEmptyGenome(constructor)) {
         return;
     }
+
+    auto& genome = constructor.genome;
+    auto const& genomeSize = constructor.genomeSize;
 
     auto subgenome = genome;
     auto subgenomeSize = genomeSize;
@@ -231,6 +233,21 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
     }
 
     auto delta = data.numberGen1.random(Const::GenomeHeaderSize - 1);
+
+    if (delta == Const::GenomeHeaderNumRepetitionsPos) {
+        auto choice = data.numberGen1.random(250);
+        if (choice < 230) {
+            subgenome[delta] = static_cast<uint8_t>(1 + data.numberGen1.random(2));
+        } else if (choice < 240) {
+            subgenome[delta] = static_cast<uint8_t>(1 + data.numberGen1.random(10));
+        } else if (choice == 240) {
+            subgenome[delta] = static_cast<uint8_t>(1 + data.numberGen1.random(20));
+        } else {
+            subgenome[delta] = 255;
+        }
+        return;
+    }
+
     auto mutatedByte = data.numberGen1.randomByte();
     if (delta == Const::GenomeHeaderSeparationPos && GenomeDecoder::convertByteToBool(mutatedByte)) {
         return;
@@ -259,16 +276,18 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
 __inline__ __device__ void MutationProcessor::customGeometryMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto& genome = constructor.genome;
-    auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize <= Const::GenomeHeaderSize) {
+    if (GenomeDecoder::hasEmptyGenome(constructor)) {
         return;
     }
 
-    auto numNodes = GenomeDecoder::getNumNodesRecursively(genome, genomeSize);
+
+    auto& genome = constructor.genome;
+    auto const& genomeSize = constructor.genomeSize;
+
+    auto numNodes = GenomeDecoder::getNumNodesRecursively(genome, genomeSize, false);
     auto node = data.numberGen1.random(numNodes - 1);
     auto sequenceNumber = 0;
-    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, [&](int depth, int nodeAddress) {
+    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, [&](int depth, int nodeAddress, int repetition) {
         if (sequenceNumber++ != node) {
             return;
         }
@@ -296,11 +315,13 @@ __inline__ __device__ void MutationProcessor::customGeometryMutation(SimulationD
 __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto& genome = constructor.genome;
-    auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize <= Const::GenomeHeaderSize) {
+    if (GenomeDecoder::hasEmptyGenome(constructor)) {
         return;
     }
+
+    auto& genome = constructor.genome;
+    auto const& genomeSize = constructor.genomeSize;
+
     int subGenomesSizeIndices[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH];
     int numSubGenomesSizeIndices;
     auto nodeAddress = GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, false, subGenomesSizeIndices, &numSubGenomesSizeIndices);
@@ -328,7 +349,7 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
     auto sizeDelta = newCellFunctionSize - origCellFunctionSize;
 
     if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
-        if (GenomeDecoder::hasSelfCopy(genome + nodeAddress, Const::CellBasicBytes + origCellFunctionSize)) {
+        if (GenomeDecoder::containsSectionSelfReplication(genome + nodeAddress, Const::CellBasicBytes + origCellFunctionSize)) {
             return;
         }
     }
@@ -355,9 +376,6 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
         auto subGenomeSize = GenomeDecoder::readWord(genome, subGenomesSizeIndices[i]);
         GenomeDecoder::writeWord(targetGenome, subGenomesSizeIndices[i], subGenomeSize + sizeDelta);
     }
-    if (constructor.genomeReadPosition > nodeAddress) {
-        constructor.genomeReadPosition += sizeDelta;
-    }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
     adaptMutationId(data, constructor);
@@ -367,10 +385,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto& genome = constructor.genome;
-    auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize < Const::GenomeHeaderSize) {
-        return;
-    }
+    auto const& genomeSize = constructor.genomeSize;
 
     int subGenomesSizeIndices[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH + 1];
     int numSubGenomesSizeIndices;
@@ -380,18 +395,18 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
 
         //choose a random node position to a constructor with a subgenome
         int numConstructorsWithSubgenome = 0;
-        GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, [&](int depth, int nodeAddressIntern) {
+        GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, [&](int depth, int nodeAddressIntern, int repetition) {
             auto cellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddressIntern);
-            if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfCopy(genome, nodeAddressIntern)) {
+            if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfReplication(genome, nodeAddressIntern)) {
                 ++numConstructorsWithSubgenome;
             }
         });
         if (numConstructorsWithSubgenome > 0) {
             auto randomIndex = data.numberGen1.random(numConstructorsWithSubgenome - 1);
             int counter = 0;
-            GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, [&](int depth, int nodeAddressIntern) {
+            GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, [&](int depth, int nodeAddressIntern, int repetition) {
                 auto cellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddressIntern);
-                if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfCopy(genome, nodeAddressIntern)) {
+                if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfReplication(genome, nodeAddressIntern)) {
                     if (randomIndex == counter) {
                         nodeAddress = nodeAddressIntern + Const::CellBasicBytes + Const::ConstructorFixedBytes + 3 + 1;
                     }
@@ -401,7 +416,6 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
         }
     }
     nodeAddress = GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, true, subGenomesSizeIndices, &numSubGenomesSizeIndices, nodeAddress);
-
 
     auto newColor = cell->color;
     if (nodeAddress < genomeSize) {
@@ -446,9 +460,6 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
         auto subGenomeSize = GenomeDecoder::readWord(genome, subGenomesSizeIndices[i]);
         GenomeDecoder::writeWord(targetGenome, subGenomesSizeIndices[i], subGenomeSize + sizeDelta);
     }
-    if (constructor.genomeReadPosition > nodeAddress || constructor.genomeReadPosition == constructor.genomeSize) {
-        constructor.genomeReadPosition += sizeDelta;
-    }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
     adaptMutationId(data, constructor);
@@ -457,11 +468,12 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
 __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto& genome = constructor.genome;
-    auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize <= Const::GenomeHeaderSize) {
+    if (GenomeDecoder::hasEmptyGenome(constructor)) {
         return;
     }
+
+    auto& genome = constructor.genome;
+    auto const& genomeSize = constructor.genomeSize;
 
     int subGenomesSizeIndices[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH];
     int numSubGenomesSizeIndices;
@@ -471,7 +483,7 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
     auto deleteSize = Const::CellBasicBytes + origCellFunctionSize;
 
     if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
-        if (GenomeDecoder::hasSelfCopy(genome + nodeAddress, deleteSize)) {
+        if (GenomeDecoder::containsSectionSelfReplication(genome + nodeAddress, deleteSize)) {
             return;
         }
     }
@@ -485,9 +497,7 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
         auto subGenomeSize = GenomeDecoder::readWord(genome, subGenomesSizeIndices[i]);
         GenomeDecoder::writeWord(genome, subGenomesSizeIndices[i], subGenomeSize - deleteSize);
     }
-    if (constructor.genomeReadPosition > nodeAddress || constructor.genomeReadPosition == constructor.genomeSize) {
-        constructor.genomeReadPosition -= deleteSize;
-    }
+    constructor.genomeCurrentNodeIndex = 0;
     constructor.genomeSize = targetGenomeSize;
     adaptMutationId(data, constructor);
 }
@@ -495,13 +505,13 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
 __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto& genome = constructor.genome;
-    auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize <= Const::GenomeHeaderSize) {
+    if (GenomeDecoder::hasEmptyGenome(constructor)) {
         return;
     }
 
     //calc source range
+    auto& genome = constructor.genome;
+    auto const& genomeSize = constructor.genomeSize;
     int subGenomesSizeIndices1[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH + 1];
     int numSubGenomesSizeIndices1;
     auto startSourceIndex = GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, false, subGenomesSizeIndices1, &numSubGenomesSizeIndices1);
@@ -561,10 +571,6 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
             targetGenome[startSourceIndex + delta1 + delta2 + i] = genome[startTargetIndex + i];
         }
 
-        if (constructor.genomeReadPosition >= startSourceIndex && constructor.genomeReadPosition <= startTargetIndex) {
-            constructor.genomeReadPosition = 0;
-        }
-
         //adjust sub genome size fields
         for (int i = 0; i < numSubGenomesSizeIndices1; ++i) {
             auto subGenomeSize = GenomeDecoder::readWord(targetGenome, subGenomesSizeIndices1[i]);
@@ -597,9 +603,6 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
         for (int i = 0; i < delta3; ++i) {
             targetGenome[startTargetIndex + delta1 + delta2 + i] = genome[endSourceIndex + i];
         }
-        if (constructor.genomeReadPosition >= startTargetIndex && constructor.genomeReadPosition <= endSourceIndex) {
-            constructor.genomeReadPosition = 0;
-        }
 
         //adjust sub genome size fields
         for (int i = 0; i < numSubGenomesSizeIndices1; ++i) {
@@ -617,17 +620,19 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
     }
 
     constructor.genome = targetGenome;
+    constructor.genomeCurrentNodeIndex = 0;
     adaptMutationId(data, constructor);
 }
 
 __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto& genome = constructor.genome;
-    auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize <= Const::GenomeHeaderSize) {
+    if (GenomeDecoder::hasEmptyGenome(constructor)) {
         return;
     }
+
+    auto& genome = constructor.genome;
+    auto const& genomeSize = constructor.genomeSize;
 
     int startSourceIndex;
     int endSourceIndex;
@@ -656,7 +661,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     }
     auto sizeDelta = endSourceIndex - startSourceIndex;
     if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
-        if (GenomeDecoder::hasSelfCopy(genome + startSourceIndex, sizeDelta)) {
+        if (GenomeDecoder::containsSectionSelfReplication(genome + startSourceIndex, sizeDelta)) {
             return;
         }
     }
@@ -693,9 +698,6 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
         auto subGenomeSize = GenomeDecoder::readWord(targetGenome, subGenomesSizeIndices[i]);
         GenomeDecoder::writeWord(targetGenome, subGenomesSizeIndices[i], subGenomeSize + sizeDelta);
     }
-    if (constructor.genomeReadPosition > startTargetIndex || constructor.genomeReadPosition == constructor.genomeSize) {
-        constructor.genomeReadPosition += sizeDelta;
-    }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
     adaptMutationId(data, constructor);
@@ -704,11 +706,12 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
 __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto& genome = constructor.genome;
-    auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize <= Const::GenomeHeaderSize) {
+    if (GenomeDecoder::hasEmptyGenome(constructor)) {
         return;
     }
+
+    auto& genome = constructor.genome;
+    auto const& genomeSize = constructor.genomeSize;
 
     int subGenomesSizeIndices[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH];
     int numSubGenomesSizeIndices;
@@ -740,11 +743,12 @@ __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data
 __inline__ __device__ void MutationProcessor::uniformColorMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto& genome = constructor.genome;
-    auto genomeSize = toInt(constructor.genomeSize);
-    if (genomeSize <= Const::GenomeHeaderSize) {
+    if (GenomeDecoder::hasEmptyGenome(constructor)) {
         return;
     }
+
+    auto& genome = constructor.genome;
+    auto const& genomeSize = constructor.genomeSize;
 
     auto origColor = GenomeDecoder::getNextCellColor(genome, Const::GenomeHeaderSize);
     auto newColor = getNewColorFromTransition(data, origColor);
@@ -756,7 +760,7 @@ __inline__ __device__ void MutationProcessor::uniformColorMutation(SimulationDat
     }
 
     GenomeDecoder::executeForEachNodeRecursively(
-        genome, genomeSize, [&](int depth, int nodeAddress) { GenomeDecoder::setNextCellColor(genome, nodeAddress, newColor); });
+        genome, genomeSize, [&](int depth, int nodeAddress, int repetition) { GenomeDecoder::setNextCellColor(genome, nodeAddress, newColor); });
 }
 
 __inline__ __device__ bool MutationProcessor::adaptMutationId(SimulationData& data, ConstructorFunction& constructor)

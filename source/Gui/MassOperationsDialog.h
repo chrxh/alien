@@ -2,7 +2,7 @@
 
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
-#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/EngineConstants.h"
 
 class _MassOperationsDialog
 {
@@ -37,6 +37,10 @@ private:
     bool _randomizeAges = false;
     int _minAge = 0;
     int _maxAge = 0;
+
+    bool _randomizeCountdowns = false;
+    int _minCountdown = 5;
+    int _maxCountdown = 5;
 
     bool _restrictToSelectedClusters = false;
 };

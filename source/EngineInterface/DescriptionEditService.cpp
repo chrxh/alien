@@ -1,4 +1,4 @@
-#include "DescriptionHelper.h"
+#include "DescriptionEditService.h"
 
 #include <cmath>
 #include <boost/range/adaptor/indexed.hpp>
@@ -8,11 +8,12 @@
 #include "Base/Math.h"
 #include "GenomeDescriptions.h"
 #include "SpaceCalculator.h"
-#include "GenomeDescriptionConverter.h"
+#include "GenomeDescriptionService.h"
 
-DataDescription DescriptionHelper::createRect(CreateRectParameters const& parameters)
+DataDescription DescriptionEditService::createRect(CreateRectParameters const& parameters)
 {
     DataDescription result;
+    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::getInstance().getRandomInt(std::numeric_limits<int>::max())) : 0;
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
             result.addCell(CellDescription()
@@ -22,7 +23,8 @@ DataDescription DescriptionHelper::createRect(CreateRectParameters const& parame
                                .setStiffness(parameters._stiffness)
                                .setMaxConnections(parameters._maxConnections)
                                .setColor(parameters._color)
-                               .setBarrier(parameters._barrier));
+                               .setBarrier(parameters._barrier)
+                               .setCreatureId(creatureId));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
@@ -33,9 +35,10 @@ DataDescription DescriptionHelper::createRect(CreateRectParameters const& parame
     return result;
 }
 
-DataDescription DescriptionHelper::createHex(CreateHexParameters const& parameters)
+DataDescription DescriptionEditService::createHex(CreateHexParameters const& parameters)
 {
     DataDescription result;
+    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::getInstance().getRandomInt(std::numeric_limits<int>::max())) : 0;
     auto incY = sqrt(3.0) * parameters._cellDistance / 2.0;
     for (int j = 0; j < parameters._layers; ++j) {
         for (int i = -(parameters._layers - 1); i < parameters._layers - j; ++i) {
@@ -48,7 +51,8 @@ DataDescription DescriptionHelper::createHex(CreateHexParameters const& paramete
                                .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
                                .setMaxConnections(parameters._maxConnections)
                                .setColor(parameters._color)
-                               .setBarrier(parameters._barrier));
+                               .setBarrier(parameters._barrier)
+                               .setCreatureId(creatureId));
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
@@ -59,7 +63,8 @@ DataDescription DescriptionHelper::createHex(CreateHexParameters const& paramete
                                    .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
                                    .setMaxConnections(parameters._maxConnections)
                                    .setColor(parameters._color)
-                                   .setBarrier(parameters._barrier));
+                                   .setBarrier(parameters._barrier)
+                                   .setCreatureId(creatureId));
             }
         }
     }
@@ -73,9 +78,10 @@ DataDescription DescriptionHelper::createHex(CreateHexParameters const& paramete
     return result;
 }
 
-DataDescription DescriptionHelper::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters)
+DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters)
 {
     DataDescription result;
+    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::getInstance().getRandomInt(std::numeric_limits<int>::max())) : 0;
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result.addCell(CellDescription()
@@ -85,7 +91,8 @@ DataDescription DescriptionHelper::createUnconnectedCircle(CreateUnconnectedCirc
                            .setStiffness(parameters._stiffness)
                            .setMaxConnections(parameters._maxConnections)
                            .setColor(parameters._color)
-                           .setBarrier(parameters._barrier));
+                           .setBarrier(parameters._barrier)
+                           .setCreatureId(creatureId));
         return result;
     }
 
@@ -109,7 +116,8 @@ DataDescription DescriptionHelper::createUnconnectedCircle(CreateUnconnectedCirc
                                .setPos({parameters._center.x + dxMod, parameters._center.y + dy})
                                .setMaxConnections(parameters._maxConnections)
                                .setColor(parameters._color)
-                               .setBarrier(parameters._barrier));
+                               .setBarrier(parameters._barrier)
+                               .setCreatureId(creatureId));
 
         }
     }
@@ -154,7 +162,7 @@ namespace
     }
 }
 
-void DescriptionHelper::duplicate(ClusteredDataDescription& data, IntVector2D const& origSize, IntVector2D const& size)
+void DescriptionEditService::duplicate(ClusteredDataDescription& data, IntVector2D const& origSize, IntVector2D const& size)
 {
     ClusteredDataDescription result;
 
@@ -224,7 +232,7 @@ namespace
     }
 }
 
-DataDescription DescriptionHelper::gridMultiply(DataDescription const& input, GridMultiplyParameters const& parameters)
+DataDescription DescriptionEditService::gridMultiply(DataDescription const& input, GridMultiplyParameters const& parameters)
 {
     DataDescription result;
     auto clone = input;
@@ -253,7 +261,7 @@ DataDescription DescriptionHelper::gridMultiply(DataDescription const& input, Gr
     return result;
 }
 
-DataDescription DescriptionHelper::randomMultiply(
+DataDescription DescriptionEditService::randomMultiply(
     DataDescription const& input,
     RandomMultiplyParameters const& parameters,
     IntVector2D const& worldSize,
@@ -326,7 +334,7 @@ DataDescription DescriptionHelper::randomMultiply(
     return result;
 }
 
-void DescriptionHelper::addIfSpaceAvailable(
+void DescriptionEditService::addIfSpaceAvailable(
     DataDescription& result,
     Occupancy& cellOccupancy,
     DataDescription const& toAdd,
@@ -343,7 +351,7 @@ void DescriptionHelper::addIfSpaceAvailable(
     }
 }
 
-void DescriptionHelper::reconnectCells(DataDescription& data, float maxDistance)
+void DescriptionEditService::reconnectCells(DataDescription& data, float maxDistance)
 {
     std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
 
@@ -370,14 +378,14 @@ void DescriptionHelper::reconnectCells(DataDescription& data, float maxDistance)
     }
 }
 
-void DescriptionHelper::removeStickiness(DataDescription& data)
+void DescriptionEditService::removeStickiness(DataDescription& data)
 {
     for (auto& cell : data.cells) {
         cell.maxConnections = toInt(cell.connections.size());
     }
 }
 
-void DescriptionHelper::correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize)
+void DescriptionEditService::correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize)
 {
     auto threshold = std::min(worldSize.x, worldSize.y) /3;
     std::unordered_map<uint64_t, CellDescription&> cellById;
@@ -408,7 +416,7 @@ void DescriptionHelper::correctConnections(ClusteredDataDescription& data, IntVe
     }
 }
 
-void DescriptionHelper::randomizeCellColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
+void DescriptionEditService::randomizeCellColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
 {
     for (auto& cluster : data.clusters) {
         auto newColor = colorCodes[NumberGenerator::getInstance().getRandomInt(toInt(colorCodes.size()))];
@@ -422,18 +430,18 @@ namespace
 {
     void colorizeGenomeNodes(std::vector<uint8_t>& genome, int color)
     {
-        auto desc = GenomeDescriptionConverter::convertBytesToDescription(genome);
+        auto desc = GenomeDescriptionService::convertBytesToDescription(genome);
         for (auto& node : desc.cells) {
             node.color = color;
             if (node.hasGenome()) {
                 colorizeGenomeNodes(node.getGenomeRef(), color);
             }
         }
-        genome = GenomeDescriptionConverter::convertDescriptionToBytes(desc);
+        genome = GenomeDescriptionService::convertDescriptionToBytes(desc);
     }
 }
 
-void DescriptionHelper::randomizeGenomeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
+void DescriptionEditService::randomizeGenomeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
 {
     for (auto& cluster : data.clusters) {
         auto newColor = colorCodes[NumberGenerator::getInstance().getRandomInt(toInt(colorCodes.size()))];
@@ -445,27 +453,39 @@ void DescriptionHelper::randomizeGenomeColors(ClusteredDataDescription& data, st
     }
 }
 
-void DescriptionHelper::randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy)
+void DescriptionEditService::randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy)
 {
     for (auto& cluster : data.clusters) {
-        auto energy = NumberGenerator::getInstance().getRandomReal(minEnergy, maxEnergy);
+        auto energy = NumberGenerator::getInstance().getRandomReal(toDouble(minEnergy), toDouble(maxEnergy));
         for (auto& cell : cluster.cells) {
             cell.energy = energy;
         }
     }
 }
 
-void DescriptionHelper::randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge)
+void DescriptionEditService::randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge)
 {
     for (auto& cluster : data.clusters) {
-        auto age = NumberGenerator::getInstance().getRandomReal(minAge, maxAge);
+        auto age = NumberGenerator::getInstance().getRandomReal(toDouble(minAge), toDouble(maxAge));
         for (auto& cell : cluster.cells) {
             cell.age = age;
         }
     }
 }
 
-void DescriptionHelper::generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers)
+void DescriptionEditService::randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue)
+{
+    for (auto& cluster : data.clusters) {
+        auto countdown = NumberGenerator::getInstance().getRandomReal(toDouble(minValue), toDouble(maxValue));
+        for (auto& cell : cluster.cells) {
+            if (cell.getCellFunctionType() == CellFunction_Detonator) {
+                std::get<DetonatorDescription>(*cell.cellFunction).countdown = countdown;
+            }
+        }
+    }
+}
+
+void DescriptionEditService::generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers)
 {
     std::unordered_map<uint64_t, int> idToIndexMap;
     for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {
@@ -516,7 +536,7 @@ void DescriptionHelper::generateExecutionOrderNumbers(DataDescription& data, std
     } while (origNumVisitedCells != visitedCellIds.size());
 }
 
-void DescriptionHelper::removeMetadata(DataDescription& data)
+void DescriptionEditService::removeMetadata(DataDescription& data)
 {
     for(auto& cell : data.cells) {
         removeMetadata(cell);
@@ -542,7 +562,7 @@ namespace
 
 }
 
-void DescriptionHelper::generateNewCreatureIds(DataDescription& data)
+void DescriptionEditService::generateNewCreatureIds(DataDescription& data)
 {
     std::unordered_map<int, int> origToNewCreatureIdMap;
     for (auto& cell : data.cells) {
@@ -556,7 +576,7 @@ void DescriptionHelper::generateNewCreatureIds(DataDescription& data)
     }
 }
 
-void DescriptionHelper::generateNewCreatureIds(ClusteredDataDescription& data)
+void DescriptionEditService::generateNewCreatureIds(ClusteredDataDescription& data)
 {
     std::unordered_map<int, int> origToNewCreatureIdMap;
     for (auto& cluster: data.clusters) {
@@ -573,13 +593,13 @@ void DescriptionHelper::generateNewCreatureIds(ClusteredDataDescription& data)
 }
 
 
-void DescriptionHelper::removeMetadata(CellDescription& cell)
+void DescriptionEditService::removeMetadata(CellDescription& cell)
 {
     cell.metadata.description.clear();
     cell.metadata.name.clear();
 }
 
-bool DescriptionHelper::isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance)
+bool DescriptionEditService::isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance)
 {
     auto intPos = toIntVector2D(posToCheck);
 
@@ -612,7 +632,7 @@ bool DescriptionHelper::isCellPresent(Occupancy const& cellPosBySlot, SpaceCalcu
     return false;
 }
 
-uint64_t DescriptionHelper::getId(CellOrParticleDescription const& entity)
+uint64_t DescriptionEditService::getId(CellOrParticleDescription const& entity)
 {
     if (std::holds_alternative<CellDescription>(entity)) {
         return std::get<CellDescription>(entity).id;
@@ -620,7 +640,7 @@ uint64_t DescriptionHelper::getId(CellOrParticleDescription const& entity)
     return std::get<ParticleDescription>(entity).id;
 }
 
-RealVector2D DescriptionHelper::getPos(CellOrParticleDescription const& entity)
+RealVector2D DescriptionEditService::getPos(CellOrParticleDescription const& entity)
 {
     if (std::holds_alternative<CellDescription>(entity)) {
         return std::get<CellDescription>(entity).pos;
@@ -628,7 +648,7 @@ RealVector2D DescriptionHelper::getPos(CellOrParticleDescription const& entity)
     return std::get<ParticleDescription>(entity).pos;
 }
 
-std::vector<CellOrParticleDescription> DescriptionHelper::getObjects(
+std::vector<CellOrParticleDescription> DescriptionEditService::getObjects(
     DataDescription const& data)
 {
     std::vector<CellOrParticleDescription> result;
@@ -665,7 +685,7 @@ namespace
     }
 }
 
-std::vector<CellOrParticleDescription> DescriptionHelper::getConstructorToMainGenomes(DataDescription const& data)
+std::vector<CellOrParticleDescription> DescriptionEditService::getConstructorToMainGenomes(DataDescription const& data)
 {
     std::map<std::vector<uint8_t>, size_t> genomeToCellIndex;
     for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {

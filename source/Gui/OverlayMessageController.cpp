@@ -52,14 +52,14 @@ void OverlayMessageController::process()
     drawList->AddText(
         styleRep.getMonospaceLargeFont(),
         styleRep.scale(MessageFontSize),
-        {center.x - fontSize.x / 2 - 2, center.y - styleRep.scale(50) - fontSize.y - 2},
+        {center.x - fontSize.x / 2 - 2, center.y - styleRep.scale(50.0f) - fontSize.y - 2},
         textColorBack,
         _message.c_str());
 
     drawList->AddText(
         styleRep.getMonospaceLargeFont(),
         styleRep.scale(MessageFontSize),
-        {center.x - fontSize.x / 2, center.y - styleRep.scale(50) - fontSize.y},
+        {center.x - fontSize.x / 2, center.y - styleRep.scale(50.0f) - fontSize.y},
         textColorFront,
         _message.c_str());
 }

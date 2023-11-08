@@ -123,7 +123,7 @@ bool _NetworkController::createUser(std::string const& userName, std::string con
     }
 }
 
-bool _NetworkController::activateUser(std::string const& userName, std::string const& password, std::string const& confirmationCode)
+bool _NetworkController::activateUser(std::string const& userName, std::string const& password, UserInfo const& userInfo, std::string const& confirmationCode)
 {
     log(Priority::Important, "network: activate user '" + userName + "'");
 
@@ -134,6 +134,9 @@ bool _NetworkController::activateUser(std::string const& userName, std::string c
     params.emplace("userName", userName);
     params.emplace("password", password);
     params.emplace("activationCode", confirmationCode);
+    if (userInfo.gpu) {
+        params.emplace("gpu", *userInfo.gpu);
+    }
 
     try {
         auto result = executeRequest([&] { return client.Post("/alien-server/activateuser.php", params); });
@@ -288,7 +291,6 @@ bool _NetworkController::getRemoteSimulationList(std::vector<RemoteSimulationDat
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
-        result.clear();
         result = NetworkDataParser::decodeRemoteSimulationData(tree);
         return true;
     } catch (...) {

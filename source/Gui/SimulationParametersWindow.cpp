@@ -5,7 +5,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
@@ -79,6 +79,7 @@ void _SimulationParametersWindow::processIntern()
     auto parameters = _simController->getSimulationParameters();
     auto origParameters = _simController->getOriginalSimulationParameters();
     auto lastParameters = parameters;
+    auto focusBaseTab = !_numSpotsLastTime.has_value() || parameters.numSpots != *_numSpotsLastTime;
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
 
@@ -92,13 +93,14 @@ void _SimulationParametersWindow::processIntern()
                     origParameters.spots[index] = createSpot(parameters, index);
                     ++parameters.numSpots;
                     ++origParameters.numSpots;
+                    _numSpotsLastTime = parameters.numSpots;
                     _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
                 AlienImGui::Tooltip("Add parameter zone");
             }
 
-            if (ImGui::BeginTabItem("Base", nullptr, ImGuiTabItemFlags_None)) {
+            if (ImGui::BeginTabItem("Base", nullptr, focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
                 processBase(parameters, origParameters);
                 ImGui::EndTabItem();
             }
@@ -121,6 +123,7 @@ void _SimulationParametersWindow::processIntern()
                     }
                     --parameters.numSpots;
                     --origParameters.numSpots;
+                    _numSpotsLastTime = parameters.numSpots;
                     _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
@@ -134,6 +137,7 @@ void _SimulationParametersWindow::processIntern()
     if (parameters != lastParameters) {
         _simController->setSimulationParameters(parameters);
     }
+    _numSpotsLastTime = parameters.numSpots;
 }
 
 SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
@@ -210,7 +214,7 @@ void _SimulationParametersWindow::processBase(
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
 
         /**
-         * Colors
+         * Coloring
          */
         if (ImGui::TreeNodeEx("Visualization", flags)) {
             AlienImGui::ColorButtonWithPicker(
@@ -223,10 +227,12 @@ void _SimulationParametersWindow::processBase(
                     .name("Cell coloring")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.cellColorization)
-                    .values({"None", "Standard cell colors", "Mutants"})
-                    .tooltip("Here one can set how the cells are to be colored during rendering. In addition to coloring according to the 7 cell colors, there "
-                             "is also the option of coloring mutations. Most of the mutations (except changes in the neuronal networks and cell properties) in "
-                             "the genome of a creature are represented by a different color."),
+                    .values({"None", "Standard cell colors", "Mutants", "Cell state", "Genome size"})
+                    .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
+                            ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
+                             " Mutants: Different mutants are represented by different colors (except changes in the neuronal networks and cell "
+                             "properties).\n\n" ICON_FA_CHEVRON_RIGHT
+                             " Cell state: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT " Genome size: blue = creature with small genome, red = large genome"),
                 simParameters.cellColorization);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -238,6 +244,13 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(&origSimParameters.zoomLevelNeuronalActivity)
                     .tooltip("The zoom level from which the neuronal activities become visible."),
                 &simParameters.zoomLevelNeuronalActivity);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Show detonations")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSimParameters.showDetonations)
+                    .tooltip("If activated, the explosions of detonator cells will be visualized."),
+                simParameters.showDetonations);
             ImGui::TreePop();
         }
 
@@ -811,7 +824,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0)
-                    .max(2.5f)
+                    .max(3.0f)
                     .defaultValue(origSimParameters.cellFunctionAttackerRadius)
                     .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                 simParameters.cellFunctionAttackerRadius);
@@ -1071,7 +1084,7 @@ void _SimulationParametersWindow::processBase(
         if (ImGui::TreeNodeEx("Cell function: Sensor", flags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Range")
+                    .name("Radius")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(10.0f)
@@ -1113,6 +1126,50 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.cellFunctionTransmitterEnergyDistributionSameCreature)
                     .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells belonging to the same creature."),
                 simParameters.cellFunctionTransmitterEnergyDistributionSameCreature);
+            ImGui::TreePop();
+        }
+
+        /**
+         * Reconnector
+         */
+        if (ImGui::TreeNodeEx("Cell function: Reconnector", flags)) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Radius")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0.0f)
+                    .max(3.0f)
+                    .defaultValue(origSimParameters.cellFunctionReconnectorRadius)
+                    .tooltip("The maximum radius in which a reconnector cell can establish or destroy connections to other cells."),
+                simParameters.cellFunctionReconnectorRadius);
+            ImGui::TreePop();
+        }
+
+        /**
+         * Detonator
+         */
+        if (ImGui::TreeNodeEx("Cell function: Detonator", flags)) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Blast radius")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0.0f)
+                    .max(10.0f)
+                    .defaultValue(origSimParameters.cellFunctionDetonatorRadius)
+                    .tooltip("The radius of the detonation."),
+                simParameters.cellFunctionDetonatorRadius);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Chain explostion probability")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .defaultValue(origSimParameters.cellFunctionDetonatorChainExplosionProbability)
+                    .tooltip("The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
+                simParameters.cellFunctionDetonatorChainExplosionProbability);
             ImGui::TreePop();
         }
 
@@ -1768,7 +1825,7 @@ void _SimulationParametersWindow::onOpenParameters()
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         SimulationParameters parameters;
-        if (!Serializer::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
+        if (!SerializerService::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
             MessageDialog::getInstance().information("Open simulation parameters", "The selected file could not be opened.");
         } else {
             _simController->setSimulationParameters(parameters);
@@ -1785,7 +1842,7 @@ void _SimulationParametersWindow::onSaveParameters()
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         auto parameters = _simController->getSimulationParameters();
-        if (!Serializer::serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
+        if (!SerializerService::serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
             MessageDialog::getInstance().information("Save simulation parameters", "The selected file could not be saved.");
         }
     });
@@ -1803,6 +1860,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
         parameters.cellFunctionConstructorPumpEnergyFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorPumpEnergyFactor[i]));
         parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
+        parameters.cellFunctionDetonatorChainExplosionProbability[i] =
+            std::max(0.0f, std::min(1.0f, parameters.cellFunctionDetonatorChainExplosionProbability[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);

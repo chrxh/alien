@@ -10,11 +10,11 @@
 #include "Base/GlobalSettings.h"
 #include "Base/StringHelper.h"
 #include "EngineInterface/SimulationController.h"
-#include "EngineInterface/GenomeDescriptionConverter.h"
+#include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/PreviewDescriptionConverter.h"
-#include "EngineInterface/Serializer.h"
+#include "EngineInterface/PreviewDescriptionService.h"
+#include "EngineInterface/SerializerService.h"
 #include "EngineInterface/ShapeGenerator.h"
 
 #include "AlienImGui.h"
@@ -28,14 +28,16 @@
 #include "Viewport.h"
 #include "HelpStrings.h"
 #include "UploadSimulationDialog.h"
+#include "ChangeColorDialog.h"
 
 namespace
 {
     auto const PreviewHeight = 300.0f;
+    auto const ContentHeaderTextWidth = 215.0f;
     auto const ContentTextWidth = 190.0f;
+    auto const DynamicTableHeaderColumnWidth = 335.0f;
     auto const DynamicTableColumnWidth = 300.0f;
-    auto const WeightsAndBiasTextWidth = 100.0f;
-    auto const WeightsAndBiasSelectionTextWidth = 400.0f;
+    auto const SubWindowRightMargin = 0.0f;
 }
 
 _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController, Viewport const& viewport)
@@ -52,6 +54,8 @@ _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, Simula
     }
     _startingPath = GlobalSettings::getInstance().getStringState("windows.genome editor.starting path", path.string());
     _previewHeight = GlobalSettings::getInstance().getFloatState("windows.genome editor.preview height", scale(PreviewHeight));
+    _changeColorDialog =
+        std::make_shared<_ChangeColorDialog>([&] { return getCurrentGenome(); }, [&](GenomeDescription const& genome) { setCurrentGenome(genome); });
 }
 
 _GenomeEditorWindow::~_GenomeEditorWindow()
@@ -65,10 +69,12 @@ void _GenomeEditorWindow::registerCyclicReferences(UploadSimulationDialogWeakPtr
     _uploadSimulationDialog = uploadSimulationDialog;
 }
 
-void _GenomeEditorWindow::openTab(GenomeDescription const& genome)
+void _GenomeEditorWindow::openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed)
 {
-    setOn(false);
-    delayedExecution([this] { setOn(true); });
+    if (openGenomeEditorIfClosed) {
+        setOn(false);
+        delayedExecution([this] { setOn(true); });
+    }
     if (_tabDatas.size() == 1 && _tabDatas.front().genome.cells.empty()) {
         _tabDatas.clear();
     }
@@ -110,6 +116,7 @@ void _GenomeEditorWindow::processIntern()
 {
     processToolbar();
     processEditor();
+    _changeColorDialog->process();
 }
 
 void _GenomeEditorWindow::processToolbar()
@@ -141,7 +148,7 @@ void _GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
-        _copiedGenome = GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome);
+        _copiedGenome = GenomeDescriptionService::convertDescriptionToBytes(selectedTab.genome);
         printOverlayMessage("Genome copied");
     }
     AlienImGui::Tooltip("Copy genome");
@@ -184,25 +191,40 @@ void _GenomeEditorWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_SEEDLING)) {
-        onCreateSpore();
+    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
+    if (AlienImGui::ToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
+        _expandNodes = true;
     }
-    AlienImGui::Tooltip("Create a spore with current genome");
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Expand all cells");
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
+    if (AlienImGui::ToolbarButton(ICON_FA_COMPRESS_ARROWS_ALT)) {
+        _expandNodes = false;
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Collapse all cells");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_PLUS_SQUARE)) {
-        _expandNodes = true;
+    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
+    if (AlienImGui::ToolbarButton(ICON_FA_PALETTE)) {
+        _changeColorDialog->open();
     }
-    AlienImGui::Tooltip("Expand all cells");
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Change the color of all cells with a specific color");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_MINUS_SQUARE)) {
-        _expandNodes = false;
+    AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_SEEDLING)) {
+        onCreateSpore();
     }
-    AlienImGui::Tooltip("Collapse all cells");
+    AlienImGui::Tooltip("Create a spore with current genome");
 
     AlienImGui::Separator();
 }
@@ -259,45 +281,10 @@ void _GenomeEditorWindow::processEditor()
     }
 }
 
-namespace
-{
-    class DynamicTableLayout
-    {
-    public:
-        bool begin()
-        {
-            _columns = std::max(toInt(ImGui::GetContentRegionAvail().x / scale(DynamicTableColumnWidth)), 1);
-            auto result = ImGui::BeginTable("##", _columns, ImGuiTableFlags_None);
-            if (result) {
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-            }
-            return result;
-        }
-        void end() { ImGui::EndTable(); }
-
-        void next()
-        {
-            auto currentCol = (++_elementNumber) % _columns;
-            if (currentCol > 0) {
-                ImGui::TableSetColumnIndex(currentCol);
-                AlienImGui::VerticalSeparator();
-                ImGui::SameLine();
-            } else {
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-            }
-        }
-
-    private:
-        int _columns = 0;
-        int _elementNumber = 0;
-    };
-}
-
 void _GenomeEditorWindow::processTab(TabData& tab)
 {
-    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(_previewHeight)), true)) {
+    _previewHeight = std::min(ImGui::GetContentRegionAvail().y - 10.0f, std::max(10.0f, _previewHeight));
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewHeight), true)) {
         AlienImGui::Group("General properties");
         processGenomeHeader(tab);
 
@@ -310,7 +297,6 @@ void _GenomeEditorWindow::processTab(TabData& tab)
     if (ImGui::IsItemActive()) {
         _previewHeight -= ImGui::GetIO().MouseDelta.y;
     }
-
     AlienImGui::Group("Preview (reference configuration)");
     if (ImGui::BeginChild("##child4", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         showPreview(tab);
@@ -320,13 +306,13 @@ void _GenomeEditorWindow::processTab(TabData& tab)
 
 void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
 {
-    DynamicTableLayout table;
+    AlienImGui::DynamicTableLayout table(DynamicTableHeaderColumnWidth);
     if (table.begin()) {
         std::vector ShapeStrings = {"Custom"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s, "Tube"s, "Lolli"s, "Small lolli"s, "Zigzag"s};
-        auto origShape = tab.genome.info.shape;
+        auto origShape = tab.genome.header.shape;
         if (AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Geometry").values(ShapeStrings).textWidth(ContentTextWidth).tooltip(Const::GenomeGeometryTooltip),
-                tab.genome.info.shape)) {
+                AlienImGui::ComboParameters().name("Geometry").values(ShapeStrings).textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeGeometryTooltip),
+                tab.genome.header.shape)) {
             updateGeometry(tab.genome, origShape);
         }
         table.next();
@@ -335,30 +321,67 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
                 .name("Connection distance")
                 .format("%.2f")
                 .step(0.05f)
-                .textWidth(ContentTextWidth)
+                .textWidth(ContentHeaderTextWidth)
                 .tooltip(Const::GenomeConnectionDistanceTooltip),
-            tab.genome.info.connectionDistance);
+            tab.genome.header.connectionDistance);
         table.next();
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(ContentTextWidth).tooltip(Const::GenomeStiffnessTooltip),
-            tab.genome.info.stiffness);
-        if (tab.genome.info.shape == ConstructionShape_Custom) {
+            AlienImGui::InputFloatParameters()
+                .name("Stiffness")
+                .format("%.2f")
+                .step(0.05f)
+                .textWidth(ContentHeaderTextWidth)
+                .tooltip(Const::GenomeStiffnessTooltip),
+            tab.genome.header.stiffness);
+        if (tab.genome.header.shape == ConstructionShape_Custom) {
             table.next();
             AlienImGui::AngleAlignmentCombo(
-                AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(ContentTextWidth).tooltip(Const::GenomeAngleAlignmentTooltip),
-                tab.genome.info.angleAlignment);
+                AlienImGui::AngleAlignmentComboParameters()
+                    .name("Angle alignment")
+                    .textWidth(ContentHeaderTextWidth)
+                    .tooltip(Const::GenomeAngleAlignmentTooltip),
+                tab.genome.header.angleAlignment);
+        }
+        table.next();
+        auto multipleBranches = !tab.genome.header.singleConstruction;
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters().name("Multiple constructions").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeMultipleConstructionsTooltip),
+            multipleBranches);
+        tab.genome.header.singleConstruction = !multipleBranches;
+        table.next();
+        AlienImGui::InputInt(
+            AlienImGui::InputIntParameters()
+                .name("Repetitions per construction")
+                .infinity(true)
+                .textWidth(ContentHeaderTextWidth)
+                .tooltip(Const::GenomeRepetitionsPerConstructionTooltip),
+            tab.genome.header.numRepetitions);
+        if (tab.genome.header.numRepetitions > 1) {
+            table.next();
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters()
+                    .name("Concatenation angle #1")
+                    .format("%.1f")
+                    .textWidth(ContentHeaderTextWidth)
+                    .tooltip(Const::GenomeConcatenationAngle1)
+                ,
+                tab.genome.header.concatenationAngle1);
+            table.next();
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters()
+                    .name("Concatenation angle #2")
+                    .format("%.1f")
+                    .textWidth(ContentHeaderTextWidth)
+                    .tooltip(Const::GenomeConcatenationAngle2),
+                tab.genome.header.concatenationAngle2);
         }
         table.next();
         AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Single construction").textWidth(ContentTextWidth).tooltip(Const::GenomeSingleConstructionTooltip),
-            tab.genome.info.singleConstruction);
-        table.next();
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Separate construction").textWidth(ContentTextWidth).tooltip(Const::GenomeSeparationConstructionTooltip),
-            tab.genome.info.separateConstruction);
+            AlienImGui::CheckboxParameters().name("Separation").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeSeparationConstructionTooltip),
+            tab.genome.header.separateConstruction);
         table.end();
     }
-    validationAndCorrection(tab.genome.info);
+    validationAndCorrection(tab.genome.header);
 }
 
 namespace 
@@ -373,7 +396,7 @@ namespace
             cell.cellFunction = TransmitterGenomeDescription();
         } break;
         case CellFunction_Constructor: {
-            cell.cellFunction = ConstructorGenomeDescription();
+            cell.cellFunction = ConstructorGenomeDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()));
         } break;
         case CellFunction_Sensor: {
             cell.cellFunction = SensorGenomeDescription();
@@ -385,7 +408,7 @@ namespace
             cell.cellFunction = AttackerGenomeDescription();
         } break;
         case CellFunction_Injector: {
-            cell.cellFunction = InjectorGenomeDescription();
+            cell.cellFunction = InjectorGenomeDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()));
         } break;
         case CellFunction_Muscle: {
             cell.cellFunction = MuscleGenomeDescription();
@@ -393,8 +416,11 @@ namespace
         case CellFunction_Defender: {
             cell.cellFunction = DefenderGenomeDescription();
         } break;
-        case CellFunction_Placeholder: {
-            cell.cellFunction = PlaceHolderGenomeDescription();
+        case CellFunction_Reconnector: {
+            cell.cellFunction = ReconnectorGenomeDescription();
+        } break;
+        case CellFunction_Detonator: {
+            cell.cellFunction = DetonatorGenomeDescription();
         } break;
         case CellFunction_None: {
             cell.cellFunction.reset();
@@ -407,7 +433,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 {
     int index = 0;
 
-    auto shapeGenerator = ShapeGeneratorFactory::create(tab.genome.info.shape);
+    auto shapeGenerator = ShapeGeneratorFactory::create(tab.genome.header.shape);
     for (auto& cell : tab.genome.cells) {
         auto isFirstOrLast = index == 0 || index == tab.genome.cells.size() - 1;
         std::optional<ShapeGeneratorResult> shapeGeneratorResult =
@@ -466,7 +492,7 @@ void _GenomeEditorWindow::processNode(
 {
     auto type = cell.getCellFunctionType();
 
-    DynamicTableLayout table;
+    AlienImGui::DynamicTableLayout table(DynamicTableColumnWidth);
     if (table.begin()) {
         if (AlienImGui::CellFunctionCombo(
                 AlienImGui::CellFunctionComboParameters().name("Function").textWidth(ContentTextWidth).tooltip(Const::getCellFunctionTooltip(type)), type)) {
@@ -479,8 +505,8 @@ void _GenomeEditorWindow::processNode(
             auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell.referenceAngle;
             if (AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::GenomeAngleTooltip), referenceAngle)) {
-                updateGeometry(tab.genome, tab.genome.info.shape);
-                tab.genome.info.shape = ConstructionShape_Custom;
+                updateGeometry(tab.genome, tab.genome.header.shape);
+                tab.genome.header.shape = ConstructionShape_Custom;
             }
             cell.referenceAngle = referenceAngle;
         }
@@ -504,8 +530,8 @@ void _GenomeEditorWindow::processNode(
         if (AlienImGui::InputOptionalInt(
                 AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::GenomeRequiredConnectionsTooltip),
                 numRequiredAdditionalConnections)) {
-            updateGeometry(tab.genome, tab.genome.info.shape);
-            tab.genome.info.shape = ConstructionShape_Custom;
+            updateGeometry(tab.genome, tab.genome.header.shape);
+            tab.genome.header.shape = ConstructionShape_Custom;
         }
         cell.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
 
@@ -682,9 +708,20 @@ void _GenomeEditorWindow::processNode(
                     .tooltip(Const::GenomeDefenderModeTooltip),
                 defender.mode);
         } break;
-        case CellFunction_Placeholder: {
+        case CellFunction_Reconnector: {
+            auto& reconnector = std::get<ReconnectorGenomeDescription>(*cell.cellFunction);
+            table.next();
+            AlienImGui::ComboColor(
+                AlienImGui::ComboColorParameters().name("Target color").textWidth(ContentTextWidth).tooltip(Const::GenomeReconnectorTargetColorTooltip),
+                reconnector.color);
         } break;
-        case CellFunction_None: {
+        case CellFunction_Detonator: {
+            table.next();
+            auto& detonator = std::get<DetonatorGenomeDescription>(*cell.cellFunction);
+            AlienImGui::InputInt(
+                AlienImGui::InputIntParameters().name("Countdown").textWidth(ContentTextWidth).tooltip(Const::GenomeDetonatorCountdownTooltip),
+                detonator.countdown);
+            detonator.countdown = std::min(65535, std::max(0, detonator.countdown));
         } break;
         }
 
@@ -695,21 +732,7 @@ void _GenomeEditorWindow::processNode(
             auto& neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
             if (ImGui::TreeNodeEx("Neural network", ImGuiTreeNodeFlags_None)) {
                 AlienImGui::NeuronSelection(
-                    AlienImGui::NeuronSelectionParameters().outputButtonPositionFromRight(WeightsAndBiasSelectionTextWidth),
-                    neuron.weights,
-                    neuron.biases,
-                    _selectedInput,
-                    _selectedOutput);
-                DynamicTableLayout table;
-                if (table.begin()) {
-                    AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(WeightsAndBiasTextWidth),
-                        neuron.weights[_selectedOutput][_selectedInput]);
-                    table.next();
-                    AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(WeightsAndBiasTextWidth), neuron.biases[_selectedOutput]);
-                    table.end();
-                }
+                    AlienImGui::NeuronSelectionParameters().rightMargin(SubWindowRightMargin), neuron.weights, neuron.biases, neuron.activationFunctions);
                 ImGui::TreePop();
             }
         } break;
@@ -740,16 +763,16 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
             content = "Genome: none";
         }
     }
-    auto width = ImGui::GetContentRegionAvail().x / 2;
+    auto width = ImGui::GetContentRegionAvail().x - scale(SubWindowRightMargin);
     if (ImGui::BeginChild("##", ImVec2(width, scale(60.0f)), true)) {
         AlienImGui::MonospaceText(content);
         AlienImGui::HelpMarker(Const::SubGenomeTooltip);
         if (AlienImGui::Button("Clear")) {
-            desc.setGenome({});
+            desc.setGenome(GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()));
         }
         ImGui::SameLine();
         if (AlienImGui::Button("Copy")) {
-            _copiedGenome = desc.isMakeGenomeCopy() ? GenomeDescriptionConverter::convertDescriptionToBytes(tab.genome) : desc.getGenomeData();
+            _copiedGenome = desc.isMakeGenomeCopy() ? GenomeDescriptionService::convertDescriptionToBytes(tab.genome) : desc.getGenomeData();
         }
         ImGui::SameLine();
         ImGui::BeginDisabled(!_copiedGenome.has_value());
@@ -762,12 +785,12 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
         if (AlienImGui::Button("Edit")) {
             auto genomeToOpen = desc.isMakeGenomeCopy()
                 ? tab.genome
-                : GenomeDescriptionConverter::convertBytesToDescription(desc.getGenomeData());
-            openTab(genomeToOpen);
+                : GenomeDescriptionService::convertBytesToDescription(desc.getGenomeData());
+            openTab(genomeToOpen, false);
         }
         ImGui::SameLine();
         if (AlienImGui::Button("Set self-copy")) {
-            desc.setMakeGenomeCopy();
+            desc.setMakeSelfCopy();
         }
     }
     ImGui::EndChild();
@@ -782,10 +805,10 @@ void _GenomeEditorWindow::onOpenGenome()
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         std::vector<uint8_t> genomeData;
-        if (!Serializer::deserializeGenomeFromFile(genomeData, firstFilename.string())) {
+        if (!SerializerService::deserializeGenomeFromFile(genomeData, firstFilename.string())) {
             MessageDialog::getInstance().information("Open genome", "The selected file could not be opened.");
         } else {
-            openTab(GenomeDescriptionConverter::convertBytesToDescription(genomeData));
+            openTab(GenomeDescriptionService::convertBytesToDescription(genomeData), false);
         }
     });
 }
@@ -799,8 +822,8 @@ void _GenomeEditorWindow::onSaveGenome()
             _startingPath = firstFilenameCopy.remove_filename().string();
 
             auto const& selectedTab = _tabDatas.at(_selectedTabIndex);
-            auto genomeData = GenomeDescriptionConverter::convertDescriptionToBytes(selectedTab.genome);
-            if (!Serializer::serializeGenomeToFile(firstFilename.string(), genomeData)) {
+            auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(selectedTab.genome);
+            if (!SerializerService::serializeGenomeToFile(firstFilename.string(), genomeData)) {
                 MessageDialog::getInstance().information("Save genome", "The selected file could not be saved.");
             }
         });
@@ -876,12 +899,14 @@ void _GenomeEditorWindow::onCreateSpore()
     pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
 
     auto genomeDesc = getCurrentGenome();
-    auto genome = GenomeDescriptionConverter::convertDescriptionToBytes(genomeDesc);
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
 
     auto parameter = _simController->getSimulationParameters();
+    auto energy = parameter.cellNormalEnergy[_editorModel->getDefaultColorCode()]
+        * toFloat(toInt(genomeDesc.cells.size()) * std::min(1000, genomeDesc.header.numRepetitions) * 2 + 1);
     auto cell = CellDescription()
                     .setPos(pos)
-                    .setEnergy(parameter.cellNormalEnergy[_editorModel->getDefaultColorCode()] * (genomeDesc.cells.size() * 2 + 1))
+                    .setEnergy(energy)
                     .setStiffness(1.0f)
                     .setMaxConnections(6)
                     .setExecutionOrderNumber(0)
@@ -897,8 +922,8 @@ void _GenomeEditorWindow::onCreateSpore()
 void _GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
-    auto preview = PreviewDescriptionConverter::convert(genome, tab.selectedNode, _simController->getSimulationParameters());
-    if (AlienImGui::ShowPreviewDescription(preview, _previewZoom, tab.selectedNode)) {
+    auto preview = PreviewDescriptionService::convert(genome, tab.selectedNode, _simController->getSimulationParameters());
+    if (AlienImGui::ShowPreviewDescription(preview, tab.previewZoom, tab.selectedNode)) {
         _nodeIndexToJump = tab.selectedNode;
     }
 }
@@ -907,6 +932,7 @@ void _GenomeEditorWindow::validationAndCorrection(GenomeHeaderDescription& info)
 {
     info.stiffness = std::max(0.0f, std::min(1.0f, info.stiffness));
     info.connectionDistance = std::max(0.5f, std::min(1.5f, info.connectionDistance));
+    info.numRepetitions = std::max(1, info.numRepetitions);
 }
 
 void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const
@@ -955,11 +981,16 @@ void _GenomeEditorWindow::updateGeometry(GenomeDescription& genome, Construction
     if (!shapeGenerator) {
         return;
     }
-    genome.info.angleAlignment = shapeGenerator->getConstructorAngleAlignment();
+    genome.header.angleAlignment = shapeGenerator->getConstructorAngleAlignment();
     for (auto& cell : genome.cells) {
         auto shapeGenerationResult = shapeGenerator->generateNextConstructionData();
         cell.referenceAngle = shapeGenerationResult.angle;
         cell.numRequiredAdditionalConnections = shapeGenerationResult.numRequiredAdditionalConnections;
     }
+}
+
+void _GenomeEditorWindow::setCurrentGenome(GenomeDescription const& genome)
+{
+    _tabDatas.at(_selectedTabIndex).genome = genome;
 }
 

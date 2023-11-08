@@ -33,6 +33,7 @@ public:
 
     __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached);
     __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos);
+    __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
 
 private:
     static int constexpr MaxOperationsPerCell = 30;
@@ -65,31 +66,28 @@ CellConnectionProcessor::scheduleAddConnectionPair(SimulationData& data, Cell* c
 
 __inline__ __device__ void CellConnectionProcessor::scheduleDeleteAllConnections(SimulationData& data, Cell* cell)
 {
+    auto index = data.structuralOperations.tryGetEntries(cell->numConnections * 2);
+    if (index == -1) {
+        return;
+    }
+
     for (int i = 0; i < cell->numConnections; ++i) {
         auto const& connectedCell = cell->connections[i].cell;
         {
-            StructuralOperation operation;
+            StructuralOperation& operation = data.structuralOperations.at(index);
             operation.type = StructuralOperation::Type::DelConnection;
             operation.data.delConnection.connectedCell = cell;
             operation.nextOperationIndex = -1;
-            auto operationIndex = data.structuralOperations.tryAddEntry(operation);
-            if (operationIndex != -1) {
-                scheduleOperationOnCell(data, connectedCell, operationIndex);
-            } else {
-                CUDA_THROW_NOT_IMPLEMENTED();
-            }
+            scheduleOperationOnCell(data, connectedCell, index);
+            ++index;
         }
         {
-            StructuralOperation operation;
+            StructuralOperation& operation = data.structuralOperations.at(index);
             operation.type = StructuralOperation::Type::DelConnection;
             operation.data.delConnection.connectedCell = connectedCell;
             operation.nextOperationIndex = -1;
-            auto operationIndex = data.structuralOperations.tryAddEntry(operation);
-            if (operationIndex != -1) {
-                scheduleOperationOnCell(data, cell, operationIndex);
-            } else {
-                CUDA_THROW_NOT_IMPLEMENTED();
-            }
+            scheduleOperationOnCell(data, cell, index);
+            ++index;
         }
     }
 }
@@ -189,6 +187,11 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteConnectionOpera
         auto scheduledOperationIndex = cell->scheduledOperationIndex;
         if (scheduledOperationIndex != -1) {
             for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
+
+                //#TODO should actually never occur
+                if (scheduledOperationIndex < 0 || scheduledOperationIndex >= data.structuralOperations.getNumEntries()) {
+                    break;
+                }
                 auto operation = data.structuralOperations.at(scheduledOperationIndex);
                 switch (operation.type) {
                 case StructuralOperation::Type::DelConnection: {
@@ -464,6 +467,33 @@ __inline__ __device__ bool CellConnectionProcessor::wouldResultInOverlappingConn
         }
     }
     return false;
+}
+
+__inline__ __device__ bool CellConnectionProcessor::isConnectedConnected(Cell* cell, Cell* otherCell)
+{
+    if (cell == otherCell) {
+        return true;
+    }
+    bool result = false;
+    for (int i = 0; i < otherCell->numConnections; ++i) {
+        auto const& connectedCell = otherCell->connections[i].cell;
+        if (connectedCell == cell) {
+            result = true;
+            break;
+        }
+
+        for (int j = 0; j < connectedCell->numConnections; ++j) {
+            auto const& connectedConnectedCell = connectedCell->connections[j].cell;
+            if (connectedConnectedCell == cell) {
+                result = true;
+                break;
+            }
+        }
+        if (result) {
+            return true;
+        }
+    }
+    return result;
 }
 
 __inline__ __device__ bool CellConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex)

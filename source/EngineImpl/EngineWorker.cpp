@@ -301,6 +301,8 @@ void EngineWorker::changeCell(CellDescription const& changedCell)
     converter.convertDescriptionToTO(dataTO, changedCell);
 
     _cudaSimulation->changeInspectedSimulationData(dataTO);
+
+    updateStatistics();
 }
 
 void EngineWorker::changeParticle(ParticleDescription const& changedParticle)

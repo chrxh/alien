@@ -93,6 +93,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release -j8
 ```
 If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
+It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
 
 # ⌨️ Command-line interface
 
@@ -137,6 +138,7 @@ A short architectural overview of the source code can be found in the [documenta
 
 ALIEN has been initiated, mainly developed and maintained by [Christian Heinemann](mailto:heinemann.christian@gmail.com). Thanks to all the others who contributed to this repository:
 - [tlemo](https://github.com/tlemo)
+- [TheBarret](https://github.com/TheBarret)
 - [mpersano](https://github.com/mpersano)
 - [dguerizec](https://github.com/dguerizec)
 
@@ -164,6 +166,7 @@ Free icons and icon font:
   - [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders)
   - [Iconduck](https://iconduck.com) (Noto Emoji by Google, [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt))
   - [Iconfinder](https://www.iconfinder.com) (Bogdan Rosu Creative, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0))
+  - [People icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/people) ([Flaticon license](https://media.flaticon.com/license/license.pdf))
 
 # 🧾 License
 ALIEN is licensed under the [BSD 3-Clause](LICENSE) license.

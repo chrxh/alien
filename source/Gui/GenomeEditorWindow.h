@@ -14,7 +14,7 @@ public:
 
     void registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
 
-    void openTab(GenomeDescription const& genome);
+    void openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed = true);
     GenomeDescription const& getCurrentGenome() const;
 
 private:
@@ -24,9 +24,10 @@ private:
 
     struct TabData
     {
-        int id;
+        int id = 0;
         GenomeDescription genome;
         std::optional<int> selectedNode;
+        float previewZoom = 30.0f;
     };
     void processTab(TabData& tab);
     void processGenomeHeader(TabData& tab);
@@ -52,15 +53,13 @@ private:
     void scheduleAddTab(GenomeDescription const& genome);
 
     void updateGeometry(GenomeDescription& genome, ConstructionShape shape);
+    void setCurrentGenome(GenomeDescription const& genome);
 
     float _previewHeight = 0;
 
     mutable int _tabSequenceNumber = 0;
     std::vector<TabData> _tabDatas;
     int _selectedTabIndex = 0;
-    int _selectedInput = 0;
-    int _selectedOutput = 0;
-    float _previewZoom = 30.0f;
     std::optional<std::vector<uint8_t>> _copiedGenome;
     std::string _startingPath;
 
@@ -74,4 +73,5 @@ private:
     SimulationController _simController;
     Viewport _viewport;
     UploadSimulationDialogWeakPtr _uploadSimulationDialog;
+    ChangeColorDialog _changeColorDialog;
 };

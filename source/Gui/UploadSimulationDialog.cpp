@@ -3,9 +3,9 @@
 #include <imgui.h>
 
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/Serializer.h"
+#include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
-#include "EngineInterface/GenomeDescriptionConverter.h"
+#include "EngineInterface/GenomeDescriptionService.h"
 
 #include "AlienImGui.h"
 #include "MessageDialog.h"
@@ -80,7 +80,7 @@ void _UploadSimulationDialog::processIntern()
         AlienImGui::InputTextMultilineParameters()
             .hint("Description (optional)")
             .textWidth(0)
-            .height(ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(50)),
+            .height(ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(50.0f)),
         _simDescription);
 
     AlienImGui::Separator();
@@ -127,7 +127,7 @@ void _UploadSimulationDialog::onUpload()
             deserializedSim.mainData = _simController->getClusteredSimulationData();
 
             SerializedSimulation serializedSim;
-            if (!Serializer::serializeSimulationToStrings(serializedSim, deserializedSim)) {
+            if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
                 MessageDialog::getInstance().information(
                     "Upload simulation", "The simulation could not be serialized for uploading.");
                 return;
@@ -142,10 +142,10 @@ void _UploadSimulationDialog::onUpload()
                 showMessage("Upload genome", "The is no valid genome in the genome editor selected.");
                 return;
             }
-            auto genomeData = GenomeDescriptionConverter::convertDescriptionToBytes(genome);
-            numObjects = GenomeDescriptionConverter::getNumNodesRecursively(genomeData);
+            auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(genome);
+            numObjects = GenomeDescriptionService::getNumNodesRecursively(genomeData, true);
 
-            if (!Serializer::serializeGenomeToString(mainData, genomeData)) {
+            if (!SerializerService::serializeGenomeToString(mainData, genomeData)) {
                 showMessage("Upload genome", "The genome could not be serialized for uploading.");
                 return;
             }

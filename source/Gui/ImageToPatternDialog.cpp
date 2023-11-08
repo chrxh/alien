@@ -9,7 +9,7 @@
 #include "Base/GlobalSettings.h"
 #include "Base/NumberGenerator.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/DescriptionHelper.h"
+#include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/Colors.h"
 
@@ -112,7 +112,7 @@ void _ImageToPatternDialog::show()
             }
         }
 
-        DescriptionHelper::reconnectCells(dataDesc, 1 * 1.5f);
+        DescriptionEditService::reconnectCells(dataDesc, 1 * 1.5f);
         dataDesc.setCenter(_viewport->getCenterInWorldPos());
 
         _simController->addAndSelectSimulationData(dataDesc);

@@ -7,6 +7,10 @@ struct CellPreviewDescription
     int executionOrderNumber = 0;
     int color = 0;
     int nodeIndex = 0;
+    bool partStart = false;
+    bool partEnd = false;
+    bool multipleConstructor = false;
+    bool selfReplicator = false;
 };
 
 struct ConnectionPreviewDescription
@@ -17,8 +21,19 @@ struct ConnectionPreviewDescription
     bool arrowToCell2 = false;
 };
 
+struct SymbolPreviewDescription
+{
+    enum class Type
+    {
+        Dot,
+        Infinity
+    } type;
+    RealVector2D pos;
+};
+
 struct PreviewDescription
 {
     std::vector<CellPreviewDescription> cells;
     std::vector<ConnectionPreviewDescription> connections;
+    std::vector<SymbolPreviewDescription> symbols;
 };

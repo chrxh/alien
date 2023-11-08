@@ -3,7 +3,6 @@ add_library(alien_engine_gpu_kernels_lib
     Array.cuh
     AttackerProcessor.cuh
     Base.cuh
-    Cell.cuh
     CellComputationProcessor.cuh
     CellConnectionProcessor.cuh
     CellFunctionProcessor.cuh
@@ -25,6 +24,7 @@ add_library(alien_engine_gpu_kernels_lib
     Definitions.cuh
     Definitions.h
     DensityMap.cuh
+    DetonatorProcessor.cuh
     EditKernels.cu
     EditKernels.cuh
     EditKernelsLauncher.cu
@@ -48,6 +48,7 @@ add_library(alien_engine_gpu_kernels_lib
     MutationProcessor.cuh
     NerveProcessor.cuh
     NeuronProcessor.cuh
+    Object.cuh
     Objects.cu
     Objects.cuh
     ObjectFactory.cuh
@@ -56,6 +57,7 @@ add_library(alien_engine_gpu_kernels_lib
     ParticleProcessor.cuh
     Physics.cuh
     ProprocessedCellFunctionData.cuh
+    ReconnectorProcessor.cuh
     RenderingData.cu
     RenderingData.cuh
     RenderingKernels.cu

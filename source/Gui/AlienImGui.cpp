@@ -11,12 +11,13 @@
 #include "Base/StringHelper.h"
 #include "Base/Math.h"
 #include "EngineInterface/Colors.h"
-#include "EngineInterface/FundamentalConstants.h"
+#include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/SimulationParameters.h"
 
 #include "CellFunctionStrings.h"
 #include "StyleRepository.h"
 #include "HelpStrings.h"
+#include "Base/NumberGenerator.h"
 
 namespace
 {
@@ -28,8 +29,11 @@ namespace
     auto constexpr HoveredTimer = 0.5f;
 }
 
-std::unordered_set<unsigned int> AlienImGui::_isExpanded;
+std::unordered_set<unsigned int> AlienImGui::_basicSilderExpanded;
+std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedInput;
+std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedOutput;
 int AlienImGui::_rotationStartIndex;
+
 
 void AlienImGui::HelpMarker(std::string const& text)
 {
@@ -75,7 +79,10 @@ void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, 
 
 bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool* enabled)
 {
-    auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
+    auto textWidth = scale(parameters._textWidth);
+    auto infinityButtonWidth = scale(30);
+    auto isInfinity = value == std::numeric_limits<int>::max();
+    auto showInfinity = parameters._infinity && (!parameters._readOnly || isInfinity);
 
     if (enabled) {
         ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
@@ -86,8 +93,20 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
         ImGui::SameLine();
     }
 
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
-    auto result = ImGui::InputInt(("##" + parameters._name).c_str(), &value);
+    auto inputWidth = ImGui::GetContentRegionAvail().x - textWidth;
+    if (showInfinity) {
+        inputWidth -= infinityButtonWidth + ImGui::GetStyle().FramePadding.x;
+    }
+
+    auto result = false;
+    if (!isInfinity) {
+        ImGui::SetNextItemWidth(inputWidth);
+        ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
+        result = ImGui::InputInt(("##" + parameters._name).c_str(), &value, 1, 100, flags);
+    } else {
+        std::string text = "infinity";
+        result = InputText(InputTextParameters().readOnly(true).width(inputWidth).textWidth(0), text);
+    }
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
@@ -97,6 +116,19 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
         }
         ImGui::EndDisabled();
     }
+    if (showInfinity) {
+        ImGui::SameLine();
+        ImGui::BeginDisabled(parameters._readOnly);
+        if (SelectableButton(CheckButtonParameters().name(ICON_FA_INFINITY).tooltip(parameters._tooltip).width(infinityButtonWidth), isInfinity)) {
+            if (isInfinity) {
+                value = std::numeric_limits<int>::max();
+            } else {
+                value = 1;
+            }
+        }
+        ImGui::EndDisabled();
+    }
+
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
     if (enabled) {
@@ -172,21 +204,22 @@ void AlienImGui::InputFloat2(InputFloat2Parameters const& parameters, float& val
     }
 }
 
-bool AlienImGui::ColorField(uint32_t cellColor, int width/* = -1*/)
+bool AlienImGui::ColorField(uint32_t cellColor, float width, float height)
 {
     if (width == 0) {
-        width = StyleRepository::getInstance().scale(30);
+        width = 30.0f;
     }
+
+    if (height == 0) {
+        width = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+    }
+
     float h, s, v;
     AlienImGui::ConvertRGBtoHSV(cellColor, h, s, v);
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.7f));
-/*
-    ImVec2 pos = ImGui::GetCursorScreenPos();
-    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
-*/
-    auto result = ImGui::Button("##button", ImVec2(width, ImGui::GetTextLineHeight()));
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s, v));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s, v));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, s, v));
+    auto result = ImGui::Button("##button", ImVec2(scale(width), scale(height)));
     ImGui::PopStyleColor(3);
 
     return result;
@@ -231,8 +264,8 @@ void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& pa
 
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
-    auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
+    auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
+    ImGui::SetNextItemWidth(width - scale(parameters._textWidth));
     if (parameters._monospaceFont) {
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
     }
@@ -252,16 +285,18 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     if (parameters._monospaceFont) {
         ImGui::PopFont();
     }
-    ImGui::SameLine();
     if (parameters._defaultValue) {
+        ImGui::SameLine();
         ImGui::BeginDisabled(std::string(buffer) == *parameters._defaultValue);
         if (revertButton(parameters._name)) {
             StringHelper::copy(buffer, bufferSize, *parameters._defaultValue);
         }
         ImGui::EndDisabled();
     }
-    ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    if (!parameters._name.empty()) {
+        ImGui::SameLine();
+        ImGui::TextUnformatted(parameters._name.c_str());
+    }
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
@@ -401,15 +436,15 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
 
 bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
 {
-    auto& styleRep = StyleRepository::getInstance();
-    auto textWidth = styleRep.scale(parameters._textWidth);
-    auto comboWidth = !parameters._name.empty() ? ImGui::GetContentRegionAvail().x - textWidth : styleRep.scale(70);
-    auto colorFieldWidth1 = comboWidth - styleRep.scale(40);
-    auto colorFieldWidth2 = comboWidth - styleRep.scale(30);
+    auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
+    auto textWidth = scale(parameters._textWidth);
+    auto comboWidth = width - textWidth;
+    auto colorFieldWidth1 = comboWidth - scale(25.0f);
+    auto colorFieldWidth2 = comboWidth - scale(30.0f);
 
     const char* items[] = { "##1", "##2", "##3", "##4", "##5", "##6", "##7" };
 
-    ImVec2 comboPos = ImGui::GetCursorPos();
+    ImVec2 comboPos = ImGui::GetCursorScreenPos();
 
     ImGui::SetNextItemWidth(comboWidth);
     if (ImGui::BeginCombo(("##" + parameters._name).c_str(), "")) {
@@ -420,9 +455,7 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
                 value = n;
             }
             ImGui::SameLine();
-            ColorField(Const::IndividualCellColors[n], colorFieldWidth1);
-            ImGui::SameLine();
-            ImGui::TextUnformatted(" ");
+            ColorField(Const::IndividualCellColors[n], colorFieldWidth1, ImGui::GetTextLineHeight());
             if (isSelected) {
                 ImGui::SetItemDefaultFocus();
             }
@@ -430,20 +463,19 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
         ImGui::EndCombo();
     }
     ImGui::SameLine();
-    ImVec2 backupPos = ImGui::GetCursorPos();
 
     ImGuiStyle& style = ImGui::GetStyle();
-    ImGui::SetCursorPos(ImVec2(comboPos.x + style.FramePadding.x, comboPos.y + style.FramePadding.y));
-    ColorField(Const::IndividualCellColors[value], colorFieldWidth2);
-
-    ImGui::SetCursorPos({backupPos.x, backupPos.y + style.FramePadding.y});
+    float h, s, v;
+    AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[value], h, s, v);
+    ImGui::GetWindowDrawList()->AddRectFilled(
+        ImVec2(comboPos.x + style.FramePadding.x, comboPos.y + style.FramePadding.y),
+        ImVec2(comboPos.x + style.FramePadding.x + colorFieldWidth2, comboPos.y + style.FramePadding.y + ImGui::GetTextLineHeight()),
+        ImColor::HSV(h, s, v));
 
     AlienImGui::Text(parameters._name);
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
-    ImGui::SameLine();
-    ImGui::Dummy(ImVec2(0, ImGui::GetTextLineHeight() + style.FramePadding.y));
 
     return true;
 }
@@ -452,32 +484,22 @@ void AlienImGui::InputColorTransition(InputColorTransitionParameters const& para
 {
     //source color field
     ImGui::PushID(sourceColor);
-    {
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-        ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
-    }
-    AlienImGui::ColorField(Const::IndividualCellColors[sourceColor], 0);
+    AlienImGui::ColorField(Const::IndividualCellColors[sourceColor]);
     ImGui::SameLine();
 
     //combo for target color
-    {
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-        ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y - ImGui::GetStyle().FramePadding.y));
-    }
     AlienImGui::Text(ICON_FA_LONG_ARROW_ALT_RIGHT);
     ImGui::SameLine();
-    ImGui::PushID(1);
-    AlienImGui::ComboColor(AlienImGui::ComboColorParameters(), targetColor);
+    ImGui::PushID("color");
+    AlienImGui::ComboColor(AlienImGui::ComboColorParameters().width(70.0f).textWidth(0), targetColor);
     ImGui::PopID();
 
-    ImGui::SameLine();
-    ImVec2 pos = ImGui::GetCursorPos();
-    ImGui::SetCursorPos({pos.x, pos.y - ImGui::GetStyle().FramePadding.y});
 
     //slider for transition age
     ImGui::PushID(2);
-    auto width = StyleRepository::getInstance().scale(parameters._textWidth);
 
+    ImGui::SameLine();
+    auto width = scale(parameters._textWidth);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
     std::string format = "%d";
     if (parameters._infinity && transitionAge == Infinity<int>::value) {
@@ -536,6 +558,30 @@ bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
+
+    return result;
+}
+
+bool AlienImGui::SelectableButton(CheckButtonParameters const& parameters, bool& value)
+{
+    auto buttonColor = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Button]);
+    auto buttonColorHovered = ImColor(ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered]);
+    auto buttonColorActive = ImColor(ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
+    if (value) {
+        buttonColor = buttonColorActive;
+        buttonColorHovered = buttonColorActive;
+    }
+
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)buttonColor);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)buttonColorHovered);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)buttonColorActive);
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    ImGui::SetCursorScreenPos(ImVec2(pos.x - ImGui::GetStyle().FramePadding.x, pos.y));
+    auto result = ImGui::Button(parameters._name.c_str(), {parameters._width, 0});
+    if (result) {
+        value = !value;
+    }
+    ImGui::PopStyleColor(3);
 
     return result;
 }
@@ -769,6 +815,45 @@ bool AlienImGui::ToolbarButton(std::string const& text)
     return result;
 }
 
+bool AlienImGui::SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue)
+{
+    auto id = std::to_string(ImGui::GetID(text.c_str()));
+
+    ImGui::PushFont(StyleRepository::getInstance().getIconFont());
+    ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
+    auto color = Const::ToolbarButtonTextColor;
+    float h, s, v;
+    ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
+
+    auto buttonColor = Const::ToolbarButtonBackgroundColor;
+    auto buttonColorHovered = ImColor::HSV(h, s, v * 0.3f);
+    auto buttonColorActive = ImColor::HSV(h, s, v * 0.45f);
+    if (value == selectionValue) {
+        buttonColor = buttonColorActive;
+        buttonColorHovered = buttonColorActive;
+    }
+
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)buttonColor);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)buttonColorHovered);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)buttonColorActive);
+
+    ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4>(Const::ToolbarButtonTextColor));
+    auto buttonSize = scale(40.0f);
+    auto result = ImGui::Button(text.c_str(), {buttonSize, buttonSize});
+    if (result) {
+        if (value == selectionValue) {
+            value = deselectionValue;
+        } else {
+            value = selectionValue;
+        }
+    }
+
+    ImGui::PopStyleColor(4);
+    ImGui::PopStyleVar();
+    ImGui::PopFont();
+    return result;
+}
+
 void AlienImGui::VerticalSeparator(float length)
 {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -893,12 +978,23 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
 
 bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode)
 {
+    auto constexpr ZoomLevelForLabels = 16.0f;
+    auto constexpr ZoomLevelForConnections = 8.0f;
+    auto const LineThickness = scale(2.0f);
+
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    auto const cellSize = scale(zoom);
+
+    auto drawTextWithShadow = [&drawList, &cellSize](std::string const& text, float posX, float posY) {
+        drawList->AddText(
+            StyleRepository::getInstance().getLargeFont(), cellSize / 2, {posX + 1.0f, posY + 1.0f}, Const::ExecutionNumberOverlayShadowColor, text.c_str());
+        drawList->AddText(StyleRepository::getInstance().getLargeFont(), cellSize / 2, {posX, posY}, Const::ExecutionNumberOverlayColor, text.c_str());
+    };
+
     auto result = false;
 
     auto color = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
     auto windowSize = ImGui::GetWindowSize();
-
-    auto const cellSize = scale(zoom);
 
     RealVector2D upperLeft;
     RealVector2D lowerRight;
@@ -921,39 +1017,37 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
     ImGui::SetCursorPos({std::max(0.0f, windowSize.x - previewSize.x) / 2, std::max(0.0f, windowSize.y - previewSize.y) / 2});
     if (ImGui::BeginChild("##genome", ImVec2(previewSize.x, previewSize.y), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
-        ImDrawList* drawList = ImGui::GetWindowDrawList();
         auto windowPos = ImGui::GetWindowPos();
         RealVector2D offset{windowPos.x + cellSize, windowPos.y + cellSize};
 
         ImGui::SetCursorPos({previewSize.x - 1, previewSize.y - 1});
+
+        //draw cells
         for (auto const& cell : desc.cells) {
             auto cellPos = (cell.pos - upperLeft) * cellSize + offset;
             float h, s, v;
             AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
-            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize / 4, ImColor::HSV(h, s * 0.7f, v * 0.7f));
 
-            RealVector2D textPos(cellPos.x - cellSize / 8, cellPos.y - cellSize / 4);
-            drawList->AddText(
-                StyleRepository::getInstance().getLargeFont(),
-                cellSize / 2,
-                {textPos.x, textPos.y},
-                Const::BranchNumberOverlayShadowColor,
-                std::to_string(cell.executionOrderNumber).c_str());
-            drawList->AddText(
-                StyleRepository::getInstance().getLargeFont(),
-                cellSize / 2,
-                {textPos.x + 1, textPos.y + 1},
-                Const::BranchNumberOverlayColor,
-                std::to_string(cell.executionOrderNumber).c_str());
+            auto cellRadiusFactor = zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * cellRadiusFactor, ImColor::HSV(h, s * 1.2f, v * 1.0f));
+
+            if (zoom > ZoomLevelForLabels) {
+                RealVector2D textPos(cellPos.x - cellSize / 8, cellPos.y - cellSize / 4);
+                drawTextWithShadow(std::to_string(cell.executionOrderNumber), textPos.x, textPos.y);
+            }
 
             if (selectedNode && cell.nodeIndex == *selectedNode) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
+                if (zoom > ZoomLevelForLabels) {
+                    drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
+                } else {
+                    drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor::HSV(h, s * 0.8f, v * 1.2f));
+                }
             }
 
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
                 auto mousePos = ImGui::GetMousePos();
-                if (mousePos.x >= cellPos.x - cellSize / 3 && mousePos.y >= cellPos.y - cellSize / 3 && mousePos.x <= cellPos.x + cellSize / 3
-                    && mousePos.y <= cellPos.y + cellSize / 3) {
+                if (mousePos.x >= cellPos.x - cellSize / 2 && mousePos.y >= cellPos.y - cellSize / 2 && mousePos.x <= cellPos.x + cellSize / 2
+                    && mousePos.y <= cellPos.y + cellSize / 2) {
                     selectedNode = cell.nodeIndex;
                     result = true;
                 }
@@ -961,37 +1055,120 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
 
         }
 
-        for (auto const& connection : desc.connections) {
-            auto cellPos1 = (connection.cell1 - upperLeft) * cellSize + offset;
-            auto cellPos2 = (connection.cell2 - upperLeft) * cellSize + offset;
-
-            auto direction = cellPos1 - cellPos2;
-
-            Math::normalize(direction);
-            auto connectionStartPos = cellPos1 - direction * cellSize / 4;
-            auto connectionEndPos = cellPos2 + direction * cellSize / 4;
-            drawList->AddLine({connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
-
-            if (connection.arrowToCell1) {
-                auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
-                auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8;
-                drawList->AddLine({arrowPartStart1.x, arrowPartStart1.y}, {connectionStartPos.x, connectionStartPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
-
-                auto arrowPartDirection2 = RealVector2D{-direction.x - direction.y, direction.x - direction.y};
-                auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 8;
-                drawList->AddLine({arrowPartStart2.x, arrowPartStart2.y}, {connectionStartPos.x, connectionStartPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
-            }
-
-            if (connection.arrowToCell2) {
-                auto arrowPartDirection1 = RealVector2D{direction.x - direction.y, direction.x + direction.y};
-                auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 8;
-                drawList->AddLine({arrowPartStart1.x, arrowPartStart1.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
-
-                auto arrowPartDirection2 = RealVector2D{direction.x + direction.y, -direction.x + direction.y};
-                auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * cellSize / 8;
-                drawList->AddLine({arrowPartStart2.x, arrowPartStart2.y}, {connectionEndPos.x, connectionEndPos.y}, ImColor(1.0f, 1.0f, 1.0f), 2.0f);
+        //draw symbols
+        for (auto const& symbol : desc.symbols) {
+            auto pos = (symbol.pos - upperLeft) * cellSize + offset;
+            switch (symbol.type) {
+            case SymbolPreviewDescription::Type::Dot: {
+                auto cellRadiusFactor = zoom > ZoomLevelForConnections ? 0.15f : 0.35f;
+                drawList->AddCircleFilled({pos.x, pos.y}, cellSize * cellRadiusFactor, Const::GenomePreviewDotSymbolColor);
+            } break;
+            case SymbolPreviewDescription::Type::Infinity: {
+                if (zoom > ZoomLevelForConnections) {
+                    drawList->AddText(
+                        StyleRepository::getInstance().getIconFont(),
+                        cellSize / 2,
+                        {pos.x - cellSize * 0.4f, pos.y - cellSize * 0.2f},
+                        Const::GenomePreviewInfinitySymbolColor,
+                        ICON_FA_INFINITY);
+                }
+            } break;
             }
         }
+
+        //draw cell connections
+        if (zoom > ZoomLevelForConnections) {
+            for (auto const& connection : desc.connections) {
+                auto cellPos1 = (connection.cell1 - upperLeft) * cellSize + offset;
+                auto cellPos2 = (connection.cell2 - upperLeft) * cellSize + offset;
+
+                auto direction = cellPos1 - cellPos2;
+
+                Math::normalize(direction);
+                auto connectionStartPos = cellPos1 - direction * cellSize / 4;
+                auto connectionEndPos = cellPos2 + direction * cellSize / 4;
+                drawList->AddLine(
+                    {connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
+
+                if (connection.arrowToCell1) {
+                    auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
+                    auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8;
+                    drawList->AddLine(
+                        {arrowPartStart1.x, arrowPartStart1.y},
+                        {connectionStartPos.x, connectionStartPos.y},
+                        Const::GenomePreviewConnectionColor,
+                        LineThickness);
+
+                    auto arrowPartDirection2 = RealVector2D{-direction.x - direction.y, direction.x - direction.y};
+                    auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 8;
+                    drawList->AddLine(
+                        {arrowPartStart2.x, arrowPartStart2.y},
+                        {connectionStartPos.x, connectionStartPos.y},
+                        Const::GenomePreviewConnectionColor,
+                        LineThickness);
+                }
+
+                if (connection.arrowToCell2) {
+                    auto arrowPartDirection1 = RealVector2D{direction.x - direction.y, direction.x + direction.y};
+                    auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 8;
+                    drawList->AddLine(
+                        {arrowPartStart1.x, arrowPartStart1.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
+
+                    auto arrowPartDirection2 = RealVector2D{direction.x + direction.y, -direction.x + direction.y};
+                    auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * cellSize / 8;
+                    drawList->AddLine(
+                        {arrowPartStart2.x, arrowPartStart2.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
+                }
+            }
+        }
+
+        //draw cell infos (start/end marks and multiple constructor marks)
+        if (zoom > ZoomLevelForLabels) {
+            for (auto const& cell : desc.cells) {
+                auto cellPos = (cell.pos - upperLeft) * cellSize + offset;
+                auto length = cellSize / 4;
+                if (cell.partStart !=  cell.partEnd) {
+                    drawList->AddTriangleFilled(
+                        {cellPos.x + length, cellPos.y},
+                        {cellPos.x + length * 2, cellPos.y - length / 2},
+                        {cellPos.x + length * 2, cellPos.y + length / 2},
+                        cell.partStart ? Const::GenomePreviewStartColor : Const::GenomePreviewEndColor);
+                }
+                if (cell.partStart && cell.partEnd) {
+                    drawList->AddTriangleFilled(
+                        {cellPos.x + length, cellPos.y - length},
+                        {cellPos.x + length * 2, cellPos.y - length * 3  / 2},
+                        {cellPos.x + length * 2, cellPos.y - length / 2},
+                        Const::GenomePreviewStartColor);
+                    drawList->AddTriangleFilled(
+                        {cellPos.x + length, cellPos.y + length},
+                        {cellPos.x + length * 2, cellPos.y + length / 2},
+                        {cellPos.x + length * 2, cellPos.y + length * 3 / 2},
+                        Const::GenomePreviewEndColor);
+                }
+                if (cell.multipleConstructor) {
+                    drawList->AddLine(
+                        {cellPos.x + length, cellPos.y + length},
+                        {cellPos.x + length * 2, cellPos.y + length},
+                        Const::GenomePreviewMultipleConstructorColor,
+                        LineThickness);
+                    drawList->AddLine(
+                        {cellPos.x + length * 1.5f, cellPos.y + length / 2},
+                        {cellPos.x + length * 1.5f, cellPos.y + length * 1.5f},
+                        Const::GenomePreviewMultipleConstructorColor,
+                        LineThickness);
+                }
+                if (cell.selfReplicator) {
+                    drawList->AddText(
+                        StyleRepository::getInstance().getIconFont(),
+                        cellSize / 4,
+                        {cellPos.x - length * 2, cellPos.y + length},
+                        Const::GenomePreviewSelfReplicatorColor,
+                        ICON_FA_CLONE);
+                }
+            }
+        }
+
     }
     ImGui::EndChild();
 
@@ -1042,13 +1219,26 @@ bool AlienImGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, 
         AlienImGui::ComboParameters().name(parameters._name).values(AngleAlignmentStrings).textWidth(parameters._textWidth).tooltip(parameters._tooltip), value);
 }
 
+namespace
+{
+    int& getIdBasedValue(std::unordered_map<unsigned int, int>& idToValueMap, int defaultValue = 0)
+    {
+        auto id = ImGui::GetID("");
+        if (!idToValueMap.contains(id)) {
+            idToValueMap[id] = 0;
+        }
+        return idToValueMap.at(id);
+    }
+}
+
 void AlienImGui::NeuronSelection(
     NeuronSelectionParameters const& parameters,
-    std::vector<std::vector<float>> const& weights,
-    std::vector<float> const& biases,
-    int& selectedInput,
-    int& selectedOutput)
+    std::vector<std::vector<float>>& weights,
+    std::vector<float>& biases,
+    std::vector<NeuronActivationFunction>& activationFunctions)
 {
+    auto& selectedInput = getIdBasedValue(_neuronSelectedInput);
+    auto& selectedOutput = getIdBasedValue(_neuronSelectedOutput);
     auto setDefaultColors = [] {
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonHoveredColor);
@@ -1059,37 +1249,43 @@ void AlienImGui::NeuronSelection(
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
     };
+    RealVector2D const ioButtonSize{scale(90.0f), scale(26.0f)};
+    RealVector2D const plotSize{scale(50.0f), scale(23.0f)};
+    auto const rightMargin = scale(parameters._rightMargin);
+    auto const biasFieldWidth = ImGui::GetStyle().FramePadding.x * 2;
+
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     auto windowPos = ImGui::GetWindowPos();
-    auto outputButtonPositionFromRight = StyleRepository::getInstance().scale(parameters._outputButtonPositionFromRight);
+
     RealVector2D inputPos[MAX_CHANNELS];
     RealVector2D outputPos[MAX_CHANNELS];
-    auto biasFieldWidth = ImGui::GetStyle().FramePadding.x * 2;
 
     //draw buttons and save positions to visualize weights
     for (int i = 0; i < MAX_CHANNELS; ++i) {
 
-        auto startButtonPos = ImGui::GetCursorPos();
+        auto buttonStartPos = ImGui::GetCursorPos();
 
+        //input button
         i == selectedInput ? setHightlightingColors() : setDefaultColors();
-        if (ImGui::Button(("Input #" + std::to_string(i)).c_str())) {
+        if (ImGui::Button(("Input #" + std::to_string(i)).c_str(), {ioButtonSize.x, ioButtonSize.y})) {
             selectedInput = i;
         }
         ImGui::PopStyleColor(3);
 
         Tooltip(Const::NeuronInputTooltipByChannel[i], false);
 
-        auto buttonSize = ImGui::GetItemRectSize();
         inputPos[i] = RealVector2D(
-            windowPos.x - ImGui::GetScrollX() + startButtonPos.x + buttonSize.x, windowPos.y - ImGui::GetScrollY() + startButtonPos.y + buttonSize.y / 2);
+            windowPos.x - ImGui::GetScrollX() + buttonStartPos.x + ioButtonSize.x, windowPos.y - ImGui::GetScrollY() + buttonStartPos.y + ioButtonSize.y / 2);
 
-        ImGui::SameLine(0, ImGui::GetContentRegionAvail().x - buttonSize.x - outputButtonPositionFromRight + ImGui::GetStyle().FramePadding.x);
-        startButtonPos = ImGui::GetCursorPos();
+        ImGui::SameLine(0, ImGui::GetContentRegionAvail().x - ioButtonSize.x * 2 - plotSize.x - ImGui::GetStyle().FramePadding.x - rightMargin);
+        buttonStartPos = ImGui::GetCursorPos();
         outputPos[i] = RealVector2D(
-            windowPos.x - ImGui::GetScrollX() + startButtonPos.x - biasFieldWidth, windowPos.y - ImGui::GetScrollY() + startButtonPos.y + buttonSize.y / 2);
+            windowPos.x - ImGui::GetScrollX() + buttonStartPos.x - biasFieldWidth - ImGui::GetStyle().FramePadding.x,
+            windowPos.y - ImGui::GetScrollY() + buttonStartPos.y + ioButtonSize.y / 2);
 
+        //output button
         i == selectedOutput ? setHightlightingColors() : setDefaultColors();
-        if (ImGui::Button(("Output #" + std::to_string(i)).c_str())) {
+        if (ImGui::Button(("Output #" + std::to_string(i)).c_str(), {ioButtonSize.x, ioButtonSize.y})) {
             selectedOutput = i;
         }
         ImGui::PopStyleColor(3);
@@ -1100,7 +1296,7 @@ void AlienImGui::NeuronSelection(
             if (std::abs(weights[j][i]) > NEAR_ZERO) {
                 continue;
             }
-            drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, ImColor::HSV(0.0f, 0.0f, 0.1f), 2.0f);
+            drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, Const::NeuronEditorConnectionColor, 2.0f);
         }
     }
     auto calcColor = [](float value) {
@@ -1125,6 +1321,48 @@ void AlienImGui::NeuronSelection(
         }
     }
 
+    //visualize activation functions
+    auto calcPlotPosition = [&](RealVector2D const& refPos, float x, NeuronActivationFunction activationFunction) {
+        float value = 0;
+        switch (activationFunction) {
+        case NeuronActivationFunction_Sigmoid:
+            value = Math::sigmoid(x);
+            break;
+        case NeuronActivationFunction_BinaryStep:
+            value = Math::binaryStep(x);
+            break;
+        case NeuronActivationFunction_Identity:
+            value = x / 4;
+            break;
+        case NeuronActivationFunction_Abs:
+            value = std::abs(x) / 4;
+            break;
+        case NeuronActivationFunction_Gaussian:
+            value = Math::gaussian(x);
+            break;
+        }
+        return RealVector2D{refPos.x + plotSize.x / 2 + x * plotSize.x / 8, refPos.y - value * plotSize.y / 2};
+    };
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        std::optional<RealVector2D> lastPos;
+        RealVector2D refPos{outputPos[i].x + ioButtonSize.x + biasFieldWidth + ImGui::GetStyle().FramePadding.x * 2, outputPos[i].y};
+        for (float dx = 0; dx <= plotSize.x + NEAR_ZERO; dx += plotSize.x / 8) {
+            auto color = std::abs(dx - plotSize.x / 2) < NEAR_ZERO ? Const::NeuronEditorZeroLinePlotColor : Const::NeuronEditorGridColor;
+            drawList->AddLine({refPos.x + dx, refPos.y - plotSize.y / 2}, {refPos.x + dx, refPos.y + plotSize.y / 2}, color, 1.0f);
+        }
+        for (float dy = -plotSize.y / 2; dy <= plotSize.y / 2 + NEAR_ZERO; dy += plotSize.y / 6) {
+            auto color = std::abs(dy) < NEAR_ZERO ? Const::NeuronEditorZeroLinePlotColor : Const::NeuronEditorGridColor;
+            drawList->AddLine({refPos.x, refPos.y + dy}, {refPos.x + plotSize.x, refPos.y + dy}, color, 1.0f);
+        }
+        for (float dx = -4.0f; dx < 4.0f; dx += 0.2f) {
+            RealVector2D pos = calcPlotPosition(refPos, dx, activationFunctions[i]);
+            if (lastPos) {
+                drawList->AddLine({lastPos->x, lastPos->y}, {pos.x, pos.y}, Const::NeuronEditorPlotColor, 1.0f);
+            }
+            lastPos = pos;
+        }
+    }
+
     //visualize biases
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         drawList->AddRectFilled(
@@ -1138,6 +1376,67 @@ void AlienImGui::NeuronSelection(
         ImColor::HSV(0.0f, 0.0f, 1.0f, 0.35f));
     drawList->AddLine(
         {inputPos[selectedInput].x, inputPos[selectedInput].y}, {outputPos[selectedOutput].x, outputPos[selectedOutput].y}, ImColor::HSV(0.0f, 0.0f, 1.0f, 0.35f), 8.0f);
+
+    auto const editorWidth = ImGui::GetContentRegionAvail().x - rightMargin;
+    auto const editorColumnWidth = 280.0f;
+    auto const editorColumnTextWidth = 155.0f;
+    auto const numWidgets = 3;
+    auto numColumns = DynamicTableLayout::calcNumColumns(editorWidth - ImGui::GetStyle().FramePadding.x * 4, editorColumnWidth);
+    auto numRows = numWidgets / numColumns;
+    if (numWidgets % numColumns != 0) {
+        ++numRows;
+    }
+    if (ImGui::BeginChild("##", ImVec2(editorWidth, scale(toFloat(numRows) * 26.0f + 18.0f + 28.0f)), true)) {
+        DynamicTableLayout table(editorColumnWidth);
+        if (table.begin()) {
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters()
+                    .name("Activation function")
+                    .textWidth(editorColumnTextWidth)
+                    .values(Const::ActivationFunctions)
+                    .tooltip(Const::GenomeNeuronActivationFunctionTooltip),
+                activationFunctions.at(selectedOutput));
+            table.next();
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(editorColumnTextWidth).tooltip(Const::GenomeNeuronWeightAndBiasTooltip),
+                weights.at(selectedOutput).at(selectedInput));
+            table.next();
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(editorColumnTextWidth).tooltip(Const::GenomeNeuronWeightAndBiasTooltip),
+                biases.at(selectedOutput));
+            table.end();
+        }
+        if (AlienImGui::Button("Clear")) {
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                for (int j = 0; j < MAX_CHANNELS; ++j) {
+                    weights[i][j] = 0;
+                }
+                biases[i] = 0;
+                activationFunctions[i] = NeuronActivationFunction_Sigmoid;
+            }
+        }
+        ImGui::SameLine();
+        if (AlienImGui::Button("Identity")) {
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                for (int j = 0; j < MAX_CHANNELS; ++j) {
+                    weights[i][j] = i == j ? 1.0f : 0.0f;
+                }
+                biases[i] = 0.0f;
+                activationFunctions[i] = NeuronActivationFunction_Identity;
+            }
+        }
+        ImGui::SameLine();
+        if (AlienImGui::Button("Randomize")) {
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                for (int j = 0; j < MAX_CHANNELS; ++j) {
+                    weights[i][j] = NumberGenerator::getInstance().getRandomFloat(-4.0f, 4.0f);
+                }
+                biases[i] = NumberGenerator::getInstance().getRandomFloat(-4.0f, 4.0f);
+                activationFunctions[i] = NumberGenerator::getInstance().getRandomInt(NeuronActivationFunction_Count);
+            }
+        }
+    }
+    ImGui::EndChild();
 }
 
 void AlienImGui::OnlineSymbol()
@@ -1195,14 +1494,14 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
 
     //color dependent button
     auto toggleButtonId = ImGui::GetID("expanded");
-    auto isExpanded = _isExpanded.contains(toggleButtonId);
+    auto isExpanded = _basicSilderExpanded.contains(toggleButtonId);
     if (parameters._colorDependence) {
         auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
         if (buttonResult) {
             if (isExpanded) {
-                _isExpanded.erase(toggleButtonId);
+                _basicSilderExpanded.erase(toggleButtonId);
             } else {
-                _isExpanded.insert(toggleButtonId);
+                _basicSilderExpanded.insert(toggleButtonId);
             }
         }
         ImGui::SameLine();
@@ -1359,13 +1658,13 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
 {
     ImGui::PushID(parameters._name.c_str());
     auto toggleButtonId = ImGui::GetID("expanded");
-    auto isExpanded = _isExpanded.contains(toggleButtonId);
+    auto isExpanded = _basicSilderExpanded.contains(toggleButtonId);
     auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
     if (buttonResult) {
         if (isExpanded) {
-            _isExpanded.erase(toggleButtonId);
+            _basicSilderExpanded.erase(toggleButtonId);
         } else {
-            _isExpanded.insert(toggleButtonId);
+            _basicSilderExpanded.insert(toggleButtonId);
         }
     }
     auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
@@ -1431,7 +1730,7 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
             static bool test = false;
             ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
             if (ImGui::Button("Define matrix", ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-                _isExpanded.insert(toggleButtonId);
+                _basicSilderExpanded.insert(toggleButtonId);
             }
             ImGui::PopStyleVar();
         } else {
@@ -1543,3 +1842,41 @@ void AlienImGui::RotateEnd(float angle)
     }
 }
 //<<<<<<<<<<
+
+int AlienImGui::DynamicTableLayout::calcNumColumns(float tableWidth, float columnWidth)
+{
+    return std::max(toInt(tableWidth / scale(columnWidth)), 1);
+}
+
+AlienImGui::DynamicTableLayout::DynamicTableLayout(float columnWidth)
+    : _columnWidth(columnWidth)
+{
+    _numColumns = calcNumColumns(ImGui::GetContentRegionAvail().x, columnWidth);
+}
+
+bool AlienImGui::DynamicTableLayout::begin()
+{
+    auto result = ImGui::BeginTable("##", _numColumns, ImGuiTableFlags_None);
+    if (result) {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+    }
+    return result;
+}
+void AlienImGui::DynamicTableLayout::end()
+{
+    ImGui::EndTable();
+}
+
+void AlienImGui::DynamicTableLayout::next()
+{
+    auto currentCol = (++_elementNumber) % _numColumns;
+    if (currentCol > 0) {
+        ImGui::TableSetColumnIndex(currentCol);
+        AlienImGui::VerticalSeparator();
+        ImGui::SameLine();
+    } else {
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+    }
+}

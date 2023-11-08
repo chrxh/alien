@@ -9,7 +9,7 @@ _FileLogger::_FileLogger()
 {
     LoggingService::getInstance().registerCallBack(this);
 
-    std::remove(Const::LogFilename);
+    std::remove(Const::LogFilename.c_str());
     _outfile.open(Const::LogFilename, std::ios_base::app);
 }
 

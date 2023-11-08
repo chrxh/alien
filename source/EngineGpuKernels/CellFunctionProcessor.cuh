@@ -37,9 +37,12 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
     auto executionOrderNumber = toInt(data.timestep % cudaSimulationParameters.cellNumExecutionOrderNumbers);
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->cellFunction != CellFunction_None && cell->executionOrderNumber == executionOrderNumber && cell->activationTime == 0
-            && cell->livingState == LivingState_Ready) {
-            data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
+        if (cell->cellFunction != CellFunction_None && cell->executionOrderNumber == executionOrderNumber) {
+            if (cell->cellFunction == CellFunction_Detonator && cell->cellFunctionData.detonator.state == DetonatorState_Activated) {
+                data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
+            } else if (cell->livingState == LivingState_Ready && cell->activationTime == 0) {
+                data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
+            }
         }
     }
 }
