@@ -373,7 +373,7 @@ bool _PatternEditorWindow::isGenomeInspectionPossible() const
 
 bool _PatternEditorWindow::isCopyingPossible() const
 {
-    return !_editorModel->isSelectionEmpty() && !_editorModel->areEntitiesInspected();
+    return !_editorModel->isSelectionEmpty();
 }
 
 void _PatternEditorWindow::onCopy()
@@ -383,7 +383,7 @@ void _PatternEditorWindow::onCopy()
 
 bool _PatternEditorWindow::isPastingPossible() const
 {
-    return _copiedSelection.has_value() && !_editorModel->areEntitiesInspected();
+    return _copiedSelection.has_value();
 }
 
 void _PatternEditorWindow::onPaste()
