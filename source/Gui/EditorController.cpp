@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <imgui.h>
+#include <GLFW/glfw3.h>
 
 #include "Base/Math.h"
 #include "EngineInterface/SimulationController.h"
@@ -63,7 +64,7 @@ void _EditorController::process()
     if (!_creatorWindow->isOn()) {
         _editorModel->setDrawMode(false);
     }
-    
+
     processSelectionRect();
     processInspectorWindows();
 
@@ -241,7 +242,14 @@ void _EditorController::processEvents()
     RealVector2D mousePos{ImGui::GetMousePos().x, ImGui::GetMousePos().y};
     RealVector2D prevMousePos = _prevMousePos ? *_prevMousePos : mousePos;
 
-    if (!ImGui::GetIO().WantCaptureMouse && !ImGui::GetIO().KeyAlt) {
+    auto& io = ImGui::GetIO();
+    if (!io.WantCaptureKeyboard) {
+        if (ImGui::IsKeyPressed(GLFW_KEY_DELETE)) {
+            _patternEditorWindow->onDelete();
+        }
+    }
+
+    if (!io.WantCaptureMouse && !io.KeyAlt) {
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
             if (!running) {

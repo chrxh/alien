@@ -571,7 +571,7 @@ void _MainWindow::processMenubar()
     }
 
     //hotkeys
-    auto io = ImGui::GetIO();
+    auto& io = ImGui::GetIO();
     if (!io.WantCaptureKeyboard) {
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_N)) {
             _newSimulationDialog->open();
