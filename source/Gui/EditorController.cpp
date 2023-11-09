@@ -17,6 +17,7 @@
 #include "MultiplierWindow.h"
 #include "GenomeEditorWindow.h"
 #include "MessageDialog.h"
+#include "OverlayMessageController.h"
 
 namespace
 {
@@ -213,6 +214,7 @@ bool _EditorController::isCopyingPossible() const
 void _EditorController::onCopy()
 {
     _patternEditorWindow->onCopy();
+    printOverlayMessage("Selection copied");
 }
 
 bool _EditorController::isPastingPossible() const
@@ -223,6 +225,7 @@ bool _EditorController::isPastingPossible() const
 void _EditorController::onPaste()
 {
     _patternEditorWindow->onPaste();
+    printOverlayMessage("Selection pasted");
 }
 
 bool _EditorController::isDeletingPossible() const
@@ -233,6 +236,7 @@ bool _EditorController::isDeletingPossible() const
 void _EditorController::onDelete()
 {
     _patternEditorWindow->onDelete();
+    printOverlayMessage("Selection deleted");
 }
 
 void _EditorController::processEvents()
@@ -243,12 +247,6 @@ void _EditorController::processEvents()
     RealVector2D prevMousePos = _prevMousePos ? *_prevMousePos : mousePos;
 
     auto& io = ImGui::GetIO();
-    if (!io.WantCaptureKeyboard) {
-        if (ImGui::IsKeyPressed(GLFW_KEY_DELETE)) {
-            _patternEditorWindow->onDelete();
-        }
-    }
-
     if (!io.WantCaptureMouse && !io.KeyAlt) {
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
