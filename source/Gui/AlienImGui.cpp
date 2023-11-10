@@ -1528,17 +1528,9 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
         ImGui::PushID(color);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth));
         if (parameters._colorDependence && isExpanded) {
-            {
-                ImVec2 pos = ImGui::GetCursorPos();
-                ImGui::SetCursorPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
-            }
             AlienImGui::ColorField(Const::IndividualCellColors[color], 0);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth));
-            {
-                ImVec2 pos = ImGui::GetCursorPos();
-                ImGui::SetCursorPos(ImVec2(pos.x, pos.y - ImGui::GetStyle().FramePadding.y));
-            }
         }
 
         //slider
