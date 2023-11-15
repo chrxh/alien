@@ -1,5 +1,13 @@
 # Release notes
 
+## [4.4.1] - 2023-11-15
+### Added
+- allow deletion of selection via DEL key
+
+### Fixed
+- allow copy & paste when inspection windows are open
+- minor layout correction in sliders and genome widgets
+
 ## [4.4.0] - 2023-11-08
 ### Added
 - engine, gui: genomes and sub-genomes contain repetition information and concatenation angles

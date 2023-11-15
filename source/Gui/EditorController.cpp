@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <imgui.h>
+#include <GLFW/glfw3.h>
 
 #include "Base/Math.h"
 #include "EngineInterface/SimulationController.h"
@@ -16,6 +17,7 @@
 #include "MultiplierWindow.h"
 #include "GenomeEditorWindow.h"
 #include "MessageDialog.h"
+#include "OverlayMessageController.h"
 
 namespace
 {
@@ -63,7 +65,7 @@ void _EditorController::process()
     if (!_creatorWindow->isOn()) {
         _editorModel->setDrawMode(false);
     }
-    
+
     processSelectionRect();
     processInspectorWindows();
 
@@ -212,6 +214,7 @@ bool _EditorController::isCopyingPossible() const
 void _EditorController::onCopy()
 {
     _patternEditorWindow->onCopy();
+    printOverlayMessage("Selection copied");
 }
 
 bool _EditorController::isPastingPossible() const
@@ -222,6 +225,7 @@ bool _EditorController::isPastingPossible() const
 void _EditorController::onPaste()
 {
     _patternEditorWindow->onPaste();
+    printOverlayMessage("Selection pasted");
 }
 
 bool _EditorController::isDeletingPossible() const
@@ -232,6 +236,7 @@ bool _EditorController::isDeletingPossible() const
 void _EditorController::onDelete()
 {
     _patternEditorWindow->onDelete();
+    printOverlayMessage("Selection deleted");
 }
 
 void _EditorController::processEvents()
@@ -241,7 +246,8 @@ void _EditorController::processEvents()
     RealVector2D mousePos{ImGui::GetMousePos().x, ImGui::GetMousePos().y};
     RealVector2D prevMousePos = _prevMousePos ? *_prevMousePos : mousePos;
 
-    if (!ImGui::GetIO().WantCaptureMouse && !ImGui::GetIO().KeyAlt) {
+    auto& io = ImGui::GetIO();
+    if (!io.WantCaptureMouse && !io.KeyAlt) {
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
             if (!running) {

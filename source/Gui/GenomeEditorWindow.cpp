@@ -36,7 +36,7 @@ namespace
     auto const ContentHeaderTextWidth = 215.0f;
     auto const ContentTextWidth = 190.0f;
     auto const DynamicTableHeaderColumnWidth = 335.0f;
-    auto const DynamicTableColumnWidth = 300.0f;
+    auto const DynamicTableColumnWidth = 308.0f;
     auto const SubWindowRightMargin = 0.0f;
 }
 

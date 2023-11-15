@@ -571,7 +571,7 @@ void _MainWindow::processMenubar()
     }
 
     //hotkeys
-    auto io = ImGui::GetIO();
+    auto& io = ImGui::GetIO();
     if (!io.WantCaptureKeyboard) {
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_N)) {
             _newSimulationDialog->open();
@@ -665,11 +665,12 @@ void _MainWindow::processMenubar()
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_C) && _editorController->isCopyingPossible()) {
             _editorController->onCopy();
-            printOverlayMessage("Selection copied");
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_V) && _editorController->isPastingPossible()) {
             _editorController->onPaste();
-            printOverlayMessage("Selection pasted");
+        }
+        if (ImGui::IsKeyPressed(GLFW_KEY_DELETE) ) {
+            _editorController->onDelete();
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {
