@@ -39,7 +39,7 @@ public:
     __inline__ __device__ static float subtractAngle(float angleMinuend, float angleSubtrahend);
     __inline__ __device__ static float calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, float boundary = 0);
     __inline__ __device__ static float alignAngle(float angle, ConstructorAngleAlignment alignment);
-    __inline__ __device__ static float avoidAngleBoundaries(float angle, float maxAngle, ConstructorAngleAlignment alignment);
+    __inline__ __device__ static float alignAngleOnBoundaries(float angle, float maxAngle, ConstructorAngleAlignment alignment);
     __inline__ __device__ static bool
     crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd);
 };
@@ -310,7 +310,7 @@ __inline__ __device__ float Math::alignAngle(float angle, ConstructorAngleAlignm
     return factor * unitAngle;
 }
 
-__inline__ __device__ float Math::avoidAngleBoundaries(float angle, float maxAngle, ConstructorAngleAlignment alignment)
+__inline__ __device__ float Math::alignAngleOnBoundaries(float angle, float maxAngle, ConstructorAngleAlignment alignment)
 {
     if (alignment != ConstructorAngleAlignment_None) {
         auto angleUnit = 360.0f / (alignment + 1);

@@ -313,7 +313,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         if (angleDiff < 0) {
             angleDiff += 360.0;
         }
-        angleDiff = Math::avoidAngleBoundaries(angleDiff, 360.0f, angleAlignment);
+        angleDiff = Math::alignAngleOnBoundaries(angleDiff, 360.0f, angleAlignment);
         if (abs(angleDiff) < NEAR_ZERO || abs(angleDiff - 360.0f) < NEAR_ZERO || abs(angleDiff + 360.0f) < NEAR_ZERO) {
             return false;
         }
@@ -358,7 +358,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         angleFromPrevious = min(angleFromPrevious, refAngle);
 
         angleFromPrevious = Math::alignAngle(angleFromPrevious, angleAlignment);
-        angleFromPrevious = Math::avoidAngleBoundaries(angleFromPrevious, refAngle, angleAlignment);
+        angleFromPrevious = Math::alignAngleOnBoundaries(angleFromPrevious, refAngle, angleAlignment);
     }
     if (angleFromPrevious < NEAR_ZERO) {
         return false;
