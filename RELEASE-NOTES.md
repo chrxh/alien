@@ -1,5 +1,12 @@
 # Release notes
 
+## [4.4.2] - 2023-11-25
+### Added
+- external energy source, which is controllable by two new parameters
+
+### Removed
+- parameter `unlimited energy for constructors` removed
+
 ## [4.4.1] - 2023-11-15
 ### Added
 - allow deletion of selection via DEL key

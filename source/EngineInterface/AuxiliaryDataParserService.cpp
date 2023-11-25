@@ -390,9 +390,15 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.cellFunctionConstructionUnlimitedEnergy,
-            defaultParameters.cellFunctionConstructionUnlimitedEnergy,
-            "simulation parameters.cell.function.constructor.unlimited energy",
+            parameters.cellFunctionConstructorExternalEnergy,
+            defaultParameters.cellFunctionConstructorExternalEnergy,
+            "simulation parameters.cell.function.constructor.external energy",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.cellFunctionConstructorExternalEnergySupplyRate,
+            defaultParameters.cellFunctionConstructorExternalEnergySupplyRate,
+            "simulation parameters.cell.function.constructor.external energy supply rate",
             parserTask);
 
         encodeDecodeProperty(

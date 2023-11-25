@@ -718,26 +718,43 @@ ConstructorProcessor::constructCellIntern(
 
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
-    if (!cudaSimulationParameters.cellFunctionConstructionUnlimitedEnergy) {
-        auto cellFunctionConstructorPumpEnergyFactor = cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[hostCell->color];
+    if (hostCell->energy < constructionData.energy + cudaSimulationParameters.cellNormalEnergy[hostCell->color]
+        && cudaSimulationParameters.cellFunctionConstructorExternalEnergySupplyRate[hostCell->color] > 0) {
+        auto externalEnergyPortion = constructionData.energy * cudaSimulationParameters.cellFunctionConstructorExternalEnergySupplyRate[hostCell->color];
 
-        auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.cellNormalEnergy[hostCell->color])
-            + min(constructionData.energy, cudaSimulationParameters.cellNormalEnergy[hostCell->color]) * (1.0f - cellFunctionConstructorPumpEnergyFactor);
+        auto externalEnergyPtr = &((*data.externalEnergy)[hostCell->color]);
+        auto origExternalEnergy = alienAtomicRead(externalEnergyPtr);
+        if (origExternalEnergy == Infinity<float>::value) {
+            hostCell->energy += externalEnergyPortion;
+        } else {
+            externalEnergyPortion = max(0.0f, min(origExternalEnergy, externalEnergyPortion));
+            auto origExternalEnergy_tickLater = atomicAdd(externalEnergyPtr, -externalEnergyPortion);
+            if (origExternalEnergy_tickLater >= externalEnergyPortion) {
+                hostCell->energy += externalEnergyPortion;
+            } else {
+                atomicAdd(externalEnergyPtr, externalEnergyPortion);
+            }
+        }
+    }
 
-        if (cellFunctionConstructorPumpEnergyFactor < 1.0f && hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + energyNeededFromHost) {
+    auto cellFunctionConstructorPumpEnergyFactor = cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[hostCell->color];
+
+    auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.cellNormalEnergy[hostCell->color])
+        + min(constructionData.energy, cudaSimulationParameters.cellNormalEnergy[hostCell->color]) * (1.0f - cellFunctionConstructorPumpEnergyFactor);
+
+    if (cellFunctionConstructorPumpEnergyFactor < 1.0f && hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + energyNeededFromHost) {
+        return false;
+    }
+    auto energyNeededFromRadiation = constructionData.energy - energyNeededFromHost;
+    auto orig = atomicAdd(data.residualEnergy, -energyNeededFromRadiation);
+    if (orig < energyNeededFromRadiation) {
+        atomicAdd(data.residualEnergy, energyNeededFromRadiation);
+        if (hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + constructionData.energy) {
             return false;
         }
-        auto energyNeededFromRadiation = constructionData.energy - energyNeededFromHost;
-        auto orig = atomicAdd(data.residualEnergy, -energyNeededFromRadiation);
-        if (orig < energyNeededFromRadiation) {
-            atomicAdd(data.residualEnergy, energyNeededFromRadiation);
-            if (hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + constructionData.energy) {
-                return false;
-            }
-            hostCell->energy -= constructionData.energy;
-        } else {
-            hostCell->energy -= energyNeededFromHost;
-        }
+        hostCell->energy -= constructionData.energy;
+    } else {
+        hostCell->energy -= energyNeededFromHost;
     }
     return true;
 }
