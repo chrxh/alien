@@ -17,7 +17,6 @@
 namespace
 {
     auto constexpr LeftColumnWidth = 180.0f;
-    auto constexpr RestorePositionTolerance = 3.0f;
 }
 
 _TemporalControlWindow::_TemporalControlWindow(
@@ -203,6 +202,9 @@ void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
         }
     }
 
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        parameters.cellFunctionConstructorExternalEnergy[i] = origParameters.cellFunctionConstructorExternalEnergy[i];
+    }
     _simController->setCurrentTimestep(snapshot.timestep);
     _simController->setSimulationData(snapshot.data);
     _simController->setSimulationParameters(parameters);

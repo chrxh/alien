@@ -10,8 +10,8 @@ class _SimulationKernelsLauncher
 public:
     _SimulationKernelsLauncher();
 
-    bool calcSimulationParametersForNextTimestep(Settings& settings);
     void calcTimestep(Settings const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
+    bool updateSimulationParametersAfterTimestep(Settings& settings, SimulationData const& simulationData);
     void prepareForSimulationParametersChanges(Settings const& settings, SimulationData const& simulationData);
 
 private:
