@@ -2,7 +2,7 @@
 
 namespace Const
 {
-    std::string const ProgramVersion = "4.4.1";
+    std::string const ProgramVersion = "4.4.2";
     std::string const DiscordLink = "https://discord.gg/7bjyZdXXQ2";
 
     std::string const BasePath = "resources/";
