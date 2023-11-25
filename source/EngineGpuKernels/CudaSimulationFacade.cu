@@ -111,6 +111,16 @@ void* _CudaSimulationFacade::registerImageResource(GLuint image)
 
 void _CudaSimulationFacade::calcTimestep()
 {
+    _simulationKernels->calcTimestep(_settings, getSimulationDataIntern(), *_simulationStatistics);
+    syncAndCheck();
+
+    automaticResizeArrays();
+
+    {
+        std::lock_guard lock(_mutexForSimulationData);
+        ++_cudaSimulationData->timestep;
+    }
+
     checkAndProcessSimulationParameterChanges();
 
     Settings settings = [this] {
@@ -121,14 +131,6 @@ void _CudaSimulationFacade::calcTimestep()
         }
         return _settings;
     }();
-
-    _simulationKernels->calcTimestep(settings, getSimulationDataIntern(), *_simulationStatistics);
-    syncAndCheck();
-
-    automaticResizeArrays();
-
-    std::lock_guard lock(_mutexForSimulationData);
-    ++_cudaSimulationData->timestep;
 }
 
 void _CudaSimulationFacade::applyCataclysm(int power)
