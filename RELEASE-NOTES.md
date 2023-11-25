@@ -2,7 +2,7 @@
 
 ## [4.4.2] - 2023-11-25
 ### Added
-- external energy sources, which are controllable by two new parameters
+- external energy source, which is controllable by two new parameters
 
 ### Removed
 - parameter `unlimited energy for constructors` removed
