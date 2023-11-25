@@ -66,7 +66,6 @@ struct SimulationParameters
     bool particleTransformationRandomCellFunction = false;
     int particleTransformationMaxGenomeSize = 300;
     
-    bool cellFunctionConstructionUnlimitedEnergy = false;
     ColorVector<float> cellFunctionConstructorOffspringDistance = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
     ColorVector<float> cellFunctionConstructorConnectingCellMaxDistance = {1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f};
     ColorVector<float> cellFunctionConstructorActivityThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
@@ -82,6 +81,8 @@ struct SimulationParameters
         {true, true, true, true, true, true, true}};
     bool cellFunctionConstructorMutationPreventDepthIncrease = false;
     bool cellFunctionConstructorMutationSelfReplication = false;
+    ColorVector<float> cellFunctionConstructorExternalEnergy = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    ColorVector<float> cellFunctionConstructorExternalEnergySupplyRate = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
     ColorVector<float> cellFunctionInjectorRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
     ColorMatrix<int> cellFunctionInjectorDurationColorMatrix = {
@@ -271,6 +272,12 @@ struct SimulationParameters
             if (cellFunctionDetonatorChainExplosionProbability[i] != other.cellFunctionDetonatorChainExplosionProbability[i]) {
                 return false;
             }
+            if (cellFunctionConstructorExternalEnergy[i] != other.cellFunctionConstructorExternalEnergy[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorExternalEnergySupplyRate[i] != other.cellFunctionConstructorExternalEnergySupplyRate[i]) {
+                return false;
+            }
         }
         if (numParticleSources != other.numParticleSources) {
             return false;
@@ -322,7 +329,6 @@ struct SimulationParameters
             && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
             && clusterDecay == other.clusterDecay
             && cellFunctionSensorActivityThreshold == other.cellFunctionSensorActivityThreshold
-            && cellFunctionConstructionUnlimitedEnergy == other.cellFunctionConstructionUnlimitedEnergy
             && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
             && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication
             && cellMaxAgeBalancer == other.cellMaxAgeBalancer && cellMaxAgeBalancerInterval == other.cellMaxAgeBalancerInterval

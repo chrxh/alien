@@ -211,12 +211,13 @@ void _SimulationParametersWindow::processBase(
     SimulationParameters const& origSimParameters)
 {
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
+        ImGuiTreeNodeFlags treeNodeClosedFlags = ImGuiTreeNodeFlags_FramePadding;
+        ImGuiTreeNodeFlags treeNodeOpenFlags = treeNodeClosedFlags | ImGuiTreeNodeFlags_DefaultOpen;
 
         /**
          * Coloring
          */
-        if (ImGui::TreeNodeEx("Visualization", flags)) {
+        if (ImGui::TreeNodeEx("Visualization", treeNodeOpenFlags)) {
             AlienImGui::ColorButtonWithPicker(
                 AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(RightColumnWidth).defaultValue(origSimParameters.backgroundColor),
                 simParameters.backgroundColor,
@@ -257,7 +258,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Numerics
          */
-        if (ImGui::TreeNodeEx("Numerics", flags)) {
+        if (ImGui::TreeNodeEx("Numerics", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Time step size")
@@ -274,7 +275,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Physics: Motion
          */
-        if (ImGui::TreeNodeEx("Physics: Motion", flags)) {
+        if (ImGui::TreeNodeEx("Physics: Motion", treeNodeOpenFlags)) {
             if (AlienImGui::Switcher(
                     AlienImGui::SwitcherParameters()
                         .name("Motion type")
@@ -370,7 +371,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Physics: Thresholds
          */
-        if (ImGui::TreeNodeEx("Physics: Thresholds", flags)) {
+        if (ImGui::TreeNodeEx("Physics: Thresholds", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum velocity")
@@ -404,7 +405,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Physics: Binding
          */
-        if (ImGui::TreeNodeEx("Physics: Binding", flags)) {
+        if (ImGui::TreeNodeEx("Physics: Binding", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum distance")
@@ -441,7 +442,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Physics: Radiation
          */
-        if (ImGui::TreeNodeEx("Physics: Radiation", flags)) {
+        if (ImGui::TreeNodeEx("Physics: Radiation", treeNodeOpenFlags)) {
             if (AlienImGui::Button(AlienImGui::ButtonParameters()
                                        .buttonText("Open editor")
                                        .name("Radiation sources")
@@ -542,7 +543,7 @@ void _SimulationParametersWindow::processBase(
          * Cell life cycle
          */
         ImGui::PushID("Transformation");
-        if (ImGui::TreeNodeEx("Cell life cycle", flags)) {
+        if (ImGui::TreeNodeEx("Cell life cycle", treeNodeOpenFlags)) {
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
                     .name("Maximum age")
@@ -610,7 +611,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Mutation 
          */
-        if (ImGui::TreeNodeEx("Cell function: Genome mutation probabilities", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Genome mutation probabilities", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Neural net")
@@ -781,7 +782,7 @@ void _SimulationParametersWindow::processBase(
          * Attacker
          */
         ImGui::PushID("Attacker");
-        if (ImGui::TreeNodeEx("Cell function: Attacker", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Attacker", treeNodeOpenFlags)) {
             AlienImGui::InputFloatColorMatrix(
                 AlienImGui::InputFloatColorMatrixParameters()
                     .name("Food chain color matrix")
@@ -927,7 +928,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Constructor
          */
-        if (ImGui::TreeNodeEx("Cell function: Constructor", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Constructor", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Pump energy")
@@ -973,7 +974,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Defender
          */
-        if (ImGui::TreeNodeEx("Cell function: Defender", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Defender", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Anti-attacker strength")
@@ -1001,7 +1002,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Injector
          */
-        if (ImGui::TreeNodeEx("Cell function: Injector", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Injector", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Injection radius")
@@ -1029,7 +1030,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Muscle
          */
-        if (ImGui::TreeNodeEx("Cell function: Muscle", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Muscle", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Contraction and expansion delta")
@@ -1081,7 +1082,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Sensor
          */
-        if (ImGui::TreeNodeEx("Cell function: Sensor", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Sensor", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Radius")
@@ -1098,7 +1099,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Transmitter
          */
-        if (ImGui::TreeNodeEx("Cell function: Transmitter", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Transmitter", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy distribution radius")
@@ -1132,7 +1133,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Reconnector
          */
-        if (ImGui::TreeNodeEx("Cell function: Reconnector", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Reconnector", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Radius")
@@ -1149,7 +1150,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Detonator
          */
-        if (ImGui::TreeNodeEx("Cell function: Detonator", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Detonator", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Blast radius")
@@ -1174,9 +1175,43 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
+         * Danger zone
+         */
+        if (ImGui::TreeNodeEx("External energy source", treeNodeOpenFlags)) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("External energy for constructors")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0.0f)
+                    .max(100000000.0f)
+                    .format("%.0f")
+                    .logarithmic(true)
+                    .infinity(true)
+                    .defaultValue(origSimParameters.cellFunctionConstructorExternalEnergy)
+                    .tooltip("This parameter can be used to set the amount of energy (per color) of an external energy source. This type of energy is "
+                             "transferred to all constructor cells at a certain rate.\n\nTip: You can explicitly enter a numerical value by selecting the "
+                             "slider and then pressing TAB.\n\nWarning: Too much external energy can result in a massive production of cells and slow down or "
+                             "even crash the simulation."),
+                simParameters.cellFunctionConstructorExternalEnergy);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("External energy supply rate")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .defaultValue(origSimParameters.cellFunctionConstructorExternalEnergySupplyRate)
+                    .tooltip("The energy from the external source is transferred to all constructor cells at a rate defined here: 0 = no energy transfer, 1 = "
+                             "constructor cells receive all the required energy"),
+                simParameters.cellFunctionConstructorExternalEnergySupplyRate);
+            ImGui::TreePop();
+        }
+
+        /**
          * Cell color transition rules
          */
-        if (ImGui::TreeNodeEx("Cell color transition rules", flags)) {
+        if (ImGui::TreeNodeEx("Cell color transition rules", treeNodeClosedFlags)) {
             for (int color = 0; color < MAX_COLORS; ++color) {
                 ImGui::PushID(color);
                 auto parameters = AlienImGui::InputColorTransitionParameters()
@@ -1201,21 +1236,6 @@ void _SimulationParametersWindow::processBase(
             }
             ImGui::TreePop();
         }
-
-        /**
-         * Danger zone
-         */
-        if (ImGui::TreeNodeEx("Danger zone", flags)) {
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Unlimited energy for constructors")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origSimParameters.cellFunctionConstructionUnlimitedEnergy)
-                    .tooltip("If activated, all constructor cells receive energy for free to construct offspring. The number of cells can increase rapidly. "
-                             "This parameter should only be activated for a short time."),
-                simParameters.cellFunctionConstructionUnlimitedEnergy);
-            ImGui::TreePop();
-        }
     }
     ImGui::EndChild();
     validationAndCorrection(simParameters);
@@ -1227,13 +1247,15 @@ void _SimulationParametersWindow::processSpot(
     SimulationParameters const& parameters)
 {
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
+        ImGuiTreeNodeFlags treeNodeClosedFlags = ImGuiTreeNodeFlags_FramePadding;
+        ImGuiTreeNodeFlags treeNodeOpenFlags = treeNodeClosedFlags | ImGuiTreeNodeFlags_DefaultOpen;
+
         auto worldSize = _simController->getWorldSize();
 
         /**
          * Colors and location
          */
-        if (ImGui::TreeNodeEx("Visualization", flags)) {
+        if (ImGui::TreeNodeEx("Visualization", treeNodeOpenFlags)) {
             AlienImGui::ColorButtonWithPicker(
                 AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(RightColumnWidth).defaultValue(origSpot.color),
                 spot.color,
@@ -1242,7 +1264,7 @@ void _SimulationParametersWindow::processSpot(
             ImGui::TreePop();
         }
 
-        if (ImGui::TreeNodeEx("Location", flags)) {
+        if (ImGui::TreeNodeEx("Location", treeNodeOpenFlags)) {
             if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Shape")
@@ -1336,7 +1358,7 @@ void _SimulationParametersWindow::processSpot(
         /**
          * Flow
          */
-        if (ImGui::TreeNodeEx("Force field", flags)) {
+        if (ImGui::TreeNodeEx("Force field", treeNodeOpenFlags)) {
             auto isForceFieldActive = spot.flowType != FlowType_None;
 
             auto forceFieldTypeIntern = std::max(0, spot.flowType - 1); //FlowType_None should not be selectable in ComboBox
@@ -1439,7 +1461,7 @@ void _SimulationParametersWindow::processSpot(
         /**
          * Physics: Motion
          */
-        if (ImGui::TreeNodeEx("Physics: Motion", flags)) {
+        if (ImGui::TreeNodeEx("Physics: Motion", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Friction")
@@ -1469,7 +1491,7 @@ void _SimulationParametersWindow::processSpot(
         /**
          * Physics: Thresholds
          */
-        if (ImGui::TreeNodeEx("Physics: Thresholds", flags)) {
+        if (ImGui::TreeNodeEx("Physics: Thresholds", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum force")
@@ -1486,7 +1508,7 @@ void _SimulationParametersWindow::processSpot(
         /**
          * Physics: Binding
          */
-        if (ImGui::TreeNodeEx("Physics: Binding", flags)) {
+        if (ImGui::TreeNodeEx("Physics: Binding", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Binding creation velocity")
@@ -1516,7 +1538,7 @@ void _SimulationParametersWindow::processSpot(
         /**
          * Physics: Radiation
          */
-        if (ImGui::TreeNodeEx("Physics: Radiation", flags)) {
+        if (ImGui::TreeNodeEx("Physics: Radiation", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Absorption factor")
@@ -1550,7 +1572,7 @@ void _SimulationParametersWindow::processSpot(
         /**
          * Cell life cycle
          */
-        if (ImGui::TreeNodeEx("Cell life cycle", flags)) {
+        if (ImGui::TreeNodeEx("Cell life cycle", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum energy")
@@ -1568,7 +1590,7 @@ void _SimulationParametersWindow::processSpot(
        /**
          * Mutation 
          */
-        if (ImGui::TreeNodeEx("Cell function: Genome mutation probabilities", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Genome mutation probabilities", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Neuron weights and biases")
@@ -1718,7 +1740,7 @@ void _SimulationParametersWindow::processSpot(
         /**
          * Attacker
          */
-        if (ImGui::TreeNodeEx("Cell function: Attacker", flags)) {
+        if (ImGui::TreeNodeEx("Cell function: Attacker", treeNodeOpenFlags)) {
             ImGui::Checkbox("##foodChainColorMatrix", &spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
             ImGui::SameLine();
             ImGui::BeginDisabled(!spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
@@ -1780,7 +1802,7 @@ void _SimulationParametersWindow::processSpot(
         /**
          * Cell color transition rules
          */
-        if (ImGui::TreeNodeEx("Cell color transition rules", flags)) {
+        if (ImGui::TreeNodeEx("Cell color transition rules", treeNodeClosedFlags)) {
             ImGui::Checkbox("##cellColorTransition", &spot.activatedValues.cellColorTransition);
             ImGui::SameLine();
             ImGui::BeginDisabled(!spot.activatedValues.cellColorTransition);
@@ -1862,6 +1884,9 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
         parameters.cellFunctionDetonatorChainExplosionProbability[i] =
             std::max(0.0f, std::min(1.0f, parameters.cellFunctionDetonatorChainExplosionProbability[i]));
+        parameters.cellFunctionConstructorExternalEnergy[i] = std::max(0.0f, parameters.cellFunctionConstructorExternalEnergy[i]);
+        parameters.cellFunctionConstructorExternalEnergySupplyRate[i] =
+            std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorExternalEnergySupplyRate[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
