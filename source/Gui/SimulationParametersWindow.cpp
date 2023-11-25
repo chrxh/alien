@@ -1180,7 +1180,7 @@ void _SimulationParametersWindow::processBase(
         if (ImGui::TreeNodeEx("External energy source", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("External energy for constructors")
+                    .name("External energy amount")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0.0f)
