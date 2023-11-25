@@ -123,14 +123,13 @@ void _CudaSimulationFacade::calcTimestep()
 
     checkAndProcessSimulationParameterChanges();
 
-    Settings settings = [this] {
+    {
         std::lock_guard lock(_mutexForSimulationParameters);
         if (_simulationKernels->calcSimulationParametersForNextTimestep(_settings)) {
             CHECK_FOR_CUDA_ERROR(
                 cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
         }
-        return _settings;
-    }();
+    }
 }
 
 void _CudaSimulationFacade::applyCataclysm(int power)
