@@ -1177,7 +1177,7 @@ void _SimulationParametersWindow::processBase(
         /**
          * Danger zone
          */
-        if (ImGui::TreeNodeEx("External energy supply", treeNodeOpenFlags)) {
+        if (ImGui::TreeNodeEx("External energy source", treeNodeOpenFlags)) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("External energy for constructors")
@@ -1189,7 +1189,9 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .infinity(true)
                     .defaultValue(origSimParameters.cellFunctionConstructorExternalEnergy)
-                    .tooltip(""),
+                    .tooltip("This parameter can be used to set the amount of energy (per color) of an external energy source. This type of energy is "
+                             "transferred to all constructor cells at a certain rate.\n\nTip: You can explicitly enter a numerical value by selecting the "
+                             "slider and pressing TAB."),
                 simParameters.cellFunctionConstructorExternalEnergy);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -1199,7 +1201,8 @@ void _SimulationParametersWindow::processBase(
                     .min(0.0f)
                     .max(1.0f)
                     .defaultValue(origSimParameters.cellFunctionConstructorExternalEnergySupplyRate)
-                    .tooltip(""),
+                    .tooltip("The energy from the external source is transferred to all constructor cells at a rate defined here: 0 = no energy transfer, 1 = "
+                             "constructor cells receive all the required energy"),
                 simParameters.cellFunctionConstructorExternalEnergySupplyRate);
             ImGui::TreePop();
         }
@@ -1880,6 +1883,9 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
         parameters.cellFunctionDetonatorChainExplosionProbability[i] =
             std::max(0.0f, std::min(1.0f, parameters.cellFunctionDetonatorChainExplosionProbability[i]));
+        parameters.cellFunctionConstructorExternalEnergy[i] = std::max(0.0f, parameters.cellFunctionConstructorExternalEnergy[i]);
+        parameters.cellFunctionConstructorExternalEnergySupplyRate[i] =
+            std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorExternalEnergySupplyRate[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
