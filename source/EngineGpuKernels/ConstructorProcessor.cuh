@@ -725,7 +725,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         auto externalEnergyPtr = &((*data.externalEnergy)[hostCell->color]);
         auto origExternalEnergy = alienAtomicRead(externalEnergyPtr);
         if (origExternalEnergy == Infinity<float>::value) {
-            hostCell->energy += constructionData.energy;
+            hostCell->energy += externalEnergyPortion;
         } else {
             externalEnergyPortion = max(0.0f, min(origExternalEnergy, externalEnergyPortion));
             auto origExternalEnergy_tickLater = atomicAdd(externalEnergyPtr, -externalEnergyPortion);

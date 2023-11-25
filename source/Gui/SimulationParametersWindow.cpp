@@ -1191,7 +1191,8 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origSimParameters.cellFunctionConstructorExternalEnergy)
                     .tooltip("This parameter can be used to set the amount of energy (per color) of an external energy source. This type of energy is "
                              "transferred to all constructor cells at a certain rate.\n\nTip: You can explicitly enter a numerical value by selecting the "
-                             "slider and pressing TAB."),
+                             "slider and then pressing TAB.\n\nWarning: Too much external energy can result in a massive production of cells and slow down or "
+                             "even crash the simulation."),
                 simParameters.cellFunctionConstructorExternalEnergy);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
