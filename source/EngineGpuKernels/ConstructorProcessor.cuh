@@ -720,7 +720,16 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 {
     if (hostCell->energy < constructionData.energy + cudaSimulationParameters.cellNormalEnergy[hostCell->color]
         && cudaSimulationParameters.cellFunctionConstructorExternalEnergySupplyRate[hostCell->color] > 0) {
-        hostCell->energy += constructionData.energy * cudaSimulationParameters.cellFunctionConstructorExternalEnergySupplyRate[hostCell->color];
+        auto externalEnergyPortion = constructionData.energy * cudaSimulationParameters.cellFunctionConstructorExternalEnergySupplyRate[hostCell->color];
+
+        auto externalEnergyPtr = &((*data.externalEnergy)[hostCell->color]);
+        externalEnergyPortion = max(0.0f, min(alienAtomicRead(externalEnergyPtr), externalEnergyPortion));
+        auto origEnergy = atomicAdd(externalEnergyPtr, -externalEnergyPortion);
+        if (origEnergy >= externalEnergyPortion) {
+            hostCell->energy += externalEnergyPortion;
+        } else {
+            atomicAdd(externalEnergyPtr, externalEnergyPortion);
+        }
     }
 
     auto cellFunctionConstructorPumpEnergyFactor = cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[hostCell->color];

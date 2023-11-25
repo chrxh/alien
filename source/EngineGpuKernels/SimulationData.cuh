@@ -4,6 +4,7 @@
 
 #include "EngineInterface/CellFunctionConstants.h"
 #include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/Colors.h"
 
 #include "Base.cuh"
 #include "CudaNumberGenerator.cuh"
@@ -26,6 +27,7 @@ struct SimulationData
     Objects tempObjects;
 
     //additional data for cell functions
+    ColorVector<float>* externalEnergy;
     double* residualEnergy;
     RawMemory processMemory;
     PreprocessedCellFunctionData preprocessedCellFunctionData;

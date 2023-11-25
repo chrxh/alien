@@ -111,7 +111,10 @@ void* _CudaSimulationFacade::registerImageResource(GLuint image)
 
 void _CudaSimulationFacade::calcTimestep()
 {
-    _simulationKernels->calcTimestep(_settings, getSimulationDataIntern(), *_simulationStatistics);
+    checkAndProcessSimulationParameterChanges();
+
+    auto simulationData = getSimulationDataIntern();
+    _simulationKernels->calcTimestep(_settings, simulationData, *_simulationStatistics);
     syncAndCheck();
 
     automaticResizeArrays();
@@ -120,12 +123,9 @@ void _CudaSimulationFacade::calcTimestep()
         std::lock_guard lock(_mutexForSimulationData);
         ++_cudaSimulationData->timestep;
     }
-
-    checkAndProcessSimulationParameterChanges();
-
     {
         std::lock_guard lock(_mutexForSimulationParameters);
-        if (_simulationKernels->calcSimulationParametersForNextTimestep(_settings)) {
+        if (_simulationKernels->updateSimulationParametersAfterTimestep(_settings, simulationData)) {
             CHECK_FOR_CUDA_ERROR(
                 cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
         }

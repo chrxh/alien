@@ -1,5 +1,6 @@
 ﻿#include "SimulationData.cuh"
 
+#include "ConstantMemory.cuh"
 #include "GarbageCollectorKernels.cuh"
 
 void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
@@ -13,6 +14,7 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     cellMap.init(worldSize);
     particleMap.init(worldSize);
 
+    CudaMemoryManager::getInstance().acquireMemory<ColorVector<float>>(1, externalEnergy);
     CudaMemoryManager::getInstance().acquireMemory<double>(1, residualEnergy);
     CHECK_FOR_CUDA_ERROR(cudaMemset(residualEnergy, 0, sizeof(double)));
  
@@ -39,6 +41,9 @@ __device__ void SimulationData::prepareForNextTimestep()
 
     for (int i = 0; i < CellFunction_WithoutNone_Count; ++i) {
         cellFunctionOperations[i].setMemory(processMemory.getTypedSubArray<CellFunctionOperation>(maxCellFunctionOperations), maxCellFunctionOperations);
+    }
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        (*externalEnergy)[i] = cudaSimulationParameters.cellFunctionConstructorExternalEnergy[i];
     }
 
     objects.saveNumEntries();
@@ -97,6 +102,7 @@ void SimulationData::free()
     numberGen1.free();
     numberGen2.free();
     processMemory.free();
+    CudaMemoryManager::getInstance().freeMemory(externalEnergy);
     CudaMemoryManager::getInstance().freeMemory(residualEnergy);
 
     structuralOperations.free();
