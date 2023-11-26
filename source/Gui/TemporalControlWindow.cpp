@@ -205,6 +205,11 @@ void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
     for (int i = 0; i < MAX_COLORS; ++i) {
         parameters.cellFunctionConstructorExternalEnergy[i] = origParameters.cellFunctionConstructorExternalEnergy[i];
     }
+    if (parameters.cellMaxAgeBalancer || origParameters.cellMaxAgeBalancer) {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            parameters.cellMaxAge[i] = origParameters.cellMaxAge[i];
+        }
+    }
     _simController->setCurrentTimestep(snapshot.timestep);
     _simController->setSimulationData(snapshot.data);
     _simController->setSimulationParameters(parameters);
