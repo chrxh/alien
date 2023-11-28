@@ -462,6 +462,10 @@ __inline__ __device__ void GenomeDecoder::setRandomCellFunctionData(
     if (cellFunction == CellFunction_Constructor || cellFunction == CellFunction_Injector) {
         auto cellFunctionFixedBytes = cellFunction == CellFunction_Constructor ? Const::ConstructorFixedBytes : Const::InjectorFixedBytes;
         genome[nodeAddress + cellFunctionFixedBytes] = makeSelfCopy ? 1 : 0;
+
+        auto subGenomeRelPos = getCellFunctionDataSize(cellFunction, makeSelfCopy, 0);
+        genome[nodeAddress + subGenomeRelPos + Const::GenomeHeaderNumRepetitionsPos] = 1;
+
         if (!makeSelfCopy) {
             writeWord(genome, nodeAddress + cellFunctionFixedBytes + 1, subGenomeSize);
         }
