@@ -1,5 +1,12 @@
 # Release notes
 
+## [4.4.3] - 2023-11-29
+### Added
+- show text background when rendering is disabled
+
+### Fixed
+- fixed insertion mutation behavior that led to undesirably high repetitions and made this mutation type more or less useless
+
 ## [4.4.2] - 2023-11-25
 ### Added
 - external energy source, which is controllable by two new parameters
