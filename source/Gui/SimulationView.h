@@ -19,8 +19,8 @@ public:
 
     void resize(IntVector2D const& viewportSize);
 
-    void draw();
-    void processControls();
+    void draw(bool renderSimulation);
+    void processControls(bool renderSimulation);
 
     bool isOverlayActive() const;
     void setOverlayActive(bool active);
