@@ -338,7 +338,7 @@ void _SimulationView::draw(bool renderSimulation)
                     clipRect,
                     text,
                     text + strlen(text),
-                    NULL,
+                    0.0f,
                     false);
             }
         }
