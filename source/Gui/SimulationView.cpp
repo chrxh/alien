@@ -278,51 +278,83 @@ void _SimulationView::processEvents()
     _prevMousePosInt = mousePosInt;
 }
 
-void _SimulationView::draw()
+void _SimulationView::draw(bool renderSimulation)
 {
-    processEvents();
+    if (renderSimulation) {
+        processEvents();
 
-    updateImageFromSimulation();
+        updateImageFromSimulation();
 
-    _shader->use();
+        _shader->use();
 
-    GLint currentFbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
+        GLint currentFbo;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
-    _shader->setInt("phase", 0);
-    glBindVertexArray(_vao);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
+        _shader->setInt("phase", 0);
+        glBindVertexArray(_vao);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
-    _shader->setInt("phase", 1);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
+        _shader->setInt("phase", 1);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-    _shader->setInt("phase", 2);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
+        _shader->setInt("phase", 2);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    } else {
+        glClearColor(0, 0, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        auto textWidth = scale(300.0f);
+        auto textHeight = scale(80.0f);
+        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+        auto styleRep = StyleRepository::getInstance();
+        auto right = ImGui::GetMainViewport()->Pos.x + ImGui::GetMainViewport()->Size.x;
+        auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
+        auto maxLength = std::max(right, bottom);
+
+        AlienImGui::RotateStart(ImGui::GetBackgroundDrawList());
+        auto font = styleRep.getReefLargeFont();
+        auto text = "Rendering disabled";
+        ImVec4 clipRect(-100000.0f, -100000.0f, 100000.0f, 100000.0f);
+        for (int i = 0; toFloat(i) * textWidth < maxLength * 2; ++i) {
+            for (int j = 0; toFloat(j) * textHeight < maxLength * 2; ++j) {
+                font->RenderText(
+                    drawList,
+                    scale(34.0f),
+                    {toFloat(i) * textWidth - maxLength / 2, toFloat(j) * textHeight - maxLength / 2},
+                    Const::RenderingDisabledTextColor,
+                    clipRect,
+                    text,
+                    text + strlen(text),
+                    NULL,
+                    false);
+            }
+        }
+        AlienImGui::RotateEnd(45.0f, ImGui::GetBackgroundDrawList());
+    }
 }
 
-void _SimulationView::processControls()
+void _SimulationView::processControls(bool renderSimulation)
 {
-    ImGuiViewport* viewport = ImGui::GetMainViewport();
-    auto mainMenubarHeight = StyleRepository::getInstance().scale(22);
-    auto scrollbarThickness = 17;   //fixed
-    _scrollbarX->process(
-        {{viewport->Pos.x, viewport->Size.y - scrollbarThickness}, {viewport->Size.x - 1 - scrollbarThickness, 1}});
-    _scrollbarY->process(
-        {{viewport->Size.x - scrollbarThickness, viewport->Pos.y + mainMenubarHeight},
-         {1, viewport->Size.y - 1 - scrollbarThickness}});
+    if (renderSimulation) {
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        auto mainMenubarHeight = StyleRepository::getInstance().scale(22);
+        auto scrollbarThickness = 17;  //fixed
+        _scrollbarX->process({{viewport->Pos.x, viewport->Size.y - scrollbarThickness}, {viewport->Size.x - 1 - scrollbarThickness, 1}});
+        _scrollbarY->process({{viewport->Size.x - scrollbarThickness, viewport->Pos.y + mainMenubarHeight}, {1, viewport->Size.y - 1 - scrollbarThickness}});
+    }
 }
 
 bool _SimulationView::isOverlayActive() const

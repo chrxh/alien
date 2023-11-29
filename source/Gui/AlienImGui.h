@@ -319,6 +319,9 @@ public:
         int _elementNumber = 0;
     };
 
+    static void RotateStart(ImDrawList* drawList);
+    static void RotateEnd(float angle, ImDrawList* drawList);
+
 private:
 
     template <typename Parameter, typename T>
@@ -340,9 +343,7 @@ private:
     template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS]);
 
-    static void RotateStart();
-    static ImVec2 RotationCenter();
-    static void RotateEnd(float angle);
+    static ImVec2 RotationCenter(ImDrawList* drawList);
 
     static std::unordered_set<unsigned int> _basicSilderExpanded;
     static int _rotationStartIndex;
