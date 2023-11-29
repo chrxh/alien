@@ -141,10 +141,10 @@ void _StartupController::processWindow()
     auto millisecSinceStartup = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_startupTimepoint).count();
 
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-    ImColor textColor = Const::ProgramVersionColor;
+    ImColor textColor = Const::ProgramVersionTextColor;
     textColor.Value.w *= ImGui::GetStyle().Alpha;
 
-    ImColor loadingTextColor = Const::ProgramVersionColor;
+    ImColor loadingTextColor = Const::ProgramVersionTextColor;
     loadingTextColor.Value.w *= ImGui::GetStyle().Alpha * 0.5f;
 
     //draw 'Initializing' text if it fits

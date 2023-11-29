@@ -1671,9 +1671,9 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
         auto startPos = ImGui::GetCursorPos();
 
         ImGui::SetCursorPos({startPos.x - scale(48), startPos.y + scale(105)});
-        RotateStart();
+        RotateStart(ImGui::GetWindowDrawList());
         ImGui::Text("[host color]");
-        RotateEnd(90.0f);
+        RotateEnd(90.0f, ImGui::GetWindowDrawList());
 
         ImGui::SetCursorPos(startPos);
 
@@ -1798,16 +1798,16 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
 
 //RotateStart, RotationCenter, etc. are taken from https://gist.github.com/carasuca/e72aacadcf6cf8139de46f97158f790f
 //>>>>>>>>>>
-void AlienImGui::RotateStart()
+void AlienImGui::RotateStart(ImDrawList* drawList)
 {
-    _rotationStartIndex = ImGui::GetWindowDrawList()->VtxBuffer.Size;
+    _rotationStartIndex = ImGui::GetBackgroundDrawList()->VtxBuffer.Size;
 }
 
-ImVec2 AlienImGui::RotationCenter()
+ImVec2 AlienImGui::RotationCenter(ImDrawList* drawList)
 {
     ImVec2 l(FLT_MAX, FLT_MAX), u(-FLT_MAX, -FLT_MAX);  // bounds
 
-    const auto& buf = ImGui::GetWindowDrawList()->VtxBuffer;
+    const auto& buf = ImGui::GetBackgroundDrawList()->VtxBuffer;
     for (int i = _rotationStartIndex; i < buf.Size; i++)
         l = ImMin(l, buf[i].pos), u = ImMax(u, buf[i].pos);
 
@@ -1822,17 +1822,18 @@ namespace
     }
 }
 
-void AlienImGui::RotateEnd(float angle)
+void AlienImGui::RotateEnd(float angle, ImDrawList* drawList)
 {
-    auto center = RotationCenter();
+    auto center = RotationCenter(drawList);
     float s = sin((angle + 90.0f) * Const::DegToRad), c = cos((angle + 90.0f) * Const::DegToRad);
     center = ImRotate(center, s, c) - center;
 
-    auto& buf = ImGui::GetWindowDrawList()->VtxBuffer;
+    auto& buf = ImGui::GetBackgroundDrawList()->VtxBuffer;
     for (int i = _rotationStartIndex; i < buf.Size; i++) {
         buf[i].pos = ImRotate(buf[i].pos, s, c) - center;
     }
 }
+
 //<<<<<<<<<<
 
 int AlienImGui::DynamicTableLayout::calcNumColumns(float tableWidth, float columnWidth)

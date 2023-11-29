@@ -313,7 +313,7 @@ void _MainWindow::processLoadingControls()
     processControllers();
 
     _uiController->process();
-    _simulationView->processControls();
+    _simulationView->processControls(_renderSimulation);
     _startupController->process();
 
     ImGui::PopStyleVar(2);
@@ -331,7 +331,7 @@ void _MainWindow::processFinishedLoading()
     processWindows();
     processControllers();
     _uiController->process();
-    _simulationView->processControls();
+    _simulationView->processControls(_renderSimulation);
 
     ImGui::PopStyleVar(2);
 
@@ -343,12 +343,7 @@ void _MainWindow::renderSimulation()
     int display_w, display_h;
     glfwGetFramebufferSize(_window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-    if (_renderSimulation) {
-        _simulationView->draw();
-    } else {
-        glClearColor(0, 0, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-    }
+    _simulationView->draw(_renderSimulation);
     ImGui::Render();
 
     _fpsController->processForceFps(WindowController::getInstance().getFps());
