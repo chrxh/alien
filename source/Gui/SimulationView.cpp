@@ -313,7 +313,7 @@ void _SimulationView::draw(bool renderSimulation)
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     } else {
-        glClearColor(0, 0, 0.1f, 1.0f);
+        glClearColor(0, 0, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         auto textWidth = scale(300.0f);
