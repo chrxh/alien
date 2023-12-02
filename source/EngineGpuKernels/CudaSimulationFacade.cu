@@ -140,12 +140,8 @@ void _CudaSimulationFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
         }
     }
     auto now = std::chrono::steady_clock::now();
-    if (!forceUpdateStatistics || !_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
+    if (forceUpdateStatistics || !_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
         _lastStatisticsUpdateTime = now;
-        updateStatistics();
-    }
-
-    if (forceUpdateStatistics) {
         updateStatistics();
     }
 }
