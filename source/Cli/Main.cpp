@@ -52,7 +52,9 @@ int main(int argc, char** argv)
 
         std::cout << "Device: " << simController->getGpuName() << std::endl;
         std::cout << "Start simulation" << std::endl;
+
         simController->calcTimesteps(timesteps);
+
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint).count();
         auto tps = ms != 0 ? 1000.0f * toFloat(timesteps) / toFloat(ms) : 0.0f; 
         std::cout << "Simulation finished: " << StringHelper::format(timesteps) << " time steps, " << StringHelper::format(ms) << " ms, "
@@ -63,6 +65,7 @@ int main(int argc, char** argv)
         std::cout << "Writing output" << std::endl;
         simData.auxiliaryData.timestep = static_cast<uint32_t>(simController->getCurrentTimestep());
         simData.mainData = simController->getClusteredSimulationData();
+        simData.auxiliaryData.simulationParameters = simController->getSimulationParameters();
         if (outputFilename.empty()) {
             std::cout << "No output file given." << std::endl;
             return 1;
