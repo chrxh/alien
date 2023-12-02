@@ -44,6 +44,8 @@ add_library(alien_engine_gpu_kernels_lib
     Map.cuh
     MapSectionCollector.cuh
     Math.cuh
+    MaxAgeBalancer.cu
+    MaxAgeBalancer.cuh
     MuscleProcessor.cuh
     MutationProcessor.cuh
     NerveProcessor.cuh

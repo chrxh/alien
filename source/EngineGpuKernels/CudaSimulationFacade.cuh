@@ -37,7 +37,7 @@ public:
 
     void* registerImageResource(GLuint image);
 
-    void calcTimestep();
+    void calcTimestep(uint64_t timesteps, bool forceUpdateStatistics);
     void applyCataclysm(int power);
 
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
@@ -74,6 +74,8 @@ public:
     ArraySizes getArraySizes() const;
 
     StatisticsData getStatistics();
+    void updateStatistics();
+
     void resetTimeIntervalStatistics();
     uint64_t getCurrentTimestep() const;
     void setCurrentTimestep(uint64_t timestep);
@@ -110,6 +112,10 @@ private:
     std::shared_ptr<RenderingData> _cudaRenderingData;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     std::shared_ptr<DataTO> _cudaAccessTO;
+
+    mutable std::mutex _mutexForStatistics;
+    std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
+    std::optional<StatisticsData> _statisticsData;
     std::shared_ptr<SimulationStatistics> _simulationStatistics;
 
 

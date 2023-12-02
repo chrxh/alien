@@ -20,6 +20,12 @@ __device__ __host__ inline float toFloat(T value)
 }
 
 template <typename T>
+__device__ __host__ inline float toDouble(T value)
+{
+    return static_cast<double>(value);
+}
+
+template <typename T>
 __device__ __host__ inline int toInt(T value)
 {
     return static_cast<int>(value);

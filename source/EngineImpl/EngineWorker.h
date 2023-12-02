@@ -154,12 +154,6 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _slowDownTimepoint;
     std::optional<std::chrono::microseconds> _slowDownOvershot;
   
-    //statistics data
-    std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
-    mutable std::mutex _mutexForStatistics;
-    StatisticsData _lastStatistics;
-    int _statisticsCounter = 0;
-
     //internals
     void* _cudaResource;
     AccessDataTOCache _dataTOCache;

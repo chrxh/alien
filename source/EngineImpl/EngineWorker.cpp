@@ -10,7 +10,6 @@
 namespace
 {
     std::chrono::milliseconds const FrameTimeout(500);
-    std::chrono::milliseconds const StatisticsUpdate(30);
 }
 
 void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
@@ -24,7 +23,6 @@ void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& gener
     if (_imageResource) {
         _cudaResource = _cudaSimulation->registerImageResource(*_imageResource);
     }
-    updateStatistics();
 }
 
 void EngineWorker::clear()
@@ -194,9 +192,7 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> o
 
 StatisticsData EngineWorker::getStatistics() const
 {
-    std::lock_guard guard(_mutexForStatistics);
-
-    return _lastStatistics;
+    return _cudaSimulation->getStatistics();
 }
 
 void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdate)
@@ -214,7 +210,6 @@ void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdat
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
     _cudaSimulation->addAndSelectSimulationData(dataTO);
-    updateStatistics();
 }
 
 void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate)
@@ -230,7 +225,6 @@ void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& da
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
     _cudaSimulation->setSimulationData(dataTO);
-    updateStatistics();
 }
 
 void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
@@ -245,7 +239,6 @@ void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
     _cudaSimulation->setSimulationData(dataTO);
-    updateStatistics();
 }
 
 void EngineWorker::removeSelectedObjects(bool includeClusters)
@@ -253,7 +246,6 @@ void EngineWorker::removeSelectedObjects(bool includeClusters)
     EngineWorkerGuard access(this);
 
     _cudaSimulation->removeSelectedObjects(includeClusters);
-    updateStatistics();
 }
 
 void EngineWorker::relaxSelectedObjects(bool includeClusters)
@@ -301,8 +293,6 @@ void EngineWorker::changeCell(CellDescription const& changedCell)
     converter.convertDescriptionToTO(dataTO, changedCell);
 
     _cudaSimulation->changeInspectedSimulationData(dataTO);
-
-    updateStatistics();
 }
 
 void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
@@ -321,10 +311,7 @@ void EngineWorker::calcTimesteps(uint64_t timesteps)
 {
     EngineWorkerGuard access(this);
 
-    for (uint64_t i = 0; i < timesteps; ++i) {
-        _cudaSimulation->calcTimestep();
-    }
-    updateStatistics();
+    _cudaSimulation->calcTimestep(timesteps, true);
 }
 
 void EngineWorker::applyCataclysm(int power)
@@ -427,8 +414,6 @@ void EngineWorker::removeSelection()
 {
     EngineWorkerGuard access(this);
     _cudaSimulation->removeSelection();
-
-    updateStatistics();
 }
 
 void EngineWorker::updateSelection()
@@ -441,16 +426,12 @@ void EngineWorker::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const
 {
     EngineWorkerGuard access(this);
     _cudaSimulation->shallowUpdateSelectedObjects(updateData);
-
-    updateStatistics();
 }
 
 void EngineWorker::colorSelectedObjects(unsigned char color, bool includeClusters)
 {
     EngineWorkerGuard access(this);
     _cudaSimulation->colorSelectedObjects(color, includeClusters);
-
-    updateStatistics();
 }
 
 void EngineWorker::reconnectSelectedObjects()
@@ -475,12 +456,7 @@ void EngineWorker::runThreadLoop()
 
             if (!_syncSimulationWithRendering && _accessState == 0) {
                 if (_isSimulationRunning.load()) {
-                    _cudaSimulation->calcTimestep();
-
-                    if (++_statisticsCounter == 3) {  //for performance reasons...
-                        updateStatistics(true);
-                        _statisticsCounter = 0;
-                    }
+                    _cudaSimulation->calcTimestep(1, false);
                 }
                 measureTPS();
                 slowdownTPS();
@@ -527,19 +503,7 @@ DataTO EngineWorker::provideTO()
 
 void EngineWorker::resetTimeIntervalStatistics()
 {
-    std::lock_guard guard(_mutexForStatistics);
     _cudaSimulation->resetTimeIntervalStatistics();
-}
-
-void EngineWorker::updateStatistics(bool afterMinDuration)
-{
-    auto now = std::chrono::steady_clock::now();
-    if (!afterMinDuration  || !_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
-
-        std::lock_guard guard(_mutexForStatistics);
-        _lastStatistics = _cudaSimulation->getStatistics();
-        _lastStatisticsUpdateTime = now;
-    }
 }
 
 void EngineWorker::processJobs()
