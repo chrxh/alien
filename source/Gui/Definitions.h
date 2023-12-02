@@ -154,9 +154,6 @@ using GenomeEditorWindow = std::shared_ptr<_GenomeEditorWindow>;
 class _RadiationSourcesWindow;
 using RadiationSourcesWindow = std::shared_ptr<_RadiationSourcesWindow>;
 
-class _BalancerController;
-using BalancerController = std::shared_ptr<_BalancerController>;
-
 class _ChangeColorDialog;
 using ChangeColorDialog = std::shared_ptr<_ChangeColorDialog>;
 

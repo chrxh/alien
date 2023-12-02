@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "EngineInterface/Settings.h"
+#include "EngineInterface/StatisticsData.h"
 
 #include "Definitions.cuh"
 #include "Macros.cuh"
@@ -11,12 +12,16 @@ public:
     _SimulationKernelsLauncher();
 
     void calcTimestep(Settings const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
-    bool updateSimulationParametersAfterTimestep(Settings& settings, SimulationData const& simulationData);
+    bool updateSimulationParametersAfterTimestep(
+        Settings& settings,
+        SimulationData const& simulationData,
+        StatisticsData const& statistics);  //returns true if parameters have been changed
     void prepareForSimulationParametersChanges(Settings const& settings, SimulationData const& simulationData);
 
 private:
     bool isRigidityUpdateEnabled(Settings const& settings) const;
 
     GarbageCollectorKernelsLauncher _garbageCollector;
+    MaxAgeBalancer _maxAgeBalancer;
 };
 

@@ -1,16 +1,18 @@
-﻿#include <cmath>
-#include "SimulationKernelsLauncher.cuh"
+﻿#include "SimulationKernelsLauncher.cuh"
+
+#include "EngineInterface/SpaceCalculator.h"
 
 #include "SimulationKernels.cuh"
 #include "FlowFieldKernels.cuh"
 #include "GarbageCollectorKernelsLauncher.cuh"
 #include "DebugKernels.cuh"
+#include "MaxAgeBalancer.cuh"
 #include "SimulationStatistics.cuh"
-#include "EngineInterface/SpaceCalculator.h"
 
 _SimulationKernelsLauncher::_SimulationKernelsLauncher()
 {
     _garbageCollector = std::make_shared<_GarbageCollectorKernelsLauncher>();
+    _maxAgeBalancer = std::make_shared<_MaxAgeBalancer>();
 }
 
 namespace 
@@ -90,9 +92,13 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);
 }
 
-bool _SimulationKernelsLauncher::updateSimulationParametersAfterTimestep(Settings& settings, SimulationData const& simulationData)
+bool _SimulationKernelsLauncher::updateSimulationParametersAfterTimestep(
+    Settings& settings,
+    SimulationData const& simulationData,
+    StatisticsData const& statistics)
 {
-    auto changesMade = false;
+    auto result = false;
+
     auto const& worldSizeX = settings.generalSettings.worldSizeX;
     auto const& worldSizeY = settings.generalSettings.worldSizeY;
     SpaceCalculator space({worldSizeX, worldSizeY});
@@ -100,11 +106,11 @@ bool _SimulationKernelsLauncher::updateSimulationParametersAfterTimestep(Setting
         auto& source = settings.simulationParameters.particleSources[i];
         if (source.velX != 0) {
             source.posX += source.velX * settings.simulationParameters.timestepSize;
-            changesMade = true;
+            result = true;
         }
         if (source.velY != 0) {
             source.posY += source.velY * settings.simulationParameters.timestepSize;
-            changesMade = true;
+            result = true;
         }
         auto correctedPosition = space.getCorrectedPosition({source.posX, source.posY});
         source.posX = correctedPosition.x;
@@ -114,11 +120,11 @@ bool _SimulationKernelsLauncher::updateSimulationParametersAfterTimestep(Setting
         auto& spot = settings.simulationParameters.spots[i];
         if (spot.velX != 0) {
             spot.posX += spot.velX * settings.simulationParameters.timestepSize;
-            changesMade = true;
+            result = true;
         }
         if (spot.velY != 0) {
             spot.posY += spot.velY * settings.simulationParameters.timestepSize;
-            changesMade = true;
+            result = true;
         }
         auto correctedPosition = space.getCorrectedPosition({spot.posX, spot.posY});
         spot.posX = correctedPosition.x;
@@ -135,9 +141,12 @@ bool _SimulationKernelsLauncher::updateSimulationParametersAfterTimestep(Setting
             simulationData.externalEnergy,
             sizeof(ColorVector<float>),
             cudaMemcpyDeviceToHost));
-        changesMade = true;
+        result = true;
     }
-    return changesMade;
+
+    result |= _maxAgeBalancer->balance(settings.simulationParameters, statistics, simulationData.timestep);
+
+    return result;
 }
 
 void _SimulationKernelsLauncher::prepareForSimulationParametersChanges(Settings const& settings, SimulationData const& data)

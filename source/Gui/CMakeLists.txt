@@ -13,8 +13,6 @@ PUBLIC
     AlienWindow.h
     AutosaveController.cpp
     AutosaveController.h
-    BalancerController.cpp
-    BalancerController.h
     BrowserWindow.cpp
     BrowserWindow.h
     CellFunctionStrings.h
