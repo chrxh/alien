@@ -209,8 +209,8 @@ void _MainWindow::mainLoop()
         case _StartupController::State::LoadingControls:
             processLoadingControls();
             break;
-        case _StartupController::State::FinishedLoading:
-            processFinishedLoading();
+        case _StartupController::State::Ready:
+            processReady();
             break;
         default:
             THROW_NOT_IMPLEMENTED();
@@ -319,7 +319,7 @@ void _MainWindow::processLoadingControls()
     renderSimulation();
 }
 
-void _MainWindow::processFinishedLoading()
+void _MainWindow::processReady()
 {
     ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10);

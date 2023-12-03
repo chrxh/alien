@@ -102,11 +102,11 @@ void _StartupController::process()
         auto alphaFactor = toFloat(millisecSinceActivation) / FadeInDuration;
         ImGui::GetStyle().Alpha = alphaFactor;
         if (alphaFactor == 1.0f) {
-            _state = State::FinishedLoading;
+            _state = State::Ready;
         }
     }
 
-    if (_state == State::FinishedLoading) {
+    if (_state == State::Ready) {
         printOverlayMessage(Const::AutosaveFileWithoutPath);
         return;
     }
