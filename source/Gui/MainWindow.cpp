@@ -200,10 +200,10 @@ void _MainWindow::mainLoop()
         case _StartupController::State::Unintialized:
             processUninitialized();
             break;
-        case _StartupController::State::RequestLoading:
+        case _StartupController::State::LoadSimulation:
             processRequestLoading();
             break;
-        case _StartupController::State::LoadingSimulation:
+        case _StartupController::State::FadeOutLoadingScreen:
             processLoadingSimulation();
             break;
         case _StartupController::State::LoadingControls:

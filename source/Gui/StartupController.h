@@ -14,8 +14,8 @@ public:
     enum class State
     {
         Unintialized,
-        RequestLoading,
-        LoadingSimulation,
+        LoadSimulation,
+        FadeOutLoadingScreen,
         LoadingControls,
         Ready
     };
@@ -24,7 +24,7 @@ public:
     void activate();
 
 private:
-    void processWindow();
+    void processLoadingScreen();
 
     void drawGrid(float yPos, float alpha);
 
