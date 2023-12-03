@@ -17,7 +17,7 @@ private:
     void processRequestLoading();
     void processLoadingSimulation();
     void processLoadingControls();
-    void processFinishedLoading();
+    void processReady();
 
     void renderSimulation();
 

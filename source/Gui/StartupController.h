@@ -17,7 +17,7 @@ public:
         RequestLoading,
         LoadingSimulation,
         LoadingControls,
-        FinishedLoading
+        Ready
     };
     State getState();
 

@@ -72,3 +72,8 @@ inline IntVector2D toIntVector2D(RealVector2D const& v)
 {
     return {static_cast<int>(v.x), static_cast<int>(v.y)};
 }
+
+inline RealVector2D toRealVector2D(IntVector2D const& v)
+{
+    return {static_cast<float>(v.x), static_cast<float>(v.y)};
+}
