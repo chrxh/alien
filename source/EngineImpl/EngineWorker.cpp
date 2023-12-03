@@ -3,7 +3,7 @@
 #include <chrono>
 
 #include "EngineGpuKernels/TOs.cuh"
-#include "EngineGpuKernels/CudaSimulationFacade.cuh"
+#include "EngineGpuKernels/SimulationCudaFacade.cuh"
 #include "AccessDataTOCache.h"
 #include "DescriptionConverter.h"
 
@@ -18,17 +18,17 @@ void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& gener
     _settings.generalSettings = generalSettings;
     _settings.simulationParameters = parameters;
     _dataTOCache = std::make_shared<_AccessDataTOCache>();
-    _cudaSimulation = std::make_shared<_CudaSimulationFacade>(timestep, _settings);
+    _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, _settings);
 
     if (_imageResource) {
-        _cudaResource = _cudaSimulation->registerImageResource(*_imageResource);
+        _cudaResource = _simulationCudaFacade->registerImageResource(*_imageResource);
     }
 }
 
 void EngineWorker::clear()
 {
     EngineWorkerGuard access(this);
-    return _cudaSimulation->clear();
+    return _simulationCudaFacade->clear();
 }
 
 void EngineWorker::setImageResource(void* image)
@@ -36,15 +36,15 @@ void EngineWorker::setImageResource(void* image)
     GLuint imageId = reinterpret_cast<uintptr_t>(image);
     _imageResource = imageId;
 
-    if (_cudaSimulation) {
+    if (_simulationCudaFacade) {
         EngineWorkerGuard access(this);
-        _cudaResource = _cudaSimulation->registerImageResource(imageId);
+        _cudaResource = _simulationCudaFacade->registerImageResource(imageId);
     }
 }
 
 std::string EngineWorker::getGpuName() const
 {
-    return _CudaSimulationFacade::checkAndReturnGpuInfo().gpuModelName;
+    return _SimulationCudaFacade::checkAndReturnGpuInfo().gpuModelName;
 }
 
 void EngineWorker::tryDrawVectorGraphics(
@@ -56,7 +56,7 @@ void EngineWorker::tryDrawVectorGraphics(
     EngineWorkerGuard access(this, FrameTimeout);
 
     if (!access.isTimeout()) {
-        _cudaSimulation->drawVectorGraphics(
+        _simulationCudaFacade->drawVectorGraphics(
             {rectUpperLeft.x, rectUpperLeft.y},
             {rectLowerRight.x, rectLowerRight.y},
             _cudaResource,
@@ -75,7 +75,7 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
     EngineWorkerGuard access(this, FrameTimeout);
 
     if (!access.isTimeout()) {
-        _cudaSimulation->drawVectorGraphics(
+        _simulationCudaFacade->drawVectorGraphics(
             {rectUpperLeft.x, rectUpperLeft.y},
             {rectLowerRight.x, rectLowerRight.y},
             _cudaResource,
@@ -84,7 +84,7 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
 
         DataTO dataTO = provideTO();
 
-        _cudaSimulation->getOverlayData(
+        _simulationCudaFacade->getOverlayData(
             {toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)},
             int2{toInt(rectLowerRight.x), toInt(rectLowerRight.y)},
             dataTO);
@@ -124,7 +124,7 @@ ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D co
 
     DataTO dataTO = provideTO();
     
-    _cudaSimulation->getSimulationData(
+    _simulationCudaFacade->getSimulationData(
         {rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
     DescriptionConverter converter(_settings.simulationParameters);
@@ -139,7 +139,7 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
 
     DataTO dataTO = provideTO();
     
-    _cudaSimulation->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
+    _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
     DescriptionConverter converter(_settings.simulationParameters);
 
@@ -153,7 +153,7 @@ ClusteredDataDescription EngineWorker::getSelectedClusteredSimulationData(bool i
 
     DataTO dataTO = provideTO();
     
-    _cudaSimulation->getSelectedSimulationData(includeClusters, dataTO);
+    _simulationCudaFacade->getSelectedSimulationData(includeClusters, dataTO);
 
     DescriptionConverter converter(_settings.simulationParameters);
 
@@ -167,7 +167,7 @@ DataDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
 
     DataTO dataTO = provideTO();
     
-    _cudaSimulation->getSelectedSimulationData(includeClusters, dataTO);
+    _simulationCudaFacade->getSelectedSimulationData(includeClusters, dataTO);
 
     DescriptionConverter converter(_settings.simulationParameters);
 
@@ -182,7 +182,7 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> o
 
     DataTO dataTO = provideTO();
     
-    _cudaSimulation->getInspectedSimulationData(objectsIds, dataTO);
+    _simulationCudaFacade->getInspectedSimulationData(objectsIds, dataTO);
 
     DescriptionConverter converter(_settings.simulationParameters);
 
@@ -192,7 +192,7 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> o
 
 StatisticsData EngineWorker::getStatistics() const
 {
-    return _cudaSimulation->getStatistics();
+    return _simulationCudaFacade->getStatistics();
 }
 
 void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdate)
@@ -203,13 +203,13 @@ void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdat
 
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->resizeArraysIfNecessary(arraySizes);
+    _simulationCudaFacade->resizeArraysIfNecessary(arraySizes);
 
     DataTO dataTO = provideTO();
 
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
-    _cudaSimulation->addAndSelectSimulationData(dataTO);
+    _simulationCudaFacade->addAndSelectSimulationData(dataTO);
 }
 
 void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate)
@@ -218,13 +218,13 @@ void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& da
 
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->resizeArraysIfNecessary(converter.getArraySizes(dataToUpdate));
+    _simulationCudaFacade->resizeArraysIfNecessary(converter.getArraySizes(dataToUpdate));
 
     DataTO dataTO = provideTO();
 
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
-    _cudaSimulation->setSimulationData(dataTO);
+    _simulationCudaFacade->setSimulationData(dataTO);
 }
 
 void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
@@ -233,54 +233,54 @@ void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
 
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->resizeArraysIfNecessary(converter.getArraySizes(dataToUpdate));
+    _simulationCudaFacade->resizeArraysIfNecessary(converter.getArraySizes(dataToUpdate));
 
     DataTO dataTO = provideTO();
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
-    _cudaSimulation->setSimulationData(dataTO);
+    _simulationCudaFacade->setSimulationData(dataTO);
 }
 
 void EngineWorker::removeSelectedObjects(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->removeSelectedObjects(includeClusters);
+    _simulationCudaFacade->removeSelectedObjects(includeClusters);
 }
 
 void EngineWorker::relaxSelectedObjects(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->relaxSelectedObjects(includeClusters);
+    _simulationCudaFacade->relaxSelectedObjects(includeClusters);
 }
 
 void EngineWorker::uniformVelocitiesForSelectedObjects(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->uniformVelocitiesForSelectedObjects(includeClusters);
+    _simulationCudaFacade->uniformVelocitiesForSelectedObjects(includeClusters);
 }
 
 void EngineWorker::makeSticky(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->makeSticky(includeClusters);
+    _simulationCudaFacade->makeSticky(includeClusters);
 }
 
 void EngineWorker::removeStickiness(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->removeStickiness(includeClusters);
+    _simulationCudaFacade->removeStickiness(includeClusters);
 }
 
 void EngineWorker::setBarrier(bool value, bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->setBarrier(value, includeClusters);
+    _simulationCudaFacade->setBarrier(value, includeClusters);
 }
 
 void EngineWorker::changeCell(CellDescription const& changedCell)
@@ -292,7 +292,7 @@ void EngineWorker::changeCell(CellDescription const& changedCell)
     DescriptionConverter converter(_settings.simulationParameters);
     converter.convertDescriptionToTO(dataTO, changedCell);
 
-    _cudaSimulation->changeInspectedSimulationData(dataTO);
+    _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
 
 void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
@@ -304,20 +304,20 @@ void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
     DescriptionConverter converter(_settings.simulationParameters);
     converter.convertDescriptionToTO(dataTO, changedParticle);
 
-    _cudaSimulation->changeInspectedSimulationData(dataTO);
+    _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
 
 void EngineWorker::calcTimesteps(uint64_t timesteps)
 {
     EngineWorkerGuard access(this);
 
-    _cudaSimulation->calcTimestep(timesteps, true);
+    _simulationCudaFacade->calcTimestep(timesteps, true);
 }
 
 void EngineWorker::applyCataclysm(int power)
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->applyCataclysm(power);
+    _simulationCudaFacade->applyCataclysm(power);
 }
 
 void EngineWorker::beginShutdown()
@@ -329,7 +329,7 @@ void EngineWorker::endShutdown()
 {
     _isSimulationRunning = false;
     _isShutdown = false;
-    _cudaSimulation.reset();
+    _simulationCudaFacade.reset();
 }
 
 int EngineWorker::getTpsRestriction() const
@@ -350,24 +350,24 @@ float EngineWorker::getTps() const
 
 uint64_t EngineWorker::getCurrentTimestep() const
 {
-    return _cudaSimulation->getCurrentTimestep();
+    return _simulationCudaFacade->getCurrentTimestep();
 }
 
 void EngineWorker::setCurrentTimestep(uint64_t value)
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->setCurrentTimestep(value);
+    _simulationCudaFacade->setCurrentTimestep(value);
     resetTimeIntervalStatistics();
 }
 
 SimulationParameters EngineWorker::getSimulationParameters() const
 {
-    return _cudaSimulation->getSimulationParameters();
+    return _simulationCudaFacade->getSimulationParameters();
 }
 
 void EngineWorker::setSimulationParameters(SimulationParameters const& parameters)
 {
-    _cudaSimulation->setSimulationParameters(parameters);
+    _simulationCudaFacade->setSimulationParameters(parameters);
 }
 
 void EngineWorker::setGpuSettings_async(GpuSettings const& gpuSettings)
@@ -389,61 +389,61 @@ void EngineWorker::applyForce_async(
 void EngineWorker::switchSelection(RealVector2D const& pos, float radius)
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->switchSelection(PointSelectionData{{pos.x, pos.y}, radius});
+    _simulationCudaFacade->switchSelection(PointSelectionData{{pos.x, pos.y}, radius});
 }
 
 void EngineWorker::swapSelection(RealVector2D const& pos, float radius)
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->swapSelection(PointSelectionData{{pos.x, pos.y}, radius});
+    _simulationCudaFacade->swapSelection(PointSelectionData{{pos.x, pos.y}, radius});
 }
 
 SelectionShallowData EngineWorker::getSelectionShallowData()
 {
     EngineWorkerGuard access(this);
-    return _cudaSimulation->getSelectionShallowData();
+    return _simulationCudaFacade->getSelectionShallowData();
 }
 
 void EngineWorker::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->setSelection(AreaSelectionData{{startPos.x, startPos.y}, {endPos.x, endPos.y}});
+    _simulationCudaFacade->setSelection(AreaSelectionData{{startPos.x, startPos.y}, {endPos.x, endPos.y}});
 }
 
 void EngineWorker::removeSelection()
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->removeSelection();
+    _simulationCudaFacade->removeSelection();
 }
 
 void EngineWorker::updateSelection()
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->updateSelection();
+    _simulationCudaFacade->updateSelection();
 }
 
 void EngineWorker::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData)
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->shallowUpdateSelectedObjects(updateData);
+    _simulationCudaFacade->shallowUpdateSelectedObjects(updateData);
 }
 
 void EngineWorker::colorSelectedObjects(unsigned char color, bool includeClusters)
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->colorSelectedObjects(color, includeClusters);
+    _simulationCudaFacade->colorSelectedObjects(color, includeClusters);
 }
 
 void EngineWorker::reconnectSelectedObjects()
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->reconnectSelectedObjects();
+    _simulationCudaFacade->reconnectSelectedObjects();
 }
 
 void EngineWorker::setDetached(bool value)
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->setDetached(value);
+    _simulationCudaFacade->setDetached(value);
 }
 
 void EngineWorker::runThreadLoop()
@@ -456,7 +456,7 @@ void EngineWorker::runThreadLoop()
 
             if (!_syncSimulationWithRendering && _accessState == 0) {
                 if (_isSimulationRunning.load()) {
-                    _cudaSimulation->calcTimestep(1, false);
+                    _simulationCudaFacade->calcTimestep(1, false);
                 }
                 measureTPS();
                 slowdownTPS();
@@ -493,29 +493,29 @@ bool EngineWorker::isSimulationRunning() const
 void EngineWorker::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
     EngineWorkerGuard access(this);
-    _cudaSimulation->testOnly_mutate(cellId, mutationType);
+    _simulationCudaFacade->testOnly_mutate(cellId, mutationType);
 }
 
 DataTO EngineWorker::provideTO()
 {
-    return _dataTOCache->getDataTO(_cudaSimulation->getArraySizes());
+    return _dataTOCache->getDataTO(_simulationCudaFacade->getArraySizes());
 }
 
 void EngineWorker::resetTimeIntervalStatistics()
 {
-    _cudaSimulation->resetTimeIntervalStatistics();
+    _simulationCudaFacade->resetTimeIntervalStatistics();
 }
 
 void EngineWorker::processJobs()
 {
     std::unique_lock<std::mutex> asyncJobsLock(_mutexForAsyncJobs);
     if (_updateGpuSettingsJob) {
-        _cudaSimulation->setGpuConstants(*_updateGpuSettingsJob);
+        _simulationCudaFacade->setGpuConstants(*_updateGpuSettingsJob);
         _updateGpuSettingsJob = std::nullopt;
     }
     if (!_applyForceJobs.empty()) {
         for (auto const& applyForceJob : _applyForceJobs) {
-            _cudaSimulation->applyForce(
+            _simulationCudaFacade->applyForce(
                 {{applyForceJob.start.x, applyForceJob.start.y},
                  {applyForceJob.end.x, applyForceJob.end.y},
                  {applyForceJob.force.x, applyForceJob.force.y},
