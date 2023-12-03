@@ -352,8 +352,9 @@ void _StatisticsWindow::processHistograms()
 
 void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valuesPtr, int fracPartDecimals)
 {
-    auto statisticsHistory = _simController->getStatisticsHistory();
+    auto const& statisticsHistory = _simController->getStatisticsHistory();
     auto const& longtermStatistics = statisticsHistory.getData();
+    std::lock_guard lock(statisticsHistory.getMutex());
 
     //std::vector<DataPointCollection> longtermStatistics;//= statisticsHistory->getData();
     //longtermStatistics.emplace_back(DataPointCollection());
