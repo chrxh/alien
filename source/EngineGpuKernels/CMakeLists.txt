@@ -13,8 +13,6 @@ add_library(alien_engine_gpu_kernels_lib
     ConstructorProcessor.cuh
     CudaMemoryManager.cuh
     CudaNumberGenerator.cuh
-    CudaSimulationFacade.cu
-    CudaSimulationFacade.cuh
     DataAccessKernels.cu
     DataAccessKernels.cuh
     DataAccessKernelsLauncher.cu
@@ -69,6 +67,8 @@ add_library(alien_engine_gpu_kernels_lib
     SelectionResult.cuh
     SensorProcessor.cuh
     ShapeGenerator.cuh
+    SimulationCudaFacade.cu
+    SimulationCudaFacade.cuh
     SimulationData.cu
     SimulationData.cuh
     SimulationKernels.cu

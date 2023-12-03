@@ -3,7 +3,7 @@
 #include "EngineInterface/CellFunctionConstants.h"
 
 #include "CellFunctionProcessor.cuh"
-#include "CudaSimulationFacade.cuh"
+#include "SimulationCudaFacade.cuh"
 #include "SimulationStatistics.cuh"
 #include "CellConnectionProcessor.cuh"
 #include "MutationProcessor.cuh"

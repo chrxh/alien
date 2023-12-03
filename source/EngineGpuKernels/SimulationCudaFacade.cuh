@@ -22,7 +22,7 @@
 
 struct cudaGraphicsResource;
 
-class _CudaSimulationFacade
+class _SimulationCudaFacade
 {
 public:
     struct GpuInfo
@@ -32,8 +32,8 @@ public:
     };
     static GpuInfo checkAndReturnGpuInfo();
 
-    _CudaSimulationFacade(uint64_t timestep, Settings const& settings);
-    ~_CudaSimulationFacade();
+    _SimulationCudaFacade(uint64_t timestep, Settings const& settings);
+    ~_SimulationCudaFacade();
 
     void* registerImageResource(GLuint image);
 

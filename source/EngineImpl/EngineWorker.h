@@ -119,7 +119,7 @@ private:
     void measureTPS();
     void slowdownTPS();
 
-    CudaSimulationFacade _cudaSimulation;
+    CudaSimulationFacade _simulationCudaFacade;
 
     //settings
     Settings _settings;
