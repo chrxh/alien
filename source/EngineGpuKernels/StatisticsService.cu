@@ -8,6 +8,8 @@ void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatis
 {
     auto& data = history.getData();
     if (!lastData || toDouble(timestep) - data.back().time > longtermTimestepDelta) {
+        std::lock_guard lock(history.getMutex());
+
         auto newDataPoint = StatisticsConverterService::convert(statisticsToAdd, timestep, lastData, lastTimestep);
         newDataPoint.time = toDouble(timestep);
         data.emplace_back(newDataPoint);

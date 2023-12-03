@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <vector>
 
 #include "DataPointCollection.h"
@@ -8,9 +9,11 @@
 class StatisticsHistory
 {
 public:
+    std::mutex& getMutex() const;
     std::vector<DataPointCollection>& getData();
     std::vector<DataPointCollection> const& getData() const;
 
 private:
-    std::vector<DataPointCollection> _data = {DataPointCollection()};
+    mutable std::mutex _mutex;
+    std::vector<DataPointCollection> _data;
 };
