@@ -50,11 +50,6 @@ _StatisticsWindow::~_StatisticsWindow()
     GlobalSettings::getInstance().setIntState("windows.statistics.plot type", _plotType);
 }
 
-void _StatisticsWindow::reset()
-{
-    _liveStatistics = TimelineLiveStatistics();
-}
-
 void _StatisticsWindow::processIntern()
 {
     if (ImGui::BeginTabBar("##Statistics", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
