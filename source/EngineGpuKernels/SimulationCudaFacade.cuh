@@ -76,7 +76,7 @@ public:
 
     RawStatisticsData getRawStatistics();
     void updateStatistics();
-    StatisticsHistory getStatisticsHistory() const;
+    StatisticsHistory const& getStatisticsHistory() const;
 
     void resetTimeIntervalStatistics();
     uint64_t getCurrentTimestep() const;

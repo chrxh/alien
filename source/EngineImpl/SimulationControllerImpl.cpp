@@ -317,7 +317,7 @@ RawStatisticsData _SimulationControllerImpl::getRawStatistics() const
     return _worker.getRawStatistics();
 }
 
-StatisticsHistory _SimulationControllerImpl::getStatisticsHistory() const
+StatisticsHistory const& _SimulationControllerImpl::getStatisticsHistory() const
 {
     return _worker.getStatisticsHistory();
 }

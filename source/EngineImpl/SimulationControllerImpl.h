@@ -97,7 +97,7 @@ public:
     GeneralSettings getGeneralSettings() const override;
     IntVector2D getWorldSize() const override;
     RawStatisticsData getRawStatistics() const override;
-    StatisticsHistory getStatisticsHistory() const override;
+    StatisticsHistory const& getStatisticsHistory() const override;
 
     std::optional<int> getTpsRestriction() const override;
     void setTpsRestriction(std::optional<int> const& value) override;
