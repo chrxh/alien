@@ -42,7 +42,7 @@ _StartupController::_StartupController(
 void _StartupController::process()
 {
     if (_state == State::Unintialized) {
-        processWindow();
+        processLoadingScreen();
         auto now = std::chrono::steady_clock::now();
         auto millisecSinceStartup =
             std::chrono::duration_cast<std::chrono::milliseconds>(now - *_startupTimepoint).count();
@@ -52,7 +52,7 @@ void _StartupController::process()
         return;
     }
 
-    if (_state == State::RequestLoading) {
+    if (_state == State::LoadSimulation) {
         DeserializedSimulation deserializedSim;
         if (!SerializerService::deserializeSimulationFromFiles(deserializedSim, Const::AutosaveFile)) {
             MessageDialog::getInstance().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
@@ -72,12 +72,12 @@ void _StartupController::process()
         _temporalControlWindow->onSnapshot();
 
         _lastActivationTimepoint = std::chrono::steady_clock::now();
-        _state = State::LoadingSimulation;
-        processWindow();
+        _state = State::FadeOutLoadingScreen;
+        processLoadingScreen();
         return;
     }
 
-    if (_state == State::LoadingSimulation) {
+    if (_state == State::FadeOutLoadingScreen) {
         auto now = std::chrono::steady_clock::now();
         auto millisecSinceActivation =
             std::chrono::duration_cast<std::chrono::milliseconds>(now - *_lastActivationTimepoint).count();
@@ -85,7 +85,7 @@ void _StartupController::process()
         auto alphaFactor = 1.0f - toFloat(millisecSinceActivation) / FadeOutDuration;
 
         ImGui::GetStyle().Alpha = alphaFactor;
-        processWindow();
+        processLoadingScreen();
 
         if (alphaFactor == 0.0f) {
             _state = State::LoadingControls;
@@ -119,10 +119,10 @@ auto _StartupController::getState() -> State
 
 void _StartupController::activate()
 {
-    _state = State::RequestLoading;
+    _state = State::LoadSimulation;
 }
 
-void _StartupController::processWindow()
+void _StartupController::processLoadingScreen()
 {
     auto styleRep = StyleRepository::getInstance();
     auto center = ImGui::GetMainViewport()->GetCenter();
