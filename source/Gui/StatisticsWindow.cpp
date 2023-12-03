@@ -353,17 +353,20 @@ void _StatisticsWindow::processHistograms()
 void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valuesPtr, int fracPartDecimals)
 {
     auto const& statisticsHistory = _simController->getStatisticsHistory();
-    auto const& longtermStatistics = statisticsHistory.getData();
+
     std::lock_guard lock(statisticsHistory.getMutex());
+    auto longtermStatistics = &statisticsHistory.getData();
 
-    //std::vector<DataPointCollection> longtermStatistics;//= statisticsHistory->getData();
-    //longtermStatistics.emplace_back(DataPointCollection());
+    std::vector dummy = {DataPointCollection()};
+    if (longtermStatistics->empty()) {
+        longtermStatistics = &dummy;
+    }
 
-    auto count = _live ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(longtermStatistics.size());
-    auto startTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : longtermStatistics.front().time;
-    auto endTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time : longtermStatistics.back().time;
-    auto values = _live ? &(_liveStatistics.dataPointCollectionHistory[0].*valuesPtr) : &(longtermStatistics[0].*valuesPtr);
-    auto timePoints = _live ? &_liveStatistics.dataPointCollectionHistory[0].time : &longtermStatistics[0].time;
+    auto count = _live ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(longtermStatistics->size());
+    auto startTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : longtermStatistics->front().time;
+    auto endTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time : longtermStatistics->back().time;
+    auto values = _live ? &(_liveStatistics.dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
+    auto timePoints = _live ? &_liveStatistics.dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
 
     switch (_plotType) {
     case 0:

@@ -6,9 +6,9 @@
 
 void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatistics const& statisticsToAdd, uint64_t timestep)
 {
+    std::lock_guard lock(history.getMutex());
     auto& data = history.getData();
-    if (!lastData || toDouble(timestep) - data.back().time > longtermTimestepDelta) {
-        std::lock_guard lock(history.getMutex());
+    if (!lastData || data.empty() || toDouble(timestep) - data.back().time > longtermTimestepDelta) {
 
         auto newDataPoint = StatisticsConverterService::convert(statisticsToAdd, timestep, lastData, lastTimestep);
         newDataPoint.time = toDouble(timestep);
@@ -30,4 +30,19 @@ void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatis
             longtermTimestepDelta *= 2;
         }
     }
+}
+
+void _StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep)
+{
+    std::lock_guard lock(history.getMutex());
+    auto& data = history.getData();
+    
+    std::vector<DataPointCollection> newData;
+    newData.reserve(data.size());
+    for (size_t i = 0; i < data.size(); ++i) {
+        if (data.at(i).time < timestep) {
+            newData.emplace_back(data.at(i));
+        }
+    }
+    data.swap(newData);
 }

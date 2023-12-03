@@ -82,7 +82,6 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, Settings const& 
 
     //default array sizes for empty simulation (will be resized later if not sufficient)
     resizeArrays({100000, 100000, 100000});
-    updateStatistics();
 }
 
 _SimulationCudaFacade::~_SimulationCudaFacade()
@@ -442,8 +441,11 @@ uint64_t _SimulationCudaFacade::getCurrentTimestep() const
 
 void _SimulationCudaFacade::setCurrentTimestep(uint64_t timestep)
 {
-    std::lock_guard lock(_mutexForSimulationData);
-    _cudaSimulationData->timestep = timestep;
+    {
+        std::lock_guard lock(_mutexForSimulationData);
+        _cudaSimulationData->timestep = timestep;
+    }
+    _statisticsService->resetTime(_statisticsHistory, timestep);
 }
 
 void _SimulationCudaFacade::clear()
