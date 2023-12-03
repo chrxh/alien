@@ -2,6 +2,8 @@
 <a href="https://alien-project.org" target="_blank">ALIEN - Explore worlds of artificial life</a>
 </h1>
 
+![image](https://github.com/chrxh/alien/assets/73127001/169b4be7-d70e-4e0e-8bf7-7a4d72d29868)
+
 <h1 align="center">
 <img src="img/alien.png" width=100%>
 </h1>
