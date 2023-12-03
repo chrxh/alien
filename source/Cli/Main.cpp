@@ -78,7 +78,7 @@ int main(int argc, char** argv)
         //write output statistics file
         if (!statisticsFilename.empty()) {
             auto timestep = simController->getCurrentTimestep();
-            auto statistics = simController->getStatistics();
+            auto statistics = simController->getRawStatistics();
             if (!ExportService::exportStatistics(timestep, statistics, statisticsFilename)) {
                 std::cout << "Could not write to statistics file." << std::endl;
                 return 1;

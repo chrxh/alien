@@ -3,8 +3,9 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <memory>
+#include <vector>
 
-#include "Base/Definitions.h"
 #include "CellFunctionConstants.h"
 
 struct SimulationParameters;
@@ -25,7 +26,7 @@ using SimulationController = std::shared_ptr<_SimulationController>;
 
 struct TimelineStatistics;
 struct HistogramData;
-struct StatisticsData;
+struct RawStatisticsData;
 
 class SpaceCalculator;
 
@@ -33,3 +34,6 @@ class _ShapeGenerator;
 using ShapeGenerator = std::shared_ptr<_ShapeGenerator>;
 
 class ShapeGeneratorResult;
+
+class _StatisticsHistory;
+using StatisticsHistory = std::shared_ptr<_StatisticsHistory>;

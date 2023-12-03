@@ -5,7 +5,7 @@
 #include <cuda/helper_cuda.h>
 
 #include "CudaMemoryManager.cuh"
-#include "Swap.cuh"
+#include "Util.cuh"
 #include "Base.cuh"
 
 namespace Const
@@ -125,8 +125,8 @@ public:
 
     __device__ __inline__ void swapContent(Array& other)
     {
-        swap(*_numEntries, *other._numEntries);
-        swap(*_data, *other._data);
+        swapValues(*_numEntries, *other._numEntries);
+        swapValues(*_data, *other._data);
     }
 
     __device__ __inline__ void reset() { *_numEntries = 0; }

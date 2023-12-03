@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "EngineInterface/Settings.h"
-#include "EngineInterface/StatisticsData.h"
+#include "EngineInterface/RawStatisticsData.h"
 
 #include "Definitions.cuh"
 #include "Macros.cuh"
@@ -15,7 +15,7 @@ public:
     bool updateSimulationParametersAfterTimestep(
         Settings& settings,
         SimulationData const& simulationData,
-        StatisticsData const& statistics);  //returns true if parameters have been changed
+        RawStatisticsData const& statistics);  //returns true if parameters have been changed
     void prepareForSimulationParametersChanges(Settings const& settings, SimulationData const& simulationData);
 
 private:

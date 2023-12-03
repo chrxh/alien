@@ -14,12 +14,14 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
-#include "EngineInterface/StatisticsData.h"
+#include "EngineInterface/RawStatisticsData.h"
 #include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/MutationType.h"
+#include "EngineInterface/DataPointCollection.h"
+
 #include "EngineGpuKernels/Definitions.h"
 
 #include "Definitions.h"
@@ -56,7 +58,8 @@ public:
     ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters);
     DataDescription getSelectedSimulationData(bool includeClusters);
     DataDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
-    StatisticsData getStatistics() const;
+    RawStatisticsData getRawStatistics() const;
+    StatisticsHistory getStatisticsHistory() const;
 
     void addAndSelectSimulationData(DataDescription const& dataToUpdate);
     void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate);

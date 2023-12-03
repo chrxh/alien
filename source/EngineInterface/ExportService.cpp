@@ -81,7 +81,7 @@ bool ExportService::exportCollectedStatistics(std::vector<DataPointCollection> c
     return true;
 }
 
-bool ExportService::exportStatistics(uint64_t timestep, StatisticsData const& statisticsData, std::string const& filename)
+bool ExportService::exportStatistics(uint64_t timestep, RawStatisticsData const& statisticsData, std::string const& filename)
 {
     std::ofstream file;
     file.open(filename, std::ios_base::out);
