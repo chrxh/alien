@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/StatisticsData.h"
+#include "EngineInterface/RawStatisticsData.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
@@ -51,10 +51,10 @@ private:
     int _plotType = 0;
     bool _maximize = false;
 
-    std::optional<StatisticsData> _lastStatisticsData;
+    std::optional<RawStatisticsData> _lastStatisticsData;
     std::optional<float> _histogramUpperBound;
     std::map<int, std::vector<double>> _cachedTimelines;
 
     TimelineLiveStatistics _liveStatistics;
-    TimelineLongtermStatistics _longtermStatistics;
+//    TimelineLongtermStatistics _longtermStatistics;
 };

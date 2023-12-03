@@ -11,7 +11,7 @@
 #include "CudaMemoryManager.cuh"
 #include "Definitions.cuh"
 #include "HashSet.cuh"
-#include "Swap.cuh"
+#include "Util.cuh"
 
 template<typename T>
 __device__ __host__ inline float toFloat(T value)

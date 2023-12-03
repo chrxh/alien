@@ -190,9 +190,14 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> o
     return result;
 }
 
-StatisticsData EngineWorker::getStatistics() const
+RawStatisticsData EngineWorker::getRawStatistics() const
 {
-    return _simulationCudaFacade->getStatistics();
+    return _simulationCudaFacade->getRawStatistics();
+}
+
+StatisticsHistory EngineWorker::getStatisticsHistory() const
+{
+    return _simulationCudaFacade->getStatisticsHistory();
 }
 
 void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdate)

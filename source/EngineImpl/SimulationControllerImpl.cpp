@@ -312,9 +312,14 @@ IntVector2D _SimulationControllerImpl::getWorldSize() const
     return {_generalSettings.worldSizeX, _generalSettings.worldSizeY};
 }
 
-StatisticsData _SimulationControllerImpl::getStatistics() const
+RawStatisticsData _SimulationControllerImpl::getRawStatistics() const
 {
-    return _worker.getStatistics();
+    return _worker.getRawStatistics();
+}
+
+StatisticsHistory _SimulationControllerImpl::getStatisticsHistory() const
+{
+    return _worker.getStatisticsHistory();
 }
 
 std::optional<int> _SimulationControllerImpl::getTpsRestriction() const

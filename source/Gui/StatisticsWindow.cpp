@@ -13,6 +13,7 @@
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/ExportService.h"
+#include "EngineInterface/StatisticsHistory.h"
 
 #include "StyleRepository.h"
 #include "AlienImGui.h"
@@ -52,7 +53,6 @@ _StatisticsWindow::~_StatisticsWindow()
 void _StatisticsWindow::reset()
 {
     _liveStatistics = TimelineLiveStatistics();
-    _longtermStatistics = TimelineLongtermStatistics();
 }
 
 void _StatisticsWindow::processIntern()
@@ -352,11 +352,14 @@ void _StatisticsWindow::processHistograms()
 
 void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valuesPtr, int fracPartDecimals)
 {
-    auto count = _live ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(_longtermStatistics.dataPointCollectionHistory.size());
-    auto startTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : _longtermStatistics.dataPointCollectionHistory.front().time;
-    auto endTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time : _longtermStatistics.dataPointCollectionHistory.back().time;
-    auto values = _live ? &(_liveStatistics.dataPointCollectionHistory[0].*valuesPtr) : &(_longtermStatistics.dataPointCollectionHistory[0].*valuesPtr);
-    auto timePoints = _live ? &_liveStatistics.dataPointCollectionHistory[0].time : &_longtermStatistics.dataPointCollectionHistory[0].time;
+    //auto statisticsHistory = _simController->getStatisticsHistory();
+    std::vector<DataPointCollection> longtermStatistics;//= statisticsHistory->getData();
+
+    auto count = _live ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(longtermStatistics.size());
+    auto startTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : longtermStatistics.front().time;
+    auto endTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time : longtermStatistics.back().time;
+    auto values = _live ? &(_liveStatistics.dataPointCollectionHistory[0].*valuesPtr) : &(longtermStatistics[0].*valuesPtr);
+    auto timePoints = _live ? &_liveStatistics.dataPointCollectionHistory[0].time : &longtermStatistics[0].time;
 
     switch (_plotType) {
     case 0:
@@ -376,10 +379,9 @@ void _StatisticsWindow::processBackground()
 {
     auto timestep = _simController->getCurrentTimestep();
 
-    _lastStatisticsData = _simController->getStatistics();
+    _lastStatisticsData = _simController->getRawStatistics();
     _liveStatistics.add(_lastStatisticsData->timeline, timestep);
-    _longtermStatistics.add(_lastStatisticsData->timeline, timestep);
-}
+} 
 
 namespace
 {
@@ -531,7 +533,7 @@ void _StatisticsWindow::onSaveStatistics()
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
 
-            if (!ExportService::exportCollectedStatistics(_longtermStatistics.dataPointCollectionHistory, firstFilename.string())) {
+            if (!ExportService::exportCollectedStatistics(_simController->getStatisticsHistory()->getData(), firstFilename.string())) {
                 MessageDialog::getInstance().information("Export statistics", "The statistics could not be saved to the specified file.");
                 return;
             }

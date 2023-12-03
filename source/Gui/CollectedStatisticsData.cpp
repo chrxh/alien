@@ -3,7 +3,8 @@
 #include <cmath>
 #include <imgui.h>
 
-#include "EngineInterface/StatisticsData.h"
+#include "Base/Definitions.h"
+#include "EngineInterface/RawStatisticsData.h"
 
 DataPoint DataPoint::operator+(DataPoint const& other) const
 {

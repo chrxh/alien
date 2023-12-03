@@ -1,7 +1,5 @@
 #include "DataPointCollection.h"
 
-#include "EngineInterface/StatisticsData.h"
-
 DataPoint DataPoint::operator+(DataPoint const& other) const
 {
     DataPoint result;

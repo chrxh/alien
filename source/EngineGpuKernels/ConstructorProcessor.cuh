@@ -8,7 +8,7 @@
 #include "CellConnectionProcessor.cuh"
 #include "MutationProcessor.cuh"
 #include "GenomeDecoder.cuh"
-#include "ShapeGenerator.cuh"
+#include "CudaShapeGenerator.cuh"
 
 class ConstructorProcessor
 {
@@ -222,7 +222,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.isLastNodeOfLastRepetition = result.isLastNode && GenomeDecoder::isLastRepetition(constructor);
     result.hasInfiniteRepetitions = GenomeDecoder::hasInfiniteRepetitions(constructor);
 
-    ShapeGenerator shapeGenerator;
+    CudaShapeGenerator shapeGenerator;
     auto shape = result.genomeHeader.shape % ConstructionShape_Count;
     if (shape != ConstructionShape_Custom) {
         for (int i = 0; i <= constructor.genomeCurrentNodeIndex; ++i) {

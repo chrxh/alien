@@ -95,7 +95,7 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
 bool _SimulationKernelsLauncher::updateSimulationParametersAfterTimestep(
     Settings& settings,
     SimulationData const& simulationData,
-    StatisticsData const& statistics)
+    RawStatisticsData const& statistics)
 {
     auto result = false;
 

@@ -43,6 +43,9 @@ using TestKernelsLauncher = std::shared_ptr<_TestKernelsLauncher>;
 class _MaxAgeBalancer;
 using MaxAgeBalancer = std::shared_ptr<_MaxAgeBalancer>;
 
+class _StatisticsService;
+using StatisticsService = std::shared_ptr<_StatisticsService>;
+
 struct ApplyForceData
 {
     float2 startPos;

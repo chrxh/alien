@@ -12,11 +12,12 @@
 #include <vector_types.h>
 #include <GL/gl.h>
 
-#include "EngineInterface/StatisticsData.h"
+#include "EngineInterface/RawStatisticsData.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/MutationType.h"
+#include "EngineInterface/StatisticsHistory.h"
 
 #include "Definitions.cuh"
 
@@ -73,8 +74,9 @@ public:
 
     ArraySizes getArraySizes() const;
 
-    StatisticsData getStatistics();
+    RawStatisticsData getRawStatistics();
     void updateStatistics();
+    StatisticsHistory getStatisticsHistory() const;
 
     void resetTimeIntervalStatistics();
     uint64_t getCurrentTimestep() const;
@@ -115,9 +117,10 @@ private:
 
     mutable std::mutex _mutexForStatistics;
     std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
-    std::optional<StatisticsData> _statisticsData;
-    std::shared_ptr<SimulationStatistics> _simulationStatistics;
-
+    std::optional<RawStatisticsData> _statisticsData;
+    StatisticsService _statisticsService;
+    StatisticsHistory _statisticsHistory;
+    std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
 
     SimulationKernelsLauncher _simulationKernels;
     DataAccessKernelsLauncher _dataAccessKernels;

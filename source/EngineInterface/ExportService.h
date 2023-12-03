@@ -7,5 +7,5 @@ class ExportService
 {
 public:
     static bool exportCollectedStatistics(std::vector<DataPointCollection> const& dataPoints, std::string const& filename);
-    static bool exportStatistics(uint64_t timestep, StatisticsData const& statisticsData, std::string const& filename);
+    static bool exportStatistics(uint64_t timestep, RawStatisticsData const& statisticsData, std::string const& filename);
 };

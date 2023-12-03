@@ -13,6 +13,7 @@ add_library(alien_engine_gpu_kernels_lib
     ConstructorProcessor.cuh
     CudaMemoryManager.cuh
     CudaNumberGenerator.cuh
+    CudaShapeGenerator.cuh
     DataAccessKernels.cu
     DataAccessKernels.cuh
     DataAccessKernelsLauncher.cu
@@ -66,7 +67,6 @@ add_library(alien_engine_gpu_kernels_lib
     RenderingKernelsLauncher.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
-    ShapeGenerator.cuh
     SimulationCudaFacade.cu
     SimulationCudaFacade.cuh
     SimulationData.cu
@@ -77,17 +77,20 @@ add_library(alien_engine_gpu_kernels_lib
     SimulationKernelsLauncher.cuh
     SimulationStatistics.cuh
     SpotCalculator.cuh
+    StatisticsService.cu
+    StatisticsService.cuh
     StatisticsKernelsLauncher.cu
     StatisticsKernelsLauncher.cuh
     StatisticsKernels.cu
     StatisticsKernels.cuh
-    Swap.cuh
     TestKernels.cu
     TestKernels.cuh
     TestKernelsLauncher.cu
     TestKernelsLauncher.cuh
     TransmitterProcessor.cuh
-    TOs.cuh)
+    TOs.cuh
+    Util.cuh
+    )
 
 target_link_libraries(alien_engine_gpu_kernels_lib alien_base_lib)
 target_link_libraries(alien_engine_gpu_kernels_lib alien_engine_interface_lib)
