@@ -35,5 +35,4 @@ using ShapeGenerator = std::shared_ptr<_ShapeGenerator>;
 
 class ShapeGeneratorResult;
 
-class _StatisticsHistory;
-using StatisticsHistory = std::shared_ptr<_StatisticsHistory>;
+class StatisticsHistory;

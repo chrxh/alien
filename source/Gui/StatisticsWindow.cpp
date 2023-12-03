@@ -352,8 +352,11 @@ void _StatisticsWindow::processHistograms()
 
 void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valuesPtr, int fracPartDecimals)
 {
-    //auto statisticsHistory = _simController->getStatisticsHistory();
-    std::vector<DataPointCollection> longtermStatistics;//= statisticsHistory->getData();
+    auto statisticsHistory = _simController->getStatisticsHistory();
+    auto const& longtermStatistics = statisticsHistory.getData();
+
+    //std::vector<DataPointCollection> longtermStatistics;//= statisticsHistory->getData();
+    //longtermStatistics.emplace_back(DataPointCollection());
 
     auto count = _live ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(longtermStatistics.size());
     auto startTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : longtermStatistics.front().time;
@@ -533,7 +536,7 @@ void _StatisticsWindow::onSaveStatistics()
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
 
-            if (!ExportService::exportCollectedStatistics(_simController->getStatisticsHistory()->getData(), firstFilename.string())) {
+            if (!ExportService::exportCollectedStatistics(_simController->getStatisticsHistory().getData(), firstFilename.string())) {
                 MessageDialog::getInstance().information("Export statistics", "The statistics could not be saved to the specified file.");
                 return;
             }

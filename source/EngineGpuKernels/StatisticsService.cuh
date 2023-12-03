@@ -6,7 +6,7 @@
 class _StatisticsService
 {
 public:
-    void addDataPoint(StatisticsHistory& history, TimelineStatistics const& newData, uint64_t timestep);
+    void addDataPoint(StatisticsHistory& history, TimelineStatistics const& statisticsToAdd, uint64_t timestep);
 
 private:
     double longtermTimestepDelta = 10.0;

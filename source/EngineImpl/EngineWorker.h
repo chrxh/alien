@@ -59,7 +59,7 @@ public:
     DataDescription getSelectedSimulationData(bool includeClusters);
     DataDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
     RawStatisticsData getRawStatistics() const;
-    StatisticsHistory getStatisticsHistory() const;
+    StatisticsHistory const& getStatisticsHistory() const;
 
     void addAndSelectSimulationData(DataDescription const& dataToUpdate);
     void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate);

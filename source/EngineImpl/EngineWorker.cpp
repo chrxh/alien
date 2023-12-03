@@ -195,7 +195,7 @@ RawStatisticsData EngineWorker::getRawStatistics() const
     return _simulationCudaFacade->getRawStatistics();
 }
 
-StatisticsHistory EngineWorker::getStatisticsHistory() const
+StatisticsHistory const& EngineWorker::getStatisticsHistory() const
 {
     return _simulationCudaFacade->getStatisticsHistory();
 }

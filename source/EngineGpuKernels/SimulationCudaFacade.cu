@@ -417,11 +417,14 @@ void _SimulationCudaFacade::updateStatistics()
     _statisticsKernels->updateStatistics(_settings.gpuSettings, getSimulationDataIntern(), *_cudaSimulationStatistics);
     syncAndCheck();
 
-    std::lock_guard lock(_mutexForStatistics);
-    _statisticsData = _cudaSimulationStatistics->getStatistics();
+    {
+        std::lock_guard lock(_mutexForStatistics);
+        _statisticsData = _cudaSimulationStatistics->getStatistics();
+    }
+    _statisticsService->addDataPoint(_statisticsHistory, _statisticsData->timeline, getCurrentTimestep());
 }
 
-StatisticsHistory _SimulationCudaFacade::getStatisticsHistory() const
+StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
 {
     return _statisticsHistory;
 }

@@ -45,6 +45,8 @@ add_library(alien_engine_interface_lib
     SimulationParametersSpotValues.h
     SpaceCalculator.cpp
     SpaceCalculator.h
+    StatisticsConverterService.cpp
+    StatisticsConverterService.h
     StatisticsHistory.cpp
     StatisticsHistory.h
     ZoomLevels.h)
