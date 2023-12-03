@@ -36,6 +36,14 @@ void _StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep
 {
     std::lock_guard lock(history.getMutex());
     auto& data = history.getData();
+
+    auto prevTimestep = data.back().time;
+    if (!data.empty() && prevTimestep > 0) {
+        longtermTimestepDelta *= toDouble(timestep) / prevTimestep;
+        if (longtermTimestepDelta < 10.0) {
+            longtermTimestepDelta = 10.0;
+        }
+    }
     
     std::vector<DataPointCollection> newData;
     newData.reserve(data.size());

@@ -357,6 +357,7 @@ void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*val
     std::lock_guard lock(statisticsHistory.getMutex());
     auto longtermStatistics = &statisticsHistory.getData();
 
+    //create dummy history if empty
     std::vector dummy = {DataPointCollection()};
     if (longtermStatistics->empty()) {
         longtermStatistics = &dummy;
