@@ -15,8 +15,6 @@ public:
     _StatisticsWindow(SimulationController const& simController);
     ~_StatisticsWindow();
 
-    void reset();
-
 private:
     void processIntern();
     void processTimelines();

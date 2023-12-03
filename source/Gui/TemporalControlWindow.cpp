@@ -165,7 +165,6 @@ void _TemporalControlWindow::processRestoreButton()
 {
     ImGui::BeginDisabled(!_snapshot);
     if (AlienImGui::ToolbarButton(ICON_FA_UNDO)) {
-        _statisticsWindow->reset();
         applySnapshot(*_snapshot);
         _simController->removeSelection();
         _history.clear();

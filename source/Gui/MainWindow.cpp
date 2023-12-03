@@ -764,7 +764,6 @@ void _MainWindow::onOpenSimulation()
                 printOverlayMessage("Loading ...");
                 delayedExecution([=, this] {
                     _simController->closeSimulation();
-                    _statisticsWindow->reset();
 
                     std::optional<std::string> errorMessage;
                     try {
@@ -831,9 +830,4 @@ void _MainWindow::onRunSimulation()
 void _MainWindow::onPauseSimulation()
 {
     _simController->pauseSimulation();
-}
-
-void _MainWindow::reset()
-{
-    _statisticsWindow->reset();
 }

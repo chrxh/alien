@@ -856,7 +856,6 @@ void _BrowserWindow::onDownloadItem(RemoteSimulationData* sim)
             }
 
             _simController->closeSimulation();
-            _statisticsWindow->reset();
 
             std::optional<std::string> errorMessage;
             try {

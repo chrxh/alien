@@ -31,9 +31,6 @@ private:
     void onRunSimulation();
     void onPauseSimulation();
 
-    void processExitDialog();
-    void reset();
-
     GLFWwindow* _window;
     GuiLogger _logger;
 
