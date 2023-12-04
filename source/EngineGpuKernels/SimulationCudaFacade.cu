@@ -428,6 +428,12 @@ StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
     return _statisticsHistory;
 }
 
+void _SimulationCudaFacade::setStatisticsHistory(StatisticsHistoryData const& data)
+{
+    std::lock_guard lock(_statisticsHistory.getMutex());
+    _statisticsHistory.getData() = data;
+}
+
 void _SimulationCudaFacade::resetTimeIntervalStatistics()
 {
     _cudaSimulationStatistics->resetAccumulatedStatistics();

@@ -5,11 +5,13 @@
 #include "Definitions.h"
 #include "AuxiliaryData.h"
 #include "Descriptions.h"
+#include "StatisticsHistory.h"
 
 struct DeserializedSimulation
 {
     AuxiliaryData auxiliaryData;
     ClusteredDataDescription mainData;
+    StatisticsHistoryData statisticsHistory;
 };
 
 struct SerializedSimulation
@@ -49,6 +51,9 @@ private:
 
     static void serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream);
     static void deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream);
+
+    static void serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream);
+    static void deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream);
 
     static bool wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input);
     static bool unwrapGenome(std::vector<uint8_t>& output, ClusteredDataDescription const& input);

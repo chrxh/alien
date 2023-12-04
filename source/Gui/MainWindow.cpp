@@ -772,6 +772,7 @@ void _MainWindow::onOpenSimulation()
                             deserializedData.auxiliaryData.generalSettings,
                             deserializedData.auxiliaryData.simulationParameters);
                         _simController->setClusteredSimulationData(deserializedData.mainData);
+                        _simController->setStatisticsHistory(deserializedData.statisticsHistory);
                     } catch (CudaMemoryAllocationException const& exception) {
                         errorMessage = exception.what();
                     } catch (...) {
@@ -814,6 +815,7 @@ void _MainWindow::onSaveSimulation()
                 sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
                 sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
                 sim.mainData = _simController->getClusteredSimulationData();
+                sim.statisticsHistory = _simController->getStatisticsHistory().getCopiedData();
 
                 if (!SerializerService::serializeSimulationToFiles(firstFilename.string(), sim)) {
                     MessageDialog::getInstance().information("Save simulation", "The simulation could not be saved to the specified file.");

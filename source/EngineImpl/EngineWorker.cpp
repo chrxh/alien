@@ -200,6 +200,11 @@ StatisticsHistory const& EngineWorker::getStatisticsHistory() const
     return _simulationCudaFacade->getStatisticsHistory();
 }
 
+void EngineWorker::setStatisticsHistory(StatisticsHistoryData const& data)
+{
+    _simulationCudaFacade->setStatisticsHistory(data);
+}
+
 void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdate)
 {
     DescriptionConverter converter(_settings.simulationParameters);

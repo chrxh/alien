@@ -6,14 +6,18 @@
 #include "DataPointCollection.h"
 #include "Definitions.h"
 
+using StatisticsHistoryData = std::vector<DataPointCollection>;
+
 class StatisticsHistory
 {
 public:
+    StatisticsHistoryData getCopiedData() const;
+
     std::mutex& getMutex() const;
-    std::vector<DataPointCollection>& getData();
-    std::vector<DataPointCollection> const& getData() const;
+    StatisticsHistoryData& getData();
+    StatisticsHistoryData const& getData() const;
 
 private:
     mutable std::mutex _mutex;
-    std::vector<DataPointCollection> _data;
+    StatisticsHistoryData _data;
 };

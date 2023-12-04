@@ -322,6 +322,11 @@ StatisticsHistory const& _SimulationControllerImpl::getStatisticsHistory() const
     return _worker.getStatisticsHistory();
 }
 
+void _SimulationControllerImpl::setStatisticsHistory(StatisticsHistoryData const& data)
+{
+    _worker.setStatisticsHistory(data);
+}
+
 std::optional<int> _SimulationControllerImpl::getTpsRestriction() const
 {
     auto result = _worker.getTpsRestriction();
