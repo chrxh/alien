@@ -65,6 +65,7 @@ int main(int argc, char** argv)
         simData.auxiliaryData.timestep = static_cast<uint32_t>(simController->getCurrentTimestep());
         simData.mainData = simController->getClusteredSimulationData();
         simData.auxiliaryData.simulationParameters = simController->getSimulationParameters();
+        simData.statisticsHistory = simController->getStatisticsHistory().getCopiedData();
         if (outputFilename.empty()) {
             std::cout << "No output file given." << std::endl;
             return 1;

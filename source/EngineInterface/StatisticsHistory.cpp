@@ -1,17 +1,22 @@
 #include "StatisticsHistory.h"
 
 
+StatisticsHistoryData StatisticsHistory::getCopiedData() const
+{
+    return _data;
+}
+
 std::mutex& StatisticsHistory::getMutex() const
 {
     return _mutex;
 }
 
-std::vector<DataPointCollection>& StatisticsHistory::getData()
+StatisticsHistoryData& StatisticsHistory::getData()
 {
     return _data;
 }
 
-std::vector<DataPointCollection> const& StatisticsHistory::getData() const
+StatisticsHistoryData const& StatisticsHistory::getData() const
 {
     return _data;
 }

@@ -68,5 +68,6 @@ void _AutosaveController::onSave()
     sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
     sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
     sim.mainData = _simController->getClusteredSimulationData();
+    sim.statisticsHistory = _simController->getStatisticsHistory().getCopiedData();
     SerializerService::serializeSimulationToFiles(Const::AutosaveFile, sim);
 }

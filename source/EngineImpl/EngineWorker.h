@@ -20,7 +20,7 @@
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/MutationType.h"
-#include "EngineInterface/DataPointCollection.h"
+#include "EngineInterface/StatisticsHistory.h"
 
 #include "EngineGpuKernels/Definitions.h"
 
@@ -60,6 +60,7 @@ public:
     DataDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
     RawStatisticsData getRawStatistics() const;
     StatisticsHistory const& getStatisticsHistory() const;
+    void setStatisticsHistory(StatisticsHistoryData const& data);
 
     void addAndSelectSimulationData(DataDescription const& dataToUpdate);
     void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate);

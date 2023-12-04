@@ -16,7 +16,7 @@ public:
     ~_StatisticsWindow();
 
 private:
-    void processIntern();
+    void processIntern() override;
     void processTimelines();
     void processTimelineStatistics();
 
@@ -54,5 +54,4 @@ private:
     std::map<int, std::vector<double>> _cachedTimelines;
 
     TimelineLiveStatistics _liveStatistics;
-//    TimelineLongtermStatistics _longtermStatistics;
 };
