@@ -1046,6 +1046,13 @@ void SerializerService::deserializeSimulationParameters(SimulationParameters& pa
 
 namespace
 {
+    std::string toString(double value)
+    {
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(9) << value;
+        return ss.str();        
+    }
+
     void loadSave(SerializationTask task, std::vector<std::string>& serializedData, int startIndex, double& value)
     {
         if (task == SerializationTask::Load) {
@@ -1053,7 +1060,7 @@ namespace
                 value = std::stod(serializedData.at(startIndex));
             }
         } else {
-            serializedData.emplace_back(std::to_string(value));
+            serializedData.emplace_back(toString(value));
         }
     }
 
@@ -1063,7 +1070,7 @@ namespace
             for (int i = 0; i < MAX_COLORS; ++i) {
                 auto index = startIndex + i;
                 if (index < serializedData.size()) {
-                    dataPoint.values[index] = std::stod(serializedData.at(i));
+                    dataPoint.values[i] = std::stod(serializedData.at(index));
                 }
             }
             if (startIndex + 7 < serializedData.size()) {
@@ -1071,9 +1078,9 @@ namespace
             }
         } else {
             for (int i = 0; i < MAX_COLORS; ++i) {
-                serializedData.emplace_back(std::to_string(dataPoint.values[i]));
+                serializedData.emplace_back(toString(dataPoint.values[i]));
             }
-            serializedData.emplace_back(std::to_string(dataPoint.summedValues));
+            serializedData.emplace_back(toString(dataPoint.summedValues));
         }
     }
 
@@ -1119,8 +1126,8 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
     writeLabelAllColors("Viruses");
     writeLabelAllColors("Cell connections");
     writeLabelAllColors("Energy particles");
+    writeLabelAllColors("Average genome cells");
     writeLabelAllColors("Total energy");
-    writeLabelAllColors("Genome size");
     writeLabelAllColors("Created cells");
     writeLabelAllColors("Attacks");
     writeLabelAllColors("Muscle activities");
@@ -1141,13 +1148,14 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
     for (auto dataPoints : statistics) {
         std::vector<std::string> entries;
         loadSave(SerializationTask::Save, entries, dataPoints);
-        stream << boost::join(entries, ", ") << std::endl;
+        stream << boost::join(entries, ",") << std::endl;
     }
 }
 
 void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream)
 {
     statistics.clear();
+
     std::vector<std::vector<std::string>> data;
     std::string line;
     std::getline(stream, line); //skip header line
@@ -1156,7 +1164,7 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
         boost::split(entries, line, boost::is_any_of(","));
 
         DataPointCollection dataPoints;
-        loadSave(SerializationTask::Save, entries, dataPoints);
+        loadSave(SerializationTask::Load, entries, dataPoints);
 
         statistics.emplace_back(dataPoints);
     }
