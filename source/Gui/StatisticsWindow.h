@@ -5,7 +5,7 @@
 
 #include "Definitions.h"
 #include "AlienWindow.h"
-#include "CollectedStatisticsData.h"
+#include "TimelineLiveStatistics.h"
 
 struct ImPlotPoint;
 

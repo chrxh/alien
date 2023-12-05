@@ -1,4 +1,4 @@
-#include "CollectedStatisticsData.h"
+#include "TimelineLiveStatistics.h"
 
 #include <cmath>
 #include <imgui.h>
@@ -102,29 +102,4 @@ void TimelineLiveStatistics::add(TimelineStatistics const& data, uint64_t timest
     dataPointCollectionHistory.emplace_back(newDataPoint);
     lastData = data;
     lastTimestep = timestep;
-}
-
-void TimelineLongtermStatistics::add(TimelineStatistics const& data, uint64_t timestep)
-{
-    if (!lastData || toDouble(timestep) - dataPointCollectionHistory.back().time > longtermTimestepDelta) {
-        auto newDataPoint = StatisticsConverterService::convert(data, timestep, lastData, lastTimestep);
-        newDataPoint.time = toDouble(timestep);
-        dataPointCollectionHistory.emplace_back(newDataPoint);
-        lastData = data;
-        lastTimestep = timestep;
-
-        if (dataPointCollectionHistory.size() > 1000) {
-            std::vector<DataPointCollection> newDataPoints;
-            newDataPoints.reserve(dataPointCollectionHistory.size() / 2);
-            for (size_t i = 0; i < (dataPointCollectionHistory.size() - 1) / 2; ++i) {
-                DataPointCollection newDataPoint = (dataPointCollectionHistory.at(i * 2) + dataPointCollectionHistory.at(i * 2 + 1)) / 2.0;
-                newDataPoint.time = dataPointCollectionHistory.at(i * 2).time;
-                newDataPoints.emplace_back(newDataPoint);
-            }
-            newDataPoints.emplace_back(dataPointCollectionHistory.back());
-            dataPointCollectionHistory.swap(newDataPoints);
-
-            longtermTimestepDelta *= 2;
-        }
-    }
 }

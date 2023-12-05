@@ -22,14 +22,3 @@ struct TimelineLiveStatistics
     void truncate();
     void add(TimelineStatistics const& statistics, uint64_t timestep);
 };
-
-struct TimelineLongtermStatistics
-{
-    double longtermTimestepDelta = 10.0;
-
-    std::vector<DataPointCollection> dataPointCollectionHistory;
-    std::optional<TimelineStatistics> lastData;
-    std::optional<uint64_t> lastTimestep;
-
-    void add(TimelineStatistics const& statistics, uint64_t timestep);
-};
