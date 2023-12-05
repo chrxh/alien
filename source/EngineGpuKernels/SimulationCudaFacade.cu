@@ -139,10 +139,13 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
                     cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             }
         }
+        auto now = std::chrono::steady_clock::now();
+        if (!_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
+            _lastStatisticsUpdateTime = now;
+            updateStatistics();
+        }
     }
-    auto now = std::chrono::steady_clock::now();
-    if (forceUpdateStatistics || !_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
-        _lastStatisticsUpdateTime = now;
+    if (forceUpdateStatistics) {
         updateStatistics();
     }
 }

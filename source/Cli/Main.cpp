@@ -49,6 +49,7 @@ int main(int argc, char** argv)
         auto simController = std::make_shared<_SimulationControllerImpl>();
         simController->newSimulation(simData.auxiliaryData.timestep, simData.auxiliaryData.generalSettings, simData.auxiliaryData.simulationParameters);
         simController->setClusteredSimulationData(simData.mainData);
+        simController->setStatisticsHistory(simData.statisticsHistory);
         std::cout << "Device: " << simController->getGpuName() << std::endl;
         std::cout << "Start simulation" << std::endl;
 
