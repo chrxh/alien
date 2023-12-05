@@ -9,12 +9,15 @@ void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatis
     std::lock_guard lock(history.getMutex());
     auto& data = history.getData();
     if (!lastData || data.empty() || toDouble(timestep) - data.back().time > longtermTimestepDelta) {
+        lastData = statisticsToAdd;
+        lastTimestep = timestep;
 
         auto newDataPoint = StatisticsConverterService::convert(statisticsToAdd, timestep, lastData, lastTimestep);
         newDataPoint.time = toDouble(timestep);
+        if (!data.empty() && abs(data.back().time - toDouble(timestep)) < NEAR_ZERO) {
+            data.pop_back();
+        }
         data.emplace_back(newDataPoint);
-        lastData = statisticsToAdd;
-        lastTimestep = timestep;
 
         if (data.size() > 1000) {
             std::vector<DataPointCollection> newData;
