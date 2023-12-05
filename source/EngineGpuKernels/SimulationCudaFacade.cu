@@ -433,8 +433,7 @@ StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
 
 void _SimulationCudaFacade::setStatisticsHistory(StatisticsHistoryData const& data)
 {
-    std::lock_guard lock(_statisticsHistory.getMutex());
-    _statisticsHistory.getData() = data;
+    _statisticsService->rewriteHistory(_statisticsHistory, data, getCurrentTimestep());
 }
 
 void _SimulationCudaFacade::resetTimeIntervalStatistics()

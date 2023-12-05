@@ -18,8 +18,6 @@ PUBLIC
     CellFunctionStrings.h
     ChangeColorDialog.cpp
     ChangeColorDialog.h
-    CollectedStatisticsData.cpp
-    CollectedStatisticsData.h
     CreateUserDialog.cpp
     CreateUserDialog.h
     CreatorWindow.cpp
@@ -117,6 +115,8 @@ PUBLIC
     StyleRepository.h
     TemporalControlWindow.cpp
     TemporalControlWindow.h
+    TimelineLiveStatistics.cpp
+    TimelineLiveStatistics.h
     UiController.cpp
     UiController.h
     UploadSimulationDialog.cpp
