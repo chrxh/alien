@@ -95,7 +95,7 @@ void TimelineLiveStatistics::add(TimelineStatistics const& data, uint64_t timest
 {
     truncate();
 
-    timepoint += ImGui::GetIO().DeltaTime;
+    timepoint += toDouble(ImGui::GetIO().DeltaTime);
 
     auto newDataPoint = StatisticsConverterService::convert(data, timestep, lastData, lastTimestep);
     newDataPoint.time = timepoint;
