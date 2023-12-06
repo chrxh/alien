@@ -21,6 +21,9 @@ void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatis
     if (!_lastData || data.empty() || toDouble(timestep) - data.back().time > _longtermTimestepDelta) {
 
         auto newDataPoint = StatisticsConverterService::convert(statisticsToAdd, timestep, _lastData, _lastTimestep);
+        if (!_lastData && !data.empty()) {
+            newDataPoint = data.back();
+        }
         newDataPoint.time = toDouble(timestep);
 
         if (!data.empty() && abs(data.back().time - toDouble(timestep)) < NEAR_ZERO) {
@@ -74,8 +77,8 @@ void _StatisticsService::rewriteHistory(StatisticsHistory& history, StatisticsHi
 {
     _lastData.reset();
     _lastTimestep.reset();
-    if (data.empty()) {
-        _longtermTimestepDelta = max(DefaultTimeStepDelta, (data.back().time - data.front().time) / (toDouble(data.size())));
+    if (!data.empty()) {
+        _longtermTimestepDelta = max(DefaultTimeStepDelta, (data.back().time - data.front().time) / toDouble(data.size()));
     } else {
         _longtermTimestepDelta = DefaultTimeStepDelta;
     }

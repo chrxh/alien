@@ -411,7 +411,11 @@ auto _SimulationCudaFacade::getArraySizes() const -> ArraySizes
 RawStatisticsData _SimulationCudaFacade::getRawStatistics()
 {
     std::lock_guard lock(_mutexForStatistics);
-    return *_statisticsData;
+    if (_statisticsData) {
+        return *_statisticsData;
+    } else {
+        return RawStatisticsData();
+    }
 }
 
 void _SimulationCudaFacade::updateStatistics()
