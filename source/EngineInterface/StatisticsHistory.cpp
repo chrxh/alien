@@ -3,6 +3,7 @@
 
 StatisticsHistoryData StatisticsHistory::getCopiedData() const
 {
+    std::lock_guard lock(_mutex);
     return _data;
 }
 

@@ -32,9 +32,10 @@
     $symbolMap = $_POST['symbolMap'];
     $size = strlen($content);
     $type = array_key_exists("type", $_POST) ? $_POST['type'] : 0;
+    $statistics = array_key_exists("statistics", $_POST) ? $_POST['statistics'] : "";
 
-    if ($db->query("INSERT INTO simulation (ID, USER_ID, NAME, WIDTH, HEIGHT, PARTICLES, VERSION, DESCRIPTION, CONTENT, SETTINGS, SYMBOL_MAP, PICTURE, TIMESTAMP, SIZE, TYPE)
-                    VALUES (NULL, {$obj->id}, '" . addslashes($simName) . "', $width, $height, $particles, '" . addslashes($version) . "', '" . addslashes($simDesc) . "', '" . addslashes($content) . "', '" . addslashes($settings) . "', '" . addslashes($symbolMap) . "', 'a', NULL, $size, $type)")) {
+    if ($db->query("INSERT INTO simulation (ID, USER_ID, NAME, WIDTH, HEIGHT, PARTICLES, VERSION, DESCRIPTION, CONTENT, SETTINGS, SYMBOL_MAP, PICTURE, TIMESTAMP, SIZE, TYPE, STATISTICS)
+                    VALUES (NULL, {$obj->id}, '" . addslashes($simName) . "', $width, $height, $particles, '" . addslashes($version) . "', '" . addslashes($simDesc) . "', '" . addslashes($content) . "', '" . addslashes($settings) . "', '" . addslashes($symbolMap) . "', 'a', NULL, $size, $type, '" . addslashes($statistics) . "')")) {
         $success = true;
 
         // create Discord message

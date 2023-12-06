@@ -9,15 +9,16 @@
 
 struct DeserializedSimulation
 {
-    AuxiliaryData auxiliaryData;
     ClusteredDataDescription mainData;
-    StatisticsHistoryData statisticsHistory;
+    AuxiliaryData auxiliaryData;
+    StatisticsHistoryData statistics;
 };
 
 struct SerializedSimulation
 {
+    std::string mainData;  //binary
     std::string auxiliaryData;  //JSON
-    std::string mainData;   //binary
+    std::string statistics;  //CSV
 };
 
 class SerializerService

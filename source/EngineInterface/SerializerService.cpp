@@ -761,7 +761,7 @@ bool SerializerService::serializeSimulationToFiles(std::string const& filename, 
             if (!stream) {
                 return false;
             }
-            serializeStatistics(data.statisticsHistory, stream);
+            serializeStatistics(data.statistics, stream);
         }
         return true;
     } catch (...) {
@@ -793,7 +793,7 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
             if (!stream) {
                 return true;
             }
-            deserializeStatistics(data.statisticsHistory, stream);
+            deserializeStatistics(data.statistics, stream);
         }
         return true;
     } catch (...) {
@@ -819,6 +819,11 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
             serializeAuxiliaryData(input.auxiliaryData, stream);
             output.auxiliaryData = stream.str();
         }
+        {
+            std::stringstream stream;
+            serializeStatistics(input.statistics, stream);
+            output.statistics = stream.str();
+        }
         return true;
     } catch (...) {
         return false;
@@ -839,6 +844,10 @@ bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation&
         {
             std::stringstream stream(input.auxiliaryData);
             deserializeAuxiliaryData(output.auxiliaryData, stream);
+        }
+        {
+            std::stringstream stream(input.statistics);
+            deserializeStatistics(output.statistics, stream);
         }
         return true;
     } catch (...) {

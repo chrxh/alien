@@ -49,7 +49,7 @@ int main(int argc, char** argv)
         auto simController = std::make_shared<_SimulationControllerImpl>();
         simController->newSimulation(simData.auxiliaryData.timestep, simData.auxiliaryData.generalSettings, simData.auxiliaryData.simulationParameters);
         simController->setClusteredSimulationData(simData.mainData);
-        simController->setStatisticsHistory(simData.statisticsHistory);
+        simController->setStatisticsHistory(simData.statistics);
         std::cout << "Device: " << simController->getGpuName() << std::endl;
         std::cout << "Start simulation" << std::endl;
 
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
         simData.auxiliaryData.timestep = static_cast<uint32_t>(simController->getCurrentTimestep());
         simData.mainData = simController->getClusteredSimulationData();
         simData.auxiliaryData.simulationParameters = simController->getSimulationParameters();
-        simData.statisticsHistory = simController->getStatisticsHistory().getCopiedData();
+        simData.statistics = simController->getStatisticsHistory().getCopiedData();
         if (outputFilename.empty()) {
             std::cout << "No output file given." << std::endl;
             return 1;
