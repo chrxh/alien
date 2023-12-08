@@ -8,7 +8,6 @@
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "Base/FileLogger.h"
-#include "EngineInterface/ExportService.h"
 #include "EngineInterface/SerializerService.h"
 #include "EngineImpl/SimulationControllerImpl.h"
 
@@ -25,10 +24,12 @@ int main(int argc, char** argv)
         std::string statisticsFilename;
         int timesteps = 0;
         app.add_option(
-            "-i", inputFilename, "Specifies the name of the input file for the simulation to run. The corresponding .settings.json should also be available.");
-        app.add_option("-o", outputFilename, "Specifies the name of the output file for the simulation.");
+            "-i", inputFilename, "Specifies the name of the input file for the simulation to run. The corresponding *.settings.json should also be available.");
+        app.add_option(
+            "-o",
+            outputFilename,
+            "Specifies the name of the output file for the simulation. The *.settings.json and *.statistics.csv file will also be saved.");
         app.add_option("-t", timesteps, "The number of time steps to be calculated.");
-        app.add_option("-s", statisticsFilename, "Specifies the name of the csv-file containing the statistics.");
         CLI11_PARSE(app, argc, argv);
 
         //read input
@@ -74,16 +75,6 @@ int main(int argc, char** argv)
         if (!SerializerService::serializeSimulationToFiles(outputFilename, simData)) {
             std::cout << "Could not write to output files." << std::endl;
             return 1;
-        }
-
-        //write output statistics file
-        if (!statisticsFilename.empty()) {
-            auto timestep = simController->getCurrentTimestep();
-            auto statistics = simController->getRawStatistics();
-            if (!ExportService::exportStatistics(timestep, statistics, statisticsFilename)) {
-                std::cout << "Could not write to statistics file." << std::endl;
-                return 1;
-            }
         }
 
         std::cout << "Finished" << std::endl;

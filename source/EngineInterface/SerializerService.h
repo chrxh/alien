@@ -39,6 +39,8 @@ public:
     static bool serializeSimulationParametersToFile(std::string const& filename, SimulationParameters const& parameters);
     static bool deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::string const& filename);
 
+    static bool serializeStatisticsToFile(std::string const& filename, StatisticsHistoryData const& statistics);
+
     static bool serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content);
     static bool deserializeContentFromFile(ClusteredDataDescription& content, std::string const& filename);
 
