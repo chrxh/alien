@@ -970,6 +970,22 @@ bool SerializerService::deserializeSimulationParametersFromFile(SimulationParame
     }
 }
 
+bool SerializerService::serializeStatisticsToFile(std::string const& filename, StatisticsHistoryData const& statistics)
+{
+    try {
+        log(Priority::Important, "save statistics history to " + filename);
+        std::ofstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        serializeStatistics(statistics, stream);
+        stream.close();
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
 bool SerializerService::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
 {
     try {

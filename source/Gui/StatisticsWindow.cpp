@@ -12,8 +12,8 @@
 #include "Base/StringHelper.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationController.h"
-#include "EngineInterface/ExportService.h"
 #include "EngineInterface/StatisticsHistory.h"
+#include "EngineInterface/SerializerService.h"
 
 #include "StyleRepository.h"
 #include "AlienImGui.h"
@@ -536,9 +536,8 @@ void _StatisticsWindow::onSaveStatistics()
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
 
-            if (!ExportService::exportCollectedStatistics(_simController->getStatisticsHistory().getData(), firstFilename.string())) {
+            if (!SerializerService::serializeStatisticsToFile(firstFilename.string(), _simController->getStatisticsHistory().getCopiedData())) {
                 MessageDialog::getInstance().information("Export statistics", "The statistics could not be saved to the specified file.");
-                return;
             }
         });
 }
