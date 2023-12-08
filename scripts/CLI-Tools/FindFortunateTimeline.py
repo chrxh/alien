@@ -3,29 +3,30 @@ import csv
 import shutil
 from datetime import datetime
 
-#constants
+# Constants
 ALIEN_PATH = 'd:/dev/alien/build/Release/'
-
 TIMESTEPS_PER_ITERATION = 100000
 TOTAL_ITERATIONS = 400
 REPLICATORS_LOWER_BOUND = 200
 MAX_TEMP_FILES = 10
 MAX_RETRIES = 5
 
+def getBaseFilename(iteration, offset):
+    return "cycle" + str((iteration + offset + MAX_TEMP_FILES) % MAX_TEMP_FILES)
+
 def runCli(iteration, fallBackLevel):
     for i in range(0, fallBackLevel + 1):
-        inputFile = "cycle" + str((iteration - fallBackLevel + i + MAX_TEMP_FILES) % MAX_TEMP_FILES) + ".sim"
-        outputFile = "cycle" + str((iteration - fallBackLevel + i + MAX_TEMP_FILES + 1) % MAX_TEMP_FILES) + ".sim"
-
-        print(f"Execute {inputFile} -> {outputFile}")
-
-        command = [ALIEN_PATH + "cli.exe", "-i", ALIEN_PATH + inputFile, "-o", ALIEN_PATH + outputFile, "-s", ALIEN_PATH + "statistics.csv", "-t", str(TIMESTEPS_PER_ITERATION)]
+        inputFilename = getBaseFilename(iteration, -fallBackLevel + i) + ".sim"
+        outputFilename = getBaseFilename(iteration, -fallBackLevel + i + 1) + ".sim"
+        print(f"Execute {inputFilename} -> {outputFilename}")
+        command = [ALIEN_PATH + "cli.exe", "-i", ALIEN_PATH + inputFilename, "-o", ALIEN_PATH + outputFilename, "-t", str(TIMESTEPS_PER_ITERATION)]
         subprocess.run(command)
 
-def readStatistics():
-    with open(ALIEN_PATH + 'statistics.csv', newline='') as csvfile:
+def readStatistics(iteration):
+    filename = getBaseFilename(iteration, 1) + ".statistics.csv"
+    with open(ALIEN_PATH + filename, newline='') as csvfile:
         rows = list(csv.reader(csvfile, delimiter=',', skipinitialspace=True))
-        values = [float(rows[-1][i]) for i in range(8, 11)]
+        values = [float(rows[-1][i]) for i in range(9, 12)]
         return values
 
 def main():
@@ -43,7 +44,7 @@ def main():
         print("*****************************************")
 
         runCli(iteration, fallBackLevel)
-        numReplicators = readStatistics()
+        numReplicators = readStatistics(iteration)
         print(f"Num replicators: {numReplicators}")
 
         if all(numReplicators[i] >= REPLICATORS_LOWER_BOUND for i in range(3)):
