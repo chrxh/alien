@@ -389,6 +389,7 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
 
 bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
 {
+    ImGui::PushID(parameters._name.c_str());
     static auto constexpr buttonWidth = 20;
 
     auto result = false;
@@ -431,6 +432,7 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
 
+    ImGui::PopID();
     return result;
 }
 

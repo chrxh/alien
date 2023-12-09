@@ -18,6 +18,7 @@ public:
 private:
     void processIntern() override;
     void processTimelines();
+
     void processTimelineStatistics();
 
     void processHistograms();
@@ -38,16 +39,14 @@ private:
         double endTime,
         int fracPartDecimals);
 
-    void onSaveStatistics();
-
-    float getPlotHeight() const;
-
     SimulationController _simController;
 
-    bool _live = true;
     std::string _startingPath;
-    int _plotType = 0;
-    bool _maximize = false;
+
+    int _plotType = 0;  //0 = accumulated, 1 = by color, 2...8 = specific color
+    int _mode = 0;  //0 = real time, 1 = entire simulation#
+    static auto constexpr MinPlotHeight = 80.0f;
+    float _plotHeight = MinPlotHeight;
 
     std::optional<RawStatisticsData> _lastStatisticsData;
     std::optional<float> _histogramUpperBound;
