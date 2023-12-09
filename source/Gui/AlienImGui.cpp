@@ -891,7 +891,10 @@ bool AlienImGui::Button(std::string const& text, float size)
 
 bool AlienImGui::CollapseButton(bool collapsed)
 {
-    return AlienImGui::Button(collapsed ? ICON_FA_PLUS_SQUARE "##collapseButton" : ICON_FA_MINUS_SQUARE "##collapseButton");
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
+    auto result = AlienImGui::Button(collapsed ? ICON_FA_CARET_DOWN "##collapseButton" : ICON_FA_CARET_RIGHT "##collapseButton", 20.0f);
+    ImGui::PopStyleColor(1);
+    return result;
 }
 
 bool AlienImGui::Button(ButtonParameters const& parameters)
@@ -1503,7 +1506,7 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
     auto toggleButtonId = ImGui::GetID("expanded");
     auto isExpanded = _basicSilderExpanded.contains(toggleButtonId);
     if (parameters._colorDependence) {
-        auto buttonResult = AlienImGui::CollapseButton(!isExpanded);
+        auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
         if (buttonResult) {
             if (isExpanded) {
                 _basicSilderExpanded.erase(toggleButtonId);

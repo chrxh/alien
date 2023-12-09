@@ -39,9 +39,10 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
     _startingPath = GlobalSettings::getInstance().getStringState("windows.statistics.starting path", path.string());
     _plotHeight = GlobalSettings::getInstance().getFloatState("windows.statistics.plot height", _plotHeight);
     _mode = GlobalSettings::getInstance().getIntState("windows.statistics.mode", _mode);
+    _liveStatistics.history = GlobalSettings::getInstance().getFloatState("windows.statistics.live statistics horizon", _liveStatistics.history);
     _plotType = GlobalSettings::getInstance().getIntState("windows.statistics.plot type", _plotType);
     auto collapsedPlotIndexJoinedString = GlobalSettings::getInstance().getStringState("windows.statistics.collapsed plot indices", "");
-
+    
     if (!collapsedPlotIndexJoinedString.empty()) {
         std::vector<std::string> collapsedPlotIndexStrings;
         boost::split(collapsedPlotIndexStrings, collapsedPlotIndexJoinedString, boost::is_any_of(" "));
@@ -56,6 +57,7 @@ _StatisticsWindow::~_StatisticsWindow()
     GlobalSettings::getInstance().setStringState("windows.statistics.starting path", _startingPath);
     GlobalSettings::getInstance().setFloatState("windows.statistics.plot height", _plotHeight);
     GlobalSettings::getInstance().setIntState("windows.statistics.mode", _mode);
+    GlobalSettings::getInstance().setFloatState("windows.statistics.live statistics horizon", _liveStatistics.history);
     GlobalSettings::getInstance().setIntState("windows.statistics.plot type", _plotType);
 
     std::vector<std::string> collapsedPlotIndexStrings;
@@ -98,7 +100,7 @@ void _StatisticsWindow::processTimelines()
             .name("Mode")
             .textWidth(RightColumnWidth)
             .values(
-                {"Real time", "Entire simulation"}),
+                {"Real time plots", "Entire history plots"}),
         _mode);
 
     ImGui::BeginDisabled(_mode == 1);
@@ -387,36 +389,33 @@ void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*val
     ImGui::PopID();
     ImGui::SameLine();
 
-    if (!isCollapsed) {
-        auto const& statisticsHistory = _simController->getStatisticsHistory();
+    auto const& statisticsHistory = _simController->getStatisticsHistory();
 
-        std::lock_guard lock(statisticsHistory.getMutex());
-        auto longtermStatistics = &statisticsHistory.getDataRef();
+    std::lock_guard lock(statisticsHistory.getMutex());
+    auto longtermStatistics = &statisticsHistory.getDataRef();
 
-        //create dummy history if empty
-        std::vector dummy = {DataPointCollection()};
-        if (longtermStatistics->empty()) {
-            longtermStatistics = &dummy;
-        }
+    //create dummy history if empty
+    std::vector dummy = {DataPointCollection()};
+    if (longtermStatistics->empty()) {
+        longtermStatistics = &dummy;
+    }
 
-        auto count = _mode == 0 ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(longtermStatistics->size());
-        auto startTime =
-            _mode == 0 ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : longtermStatistics->front().time;
-        auto endTime = _mode == 0 ? _liveStatistics.dataPointCollectionHistory.back().time : longtermStatistics->back().time;
-        auto values = _mode == 0 ? &(_liveStatistics.dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
-        auto timePoints = _mode == 0 ? &_liveStatistics.dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
+    auto count = _mode == 0 ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(longtermStatistics->size());
+    auto startTime = _mode == 0 ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : longtermStatistics->front().time;
+    auto endTime = _mode == 0 ? _liveStatistics.dataPointCollectionHistory.back().time : longtermStatistics->back().time;
+    auto values = _mode == 0 ? &(_liveStatistics.dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
+    auto timePoints = _mode == 0 ? &_liveStatistics.dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
 
-        switch (_plotType) {
-        case 0:
-            plotSumColorsIntern(row, values, timePoints, count, startTime, endTime, fracPartDecimals);
-            break;
-        case 1:
-            plotByColorIntern(row, values, timePoints, count, startTime, endTime, fracPartDecimals);
-            break;
-        default:
-            plotForColorIntern(row, values, _plotType - 2, timePoints, count, startTime, endTime, fracPartDecimals);
-            break;
-        }
+    switch (_plotType) {
+    case 0:
+        plotSumColorsIntern(row, values, timePoints, count, startTime, endTime, fracPartDecimals);
+        break;
+    case 1:
+        plotByColorIntern(row, values, timePoints, count, startTime, endTime, fracPartDecimals);
+        break;
+    default:
+        plotForColorIntern(row, values, _plotType - 2, timePoints, count, startTime, endTime, fracPartDecimals);
+        break;
     }
     ImGui::Spacing();
 }
@@ -461,7 +460,9 @@ void _StatisticsWindow::plotSumColorsIntern(
     ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
-    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(_plotHeight)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+
+    if (ImPlot::BeginPlot(
+            "##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         auto color = ImPlot::GetColormapColor(row <= 10 ? row : 20 - row);
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::AnnotateClamped(
@@ -505,8 +506,9 @@ void _StatisticsWindow::plotByColorIntern(
     ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 1.5f);
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
 
-    auto flags = _plotHeight > 160.0f ? ImPlotFlags_None : ImPlotFlags_NoLegend;
-    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(_plotHeight)), flags, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+    auto isCollapsed = _collapsedPlotIndices.contains(row);
+    auto flags = _plotHeight > 160.0f && !isCollapsed ? ImPlotFlags_None : ImPlotFlags_NoLegend;
+    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), flags, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         for (int i = 0; i < MAX_COLORS; ++i) {
             ImGui::PushID(i);
             auto colorRaw = Const::IndividualCellColors[i];
@@ -547,7 +549,7 @@ void _StatisticsWindow::plotForColorIntern(
     ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
-    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(_plotHeight)), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
 
         float h, s, v;
         AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[colorIndex], h, s, v);
@@ -569,4 +571,10 @@ void _StatisticsWindow::plotForColorIntern(
     ImPlot::PopStyleVar();
     ImPlot::PopStyleColor(3);
     ImGui::PopID();
+}
+
+float _StatisticsWindow::calcPlotHeight(int row) const
+{
+    auto isCollapsed = _collapsedPlotIndices.contains(row);
+    return isCollapsed ? 25.0f : _plotHeight;
 }
