@@ -65,7 +65,7 @@ DataPointCollection StatisticsConverterService::convert(
     std::optional<uint64_t> lastTimestep)
 {
     DataPointCollection result;
-
+    result.time = toDouble(timestep);
     result.numCells = getDataPointForTimestepProperty(data.timestep.numCells);
     result.numSelfReplicators = getDataPointForTimestepProperty(data.timestep.numSelfReplicators);
     result.numViruses = getDataPointForTimestepProperty(data.timestep.numViruses);

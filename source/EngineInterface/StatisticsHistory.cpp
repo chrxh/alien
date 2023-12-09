@@ -12,12 +12,12 @@ std::mutex& StatisticsHistory::getMutex() const
     return _mutex;
 }
 
-StatisticsHistoryData& StatisticsHistory::getData()
+StatisticsHistoryData& StatisticsHistory::getDataRef()
 {
     return _data;
 }
 
-StatisticsHistoryData const& StatisticsHistory::getData() const
+StatisticsHistoryData const& StatisticsHistory::getDataRef() const
 {
     return _data;
 }
