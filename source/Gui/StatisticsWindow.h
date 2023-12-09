@@ -51,6 +51,7 @@ private:
     std::optional<RawStatisticsData> _lastStatisticsData;
     std::optional<float> _histogramUpperBound;
     std::map<int, std::vector<double>> _cachedTimelines;
+    std::unordered_set<int> _collapsedPlotIndices;
 
     TimelineLiveStatistics _liveStatistics;
 };
