@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include <boost/algorithm/string.hpp>
+
 #include <ImFileDialog.h>
 #include <imgui.h>
 #include <implot.h>
@@ -38,6 +40,15 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
     _plotHeight = GlobalSettings::getInstance().getFloatState("windows.statistics.plot height", _plotHeight);
     _mode = GlobalSettings::getInstance().getIntState("windows.statistics.mode", _mode);
     _plotType = GlobalSettings::getInstance().getIntState("windows.statistics.plot type", _plotType);
+    auto collapsedPlotIndexJoinedString = GlobalSettings::getInstance().getStringState("windows.statistics.collapsed plot indices", "");
+
+    if (!collapsedPlotIndexJoinedString.empty()) {
+        std::vector<std::string> collapsedPlotIndexStrings;
+        boost::split(collapsedPlotIndexStrings, collapsedPlotIndexJoinedString, boost::is_any_of(" "));
+        for (auto const& s : collapsedPlotIndexStrings) {
+            _collapsedPlotIndices.emplace(std::stoi(s));
+        }
+    }
 }
 
 _StatisticsWindow::~_StatisticsWindow()
@@ -46,6 +57,12 @@ _StatisticsWindow::~_StatisticsWindow()
     GlobalSettings::getInstance().setFloatState("windows.statistics.plot height", _plotHeight);
     GlobalSettings::getInstance().setIntState("windows.statistics.mode", _mode);
     GlobalSettings::getInstance().setIntState("windows.statistics.plot type", _plotType);
+
+    std::vector<std::string> collapsedPlotIndexStrings;
+    for (auto const& index : _collapsedPlotIndices) {
+        collapsedPlotIndexStrings.emplace_back(std::to_string(index));
+    }
+    GlobalSettings::getInstance().setStringState("windows.statistics.collapsed plot indices", boost::join(collapsedPlotIndexStrings, " "));
 }
 
 void _StatisticsWindow::processIntern()
@@ -358,33 +375,48 @@ void _StatisticsWindow::processHistograms()
 
 void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valuesPtr, int fracPartDecimals)
 {
-    auto const& statisticsHistory = _simController->getStatisticsHistory();
-
-    std::lock_guard lock(statisticsHistory.getMutex());
-    auto longtermStatistics = &statisticsHistory.getDataRef();
-
-    //create dummy history if empty
-    std::vector dummy = {DataPointCollection()};
-    if (longtermStatistics->empty()) {
-        longtermStatistics = &dummy;
+    auto isCollapsed = _collapsedPlotIndices.contains(row);
+    ImGui::PushID(row);
+    if (AlienImGui::CollapseButton(isCollapsed)) {
+        if (isCollapsed) {
+            _collapsedPlotIndices.erase(row);
+        } else {
+            _collapsedPlotIndices.insert(row);
+        }
     }
+    ImGui::PopID();
+    ImGui::SameLine();
 
-    auto count = _mode == 0 ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(longtermStatistics->size());
-    auto startTime = _mode == 0 ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : longtermStatistics->front().time;
-    auto endTime = _mode == 0 ? _liveStatistics.dataPointCollectionHistory.back().time : longtermStatistics->back().time;
-    auto values = _mode == 0 ? &(_liveStatistics.dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
-    auto timePoints = _mode == 0 ? &_liveStatistics.dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
+    if (!isCollapsed) {
+        auto const& statisticsHistory = _simController->getStatisticsHistory();
 
-    switch (_plotType) {
-    case 0:
-        plotSumColorsIntern(row, values, timePoints, count, startTime, endTime, fracPartDecimals);
-        break;
-    case 1:
-        plotByColorIntern(row, values, timePoints, count, startTime, endTime, fracPartDecimals);
-        break;
-    default:
-        plotForColorIntern(row, values, _plotType - 2, timePoints, count, startTime, endTime, fracPartDecimals);
-        break;
+        std::lock_guard lock(statisticsHistory.getMutex());
+        auto longtermStatistics = &statisticsHistory.getDataRef();
+
+        //create dummy history if empty
+        std::vector dummy = {DataPointCollection()};
+        if (longtermStatistics->empty()) {
+            longtermStatistics = &dummy;
+        }
+
+        auto count = _mode == 0 ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(longtermStatistics->size());
+        auto startTime =
+            _mode == 0 ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : longtermStatistics->front().time;
+        auto endTime = _mode == 0 ? _liveStatistics.dataPointCollectionHistory.back().time : longtermStatistics->back().time;
+        auto values = _mode == 0 ? &(_liveStatistics.dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
+        auto timePoints = _mode == 0 ? &_liveStatistics.dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
+
+        switch (_plotType) {
+        case 0:
+            plotSumColorsIntern(row, values, timePoints, count, startTime, endTime, fracPartDecimals);
+            break;
+        case 1:
+            plotByColorIntern(row, values, timePoints, count, startTime, endTime, fracPartDecimals);
+            break;
+        default:
+            plotForColorIntern(row, values, _plotType - 2, timePoints, count, startTime, endTime, fracPartDecimals);
+            break;
+        }
     }
     ImGui::Spacing();
 }

@@ -889,6 +889,11 @@ bool AlienImGui::Button(std::string const& text, float size)
     return result;
 }
 
+bool AlienImGui::CollapseButton(bool collapsed)
+{
+    return AlienImGui::Button(collapsed ? ICON_FA_PLUS_SQUARE "##collapseButton" : ICON_FA_MINUS_SQUARE "##collapseButton");
+}
+
 bool AlienImGui::Button(ButtonParameters const& parameters)
 {
     auto width = ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().scale(parameters._textWidth);
@@ -1498,7 +1503,7 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
     auto toggleButtonId = ImGui::GetID("expanded");
     auto isExpanded = _basicSilderExpanded.contains(toggleButtonId);
     if (parameters._colorDependence) {
-        auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
+        auto buttonResult = AlienImGui::CollapseButton(!isExpanded);
         if (buttonResult) {
             if (isExpanded) {
                 _basicSilderExpanded.erase(toggleButtonId);
