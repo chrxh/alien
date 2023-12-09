@@ -54,7 +54,6 @@ def copy_sim(input, output):
 
 
 def main():
-
     iteration = 0
     savepoint = 0
     retry = 0
@@ -67,7 +66,7 @@ def main():
 
     while True:
         print("*******************************************")
-        print(f"Iteration {iteration}, savepoint: {savepoint}, retry: {retry}")
+        print(f"Iteration {iteration}, Savepoint: {savepoint}, Retry: {retry}")
         print(datetime.now().strftime("%H:%M:%S"))
         print("*******************************************")
 
