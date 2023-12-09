@@ -100,7 +100,7 @@ This repository also contains a CLI for ALIEN. It can be used to run simulations
 The CLI takes the simulation file, along with its parameters and the number of time steps, as input. It then provides the resulting simulation file and the statistics (as a CSV file) as output.
 For example,
 ```
-.\cli.exe -i example.sim -o output.sim -t 1000 -s statistics.csv
+.\cli.exe -i example.sim -o output.sim -t 1000
 ```
 runs the simulation file `example.sim` for 1000 time steps.
 
