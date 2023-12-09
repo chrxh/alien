@@ -9,43 +9,50 @@ namespace
     auto constexpr MaxSamples = 1000;
 }
 
-void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatistics const& statisticsToAdd, uint64_t timestep)
+void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatistics const& newRawStatistics, uint64_t timestep)
 {
     std::lock_guard lock(history.getMutex());
-    auto& data = history.getData();
+    auto& historyData = history.getDataRef();
 
-    if (!data.empty() && data.back().time > toDouble(timestep) + NEAR_ZERO) {
-        data.clear();
+    if (!historyData.empty() && historyData.back().time > toDouble(timestep) + NEAR_ZERO) {
+        historyData.clear();
     }
 
-    if (!_lastData || data.empty() || toDouble(timestep) - data.back().time > _longtermTimestepDelta) {
+    if (!_lastRawStatistics || historyData.empty() || toDouble(timestep) - historyData.back().time > _longtermTimestepDelta) {
 
-        auto newDataPoint = StatisticsConverterService::convert(statisticsToAdd, timestep, _lastData, _lastTimestep);
-        if (!_lastData && !data.empty()) {
-            newDataPoint = data.back();
+        auto newDataPoint = [&] {
+            if (!_lastRawStatistics && !historyData.empty()) {
+
+                //reuse last entry if no raw statistics is available
+                auto result = historyData.back();
+                result.time = toDouble(timestep);
+                return result;
+            } else {
+                return StatisticsConverterService::convert(newRawStatistics, timestep, _lastRawStatistics, _lastTimestep);
+            }
+        }();
+
+        //remove last entry if timestep has not changed
+        if (!historyData.empty() && abs(historyData.back().time - toDouble(timestep)) < NEAR_ZERO) {
+            historyData.pop_back();
         }
-        newDataPoint.time = toDouble(timestep);
+        historyData.emplace_back(newDataPoint);
 
-        if (!data.empty() && abs(data.back().time - toDouble(timestep)) < NEAR_ZERO) {
-            data.pop_back();
-        }
-        data.emplace_back(newDataPoint);
-
-        _lastData = statisticsToAdd;
+        _lastRawStatistics = newRawStatistics;
         _lastTimestep = timestep;
 
-        if (data.size() > MaxSamples) {
+        if (historyData.size() > MaxSamples) {
             std::vector<DataPointCollection> newData;
-            newData.reserve(data.size() / 2);
-            for (size_t i = 0; i < (data.size() - 1) / 2; ++i) {
-                DataPointCollection newDataPoint = (data.at(i * 2) + data.at(i * 2 + 1)) / 2.0;
-                newDataPoint.time = data.at(i * 2).time;
-                newData.emplace_back(newDataPoint);
+            newData.reserve(historyData.size() / 2);
+            for (size_t i = 0; i < (historyData.size() - 1) / 2; ++i) {
+                DataPointCollection interpolatedDataPoint = (historyData.at(i * 2) + historyData.at(i * 2 + 1)) / 2.0;
+                interpolatedDataPoint.time = historyData.at(i * 2).time;
+                newData.emplace_back(interpolatedDataPoint);
             }
-            newData.emplace_back(data.back());
-            data.swap(newData);
+            newData.emplace_back(historyData.back());
+            historyData.swap(newData);
 
-            _longtermTimestepDelta *= 2;
+            _longtermTimestepDelta *= 2.0;
         }
     }
 }
@@ -53,7 +60,7 @@ void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatis
 void _StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep)
 {
     std::lock_guard lock(history.getMutex());
-    auto& data = history.getData();
+    auto& data = history.getDataRef();
 
     auto prevTimestep = data.back().time;
     if (!data.empty() && prevTimestep > 0) {
@@ -61,28 +68,30 @@ void _StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep
         if (_longtermTimestepDelta < DefaultTimeStepDelta) {
             _longtermTimestepDelta = DefaultTimeStepDelta;
         }
+    } else {
+        _longtermTimestepDelta = DefaultTimeStepDelta;
     }
     
     std::vector<DataPointCollection> newData;
     newData.reserve(data.size());
     for (size_t i = 0; i < data.size(); ++i) {
-        if (data.at(i).time < timestep) {
+        if (data.at(i).time < toDouble(timestep)) {
             newData.emplace_back(data.at(i));
         }
     }
     data.swap(newData);
 }
 
-void _StatisticsService::rewriteHistory(StatisticsHistory& history, StatisticsHistoryData const& data, uint64_t timestep)
+void _StatisticsService::rewriteHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep)
 {
-    _lastData.reset();
+    _lastRawStatistics.reset();
     _lastTimestep.reset();
-    if (!data.empty()) {
-        _longtermTimestepDelta = max(DefaultTimeStepDelta, (data.back().time - data.front().time) / toDouble(data.size()));
+    if (!newHistoryData.empty()) {
+        _longtermTimestepDelta = max(DefaultTimeStepDelta, (timestep - newHistoryData.front().time) / toDouble(newHistoryData.size()));
     } else {
         _longtermTimestepDelta = DefaultTimeStepDelta;
     }
 
     std::lock_guard lock(history.getMutex());
-    history.getData() = data;
+    history.getDataRef() = newHistoryData;
 }

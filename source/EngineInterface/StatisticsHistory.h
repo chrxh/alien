@@ -14,8 +14,8 @@ public:
     StatisticsHistoryData getCopiedData() const;
 
     std::mutex& getMutex() const;
-    StatisticsHistoryData& getData();
-    StatisticsHistoryData const& getData() const;
+    StatisticsHistoryData& getDataRef();
+    StatisticsHistoryData const& getDataRef() const;
 
 private:
     mutable std::mutex _mutex;

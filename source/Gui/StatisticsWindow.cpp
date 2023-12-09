@@ -350,7 +350,7 @@ void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*val
     auto const& statisticsHistory = _simController->getStatisticsHistory();
 
     std::lock_guard lock(statisticsHistory.getMutex());
-    auto longtermStatistics = &statisticsHistory.getData();
+    auto longtermStatistics = &statisticsHistory.getDataRef();
 
     //create dummy history if empty
     std::vector dummy = {DataPointCollection()};
