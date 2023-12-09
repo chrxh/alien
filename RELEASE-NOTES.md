@@ -1,5 +1,23 @@
 # Release notes
 
+## [4.5.0] - 2023-12-09
+### Added
+- engine, gui: entire statistics history are saved along with a simulation
+- gui/statistics: configurable plot heights
+- gui/statistics: collapse specific plots
+- gui/browser: statistics history are up/downloaded along with a simulation
+- gui/sim view: draw boundaries of the world
+- Python script `FindFurtunateTimeline`: constantly monitors populations in a simulation and resort to savepoints in case of extinction
+
+### Changed
+- gui/statistics: widgets for real time and time horizon parameter are aligned with the other widgets
+
+### Fixed
+- in simulation runs via CLI, certain simulation parameters are adjusted as in the GUI (e.g. if the max age balancer is switched on, external energy consumption)
+
+### Removed
+- export statistics function
+
 ## [4.4.3] - 2023-11-29
 ### Added
 - show text background when rendering is disabled
