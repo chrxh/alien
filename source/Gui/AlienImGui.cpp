@@ -892,7 +892,7 @@ bool AlienImGui::Button(std::string const& text, float size)
 bool AlienImGui::CollapseButton(bool collapsed)
 {
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
-    auto result = AlienImGui::Button(collapsed ? ICON_FA_CARET_DOWN "##collapseButton" : ICON_FA_CARET_RIGHT "##collapseButton", 20.0f);
+    auto result = AlienImGui::Button(collapsed ? ICON_FA_CARET_RIGHT "##collapseButton" : ICON_FA_CARET_DOWN "##collapseButton", 20.0f);
     ImGui::PopStyleColor(1);
     return result;
 }
