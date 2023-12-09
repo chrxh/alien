@@ -61,11 +61,12 @@ namespace
 DataPointCollection StatisticsConverterService::convert(
     TimelineStatistics const& data,
     uint64_t timestep,
+    double time,
     std::optional<TimelineStatistics> const& lastData,
     std::optional<uint64_t> lastTimestep)
 {
     DataPointCollection result;
-    result.time = toDouble(timestep);
+    result.time = time;
     result.numCells = getDataPointForTimestepProperty(data.timestep.numCells);
     result.numSelfReplicators = getDataPointForTimestepProperty(data.timestep.numSelfReplicators);
     result.numViruses = getDataPointForTimestepProperty(data.timestep.numViruses);
