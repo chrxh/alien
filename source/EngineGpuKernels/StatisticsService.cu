@@ -28,7 +28,7 @@ void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatis
                 result.time = toDouble(timestep);
                 return result;
             } else {
-                return StatisticsConverterService::convert(newRawStatistics, timestep, _lastRawStatistics, _lastTimestep);
+                return StatisticsConverterService::convert(newRawStatistics, timestep, toDouble(timestep), _lastRawStatistics, _lastTimestep);
             }
         }();
 
