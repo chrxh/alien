@@ -14,6 +14,7 @@
 
 ### Fixed
 - in simulation runs via CLI, certain simulation parameters are adjusted as in the GUI (e.g. if the max age balancer is switched on, external energy consumption)
+- wrong color conversion HSV -> RGB fixed (relevant for mutation and genome size coloring)
 
 ### Removed
 - export statistics function
