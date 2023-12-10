@@ -2,10 +2,10 @@
 
 ## [4.5.0] - 2023-12-09
 ### Added
-- engine, gui: entire statistics history are saved along with a simulation
+- engine, gui: entire statistical history are saved along with a simulation
 - gui/statistics: configurable plot heights
 - gui/statistics: collapse specific plots
-- gui/browser: statistics history are up/downloaded along with a simulation
+- gui/browser: statistical history are up/downloaded along with a simulation
 - gui/sim view: draw boundaries of the world
 - Python script `FindFurtunateTimeline`: constantly monitors populations in a simulation and resort to savepoints in case of extinction
 
