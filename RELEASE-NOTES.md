@@ -12,12 +12,12 @@
 ### Changed
 - gui/statistics: widgets for real time and time horizon parameter are aligned with the other widgets
 
+### Removed
+- export statistics function
+
 ### Fixed
 - in simulation runs via CLI, certain simulation parameters are adjusted as in the GUI (e.g. if the max age balancer is switched on, external energy consumption)
 - wrong color conversion HSV -> RGB fixed (relevant for mutation and genome size coloring)
-
-### Removed
-- export statistics function
 
 ## [4.4.3] - 2023-11-29
 ### Added
