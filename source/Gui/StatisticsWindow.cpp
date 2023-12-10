@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include <boost/algorithm/string.hpp>
+
 #include <ImFileDialog.h>
 #include <imgui.h>
 #include <implot.h>
@@ -12,7 +14,8 @@
 #include "Base/StringHelper.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationController.h"
-#include "EngineInterface/ExportService.h"
+#include "EngineInterface/StatisticsHistory.h"
+#include "EngineInterface/SerializerService.h"
 
 #include "StyleRepository.h"
 #include "AlienImGui.h"
@@ -23,8 +26,6 @@ namespace
 {
     auto const RightColumnWidth = 175.0f;
     auto const RightColumnWidthTable = 150.0f;
-    auto const PlotMaxHeight = 160.0f;
-    auto const PlotMinHeight = 80.0f;
 }
 
 _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
@@ -36,23 +37,34 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
         path = path.parent_path();
     }
     _startingPath = GlobalSettings::getInstance().getStringState("windows.statistics.starting path", path.string());
-    _maximize = GlobalSettings::getInstance().getBoolState("windows.statistics.maximized", _maximize);
-    _live = GlobalSettings::getInstance().getBoolState("windows.statistics.live", _live);
+    _plotHeight = GlobalSettings::getInstance().getFloatState("windows.statistics.plot height", _plotHeight);
+    _mode = GlobalSettings::getInstance().getIntState("windows.statistics.mode", _mode);
+    _liveStatistics.history = GlobalSettings::getInstance().getFloatState("windows.statistics.live statistics horizon", _liveStatistics.history);
     _plotType = GlobalSettings::getInstance().getIntState("windows.statistics.plot type", _plotType);
+    auto collapsedPlotIndexJoinedString = GlobalSettings::getInstance().getStringState("windows.statistics.collapsed plot indices", "");
+    
+    if (!collapsedPlotIndexJoinedString.empty()) {
+        std::vector<std::string> collapsedPlotIndexStrings;
+        boost::split(collapsedPlotIndexStrings, collapsedPlotIndexJoinedString, boost::is_any_of(" "));
+        for (auto const& s : collapsedPlotIndexStrings) {
+            _collapsedPlotIndices.emplace(std::stoi(s));
+        }
+    }
 }
 
 _StatisticsWindow::~_StatisticsWindow()
 {
     GlobalSettings::getInstance().setStringState("windows.statistics.starting path", _startingPath);
-    GlobalSettings::getInstance().setBoolState("windows.statistics.maximized", _maximize);
-    GlobalSettings::getInstance().setBoolState("windows.statistics.live", _live);
+    GlobalSettings::getInstance().setFloatState("windows.statistics.plot height", _plotHeight);
+    GlobalSettings::getInstance().setIntState("windows.statistics.mode", _mode);
+    GlobalSettings::getInstance().setFloatState("windows.statistics.live statistics horizon", _liveStatistics.history);
     GlobalSettings::getInstance().setIntState("windows.statistics.plot type", _plotType);
-}
 
-void _StatisticsWindow::reset()
-{
-    _liveStatistics = TimelineLiveStatistics();
-    _longtermStatistics = TimelineLongtermStatistics();
+    std::vector<std::string> collapsedPlotIndexStrings;
+    for (auto const& index : _collapsedPlotIndices) {
+        collapsedPlotIndexStrings.emplace_back(std::to_string(index));
+    }
+    GlobalSettings::getInstance().setStringState("windows.statistics.collapsed plot indices", boost::join(collapsedPlotIndexStrings, " "));
 }
 
 void _StatisticsWindow::processIntern()
@@ -82,18 +94,26 @@ void _StatisticsWindow::processIntern()
 void _StatisticsWindow::processTimelines()
 {
     ImGui::Spacing();
-    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Real time"), _live);
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!_live);
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(RightColumnWidth));
-    ImGui::SliderFloat("", &_liveStatistics.history, 1, TimelineLiveStatistics::MaxLiveHistory, "%.1f s");
-    ImGui::EndDisabled();
 
-    ImGui::SameLine();
-    if (AlienImGui::Button("Export")) {
-        onSaveStatistics();
-    }
-    AlienImGui::Separator();
+    AlienImGui::Switcher(
+        AlienImGui::SwitcherParameters()
+            .name("Mode")
+            .textWidth(RightColumnWidth)
+            .values(
+                {"Real time plots", "Entire history plots"}),
+        _mode);
+
+    ImGui::BeginDisabled(_mode == 1);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(RightColumnWidth));
+    AlienImGui::SliderFloat(
+        AlienImGui::SliderFloatParameters()
+            .name("Time horizon")
+            .min(1.0f)
+            .max(TimelineLiveStatistics::MaxLiveHistory)
+            .format("%.1f s")
+            .textWidth(RightColumnWidth),
+        &_liveStatistics.history);
+    ImGui::EndDisabled();
 
     AlienImGui::Switcher(
         AlienImGui::SwitcherParameters()
@@ -102,14 +122,19 @@ void _StatisticsWindow::processTimelines()
             .values(
             {"Accumulate values for all colors", "Break down by color", "Color #0", "Color #1", "Color #2", "Color #3", "Color #4", "Color #5", "Color #6"}),
         _plotType);
-    ImGui::SameLine();
-    if (ImGui::Button(_maximize ? ICON_FA_WINDOW_MINIMIZE : ICON_FA_WINDOW_MAXIMIZE)) {
-        _maximize = !_maximize;
-    }
 
+    AlienImGui::SliderFloat(
+        AlienImGui::SliderFloatParameters()
+            .name("Plot height")
+            .min(MinPlotHeight)
+            .max(1000.0f)
+            .format("%.0f")
+            .textWidth(RightColumnWidth),
+        &_plotHeight);
     ImGui::Spacing();
     ImGui::Spacing();
     ImGui::Separator();
+
     if (ImGui::BeginChild("##plots", ImVec2(0, 0), false)) {
         processTimelineStatistics();
     }
@@ -352,11 +377,34 @@ void _StatisticsWindow::processHistograms()
 
 void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valuesPtr, int fracPartDecimals)
 {
-    auto count = _live ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(_longtermStatistics.dataPointCollectionHistory.size());
-    auto startTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : _longtermStatistics.dataPointCollectionHistory.front().time;
-    auto endTime = _live ? _liveStatistics.dataPointCollectionHistory.back().time : _longtermStatistics.dataPointCollectionHistory.back().time;
-    auto values = _live ? &(_liveStatistics.dataPointCollectionHistory[0].*valuesPtr) : &(_longtermStatistics.dataPointCollectionHistory[0].*valuesPtr);
-    auto timePoints = _live ? &_liveStatistics.dataPointCollectionHistory[0].time : &_longtermStatistics.dataPointCollectionHistory[0].time;
+    auto isCollapsed = _collapsedPlotIndices.contains(row);
+    ImGui::PushID(row);
+    if (AlienImGui::CollapseButton(isCollapsed)) {
+        if (isCollapsed) {
+            _collapsedPlotIndices.erase(row);
+        } else {
+            _collapsedPlotIndices.insert(row);
+        }
+    }
+    ImGui::PopID();
+    ImGui::SameLine();
+
+    auto const& statisticsHistory = _simController->getStatisticsHistory();
+
+    std::lock_guard lock(statisticsHistory.getMutex());
+    auto longtermStatistics = &statisticsHistory.getDataRef();
+
+    //create dummy history if empty
+    std::vector dummy = {DataPointCollection()};
+    if (longtermStatistics->empty()) {
+        longtermStatistics = &dummy;
+    }
+
+    auto count = _mode == 0 ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(longtermStatistics->size());
+    auto startTime = _mode == 0 ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : longtermStatistics->front().time;
+    auto endTime = _mode == 0 ? _liveStatistics.dataPointCollectionHistory.back().time : longtermStatistics->back().time;
+    auto values = _mode == 0 ? &(_liveStatistics.dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
+    auto timePoints = _mode == 0 ? &_liveStatistics.dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
 
     switch (_plotType) {
     case 0:
@@ -376,10 +424,9 @@ void _StatisticsWindow::processBackground()
 {
     auto timestep = _simController->getCurrentTimestep();
 
-    _lastStatisticsData = _simController->getStatistics();
+    _lastStatisticsData = _simController->getRawStatistics();
     _liveStatistics.add(_lastStatisticsData->timeline, timestep);
-    _longtermStatistics.add(_lastStatisticsData->timeline, timestep);
-}
+} 
 
 namespace
 {
@@ -413,7 +460,9 @@ void _StatisticsWindow::plotSumColorsIntern(
     ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
-    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(getPlotHeight())), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+
+    if (ImPlot::BeginPlot(
+            "##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         auto color = ImPlot::GetColormapColor(row <= 10 ? row : 20 - row);
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::AnnotateClamped(
@@ -457,8 +506,9 @@ void _StatisticsWindow::plotByColorIntern(
     ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 1.5f);
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
 
-    auto flags = _maximize ? ImPlotFlags_None : ImPlotFlags_NoLegend;
-    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(getPlotHeight())), flags, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+    auto isCollapsed = _collapsedPlotIndices.contains(row);
+    auto flags = _plotHeight > 160.0f && !isCollapsed ? ImPlotFlags_None : ImPlotFlags_NoLegend;
+    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), flags, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         for (int i = 0; i < MAX_COLORS; ++i) {
             ImGui::PushID(i);
             auto colorRaw = Const::IndividualCellColors[i];
@@ -499,7 +549,7 @@ void _StatisticsWindow::plotForColorIntern(
     ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
-    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(getPlotHeight())), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
 
         float h, s, v;
         AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[colorIndex], h, s, v);
@@ -523,23 +573,8 @@ void _StatisticsWindow::plotForColorIntern(
     ImGui::PopID();
 }
 
-void _StatisticsWindow::onSaveStatistics()
+float _StatisticsWindow::calcPlotHeight(int row) const
 {
-    GenericFileDialogs::getInstance().showSaveFileDialog(
-        "Export statistics", "Comma-separated values (*.csv){.csv},.*", _startingPath, [&](std::filesystem::path const& path) {
-            auto firstFilename = ifd::FileDialog::Instance().GetResult();
-            auto firstFilenameCopy = firstFilename;
-            _startingPath = firstFilenameCopy.remove_filename().string();
-
-            if (!ExportService::exportCollectedStatistics(_longtermStatistics.dataPointCollectionHistory, firstFilename.string())) {
-                MessageDialog::getInstance().information("Export statistics", "The statistics could not be saved to the specified file.");
-                return;
-            }
-        });
+    auto isCollapsed = _collapsedPlotIndices.contains(row);
+    return isCollapsed ? 25.0f : _plotHeight;
 }
-
-float _StatisticsWindow::getPlotHeight() const
-{
-    return _maximize ? PlotMaxHeight : PlotMinHeight;
-}
-

@@ -32,39 +32,39 @@ namespace
         return float2{(pos.x - rectUpperLeft.x) * zoom, (pos.y - rectUpperLeft.y) * zoom};
     }
 
-    __device__ __inline__ int3 convertHSVtoRGB(int h, float s, float v)
+    __device__ __inline__ int3 convertHSVtoRGB(float h, float s, float v)
     {
         auto c = v * s;
-        auto x = c * (1 - abs(((h / 60) % 2) - 1));
+        auto x = c * (1 - abs(fmodf((h / 60), 2) - 1));
         auto m = v - c;
 
         float r_, g_, b_;
-        if (0 <= h && h < 60) {
+        if (0 <= h && h < 60.0f) {
             r_ = c;
             g_ = x;
             b_ = 0;
         }
-        if (60 <= h && h < 120) {
+        if (60.0f <= h && h < 120.0f) {
             r_ = x;
             g_ = c;
             b_ = 0;
         }
-        if (120 <= h && h < 180) {
+        if (120.0f <= h && h < 180.0f) {
             r_ = 0;
             g_ = c;
             b_ = x;
         }
-        if (180 <= h && h < 240) {
+        if (180.0f <= h && h < 240.0f) {
             r_ = 0;
             g_ = x;
             b_ = c;
         }
-        if (240 <= h && h < 300) {
+        if (240.0f <= h && h < 300.0f) {
             r_ = x;
             g_ = 0;
             b_ = c;
         }
-        if (300 <= h && h <= 360) {
+        if (300.0f <= h && h <= 360.0f) {
             r_ = c;
             g_ = 0;
             b_ = x;
@@ -113,7 +113,7 @@ namespace
         if (cudaSimulationParameters.cellColorization == CellColorization_MutationId) {
             auto h = abs((cell->mutationId * 12107) % 360);
             auto s = 0.3f + toFloat(abs(cell->mutationId * 12107) % 700) / 1000;
-            auto rgb = convertHSVtoRGB(h, s, 1.0f);
+            auto rgb = convertHSVtoRGB(toFloat(h), s, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
         if (cudaSimulationParameters.cellColorization == CellColorization_LivingState) {
@@ -134,7 +134,7 @@ namespace
         }
 
         if (cudaSimulationParameters.cellColorization == CellColorization_GenomeSize) {
-            auto rgb = convertHSVtoRGB(min(360, 240 + cell->genomeNumNodes),  1.0f, 1.0f);
+            auto rgb = convertHSVtoRGB(toFloat(min(360, 240 + cell->genomeNumNodes)),  1.0f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
 

@@ -253,6 +253,7 @@ public:
     static void VerticalSeparator(float length = 23.0f);
     static void ToolbarSeparator();
     static bool Button(std::string const& text, float size = 0);
+    static bool CollapseButton(bool collapsed);
 
     struct ButtonParameters
     {

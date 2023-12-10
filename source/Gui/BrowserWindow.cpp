@@ -843,7 +843,7 @@ void _BrowserWindow::onDownloadItem(RemoteSimulationData* sim)
     delayedExecution([=, this] {
         std::string dataTypeString = _selectedDataType == DataType_Simulation ? "simulation" : "genome";
         SerializedSimulation serializedSim;
-        if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, sim->id)) {
+        if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, sim->id)) {
             MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
             return;
         }
@@ -856,13 +856,13 @@ void _BrowserWindow::onDownloadItem(RemoteSimulationData* sim)
             }
 
             _simController->closeSimulation();
-            _statisticsWindow->reset();
 
             std::optional<std::string> errorMessage;
             try {
                 _simController->newSimulation(
                     deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
                 _simController->setClusteredSimulationData(deserializedSim.mainData);
+                _simController->setStatisticsHistory(deserializedSim.statistics);
             } catch (CudaMemoryAllocationException const& exception) {
                 errorMessage = exception.what();
             } catch (...) {

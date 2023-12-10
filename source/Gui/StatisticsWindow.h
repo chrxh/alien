@@ -1,11 +1,11 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/StatisticsData.h"
+#include "EngineInterface/RawStatisticsData.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
-#include "CollectedStatisticsData.h"
+#include "TimelineLiveStatistics.h"
 
 struct ImPlotPoint;
 
@@ -15,11 +15,10 @@ public:
     _StatisticsWindow(SimulationController const& simController);
     ~_StatisticsWindow();
 
-    void reset();
-
 private:
-    void processIntern();
+    void processIntern() override;
     void processTimelines();
+
     void processTimelineStatistics();
 
     void processHistograms();
@@ -40,21 +39,22 @@ private:
         double endTime,
         int fracPartDecimals);
 
-    void onSaveStatistics();
-
-    float getPlotHeight() const;
+    float calcPlotHeight(int row) const;
 
     SimulationController _simController;
 
-    bool _live = true;
     std::string _startingPath;
-    int _plotType = 0;
-    bool _maximize = false;
 
-    std::optional<StatisticsData> _lastStatisticsData;
+    int _plotType = 0;  //0 = accumulated, 1 = by color, 2...8 = specific color
+    int _mode = 0;  //0 = real time, 1 = entire history
+    static auto constexpr MinPlotHeight = 80.0f;
+    float _plotHeight = MinPlotHeight;
+
+    std::optional<RawStatisticsData> _lastStatisticsData;
     std::optional<float> _histogramUpperBound;
     std::map<int, std::vector<double>> _cachedTimelines;
+    std::unordered_set<int> _collapsedPlotIndices;
 
     TimelineLiveStatistics _liveStatistics;
-    TimelineLongtermStatistics _longtermStatistics;
 };
+

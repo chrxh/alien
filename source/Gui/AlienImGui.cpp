@@ -389,6 +389,7 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
 
 bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
 {
+    ImGui::PushID(parameters._name.c_str());
     static auto constexpr buttonWidth = 20;
 
     auto result = false;
@@ -431,6 +432,7 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
 
+    ImGui::PopID();
     return result;
 }
 
@@ -884,6 +886,14 @@ bool AlienImGui::Button(std::string const& text, float size)
     /*
     ImGui::PopStyleColor(4);
 */
+    return result;
+}
+
+bool AlienImGui::CollapseButton(bool collapsed)
+{
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
+    auto result = AlienImGui::Button(collapsed ? ICON_FA_CARET_RIGHT "##collapseButton" : ICON_FA_CARET_DOWN "##collapseButton", 20.0f);
+    ImGui::PopStyleColor(1);
     return result;
 }
 

@@ -12,7 +12,6 @@
 #include "GenericFileDialogs.h"
 #include "MessageDialog.h"
 #include "RadiationSourcesWindow.h"
-#include "BalancerController.h"
 #include "OverlayMessageController.h"
 
 namespace
@@ -46,12 +45,10 @@ namespace
 
 _SimulationParametersWindow::_SimulationParametersWindow(
     SimulationController const& simController,
-    RadiationSourcesWindow const& radiationSourcesWindow,
-    BalancerController const& balancerController)
+    RadiationSourcesWindow const& radiationSourcesWindow)
     : _AlienWindow("Simulation parameters", "windows.simulation parameters", false)
     , _simController(simController)
     , _radiationSourcesWindow(radiationSourcesWindow)
-    , _balancerController(balancerController)
 {
     for (int n = 0; n < IM_ARRAYSIZE(_savedPalette); n++) {
         ImVec4 color;

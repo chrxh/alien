@@ -1,4 +1,12 @@
-#include "DataPointCollection.h"
+#include "TimelineLiveStatistics.h"
+
+#include <cmath>
+#include <imgui.h>
+
+#include "Base/Definitions.h"
+#include "EngineInterface/RawStatisticsData.h"
+#include "EngineInterface/StatisticsConverterService.h"
+
 
 DataPoint DataPoint::operator+(DataPoint const& other) const
 {
@@ -74,4 +82,23 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
     result.numReconnectorRemoved = numReconnectorRemoved / divisor;
     result.numDetonations = numDetonations / divisor;
     return result;
+}
+
+void TimelineLiveStatistics::truncate()
+{
+    if (!dataPointCollectionHistory.empty() && dataPointCollectionHistory.back().time - dataPointCollectionHistory.front().time > (MaxLiveHistory + 1.0)) {
+        dataPointCollectionHistory.erase(dataPointCollectionHistory.begin());
+    }
+}
+
+void TimelineLiveStatistics::add(TimelineStatistics const& data, uint64_t timestep)
+{
+    truncate();
+
+    timepoint += toDouble(ImGui::GetIO().DeltaTime);
+
+    auto newDataPoint = StatisticsConverterService::convert(data, timestep, timepoint, lastData, lastTimestep);
+    dataPointCollectionHistory.emplace_back(newDataPoint);
+    lastData = data;
+    lastTimestep = timestep;
 }

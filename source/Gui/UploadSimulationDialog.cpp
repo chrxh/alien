@@ -113,7 +113,8 @@ void _UploadSimulationDialog::onUpload()
 
     delayedExecution([=, this] {
         std::string mainData;
-        std::string auxiliaryData;
+        std::string settings;
+        std::string statistics;
         IntVector2D size;
         int numObjects = 0;
 
@@ -124,6 +125,7 @@ void _UploadSimulationDialog::onUpload()
             deserializedSim.auxiliaryData.center = _viewport->getCenterInWorldPos();
             deserializedSim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
             deserializedSim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
+            deserializedSim.statistics = _simController->getStatisticsHistory().getCopiedData();
             deserializedSim.mainData = _simController->getClusteredSimulationData();
 
             SerializedSimulation serializedSim;
@@ -133,7 +135,8 @@ void _UploadSimulationDialog::onUpload()
                 return;
             }
             mainData = serializedSim.mainData;
-            auxiliaryData = serializedSim.auxiliaryData;
+            settings = serializedSim.auxiliaryData;
+            statistics = serializedSim.statistics;
             size = {deserializedSim.auxiliaryData.generalSettings.worldSizeX, deserializedSim.auxiliaryData.generalSettings.worldSizeY};
             numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
         } else {
@@ -151,7 +154,7 @@ void _UploadSimulationDialog::onUpload()
             }
         }
 
-        if (!_networkController->uploadSimulation(_simName, _simDescription, size, numObjects, mainData, auxiliaryData, _dataType)) {
+        if (!_networkController->uploadSimulation(_simName, _simDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
             showMessage("Error", "Failed to upload " + BrowserDataTypeToLowerString.at(_dataType) + ".");
             return;
         }

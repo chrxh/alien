@@ -5,7 +5,7 @@
 
 #include "CellConnectionProcessor.cuh"
 #include "GenomeDecoder.cuh"
-#include "ShapeGenerator.cuh"
+#include "CudaShapeGenerator.cuh"
 
 class MutationProcessor
 {
@@ -256,7 +256,7 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
         auto shape = mutatedByte % ConstructionShape_Count;
         auto origShape = subgenome[delta] % ConstructionShape_Count;
         if (origShape != ConstructionShape_Custom && shape == ConstructionShape_Custom) {
-            ShapeGenerator shapeGenerator;
+            CudaShapeGenerator shapeGenerator;
             subgenome[Const::GenomeHeaderAlignmentPos] = shapeGenerator.getConstructorAngleAlignment(shape);
 
             GenomeDecoder::executeForEachNode(subgenome, subgenomeSize, [&](int nodeAddress) {
