@@ -64,7 +64,6 @@ void _ResizeWorldDialog::processIntern()
         close();
     }
 
-    ImGui::EndPopup();
     _width = std::max(1, _width);
     _height = std::max(1, _height);
 }

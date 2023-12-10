@@ -12,17 +12,18 @@
 #include <vector_types.h>
 #include <GL/gl.h>
 
-#include "EngineInterface/StatisticsData.h"
+#include "EngineInterface/RawStatisticsData.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/MutationType.h"
+#include "EngineInterface/StatisticsHistory.h"
 
 #include "Definitions.cuh"
 
 struct cudaGraphicsResource;
 
-class _CudaSimulationFacade
+class _SimulationCudaFacade
 {
 public:
     struct GpuInfo
@@ -32,12 +33,12 @@ public:
     };
     static GpuInfo checkAndReturnGpuInfo();
 
-    _CudaSimulationFacade(uint64_t timestep, Settings const& settings);
-    ~_CudaSimulationFacade();
+    _SimulationCudaFacade(uint64_t timestep, Settings const& settings);
+    ~_SimulationCudaFacade();
 
     void* registerImageResource(GLuint image);
 
-    void calcTimestep();
+    void calcTimestep(uint64_t timesteps, bool forceUpdateStatistics);
     void applyCataclysm(int power);
 
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
@@ -73,7 +74,11 @@ public:
 
     ArraySizes getArraySizes() const;
 
-    StatisticsData getStatistics();
+    RawStatisticsData getRawStatistics();
+    void updateStatistics();
+    StatisticsHistory const& getStatisticsHistory() const;
+    void setStatisticsHistory(StatisticsHistoryData const& data);
+
     void resetTimeIntervalStatistics();
     uint64_t getCurrentTimestep() const;
     void setCurrentTimestep(uint64_t timestep);
@@ -110,8 +115,13 @@ private:
     std::shared_ptr<RenderingData> _cudaRenderingData;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     std::shared_ptr<DataTO> _cudaAccessTO;
-    std::shared_ptr<SimulationStatistics> _simulationStatistics;
 
+    mutable std::mutex _mutexForStatistics;
+    std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
+    std::optional<RawStatisticsData> _statisticsData;
+    StatisticsService _statisticsService;
+    StatisticsHistory _statisticsHistory;
+    std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
 
     SimulationKernelsLauncher _simulationKernels;
     DataAccessKernelsLauncher _dataAccessKernels;

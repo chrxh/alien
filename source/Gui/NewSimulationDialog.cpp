@@ -76,8 +76,6 @@ void _NewSimulationDialog::onNewSimulation()
     }
     _simController->closeSimulation();
 
-    _statisticsWindow->reset();
-
     GeneralSettings generalSettings;
     generalSettings.worldSizeX = _width;
     generalSettings.worldSizeY = _height;

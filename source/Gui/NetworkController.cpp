@@ -412,7 +412,8 @@ bool _NetworkController::uploadSimulation(
     IntVector2D const& size,
     int particles,
     std::string const& mainData,
-    std::string const& auxiliaryData,
+    std::string const& settings,
+    std::string const& statistics,
     RemoteDataType type)
 {
     log(Priority::Important, "network: upload simulation with name='" + simulationName + "'");
@@ -430,9 +431,10 @@ bool _NetworkController::uploadSimulation(
         {"particles", std::to_string(particles), "", ""},
         {"version", Const::ProgramVersion, "", ""},
         {"content", mainData, "", "application/octet-stream"},
-        {"settings", auxiliaryData, "", ""},
+        {"settings", settings, "", ""},
         {"symbolMap", "", "", ""},
         {"type", std::to_string(type), "", ""},
+        {"statistics", statistics, "", ""},
     };
 
     try {
@@ -444,7 +446,7 @@ bool _NetworkController::uploadSimulation(
     }
 }
 
-bool _NetworkController::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string const& simId)
+bool _NetworkController::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
 {
     log(Priority::Important, "network: download simulation with id=" + simId);
 
@@ -462,6 +464,10 @@ bool _NetworkController::downloadSimulation(std::string& mainData, std::string& 
         {
             auto result = executeRequest([&] { return client.Get("/alien-server/downloadsettings.php", params, {}); });
             auxiliaryData = result->body;
+        }
+        {
+            auto result = executeRequest([&] { return client.Get("/alien-server/downloadstatistics.php", params, {}); });
+            statistics = result->body;
         }
         return true;
     } catch (...) {

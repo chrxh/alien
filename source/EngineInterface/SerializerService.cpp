@@ -159,15 +159,16 @@ namespace
 
     auto constexpr Id_Detonator_State = 0;
     auto constexpr Id_Detonator_Countdown = 1;
-}
 
-namespace cereal
-{
     enum class SerializationTask
     {
         Load,
         Save
     };
+}
+
+namespace cereal
+{
     using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>, std::optional<int>, std::vector<int>>;
 
     template <class Archive>
@@ -738,6 +739,8 @@ bool SerializerService::serializeSimulationToFiles(std::string const& filename, 
         log(Priority::Important, "save simulation to " + filename);
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
+        std::filesystem::path statisticsFilename(filename);
+        statisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
 
         {
             zstr::ofstream stream(filename, std::ios::binary);
@@ -752,7 +755,13 @@ bool SerializerService::serializeSimulationToFiles(std::string const& filename, 
                 return false;
             }
             serializeAuxiliaryData(data.auxiliaryData, stream);
-            stream.close();
+        }
+        {
+            std::ofstream stream(statisticsFilename.string(), std::ios::binary);
+            if (!stream) {
+                return false;
+            }
+            serializeStatistics(data.statistics, stream);
         }
         return true;
     } catch (...) {
@@ -766,6 +775,8 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
         log(Priority::Important, "load simulation from " + filename);
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
+        std::filesystem::path statisticsFilename(filename);
+        statisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
 
         if (!deserializeDataDescription(data.mainData, filename)) {
             return false;
@@ -776,7 +787,13 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
                 return false;
             }
             deserializeAuxiliaryData(data.auxiliaryData, stream);
-            stream.close();
+        }
+        {
+            std::ifstream stream(statisticsFilename.string(), std::ios::binary);
+            if (!stream) {
+                return true;
+            }
+            deserializeStatistics(data.statistics, stream);
         }
         return true;
     } catch (...) {
@@ -802,6 +819,11 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
             serializeAuxiliaryData(input.auxiliaryData, stream);
             output.auxiliaryData = stream.str();
         }
+        {
+            std::stringstream stream;
+            serializeStatistics(input.statistics, stream);
+            output.statistics = stream.str();
+        }
         return true;
     } catch (...) {
         return false;
@@ -822,6 +844,10 @@ bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation&
         {
             std::stringstream stream(input.auxiliaryData);
             deserializeAuxiliaryData(output.auxiliaryData, stream);
+        }
+        {
+            std::stringstream stream(input.statistics);
+            deserializeStatistics(output.statistics, stream);
         }
         return true;
     } catch (...) {
@@ -944,6 +970,22 @@ bool SerializerService::deserializeSimulationParametersFromFile(SimulationParame
     }
 }
 
+bool SerializerService::serializeStatisticsToFile(std::string const& filename, StatisticsHistoryData const& statistics)
+{
+    try {
+        log(Priority::Important, "save statistics history to " + filename);
+        std::ofstream stream(filename, std::ios::binary);
+        if (!stream) {
+            return false;
+        }
+        serializeStatistics(statistics, stream);
+        stream.close();
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
 bool SerializerService::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
 {
     try {
@@ -1025,6 +1067,132 @@ void SerializerService::deserializeSimulationParameters(SimulationParameters& pa
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
     parameters = AuxiliaryDataParserService::decodeSimulationParameters(tree);
+}
+
+namespace
+{
+    std::string toString(double value)
+    {
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(9) << value;
+        return ss.str();        
+    }
+
+    void loadSave(SerializationTask task, std::vector<std::string>& serializedData, int startIndex, double& value)
+    {
+        if (task == SerializationTask::Load) {
+            if (startIndex < serializedData.size()) {
+                value = std::stod(serializedData.at(startIndex));
+            }
+        } else {
+            serializedData.emplace_back(toString(value));
+        }
+    }
+
+    void loadSave(SerializationTask task, std::vector<std::string>& serializedData, int startIndex, DataPoint& dataPoint)
+    {
+        if (task == SerializationTask::Load) {
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                auto index = startIndex + i;
+                if (index < serializedData.size()) {
+                    dataPoint.values[i] = std::stod(serializedData.at(index));
+                }
+            }
+            if (startIndex + 7 < serializedData.size()) {
+                dataPoint.summedValues = std::stod(serializedData.at(startIndex + 7));
+            }
+        } else {
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                serializedData.emplace_back(toString(dataPoint.values[i]));
+            }
+            serializedData.emplace_back(toString(dataPoint.summedValues));
+        }
+    }
+
+    void loadSave(SerializationTask task, std::vector<std::string>& serializedData, DataPointCollection& dataPoints)
+    {
+        loadSave(task, serializedData, 0, dataPoints.time);
+        loadSave(task, serializedData, 1 + 0 * 8, dataPoints.numCells);
+        loadSave(task, serializedData, 1 + 1 * 8, dataPoints.numSelfReplicators);
+        loadSave(task, serializedData, 1 + 2 * 8, dataPoints.numViruses);
+        loadSave(task, serializedData, 1 + 3 * 8, dataPoints.numConnections);
+        loadSave(task, serializedData, 1 + 4 * 8, dataPoints.numParticles);
+        loadSave(task, serializedData, 1 + 5 * 8, dataPoints.averageGenomeCells);
+        loadSave(task, serializedData, 1 + 6 * 8, dataPoints.totalEnergy);
+        loadSave(task, serializedData, 1 + 7 * 8, dataPoints.numCreatedCells);
+        loadSave(task, serializedData, 1 + 8 * 8, dataPoints.numAttacks);
+        loadSave(task, serializedData, 1 + 9 * 8, dataPoints.numMuscleActivities);
+        loadSave(task, serializedData, 1 + 10 * 8, dataPoints.numDefenderActivities);
+        loadSave(task, serializedData, 1 + 11 * 8, dataPoints.numTransmitterActivities);
+        loadSave(task, serializedData, 1 + 12 * 8, dataPoints.numInjectionActivities);
+        loadSave(task, serializedData, 1 + 13 * 8, dataPoints.numCompletedInjections);
+        loadSave(task, serializedData, 1 + 14 * 8, dataPoints.numNervePulses);
+        loadSave(task, serializedData, 1 + 15 * 8, dataPoints.numNeuronActivities);
+        loadSave(task, serializedData, 1 + 16 * 8, dataPoints.numSensorActivities);
+        loadSave(task, serializedData, 1 + 17 * 8, dataPoints.numSensorMatches);
+        loadSave(task, serializedData, 1 + 18 * 8, dataPoints.numReconnectorCreated);
+        loadSave(task, serializedData, 1 + 19 * 8, dataPoints.numReconnectorRemoved);
+        loadSave(task, serializedData, 1 + 20 * 8, dataPoints.numDetonations);
+    }
+}
+
+void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream)
+{
+    //header row
+    stream << "Time step";
+    auto writeLabelAllColors = [&stream](auto const& name) {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            stream << ", " << name << " (color " << i << ")";
+        }
+        stream << ", " << name << " (accumulated)";
+    };
+    writeLabelAllColors("Cells");
+    writeLabelAllColors("Self-replicators");
+    writeLabelAllColors("Viruses");
+    writeLabelAllColors("Cell connections");
+    writeLabelAllColors("Energy particles");
+    writeLabelAllColors("Average genome cells");
+    writeLabelAllColors("Total energy");
+    writeLabelAllColors("Created cells");
+    writeLabelAllColors("Attacks");
+    writeLabelAllColors("Muscle activities");
+    writeLabelAllColors("Transmitter activities");
+    writeLabelAllColors("Defender activities");
+    writeLabelAllColors("Injection activities");
+    writeLabelAllColors("Completed injections");
+    writeLabelAllColors("Nerve pulses");
+    writeLabelAllColors("Neuron activities");
+    writeLabelAllColors("Sensor activities");
+    writeLabelAllColors("Sensor matches");
+    writeLabelAllColors("Reconnector creations");
+    writeLabelAllColors("Reconnector deletions");
+    writeLabelAllColors("Detonations");
+    stream << std::endl;
+
+    //content
+    for (auto dataPoints : statistics) {
+        std::vector<std::string> entries;
+        loadSave(SerializationTask::Save, entries, dataPoints);
+        stream << boost::join(entries, ",") << std::endl;
+    }
+}
+
+void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream)
+{
+    statistics.clear();
+
+    std::vector<std::vector<std::string>> data;
+    std::string line;
+    std::getline(stream, line); //skip header line
+    while (std::getline(stream, line)) {
+        std::vector<std::string> entries;
+        boost::split(entries, line, boost::is_any_of(","));
+
+        DataPointCollection dataPoints;
+        loadSave(SerializationTask::Load, entries, dataPoints);
+
+        statistics.emplace_back(dataPoints);
+    }
 }
 
 bool SerializerService::wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input)

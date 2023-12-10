@@ -10,7 +10,7 @@ struct ShapeGeneratorResult
     int numRequiredAdditionalConnections;
 };
 
-class ShapeGenerator
+class CudaShapeGenerator
 {
 public:
     __inline__ __device__ ShapeGeneratorResult generateNextConstructionData(ConstructionShape shape);
@@ -35,7 +35,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstructionData(ConstructionShape shape)
+__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionData(ConstructionShape shape)
 {
     switch (shape) {
     case ConstructionShape_Segment:
@@ -61,7 +61,7 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
     }
 }
 
-__inline__ __device__ ConstructorAngleAlignment ShapeGenerator::getConstructorAngleAlignment(ConstructionShape shape)
+__inline__ __device__ ConstructorAngleAlignment CudaShapeGenerator::getConstructorAngleAlignment(ConstructionShape shape)
 {
     switch (shape) {
     case ConstructionShape_Custom:
@@ -87,7 +87,7 @@ __inline__ __device__ ConstructorAngleAlignment ShapeGenerator::getConstructorAn
     }
 }
 
-__inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForSegment()
+__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForSegment()
 {
     ShapeGeneratorResult result;
     result.angle = 0;
@@ -95,7 +95,7 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
     return result;
 }
 
-__inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForTriangle()
+__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForTriangle()
 {
     ShapeGeneratorResult result;
     auto edgeLength = max(2, _processedEdges + 1);
@@ -120,7 +120,7 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
     return result;
 }
 
-__inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForRectangle()
+__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForRectangle()
 {
     ShapeGeneratorResult result;
     if (_processedEdges == 0) {
@@ -142,7 +142,7 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
     return result;
 }
 
-__inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForHexagon()
+__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForHexagon()
 {
     ShapeGeneratorResult result;
 
@@ -169,7 +169,7 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
     return result;
 }
 
-__inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForLoop()
+__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForLoop()
 {
     ShapeGeneratorResult result;
 
@@ -196,7 +196,7 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
     return result;
 }
 
-__inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForTube()
+__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForTube()
 {
     ShapeGeneratorResult result;
     if (_edgePos % 6 == 0) {
@@ -228,7 +228,7 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
     return result;
 }
 
-__inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForLolli()
+__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForLolli()
 {
     ShapeGeneratorResult result;
 
@@ -261,7 +261,7 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
     return result;
 }
 
-__inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForSmallLolli()
+__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForSmallLolli()
 {
     ShapeGeneratorResult result;
 
@@ -291,7 +291,7 @@ __inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstruct
     return result;
 }
 
-__inline__ __device__ ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForZigzag()
+__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForZigzag()
 {
     ShapeGeneratorResult result;
     if (_edgePos % 4 == 0) {

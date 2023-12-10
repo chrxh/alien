@@ -14,17 +14,17 @@ public:
     enum class State
     {
         Unintialized,
-        RequestLoading,
-        LoadingSimulation,
+        LoadSimulation,
+        FadeOutLoadingScreen,
         LoadingControls,
-        FinishedLoading
+        Ready
     };
     State getState();
 
     void activate();
 
 private:
-    void processWindow();
+    void processLoadingScreen();
 
     void drawGrid(float yPos, float alpha);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/StatisticsData.h"
+#include "EngineInterface/RawStatisticsData.h"
 
 #include "Base.cuh"
 #include "Definitions.cuh"
@@ -11,8 +11,8 @@ public:
 
     __host__ void init()
     {
-        CudaMemoryManager::getInstance().acquireMemory<StatisticsData>(1, _data);
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_data, 0, sizeof(StatisticsData)));
+        CudaMemoryManager::getInstance().acquireMemory<RawStatisticsData>(1, _data);
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_data, 0, sizeof(RawStatisticsData)));
     }
 
     __host__ void free()
@@ -20,10 +20,10 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_data);
     }
 
-    __host__ StatisticsData getStatistics()
+    __host__ RawStatisticsData getStatistics()
     {
-        StatisticsData result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _data, sizeof(StatisticsData), cudaMemcpyDeviceToHost));
+        RawStatisticsData result;
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _data, sizeof(RawStatisticsData), cudaMemcpyDeviceToHost));
         return result;
     }
 
@@ -53,10 +53,10 @@ public:
     //accumulated statistics
     __host__ void resetAccumulatedStatistics()
     {
-        StatisticsData hostData;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&hostData, _data, sizeof(StatisticsData), cudaMemcpyDeviceToHost));
+        RawStatisticsData hostData;
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&hostData, _data, sizeof(RawStatisticsData), cudaMemcpyDeviceToHost));
         hostData.timeline.accumulated = AccumulatedStatistics();
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &hostData, sizeof(StatisticsData), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &hostData, sizeof(RawStatisticsData), cudaMemcpyHostToDevice));
     }
 
     __inline__ __device__ void incNumCreatedCells(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numCreatedCells[color], uint64_t(1)); }
@@ -98,6 +98,6 @@ public:
     __inline__ __device__ int getMaxValue() const { return _data->histogram.maxValue; }
 
 private:
-    StatisticsData* _data;
+    RawStatisticsData* _data;
 };
 

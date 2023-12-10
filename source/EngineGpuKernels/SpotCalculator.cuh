@@ -4,7 +4,7 @@
 
 #include "EngineInterface/SimulationParametersSpotValues.h"
 #include "ConstantMemory.cuh"
-#include "Swap.cuh"
+#include "Util.cuh"
 #include "Math.cuh"
 
 class SpotCalculator

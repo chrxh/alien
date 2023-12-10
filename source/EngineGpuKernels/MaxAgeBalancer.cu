@@ -1,9 +1,8 @@
-#include "BalancerController.h"
+#include "MaxAgeBalancer.cuh"
 
-#include <cmath>
+#include <vector>
 
-#include "EngineInterface/SimulationController.h"
-#include "EngineInterface/StatisticsData.h"
+#include "Base.cuh"
 
 namespace
 {
@@ -14,24 +13,21 @@ namespace
     auto constexpr MinReplicatorsLowerValue = 20;
 }
 
-_BalancerController::_BalancerController(SimulationController const& simController)
-    : _simController(simController)
-{}
-
-void _BalancerController::process()
+bool _MaxAgeBalancer::balance(SimulationParameters& parameters, RawStatisticsData const& statistics, uint64_t timestep)
 {
-    auto const& parameters = _simController->getSimulationParameters();
+    auto result = false;
     if (parameters.cellMaxAgeBalancer) {
-        initializeIfNecessary();
-        doAdaptionIfNecessary();
+        initializeIfNecessary(parameters, timestep);
+        result |= doAdaptionIfNecessary(parameters, statistics, timestep);
     }
 
-    saveLastState();
+    saveLastState(parameters);
+
+    return result;
 }
 
-void _BalancerController::initializeIfNecessary()
+void _MaxAgeBalancer::initializeIfNecessary(SimulationParameters const& parameters, uint64_t timestep)
 {
-    auto const& parameters = _simController->getSimulationParameters();
     auto needsInitialization = false;
     for (int i = 0; i < MAX_COLORS; ++i) {
         if (parameters.cellMaxAge[i] != _lastCellMaxAge[i]) {
@@ -46,19 +42,18 @@ void _BalancerController::initializeIfNecessary()
         for (int i = 0; i < MAX_COLORS; ++i) {
             _cellMaxAge[i] = parameters.cellMaxAge[i];
         }
-        startNewMeasurement();
+        startNewMeasurement(timestep);
     }
 }
 
-void _BalancerController::doAdaptionIfNecessary()
+bool _MaxAgeBalancer::doAdaptionIfNecessary(SimulationParameters& parameters, RawStatisticsData const& statistics, uint64_t timestep)
 {
-    auto const& parameters = _simController->getSimulationParameters();
-    auto statistics = _simController->getStatistics();
+    auto result = false;
     for (int i = 0; i < MAX_COLORS; ++i) {
         _numReplicators[i] += statistics.timeline.timestep.numSelfReplicators[i];
     }
     ++_numMeasurements;
-    if (_simController->getCurrentTimestep() - *_lastTimestep > parameters.cellMaxAgeBalancerInterval) {
+    if (timestep - *_lastTimestep > parameters.cellMaxAgeBalancerInterval) {
         uint64_t maxReplicators = 0;
         uint64_t averageReplicators = 0;
         int numAveragedReplicators = 0;
@@ -89,28 +84,27 @@ void _BalancerController::doAdaptionIfNecessary()
                 }
             }
 
-            auto parameters = _simController->getSimulationParameters();
             for (int i = 0; i < MAX_COLORS; ++i) {
                 parameters.cellMaxAge[i] = toInt(_cellMaxAge[i]);
             }
-            _simController->setSimulationParameters(parameters);
+            result = true;
         }
-        startNewMeasurement();
+        startNewMeasurement(timestep);
     }
+    return result;
 }
 
-void _BalancerController::startNewMeasurement()
+void _MaxAgeBalancer::startNewMeasurement(uint64_t timestep)
 {
-    _lastTimestep = _simController->getCurrentTimestep();
+    _lastTimestep = timestep;
     for (int i = 0; i < MAX_COLORS; ++i) {
         _numReplicators[i] = 0;
     }
     _numMeasurements = 0;
 }
 
-void _BalancerController::saveLastState()
+void _MaxAgeBalancer::saveLastState(SimulationParameters const& parameters)
 {
-    auto const& parameters = _simController->getSimulationParameters();
     for (int i = 0; i < MAX_COLORS; ++i) {
         _lastCellMaxAge[i] = parameters.cellMaxAge[i];
     }

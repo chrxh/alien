@@ -14,12 +14,14 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
-#include "EngineInterface/StatisticsData.h"
+#include "EngineInterface/RawStatisticsData.h"
 #include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/Settings.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/MutationType.h"
+#include "EngineInterface/StatisticsHistory.h"
+
 #include "EngineGpuKernels/Definitions.h"
 
 #include "Definitions.h"
@@ -56,7 +58,9 @@ public:
     ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters);
     DataDescription getSelectedSimulationData(bool includeClusters);
     DataDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
-    StatisticsData getStatistics() const;
+    RawStatisticsData getRawStatistics() const;
+    StatisticsHistory const& getStatisticsHistory() const;
+    void setStatisticsHistory(StatisticsHistoryData const& data);
 
     void addAndSelectSimulationData(DataDescription const& dataToUpdate);
     void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate);
@@ -119,7 +123,7 @@ private:
     void measureTPS();
     void slowdownTPS();
 
-    CudaSimulationFacade _cudaSimulation;
+    CudaSimulationFacade _simulationCudaFacade;
 
     //settings
     Settings _settings;
@@ -154,12 +158,6 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _slowDownTimepoint;
     std::optional<std::chrono::microseconds> _slowDownOvershot;
   
-    //statistics data
-    std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
-    mutable std::mutex _mutexForStatistics;
-    StatisticsData _lastStatistics;
-    int _statisticsCounter = 0;
-
     //internals
     void* _cudaResource;
     AccessDataTOCache _dataTOCache;

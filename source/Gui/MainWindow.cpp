@@ -70,7 +70,6 @@
 #include "GenomeEditorWindow.h"
 #include "RadiationSourcesWindow.h"
 #include "OverlayMessageController.h"
-#include "BalancerController.h"
 #include "ExitDialog.h"
 
 namespace
@@ -129,8 +128,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _viewport);
     _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController);
-    _balancerController = std::make_shared<_BalancerController>(_simController);
-    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow, _balancerController);
+    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
     _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow, _viewport);
     _exitDialog = std::make_shared<_ExitDialog>(_onExit);
@@ -202,17 +200,17 @@ void _MainWindow::mainLoop()
         case _StartupController::State::Unintialized:
             processUninitialized();
             break;
-        case _StartupController::State::RequestLoading:
+        case _StartupController::State::LoadSimulation:
             processRequestLoading();
             break;
-        case _StartupController::State::LoadingSimulation:
+        case _StartupController::State::FadeOutLoadingScreen:
             processLoadingSimulation();
             break;
         case _StartupController::State::LoadingControls:
             processLoadingControls();
             break;
-        case _StartupController::State::FinishedLoading:
-            processFinishedLoading();
+        case _StartupController::State::Ready:
+            processReady();
             break;
         default:
             THROW_NOT_IMPLEMENTED();
@@ -321,7 +319,7 @@ void _MainWindow::processLoadingControls()
     renderSimulation();
 }
 
-void _MainWindow::processFinishedLoading()
+void _MainWindow::processReady()
 {
     ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10);
@@ -748,7 +746,6 @@ void _MainWindow::processControllers()
 {
     _autosaveController->process();
     _editorController->process();
-    _balancerController->process();
     _networkController->process();
     OverlayMessageController::getInstance().process();
     DelayedExecutionController::getInstance().process();
@@ -767,7 +764,6 @@ void _MainWindow::onOpenSimulation()
                 printOverlayMessage("Loading ...");
                 delayedExecution([=, this] {
                     _simController->closeSimulation();
-                    _statisticsWindow->reset();
 
                     std::optional<std::string> errorMessage;
                     try {
@@ -776,6 +772,7 @@ void _MainWindow::onOpenSimulation()
                             deserializedData.auxiliaryData.generalSettings,
                             deserializedData.auxiliaryData.simulationParameters);
                         _simController->setClusteredSimulationData(deserializedData.mainData);
+                        _simController->setStatisticsHistory(deserializedData.statistics);
                     } catch (CudaMemoryAllocationException const& exception) {
                         errorMessage = exception.what();
                     } catch (...) {
@@ -818,6 +815,7 @@ void _MainWindow::onSaveSimulation()
                 sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
                 sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
                 sim.mainData = _simController->getClusteredSimulationData();
+                sim.statistics = _simController->getStatisticsHistory().getCopiedData();
 
                 if (!SerializerService::serializeSimulationToFiles(firstFilename.string(), sim)) {
                     MessageDialog::getInstance().information("Save simulation", "The simulation could not be saved to the specified file.");
@@ -834,9 +832,4 @@ void _MainWindow::onRunSimulation()
 void _MainWindow::onPauseSimulation()
 {
     _simController->pauseSimulation();
-}
-
-void _MainWindow::reset()
-{
-    _statisticsWindow->reset();
 }

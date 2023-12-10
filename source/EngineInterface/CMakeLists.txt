@@ -6,14 +6,14 @@ add_library(alien_engine_interface_lib
     AuxiliaryDataParserService.h
     CellFunctionConstants.h
     Colors.h
+    DataPointCollection.cpp
+    DataPointCollection.h
     Definitions.h
     DescriptionEditService.cpp
     DescriptionEditService.h
     Descriptions.cpp
     Descriptions.h
     EngineConstants.h
-    ExportService.cpp
-    ExportService.h
     GenomeConstants.h
     GenomeDescriptionService.cpp
     GenomeDescriptionService.h
@@ -28,6 +28,7 @@ add_library(alien_engine_interface_lib
     PreviewDescriptionService.h
     PreviewDescriptions.h
     RadiationSource.h
+    RawStatisticsData.h
     SelectionShallowData.h
     SerializerService.cpp
     SerializerService.h
@@ -42,7 +43,10 @@ add_library(alien_engine_interface_lib
     SimulationParametersSpotValues.h
     SpaceCalculator.cpp
     SpaceCalculator.h
-    StatisticsData.h
+    StatisticsConverterService.cpp
+    StatisticsConverterService.h
+    StatisticsHistory.cpp
+    StatisticsHistory.h
     ZoomLevels.h)
 
 target_link_libraries(alien_engine_interface_lib Boost::boost)

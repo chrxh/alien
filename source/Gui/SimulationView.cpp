@@ -312,8 +312,19 @@ void _SimulationView::draw(bool renderSimulation)
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+        auto p1 = _viewport->mapWorldToViewPosition({0, 0});
+        auto worldSize = _simController->getWorldSize();
+        auto p2 = _viewport->mapWorldToViewPosition(toRealVector2D(worldSize));
+        auto color = ImColor::HSV(0.66f, 1.0f, 1.0f, 0.8f);
+        drawList->AddLine({p1.x, p1.y}, {p2.x, p1.y}, color);
+        drawList->AddLine({p2.x, p1.y}, {p2.x, p2.y}, color);
+        drawList->AddLine({p2.x, p2.y}, {p1.x, p2.y}, color);
+        drawList->AddLine({p1.x, p2.y}, {p1.x, p1.y}, color);
+
     } else {
-        glClearColor(0, 0, 0.1f, 1.0f);
+        glClearColor(0, 0, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         auto textWidth = scale(300.0f);

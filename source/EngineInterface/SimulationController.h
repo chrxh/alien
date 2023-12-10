@@ -6,6 +6,8 @@
 #include "ShallowUpdateSelectionData.h"
 #include "SimulationController.h"
 #include "MutationType.h"
+#include "DataPointCollection.h"
+#include "StatisticsHistory.h"
 
 class _SimulationController
 {
@@ -83,7 +85,9 @@ public:
 
     virtual GeneralSettings getGeneralSettings() const = 0;
     virtual IntVector2D getWorldSize() const = 0;
-    virtual StatisticsData getStatistics() const = 0;
+    virtual RawStatisticsData getRawStatistics() const = 0;
+    virtual StatisticsHistory const& getStatisticsHistory() const = 0;
+    virtual void setStatisticsHistory(StatisticsHistoryData const& data) = 0;
 
     virtual std::optional<int> getTpsRestriction() const = 0;
     virtual void setTpsRestriction(std::optional<int> const& value) = 0;

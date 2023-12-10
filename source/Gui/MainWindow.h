@@ -17,7 +17,7 @@ private:
     void processRequestLoading();
     void processLoadingSimulation();
     void processLoadingControls();
-    void processFinishedLoading();
+    void processReady();
 
     void renderSimulation();
 
@@ -30,9 +30,6 @@ private:
     void onSaveSimulation();
     void onRunSimulation();
     void onPauseSimulation();
-
-    void processExitDialog();
-    void reset();
 
     GLFWwindow* _window;
     GuiLogger _logger;
@@ -75,7 +72,6 @@ private:
     EditorController _editorController; 
     FpsController _fpsController;
     NetworkController _networkController;
-    BalancerController _balancerController;
 
     bool _onExit = false;
     bool _simulationMenuToggled = false;
