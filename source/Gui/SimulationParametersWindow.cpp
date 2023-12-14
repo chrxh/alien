@@ -598,8 +598,8 @@ void _SimulationParametersWindow::processBase(
                     .name("Cell network decay")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.clusterDecay)
-                    .tooltip("If enabled, entire cell networks will disintegrate when one of their cells is dying because of insufficient energy. This option "
-                             "is useful to minimize the presence of cell corpses."),
+                    .tooltip("If enabled, entire cell networks will disintegrate when one of their cells is dying because of insufficient energy or exceeding "
+                             "the max. age. Furthermore, the dying process is much slower. This option is useful to minimize the presence of damaged cell networks."),
                 simParameters.clusterDecay);
             ImGui::TreePop();
         }
