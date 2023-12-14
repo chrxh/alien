@@ -89,7 +89,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
 {
     auto& constructor = cell->cellFunctionData.constructor;
     if (!GenomeDecoder::isFirstNode(constructor)) {
-        return;        
+        return;
     }
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
     if (!isConstructionTriggered(data, cell, activity)) {
@@ -100,9 +100,6 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
         constructor.isComplete = true;
         return;
     }
-
-    auto numConnectedGenomeNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, true, false);
-
     auto constexpr ContainerSize = 256;
     Cell* temp[ContainerSize * 2];
     HashSet<Cell*, HashFunctor<Cell*>> visitedCells(ContainerSize * 2, temp);
@@ -113,7 +110,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
     auto connectionIndex = 0;
     Cell* lastCells[ContainerSize];
     int lastIndices[ContainerSize];
-    int scannedCells = 1;
+
     do {
         auto goBack = false;
         if (connectionIndex < currentCell->numConnections) {
@@ -123,7 +120,14 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
                 if (nextCell->creatureId != cell->creatureId) {
                     goBack = true;
                 } else {
-                    ++scannedCells;
+                    if (nextCell->cellFunction == CellFunction_Constructor && !GenomeDecoder::hasEmptyGenome(nextCell->cellFunctionData.constructor)
+                        && !nextCell->cellFunctionData.constructor.isConstructionBuilt
+                        && !GenomeDecoder::containsSectionSelfReplication(
+                            nextCell->cellFunctionData.constructor.genome + Const::GenomeHeaderSize,
+                            nextCell->cellFunctionData.constructor.genomeSize - Const::GenomeHeaderSize)) {
+                        constructor.isComplete = false;
+                        return;
+                    }
                     lastCells[depth] = currentCell;
                     lastIndices[depth] = connectionIndex;
                     currentCell = nextCell;
@@ -149,7 +153,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
         }
     } while (true);
 
-    constructor.isComplete = scannedCells == numConnectedGenomeNodes;
+    constructor.isComplete = true;
 }
 
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
