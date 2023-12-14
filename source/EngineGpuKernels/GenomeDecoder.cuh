@@ -621,7 +621,7 @@ __inline__ __device__ void GenomeDecoder::setNextConstructionAngle2(uint8_t* gen
 
 __inline__ __device__ void GenomeDecoder::setNextConstructorSeparation(uint8_t* genome, int nodeAddress, bool separation)
 {
-    genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorFixedBytes + 3 + Const::ConstructorSeparation] = convertBoolToByte(separation);
+    genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorFixedBytes + 3 + Const::GenomeHeaderSeparationPos] = convertBoolToByte(separation);
 }
 
 __inline__ __device__ int GenomeDecoder::getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeAddress)
