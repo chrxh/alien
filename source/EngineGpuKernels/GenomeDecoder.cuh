@@ -14,10 +14,10 @@ public:
     template <typename Func>
     __inline__ __device__ static void executeForEachNode(uint8_t* genome, int genomeSize, Func func);
     template <typename Func>
-    __inline__ __device__ static void executeForEachNodeRecursively(uint8_t* genome, int genomeSize, Func func);
+    __inline__ __device__ static void executeForEachNodeRecursively(uint8_t* genome, int genomeSize, bool includedSeparatedParts, Func func);
     __inline__ __device__ static GenomeHeader readGenomeHeader(ConstructorFunction const& constructor);
     __inline__ __device__ static int getGenomeDepth(uint8_t* genome, int genomeSize);
-    __inline__ __device__ static int getNumNodesRecursively(uint8_t* genome, int genomeSize, bool includeRepetitions);
+    __inline__ __device__ static int getNumNodesRecursively(uint8_t* genome, int genomeSize, bool includeRepetitions, bool includedSeparatedParts);
     __inline__ __device__ static int getRandomGenomeNodeAddress(
         SimulationData& data,
         uint8_t* genome,
@@ -106,7 +106,7 @@ __inline__ __device__ void GenomeDecoder::executeForEachNode(uint8_t* genome, in
 }
 
 template <typename Func>
-__inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t* genome, int genomeSize, Func func)
+__inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t* genome, int genomeSize, bool includedSeparatedParts, Func func)
 {
     CHECK(genomeSize >= Const::GenomeHeaderSize)
 
@@ -123,14 +123,19 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
             auto cellFunctionFixedBytes = cellFunction == CellFunction_Constructor ? Const::ConstructorFixedBytes : Const::InjectorFixedBytes;
             auto makeSelfCopy = GenomeDecoder::convertByteToBool(genome[nodeAddress + Const::CellBasicBytes + cellFunctionFixedBytes]);
             if (!makeSelfCopy) {
-                auto subGenomeSize = GenomeDecoder::getNextSubGenomeSize(genome, genomeSize, nodeAddress);
-                nodeAddress += Const::CellBasicBytes + cellFunctionFixedBytes + 3;
-                subGenomeEndAddresses[depth++] = nodeAddress + subGenomeSize;
+                auto deltaSubGenomeStartPos = Const::CellBasicBytes + cellFunctionFixedBytes + 3;
+                if (!includedSeparatedParts && GenomeDecoder::isSeparating(genome + nodeAddress + deltaSubGenomeStartPos)) {
+                    //skip scanning sub-genome
+                } else {
+                    auto subGenomeSize = GenomeDecoder::getNextSubGenomeSize(genome, genomeSize, nodeAddress);
+                    nodeAddress += deltaSubGenomeStartPos;
+                    subGenomeEndAddresses[depth++] = nodeAddress + subGenomeSize;
 
-                auto repetitions = getNumRepetitions(genome + nodeAddress, true);
-                subGenomeNumRepetitions[depth] = subGenomeNumRepetitions[depth - 1] * repetitions;
-                nodeAddress += Const::GenomeHeaderSize;
-                goToNextSibling = false;
+                    auto repetitions = GenomeDecoder::getNumRepetitions(genome + nodeAddress, true);
+                    subGenomeNumRepetitions[depth] = subGenomeNumRepetitions[depth - 1] * repetitions;
+                    nodeAddress += Const::GenomeHeaderSize;
+                    goToNextSibling = false;
+                }
             }
         }
         if (goToNextSibling) {
@@ -151,17 +156,19 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
 __inline__ __device__ int GenomeDecoder::getGenomeDepth(uint8_t* genome, int genomeSize)
 {
     auto result = 0;
-    executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress, int repetition) { result = max(result, depth); });
+    executeForEachNodeRecursively(genome, genomeSize, true, [&result](int depth, int nodeAddress, int repetition) { result = max(result, depth); });
     return result;
 }
 
-__inline__ __device__ int GenomeDecoder::getNumNodesRecursively(uint8_t* genome, int genomeSize, bool includeRepetitions)
+__inline__ __device__ int GenomeDecoder::getNumNodesRecursively(uint8_t* genome, int genomeSize, bool includeRepetitions, bool includedSeparatedParts)
 {
     auto result = 0;
     if (!includeRepetitions) {
-        executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress, int repetitions) { ++result; });
+        executeForEachNodeRecursively(
+            genome, genomeSize, includedSeparatedParts, [&result](int depth, int nodeAddress, int repetitions) { ++result; });
     } else {
-        executeForEachNodeRecursively(genome, genomeSize, [&result](int depth, int nodeAddress, int repetitions) { result += repetitions; });
+        executeForEachNodeRecursively(
+            genome, genomeSize, includedSeparatedParts, [&result](int depth, int nodeAddress, int repetitions) { result += repetitions; });
     }
     return result;
 }
