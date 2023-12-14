@@ -365,7 +365,7 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
     GenomeDecoder::setNextCellFunctionType(targetGenome, nodeAddress, newCellFunction);
     GenomeDecoder::setRandomCellFunctionData(data, targetGenome, nodeAddress + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeHeaderSize);
     if (newCellFunction == CellFunction_Constructor && !makeSelfCopy) {
-        GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);  //currently no subgenome with separation property wished
+        GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);  //currently no sub-genome with separation property wished
     }
 
     for (int i = nodeAddress + Const::CellBasicBytes + origCellFunctionSize; i < genomeSize; ++i) {
@@ -449,7 +449,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     GenomeDecoder::setNextCellColor(targetGenome, nodeAddress, newColor);
     GenomeDecoder::setRandomCellFunctionData(data, targetGenome, nodeAddress + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeHeaderSize);
     if (newCellFunction == CellFunction_Constructor && !makeSelfCopy) {
-        GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);      //currently no subgenome with separation property wished
+        GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);      //currently no sub-genome with separation property wished
     }
 
     for (int i = nodeAddress; i < genomeSize; ++i) {
