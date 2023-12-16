@@ -4,10 +4,10 @@
 ### Added
 - new simulation parameters to reduce energy particle absorption for cells with fewer connections
 - new simulation parameters to configure the decay probability of dying cells
-- validation of normal and minimal cell energies in parameter window
+- validation of normal and minimal cell energies in the simulation parameter window
 
 ### Changed
-- parameter 'Genome size bonus' only takes into account the genome of the non-separating parts
+- parameter 'Genome size bonus' only takes into account the non-separating parts of the genome
 
 ### Fixed
 - layout problems with the display of color matrices fixed
