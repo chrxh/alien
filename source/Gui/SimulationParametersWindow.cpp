@@ -465,6 +465,17 @@ void _SimulationParametersWindow::processBase(
                 simParameters.baseValues.radiationAbsorption);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
+                    .name("Absorption low connection penalty")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(5.0f)
+                    .format("%.1f")
+                    .defaultValue(origSimParameters.radiationAbsorptionLowConnectionPenalty)
+                    .tooltip("When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy particle."),
+                simParameters.radiationAbsorptionLowConnectionPenalty);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
                     .name("Absorption velocity penalty")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
@@ -473,7 +484,7 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .format("%.1f")
                     .defaultValue(origSimParameters.radiationAbsorptionVelocityPenalty)
-                    .tooltip("When this parameter is increased, cells with higher velocity can absorb less energy from an incoming energy particle."),
+                    .tooltip("When this parameter is increased, cells with higher velocity will absorb less energy from an incoming energy particle."),
                 simParameters.radiationAbsorptionVelocityPenalty);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -1877,6 +1888,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             parameters.cellFunctionAttackerGenomeSizeBonus[i][j] = std::max(0.0f, parameters.cellFunctionAttackerGenomeSizeBonus[i][j]);
         }
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
+        parameters.radiationAbsorptionVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionVelocityPenalty[i]);
+        parameters.radiationAbsorptionLowConnectionPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionLowConnectionPenalty[i]);
         parameters.cellFunctionConstructorPumpEnergyFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorPumpEnergyFactor[i]));
         parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
         parameters.cellFunctionDetonatorChainExplosionProbability[i] =
