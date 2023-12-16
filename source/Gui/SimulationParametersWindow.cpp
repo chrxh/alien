@@ -465,6 +465,17 @@ void _SimulationParametersWindow::processBase(
                 simParameters.baseValues.radiationAbsorption);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
+                    .name("Absorption low connection penalty")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(0)
+                    .max(5.0f)
+                    .format("%.1f")
+                    .defaultValue(origSimParameters.radiationAbsorptionLowConnectionPenalty)
+                    .tooltip("When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy particle."),
+                simParameters.radiationAbsorptionLowConnectionPenalty);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
                     .name("Absorption velocity penalty")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
@@ -473,7 +484,7 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .format("%.1f")
                     .defaultValue(origSimParameters.radiationAbsorptionVelocityPenalty)
-                    .tooltip("When this parameter is increased, cells with higher velocity can absorb less energy from an incoming energy particle."),
+                    .tooltip("When this parameter is increased, cells with higher velocity will absorb less energy from an incoming energy particle."),
                 simParameters.radiationAbsorptionVelocityPenalty);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -593,13 +604,27 @@ void _SimulationParametersWindow::processBase(
                              ICON_FA_CARET_RIGHT" If the transformation of energy particles to "
                              "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
                 simParameters.cellNormalEnergy);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Decay rate of dying cells")
+                    .colorDependence(true)
+                    .textWidth(RightColumnWidth)
+                    .min(1e-6f)
+                    .max(0.05f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .defaultValue(origSimParameters.clusterDecayProb)
+                    .tooltip(
+                        "The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) provided that one of the following conditions is satisfied:\n" ICON_FA_CARET_RIGHT
+                        " the cell has too low energy,\n" ICON_FA_CARET_RIGHT " the cell is in 'Dying' state\n" ICON_FA_CARET_RIGHT " the cell has exceeded the maximum age.")
+                , simParameters.clusterDecayProb);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Cell network decay")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.clusterDecay)
-                    .tooltip("If enabled, entire cell networks will disintegrate when one of their cells is dying because of insufficient energy. This option "
-                             "is useful to minimize the presence of cell corpses."),
+                    .tooltip("If enabled, entire cell networks will disintegrate when one of their cells is dying because of insufficient energy or exceeding "
+                             "the max. age. This option is useful to minimize the presence of damaged cell networks."),
                 simParameters.clusterDecay);
             ImGui::TreePop();
         }
@@ -1832,7 +1857,7 @@ void _SimulationParametersWindow::processSpot(
         }
     }
     ImGui::EndChild();
-    validationAndCorrection(spot);
+    validationAndCorrection(spot, parameters);
 }
 
 void _SimulationParametersWindow::onOpenParameters()
@@ -1877,6 +1902,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             parameters.cellFunctionAttackerGenomeSizeBonus[i][j] = std::max(0.0f, parameters.cellFunctionAttackerGenomeSizeBonus[i][j]);
         }
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
+        parameters.radiationAbsorptionVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionVelocityPenalty[i]);
+        parameters.radiationAbsorptionLowConnectionPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionLowConnectionPenalty[i]);
         parameters.cellFunctionConstructorPumpEnergyFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorPumpEnergyFactor[i]));
         parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
         parameters.cellFunctionDetonatorChainExplosionProbability[i] =
@@ -1884,13 +1911,14 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.cellFunctionConstructorExternalEnergy[i] = std::max(0.0f, parameters.cellFunctionConstructorExternalEnergy[i]);
         parameters.cellFunctionConstructorExternalEnergySupplyRate[i] =
             std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorExternalEnergySupplyRate[i]));
+        parameters.baseValues.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
     parameters.cellMaxAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.cellMaxAgeBalancerInterval));
 }
 
-void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot) const
+void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
@@ -1898,6 +1926,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSp
                 std::max(0.0f, std::min(1.0f, spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j]));
         }
         spot.values.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorption[i]));
+        spot.values.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
     }
     spot.values.cellMaxBindingEnergy = std::max(10.0f, spot.values.cellMaxBindingEnergy);
 }

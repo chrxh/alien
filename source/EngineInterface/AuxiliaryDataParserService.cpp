@@ -261,6 +261,12 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.radiationAbsorptionLowConnectionPenalty,
+            defaultParameters.radiationAbsorptionLowConnectionPenalty,
+            "simulation parameters.radiation.absorption low connection penalty",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.highRadiationMinCellEnergy,
             defaultParameters.highRadiationMinCellEnergy,
             "simulation parameters.high radiation.min cell energy",

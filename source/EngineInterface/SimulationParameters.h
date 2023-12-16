@@ -48,6 +48,7 @@ struct SimulationParameters
     float radiationVelocityPerturbation = 0.5f;
     ColorVector<int> radiationMinCellAge = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> radiationAbsorptionVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    ColorVector<float> radiationAbsorptionLowConnectionPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> highRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
     bool clusterDecay = false;
@@ -183,6 +184,9 @@ struct SimulationParameters
                 return false;
             }
             if (radiationAbsorptionVelocityPenalty[i] != other.radiationAbsorptionVelocityPenalty[i]) {
+                return false;
+            }
+            if (radiationAbsorptionLowConnectionPenalty[i] != other.radiationAbsorptionLowConnectionPenalty[i]) {
                 return false;
             }
             if (cellFunctionInjectorRadius[i] != other.cellFunctionInjectorRadius[i]) {
