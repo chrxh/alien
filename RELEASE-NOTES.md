@@ -1,23 +1,35 @@
 # Release notes
 
+## [4.5.1] - 2023-12-16
+### Added
+- new simulation parameters to reduce energy particle absorption for cells with fewer connections
+- new simulation parameters to configure the decay probability of dying cells
+- validation of normal and minimal cell energy parameters in the simulation parameter window
+
+### Changed
+- parameter 'Genome size bonus' only takes into account the non-separating parts of the genome
+
+### Fixed
+- layout problems with the display of color matrices fixed
+
 ## [4.5.0] - 2023-12-09
 ### Added
-- engine, gui: entire statistics history are saved along with a simulation
+- engine, gui: entire statistical history are saved along with a simulation
 - gui/statistics: configurable plot heights
 - gui/statistics: collapse specific plots
-- gui/browser: statistics history are up/downloaded along with a simulation
+- gui/browser: statistical history are up/downloaded along with a simulation
 - gui/sim view: draw boundaries of the world
 - Python script `FindFurtunateTimeline`: constantly monitors populations in a simulation and resort to savepoints in case of extinction
 
 ### Changed
 - gui/statistics: widgets for real time and time horizon parameter are aligned with the other widgets
 
+### Removed
+- export statistics function
+
 ### Fixed
 - in simulation runs via CLI, certain simulation parameters are adjusted as in the GUI (e.g. if the max age balancer is switched on, external energy consumption)
 - wrong color conversion HSV -> RGB fixed (relevant for mutation and genome size coloring)
-
-### Removed
-- export statistics function
 
 ## [4.4.3] - 2023-11-29
 ### Added

@@ -1,5 +1,6 @@
 #include "SimulationView.h"
 
+#include <algorithm>
 #include <glad/glad.h>
 #include <imgui.h>
 #include <cmath>

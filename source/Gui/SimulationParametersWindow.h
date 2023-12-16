@@ -26,7 +26,7 @@ private:
     void onSaveParameters();
 
     void validationAndCorrection(SimulationParameters& parameters) const;
-    void validationAndCorrection(SimulationParametersSpot& spot) const;
+    void validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const;
 
     SimulationController _simController;
     RadiationSourcesWindow _radiationSourcesWindow;

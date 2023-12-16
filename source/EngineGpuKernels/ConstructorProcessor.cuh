@@ -89,7 +89,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
 {
     auto& constructor = cell->cellFunctionData.constructor;
     if (!GenomeDecoder::isFirstNode(constructor)) {
-        return;        
+        return;
     }
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
     if (!isConstructionTriggered(data, cell, activity)) {
@@ -365,7 +365,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
 
     if (GenomeDecoder::containsSelfReplication(constructor)) {
         constructor.offspringCreatureId = 1 + data.numberGen1.random(65535);
-        hostCell->genomeNumNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize), true);
+        hostCell->genomeNumNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize), true, false);
     } else {
         constructor.offspringCreatureId = hostCell->creatureId;
     }
