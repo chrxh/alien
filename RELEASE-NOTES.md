@@ -1,5 +1,17 @@
 # Release notes
 
+## [4.5.1] - 2023-12-16
+### Added
+- new simulation parameters to reduce energy particle absorption for cells with fewer connections
+- new simulation parameters to configure the decay probability of dying cells
+- validation of normal and minimal cell energies in parameter window
+
+### Changed
+- parameter 'Genome size bonus' only takes into account the genome of the non-separating parts
+
+### Fixed
+- layout problems with the display of color matrices fixed
+
 ## [4.5.0] - 2023-12-09
 ### Added
 - engine, gui: entire statistical history are saved along with a simulation
