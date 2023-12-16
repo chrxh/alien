@@ -604,13 +604,27 @@ void _SimulationParametersWindow::processBase(
                              ICON_FA_CARET_RIGHT" If the transformation of energy particles to "
                              "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
                 simParameters.cellNormalEnergy);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Decay rate of dying cells")
+                    .colorDependence(true)
+                    .textWidth(RightColumnWidth)
+                    .min(1e-6f)
+                    .max(0.05f)
+                    .format("%.6f")
+                    .logarithmic(true)
+                    .defaultValue(origSimParameters.clusterDecayProb)
+                    .tooltip(
+                        "The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) provided that one of the following conditions is satisfied:\n" ICON_FA_CARET_RIGHT
+                        " the cell has too low energy,\n" ICON_FA_CARET_RIGHT " the cell is in 'Dying' state\n" ICON_FA_CARET_RIGHT " the cell has exceeded the maximum age.")
+                , simParameters.clusterDecayProb);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Cell network decay")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origSimParameters.clusterDecay)
                     .tooltip("If enabled, entire cell networks will disintegrate when one of their cells is dying because of insufficient energy or exceeding "
-                             "the max. age. Furthermore, the dying process is much slower. This option is useful to minimize the presence of damaged cell networks."),
+                             "the max. age. This option is useful to minimize the presence of damaged cell networks."),
                 simParameters.clusterDecay);
             ImGui::TreePop();
         }
