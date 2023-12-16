@@ -505,6 +505,16 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     return result;
 }
 
+namespace
+{
+    void checkAndCorrectInvalidEnergy(float& energy)
+    {
+        if (std::isnan(energy) || energy < 0 || energy > 1e12) {
+            energy = 0;
+        }
+    }
+}
+
 void DescriptionConverter::addParticle(DataTO const& dataTO, ParticleDescription const& particleDesc) const
 {
     auto particleIndex = (*dataTO.numParticles)++;
@@ -513,7 +523,8 @@ void DescriptionConverter::addParticle(DataTO const& dataTO, ParticleDescription
 	particleTO.id = particleDesc.id == 0 ? NumberGenerator::getInstance().getId() : particleDesc.id;
     particleTO.pos = {particleDesc.pos.x, particleDesc.pos.y};
     particleTO.vel = {particleDesc.vel.x, particleDesc.vel.y};
-	particleTO.energy = particleDesc.energy;
+    particleTO.energy = particleDesc.energy;
+    checkAndCorrectInvalidEnergy(particleTO.energy);
     particleTO.color = particleDesc.color;
 }
 
@@ -526,6 +537,7 @@ void DescriptionConverter::addCell(
 	cellTO.pos= { cellDesc.pos.x, cellDesc.pos.y };
     cellTO.vel = {cellDesc.vel.x, cellDesc.vel.y};
     cellTO.energy = cellDesc.energy;
+    checkAndCorrectInvalidEnergy(cellTO.energy);
     cellTO.stiffness = cellDesc.stiffness;
     cellTO.maxConnections = cellDesc.maxConnections;
     cellTO.executionOrderNumber = cellDesc.executionOrderNumber;

@@ -1832,7 +1832,7 @@ void _SimulationParametersWindow::processSpot(
         }
     }
     ImGui::EndChild();
-    validationAndCorrection(spot);
+    validationAndCorrection(spot, parameters);
 }
 
 void _SimulationParametersWindow::onOpenParameters()
@@ -1884,13 +1884,14 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.cellFunctionConstructorExternalEnergy[i] = std::max(0.0f, parameters.cellFunctionConstructorExternalEnergy[i]);
         parameters.cellFunctionConstructorExternalEnergySupplyRate[i] =
             std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorExternalEnergySupplyRate[i]));
+        parameters.baseValues.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
     parameters.cellMaxAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.cellMaxAgeBalancerInterval));
 }
 
-void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot) const
+void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
@@ -1898,6 +1899,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSp
                 std::max(0.0f, std::min(1.0f, spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j]));
         }
         spot.values.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorption[i]));
+        spot.values.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
     }
     spot.values.cellMaxBindingEnergy = std::max(10.0f, spot.values.cellMaxBindingEnergy);
 }
