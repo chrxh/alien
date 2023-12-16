@@ -509,7 +509,7 @@ namespace
 {
     void checkAndCorrectInvalidEnergy(float& energy)
     {
-        if (std::isnan(energy) || energy < 0 || energy > 1e12) {
+        if (isnan(energy) || energy < 0 || energy > 1e12) {
             energy = 0;
         }
     }
