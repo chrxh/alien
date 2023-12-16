@@ -1675,15 +1675,16 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
 
     if (isExpanded) {
         ImGui::BeginGroup();
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(130.0f));
-        ImGui::Text("[target color]");
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(115.0f));
+        ImGui::Text("[target cell color]");
 
         auto startPos = ImGui::GetCursorPos();
 
-        ImGui::SetCursorPos({startPos.x - scale(48), startPos.y + scale(105)});
-        RotateStart(ImGui::GetWindowDrawList());
-        ImGui::Text("[host color]");
-        RotateEnd(90.0f, ImGui::GetWindowDrawList());
+        ImGui::SetCursorPos({startPos.x - scale(48), startPos.y + scale(121)});
+        auto drawList = ImGui::GetWindowDrawList();
+        RotateStart(drawList);
+        ImGui::Text("[cell color]");
+        RotateEnd(90.0f, drawList);
 
         ImGui::SetCursorPos(startPos);
 
@@ -1698,12 +1699,8 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
                     ImGui::TableNextColumn();
                     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
                     if (row == 0 && col > 0) {
-                        ImVec2 pos = ImGui::GetCursorScreenPos();
-                        ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
                         ColorField(Const::IndividualCellColors[col - 1], -1);
                     } else if (row > 0 && col == 0) {
-                        ImVec2 pos = ImGui::GetCursorScreenPos();
-                        ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + ImGui::GetStyle().FramePadding.y));
                         ColorField(Const::IndividualCellColors[row - 1], -1);
                     } else if (row > 0 && col > 0) {
                         if constexpr (std::is_same<T, float>()) {
@@ -1810,14 +1807,14 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
 //>>>>>>>>>>
 void AlienImGui::RotateStart(ImDrawList* drawList)
 {
-    _rotationStartIndex = ImGui::GetBackgroundDrawList()->VtxBuffer.Size;
+    _rotationStartIndex = drawList->VtxBuffer.Size;
 }
 
 ImVec2 AlienImGui::RotationCenter(ImDrawList* drawList)
 {
     ImVec2 l(FLT_MAX, FLT_MAX), u(-FLT_MAX, -FLT_MAX);  // bounds
 
-    const auto& buf = ImGui::GetBackgroundDrawList()->VtxBuffer;
+    const auto& buf = drawList->VtxBuffer;
     for (int i = _rotationStartIndex; i < buf.Size; i++)
         l = ImMin(l, buf[i].pos), u = ImMax(u, buf[i].pos);
 
@@ -1838,7 +1835,7 @@ void AlienImGui::RotateEnd(float angle, ImDrawList* drawList)
     float s = sin((angle + 90.0f) * Const::DegToRad), c = cos((angle + 90.0f) * Const::DegToRad);
     center = ImRotate(center, s, c) - center;
 
-    auto& buf = ImGui::GetBackgroundDrawList()->VtxBuffer;
+    auto& buf = drawList->VtxBuffer;
     for (int i = _rotationStartIndex; i < buf.Size; i++) {
         buf[i].pos = ImRotate(buf[i].pos, s, c) - center;
     }
