@@ -7,7 +7,7 @@
 
 #include "AlienWindow.h"
 #include "BrowserSimulationData.h"
-#include "RemoteSimulationData.h"
+#include "NetworkDataTO.h"
 #include "UserData.h"
 #include "Definitions.h"
 
@@ -53,7 +53,7 @@ private:
 
     void processActivated() override;
 
-    void sortRemoteSimulationData(std::vector<RemoteSimulationData>& remoteData, ImGuiTableSortSpecs* sortSpecs);
+    void sortRemoteSimulationData(std::vector<NetworkDataTO>& remoteData, ImGuiTableSortSpecs* sortSpecs);
     void sortUserList();
 
     void onDownloadItem(BrowserSimulationData const& sim);
@@ -79,9 +79,9 @@ private:
 
     int _numSimulations = 0;
     int _numGenomes = 0;
-    std::vector<RemoteSimulationData> _rawRemoteDataList;
-    std::vector<RemoteSimulationData> _filteredRemoteSimulationList;
-    std::vector<RemoteSimulationData> _filteredRemoteGenomeList;
+    std::vector<NetworkDataTO> _rawNetworkDataTOs;
+    std::vector<NetworkDataTO> _filteredNetworkSimulationTOs;
+    std::vector<NetworkDataTO> _filteredNetworkGenomeTOs;
 
     std::vector<BrowserSimulationData> _browserSimulationList;
     std::vector<BrowserSimulationData> _browserGenomeList;

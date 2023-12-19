@@ -1,12 +1,12 @@
 #include "NetworkDataParserService.h"
 
-#include "RemoteSimulationData.h"
+#include "NetworkDataTO.h"
 
-std::vector<RemoteSimulationData> NetworkDataParserService::decodeRemoteSimulationData(boost::property_tree::ptree const& tree)
+std::vector<NetworkDataTO> NetworkDataParserService::decodeRemoteSimulationData(boost::property_tree::ptree const& tree)
 {
-    std::vector<RemoteSimulationData> result;
+    std::vector<NetworkDataTO> result;
     for (auto const& [key, subTree] : tree) {
-        auto entry = std::make_shared<_RemoteSimulationData>();
+        auto entry = std::make_shared<_NetworkDataTO>();
         entry->id = subTree.get<std::string>("id");
         entry->userName = subTree.get<std::string>("userName");
         entry->simName = subTree.get<std::string>("simulationName");
@@ -31,7 +31,7 @@ std::vector<RemoteSimulationData> NetworkDataParserService::decodeRemoteSimulati
         }
         entry->numDownloads = subTree.get<int>("numDownloads");
         entry->fromRelease = subTree.get<int>("fromRelease") == 1;
-        entry->type = subTree.get<RemoteDataType>("type");
+        entry->type = subTree.get<NetworkDataType>("type");
         result.emplace_back(entry);
     }
     return result;

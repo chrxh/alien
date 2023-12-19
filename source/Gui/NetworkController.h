@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-#include "RemoteSimulationData.h"
+#include "NetworkDataTO.h"
 #include "UserData.h"
 #include "Definitions.h"
 
@@ -40,7 +40,7 @@ public:
     bool resetPassword(std::string const& userName, std::string const& email);
     bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
 
-    bool getRemoteSimulationList(std::vector<RemoteSimulationData>& result, bool withRetry) const;
+    bool getRemoteSimulationList(std::vector<NetworkDataTO>& result, bool withRetry) const;
     bool getUserList(std::vector<UserData>& result, bool withRetry) const;
     bool getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const;
     bool getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
@@ -54,7 +54,7 @@ public:
         std::string const& data,
         std::string const& settings,
         std::string const& statistics,
-        RemoteDataType type);
+        NetworkDataType type);
     bool downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
     bool deleteSimulation(std::string const& simId);
 

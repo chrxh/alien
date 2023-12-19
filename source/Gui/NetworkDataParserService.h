@@ -9,6 +9,6 @@
 class NetworkDataParserService
 {
 public:
-    static std::vector<RemoteSimulationData> decodeRemoteSimulationData(boost::property_tree::ptree const& tree);
+    static std::vector<NetworkDataTO> decodeRemoteSimulationData(boost::property_tree::ptree const& tree);
     static std::vector<UserData> decodeUserData(boost::property_tree::ptree const& tree);
 };

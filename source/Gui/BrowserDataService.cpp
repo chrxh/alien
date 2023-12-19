@@ -2,7 +2,7 @@
 
 #include "BrowserSimulationData.h"
 
-std::vector<BrowserSimulationData> BrowserDataService::createBrowserData(std::vector<RemoteSimulationData> const& remoteData)
+std::vector<BrowserSimulationData> BrowserDataService::createBrowserData(std::vector<NetworkDataTO> const& remoteData)
 {
     std::vector<BrowserSimulationData> result;
     result.reserve(remoteData.size());
