@@ -2,6 +2,7 @@
 
 #include <map>
 #include <string>
+#include <variant>
 
 #include "Definitions.h"
 
@@ -12,9 +13,12 @@ enum BrowserDataType_
     BrowserDataType_Genome
 };
 
-class _BrowserDataTO
+struct BrowserFolder
 {
-public:
+};
+
+struct BrowserLeaf
+{
     std::string id;
     std::string timestamp;
     std::string userName;
@@ -27,7 +31,15 @@ public:
     uint64_t contentSize;
     std::string description;
     std::string version;
-    bool fromRelease;
-    BrowserDataType type;
 };
-        
+
+struct _BrowserDataTO
+{
+    BrowserDataType type;
+    int level;
+    std::variant<BrowserFolder, BrowserLeaf> node;
+
+    bool isLeaf();
+    BrowserLeaf& getLeaf();
+    BrowserFolder& getFolder();
+};

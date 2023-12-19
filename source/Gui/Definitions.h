@@ -178,8 +178,8 @@ enum DataType_
     DataType_Genome
 };
 
-class _BrowserDataTO;
+struct _BrowserDataTO;
 using BrowserDataTO = std::shared_ptr<_BrowserDataTO>;
 
-class _NetworkDataTO;
+struct _NetworkDataTO;
 using NetworkDataTO = std::shared_ptr<_NetworkDataTO>;

@@ -56,8 +56,8 @@ private:
     void sortRemoteSimulationData(std::vector<NetworkDataTO>& remoteData, ImGuiTableSortSpecs* sortSpecs);
     void sortUserList();
 
-    void onDownloadItem(BrowserDataTO const& to);
-    void onDeleteItem(BrowserDataTO const& to);
+    void onDownloadItem(BrowserLeaf const& leaf);
+    void onDeleteItem(BrowserLeaf const& leaf);
     void onToggleLike(BrowserDataTO const& to, int emojiType);
     void openWeblink(std::string const& link);
 
