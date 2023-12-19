@@ -104,7 +104,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
 {
     try {
         bool success = _networkController->getRemoteSimulationList(_rawNetworkDataTOs, withRetry);
-        success &= _networkController->getUserList(_userList, withRetry);
+        success &= _networkController->getUserList(_userTOs, withRetry);
 
         if (!success) {
             if (withRetry) {
@@ -315,14 +315,14 @@ void _BrowserWindow::processSimulationList()
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateBrowserData = false;
 
-                _browserSimulationList = BrowserDataService::createBrowserData(_filteredNetworkSimulationTOs);
+                _browserSimulationTOs = BrowserDataService::createBrowserData(_filteredNetworkSimulationTOs);
             }
         }
         ImGuiListClipper clipper;
-        clipper.Begin(_browserSimulationList.size());
+        clipper.Begin(_browserSimulationTOs.size());
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto item = _browserSimulationList[row];
+                auto item = _browserSimulationTOs[row];
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
@@ -414,15 +414,15 @@ void _BrowserWindow::processGenomeList()
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateBrowserData = false;
 
-                _browserGenomeList = BrowserDataService::createBrowserData(_filteredNetworkGenomeTOs);
+                _browserGenomeTOs = BrowserDataService::createBrowserData(_filteredNetworkGenomeTOs);
             }
         }
         ImGuiListClipper clipper;
-        clipper.Begin(_browserGenomeList.size());
+        clipper.Begin(_browserGenomeTOs.size());
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
 
-                auto& item = _browserGenomeList[row];
+                auto& item = _browserGenomeTOs[row];
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
@@ -493,10 +493,10 @@ void _BrowserWindow::processUserList()
         ImGui::TableHeadersRow();
 
         ImGuiListClipper clipper;
-        clipper.Begin(_userList.size());
+        clipper.Begin(_userTOs.size());
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto item = &_userList[row];
+                auto item = &_userTOs[row];
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
@@ -551,7 +551,7 @@ void _BrowserWindow::processStatus()
         statusText += std::to_string(_numGenomes) + " genomes found";
 
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-        statusText += std::to_string(_userList.size()) + " simulators found";
+        statusText += std::to_string(_userTOs.size()) + " simulators found";
 
         statusText += std::string("  " ICON_FA_INFO_CIRCLE " ");
         if (auto userName = _networkController->getLoggedInUserName()) {
@@ -640,7 +640,7 @@ void _BrowserWindow::processEmojiButton(int emojiType)
     auto cursorPos = ImGui::GetCursorScreenPos();
     auto emojiWidth = scale(toFloat(emoji.width));
     auto emojiHeight = scale(toFloat(emoji.height));
-    auto sim = _simOfEmojiPopup;
+    auto sim = _emojiPopupTO;
     if (ImGui::ImageButton((void*)(intptr_t)emoji.textureId, {emojiWidth, emojiHeight}, {0, 0}, {1.0f, 1.0f})) {
         onToggleLike(sim, toInt(emojiType));
         ImGui::CloseCurrentPopup();
@@ -659,17 +659,17 @@ void _BrowserWindow::processEmojiButton(int emojiType)
     }
 }
 
-void _BrowserWindow::processEmojiList(BrowserSimulationData const& sim)
+void _BrowserWindow::processEmojiList(BrowserDataTO const& to)
 {
     //calc remap which allows to show most frequent like type first
     std::map<int, int> remap;
     std::set<int> processedEmojiTypes;
 
     int index = 0;
-    while (processedEmojiTypes.size() < sim->numLikesByEmojiType.size()) {
+    while (processedEmojiTypes.size() < to->numLikesByEmojiType.size()) {
         int maxLikes = 0;
         std::optional<int> maxEmojiType;
-        for (auto const& [emojiType, numLikes] : sim->numLikesByEmojiType) {
+        for (auto const& [emojiType, numLikes] : to->numLikesByEmojiType) {
             if (!processedEmojiTypes.contains(emojiType) && numLikes > maxLikes) {
                 maxLikes = numLikes;
                 maxEmojiType = emojiType;
@@ -684,7 +684,7 @@ void _BrowserWindow::processEmojiList(BrowserSimulationData const& sim)
     int counter = 0;
     std::optional<int> toggleEmojiType;
     for (auto const& emojiType : remap | std::views::values) {
-        auto numLikes = sim->numLikesByEmojiType.at(emojiType);
+        auto numLikes = to->numLikesByEmojiType.at(emojiType);
 
         AlienImGui::Text(std::to_string(numLikes));
         ImGui::SameLine();
@@ -703,31 +703,31 @@ void _BrowserWindow::processEmojiList(BrowserSimulationData const& sim)
                     0)) {
                 toggleEmojiType = emojiType;
             }
-            bool isLiked = _ownEmojiTypeBySimId.contains(sim->id) && _ownEmojiTypeBySimId.at(sim->id) == emojiType;
+            bool isLiked = _ownEmojiTypeBySimId.contains(to->id) && _ownEmojiTypeBySimId.at(to->id) == emojiType;
             if (isLiked) {
                 ImDrawList* drawList = ImGui::GetWindowDrawList();
                 drawList->AddRect(
                     ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x + emojiWidth, cursorPos.y + emojiHeight), (ImU32)ImColor::HSV(0, 0, 1, 0.5f), 1.0f);
             }
             ImGui::PopStyleColor(2);
-            AlienImGui::Tooltip([=, this] { return getUserNamesToEmojiType(sim->id, emojiType); }, false);
+            AlienImGui::Tooltip([=, this] { return getUserNamesToEmojiType(to->id, emojiType); }, false);
         }
 
         //separator except for last element
-        if (++counter < sim->numLikesByEmojiType.size()) {
+        if (++counter < to->numLikesByEmojiType.size()) {
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
         }
     }
     if (toggleEmojiType) {
-        onToggleLike(sim, *toggleEmojiType);
+        onToggleLike(to, *toggleEmojiType);
     }
 }
 
-void _BrowserWindow::processActionButtons(BrowserSimulationData const& sim)
+void _BrowserWindow::processActionButtons(BrowserDataTO const& to)
 {
     //like button
-    auto liked = isLiked(sim->id);
+    auto liked = isLiked(to->id);
     if (liked) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeButtonTextColor);
     } else {
@@ -737,7 +737,7 @@ void _BrowserWindow::processActionButtons(BrowserSimulationData const& sim)
     ImGui::PopStyleColor();
     if (likeButtonResult) {
         _activateEmojiPopup = true;
-        _simOfEmojiPopup = sim;
+        _emojiPopupTO = to;
     }
     AlienImGui::Tooltip("Choose a reaction");
     ImGui::SameLine();
@@ -747,18 +747,18 @@ void _BrowserWindow::processActionButtons(BrowserSimulationData const& sim)
     auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
     ImGui::PopStyleColor();
     if (downloadButtonResult) {
-        onDownloadItem(sim);
+        onDownloadItem(to);
     }
     AlienImGui::Tooltip("Download");
     ImGui::SameLine();
 
     //delete button
-    if (sim->userName == _networkController->getLoggedInUserName().value_or("")) {
+    if (to->userName == _networkController->getLoggedInUserName().value_or("")) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DeleteButtonTextColor);
         auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
         ImGui::PopStyleColor();
         if (deleteButtonResult) {
-            onDeleteItem(sim);
+            onDeleteItem(to);
         }
         AlienImGui::Tooltip("Delete");
     }
@@ -837,17 +837,17 @@ void _BrowserWindow::sortRemoteSimulationData(std::vector<NetworkDataTO>& remote
 
 void _BrowserWindow::sortUserList()
 {
-    std::sort(_userList.begin(), _userList.end(), [&](auto const& left, auto const& right) { return UserData::compareOnlineAndTimestamp(left, right) > 0; });
+    std::sort(_userTOs.begin(), _userTOs.end(), [&](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
 }
 
-void _BrowserWindow::onDownloadItem(BrowserSimulationData const& sim)
+void _BrowserWindow::onDownloadItem(BrowserDataTO const& to)
 {
     printOverlayMessage("Downloading ...");
 
     delayedExecution([=, this] {
         std::string dataTypeString = _selectedDataType == DataType_Simulation ? "simulation" : "genome";
         SerializedSimulation serializedSim;
-        if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, sim->id)) {
+        if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, to->id)) {
             MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
             return;
         }
@@ -893,7 +893,7 @@ void _BrowserWindow::onDownloadItem(BrowserSimulationData const& sim)
             _editorController->setOn(true);
             _editorController->getGenomeEditorWindow()->openTab(GenomeDescriptionService::convertBytesToDescription(genome));
         }
-        if (VersionChecker::isVersionNewer(sim->version)) {
+        if (VersionChecker::isVersionNewer(to->version)) {
             MessageDialog::getInstance().information(
                 "Warning",
                 "The download was successful but the " + dataTypeString +" was generated using a more recent\n"
@@ -903,12 +903,12 @@ void _BrowserWindow::onDownloadItem(BrowserSimulationData const& sim)
     });
 }
 
-void _BrowserWindow::onDeleteItem(BrowserSimulationData const& sim)
+void _BrowserWindow::onDeleteItem(BrowserDataTO const& to)
 {
-    MessageDialog::getInstance().yesNo("Delete item", "Do you really want to delete the selected item?", [sim, this]() {
+    MessageDialog::getInstance().yesNo("Delete item", "Do you really want to delete the selected item?", [to, this]() {
         printOverlayMessage("Deleting ...");
 
-        delayedExecution([browserData = sim, this] {
+        delayedExecution([browserData = to, this] {
             if (!_networkController->deleteSimulation(browserData->id)) {
                 MessageDialog::getInstance().information("Error", "Failed to delete item. Please try again later.");
                 return;
@@ -918,35 +918,35 @@ void _BrowserWindow::onDeleteItem(BrowserSimulationData const& sim)
     });
 }
 
-void _BrowserWindow::onToggleLike(BrowserSimulationData const& sim, int emojiType)
+void _BrowserWindow::onToggleLike(BrowserDataTO const& to, int emojiType)
 {
     if (_networkController->getLoggedInUserName()) {
 
         //remove existing like
-        auto findResult = _ownEmojiTypeBySimId.find(sim->id);
+        auto findResult = _ownEmojiTypeBySimId.find(to->id);
         auto onlyRemoveLike = false;
         if (findResult != _ownEmojiTypeBySimId.end()) {
             auto origEmojiType = findResult->second;
-            if (--sim->numLikesByEmojiType[origEmojiType] == 0) {
-                sim->numLikesByEmojiType.erase(origEmojiType);
+            if (--to->numLikesByEmojiType[origEmojiType] == 0) {
+                to->numLikesByEmojiType.erase(origEmojiType);
             }
             _ownEmojiTypeBySimId.erase(findResult);
-            _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(sim->id, origEmojiType));  //invalidate cache entry
+            _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(to->id, origEmojiType));  //invalidate cache entry
             onlyRemoveLike = origEmojiType == emojiType;  //remove like if same like icon has been clicked
         }
 
         //create new like
         if (!onlyRemoveLike) {
-            _ownEmojiTypeBySimId[sim->id] = emojiType;
-            if (sim->numLikesByEmojiType.contains(emojiType)) {
-                ++sim->numLikesByEmojiType[emojiType];
+            _ownEmojiTypeBySimId[to->id] = emojiType;
+            if (to->numLikesByEmojiType.contains(emojiType)) {
+                ++to->numLikesByEmojiType[emojiType];
             } else {
-                sim->numLikesByEmojiType[emojiType] = 1;
+                to->numLikesByEmojiType[emojiType] = 1;
             }
         }
 
-        _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(sim->id, emojiType));  //invalidate cache entry
-        _networkController->toggleLikeSimulation(sim->id, emojiType);
+        _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(to->id, emojiType));  //invalidate cache entry
+        _networkController->toggleLikeSimulation(to->id, emojiType);
         //_scheduleCreateBrowserData = true;
     } else {
         _loginDialog.lock()->open();
@@ -980,11 +980,11 @@ std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& simId, in
     return boost::algorithm::join(userNames, ", ");
 }
 
-void _BrowserWindow::pushTextColor(BrowserSimulationData const& entry)
+void _BrowserWindow::pushTextColor(BrowserDataTO const& to)
 {
-    if (VersionChecker::isVersionOutdated(entry->version)) {
+    if (VersionChecker::isVersionOutdated(to->version)) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionOutdatedColor);
-    } else if (VersionChecker::isVersionNewer(entry->version)) {
+    } else if (VersionChecker::isVersionNewer(to->version)) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionNewerColor);
     } else {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionOkColor);

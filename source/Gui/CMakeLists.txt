@@ -15,7 +15,7 @@ PUBLIC
     AutosaveController.h
     BrowserDataService.cpp
     BrowserDataService.h
-    BrowserSimulationData.h
+    BrowserDataTO.h
     BrowserWindow.cpp
     BrowserWindow.h
     CellFunctionStrings.h
@@ -124,7 +124,7 @@ PUBLIC
     UiController.h
     UploadSimulationDialog.cpp
     UploadSimulationDialog.h
-    UserData.h
+    UserTO.h
     Viewport.cpp
     Viewport.h
     WindowController.cpp

@@ -3,7 +3,7 @@
 #include <chrono>
 
 #include "NetworkDataTO.h"
-#include "UserData.h"
+#include "UserTO.h"
 #include "Definitions.h"
 
 using LoginErrorCode = int;
@@ -41,7 +41,7 @@ public:
     bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
 
     bool getRemoteSimulationList(std::vector<NetworkDataTO>& result, bool withRetry) const;
-    bool getUserList(std::vector<UserData>& result, bool withRetry) const;
+    bool getUserList(std::vector<UserTO>& result, bool withRetry) const;
     bool getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const;
     bool getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
     bool toggleLikeSimulation(std::string const& simId, int likeType);

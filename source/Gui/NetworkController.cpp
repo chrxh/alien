@@ -299,7 +299,7 @@ bool _NetworkController::getRemoteSimulationList(std::vector<NetworkDataTO>& res
     }
 }
 
-bool _NetworkController::getUserList(std::vector<UserData>& result, bool withRetry) const
+bool _NetworkController::getUserList(std::vector<UserTO>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get user list");
 
@@ -315,7 +315,7 @@ bool _NetworkController::getUserList(std::vector<UserData>& result, bool withRet
         boost::property_tree::read_json(stream, tree);
         result.clear();
         result = NetworkDataParserService::decodeUserData(tree);
-        for (UserData& userData : result) {
+        for (UserTO& userData : result) {
             userData.timeSpent = userData.timeSpent * RefreshInterval / 60;
         }
         return true;
