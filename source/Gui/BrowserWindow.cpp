@@ -103,7 +103,7 @@ void _BrowserWindow::onRefresh()
 void _BrowserWindow::refreshIntern(bool withRetry)
 {
     try {
-        bool success = _networkController->getRemoteSimulationList(_rawRemoteDataList, withRetry);
+        bool success = _networkController->getRemoteSimulationList(_rawNetworkDataTOs, withRetry);
         success &= _networkController->getUserList(_userList, withRetry);
 
         if (!success) {
@@ -113,7 +113,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         } else {
             _numSimulations = 0;
             _numGenomes = 0;
-            for (auto const& entry : _rawRemoteDataList) {
+            for (auto const& entry : _rawNetworkDataTOs) {
                 if (entry->type == DataType_Simulation) {
                     ++_numSimulations;
                 } else {
@@ -273,49 +273,49 @@ void _BrowserWindow::processSimulationList()
             "Actions",
             ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed,
             scale(90.0f),
-            RemoteSimulationDataColumnId_Actions);
+            NetworkDataColumnId_Actions);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             scale(135.0f),
-            RemoteSimulationDataColumnId_Timestamp);
+            NetworkDataColumnId_Timestamp);
         ImGui::TableSetupColumn(
             "User name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
-            RemoteSimulationDataColumnId_UserName);
+            NetworkDataColumnId_UserName);
         ImGui::TableSetupColumn(
             "Simulation name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(160.0f),
-            RemoteSimulationDataColumnId_SimulationName);
+            NetworkDataColumnId_SimulationName);
         ImGui::TableSetupColumn(
             "Description",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
-            RemoteSimulationDataColumnId_Description);
+            NetworkDataColumnId_Description);
         ImGui::TableSetupColumn(
             "Reactions",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
-            RemoteSimulationDataColumnId_Likes);
-        ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_NumDownloads);
-        ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Width);
-        ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Height);
-        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Particles);
-        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_FileSize);
-        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Version);
+            NetworkDataColumnId_Likes);
+        ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_NumDownloads);
+        ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_Width);
+        ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_Height);
+        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_Particles);
+        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_FileSize);
+        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_Version);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
         //create table data if necessary
         if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
             if (sortSpecs->SpecsDirty || _scheduleCreateBrowserData) {
-                sortRemoteSimulationData(_filteredRemoteSimulationList, sortSpecs);
+                sortRemoteSimulationData(_filteredNetworkSimulationTOs, sortSpecs);
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateBrowserData = false;
 
-                _browserSimulationList = BrowserDataService::createBrowserData(_filteredRemoteSimulationList);
+                _browserSimulationList = BrowserDataService::createBrowserData(_filteredNetworkSimulationTOs);
             }
         }
         ImGuiListClipper clipper;
@@ -373,48 +373,48 @@ void _BrowserWindow::processGenomeList()
 
     if (ImGui::BeginTable("Browser", 10, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn(
-            "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f), RemoteSimulationDataColumnId_Actions);
+            "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f), NetworkDataColumnId_Actions);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             scale(135.0f),
-            RemoteSimulationDataColumnId_Timestamp);
+            NetworkDataColumnId_Timestamp);
         ImGui::TableSetupColumn(
             "User name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
-            RemoteSimulationDataColumnId_UserName);
+            NetworkDataColumnId_UserName);
         ImGui::TableSetupColumn(
             "Genome name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(160.0f),
-            RemoteSimulationDataColumnId_SimulationName);
+            NetworkDataColumnId_SimulationName);
         ImGui::TableSetupColumn(
             "Description",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
-            RemoteSimulationDataColumnId_Description);
+            NetworkDataColumnId_Description);
         ImGui::TableSetupColumn(
             "Reactions",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
-            RemoteSimulationDataColumnId_Likes);
+            NetworkDataColumnId_Likes);
         ImGui::TableSetupColumn(
-            "Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_NumDownloads);
-        ImGui::TableSetupColumn("Cells", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Particles);
-        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_FileSize);
-        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, RemoteSimulationDataColumnId_Version);
+            "Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_NumDownloads);
+        ImGui::TableSetupColumn("Cells", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_Particles);
+        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_FileSize);
+        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_Version);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
         //create table data if necessary
         if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
             if (sortSpecs->SpecsDirty || _scheduleCreateBrowserData) {
-                sortRemoteSimulationData(_filteredRemoteGenomeList, sortSpecs);
+                sortRemoteSimulationData(_filteredNetworkGenomeTOs, sortSpecs);
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateBrowserData = false;
 
-                _browserGenomeList = BrowserDataService::createBrowserData(_filteredRemoteGenomeList);
+                _browserGenomeList = BrowserDataService::createBrowserData(_filteredNetworkGenomeTOs);
             }
         }
         ImGuiListClipper clipper;
@@ -826,11 +826,11 @@ void _BrowserWindow::processActivated()
     onRefresh();
 }
 
-void _BrowserWindow::sortRemoteSimulationData(std::vector<RemoteSimulationData>& remoteData, ImGuiTableSortSpecs* sortSpecs)
+void _BrowserWindow::sortRemoteSimulationData(std::vector<NetworkDataTO>& remoteData, ImGuiTableSortSpecs* sortSpecs)
 {
     if (remoteData.size() > 1) {
         std::sort(remoteData.begin(), remoteData.end(), [&](auto const& left, auto const& right) {
-            return _RemoteSimulationData::compare(left, right, sortSpecs) < 0;
+            return _NetworkDataTO::compare(left, right, sortSpecs) < 0;
         });
     }
 }
@@ -993,16 +993,16 @@ void _BrowserWindow::pushTextColor(BrowserSimulationData const& entry)
 
 void _BrowserWindow::calcFilteredSimulationAndGenomeLists()
 {
-    _filteredRemoteSimulationList.clear();
-    _filteredRemoteSimulationList.reserve(_rawRemoteDataList.size());
-    _filteredRemoteGenomeList.clear();
-    _filteredRemoteGenomeList.reserve(_filteredRemoteGenomeList.size());
-    for (auto const& simData : _rawRemoteDataList) {
+    _filteredNetworkSimulationTOs.clear();
+    _filteredNetworkSimulationTOs.reserve(_rawNetworkDataTOs.size());
+    _filteredNetworkGenomeTOs.clear();
+    _filteredNetworkGenomeTOs.reserve(_filteredNetworkGenomeTOs.size());
+    for (auto const& simData : _rawNetworkDataTOs) {
         if (simData->matchWithFilter(_filter) &&_showCommunityCreations != simData->fromRelease) {
-            if (simData->type == RemoteDataType_Simulation) {
-                _filteredRemoteSimulationList.emplace_back(simData);
+            if (simData->type == NetworkDataType_Simulation) {
+                _filteredNetworkSimulationTOs.emplace_back(simData);
             } else {
-                _filteredRemoteGenomeList.emplace_back(simData);
+                _filteredNetworkGenomeTOs.emplace_back(simData);
             }
         }
     }

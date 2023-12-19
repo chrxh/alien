@@ -275,7 +275,7 @@ bool _NetworkController::setNewPassword(std::string const& userName, std::string
     }
 }
 
-bool _NetworkController::getRemoteSimulationList(std::vector<RemoteSimulationData>& result, bool withRetry) const
+bool _NetworkController::getRemoteSimulationList(std::vector<NetworkDataTO>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get simulation list");
 
@@ -414,7 +414,7 @@ bool _NetworkController::uploadSimulation(
     std::string const& mainData,
     std::string const& settings,
     std::string const& statistics,
-    RemoteDataType type)
+    NetworkDataType type)
 {
     log(Priority::Important, "network: upload simulation with name='" + simulationName + "'");
 

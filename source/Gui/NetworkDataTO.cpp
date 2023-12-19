@@ -1,45 +1,45 @@
-#include "RemoteSimulationData.h"
+#include "NetworkDataTO.h"
 
 #include <ranges>
 #include <imgui.h>
 
-int _RemoteSimulationData::compare(RemoteSimulationData const& left, RemoteSimulationData const& right, ImGuiTableSortSpecs const* specs)
+int _NetworkDataTO::compare(NetworkDataTO const& left, NetworkDataTO const& right, ImGuiTableSortSpecs const* specs)
 {
     for (int n = 0; n < specs->SpecsCount; n++) {
         const ImGuiTableColumnSortSpecs* sortSpec = &specs->Specs[n];
         int delta = 0;
         switch (sortSpec->ColumnUserID) {
-        case RemoteSimulationDataColumnId_Timestamp:
+        case NetworkDataColumnId_Timestamp:
             delta = left->timestamp.compare(right->timestamp);
             break;
-        case RemoteSimulationDataColumnId_UserName:
+        case NetworkDataColumnId_UserName:
             delta = left->userName.compare(right->userName);
             break;
-        case RemoteSimulationDataColumnId_SimulationName:
+        case NetworkDataColumnId_SimulationName:
             delta = left->simName.compare(right->simName);
             break;
-        case RemoteSimulationDataColumnId_Description:
+        case NetworkDataColumnId_Description:
             delta = left->description.compare(right->description);
             break;
-        case RemoteSimulationDataColumnId_Likes:
+        case NetworkDataColumnId_Likes:
             delta = left->getTotalLikes() - right->getTotalLikes();
             break;
-        case RemoteSimulationDataColumnId_NumDownloads:
+        case NetworkDataColumnId_NumDownloads:
             delta = left->numDownloads - right->numDownloads;
             break;
-        case RemoteSimulationDataColumnId_Width:
+        case NetworkDataColumnId_Width:
             delta = left->width - right->width;
             break;
-        case RemoteSimulationDataColumnId_Height:
+        case NetworkDataColumnId_Height:
             delta = left->height - right->height;
             break;
-        case RemoteSimulationDataColumnId_Particles:
+        case NetworkDataColumnId_Particles:
             delta = left->particles - right->particles;
             break;
-        case RemoteSimulationDataColumnId_FileSize:
+        case NetworkDataColumnId_FileSize:
             delta = static_cast<int>(left->contentSize / 1024) - static_cast<int>(right->contentSize / 1024);
             break;
-        case RemoteSimulationDataColumnId_Version:
+        case NetworkDataColumnId_Version:
             delta = left->version.compare(right->version);
             break;
         }
@@ -54,7 +54,7 @@ int _RemoteSimulationData::compare(RemoteSimulationData const& left, RemoteSimul
     return 0;
 }
 
-bool _RemoteSimulationData::matchWithFilter(std::string const& filter) const
+bool _NetworkDataTO::matchWithFilter(std::string const& filter) const
 {
     auto match = false;
     if (timestamp.find(filter) != std::string::npos) {
@@ -90,7 +90,7 @@ bool _RemoteSimulationData::matchWithFilter(std::string const& filter) const
     return match;
 }
 
-int _RemoteSimulationData::getTotalLikes() const
+int _NetworkDataTO::getTotalLikes() const
 {
     int result = 0;
     for (auto const& numReactions : numLikesByEmojiType | std::views::values) {

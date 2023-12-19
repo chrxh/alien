@@ -74,6 +74,8 @@ PUBLIC
     NetworkController.h
     NetworkDataParserService.cpp
     NetworkDataParserService.h
+    NetworkDataTO.cpp
+    NetworkDataTO.h
     NetworkSettingsDialog.cpp
     NetworkSettingsDialog.h
     NewSimulationDialog.cpp
@@ -90,8 +92,6 @@ PUBLIC
     PatternEditorWindow.h
     RadiationSourcesWindow.cpp
     RadiationSourcesWindow.h
-    RemoteSimulationData.cpp
-    RemoteSimulationData.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp

@@ -181,5 +181,5 @@ enum DataType_
 class _BrowserSimulationData;
 using BrowserSimulationData = std::shared_ptr<_BrowserSimulationData>;
 
-class _RemoteSimulationData;
-using RemoteSimulationData = std::shared_ptr<_RemoteSimulationData>;
+class _NetworkDataTO;
+using NetworkDataTO = std::shared_ptr<_NetworkDataTO>;

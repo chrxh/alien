@@ -3,10 +3,10 @@
 #include <vector>
 
 #include "Definitions.h"
-#include "RemoteSimulationData.h"
+#include "NetworkDataTO.h"
 
 class BrowserDataService
 {
 public:
-    static std::vector<BrowserSimulationData> createBrowserData(std::vector<RemoteSimulationData> const& remoteData);
+    static std::vector<BrowserSimulationData> createBrowserData(std::vector<NetworkDataTO> const& remoteData);
 };
