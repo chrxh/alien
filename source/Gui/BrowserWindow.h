@@ -6,6 +6,7 @@
 #include "EngineInterface/Definitions.h"
 
 #include "AlienWindow.h"
+#include "BrowserSimulationData.h"
 #include "RemoteSimulationData.h"
 #include "UserData.h"
 #include "Definitions.h"
@@ -42,9 +43,9 @@ private:
 
     void processEmojiWindow();
     void processEmojiButton(int emojiType);
-    void processEmojiList(RemoteSimulationData* sim);
+    void processEmojiList(BrowserSimulationData const& sim);
 
-    void processActionButtons(RemoteSimulationData* simData);
+    void processActionButtons(BrowserSimulationData const& sim);
 
     void processShortenedText(std::string const& text, bool bold = false);
     bool processActionButton(std::string const& text);
@@ -52,23 +53,23 @@ private:
 
     void processActivated() override;
 
-    void sortSimulationList();
+    void sortRemoteSimulationData(std::vector<RemoteSimulationData>& remoteData, ImGuiTableSortSpecs* sortSpecs);
     void sortUserList();
 
-    void onDownloadItem(RemoteSimulationData* sim);
-    void onDeleteItem(RemoteSimulationData* sim);
-    void onToggleLike(RemoteSimulationData* sim, int emojiType);
+    void onDownloadItem(BrowserSimulationData const& sim);
+    void onDeleteItem(BrowserSimulationData const& sim);
+    void onToggleLike(BrowserSimulationData const& sim, int emojiType);
     void openWeblink(std::string const& link);
 
     bool isLiked(std::string const& simId);
     std::string getUserNamesToEmojiType(std::string const& simId, int emojiType);
 
-    void pushTextColor(RemoteSimulationData const& entry);
+    void pushTextColor(BrowserSimulationData const& entry);
     void calcFilteredSimulationAndGenomeLists();
 
     DataType _selectedDataType = DataType_Simulation; 
     bool _scheduleRefresh = false;
-    bool _scheduleSort = false;
+    bool _scheduleCreateBrowserData = false;
     std::string _filter;
     bool _showCommunityCreations = false;
     float _userTableWidth = 0;
@@ -82,13 +83,16 @@ private:
     std::vector<RemoteSimulationData> _filteredRemoteSimulationList;
     std::vector<RemoteSimulationData> _filteredRemoteGenomeList;
 
+    std::vector<BrowserSimulationData> _browserSimulationList;
+    std::vector<BrowserSimulationData> _browserGenomeList;
+
     std::vector<UserData> _userList;
 
     std::vector<TextureData> _emojis;
 
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
-    RemoteSimulationData* _simOfEmojiPopup = nullptr;
+    BrowserSimulationData _simOfEmojiPopup;
 
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 
