@@ -3,6 +3,8 @@
 #include <map>
 #include <string>
 
+#include "Definitions.h"
+
 using BrowserDataType = int;
 enum BrowserDataType_
 {
@@ -10,7 +12,7 @@ enum BrowserDataType_
     BrowserDataType_Genome
 };
 
-class _BrowserSimulationData
+class _BrowserDataTO
 {
 public:
     std::string id;

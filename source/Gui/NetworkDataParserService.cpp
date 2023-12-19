@@ -37,11 +37,11 @@ std::vector<NetworkDataTO> NetworkDataParserService::decodeRemoteSimulationData(
     return result;
 }
 
-std::vector<UserData> NetworkDataParserService::decodeUserData(boost::property_tree::ptree const& tree)
+std::vector<UserTO> NetworkDataParserService::decodeUserData(boost::property_tree::ptree const& tree)
 {
-    std::vector<UserData> result;
+    std::vector<UserTO> result;
     for (auto const& [key, subTree] : tree) {
-        UserData entry;
+        UserTO entry;
         entry.userName = subTree.get<std::string>("userName");
         entry.starsReceived = subTree.get<int>("starsReceived");
         entry.starsGiven = subTree.get<int>("starsGiven");

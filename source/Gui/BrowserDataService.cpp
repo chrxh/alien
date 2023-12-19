@@ -1,13 +1,13 @@
 #include "BrowserDataService.h"
 
-#include "BrowserSimulationData.h"
+#include "BrowserDataTO.h"
 
-std::vector<BrowserSimulationData> BrowserDataService::createBrowserData(std::vector<NetworkDataTO> const& remoteData)
+std::vector<BrowserDataTO> BrowserDataService::createBrowserData(std::vector<NetworkDataTO> const& remoteData)
 {
-    std::vector<BrowserSimulationData> result;
+    std::vector<BrowserDataTO> result;
     result.reserve(remoteData.size());
     for (auto const& entry : remoteData) {
-        auto browserData = std::make_shared<_BrowserSimulationData>();
+        auto browserData = std::make_shared<_BrowserDataTO>();
         browserData->id = entry->id;
         browserData->timestamp = entry->timestamp;
         browserData->userName = entry->userName;

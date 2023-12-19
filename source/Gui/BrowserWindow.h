@@ -6,9 +6,9 @@
 #include "EngineInterface/Definitions.h"
 
 #include "AlienWindow.h"
-#include "BrowserSimulationData.h"
+#include "BrowserDataTO.h"
 #include "NetworkDataTO.h"
-#include "UserData.h"
+#include "UserTO.h"
 #include "Definitions.h"
 
 class _BrowserWindow : public _AlienWindow
@@ -43,9 +43,9 @@ private:
 
     void processEmojiWindow();
     void processEmojiButton(int emojiType);
-    void processEmojiList(BrowserSimulationData const& sim);
+    void processEmojiList(BrowserDataTO const& to);
 
-    void processActionButtons(BrowserSimulationData const& sim);
+    void processActionButtons(BrowserDataTO const& to);
 
     void processShortenedText(std::string const& text, bool bold = false);
     bool processActionButton(std::string const& text);
@@ -56,15 +56,15 @@ private:
     void sortRemoteSimulationData(std::vector<NetworkDataTO>& remoteData, ImGuiTableSortSpecs* sortSpecs);
     void sortUserList();
 
-    void onDownloadItem(BrowserSimulationData const& sim);
-    void onDeleteItem(BrowserSimulationData const& sim);
-    void onToggleLike(BrowserSimulationData const& sim, int emojiType);
+    void onDownloadItem(BrowserDataTO const& to);
+    void onDeleteItem(BrowserDataTO const& to);
+    void onToggleLike(BrowserDataTO const& to, int emojiType);
     void openWeblink(std::string const& link);
 
     bool isLiked(std::string const& simId);
     std::string getUserNamesToEmojiType(std::string const& simId, int emojiType);
 
-    void pushTextColor(BrowserSimulationData const& entry);
+    void pushTextColor(BrowserDataTO const& to);
     void calcFilteredSimulationAndGenomeLists();
 
     DataType _selectedDataType = DataType_Simulation; 
@@ -83,16 +83,16 @@ private:
     std::vector<NetworkDataTO> _filteredNetworkSimulationTOs;
     std::vector<NetworkDataTO> _filteredNetworkGenomeTOs;
 
-    std::vector<BrowserSimulationData> _browserSimulationList;
-    std::vector<BrowserSimulationData> _browserGenomeList;
+    std::vector<BrowserDataTO> _browserSimulationTOs;
+    std::vector<BrowserDataTO> _browserGenomeTOs;
 
-    std::vector<UserData> _userList;
+    std::vector<UserTO> _userTOs;
 
     std::vector<TextureData> _emojis;
 
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
-    BrowserSimulationData _simOfEmojiPopup;
+    BrowserDataTO _emojiPopupTO;
 
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 
