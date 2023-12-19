@@ -67,6 +67,8 @@ namespace Const
     ImColor const VersionOutdatedColor = ImColor::HSV(0.0f, 0.0f, 0.6f);
     ImColor const VersionNewerColor = ImColor::HSV(0.0f, 0.2f, 1.0f);
 
+    ImColor const DirectoryColor = ImColor::HSV(0.58f, 0.3f, 1.0f);
+
     ImColor const GenomePreviewConnectionColor = ImColor::HSV(0, 0, 0.5f);
     ImColor const GenomePreviewDotSymbolColor = ImColor::HSV(0, 0, 0.7f);
     ImColor const GenomePreviewInfinitySymbolColor = ImColor::HSV(0, 0, 0.7f);

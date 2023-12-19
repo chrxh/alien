@@ -8,20 +8,25 @@ std::vector<BrowserDataTO> BrowserDataService::createBrowserData(std::vector<Net
     result.reserve(remoteData.size());
     for (auto const& entry : remoteData) {
         auto browserData = std::make_shared<_BrowserDataTO>();
-        browserData->id = entry->id;
-        browserData->timestamp = entry->timestamp;
-        browserData->userName = entry->userName;
-        browserData->simName = entry->simName;
-        browserData->numLikesByEmojiType = entry->numLikesByEmojiType;
-        browserData->numDownloads = entry->numDownloads;
-        browserData->width = entry->width;
-        browserData->height = entry->height;
-        browserData->particles = entry->particles;
-        browserData->contentSize = entry->contentSize;
-        browserData->description = entry->description;
-        browserData->version = entry->version;
-        browserData->fromRelease = entry->fromRelease;
+
+        BrowserLeaf leaf{
+            .id = entry->id,
+            .timestamp = entry->timestamp,
+            .userName = entry->userName,
+            .simName = entry->simName,
+            .numLikesByEmojiType = entry->numLikesByEmojiType,
+            .numDownloads = entry->numDownloads,
+            .width = entry->width,
+            .height = entry->height,
+            .particles = entry->particles,
+            .contentSize = entry->contentSize,
+            .description = entry->description,
+            .version = entry->version
+        };
+
         browserData->type = entry->type;
+        browserData->level = 0;
+        browserData->node = leaf;
 
         result.emplace_back(browserData);
     }

@@ -30,9 +30,8 @@ enum NetworkDataType_
     NetworkDataType_Genome
 };
 
-class _NetworkDataTO
+struct _NetworkDataTO
 {
-public:
     std::string id;
     std::string timestamp;
     std::string userName;

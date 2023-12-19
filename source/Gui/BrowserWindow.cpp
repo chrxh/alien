@@ -327,34 +327,37 @@ void _BrowserWindow::processSimulationList()
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
 
-                ImGui::TableNextColumn();
-                processActionButtons(item);
-                ImGui::TableNextColumn();
-                pushTextColor(item);
-                AlienImGui::Text(item->timestamp);
-                ImGui::TableNextColumn();
-                processShortenedText(item->userName);
-                ImGui::TableNextColumn();
-                processShortenedText(item->simName);
-                ImGui::TableNextColumn();
-                processShortenedText(item->description);
-                ImGui::TableNextColumn();
-                processEmojiList(item);
+                if (item->isLeaf()) {
+                    auto& leaf = item->getLeaf();
+                    ImGui::TableNextColumn();
+                    processActionButtons(item);
+                    ImGui::TableNextColumn();
+                    pushTextColor(item);
+                    AlienImGui::Text(leaf.timestamp);
+                    ImGui::TableNextColumn();
+                    processShortenedText(leaf.userName);
+                    ImGui::TableNextColumn();
+                    processShortenedText(leaf.simName);
+                    ImGui::TableNextColumn();
+                    processShortenedText(leaf.description);
+                    ImGui::TableNextColumn();
+                    processEmojiList(item);
 
-                ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(item->numDownloads));
-                ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(item->width));
-                ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(item->height));
-                ImGui::TableNextColumn();
-                AlienImGui::Text(StringHelper::format(item->particles / 1000) + " K");
-                ImGui::TableNextColumn();
-                AlienImGui::Text(StringHelper::format(item->contentSize / 1024) + " KB");
-                ImGui::TableNextColumn();
-                AlienImGui::Text(item->version);
+                    ImGui::TableNextColumn();
+                    AlienImGui::Text(std::to_string(leaf.numDownloads));
+                    ImGui::TableNextColumn();
+                    AlienImGui::Text(std::to_string(leaf.width));
+                    ImGui::TableNextColumn();
+                    AlienImGui::Text(std::to_string(leaf.height));
+                    ImGui::TableNextColumn();
+                    AlienImGui::Text(StringHelper::format(leaf.particles / 1000) + " K");
+                    ImGui::TableNextColumn();
+                    AlienImGui::Text(StringHelper::format(leaf.contentSize / 1024) + " KB");
+                    ImGui::TableNextColumn();
+                    AlienImGui::Text(leaf.version);
 
-                ImGui::PopStyleColor();
+                    ImGui::PopStyleColor();
+                }
                 ImGui::PopID();
             }
         ImGui::EndTable();
@@ -427,30 +430,34 @@ void _BrowserWindow::processGenomeList()
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
 
-                ImGui::TableNextColumn();
-                processActionButtons(item);
-                ImGui::TableNextColumn();
-                pushTextColor(item);
-                AlienImGui::Text(item->timestamp);
-                ImGui::TableNextColumn();
-                processShortenedText(item->userName);
-                ImGui::TableNextColumn();
-                processShortenedText(item->simName);
-                ImGui::TableNextColumn();
-                processShortenedText(item->description);
-                ImGui::TableNextColumn();
-                processEmojiList(item);
+                if (item->isLeaf()) {
+                    auto& leaf = item->getLeaf();
 
-                ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(item->numDownloads));
-                ImGui::TableNextColumn();
-                AlienImGui::Text(StringHelper::format(item->particles));
-                ImGui::TableNextColumn();
-                AlienImGui::Text(StringHelper::format(item->contentSize) + " Bytes");
-                ImGui::TableNextColumn();
-                AlienImGui::Text(item->version);
+                    ImGui::TableNextColumn();
+                    processActionButtons(item);
+                    ImGui::TableNextColumn();
+                    pushTextColor(item);
+                    AlienImGui::Text(leaf.timestamp);
+                    ImGui::TableNextColumn();
+                    processShortenedText(leaf.userName);
+                    ImGui::TableNextColumn();
+                    processShortenedText(leaf.simName);
+                    ImGui::TableNextColumn();
+                    processShortenedText(leaf.description);
+                    ImGui::TableNextColumn();
+                    processEmojiList(item);
 
-                ImGui::PopStyleColor();
+                    ImGui::TableNextColumn();
+                    AlienImGui::Text(std::to_string(leaf.numDownloads));
+                    ImGui::TableNextColumn();
+                    AlienImGui::Text(StringHelper::format(leaf.particles));
+                    ImGui::TableNextColumn();
+                    AlienImGui::Text(StringHelper::format(leaf.contentSize) + " Bytes");
+                    ImGui::TableNextColumn();
+                    AlienImGui::Text(leaf.version);
+
+                    ImGui::PopStyleColor();
+                }
                 ImGui::PopID();
             }
         ImGui::EndTable();
@@ -640,14 +647,14 @@ void _BrowserWindow::processEmojiButton(int emojiType)
     auto cursorPos = ImGui::GetCursorScreenPos();
     auto emojiWidth = scale(toFloat(emoji.width));
     auto emojiHeight = scale(toFloat(emoji.height));
-    auto sim = _emojiPopupTO;
+    auto leaf = _emojiPopupTO->getLeaf();
     if (ImGui::ImageButton((void*)(intptr_t)emoji.textureId, {emojiWidth, emojiHeight}, {0, 0}, {1.0f, 1.0f})) {
-        onToggleLike(sim, toInt(emojiType));
+        onToggleLike(_emojiPopupTO, toInt(emojiType));
         ImGui::CloseCurrentPopup();
     }
     ImGui::PopStyleColor(2);
 
-    bool isLiked = _ownEmojiTypeBySimId.contains(sim->id) && _ownEmojiTypeBySimId.at(sim->id) == emojiType;
+    bool isLiked = _ownEmojiTypeBySimId.contains(leaf.id) && _ownEmojiTypeBySimId.at(leaf.id) == emojiType;
     if (isLiked) {
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         auto& style = ImGui::GetStyle();
@@ -666,10 +673,11 @@ void _BrowserWindow::processEmojiList(BrowserDataTO const& to)
     std::set<int> processedEmojiTypes;
 
     int index = 0;
-    while (processedEmojiTypes.size() < to->numLikesByEmojiType.size()) {
+    auto& leaf = to->getLeaf();
+    while (processedEmojiTypes.size() < leaf.numLikesByEmojiType.size()) {
         int maxLikes = 0;
         std::optional<int> maxEmojiType;
-        for (auto const& [emojiType, numLikes] : to->numLikesByEmojiType) {
+        for (auto const& [emojiType, numLikes] : leaf.numLikesByEmojiType) {
             if (!processedEmojiTypes.contains(emojiType) && numLikes > maxLikes) {
                 maxLikes = numLikes;
                 maxEmojiType = emojiType;
@@ -684,7 +692,7 @@ void _BrowserWindow::processEmojiList(BrowserDataTO const& to)
     int counter = 0;
     std::optional<int> toggleEmojiType;
     for (auto const& emojiType : remap | std::views::values) {
-        auto numLikes = to->numLikesByEmojiType.at(emojiType);
+        auto numLikes = leaf.numLikesByEmojiType.at(emojiType);
 
         AlienImGui::Text(std::to_string(numLikes));
         ImGui::SameLine();
@@ -703,18 +711,18 @@ void _BrowserWindow::processEmojiList(BrowserDataTO const& to)
                     0)) {
                 toggleEmojiType = emojiType;
             }
-            bool isLiked = _ownEmojiTypeBySimId.contains(to->id) && _ownEmojiTypeBySimId.at(to->id) == emojiType;
+            bool isLiked = _ownEmojiTypeBySimId.contains(leaf.id) && _ownEmojiTypeBySimId.at(leaf.id) == emojiType;
             if (isLiked) {
                 ImDrawList* drawList = ImGui::GetWindowDrawList();
                 drawList->AddRect(
                     ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x + emojiWidth, cursorPos.y + emojiHeight), (ImU32)ImColor::HSV(0, 0, 1, 0.5f), 1.0f);
             }
             ImGui::PopStyleColor(2);
-            AlienImGui::Tooltip([=, this] { return getUserNamesToEmojiType(to->id, emojiType); }, false);
+            AlienImGui::Tooltip([=, this] { return getUserNamesToEmojiType(leaf.id, emojiType); }, false);
         }
 
         //separator except for last element
-        if (++counter < to->numLikesByEmojiType.size()) {
+        if (++counter < leaf.numLikesByEmojiType.size()) {
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
         }
@@ -727,40 +735,43 @@ void _BrowserWindow::processEmojiList(BrowserDataTO const& to)
 void _BrowserWindow::processActionButtons(BrowserDataTO const& to)
 {
     //like button
-    auto liked = isLiked(to->id);
-    if (liked) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeButtonTextColor);
-    } else {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::NoLikeButtonTextColor);
-    }
-    auto likeButtonResult = processActionButton(ICON_FA_SMILE);
-    ImGui::PopStyleColor();
-    if (likeButtonResult) {
-        _activateEmojiPopup = true;
-        _emojiPopupTO = to;
-    }
-    AlienImGui::Tooltip("Choose a reaction");
-    ImGui::SameLine();
-
-    //download button
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
-    auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
-    ImGui::PopStyleColor();
-    if (downloadButtonResult) {
-        onDownloadItem(to);
-    }
-    AlienImGui::Tooltip("Download");
-    ImGui::SameLine();
-
-    //delete button
-    if (to->userName == _networkController->getLoggedInUserName().value_or("")) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DeleteButtonTextColor);
-        auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
-        ImGui::PopStyleColor();
-        if (deleteButtonResult) {
-            onDeleteItem(to);
+    if (to->isLeaf()) {
+        auto const& leaf = to->getLeaf();
+        auto liked = isLiked(leaf.id);
+        if (liked) {
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeButtonTextColor);
+        } else {
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::NoLikeButtonTextColor);
         }
-        AlienImGui::Tooltip("Delete");
+        auto likeButtonResult = processActionButton(ICON_FA_SMILE);
+        ImGui::PopStyleColor();
+        if (likeButtonResult) {
+            _activateEmojiPopup = true;
+            _emojiPopupTO = to;
+        }
+        AlienImGui::Tooltip("Choose a reaction");
+        ImGui::SameLine();
+
+        //download button
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
+        auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
+        ImGui::PopStyleColor();
+        if (downloadButtonResult) {
+            onDownloadItem(leaf);
+        }
+        AlienImGui::Tooltip("Download");
+        ImGui::SameLine();
+
+        //delete button
+        if (leaf.userName == _networkController->getLoggedInUserName().value_or("")) {
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DeleteButtonTextColor);
+            auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
+            ImGui::PopStyleColor();
+            if (deleteButtonResult) {
+                onDeleteItem(leaf);
+            }
+            AlienImGui::Tooltip("Delete");
+        }
     }
 }
 
@@ -840,14 +851,14 @@ void _BrowserWindow::sortUserList()
     std::sort(_userTOs.begin(), _userTOs.end(), [&](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
 }
 
-void _BrowserWindow::onDownloadItem(BrowserDataTO const& to)
+void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
 {
     printOverlayMessage("Downloading ...");
 
     delayedExecution([=, this] {
         std::string dataTypeString = _selectedDataType == DataType_Simulation ? "simulation" : "genome";
         SerializedSimulation serializedSim;
-        if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, to->id)) {
+        if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.id)) {
             MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
             return;
         }
@@ -893,7 +904,7 @@ void _BrowserWindow::onDownloadItem(BrowserDataTO const& to)
             _editorController->setOn(true);
             _editorController->getGenomeEditorWindow()->openTab(GenomeDescriptionService::convertBytesToDescription(genome));
         }
-        if (VersionChecker::isVersionNewer(to->version)) {
+        if (VersionChecker::isVersionNewer(leaf.version)) {
             MessageDialog::getInstance().information(
                 "Warning",
                 "The download was successful but the " + dataTypeString +" was generated using a more recent\n"
@@ -903,13 +914,13 @@ void _BrowserWindow::onDownloadItem(BrowserDataTO const& to)
     });
 }
 
-void _BrowserWindow::onDeleteItem(BrowserDataTO const& to)
+void _BrowserWindow::onDeleteItem(BrowserLeaf const& leaf)
 {
-    MessageDialog::getInstance().yesNo("Delete item", "Do you really want to delete the selected item?", [to, this]() {
+    MessageDialog::getInstance().yesNo("Delete item", "Do you really want to delete the selected item?", [leaf, this]() {
         printOverlayMessage("Deleting ...");
 
-        delayedExecution([browserData = to, this] {
-            if (!_networkController->deleteSimulation(browserData->id)) {
+        delayedExecution([leafCopy = leaf, this] {
+            if (!_networkController->deleteSimulation(leafCopy.id)) {
                 MessageDialog::getInstance().information("Error", "Failed to delete item. Please try again later.");
                 return;
             }
@@ -920,33 +931,35 @@ void _BrowserWindow::onDeleteItem(BrowserDataTO const& to)
 
 void _BrowserWindow::onToggleLike(BrowserDataTO const& to, int emojiType)
 {
+    CHECK(to->isLeaf());
+    auto& leaf = to->getLeaf();
     if (_networkController->getLoggedInUserName()) {
 
         //remove existing like
-        auto findResult = _ownEmojiTypeBySimId.find(to->id);
+        auto findResult = _ownEmojiTypeBySimId.find(leaf.id);
         auto onlyRemoveLike = false;
         if (findResult != _ownEmojiTypeBySimId.end()) {
             auto origEmojiType = findResult->second;
-            if (--to->numLikesByEmojiType[origEmojiType] == 0) {
-                to->numLikesByEmojiType.erase(origEmojiType);
+            if (--leaf.numLikesByEmojiType[origEmojiType] == 0) {
+                leaf.numLikesByEmojiType.erase(origEmojiType);
             }
             _ownEmojiTypeBySimId.erase(findResult);
-            _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(to->id, origEmojiType));  //invalidate cache entry
+            _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.id, origEmojiType));  //invalidate cache entry
             onlyRemoveLike = origEmojiType == emojiType;  //remove like if same like icon has been clicked
         }
 
         //create new like
         if (!onlyRemoveLike) {
-            _ownEmojiTypeBySimId[to->id] = emojiType;
-            if (to->numLikesByEmojiType.contains(emojiType)) {
-                ++to->numLikesByEmojiType[emojiType];
+            _ownEmojiTypeBySimId[leaf.id] = emojiType;
+            if (leaf.numLikesByEmojiType.contains(emojiType)) {
+                ++leaf.numLikesByEmojiType[emojiType];
             } else {
-                to->numLikesByEmojiType[emojiType] = 1;
+                leaf.numLikesByEmojiType[emojiType] = 1;
             }
         }
 
-        _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(to->id, emojiType));  //invalidate cache entry
-        _networkController->toggleLikeSimulation(to->id, emojiType);
+        _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.id, emojiType));  //invalidate cache entry
+        _networkController->toggleLikeSimulation(leaf.id, emojiType);
         //_scheduleCreateBrowserData = true;
     } else {
         _loginDialog.lock()->open();
@@ -982,12 +995,17 @@ std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& simId, in
 
 void _BrowserWindow::pushTextColor(BrowserDataTO const& to)
 {
-    if (VersionChecker::isVersionOutdated(to->version)) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionOutdatedColor);
-    } else if (VersionChecker::isVersionNewer(to->version)) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionNewerColor);
+    if (to->isLeaf()) {
+        auto const& leaf = to->getLeaf();
+        if (VersionChecker::isVersionOutdated(leaf.version)) {
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionOutdatedColor);
+        } else if (VersionChecker::isVersionNewer(leaf.version)) {
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionNewerColor);
+        } else {
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionOkColor);
+        }
     } else {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionOkColor);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::DirectoryColor);
     }
 }
 
@@ -997,12 +1015,12 @@ void _BrowserWindow::calcFilteredSimulationAndGenomeLists()
     _filteredNetworkSimulationTOs.reserve(_rawNetworkDataTOs.size());
     _filteredNetworkGenomeTOs.clear();
     _filteredNetworkGenomeTOs.reserve(_filteredNetworkGenomeTOs.size());
-    for (auto const& simData : _rawNetworkDataTOs) {
-        if (simData->matchWithFilter(_filter) &&_showCommunityCreations != simData->fromRelease) {
-            if (simData->type == NetworkDataType_Simulation) {
-                _filteredNetworkSimulationTOs.emplace_back(simData);
+    for (auto const& to : _rawNetworkDataTOs) {
+        if (to->matchWithFilter(_filter) &&_showCommunityCreations != to->fromRelease) {
+            if (to->type == NetworkDataType_Simulation) {
+                _filteredNetworkSimulationTOs.emplace_back(to);
             } else {
-                _filteredNetworkGenomeTOs.emplace_back(simData);
+                _filteredNetworkGenomeTOs.emplace_back(to);
             }
         }
     }

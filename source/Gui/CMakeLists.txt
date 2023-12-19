@@ -15,6 +15,7 @@ PUBLIC
     AutosaveController.h
     BrowserDataService.cpp
     BrowserDataService.h
+    BrowserDataTO.cpp
     BrowserDataTO.h
     BrowserWindow.cpp
     BrowserWindow.h
