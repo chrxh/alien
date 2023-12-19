@@ -177,3 +177,9 @@ enum DataType_
     DataType_Simulation,
     DataType_Genome
 };
+
+class _BrowserSimulationData;
+using BrowserSimulationData = std::shared_ptr<_BrowserSimulationData>;
+
+class _RemoteSimulationData;
+using RemoteSimulationData = std::shared_ptr<_RemoteSimulationData>;

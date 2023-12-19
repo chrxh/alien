@@ -3,6 +3,8 @@
 #include <string>
 #include <map>
 
+#include "Definitions.h"
+
 class ImGuiTableSortSpecs;
 
 enum RemoteSimulationDataColumnId
@@ -28,7 +30,7 @@ enum RemoteDataType_
     RemoteDataType_Genome
 };
 
-class RemoteSimulationData
+class _RemoteSimulationData
 {
 public:
     std::string id;
@@ -46,7 +48,7 @@ public:
     bool fromRelease;
     RemoteDataType type;
 
-    static int compare(void const* left, void const* right, ImGuiTableSortSpecs const* specs);
+    static int compare(RemoteSimulationData const& left, RemoteSimulationData const& right, ImGuiTableSortSpecs const* specs);
     bool matchWithFilter(std::string const& filter) const;
 
     int getTotalLikes() const;

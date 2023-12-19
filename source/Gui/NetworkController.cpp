@@ -10,7 +10,7 @@
 #include "Base/Resources.h"
 
 #include "MessageDialog.h"
-#include "NetworkDataParser.h"
+#include "NetworkDataParserService.h"
 
 namespace
 {
@@ -291,7 +291,7 @@ bool _NetworkController::getRemoteSimulationList(std::vector<RemoteSimulationDat
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
-        result = NetworkDataParser::decodeRemoteSimulationData(tree);
+        result = NetworkDataParserService::decodeRemoteSimulationData(tree);
         return true;
     } catch (...) {
         logNetworkError();
@@ -314,7 +314,7 @@ bool _NetworkController::getUserList(std::vector<UserData>& result, bool withRet
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
         result.clear();
-        result = NetworkDataParser::decodeUserData(tree);
+        result = NetworkDataParserService::decodeUserData(tree);
         for (UserData& userData : result) {
             userData.timeSpent = userData.timeSpent * RefreshInterval / 60;
         }

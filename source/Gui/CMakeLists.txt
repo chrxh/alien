@@ -13,6 +13,9 @@ PUBLIC
     AlienWindow.h
     AutosaveController.cpp
     AutosaveController.h
+    BrowserDataService.cpp
+    BrowserDataService.h
+    BrowserSimulationData.h
     BrowserWindow.cpp
     BrowserWindow.h
     CellFunctionStrings.h
@@ -69,8 +72,8 @@ PUBLIC
     MultiplierWindow.h
     NetworkController.cpp
     NetworkController.h
-    NetworkDataParser.cpp
-    NetworkDataParser.h
+    NetworkDataParserService.cpp
+    NetworkDataParserService.h
     NetworkSettingsDialog.cpp
     NetworkSettingsDialog.h
     NewSimulationDialog.cpp

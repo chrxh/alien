@@ -3,46 +3,44 @@
 #include <ranges>
 #include <imgui.h>
 
-int RemoteSimulationData::compare(void const* left, void const* right, ImGuiTableSortSpecs const* specs)
+int _RemoteSimulationData::compare(RemoteSimulationData const& left, RemoteSimulationData const& right, ImGuiTableSortSpecs const* specs)
 {
-    auto leftImpl = reinterpret_cast<RemoteSimulationData const*>(left);
-    auto rightImpl = reinterpret_cast<RemoteSimulationData const*>(right);
     for (int n = 0; n < specs->SpecsCount; n++) {
         const ImGuiTableColumnSortSpecs* sortSpec = &specs->Specs[n];
         int delta = 0;
         switch (sortSpec->ColumnUserID) {
         case RemoteSimulationDataColumnId_Timestamp:
-            delta = leftImpl->timestamp.compare(rightImpl->timestamp);
+            delta = left->timestamp.compare(right->timestamp);
             break;
         case RemoteSimulationDataColumnId_UserName:
-            delta = leftImpl->userName.compare(rightImpl->userName);
+            delta = left->userName.compare(right->userName);
             break;
         case RemoteSimulationDataColumnId_SimulationName:
-            delta = leftImpl->simName.compare(rightImpl->simName);
+            delta = left->simName.compare(right->simName);
             break;
         case RemoteSimulationDataColumnId_Description:
-            delta = leftImpl->description.compare(rightImpl->description);
+            delta = left->description.compare(right->description);
             break;
         case RemoteSimulationDataColumnId_Likes:
-            delta = leftImpl->getTotalLikes() - rightImpl->getTotalLikes();
+            delta = left->getTotalLikes() - right->getTotalLikes();
             break;
         case RemoteSimulationDataColumnId_NumDownloads:
-            delta = leftImpl->numDownloads - rightImpl->numDownloads;
+            delta = left->numDownloads - right->numDownloads;
             break;
         case RemoteSimulationDataColumnId_Width:
-            delta = leftImpl->width - rightImpl->width;
+            delta = left->width - right->width;
             break;
         case RemoteSimulationDataColumnId_Height:
-            delta = leftImpl->height - rightImpl->height;
+            delta = left->height - right->height;
             break;
         case RemoteSimulationDataColumnId_Particles:
-            delta = leftImpl->particles - rightImpl->particles;
+            delta = left->particles - right->particles;
             break;
         case RemoteSimulationDataColumnId_FileSize:
-            delta = static_cast<int>(leftImpl->contentSize / 1024) - static_cast<int>(rightImpl->contentSize / 1024);
+            delta = static_cast<int>(left->contentSize / 1024) - static_cast<int>(right->contentSize / 1024);
             break;
         case RemoteSimulationDataColumnId_Version:
-            delta = leftImpl->version.compare(rightImpl->version);
+            delta = left->version.compare(right->version);
             break;
         }
         if (delta > 0) {
@@ -56,7 +54,7 @@ int RemoteSimulationData::compare(void const* left, void const* right, ImGuiTabl
     return 0;
 }
 
-bool RemoteSimulationData::matchWithFilter(std::string const& filter) const
+bool _RemoteSimulationData::matchWithFilter(std::string const& filter) const
 {
     auto match = false;
     if (timestamp.find(filter) != std::string::npos) {
@@ -92,7 +90,7 @@ bool RemoteSimulationData::matchWithFilter(std::string const& filter) const
     return match;
 }
 
-int RemoteSimulationData::getTotalLikes() const
+int _RemoteSimulationData::getTotalLikes() const
 {
     int result = 0;
     for (auto const& numReactions : numLikesByEmojiType | std::views::values) {

@@ -3,10 +3,10 @@
 #include <vector>
 #include <boost/property_tree/json_parser.hpp>
 
-#include "RemoteSimulationData.h"
 #include "UserData.h"
+#include "Definitions.h"
 
-class NetworkDataParser
+class NetworkDataParserService
 {
 public:
     static std::vector<RemoteSimulationData> decodeRemoteSimulationData(boost::property_tree::ptree const& tree);
