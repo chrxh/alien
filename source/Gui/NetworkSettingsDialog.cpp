@@ -2,8 +2,9 @@
 
 #include <imgui.h>
 
+#include "Network/NetworkController.h"
+
 #include "AlienImGui.h"
-#include "NetworkController.h"
 #include "BrowserWindow.h"
 #include "StyleRepository.h"
 

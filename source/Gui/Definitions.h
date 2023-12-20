@@ -115,9 +115,6 @@ using BrowserWindow = std::shared_ptr<_BrowserWindow>;
 class _ShaderWindow;
 using ShaderWindow = std::shared_ptr<_ShaderWindow>;
 
-class _NetworkController;
-using NetworkController = std::shared_ptr<_NetworkController>;
-
 class _LoginDialog;
 using LoginDialog = std::shared_ptr<_LoginDialog>;
 using LoginDialogWeakPtr = std::weak_ptr<_LoginDialog>;
@@ -170,16 +167,3 @@ struct TextureData
     int width;
     int height;
 };
-
-using DataType = int;
-enum DataType_
-{
-    DataType_Simulation,
-    DataType_Genome
-};
-
-struct _BrowserDataTO;
-using BrowserDataTO = std::shared_ptr<_BrowserDataTO>;
-
-struct _NetworkDataTO;
-using NetworkDataTO = std::shared_ptr<_NetworkDataTO>;

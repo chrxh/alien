@@ -9,7 +9,6 @@
 #include "Base/LoggingService.h"
 #include "Base/Resources.h"
 
-#include "MessageDialog.h"
 #include "NetworkDataParserService.h"
 
 namespace

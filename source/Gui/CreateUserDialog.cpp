@@ -3,9 +3,10 @@
 #include <imgui.h>
 #include <Fonts/IconsFontAwesome5.h>
 
+#include "Network/NetworkController.h"
+
 #include "AlienImGui.h"
 #include "MessageDialog.h"
-#include "NetworkController.h"
 #include "ActivateUserDialog.h"
 
 _CreateUserDialog::_CreateUserDialog(ActivateUserDialog const& activateUserDialog, NetworkController const& networkController)

@@ -1,7 +1,9 @@
 #pragma once
 
-#include "AlienDialog.h"
 #include "EngineInterface/Definitions.h"
+#include "Network/Definitions.h"
+
+#include "AlienDialog.h"
 #include "Definitions.h"
 
 class _UploadSimulationDialog : public _AlienDialog

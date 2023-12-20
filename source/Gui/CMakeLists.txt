@@ -13,10 +13,6 @@ PUBLIC
     AlienWindow.h
     AutosaveController.cpp
     AutosaveController.h
-    BrowserDataService.cpp
-    BrowserDataService.h
-    BrowserDataTO.cpp
-    BrowserDataTO.h
     BrowserWindow.cpp
     BrowserWindow.h
     CellFunctionStrings.h
@@ -71,12 +67,6 @@ PUBLIC
     ModeController.h
     MultiplierWindow.cpp
     MultiplierWindow.h
-    NetworkController.cpp
-    NetworkController.h
-    NetworkDataParserService.cpp
-    NetworkDataParserService.h
-    NetworkDataTO.cpp
-    NetworkDataTO.h
     NetworkSettingsDialog.cpp
     NetworkSettingsDialog.h
     NewSimulationDialog.cpp
@@ -125,7 +115,6 @@ PUBLIC
     UiController.h
     UploadSimulationDialog.cpp
     UploadSimulationDialog.h
-    UserTO.h
     Viewport.cpp
     Viewport.h
     WindowController.cpp
@@ -135,6 +124,7 @@ target_link_libraries(alien BaseLib)
 target_link_libraries(alien EngineGpuKernelsLib)
 target_link_libraries(alien EngineImplLib)
 target_link_libraries(alien EngineInterfaceLib)
+target_link_libraries(alien NetworkLib)
 
 target_link_libraries(alien im_file_dialog)
 target_link_libraries(alien CUDA::cudart_static)

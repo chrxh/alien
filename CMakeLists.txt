@@ -45,7 +45,7 @@ add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:--Werror=all-warnings>)
 add_executable(alien)
 add_executable(cli)
 add_executable(EngineTests)
-add_executable(GuiTests)
+add_executable(NetworkTests)
 
 find_package(CUDAToolkit)
 find_package(Boost REQUIRED)
@@ -69,7 +69,8 @@ add_subdirectory(source/EngineImpl)
 add_subdirectory(source/EngineInterface)
 add_subdirectory(source/EngineTests)
 add_subdirectory(source/Gui)
-add_subdirectory(source/GuiTests)
+add_subdirectory(source/Network)
+add_subdirectory(source/NetworkTests)
 
 # Copy resources to the build location
 add_custom_command(

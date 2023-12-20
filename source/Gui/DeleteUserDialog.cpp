@@ -2,11 +2,12 @@
 
 #include <imgui.h>
 
+#include "Network/NetworkController.h"
+
 #include "AlienImGui.h"
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
 #include "MessageDialog.h"
-#include "NetworkController.h"
 
 _DeleteUserDialog::_DeleteUserDialog(BrowserWindow const& browserWindow, NetworkController const& networkController)
     : _AlienDialog("Delete user")

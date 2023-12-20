@@ -6,10 +6,10 @@
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/GenomeDescriptionService.h"
+#include "Network/NetworkController.h"
 
 #include "AlienImGui.h"
 #include "MessageDialog.h"
-#include "NetworkController.h"
 #include "StyleRepository.h"
 #include "BrowserWindow.h"
 #include "DelayedExecutionController.h"
