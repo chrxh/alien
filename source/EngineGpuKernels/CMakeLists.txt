@@ -1,5 +1,5 @@
 
-add_library(alien_engine_gpu_kernels_lib
+add_library(EngineGpuKernelsLib
     Array.cuh
     AttackerProcessor.cuh
     Base.cuh
@@ -92,8 +92,8 @@ add_library(alien_engine_gpu_kernels_lib
     Util.cuh
     )
 
-target_link_libraries(alien_engine_gpu_kernels_lib alien_base_lib)
-target_link_libraries(alien_engine_gpu_kernels_lib alien_engine_interface_lib)
+target_link_libraries(EngineGpuKernelsLib BaseLib)
+target_link_libraries(EngineGpuKernelsLib EngineInterfaceLib)
 
 # See https://gitlab.kitware.com/cmake/cmake/-/issues/17520
-set_property(TARGET alien_engine_gpu_kernels_lib PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+set_property(TARGET EngineGpuKernelsLib PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
