@@ -43,7 +43,8 @@ add_compile_definitions($<$<COMPILE_LANGUAGE:CXX>:NOMINMAX>)
 add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:--Werror=all-warnings>)
 
 add_executable(alien)
-add_executable(tests)
+add_executable(engine_tests)
+add_executable(gui_tests)
 add_executable(cli)
 
 find_package(CUDAToolkit)
@@ -62,12 +63,13 @@ find_package(CLI11 CONFIG REQUIRED)
 
 add_subdirectory(external/ImFileDialog)
 add_subdirectory(source/Base)
+add_subdirectory(source/Cli)
 add_subdirectory(source/EngineGpuKernels)
 add_subdirectory(source/EngineImpl)
 add_subdirectory(source/EngineInterface)
 add_subdirectory(source/EngineTests)
 add_subdirectory(source/Gui)
-add_subdirectory(source/Cli)
+add_subdirectory(source/GuiTests)
 
 # Copy resources to the build location
 add_custom_command(
