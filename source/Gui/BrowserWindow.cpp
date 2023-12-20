@@ -22,7 +22,7 @@
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 #include "Network/BrowserDataService.h"
-#include "Network/NetworkController.h"
+#include "Network/NetworkService.h"
 #include "Network/NetworkDataParserService.h"
 
 #include "AlienImGui.h"
@@ -54,14 +54,14 @@ namespace
 
 _BrowserWindow::_BrowserWindow(
     SimulationController const& simController,
-    NetworkController const& networkController,
+    NetworkService const& networkController,
     StatisticsWindow const& statisticsWindow,
     Viewport const& viewport,
     TemporalControlWindow const& temporalControlWindow,
     EditorController const& editorController)
     : _AlienWindow("Browser", "windows.browser", true)
     , _simController(simController)
-    , _networkController(networkController)
+    , _networkService(networkController)
     , _statisticsWindow(statisticsWindow)
     , _viewport(viewport)
     , _temporalControlWindow(temporalControlWindow)
@@ -103,8 +103,10 @@ void _BrowserWindow::onRefresh()
 void _BrowserWindow::refreshIntern(bool withRetry)
 {
     try {
-        bool success = _networkController->getRemoteSimulationList(_rawNetworkDataTOs, withRetry);
-        success &= _networkController->getUserList(_userTOs, withRetry);
+        _networkService->refreshLogin();
+
+        bool success = _networkService->getRemoteSimulationList(_rawNetworkDataTOs, withRetry);
+        success &= _networkService->getUserList(_userTOs, withRetry);
 
         if (!success) {
             if (withRetry) {
@@ -124,8 +126,8 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         calcFilteredSimulationAndGenomeLists();
         _scheduleCreateBrowserData = true;
 
-        if (_networkController->getLoggedInUserName()) {
-            if (!_networkController->getEmojiTypeBySimId(_ownEmojiTypeBySimId)) {
+        if (_networkService->getLoggedInUserName()) {
+            if (!_networkService->getEmojiTypeBySimId(_ownEmojiTypeBySimId)) {
                 MessageDialog::getInstance().information("Error", "Failed to retrieve browser data. Please try again.");
             }
         } else {
@@ -215,7 +217,7 @@ void _BrowserWindow::processToolbar()
     AlienImGui::Tooltip("Refresh");
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(_networkController->getLoggedInUserName().has_value());
+    ImGui::BeginDisabled(_networkService->getLoggedInUserName().has_value());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_IN_ALT)) {
         if (auto loginDialog = _loginDialog.lock()) {
             loginDialog->open();
@@ -225,10 +227,10 @@ void _BrowserWindow::processToolbar()
     AlienImGui::Tooltip("Login or register");
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!_networkController->getLoggedInUserName());
+    ImGui::BeginDisabled(!_networkService->getLoggedInUserName());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_OUT_ALT)) {
         if (auto loginDialog = _loginDialog.lock()) {
-            _networkController->logout();
+            _networkService->logout();
             onRefresh();
         }
     }
@@ -493,7 +495,7 @@ void _BrowserWindow::processUserList()
     AlienImGui::Group("Simulators");
     if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
-        auto isLoggedIn = _networkController->getLoggedInUserName().has_value();
+        auto isLoggedIn = _networkService->getLoggedInUserName().has_value();
         ImGui::TableSetupColumn(
             isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
@@ -515,7 +517,7 @@ void _BrowserWindow::processUserList()
                 ImGui::TableNextRow(0, scale(RowHeight));
 
                 ImGui::TableNextColumn();
-                auto isBoldFont = isLoggedIn && *_networkController->getLoggedInUserName() == item->userName;
+                auto isBoldFont = isLoggedIn && *_networkService->getLoggedInUserName() == item->userName;
 
                 if (item->online) {
                     AlienImGui::OnlineSymbol();
@@ -567,13 +569,13 @@ void _BrowserWindow::processStatus()
         statusText += std::to_string(_userTOs.size()) + " simulators found";
 
         statusText += std::string("  " ICON_FA_INFO_CIRCLE " ");
-        if (auto userName = _networkController->getLoggedInUserName()) {
-            statusText += "Logged in as " + *userName + " @ " + _networkController->getServerAddress();// + ": ";
+        if (auto userName = _networkService->getLoggedInUserName()) {
+            statusText += "Logged in as " + *userName + " @ " + _networkService->getServerAddress();// + ": ";
         } else {
-            statusText += "Not logged in to " + _networkController->getServerAddress();// + ": ";
+            statusText += "Not logged in to " + _networkService->getServerAddress();// + ": ";
         }
 
-        if (!_networkController->getLoggedInUserName()) {
+        if (!_networkService->getLoggedInUserName()) {
             statusText += std::string("   " ICON_FA_INFO_CIRCLE " ");
             statusText += "In order to share and upvote simulations you need to log in.";
         }
@@ -769,7 +771,7 @@ void _BrowserWindow::processActionButtons(BrowserDataTO const& to)
         ImGui::SameLine();
 
         //delete button
-        if (leaf.userName == _networkController->getLoggedInUserName().value_or("")) {
+        if (leaf.userName == _networkService->getLoggedInUserName().value_or("")) {
             ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DeleteButtonTextColor);
             auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
             ImGui::PopStyleColor();
@@ -864,7 +866,7 @@ void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
     delayedExecution([=, this] {
         std::string dataTypeString = _selectedDataType == DataType_Simulation ? "simulation" : "genome";
         SerializedSimulation serializedSim;
-        if (!_networkController->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.id)) {
+        if (!_networkService->downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.id)) {
             MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
             return;
         }
@@ -926,7 +928,7 @@ void _BrowserWindow::onDeleteItem(BrowserLeaf const& leaf)
         printOverlayMessage("Deleting ...");
 
         delayedExecution([leafCopy = leaf, this] {
-            if (!_networkController->deleteSimulation(leafCopy.id)) {
+            if (!_networkService->deleteSimulation(leafCopy.id)) {
                 MessageDialog::getInstance().information("Error", "Failed to delete item. Please try again later.");
                 return;
             }
@@ -939,7 +941,7 @@ void _BrowserWindow::onToggleLike(BrowserDataTO const& to, int emojiType)
 {
     CHECK(to->isLeaf());
     auto& leaf = to->getLeaf();
-    if (_networkController->getLoggedInUserName()) {
+    if (_networkService->getLoggedInUserName()) {
 
         //remove existing like
         auto findResult = _ownEmojiTypeBySimId.find(leaf.id);
@@ -965,7 +967,7 @@ void _BrowserWindow::onToggleLike(BrowserDataTO const& to, int emojiType)
         }
 
         _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.id, emojiType));  //invalidate cache entry
-        _networkController->toggleLikeSimulation(leaf.id, emojiType);
+        _networkService->toggleLikeSimulation(leaf.id, emojiType);
         //_scheduleCreateBrowserData = true;
     } else {
         _loginDialog.lock()->open();
@@ -992,7 +994,7 @@ std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& simId, in
     if (findResult != _userNamesByEmojiTypeBySimIdCache.end()) {
         userNames = findResult->second;
     } else {
-        _networkController->getUserNamesForSimulationAndEmojiType(userNames, simId, emojiType);
+        _networkService->getUserNamesForSimulationAndEmojiType(userNames, simId, emojiType);
         _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(simId, emojiType), userNames);
     }
 

@@ -1,4 +1,4 @@
-#include "NetworkController.h"
+#include "NetworkService.h"
 
 #include <boost/property_tree/json_parser.hpp>
 
@@ -57,51 +57,39 @@ namespace
     }
 }
 
-_NetworkController::_NetworkController()
+_NetworkService::_NetworkService()
 {
     _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
 }
 
-_NetworkController::~_NetworkController()
+_NetworkService::~_NetworkService()
 {
     GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
     logout();
 }
 
-void _NetworkController::process()
-{
-    auto now = std::chrono::steady_clock::now();
-    if (!_lastRefreshTime) {
-        _lastRefreshTime = now;
-    }
-    if (std::chrono::duration_cast<std::chrono::minutes>(now - *_lastRefreshTime).count() >= RefreshInterval) {
-        _lastRefreshTime = now;
-        refreshLogin();
-    }
-}
-
-std::string _NetworkController::getServerAddress() const
+std::string _NetworkService::getServerAddress() const
 {
     return _serverAddress;
 }
 
-void _NetworkController::setServerAddress(std::string const& value)
+void _NetworkService::setServerAddress(std::string const& value)
 {
     _serverAddress = value;
     logout();
 }
 
-std::optional<std::string> _NetworkController::getLoggedInUserName() const
+std::optional<std::string> _NetworkService::getLoggedInUserName() const
 {
     return _loggedInUserName;
 }
 
-std::optional<std::string> _NetworkController::getPassword() const
+std::optional<std::string> _NetworkService::getPassword() const
 {
     return _password;
 }
 
-bool _NetworkController::createUser(std::string const& userName, std::string const& password, std::string const& email)
+bool _NetworkService::createUser(std::string const& userName, std::string const& password, std::string const& email)
 {
     log(Priority::Important, "network: create user '" + userName + "'");
 
@@ -122,7 +110,7 @@ bool _NetworkController::createUser(std::string const& userName, std::string con
     }
 }
 
-bool _NetworkController::activateUser(std::string const& userName, std::string const& password, UserInfo const& userInfo, std::string const& confirmationCode)
+bool _NetworkService::activateUser(std::string const& userName, std::string const& password, UserInfo const& userInfo, std::string const& confirmationCode)
 {
     log(Priority::Important, "network: activate user '" + userName + "'");
 
@@ -146,7 +134,7 @@ bool _NetworkController::activateUser(std::string const& userName, std::string c
     }
 }
 
-bool _NetworkController::login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo)
+bool _NetworkService::login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
     log(Priority::Important, "network: login user '" + userName + "'");
 
@@ -182,7 +170,7 @@ bool _NetworkController::login(LoginErrorCode& errorCode, std::string const& use
     }
 }
 
-bool _NetworkController::logout()
+bool _NetworkService::logout()
 {
     log(Priority::Important, "network: logout");
     bool result = true;
@@ -208,7 +196,26 @@ bool _NetworkController::logout()
     return result;
 }
 
-bool _NetworkController::deleteUser()
+void _NetworkService::refreshLogin()
+{
+    if (_loggedInUserName && _password) {
+        log(Priority::Important, "network: refresh login");
+
+        httplib::SSLClient client(_serverAddress);
+        configureClient(client);
+
+        httplib::Params params;
+        params.emplace("userName", *_loggedInUserName);
+        params.emplace("password", *_password);
+
+        try {
+            executeRequest([&] { return client.Post("/alien-server/refreshlogin.php", params); });
+        } catch (...) {
+        }
+    }
+}
+
+bool _NetworkService::deleteUser()
 {
     log(Priority::Important, "network: delete user '" + *_loggedInUserName + "'");
 
@@ -233,7 +240,7 @@ bool _NetworkController::deleteUser()
     }
 }
 
-bool _NetworkController::resetPassword(std::string const& userName, std::string const& email)
+bool _NetworkService::resetPassword(std::string const& userName, std::string const& email)
 {
     log(Priority::Important, "network: reset password of user '" + userName + "'");
 
@@ -253,7 +260,7 @@ bool _NetworkController::resetPassword(std::string const& userName, std::string 
     }
 }
 
-bool _NetworkController::setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode)
+bool _NetworkService::setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode)
 {
     log(Priority::Important, "network: set new password for user '" + userName + "'");
 
@@ -274,7 +281,7 @@ bool _NetworkController::setNewPassword(std::string const& userName, std::string
     }
 }
 
-bool _NetworkController::getRemoteSimulationList(std::vector<NetworkDataTO>& result, bool withRetry) const
+bool _NetworkService::getRemoteSimulationList(std::vector<NetworkDataTO>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get simulation list");
 
@@ -298,7 +305,7 @@ bool _NetworkController::getRemoteSimulationList(std::vector<NetworkDataTO>& res
     }
 }
 
-bool _NetworkController::getUserList(std::vector<UserTO>& result, bool withRetry) const
+bool _NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get user list");
 
@@ -324,7 +331,7 @@ bool _NetworkController::getUserList(std::vector<UserTO>& result, bool withRetry
     }
 }
 
-bool _NetworkController::getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const
+bool _NetworkService::getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const
 {
     log(Priority::Important, "network: get liked simulations");
 
@@ -353,7 +360,7 @@ bool _NetworkController::getEmojiTypeBySimId(std::unordered_map<std::string, int
     }
 }
 
-bool _NetworkController::getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
+bool _NetworkService::getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
 {
     log(Priority::Important, "network: get user likes for simulation with id=" + simId + " and likeType=" + std::to_string(likeType));
 
@@ -382,7 +389,7 @@ bool _NetworkController::getUserNamesForSimulationAndEmojiType(std::set<std::str
     }
 }
 
-bool _NetworkController::toggleLikeSimulation(std::string const& simId, int likeType)
+bool _NetworkService::toggleLikeSimulation(std::string const& simId, int likeType)
 {
     log(Priority::Important, "network: toggle like for simulation with id=" + simId);
 
@@ -405,7 +412,7 @@ bool _NetworkController::toggleLikeSimulation(std::string const& simId, int like
     }
 }
 
-bool _NetworkController::uploadSimulation(
+bool _NetworkService::uploadSimulation(
     std::string const& simulationName,
     std::string const& description,
     IntVector2D const& size,
@@ -445,7 +452,7 @@ bool _NetworkController::uploadSimulation(
     }
 }
 
-bool _NetworkController::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
+bool _NetworkService::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
 {
     log(Priority::Important, "network: download simulation with id=" + simId);
 
@@ -475,7 +482,7 @@ bool _NetworkController::downloadSimulation(std::string& mainData, std::string& 
     }
 }
 
-bool _NetworkController::deleteSimulation(std::string const& simId)
+bool _NetworkService::deleteSimulation(std::string const& simId)
 {
     log(Priority::Important, "network: delete simulation with id=" + simId);
 
@@ -493,24 +500,5 @@ bool _NetworkController::deleteSimulation(std::string const& simId)
     } catch (...) {
         logNetworkError();
         return false;
-    }
-}
-
-void _NetworkController::refreshLogin()
-{
-    if (_loggedInUserName && _password) {
-        log(Priority::Important, "network: refresh login");
-
-        httplib::SSLClient client(_serverAddress);
-        configureClient(client);
-
-        httplib::Params params;
-        params.emplace("userName", *_loggedInUserName);
-        params.emplace("password", *_password);
-
-        try {
-            executeRequest([&] { return client.Post("/alien-server/refreshlogin.php", params); });
-        } catch (...) {
-        }
     }
 }

@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include "EngineInterface/SimulationController.h"
-#include "Network/NetworkController.h"
+#include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
 #include "MessageDialog.h"
@@ -14,11 +14,11 @@
 _ActivateUserDialog::_ActivateUserDialog(
     SimulationController const& simController,
     BrowserWindow const& browserWindow,
-    NetworkController const& networkController)
+    NetworkService const& networkController)
     : _AlienDialog("Activate user")
     , _simController(simController)
     , _browserWindow(browserWindow)
-    , _networkController(networkController)
+    , _networkService(networkController)
 {}
 
 _ActivateUserDialog::~_ActivateUserDialog() {}
@@ -81,10 +81,10 @@ void _ActivateUserDialog::processIntern()
 
 void _ActivateUserDialog::onActivateUser()
 {
-    auto result = _networkController->activateUser(_userName, _password, _userInfo, _confirmationCode);
+    auto result = _networkService->activateUser(_userName, _password, _userInfo, _confirmationCode);
     if (result) {
         LoginErrorCode errorCode;
-        result |= _networkController->login(errorCode, _userName, _password, _userInfo);
+        result |= _networkService->login(errorCode, _userName, _password, _userInfo);
     }
     if (!result) {
         MessageDialog::getInstance().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");

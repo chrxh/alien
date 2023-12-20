@@ -16,7 +16,7 @@ class _BrowserWindow : public _AlienWindow
 public:
     _BrowserWindow(
         SimulationController const& simController,
-        NetworkController const& networkController,
+        NetworkService const& networkController,
         StatisticsWindow const& statisticsWindow,
         Viewport const& viewport,
         TemporalControlWindow const& temporalControlWindow,
@@ -97,7 +97,7 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 
     SimulationController _simController;
-    NetworkController _networkController;
+    NetworkService _networkService;
     StatisticsWindow _statisticsWindow;
     Viewport _viewport;
     TemporalControlWindow _temporalControlWindow;
