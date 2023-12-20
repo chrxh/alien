@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Network/NetworkController.h"
+
 #include "AlienDialog.h"
 #include "Definitions.h"
-#include "NetworkController.h"
 
 class _CreateUserDialog : public _AlienDialog
 {

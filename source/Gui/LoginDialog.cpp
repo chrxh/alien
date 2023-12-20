@@ -4,9 +4,9 @@
 
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/SimulationController.h"
+#include "Network/NetworkController.h"
 
 #include "AlienImGui.h"
-#include "NetworkController.h"
 #include "MessageDialog.h"
 #include "CreateUserDialog.h"
 #include "BrowserWindow.h"

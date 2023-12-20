@@ -23,6 +23,7 @@
 
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
+#include "Network/NetworkController.h"
 
 #include "ModeController.h"
 #include "SimulationView.h"
@@ -53,7 +54,6 @@
 #include "PatternAnalysisDialog.h"
 #include "MessageDialog.h"
 #include "FpsController.h"
-#include "NetworkController.h"
 #include "BrowserWindow.h"
 #include "LoginDialog.h"
 #include "UploadSimulationDialog.h"

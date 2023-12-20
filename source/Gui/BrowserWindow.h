@@ -4,11 +4,11 @@
 
 #include "Base/Hashes.h"
 #include "EngineInterface/Definitions.h"
+#include "Network/BrowserDataTO.h"
+#include "Network/NetworkDataTO.h"
+#include "Network/UserTO.h"
 
 #include "AlienWindow.h"
-#include "BrowserDataTO.h"
-#include "NetworkDataTO.h"
-#include "UserTO.h"
 #include "Definitions.h"
 
 class _BrowserWindow : public _AlienWindow

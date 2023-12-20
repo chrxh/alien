@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Network/Definitions.h"
+
 #include "AlienDialog.h"
 #include "Definitions.h"
 

@@ -3,11 +3,11 @@
 #include <imgui.h>
 
 #include "EngineInterface/SimulationController.h"
+#include "Network/NetworkController.h"
 
 #include "AlienImGui.h"
 #include "BrowserWindow.h"
 #include "MessageDialog.h"
-#include "NetworkController.h"
 
 _NewPasswordDialog::_NewPasswordDialog(
     SimulationController const& simController,

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
+#include "Network/Definitions.h"
+
 #include "Definitions.h"
 
 class _MainWindow
