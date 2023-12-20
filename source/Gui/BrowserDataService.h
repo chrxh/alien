@@ -8,5 +8,5 @@
 class BrowserDataService
 {
 public:
-    static std::vector<BrowserDataTO> createBrowserData(std::vector<NetworkDataTO> const& remoteData);
+    static std::vector<BrowserDataTO> createBrowserData(std::vector<NetworkDataTO> const& browserData);
 };

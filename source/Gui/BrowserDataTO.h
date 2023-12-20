@@ -36,7 +36,7 @@ struct BrowserLeaf
 struct _BrowserDataTO
 {
     BrowserDataType type;
-    int level;
+    std::vector<std::string> location;
     std::variant<BrowserFolder, BrowserLeaf> node;
 
     bool isLeaf();

@@ -275,6 +275,11 @@ void _BrowserWindow::processSimulationList()
             scale(90.0f),
             NetworkDataColumnId_Actions);
         ImGui::TableSetupColumn(
+            "Simulation name",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scale(160.0f),
+            NetworkDataColumnId_SimulationName);
+        ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             scale(135.0f),
@@ -284,11 +289,6 @@ void _BrowserWindow::processSimulationList()
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
             NetworkDataColumnId_UserName);
-        ImGui::TableSetupColumn(
-            "Simulation name",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(160.0f),
-            NetworkDataColumnId_SimulationName);
         ImGui::TableSetupColumn(
             "Description",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
@@ -332,12 +332,12 @@ void _BrowserWindow::processSimulationList()
                     ImGui::TableNextColumn();
                     processActionButtons(item);
                     ImGui::TableNextColumn();
+                    processShortenedText(leaf.simName);
+                    ImGui::TableNextColumn();
                     pushTextColor(item);
                     AlienImGui::Text(leaf.timestamp);
                     ImGui::TableNextColumn();
                     processShortenedText(leaf.userName);
-                    ImGui::TableNextColumn();
-                    processShortenedText(leaf.simName);
                     ImGui::TableNextColumn();
                     processShortenedText(leaf.description);
                     ImGui::TableNextColumn();
@@ -357,6 +357,12 @@ void _BrowserWindow::processSimulationList()
                     AlienImGui::Text(leaf.version);
 
                     ImGui::PopStyleColor();
+                } else {
+                    ImGui::TableNextColumn();
+                    ImGui::TableNextColumn();
+                    AlienImGui::CollapseButton(false);
+                    ImGui::SameLine();
+                    processShortenedText(item->location.back());
                 }
                 ImGui::PopID();
             }
@@ -378,6 +384,11 @@ void _BrowserWindow::processGenomeList()
         ImGui::TableSetupColumn(
             "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f), NetworkDataColumnId_Actions);
         ImGui::TableSetupColumn(
+            "Genome name",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scale(160.0f),
+            NetworkDataColumnId_SimulationName);
+        ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             scale(135.0f),
@@ -387,11 +398,6 @@ void _BrowserWindow::processGenomeList()
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
             NetworkDataColumnId_UserName);
-        ImGui::TableSetupColumn(
-            "Genome name",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(160.0f),
-            NetworkDataColumnId_SimulationName);
         ImGui::TableSetupColumn(
             "Description",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
@@ -436,12 +442,12 @@ void _BrowserWindow::processGenomeList()
                     ImGui::TableNextColumn();
                     processActionButtons(item);
                     ImGui::TableNextColumn();
+                    processShortenedText(leaf.simName);
+                    ImGui::TableNextColumn();
                     pushTextColor(item);
                     AlienImGui::Text(leaf.timestamp);
                     ImGui::TableNextColumn();
                     processShortenedText(leaf.userName);
-                    ImGui::TableNextColumn();
-                    processShortenedText(leaf.simName);
                     ImGui::TableNextColumn();
                     processShortenedText(leaf.description);
                     ImGui::TableNextColumn();
