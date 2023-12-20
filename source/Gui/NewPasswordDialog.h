@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Network/NetworkController.h"
+#include "Network/NetworkService.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
@@ -8,7 +8,7 @@
 class _NewPasswordDialog : public _AlienDialog
 {
 public:
-    _NewPasswordDialog(SimulationController const& simController, BrowserWindow const& browserWindow, NetworkController const& networkController);
+    _NewPasswordDialog(SimulationController const& simController, BrowserWindow const& browserWindow, NetworkService const& networkController);
 
     void open(std::string const& userName, UserInfo const& userInfo);
 
@@ -19,7 +19,7 @@ private:
 
     SimulationController _simController; 
     BrowserWindow _browserWindow;
-    NetworkController _networkController;
+    NetworkService _networkService;
 
     std::string _userName;
     std::string _newPassword;

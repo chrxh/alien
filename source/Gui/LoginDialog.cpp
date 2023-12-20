@@ -4,7 +4,7 @@
 
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/SimulationController.h"
-#include "Network/NetworkController.h"
+#include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
 #include "MessageDialog.h"
@@ -21,13 +21,13 @@ _LoginDialog::_LoginDialog(
     CreateUserDialog const& createUserDialog,
     ActivateUserDialog const& activateUserDialog,
     ResetPasswordDialog const& resetPasswordDialog,
-    NetworkController const& networkController)
+    NetworkService const& networkController)
     : _AlienDialog("Login")
     , _simController(simController)
     , _browserWindow(browserWindow)
     , _createUserDialog(createUserDialog)
     , _activateUserDialog(activateUserDialog)
-    , _networkController(networkController)
+    , _networkService(networkController)
     , _resetPasswordDialog(resetPasswordDialog)
 
 {
@@ -40,7 +40,7 @@ _LoginDialog::_LoginDialog(
         _password = settings.getStringState("dialogs.login.password", "");
         if (!_userName.empty()) {
             LoginErrorCode errorCode;
-            if (!_networkController->login(errorCode, _userName, _password, getUserInfo())) {
+            if (!_networkService->login(errorCode, _userName, _password, getUserInfo())) {
                 if (errorCode != LoginErrorCode_UnconfirmedUser) {
                     MessageDialog::getInstance().information("Error", "Login failed.");
                 }
@@ -132,7 +132,7 @@ void _LoginDialog::onLogin()
 
     auto userInfo = getUserInfo();
 
-    if (!_networkController->login(errorCode, _userName, _password, userInfo)) {
+    if (!_networkService->login(errorCode, _userName, _password, userInfo)) {
         switch (errorCode) {
         case LoginErrorCode_UnconfirmedUser: {
             _activateUserDialog->open(_userName, _password, userInfo);

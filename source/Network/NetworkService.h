@@ -18,13 +18,11 @@ struct UserInfo
     std::optional<std::string> gpu;
 };
 
-class _NetworkController
+class _NetworkService
 {
 public:
-    _NetworkController();
-    ~_NetworkController();
-
-    void process();
+    _NetworkService();
+    ~_NetworkService();
 
     std::string getServerAddress() const;
     void setServerAddress(std::string const& value);
@@ -36,6 +34,7 @@ public:
 
     bool login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo);
     bool logout();
+    void refreshLogin();
     bool deleteUser();
     bool resetPassword(std::string const& userName, std::string const& email);
     bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
@@ -59,8 +58,6 @@ public:
     bool deleteSimulation(std::string const& simId);
 
 private:
-    void refreshLogin();
-
     std::string _serverAddress;
     std::optional<std::string> _loggedInUserName;
     std::optional<std::string> _password;

@@ -6,7 +6,7 @@
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/GenomeDescriptionService.h"
-#include "Network/NetworkController.h"
+#include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
 #include "MessageDialog.h"
@@ -32,12 +32,12 @@ _UploadSimulationDialog::_UploadSimulationDialog(
     BrowserWindow const& browserWindow,
     LoginDialog const& loginDialog,
     SimulationController const& simController,
-    NetworkController const& networkController,
+    NetworkService const& networkController,
     Viewport const& viewport,
     GenomeEditorWindow const& genomeEditorWindow)
     : _AlienDialog("")
     , _simController(simController)
-    , _networkController(networkController)
+    , _networkService(networkController)
     , _browserWindow(browserWindow)
     , _loginDialog(loginDialog)
     , _viewport(viewport)
@@ -57,7 +57,7 @@ _UploadSimulationDialog::~_UploadSimulationDialog()
 
 void _UploadSimulationDialog::open(DataType dataType)
 {
-    if (_networkController->getLoggedInUserName()) {
+    if (_networkService->getLoggedInUserName()) {
         changeTitle("Upload " + BrowserDataTypeToLowerString.at(dataType));
         _dataType = dataType;
         _AlienDialog::open();
@@ -154,7 +154,7 @@ void _UploadSimulationDialog::onUpload()
             }
         }
 
-        if (!_networkController->uploadSimulation(_simName, _simDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
+        if (!_networkService->uploadSimulation(_simName, _simDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
             showMessage("Error", "Failed to upload " + BrowserDataTypeToLowerString.at(_dataType) + ".");
             return;
         }

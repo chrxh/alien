@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Network/NetworkController.h"
+#include "Network/NetworkService.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
@@ -8,7 +8,7 @@
 class _CreateUserDialog : public _AlienDialog
 {
 public:
-    _CreateUserDialog(ActivateUserDialog const& activateUserDialog, NetworkController const& networkController);
+    _CreateUserDialog(ActivateUserDialog const& activateUserDialog, NetworkService const& networkController);
     ~_CreateUserDialog();
 
     void open(std::string const& userName, std::string const& password, UserInfo const& userInfo);
@@ -17,7 +17,7 @@ public:
 private:
     void processIntern();
 
-    NetworkController _networkController;
+    NetworkService _networkService;
     ActivateUserDialog _activateUserDialog; 
 
     std::string _userName;

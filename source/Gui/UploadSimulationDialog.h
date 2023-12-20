@@ -13,7 +13,7 @@ public:
         BrowserWindow const& browserWindow,
         LoginDialog const& loginDialog,
         SimulationController const& simController,
-        NetworkController const& networkController,
+        NetworkService const& networkController,
         Viewport const& viewport,
         GenomeEditorWindow const& genomeEditorWindow);
     ~_UploadSimulationDialog();
@@ -38,6 +38,6 @@ private:
     LoginDialog _loginDialog;
     SimulationController _simController;
     Viewport _viewport;
-    NetworkController _networkController;
+    NetworkService _networkService;
     GenomeEditorWindow _genomeEditorWindow;
 };

@@ -2,8 +2,8 @@
 
 #include "Base/Definitions.h"
 
-class _NetworkController;
-using NetworkController = std::shared_ptr<_NetworkController>;
+class _NetworkService;
+using NetworkService = std::shared_ptr<_NetworkService>;
 
 using DataType = int;
 enum DataType_
