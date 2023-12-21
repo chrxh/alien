@@ -3,9 +3,9 @@ PUBLIC
     BrowserDataServiceTests.cpp
     Testsuite.cpp)
 
-target_link_libraries(NetworkTests BaseLib)
-target_link_libraries(NetworkTests EngineInterfaceLib)
-target_link_libraries(NetworkTests NetworkLib)
+target_link_libraries(NetworkTests Base)
+target_link_libraries(NetworkTests EngineInterface)
+target_link_libraries(NetworkTests Network)
 
 target_link_libraries(NetworkTests Boost::boost)
 target_link_libraries(NetworkTests OpenGL::GL OpenGL::GLU)

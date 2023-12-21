@@ -1,21 +1,21 @@
 
-add_library(NetworkLib
+add_library(Network
     BrowserDataService.cpp
     BrowserDataService.h
     BrowserDataTO.cpp
     BrowserDataTO.h
     Definitions.h
-    NetworkController.cpp
-    NetworkController.h
+    NetworkService.cpp
+    NetworkService.h
     NetworkDataParserService.cpp
     NetworkDataParserService.h
     NetworkDataTO.cpp
     NetworkDataTO.h
     UserTO.h)
 
-target_link_libraries(NetworkLib BaseLib)
-target_link_libraries(NetworkLib Boost::boost)
+target_link_libraries(Network Base)
+target_link_libraries(Network Boost::boost)
     
 if (MSVC)
-    target_compile_options(NetworkLib PRIVATE "/MP")
+    target_compile_options(Network PRIVATE "/MP")
 endif()

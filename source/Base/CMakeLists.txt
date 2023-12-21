@@ -1,5 +1,5 @@
 
-add_library(BaseLib
+add_library(Base
     Definitions.cpp
     Definitions.h
     Exceptions.h
@@ -25,8 +25,8 @@ add_library(BaseLib
     VersionChecker.cpp
     VersionChecker.h)
 
-target_link_libraries(BaseLib Boost::boost)
+target_link_libraries(Base Boost::boost)
 
 if (MSVC)
-    target_compile_options(BaseLib PRIVATE "/MP")
+    target_compile_options(Base PRIVATE "/MP")
 endif()

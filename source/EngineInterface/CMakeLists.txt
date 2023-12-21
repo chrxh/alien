@@ -1,5 +1,5 @@
 
-add_library(EngineInterfaceLib
+add_library(EngineInterface
     ArraySizes.h
     AuxiliaryData.h
     AuxiliaryDataParserService.cpp
@@ -49,13 +49,13 @@ add_library(EngineInterfaceLib
     StatisticsHistory.h
     ZoomLevels.h)
 
-target_link_libraries(EngineInterfaceLib Boost::boost)
-target_link_libraries(EngineInterfaceLib cereal)
+target_link_libraries(EngineInterface Boost::boost)
+target_link_libraries(EngineInterface cereal)
 target_link_libraries(alien ZLIB::ZLIB)
 
 find_path(ZSTR_INCLUDE_DIRS "zstr.hpp")
-target_include_directories(EngineInterfaceLib PRIVATE ${ZSTR_INCLUDE_DIRS})
+target_include_directories(EngineInterface PRIVATE ${ZSTR_INCLUDE_DIRS})
 
 if (MSVC)
-    target_compile_options(EngineInterfaceLib PRIVATE "/MP")
+    target_compile_options(EngineInterface PRIVATE "/MP")
 endif()

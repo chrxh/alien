@@ -1,5 +1,5 @@
 
-add_library(EngineGpuKernelsLib
+add_library(EngineGpuKernels
     Array.cuh
     AttackerProcessor.cuh
     Base.cuh
@@ -92,8 +92,8 @@ add_library(EngineGpuKernelsLib
     Util.cuh
     )
 
-target_link_libraries(EngineGpuKernelsLib BaseLib)
-target_link_libraries(EngineGpuKernelsLib EngineInterfaceLib)
+target_link_libraries(EngineGpuKernels Base)
+target_link_libraries(EngineGpuKernels EngineInterface)
 
 # See https://gitlab.kitware.com/cmake/cmake/-/issues/17520
-set_property(TARGET EngineGpuKernelsLib PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+set_property(TARGET EngineGpuKernels PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
