@@ -20,10 +20,10 @@ PUBLIC
     Testsuite.cpp
     TransmitterTests.cpp)
 
-target_link_libraries(EngineTests BaseLib)
-target_link_libraries(EngineTests EngineGpuKernelsLib)
-target_link_libraries(EngineTests EngineImplLib)
-target_link_libraries(EngineTests EngineInterfaceLib)
+target_link_libraries(EngineTests Base)
+target_link_libraries(EngineTests EngineGpuKernels)
+target_link_libraries(EngineTests EngineImpl)
+target_link_libraries(EngineTests EngineInterface)
 
 target_link_libraries(EngineTests CUDA::cudart_static)
 target_link_libraries(EngineTests CUDA::cuda_driver)

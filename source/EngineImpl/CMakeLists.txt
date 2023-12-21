@@ -1,5 +1,5 @@
 
-add_library(EngineImplLib
+add_library(EngineImpl
     AccessDataTOCache.cpp
     AccessDataTOCache.h
     DescriptionConverter.cpp
@@ -10,12 +10,12 @@ add_library(EngineImplLib
     SimulationControllerImpl.cpp
     SimulationControllerImpl.h)
 
-target_link_libraries(EngineImplLib BaseLib)
-target_link_libraries(EngineImplLib EngineGpuKernelsLib)
+target_link_libraries(EngineImpl Base)
+target_link_libraries(EngineImpl EngineGpuKernels)
 
-target_link_libraries(EngineImplLib CUDA::cudart_static)
-target_link_libraries(EngineImplLib Boost::boost)
+target_link_libraries(EngineImpl CUDA::cudart_static)
+target_link_libraries(EngineImpl Boost::boost)
 
 if (MSVC)
-    target_compile_options(EngineImplLib PRIVATE "/MP")
+    target_compile_options(EngineImpl PRIVATE "/MP")
 endif()

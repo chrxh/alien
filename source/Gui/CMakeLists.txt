@@ -120,11 +120,11 @@ PUBLIC
     WindowController.cpp
     WindowController.h)
 
-target_link_libraries(alien BaseLib)
-target_link_libraries(alien EngineGpuKernelsLib)
-target_link_libraries(alien EngineImplLib)
-target_link_libraries(alien EngineInterfaceLib)
-target_link_libraries(alien NetworkLib)
+target_link_libraries(alien Base)
+target_link_libraries(alien EngineGpuKernels)
+target_link_libraries(alien EngineImpl)
+target_link_libraries(alien EngineInterface)
+target_link_libraries(alien Network)
 
 target_link_libraries(alien im_file_dialog)
 target_link_libraries(alien CUDA::cudart_static)
