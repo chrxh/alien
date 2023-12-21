@@ -17,12 +17,14 @@ std::vector<BrowserDataTO> BrowserDataService::createBrowserData(std::vector<Net
             location.pop_back();
         }
 
+        std::list<BrowserDataTO>::iterator bestMatchIter;
+        int bestMatchEqualFolders;
         if (!result.empty()) {
 
             //find matching node
             auto searchIter = result.end();
-            auto bestMatchIter = searchIter;
-            int bestMatchEqualFolders = -1;
+            bestMatchIter = searchIter;
+            bestMatchEqualFolders = -1;
             for (int i = 0; i < result.size(); ++i) {
                 --searchIter;
                 auto otherEntry = *searchIter;
@@ -45,15 +47,17 @@ std::vector<BrowserDataTO> BrowserDataService::createBrowserData(std::vector<Net
                     bestMatchEqualFolders = equalFolders;
                 }
             }
-
-            //insert folders
-            for (int i = bestMatchEqualFolders; i < location.size(); ++i) {
-                auto browserData = std::make_shared<_BrowserDataTO>();
-                browserData->location = std::vector(location.begin(), location.begin() + i + 1);
-                browserData->type = entry->type;
-                browserData->node = BrowserFolder();
-                result.insert(bestMatchIter, browserData);
-            }
+        } else {
+            bestMatchIter = result.begin();
+            bestMatchEqualFolders = 0;
+        }
+        //insert folders
+        for (int i = bestMatchEqualFolders; i < location.size(); ++i) {
+            auto browserData = std::make_shared<_BrowserDataTO>();
+            browserData->location = std::vector(location.begin(), location.begin() + i + 1);
+            browserData->type = entry->type;
+            browserData->node = BrowserFolder();
+            result.insert(bestMatchIter, browserData);
         }
 
         auto browserData = std::make_shared<_BrowserDataTO>();
