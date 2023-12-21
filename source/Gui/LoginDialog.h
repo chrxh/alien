@@ -13,8 +13,7 @@ public:
         BrowserWindow const& browserWindow,
         CreateUserDialog const& createUserDialog,
         ActivateUserDialog const& activateUserDialog,
-        ResetPasswordDialog const& resetPasswordDialog,
-        NetworkService const& networkController);
+        ResetPasswordDialog const& resetPasswordDialog);
     ~_LoginDialog();
 
     bool isShareGpuInfo() const;
@@ -31,7 +30,6 @@ private:
     BrowserWindow _browserWindow;
     CreateUserDialog _createUserDialog;
     ActivateUserDialog _activateUserDialog;
-    NetworkService _networkService;
     ResetPasswordDialog _resetPasswordDialog;
 
     bool _shareGpuInfo = true;

@@ -13,12 +13,10 @@
 
 _ActivateUserDialog::_ActivateUserDialog(
     SimulationController const& simController,
-    BrowserWindow const& browserWindow,
-    NetworkService const& networkController)
+    BrowserWindow const& browserWindow)
     : _AlienDialog("Activate user")
     , _simController(simController)
     , _browserWindow(browserWindow)
-    , _networkService(networkController)
 {}
 
 _ActivateUserDialog::~_ActivateUserDialog() {}
@@ -81,10 +79,11 @@ void _ActivateUserDialog::processIntern()
 
 void _ActivateUserDialog::onActivateUser()
 {
-    auto result = _networkService->activateUser(_userName, _password, _userInfo, _confirmationCode);
+    auto& networkService = NetworkService::getInstance();
+    auto result = networkService.activateUser(_userName, _password, _userInfo, _confirmationCode);
     if (result) {
         LoginErrorCode errorCode;
-        result |= _networkService->login(errorCode, _userName, _password, _userInfo);
+        result |= networkService.login(errorCode, _userName, _password, _userInfo);
     }
     if (!result) {
         MessageDialog::getInstance().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");

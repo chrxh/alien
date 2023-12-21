@@ -8,7 +8,7 @@
 class _NewPasswordDialog : public _AlienDialog
 {
 public:
-    _NewPasswordDialog(SimulationController const& simController, BrowserWindow const& browserWindow, NetworkService const& networkController);
+    _NewPasswordDialog(SimulationController const& simController, BrowserWindow const& browserWindow);
 
     void open(std::string const& userName, UserInfo const& userInfo);
 
@@ -19,7 +19,6 @@ private:
 
     SimulationController _simController; 
     BrowserWindow _browserWindow;
-    NetworkService _networkService;
 
     std::string _userName;
     std::string _newPassword;

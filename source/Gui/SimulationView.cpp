@@ -331,7 +331,7 @@ void _SimulationView::draw(bool renderSimulation)
         auto textWidth = scale(300.0f);
         auto textHeight = scale(80.0f);
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto styleRep = StyleRepository::getInstance();
+        auto& styleRep = StyleRepository::getInstance();
         auto right = ImGui::GetMainViewport()->Pos.x + ImGui::GetMainViewport()->Size.x;
         auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
         auto maxLength = std::max(right, bottom);

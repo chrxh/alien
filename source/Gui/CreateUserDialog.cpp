@@ -9,9 +9,8 @@
 #include "MessageDialog.h"
 #include "ActivateUserDialog.h"
 
-_CreateUserDialog::_CreateUserDialog(ActivateUserDialog const& activateUserDialog, NetworkService const& networkController)
+_CreateUserDialog::_CreateUserDialog(ActivateUserDialog const& activateUserDialog)
     : _AlienDialog("Create user")
-    , _networkService(networkController)
     , _activateUserDialog(activateUserDialog)
 {
 }
@@ -62,7 +61,9 @@ void _CreateUserDialog::processIntern()
 
 void _CreateUserDialog::onCreateUser()
 {
-    if (_networkService->createUser(_userName, _password, _email)) {
+    auto& networkService = NetworkService::getInstance();
+
+    if (networkService.createUser(_userName, _password, _email)) {
         _activateUserDialog->open(_userName, _password, _userInfo);
     } else {
         MessageDialog::getInstance().information(

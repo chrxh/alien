@@ -57,39 +57,34 @@ namespace
     }
 }
 
-_NetworkService::_NetworkService()
+NetworkService& NetworkService::getInstance()
 {
-    _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
+    static NetworkService instance;
+    return instance;
 }
 
-_NetworkService::~_NetworkService()
-{
-    GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
-    logout();
-}
-
-std::string _NetworkService::getServerAddress() const
+std::string NetworkService::getServerAddress() const
 {
     return _serverAddress;
 }
 
-void _NetworkService::setServerAddress(std::string const& value)
+void NetworkService::setServerAddress(std::string const& value)
 {
     _serverAddress = value;
     logout();
 }
 
-std::optional<std::string> _NetworkService::getLoggedInUserName() const
+std::optional<std::string> NetworkService::getLoggedInUserName() const
 {
     return _loggedInUserName;
 }
 
-std::optional<std::string> _NetworkService::getPassword() const
+std::optional<std::string> NetworkService::getPassword() const
 {
     return _password;
 }
 
-bool _NetworkService::createUser(std::string const& userName, std::string const& password, std::string const& email)
+bool NetworkService::createUser(std::string const& userName, std::string const& password, std::string const& email)
 {
     log(Priority::Important, "network: create user '" + userName + "'");
 
@@ -110,7 +105,7 @@ bool _NetworkService::createUser(std::string const& userName, std::string const&
     }
 }
 
-bool _NetworkService::activateUser(std::string const& userName, std::string const& password, UserInfo const& userInfo, std::string const& confirmationCode)
+bool NetworkService::activateUser(std::string const& userName, std::string const& password, UserInfo const& userInfo, std::string const& confirmationCode)
 {
     log(Priority::Important, "network: activate user '" + userName + "'");
 
@@ -134,7 +129,7 @@ bool _NetworkService::activateUser(std::string const& userName, std::string cons
     }
 }
 
-bool _NetworkService::login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo)
+bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
     log(Priority::Important, "network: login user '" + userName + "'");
 
@@ -170,7 +165,7 @@ bool _NetworkService::login(LoginErrorCode& errorCode, std::string const& userNa
     }
 }
 
-bool _NetworkService::logout()
+bool NetworkService::logout()
 {
     log(Priority::Important, "network: logout");
     bool result = true;
@@ -196,7 +191,13 @@ bool _NetworkService::logout()
     return result;
 }
 
-void _NetworkService::refreshLogin()
+void NetworkService::shutdown()
+{
+    GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
+    logout();
+}
+
+void NetworkService::refreshLogin()
 {
     if (_loggedInUserName && _password) {
         log(Priority::Important, "network: refresh login");
@@ -215,7 +216,7 @@ void _NetworkService::refreshLogin()
     }
 }
 
-bool _NetworkService::deleteUser()
+bool NetworkService::deleteUser()
 {
     log(Priority::Important, "network: delete user '" + *_loggedInUserName + "'");
 
@@ -240,7 +241,7 @@ bool _NetworkService::deleteUser()
     }
 }
 
-bool _NetworkService::resetPassword(std::string const& userName, std::string const& email)
+bool NetworkService::resetPassword(std::string const& userName, std::string const& email)
 {
     log(Priority::Important, "network: reset password of user '" + userName + "'");
 
@@ -260,7 +261,7 @@ bool _NetworkService::resetPassword(std::string const& userName, std::string con
     }
 }
 
-bool _NetworkService::setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode)
+bool NetworkService::setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode)
 {
     log(Priority::Important, "network: set new password for user '" + userName + "'");
 
@@ -281,7 +282,7 @@ bool _NetworkService::setNewPassword(std::string const& userName, std::string co
     }
 }
 
-bool _NetworkService::getRemoteSimulationList(std::vector<NetworkDataTO>& result, bool withRetry) const
+bool NetworkService::getRemoteSimulationList(std::vector<NetworkDataTO>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get simulation list");
 
@@ -305,7 +306,7 @@ bool _NetworkService::getRemoteSimulationList(std::vector<NetworkDataTO>& result
     }
 }
 
-bool _NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry) const
+bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get user list");
 
@@ -331,7 +332,7 @@ bool _NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry) c
     }
 }
 
-bool _NetworkService::getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const
+bool NetworkService::getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const
 {
     log(Priority::Important, "network: get liked simulations");
 
@@ -360,7 +361,7 @@ bool _NetworkService::getEmojiTypeBySimId(std::unordered_map<std::string, int>& 
     }
 }
 
-bool _NetworkService::getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
+bool NetworkService::getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
 {
     log(Priority::Important, "network: get user likes for simulation with id=" + simId + " and likeType=" + std::to_string(likeType));
 
@@ -389,7 +390,7 @@ bool _NetworkService::getUserNamesForSimulationAndEmojiType(std::set<std::string
     }
 }
 
-bool _NetworkService::toggleLikeSimulation(std::string const& simId, int likeType)
+bool NetworkService::toggleLikeSimulation(std::string const& simId, int likeType)
 {
     log(Priority::Important, "network: toggle like for simulation with id=" + simId);
 
@@ -412,7 +413,7 @@ bool _NetworkService::toggleLikeSimulation(std::string const& simId, int likeTyp
     }
 }
 
-bool _NetworkService::uploadSimulation(
+bool NetworkService::uploadSimulation(
     std::string const& simulationName,
     std::string const& description,
     IntVector2D const& size,
@@ -452,7 +453,7 @@ bool _NetworkService::uploadSimulation(
     }
 }
 
-bool _NetworkService::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
+bool NetworkService::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
 {
     log(Priority::Important, "network: download simulation with id=" + simId);
 
@@ -482,7 +483,7 @@ bool _NetworkService::downloadSimulation(std::string& mainData, std::string& aux
     }
 }
 
-bool _NetworkService::deleteSimulation(std::string const& simId)
+bool NetworkService::deleteSimulation(std::string const& simId)
 {
     log(Priority::Important, "network: delete simulation with id=" + simId);
 
@@ -501,4 +502,13 @@ bool _NetworkService::deleteSimulation(std::string const& simId)
         logNetworkError();
         return false;
     }
+}
+
+NetworkService::NetworkService()
+{
+    _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
+}
+
+NetworkService::~NetworkService()
+{
 }
