@@ -32,12 +32,10 @@ _UploadSimulationDialog::_UploadSimulationDialog(
     BrowserWindow const& browserWindow,
     LoginDialog const& loginDialog,
     SimulationController const& simController,
-    NetworkService const& networkController,
     Viewport const& viewport,
     GenomeEditorWindow const& genomeEditorWindow)
     : _AlienDialog("")
     , _simController(simController)
-    , _networkService(networkController)
     , _browserWindow(browserWindow)
     , _loginDialog(loginDialog)
     , _viewport(viewport)
@@ -57,7 +55,8 @@ _UploadSimulationDialog::~_UploadSimulationDialog()
 
 void _UploadSimulationDialog::open(DataType dataType)
 {
-    if (_networkService->getLoggedInUserName()) {
+    auto& networkService = NetworkService::getInstance();
+    if (networkService.getLoggedInUserName()) {
         changeTitle("Upload " + BrowserDataTypeToLowerString.at(dataType));
         _dataType = dataType;
         _AlienDialog::open();
@@ -154,7 +153,8 @@ void _UploadSimulationDialog::onUpload()
             }
         }
 
-        if (!_networkService->uploadSimulation(_simName, _simDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
+        auto& networkService = NetworkService::getInstance();
+        if (!networkService.uploadSimulation(_simName, _simDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
             showMessage("Error", "Failed to upload " + BrowserDataTypeToLowerString.at(_dataType) + ".");
             return;
         }

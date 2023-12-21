@@ -90,6 +90,7 @@ class StyleRepository
 {
 public:
     static StyleRepository& getInstance();
+    StyleRepository(StyleRepository const&) = delete;
 
     void init();
 

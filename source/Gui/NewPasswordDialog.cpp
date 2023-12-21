@@ -11,12 +11,10 @@
 
 _NewPasswordDialog::_NewPasswordDialog(
     SimulationController const& simController,
-    BrowserWindow const& browserWindow,
-    NetworkService const& networkController)
+    BrowserWindow const& browserWindow)
     : _AlienDialog("New password")
     , _simController(simController)
     , _browserWindow(browserWindow)
-    , _networkService(networkController)
 {}
 
 void _NewPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
@@ -60,10 +58,11 @@ void _NewPasswordDialog::processIntern()
 
 void _NewPasswordDialog::onNewPassword()
 {
-    auto result = _networkService->setNewPassword(_userName, _newPassword, _confirmationCode);
+    auto& networkService = NetworkService::getInstance();
+    auto result = networkService.setNewPassword(_userName, _newPassword, _confirmationCode);
     if (result) {
         LoginErrorCode errorCode;
-        result |= _networkService->login(errorCode, _userName, _newPassword, _userInfo);
+        result |= networkService.login(errorCode, _userName, _newPassword, _userInfo);
     }
     if (!result) {
         MessageDialog::getInstance().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to reset the password again.");

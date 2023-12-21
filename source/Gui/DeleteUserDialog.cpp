@@ -9,17 +9,18 @@
 #include "CreateUserDialog.h"
 #include "MessageDialog.h"
 
-_DeleteUserDialog::_DeleteUserDialog(BrowserWindow const& browserWindow, NetworkService const& networkController)
+_DeleteUserDialog::_DeleteUserDialog(BrowserWindow const& browserWindow)
     : _AlienDialog("Delete user")
     , _browserWindow(browserWindow)
-    , _networkService(networkController)
 {
 }
 
 void _DeleteUserDialog::processIntern()
 {
+    auto& networkService = NetworkService::getInstance();
+
     AlienImGui::Text(
-        "Warning: All the data of the user '" + *_networkService->getLoggedInUserName()
+        "Warning: All the data of the user '" + *networkService.getLoggedInUserName()
         + "' will be deleted on the server side.\nThese include the likes, the simulations and the account data.");
     AlienImGui::Separator();
 
@@ -29,7 +30,7 @@ void _DeleteUserDialog::processIntern()
     ImGui::BeginDisabled(_reenteredPassword.empty());
     if (AlienImGui::Button("Delete")) {
         close();
-        if (_reenteredPassword == *_networkService->getPassword()) {
+        if (_reenteredPassword == *networkService.getPassword()) {
             onDelete();
         } else {
             MessageDialog::getInstance().information("Error", "The password does not match.");
@@ -48,8 +49,9 @@ void _DeleteUserDialog::processIntern()
 
 void _DeleteUserDialog::onDelete()
 {
-    auto userName = *_networkService->getLoggedInUserName();
-    if (_networkService->deleteUser()) {
+    auto& networkService = NetworkService::getInstance();
+    auto userName = *networkService.getLoggedInUserName();
+    if (networkService.deleteUser()) {
         _browserWindow->onRefresh();
         MessageDialog::getInstance().information("Information", "The user '" + userName + "' has been deleted.\nYou are logged out.");
     } else {

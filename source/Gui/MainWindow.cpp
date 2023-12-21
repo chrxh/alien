@@ -121,7 +121,6 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     _editorController =
         std::make_shared<_EditorController>(_simController, _viewport);
     _modeController = std::make_shared<_ModeController>(_editorController);
-    _networkService = std::make_shared<_NetworkService>();
     _simulationView = std::make_shared<_SimulationView>(_simController, _modeController, _viewport, _editorController->getEditorModel());
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simController);
@@ -141,16 +140,16 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
     _browserWindow =
-        std::make_shared<_BrowserWindow>(_simController, _networkService, _statisticsWindow, _viewport, _temporalControlWindow, _editorController);
-    _activateUserDialog = std::make_shared<_ActivateUserDialog>(_simController, _browserWindow, _networkService);
-    _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog, _networkService);
-    _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simController, _browserWindow, _networkService);
-    _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog, _networkService);
-    _loginDialog = std::make_shared<_LoginDialog>(_simController, _browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog, _networkService);
+        std::make_shared<_BrowserWindow>(_simController, _statisticsWindow, _viewport, _temporalControlWindow, _editorController);
+    _activateUserDialog = std::make_shared<_ActivateUserDialog>(_simController, _browserWindow);
+    _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog);
+    _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simController, _browserWindow);
+    _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
+    _loginDialog = std::make_shared<_LoginDialog>(_simController, _browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(
-        _browserWindow, _loginDialog, _simController, _networkService, _viewport, _editorController->getGenomeEditorWindow());
-    _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow, _networkService);
-    _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow, _networkService);
+        _browserWindow, _loginDialog, _simController, _viewport, _editorController->getGenomeEditorWindow());
+    _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow);
+    _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_viewport, _simController);
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
 
@@ -357,6 +356,7 @@ void _MainWindow::processMenubar()
     auto creatorWindow = _editorController->getCreatorWindow();
     auto multiplierWindow = _editorController->getMultiplierWindow();
     auto genomeEditorWindow = _editorController->getGenomeEditorWindow();
+    auto& networkService = NetworkService::getInstance();
 
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
@@ -395,30 +395,30 @@ void _MainWindow::processMenubar()
                 _browserWindow->setOn(!_browserWindow->isOn());
             }
             ImGui::Separator();
-            ImGui::BeginDisabled((bool)_networkService->getLoggedInUserName());
+            ImGui::BeginDisabled((bool)networkService.getLoggedInUserName());
             if (ImGui::MenuItem("Login", "ALT+L")) {
                 _loginDialog->open();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_networkService->getLoggedInUserName());
+            ImGui::BeginDisabled(!networkService.getLoggedInUserName());
             if (ImGui::MenuItem("Logout", "ALT+T")) {
-                _networkService->logout();
+                networkService.logout();
                 _browserWindow->onRefresh();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_networkService->getLoggedInUserName());
+            ImGui::BeginDisabled(!networkService.getLoggedInUserName());
             if (ImGui::MenuItem("Upload simulation", "ALT+D")) {
                 _uploadSimulationDialog->open(DataType_Simulation);
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_networkService->getLoggedInUserName());
+            ImGui::BeginDisabled(!networkService.getLoggedInUserName());
             if (ImGui::MenuItem("Upload genome", "ALT+Q")) {
                 _uploadSimulationDialog->open(DataType_Genome);
             }
             ImGui::EndDisabled();
 
             ImGui::Separator();
-            ImGui::BeginDisabled(!_networkService->getLoggedInUserName());
+            ImGui::BeginDisabled(!networkService.getLoggedInUserName());
             if (ImGui::MenuItem("Delete user", "ALT+J")) {
                 _deleteUserDialog->open();
             }
@@ -589,20 +589,20 @@ void _MainWindow::processMenubar()
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_W)) {
             _browserWindow->setOn(!_browserWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_L) && !_networkService->getLoggedInUserName()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_L) && !networkService.getLoggedInUserName()) {
             _loginDialog->open();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_T)) {
-            _networkService->logout();
+            networkService.logout();
             _browserWindow->onRefresh();
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_D) && _networkService->getLoggedInUserName()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_D) && networkService.getLoggedInUserName()) {
             _uploadSimulationDialog->open(DataType_Simulation);
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_Q) && _networkService->getLoggedInUserName()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_Q) && networkService.getLoggedInUserName()) {
             _uploadSimulationDialog->open(DataType_Genome);
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_J) && _networkService->getLoggedInUserName()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_J) && networkService.getLoggedInUserName()) {
             _deleteUserDialog->open();
         }
 
