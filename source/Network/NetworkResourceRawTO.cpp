@@ -1,45 +1,45 @@
-#include "NetworkDataTO.h"
+#include "NetworkResourceRawTO.h"
 
 #include <ranges>
 #include <imgui.h>
 
-int _NetworkDataTO::compare(NetworkDataTO const& left, NetworkDataTO const& right, ImGuiTableSortSpecs const* specs)
+int _NetworkResourceRawTO::compare(NetworkResourceRawTO const& left, NetworkResourceRawTO const& right, ImGuiTableSortSpecs const* specs)
 {
     for (int n = 0; n < specs->SpecsCount; n++) {
         const ImGuiTableColumnSortSpecs* sortSpec = &specs->Specs[n];
         int delta = 0;
         switch (sortSpec->ColumnUserID) {
-        case NetworkDataColumnId_Timestamp:
+        case NetworkResourceColumnId_Timestamp:
             delta = left->timestamp.compare(right->timestamp);
             break;
-        case NetworkDataColumnId_UserName:
+        case NetworkResourceColumnId_UserName:
             delta = left->userName.compare(right->userName);
             break;
-        case NetworkDataColumnId_SimulationName:
+        case NetworkResourceColumnId_SimulationName:
             delta = left->simName.compare(right->simName);
             break;
-        case NetworkDataColumnId_Description:
+        case NetworkResourceColumnId_Description:
             delta = left->description.compare(right->description);
             break;
-        case NetworkDataColumnId_Likes:
+        case NetworkResourceColumnId_Likes:
             delta = left->getTotalLikes() - right->getTotalLikes();
             break;
-        case NetworkDataColumnId_NumDownloads:
+        case NetworkResourceColumnId_NumDownloads:
             delta = left->numDownloads - right->numDownloads;
             break;
-        case NetworkDataColumnId_Width:
+        case NetworkResourceColumnId_Width:
             delta = left->width - right->width;
             break;
-        case NetworkDataColumnId_Height:
+        case NetworkResourceColumnId_Height:
             delta = left->height - right->height;
             break;
-        case NetworkDataColumnId_Particles:
+        case NetworkResourceColumnId_Particles:
             delta = left->particles - right->particles;
             break;
-        case NetworkDataColumnId_FileSize:
+        case NetworkResourceColumnId_FileSize:
             delta = static_cast<int>(left->contentSize / 1024) - static_cast<int>(right->contentSize / 1024);
             break;
-        case NetworkDataColumnId_Version:
+        case NetworkResourceColumnId_Version:
             delta = left->version.compare(right->version);
             break;
         }
@@ -54,7 +54,7 @@ int _NetworkDataTO::compare(NetworkDataTO const& left, NetworkDataTO const& righ
     return 0;
 }
 
-bool _NetworkDataTO::matchWithFilter(std::string const& filter) const
+bool _NetworkResourceRawTO::matchWithFilter(std::string const& filter) const
 {
     auto match = false;
     if (timestamp.find(filter) != std::string::npos) {
@@ -90,7 +90,7 @@ bool _NetworkDataTO::matchWithFilter(std::string const& filter) const
     return match;
 }
 
-int _NetworkDataTO::getTotalLikes() const
+int _NetworkResourceRawTO::getTotalLikes() const
 {
     int result = 0;
     for (auto const& numReactions : numLikesByEmojiType | std::views::values) {

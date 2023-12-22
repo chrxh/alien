@@ -4,15 +4,16 @@
 
 class NetworkService;
 
-using DataType = int;
-enum DataType_
+using NetworkResourceType = int;
+enum NetworkResourceType_
 {
-    DataType_Simulation,
-    DataType_Genome
+    NetworkResourceType_Simulation,
+    NetworkResourceType_Genome
 };
 
-struct _BrowserDataTO;
-using BrowserDataTO = std::shared_ptr<_BrowserDataTO>;
 
-struct _NetworkDataTO;
-using NetworkDataTO = std::shared_ptr<_NetworkDataTO>;
+struct _NetworkResourceTreeTO;
+using NetworkResourceTreeTO = std::shared_ptr<_NetworkResourceTreeTO>;
+
+struct _NetworkResourceRawTO;
+using NetworkResourceRawTO = std::shared_ptr<_NetworkResourceRawTO>;

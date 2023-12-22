@@ -5,13 +5,7 @@
 #include <variant>
 
 #include "Definitions.h"
-
-using BrowserDataType = int;
-enum BrowserDataType_
-{
-    BrowserDataType_Simulation,
-    BrowserDataType_Genome
-};
+#include "NetworkResourceRawTO.h"
 
 struct BrowserFolder
 {
@@ -42,9 +36,9 @@ enum class FolderLine
     None
 };
 
-struct _BrowserDataTO
+struct _NetworkResourceTreeTO
 {
-    BrowserDataType type;
+    NetworkResourceType type;
     std::vector<std::string> folderNames;
     std::vector<FolderLine> folderLines;
     std::variant<BrowserFolder, BrowserLeaf> node;

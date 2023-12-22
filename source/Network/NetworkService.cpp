@@ -9,7 +9,7 @@
 #include "Base/LoggingService.h"
 #include "Base/Resources.h"
 
-#include "NetworkDataParserService.h"
+#include "NetworkResourceParserService.h"
 
 namespace
 {
@@ -282,7 +282,7 @@ bool NetworkService::setNewPassword(std::string const& userName, std::string con
     }
 }
 
-bool NetworkService::getRemoteSimulationList(std::vector<NetworkDataTO>& result, bool withRetry) const
+bool NetworkService::getRemoteSimulationList(std::vector<NetworkResourceRawTO>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get simulation list");
 
@@ -298,7 +298,7 @@ bool NetworkService::getRemoteSimulationList(std::vector<NetworkDataTO>& result,
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
-        result = NetworkDataParserService::decodeRemoteSimulationData(tree);
+        result = NetworkResourceParserService::decodeRemoteSimulationData(tree);
         return true;
     } catch (...) {
         logNetworkError();
@@ -321,7 +321,7 @@ bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry) co
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
         result.clear();
-        result = NetworkDataParserService::decodeUserData(tree);
+        result = NetworkResourceParserService::decodeUserData(tree);
         for (UserTO& userData : result) {
             userData.timeSpent = userData.timeSpent * RefreshInterval / 60;
         }
@@ -421,7 +421,7 @@ bool NetworkService::uploadSimulation(
     std::string const& mainData,
     std::string const& settings,
     std::string const& statistics,
-    NetworkDataType type)
+    NetworkResourceType type)
 {
     log(Priority::Important, "network: upload simulation with name='" + simulationName + "'");
 

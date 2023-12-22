@@ -4,8 +4,8 @@
 
 #include "Base/Hashes.h"
 #include "EngineInterface/Definitions.h"
-#include "Network/BrowserDataTO.h"
-#include "Network/NetworkDataTO.h"
+#include "Network/NetworkResourceTreeTO.h"
+#include "Network/NetworkResourceRawTO.h"
 #include "Network/UserTO.h"
 
 #include "AlienWindow.h"
@@ -42,9 +42,9 @@ private:
 
     void processEmojiWindow();
     void processEmojiButton(int emojiType);
-    void processEmojiList(BrowserDataTO const& to);
+    void processEmojiList(NetworkResourceTreeTO const& to);
 
-    void processActionButtons(BrowserDataTO const& to);
+    void processActionButtons(NetworkResourceTreeTO const& to);
 
     void processShortenedText(std::string const& text, bool bold = false);
     bool processActionButton(std::string const& text);
@@ -52,21 +52,21 @@ private:
 
     void processActivated() override;
 
-    void sortRemoteSimulationData(std::vector<NetworkDataTO>& remoteData, ImGuiTableSortSpecs* sortSpecs);
+    void sortRemoteSimulationData(std::vector<NetworkResourceRawTO>& remoteData, ImGuiTableSortSpecs* sortSpecs);
     void sortUserList();
 
     void onDownloadItem(BrowserLeaf const& leaf);
     void onDeleteItem(BrowserLeaf const& leaf);
-    void onToggleLike(BrowserDataTO const& to, int emojiType);
+    void onToggleLike(NetworkResourceTreeTO const& to, int emojiType);
     void openWeblink(std::string const& link);
 
     bool isLiked(std::string const& simId);
     std::string getUserNamesToEmojiType(std::string const& simId, int emojiType);
 
-    void pushTextColor(BrowserDataTO const& to);
+    void pushTextColor(NetworkResourceTreeTO const& to);
     void calcFilteredSimulationAndGenomeLists();
 
-    DataType _selectedDataType = DataType_Simulation; 
+    NetworkResourceType _selectedDataType = NetworkResourceType_Simulation; 
     bool _scheduleRefresh = false;
     bool _scheduleCreateBrowserData = false;
     std::string _filter;
@@ -78,12 +78,12 @@ private:
 
     int _numSimulations = 0;
     int _numGenomes = 0;
-    std::vector<NetworkDataTO> _rawNetworkDataTOs;
-    std::vector<NetworkDataTO> _filteredNetworkSimulationTOs;
-    std::vector<NetworkDataTO> _filteredNetworkGenomeTOs;
+    std::vector<NetworkResourceRawTO> _rawNetworkResourceRawTOs;
+    std::vector<NetworkResourceRawTO> _filteredNetworkSimulationTOs;
+    std::vector<NetworkResourceRawTO> _filteredNetworkGenomeTOs;
 
-    std::vector<BrowserDataTO> _browserSimulationTOs;
-    std::vector<BrowserDataTO> _browserGenomeTOs;
+    std::vector<NetworkResourceTreeTO> _browserSimulationTOs;
+    std::vector<NetworkResourceTreeTO> _browserGenomeTOs;
 
     std::vector<UserTO> _userTOs;
 
@@ -91,7 +91,7 @@ private:
 
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
-    BrowserDataTO _emojiPopupTO;
+    NetworkResourceTreeTO _emojiPopupTO;
 
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 

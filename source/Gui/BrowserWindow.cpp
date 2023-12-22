@@ -21,9 +21,10 @@
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
-#include "Network/BrowserDataService.h"
+#include "Network/NetworkResourceService.h"
 #include "Network/NetworkService.h"
-#include "Network/NetworkDataParserService.h"
+#include "Network/NetworkResourceParserService.h"
+#include "Network/NetworkResourceTreeTO.h"
 
 #include "AlienImGui.h"
 #include "StyleRepository.h"
@@ -105,7 +106,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         auto& networkService = NetworkService::getInstance();
         networkService.refreshLogin();
 
-        bool success = networkService.getRemoteSimulationList(_rawNetworkDataTOs, withRetry);
+        bool success = networkService.getRemoteSimulationList(_rawNetworkResourceRawTOs, withRetry);
         success &= networkService.getUserList(_userTOs, withRetry);
 
         if (!success) {
@@ -115,8 +116,8 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         } else {
             _numSimulations = 0;
             _numGenomes = 0;
-            for (auto const& entry : _rawNetworkDataTOs) {
-                if (entry->type == DataType_Simulation) {
+            for (auto const& entry : _rawNetworkResourceRawTOs) {
+                if (entry->type == NetworkResourceType_Simulation) {
                     ++_numSimulations;
                 } else {
                     ++_numGenomes;
@@ -246,7 +247,7 @@ void _BrowserWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_SHARE_ALT)) {
         _uploadSimulationDialog.lock()->open(_selectedDataType);
     }
-    std::string dataType = _selectedDataType == DataType_Simulation
+    std::string dataType = _selectedDataType == NetworkResourceType_Simulation
         ? "simulation"
         : "genome";
     AlienImGui::Tooltip(
@@ -311,7 +312,7 @@ namespace
 void _BrowserWindow::processSimulationList()
 {
     ImGui::PushID("SimulationList");
-    _selectedDataType = DataType_Simulation;
+    _selectedDataType = NetworkResourceType_Simulation;
     auto& styleRepository = StyleRepository::getInstance();
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
@@ -322,38 +323,38 @@ void _BrowserWindow::processSimulationList()
             "Actions",
             ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed,
             scale(90.0f),
-            NetworkDataColumnId_Actions);
+            NetworkResourceColumnId_Actions);
         ImGui::TableSetupColumn(
             "Simulation folder/name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(190.0f),
-            NetworkDataColumnId_SimulationName);
+            NetworkResourceColumnId_SimulationName);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             scale(135.0f),
-            NetworkDataColumnId_Timestamp);
+            NetworkResourceColumnId_Timestamp);
         ImGui::TableSetupColumn(
             "User name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
-            NetworkDataColumnId_UserName);
+            NetworkResourceColumnId_UserName);
         ImGui::TableSetupColumn(
             "Description",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
-            NetworkDataColumnId_Description);
+            NetworkResourceColumnId_Description);
         ImGui::TableSetupColumn(
             "Reactions",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
-            NetworkDataColumnId_Likes);
-        ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_NumDownloads);
-        ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_Width);
-        ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_Height);
-        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_Particles);
-        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_FileSize);
-        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_Version);
+            NetworkResourceColumnId_Likes);
+        ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
+        ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Width);
+        ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Height);
+        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Particles);
+        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_FileSize);
+        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Version);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
@@ -364,7 +365,7 @@ void _BrowserWindow::processSimulationList()
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateBrowserData = false;
 
-                _browserSimulationTOs = BrowserDataService::createBrowserData(_filteredNetworkSimulationTOs);
+                _browserSimulationTOs = NetworkResourceService::createBrowserData(_filteredNetworkSimulationTOs);
             }
         }
         ImGuiListClipper clipper;
@@ -429,7 +430,7 @@ void _BrowserWindow::processSimulationList()
 void _BrowserWindow::processGenomeList()
 {
     ImGui::PushID("GenomeList");
-    _selectedDataType = DataType_Genome;
+    _selectedDataType = NetworkResourceType_Genome;
     auto& styleRepository = StyleRepository::getInstance();
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
@@ -437,37 +438,37 @@ void _BrowserWindow::processGenomeList()
 
     if (ImGui::BeginTable("Browser", 10, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn(
-            "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f), NetworkDataColumnId_Actions);
+            "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f), NetworkResourceColumnId_Actions);
         ImGui::TableSetupColumn(
             "Genome name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(160.0f),
-            NetworkDataColumnId_SimulationName);
+            NetworkResourceColumnId_SimulationName);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             scale(135.0f),
-            NetworkDataColumnId_Timestamp);
+            NetworkResourceColumnId_Timestamp);
         ImGui::TableSetupColumn(
             "User name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
-            NetworkDataColumnId_UserName);
+            NetworkResourceColumnId_UserName);
         ImGui::TableSetupColumn(
             "Description",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
-            NetworkDataColumnId_Description);
+            NetworkResourceColumnId_Description);
         ImGui::TableSetupColumn(
             "Reactions",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
-            NetworkDataColumnId_Likes);
+            NetworkResourceColumnId_Likes);
         ImGui::TableSetupColumn(
-            "Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_NumDownloads);
-        ImGui::TableSetupColumn("Cells", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_Particles);
-        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_FileSize);
-        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkDataColumnId_Version);
+            "Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
+        ImGui::TableSetupColumn("Cells", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Particles);
+        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_FileSize);
+        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Version);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
@@ -478,7 +479,7 @@ void _BrowserWindow::processGenomeList()
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateBrowserData = false;
 
-                _browserGenomeTOs = BrowserDataService::createBrowserData(_filteredNetworkGenomeTOs);
+                _browserGenomeTOs = NetworkResourceService::createBrowserData(_filteredNetworkGenomeTOs);
             }
         }
         ImGuiListClipper clipper;
@@ -730,7 +731,7 @@ void _BrowserWindow::processEmojiButton(int emojiType)
     }
 }
 
-void _BrowserWindow::processEmojiList(BrowserDataTO const& to)
+void _BrowserWindow::processEmojiList(NetworkResourceTreeTO const& to)
 {
     //calc remap which allows to show most frequent like type first
     std::map<int, int> remap;
@@ -796,7 +797,7 @@ void _BrowserWindow::processEmojiList(BrowserDataTO const& to)
     }
 }
 
-void _BrowserWindow::processActionButtons(BrowserDataTO const& to)
+void _BrowserWindow::processActionButtons(NetworkResourceTreeTO const& to)
 {
     auto& networkService = NetworkService::getInstance();
     //like button
@@ -903,11 +904,11 @@ void _BrowserWindow::processActivated()
     onRefresh();
 }
 
-void _BrowserWindow::sortRemoteSimulationData(std::vector<NetworkDataTO>& remoteData, ImGuiTableSortSpecs* sortSpecs)
+void _BrowserWindow::sortRemoteSimulationData(std::vector<NetworkResourceRawTO>& remoteData, ImGuiTableSortSpecs* sortSpecs)
 {
     if (remoteData.size() > 1) {
         std::sort(remoteData.begin(), remoteData.end(), [&](auto const& left, auto const& right) {
-            return _NetworkDataTO::compare(left, right, sortSpecs) < 0;
+            return _NetworkResourceRawTO::compare(left, right, sortSpecs) < 0;
         });
     }
 }
@@ -923,14 +924,14 @@ void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
 
     delayedExecution([=, this] {
         auto& networkService = NetworkService::getInstance();
-        std::string dataTypeString = _selectedDataType == DataType_Simulation ? "simulation" : "genome";
+        std::string dataTypeString = _selectedDataType == NetworkResourceType_Simulation ? "simulation" : "genome";
         SerializedSimulation serializedSim;
         if (!networkService.downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.id)) {
             MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
             return;
         }
 
-        if (_selectedDataType == DataType_Simulation) {
+        if (_selectedDataType == NetworkResourceType_Simulation) {
             DeserializedSimulation deserializedSim;
             if (!SerializerService::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
                 MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
@@ -997,7 +998,7 @@ void _BrowserWindow::onDeleteItem(BrowserLeaf const& leaf)
     });
 }
 
-void _BrowserWindow::onToggleLike(BrowserDataTO const& to, int emojiType)
+void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
 {
     CHECK(to->isLeaf());
     auto& leaf = to->getLeaf();
@@ -1064,7 +1065,7 @@ std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& simId, in
     return boost::algorithm::join(userNames, ", ");
 }
 
-void _BrowserWindow::pushTextColor(BrowserDataTO const& to)
+void _BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
 {
     if (to->isLeaf()) {
         auto const& leaf = to->getLeaf();
@@ -1083,12 +1084,12 @@ void _BrowserWindow::pushTextColor(BrowserDataTO const& to)
 void _BrowserWindow::calcFilteredSimulationAndGenomeLists()
 {
     _filteredNetworkSimulationTOs.clear();
-    _filteredNetworkSimulationTOs.reserve(_rawNetworkDataTOs.size());
+    _filteredNetworkSimulationTOs.reserve(_rawNetworkResourceRawTOs.size());
     _filteredNetworkGenomeTOs.clear();
     _filteredNetworkGenomeTOs.reserve(_filteredNetworkGenomeTOs.size());
-    for (auto const& to : _rawNetworkDataTOs) {
+    for (auto const& to : _rawNetworkResourceRawTOs) {
         if (to->matchWithFilter(_filter) &&_showCommunityCreations != to->fromRelease) {
-            if (to->type == NetworkDataType_Simulation) {
+            if (to->type == NetworkResourceType_Simulation) {
                 _filteredNetworkSimulationTOs.emplace_back(to);
             } else {
                 _filteredNetworkGenomeTOs.emplace_back(to);
