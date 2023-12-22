@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
 #include "Base/NumberGenerator.h"
-#include "Network/NetworkDataTO.h"
-#include "Network/BrowserDataService.h"
+#include "Network/NetworkResourceRawTO.h"
+#include "Network/NetworkResourceService.h"
 
-#include "Network/BrowserDataTO.h"
+#include "Network/NetworkResourceTreeTO.h"
 
 class BrowserDataServiceTests : public ::testing::Test
 {
@@ -16,24 +16,24 @@ public:
 
 TEST_F(BrowserDataServiceTests, nameWithoutFolder)
 {
-    std::vector<NetworkDataTO> inputTOs;
-    auto inputTO = std::make_shared<_NetworkDataTO>();
+    std::vector<NetworkResourceRawTO> inputTOs;
+    auto inputTO = std::make_shared<_NetworkResourceRawTO>();
     inputTO->simName = "test";
     inputTOs.emplace_back(inputTO);
 
-    auto outputTOs = BrowserDataService::createBrowserData(inputTOs);
+    auto outputTOs = NetworkResourceService::createBrowserData(inputTOs);
 
     ASSERT_EQ(1, outputTOs.size());
 }
 
 TEST_F(BrowserDataServiceTests, nameWithFolder)
 {
-    std::vector<NetworkDataTO> inputTOs;
-    auto inputTO = std::make_shared<_NetworkDataTO>();
+    std::vector<NetworkResourceRawTO> inputTOs;
+    auto inputTO = std::make_shared<_NetworkResourceRawTO>();
     inputTO->simName = "folder/test";
     inputTOs.emplace_back(inputTO);
 
-    auto outputTOs = BrowserDataService::createBrowserData(inputTOs);
+    auto outputTOs = NetworkResourceService::createBrowserData(inputTOs);
 
     ASSERT_EQ(2, outputTOs.size());
     {
@@ -53,12 +53,12 @@ TEST_F(BrowserDataServiceTests, nameWithFolder)
 
 TEST_F(BrowserDataServiceTests, nameWithTwoFolders)
 {
-    std::vector<NetworkDataTO> inputTOs;
-    auto inputTO = std::make_shared<_NetworkDataTO>();
+    std::vector<NetworkResourceRawTO> inputTOs;
+    auto inputTO = std::make_shared<_NetworkResourceRawTO>();
     inputTO->simName = "folder1/folder2/test";
     inputTOs.emplace_back(inputTO);
 
-    auto outputTOs = BrowserDataService::createBrowserData(inputTOs);
+    auto outputTOs = NetworkResourceService::createBrowserData(inputTOs);
 
     ASSERT_EQ(3, outputTOs.size());
     {
@@ -87,19 +87,19 @@ TEST_F(BrowserDataServiceTests, nameWithTwoFolders)
 
 TEST_F(BrowserDataServiceTests, twoNamesWithTwoFolders)
 {
-    std::vector<NetworkDataTO> inputTOs;
+    std::vector<NetworkResourceRawTO> inputTOs;
     {
-        auto inputTO = std::make_shared<_NetworkDataTO>();
+        auto inputTO = std::make_shared<_NetworkResourceRawTO>();
         inputTO->simName = "A/B/C";
         inputTOs.emplace_back(inputTO);
     }
     {
-        auto inputTO = std::make_shared<_NetworkDataTO>();
+        auto inputTO = std::make_shared<_NetworkResourceRawTO>();
         inputTO->simName = "X/Y/Z";
         inputTOs.emplace_back(inputTO);
     }
 
-    auto outputTOs = BrowserDataService::createBrowserData(inputTOs);
+    auto outputTOs = NetworkResourceService::createBrowserData(inputTOs);
 
     ASSERT_EQ(6, outputTOs.size());
     {

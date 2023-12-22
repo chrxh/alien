@@ -17,7 +17,7 @@ public:
         GenomeEditorWindow const& genomeEditorWindow);
     ~_UploadSimulationDialog();
 
-    void open(DataType dataType);
+    void open(NetworkResourceType dataType);
 
 private:
     void processIntern();
@@ -31,7 +31,7 @@ private:
     std::string _origSimName;
     std::string _origSimDescription;
 
-    DataType _dataType = DataType_Simulation;
+    NetworkResourceType _dataType = NetworkResourceType_Simulation;
 
     BrowserWindow _browserWindow;
     LoginDialog _loginDialog;

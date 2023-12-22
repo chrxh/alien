@@ -1,16 +1,16 @@
 
 add_library(Network
-    BrowserDataService.cpp
-    BrowserDataService.h
-    BrowserDataTO.cpp
-    BrowserDataTO.h
     Definitions.h
     NetworkService.cpp
     NetworkService.h
-    NetworkDataParserService.cpp
-    NetworkDataParserService.h
-    NetworkDataTO.cpp
-    NetworkDataTO.h
+    NetworkResourceParserService.cpp
+    NetworkResourceParserService.h
+    NetworkResourceRawTO.cpp
+    NetworkResourceRawTO.h
+    NetworkResourceService.cpp
+    NetworkResourceService.h
+    NetworkResourceTreeTO.cpp
+    NetworkResourceTreeTO.h
     UserTO.h)
 
 target_link_libraries(Network Base)

@@ -6,9 +6,9 @@
 #include "UserTO.h"
 #include "Definitions.h"
 
-class NetworkDataParserService
+class NetworkResourceParserService
 {
 public:
-    static std::vector<NetworkDataTO> decodeRemoteSimulationData(boost::property_tree::ptree const& tree);
+    static std::vector<NetworkResourceRawTO> decodeRemoteSimulationData(boost::property_tree::ptree const& tree);
     static std::vector<UserTO> decodeUserData(boost::property_tree::ptree const& tree);
 };

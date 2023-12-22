@@ -1,9 +1,9 @@
-#include "BrowserDataService.h"
+#include "NetworkResourceService.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "BrowserDataTO.h"
+#include "NetworkResourceTreeTO.h"
 
 namespace
 {
@@ -22,9 +22,9 @@ namespace
     }
 }
 
-std::vector<BrowserDataTO> BrowserDataService::createBrowserData(std::vector<NetworkDataTO> const& networkTOs)
+std::vector<NetworkResourceTreeTO> NetworkResourceService::createBrowserData(std::vector<NetworkResourceRawTO> const& networkTOs)
 {
-    std::list<BrowserDataTO> browserDataToList;
+    std::list<NetworkResourceTreeTO> browserDataToList;
     for (auto const& entry : networkTOs) {
 
         //parse folder names
@@ -36,7 +36,7 @@ std::vector<BrowserDataTO> BrowserDataService::createBrowserData(std::vector<Net
             folderNames.pop_back();
         }
 
-        std::list<BrowserDataTO>::iterator bestMatchIter;
+        std::list<NetworkResourceTreeTO>::iterator bestMatchIter;
         int bestMatchEqualFolders;
         if (!browserDataToList.empty()) {
 
@@ -64,7 +64,7 @@ std::vector<BrowserDataTO> BrowserDataService::createBrowserData(std::vector<Net
 
         //insert folders
         for (int i = bestMatchEqualFolders; i < folderNames.size(); ++i) {
-            auto browserData = std::make_shared<_BrowserDataTO>();
+            auto browserData = std::make_shared<_NetworkResourceTreeTO>();
             browserData->folderNames = std::vector(folderNames.begin(), folderNames.begin() + i + 1);
             browserData->type = entry->type;
             browserData->node = BrowserFolder();
@@ -73,7 +73,7 @@ std::vector<BrowserDataTO> BrowserDataService::createBrowserData(std::vector<Net
         }
 
         //insert leaf
-        auto browserData = std::make_shared<_BrowserDataTO>();
+        auto browserData = std::make_shared<_NetworkResourceTreeTO>();
         BrowserLeaf leaf{
             .id = entry->id,
             .timestamp = entry->timestamp,

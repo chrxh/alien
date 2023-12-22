@@ -20,12 +20,12 @@
 
 namespace
 {
-    std::map<DataType, std::string> const BrowserDataTypeToLowerString = {
-        {DataType_Simulation, "simulation"},
-        {DataType_Genome, "genome"}};
-    std::map<DataType, std::string> const BrowserDataTypeToUpperString = {
-        {DataType_Simulation, "Simulation"},
-        {DataType_Genome, "Genome"}};
+    std::map<NetworkResourceType, std::string> const BrowserDataTypeToLowerString = {
+        {NetworkResourceType_Simulation, "simulation"},
+        {NetworkResourceType_Genome, "genome"}};
+    std::map<NetworkResourceType, std::string> const BrowserDataTypeToUpperString = {
+        {NetworkResourceType_Simulation, "Simulation"},
+        {NetworkResourceType_Genome, "Genome"}};
 }
 
 _UploadSimulationDialog::_UploadSimulationDialog(
@@ -53,7 +53,7 @@ _UploadSimulationDialog::~_UploadSimulationDialog()
     settings.setStringState("dialogs.upload.simulation description", _simDescription);
 }
 
-void _UploadSimulationDialog::open(DataType dataType)
+void _UploadSimulationDialog::open(NetworkResourceType dataType)
 {
     auto& networkService = NetworkService::getInstance();
     if (networkService.getLoggedInUserName()) {
@@ -117,7 +117,7 @@ void _UploadSimulationDialog::onUpload()
         IntVector2D size;
         int numObjects = 0;
 
-        if (_dataType == DataType_Simulation) {
+        if (_dataType == NetworkResourceType_Simulation) {
             DeserializedSimulation deserializedSim;
             deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
             deserializedSim.auxiliaryData.zoom = _viewport->getZoomFactor();
