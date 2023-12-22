@@ -33,10 +33,20 @@ struct BrowserLeaf
     std::string version;
 };
 
+enum class FolderLine
+{
+    Start,
+    Continue,
+    Branch,
+    End,
+    None
+};
+
 struct _BrowserDataTO
 {
     BrowserDataType type;
-    std::vector<std::string> folders;
+    std::vector<std::string> folderNames;
+    std::vector<FolderLine> folderLines;
     std::variant<BrowserFolder, BrowserLeaf> node;
 
     bool isLeaf();

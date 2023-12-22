@@ -39,14 +39,14 @@ TEST_F(BrowserDataServiceTests, nameWithFolder)
     {
         auto outputTO = outputTOs.front();
         EXPECT_FALSE(outputTO->isLeaf());
-        EXPECT_EQ(1, outputTO->folders.size());
-        EXPECT_EQ(std::string("folder"), outputTO->folders.front());
+        EXPECT_EQ(1, outputTO->folderNames.size());
+        EXPECT_EQ(std::string("folder"), outputTO->folderNames.front());
     }
     {
         auto outputTO = outputTOs.back();
         EXPECT_TRUE(outputTO->isLeaf());
-        EXPECT_EQ(1, outputTO->folders.size());
-        EXPECT_EQ(std::string("folder"), outputTO->folders.front());
+        EXPECT_EQ(1, outputTO->folderNames.size());
+        EXPECT_EQ(std::string("folder"), outputTO->folderNames.front());
         EXPECT_EQ(std::string("test"), outputTO->getLeaf().simName);
     }
 }
@@ -64,22 +64,22 @@ TEST_F(BrowserDataServiceTests, nameWithTwoFolders)
     {
         auto outputTO = outputTOs.at(0);
         EXPECT_FALSE(outputTO->isLeaf());
-        EXPECT_EQ(1, outputTO->folders.size());
-        EXPECT_EQ(std::string("folder1"), outputTO->folders.at(0));
+        EXPECT_EQ(1, outputTO->folderNames.size());
+        EXPECT_EQ(std::string("folder1"), outputTO->folderNames.at(0));
     }
     {
         auto outputTO = outputTOs.at(1);
         EXPECT_FALSE(outputTO->isLeaf());
-        EXPECT_EQ(2, outputTO->folders.size());
-        EXPECT_EQ(std::string("folder1"), outputTO->folders.at(0));
-        EXPECT_EQ(std::string("folder2"), outputTO->folders.at(1));
+        EXPECT_EQ(2, outputTO->folderNames.size());
+        EXPECT_EQ(std::string("folder1"), outputTO->folderNames.at(0));
+        EXPECT_EQ(std::string("folder2"), outputTO->folderNames.at(1));
     }
     {
         auto outputTO = outputTOs.at(2);
         EXPECT_TRUE(outputTO->isLeaf());
-        EXPECT_EQ(2, outputTO->folders.size());
-        EXPECT_EQ(std::string("folder1"), outputTO->folders.at(0));
-        EXPECT_EQ(std::string("folder2"), outputTO->folders.at(1));
+        EXPECT_EQ(2, outputTO->folderNames.size());
+        EXPECT_EQ(std::string("folder1"), outputTO->folderNames.at(0));
+        EXPECT_EQ(std::string("folder2"), outputTO->folderNames.at(1));
         EXPECT_EQ(std::string("test"), outputTO->getLeaf().simName);
     }
 }
@@ -105,43 +105,43 @@ TEST_F(BrowserDataServiceTests, twoNamesWithTwoFolders)
     {
         auto outputTO = outputTOs.at(0);
         EXPECT_FALSE(outputTO->isLeaf());
-        EXPECT_EQ(1, outputTO->folders.size());
-        EXPECT_EQ(std::string("A"), outputTO->folders.at(0));
+        EXPECT_EQ(1, outputTO->folderNames.size());
+        EXPECT_EQ(std::string("A"), outputTO->folderNames.at(0));
     }
     {
         auto outputTO = outputTOs.at(1);
         EXPECT_FALSE(outputTO->isLeaf());
-        EXPECT_EQ(2, outputTO->folders.size());
-        EXPECT_EQ(std::string("A"), outputTO->folders.at(0));
-        EXPECT_EQ(std::string("B"), outputTO->folders.at(1));
+        EXPECT_EQ(2, outputTO->folderNames.size());
+        EXPECT_EQ(std::string("A"), outputTO->folderNames.at(0));
+        EXPECT_EQ(std::string("B"), outputTO->folderNames.at(1));
     }
     {
         auto outputTO = outputTOs.at(2);
         EXPECT_TRUE(outputTO->isLeaf());
-        EXPECT_EQ(2, outputTO->folders.size());
-        EXPECT_EQ(std::string("A"), outputTO->folders.at(0));
-        EXPECT_EQ(std::string("B"), outputTO->folders.at(1));
+        EXPECT_EQ(2, outputTO->folderNames.size());
+        EXPECT_EQ(std::string("A"), outputTO->folderNames.at(0));
+        EXPECT_EQ(std::string("B"), outputTO->folderNames.at(1));
         EXPECT_EQ(std::string("C"), outputTO->getLeaf().simName);
     }
     {
         auto outputTO = outputTOs.at(3);
         EXPECT_FALSE(outputTO->isLeaf());
-        EXPECT_EQ(1, outputTO->folders.size());
-        EXPECT_EQ(std::string("X"), outputTO->folders.at(0));
+        EXPECT_EQ(1, outputTO->folderNames.size());
+        EXPECT_EQ(std::string("X"), outputTO->folderNames.at(0));
     }
     {
         auto outputTO = outputTOs.at(4);
         EXPECT_FALSE(outputTO->isLeaf());
-        EXPECT_EQ(2, outputTO->folders.size());
-        EXPECT_EQ(std::string("X"), outputTO->folders.at(0));
-        EXPECT_EQ(std::string("Y"), outputTO->folders.at(1));
+        EXPECT_EQ(2, outputTO->folderNames.size());
+        EXPECT_EQ(std::string("X"), outputTO->folderNames.at(0));
+        EXPECT_EQ(std::string("Y"), outputTO->folderNames.at(1));
     }
     {
         auto outputTO = outputTOs.at(5);
         EXPECT_TRUE(outputTO->isLeaf());
-        EXPECT_EQ(2, outputTO->folders.size());
-        EXPECT_EQ(std::string("X"), outputTO->folders.at(0));
-        EXPECT_EQ(std::string("Y"), outputTO->folders.at(1));
+        EXPECT_EQ(2, outputTO->folderNames.size());
+        EXPECT_EQ(std::string("X"), outputTO->folderNames.at(0));
+        EXPECT_EQ(std::string("Y"), outputTO->folderNames.at(1));
         EXPECT_EQ(std::string("Z"), outputTO->getLeaf().simName);
     }
 }

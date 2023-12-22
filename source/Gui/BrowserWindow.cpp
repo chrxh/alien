@@ -265,21 +265,41 @@ void _BrowserWindow::processToolbar()
 
 namespace
 {
-    void drawFolderLines(int count)
+    void drawFolderLines(std::vector<FolderLine> const& folderLines, int count)
     {
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
-        for (int i = 0; i < count; ++i) {
+        for (auto const& folderLine : folderLines | std::views::take(count)) {
             ImVec2 pos = ImGui::GetCursorScreenPos();
             ImGuiStyle& style = ImGui::GetStyle();
-            ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight)),
-                ImColor::HSV(0, 0, 0.5f));
-            if (i == count - 1) {
+            switch (folderLine) {
+            case FolderLine::Continue: {
+                ImGui::GetWindowDrawList()->AddRectFilled(
+                    ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
+                    ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight)),
+                    ImColor::HSV(0, 0, 0.5f));
+            } break;
+            case FolderLine::Branch: {
+                ImGui::GetWindowDrawList()->AddRectFilled(
+                    ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
+                    ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight)),
+                    ImColor::HSV(0, 0, 0.5f));
                 ImGui::GetWindowDrawList()->AddRectFilled(
                     ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2),
                     ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
                     ImColor::HSV(0, 0, 0.5f));
+            } break;
+            case FolderLine::End: {
+                ImGui::GetWindowDrawList()->AddRectFilled(
+                    ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
+                    ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
+                    ImColor::HSV(0, 0, 0.5f));
+                ImGui::GetWindowDrawList()->AddRectFilled(
+                    ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2),
+                    ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
+                    ImColor::HSV(0, 0, 0.5f));
+            } break;
+            default: {
+            } break;
             }
             ImGui::Dummy({scale(20.0f), 0});
             ImGui::SameLine();
@@ -304,9 +324,9 @@ void _BrowserWindow::processSimulationList()
             scale(90.0f),
             NetworkDataColumnId_Actions);
         ImGui::TableSetupColumn(
-            "Simulation name",
+            "Simulation folder/name",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(160.0f),
+            styleRepository.scale(190.0f),
             NetworkDataColumnId_SimulationName);
         ImGui::TableSetupColumn(
             "Timestamp",
@@ -361,7 +381,7 @@ void _BrowserWindow::processSimulationList()
                     ImGui::TableNextColumn();
                     processActionButtons(item);
                     ImGui::TableNextColumn();
-                    drawFolderLines(item->folders.size());
+                    drawFolderLines(item->folderLines, item->folderLines.size());
 
                     processShortenedText(leaf.simName);
                     ImGui::TableNextColumn();
@@ -392,12 +412,12 @@ void _BrowserWindow::processSimulationList()
                     ImGui::TableNextColumn();
                     ImGui::TableNextColumn();
                     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
-                    drawFolderLines(item->folders.size() - 1);
+                    drawFolderLines(item->folderLines, item->folderLines.size() - 1);
                     AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f);
                     ImGui::PopStyleColor(1);
 
                     ImGui::SameLine();
-                    processShortenedText(item->folders.back());
+                    processShortenedText(item->folderNames.back());
                 }
                 ImGui::PopID();
             }
