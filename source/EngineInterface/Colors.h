@@ -27,7 +27,7 @@ namespace Const
     uint32_t const CellFunctionInfoColor = 0x404090;
     uint32_t const BranchNumberInfoColor = 0x000000;
 
-    uint32_t const NothingnessColor = 0x000000;
+    uint32_t const VoidColor = 0x000000;
 }
 
 template <typename T>

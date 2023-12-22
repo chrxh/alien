@@ -82,6 +82,8 @@ namespace Const
     ImColor const NeuronEditorZeroLinePlotColor = ImColor::HSV(0.6f, 1.0f, 0.7f);
     ImColor const NeuronEditorPlotColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
 
+    ImColor const BrowserFolderLineColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
+
     float const WindowAlpha = 0.9f;
     float const SliderBarWidth = 30.0f;
 }

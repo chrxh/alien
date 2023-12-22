@@ -275,28 +275,28 @@ namespace
             case FolderLine::Continue: {
                 ImGui::GetWindowDrawList()->AddRectFilled(
                     ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
-                    ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight)),
-                    ImColor::HSV(0, 0, 0.5f));
+                    ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
+                    Const::BrowserFolderLineColor);
             } break;
             case FolderLine::Branch: {
                 ImGui::GetWindowDrawList()->AddRectFilled(
                     ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
-                    ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight)),
-                    ImColor::HSV(0, 0, 0.5f));
+                    ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
+                    Const::BrowserFolderLineColor);
                 ImGui::GetWindowDrawList()->AddRectFilled(
                     ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2),
                     ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
-                    ImColor::HSV(0, 0, 0.5f));
+                    Const::BrowserFolderLineColor);
             } break;
             case FolderLine::End: {
                 ImGui::GetWindowDrawList()->AddRectFilled(
                     ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
                     ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
-                    ImColor::HSV(0, 0, 0.5f));
+                    Const::BrowserFolderLineColor);
                 ImGui::GetWindowDrawList()->AddRectFilled(
                     ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2),
                     ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
-                    ImColor::HSV(0, 0, 0.5f));
+                    Const::BrowserFolderLineColor);
             } break;
             default: {
             } break;
