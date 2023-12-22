@@ -263,6 +263,31 @@ void _BrowserWindow::processToolbar()
     AlienImGui::Separator();
 }
 
+namespace
+{
+    void drawFolderLines(int count)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
+        for (int i = 0; i < count; ++i) {
+            ImVec2 pos = ImGui::GetCursorScreenPos();
+            ImGuiStyle& style = ImGui::GetStyle();
+            ImGui::GetWindowDrawList()->AddRectFilled(
+                ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight)),
+                ImColor::HSV(0, 0, 0.5f));
+            if (i == count - 1) {
+                ImGui::GetWindowDrawList()->AddRectFilled(
+                    ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2),
+                    ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
+                    ImColor::HSV(0, 0, 0.5f));
+            }
+            ImGui::Dummy({scale(20.0f), 0});
+            ImGui::SameLine();
+        }
+        ImGui::PopStyleColor(1);
+    }
+}
+
 void _BrowserWindow::processSimulationList()
 {
     ImGui::PushID("SimulationList");
@@ -336,6 +361,8 @@ void _BrowserWindow::processSimulationList()
                     ImGui::TableNextColumn();
                     processActionButtons(item);
                     ImGui::TableNextColumn();
+                    drawFolderLines(item->folders.size());
+
                     processShortenedText(leaf.simName);
                     ImGui::TableNextColumn();
                     pushTextColor(item);
@@ -364,9 +391,13 @@ void _BrowserWindow::processSimulationList()
                 } else {
                     ImGui::TableNextColumn();
                     ImGui::TableNextColumn();
-                    AlienImGui::CollapseButton(false);
+                    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
+                    drawFolderLines(item->folders.size() - 1);
+                    AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f);
+                    ImGui::PopStyleColor(1);
+
                     ImGui::SameLine();
-                    processShortenedText(item->location.back());
+                    processShortenedText(item->folders.back());
                 }
                 ImGui::PopID();
             }
