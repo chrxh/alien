@@ -6,34 +6,34 @@
 
 #include "Network/NetworkResourceTreeTO.h"
 
-class BrowserDataServiceTests : public ::testing::Test
+class NetworkResourceServiceTests : public ::testing::Test
 {
 public:
-    BrowserDataServiceTests()
+    NetworkResourceServiceTests()
     {}
-    ~BrowserDataServiceTests() = default;
+    ~NetworkResourceServiceTests() = default;
 };
 
-TEST_F(BrowserDataServiceTests, nameWithoutFolder)
+TEST_F(NetworkResourceServiceTests, nameWithoutFolder)
 {
     std::vector<NetworkResourceRawTO> inputTOs;
     auto inputTO = std::make_shared<_NetworkResourceRawTO>();
     inputTO->simName = "test";
     inputTOs.emplace_back(inputTO);
 
-    auto outputTOs = NetworkResourceService::createBrowserData(inputTOs);
+    auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs);
 
     ASSERT_EQ(1, outputTOs.size());
 }
 
-TEST_F(BrowserDataServiceTests, nameWithFolder)
+TEST_F(NetworkResourceServiceTests, nameWithFolder)
 {
     std::vector<NetworkResourceRawTO> inputTOs;
     auto inputTO = std::make_shared<_NetworkResourceRawTO>();
     inputTO->simName = "folder/test";
     inputTOs.emplace_back(inputTO);
 
-    auto outputTOs = NetworkResourceService::createBrowserData(inputTOs);
+    auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs);
 
     ASSERT_EQ(2, outputTOs.size());
     {
@@ -51,14 +51,14 @@ TEST_F(BrowserDataServiceTests, nameWithFolder)
     }
 }
 
-TEST_F(BrowserDataServiceTests, nameWithTwoFolders)
+TEST_F(NetworkResourceServiceTests, nameWithTwoFolders)
 {
     std::vector<NetworkResourceRawTO> inputTOs;
     auto inputTO = std::make_shared<_NetworkResourceRawTO>();
     inputTO->simName = "folder1/folder2/test";
     inputTOs.emplace_back(inputTO);
 
-    auto outputTOs = NetworkResourceService::createBrowserData(inputTOs);
+    auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs);
 
     ASSERT_EQ(3, outputTOs.size());
     {
@@ -85,7 +85,7 @@ TEST_F(BrowserDataServiceTests, nameWithTwoFolders)
 }
 
 
-TEST_F(BrowserDataServiceTests, twoNamesWithTwoFolders)
+TEST_F(NetworkResourceServiceTests, twoNamesWithTwoFolders)
 {
     std::vector<NetworkResourceRawTO> inputTOs;
     {
@@ -99,7 +99,7 @@ TEST_F(BrowserDataServiceTests, twoNamesWithTwoFolders)
         inputTOs.emplace_back(inputTO);
     }
 
-    auto outputTOs = NetworkResourceService::createBrowserData(inputTOs);
+    auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs);
 
     ASSERT_EQ(6, outputTOs.size());
     {

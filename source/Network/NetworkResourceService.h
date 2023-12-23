@@ -8,5 +8,7 @@
 class NetworkResourceService
 {
 public:
-    static std::vector<NetworkResourceTreeTO> createBrowserData(std::vector<NetworkResourceRawTO> const& browserData);
+    static std::vector<NetworkResourceTreeTO> createTreeTOs(
+        std::vector<NetworkResourceRawTO> const& browserData,
+        std::vector<std::vector<std::string>> const& expandedFolderNames);
 };
