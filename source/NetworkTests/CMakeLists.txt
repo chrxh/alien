@@ -1,6 +1,6 @@
 target_sources(NetworkTests
 PUBLIC
-    BrowserDataServiceTests.cpp
+    NetworkResourceServiceTests.cpp
     Testsuite.cpp)
 
 target_link_libraries(NetworkTests Base)

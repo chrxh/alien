@@ -266,20 +266,22 @@ void _BrowserWindow::processToolbar()
 
 namespace
 {
-    void drawFolderLines(std::vector<FolderLine> const& folderLines, int count)
+    void drawFolderLines(std::vector<FolderSymbols> const& folderLines, int count)
     {
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
         for (auto const& folderLine : folderLines | std::views::take(count)) {
             ImVec2 pos = ImGui::GetCursorScreenPos();
             ImGuiStyle& style = ImGui::GetStyle();
             switch (folderLine) {
-            case FolderLine::Continue: {
+            case FolderSymbols::ExpandedFolder: {
+            } break;
+            case FolderSymbols::ContinueFolder: {
                 ImGui::GetWindowDrawList()->AddRectFilled(
                     ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
                     ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
                     Const::BrowserFolderLineColor);
             } break;
-            case FolderLine::Branch: {
+            case FolderSymbols::BranchFolder: {
                 ImGui::GetWindowDrawList()->AddRectFilled(
                     ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
                     ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
@@ -289,7 +291,7 @@ namespace
                     ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
                     Const::BrowserFolderLineColor);
             } break;
-            case FolderLine::End: {
+            case FolderSymbols::EndFolder: {
                 ImGui::GetWindowDrawList()->AddRectFilled(
                     ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
                     ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
@@ -365,14 +367,14 @@ void _BrowserWindow::processSimulationList()
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateBrowserData = false;
 
-                _browserSimulationTOs = NetworkResourceService::createBrowserData(_filteredNetworkSimulationTOs);
+                _simulationTreeTOs = NetworkResourceService::createTreeTOs(_filteredNetworkSimulationTOs, _expandedFolderNames);
             }
         }
         ImGuiListClipper clipper;
-        clipper.Begin(_browserSimulationTOs.size());
+        clipper.Begin(_simulationTreeTOs.size());
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto item = _browserSimulationTOs[row];
+                auto item = _simulationTreeTOs[row];
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
@@ -479,15 +481,15 @@ void _BrowserWindow::processGenomeList()
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateBrowserData = false;
 
-                _browserGenomeTOs = NetworkResourceService::createBrowserData(_filteredNetworkGenomeTOs);
+                _genomeTreeTOs = NetworkResourceService::createTreeTOs(_filteredNetworkGenomeTOs, _expandedFolderNames);
             }
         }
         ImGuiListClipper clipper;
-        clipper.Begin(_browserGenomeTOs.size());
+        clipper.Begin(_genomeTreeTOs.size());
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
 
-                auto& item = _browserGenomeTOs[row];
+                auto& item = _genomeTreeTOs[row];
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));

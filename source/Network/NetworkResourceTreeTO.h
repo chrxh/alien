@@ -27,12 +27,12 @@ struct BrowserLeaf
     std::string version;
 };
 
-enum class FolderLine
+enum class FolderSymbols
 {
-    Start,
-    Continue,
-    Branch,
-    End,
+    ExpandedFolder,
+    ContinueFolder,
+    BranchFolder,
+    EndFolder,
     None
 };
 
@@ -40,7 +40,7 @@ struct _NetworkResourceTreeTO
 {
     NetworkResourceType type;
     std::vector<std::string> folderNames;
-    std::vector<FolderLine> folderLines;
+    std::vector<FolderSymbols> folderLines;
     std::variant<BrowserFolder, BrowserLeaf> node;
 
     bool isLeaf();

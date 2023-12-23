@@ -81,9 +81,10 @@ private:
     std::vector<NetworkResourceRawTO> _rawNetworkResourceRawTOs;
     std::vector<NetworkResourceRawTO> _filteredNetworkSimulationTOs;
     std::vector<NetworkResourceRawTO> _filteredNetworkGenomeTOs;
+    std::vector<std::vector<std::string>> _expandedFolderNames;
 
-    std::vector<NetworkResourceTreeTO> _browserSimulationTOs;
-    std::vector<NetworkResourceTreeTO> _browserGenomeTOs;
+    std::vector<NetworkResourceTreeTO> _simulationTreeTOs;
+    std::vector<NetworkResourceTreeTO> _genomeTreeTOs;
 
     std::vector<UserTO> _userTOs;
 
