@@ -29,6 +29,7 @@ struct BrowserLeaf
 
 enum class FolderTreeSymbols
 {
+    Collapsed,
     Expanded,
     Continue,
     Branch,
