@@ -103,31 +103,31 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
 
         if (i == 0) {
             if (!entry->isLeaf()) {
-                entry->folderLines.emplace_back(FolderSymbols::ExpandedFolder);
+                entry->treeSymbols.emplace_back(FolderTreeSymbols::Expanded);
             }
         } else {
             auto const& prevEntry = treeTOs.at(i - 1);
             auto numEqualFolders = getNumEqualFolders(entry->folderNames, prevEntry->folderNames);
 
-            entry->folderLines.resize(entry->folderNames.size(), FolderSymbols::None);
+            entry->treeSymbols.resize(entry->folderNames.size(), FolderTreeSymbols::None);
 
             //process until numEqualFolders - 1
             if (numEqualFolders > 0) {
                 int f = numEqualFolders - 1;
-                if (prevEntry->folderLines.at(f) == FolderSymbols::ExpandedFolder) {
-                    entry->folderLines.at(f) = FolderSymbols::EndFolder;
-                } else if (prevEntry->folderLines.at(f) == FolderSymbols::EndFolder) {
-                    prevEntry->folderLines.at(f) = FolderSymbols::BranchFolder;
-                    entry->folderLines.at(f) = FolderSymbols::EndFolder;
-                } else if (prevEntry->folderLines.at(f) == FolderSymbols::BranchFolder) {
-                    entry->folderLines.at(f) = FolderSymbols::EndFolder;
-                } else if (prevEntry->folderLines.at(f) == FolderSymbols::None) {
+                if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::Expanded) {
+                    entry->treeSymbols.at(f) = FolderTreeSymbols::End;
+                } else if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::End) {
+                    prevEntry->treeSymbols.at(f) = FolderTreeSymbols::Branch;
+                    entry->treeSymbols.at(f) = FolderTreeSymbols::End;
+                } else if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::Branch) {
+                    entry->treeSymbols.at(f) = FolderTreeSymbols::End;
+                } else if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::None) {
                     for (int j = i - 1; j >= 0; --j) {
                         auto& otherEntry = treeTOs.at(j);
-                        if (otherEntry->folderLines.at(f) == FolderSymbols::None) {
-                            otherEntry->folderLines.at(f) = FolderSymbols::ContinueFolder;
-                        } else if (otherEntry->folderLines.at(f) == FolderSymbols::EndFolder) {
-                            otherEntry->folderLines.at(f) = FolderSymbols::BranchFolder;
+                        if (otherEntry->treeSymbols.at(f) == FolderTreeSymbols::None) {
+                            otherEntry->treeSymbols.at(f) = FolderTreeSymbols::Continue;
+                        } else if (otherEntry->treeSymbols.at(f) == FolderTreeSymbols::End) {
+                            otherEntry->treeSymbols.at(f) = FolderTreeSymbols::Branch;
                         } else {
                             break;
                         }
@@ -138,25 +138,25 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
             }
 
             for (int f = 0; f < numEqualFolders - 1; ++f) {
-                if (prevEntry->folderLines.at(f) == FolderSymbols::BranchFolder) {
-                    entry->folderLines.at(f) = FolderSymbols::None;
+                if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::Branch) {
+                    entry->treeSymbols.at(f) = FolderTreeSymbols::None;
                 }
             }
 
             if (numEqualFolders < entry->folderNames.size()) {
                 CHECK(numEqualFolders + 1 == entry->folderNames.size());
-                entry->folderLines.back() = FolderSymbols::ExpandedFolder;
+                entry->treeSymbols.back() = FolderTreeSymbols::Expanded;
 
                 if (numEqualFolders > 0 && numEqualFolders < prevEntry->folderNames.size()) {
-                    entry->folderLines.at(numEqualFolders - 1) = FolderSymbols::EndFolder;
+                    entry->treeSymbols.at(numEqualFolders - 1) = FolderTreeSymbols::End;
                     bool noneFound = false;
                     for (int j = i - 1; j >= 0; --j) {
                         auto& otherEntry = treeTOs.at(j);
-                        if (otherEntry->folderLines.at(numEqualFolders - 1) == FolderSymbols::None) {
-                            otherEntry->folderLines.at(numEqualFolders - 1) = FolderSymbols::ContinueFolder;
+                        if (otherEntry->treeSymbols.at(numEqualFolders - 1) == FolderTreeSymbols::None) {
+                            otherEntry->treeSymbols.at(numEqualFolders - 1) = FolderTreeSymbols::Continue;
                             noneFound = true;
-                        } else if (noneFound && otherEntry->folderLines.at(numEqualFolders - 1) == FolderSymbols::EndFolder) {
-                            otherEntry->folderLines.at(numEqualFolders - 1) = FolderSymbols::BranchFolder;
+                        } else if (noneFound && otherEntry->treeSymbols.at(numEqualFolders - 1) == FolderTreeSymbols::End) {
+                            otherEntry->treeSymbols.at(numEqualFolders - 1) = FolderTreeSymbols::Branch;
                         } else {
                             break;
                         }
@@ -164,7 +164,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
                 }
             }
             if (numEqualFolders > 0 && numEqualFolders < prevEntry->folderNames.size() && numEqualFolders == entry->folderNames.size()) {
-                entry->folderLines.back() = FolderSymbols::EndFolder;
+                entry->treeSymbols.back() = FolderTreeSymbols::End;
             }
         }
     }

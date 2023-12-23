@@ -266,22 +266,24 @@ void _BrowserWindow::processToolbar()
 
 namespace
 {
-    void drawFolderLines(std::vector<FolderSymbols> const& folderLines, int count)
+    void drawFolderTreeSymbols(std::vector<FolderTreeSymbols> const& folderLines)
     {
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
-        for (auto const& folderLine : folderLines | std::views::take(count)) {
+        for (auto const& folderLine : folderLines) {
             ImVec2 pos = ImGui::GetCursorScreenPos();
             ImGuiStyle& style = ImGui::GetStyle();
             switch (folderLine) {
-            case FolderSymbols::ExpandedFolder: {
+            case FolderTreeSymbols::Expanded: {
+                AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f);
             } break;
-            case FolderSymbols::ContinueFolder: {
+            case FolderTreeSymbols::Continue: {
                 ImGui::GetWindowDrawList()->AddRectFilled(
                     ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
                     ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
                     Const::BrowserFolderLineColor);
+                ImGui::Dummy({scale(20.0f), 0});
             } break;
-            case FolderSymbols::BranchFolder: {
+            case FolderTreeSymbols::Branch: {
                 ImGui::GetWindowDrawList()->AddRectFilled(
                     ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
                     ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
@@ -290,8 +292,9 @@ namespace
                     ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2),
                     ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
                     Const::BrowserFolderLineColor);
+                ImGui::Dummy({scale(20.0f), 0});
             } break;
-            case FolderSymbols::EndFolder: {
+            case FolderTreeSymbols::End: {
                 ImGui::GetWindowDrawList()->AddRectFilled(
                     ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
                     ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
@@ -300,11 +303,14 @@ namespace
                     ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2),
                     ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
                     Const::BrowserFolderLineColor);
+                ImGui::Dummy({scale(20.0f), 0});
+            } break;
+            case FolderTreeSymbols::None: {
+                ImGui::Dummy({scale(20.0f), 0});
             } break;
             default: {
             } break;
             }
-            ImGui::Dummy({scale(20.0f), 0});
             ImGui::SameLine();
         }
         ImGui::PopStyleColor(1);
@@ -384,7 +390,7 @@ void _BrowserWindow::processSimulationList()
                     ImGui::TableNextColumn();
                     processActionButtons(item);
                     ImGui::TableNextColumn();
-                    drawFolderLines(item->folderLines, item->folderLines.size());
+                    drawFolderTreeSymbols(item->treeSymbols);
 
                     processShortenedText(leaf.simName);
                     ImGui::TableNextColumn();
@@ -415,11 +421,9 @@ void _BrowserWindow::processSimulationList()
                     ImGui::TableNextColumn();
                     ImGui::TableNextColumn();
                     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
-                    drawFolderLines(item->folderLines, item->folderLines.size() - 1);
-                    AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f);
+                    drawFolderTreeSymbols(item->treeSymbols);
                     ImGui::PopStyleColor(1);
 
-                    ImGui::SameLine();
                     processShortenedText(item->folderNames.back());
                 }
                 ImGui::PopID();
