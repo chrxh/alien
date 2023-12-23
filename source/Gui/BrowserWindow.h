@@ -66,7 +66,7 @@ private:
     void pushTextColor(NetworkResourceTreeTO const& to);
     void calcFilteredSimulationAndGenomeLists();
 
-    void drawFolderTreeSymbols(NetworkResourceTreeTO& entry);
+    void processFolderTreeSymbols(NetworkResourceTreeTO& entry);
 
 
     NetworkResourceType _selectedDataType = NetworkResourceType_Simulation; 
@@ -84,7 +84,7 @@ private:
     std::vector<NetworkResourceRawTO> _rawNetworkResourceRawTOs;
     std::vector<NetworkResourceRawTO> _filteredNetworkSimulationTOs;
     std::vector<NetworkResourceRawTO> _filteredNetworkGenomeTOs;
-    std::set<std::vector<std::string>> _expandedFolderNames;
+    std::vector<std::vector<std::string>> _expandedFolderNames;
 
     std::vector<NetworkResourceTreeTO> _simulationTreeTOs;
     std::vector<NetworkResourceTreeTO> _genomeTreeTOs;

@@ -26,7 +26,7 @@ namespace
 
 std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
     std::vector<NetworkResourceRawTO> const& networkTOs,
-    std::set<std::vector<std::string>> const& expandedFolderNames)
+    std::vector<std::vector<std::string>> const& expandedFolderNames)
 {
     std::list<NetworkResourceTreeTO> treeToList;
     for (auto const& entry : networkTOs) {

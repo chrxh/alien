@@ -337,7 +337,7 @@ void _BrowserWindow::processSimulationList()
                     ImGui::TableNextColumn();
                     processActionButtons(item);
                     ImGui::TableNextColumn();
-                    drawFolderTreeSymbols(item);
+                    processFolderTreeSymbols(item);
 
                     processShortenedText(leaf.simName);
                     ImGui::TableNextColumn();
@@ -368,7 +368,7 @@ void _BrowserWindow::processSimulationList()
                     ImGui::TableNextColumn();
                     ImGui::TableNextColumn();
                     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
-                    drawFolderTreeSymbols(item);
+                    processFolderTreeSymbols(item);
                     ImGui::PopStyleColor(1);
 
                     processShortenedText(item->folderNames.back());
@@ -1051,7 +1051,7 @@ void _BrowserWindow::calcFilteredSimulationAndGenomeLists()
     }
 }
 
-void _BrowserWindow::drawFolderTreeSymbols(NetworkResourceTreeTO& entry)
+void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO& entry)
 {
     auto const& treeSymbols = entry->treeSymbols;
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
@@ -1061,13 +1061,30 @@ void _BrowserWindow::drawFolderTreeSymbols(NetworkResourceTreeTO& entry)
         switch (folderLine) {
         case FolderTreeSymbols::Collapsed: {
             if (AlienImGui::Button(ICON_FA_PLUS_SQUARE, 20.0f)) {
-                _expandedFolderNames.emplace(entry->folderNames);
+                _expandedFolderNames.emplace_back(entry->folderNames);
                 _scheduleCreateBrowserData = true;
             }
         } break;
         case FolderTreeSymbols::Expanded: {
             if (AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f)) {
-                _expandedFolderNames.erase(entry->folderNames);
+                std::vector<std::vector<std::string>> newExpandedFolderNames;
+                auto const& folderNamesToCollapse = entry->folderNames;
+                for (auto const& expandedFolderNames : _expandedFolderNames) {
+                    auto adopt = false;
+                    if (expandedFolderNames.size() < folderNamesToCollapse.size()) {
+                        adopt = true;
+                    } else {
+                        for (int i = 0; i < folderNamesToCollapse.size(); ++i) {
+                            if (expandedFolderNames.at(i) != folderNamesToCollapse.at(i)) {
+                                adopt = true;
+                            }
+                        }
+                    }
+                    if (adopt) {
+                        newExpandedFolderNames.emplace_back(expandedFolderNames);
+                    }
+                }
+                _expandedFolderNames = newExpandedFolderNames;
                 _scheduleCreateBrowserData = true;
             }
         } break;
