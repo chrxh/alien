@@ -275,15 +275,19 @@ void _BrowserWindow::processSimulationList()
 
     if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn(
-            "Actions",
-            ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed,
-            scale(90.0f),
-            NetworkResourceColumnId_Actions);
-        ImGui::TableSetupColumn(
-            "Simulation folder/name",
+            "Simulation",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(190.0f),
             NetworkResourceColumnId_SimulationName);
+        ImGui::TableSetupColumn(
+            "Description",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scale(120.0f),
+            NetworkResourceColumnId_Description);
+        ImGui::TableSetupColumn(
+            "Reactions", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_Likes);
+        //ImGui::TableSetupColumn(
+        //    "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f), NetworkResourceColumnId_Actions);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
@@ -294,16 +298,6 @@ void _BrowserWindow::processSimulationList()
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
             NetworkResourceColumnId_UserName);
-        ImGui::TableSetupColumn(
-            "Description",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(120.0f),
-            NetworkResourceColumnId_Description);
-        ImGui::TableSetupColumn(
-            "Reactions",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(120.0f),
-            NetworkResourceColumnId_Likes);
         ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
         ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Width);
         ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Height);
@@ -335,20 +329,29 @@ void _BrowserWindow::processSimulationList()
                 if (item->isLeaf()) {
                     auto& leaf = item->getLeaf();
                     ImGui::TableNextColumn();
-                    processActionButtons(item);
-                    ImGui::TableNextColumn();
                     processFolderTreeSymbols(item);
 
+                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
+                    auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
+                    ImGui::PopStyleColor();
+                    if (downloadButtonResult) {
+                        onDownloadItem(leaf);
+                    }
+                    AlienImGui::Tooltip("Download");
+                    ImGui::SameLine();
+
                     processShortenedText(leaf.simName);
+                    ImGui::TableNextColumn();
+                    processShortenedText(leaf.description);
+                    ImGui::TableNextColumn();
+                    processEmojiList(item);
+                    //ImGui::TableNextColumn();
+                    //processActionButtons(item);
                     ImGui::TableNextColumn();
                     pushTextColor(item);
                     AlienImGui::Text(leaf.timestamp);
                     ImGui::TableNextColumn();
                     processShortenedText(leaf.userName);
-                    ImGui::TableNextColumn();
-                    processShortenedText(leaf.description);
-                    ImGui::TableNextColumn();
-                    processEmojiList(item);
 
                     ImGui::TableNextColumn();
                     AlienImGui::Text(std::to_string(leaf.numDownloads));
@@ -365,7 +368,6 @@ void _BrowserWindow::processSimulationList()
 
                     ImGui::PopStyleColor();
                 } else {
-                    ImGui::TableNextColumn();
                     ImGui::TableNextColumn();
                     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
                     processFolderTreeSymbols(item);
@@ -391,12 +393,19 @@ void _BrowserWindow::processGenomeList()
 
     if (ImGui::BeginTable("Browser", 10, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn(
-            "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f), NetworkResourceColumnId_Actions);
-        ImGui::TableSetupColumn(
-            "Genome name",
+            "Genome",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(160.0f),
             NetworkResourceColumnId_SimulationName);
+        ImGui::TableSetupColumn(
+            "Description",
+            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+            styleRepository.scale(120.0f),
+            NetworkResourceColumnId_Description);
+        ImGui::TableSetupColumn(
+            "Reactions", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_Likes);
+        //ImGui::TableSetupColumn(
+        //    "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f), NetworkResourceColumnId_Actions);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
@@ -407,16 +416,6 @@ void _BrowserWindow::processGenomeList()
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
             styleRepository.scale(120.0f),
             NetworkResourceColumnId_UserName);
-        ImGui::TableSetupColumn(
-            "Description",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(120.0f),
-            NetworkResourceColumnId_Description);
-        ImGui::TableSetupColumn(
-            "Reactions",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(120.0f),
-            NetworkResourceColumnId_Likes);
         ImGui::TableSetupColumn(
             "Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
         ImGui::TableSetupColumn("Cells", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Particles);
@@ -444,24 +443,26 @@ void _BrowserWindow::processGenomeList()
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
-
                 if (item->isLeaf()) {
                     auto& leaf = item->getLeaf();
 
                     ImGui::TableNextColumn();
-                    processActionButtons(item);
-                    ImGui::TableNextColumn();
+                    ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+                    static bool selected = true;
+                    ImGui::Selectable("", &selected, selectable_flags, ImVec2(0, 22.0f));
+                    ImGui::SameLine();
                     processShortenedText(leaf.simName);
+                    ImGui::TableNextColumn();
+                    processShortenedText(leaf.description);
+                    ImGui::TableNextColumn();
+                    processEmojiList(item);
+                    //ImGui::TableNextColumn();
+                    //processActionButtons(item);
                     ImGui::TableNextColumn();
                     pushTextColor(item);
                     AlienImGui::Text(leaf.timestamp);
                     ImGui::TableNextColumn();
                     processShortenedText(leaf.userName);
-                    ImGui::TableNextColumn();
-                    processShortenedText(leaf.description);
-                    ImGui::TableNextColumn();
-                    processEmojiList(item);
-
                     ImGui::TableNextColumn();
                     AlienImGui::Text(std::to_string(leaf.numDownloads));
                     ImGui::TableNextColumn();
