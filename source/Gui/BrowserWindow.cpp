@@ -326,9 +326,15 @@ void _BrowserWindow::processSimulationList()
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
 
+                ImGui::TableNextColumn();
+                ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+                static bool selected = true;
+                ImGui::Selectable("", &selected, selectable_flags, ImVec2(0, scale(RowHeight - 3.0f)));
+                ImGui::SameLine();
+
                 if (item->isLeaf()) {
                     auto& leaf = item->getLeaf();
-                    ImGui::TableNextColumn();
+
                     processFolderTreeSymbols(item);
 
                     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
@@ -368,7 +374,6 @@ void _BrowserWindow::processSimulationList()
 
                     ImGui::PopStyleColor();
                 } else {
-                    ImGui::TableNextColumn();
                     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
                     processFolderTreeSymbols(item);
                     ImGui::PopStyleColor(1);
@@ -447,10 +452,6 @@ void _BrowserWindow::processGenomeList()
                     auto& leaf = item->getLeaf();
 
                     ImGui::TableNextColumn();
-                    ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
-                    static bool selected = true;
-                    ImGui::Selectable("", &selected, selectable_flags, ImVec2(0, 22.0f));
-                    ImGui::SameLine();
                     processShortenedText(leaf.simName);
                     ImGui::TableNextColumn();
                     processShortenedText(leaf.description);
