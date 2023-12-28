@@ -65,7 +65,7 @@ private:
     void sortRawTOs(std::vector<NetworkResourceRawTO>& tos, ImGuiTableSortSpecs* sortSpecs);
     void sortUserList();
 
-    void filteredRawTOs();
+    void filterRawTOs();
 
     void onDownloadItem(BrowserLeaf const& leaf);
     void onDeleteItem(BrowserLeaf const& leaf);

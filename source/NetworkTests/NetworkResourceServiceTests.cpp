@@ -21,7 +21,7 @@ TEST_F(NetworkResourceServiceTests, nameWithoutFolder)
     inputTO->simName = "test";
     inputTOs.emplace_back(inputTO);
 
-    auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs);
+    auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs, {});
 
     ASSERT_EQ(1, outputTOs.size());
 }
@@ -33,7 +33,7 @@ TEST_F(NetworkResourceServiceTests, nameWithFolder)
     inputTO->simName = "folder/test";
     inputTOs.emplace_back(inputTO);
 
-    auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs);
+    auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs, {});
 
     ASSERT_EQ(2, outputTOs.size());
     {
@@ -58,7 +58,7 @@ TEST_F(NetworkResourceServiceTests, nameWithTwoFolders)
     inputTO->simName = "folder1/folder2/test";
     inputTOs.emplace_back(inputTO);
 
-    auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs);
+    auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs, {});
 
     ASSERT_EQ(3, outputTOs.size());
     {
@@ -99,7 +99,7 @@ TEST_F(NetworkResourceServiceTests, twoNamesWithTwoFolders)
         inputTOs.emplace_back(inputTO);
     }
 
-    auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs);
+    auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs, {});
 
     ASSERT_EQ(6, outputTOs.size());
     {
