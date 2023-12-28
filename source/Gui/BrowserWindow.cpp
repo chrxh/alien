@@ -382,7 +382,7 @@ void _BrowserWindow::processSimulationList()
 
                     processShortenedText(item->folderNames.back());
                     ImGui::SameLine();
-                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderNumSimsColor);
                     AlienImGui::Text("(" + std::to_string(folder.numLeafs) + ")");
                     ImGui::PopStyleColor();
                 }
@@ -1076,24 +1076,6 @@ void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO& entry)
         case FolderTreeSymbols::Collapsed: {
             if (AlienImGui::Button(ICON_FA_PLUS_SQUARE, 20.0f)) {
                 _collapsedFolderNames.erase(entry->folderNames);
-                //std::vector<std::vector<std::string>> newExpandedFolderNames;
-                //auto const& folderNamesToCollapse = entry->folderNames;
-                //for (auto const& expandedFolderNames : _collapsedFolderNames) {
-                //    auto adopt = false;
-                //    if (expandedFolderNames.size() < folderNamesToCollapse.size()) {
-                //        adopt = true;
-                //    } else {
-                //        for (int i = 0; i < folderNamesToCollapse.size(); ++i) {
-                //            if (expandedFolderNames.at(i) != folderNamesToCollapse.at(i)) {
-                //                adopt = true;
-                //            }
-                //        }
-                //    }
-                //    if (adopt) {
-                //        newExpandedFolderNames.emplace_back(expandedFolderNames);
-                //    }
-                //}
-                //_collapsedFolderNames = newExpandedFolderNames;
                 _scheduleCreateBrowserData = true;
             }
         } break;
@@ -1110,19 +1092,27 @@ void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO& entry)
                 ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
                 Const::BrowserFolderLineColor);
             ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2),
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
+                Const::BrowserFolderLineColor);
+            ImGui::GetWindowDrawList()->AddRectFilled(
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f - 0.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y - scale(0.5f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f + 2.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(2.0f)),
                 Const::BrowserFolderLineColor);
             ImGui::Dummy({scale(20.0f), 0});
         } break;
         case FolderTreeSymbols::End: {
             ImGui::GetWindowDrawList()->AddRectFilled(
                 ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
                 Const::BrowserFolderLineColor);
             ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2),
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 + scale(1.5f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
+                Const::BrowserFolderLineColor);
+            ImGui::GetWindowDrawList()->AddRectFilled(
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f - 0.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y - scale(0.5f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f + 2.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(2.0f)),
                 Const::BrowserFolderLineColor);
             ImGui::Dummy({scale(20.0f), 0});
         } break;
