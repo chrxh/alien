@@ -12,8 +12,8 @@ enum NetworkResourceType_
 };
 
 
-struct _NetworkResourceTreeTO;
-using NetworkResourceTreeTO = std::shared_ptr<_NetworkResourceTreeTO>;
-
 struct _NetworkResourceRawTO;
 using NetworkResourceRawTO = std::shared_ptr<_NetworkResourceRawTO>;
+
+struct _NetworkResourceTreeTO;
+using NetworkResourceTreeTO = std::shared_ptr<_NetworkResourceTreeTO>;
