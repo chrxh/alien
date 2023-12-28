@@ -10,6 +10,7 @@
 struct BrowserFolder
 {
     int numLeafs;
+    int numReactions;
 };
 
 struct BrowserLeaf

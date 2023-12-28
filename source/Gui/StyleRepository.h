@@ -55,8 +55,7 @@ namespace Const
     ImColor const InspectorLineColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);
     ImColor const InspectorRectColor = ImColor::HSV(0.54f, 0.0f, 0.5f, 1.0f);
 
-    ImColor const LikeButtonTextColor = ImColor::HSV(0.16f, 1.0f, 1.0f, 1.0f);
-    ImColor const NoLikeButtonTextColor = ImColor::HSV(0.16f, 0.5f, 0.5f, 1.0f);
+    ImColor const AddReactionButtonTextColor = ImColor::HSV(0.375f, 0.6f, 0.7f, 1.0f);
     ImColor const DownloadButtonTextColor = ImColor::HSV(0.55f, 0.6f, 1.0f, 1.0f);
     ImColor const DeleteButtonTextColor = ImColor::HSV(0.0f, 0.6f, 0.8f, 1.0f);
 
@@ -83,7 +82,7 @@ namespace Const
     ImColor const NeuronEditorPlotColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
 
     ImColor const BrowserFolderLineColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
-    ImColor const BrowserFolderNumSimsColor = ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f);
+    ImColor const BrowserFolderPropertiesTextColor = ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f);
 
     float const WindowAlpha = 0.9f;
     float const SliderBarWidth = 30.0f;

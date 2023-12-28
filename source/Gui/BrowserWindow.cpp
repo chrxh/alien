@@ -277,17 +277,15 @@ void _BrowserWindow::processSimulationList()
         ImGui::TableSetupColumn(
             "Simulation",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(190.0f),
+            styleRepository.scale(210.0f),
             NetworkResourceColumnId_SimulationName);
         ImGui::TableSetupColumn(
             "Description",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(120.0f),
+            styleRepository.scale(200.0f),
             NetworkResourceColumnId_Description);
         ImGui::TableSetupColumn(
             "Reactions", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_Likes);
-        //ImGui::TableSetupColumn(
-        //    "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f), NetworkResourceColumnId_Actions);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
@@ -336,23 +334,14 @@ void _BrowserWindow::processSimulationList()
                     auto& leaf = item->getLeaf();
 
                     processFolderTreeSymbols(item);
-
-                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
-                    auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
-                    ImGui::PopStyleColor();
-                    if (downloadButtonResult) {
-                        onDownloadItem(leaf);
-                    }
-                    AlienImGui::Tooltip("Download");
+                    processDownloadButton(leaf);
                     ImGui::SameLine();
-
                     processShortenedText(leaf.simName);
+
                     ImGui::TableNextColumn();
                     processShortenedText(leaf.description);
                     ImGui::TableNextColumn();
-                    processEmojiList(item);
-                    //ImGui::TableNextColumn();
-                    //processActionButtons(item);
+                    processReactionList(item);
                     ImGui::TableNextColumn();
                     pushTextColor(item);
                     AlienImGui::Text(leaf.timestamp);
@@ -376,15 +365,21 @@ void _BrowserWindow::processSimulationList()
                 } else {
                     auto& folder = item->getFolder();
 
-                    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
                     processFolderTreeSymbols(item);
-                    ImGui::PopStyleColor(1);
-
                     processShortenedText(item->folderNames.back());
                     ImGui::SameLine();
-                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderNumSimsColor);
-                    AlienImGui::Text("(" + std::to_string(folder.numLeafs) + ")");
+                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
+                    std::string numSimsString = folder.numLeafs == 1 ? "sim" : "sims";
+                    AlienImGui::Text("(" + std::to_string(folder.numLeafs) + " " + numSimsString + ")");
                     ImGui::PopStyleColor();
+                    ImGui::TableNextColumn();
+                    ImGui::TableNextColumn();
+                    //ImGui::Dummy({scale(18.0f), 0});
+                    //ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
+                    AlienImGui::Text("(" + std::to_string(folder.numReactions) + ")");
+                    ImGui::PopStyleColor();
+
                 }
                 ImGui::PopID();
             }
@@ -462,7 +457,7 @@ void _BrowserWindow::processGenomeList()
                     ImGui::TableNextColumn();
                     processShortenedText(leaf.description);
                     ImGui::TableNextColumn();
-                    processEmojiList(item);
+                    processReactionList(item);
                     //ImGui::TableNextColumn();
                     //processActionButtons(item);
                     ImGui::TableNextColumn();
@@ -692,8 +687,17 @@ void _BrowserWindow::processEmojiButton(int emojiType)
     }
 }
 
-void _BrowserWindow::processEmojiList(NetworkResourceTreeTO const& to)
+void _BrowserWindow::processReactionList(NetworkResourceTreeTO const& to)
 {
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
+    auto isAddReaction = processActionButton(ICON_FA_PLUS);
+    ImGui::PopStyleColor();
+    AlienImGui::Tooltip("Add a reaction");
+    if (isAddReaction) {
+        _activateEmojiPopup = true;
+        _emojiPopupTO = to;
+    }
+
     //calc remap which allows to show most frequent like type first
     std::map<int, int> remap;
     std::set<int> processedEmojiTypes;
@@ -720,6 +724,7 @@ void _BrowserWindow::processEmojiList(NetworkResourceTreeTO const& to)
     for (auto const& emojiType : remap | std::views::values) {
         auto numLikes = leaf.numLikesByEmojiType.at(emojiType);
 
+        ImGui::SameLine();
         AlienImGui::Text(std::to_string(numLikes));
         ImGui::SameLine();
         if (emojiType < _emojis.size()) {
@@ -749,7 +754,6 @@ void _BrowserWindow::processEmojiList(NetworkResourceTreeTO const& to)
 
         //separator except for last element
         if (++counter < leaf.numLikesByEmojiType.size()) {
-            ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
         }
     }
@@ -758,49 +762,60 @@ void _BrowserWindow::processEmojiList(NetworkResourceTreeTO const& to)
     }
 }
 
+void _BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
+{
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
+    auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
+    ImGui::PopStyleColor();
+    if (downloadButtonResult) {
+        onDownloadItem(leaf);
+    }
+    AlienImGui::Tooltip("Download");
+}
+
 void _BrowserWindow::processActionButtons(NetworkResourceTreeTO const& to)
 {
-    auto& networkService = NetworkService::getInstance();
-    //like button
+    //auto& networkService = NetworkService::getInstance();
+    ////like button
 
-    if (to->isLeaf()) {
-        auto const& leaf = to->getLeaf();
-        auto liked = isLiked(leaf.id);
-        if (liked) {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::LikeButtonTextColor);
-        } else {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::NoLikeButtonTextColor);
-        }
-        auto likeButtonResult = processActionButton(ICON_FA_SMILE);
-        ImGui::PopStyleColor();
-        if (likeButtonResult) {
-            _activateEmojiPopup = true;
-            _emojiPopupTO = to;
-        }
-        AlienImGui::Tooltip("Choose a reaction");
-        ImGui::SameLine();
+    //if (to->isLeaf()) {
+    //    auto const& leaf = to->getLeaf();
+    //    auto liked = isLiked(leaf.id);
+    //    if (liked) {
+    //        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::AddReactionButtonTextColor);
+    //    } else {
+    //        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::NoLikeButtonTextColor);
+    //    }
+    //    auto likeButtonResult = processActionButton(ICON_FA_STAR);
+    //    ImGui::PopStyleColor();
+    //    if (likeButtonResult) {
+    //        _activateEmojiPopup = true;
+    //        _emojiPopupTO = to;
+    //    }
+    //    AlienImGui::Tooltip("Choose a reaction");
+    //    ImGui::SameLine();
 
-        //download button
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
-        auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
-        ImGui::PopStyleColor();
-        if (downloadButtonResult) {
-            onDownloadItem(leaf);
-        }
-        AlienImGui::Tooltip("Download");
-        ImGui::SameLine();
+    //    //download button
+    //    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
+    //    auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
+    //    ImGui::PopStyleColor();
+    //    if (downloadButtonResult) {
+    //        onDownloadItem(leaf);
+    //    }
+    //    AlienImGui::Tooltip("Download");
+    //    ImGui::SameLine();
 
-        //delete button
-        if (leaf.userName == networkService.getLoggedInUserName().value_or("")) {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DeleteButtonTextColor);
-            auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
-            ImGui::PopStyleColor();
-            if (deleteButtonResult) {
-                onDeleteItem(leaf);
-            }
-            AlienImGui::Tooltip("Delete");
-        }
-    }
+    //    //delete button
+    //    if (leaf.userName == networkService.getLoggedInUserName().value_or("")) {
+    //        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DeleteButtonTextColor);
+    //        auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
+    //        ImGui::PopStyleColor();
+    //        if (deleteButtonResult) {
+    //            onDeleteItem(leaf);
+    //        }
+    //        AlienImGui::Tooltip("Delete");
+    //    }
+    //}
 }
 
 namespace

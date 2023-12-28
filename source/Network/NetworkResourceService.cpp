@@ -172,10 +172,14 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
         }
     }
 
-    //calc numLeafs for folders
+    //calc numLeafs and numReactions for folders
     for (int i = toInt(treeTOs.size()) - 1; i > 0; --i) {
         auto& entry = treeTOs.at(i);
         if (entry->isLeaf()) {
+            int numReactions = 0;
+            for (auto const& count : entry->getLeaf().numLikesByEmojiType | std::views::values) {
+                numReactions += count;
+            }
             for (int j = i - 1; j >= 0; --j) {
                 auto& otherEntry = treeTOs.at(j);
                 auto numEqualFolders = getNumEqualFolders(entry->folderNames, otherEntry->folderNames);
@@ -183,7 +187,9 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
                     break;
                 }
                 if (numEqualFolders == otherEntry->folderNames.size() && !otherEntry->isLeaf()) {
-                    ++otherEntry->getFolder().numLeafs;
+                    auto& folder = otherEntry->getFolder();
+                    ++folder.numLeafs;
+                    folder.numReactions += numReactions;
                 }
             }
         }
