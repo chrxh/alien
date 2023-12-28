@@ -42,8 +42,9 @@ private:
 
     void processEmojiWindow();
     void processEmojiButton(int emojiType);
-    void processEmojiList(NetworkResourceTreeTO const& to);
+    void processReactionList(NetworkResourceTreeTO const& to);
 
+    void processDownloadButton(BrowserLeaf const& leaf);
     void processActionButtons(NetworkResourceTreeTO const& to);
 
     void processShortenedText(std::string const& text, bool bold = false);
