@@ -9,6 +9,7 @@
 
 struct BrowserFolder
 {
+    int numLeafs;
 };
 
 struct BrowserLeaf

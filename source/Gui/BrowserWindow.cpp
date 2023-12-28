@@ -374,11 +374,17 @@ void _BrowserWindow::processSimulationList()
 
                     ImGui::PopStyleColor();
                 } else {
+                    auto& folder = item->getFolder();
+
                     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
                     processFolderTreeSymbols(item);
                     ImGui::PopStyleColor(1);
 
                     processShortenedText(item->folderNames.back());
+                    ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f));
+                    AlienImGui::Text("(" + std::to_string(folder.numLeafs) + ")");
+                    ImGui::PopStyleColor();
                 }
                 ImGui::PopID();
             }

@@ -172,6 +172,23 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
         }
     }
 
+    //calc numLeafs for folders
+    for (int i = toInt(treeTOs.size()) - 1; i > 0; --i) {
+        auto& entry = treeTOs.at(i);
+        if (entry->isLeaf()) {
+            for (int j = i - 1; j >= 0; --j) {
+                auto& otherEntry = treeTOs.at(j);
+                auto numEqualFolders = getNumEqualFolders(entry->folderNames, otherEntry->folderNames);
+                if (numEqualFolders == 0) {
+                    break;
+                }
+                if (numEqualFolders == otherEntry->folderNames.size() && !otherEntry->isLeaf()) {
+                    ++otherEntry->getFolder().numLeafs;
+                }
+            }
+        }
+    }
+
     //collapse items
     std::unordered_set<std::string> collapsedFolderStrings;
     for(auto const& folderNames : collapsedFolderNames) {
