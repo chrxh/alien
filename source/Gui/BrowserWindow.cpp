@@ -93,6 +93,8 @@ void _BrowserWindow::registerCyclicReferences(LoginDialogWeakPtr const& loginDia
 
     auto firstStart = GlobalSettings::getInstance().getBoolState("windows.browser.first start", true);
     refreshIntern(firstStart);
+    _simulations.collapsedFolderNames = NetworkResourceService::calcInitialCollapsedFolderNames(_simulations.rawTOs);
+    _genomes.collapsedFolderNames = NetworkResourceService::calcInitialCollapsedFolderNames(_genomes.rawTOs);
 }
 
 void _BrowserWindow::onRefresh()
@@ -124,8 +126,8 @@ void _BrowserWindow::refreshIntern(bool withRetry)
                 }
             }
         }
-        calcFilteredSimulationAndGenomeLists();
-        _scheduleCreateBrowserData = true;
+        filteredRawTOs();
+        _scheduleCreateTreeTOs = true;
 
         if (networkService.getLoggedInUserName()) {
             if (!networkService.getEmojiTypeBySimId(_ownEmojiTypeBySimId)) {
@@ -293,10 +295,10 @@ void _BrowserWindow::processSimulationList()
 
         //create table data if necessary
         if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
-            if (sortSpecs->SpecsDirty || _scheduleCreateBrowserData) {
-                sortRemoteSimulationData(_simulations.rawTOs, sortSpecs);
+            if (sortSpecs->SpecsDirty || _scheduleCreateTreeTOs) {
+                sortRawTOs(_simulations.rawTOs, sortSpecs);
                 sortSpecs->SpecsDirty = false;
-                _scheduleCreateBrowserData = false;
+                _scheduleCreateTreeTOs = false;
 
                 _simulations.treeTOs = NetworkResourceService::createTreeTOs(_simulations.rawTOs, _simulations.collapsedFolderNames);
             }
@@ -418,10 +420,10 @@ void _BrowserWindow::processGenomeList()
 
         //create table data if necessary
         if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
-            if (sortSpecs->SpecsDirty || _scheduleCreateBrowserData) {
-                sortRemoteSimulationData(_genomes.rawTOs, sortSpecs);
+            if (sortSpecs->SpecsDirty || _scheduleCreateTreeTOs) {
+                sortRawTOs(_genomes.rawTOs, sortSpecs);
                 sortSpecs->SpecsDirty = false;
-                _scheduleCreateBrowserData = false;
+                _scheduleCreateTreeTOs = false;
 
                 _genomes.treeTOs = NetworkResourceService::createTreeTOs(_genomes.rawTOs, _simulations.collapsedFolderNames);
             }
@@ -588,13 +590,13 @@ void _BrowserWindow::processFilter()
 {
     ImGui::Spacing();
     if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Community creations"), _showCommunityCreations)) {
-        calcFilteredSimulationAndGenomeLists();
-        _scheduleCreateBrowserData = true;
+        filteredRawTOs();
+        _scheduleCreateTreeTOs = true;
     }
     ImGui::SameLine();
     if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter"), _filter)) {
-        calcFilteredSimulationAndGenomeLists();
-        _scheduleCreateBrowserData = true;
+        filteredRawTOs();
+        _scheduleCreateTreeTOs = true;
     }
 }
 
@@ -609,13 +611,13 @@ void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& entry
         case FolderTreeSymbols::Expanded: {
             if (AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f)) {
                 collapsedFolderNames.insert(entry->folderNames);
-                _scheduleCreateBrowserData = true;
+                _scheduleCreateTreeTOs = true;
             }
         } break;
         case FolderTreeSymbols::Collapsed: {
             if (AlienImGui::Button(ICON_FA_PLUS_SQUARE, 20.0f)) {
                 collapsedFolderNames.erase(entry->folderNames);
-                _scheduleCreateBrowserData = true;
+                _scheduleCreateTreeTOs = true;
             }
         } break;
         case FolderTreeSymbols::Continue: {
@@ -933,10 +935,10 @@ void _BrowserWindow::processActivated()
     onRefresh();
 }
 
-void _BrowserWindow::sortRemoteSimulationData(std::vector<NetworkResourceRawTO>& remoteData, ImGuiTableSortSpecs* sortSpecs)
+void _BrowserWindow::sortRawTOs(std::vector<NetworkResourceRawTO>& tos, ImGuiTableSortSpecs* sortSpecs)
 {
-    if (remoteData.size() > 1) {
-        std::sort(remoteData.begin(), remoteData.end(), [&](auto const& left, auto const& right) {
+    if (tos.size() > 1) {
+        std::sort(tos.begin(), tos.end(), [&](auto const& left, auto const& right) {
             return _NetworkResourceRawTO::compare(left, right, sortSpecs) < 0;
         });
     }
@@ -945,6 +947,23 @@ void _BrowserWindow::sortRemoteSimulationData(std::vector<NetworkResourceRawTO>&
 void _BrowserWindow::sortUserList()
 {
     std::sort(_userTOs.begin(), _userTOs.end(), [&](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
+}
+
+void _BrowserWindow::filteredRawTOs()
+{
+    _simulations.rawTOs.clear();
+    _simulations.rawTOs.reserve(_unfilteredRawTOs.size());
+    _genomes.rawTOs.clear();
+    _genomes.rawTOs.reserve(_genomes.rawTOs.size());
+    for (auto const& to : _unfilteredRawTOs) {
+        if (to->matchWithFilter(_filter) && _showCommunityCreations != to->fromRelease) {
+            if (to->type == NetworkResourceType_Simulation) {
+                _simulations.rawTOs.emplace_back(to);
+            } else {
+                _genomes.rawTOs.emplace_back(to);
+            }
+        }
+    }
 }
 
 void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
@@ -1059,7 +1078,7 @@ void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType
 
         _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.id, emojiType));  //invalidate cache entry
         networkService.toggleLikeSimulation(leaf.id, emojiType);
-        //_scheduleCreateBrowserData = true;
+        //_scheduleCreateTreeTOs = true;
     } else {
         _loginDialog.lock()->open();
     }
@@ -1107,22 +1126,5 @@ void _BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
         }
     } else {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::DirectoryColor);
-    }
-}
-
-void _BrowserWindow::calcFilteredSimulationAndGenomeLists()
-{
-    _simulations.rawTOs.clear();
-    _simulations.rawTOs.reserve(_unfilteredRawTOs.size());
-    _genomes.rawTOs.clear();
-    _genomes.rawTOs.reserve(_genomes.rawTOs.size());
-    for (auto const& to : _unfilteredRawTOs) {
-        if (to->matchWithFilter(_filter) &&_showCommunityCreations != to->fromRelease) {
-            if (to->type == NetworkResourceType_Simulation) {
-                _simulations.rawTOs.emplace_back(to);
-            } else {
-                _genomes.rawTOs.emplace_back(to);
-            }
-        }
     }
 }

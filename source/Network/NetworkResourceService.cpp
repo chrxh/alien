@@ -25,16 +25,16 @@ namespace
 }
 
 std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
-    std::vector<NetworkResourceRawTO> const& networkTOs,
+    std::vector<NetworkResourceRawTO> const& rawTOs,
     std::set<std::vector<std::string>> const& collapsedFolderNames)
 {
     std::list<NetworkResourceTreeTO> treeToList;
-    for (auto const& entry : networkTOs) {
+    for (auto const& rawTO : rawTOs) {
 
         //parse folder names
         std::vector<std::string> folderNames;
         std::string nameWithoutFolders;
-        boost::split(folderNames, entry->simName, boost::is_any_of("/"));
+        boost::split(folderNames, rawTO->simName, boost::is_any_of("/"));
         if (!folderNames.empty()) {
             nameWithoutFolders = folderNames.back();
             folderNames.pop_back();
@@ -50,8 +50,8 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
             bestMatchEqualFolders = -1;
             for (int i = 0; i < treeToList.size(); ++i) {
                 --searchIter;
-                auto otherEntry = *searchIter;
-                auto equalFolders = getNumEqualFolders(folderNames, otherEntry->folderNames);
+                auto otherRawTO = *searchIter;
+                auto equalFolders = getNumEqualFolders(folderNames, otherRawTO->folderNames);
                 if (equalFolders < bestMatchEqualFolders) {
                     break;
                 }
@@ -70,7 +70,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
         for (int i = bestMatchEqualFolders; i < folderNames.size(); ++i) {
             auto treeTO = std::make_shared<_NetworkResourceTreeTO>();
             treeTO->folderNames = std::vector(folderNames.begin(), folderNames.begin() + i + 1);
-            treeTO->type = entry->type;
+            treeTO->type = rawTO->type;
             treeTO->node = BrowserFolder();
             bestMatchIter = treeToList.insert(bestMatchIter, treeTO);
             ++bestMatchIter;
@@ -79,20 +79,20 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
         //insert leaf
         auto treeTO = std::make_shared<_NetworkResourceTreeTO>();
         BrowserLeaf leaf{
-            .id = entry->id,
-            .timestamp = entry->timestamp,
-            .userName = entry->userName,
+            .id = rawTO->id,
+            .timestamp = rawTO->timestamp,
+            .userName = rawTO->userName,
             .simName = nameWithoutFolders,
-            .numLikesByEmojiType = entry->numLikesByEmojiType,
-            .numDownloads = entry->numDownloads,
-            .width = entry->width,
-            .height = entry->height,
-            .particles = entry->particles,
-            .contentSize = entry->contentSize,
-            .description = entry->description,
-            .version = entry->version
+            .numLikesByEmojiType = rawTO->numLikesByEmojiType,
+            .numDownloads = rawTO->numDownloads,
+            .width = rawTO->width,
+            .height = rawTO->height,
+            .particles = rawTO->particles,
+            .contentSize = rawTO->contentSize,
+            .description = rawTO->description,
+            .version = rawTO->version
         };
-        treeTO->type = entry->type;
+        treeTO->type = rawTO->type;
         treeTO->folderNames = folderNames;
         treeTO->node = leaf;
         treeToList.insert(bestMatchIter, treeTO);
@@ -101,35 +101,35 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
     //calc folder lines
     std::vector treeTOs(treeToList.begin(), treeToList.end());
     for (int i = 0; i < treeTOs.size(); ++i) {
-        auto& entry = treeTOs.at(i);
+        auto& treeTO = treeTOs.at(i);
 
         if (i == 0) {
-            if (!entry->isLeaf()) {
-                entry->treeSymbols.emplace_back(FolderTreeSymbols::Expanded);
+            if (!treeTO->isLeaf()) {
+                treeTO->treeSymbols.emplace_back(FolderTreeSymbols::Expanded);
             }
         } else {
-            auto const& prevEntry = treeTOs.at(i - 1);
-            auto numEqualFolders = getNumEqualFolders(entry->folderNames, prevEntry->folderNames);
+            auto const& prevTreeTO = treeTOs.at(i - 1);
+            auto numEqualFolders = getNumEqualFolders(treeTO->folderNames, prevTreeTO->folderNames);
 
-            entry->treeSymbols.resize(entry->folderNames.size(), FolderTreeSymbols::None);
+            treeTO->treeSymbols.resize(treeTO->folderNames.size(), FolderTreeSymbols::None);
 
             //calc symbols at position numEqualFolders - 1
             if (numEqualFolders > 0) {
                 int f = numEqualFolders - 1;
-                if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::Expanded) {
-                    entry->treeSymbols.at(f) = FolderTreeSymbols::End;
-                } else if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::End) {
-                    prevEntry->treeSymbols.at(f) = FolderTreeSymbols::Branch;
-                    entry->treeSymbols.at(f) = FolderTreeSymbols::End;
-                } else if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::Branch) {
-                    entry->treeSymbols.at(f) = FolderTreeSymbols::End;
-                } else if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::None) {
+                if (prevTreeTO->treeSymbols.at(f) == FolderTreeSymbols::Expanded) {
+                    treeTO->treeSymbols.at(f) = FolderTreeSymbols::End;
+                } else if (prevTreeTO->treeSymbols.at(f) == FolderTreeSymbols::End) {
+                    prevTreeTO->treeSymbols.at(f) = FolderTreeSymbols::Branch;
+                    treeTO->treeSymbols.at(f) = FolderTreeSymbols::End;
+                } else if (prevTreeTO->treeSymbols.at(f) == FolderTreeSymbols::Branch) {
+                    treeTO->treeSymbols.at(f) = FolderTreeSymbols::End;
+                } else if (prevTreeTO->treeSymbols.at(f) == FolderTreeSymbols::None) {
                     for (int j = i - 1; j >= 0; --j) {
-                        auto& otherEntry = treeTOs.at(j);
-                        if (otherEntry->treeSymbols.at(f) == FolderTreeSymbols::None) {
-                            otherEntry->treeSymbols.at(f) = FolderTreeSymbols::Continue;
-                        } else if (otherEntry->treeSymbols.at(f) == FolderTreeSymbols::End) {
-                            otherEntry->treeSymbols.at(f) = FolderTreeSymbols::Branch;
+                        auto& otherTreeTO = treeTOs.at(j);
+                        if (otherTreeTO->treeSymbols.at(f) == FolderTreeSymbols::None) {
+                            otherTreeTO->treeSymbols.at(f) = FolderTreeSymbols::Continue;
+                        } else if (otherTreeTO->treeSymbols.at(f) == FolderTreeSymbols::End) {
+                            otherTreeTO->treeSymbols.at(f) = FolderTreeSymbols::Branch;
                         } else {
                             break;
                         }
@@ -141,53 +141,53 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
 
             //calc symbols before position numEqualFolders - 1
             for (int f = 0; f < numEqualFolders - 1; ++f) {
-                if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::Branch) {
-                    entry->treeSymbols.at(f) = FolderTreeSymbols::None;
+                if (prevTreeTO->treeSymbols.at(f) == FolderTreeSymbols::Branch) {
+                    treeTO->treeSymbols.at(f) = FolderTreeSymbols::None;
                 }
             }
 
-            if (numEqualFolders < entry->folderNames.size()) {
-                CHECK(numEqualFolders + 1 == entry->folderNames.size());
-                entry->treeSymbols.back() = FolderTreeSymbols::Expanded;
+            if (numEqualFolders < treeTO->folderNames.size()) {
+                CHECK(numEqualFolders + 1 == treeTO->folderNames.size());
+                treeTO->treeSymbols.back() = FolderTreeSymbols::Expanded;
 
-                if (numEqualFolders > 0 && numEqualFolders < prevEntry->folderNames.size()) {
-                    entry->treeSymbols.at(numEqualFolders - 1) = FolderTreeSymbols::End;
+                if (numEqualFolders > 0 && numEqualFolders < prevTreeTO->folderNames.size()) {
+                    treeTO->treeSymbols.at(numEqualFolders - 1) = FolderTreeSymbols::End;
                     bool noneFound = false;
                     for (int j = i - 1; j >= 0; --j) {
-                        auto& otherEntry = treeTOs.at(j);
-                        if (otherEntry->treeSymbols.at(numEqualFolders - 1) == FolderTreeSymbols::None) {
-                            otherEntry->treeSymbols.at(numEqualFolders - 1) = FolderTreeSymbols::Continue;
+                        auto& otherTreeTO = treeTOs.at(j);
+                        if (otherTreeTO->treeSymbols.at(numEqualFolders - 1) == FolderTreeSymbols::None) {
+                            otherTreeTO->treeSymbols.at(numEqualFolders - 1) = FolderTreeSymbols::Continue;
                             noneFound = true;
-                        } else if (noneFound && otherEntry->treeSymbols.at(numEqualFolders - 1) == FolderTreeSymbols::End) {
-                            otherEntry->treeSymbols.at(numEqualFolders - 1) = FolderTreeSymbols::Branch;
+                        } else if (noneFound && otherTreeTO->treeSymbols.at(numEqualFolders - 1) == FolderTreeSymbols::End) {
+                            otherTreeTO->treeSymbols.at(numEqualFolders - 1) = FolderTreeSymbols::Branch;
                         } else {
                             break;
                         }
                     }
                 }
             }
-            if (numEqualFolders > 0 && numEqualFolders < prevEntry->folderNames.size() && numEqualFolders == entry->folderNames.size()) {
-                entry->treeSymbols.back() = FolderTreeSymbols::End;
+            if (numEqualFolders > 0 && numEqualFolders < prevTreeTO->folderNames.size() && numEqualFolders == treeTO->folderNames.size()) {
+                treeTO->treeSymbols.back() = FolderTreeSymbols::End;
             }
         }
     }
 
     //calc numLeafs and numReactions for folders
     for (int i = toInt(treeTOs.size()) - 1; i > 0; --i) {
-        auto& entry = treeTOs.at(i);
-        if (entry->isLeaf()) {
+        auto& treeTO = treeTOs.at(i);
+        if (treeTO->isLeaf()) {
             int numReactions = 0;
-            for (auto const& count : entry->getLeaf().numLikesByEmojiType | std::views::values) {
+            for (auto const& count : treeTO->getLeaf().numLikesByEmojiType | std::views::values) {
                 numReactions += count;
             }
             for (int j = i - 1; j >= 0; --j) {
-                auto& otherEntry = treeTOs.at(j);
-                auto numEqualFolders = getNumEqualFolders(entry->folderNames, otherEntry->folderNames);
+                auto& otherTreeTO = treeTOs.at(j);
+                auto numEqualFolders = getNumEqualFolders(treeTO->folderNames, otherTreeTO->folderNames);
                 if (numEqualFolders == 0) {
                     break;
                 }
-                if (numEqualFolders == otherEntry->folderNames.size() && !otherEntry->isLeaf()) {
-                    auto& folder = otherEntry->getFolder();
+                if (numEqualFolders == otherTreeTO->folderNames.size() && !otherTreeTO->isLeaf()) {
+                    auto& folder = otherTreeTO->getFolder();
                     ++folder.numLeafs;
                     folder.numReactions += numReactions;
                 }
@@ -203,13 +203,13 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
 
     std::vector<NetworkResourceTreeTO> result;
     result.reserve(treeTOs.size());
-    for (auto const& entry : treeTOs) {
+    for (auto const& treeTO : treeTOs) {
         auto isVisible = true;
 
         std::string folderString;
-        auto numSolderToCheck = entry->isLeaf() ? entry->folderNames.size() : entry->folderNames.size() - 1;
+        auto numSolderToCheck = treeTO->isLeaf() ? treeTO->folderNames.size() : treeTO->folderNames.size() - 1;
         for (size_t i = 0; i < numSolderToCheck; ++i) {
-            folderString.append(entry->folderNames.at(i));
+            folderString.append(treeTO->folderNames.at(i));
             if (collapsedFolderStrings.contains(folderString)) {
                 isVisible = false;
             }
@@ -218,14 +218,27 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
             }
         }
 
-        if (!entry->isLeaf()) {
-            auto folderString = boost::join(entry->folderNames, "/");
+        if (!treeTO->isLeaf()) {
+            auto folderString = boost::join(treeTO->folderNames, "/");
             if (collapsedFolderStrings.contains(folderString)) {
-                entry->treeSymbols.back() = FolderTreeSymbols::Collapsed;
+                treeTO->treeSymbols.back() = FolderTreeSymbols::Collapsed;
             }
         }
         if (isVisible) {
-            result.emplace_back(entry);
+            result.emplace_back(treeTO);
+        }
+    }
+    return result;
+}
+
+std::set<std::vector<std::string>> NetworkResourceService::calcInitialCollapsedFolderNames(std::vector<NetworkResourceRawTO> const& rawTOs)
+{
+    std::set<std::vector<std::string>> result;
+    for (auto const& rawTO : rawTOs) {
+        std::vector<std::string> folderNames;
+        boost::split(folderNames, rawTO->simName, boost::is_any_of("/"));
+        for (int i = 0; i < toInt(folderNames.size()) - 2; ++i) {
+            result.insert(std::vector(folderNames.begin(), folderNames.begin() + 2 + i));
         }
     }
     return result;
