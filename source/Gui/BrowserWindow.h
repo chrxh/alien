@@ -27,6 +27,14 @@ public:
     void onRefresh();
 
 private:
+    struct ResourceData
+    {
+        int numResources = 0;
+        std::vector<NetworkResourceRawTO> rawTOs;
+        std::vector<NetworkResourceTreeTO> treeTOs;
+        std::set<std::vector<std::string>> collapsedFolderNames;
+    };
+
     void refreshIntern(bool withRetry);
 
     void processIntern() override;
@@ -54,8 +62,10 @@ private:
 
     void processActivated() override;
 
-    void sortRemoteSimulationData(std::vector<NetworkResourceRawTO>& remoteData, ImGuiTableSortSpecs* sortSpecs);
+    void sortRawTOs(std::vector<NetworkResourceRawTO>& tos, ImGuiTableSortSpecs* sortSpecs);
     void sortUserList();
+
+    void filteredRawTOs();
 
     void onDownloadItem(BrowserLeaf const& leaf);
     void onDeleteItem(BrowserLeaf const& leaf);
@@ -66,26 +76,17 @@ private:
     std::string getUserNamesToEmojiType(std::string const& simId, int emojiType);
 
     void pushTextColor(NetworkResourceTreeTO const& to);
-    void calcFilteredSimulationAndGenomeLists();
-
 
     NetworkResourceType _selectedDataType = NetworkResourceType_Simulation; 
     bool _scheduleRefresh = false;
-    bool _scheduleCreateBrowserData = false;
+    bool _scheduleCreateTreeTOs = false;
+
     std::string _filter;
     bool _showCommunityCreations = false;
     float _userTableWidth = 0;
     std::unordered_set<std::string> _selectionIds;
     std::unordered_map<std::string, int> _ownEmojiTypeBySimId;
     std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByEmojiTypeBySimIdCache;
-
-    struct ResourceData
-    {
-        int numResources = 0;
-        std::vector<NetworkResourceRawTO> rawTOs;
-        std::vector<NetworkResourceTreeTO> treeTOs;
-        std::set<std::vector<std::string>> collapsedFolderNames;
-    };
 
     std::vector<NetworkResourceRawTO> _unfilteredRawTOs;
     ResourceData _genomes;
