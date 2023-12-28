@@ -26,7 +26,7 @@ namespace
 
 std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
     std::vector<NetworkResourceRawTO> const& networkTOs,
-    std::vector<std::vector<std::string>> const& expandedFolderNames)
+    std::set<std::vector<std::string>> const& collapsedFolderNames)
 {
     std::list<NetworkResourceTreeTO> treeToList;
     for (auto const& entry : networkTOs) {
@@ -105,7 +105,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
 
         if (i == 0) {
             if (!entry->isLeaf()) {
-                entry->treeSymbols.emplace_back(FolderTreeSymbols::Collapsed);
+                entry->treeSymbols.emplace_back(FolderTreeSymbols::Expanded);
             }
         } else {
             auto const& prevEntry = treeTOs.at(i - 1);
@@ -113,10 +113,10 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
 
             entry->treeSymbols.resize(entry->folderNames.size(), FolderTreeSymbols::None);
 
-            //process until numEqualFolders - 1
+            //calc symbols at position numEqualFolders - 1
             if (numEqualFolders > 0) {
                 int f = numEqualFolders - 1;
-                if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::Collapsed) {
+                if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::Expanded) {
                     entry->treeSymbols.at(f) = FolderTreeSymbols::End;
                 } else if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::End) {
                     prevEntry->treeSymbols.at(f) = FolderTreeSymbols::Branch;
@@ -139,6 +139,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
 
             }
 
+            //calc symbols before position numEqualFolders - 1
             for (int f = 0; f < numEqualFolders - 1; ++f) {
                 if (prevEntry->treeSymbols.at(f) == FolderTreeSymbols::Branch) {
                     entry->treeSymbols.at(f) = FolderTreeSymbols::None;
@@ -147,7 +148,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
 
             if (numEqualFolders < entry->folderNames.size()) {
                 CHECK(numEqualFolders + 1 == entry->folderNames.size());
-                entry->treeSymbols.back() = FolderTreeSymbols::Collapsed;
+                entry->treeSymbols.back() = FolderTreeSymbols::Expanded;
 
                 if (numEqualFolders > 0 && numEqualFolders < prevEntry->folderNames.size()) {
                     entry->treeSymbols.at(numEqualFolders - 1) = FolderTreeSymbols::End;
@@ -172,37 +173,32 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
     }
 
     //collapse items
-    std::unordered_set<std::string> expandedFolderStrings;
-    for(auto const& folderNames : expandedFolderNames) {
-        expandedFolderStrings.insert(boost::join(folderNames, "/"));
+    std::unordered_set<std::string> collapsedFolderStrings;
+    for(auto const& folderNames : collapsedFolderNames) {
+        collapsedFolderStrings.insert(boost::join(folderNames, "/"));
     }
 
     std::vector<NetworkResourceTreeTO> result;
     result.reserve(treeTOs.size());
     for (auto const& entry : treeTOs) {
-        auto isVisible = false;
-        if (entry->isLeaf()) {
-            if (entry->folderNames.empty()) {
-                isVisible = true;
+        auto isVisible = true;
+
+        std::string folderString;
+        auto numSolderToCheck = entry->isLeaf() ? entry->folderNames.size() : entry->folderNames.size() - 1;
+        for (size_t i = 0; i < numSolderToCheck; ++i) {
+            folderString.append(entry->folderNames.at(i));
+            if (collapsedFolderStrings.contains(folderString)) {
+                isVisible = false;
             }
+            if (i < numSolderToCheck) {
+                folderString.append("/");
+            }
+        }
+
+        if (!entry->isLeaf()) {
             auto folderString = boost::join(entry->folderNames, "/");
-            if (expandedFolderStrings.contains(folderString)) {
-                isVisible = true;
-            }
-        } else {
-            auto size = entry->folderNames.size();
-            if (size == 1) {
-                isVisible = true;
-            }
-            if (size > 1) {
-                auto folderString = boost::join(std::vector(entry->folderNames.begin(), entry->folderNames.end() - 1), "/");
-                if (expandedFolderStrings.contains(folderString)) {
-                    isVisible = true;
-                }
-            }
-            auto folderString = boost::join(entry->folderNames, "/");
-            if (expandedFolderStrings.contains(folderString)) {
-                entry->treeSymbols.back() = FolderTreeSymbols::Expanded;
+            if (collapsedFolderStrings.contains(folderString)) {
+                entry->treeSymbols.back() = FolderTreeSymbols::Collapsed;
             }
         }
         if (isVisible) {
