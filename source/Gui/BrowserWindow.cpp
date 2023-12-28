@@ -83,6 +83,10 @@ _BrowserWindow::~_BrowserWindow()
     GlobalSettings::getInstance().setBoolState("windows.browser.show community creations", _showCommunityCreations);
     GlobalSettings::getInstance().setBoolState("windows.browser.first start", false);
     GlobalSettings::getInstance().setFloatState("windows.browser.user table width", _userTableWidth);
+    GlobalSettings::getInstance().setStringState(
+        "windows.browser.simulations.collapsed folders", NetworkResourceService::convertFolderNamesToSettings(_simulations.collapsedFolderNames));
+    GlobalSettings::getInstance().setStringState(
+        "windows.browser.genomes.collapsed folders", NetworkResourceService::convertFolderNamesToSettings(_genomes.collapsedFolderNames));
     NetworkService::getInstance().shutdown();
 }
 
@@ -93,8 +97,16 @@ void _BrowserWindow::registerCyclicReferences(LoginDialogWeakPtr const& loginDia
 
     auto firstStart = GlobalSettings::getInstance().getBoolState("windows.browser.first start", true);
     refreshIntern(firstStart);
-    _simulations.collapsedFolderNames = NetworkResourceService::calcInitialCollapsedFolderNames(_simulations.rawTOs);
-    _genomes.collapsedFolderNames = NetworkResourceService::calcInitialCollapsedFolderNames(_genomes.rawTOs);
+
+    auto initialCollapsedSimulationFolders = NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::calcInitialCollapsedFolderNames(_simulations.rawTOs));
+    auto collapsedSimulationFolders = GlobalSettings::getInstance().getStringState("windows.browser.simulations.collapsed folders", initialCollapsedSimulationFolders);
+    _simulations.collapsedFolderNames = NetworkResourceService::convertSettingsToFolderNames(collapsedSimulationFolders);
+
+    auto initialCollapsedGenomeFolders =
+        NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::calcInitialCollapsedFolderNames(_simulations.rawTOs));
+    auto collapsedGenomeFolders =
+        GlobalSettings::getInstance().getStringState("windows.browser.genomes.collapsed folders", initialCollapsedGenomeFolders);
+    _genomes.collapsedFolderNames = NetworkResourceService::convertSettingsToFolderNames(collapsedGenomeFolders);
 }
 
 void _BrowserWindow::onRefresh()
@@ -126,7 +138,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
                 }
             }
         }
-        filteredRawTOs();
+        filterRawTOs();
         _scheduleCreateTreeTOs = true;
 
         if (networkService.getLoggedInUserName()) {
@@ -274,7 +286,7 @@ void _BrowserWindow::processSimulationList()
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, 0), 0.0f)) {
+    if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
         ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Description);
         ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_Likes);
@@ -362,8 +374,8 @@ void _BrowserWindow::processSimulationList()
                     ImGui::PopStyleColor();
                     ImGui::TableNextColumn();
                     ImGui::TableNextColumn();
-                    //ImGui::Dummy({scale(18.0f), 0});
-                    //ImGui::SameLine();
+                    auto pos = ImGui::GetCursorScreenPos();
+                    ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
                     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
                     AlienImGui::Text("(" + std::to_string(folder.numReactions) + ")");
                     ImGui::PopStyleColor();
@@ -385,7 +397,7 @@ void _BrowserWindow::processGenomeList()
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Browser", 10, flags, ImVec2(0, 0), 0.0f)) {
+    if (ImGui::BeginTable("Browser", 9, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn(
             "Genome",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
@@ -590,12 +602,12 @@ void _BrowserWindow::processFilter()
 {
     ImGui::Spacing();
     if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Community creations"), _showCommunityCreations)) {
-        filteredRawTOs();
+        filterRawTOs();
         _scheduleCreateTreeTOs = true;
     }
     ImGui::SameLine();
     if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter"), _filter)) {
-        filteredRawTOs();
+        filterRawTOs();
         _scheduleCreateTreeTOs = true;
     }
 }
@@ -949,7 +961,7 @@ void _BrowserWindow::sortUserList()
     std::sort(_userTOs.begin(), _userTOs.end(), [&](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
 }
 
-void _BrowserWindow::filteredRawTOs()
+void _BrowserWindow::filterRawTOs()
 {
     _simulations.rawTOs.clear();
     _simulations.rawTOs.reserve(_unfilteredRawTOs.size());

@@ -243,3 +243,26 @@ std::set<std::vector<std::string>> NetworkResourceService::calcInitialCollapsedF
     }
     return result;
 }
+
+std::string NetworkResourceService::convertFolderNamesToSettings(std::set<std::vector<std::string>> const& data)
+{
+    std::vector<std::string> parts;
+    for (auto const& folderNames : data) {
+        parts.emplace_back(boost::join(folderNames, "/"));
+    }
+    return boost::join(parts, "\\");
+}
+
+std::set<std::vector<std::string>> NetworkResourceService::convertSettingsToFolderNames(std::string const& data)
+{
+    std::vector<std::string> parts;
+    boost::split(parts, data, boost::is_any_of("\\"));
+
+    std::set<std::vector<std::string>> result;
+    for (auto const& part : parts) {
+        std::vector<std::string> splittedParts;
+        boost::split(splittedParts, part, boost::is_any_of("/"));
+        result.insert(splittedParts);
+    }
+    return result;
+}
