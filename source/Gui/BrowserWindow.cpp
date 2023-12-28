@@ -314,7 +314,7 @@ void _BrowserWindow::processSimulationList()
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateBrowserData = false;
 
-                _simulationTreeTOs = NetworkResourceService::createTreeTOs(_filteredNetworkSimulationTOs, _expandedFolderNames);
+                _simulationTreeTOs = NetworkResourceService::createTreeTOs(_filteredNetworkSimulationTOs, _collapsedFolderNames);
             }
         }
         ImGuiListClipper clipper;
@@ -327,10 +327,10 @@ void _BrowserWindow::processSimulationList()
                 ImGui::TableNextRow(0, scale(RowHeight));
 
                 ImGui::TableNextColumn();
-                ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
-                static bool selected = true;
-                ImGui::Selectable("", &selected, selectable_flags, ImVec2(0, scale(RowHeight - 3.0f)));
-                ImGui::SameLine();
+                //ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+                //static bool selected = true;
+                //ImGui::Selectable("", &selected, selectable_flags, ImVec2(0, scale(RowHeight - 3.0f)));
+                //ImGui::SameLine();
 
                 if (item->isLeaf()) {
                     auto& leaf = item->getLeaf();
@@ -436,7 +436,7 @@ void _BrowserWindow::processGenomeList()
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateBrowserData = false;
 
-                _genomeTreeTOs = NetworkResourceService::createTreeTOs(_filteredNetworkGenomeTOs, _expandedFolderNames);
+                _genomeTreeTOs = NetworkResourceService::createTreeTOs(_filteredNetworkGenomeTOs, _collapsedFolderNames);
             }
         }
         ImGuiListClipper clipper;
@@ -1061,32 +1061,33 @@ void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO& entry)
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImGuiStyle& style = ImGui::GetStyle();
         switch (folderLine) {
-        case FolderTreeSymbols::Collapsed: {
-            if (AlienImGui::Button(ICON_FA_PLUS_SQUARE, 20.0f)) {
-                _expandedFolderNames.emplace_back(entry->folderNames);
+        case FolderTreeSymbols::Expanded: {
+            if (AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f)) {
+                _collapsedFolderNames.insert(entry->folderNames);
                 _scheduleCreateBrowserData = true;
             }
         } break;
-        case FolderTreeSymbols::Expanded: {
-            if (AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f)) {
-                std::vector<std::vector<std::string>> newExpandedFolderNames;
-                auto const& folderNamesToCollapse = entry->folderNames;
-                for (auto const& expandedFolderNames : _expandedFolderNames) {
-                    auto adopt = false;
-                    if (expandedFolderNames.size() < folderNamesToCollapse.size()) {
-                        adopt = true;
-                    } else {
-                        for (int i = 0; i < folderNamesToCollapse.size(); ++i) {
-                            if (expandedFolderNames.at(i) != folderNamesToCollapse.at(i)) {
-                                adopt = true;
-                            }
-                        }
-                    }
-                    if (adopt) {
-                        newExpandedFolderNames.emplace_back(expandedFolderNames);
-                    }
-                }
-                _expandedFolderNames = newExpandedFolderNames;
+        case FolderTreeSymbols::Collapsed: {
+            if (AlienImGui::Button(ICON_FA_PLUS_SQUARE, 20.0f)) {
+                _collapsedFolderNames.erase(entry->folderNames);
+                //std::vector<std::vector<std::string>> newExpandedFolderNames;
+                //auto const& folderNamesToCollapse = entry->folderNames;
+                //for (auto const& expandedFolderNames : _collapsedFolderNames) {
+                //    auto adopt = false;
+                //    if (expandedFolderNames.size() < folderNamesToCollapse.size()) {
+                //        adopt = true;
+                //    } else {
+                //        for (int i = 0; i < folderNamesToCollapse.size(); ++i) {
+                //            if (expandedFolderNames.at(i) != folderNamesToCollapse.at(i)) {
+                //                adopt = true;
+                //            }
+                //        }
+                //    }
+                //    if (adopt) {
+                //        newExpandedFolderNames.emplace_back(expandedFolderNames);
+                //    }
+                //}
+                //_collapsedFolderNames = newExpandedFolderNames;
                 _scheduleCreateBrowserData = true;
             }
         } break;
