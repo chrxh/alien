@@ -274,34 +274,21 @@ void _BrowserWindow::processSimulationList()
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
     if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, 0), 0.0f)) {
-        ImGui::TableSetupColumn(
-            "Simulation",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(210.0f),
-            NetworkResourceColumnId_SimulationName);
-        ImGui::TableSetupColumn(
-            "Description",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(200.0f),
-            NetworkResourceColumnId_Description);
-        ImGui::TableSetupColumn(
-            "Reactions", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_Likes);
+        ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(210.0f), NetworkResourceColumnId_SimulationName);
+        ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(200.0f), NetworkResourceColumnId_Description);
+        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_Likes);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             scale(135.0f),
             NetworkResourceColumnId_Timestamp);
-        ImGui::TableSetupColumn(
-            "User name",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(120.0f),
-            NetworkResourceColumnId_UserName);
-        ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
-        ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Width);
-        ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Height);
-        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Particles);
-        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_FileSize);
-        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Version);
+        ImGui::TableSetupColumn("User name", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_UserName);
+        ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
+        ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Width);
+        ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Height);
+        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Particles);
+        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_FileSize);
+        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Version);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
