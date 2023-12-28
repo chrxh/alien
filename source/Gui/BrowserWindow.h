@@ -40,6 +40,7 @@ private:
     void processFilter();
     void processToolbar();
 
+    void processFolderTreeSymbols(NetworkResourceTreeTO const& entry, std::set<std::vector<std::string>>& collapsedFolderNames);
     void processEmojiWindow();
     void processEmojiButton(int emojiType);
     void processReactionList(NetworkResourceTreeTO const& to);
@@ -67,8 +68,6 @@ private:
     void pushTextColor(NetworkResourceTreeTO const& to);
     void calcFilteredSimulationAndGenomeLists();
 
-    void processFolderTreeSymbols(NetworkResourceTreeTO& entry);
-
 
     NetworkResourceType _selectedDataType = NetworkResourceType_Simulation; 
     bool _scheduleRefresh = false;
@@ -80,15 +79,17 @@ private:
     std::unordered_map<std::string, int> _ownEmojiTypeBySimId;
     std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByEmojiTypeBySimIdCache;
 
-    int _numSimulations = 0;
-    int _numGenomes = 0;
-    std::vector<NetworkResourceRawTO> _rawNetworkResourceRawTOs;
-    std::vector<NetworkResourceRawTO> _filteredNetworkSimulationTOs;
-    std::vector<NetworkResourceRawTO> _filteredNetworkGenomeTOs;
-    std::set<std::vector<std::string>> _collapsedFolderNames;
+    struct ResourceData
+    {
+        int numResources = 0;
+        std::vector<NetworkResourceRawTO> rawTOs;
+        std::vector<NetworkResourceTreeTO> treeTOs;
+        std::set<std::vector<std::string>> collapsedFolderNames;
+    };
 
-    std::vector<NetworkResourceTreeTO> _simulationTreeTOs;
-    std::vector<NetworkResourceTreeTO> _genomeTreeTOs;
+    std::vector<NetworkResourceRawTO> _unfilteredRawTOs;
+    ResourceData _genomes;
+    ResourceData _simulations;
 
     std::vector<UserTO> _userTOs;
 

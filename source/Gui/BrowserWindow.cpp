@@ -106,7 +106,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         auto& networkService = NetworkService::getInstance();
         networkService.refreshLogin();
 
-        bool success = networkService.getRemoteSimulationList(_rawNetworkResourceRawTOs, withRetry);
+        bool success = networkService.getRemoteSimulationList(_unfilteredRawTOs, withRetry);
         success &= networkService.getUserList(_userTOs, withRetry);
 
         if (!success) {
@@ -114,13 +114,13 @@ void _BrowserWindow::refreshIntern(bool withRetry)
                 MessageDialog::getInstance().information("Error", "Failed to retrieve browser data. Please try again.");
             }
         } else {
-            _numSimulations = 0;
-            _numGenomes = 0;
-            for (auto const& entry : _rawNetworkResourceRawTOs) {
+            _simulations.numResources = 0;
+            _genomes.numResources = 0;
+            for (auto const& entry : _unfilteredRawTOs) {
                 if (entry->type == NetworkResourceType_Simulation) {
-                    ++_numSimulations;
+                    ++_simulations.numResources;
                 } else {
-                    ++_numGenomes;
+                    ++_genomes.numResources;
                 }
             }
         }
@@ -268,21 +268,20 @@ void _BrowserWindow::processSimulationList()
 {
     ImGui::PushID("SimulationList");
     _selectedDataType = NetworkResourceType_Simulation;
-    auto& styleRepository = StyleRepository::getInstance();
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
     if (ImGui::BeginTable("Browser", 12, flags, ImVec2(0, 0), 0.0f)) {
-        ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(210.0f), NetworkResourceColumnId_SimulationName);
-        ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(200.0f), NetworkResourceColumnId_Description);
-        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_Likes);
+        ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
+        ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Description);
+        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_Likes);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             scale(135.0f),
             NetworkResourceColumnId_Timestamp);
-        ImGui::TableSetupColumn("User name", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_UserName);
+        ImGui::TableSetupColumn("User name", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_UserName);
         ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
         ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Width);
         ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Height);
@@ -295,18 +294,18 @@ void _BrowserWindow::processSimulationList()
         //create table data if necessary
         if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
             if (sortSpecs->SpecsDirty || _scheduleCreateBrowserData) {
-                sortRemoteSimulationData(_filteredNetworkSimulationTOs, sortSpecs);
+                sortRemoteSimulationData(_simulations.rawTOs, sortSpecs);
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateBrowserData = false;
 
-                _simulationTreeTOs = NetworkResourceService::createTreeTOs(_filteredNetworkSimulationTOs, _collapsedFolderNames);
+                _simulations.treeTOs = NetworkResourceService::createTreeTOs(_simulations.rawTOs, _simulations.collapsedFolderNames);
             }
         }
         ImGuiListClipper clipper;
-        clipper.Begin(_simulationTreeTOs.size());
+        clipper.Begin(_simulations.treeTOs.size());
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto item = _simulationTreeTOs[row];
+                auto item = _simulations.treeTOs[row];
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
@@ -320,7 +319,7 @@ void _BrowserWindow::processSimulationList()
                 if (item->isLeaf()) {
                     auto& leaf = item->getLeaf();
 
-                    processFolderTreeSymbols(item);
+                    processFolderTreeSymbols(item, _simulations.collapsedFolderNames);
                     processDownloadButton(leaf);
                     ImGui::SameLine();
                     processShortenedText(leaf.simName);
@@ -352,7 +351,7 @@ void _BrowserWindow::processSimulationList()
                 } else {
                     auto& folder = item->getFolder();
 
-                    processFolderTreeSymbols(item);
+                    processFolderTreeSymbols(item, _simulations.collapsedFolderNames);
                     processShortenedText(item->folderNames.back());
                     ImGui::SameLine();
                     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
@@ -420,19 +419,19 @@ void _BrowserWindow::processGenomeList()
         //create table data if necessary
         if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
             if (sortSpecs->SpecsDirty || _scheduleCreateBrowserData) {
-                sortRemoteSimulationData(_filteredNetworkGenomeTOs, sortSpecs);
+                sortRemoteSimulationData(_genomes.rawTOs, sortSpecs);
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateBrowserData = false;
 
-                _genomeTreeTOs = NetworkResourceService::createTreeTOs(_filteredNetworkGenomeTOs, _collapsedFolderNames);
+                _genomes.treeTOs = NetworkResourceService::createTreeTOs(_genomes.rawTOs, _simulations.collapsedFolderNames);
             }
         }
         ImGuiListClipper clipper;
-        clipper.Begin(_genomeTreeTOs.size());
+        clipper.Begin(_genomes.treeTOs.size());
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
 
-                auto& item = _genomeTreeTOs[row];
+                auto& item = _genomes.treeTOs[row];
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
@@ -560,10 +559,10 @@ void _BrowserWindow::processStatus()
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
         std::string statusText;
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-        statusText += std::to_string(_numSimulations) + " simulations found";
+        statusText += std::to_string(_simulations.numResources) + " simulations found";
 
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-        statusText += std::to_string(_numGenomes) + " genomes found";
+        statusText += std::to_string(_genomes.numResources) + " genomes found";
 
         statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
         statusText += std::to_string(_userTOs.size()) + " simulators found";
@@ -599,6 +598,73 @@ void _BrowserWindow::processFilter()
     }
 }
 
+void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& entry, std::set<std::vector<std::string>>& collapsedFolderNames)
+{
+    auto const& treeSymbols = entry->treeSymbols;
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
+    for (auto const& folderLine : treeSymbols) {
+        ImVec2 pos = ImGui::GetCursorScreenPos();
+        ImGuiStyle& style = ImGui::GetStyle();
+        switch (folderLine) {
+        case FolderTreeSymbols::Expanded: {
+            if (AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f)) {
+                collapsedFolderNames.insert(entry->folderNames);
+                _scheduleCreateBrowserData = true;
+            }
+        } break;
+        case FolderTreeSymbols::Collapsed: {
+            if (AlienImGui::Button(ICON_FA_PLUS_SQUARE, 20.0f)) {
+                collapsedFolderNames.erase(entry->folderNames);
+                _scheduleCreateBrowserData = true;
+            }
+        } break;
+        case FolderTreeSymbols::Continue: {
+            ImGui::GetWindowDrawList()->AddRectFilled(
+                ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
+                Const::BrowserFolderLineColor);
+            ImGui::Dummy({scale(20.0f), 0});
+        } break;
+        case FolderTreeSymbols::Branch: {
+            ImGui::GetWindowDrawList()->AddRectFilled(
+                ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
+                Const::BrowserFolderLineColor);
+            ImGui::GetWindowDrawList()->AddRectFilled(
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
+                Const::BrowserFolderLineColor);
+            ImGui::GetWindowDrawList()->AddRectFilled(
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f - 0.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y - scale(0.5f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f + 2.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(2.0f)),
+                Const::BrowserFolderLineColor);
+            ImGui::Dummy({scale(20.0f), 0});
+        } break;
+        case FolderTreeSymbols::End: {
+            ImGui::GetWindowDrawList()->AddRectFilled(
+                ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
+                Const::BrowserFolderLineColor);
+            ImGui::GetWindowDrawList()->AddRectFilled(
+                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
+                Const::BrowserFolderLineColor);
+            ImGui::GetWindowDrawList()->AddRectFilled(
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f - 0.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y - scale(0.5f)),
+                ImVec2(pos.x + style.FramePadding.x + scale(20.0f + 2.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(2.0f)),
+                Const::BrowserFolderLineColor);
+            ImGui::Dummy({scale(20.0f), 0});
+        } break;
+        case FolderTreeSymbols::None: {
+            ImGui::Dummy({scale(20.0f), 0});
+        } break;
+        default: {
+        } break;
+        }
+        ImGui::SameLine();
+    }
+    ImGui::PopStyleColor(1);
+}
 
 void _BrowserWindow::processEmojiWindow()
 {
@@ -1046,85 +1112,17 @@ void _BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
 
 void _BrowserWindow::calcFilteredSimulationAndGenomeLists()
 {
-    _filteredNetworkSimulationTOs.clear();
-    _filteredNetworkSimulationTOs.reserve(_rawNetworkResourceRawTOs.size());
-    _filteredNetworkGenomeTOs.clear();
-    _filteredNetworkGenomeTOs.reserve(_filteredNetworkGenomeTOs.size());
-    for (auto const& to : _rawNetworkResourceRawTOs) {
+    _simulations.rawTOs.clear();
+    _simulations.rawTOs.reserve(_unfilteredRawTOs.size());
+    _genomes.rawTOs.clear();
+    _genomes.rawTOs.reserve(_genomes.rawTOs.size());
+    for (auto const& to : _unfilteredRawTOs) {
         if (to->matchWithFilter(_filter) &&_showCommunityCreations != to->fromRelease) {
             if (to->type == NetworkResourceType_Simulation) {
-                _filteredNetworkSimulationTOs.emplace_back(to);
+                _simulations.rawTOs.emplace_back(to);
             } else {
-                _filteredNetworkGenomeTOs.emplace_back(to);
+                _genomes.rawTOs.emplace_back(to);
             }
         }
     }
-}
-
-void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO& entry)
-{
-    auto const& treeSymbols = entry->treeSymbols;
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
-    for (auto const& folderLine : treeSymbols) {
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-        ImGuiStyle& style = ImGui::GetStyle();
-        switch (folderLine) {
-        case FolderTreeSymbols::Expanded: {
-            if (AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f)) {
-                _collapsedFolderNames.insert(entry->folderNames);
-                _scheduleCreateBrowserData = true;
-            }
-        } break;
-        case FolderTreeSymbols::Collapsed: {
-            if (AlienImGui::Button(ICON_FA_PLUS_SQUARE, 20.0f)) {
-                _collapsedFolderNames.erase(entry->folderNames);
-                _scheduleCreateBrowserData = true;
-            }
-        } break;
-        case FolderTreeSymbols::Continue: {
-            ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
-                Const::BrowserFolderLineColor);
-            ImGui::Dummy({scale(20.0f), 0});
-        } break;
-        case FolderTreeSymbols::Branch: {
-            ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
-                Const::BrowserFolderLineColor);
-            ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y),
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
-                Const::BrowserFolderLineColor);
-            ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f - 0.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y - scale(0.5f)),
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f + 2.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(2.0f)),
-                Const::BrowserFolderLineColor);
-            ImGui::Dummy({scale(20.0f), 0});
-        } break;
-        case FolderTreeSymbols::End: {
-            ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
-                Const::BrowserFolderLineColor);
-            ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y),
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
-                Const::BrowserFolderLineColor);
-            ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f - 0.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y - scale(0.5f)),
-                ImVec2(pos.x + style.FramePadding.x + scale(20.0f + 2.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(2.0f)),
-                Const::BrowserFolderLineColor);
-            ImGui::Dummy({scale(20.0f), 0});
-        } break;
-        case FolderTreeSymbols::None: {
-            ImGui::Dummy({scale(20.0f), 0});
-        } break;
-        default: {
-        } break;
-        }
-        ImGui::SameLine();
-    }
-    ImGui::PopStyleColor(1);
 }
