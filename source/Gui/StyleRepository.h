@@ -79,7 +79,7 @@ namespace Const
     ImColor const BrowserFolderPropertiesTextColor = ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f);
     ImColor const BrowserFolderSymbolColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
 
-    ImColor const BrowserVersionOkTextColor = ImColor::HSV(0.58f, 0.0f, 1.0f);
+    ImColor const BrowserVersionOkTextColor = ImColor::HSV(0.58f, 0.2f, 1.0f);
     ImColor const BrowserVersionOutdatedTextColor = ImColor::HSV(0.0f, 0.0f, 0.6f);
     ImColor const BrowserVersionNewerTextColor = ImColor::HSV(0.0f, 0.2f, 1.0f);
 
