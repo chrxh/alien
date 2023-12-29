@@ -17,6 +17,11 @@ namespace Const
     int64_t const TextDecentColor = 0xff909090;
     int64_t const TextInfoColor = 0xff308787;
 
+    ImColor const HeaderColor = ImColor::HSV(0.58f, 0.7f, 0.3f);
+    ImColor const HeaderActiveColor = ImColor::HSV(0.58f, 0.7f, 0.5f);
+    ImColor const HeaderHoveredColor = ImColor::HSV(0.58f, 0.7f, 0.4f);
+
+
     ImColor const MenuButtonColor = ImColor::HSV(0.6f, 0.6f, 0.5f);
     ImColor const MenuButtonHoveredColor = ImColor::HSV(0.6f, 1.0f, 1.0f);
     ImColor const MenuButtonActiveColor = ImColor::HSV(0.6f, 0.8f, 0.7f);
@@ -55,17 +60,8 @@ namespace Const
     ImColor const InspectorLineColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);
     ImColor const InspectorRectColor = ImColor::HSV(0.54f, 0.0f, 0.5f, 1.0f);
 
-    ImColor const LikeButtonTextColor = ImColor::HSV(0.16f, 1.0f, 1.0f, 1.0f);
-    ImColor const NoLikeButtonTextColor = ImColor::HSV(0.16f, 0.5f, 0.5f, 1.0f);
-    ImColor const DownloadButtonTextColor = ImColor::HSV(0.55f, 0.6f, 1.0f, 1.0f);
-    ImColor const DeleteButtonTextColor = ImColor::HSV(0.0f, 0.6f, 0.8f, 1.0f);
-
     ImColor const NavigationCursorColor = ImColor::HSV(0, 0.0f, 1.0f, 0.4f);
     ImColor const EditCursorColor = ImColor::HSV(0.6, 0.6f, 1.0f, 0.7f);
-
-    ImColor const VersionOkColor = ImColor::HSV(0.58f, 0.0f, 1.0f);
-    ImColor const VersionOutdatedColor = ImColor::HSV(0.0f, 0.0f, 0.6f);
-    ImColor const VersionNewerColor = ImColor::HSV(0.0f, 0.2f, 1.0f);
 
     ImColor const GenomePreviewConnectionColor = ImColor::HSV(0, 0, 0.5f);
     ImColor const GenomePreviewDotSymbolColor = ImColor::HSV(0, 0, 0.7f);
@@ -80,14 +76,28 @@ namespace Const
     ImColor const NeuronEditorZeroLinePlotColor = ImColor::HSV(0.6f, 1.0f, 0.7f);
     ImColor const NeuronEditorPlotColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
 
+    ImColor const BrowserAddReactionButtonTextColor = ImColor::HSV(0.375f, 0.6f, 0.7f, 1.0f);
+    ImColor const BrowserDownloadButtonTextColor = ImColor::HSV(0.55f, 0.6f, 1.0f, 1.0f);
+    ImColor const BrowserDeleteButtonTextColor = ImColor::HSV(0.0f, 0.6f, 0.8f, 1.0f);
+    ImColor const BrowserFolderTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
+    ImColor const BrowserFolderLineColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
+    ImColor const BrowserFolderPropertiesTextColor = ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f);
+    ImColor const BrowserFolderSymbolColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
+
+    ImColor const BrowserVersionOkTextColor = ImColor::HSV(0.58f, 0.2f, 1.0f);
+    ImColor const BrowserVersionOutdatedTextColor = ImColor::HSV(0.0f, 0.0f, 0.6f);
+    ImColor const BrowserVersionNewerTextColor = ImColor::HSV(0.0f, 0.2f, 1.0f);
+
     float const WindowAlpha = 0.9f;
     float const SliderBarWidth = 30.0f;
+    float const WindowsRounding = 10.0f;
 }
 
 class StyleRepository
 {
 public:
     static StyleRepository& getInstance();
+    StyleRepository(StyleRepository const&) = delete;
 
     void init();
 

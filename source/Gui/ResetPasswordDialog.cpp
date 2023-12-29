@@ -6,9 +6,8 @@
 #include "MessageDialog.h"
 #include "NewPasswordDialog.h"
 
-_ResetPasswordDialog::_ResetPasswordDialog(NewPasswordDialog const& newPasswordDialog, NetworkController const& networkController)
+_ResetPasswordDialog::_ResetPasswordDialog(NewPasswordDialog const& newPasswordDialog)
     : _AlienDialog("Reset password")
-    , _networkController(networkController)
     , _newPasswordDialog(newPasswordDialog)
 {}
 
@@ -53,7 +52,9 @@ void _ResetPasswordDialog::processIntern()
 
 void _ResetPasswordDialog::onResetPassword()
 {
-    if (_networkController->resetPassword(_userName, _email)) {
+    auto& networkService = NetworkService::getInstance();
+
+    if (networkService.resetPassword(_userName, _email)) {
         _newPasswordDialog->open(_userName, _userInfo);
     } else {
         MessageDialog::getInstance().information(

@@ -1,7 +1,9 @@
 #pragma once
 
-#include "AlienDialog.h"
 #include "EngineInterface/Definitions.h"
+#include "Network/Definitions.h"
+
+#include "AlienDialog.h"
 #include "Definitions.h"
 
 class _UploadSimulationDialog : public _AlienDialog
@@ -11,12 +13,11 @@ public:
         BrowserWindow const& browserWindow,
         LoginDialog const& loginDialog,
         SimulationController const& simController,
-        NetworkController const& networkController,
         Viewport const& viewport,
         GenomeEditorWindow const& genomeEditorWindow);
     ~_UploadSimulationDialog();
 
-    void open(DataType dataType);
+    void open(NetworkResourceType dataType, std::string const& folder = "");
 
 private:
     void processIntern();
@@ -24,18 +25,18 @@ private:
 
     void onUpload();
 
-    std::string _simName;
-    std::string _simDescription;
+    std::string _folder;
+    std::string _resourceName;
+    std::string _resourceDescription;
 
-    std::string _origSimName;
-    std::string _origSimDescription;
+    std::string _origResourceName;
+    std::string _origResourceDescription;
 
-    DataType _dataType = DataType_Simulation;
+    NetworkResourceType _dataType = NetworkResourceType_Simulation;
 
     BrowserWindow _browserWindow;
     LoginDialog _loginDialog;
     SimulationController _simController;
     Viewport _viewport;
-    NetworkController _networkController;
     GenomeEditorWindow _genomeEditorWindow;
 };

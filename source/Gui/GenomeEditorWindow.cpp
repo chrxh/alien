@@ -138,7 +138,7 @@ void _GenomeEditorWindow::processToolbar()
     AlienImGui::Tooltip("Save genome to file");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_SHARE_ALT)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_UPLOAD)) {
         onUploadGenome();
     }
     AlienImGui::Tooltip("Share your genome with other users:\nYour current genome will be uploaded to the server and made visible in the browser.");
@@ -831,7 +831,7 @@ void _GenomeEditorWindow::onSaveGenome()
 
 void _GenomeEditorWindow::onUploadGenome()
 {
-    _uploadSimulationDialog.lock()->open(DataType_Genome);
+    _uploadSimulationDialog.lock()->open(NetworkResourceType_Genome);
 }
 
 void _GenomeEditorWindow::onAddNode()

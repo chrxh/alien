@@ -24,7 +24,7 @@ _LogWindow::~_LogWindow()
 
 void _LogWindow::processIntern()
 {
-    auto styleRepository = StyleRepository::getInstance();
+    auto& styleRepository = StyleRepository::getInstance();
     if (ImGui::BeginChild(
             "##", ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scale(40.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
         ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());

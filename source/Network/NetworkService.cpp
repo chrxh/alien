@@ -1,4 +1,4 @@
-#include "NetworkController.h"
+#include "NetworkService.h"
 
 #include <boost/property_tree/json_parser.hpp>
 
@@ -9,8 +9,7 @@
 #include "Base/LoggingService.h"
 #include "Base/Resources.h"
 
-#include "MessageDialog.h"
-#include "NetworkDataParser.h"
+#include "NetworkResourceParserService.h"
 
 namespace
 {
@@ -58,51 +57,34 @@ namespace
     }
 }
 
-_NetworkController::_NetworkController()
+NetworkService& NetworkService::getInstance()
 {
-    _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
+    static NetworkService instance;
+    return instance;
 }
 
-_NetworkController::~_NetworkController()
-{
-    GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
-    logout();
-}
-
-void _NetworkController::process()
-{
-    auto now = std::chrono::steady_clock::now();
-    if (!_lastRefreshTime) {
-        _lastRefreshTime = now;
-    }
-    if (std::chrono::duration_cast<std::chrono::minutes>(now - *_lastRefreshTime).count() >= RefreshInterval) {
-        _lastRefreshTime = now;
-        refreshLogin();
-    }
-}
-
-std::string _NetworkController::getServerAddress() const
+std::string NetworkService::getServerAddress() const
 {
     return _serverAddress;
 }
 
-void _NetworkController::setServerAddress(std::string const& value)
+void NetworkService::setServerAddress(std::string const& value)
 {
     _serverAddress = value;
     logout();
 }
 
-std::optional<std::string> _NetworkController::getLoggedInUserName() const
+std::optional<std::string> NetworkService::getLoggedInUserName() const
 {
     return _loggedInUserName;
 }
 
-std::optional<std::string> _NetworkController::getPassword() const
+std::optional<std::string> NetworkService::getPassword() const
 {
     return _password;
 }
 
-bool _NetworkController::createUser(std::string const& userName, std::string const& password, std::string const& email)
+bool NetworkService::createUser(std::string const& userName, std::string const& password, std::string const& email)
 {
     log(Priority::Important, "network: create user '" + userName + "'");
 
@@ -123,7 +105,7 @@ bool _NetworkController::createUser(std::string const& userName, std::string con
     }
 }
 
-bool _NetworkController::activateUser(std::string const& userName, std::string const& password, UserInfo const& userInfo, std::string const& confirmationCode)
+bool NetworkService::activateUser(std::string const& userName, std::string const& password, UserInfo const& userInfo, std::string const& confirmationCode)
 {
     log(Priority::Important, "network: activate user '" + userName + "'");
 
@@ -147,7 +129,7 @@ bool _NetworkController::activateUser(std::string const& userName, std::string c
     }
 }
 
-bool _NetworkController::login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo)
+bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
     log(Priority::Important, "network: login user '" + userName + "'");
 
@@ -183,7 +165,7 @@ bool _NetworkController::login(LoginErrorCode& errorCode, std::string const& use
     }
 }
 
-bool _NetworkController::logout()
+bool NetworkService::logout()
 {
     log(Priority::Important, "network: logout");
     bool result = true;
@@ -209,7 +191,32 @@ bool _NetworkController::logout()
     return result;
 }
 
-bool _NetworkController::deleteUser()
+void NetworkService::shutdown()
+{
+    GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
+    logout();
+}
+
+void NetworkService::refreshLogin()
+{
+    if (_loggedInUserName && _password) {
+        log(Priority::Important, "network: refresh login");
+
+        httplib::SSLClient client(_serverAddress);
+        configureClient(client);
+
+        httplib::Params params;
+        params.emplace("userName", *_loggedInUserName);
+        params.emplace("password", *_password);
+
+        try {
+            executeRequest([&] { return client.Post("/alien-server/refreshlogin.php", params); });
+        } catch (...) {
+        }
+    }
+}
+
+bool NetworkService::deleteUser()
 {
     log(Priority::Important, "network: delete user '" + *_loggedInUserName + "'");
 
@@ -234,7 +241,7 @@ bool _NetworkController::deleteUser()
     }
 }
 
-bool _NetworkController::resetPassword(std::string const& userName, std::string const& email)
+bool NetworkService::resetPassword(std::string const& userName, std::string const& email)
 {
     log(Priority::Important, "network: reset password of user '" + userName + "'");
 
@@ -254,7 +261,7 @@ bool _NetworkController::resetPassword(std::string const& userName, std::string 
     }
 }
 
-bool _NetworkController::setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode)
+bool NetworkService::setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode)
 {
     log(Priority::Important, "network: set new password for user '" + userName + "'");
 
@@ -275,7 +282,7 @@ bool _NetworkController::setNewPassword(std::string const& userName, std::string
     }
 }
 
-bool _NetworkController::getRemoteSimulationList(std::vector<RemoteSimulationData>& result, bool withRetry) const
+bool NetworkService::getRemoteSimulationList(std::vector<NetworkResourceRawTO>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get simulation list");
 
@@ -291,7 +298,7 @@ bool _NetworkController::getRemoteSimulationList(std::vector<RemoteSimulationDat
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
-        result = NetworkDataParser::decodeRemoteSimulationData(tree);
+        result = NetworkResourceParserService::decodeRemoteSimulationData(tree);
         return true;
     } catch (...) {
         logNetworkError();
@@ -299,7 +306,7 @@ bool _NetworkController::getRemoteSimulationList(std::vector<RemoteSimulationDat
     }
 }
 
-bool _NetworkController::getUserList(std::vector<UserData>& result, bool withRetry) const
+bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry) const
 {
     log(Priority::Important, "network: get user list");
 
@@ -314,8 +321,8 @@ bool _NetworkController::getUserList(std::vector<UserData>& result, bool withRet
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
         result.clear();
-        result = NetworkDataParser::decodeUserData(tree);
-        for (UserData& userData : result) {
+        result = NetworkResourceParserService::decodeUserData(tree);
+        for (UserTO& userData : result) {
             userData.timeSpent = userData.timeSpent * RefreshInterval / 60;
         }
         return true;
@@ -325,7 +332,7 @@ bool _NetworkController::getUserList(std::vector<UserData>& result, bool withRet
     }
 }
 
-bool _NetworkController::getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const
+bool NetworkService::getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const
 {
     log(Priority::Important, "network: get liked simulations");
 
@@ -354,7 +361,7 @@ bool _NetworkController::getEmojiTypeBySimId(std::unordered_map<std::string, int
     }
 }
 
-bool _NetworkController::getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
+bool NetworkService::getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
 {
     log(Priority::Important, "network: get user likes for simulation with id=" + simId + " and likeType=" + std::to_string(likeType));
 
@@ -383,7 +390,7 @@ bool _NetworkController::getUserNamesForSimulationAndEmojiType(std::set<std::str
     }
 }
 
-bool _NetworkController::toggleLikeSimulation(std::string const& simId, int likeType)
+bool NetworkService::toggleLikeSimulation(std::string const& simId, int likeType)
 {
     log(Priority::Important, "network: toggle like for simulation with id=" + simId);
 
@@ -406,7 +413,7 @@ bool _NetworkController::toggleLikeSimulation(std::string const& simId, int like
     }
 }
 
-bool _NetworkController::uploadSimulation(
+bool NetworkService::uploadSimulation(
     std::string const& simulationName,
     std::string const& description,
     IntVector2D const& size,
@@ -414,7 +421,7 @@ bool _NetworkController::uploadSimulation(
     std::string const& mainData,
     std::string const& settings,
     std::string const& statistics,
-    RemoteDataType type)
+    NetworkResourceType type)
 {
     log(Priority::Important, "network: upload simulation with name='" + simulationName + "'");
 
@@ -446,7 +453,7 @@ bool _NetworkController::uploadSimulation(
     }
 }
 
-bool _NetworkController::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
+bool NetworkService::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
 {
     log(Priority::Important, "network: download simulation with id=" + simId);
 
@@ -476,7 +483,7 @@ bool _NetworkController::downloadSimulation(std::string& mainData, std::string& 
     }
 }
 
-bool _NetworkController::deleteSimulation(std::string const& simId)
+bool NetworkService::deleteSimulation(std::string const& simId)
 {
     log(Priority::Important, "network: delete simulation with id=" + simId);
 
@@ -497,21 +504,11 @@ bool _NetworkController::deleteSimulation(std::string const& simId)
     }
 }
 
-void _NetworkController::refreshLogin()
+NetworkService::NetworkService()
 {
-    if (_loggedInUserName && _password) {
-        log(Priority::Important, "network: refresh login");
+    _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
+}
 
-        httplib::SSLClient client(_serverAddress);
-        configureClient(client);
-
-        httplib::Params params;
-        params.emplace("userName", *_loggedInUserName);
-        params.emplace("password", *_password);
-
-        try {
-            executeRequest([&] { return client.Post("/alien-server/refreshlogin.php", params); });
-        } catch (...) {
-        }
-    }
+NetworkService::~NetworkService()
+{
 }

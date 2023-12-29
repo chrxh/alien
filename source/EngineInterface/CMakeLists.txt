@@ -1,5 +1,5 @@
 
-add_library(alien_engine_interface_lib
+add_library(EngineInterface
     ArraySizes.h
     AuxiliaryData.h
     AuxiliaryDataParserService.cpp
@@ -49,13 +49,13 @@ add_library(alien_engine_interface_lib
     StatisticsHistory.h
     ZoomLevels.h)
 
-target_link_libraries(alien_engine_interface_lib Boost::boost)
-target_link_libraries(alien_engine_interface_lib cereal)
+target_link_libraries(EngineInterface Boost::boost)
+target_link_libraries(EngineInterface cereal)
 target_link_libraries(alien ZLIB::ZLIB)
 
 find_path(ZSTR_INCLUDE_DIRS "zstr.hpp")
-target_include_directories(alien_engine_interface_lib PRIVATE ${ZSTR_INCLUDE_DIRS})
+target_include_directories(EngineInterface PRIVATE ${ZSTR_INCLUDE_DIRS})
 
 if (MSVC)
-    target_compile_options(alien_engine_interface_lib PRIVATE "/MP")
+    target_compile_options(EngineInterface PRIVATE "/MP")
 endif()

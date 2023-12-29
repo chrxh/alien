@@ -4,9 +4,9 @@
 
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/SimulationController.h"
+#include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
-#include "NetworkController.h"
 #include "MessageDialog.h"
 #include "CreateUserDialog.h"
 #include "BrowserWindow.h"
@@ -20,17 +20,16 @@ _LoginDialog::_LoginDialog(
     BrowserWindow const& browserWindow,
     CreateUserDialog const& createUserDialog,
     ActivateUserDialog const& activateUserDialog,
-    ResetPasswordDialog const& resetPasswordDialog,
-    NetworkController const& networkController)
+    ResetPasswordDialog const& resetPasswordDialog)
     : _AlienDialog("Login")
     , _simController(simController)
     , _browserWindow(browserWindow)
     , _createUserDialog(createUserDialog)
     , _activateUserDialog(activateUserDialog)
-    , _networkController(networkController)
     , _resetPasswordDialog(resetPasswordDialog)
 
 {
+    auto& networkService = NetworkService::getInstance();
     auto& settings = GlobalSettings::getInstance();
     _remember = settings.getBoolState("dialogs.login.remember", _remember);
     _shareGpuInfo = settings.getBoolState("dialogs.login.share gpu info", _shareGpuInfo);
@@ -40,7 +39,7 @@ _LoginDialog::_LoginDialog(
         _password = settings.getStringState("dialogs.login.password", "");
         if (!_userName.empty()) {
             LoginErrorCode errorCode;
-            if (!_networkController->login(errorCode, _userName, _password, getUserInfo())) {
+            if (!networkService.login(errorCode, _userName, _password, getUserInfo())) {
                 if (errorCode != LoginErrorCode_UnconfirmedUser) {
                     MessageDialog::getInstance().information("Error", "Login failed.");
                 }
@@ -131,8 +130,9 @@ void _LoginDialog::onLogin()
     LoginErrorCode errorCode;
 
     auto userInfo = getUserInfo();
+    auto& networkService = NetworkService::getInstance();
 
-    if (!_networkController->login(errorCode, _userName, _password, userInfo)) {
+    if (!networkService.login(errorCode, _userName, _password, userInfo)) {
         switch (errorCode) {
         case LoginErrorCode_UnconfirmedUser: {
             _activateUserDialog->open(_userName, _password, userInfo);

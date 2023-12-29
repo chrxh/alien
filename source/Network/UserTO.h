@@ -1,7 +1,8 @@
 #pragma once
+
 #include <string>
 
-class UserData
+class UserTO
 {
 public:
     std::string userName;
@@ -13,7 +14,7 @@ public:
     int timeSpent;
     std::string gpu;
 
-    static int compareOnlineAndTimestamp(UserData const& left, UserData const& right)
+    static int compareOnlineAndTimestamp(UserTO const& left, UserTO const& right)
     {
         if (int result = static_cast<int>(left.online) - static_cast<int>(right.online)) {
             return result;

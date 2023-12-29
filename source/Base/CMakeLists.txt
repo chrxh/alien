@@ -1,5 +1,5 @@
 
-add_library(alien_base_lib
+add_library(Base
     Definitions.cpp
     Definitions.h
     Exceptions.h
@@ -25,8 +25,8 @@ add_library(alien_base_lib
     VersionChecker.cpp
     VersionChecker.h)
 
-target_link_libraries(alien_base_lib Boost::boost)
+target_link_libraries(Base Boost::boost)
 
 if (MSVC)
-    target_compile_options(alien_base_lib PRIVATE "/MP")
+    target_compile_options(Base PRIVATE "/MP")
 endif()
