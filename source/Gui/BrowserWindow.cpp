@@ -227,6 +227,7 @@ void _BrowserWindow::processBackground()
 void _BrowserWindow::processToolbar()
 {
     auto& networkService = NetworkService::getInstance();
+    std::string resourceTypeString = _selectedDataType == NetworkResourceType_Simulation ? "simulation" : "genome";
 
     if (AlienImGui::ToolbarButton(ICON_FA_SYNC)) {
         onRefresh();
@@ -258,16 +259,26 @@ void _BrowserWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_SHARE_ALT)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_UPLOAD)) {
         _uploadSimulationDialog.lock()->open(_selectedDataType);
     }
-    std::string dataType = _selectedDataType == NetworkResourceType_Simulation
-        ? "simulation"
-        : "genome";
     AlienImGui::Tooltip(
-        "Share your " + dataType + " with other users:\nYour current " + dataType + " will be uploaded to the server and made visible in the browser.");
+        "Share your current " + resourceTypeString + " with other users:\nYour current " + resourceTypeString + " will be uploaded to the server and made visible in the browser.");
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(
+        _selectedResource == nullptr || !_selectedResource->isLeaf()
+        || _selectedResource->getLeaf().rawTO->userName != networkService.getLoggedInUserName().value_or(""));
+    if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
+        onDeleteItem(_selectedResource->getLeaf());
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Delete selected " + resourceTypeString);
 
 #ifdef _WIN32
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COMMENTS)) {
         openWeblink(Const::DiscordLink);
@@ -325,13 +336,13 @@ void _BrowserWindow::processSimulationList()
                 ImGui::TableNextRow(0, scale(RowHeight));
                 ImGui::TableNextColumn();
 
-                auto selected = _simulations.selected == treeTO;
+                auto selected = _selectedResource == treeTO;
                 if (ImGui::Selectable(
                         "",
                         &selected,
                         ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
                         ImVec2(0, scale(RowHeight) - ImGui::GetStyle().FramePadding.y))) {
-                    _simulations.selected = selected ? treeTO : nullptr;
+                    _selectedResource = selected ? treeTO : nullptr;
                 }
                 ImGui::SameLine();
 
@@ -415,13 +426,13 @@ void _BrowserWindow::processGenomeList()
                 ImGui::TableNextRow(0, scale(RowHeight));
                 ImGui::TableNextColumn();
 
-                auto selected = _genomes.selected == treeTO;
+                auto selected = _selectedResource == treeTO;
                 if (ImGui::Selectable(
                         "",
                         &selected,
                         ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
                         ImVec2(0, scale(RowHeight) - ImGui::GetStyle().FramePadding.y))) {
-                    _genomes.selected = selected ? treeTO : nullptr;
+                    _selectedResource = selected ? treeTO : nullptr;
                 }
                 ImGui::SameLine();
 
