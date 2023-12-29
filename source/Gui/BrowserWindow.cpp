@@ -139,7 +139,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
             }
         }
         filterRawTOs();
-        _scheduleCreateTreeTOs = true;
+        scheduleCreateTreeTOs();
 
         if (networkService.getLoggedInUserName()) {
             if (!networkService.getEmojiTypeBySimId(_ownEmojiTypeBySimId)) {
@@ -148,7 +148,6 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         } else {
             _ownEmojiTypeBySimId.clear();
         }
-
         sortUserList();
     } catch (std::exception const& e) {
         if (withRetry) {
@@ -327,10 +326,10 @@ void _BrowserWindow::processSimulationList()
 
         //create table data if necessary
         if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
-            if (sortSpecs->SpecsDirty || _scheduleCreateTreeTOs) {
+            if (sortSpecs->SpecsDirty || _scheduleCreateSimulationTreeTOs) {
                 sortRawTOs(_simulations.rawTOs, sortSpecs);
                 sortSpecs->SpecsDirty = false;
-                _scheduleCreateTreeTOs = false;
+                _scheduleCreateSimulationTreeTOs = false;
 
                 _simulations.treeTOs = NetworkResourceService::createTreeTOs(_simulations.rawTOs, _simulations.collapsedFolderNames);
             }
@@ -416,10 +415,10 @@ void _BrowserWindow::processGenomeList()
 
         //create table data if necessary
         if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
-            if (sortSpecs->SpecsDirty || _scheduleCreateTreeTOs) {
+            if (sortSpecs->SpecsDirty || _scheduleCreateGenomeTreeTOs) {
                 sortRawTOs(_genomes.rawTOs, sortSpecs);
                 sortSpecs->SpecsDirty = false;
-                _scheduleCreateTreeTOs = false;
+                _scheduleCreateGenomeTreeTOs = false;
 
                 _genomes.treeTOs = NetworkResourceService::createTreeTOs(_genomes.rawTOs, _simulations.collapsedFolderNames);
             }
@@ -489,7 +488,7 @@ void _BrowserWindow::processUserList()
 {
     auto& networkService = NetworkService::getInstance();
 
-    ImGui::PushID("UserTable");
+    ImGui::PushID("User list");
     auto& styleRepository = StyleRepository::getInstance();
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable
          | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
@@ -594,12 +593,12 @@ void _BrowserWindow::processFilter()
     ImGui::Spacing();
     if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Community creations"), _showCommunityCreations)) {
         filterRawTOs();
-        _scheduleCreateTreeTOs = true;
+        scheduleCreateTreeTOs();
     }
     ImGui::SameLine();
     if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter"), _filter)) {
         filterRawTOs();
-        _scheduleCreateTreeTOs = true;
+        scheduleCreateTreeTOs();
     }
 }
 
@@ -802,13 +801,13 @@ void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeT
         case FolderTreeSymbols::Expanded: {
             if (AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f)) {
                 collapsedFolderNames.insert(treeTO->folderNames);
-                _scheduleCreateTreeTOs = true;
+                scheduleCreateTreeTOs();
             }
         } break;
         case FolderTreeSymbols::Collapsed: {
             if (AlienImGui::Button(ICON_FA_PLUS_SQUARE, 20.0f)) {
                 collapsedFolderNames.erase(treeTO->folderNames);
-                _scheduleCreateTreeTOs = true;
+                scheduleCreateTreeTOs();
             }
         } break;
         case FolderTreeSymbols::Continue: {
@@ -870,7 +869,7 @@ void _BrowserWindow::processEmojiWindow()
         ImGui::Spacing();
         ImGui::Spacing();
         if (_showAllEmojis) {
-            if (ImGui::BeginChild("##emojichild", ImVec2(scale(335), scale(300)), false)) {
+            if (ImGui::BeginChild("##reactionchild", ImVec2(scale(335), scale(300)), false)) {
                 int offset = 0;
                 for (int i = 0; i < NumEmojiBlocks; ++i) {
                     for (int j = 0; j < NumEmojisPerBlock[i]; ++j) {
@@ -885,7 +884,7 @@ void _BrowserWindow::processEmojiWindow()
             }
             ImGui::EndChild();
         } else {
-            if (ImGui::BeginChild("##emojichild", ImVec2(scale(335), scale(90)), false)) {
+            if (ImGui::BeginChild("##reactionchild", ImVec2(scale(335), scale(90)), false)) {
                 for (int i = 0; i < NumEmojisPerRow; ++i) {
                     if (i % NumEmojisPerRow != 0) {
                         ImGui::SameLine();
@@ -1006,6 +1005,12 @@ void _BrowserWindow::processActivated()
     onRefresh();
 }
 
+void _BrowserWindow::scheduleCreateTreeTOs()
+{
+    _scheduleCreateSimulationTreeTOs = true;
+    _scheduleCreateGenomeTreeTOs = true;
+}
+
 void _BrowserWindow::sortRawTOs(std::vector<NetworkResourceRawTO>& tos, ImGuiTableSortSpecs* sortSpecs)
 {
     if (tos.size() > 1) {
@@ -1025,7 +1030,7 @@ void _BrowserWindow::filterRawTOs()
     _simulations.rawTOs.clear();
     _simulations.rawTOs.reserve(_unfilteredRawTOs.size());
     _genomes.rawTOs.clear();
-    _genomes.rawTOs.reserve(_genomes.rawTOs.size());
+    _genomes.rawTOs.reserve(_unfilteredRawTOs.size());
     for (auto const& to : _unfilteredRawTOs) {
         if (to->matchWithFilter(_filter) && _showCommunityCreations != to->fromRelease) {
             if (to->type == NetworkResourceType_Simulation) {
@@ -1149,7 +1154,6 @@ void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType
 
         _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  //invalidate cache entry
         networkService.toggleLikeSimulation(leaf.rawTO->id, emojiType);
-        //_scheduleCreateTreeTOs = true;
     } else {
         _loginDialog.lock()->open();
     }
