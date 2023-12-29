@@ -33,7 +33,6 @@ private:
         std::vector<NetworkResourceRawTO> rawTOs;
         std::vector<NetworkResourceTreeTO> treeTOs;
         std::set<std::vector<std::string>> collapsedFolderNames;
-        NetworkResourceTreeTO selected;
     };
 
     void refreshIntern(bool withRetry);
@@ -102,6 +101,7 @@ private:
     std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByEmojiTypeBySimIdCache;
 
     std::vector<NetworkResourceRawTO> _unfilteredRawTOs;
+    NetworkResourceTreeTO _selectedResource;
     ResourceData _genomes;
     ResourceData _simulations;
 
