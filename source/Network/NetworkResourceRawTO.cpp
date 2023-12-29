@@ -16,7 +16,7 @@ int _NetworkResourceRawTO::compare(NetworkResourceRawTO const& left, NetworkReso
             delta = left->userName.compare(right->userName);
             break;
         case NetworkResourceColumnId_SimulationName:
-            delta = left->simName.compare(right->simName);
+            delta = left->resourceName.compare(right->resourceName);
             break;
         case NetworkResourceColumnId_Description:
             delta = left->description.compare(right->description);
@@ -63,7 +63,7 @@ bool _NetworkResourceRawTO::matchWithFilter(std::string const& filter) const
     if (userName.find(filter) != std::string::npos) {
         match = true;
     }
-    if (simName.find(filter) != std::string::npos) {
+    if (resourceName.find(filter) != std::string::npos) {
         match = true;
     }
     if (std::to_string(numDownloads).find(filter) != std::string::npos) {

@@ -260,7 +260,13 @@ void _BrowserWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_UPLOAD)) {
-        _uploadSimulationDialog.lock()->open(_selectedDataType);
+        std::string prefix = [&] {
+            if (_selectedResource == nullptr || _selectedResource->isLeaf()) {
+                return std::string();
+            }
+            return NetworkResourceService::concatenateFolderNames(_selectedResource->folderNames, true);
+        }();
+        _uploadSimulationDialog.lock()->open(_selectedDataType, prefix);
     }
     AlienImGui::Tooltip(
         "Share your current " + resourceTypeString + " with other users:\nYour current " + resourceTypeString + " will be uploaded to the server and made visible in the browser.");
@@ -271,6 +277,7 @@ void _BrowserWindow::processToolbar()
         || _selectedResource->getLeaf().rawTO->userName != networkService.getLoggedInUserName().value_or(""));
     if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
         onDeleteItem(_selectedResource->getLeaf());
+        _selectedResource = nullptr;
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Delete selected " + resourceTypeString);
@@ -602,7 +609,7 @@ void _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
         processFolderTreeSymbols(treeTO, _simulations.collapsedFolderNames);
         processDownloadButton(leaf);
         ImGui::SameLine();
-        processShortenedText(leaf.rawTO->simName, true);
+        processShortenedText(leaf.leafName, true);
     } else {
         auto& folder = treeTO->getFolder();
 
@@ -933,51 +940,6 @@ void _BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
         onDownloadItem(leaf);
     }
     AlienImGui::Tooltip("Download");
-}
-
-void _BrowserWindow::processActionButtons(NetworkResourceTreeTO const& to)
-{
-    //auto& networkService = NetworkService::getInstance();
-    ////like button
-
-    //if (to->isLeaf()) {
-    //    auto const& leaf = to->getLeaf();
-    //    auto liked = isLiked(leaf.id);
-    //    if (liked) {
-    //        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserAddReactionButtonTextColor);
-    //    } else {
-    //        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::NoLikeButtonTextColor);
-    //    }
-    //    auto likeButtonResult = processActionButton(ICON_FA_STAR);
-    //    ImGui::PopStyleColor();
-    //    if (likeButtonResult) {
-    //        _activateEmojiPopup = true;
-    //        _emojiPopupTO = to;
-    //    }
-    //    AlienImGui::Tooltip("Choose a reaction");
-    //    ImGui::SameLine();
-
-    //    //download button
-    //    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDownloadButtonTextColor);
-    //    auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
-    //    ImGui::PopStyleColor();
-    //    if (downloadButtonResult) {
-    //        onDownloadItem(leaf);
-    //    }
-    //    AlienImGui::Tooltip("Download");
-    //    ImGui::SameLine();
-
-    //    //delete button
-    //    if (leaf.userName == networkService.getLoggedInUserName().value_or("")) {
-    //        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDeleteButtonTextColor);
-    //        auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
-    //        ImGui::PopStyleColor();
-    //        if (deleteButtonResult) {
-    //            onDeleteItem(leaf);
-    //        }
-    //        AlienImGui::Tooltip("Delete");
-    //    }
-    //}
 }
 
 namespace

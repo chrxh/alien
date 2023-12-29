@@ -42,23 +42,24 @@ _UploadSimulationDialog::_UploadSimulationDialog(
     , _genomeEditorWindow(genomeEditorWindow)
 {
     auto& settings = GlobalSettings::getInstance();
-    _simName = settings.getStringState("dialogs.upload.simulation name", "");
-    _simDescription = settings.getStringState("dialogs.upload.simulation description", "");
+    _resourceName = settings.getStringState("dialogs.upload.simulation name", "");
+    _resourceDescription = settings.getStringState("dialogs.upload.simulation description", "");
 }
 
 _UploadSimulationDialog::~_UploadSimulationDialog()
 {
     auto& settings = GlobalSettings::getInstance();
-    settings.setStringState("dialogs.upload.simulation name", _simName);
-    settings.setStringState("dialogs.upload.simulation description", _simDescription);
+    settings.setStringState("dialogs.upload.simulation name", _resourceName);
+    settings.setStringState("dialogs.upload.simulation description", _resourceDescription);
 }
 
-void _UploadSimulationDialog::open(NetworkResourceType dataType)
+void _UploadSimulationDialog::open(NetworkResourceType dataType, std::string const& folder)
 {
     auto& networkService = NetworkService::getInstance();
     if (networkService.getLoggedInUserName()) {
         changeTitle("Upload " + BrowserDataTypeToLowerString.at(dataType));
         _dataType = dataType;
+        _folder = folder;
         _AlienDialog::open();
     } else {
         _loginDialog->open();
@@ -71,20 +72,27 @@ void _UploadSimulationDialog::processIntern()
     AlienImGui::HelpMarker(
         "The " + BrowserDataTypeToLowerString.at(_dataType)
         + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
+
     AlienImGui::Separator();
 
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_dataType)  + " name").textWidth(0), _simName);
+    AlienImGui::InputText(AlienImGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_dataType)  + " name").textWidth(0), _resourceName);
+    ImGui::BeginDisabled();
+    std::string text = "The simulation will be uploaded into the following folder:\n" + _folder;
+    AlienImGui::InputText(AlienImGui::InputTextParameters().hint(_folder).textWidth(0).readOnly(true), text);
+    ImGui::EndDisabled();
+    AlienImGui::Separator();
+
     AlienImGui::Separator();
     AlienImGui::InputTextMultiline(
         AlienImGui::InputTextMultilineParameters()
             .hint("Description (optional)")
             .textWidth(0)
             .height(ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(50.0f)),
-        _simDescription);
+        _resourceDescription);
 
     AlienImGui::Separator();
 
-    ImGui::BeginDisabled(_simName.empty());
+    ImGui::BeginDisabled(_resourceName.empty());
     if (AlienImGui::Button("OK")) {
         close();
         onUpload();
@@ -95,15 +103,15 @@ void _UploadSimulationDialog::processIntern()
     ImGui::SameLine();
     if (AlienImGui::Button("Cancel")) {
         close();
-        _simName = _origSimName;
-        _simDescription = _origSimDescription;
+        _resourceName = _origResourceName;
+        _resourceDescription = _origResourceDescription;
     }
 }
 
 void _UploadSimulationDialog::openIntern()
 {
-    _origSimName = _simName;
-    _origSimDescription = _simDescription;
+    _origResourceName = _resourceName;
+    _origResourceDescription = _resourceDescription;
 }
 
 void _UploadSimulationDialog::onUpload()
@@ -154,7 +162,7 @@ void _UploadSimulationDialog::onUpload()
         }
 
         auto& networkService = NetworkService::getInstance();
-        if (!networkService.uploadSimulation(_simName, _simDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
+        if (!networkService.uploadSimulation(_resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
             showMessage("Error", "Failed to upload " + BrowserDataTypeToLowerString.at(_dataType) + ".");
             return;
         }

@@ -34,7 +34,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
         //parse folder names
         std::vector<std::string> folderNames;
         std::string nameWithoutFolders;
-        boost::split(folderNames, rawTO->simName, boost::is_any_of("/"));
+        boost::split(folderNames, rawTO->resourceName, boost::is_any_of("/"));
         if (!folderNames.empty()) {
             nameWithoutFolders = folderNames.back();
             folderNames.pop_back();
@@ -78,7 +78,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
 
         //insert leaf
         auto treeTO = std::make_shared<_NetworkResourceTreeTO>();
-        BrowserLeaf leaf{.rawTO = rawTO};
+        BrowserLeaf leaf{.leafName = nameWithoutFolders, .rawTO = rawTO};
         treeTO->type = rawTO->type;
         treeTO->folderNames = folderNames;
         treeTO->node = leaf;
@@ -223,10 +223,19 @@ std::set<std::vector<std::string>> NetworkResourceService::calcInitialCollapsedF
     std::set<std::vector<std::string>> result;
     for (auto const& rawTO : rawTOs) {
         std::vector<std::string> folderNames;
-        boost::split(folderNames, rawTO->simName, boost::is_any_of("/"));
+        boost::split(folderNames, rawTO->resourceName, boost::is_any_of("/"));
         for (int i = 0; i < toInt(folderNames.size()) - 2; ++i) {
             result.insert(std::vector(folderNames.begin(), folderNames.begin() + 2 + i));
         }
+    }
+    return result;
+}
+
+std::string NetworkResourceService::concatenateFolderNames(std::vector<std::string> const& folderNames, bool withSlash)
+{
+    auto result = boost::join(folderNames, "/");
+    if (withSlash) {
+        result.append("/");
     }
     return result;
 }
@@ -235,7 +244,7 @@ std::string NetworkResourceService::convertFolderNamesToSettings(std::set<std::v
 {
     std::vector<std::string> parts;
     for (auto const& folderNames : data) {
-        parts.emplace_back(boost::join(folderNames, "/"));
+        parts.emplace_back(concatenateFolderNames(folderNames, false));
     }
     return boost::join(parts, "\\");
 }

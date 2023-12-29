@@ -33,6 +33,9 @@ private:
     void onRunSimulation();
     void onPauseSimulation();
 
+    void pushGlobalStyle();
+    void popGlobalStyle();
+
     GLFWwindow* _window;
     GuiLogger _logger;
 

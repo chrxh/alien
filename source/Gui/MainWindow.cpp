@@ -195,12 +195,6 @@ void _MainWindow::mainLoop()
 
      //   ImGui::ShowDemoWindow(NULL);
 
-        ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, Const::WindowsRounding);
-        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, (ImVec4)Const::HeaderHoveredColor);
-        ImGui::PushStyleColor(ImGuiCol_HeaderActive, (ImVec4)Const::HeaderActiveColor);
-        ImGui::PushStyleColor(ImGuiCol_Header, (ImVec4)Const::HeaderColor);
-
         switch (_startupController->getState()) {
         case _StartupController::State::Unintialized:
             processUninitialized();
@@ -220,9 +214,6 @@ void _MainWindow::mainLoop()
         default:
             THROW_NOT_IMPLEMENTED();
         }
-        ImGui::PopStyleColor(3);
-        ImGui::PopStyleVar(2);
-
     }
 }
 
@@ -310,8 +301,7 @@ void _MainWindow::processLoadingSimulation()
 
 void _MainWindow::processLoadingControls()
 {
-    ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10);
+    pushGlobalStyle();
 
     processMenubar();
     processDialogs();
@@ -322,19 +312,23 @@ void _MainWindow::processLoadingControls()
     _simulationView->processControls(_renderSimulation);
     _startupController->process();
 
-    ImGui::PopStyleVar(2);
+    popGlobalStyle();
 
     renderSimulation();
 }
 
 void _MainWindow::processReady()
 {
+    pushGlobalStyle();
+
     processMenubar();
     processDialogs();
     processWindows();
     processControllers();
     _uiController->process();
     _simulationView->processControls(_renderSimulation);
+
+    popGlobalStyle();
 
     renderSimulation();
 }
@@ -835,4 +829,19 @@ void _MainWindow::onRunSimulation()
 void _MainWindow::onPauseSimulation()
 {
     _simController->pauseSimulation();
+}
+
+void _MainWindow::pushGlobalStyle()
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, Const::SliderBarWidth);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, Const::WindowsRounding);
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, (ImVec4)Const::HeaderHoveredColor);
+    ImGui::PushStyleColor(ImGuiCol_HeaderActive, (ImVec4)Const::HeaderActiveColor);
+    ImGui::PushStyleColor(ImGuiCol_Header, (ImVec4)Const::HeaderColor);
+}
+
+void _MainWindow::popGlobalStyle()
+{
+    ImGui::PopStyleColor(3);
+    ImGui::PopStyleVar(2);
 }
