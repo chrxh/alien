@@ -181,7 +181,7 @@ void AlienImGui::InputFloat2(InputFloat2Parameters const& parameters, float& val
 
     ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
-    float value[2];
+    static float value[2];
     value[0] = value1;
     value[1] = value2;
     ImGui::InputFloat2(("##" + parameters._name).c_str(), value, parameters._format.c_str(), flags);

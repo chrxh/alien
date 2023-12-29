@@ -72,6 +72,8 @@ private:
 
     void processActivated() override;
 
+    void scheduleCreateTreeTOs();
+
     void sortRawTOs(std::vector<NetworkResourceRawTO>& tos, ImGuiTableSortSpecs* sortSpecs);
     void sortUserList();
 
@@ -90,7 +92,8 @@ private:
 
     NetworkResourceType _selectedDataType = NetworkResourceType_Simulation; 
     bool _scheduleRefresh = false;
-    bool _scheduleCreateTreeTOs = false;
+    bool _scheduleCreateSimulationTreeTOs = false;
+    bool _scheduleCreateGenomeTreeTOs = false;
 
     std::string _filter;
     bool _showCommunityCreations = false;

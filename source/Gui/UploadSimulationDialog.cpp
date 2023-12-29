@@ -75,7 +75,7 @@ void _UploadSimulationDialog::processIntern()
     AlienImGui::HelpMarker(
         "The " + resourceTypeString + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
 
-    AlienImGui::Text("How to use folders?");
+    AlienImGui::Text("How to use or create folders?");
     AlienImGui::HelpMarker("If you want to upload the " + resourceTypeString
         + " to a folder, you can use the `/`-notation. The folder will be created automatically if it does not exist.\nFor instance, naming a simulation as `Biome/Water "
           "world/Initial/Variant 1` will create the nested folders `Biome`, `Water world` and `Initial`.");
@@ -83,8 +83,8 @@ void _UploadSimulationDialog::processIntern()
     AlienImGui::Separator();
 
     if (!_folder.empty()) {
-        std::string text = "The following folder has been selected and will used for the upload: \n" + _folder;
-        ImGui::PushID(1);
+        std::string text = "The following folder has been selected and will used for the upload:\n" + _folder;
+        ImGui::PushID("folder info");
         ImGui::BeginDisabled();
         AlienImGui::InputTextMultiline(AlienImGui::InputTextMultilineParameters().hint(_folder).textWidth(0).height(FolderWidgetHeight), text);
         ImGui::EndDisabled();
@@ -95,7 +95,7 @@ void _UploadSimulationDialog::processIntern()
 
     AlienImGui::Separator();
 
-    ImGui::PushID(2);
+    ImGui::PushID("description");
     AlienImGui::InputTextMultiline(
         AlienImGui::InputTextMultilineParameters()
             .hint("Description (optional)")
