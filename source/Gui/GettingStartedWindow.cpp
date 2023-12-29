@@ -34,7 +34,7 @@ void _GettingStartedWindow::processIntern()
          */
         drawHeading1("Introduction");
 
-        ImGui::Text("ALIEN is an artificial life and physics simulation tool based on a 2D CUDA-powered particle engine for soft bodies and fluids.");
+        ImGui::Text("ALIEN is an artificial life and physics simulation tool based on a CUDA-powered 2D particle engine for soft bodies and fluids.");
         ImGui::Text(
             "Each particle can be equipped with higher-level functions including sensors, muscles, neurons, constructors, etc. that allow to "
             "mimic certain functionalities of biological cells or of robotic components. Multi-cellular organisms are simulated as networks of "

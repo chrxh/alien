@@ -930,7 +930,7 @@ void AlienImGui::Tooltip(std::string const& text, bool delay)
 void AlienImGui::Tooltip(std::function<std::string()> const& textFunc, bool delay)
 {
     if (ImGui::IsItemHovered() && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
-        Tooltip(textFunc());
+        Tooltip(textFunc(), delay);
     }
 }
 
