@@ -20,6 +20,8 @@
 
 namespace
 {
+    auto constexpr FolderWidgetHeight = 50.0f;
+
     std::map<NetworkResourceType, std::string> const BrowserDataTypeToLowerString = {
         {NetworkResourceType_Simulation, "simulation"},
         {NetworkResourceType_Genome, "genome"}};
@@ -68,27 +70,39 @@ void _UploadSimulationDialog::open(NetworkResourceType dataType, std::string con
 
 void _UploadSimulationDialog::processIntern()
 {
+    auto resourceTypeString = BrowserDataTypeToLowerString.at(_dataType);
     AlienImGui::Text("Data privacy policy");
     AlienImGui::HelpMarker(
-        "The " + BrowserDataTypeToLowerString.at(_dataType)
-        + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
+        "The " + resourceTypeString + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
+
+    AlienImGui::Text("How to use folders?");
+    AlienImGui::HelpMarker("If you want to upload the " + resourceTypeString
+        + " to a folder, you can use the `/`-notation. The folder will be created automatically if it does not exist.\nFor instance, naming a simulation as `Biome/Water "
+          "world/Initial/Variant 1` will create the nested folders `Biome`, `Water world` and `Initial`.");
 
     AlienImGui::Separator();
+
+    if (!_folder.empty()) {
+        std::string text = "The following folder has been selected and will used for the upload: \n" + _folder;
+        ImGui::PushID(1);
+        ImGui::BeginDisabled();
+        AlienImGui::InputTextMultiline(AlienImGui::InputTextMultilineParameters().hint(_folder).textWidth(0).height(FolderWidgetHeight), text);
+        ImGui::EndDisabled();
+        ImGui::PopID();
+    }
 
     AlienImGui::InputText(AlienImGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_dataType)  + " name").textWidth(0), _resourceName);
-    ImGui::BeginDisabled();
-    std::string text = "The simulation will be uploaded into the following folder:\n" + _folder;
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint(_folder).textWidth(0).readOnly(true), text);
-    ImGui::EndDisabled();
-    AlienImGui::Separator();
 
     AlienImGui::Separator();
+
+    ImGui::PushID(2);
     AlienImGui::InputTextMultiline(
         AlienImGui::InputTextMultilineParameters()
             .hint("Description (optional)")
             .textWidth(0)
             .height(ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(50.0f)),
         _resourceDescription);
+    ImGui::PopID();
 
     AlienImGui::Separator();
 
@@ -162,7 +176,7 @@ void _UploadSimulationDialog::onUpload()
         }
 
         auto& networkService = NetworkService::getInstance();
-        if (!networkService.uploadSimulation(_resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
+        if (!networkService.uploadSimulation(_folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
             showMessage("Error", "Failed to upload " + BrowserDataTypeToLowerString.at(_dataType) + ".");
             return;
         }
