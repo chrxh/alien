@@ -8,7 +8,7 @@
 - gui/browser: show number of simulations per folder
 
 ### Changed
-- gui/browser: tree view instead of a pure table view
+- gui/browser: tree view instead of a pure tabular view
 - gui/browser: simulations and genomes can be selected for user actions (e.g. deletion)
 
 ### Removed
