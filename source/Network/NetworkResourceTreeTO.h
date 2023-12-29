@@ -15,18 +15,7 @@ struct BrowserFolder
 
 struct BrowserLeaf
 {
-    std::string id;
-    std::string timestamp;
-    std::string userName;
-    std::string simName;
-    std::map<int, int> numLikesByEmojiType;
-    int numDownloads;
-    int width;
-    int height;
-    int particles;
-    uint64_t contentSize;
-    std::string description;
-    std::string version;
+    NetworkResourceRawTO rawTO;
 };
 
 enum class FolderTreeSymbols
