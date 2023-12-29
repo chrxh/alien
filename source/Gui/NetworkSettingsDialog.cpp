@@ -2,8 +2,9 @@
 
 #include <imgui.h>
 
+#include "Network/NetworkService.h"
+
 #include "AlienImGui.h"
-#include "NetworkController.h"
 #include "BrowserWindow.h"
 #include "StyleRepository.h"
 
@@ -12,10 +13,9 @@ namespace
     auto const RightColumnWidth = 150.0f;
 }
 
-_NetworkSettingsDialog::_NetworkSettingsDialog(BrowserWindow const& browserWindow, NetworkController const& networkController)
+_NetworkSettingsDialog::_NetworkSettingsDialog(BrowserWindow const& browserWindow)
     : _AlienDialog("Network settings")
     , _browserWindow(browserWindow)
-    , _networkController(networkController)
 {
 }
 
@@ -41,12 +41,14 @@ void _NetworkSettingsDialog::processIntern()
 
 void _NetworkSettingsDialog::openIntern()
 {
-    _origServerAddress = _networkController->getServerAddress();
+    auto& networkService = NetworkService::getInstance();
+    _origServerAddress = networkService.getServerAddress();
     _serverAddress = _origServerAddress;
 }
 
 void _NetworkSettingsDialog::onChangeSettings()
 {
-    _networkController->setServerAddress(_serverAddress);
+    auto& networkService = NetworkService::getInstance();
+    networkService.setServerAddress(_serverAddress);
     _browserWindow->onRefresh();
 }

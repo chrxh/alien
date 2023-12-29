@@ -6,10 +6,10 @@
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/GenomeDescriptionService.h"
+#include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
 #include "MessageDialog.h"
-#include "NetworkController.h"
 #include "StyleRepository.h"
 #include "BrowserWindow.h"
 #include "DelayedExecutionController.h"
@@ -20,46 +20,48 @@
 
 namespace
 {
-    std::map<DataType, std::string> const BrowserDataTypeToLowerString = {
-        {DataType_Simulation, "simulation"},
-        {DataType_Genome, "genome"}};
-    std::map<DataType, std::string> const BrowserDataTypeToUpperString = {
-        {DataType_Simulation, "Simulation"},
-        {DataType_Genome, "Genome"}};
+    auto constexpr FolderWidgetHeight = 50.0f;
+
+    std::map<NetworkResourceType, std::string> const BrowserDataTypeToLowerString = {
+        {NetworkResourceType_Simulation, "simulation"},
+        {NetworkResourceType_Genome, "genome"}};
+    std::map<NetworkResourceType, std::string> const BrowserDataTypeToUpperString = {
+        {NetworkResourceType_Simulation, "Simulation"},
+        {NetworkResourceType_Genome, "Genome"}};
 }
 
 _UploadSimulationDialog::_UploadSimulationDialog(
     BrowserWindow const& browserWindow,
     LoginDialog const& loginDialog,
     SimulationController const& simController,
-    NetworkController const& networkController,
     Viewport const& viewport,
     GenomeEditorWindow const& genomeEditorWindow)
     : _AlienDialog("")
     , _simController(simController)
-    , _networkController(networkController)
     , _browserWindow(browserWindow)
     , _loginDialog(loginDialog)
     , _viewport(viewport)
     , _genomeEditorWindow(genomeEditorWindow)
 {
     auto& settings = GlobalSettings::getInstance();
-    _simName = settings.getStringState("dialogs.upload.simulation name", "");
-    _simDescription = settings.getStringState("dialogs.upload.simulation description", "");
+    _resourceName = settings.getStringState("dialogs.upload.simulation name", "");
+    _resourceDescription = settings.getStringState("dialogs.upload.simulation description", "");
 }
 
 _UploadSimulationDialog::~_UploadSimulationDialog()
 {
     auto& settings = GlobalSettings::getInstance();
-    settings.setStringState("dialogs.upload.simulation name", _simName);
-    settings.setStringState("dialogs.upload.simulation description", _simDescription);
+    settings.setStringState("dialogs.upload.simulation name", _resourceName);
+    settings.setStringState("dialogs.upload.simulation description", _resourceDescription);
 }
 
-void _UploadSimulationDialog::open(DataType dataType)
+void _UploadSimulationDialog::open(NetworkResourceType dataType, std::string const& folder)
 {
-    if (_networkController->getLoggedInUserName()) {
+    auto& networkService = NetworkService::getInstance();
+    if (networkService.getLoggedInUserName()) {
         changeTitle("Upload " + BrowserDataTypeToLowerString.at(dataType));
         _dataType = dataType;
+        _folder = folder;
         _AlienDialog::open();
     } else {
         _loginDialog->open();
@@ -68,24 +70,43 @@ void _UploadSimulationDialog::open(DataType dataType)
 
 void _UploadSimulationDialog::processIntern()
 {
+    auto resourceTypeString = BrowserDataTypeToLowerString.at(_dataType);
     AlienImGui::Text("Data privacy policy");
     AlienImGui::HelpMarker(
-        "The " + BrowserDataTypeToLowerString.at(_dataType)
-        + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
+        "The " + resourceTypeString + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
+
+    AlienImGui::Text("How to use or create folders?");
+    AlienImGui::HelpMarker("If you want to upload the " + resourceTypeString
+        + " to a folder, you can use the `/`-notation. The folder will be created automatically if it does not exist.\nFor instance, naming a simulation as `Biome/Water "
+          "world/Initial/Variant 1` will create the nested folders `Biome`, `Water world` and `Initial`.");
+
     AlienImGui::Separator();
 
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_dataType)  + " name").textWidth(0), _simName);
+    if (!_folder.empty()) {
+        std::string text = "The following folder has been selected and will used for the upload:\n" + _folder;
+        ImGui::PushID("folder info");
+        ImGui::BeginDisabled();
+        AlienImGui::InputTextMultiline(AlienImGui::InputTextMultilineParameters().hint(_folder).textWidth(0).height(FolderWidgetHeight), text);
+        ImGui::EndDisabled();
+        ImGui::PopID();
+    }
+
+    AlienImGui::InputText(AlienImGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_dataType)  + " name").textWidth(0), _resourceName);
+
     AlienImGui::Separator();
+
+    ImGui::PushID("description");
     AlienImGui::InputTextMultiline(
         AlienImGui::InputTextMultilineParameters()
             .hint("Description (optional)")
             .textWidth(0)
             .height(ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(50.0f)),
-        _simDescription);
+        _resourceDescription);
+    ImGui::PopID();
 
     AlienImGui::Separator();
 
-    ImGui::BeginDisabled(_simName.empty());
+    ImGui::BeginDisabled(_resourceName.empty());
     if (AlienImGui::Button("OK")) {
         close();
         onUpload();
@@ -96,15 +117,15 @@ void _UploadSimulationDialog::processIntern()
     ImGui::SameLine();
     if (AlienImGui::Button("Cancel")) {
         close();
-        _simName = _origSimName;
-        _simDescription = _origSimDescription;
+        _resourceName = _origResourceName;
+        _resourceDescription = _origResourceDescription;
     }
 }
 
 void _UploadSimulationDialog::openIntern()
 {
-    _origSimName = _simName;
-    _origSimDescription = _simDescription;
+    _origResourceName = _resourceName;
+    _origResourceDescription = _resourceDescription;
 }
 
 void _UploadSimulationDialog::onUpload()
@@ -118,7 +139,7 @@ void _UploadSimulationDialog::onUpload()
         IntVector2D size;
         int numObjects = 0;
 
-        if (_dataType == DataType_Simulation) {
+        if (_dataType == NetworkResourceType_Simulation) {
             DeserializedSimulation deserializedSim;
             deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
             deserializedSim.auxiliaryData.zoom = _viewport->getZoomFactor();
@@ -154,7 +175,8 @@ void _UploadSimulationDialog::onUpload()
             }
         }
 
-        if (!_networkController->uploadSimulation(_simName, _simDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
+        auto& networkService = NetworkService::getInstance();
+        if (!networkService.uploadSimulation(_folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
             showMessage("Error", "Failed to upload " + BrowserDataTypeToLowerString.at(_dataType) + ".");
             return;
         }

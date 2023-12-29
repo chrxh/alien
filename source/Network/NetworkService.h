@@ -2,8 +2,8 @@
 
 #include <chrono>
 
-#include "RemoteSimulationData.h"
-#include "UserData.h"
+#include "NetworkResourceRawTO.h"
+#include "UserTO.h"
 #include "Definitions.h"
 
 using LoginErrorCode = int;
@@ -18,13 +18,11 @@ struct UserInfo
     std::optional<std::string> gpu;
 };
 
-class _NetworkController
+class NetworkService
 {
 public:
-    _NetworkController();
-    ~_NetworkController();
-
-    void process();
+    static NetworkService& getInstance();
+    NetworkService(NetworkService const&) = delete;
 
     std::string getServerAddress() const;
     void setServerAddress(std::string const& value);
@@ -36,12 +34,14 @@ public:
 
     bool login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo);
     bool logout();
+    void shutdown();
+    void refreshLogin();
     bool deleteUser();
     bool resetPassword(std::string const& userName, std::string const& email);
     bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
 
-    bool getRemoteSimulationList(std::vector<RemoteSimulationData>& result, bool withRetry) const;
-    bool getUserList(std::vector<UserData>& result, bool withRetry) const;
+    bool getRemoteSimulationList(std::vector<NetworkResourceRawTO>& result, bool withRetry) const;
+    bool getUserList(std::vector<UserTO>& result, bool withRetry) const;
     bool getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const;
     bool getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
     bool toggleLikeSimulation(std::string const& simId, int likeType);
@@ -54,12 +54,13 @@ public:
         std::string const& data,
         std::string const& settings,
         std::string const& statistics,
-        RemoteDataType type);
+        NetworkResourceType type);
     bool downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
     bool deleteSimulation(std::string const& simId);
 
 private:
-    void refreshLogin();
+    NetworkService();
+    ~NetworkService();
 
     std::string _serverAddress;
     std::optional<std::string> _loggedInUserName;

@@ -1,5 +1,19 @@
 # Release notes
 
+## [4.6.0] - 2023-12-29
+### Added
+- gui/browser: support for displaying folders and subfolders
+- gui/browser: folders for simulations and genomes are automatically created by parsing their names for `/`
+- gui/browser: allow uploading to a selected folder
+- gui/browser: show number of simulations per folder
+
+### Changed
+- gui/browser: tree view instead of a pure tabular view
+- gui/browser: simulations and genomes can be selected for user actions (e.g. deletion)
+
+### Removed
+- gui/browser: column for actions removed
+
 ## [4.5.1] - 2023-12-16
 ### Added
 - new simulation parameters to reduce energy particle absorption for cells with fewer connections

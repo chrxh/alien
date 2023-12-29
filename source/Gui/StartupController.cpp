@@ -125,7 +125,7 @@ void _StartupController::activate()
 
 void _StartupController::processLoadingScreen()
 {
-    auto styleRep = StyleRepository::getInstance();
+    auto& styleRep = StyleRepository::getInstance();
     auto center = ImGui::GetMainViewport()->GetCenter();
     auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));

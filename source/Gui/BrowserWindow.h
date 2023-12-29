@@ -4,10 +4,11 @@
 
 #include "Base/Hashes.h"
 #include "EngineInterface/Definitions.h"
+#include "Network/NetworkResourceTreeTO.h"
+#include "Network/NetworkResourceRawTO.h"
+#include "Network/UserTO.h"
 
 #include "AlienWindow.h"
-#include "RemoteSimulationData.h"
-#include "UserData.h"
 #include "Definitions.h"
 
 class _BrowserWindow : public _AlienWindow
@@ -15,7 +16,6 @@ class _BrowserWindow : public _AlienWindow
 public:
     _BrowserWindow(
         SimulationController const& simController,
-        NetworkController const& networkController,
         StatisticsWindow const& statisticsWindow,
         Viewport const& viewport,
         TemporalControlWindow const& temporalControlWindow,
@@ -27,6 +27,14 @@ public:
     void onRefresh();
 
 private:
+    struct ResourceData
+    {
+        int numResources = 0;
+        std::vector<NetworkResourceRawTO> rawTOs;
+        std::vector<NetworkResourceTreeTO> treeTOs;
+        std::set<std::vector<std::string>> collapsedFolderNames;
+    };
+
     void refreshIntern(bool withRetry);
 
     void processIntern() override;
@@ -40,11 +48,23 @@ private:
     void processFilter();
     void processToolbar();
 
+    void processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);
+    void processDescriptionField(NetworkResourceTreeTO const& treeTO);
+    void processReactionList(NetworkResourceTreeTO const& treeTO);
+    void processTimestampField(NetworkResourceTreeTO const& treeTO);
+    void processUserNameField(NetworkResourceTreeTO const& treeTO);
+    void processNumDownloadsField(NetworkResourceTreeTO const& treeTO);
+    void processWidthField(NetworkResourceTreeTO const& treeTO);
+    void processHeightField(NetworkResourceTreeTO const& treeTO);
+    void processNumParticlesField(NetworkResourceTreeTO const& treeTO);
+    void processSizeField(NetworkResourceTreeTO const& treeTO, bool kbyte);
+    void processVersionField(NetworkResourceTreeTO const& treeTO);
+
+    void processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);
     void processEmojiWindow();
     void processEmojiButton(int emojiType);
-    void processEmojiList(RemoteSimulationData* sim);
 
-    void processActionButtons(RemoteSimulationData* simData);
+    void processDownloadButton(BrowserLeaf const& leaf);
 
     void processShortenedText(std::string const& text, bool bold = false);
     bool processActionButton(std::string const& text);
@@ -52,23 +72,29 @@ private:
 
     void processActivated() override;
 
-    void sortSimulationList();
+    void scheduleCreateTreeTOs();
+
+    void sortRawTOs(std::vector<NetworkResourceRawTO>& tos, ImGuiTableSortSpecs* sortSpecs);
     void sortUserList();
 
-    void onDownloadItem(RemoteSimulationData* sim);
-    void onDeleteItem(RemoteSimulationData* sim);
-    void onToggleLike(RemoteSimulationData* sim, int emojiType);
+    void filterRawTOs();
+
+    void onDownloadItem(BrowserLeaf const& leaf);
+    void onDeleteItem(BrowserLeaf const& leaf);
+    void onToggleLike(NetworkResourceTreeTO const& to, int emojiType);
     void openWeblink(std::string const& link);
 
     bool isLiked(std::string const& simId);
     std::string getUserNamesToEmojiType(std::string const& simId, int emojiType);
 
-    void pushTextColor(RemoteSimulationData const& entry);
-    void calcFilteredSimulationAndGenomeLists();
+    void pushTextColor(NetworkResourceTreeTO const& to);
+    void popTextColor();
 
-    DataType _selectedDataType = DataType_Simulation; 
+    NetworkResourceType _selectedDataType = NetworkResourceType_Simulation; 
     bool _scheduleRefresh = false;
-    bool _scheduleSort = false;
+    bool _scheduleCreateSimulationTreeTOs = false;
+    bool _scheduleCreateGenomeTreeTOs = false;
+
     std::string _filter;
     bool _showCommunityCreations = false;
     float _userTableWidth = 0;
@@ -76,24 +102,22 @@ private:
     std::unordered_map<std::string, int> _ownEmojiTypeBySimId;
     std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByEmojiTypeBySimIdCache;
 
-    int _numSimulations = 0;
-    int _numGenomes = 0;
-    std::vector<RemoteSimulationData> _rawRemoteDataList;
-    std::vector<RemoteSimulationData> _filteredRemoteSimulationList;
-    std::vector<RemoteSimulationData> _filteredRemoteGenomeList;
+    std::vector<NetworkResourceRawTO> _unfilteredRawTOs;
+    NetworkResourceTreeTO _selectedResource;
+    ResourceData _genomes;
+    ResourceData _simulations;
 
-    std::vector<UserData> _userList;
+    std::vector<UserTO> _userTOs;
 
     std::vector<TextureData> _emojis;
 
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
-    RemoteSimulationData* _simOfEmojiPopup = nullptr;
+    NetworkResourceTreeTO _emojiPopupTO;
 
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 
     SimulationController _simController;
-    NetworkController _networkController;
     StatisticsWindow _statisticsWindow;
     Viewport _viewport;
     TemporalControlWindow _temporalControlWindow;

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
+#include "Network/Definitions.h"
+
 #include "Definitions.h"
 
 class _MainWindow
@@ -30,6 +32,9 @@ private:
     void onSaveSimulation();
     void onRunSimulation();
     void onPauseSimulation();
+
+    void pushGlobalStyle();
+    void popGlobalStyle();
 
     GLFWwindow* _window;
     GuiLogger _logger;
@@ -71,7 +76,6 @@ private:
     UiController _uiController; 
     EditorController _editorController; 
     FpsController _fpsController;
-    NetworkController _networkController;
 
     bool _onExit = false;
     bool _simulationMenuToggled = false;

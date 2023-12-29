@@ -27,6 +27,8 @@ public:
     void unregisterCallBack(LoggingCallBack* callback);
 
 private:
+    LoggingService() = default;
+
     std::vector<LoggingCallBack*> _callbacks;
     std::mutex _mutex;
 };
