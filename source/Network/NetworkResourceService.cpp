@@ -78,20 +78,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
 
         //insert leaf
         auto treeTO = std::make_shared<_NetworkResourceTreeTO>();
-        BrowserLeaf leaf{
-            .id = rawTO->id,
-            .timestamp = rawTO->timestamp,
-            .userName = rawTO->userName,
-            .simName = nameWithoutFolders,
-            .numLikesByEmojiType = rawTO->numLikesByEmojiType,
-            .numDownloads = rawTO->numDownloads,
-            .width = rawTO->width,
-            .height = rawTO->height,
-            .particles = rawTO->particles,
-            .contentSize = rawTO->contentSize,
-            .description = rawTO->description,
-            .version = rawTO->version
-        };
+        BrowserLeaf leaf{.rawTO = rawTO};
         treeTO->type = rawTO->type;
         treeTO->folderNames = folderNames;
         treeTO->node = leaf;
@@ -177,7 +164,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
         auto& treeTO = treeTOs.at(i);
         if (treeTO->isLeaf()) {
             int numReactions = 0;
-            for (auto const& count : treeTO->getLeaf().numLikesByEmojiType | std::views::values) {
+            for (auto const& count : treeTO->getLeaf().rawTO->numLikesByEmojiType | std::views::values) {
                 numReactions += count;
             }
             for (int j = i - 1; j >= 0; --j) {
