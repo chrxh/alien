@@ -323,15 +323,20 @@ void _BrowserWindow::processSimulationList()
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
+                ImGui::TableNextColumn();
 
-                //ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
-                //static bool selected = true;
-                //ImGui::Selectable("", &selected, selectable_flags, ImVec2(0, scale(RowHeight - 3.0f)));
-                //ImGui::SameLine();
+                auto selected = _simulations.selected == treeTO;
+                if (ImGui::Selectable(
+                        "",
+                        &selected,
+                        ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
+                        ImVec2(0, scale(RowHeight) - ImGui::GetStyle().FramePadding.y))) {
+                    _simulations.selected = selected ? treeTO : nullptr;
+                }
+                ImGui::SameLine();
 
                 pushTextColor(treeTO);
 
-                ImGui::TableNextColumn();
                 processResourceNameField(treeTO, _simulations.collapsedFolderNames);
                 ImGui::TableNextColumn();
                 processDescriptionField(treeTO);
@@ -408,10 +413,20 @@ void _BrowserWindow::processGenomeList()
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
+                ImGui::TableNextColumn();
+
+                auto selected = _genomes.selected == treeTO;
+                if (ImGui::Selectable(
+                        "",
+                        &selected,
+                        ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
+                        ImVec2(0, scale(RowHeight) - ImGui::GetStyle().FramePadding.y))) {
+                    _genomes.selected = selected ? treeTO : nullptr;
+                }
+                ImGui::SameLine();
 
                 pushTextColor(treeTO);
 
-                ImGui::TableNextColumn();
                 processResourceNameField(treeTO, _genomes.collapsedFolderNames);
                 ImGui::TableNextColumn();
                 processDescriptionField(treeTO);
@@ -584,8 +599,14 @@ void _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
         processShortenedText(treeTO->folderNames.back());
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
-        std::string numSimsString = folder.numLeafs == 1 ? "sim" : "sims";
-        AlienImGui::Text("(" + std::to_string(folder.numLeafs) + " " + numSimsString + ")");
+        std::string resourceTypeString = [&] {
+            if (treeTO->type == NetworkResourceType_Simulation) {
+                return folder.numLeafs == 1 ? "sim" : "sims";
+            } else {
+                return folder.numLeafs == 1 ? "genome" : "genomes";
+            }
+        }();
+        AlienImGui::Text("(" + std::to_string(folder.numLeafs) + " " + resourceTypeString + ")");
         ImGui::PopStyleColor();
     }
 }

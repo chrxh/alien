@@ -33,6 +33,7 @@ private:
         std::vector<NetworkResourceRawTO> rawTOs;
         std::vector<NetworkResourceTreeTO> treeTOs;
         std::set<std::vector<std::string>> collapsedFolderNames;
+        NetworkResourceTreeTO selected;
     };
 
     void refreshIntern(bool withRetry);
