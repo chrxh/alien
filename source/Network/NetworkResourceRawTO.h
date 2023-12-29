@@ -28,7 +28,7 @@ struct _NetworkResourceRawTO
     std::string id;
     std::string timestamp;
     std::string userName;
-    std::string simName;
+    std::string resourceName;
     std::map<int, int> numLikesByEmojiType;
     int numDownloads;
     int width;

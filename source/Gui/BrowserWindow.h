@@ -65,7 +65,6 @@ private:
     void processEmojiButton(int emojiType);
 
     void processDownloadButton(BrowserLeaf const& leaf);
-    void processActionButtons(NetworkResourceTreeTO const& to);
 
     void processShortenedText(std::string const& text, bool bold = false);
     bool processActionButton(std::string const& text);

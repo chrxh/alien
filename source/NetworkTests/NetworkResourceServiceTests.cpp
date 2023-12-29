@@ -18,7 +18,7 @@ TEST_F(NetworkResourceServiceTests, nameWithoutFolder)
 {
     std::vector<NetworkResourceRawTO> inputTOs;
     auto inputTO = std::make_shared<_NetworkResourceRawTO>();
-    inputTO->simName = "test";
+    inputTO->resourceName = "test";
     inputTOs.emplace_back(inputTO);
 
     auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs, {});
@@ -30,7 +30,7 @@ TEST_F(NetworkResourceServiceTests, nameWithFolder)
 {
     std::vector<NetworkResourceRawTO> inputTOs;
     auto inputTO = std::make_shared<_NetworkResourceRawTO>();
-    inputTO->simName = "folder/test";
+    inputTO->resourceName = "folder/test";
     inputTOs.emplace_back(inputTO);
 
     auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs, {});
@@ -55,7 +55,7 @@ TEST_F(NetworkResourceServiceTests, nameWithTwoFolders)
 {
     std::vector<NetworkResourceRawTO> inputTOs;
     auto inputTO = std::make_shared<_NetworkResourceRawTO>();
-    inputTO->simName = "folder1/folder2/test";
+    inputTO->resourceName = "folder1/folder2/test";
     inputTOs.emplace_back(inputTO);
 
     auto outputTOs = NetworkResourceService::createTreeTOs(inputTOs, {});
@@ -90,12 +90,12 @@ TEST_F(NetworkResourceServiceTests, twoNamesWithTwoFolders)
     std::vector<NetworkResourceRawTO> inputTOs;
     {
         auto inputTO = std::make_shared<_NetworkResourceRawTO>();
-        inputTO->simName = "A/B/C";
+        inputTO->resourceName = "A/B/C";
         inputTOs.emplace_back(inputTO);
     }
     {
         auto inputTO = std::make_shared<_NetworkResourceRawTO>();
-        inputTO->simName = "X/Y/Z";
+        inputTO->resourceName = "X/Y/Z";
         inputTOs.emplace_back(inputTO);
     }
 

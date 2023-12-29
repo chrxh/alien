@@ -17,7 +17,7 @@ public:
         GenomeEditorWindow const& genomeEditorWindow);
     ~_UploadSimulationDialog();
 
-    void open(NetworkResourceType dataType);
+    void open(NetworkResourceType dataType, std::string const& folder = "");
 
 private:
     void processIntern();
@@ -25,11 +25,12 @@ private:
 
     void onUpload();
 
-    std::string _simName;
-    std::string _simDescription;
+    std::string _folder;
+    std::string _resourceName;
+    std::string _resourceDescription;
 
-    std::string _origSimName;
-    std::string _origSimDescription;
+    std::string _origResourceName;
+    std::string _origResourceDescription;
 
     NetworkResourceType _dataType = NetworkResourceType_Simulation;
 

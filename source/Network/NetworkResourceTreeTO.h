@@ -15,6 +15,7 @@ struct BrowserFolder
 
 struct BrowserLeaf
 {
+    std::string leafName;
     NetworkResourceRawTO rawTO;
 };
 
