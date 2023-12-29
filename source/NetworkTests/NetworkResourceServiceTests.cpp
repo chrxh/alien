@@ -47,7 +47,7 @@ TEST_F(NetworkResourceServiceTests, nameWithFolder)
         EXPECT_TRUE(outputTO->isLeaf());
         EXPECT_EQ(1, outputTO->folderNames.size());
         EXPECT_EQ(std::string("folder"), outputTO->folderNames.front());
-        EXPECT_EQ(std::string("test"), outputTO->getLeaf().simName);
+        EXPECT_EQ(std::string("test"), outputTO->getLeaf().rawTO->simName);
     }
 }
 
@@ -80,7 +80,7 @@ TEST_F(NetworkResourceServiceTests, nameWithTwoFolders)
         EXPECT_EQ(2, outputTO->folderNames.size());
         EXPECT_EQ(std::string("folder1"), outputTO->folderNames.at(0));
         EXPECT_EQ(std::string("folder2"), outputTO->folderNames.at(1));
-        EXPECT_EQ(std::string("test"), outputTO->getLeaf().simName);
+        EXPECT_EQ(std::string("test"), outputTO->getLeaf().rawTO->simName);
     }
 }
 
@@ -121,7 +121,7 @@ TEST_F(NetworkResourceServiceTests, twoNamesWithTwoFolders)
         EXPECT_EQ(2, outputTO->folderNames.size());
         EXPECT_EQ(std::string("A"), outputTO->folderNames.at(0));
         EXPECT_EQ(std::string("B"), outputTO->folderNames.at(1));
-        EXPECT_EQ(std::string("C"), outputTO->getLeaf().simName);
+        EXPECT_EQ(std::string("C"), outputTO->getLeaf().rawTO->simName);
     }
     {
         auto outputTO = outputTOs.at(3);
@@ -142,6 +142,6 @@ TEST_F(NetworkResourceServiceTests, twoNamesWithTwoFolders)
         EXPECT_EQ(2, outputTO->folderNames.size());
         EXPECT_EQ(std::string("X"), outputTO->folderNames.at(0));
         EXPECT_EQ(std::string("Y"), outputTO->folderNames.at(1));
-        EXPECT_EQ(std::string("Z"), outputTO->getLeaf().simName);
+        EXPECT_EQ(std::string("Z"), outputTO->getLeaf().rawTO->simName);
     }
 }

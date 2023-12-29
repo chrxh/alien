@@ -17,6 +17,11 @@ namespace Const
     int64_t const TextDecentColor = 0xff909090;
     int64_t const TextInfoColor = 0xff308787;
 
+    ImColor const HeaderColor = ImColor::HSV(0.58f, 0.7f, 0.3f);
+    ImColor const HeaderActiveColor = ImColor::HSV(0.58f, 0.7f, 0.5f);
+    ImColor const HeaderHoveredColor = ImColor::HSV(0.58f, 0.7f, 0.4f);
+
+
     ImColor const MenuButtonColor = ImColor::HSV(0.6f, 0.6f, 0.5f);
     ImColor const MenuButtonHoveredColor = ImColor::HSV(0.6f, 1.0f, 1.0f);
     ImColor const MenuButtonActiveColor = ImColor::HSV(0.6f, 0.8f, 0.7f);
@@ -85,6 +90,7 @@ namespace Const
 
     float const WindowAlpha = 0.9f;
     float const SliderBarWidth = 30.0f;
+    float const WindowsRounding = 10.0f;
 }
 
 class StyleRepository
