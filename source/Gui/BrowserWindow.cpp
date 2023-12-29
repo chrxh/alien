@@ -319,7 +319,7 @@ void _BrowserWindow::processSimulationList()
         clipper.Begin(_simulations.treeTOs.size());
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto item = _simulations.treeTOs[row];
+                auto treeTO = _simulations.treeTOs[row];
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
@@ -330,57 +330,32 @@ void _BrowserWindow::processSimulationList()
                 //ImGui::Selectable("", &selected, selectable_flags, ImVec2(0, scale(RowHeight - 3.0f)));
                 //ImGui::SameLine();
 
-                if (item->isLeaf()) {
-                    auto& leaf = item->getLeaf();
+                pushTextColor(treeTO);
 
-                    processFolderTreeSymbols(item, _simulations.collapsedFolderNames);
-                    processDownloadButton(leaf);
-                    ImGui::SameLine();
-                    processShortenedText(leaf.simName);
+                processResourceNameField(treeTO, _simulations.collapsedFolderNames);
+                ImGui::TableNextColumn();
+                processDescriptionField(treeTO);
+                ImGui::TableNextColumn();
+                processReactionList(treeTO);
+                ImGui::TableNextColumn();
+                processTimestampField(treeTO);
+                ImGui::TableNextColumn();
+                processUserNameField(treeTO);
+                ImGui::TableNextColumn();
+                processNumDownloadsField(treeTO);
+                ImGui::TableNextColumn();
+                processWidthField(treeTO);
+                ImGui::TableNextColumn();
+                processHeightField(treeTO);
+                ImGui::TableNextColumn();
+                processNumParticlesField(treeTO);
+                ImGui::TableNextColumn();
+                processSizeField(treeTO);
+                ImGui::TableNextColumn();
+                processVersionField(treeTO);
 
-                    ImGui::TableNextColumn();
-                    processShortenedText(leaf.description);
-                    ImGui::TableNextColumn();
-                    processReactionList(item);
-                    ImGui::TableNextColumn();
-                    pushTextColor(item);
-                    AlienImGui::Text(leaf.timestamp);
-                    ImGui::TableNextColumn();
-                    processShortenedText(leaf.userName);
+                popTextColor();
 
-                    ImGui::TableNextColumn();
-                    AlienImGui::Text(std::to_string(leaf.numDownloads));
-                    ImGui::TableNextColumn();
-                    AlienImGui::Text(std::to_string(leaf.width));
-                    ImGui::TableNextColumn();
-                    AlienImGui::Text(std::to_string(leaf.height));
-                    ImGui::TableNextColumn();
-                    AlienImGui::Text(StringHelper::format(leaf.particles / 1000) + " K");
-                    ImGui::TableNextColumn();
-                    AlienImGui::Text(StringHelper::format(leaf.contentSize / 1024) + " KB");
-                    ImGui::TableNextColumn();
-                    AlienImGui::Text(leaf.version);
-
-                    ImGui::PopStyleColor();
-                } else {
-                    auto& folder = item->getFolder();
-
-                    processFolderTreeSymbols(item, _simulations.collapsedFolderNames);
-                    processShortenedText(item->folderNames.back());
-                    ImGui::SameLine();
-                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
-                    std::string numSimsString = folder.numLeafs == 1 ? "sim" : "sims";
-                    AlienImGui::Text("(" + std::to_string(folder.numLeafs) + " " + numSimsString + ")");
-                    ImGui::PopStyleColor();
-                    ImGui::TableNextColumn();
-                    ImGui::TableNextColumn();
-                    auto pos = ImGui::GetCursorScreenPos();
-                    ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
-                    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
-                    AlienImGui::Text("(" + std::to_string(folder.numReactions) + ")");
-                    ImGui::PopStyleColor();
-
-                }
                 ImGui::PopID();
             }
         ImGui::EndTable();
@@ -612,23 +587,203 @@ void _BrowserWindow::processFilter()
     }
 }
 
-void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& entry, std::set<std::vector<std::string>>& collapsedFolderNames)
+void _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
 {
-    auto const& treeSymbols = entry->treeSymbols;
+    if (treeTO->isLeaf()) {
+        auto& leaf = treeTO->getLeaf();
+
+        processFolderTreeSymbols(treeTO, _simulations.collapsedFolderNames);
+        processDownloadButton(leaf);
+        ImGui::SameLine();
+        processShortenedText(leaf.simName);
+    } else {
+        auto& folder = treeTO->getFolder();
+
+        processFolderTreeSymbols(treeTO, _simulations.collapsedFolderNames);
+        processShortenedText(treeTO->folderNames.back());
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
+        std::string numSimsString = folder.numLeafs == 1 ? "sim" : "sims";
+        AlienImGui::Text("(" + std::to_string(folder.numLeafs) + " " + numSimsString + ")");
+        ImGui::PopStyleColor();
+    }
+}
+
+void _BrowserWindow::processDescriptionField(NetworkResourceTreeTO const& treeTO)
+{
+    if (treeTO->isLeaf()) {
+        auto& leaf = treeTO->getLeaf();
+        processShortenedText(leaf.description);
+    }
+}
+
+void _BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
+{
+    if (treeTO->isLeaf()) {
+        auto& leaf = treeTO->getLeaf();
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDownloadButtonTextColor);
+        auto isAddReaction = processActionButton(ICON_FA_PLUS);
+        ImGui::PopStyleColor();
+        AlienImGui::Tooltip("Add a reaction");
+        if (isAddReaction) {
+            _activateEmojiPopup = true;
+            _emojiPopupTO = treeTO;
+        }
+
+        //calc remap which allows to show most frequent like type first
+        std::map<int, int> remap;
+        std::set<int> processedEmojiTypes;
+
+        int index = 0;
+        while (processedEmojiTypes.size() < leaf.numLikesByEmojiType.size()) {
+            int maxLikes = 0;
+            std::optional<int> maxEmojiType;
+            for (auto const& [emojiType, numLikes] : leaf.numLikesByEmojiType) {
+                if (!processedEmojiTypes.contains(emojiType) && numLikes > maxLikes) {
+                    maxLikes = numLikes;
+                    maxEmojiType = emojiType;
+                }
+            }
+            processedEmojiTypes.insert(*maxEmojiType);
+            remap.emplace(index, *maxEmojiType);
+            ++index;
+        }
+
+        //show like types with count
+        int counter = 0;
+        std::optional<int> toggleEmojiType;
+        for (auto const& emojiType : remap | std::views::values) {
+            auto numLikes = leaf.numLikesByEmojiType.at(emojiType);
+
+            ImGui::SameLine();
+            AlienImGui::Text(std::to_string(numLikes));
+            ImGui::SameLine();
+            if (emojiType < _emojis.size()) {
+                auto const& emoji = _emojis.at(emojiType);
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(7.0f));
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(1.0f));
+                ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(Const::ToolbarButtonHoveredColor));
+                auto cursorPos = ImGui::GetCursorScreenPos();
+                auto emojiWidth = scale(toFloat(emoji.width) / 2.5f);
+                auto emojiHeight = scale(toFloat(emoji.height) / 2.5f);
+                if (ImGui::ImageButton((void*)(intptr_t)emoji.textureId, {emojiWidth, emojiHeight}, ImVec2(0, 0), ImVec2(1, 1), 0)) {
+                    toggleEmojiType = emojiType;
+                }
+                bool isLiked = _ownEmojiTypeBySimId.contains(leaf.id) && _ownEmojiTypeBySimId.at(leaf.id) == emojiType;
+                if (isLiked) {
+                    ImDrawList* drawList = ImGui::GetWindowDrawList();
+                    drawList->AddRect(
+                        ImVec2(cursorPos.x, cursorPos.y),
+                        ImVec2(cursorPos.x + emojiWidth, cursorPos.y + emojiHeight),
+                        (ImU32)ImColor::HSV(0, 0, 1, 0.5f),
+                        1.0f);
+                }
+                ImGui::PopStyleColor(2);
+                AlienImGui::Tooltip([=, this] { return getUserNamesToEmojiType(leaf.id, emojiType); }, false);
+            }
+
+            //separator except for last element
+            if (++counter < leaf.numLikesByEmojiType.size()) {
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
+            }
+        }
+        if (toggleEmojiType) {
+            onToggleLike(treeTO, *toggleEmojiType);
+        }
+    } else {
+        auto& folder = treeTO->getFolder();
+
+        auto pos = ImGui::GetCursorScreenPos();
+        ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
+        AlienImGui::Text("(" + std::to_string(folder.numReactions) + ")");
+        ImGui::PopStyleColor();
+    }
+}
+
+void _BrowserWindow::processTimestampField(NetworkResourceTreeTO const& treeTO)
+{
+    if (treeTO->isLeaf()) {
+        auto& leaf = treeTO->getLeaf();
+        AlienImGui::Text(leaf.timestamp);
+    }
+}
+
+void _BrowserWindow::processUserNameField(NetworkResourceTreeTO const& treeTO)
+{
+    if (treeTO->isLeaf()) {
+        auto& leaf = treeTO->getLeaf();
+        processShortenedText(leaf.userName);
+    }
+}
+
+void _BrowserWindow::processNumDownloadsField(NetworkResourceTreeTO const& treeTO)
+{
+    if (treeTO->isLeaf()) {
+        auto& leaf = treeTO->getLeaf();
+        AlienImGui::Text(std::to_string(leaf.numDownloads));
+    }
+}
+
+void _BrowserWindow::processWidthField(NetworkResourceTreeTO const& treeTO)
+{
+    if (treeTO->isLeaf()) {
+        auto& leaf = treeTO->getLeaf();
+        AlienImGui::Text(std::to_string(leaf.width));
+    }
+}
+
+void _BrowserWindow::processHeightField(NetworkResourceTreeTO const& treeTO)
+{
+    if (treeTO->isLeaf()) {
+        auto& leaf = treeTO->getLeaf();
+        AlienImGui::Text(std::to_string(leaf.height));
+    }
+}
+
+void _BrowserWindow::processNumParticlesField(NetworkResourceTreeTO const& treeTO)
+{
+    if (treeTO->isLeaf()) {
+        auto& leaf = treeTO->getLeaf();
+        AlienImGui::Text(StringHelper::format(leaf.particles / 1000) + " K");
+    }
+}
+
+void _BrowserWindow::processSizeField(NetworkResourceTreeTO const& treeTO)
+{
+    if (treeTO->isLeaf()) {
+        auto& leaf = treeTO->getLeaf();
+        AlienImGui::Text(StringHelper::format(leaf.contentSize / 1024) + " KB");
+    }
+}
+
+void _BrowserWindow::processVersionField(NetworkResourceTreeTO const& treeTO)
+{
+    if (treeTO->isLeaf()) {
+        auto& leaf = treeTO->getLeaf();
+        AlienImGui::Text(leaf.version);
+    }
+}
+
+void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
+{
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderSymbolColor);
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
+    auto const& treeSymbols = treeTO->treeSymbols;
     for (auto const& folderLine : treeSymbols) {
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImGuiStyle& style = ImGui::GetStyle();
         switch (folderLine) {
         case FolderTreeSymbols::Expanded: {
             if (AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f)) {
-                collapsedFolderNames.insert(entry->folderNames);
+                collapsedFolderNames.insert(treeTO->folderNames);
                 _scheduleCreateTreeTOs = true;
             }
         } break;
         case FolderTreeSymbols::Collapsed: {
             if (AlienImGui::Button(ICON_FA_PLUS_SQUARE, 20.0f)) {
-                collapsedFolderNames.erase(entry->folderNames);
+                collapsedFolderNames.erase(treeTO->folderNames);
                 _scheduleCreateTreeTOs = true;
             }
         } break;
@@ -677,7 +832,7 @@ void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& entry
         }
         ImGui::SameLine();
     }
-    ImGui::PopStyleColor(1);
+    ImGui::PopStyleColor(2);
 }
 
 void _BrowserWindow::processEmojiWindow()
@@ -754,84 +909,9 @@ void _BrowserWindow::processEmojiButton(int emojiType)
     }
 }
 
-void _BrowserWindow::processReactionList(NetworkResourceTreeTO const& to)
-{
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
-    auto isAddReaction = processActionButton(ICON_FA_PLUS);
-    ImGui::PopStyleColor();
-    AlienImGui::Tooltip("Add a reaction");
-    if (isAddReaction) {
-        _activateEmojiPopup = true;
-        _emojiPopupTO = to;
-    }
-
-    //calc remap which allows to show most frequent like type first
-    std::map<int, int> remap;
-    std::set<int> processedEmojiTypes;
-
-    int index = 0;
-    auto& leaf = to->getLeaf();
-    while (processedEmojiTypes.size() < leaf.numLikesByEmojiType.size()) {
-        int maxLikes = 0;
-        std::optional<int> maxEmojiType;
-        for (auto const& [emojiType, numLikes] : leaf.numLikesByEmojiType) {
-            if (!processedEmojiTypes.contains(emojiType) && numLikes > maxLikes) {
-                maxLikes = numLikes;
-                maxEmojiType = emojiType;
-            }
-        }
-        processedEmojiTypes.insert(*maxEmojiType);
-        remap.emplace(index, *maxEmojiType);
-        ++index;
-    }
-
-    //show like types with count
-    int counter = 0;
-    std::optional<int> toggleEmojiType;
-    for (auto const& emojiType : remap | std::views::values) {
-        auto numLikes = leaf.numLikesByEmojiType.at(emojiType);
-
-        ImGui::SameLine();
-        AlienImGui::Text(std::to_string(numLikes));
-        ImGui::SameLine();
-        if (emojiType < _emojis.size()) {
-            auto const& emoji = _emojis.at(emojiType);
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(7.0f));
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(1.0f));
-            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(Const::ToolbarButtonHoveredColor));
-            auto cursorPos = ImGui::GetCursorScreenPos();
-            auto emojiWidth = scale(toFloat(emoji.width) / 2.5f);
-            auto emojiHeight = scale(toFloat(emoji.height) / 2.5f);
-            if (ImGui::ImageButton((void*)(intptr_t)emoji.textureId, {emojiWidth, emojiHeight},
-                    ImVec2(0, 0),
-                    ImVec2(1, 1),
-                    0)) {
-                toggleEmojiType = emojiType;
-            }
-            bool isLiked = _ownEmojiTypeBySimId.contains(leaf.id) && _ownEmojiTypeBySimId.at(leaf.id) == emojiType;
-            if (isLiked) {
-                ImDrawList* drawList = ImGui::GetWindowDrawList();
-                drawList->AddRect(
-                    ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x + emojiWidth, cursorPos.y + emojiHeight), (ImU32)ImColor::HSV(0, 0, 1, 0.5f), 1.0f);
-            }
-            ImGui::PopStyleColor(2);
-            AlienImGui::Tooltip([=, this] { return getUserNamesToEmojiType(leaf.id, emojiType); }, false);
-        }
-
-        //separator except for last element
-        if (++counter < leaf.numLikesByEmojiType.size()) {
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
-        }
-    }
-    if (toggleEmojiType) {
-        onToggleLike(to, *toggleEmojiType);
-    }
-}
-
 void _BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
 {
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDownloadButtonTextColor);
     auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
     ImGui::PopStyleColor();
     if (downloadButtonResult) {
@@ -849,7 +929,7 @@ void _BrowserWindow::processActionButtons(NetworkResourceTreeTO const& to)
     //    auto const& leaf = to->getLeaf();
     //    auto liked = isLiked(leaf.id);
     //    if (liked) {
-    //        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::AddReactionButtonTextColor);
+    //        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserAddReactionButtonTextColor);
     //    } else {
     //        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::NoLikeButtonTextColor);
     //    }
@@ -863,7 +943,7 @@ void _BrowserWindow::processActionButtons(NetworkResourceTreeTO const& to)
     //    ImGui::SameLine();
 
     //    //download button
-    //    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DownloadButtonTextColor);
+    //    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDownloadButtonTextColor);
     //    auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
     //    ImGui::PopStyleColor();
     //    if (downloadButtonResult) {
@@ -874,7 +954,7 @@ void _BrowserWindow::processActionButtons(NetworkResourceTreeTO const& to)
 
     //    //delete button
     //    if (leaf.userName == networkService.getLoggedInUserName().value_or("")) {
-    //        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::DeleteButtonTextColor);
+    //        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDeleteButtonTextColor);
     //        auto deleteButtonResult = processActionButton(ICON_FA_TRASH);
     //        ImGui::PopStyleColor();
     //        if (deleteButtonResult) {
@@ -1130,13 +1210,18 @@ void _BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
     if (to->isLeaf()) {
         auto const& leaf = to->getLeaf();
         if (VersionChecker::isVersionOutdated(leaf.version)) {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionOutdatedColor);
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionOutdatedTextColor);
         } else if (VersionChecker::isVersionNewer(leaf.version)) {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionNewerColor);
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionNewerTextColor);
         } else {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::VersionOkColor);
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionOkTextColor);
         }
     } else {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::DirectoryColor);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserFolderTextColor);
     }
+}
+
+void _BrowserWindow::popTextColor()
+{
+    ImGui::PopStyleColor();
 }
