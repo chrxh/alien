@@ -269,7 +269,9 @@ void _BrowserWindow::processToolbar()
         _uploadSimulationDialog.lock()->open(_selectedDataType, prefix);
     }
     AlienImGui::Tooltip(
-        "Share your current " + resourceTypeString + " with other users:\nYour current " + resourceTypeString + " will be uploaded to the server and made visible in the browser.");
+        "Share your current " + resourceTypeString + " with other users:\nThe " + resourceTypeString
+        + " will be uploaded to the server and made visible in the browser.\nIf you have already selected a folder, your " + resourceTypeString
+        + " will be uploaded there.");
 
     ImGui::SameLine();
     ImGui::BeginDisabled(
