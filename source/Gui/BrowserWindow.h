@@ -48,10 +48,21 @@ private:
     void processFilter();
     void processToolbar();
 
-    void processFolderTreeSymbols(NetworkResourceTreeTO const& entry, std::set<std::vector<std::string>>& collapsedFolderNames);
+    void processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);
+    void processDescriptionField(NetworkResourceTreeTO const& treeTO);
+    void processReactionList(NetworkResourceTreeTO const& treeTO);
+    void processTimestampField(NetworkResourceTreeTO const& treeTO);
+    void processUserNameField(NetworkResourceTreeTO const& treeTO);
+    void processNumDownloadsField(NetworkResourceTreeTO const& treeTO);
+    void processWidthField(NetworkResourceTreeTO const& treeTO);
+    void processHeightField(NetworkResourceTreeTO const& treeTO);
+    void processNumParticlesField(NetworkResourceTreeTO const& treeTO);
+    void processSizeField(NetworkResourceTreeTO const& treeTO);
+    void processVersionField(NetworkResourceTreeTO const& treeTO);
+
+    void processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);
     void processEmojiWindow();
     void processEmojiButton(int emojiType);
-    void processReactionList(NetworkResourceTreeTO const& to);
 
     void processDownloadButton(BrowserLeaf const& leaf);
     void processActionButtons(NetworkResourceTreeTO const& to);
@@ -76,6 +87,7 @@ private:
     std::string getUserNamesToEmojiType(std::string const& simId, int emojiType);
 
     void pushTextColor(NetworkResourceTreeTO const& to);
+    void popTextColor();
 
     NetworkResourceType _selectedDataType = NetworkResourceType_Simulation; 
     bool _scheduleRefresh = false;
