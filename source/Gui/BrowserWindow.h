@@ -57,7 +57,7 @@ private:
     void processWidthField(NetworkResourceTreeTO const& treeTO);
     void processHeightField(NetworkResourceTreeTO const& treeTO);
     void processNumParticlesField(NetworkResourceTreeTO const& treeTO);
-    void processSizeField(NetworkResourceTreeTO const& treeTO);
+    void processSizeField(NetworkResourceTreeTO const& treeTO, bool kbyte);
     void processVersionField(NetworkResourceTreeTO const& treeTO);
 
     void processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);

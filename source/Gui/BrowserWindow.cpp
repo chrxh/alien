@@ -324,7 +324,6 @@ void _BrowserWindow::processSimulationList()
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
 
-                ImGui::TableNextColumn();
                 //ImGuiSelectableFlags selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
                 //static bool selected = true;
                 //ImGui::Selectable("", &selected, selectable_flags, ImVec2(0, scale(RowHeight - 3.0f)));
@@ -332,6 +331,7 @@ void _BrowserWindow::processSimulationList()
 
                 pushTextColor(treeTO);
 
+                ImGui::TableNextColumn();
                 processResourceNameField(treeTO, _simulations.collapsedFolderNames);
                 ImGui::TableNextColumn();
                 processDescriptionField(treeTO);
@@ -350,7 +350,7 @@ void _BrowserWindow::processSimulationList()
                 ImGui::TableNextColumn();
                 processNumParticlesField(treeTO);
                 ImGui::TableNextColumn();
-                processSizeField(treeTO);
+                processSizeField(treeTO, true);
                 ImGui::TableNextColumn();
                 processVersionField(treeTO);
 
@@ -373,35 +373,19 @@ void _BrowserWindow::processGenomeList()
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
     if (ImGui::BeginTable("Browser", 9, flags, ImVec2(0, 0), 0.0f)) {
-        ImGui::TableSetupColumn(
-            "Genome",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(160.0f),
-            NetworkResourceColumnId_SimulationName);
-        ImGui::TableSetupColumn(
-            "Description",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(120.0f),
-            NetworkResourceColumnId_Description);
-        ImGui::TableSetupColumn(
-            "Reactions", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_Likes);
-        //ImGui::TableSetupColumn(
-        //    "Actions", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f), NetworkResourceColumnId_Actions);
+        ImGui::TableSetupColumn("Genome", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(210.0f), NetworkResourceColumnId_SimulationName);
+        ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(200.0f), NetworkResourceColumnId_Description);
+        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_Likes);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             scale(135.0f),
             NetworkResourceColumnId_Timestamp);
-        ImGui::TableSetupColumn(
-            "User name",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(120.0f),
-            NetworkResourceColumnId_UserName);
-        ImGui::TableSetupColumn(
-            "Downloads", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
-        ImGui::TableSetupColumn("Cells", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Particles);
-        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_FileSize);
-        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Version);
+        ImGui::TableSetupColumn("User name", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_UserName);
+        ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
+        ImGui::TableSetupColumn("Cells", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Particles);
+        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_FileSize);
+        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Version);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
@@ -420,37 +404,34 @@ void _BrowserWindow::processGenomeList()
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
 
-                auto& item = _genomes.treeTOs[row];
+                auto& treeTO = _genomes.treeTOs[row];
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
-                if (item->isLeaf()) {
-                    auto& leaf = item->getLeaf();
 
-                    ImGui::TableNextColumn();
-                    processShortenedText(leaf.simName);
-                    ImGui::TableNextColumn();
-                    processShortenedText(leaf.description);
-                    ImGui::TableNextColumn();
-                    processReactionList(item);
-                    //ImGui::TableNextColumn();
-                    //processActionButtons(item);
-                    ImGui::TableNextColumn();
-                    pushTextColor(item);
-                    AlienImGui::Text(leaf.timestamp);
-                    ImGui::TableNextColumn();
-                    processShortenedText(leaf.userName);
-                    ImGui::TableNextColumn();
-                    AlienImGui::Text(std::to_string(leaf.numDownloads));
-                    ImGui::TableNextColumn();
-                    AlienImGui::Text(StringHelper::format(leaf.particles));
-                    ImGui::TableNextColumn();
-                    AlienImGui::Text(StringHelper::format(leaf.contentSize) + " Bytes");
-                    ImGui::TableNextColumn();
-                    AlienImGui::Text(leaf.version);
+                pushTextColor(treeTO);
 
-                    ImGui::PopStyleColor();
-                }
+                ImGui::TableNextColumn();
+                processResourceNameField(treeTO, _genomes.collapsedFolderNames);
+                ImGui::TableNextColumn();
+                processDescriptionField(treeTO);
+                ImGui::TableNextColumn();
+                processReactionList(treeTO);
+                ImGui::TableNextColumn();
+                processTimestampField(treeTO);
+                ImGui::TableNextColumn();
+                processUserNameField(treeTO);
+                ImGui::TableNextColumn();
+                processNumDownloadsField(treeTO);
+                ImGui::TableNextColumn();
+                processNumParticlesField(treeTO);
+                ImGui::TableNextColumn();
+                processSizeField(treeTO, false);
+                ImGui::TableNextColumn();
+                processVersionField(treeTO);
+
+                popTextColor();
+
                 ImGui::PopID();
             }
         ImGui::EndTable();
@@ -595,7 +576,7 @@ void _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
         processFolderTreeSymbols(treeTO, _simulations.collapsedFolderNames);
         processDownloadButton(leaf);
         ImGui::SameLine();
-        processShortenedText(leaf.simName);
+        processShortenedText(leaf.simName, true);
     } else {
         auto& folder = treeTO->getFolder();
 
@@ -750,11 +731,15 @@ void _BrowserWindow::processNumParticlesField(NetworkResourceTreeTO const& treeT
     }
 }
 
-void _BrowserWindow::processSizeField(NetworkResourceTreeTO const& treeTO)
+void _BrowserWindow::processSizeField(NetworkResourceTreeTO const& treeTO, bool kbyte)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienImGui::Text(StringHelper::format(leaf.contentSize / 1024) + " KB");
+        if (kbyte) {
+            AlienImGui::Text(StringHelper::format(leaf.contentSize / 1024) + " KB");
+        } else {
+            AlienImGui::Text(StringHelper::format(leaf.contentSize) + " Bytes");
+        }
     }
 }
 
