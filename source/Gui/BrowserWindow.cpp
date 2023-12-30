@@ -1045,6 +1045,7 @@ void _BrowserWindow::filterRawTOs()
 void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
 {
     printOverlayMessage("Downloading ...");
+    ++leaf.rawTO->numDownloads;
 
     delayedExecution([=, this] {
         auto& networkService = NetworkService::getInstance();
