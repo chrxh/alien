@@ -5,6 +5,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include "NetworkResourceRawTO.h"
 #include "NetworkResourceTreeTO.h"
 
 namespace
@@ -218,14 +219,14 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
     return result;
 }
 
-std::set<std::vector<std::string>> NetworkResourceService::calcInitialCollapsedFolderNames(std::vector<NetworkResourceRawTO> const& rawTOs)
+std::set<std::vector<std::string>> NetworkResourceService::getAllFolderNames(std::vector<NetworkResourceRawTO> const& rawTOs, int minNesting)
 {
     std::set<std::vector<std::string>> result;
     for (auto const& rawTO : rawTOs) {
         std::vector<std::string> folderNames;
         boost::split(folderNames, rawTO->resourceName, boost::is_any_of("/"));
-        for (int i = 0; i < toInt(folderNames.size()) - 2; ++i) {
-            result.insert(std::vector(folderNames.begin(), folderNames.begin() + 2 + i));
+        for (int i = 0; i < toInt(folderNames.size()) - minNesting; ++i) {
+            result.insert(std::vector(folderNames.begin(), folderNames.begin() + minNesting + i));
         }
     }
     return result;
