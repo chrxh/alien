@@ -98,12 +98,12 @@ void _BrowserWindow::registerCyclicReferences(LoginDialogWeakPtr const& loginDia
     auto firstStart = GlobalSettings::getInstance().getBoolState("windows.browser.first start", true);
     refreshIntern(firstStart);
 
-    auto initialCollapsedSimulationFolders = NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::calcInitialCollapsedFolderNames(_simulations.rawTOs));
+    auto initialCollapsedSimulationFolders = NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::getAllFolderNames(_simulations.rawTOs));
     auto collapsedSimulationFolders = GlobalSettings::getInstance().getStringState("windows.browser.simulations.collapsed folders", initialCollapsedSimulationFolders);
     _simulations.collapsedFolderNames = NetworkResourceService::convertSettingsToFolderNames(collapsedSimulationFolders);
 
     auto initialCollapsedGenomeFolders =
-        NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::calcInitialCollapsedFolderNames(_simulations.rawTOs));
+        NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::getAllFolderNames(_simulations.rawTOs));
     auto collapsedGenomeFolders =
         GlobalSettings::getInstance().getStringState("windows.browser.genomes.collapsed folders", initialCollapsedGenomeFolders);
     _genomes.collapsedFolderNames = NetworkResourceService::convertSettingsToFolderNames(collapsedGenomeFolders);
@@ -226,13 +226,15 @@ void _BrowserWindow::processBackground()
 void _BrowserWindow::processToolbar()
 {
     auto& networkService = NetworkService::getInstance();
-    std::string resourceTypeString = _selectedDataType == NetworkResourceType_Simulation ? "simulation" : "genome";
+    std::string resourceTypeString = _visibleResourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
 
+    //refresh button
     if (AlienImGui::ToolbarButton(ICON_FA_SYNC)) {
         onRefresh();
     }
     AlienImGui::Tooltip("Refresh");
 
+    //login button
     ImGui::SameLine();
     ImGui::BeginDisabled(networkService.getLoggedInUserName().has_value());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_IN_ALT)) {
@@ -243,6 +245,7 @@ void _BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Login or register");
 
+    //logout button
     ImGui::SameLine();
     ImGui::BeginDisabled(!networkService.getLoggedInUserName());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_OUT_ALT)) {
@@ -254,9 +257,11 @@ void _BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Logout");
 
+    //separator
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
 
+    //upload button
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_UPLOAD)) {
         std::string prefix = [&] {
@@ -265,13 +270,14 @@ void _BrowserWindow::processToolbar()
             }
             return NetworkResourceService::concatenateFolderNames(_selectedResource->folderNames, true);
         }();
-        _uploadSimulationDialog.lock()->open(_selectedDataType, prefix);
+        _uploadSimulationDialog.lock()->open(_visibleResourceType, prefix);
     }
     AlienImGui::Tooltip(
         "Share your current " + resourceTypeString + " with other users:\nThe " + resourceTypeString
         + " will be uploaded to the server and made visible in the browser.\nIf you have already selected a folder, your " + resourceTypeString
         + " will be uploaded there.");
 
+    //delete button
     ImGui::SameLine();
     ImGui::BeginDisabled(
         _selectedResource == nullptr || !_selectedResource->isLeaf()
@@ -283,10 +289,30 @@ void _BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Delete selected " + resourceTypeString);
 
-#ifdef _WIN32
+    //separator
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
 
+    //expand button
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
+        onExpandFolders();
+    }
+    AlienImGui::Tooltip("Expand all folders");
+
+    //collapse button
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_COMPRESS_ARROWS_ALT)) {
+        onCollapseFolders();
+    }
+    AlienImGui::Tooltip("Collapse all folders");
+
+#ifdef _WIN32
+    //separator
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    //Discord button
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COMMENTS)) {
         openWeblink(Const::DiscordLink);
@@ -300,7 +326,7 @@ void _BrowserWindow::processToolbar()
 void _BrowserWindow::processSimulationList()
 {
     ImGui::PushID("SimulationList");
-    _selectedDataType = NetworkResourceType_Simulation;
+    _visibleResourceType = NetworkResourceType_Simulation;
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
@@ -390,7 +416,7 @@ void _BrowserWindow::processSimulationList()
 void _BrowserWindow::processGenomeList()
 {
     ImGui::PushID("GenomeList");
-    _selectedDataType = NetworkResourceType_Genome;
+    _visibleResourceType = NetworkResourceType_Genome;
     auto& styleRepository = StyleRepository::getInstance();
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
@@ -420,7 +446,7 @@ void _BrowserWindow::processGenomeList()
                 sortSpecs->SpecsDirty = false;
                 _scheduleCreateGenomeTreeTOs = false;
 
-                _genomes.treeTOs = NetworkResourceService::createTreeTOs(_genomes.rawTOs, _simulations.collapsedFolderNames);
+                _genomes.treeTOs = NetworkResourceService::createTreeTOs(_genomes.rawTOs, _genomes.collapsedFolderNames);
             }
         }
         ImGuiListClipper clipper;
@@ -607,14 +633,14 @@ void _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
 
-        processFolderTreeSymbols(treeTO, _simulations.collapsedFolderNames);
+        processFolderTreeSymbols(treeTO, collapsedFolderNames);
         processDownloadButton(leaf);
         ImGui::SameLine();
         processShortenedText(leaf.leafName, true);
     } else {
         auto& folder = treeTO->getFolder();
 
-        processFolderTreeSymbols(treeTO, _simulations.collapsedFolderNames);
+        processFolderTreeSymbols(treeTO, collapsedFolderNames);
         processShortenedText(treeTO->folderNames.back());
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
@@ -1049,14 +1075,14 @@ void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
 
     delayedExecution([=, this] {
         auto& networkService = NetworkService::getInstance();
-        std::string dataTypeString = _selectedDataType == NetworkResourceType_Simulation ? "simulation" : "genome";
+        std::string dataTypeString = _visibleResourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
         SerializedSimulation serializedSim;
         if (!networkService.downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.rawTO->id)) {
             MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
             return;
         }
 
-        if (_selectedDataType == NetworkResourceType_Simulation) {
+        if (_visibleResourceType == NetworkResourceType_Simulation) {
             DeserializedSimulation deserializedSim;
             if (!SerializerService::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
                 MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
@@ -1158,6 +1184,28 @@ void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType
     } else {
         _loginDialog.lock()->open();
     }
+}
+
+void _BrowserWindow::onExpandFolders()
+{
+    if (_visibleResourceType == NetworkResourceType_Simulation) {
+        _simulations.collapsedFolderNames.clear();
+    } else {
+        _genomes.collapsedFolderNames.clear();
+    }
+    scheduleCreateTreeTOs();
+}
+
+void _BrowserWindow::onCollapseFolders()
+{
+    if (_visibleResourceType == NetworkResourceType_Simulation) {
+        auto folderNames = NetworkResourceService::getAllFolderNames(_simulations.rawTOs, 1);
+        _simulations.collapsedFolderNames.insert(folderNames.begin(), folderNames.end());
+    } else {
+        auto folderNames = NetworkResourceService::getAllFolderNames(_genomes.rawTOs, 1);
+        _genomes.collapsedFolderNames.insert(folderNames.begin(), folderNames.end());
+    }
+    scheduleCreateTreeTOs();
 }
 
 void _BrowserWindow::openWeblink(std::string const& link)

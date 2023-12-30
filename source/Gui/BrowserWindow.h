@@ -82,6 +82,8 @@ private:
     void onDownloadItem(BrowserLeaf const& leaf);
     void onDeleteItem(BrowserLeaf const& leaf);
     void onToggleLike(NetworkResourceTreeTO const& to, int emojiType);
+    void onExpandFolders();
+    void onCollapseFolders();
     void openWeblink(std::string const& link);
 
     bool isLiked(std::string const& simId);
@@ -90,10 +92,16 @@ private:
     void pushTextColor(NetworkResourceTreeTO const& to);
     void popTextColor();
 
-    NetworkResourceType _selectedDataType = NetworkResourceType_Simulation; 
     bool _scheduleRefresh = false;
     bool _scheduleCreateSimulationTreeTOs = false;
     bool _scheduleCreateGenomeTreeTOs = false;
+    bool _activateEmojiPopup = false;
+    bool _showAllEmojis = false;
+    NetworkResourceTreeTO _emojiPopupTO;
+    std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
+
+    NetworkResourceType _visibleResourceType = NetworkResourceType_Simulation; 
+    NetworkResourceTreeTO _selectedResource;
 
     std::string _filter;
     bool _showCommunityCreations = false;
@@ -103,19 +111,13 @@ private:
     std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByEmojiTypeBySimIdCache;
 
     std::vector<NetworkResourceRawTO> _unfilteredRawTOs;
-    NetworkResourceTreeTO _selectedResource;
     ResourceData _genomes;
     ResourceData _simulations;
 
     std::vector<UserTO> _userTOs;
 
+
     std::vector<TextureData> _emojis;
-
-    bool _activateEmojiPopup = false;
-    bool _showAllEmojis = false;
-    NetworkResourceTreeTO _emojiPopupTO;
-
-    std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 
     SimulationController _simController;
     StatisticsWindow _statisticsWindow;

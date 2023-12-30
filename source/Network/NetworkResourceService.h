@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "Definitions.h"
-#include "NetworkResourceRawTO.h"
 
 class NetworkResourceService
 {
@@ -12,7 +11,7 @@ public:
         std::vector<NetworkResourceRawTO> const& rawTOs,
         std::set<std::vector<std::string>> const& collapsedFolderNames);
 
-    static std::set<std::vector<std::string>> calcInitialCollapsedFolderNames(std::vector<NetworkResourceRawTO> const& browserData);
+    static std::set<std::vector<std::string>> getAllFolderNames(std::vector<NetworkResourceRawTO> const& browserData, int minNesting = 2);
 
     static std::string concatenateFolderNames(std::vector<std::string> const& folderNames, bool withSlash);
     static std::string convertFolderNamesToSettings(std::set<std::vector<std::string>> const& data);
