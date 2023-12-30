@@ -120,7 +120,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         auto& networkService = NetworkService::getInstance();
         networkService.refreshLogin();
 
-        bool success = networkService.getRemoteSimulationList(_unfilteredRawTOs, withRetry);
+        bool success = networkService.getRemoteSimulationList(_allRawTOs, withRetry);
         success &= networkService.getUserList(_userTOs, withRetry);
 
         if (!success) {
@@ -130,7 +130,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         } else {
             _simulations.numResources = 0;
             _genomes.numResources = 0;
-            for (auto const& entry : _unfilteredRawTOs) {
+            for (auto const& entry : _allRawTOs) {
                 if (entry->type == NetworkResourceType_Simulation) {
                     ++_simulations.numResources;
                 } else {
@@ -1054,10 +1054,10 @@ void _BrowserWindow::sortUserList()
 void _BrowserWindow::filterRawTOs()
 {
     _simulations.rawTOs.clear();
-    _simulations.rawTOs.reserve(_unfilteredRawTOs.size());
+    _simulations.rawTOs.reserve(_allRawTOs.size());
     _genomes.rawTOs.clear();
-    _genomes.rawTOs.reserve(_unfilteredRawTOs.size());
-    for (auto const& to : _unfilteredRawTOs) {
+    _genomes.rawTOs.reserve(_allRawTOs.size());
+    for (auto const& to : _allRawTOs) {
         if (to->matchWithFilter(_filter) && _showCommunityCreations != to->fromRelease) {
             if (to->type == NetworkResourceType_Simulation) {
                 _simulations.rawTOs.emplace_back(to);

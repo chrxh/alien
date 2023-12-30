@@ -27,11 +27,15 @@ public:
     void onRefresh();
 
 private:
+    struct ResourceDataKey
+    {
+        NetworkResourceType resourceType;
+        WorkspaceType workspace;
+    };
     struct ResourceData
     {
-        int numResources = 0;
-        std::vector<NetworkResourceRawTO> rawTOs;
-        std::vector<NetworkResourceTreeTO> treeTOs;
+        std::vector<NetworkResourceRawTO> rawTOs;   //unfiltered
+        std::vector<NetworkResourceTreeTO> treeTOs; //filtered
         std::set<std::vector<std::string>> collapsedFolderNames;
     };
 
@@ -100,7 +104,11 @@ private:
     NetworkResourceTreeTO _emojiPopupTO;
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 
-    NetworkResourceType _visibleResourceType = NetworkResourceType_Simulation; 
+    std::vector<UserTO> _userTOs;
+    std::vector<NetworkResourceRawTO> _allRawTOs;
+    ResourceDataKey _currentWorkspace;
+    std::map<ResourceDataKey, ResourceData> _workspaces;
+
     NetworkResourceTreeTO _selectedResource;
 
     std::string _filter;
@@ -109,13 +117,6 @@ private:
     std::unordered_set<std::string> _selectionIds;
     std::unordered_map<std::string, int> _ownEmojiTypeBySimId;
     std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByEmojiTypeBySimIdCache;
-
-    std::vector<NetworkResourceRawTO> _unfilteredRawTOs;
-    ResourceData _genomes;
-    ResourceData _simulations;
-
-    std::vector<UserTO> _userTOs;
-
 
     std::vector<TextureData> _emojis;
 
