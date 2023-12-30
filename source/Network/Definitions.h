@@ -11,6 +11,13 @@ enum NetworkResourceType_
     NetworkResourceType_Genome
 };
 
+using WorkspaceType = int;
+enum WorkspaceType_
+{
+    WorkspaceType_AlienProject,
+    WorkspaceType_Shared
+};
+
 
 struct _NetworkResourceRawTO;
 using NetworkResourceRawTO = std::shared_ptr<_NetworkResourceRawTO>;
