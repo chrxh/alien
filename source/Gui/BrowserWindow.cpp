@@ -66,7 +66,8 @@ _BrowserWindow::_BrowserWindow(
     , _temporalControlWindow(temporalControlWindow)
     , _editorController(editorController)
 {
-    _showCommunityCreations = GlobalSettings::getInstance().getBoolState("windows.browser.show community creations", _showCommunityCreations);
+    _currentWorkspace.resourceType = GlobalSettings::getInstance().getIntState("windows.browser.resource type", _currentWorkspace.resourceType);
+    _currentWorkspace.workspaceType = GlobalSettings::getInstance().getIntState("windows.browser.workspace type", _currentWorkspace.workspaceType);
     _userTableWidth = GlobalSettings::getInstance().getFloatState("windows.browser.user table width", scale(UserTableWidth));
 
     int numEmojis = 0;
@@ -87,7 +88,7 @@ namespace
 {
     std::unordered_map<NetworkResourceType, std::string> const networkResourceTypeToString = {
         {NetworkResourceType_Simulation, std::string("simulations")},
-        {NetworkResourceType_Simulation, std::string("genomes")}};
+        {NetworkResourceType_Genome, std::string("genomes")}};
     std::unordered_map<WorkspaceType, std::string> const workspaceTypeToString = {
         {WorkspaceType_Shared, std::string("shared")},
         {WorkspaceType_AlienProject, std::string("alien-project")}};
@@ -95,7 +96,8 @@ namespace
 
 _BrowserWindow::~_BrowserWindow()
 {
-    GlobalSettings::getInstance().setBoolState("windows.browser.show community creations", _showCommunityCreations);
+    GlobalSettings::getInstance().setIntState("windows.browser.resource type", _currentWorkspace.resourceType);
+    GlobalSettings::getInstance().setIntState("windows.browser.workspace type", _currentWorkspace.workspaceType);
     GlobalSettings::getInstance().setBoolState("windows.browser.first start", false);
     GlobalSettings::getInstance().setFloatState("windows.browser.user table width", _userTableWidth);
     for (auto const& [workspaceId, workspace] : _workspaces) {
@@ -670,8 +672,10 @@ void _BrowserWindow::processStatus()
 void _BrowserWindow::processFilter()
 {
     ImGui::Spacing();
-    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Community creations"), _showCommunityCreations)) {
+    auto communityCreations = _currentWorkspace.workspaceType == WorkspaceType_Shared;
+    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Community creations"), communityCreations)) {
         createTreeTOs(_workspaces.at(_currentWorkspace));
+        _currentWorkspace.workspaceType = communityCreations ? WorkspaceType_Shared : WorkspaceType_AlienProject;
     }
     ImGui::SameLine();
     if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter"), _filter)) {

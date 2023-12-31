@@ -103,13 +103,12 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 
     std::vector<UserTO> _userTOs;
-    WorkspaceId _currentWorkspace;
+    WorkspaceId _currentWorkspace = {NetworkResourceType_Simulation, WorkspaceType_AlienProject};
     std::map<WorkspaceId, Workspace> _workspaces;
 
     NetworkResourceTreeTO _selectedResource;
 
     std::string _filter;
-    bool _showCommunityCreations = false;
     float _userTableWidth = 0;
     std::unordered_set<std::string> _selectionIds;
     std::unordered_map<std::string, int> _ownEmojiTypeBySimId;
