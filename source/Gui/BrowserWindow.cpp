@@ -169,10 +169,12 @@ void _BrowserWindow::processIntern()
                 ImGuiWindowFlags_HorizontalScrollbar)) {
             if (ImGui::BeginTabBar("##Type", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
                 if (ImGui::BeginTabItem("Simulations", nullptr, ImGuiTabItemFlags_None)) {
+                    _currentWorkspace.resourceType = NetworkResourceType_Simulation;
                     processSimulationList();
                     ImGui::EndTabItem();
                 }
                 if (ImGui::BeginTabItem("Genomes", nullptr, ImGuiTabItemFlags_None)) {
+                    _currentWorkspace.resourceType = NetworkResourceType_Genome;
                     processGenomeList();
                     ImGui::EndTabItem();
                 }
@@ -326,7 +328,6 @@ void _BrowserWindow::processToolbar()
 void _BrowserWindow::processSimulationList()
 {
     ImGui::PushID("SimulationList");
-    _visibleResourceType = NetworkResourceType_Simulation;
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
@@ -353,11 +354,19 @@ void _BrowserWindow::processSimulationList()
         //create table data if necessary
         if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
             if (sortSpecs->SpecsDirty || _scheduleCreateSimulationTreeTOs) {
-                sortRawTOs(_simulations.rawTOs, sortSpecs);
+                for (WorkspaceType workspace = 0; workspace < WorkspaceType_Count; ++workspace) {
+                    auto& resourceData = _workspaces.at(ResourceDataKey(NetworkResourceType_Simulation, workspace));
+                    resourceData.sortSpecs.clear();
+                    for (int i = 0; i < sortSpecs->SpecsCount; ++i) {
+                        resourceData.sortSpecs.emplace_back(sortSpecs->Specs[i]);
+                    }
+                    createTreeTOs(resourceData);
+                }
                 sortSpecs->SpecsDirty = false;
-                _scheduleCreateSimulationTreeTOs = false;
+                //sortRawTOs(_simulations.rawTOs, sortSpecs);
+                //_scheduleCreateSimulationTreeTOs = false;
 
-                _simulations.treeTOs = NetworkResourceService::createTreeTOs(_simulations.rawTOs, _simulations.collapsedFolderNames);
+                //_simulations.treeTOs = NetworkResourceService::createTreeTOs(_simulations.rawTOs, _simulations.collapsedFolderNames);
             }
         }
         ImGuiListClipper clipper;
@@ -1035,6 +1044,10 @@ void _BrowserWindow::scheduleCreateTreeTOs()
 {
     _scheduleCreateSimulationTreeTOs = true;
     _scheduleCreateGenomeTreeTOs = true;
+}
+
+void _BrowserWindow::createTreeTOs(ResourceData& resourceData)
+{
 }
 
 void _BrowserWindow::sortRawTOs(std::vector<NetworkResourceRawTO>& tos, ImGuiTableSortSpecs* sortSpecs)

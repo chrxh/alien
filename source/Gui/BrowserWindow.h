@@ -11,6 +11,8 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
+struct ImGuiTableColumnSortSpecs;
+
 class _BrowserWindow : public _AlienWindow
 {
 public:
@@ -29,12 +31,12 @@ public:
 private:
     struct ResourceDataKey
     {
-        NetworkResourceType resourceType;
-        WorkspaceType workspace;
+        NetworkResourceType resourceType = NetworkResourceType_Simulation;
+        WorkspaceType workspace = WorkspaceType_AlienProject;
     };
     struct ResourceData
     {
-        //TODO sort spec
+        std::vector<ImGuiTableColumnSortSpecs> sortSpecs;
         std::vector<NetworkResourceRawTO> rawTOs;    //unfiltered, sorted
         std::vector<NetworkResourceTreeTO> treeTOs;  //filtered, sorted
         std::set<std::vector<std::string>> collapsedFolderNames;
@@ -79,6 +81,7 @@ private:
 
     void scheduleCreateTreeTOs();
 
+    void createTreeTOs(ResourceData& resourceData);
     void sortRawTOs(std::vector<NetworkResourceRawTO>& tos, ImGuiTableSortSpecs* sortSpecs);
     void sortUserList();
 
@@ -106,7 +109,6 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 
     std::vector<UserTO> _userTOs;
-    std::vector<NetworkResourceRawTO> _allRawTOs;
     ResourceDataKey _currentWorkspace;
     std::map<ResourceDataKey, ResourceData> _workspaces;
 
