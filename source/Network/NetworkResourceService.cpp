@@ -71,7 +71,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
         for (int i = bestMatchEqualFolders; i < folderNames.size(); ++i) {
             auto treeTO = std::make_shared<_NetworkResourceTreeTO>();
             treeTO->folderNames = std::vector(folderNames.begin(), folderNames.begin() + i + 1);
-            treeTO->type = rawTO->type;
+            treeTO->type = rawTO->resourceType;
             treeTO->node = BrowserFolder();
             bestMatchIter = treeToList.insert(bestMatchIter, treeTO);
             ++bestMatchIter;
@@ -80,7 +80,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
         //insert leaf
         auto treeTO = std::make_shared<_NetworkResourceTreeTO>();
         BrowserLeaf leaf{.leafName = nameWithoutFolders, .rawTO = rawTO};
-        treeTO->type = rawTO->type;
+        treeTO->type = rawTO->resourceType;
         treeTO->folderNames = folderNames;
         treeTO->node = leaf;
         treeToList.insert(bestMatchIter, treeTO);

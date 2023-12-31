@@ -29,12 +29,13 @@ public:
     void onRefresh();
 
 private:
-    struct ResourceDataKey
+    struct WorkspaceId
     {
-        NetworkResourceType resourceType = NetworkResourceType_Simulation;
-        WorkspaceType workspace = WorkspaceType_AlienProject;
+        NetworkResourceType resourceType;
+        WorkspaceType workspaceType;
+        auto operator<=>(WorkspaceId const&) const = default;
     };
-    struct ResourceData
+    struct Workspace
     {
         std::vector<ImGuiTableColumnSortSpecs> sortSpecs;
         std::vector<NetworkResourceRawTO> rawTOs;    //unfiltered, sorted
@@ -55,7 +56,7 @@ private:
     void processFilter();
     void processToolbar();
 
-    void processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);
+    bool processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);   //return true if folder symbol clicked
     void processDescriptionField(NetworkResourceTreeTO const& treeTO);
     void processReactionList(NetworkResourceTreeTO const& treeTO);
     void processTimestampField(NetworkResourceTreeTO const& treeTO);
@@ -67,7 +68,7 @@ private:
     void processSizeField(NetworkResourceTreeTO const& treeTO, bool kbyte);
     void processVersionField(NetworkResourceTreeTO const& treeTO);
 
-    void processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);
+    bool processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);   //return true if folder symbol clicked
     void processEmojiWindow();
     void processEmojiButton(int emojiType);
 
@@ -79,13 +80,8 @@ private:
 
     void processActivated() override;
 
-    void scheduleCreateTreeTOs();
-
-    void createTreeTOs(ResourceData& resourceData);
-    void sortRawTOs(std::vector<NetworkResourceRawTO>& tos, ImGuiTableSortSpecs* sortSpecs);
+    void createTreeTOs(Workspace& workspace);
     void sortUserList();
-
-    void filterRawTOs();
 
     void onDownloadItem(BrowserLeaf const& leaf);
     void onDeleteItem(BrowserLeaf const& leaf);
@@ -101,16 +97,14 @@ private:
     void popTextColor();
 
     bool _scheduleRefresh = false;
-    bool _scheduleCreateSimulationTreeTOs = false;
-    bool _scheduleCreateGenomeTreeTOs = false;
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
     NetworkResourceTreeTO _emojiPopupTO;
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 
     std::vector<UserTO> _userTOs;
-    ResourceDataKey _currentWorkspace;
-    std::map<ResourceDataKey, ResourceData> _workspaces;
+    WorkspaceId _currentWorkspace;
+    std::map<WorkspaceId, Workspace> _workspaces;
 
     NetworkResourceTreeTO _selectedResource;
 

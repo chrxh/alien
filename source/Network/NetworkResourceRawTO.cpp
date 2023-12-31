@@ -3,12 +3,11 @@
 #include <ranges>
 #include <imgui.h>
 
-int _NetworkResourceRawTO::compare(NetworkResourceRawTO const& left, NetworkResourceRawTO const& right, ImGuiTableSortSpecs const* specs)
+int _NetworkResourceRawTO::compare(NetworkResourceRawTO const& left, NetworkResourceRawTO const& right, std::vector<ImGuiTableColumnSortSpecs> const& sortSpecs)
 {
-    for (int n = 0; n < specs->SpecsCount; n++) {
-        const ImGuiTableColumnSortSpecs* sortSpec = &specs->Specs[n];
+    for (auto const& sortSpec : sortSpecs) {
         int delta = 0;
-        switch (sortSpec->ColumnUserID) {
+        switch (sortSpec.ColumnUserID) {
         case NetworkResourceColumnId_Timestamp:
             delta = left->timestamp.compare(right->timestamp);
             break;
@@ -42,15 +41,16 @@ int _NetworkResourceRawTO::compare(NetworkResourceRawTO const& left, NetworkReso
         case NetworkResourceColumnId_Version:
             delta = left->version.compare(right->version);
             break;
+        default:
+            break;
         }
         if (delta > 0) {
-            return (sortSpec->SortDirection == ImGuiSortDirection_Ascending) ? +1 : -1;
+            return (sortSpec.SortDirection == ImGuiSortDirection_Ascending) ? +1 : -1;
         }
         if (delta < 0) {
-            return (sortSpec->SortDirection == ImGuiSortDirection_Ascending) ? -1 : +1;
+            return (sortSpec.SortDirection == ImGuiSortDirection_Ascending) ? -1 : +1;
         }
     }
-
     return 0;
 }
 
