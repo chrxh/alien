@@ -368,7 +368,7 @@ void _BrowserWindow::processSimulationList()
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
-        //create table data if necessary
+        //create treeTOs if sorting changed
         if (auto sortSpecs = ImGui::TableGetSortSpecs()) {
             if (sortSpecs->SpecsDirty) {
                 for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
@@ -469,7 +469,7 @@ void _BrowserWindow::processGenomeList()
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
-        //create table data if necessary
+        //create treeTOs if sorting changed
         if (auto sortSpecs = ImGui::TableGetSortSpecs()) {
             if (sortSpecs->SpecsDirty) {
                 for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
