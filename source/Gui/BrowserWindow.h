@@ -34,8 +34,9 @@ private:
     };
     struct ResourceData
     {
-        std::vector<NetworkResourceRawTO> rawTOs;   //unfiltered
-        std::vector<NetworkResourceTreeTO> treeTOs; //filtered
+        //TODO sort spec
+        std::vector<NetworkResourceRawTO> rawTOs;    //unfiltered, sorted
+        std::vector<NetworkResourceTreeTO> treeTOs;  //filtered, sorted
         std::set<std::vector<std::string>> collapsedFolderNames;
     };
 
