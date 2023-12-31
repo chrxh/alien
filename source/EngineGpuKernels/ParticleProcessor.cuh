@@ -60,12 +60,15 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
             if (lock.tryLock()) {
 
                 if (particle->energy > NEAR_ZERO && otherParticle->energy > NEAR_ZERO) {
-                    auto factor1 = particle->energy / (particle->energy + otherParticle->energy);
-                    otherParticle->vel = particle->vel * factor1 + otherParticle->vel * (1.0f - factor1);
-                    otherParticle->energy += particle->energy;
-                    otherParticle->lastAbsorbedCell = nullptr;
-                    particle->energy = 0;
-                    particle = nullptr;
+                    if (cudaSimulationParameters.particleTransformationAllowed
+                        || particle->energy + otherParticle->energy < cudaSimulationParameters.cellNormalEnergy[particle->color]) {
+                        auto factor1 = particle->energy / (particle->energy + otherParticle->energy);
+                        otherParticle->vel = particle->vel * factor1 + otherParticle->vel * (1.0f - factor1);
+                        otherParticle->energy += particle->energy;
+                        otherParticle->lastAbsorbedCell = nullptr;
+                        particle->energy = 0;
+                        particle = nullptr;
+                    }
                 }
 
                 lock.releaseLock();
