@@ -15,8 +15,8 @@ enum NetworkResourceType_
 using WorkspaceType = int;
 enum WorkspaceType_
 {
-    WorkspaceType_AlienProject,
     WorkspaceType_Shared,
+    WorkspaceType_AlienProject,
     WorkspaceType_Count
 };
 
