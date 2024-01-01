@@ -48,13 +48,15 @@ private:
     void processIntern() override;
     void processBackground() override;
 
+    void processToolbar();
+    void processFilter();
+    void processWorkspace();
+    void processMovableSeparator();
+    void processUserList();
+    void processStatus();
+
     void processSimulationList();
     void processGenomeList();
-    void processUserList();
-
-    void processStatus();
-    void processFilter();
-    void processToolbar();
 
     bool processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);   //return true if folder symbol clicked
     void processDescriptionField(NetworkResourceTreeTO const& treeTO);

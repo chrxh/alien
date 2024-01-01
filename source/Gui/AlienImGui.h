@@ -170,6 +170,7 @@ public:
     struct SwitcherParameters
     {
         MEMBER_DECLARATION(SwitcherParameters, std::string, name, "");
+        MEMBER_DECLARATION(SwitcherParameters, float, width, 0);
         MEMBER_DECLARATION(SwitcherParameters, float, textWidth, 100);
         MEMBER_DECLARATION(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
