@@ -391,6 +391,9 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
 {
     ImGui::PushID(parameters._name.c_str());
     static auto constexpr buttonWidth = 20;
+    auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
+    auto textAndButtonWidth = scale(parameters._textWidth + buttonWidth * 2) + ImGui::GetStyle().FramePadding.x * 4;
+    auto switcherWidth = width - textAndButtonWidth;
 
     auto result = false;
     auto numValues = toInt(parameters._values.size());
@@ -400,7 +403,7 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
     static char buffer[1024];
     StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
 
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth + buttonWidth * 2) - ImGui::GetStyle().FramePadding.x * 4);
+    ImGui::SetNextItemWidth(switcherWidth);
     ImGui::InputText(("##" + parameters._name).c_str(), buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
 
     ImGui::SameLine();
