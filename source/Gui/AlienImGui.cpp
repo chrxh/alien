@@ -865,7 +865,7 @@ void AlienImGui::VerticalSeparator(float length)
     auto cursorPos = ImGui::GetCursorScreenPos();
     auto color = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Border]);
     color.Value.w *= ImGui::GetStyle().Alpha;
-    drawList->AddLine(ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x, cursorPos.y + scale(length)), color, 2.0f);
+    drawList->AddLine(ImVec2(cursorPos.x, cursorPos.y - ImGui::GetStyle().FramePadding.y), ImVec2(cursorPos.x, cursorPos.y + scale(length)), color, 2.0f);
     ImGui::Dummy(ImVec2(ImGui::GetStyle().FramePadding.x * 2, 1));
 }
 
