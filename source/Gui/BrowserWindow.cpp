@@ -92,7 +92,8 @@ namespace
         {NetworkResourceType_Genome, std::string("genomes")}};
     std::unordered_map<WorkspaceType, std::string> const workspaceTypeToString = {
         {WorkspaceType_Shared, std::string("shared")},
-        {WorkspaceType_AlienProject, std::string("alien-project")}};
+        {WorkspaceType_AlienProject, std::string("alien-project")},
+        {WorkspaceType_Private, std::string("private")}};
 }
 
 _BrowserWindow::~_BrowserWindow()
@@ -319,14 +320,17 @@ void _BrowserWindow::processFilter()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
+        auto userName = NetworkService::getInstance().getLoggedInUserName();
+        auto privateWorkspaceString = userName.has_value() ? *userName + "'s workspace": "Private workspace (need to login)"; 
         AlienImGui::Switcher(
-            AlienImGui::SwitcherParameters().name("Workspace").values({std::string("alien-project"), std::string("public"), std::string("private")}),
+            AlienImGui::SwitcherParameters().textWidth(48.0f).tooltip(std::string()).values(
+                {std::string("Public workspace"), std::string("alien-project's workspace"),privateWorkspaceString}),
             _currentWorkspace.workspaceType);
         ImGui::SameLine();
         AlienImGui::VerticalSeparator();
 
-        ImGui::TableSetColumnIndex(1);
-        if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter").textWidth(50.0f), _filter)) {
+        ImGui::TableSetColumnIndex(1); 
+        if (AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Filter").textWidth(0), _filter)) {
             createTreeTOs(_workspaces.at(_currentWorkspace));
         }
 

@@ -17,6 +17,7 @@ enum WorkspaceType_
 {
     WorkspaceType_Shared,
     WorkspaceType_AlienProject,
+    WorkspaceType_Private,
     WorkspaceType_Count
 };
 
