@@ -45,7 +45,8 @@ namespace
     auto constexpr RefreshInterval = 20;  //in minutes
 
     auto constexpr UserTableWidth = 300.0f;
-    auto constexpr BrowserBottomHeight = 68.0f;
+    auto constexpr BrowserBottomSpace = 41.0f;
+    auto constexpr WorkspaceBottomSpace = 34.0f;
     auto constexpr RowHeight = 25.0f;
 
     auto constexpr NumEmojiBlocks = 4;
@@ -178,7 +179,6 @@ void _BrowserWindow::refreshIntern(bool withRetry)
 void _BrowserWindow::processIntern()
 {
     processToolbar();
-    processFilter();
 
     processWorkspace();
 
@@ -189,6 +189,7 @@ void _BrowserWindow::processIntern()
     processUserList();
 
     processStatus();
+
     processEmojiWindow();
 }
 
@@ -312,7 +313,7 @@ void _BrowserWindow::processToolbar()
 void _BrowserWindow::processFilter()
 {
     ImGui::Spacing();
-    if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
+    if (ImGui::BeginTable("##", 2, 0, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##workspaceType");
         ImGui::TableSetupColumn("##textFilter");
 
@@ -325,14 +326,12 @@ void _BrowserWindow::processFilter()
         AlienImGui::VerticalSeparator();
 
         ImGui::TableSetColumnIndex(1);
-        if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter"), _filter)) {
+        if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter").textWidth(50.0f), _filter)) {
             createTreeTOs(_workspaces.at(_currentWorkspace));
         }
 
         ImGui::EndTable();
     }
-
-    AlienImGui::Separator();
 }
 
 void _BrowserWindow::processWorkspace()
@@ -340,7 +339,7 @@ void _BrowserWindow::processWorkspace()
     auto sizeAvailable = ImGui::GetContentRegionAvail();
     if (ImGui::BeginChild(
             "##1",
-            ImVec2(sizeAvailable.x - scale(_userTableWidth), sizeAvailable.y - scale(BrowserBottomHeight)),
+            ImVec2(sizeAvailable.x - scale(_userTableWidth), sizeAvailable.y - scale(BrowserBottomSpace)),
             false,
             ImGuiWindowFlags_HorizontalScrollbar)) {
         if (ImGui::BeginTabBar("##Type", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
@@ -356,6 +355,7 @@ void _BrowserWindow::processWorkspace()
             }
             ImGui::EndTabBar();
         }
+        processFilter();
     }
     ImGui::EndChild();
 }
@@ -363,7 +363,7 @@ void _BrowserWindow::processWorkspace()
 void _BrowserWindow::processMovableSeparator()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
-    ImGui::Button("", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomHeight)));
+    ImGui::Button("", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomSpace)));
     if (ImGui::IsItemActive()) {
         _userTableWidth -= ImGui::GetIO().MouseDelta.x;
     }
@@ -383,123 +383,117 @@ namespace
 void _BrowserWindow::processUserList()
 {
     auto& networkService = NetworkService::getInstance();
-
-    {
-        auto sizeAvailable = ImGui::GetContentRegionAvail();
-        if (ImGui::BeginChild("##2", ImVec2(sizeAvailable.x, sizeAvailable.y - scale(BrowserBottomHeight)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+    auto sizeAvailable = ImGui::GetContentRegionAvail();
+    if (ImGui::BeginChild("##2", ImVec2(sizeAvailable.x, sizeAvailable.y - scale(BrowserBottomSpace)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
 
-            ImGui::PushID("User list");
-            auto& styleRepository = StyleRepository::getInstance();
-            static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
-                | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
+        ImGui::PushID("User list");
+        auto& styleRepository = StyleRepository::getInstance();
+        static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
+            | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-            AlienImGui::Group("Simulators");
-            if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
-                ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
-                auto isLoggedIn = networkService.getLoggedInUserName().has_value();
-                ImGui::TableSetupColumn(
-                    isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
-                    ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-                    styleRepository.scale(200.0f));
-                ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
-                ImGui::TableSetupColumn(
-                    "Reactions received",
-                    ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
-                    scale(120.0f));
-                ImGui::TableSetupColumn("Reactions given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
-                ImGui::TableSetupScrollFreeze(0, 1);
-                ImGui::TableHeadersRow();
+        AlienImGui::Group("Simulators");
+        if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+            auto isLoggedIn = networkService.getLoggedInUserName().has_value();
+            ImGui::TableSetupColumn(
+                isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
+                ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+                styleRepository.scale(200.0f));
+            ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
+            ImGui::TableSetupColumn(
+                "Reactions received",
+                ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
+                scale(120.0f));
+            ImGui::TableSetupColumn("Reactions given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
+            ImGui::TableSetupScrollFreeze(0, 1);
+            ImGui::TableHeadersRow();
 
-                ImGuiListClipper clipper;
-                clipper.Begin(_userTOs.size());
-                while (clipper.Step()) {
-                    for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                        auto item = &_userTOs[row];
+            ImGuiListClipper clipper;
+            clipper.Begin(_userTOs.size());
+            while (clipper.Step()) {
+                for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
+                    auto item = &_userTOs[row];
 
-                        ImGui::PushID(row);
-                        ImGui::TableNextRow(0, scale(RowHeight));
+                    ImGui::PushID(row);
+                    ImGui::TableNextRow(0, scale(RowHeight));
 
-                        ImGui::TableNextColumn();
-                        auto isBoldFont = isLoggedIn && *networkService.getLoggedInUserName() == item->userName;
+                    ImGui::TableNextColumn();
+                    auto isBoldFont = isLoggedIn && *networkService.getLoggedInUserName() == item->userName;
 
-                        if (item->online) {
-                            AlienImGui::OnlineSymbol();
-                            ImGui::SameLine();
-                        } else if (item->lastDayOnline) {
-                            AlienImGui::LastDayOnlineSymbol();
-                            ImGui::SameLine();
-                        }
-                        processShortenedText(item->userName, isBoldFont);
-
-                        ImGui::TableNextColumn();
-                        if (isLoggedIn && _loginDialog.lock()->isShareGpuInfo()) {
-                            processShortenedText(getGpuString(item->gpu), isBoldFont);
-                        }
-
-                        ImGui::TableNextColumn();
-                        if (item->timeSpent > 0) {
-                            processShortenedText(StringHelper::format(item->timeSpent) + "h", isBoldFont);
-                        }
-
-                        ImGui::TableNextColumn();
-                        processShortenedText(std::to_string(item->starsReceived), isBoldFont);
-
-                        ImGui::TableNextColumn();
-                        processShortenedText(std::to_string(item->starsGiven), isBoldFont);
-
-                        ImGui::PopID();
+                    if (item->online) {
+                        AlienImGui::OnlineSymbol();
+                        ImGui::SameLine();
+                    } else if (item->lastDayOnline) {
+                        AlienImGui::LastDayOnlineSymbol();
+                        ImGui::SameLine();
                     }
+                    processShortenedText(item->userName, isBoldFont);
+
+                    ImGui::TableNextColumn();
+                    if (isLoggedIn && _loginDialog.lock()->isShareGpuInfo()) {
+                        processShortenedText(getGpuString(item->gpu), isBoldFont);
+                    }
+
+                    ImGui::TableNextColumn();
+                    if (item->timeSpent > 0) {
+                        processShortenedText(StringHelper::format(item->timeSpent) + "h", isBoldFont);
+                    }
+
+                    ImGui::TableNextColumn();
+                    processShortenedText(std::to_string(item->starsReceived), isBoldFont);
+
+                    ImGui::TableNextColumn();
+                    processShortenedText(std::to_string(item->starsGiven), isBoldFont);
+
+                    ImGui::PopID();
                 }
-                ImGui::EndTable();
             }
-            ImGui::PopID();
+            ImGui::EndTable();
         }
-        ImGui::EndChild();
+        ImGui::PopID();
     }
+    ImGui::EndChild();
 }
 
 void _BrowserWindow::processStatus()
 {
-    auto& styleRepository = StyleRepository::getInstance();
     auto& networkService = NetworkService::getInstance();
 
-    if (ImGui::BeginChild("##", ImVec2(0, styleRepository.scale(33.0f)), true)) {
-        auto numSimulations = 0;
-        for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
-            numSimulations += toInt(_workspaces.at(WorkspaceId{NetworkResourceType_Simulation, workspaceType}).rawTOs.size());
-        }
-        auto numGenomes = 0;
-        for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
-            numGenomes += toInt(_workspaces.at(WorkspaceId{NetworkResourceType_Genome, workspaceType}).rawTOs.size());
-        }
-
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
-        std::string statusText;
-        statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-        statusText += std::to_string(numSimulations) + " simulations found";
-
-        statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-        statusText += std::to_string(numGenomes) + " genomes found";
-
-        statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-        statusText += std::to_string(_userTOs.size()) + " simulators found";
-
-        statusText += std::string("  " ICON_FA_INFO_CIRCLE " ");
-        if (auto userName = networkService.getLoggedInUserName()) {
-            statusText += "Logged in as " + *userName + " @ " + networkService.getServerAddress();  // + ": ";
-        } else {
-            statusText += "Not logged in to " + networkService.getServerAddress();  // + ": ";
-        }
-
-        if (!networkService.getLoggedInUserName()) {
-            statusText += std::string("   " ICON_FA_INFO_CIRCLE " ");
-            statusText += "In order to share and upvote simulations you need to log in.";
-        }
-        AlienImGui::Text(statusText);
-        ImGui::PopStyleColor();
+    AlienImGui::Separator();
+    auto numSimulations = 0;
+    for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+        numSimulations += toInt(_workspaces.at(WorkspaceId{NetworkResourceType_Simulation, workspaceType}).rawTOs.size());
     }
-    ImGui::EndChild();
+    auto numGenomes = 0;
+    for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+        numGenomes += toInt(_workspaces.at(WorkspaceId{NetworkResourceType_Genome, workspaceType}).rawTOs.size());
+    }
+
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
+    std::string statusText;
+    statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
+    statusText += std::to_string(numSimulations) + " simulations found";
+
+    statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
+    statusText += std::to_string(numGenomes) + " genomes found";
+
+    statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
+    statusText += std::to_string(_userTOs.size()) + " simulators found";
+
+    statusText += std::string("  " ICON_FA_INFO_CIRCLE " ");
+    if (auto userName = networkService.getLoggedInUserName()) {
+        statusText += "Logged in as " + *userName + " @ " + networkService.getServerAddress();  // + ": ";
+    } else {
+        statusText += "Not logged in to " + networkService.getServerAddress();  // + ": ";
+    }
+
+    if (!networkService.getLoggedInUserName()) {
+        statusText += std::string("   " ICON_FA_INFO_CIRCLE " ");
+        statusText += "In order to share and upvote simulations you need to log in.";
+    }
+    AlienImGui::Text(statusText);
+    ImGui::PopStyleColor();
 }
 
 void _BrowserWindow::processSimulationList()
@@ -509,7 +503,7 @@ void _BrowserWindow::processSimulationList()
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, 0), 0.0f)) {
+    if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, - scale(WorkspaceBottomSpace)), 0.0f)) {
         ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
         ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Description);
         ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_Likes);
@@ -612,7 +606,7 @@ void _BrowserWindow::processGenomeList()
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Browser", 9, flags, ImVec2(0, 0), 0.0f)) {
+    if (ImGui::BeginTable("Browser", 9, flags, ImVec2(0, -scale(WorkspaceBottomSpace)), 0.0f)) {
         ImGui::TableSetupColumn("Genome", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
         ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Description);
         ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_Likes);
