@@ -269,6 +269,18 @@ void _BrowserWindow::processToolbar()
         + " will be uploaded to the server and made visible in the browser.\nIf you have already selected a folder, your " + resourceTypeString
         + " will be uploaded there.");
 
+    //move to other workspace button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(
+        _selectedResource == nullptr || !_selectedResource->isLeaf()
+        || _selectedResource->getLeaf().rawTO->userName != networkService.getLoggedInUserName().value_or(""));
+    WorkspaceId targetWorkspaceId{.resourceType = _currentWorkspace.resourceType, .workspaceType = 2 - _currentWorkspace.workspaceType};
+    if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
+        onMoveItem(_selectedResource->getLeaf().rawTO, _currentWorkspace, targetWorkspaceId);
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Move to " + workspaceTypeToString.at(targetWorkspaceId.workspaceType) + " workspace");
+
     //delete button
     ImGui::SameLine();
     ImGui::BeginDisabled(
@@ -326,14 +338,14 @@ void _BrowserWindow::processWorkspaceSelectionAndFilter()
         ImGui::TableSetColumnIndex(0);
         auto userName = NetworkService::getInstance().getLoggedInUserName();
         auto privateWorkspaceString = userName.has_value() ? *userName + "'s private workspace": "Private workspace (need to login)";
-        auto workspaceType_reordered = _currentWorkspace.workspaceType != 1 ? 2 - _currentWorkspace.workspaceType : 1;  //change the order for display
+        auto workspaceType_reordered = 2 - _currentWorkspace.workspaceType;  //change the order for display
         AlienImGui::Switcher(
             AlienImGui::SwitcherParameters()
                 .textWidth(48.0f)
                 .tooltip(Const::BrowserWorkspaceTooltip)
                 .values({privateWorkspaceString, std::string("alien-project's workspace"), std::string("Public workspace")}),
             workspaceType_reordered);
-        _currentWorkspace.workspaceType = workspaceType_reordered != 1 ? 2 - workspaceType_reordered : 1;
+        _currentWorkspace.workspaceType = 2 - workspaceType_reordered;
         ImGui::SameLine();
         AlienImGui::VerticalSeparator();
 
@@ -1206,6 +1218,20 @@ void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
                 "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
         }
     });
+}
+
+void _BrowserWindow::onMoveItem(NetworkResourceRawTO const& rawTO, WorkspaceId const& sourceId, WorkspaceId const& targetId)
+{
+    auto& source = _workspaces.at(sourceId);
+    auto findResult = std::ranges::find_if(source.rawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
+    if (findResult != source.rawTOs.end()) {
+        source.rawTOs.erase(findResult);
+    }
+    createTreeTOs(source);
+
+    auto& target = _workspaces.at(targetId);
+    target.rawTOs.emplace_back(rawTO);
+    createTreeTOs(target);
 }
 
 void _BrowserWindow::onDeleteItem(BrowserLeaf const& leaf)
