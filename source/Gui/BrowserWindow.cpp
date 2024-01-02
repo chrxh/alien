@@ -315,7 +315,7 @@ void _BrowserWindow::processToolbar()
     AlienImGui::Separator();
 }
 
-void _BrowserWindow::processFilter()
+void _BrowserWindow::processWorkspaceSelectionAndFilter()
 {
     ImGui::Spacing();
     if (ImGui::BeginTable("##", 2, 0, ImVec2(-1, 0))) {
@@ -325,14 +325,15 @@ void _BrowserWindow::processFilter()
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         auto userName = NetworkService::getInstance().getLoggedInUserName();
-        auto privateWorkspaceString = userName.has_value() ? *userName + "'s workspace": "Private workspace (need to login)"; 
+        auto privateWorkspaceString = userName.has_value() ? *userName + "'s private workspace": "Private workspace (need to login)";
+        auto workspaceType_reordered = _currentWorkspace.workspaceType != 1 ? 2 - _currentWorkspace.workspaceType : 1;  //change the order for display
         AlienImGui::Switcher(
             AlienImGui::SwitcherParameters()
                 .textWidth(48.0f)
                 .tooltip(Const::BrowserWorkspaceTooltip)
-                .values(
-                {std::string("Public workspace"), std::string("alien-project's workspace"),privateWorkspaceString}),
-            _currentWorkspace.workspaceType);
+                .values({privateWorkspaceString, std::string("alien-project's workspace"), std::string("Public workspace")}),
+            workspaceType_reordered);
+        _currentWorkspace.workspaceType = workspaceType_reordered != 1 ? 2 - workspaceType_reordered : 1;
         ImGui::SameLine();
         AlienImGui::VerticalSeparator();
 
@@ -366,7 +367,7 @@ void _BrowserWindow::processWorkspace()
             }
             ImGui::EndTabBar();
         }
-        processFilter();
+        processWorkspaceSelectionAndFilter();
     }
     ImGui::EndChild();
 }

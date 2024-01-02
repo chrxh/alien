@@ -50,7 +50,7 @@ private:
     void processBackground() override;
 
     void processToolbar();
-    void processFilter();
+    void processWorkspaceSelectionAndFilter();
     void processWorkspace();
     void processMovableSeparator();
     void processUserList();
@@ -113,7 +113,6 @@ private:
 
     std::string _filter;
     float _userTableWidth = 0;
-    std::unordered_set<std::string> _selectionIds;
     std::unordered_map<std::string, int> _ownEmojiTypeBySimId;
     std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByEmojiTypeBySimIdCache;
 
