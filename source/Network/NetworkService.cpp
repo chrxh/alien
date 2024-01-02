@@ -282,15 +282,19 @@ bool NetworkService::setNewPassword(std::string const& userName, std::string con
     }
 }
 
-bool NetworkService::getRemoteSimulationList(std::vector<NetworkResourceRawTO>& result, bool withRetry) const
+bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& result, bool withRetry) const
 {
-    log(Priority::Important, "network: get simulation list");
+    log(Priority::Important, "network: get resource list");
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
     httplib::Params params;
     params.emplace("version", Const::ProgramVersion);
+    if (_loggedInUserName && _password) {
+        params.emplace("userName", *_loggedInUserName);
+        params.emplace("password", *_password);
+    }
 
     try {
         auto postResult = executeRequest([&] { return client.Post("/alien-server/getversionedsimulationlist.php", params); }, withRetry);
@@ -332,9 +336,9 @@ bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry) co
     }
 }
 
-bool NetworkService::getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const
+bool NetworkService::getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result) const
 {
-    log(Priority::Important, "network: get liked simulations");
+    log(Priority::Important, "network: get liked resources");
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -361,9 +365,9 @@ bool NetworkService::getEmojiTypeBySimId(std::unordered_map<std::string, int>& r
     }
 }
 
-bool NetworkService::getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
+bool NetworkService::getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
 {
-    log(Priority::Important, "network: get user likes for simulation with id=" + simId + " and likeType=" + std::to_string(likeType));
+    log(Priority::Important, "network: get user reactions for resource with id=" + simId + " and likeType=" + std::to_string(likeType));
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -390,9 +394,9 @@ bool NetworkService::getUserNamesForSimulationAndEmojiType(std::set<std::string>
     }
 }
 
-bool NetworkService::toggleLikeSimulation(std::string const& simId, int likeType)
+bool NetworkService::toggleReactToResource(std::string const& simId, int likeType)
 {
-    log(Priority::Important, "network: toggle like for simulation with id=" + simId);
+    log(Priority::Important, "network: toggle like for resource with id=" + simId);
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -424,7 +428,7 @@ bool NetworkService::uploadSimulation(
     NetworkResourceType resourceType,
     WorkspaceType workspaceType)
 {
-    log(Priority::Important, "network: upload simulation with name='" + simulationName + "'");
+    log(Priority::Important, "network: upload resource with name='" + simulationName + "'");
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -457,7 +461,7 @@ bool NetworkService::uploadSimulation(
 
 bool NetworkService::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
 {
-    log(Priority::Important, "network: download simulation with id=" + simId);
+    log(Priority::Important, "network: download resource with id=" + simId);
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -485,9 +489,9 @@ bool NetworkService::downloadSimulation(std::string& mainData, std::string& auxi
     }
 }
 
-bool NetworkService::deleteSimulation(std::string const& simId)
+bool NetworkService::deleteResource(std::string const& simId)
 {
-    log(Priority::Important, "network: delete simulation with id=" + simId);
+    log(Priority::Important, "network: delete resource with id=" + simId);
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -498,8 +502,8 @@ bool NetworkService::deleteSimulation(std::string const& simId)
     params.emplace("simId", simId);
 
     try {
-    auto result = executeRequest([&] { return client.Post("/alien-server/deletesimulation.php", params); });
-    return parseBoolResult(result->body);
+        auto result = executeRequest([&] { return client.Post("/alien-server/deletesimulation.php", params); });
+        return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
         return false;

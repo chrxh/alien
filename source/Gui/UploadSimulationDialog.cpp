@@ -55,15 +55,15 @@ _UploadSimulationDialog::~_UploadSimulationDialog()
     settings.setStringState("dialogs.upload.simulation description", _resourceDescription);
 }
 
-void _UploadSimulationDialog::open(NetworkResourceType resourceType, WorkspaceType workspaceType, std::string const& folder)
+void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder)
 {
     auto& networkService = NetworkService::getInstance();
     if (networkService.getLoggedInUserName()) {
-
+        auto workspaceType = _browserWindow->getCurrentWorkspaceType();
         if (workspaceType == WorkspaceType_AlienProject && *networkService.getLoggedInUserName() != "alien-project") {
             MessageDialog::getInstance().information(
                 "Upload " + BrowserDataTypeToLowerString.at(resourceType),
-                "You are not allowed to upload to alien-project's workspace.\nPlease choose the public or private workspace.");
+                "You are not allowed to upload to alien-project's workspace.\nPlease choose the public or private workspace in the browser.");
             return;
         }
 
