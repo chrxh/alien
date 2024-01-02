@@ -406,12 +406,12 @@ void _MainWindow::processMenubar()
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!networkService.getLoggedInUserName());
             if (ImGui::MenuItem("Upload simulation", "ALT+D")) {
-                _uploadSimulationDialog->open(NetworkResourceType_Simulation);
+                _uploadSimulationDialog->open(NetworkResourceType_Simulation, WorkspaceType_Shared);
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!networkService.getLoggedInUserName());
             if (ImGui::MenuItem("Upload genome", "ALT+Q")) {
-                _uploadSimulationDialog->open(NetworkResourceType_Genome);
+                _uploadSimulationDialog->open(NetworkResourceType_Genome, WorkspaceType_Shared);
             }
             ImGui::EndDisabled();
 
@@ -595,10 +595,10 @@ void _MainWindow::processMenubar()
             _browserWindow->onRefresh();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_D) && networkService.getLoggedInUserName()) {
-            _uploadSimulationDialog->open(NetworkResourceType_Simulation);
+            _uploadSimulationDialog->open(NetworkResourceType_Simulation, WorkspaceType_Shared);
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_Q) && networkService.getLoggedInUserName()) {
-            _uploadSimulationDialog->open(NetworkResourceType_Genome);
+            _uploadSimulationDialog->open(NetworkResourceType_Genome, WorkspaceType_Shared);
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_J) && networkService.getLoggedInUserName()) {
             _deleteUserDialog->open();

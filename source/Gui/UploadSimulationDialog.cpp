@@ -55,12 +55,21 @@ _UploadSimulationDialog::~_UploadSimulationDialog()
     settings.setStringState("dialogs.upload.simulation description", _resourceDescription);
 }
 
-void _UploadSimulationDialog::open(NetworkResourceType dataType, std::string const& folder)
+void _UploadSimulationDialog::open(NetworkResourceType resourceType, WorkspaceType workspaceType, std::string const& folder)
 {
     auto& networkService = NetworkService::getInstance();
     if (networkService.getLoggedInUserName()) {
-        changeTitle("Upload " + BrowserDataTypeToLowerString.at(dataType));
-        _dataType = dataType;
+
+        if (workspaceType == WorkspaceType_AlienProject && *networkService.getLoggedInUserName() != "alien-project") {
+            MessageDialog::getInstance().information(
+                "Upload " + BrowserDataTypeToLowerString.at(resourceType),
+                "You are not allowed to upload to alien-project's workspace.\nPlease choose the public or private workspace.");
+            return;
+        }
+
+        changeTitle("Upload " + BrowserDataTypeToLowerString.at(resourceType));
+        _resourceType = resourceType;
+        _workspaceType = workspaceType;
         _folder = folder;
         _AlienDialog::open();
     } else {
@@ -70,7 +79,7 @@ void _UploadSimulationDialog::open(NetworkResourceType dataType, std::string con
 
 void _UploadSimulationDialog::processIntern()
 {
-    auto resourceTypeString = BrowserDataTypeToLowerString.at(_dataType);
+    auto resourceTypeString = BrowserDataTypeToLowerString.at(_resourceType);
     AlienImGui::Text("Data privacy policy");
     AlienImGui::HelpMarker(
         "The " + resourceTypeString + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
@@ -91,7 +100,7 @@ void _UploadSimulationDialog::processIntern()
         ImGui::PopID();
     }
 
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_dataType)  + " name").textWidth(0), _resourceName);
+    AlienImGui::InputText(AlienImGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_resourceType)  + " name").textWidth(0), _resourceName);
 
     AlienImGui::Separator();
 
@@ -139,7 +148,7 @@ void _UploadSimulationDialog::onUpload()
         IntVector2D size;
         int numObjects = 0;
 
-        if (_dataType == NetworkResourceType_Simulation) {
+        if (_resourceType == NetworkResourceType_Simulation) {
             DeserializedSimulation deserializedSim;
             deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
             deserializedSim.auxiliaryData.zoom = _viewport->getZoomFactor();
@@ -176,8 +185,8 @@ void _UploadSimulationDialog::onUpload()
         }
 
         auto& networkService = NetworkService::getInstance();
-        if (!networkService.uploadSimulation(_folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
-            showMessage("Error", "Failed to upload " + BrowserDataTypeToLowerString.at(_dataType) + ".");
+        if (!networkService.uploadSimulation(_folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, _workspaceType)) {
+            showMessage("Error", "Failed to upload " + BrowserDataTypeToLowerString.at(_resourceType) + ".");
             return;
         }
         _browserWindow->onRefresh();

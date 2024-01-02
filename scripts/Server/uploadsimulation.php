@@ -31,19 +31,28 @@
     $settings = $_POST['settings'];
     $symbolMap = $_POST['symbolMap'];
     $size = strlen($content);
-    $type = array_key_exists("type", $_POST) ? $_POST['type'] : 0;
-    $statistics = array_key_exists("statistics", $_POST) ? $_POST['statistics'] : "";
+    $type = array_key_exists('type', $_POST) ? $_POST['type'] : 0;
+    $workspace = array_key_exists('workspace', $_POST) ? $_POST['workspace'] : 0;
+    $statistics = array_key_exists('statistics', $_POST) ? $_POST['statistics'] : "";
 
-    if ($db->query("INSERT INTO simulation (ID, USER_ID, NAME, WIDTH, HEIGHT, PARTICLES, VERSION, DESCRIPTION, CONTENT, SETTINGS, SYMBOL_MAP, PICTURE, TIMESTAMP, SIZE, TYPE, STATISTICS)
-                    VALUES (NULL, {$obj->id}, '" . addslashes($simName) . "', $width, $height, $particles, '" . addslashes($version) . "', '" . addslashes($simDesc) . "', '" . addslashes($content) . "', '" . addslashes($settings) . "', '" . addslashes($symbolMap) . "', 'a', NULL, $size, $type, '" . addslashes($statistics) . "')")) {
+    if ($userName != 'alien-project' && $workspace == 1) {
+        echo json_encode(["result"=>false]);
+        $db->close();
+        exit;
+    }
+
+    if ($db->query("INSERT INTO simulation (ID, USER_ID, NAME, WIDTH, HEIGHT, PARTICLES, VERSION, DESCRIPTION, CONTENT, SETTINGS, SYMBOL_MAP, PICTURE, TIMESTAMP, FROM_RELEASE, SIZE, TYPE, STATISTICS)
+                    VALUES (NULL, {$obj->id}, '" . addslashes($simName) . "', $width, $height, $particles, '" . addslashes($version) . "', '" . addslashes($simDesc) . "', '" . addslashes($content) . "', '" . addslashes($settings) . "', '" . addslashes($symbolMap) . "', '" . "" . "', " . "NULL, " .addslashes($workspace) . ", " . addslashes($size) . ", " . addslashes($type) . ", '" . addslashes($statistics) . "')")) {
         $success = true;
 
         // create Discord message
-        if ($type == 0) {
-            $discordPayload = createAddSimulationMessage($simName, $userName, $simDesc, $width, $height, $particles);
-        }
-        if ($type == 1) {
-            $discordPayload = createAddGenomeMessage($simName, $userName, $simDesc, $width, $height, $particles);
+        if ($workspace != 2) {
+            if ($type == 0) {
+                $discordPayload = createAddSimulationMessage($simName, $userName, $simDesc, $width, $height, $particles);
+            }
+            if ($type == 1) {
+                $discordPayload = createAddGenomeMessage($simName, $userName, $simDesc, $width, $height, $particles);
+            }
         }
         sendDiscordMessage($discordPayload);
     }

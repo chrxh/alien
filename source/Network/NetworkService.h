@@ -54,7 +54,8 @@ public:
         std::string const& data,
         std::string const& settings,
         std::string const& statistics,
-        NetworkResourceType type);
+        NetworkResourceType resourceType,
+        WorkspaceType workspaceType);
     bool downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
     bool deleteSimulation(std::string const& simId);
 

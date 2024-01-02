@@ -421,7 +421,8 @@ bool NetworkService::uploadSimulation(
     std::string const& mainData,
     std::string const& settings,
     std::string const& statistics,
-    NetworkResourceType type)
+    NetworkResourceType resourceType,
+    WorkspaceType workspaceType)
 {
     log(Priority::Important, "network: upload simulation with name='" + simulationName + "'");
 
@@ -440,7 +441,8 @@ bool NetworkService::uploadSimulation(
         {"content", mainData, "", "application/octet-stream"},
         {"settings", settings, "", ""},
         {"symbolMap", "", "", ""},
-        {"type", std::to_string(type), "", ""},
+        {"type", std::to_string(resourceType), "", ""},
+        {"workspace", std::to_string(workspaceType), "", ""},
         {"statistics", statistics, "", ""},
     };
 
