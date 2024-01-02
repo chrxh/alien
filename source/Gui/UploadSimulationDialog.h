@@ -17,7 +17,7 @@ public:
         GenomeEditorWindow const& genomeEditorWindow);
     ~_UploadSimulationDialog();
 
-    void open(NetworkResourceType resourceType, WorkspaceType workspaceType, std::string const& folder = "");
+    void open(NetworkResourceType resourceType, std::string const& folder = "");
 
 private:
     void processIntern();

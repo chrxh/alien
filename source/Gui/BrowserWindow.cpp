@@ -137,6 +137,11 @@ void _BrowserWindow::onRefresh()
     refreshIntern(true);
 }
 
+WorkspaceType _BrowserWindow::getCurrentWorkspaceType() const
+{
+    return _currentWorkspace.workspaceType;
+}
+
 void _BrowserWindow::refreshIntern(bool withRetry)
 {
     try {
@@ -144,7 +149,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         networkService.refreshLogin();
 
         std::vector<NetworkResourceRawTO> rawTOs;
-        bool success = networkService.getRemoteSimulationList(rawTOs, withRetry);
+        bool success = networkService.getNetworkResources(rawTOs, withRetry);
         success &= networkService.getUserList(_userTOs, withRetry);
 
         if (!success) {
@@ -164,7 +169,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         }
 
         if (networkService.getLoggedInUserName()) {
-            if (!networkService.getEmojiTypeBySimId(_ownEmojiTypeBySimId)) {
+            if (!networkService.getEmojiTypeByResourceId(_ownEmojiTypeBySimId)) {
                 MessageDialog::getInstance().information("Error", "Failed to retrieve browser data. Please try again.");
             }
         } else {
@@ -257,7 +262,7 @@ void _BrowserWindow::processToolbar()
             }
             return NetworkResourceService::concatenateFolderNames(_selectedResource->folderNames, true);
         }();
-        _uploadSimulationDialog.lock()->open(_currentWorkspace.resourceType, _currentWorkspace.workspaceType, prefix);
+        _uploadSimulationDialog.lock()->open(_currentWorkspace.resourceType, prefix);
     }
     AlienImGui::Tooltip(
         "Share your current " + resourceTypeString + " with other users:\nThe " + resourceTypeString
@@ -1209,7 +1214,7 @@ void _BrowserWindow::onDeleteItem(BrowserLeaf const& leaf)
 
         delayedExecution([leafCopy = leaf, this] {
             auto& networkService = NetworkService::getInstance();
-            if (!networkService.deleteSimulation(leafCopy.rawTO->id)) {
+            if (!networkService.deleteResource(leafCopy.rawTO->id)) {
                 MessageDialog::getInstance().information("Error", "Failed to delete item. Please try again later.");
                 return;
             }
@@ -1249,7 +1254,7 @@ void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType
         }
 
         _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  //invalidate cache entry
-        networkService.toggleLikeSimulation(leaf.rawTO->id, emojiType);
+        networkService.toggleReactToResource(leaf.rawTO->id, emojiType);
     } else {
         _loginDialog.lock()->open();
     }
@@ -1291,7 +1296,7 @@ std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& simId, in
     if (findResult != _userNamesByEmojiTypeBySimIdCache.end()) {
         userNames = findResult->second;
     } else {
-        networkService.getUserNamesForSimulationAndEmojiType(userNames, simId, emojiType);
+        networkService.getUserNamesForResourceAndEmojiType(userNames, simId, emojiType);
         _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(simId, emojiType), userNames);
     }
 

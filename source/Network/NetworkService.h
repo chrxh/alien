@@ -40,11 +40,11 @@ public:
     bool resetPassword(std::string const& userName, std::string const& email);
     bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
 
-    bool getRemoteSimulationList(std::vector<NetworkResourceRawTO>& result, bool withRetry) const;
+    bool getNetworkResources(std::vector<NetworkResourceRawTO>& result, bool withRetry) const;
     bool getUserList(std::vector<UserTO>& result, bool withRetry) const;
-    bool getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const;
-    bool getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
-    bool toggleLikeSimulation(std::string const& simId, int likeType);
+    bool getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result) const;
+    bool getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
+    bool toggleReactToResource(std::string const& simId, int likeType);
 
     bool uploadSimulation(
         std::string const& simulationName,
@@ -57,7 +57,7 @@ public:
         NetworkResourceType resourceType,
         WorkspaceType workspaceType);
     bool downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
-    bool deleteSimulation(std::string const& simId);
+    bool deleteResource(std::string const& simId);
 
 private:
     NetworkService();

@@ -32,7 +32,7 @@
             sim.TIMESTAMP as timestamp,
             sim.NUM_DOWNLOADS as numDownloads,
             sim.SIZE as contentSize,
-            sim.FROM_RELEASE as fromRelease,
+            sim.FROM_RELEASE as workspace,
             sim.TYPE as type
         FROM simulation sim
         LEFT JOIN
@@ -41,10 +41,17 @@
             u.ID=sim.USER_ID
         ");
 
+    $userName = array_key_exists('userName', $_POST) ? $_POST['userName'] : '';
+    $pw = array_key_exists('password', $_POST) ? $_POST['password'] : '';
+    $pwCorrect = checkPw($db, $userName, $pw);
+
     $result = array();
     while($obj = $response->fetch_object()){
         $totalLikes = 0;
 
+        if ((int)$obj->workspace == 2 && (!$pwCorrect || strcmp($obj->userName, $userName) != 0)) {
+            continue;
+        }
         $likesByType = array();
         if (isset($likesBySimulationByType[$obj->id])) {
             foreach($likesBySimulationByType[$obj->id] as $likeType => $likes) {
@@ -67,7 +74,7 @@
             "likes" => $totalLikes,
             "likesByType" => $likesByType,
             "numDownloads" => (int)$obj->numDownloads,
-            "fromRelease" => (int)$obj->fromRelease,
+            "fromRelease" => (int)$obj->workspace,
             "type" => is_null($obj->type) ? 0 : $obj->type
         ];
     }

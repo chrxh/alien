@@ -27,6 +27,7 @@ public:
     void registerCyclicReferences(LoginDialogWeakPtr const& loginDialog, UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
 
     void onRefresh();
+    WorkspaceType getCurrentWorkspaceType() const;
 
 private:
     struct WorkspaceId
