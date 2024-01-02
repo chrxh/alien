@@ -831,7 +831,7 @@ void _GenomeEditorWindow::onSaveGenome()
 
 void _GenomeEditorWindow::onUploadGenome()
 {
-    _uploadSimulationDialog.lock()->open(NetworkResourceType_Genome);
+    _uploadSimulationDialog.lock()->open(NetworkResourceType_Genome, WorkspaceType_Shared);
 }
 
 void _GenomeEditorWindow::onAddNode()

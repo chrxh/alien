@@ -39,6 +39,7 @@
 #include "OpenGLHelper.h"
 #include "OverlayMessageController.h"
 #include "GenomeEditorWindow.h"
+#include "HelpStrings.h"
 
 namespace
 {
@@ -182,10 +183,8 @@ void _BrowserWindow::processIntern()
     processToolbar();
 
     processWorkspace();
-
     ImGui::SameLine();
     processMovableSeparator();
-
     ImGui::SameLine();
     processUserList();
 
@@ -258,7 +257,7 @@ void _BrowserWindow::processToolbar()
             }
             return NetworkResourceService::concatenateFolderNames(_selectedResource->folderNames, true);
         }();
-        _uploadSimulationDialog.lock()->open(_currentWorkspace.resourceType, prefix);
+        _uploadSimulationDialog.lock()->open(_currentWorkspace.resourceType, _currentWorkspace.workspaceType, prefix);
     }
     AlienImGui::Tooltip(
         "Share your current " + resourceTypeString + " with other users:\nThe " + resourceTypeString
@@ -323,7 +322,10 @@ void _BrowserWindow::processFilter()
         auto userName = NetworkService::getInstance().getLoggedInUserName();
         auto privateWorkspaceString = userName.has_value() ? *userName + "'s workspace": "Private workspace (need to login)"; 
         AlienImGui::Switcher(
-            AlienImGui::SwitcherParameters().textWidth(48.0f).tooltip(std::string()).values(
+            AlienImGui::SwitcherParameters()
+                .textWidth(48.0f)
+                .tooltip(Const::BrowserWorkspaceTooltip)
+                .values(
                 {std::string("Public workspace"), std::string("alien-project's workspace"),privateWorkspaceString}),
             _currentWorkspace.workspaceType);
         ImGui::SameLine();
