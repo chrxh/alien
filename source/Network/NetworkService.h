@@ -21,10 +21,10 @@ struct UserInfo
 class NetworkService
 {
 public:
-    NetworkService(NetworkService const&) = delete;
     NetworkService() = delete;
 
     static void init();
+    static void shutdown();
 
     static std::string getServerAddress();
     static void setServerAddress(std::string const& value);
@@ -36,7 +36,6 @@ public:
 
     static bool login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo);
     static bool logout();
-    static void shutdown();
     static void refreshLogin();
     static bool deleteUser();
     static bool resetPassword(std::string const& userName, std::string const& email);
@@ -48,8 +47,8 @@ public:
     static bool getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
     static bool toggleReactToResource(std::string const& simId, int likeType);
 
-    static bool uploadSimulation(
-        std::string const& simulationName,
+    static bool uploadResource(
+        std::string const& resourceName,
         std::string const& description,
         IntVector2D const& size,
         int particles,
@@ -58,7 +57,8 @@ public:
         std::string const& statistics,
         NetworkResourceType resourceType,
         WorkspaceType workspaceType);
-    static bool downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
+    static bool downloadResource(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
+    static bool moveResource(std::string const& simId, WorkspaceType targetWorkspace);
     static bool deleteResource(std::string const& simId);
 
 private:

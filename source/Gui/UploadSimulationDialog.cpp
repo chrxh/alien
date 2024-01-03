@@ -183,7 +183,7 @@ void _UploadSimulationDialog::onUpload()
             }
         }
 
-        if (!NetworkService::uploadSimulation(_folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, _workspaceType)) {
+        if (!NetworkService::uploadResource(_folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, _workspaceType)) {
             showMessage("Error", "Failed to upload " + BrowserDataTypeToLowerString.at(_resourceType) + ".");
             return;
         }

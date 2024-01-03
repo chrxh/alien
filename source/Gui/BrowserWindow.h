@@ -86,9 +86,9 @@ private:
     void createTreeTOs(Workspace& workspace);
     void sortUserList();
 
-    void onDownloadItem(BrowserLeaf const& leaf);
-    void onMoveItem(NetworkResourceTreeTO const& treeTO, WorkspaceId const& sourceId, WorkspaceId const& targetId);
-    void onDeleteItem(BrowserLeaf const& leaf);
+    void onDownloadResource(BrowserLeaf const& leaf);
+    void onMoveResource(NetworkResourceTreeTO const& treeTO, WorkspaceId const& sourceId, WorkspaceId const& targetId);
+    void onDeleteResource(BrowserLeaf const& leaf);
     void onToggleLike(NetworkResourceTreeTO const& to, int emojiType);
     void onExpandFolders();
     void onCollapseFolders();
