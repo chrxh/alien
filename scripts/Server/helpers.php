@@ -1,5 +1,6 @@
 <?php
     const MAX_MINUTES_FOR_INACTIVITY = 60; 
+    const PRIVATE_WORKSPACE_TYPE = 2;
 
     function connectToDB()
     {
@@ -55,20 +56,4 @@
         }
         return false;
     }
-
-    function sendDiscordMessage($payload) {
-        if (strlen($payload) >= 0) {
-            $ch = curl_init("[webhook URL]");
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-            curl_setopt($ch, CURLOPT_HEADER, 0);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            $response = curl_exec($ch);
-            curl_close($ch);
-            return $response;
-        }
-    }
-
 ?>

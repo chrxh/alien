@@ -1,5 +1,6 @@
 <?php
     require './helpers.php';
+    require './hooks.php';
 
     $db = connectToDB();
     $db->begin_transaction();
@@ -46,86 +47,14 @@
         $success = true;
 
         // create Discord message
-        if ($workspace != 2) {
-            if ($type == 0) {
-                $discordPayload = createAddSimulationMessage($simName, $userName, $simDesc, $width, $height, $particles);
-            }
-            if ($type == 1) {
-                $discordPayload = createAddGenomeMessage($simName, $userName, $simDesc, $width, $height, $particles);
-            }
+        if ($workspace != PRIVATE_WORKSPACE_TYPE) {
+            $discordPayload = createAddResourceMessage($type, $simName, $userName, $simDesc, $width, $height, $particles);
+            sendDiscordMessage($discordPayload);
         }
-        sendDiscordMessage($discordPayload);
     }
 
     echo json_encode(["result"=>$success]);
 
     $db->commit();
     $db->close();
-
-    // functions for Discord messages
-    function createAddSimulationMessage($simName, $userName, $simDesc, $width, $height, $particles) {
-        $particlesString = $particles < 1000 ? "{$particles}" : strval((int)($particles/1000)) . " K";
-        return json_encode([
-            "username" => "alien-project",
-            "avatar_url" => "https://alien-project.org/alien-server/logo.png",
-            "content" => "",
-            "embeds" => [
-                [
-                    "author" => [
-                        "name" => "New simulation added to the database",
-                        "icon_url" => "https://alien-project.org/alien-server/galaxy.png"
-                    ],
-                    "title" => $simName,
-                    "description" => $simDesc,
-                    "fields" => [
-                        [
-                            "name" => "User",
-                            "value" => $userName,
-                            "inline" => true
-                        ],
-                        [
-                          "name" => "Size",
-                          "value" => "{$width} x {$height}",
-                          "inline" => true
-                        ],
-                        [
-                          "name" => "Objects",
-                          "value" => $particlesString,
-                          "inline" => true
-                        ]
-                    ]
-                ]
-            ]
-        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-    }
-
-    function createAddGenomeMessage($simName, $userName, $simDesc, $width, $height, $particles) {
-        return json_encode([
-            "username" => "alien-project",
-            "avatar_url" => "https://alien-project.org/alien-server/logo.png",
-            "content" => "",
-            "embeds" => [
-                [
-                    "author" => [
-                        "name" => "New genome added to the database",
-                        "icon_url" => "https://alien-project.org/alien-server/genome.png"
-                    ],
-                    "title" => $simName,
-                    "description" => $simDesc,
-                    "fields" => [
-                        [
-                            "name" => "User",
-                            "value" => $userName,
-                            "inline" => true
-                        ],
-                        [
-                          "name" => "Cells",
-                          "value" => "{$particles}",
-                          "inline" => true
-                        ]
-                    ]
-                ]
-            ]
-        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-    }
 ?>
