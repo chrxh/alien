@@ -210,6 +210,7 @@ void _BrowserWindow::processBackground()
 void _BrowserWindow::processToolbar()
 {
     std::string resourceTypeString = _currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
+    auto owner = isOwner(_selectedTreeTO);
 
     //refresh button
     if (AlienImGui::ToolbarButton(ICON_FA_SYNC)) {
@@ -260,9 +261,16 @@ void _BrowserWindow::processToolbar()
         + " will be uploaded to the server and made visible in the browser.\nIf you have already selected a folder, your " + resourceTypeString
         + " will be uploaded there.");
 
+    //edit button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!owner);
+    if (AlienImGui::ToolbarButton(ICON_FA_EDIT)) {
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Change name or description");
+
     //move to other workspace button
     ImGui::SameLine();
-    auto owner = isOwner(_selectedTreeTO);
     ImGui::BeginDisabled(!owner);
     WorkspaceId targetWorkspaceId{.resourceType = _currentWorkspace.resourceType, .workspaceType = 2 - _currentWorkspace.workspaceType};
     if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
