@@ -24,6 +24,8 @@ namespace Const
         "If the conditions are met and the error still occurs, please start ALIEN with the command line parameter '-d', try to reproduce the error and "
         "then create a GitHub issue on https://github.com/chrxh/alien/issues where the log.txt is attached.";
 
+    std::string const NotAllowedCharacters = "Your input contains not allowed characters.";
+
     std::string const NeuronTooltip =
         "This function equips the cell with a small network of 8 neurons with 8x8 configurable weights, 8 bias values and activation functions. It processes "
         "the input from channel #0 to #7 and provides the output to those channels. More precisely, the output of each neuron calculates as\noutput_j := "

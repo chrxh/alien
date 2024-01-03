@@ -4,9 +4,11 @@
 
 #include "Network/NetworkService.h"
 #include "Network/NetworkResourceService.h"
+#include "Network/ValidationService.h"
 
 #include "AlienImGui.h"
 #include "BrowserWindow.h"
+#include "HelpStrings.h"
 #include "StyleRepository.h"
 #include "MessageDialog.h"
 
@@ -67,12 +69,16 @@ void _EditSimulationDialog::processForLeaf()
 
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
-        if (!NetworkService::editResource(rawTO->id, _newName, _newDescription)) {
-            showMessage("Error", "Failed to edit " + resourceTypeString + ".");
+        if (ValidationService::isStringValidForDatabase(_newName) && ValidationService::isStringValidForDatabase(_newDescription)) {
+            if (!NetworkService::editResource(rawTO->id, _newName, _newDescription)) {
+                showMessage("Error", "Failed to edit " + resourceTypeString + ".");
+            } else {
+                _browserWindow->onRefresh();
+            }
+            close();
         } else {
-            _browserWindow->onRefresh();
+            showMessage("Error", Const::NotAllowedCharacters);
         }
-        close();
     }
     ImGui::EndDisabled();
     ImGui::SetItemDefaultFocus();
@@ -94,16 +100,20 @@ void _EditSimulationDialog::processForFolder()
 
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
-        for (auto const& rawTO : _rawTOs) {
-            auto nameWithoutFolder = NetworkResourceService::removeFoldersFromName(rawTO->resourceName);
-            auto newName = NetworkResourceService::concatenateFolderName({_newName, nameWithoutFolder}, false);
-            if (!NetworkService::editResource(rawTO->id, newName, rawTO->description)) {
-                showMessage("Error", "Failed to change folder name.");
-                break;
+        if (ValidationService::isStringValidForDatabase(_newName)) {
+            for (auto const& rawTO : _rawTOs) {
+                auto nameWithoutFolder = NetworkResourceService::removeFoldersFromName(rawTO->resourceName);
+                auto newName = NetworkResourceService::concatenateFolderName({_newName, nameWithoutFolder}, false);
+                if (!NetworkService::editResource(rawTO->id, newName, rawTO->description)) {
+                    showMessage("Error", "Failed to change folder name.");
+                    break;
+                }
             }
+            _browserWindow->onRefresh();
+            close();
+        } else {
+            showMessage("Error", Const::NotAllowedCharacters);
         }
-        _browserWindow->onRefresh();
-        close();
     }
     ImGui::EndDisabled();
     ImGui::SetItemDefaultFocus();
