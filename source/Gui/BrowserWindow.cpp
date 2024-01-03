@@ -145,7 +145,6 @@ void _BrowserWindow::refreshIntern(bool withRetry)
 {
     try {
         NetworkService::refreshLogin();
-        NetworkResourceService::invalidateCache();
 
         std::vector<NetworkResourceRawTO> rawTOs;
         bool success = NetworkService::getNetworkResources(rawTOs, withRetry);
@@ -272,7 +271,7 @@ void _BrowserWindow::processToolbar()
     ImGui::BeginDisabled(!isOwner(_selectedTreeTO));
     WorkspaceId targetWorkspaceId{.resourceType = _currentWorkspace.resourceType, .workspaceType = 2 - _currentWorkspace.workspaceType};
     if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
-        onMoveItem(_selectedTreeTO->getLeaf().rawTO, _currentWorkspace, targetWorkspaceId);
+        onMoveItem(_selectedTreeTO, _currentWorkspace, targetWorkspaceId);
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Move to " + workspaceTypeToString.at(targetWorkspaceId.workspaceType) + " workspace");
@@ -1212,17 +1211,21 @@ void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
     });
 }
 
-void _BrowserWindow::onMoveItem(NetworkResourceRawTO const& rawTO, WorkspaceId const& sourceId, WorkspaceId const& targetId)
+void _BrowserWindow::onMoveItem(NetworkResourceTreeTO const& treeTO, WorkspaceId const& sourceId, WorkspaceId const& targetId)
 {
     auto& source = _workspaces.at(sourceId);
-    auto findResult = std::ranges::find_if(source.rawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
-    if (findResult != source.rawTOs.end()) {
-        source.rawTOs.erase(findResult);
+    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, source.rawTOs);
+
+    for (auto const& rawTO : rawTOs) {
+        auto findResult = std::ranges::find_if(source.rawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
+        if (findResult != source.rawTOs.end()) {
+            source.rawTOs.erase(findResult);
+        }
     }
     createTreeTOs(source);
 
     auto& target = _workspaces.at(targetId);
-    target.rawTOs.emplace_back(rawTO);
+    target.rawTOs.insert(target.rawTOs.end(), rawTOs.begin(), rawTOs.end());
     createTreeTOs(target);
 }
 
