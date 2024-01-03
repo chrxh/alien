@@ -11,6 +11,8 @@
 
 namespace
 {
+    auto constexpr FolderSeparator = "/";
+
     int getNumEqualFolders(std::vector<std::string> const& folderNames, std::vector<std::string> const& otherFolderNames)
     {
         auto equalFolders = 0;
@@ -54,7 +56,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
         //parse folder names
         std::vector<std::string> folderNames;
         std::string nameWithoutFolders;
-        boost::split(folderNames, rawTO->resourceName, boost::is_any_of("/"));
+        boost::split(folderNames, rawTO->resourceName, boost::is_any_of(FolderSeparator));
         if (!folderNames.empty()) {
             nameWithoutFolders = folderNames.back();
             folderNames.pop_back();
@@ -205,7 +207,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
     //collapse items
     std::unordered_set<std::string> collapsedFolderStrings;
     for(auto const& folderNames : collapsedFolderNames) {
-        collapsedFolderStrings.insert(boost::join(folderNames, "/"));
+        collapsedFolderStrings.insert(boost::join(folderNames, FolderSeparator));
     }
 
     std::vector<NetworkResourceTreeTO> result;
@@ -221,12 +223,12 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
                 isVisible = false;
             }
             if (i < numSolderToCheck) {
-                folderString.append("/");
+                folderString.append(FolderSeparator);
             }
         }
 
         if (!treeTO->isLeaf()) {
-            auto folderString = boost::join(treeTO->folderNames, "/");
+            auto folderString = boost::join(treeTO->folderNames, FolderSeparator);
             if (collapsedFolderStrings.contains(folderString)) {
                 treeTO->treeSymbols.back() = FolderTreeSymbols::Collapsed;
             }
@@ -267,9 +269,16 @@ void NetworkResourceService::invalidateCache()
 std::vector<std::string> NetworkResourceService::getFolderNames(std::string const& resourceName)
 {
     std::vector<std::string> result;
-    boost::split(result, resourceName, boost::is_any_of("/"));
+    boost::split(result, resourceName, boost::is_any_of(FolderSeparator));
     result.pop_back();
     return result;
+}
+
+std::string NetworkResourceService::removeFoldersFromName(std::string const& resourceName)
+{
+    std::vector<std::string> parts;
+    boost::split(parts, resourceName, boost::is_any_of(FolderSeparator));
+    return parts.back();
 }
 
 std::set<std::vector<std::string>> NetworkResourceService::getFolderNames(std::vector<NetworkResourceRawTO> const& rawTOs, int minNesting)
@@ -277,7 +286,7 @@ std::set<std::vector<std::string>> NetworkResourceService::getFolderNames(std::v
     std::set<std::vector<std::string>> result;
     for (auto const& rawTO : rawTOs) {
         std::vector<std::string> folderNames;
-        boost::split(folderNames, rawTO->resourceName, boost::is_any_of("/"));
+        boost::split(folderNames, rawTO->resourceName, boost::is_any_of(FolderSeparator));
         for (int i = 0; i < toInt(folderNames.size()) - minNesting; ++i) {
             result.insert(std::vector(folderNames.begin(), folderNames.begin() + minNesting + i));
         }
@@ -287,9 +296,9 @@ std::set<std::vector<std::string>> NetworkResourceService::getFolderNames(std::v
 
 std::string NetworkResourceService::concatenateFolderName(std::vector<std::string> const& folderNames, bool withSlashAtTheEnd)
 {
-    auto result = boost::join(folderNames, "/");
+    auto result = boost::join(folderNames, FolderSeparator);
     if (withSlashAtTheEnd) {
-        result.append("/");
+        result.append(FolderSeparator);
     }
     return result;
 }
@@ -311,7 +320,7 @@ std::set<std::vector<std::string>> NetworkResourceService::convertSettingsToFold
     std::set<std::vector<std::string>> result;
     for (auto const& part : parts) {
         std::vector<std::string> splittedParts;
-        boost::split(splittedParts, part, boost::is_any_of("/"));
+        boost::split(splittedParts, part, boost::is_any_of(FolderSeparator));
         result.insert(splittedParts);
     }
     return result;

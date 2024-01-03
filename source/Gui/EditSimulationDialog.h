@@ -17,7 +17,8 @@ public:
 private:
     void processIntern();
 
-    void processLeaf();
+    void processForLeaf();
+    void processForFolder();
 
     NetworkResourceTreeTO _treeTO;
     std::vector<NetworkResourceRawTO> _rawTOs;
