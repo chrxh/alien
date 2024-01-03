@@ -47,7 +47,7 @@ private:
     std::string createLogString(GLFWvidmode const& videoMode) const;
 
     WindowData _windowData;
-    GLFWvidmode* _desktopVideoMode;
+    std::shared_ptr<GLFWvidmode> _desktopVideoMode;
     IntVector2D _startupSize;
     IntVector2D _sizeInWindowedMode = {1920 * 3 / 4, 1080 * 3 / 4};
     float _contentScaleFactor = 1.0f;
