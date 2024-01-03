@@ -272,6 +272,9 @@ void _BrowserWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_EDIT)) {
         if (_selectedTreeTO->isLeaf()) {
             _editSimulationDialog.lock()->openForLeaf(_selectedTreeTO);
+        } else {
+            auto rawTOs = NetworkResourceService::getMatchingRawTOs(_selectedTreeTO, _workspaces.at(_currentWorkspace).rawTOs);
+            _editSimulationDialog.lock()->openForFolder(_selectedTreeTO, rawTOs);
         }
     }
     ImGui::EndDisabled();
@@ -292,7 +295,6 @@ void _BrowserWindow::processToolbar()
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
     if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
         onDeleteResource(_selectedTreeTO);
-        _selectedTreeTO = nullptr;
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Delete selected " + resourceTypeString);
@@ -1157,6 +1159,7 @@ void _BrowserWindow::createTreeTOs(Workspace& workspace)
 
     //create treeTOs
     workspace.treeTOs = NetworkResourceService::createTreeTOs(filteredRawTOs, workspace.collapsedFolderNames);
+    _selectedTreeTO = nullptr;
 }
 
 void _BrowserWindow::sortUserList()

@@ -3,6 +3,7 @@
 #include <imgui.h>
 
 #include "Network/NetworkService.h"
+#include "Network/NetworkResourceService.h"
 
 #include "AlienImGui.h"
 #include "BrowserWindow.h"
@@ -31,16 +32,20 @@ void _EditSimulationDialog::openForFolder(NetworkResourceTreeTO const& treeTO, s
     _AlienDialog::open();
     _treeTO = treeTO;
     _rawTOs = rawTOs;
+
+    _newName = NetworkResourceService::concatenateFolderName(treeTO->folderNames, false);
 }
 
 void _EditSimulationDialog::processIntern()
 {
     if (_treeTO->isLeaf()) {
-        processLeaf();
+        processForLeaf();
+    } else {
+        processForFolder();
     }
 }
 
-void _EditSimulationDialog::processLeaf()
+void _EditSimulationDialog::processForLeaf()
 {
     auto& rawTO = _treeTO->getLeaf().rawTO;
     std::string resourceTypeString = rawTO->resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
@@ -60,11 +65,42 @@ void _EditSimulationDialog::processLeaf()
 
     AlienImGui::Separator();
 
-    ImGui::BeginDisabled(rawTO->resourceName.empty());
+    ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
         if (!NetworkService::editResource(rawTO->id, _newName, _newDescription)) {
             showMessage("Error", "Failed to edit " + resourceTypeString + ".");
-            return;
+        } else {
+            _browserWindow->onRefresh();
+        }
+        close();
+    }
+    ImGui::EndDisabled();
+    ImGui::SetItemDefaultFocus();
+
+    ImGui::SameLine();
+    if (AlienImGui::Button("Cancel")) {
+        close();
+    }
+}
+
+void _EditSimulationDialog::processForFolder()
+{
+    if (ImGui::BeginChild("", {0, -scale(50.0f)})) {
+        AlienImGui::InputText(AlienImGui::InputTextParameters().textWidth(0).hint("Folder name"), _newName);
+    }
+    ImGui::EndChild();
+
+    AlienImGui::Separator();
+
+    ImGui::BeginDisabled(_newName.empty());
+    if (AlienImGui::Button("OK")) {
+        for (auto const& rawTO : _rawTOs) {
+            auto nameWithoutFolder = NetworkResourceService::removeFoldersFromName(rawTO->resourceName);
+            auto newName = NetworkResourceService::concatenateFolderName({_newName, nameWithoutFolder}, false);
+            if (!NetworkService::editResource(rawTO->id, newName, rawTO->description)) {
+                showMessage("Error", "Failed to change folder name.");
+                break;
+            }
         }
         _browserWindow->onRefresh();
         close();
