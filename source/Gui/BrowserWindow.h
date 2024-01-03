@@ -40,7 +40,6 @@ private:
     {
         std::vector<ImGuiTableColumnSortSpecs> sortSpecs;
         std::vector<NetworkResourceRawTO> rawTOs;    //unfiltered, sorted
-        std::unordered_map<NetworkResourceRawTO, size_t> indices;
         std::vector<NetworkResourceTreeTO> treeTOs;  //filtered, sorted
         std::set<std::vector<std::string>> collapsedFolderNames;
     };

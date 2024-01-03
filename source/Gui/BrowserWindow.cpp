@@ -121,7 +121,7 @@ void _BrowserWindow::registerCyclicReferences(LoginDialogWeakPtr const& loginDia
 
     for (auto& [workspaceId, workspace] : _workspaces) {
         auto initialCollapsedSimulationFolders =
-            NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::getAllFolderNames(workspace.rawTOs));
+            NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::getFolderNames(workspace.rawTOs));
         auto collapsedSimulationFolders = GlobalSettings::getInstance().getStringState(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
@@ -145,6 +145,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
 {
     try {
         NetworkService::refreshLogin();
+        NetworkResourceService::invalidateCache();
 
         std::vector<NetworkResourceRawTO> rawTOs;
         bool success = NetworkService::getNetworkResources(rawTOs, withRetry);
@@ -257,7 +258,7 @@ void _BrowserWindow::processToolbar()
             if (_selectedTreeTO == nullptr || _selectedTreeTO->isLeaf()) {
                 return std::string();
             }
-            return NetworkResourceService::concatenateFolderNames(_selectedTreeTO->folderNames, true);
+            return NetworkResourceService::concatenateFolderName(_selectedTreeTO->folderNames, true);
         }();
         _uploadSimulationDialog.lock()->open(_currentWorkspace.resourceType, prefix);
     }
@@ -1129,9 +1130,6 @@ void _BrowserWindow::createTreeTOs(Workspace& workspace)
             return _NetworkResourceRawTO::compare(left, right, workspace.sortSpecs) < 0;
         });
     }
-    for (auto const& [index, rawTO] : workspace.rawTOs | boost::adaptors::indexed(0)) {
-        workspace.indices.emplace(rawTO, index);
-    }
 
     //filtering
     std::vector<NetworkResourceRawTO> filteredRawTOs;
@@ -1289,7 +1287,7 @@ void _BrowserWindow::onExpandFolders()
 void _BrowserWindow::onCollapseFolders()
 {
     auto& workspace = _workspaces.at(_currentWorkspace);
-    workspace.collapsedFolderNames = NetworkResourceService::getAllFolderNames(workspace.rawTOs, 1);
+    workspace.collapsedFolderNames = NetworkResourceService::getFolderNames(workspace.rawTOs, 1);
     createTreeTOs(workspace);
 }
 
@@ -1307,9 +1305,9 @@ bool _BrowserWindow::isOwner(NetworkResourceTreeTO const& treeTO) const
     }
     auto const& workspace = _workspaces.at(_currentWorkspace);
 
-    auto rawTOs = NetworkResourceService::getAllRawTOs(treeTO, workspace.rawTOs, workspace.indices);
-    //    _selectedTreeTO == nullptr || !_selectedTreeTO->isLeaf() || _selectedTreeTO->getLeaf().rawTO->userName != NetworkService::getLoggedInUserName().value_or("")
-    return false;
+    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, workspace.rawTOs);
+    auto userName = NetworkService::getLoggedInUserName().value_or("");
+    return std::ranges::all_of(rawTOs, [&](NetworkResourceRawTO const& rawTO) { return rawTO->userName == userName; });
 }
 
 std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& resourceId, int emojiType)

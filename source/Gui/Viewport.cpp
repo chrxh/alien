@@ -6,7 +6,7 @@
 
 _Viewport::_Viewport()
 {
-    _viewSize = WindowController::getInstance().getStartupWindowSize();
+    _viewSize = WindowController::getStartupWindowSize();
 }
 
 float _Viewport::getZoomFactor() const

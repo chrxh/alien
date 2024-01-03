@@ -27,7 +27,7 @@ StyleRepository& StyleRepository::getInstance()
 
 void StyleRepository::init()
 {
-    auto scaleFactor = WindowController::getInstance().getContentScaleFactor();
+    auto scaleFactor = WindowController::getContentScaleFactor();
 
     auto& style = ImGui::GetStyle();
     style.ScaleAllSizes(scaleFactor);
@@ -127,10 +127,10 @@ ImFont* StyleRepository::getReefLargeFont() const
 
 float StyleRepository::scale(float value) const
 {
-    return WindowController::getInstance().getContentScaleFactor() * value;
+    return WindowController::getContentScaleFactor() * value;
 }
 
 float StyleRepository::scaleInverse(float value) const
 {
-    return WindowController::getInstance().getContentScaleFactor() / value;
+    return WindowController::getContentScaleFactor() / value;
 }
