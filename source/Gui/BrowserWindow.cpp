@@ -271,7 +271,7 @@ void _BrowserWindow::processToolbar()
     ImGui::BeginDisabled(!isOwner(_selectedTreeTO));
     WorkspaceId targetWorkspaceId{.resourceType = _currentWorkspace.resourceType, .workspaceType = 2 - _currentWorkspace.workspaceType};
     if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
-        onMoveItem(_selectedTreeTO, _currentWorkspace, targetWorkspaceId);
+        onMoveResource(_selectedTreeTO, _currentWorkspace, targetWorkspaceId);
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Move to " + workspaceTypeToString.at(targetWorkspaceId.workspaceType) + " workspace");
@@ -282,7 +282,7 @@ void _BrowserWindow::processToolbar()
         _selectedTreeTO == nullptr || !_selectedTreeTO->isLeaf()
         || _selectedTreeTO->getLeaf().rawTO->userName != NetworkService::getLoggedInUserName().value_or(""));
     if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
-        onDeleteItem(_selectedTreeTO->getLeaf());
+        onDeleteResource(_selectedTreeTO->getLeaf());
         _selectedTreeTO = nullptr;
     }
     ImGui::EndDisabled();
@@ -1054,7 +1054,7 @@ void _BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
     auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
     ImGui::PopStyleColor();
     if (downloadButtonResult) {
-        onDownloadItem(leaf);
+        onDownloadResource(leaf);
     }
     AlienImGui::Tooltip("Download");
 }
@@ -1147,7 +1147,7 @@ void _BrowserWindow::sortUserList()
     std::sort(_userTOs.begin(), _userTOs.end(), [&](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
 }
 
-void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
+void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
 {
     printOverlayMessage("Downloading ...");
     ++leaf.rawTO->numDownloads;
@@ -1155,7 +1155,7 @@ void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
     delayedExecution([=, this] {
         std::string dataTypeString = _currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
         SerializedSimulation serializedSim;
-        if (!NetworkService::downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.rawTO->id)) {
+        if (!NetworkService::downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.rawTO->id)) {
             MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
             return;
         }
@@ -1211,11 +1211,12 @@ void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
     });
 }
 
-void _BrowserWindow::onMoveItem(NetworkResourceTreeTO const& treeTO, WorkspaceId const& sourceId, WorkspaceId const& targetId)
+void _BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO, WorkspaceId const& sourceId, WorkspaceId const& targetId)
 {
     auto& source = _workspaces.at(sourceId);
     auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, source.rawTOs);
 
+    //remove resources form source workspace
     for (auto const& rawTO : rawTOs) {
         auto findResult = std::ranges::find_if(source.rawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
         if (findResult != source.rawTOs.end()) {
@@ -1224,12 +1225,25 @@ void _BrowserWindow::onMoveItem(NetworkResourceTreeTO const& treeTO, WorkspaceId
     }
     createTreeTOs(source);
 
+    //add resources to target workspace
     auto& target = _workspaces.at(targetId);
     target.rawTOs.insert(target.rawTOs.end(), rawTOs.begin(), rawTOs.end());
     createTreeTOs(target);
+
+    //apply changes to server
+    delayedExecution([targetId = targetId, rawTOs = rawTOs, this] {
+        for (auto const& rawTO : rawTOs) {
+            if (!NetworkService::moveResource(rawTO->id, targetId.workspaceType)) {
+                MessageDialog::getInstance().information("Error", "Failed to move item.");
+                refreshIntern(true);
+                return;
+            }
+        }
+    });
+    printOverlayMessage("Moving to " + workspaceTypeToString.at(targetId.workspaceType) + " workspace ...");
 }
 
-void _BrowserWindow::onDeleteItem(BrowserLeaf const& leaf)
+void _BrowserWindow::onDeleteResource(BrowserLeaf const& leaf)
 {
     MessageDialog::getInstance().yesNo("Delete item", "Do you really want to delete the selected item?", [leaf, this]() {
         printOverlayMessage("Deleting ...");

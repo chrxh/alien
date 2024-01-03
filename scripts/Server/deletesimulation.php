@@ -14,7 +14,7 @@
         exit;
     }
 
-    $obj = $db->query("SELECT u.NAME as userName FROM simulation sim, user u WHERE sim.USER_ID = u.ID and sim.ID='".addslashes($simId)."'")->fetch_object();
+    $obj = $db->query("SELECT u.NAME as userName FROM simulation sim, user u WHERE sim.USER_ID = u.ID and sim.ID=".addslashes($simId))->fetch_object();
     if ($obj && strcmp($obj->userName, $userName) != 0) {
         echo json_encode(["result"=>false]);
         $db->close();

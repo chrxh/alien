@@ -67,6 +67,12 @@ void NetworkService::init()
     _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
 }
 
+void NetworkService::shutdown()
+{
+    GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
+    logout();
+}
+
 std::string NetworkService::getServerAddress()
 {
     return _serverAddress;
@@ -193,12 +199,6 @@ bool NetworkService::logout()
     _loggedInUserName = std::nullopt;
     _password = std::nullopt;
     return result;
-}
-
-void NetworkService::shutdown()
-{
-    GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
-    logout();
 }
 
 void NetworkService::refreshLogin()
@@ -421,8 +421,8 @@ bool NetworkService::toggleReactToResource(std::string const& simId, int likeTyp
     }
 }
 
-bool NetworkService::uploadSimulation(
-    std::string const& simulationName,
+bool NetworkService::uploadResource(
+    std::string const& resourceName,
     std::string const& description,
     IntVector2D const& size,
     int particles,
@@ -432,7 +432,7 @@ bool NetworkService::uploadSimulation(
     NetworkResourceType resourceType,
     WorkspaceType workspaceType)
 {
-    log(Priority::Important, "network: upload resource with name='" + simulationName + "'");
+    log(Priority::Important, "network: upload resource with name='" + resourceName + "'");
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -440,7 +440,7 @@ bool NetworkService::uploadSimulation(
     httplib::MultipartFormDataItems items = {
         {"userName", *_loggedInUserName, "", ""},
         {"password", *_password, "", ""},
-        {"simName", simulationName, "", ""},
+        {"simName", resourceName, "", ""},
         {"simDesc", description, "", ""},
         {"width", std::to_string(size.x), "", ""},
         {"height", std::to_string(size.y), "", ""},
@@ -463,7 +463,7 @@ bool NetworkService::uploadSimulation(
     }
 }
 
-bool NetworkService::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
+bool NetworkService::downloadResource(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
 {
     log(Priority::Important, "network: download resource with id=" + simId);
 
@@ -487,6 +487,28 @@ bool NetworkService::downloadSimulation(std::string& mainData, std::string& auxi
             statistics = result->body;
         }
         return true;
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
+}
+
+bool NetworkService::moveResource(std::string const& simId, WorkspaceType targetWorkspace)
+{
+    log(Priority::Important, "network: move resource with id=" + simId + " to other workspace");
+
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("userName", *_loggedInUserName);
+    params.emplace("password", *_password);
+    params.emplace("simId", simId);
+    params.emplace("targetWorkspace", std::to_string(targetWorkspace));
+
+    try {
+        auto result = executeRequest([&] { return client.Post("/alien-server/movesimulation.php", params); });
+        return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
         return false;
