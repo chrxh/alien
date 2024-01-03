@@ -21,32 +21,34 @@ struct UserInfo
 class NetworkService
 {
 public:
-    static NetworkService& getInstance();
     NetworkService(NetworkService const&) = delete;
+    NetworkService() = delete;
 
-    std::string getServerAddress() const;
-    void setServerAddress(std::string const& value);
-    std::optional<std::string> getLoggedInUserName() const;
-    std::optional<std::string> getPassword() const;
+    static void init();
 
-    bool createUser(std::string const& userName, std::string const& password, std::string const& email);
-    bool activateUser(std::string const& userName, std::string const& password, UserInfo const& userInfo, std::string const& confirmationCode);
+    static std::string getServerAddress();
+    static void setServerAddress(std::string const& value);
+    static std::optional<std::string> getLoggedInUserName();
+    static std::optional<std::string> getPassword();
 
-    bool login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo);
-    bool logout();
-    void shutdown();
-    void refreshLogin();
-    bool deleteUser();
-    bool resetPassword(std::string const& userName, std::string const& email);
-    bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
+    static bool createUser(std::string const& userName, std::string const& password, std::string const& email);
+    static bool activateUser(std::string const& userName, std::string const& password, UserInfo const& userInfo, std::string const& confirmationCode);
 
-    bool getNetworkResources(std::vector<NetworkResourceRawTO>& result, bool withRetry) const;
-    bool getUserList(std::vector<UserTO>& result, bool withRetry) const;
-    bool getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result) const;
-    bool getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
-    bool toggleReactToResource(std::string const& simId, int likeType);
+    static bool login(LoginErrorCode& errorCode, std::string const& userName, std::string const& password, UserInfo const& userInfo);
+    static bool logout();
+    static void shutdown();
+    static void refreshLogin();
+    static bool deleteUser();
+    static bool resetPassword(std::string const& userName, std::string const& email);
+    static bool setNewPassword(std::string const& userName, std::string const& newPassword, std::string const& confirmationCode);
 
-    bool uploadSimulation(
+    static bool getNetworkResources(std::vector<NetworkResourceRawTO>& result, bool withRetry);
+    static bool getUserList(std::vector<UserTO>& result, bool withRetry);
+    static bool getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result);
+    static bool getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
+    static bool toggleReactToResource(std::string const& simId, int likeType);
+
+    static bool uploadSimulation(
         std::string const& simulationName,
         std::string const& description,
         IntVector2D const& size,
@@ -56,15 +58,12 @@ public:
         std::string const& statistics,
         NetworkResourceType resourceType,
         WorkspaceType workspaceType);
-    bool downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
-    bool deleteResource(std::string const& simId);
+    static bool downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
+    static bool deleteResource(std::string const& simId);
 
 private:
-    NetworkService();
-    ~NetworkService();
-
-    std::string _serverAddress;
-    std::optional<std::string> _loggedInUserName;
-    std::optional<std::string> _password;
-    std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
+    static std::string _serverAddress;
+    static std::optional<std::string> _loggedInUserName;
+    static std::optional<std::string> _password;
+    static std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
 };

@@ -58,11 +58,10 @@ void _NewPasswordDialog::processIntern()
 
 void _NewPasswordDialog::onNewPassword()
 {
-    auto& networkService = NetworkService::getInstance();
-    auto result = networkService.setNewPassword(_userName, _newPassword, _confirmationCode);
+    auto result = NetworkService::setNewPassword(_userName, _newPassword, _confirmationCode);
     if (result) {
         LoginErrorCode errorCode;
-        result |= networkService.login(errorCode, _userName, _newPassword, _userInfo);
+        result |= NetworkService::login(errorCode, _userName, _newPassword, _userInfo);
     }
     if (!result) {
         MessageDialog::getInstance().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to reset the password again.");

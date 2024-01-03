@@ -57,10 +57,9 @@ _UploadSimulationDialog::~_UploadSimulationDialog()
 
 void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder)
 {
-    auto& networkService = NetworkService::getInstance();
-    if (networkService.getLoggedInUserName()) {
+    if (NetworkService::getLoggedInUserName()) {
         auto workspaceType = _browserWindow->getCurrentWorkspaceType();
-        if (workspaceType == WorkspaceType_AlienProject && *networkService.getLoggedInUserName() != "alien-project") {
+        if (workspaceType == WorkspaceType_AlienProject && *NetworkService::getLoggedInUserName() != "alien-project") {
             MessageDialog::getInstance().information(
                 "Upload " + BrowserDataTypeToLowerString.at(resourceType),
                 "You are not allowed to upload to alien-project's workspace.\nPlease choose the public or private workspace in the browser.");
@@ -184,8 +183,7 @@ void _UploadSimulationDialog::onUpload()
             }
         }
 
-        auto& networkService = NetworkService::getInstance();
-        if (!networkService.uploadSimulation(_folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, _workspaceType)) {
+        if (!NetworkService::uploadSimulation(_folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, _workspaceType)) {
             showMessage("Error", "Failed to upload " + BrowserDataTypeToLowerString.at(_resourceType) + ".");
             return;
         }

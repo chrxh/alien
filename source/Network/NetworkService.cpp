@@ -57,13 +57,17 @@ namespace
     }
 }
 
-NetworkService& NetworkService::getInstance()
+std::string NetworkService::_serverAddress;
+std::optional<std::string> NetworkService::_loggedInUserName;
+std::optional<std::string> NetworkService::_password;
+std::optional<std::chrono::steady_clock::time_point> NetworkService::_lastRefreshTime;
+
+void NetworkService::init()
 {
-    static NetworkService instance;
-    return instance;
+    _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
 }
 
-std::string NetworkService::getServerAddress() const
+std::string NetworkService::getServerAddress()
 {
     return _serverAddress;
 }
@@ -74,12 +78,12 @@ void NetworkService::setServerAddress(std::string const& value)
     logout();
 }
 
-std::optional<std::string> NetworkService::getLoggedInUserName() const
+std::optional<std::string> NetworkService::getLoggedInUserName()
 {
     return _loggedInUserName;
 }
 
-std::optional<std::string> NetworkService::getPassword() const
+std::optional<std::string> NetworkService::getPassword()
 {
     return _password;
 }
@@ -282,7 +286,7 @@ bool NetworkService::setNewPassword(std::string const& userName, std::string con
     }
 }
 
-bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& result, bool withRetry) const
+bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& result, bool withRetry)
 {
     log(Priority::Important, "network: get resource list");
 
@@ -310,7 +314,7 @@ bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& resu
     }
 }
 
-bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry) const
+bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry)
 {
     log(Priority::Important, "network: get user list");
 
@@ -336,7 +340,7 @@ bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry) co
     }
 }
 
-bool NetworkService::getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result) const
+bool NetworkService::getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result)
 {
     log(Priority::Important, "network: get liked resources");
 
@@ -508,13 +512,4 @@ bool NetworkService::deleteResource(std::string const& simId)
         logNetworkError();
         return false;
     }
-}
-
-NetworkService::NetworkService()
-{
-    _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
-}
-
-NetworkService::~NetworkService()
-{
 }

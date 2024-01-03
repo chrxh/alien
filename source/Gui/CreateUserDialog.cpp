@@ -61,9 +61,7 @@ void _CreateUserDialog::processIntern()
 
 void _CreateUserDialog::onCreateUser()
 {
-    auto& networkService = NetworkService::getInstance();
-
-    if (networkService.createUser(_userName, _password, _email)) {
+    if (NetworkService::createUser(_userName, _password, _email)) {
         _activateUserDialog->open(_userName, _password, _userInfo);
     } else {
         MessageDialog::getInstance().information(

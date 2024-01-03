@@ -40,6 +40,7 @@ private:
     {
         std::vector<ImGuiTableColumnSortSpecs> sortSpecs;
         std::vector<NetworkResourceRawTO> rawTOs;    //unfiltered, sorted
+        std::unordered_map<NetworkResourceRawTO, size_t> indices;
         std::vector<NetworkResourceTreeTO> treeTOs;  //filtered, sorted
         std::set<std::vector<std::string>> collapsedFolderNames;
     };
@@ -94,8 +95,8 @@ private:
     void onCollapseFolders();
     void openWeblink(std::string const& link);
 
-    bool isLiked(std::string const& simId);
-    std::string getUserNamesToEmojiType(std::string const& simId, int emojiType);
+    bool isOwner(NetworkResourceTreeTO const& treeTO) const;
+    std::string getUserNamesToEmojiType(std::string const& resourceId, int emojiType);
 
     void pushTextColor(NetworkResourceTreeTO const& to);
     void popTextColor();
@@ -110,7 +111,7 @@ private:
     WorkspaceId _currentWorkspace = {NetworkResourceType_Simulation, WorkspaceType_AlienProject};
     std::map<WorkspaceId, Workspace> _workspaces;
 
-    NetworkResourceTreeTO _selectedResource;
+    NetworkResourceTreeTO _selectedTreeTO;
 
     std::string _filter;
     float _userTableWidth = 0;

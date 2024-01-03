@@ -56,7 +56,6 @@ WindowController& WindowController::getInstance()
 
 WindowController::~WindowController()
 {
-    delete _desktopVideoMode;
 }
 
 void WindowController::init()
@@ -71,7 +70,7 @@ void WindowController::init()
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
     _windowData.mode = glfwGetVideoMode(primaryMonitor);
 
-    _desktopVideoMode = new GLFWvidmode;
+    _desktopVideoMode = std::make_shared<GLFWvidmode>();
     *_desktopVideoMode = *_windowData.mode;
 
     _windowData.window = [&] {

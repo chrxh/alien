@@ -219,6 +219,18 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
     return result;
 }
 
+std::vector<NetworkResourceRawTO> NetworkResourceService::getAllRawTOs(
+    NetworkResourceTreeTO const& treeTO,
+    std::vector<NetworkResourceRawTO> const& rawTOs,
+    std::unordered_map<NetworkResourceRawTO, size_t> const& indices)
+{
+    if (treeTO->isLeaf()) {
+        return {treeTO->getLeaf().rawTO};
+    }
+    //auto index = indices.at()
+    return {};
+}
+
 std::set<std::vector<std::string>> NetworkResourceService::getAllFolderNames(std::vector<NetworkResourceRawTO> const& rawTOs, int minNesting)
 {
     std::set<std::vector<std::string>> result;
