@@ -35,6 +35,7 @@
 #include "UploadSimulationDialog.h"
 #include "DelayedExecutionController.h"
 #include "EditorController.h"
+#include "EditSimulationDialog.h"
 #include "OpenGLHelper.h"
 #include "OverlayMessageController.h"
 #include "GenomeEditorWindow.h"
@@ -110,10 +111,14 @@ _BrowserWindow::~_BrowserWindow()
     }
 }
 
-void _BrowserWindow::registerCyclicReferences(LoginDialogWeakPtr const& loginDialog, UploadSimulationDialogWeakPtr const& uploadSimulationDialog)
+void _BrowserWindow::registerCyclicReferences(
+    LoginDialogWeakPtr const& loginDialog,
+    UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
+    EditSimulationDialogWeakPtr const& editSimulationDialog)
 {
     _loginDialog = loginDialog;
     _uploadSimulationDialog = uploadSimulationDialog;
+    _editSimulationDialog = editSimulationDialog;
 
     auto firstStart = GlobalSettings::getInstance().getBoolState("windows.browser.first start", true);
     refreshIntern(firstStart);
@@ -210,7 +215,7 @@ void _BrowserWindow::processBackground()
 void _BrowserWindow::processToolbar()
 {
     std::string resourceTypeString = _currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
-    auto owner = isOwner(_selectedTreeTO);
+    auto isOwnerForSelectedItem = isOwner(_selectedTreeTO);
 
     //refresh button
     if (AlienImGui::ToolbarButton(ICON_FA_SYNC)) {
@@ -263,15 +268,18 @@ void _BrowserWindow::processToolbar()
 
     //edit button
     ImGui::SameLine();
-    ImGui::BeginDisabled(!owner);
+    ImGui::BeginDisabled(!isOwnerForSelectedItem);
     if (AlienImGui::ToolbarButton(ICON_FA_EDIT)) {
+        if (_selectedTreeTO->isLeaf()) {
+            _editSimulationDialog.lock()->openForLeaf(_selectedTreeTO);
+        }
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Change name or description");
 
     //move to other workspace button
     ImGui::SameLine();
-    ImGui::BeginDisabled(!owner);
+    ImGui::BeginDisabled(!isOwnerForSelectedItem);
     WorkspaceId targetWorkspaceId{.resourceType = _currentWorkspace.resourceType, .workspaceType = 2 - _currentWorkspace.workspaceType};
     if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
         onMoveResource(_selectedTreeTO, _currentWorkspace, targetWorkspaceId);
@@ -281,7 +289,7 @@ void _BrowserWindow::processToolbar()
 
     //delete button
     ImGui::SameLine();
-    ImGui::BeginDisabled(!owner);
+    ImGui::BeginDisabled(!isOwnerForSelectedItem);
     if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
         onDeleteResource(_selectedTreeTO);
         _selectedTreeTO = nullptr;

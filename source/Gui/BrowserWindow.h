@@ -24,7 +24,10 @@ public:
         EditorController const& editorController);
     ~_BrowserWindow();
 
-    void registerCyclicReferences(LoginDialogWeakPtr const& loginDialog, UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
+    void registerCyclicReferences(
+        LoginDialogWeakPtr const& loginDialog,
+        UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
+        EditSimulationDialogWeakPtr const& editSimulationDialog);
 
     void onRefresh();
     WorkspaceType getCurrentWorkspaceType() const;
@@ -125,4 +128,5 @@ private:
     LoginDialogWeakPtr _loginDialog;
     EditorController _editorController;
     UploadSimulationDialogWeakPtr _uploadSimulationDialog;
+    EditSimulationDialogWeakPtr _editSimulationDialog;
 };

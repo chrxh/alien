@@ -57,6 +57,7 @@
 #include "BrowserWindow.h"
 #include "LoginDialog.h"
 #include "UploadSimulationDialog.h"
+#include "EditSimulationDialog.h"
 #include "CreateUserDialog.h"
 #include "ActivateUserDialog.h"
 #include "DelayedExecutionController.h"
@@ -151,13 +152,14 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     _loginDialog = std::make_shared<_LoginDialog>(_simController, _browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(
         _browserWindow, _loginDialog, _simController, _viewport, _editorController->getGenomeEditorWindow());
+    _editSimulationDialog = std::make_shared<_EditSimulationDialog>(_browserWindow);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_viewport, _simController);
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
 
     //cyclic references
-    _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog);
+    _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog);
     _activateUserDialog->registerCyclicReferences(_createUserDialog);
     _editorController->registerCyclicReferences(_uploadSimulationDialog);
 
@@ -718,6 +720,7 @@ void _MainWindow::processDialogs()
     _createUserDialog->process();
     _activateUserDialog->process();
     _uploadSimulationDialog->process();
+    _editSimulationDialog->process();
     _deleteUserDialog->process();
     _networkSettingsDialog->process();
     _resetPasswordDialog->process();
