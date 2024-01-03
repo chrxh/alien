@@ -1,6 +1,7 @@
 #include "UploadSimulationDialog.h"
 
 #include <imgui.h>
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/SerializerService.h"
@@ -184,7 +185,10 @@ void _UploadSimulationDialog::onUpload()
         }
 
         if (!NetworkService::uploadResource(_folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, _workspaceType)) {
-            showMessage("Error", "Failed to upload " + BrowserDataTypeToLowerString.at(_resourceType) + ".");
+            showMessage(
+                "Error",
+                "Failed to upload " + BrowserDataTypeToLowerString.at(_resourceType)
+                    + ".\n\nPossible reasons:\n\n" ICON_FA_CHEVRON_RIGHT " The server is not reachable.\n\n" ICON_FA_CHEVRON_RIGHT " The total size of your uploads exceeds the allowed storage limit.");
             return;
         }
         _browserWindow->onRefresh();

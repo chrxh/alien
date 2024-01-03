@@ -9,13 +9,20 @@ class _EditSimulationDialog : public _AlienDialog
 {
 public:
     _EditSimulationDialog(BrowserWindow const& browserWindow);
-    ~_EditSimulationDialog();
+    virtual ~_EditSimulationDialog() override = default;
 
-    void open(NetworkResourceTreeTO const& treeTO);
+    void openForLeaf(NetworkResourceTreeTO const& treeTO);
+    void openForFolder(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs);
 
 private:
     void processIntern();
 
+    void processLeaf();
+
     NetworkResourceTreeTO _treeTO;
+    std::vector<NetworkResourceRawTO> _rawTOs;
+    std::string _newName;
+    std::string _newDescription;
+
     BrowserWindow _browserWindow;
 };

@@ -58,6 +58,7 @@ public:
         NetworkResourceType resourceType,
         WorkspaceType workspaceType);
     static bool downloadResource(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
+    static bool editResource(std::string const& simId, std::string const& newName, std::string const& newDescription);
     static bool moveResource(std::string const& simId, WorkspaceType targetWorkspace);
     static bool deleteResource(std::string const& simId);
 

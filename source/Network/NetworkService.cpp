@@ -493,6 +493,29 @@ bool NetworkService::downloadResource(std::string& mainData, std::string& auxili
     }
 }
 
+bool NetworkService::editResource(std::string const& simId, std::string const& newName, std::string const& newDescription)
+{
+    log(Priority::Important, "network: edit resource with id=" + simId);
+
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("userName", *_loggedInUserName);
+    params.emplace("password", *_password);
+    params.emplace("simId", simId);
+    params.emplace("newName", newName);
+    params.emplace("newDescription", newDescription);
+
+    try {
+        auto result = executeRequest([&] { return client.Post("/alien-server/editsimulation.php", params); });
+        return parseBoolResult(result->body);
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
+}
+
 bool NetworkService::moveResource(std::string const& simId, WorkspaceType targetWorkspace)
 {
     log(Priority::Important, "network: move resource with id=" + simId + " to other workspace");
