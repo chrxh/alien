@@ -11,13 +11,17 @@ public:
         std::vector<NetworkResourceRawTO> const& rawTOs,
         std::set<std::vector<std::string>> const& collapsedFolderNames);
 
-    static std::vector<NetworkResourceRawTO> getAllRawTOs(
-        NetworkResourceTreeTO const& treeTO,
-        std::vector<NetworkResourceRawTO> const& rawTOs,
-        std::unordered_map<NetworkResourceRawTO, size_t> const& indices);
-    static std::set<std::vector<std::string>> getAllFolderNames(std::vector<NetworkResourceRawTO> const& browserData, int minNesting = 2);
+    static std::vector<NetworkResourceRawTO> getMatchingRawTOs(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs);
+    static void invalidateCache();  //invalidate cache for getMatchingRawTOs
 
-    static std::string concatenateFolderNames(std::vector<std::string> const& folderNames, bool withSlash);
+    static std::set<std::vector<std::string>> getFolderNames(std::vector<NetworkResourceRawTO> const& browserData, int minNesting = 2);
+
+    static std::string concatenateFolderName(std::vector<std::string> const& folderNames, bool withSlashAtTheEnd);
+    static std::vector<std::string> separateFolderNames(std::string const& concatenatedFolderName);
+
     static std::string convertFolderNamesToSettings(std::set<std::vector<std::string>> const& data);
     static std::set<std::vector<std::string>> convertSettingsToFolderNames(std::string const& data);
+
+private:
+    static std::unordered_map<NetworkResourceTreeTO, std::vector<NetworkResourceRawTO>> _treeTOtoRawTOcache;
 };
