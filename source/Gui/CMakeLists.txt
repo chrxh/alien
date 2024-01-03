@@ -33,6 +33,8 @@ PUBLIC
     EditorController.h
     EditorModel.cpp
     EditorModel.h
+    EditSimulationDialog.cpp
+    EditSimulationDialog.h
     ExitDialog.cpp
     ExitDialog.h
     FpsController.cpp
