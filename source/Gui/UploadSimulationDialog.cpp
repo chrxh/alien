@@ -8,6 +8,7 @@
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "Network/NetworkService.h"
+#include "Network/ValidationService.h"
 
 #include "AlienImGui.h"
 #include "MessageDialog.h"
@@ -17,6 +18,7 @@
 #include "OverlayMessageController.h"
 #include "Viewport.h"
 #include "GenomeEditorWindow.h"
+#include "HelpStrings.h"
 #include "LoginDialog.h"
 
 namespace
@@ -117,8 +119,12 @@ void _UploadSimulationDialog::processIntern()
 
     ImGui::BeginDisabled(_resourceName.empty());
     if (AlienImGui::Button("OK")) {
-        close();
-        onUpload();
+        if (ValidationService::isStringValidForDatabase(_resourceName) && ValidationService::isStringValidForDatabase(_resourceDescription)) {
+            close();
+            onUpload();
+        } else {
+            showMessage("Error", Const::NotAllowedCharacters);
+        }
     }
     ImGui::EndDisabled();
     ImGui::SetItemDefaultFocus();

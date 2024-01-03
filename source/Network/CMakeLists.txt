@@ -11,7 +11,9 @@ add_library(Network
     NetworkResourceService.h
     NetworkResourceTreeTO.cpp
     NetworkResourceTreeTO.h
-    UserTO.h)
+    UserTO.h
+    ValidationService.cpp
+    ValidationService.h)
 
 target_link_libraries(Network Base)
 target_link_libraries(Network Boost::boost)
