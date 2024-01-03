@@ -206,11 +206,6 @@ void _BrowserWindow::processBackground()
         _lastRefreshTime = now;
         refreshIntern(false);
     }
-
-    if (_scheduleRefresh) {
-        onRefresh();
-        _scheduleRefresh = false;
-    }
 }
 
 void _BrowserWindow::processToolbar()
@@ -268,7 +263,8 @@ void _BrowserWindow::processToolbar()
 
     //move to other workspace button
     ImGui::SameLine();
-    ImGui::BeginDisabled(!isOwner(_selectedTreeTO));
+    auto owner = isOwner(_selectedTreeTO);
+    ImGui::BeginDisabled(!owner);
     WorkspaceId targetWorkspaceId{.resourceType = _currentWorkspace.resourceType, .workspaceType = 2 - _currentWorkspace.workspaceType};
     if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
         onMoveResource(_selectedTreeTO, _currentWorkspace, targetWorkspaceId);
@@ -278,11 +274,9 @@ void _BrowserWindow::processToolbar()
 
     //delete button
     ImGui::SameLine();
-    ImGui::BeginDisabled(
-        _selectedTreeTO == nullptr || !_selectedTreeTO->isLeaf()
-        || _selectedTreeTO->getLeaf().rawTO->userName != NetworkService::getLoggedInUserName().value_or(""));
+    ImGui::BeginDisabled(!owner);
     if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
-        onDeleteResource(_selectedTreeTO->getLeaf());
+        onDeleteResource(_selectedTreeTO);
         _selectedTreeTO = nullptr;
     }
     ImGui::EndDisabled();
@@ -1243,17 +1237,33 @@ void _BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO, Workspa
     printOverlayMessage("Moving to " + workspaceTypeToString.at(targetId.workspaceType) + " workspace ...");
 }
 
-void _BrowserWindow::onDeleteResource(BrowserLeaf const& leaf)
+void _BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
 {
-    MessageDialog::getInstance().yesNo("Delete item", "Do you really want to delete the selected item?", [leaf, this]() {
-        printOverlayMessage("Deleting ...");
+    auto& workspace = _workspaces.at(_currentWorkspace);
+    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, workspace.rawTOs);
 
-        delayedExecution([leafCopy = leaf, this] {
-            if (!NetworkService::deleteResource(leafCopy.rawTO->id)) {
-                MessageDialog::getInstance().information("Error", "Failed to delete item. Please try again later.");
-                return;
+    auto message = treeTO->isLeaf() ? "Do you really want to delete the selected item?" : "Do you really want to delete the selected folder?";
+    MessageDialog::getInstance().yesNo("Delete", message, [rawTOs = rawTOs, &workspace, this]() {
+
+        //remove resources form workspace
+        for (auto const& rawTO : rawTOs) {
+            auto findResult = std::ranges::find_if(workspace.rawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
+            if (findResult != workspace.rawTOs.end()) {
+                workspace.rawTOs.erase(findResult);
             }
-            _scheduleRefresh = true;
+        }
+        createTreeTOs(workspace);
+
+        //apply changes to server
+        printOverlayMessage("Deleting ...");
+        delayedExecution([rawTOs = rawTOs, this] {
+            for (auto const& rawTO : rawTOs) {
+                if (!NetworkService::deleteResource(rawTO->id)) {
+                    MessageDialog::getInstance().information("Error", "Failed to delete item. Please try again later.");
+                    refreshIntern(true);
+                    return;
+                }
+            }
         });
     });
 }

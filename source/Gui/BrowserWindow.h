@@ -88,7 +88,7 @@ private:
 
     void onDownloadResource(BrowserLeaf const& leaf);
     void onMoveResource(NetworkResourceTreeTO const& treeTO, WorkspaceId const& sourceId, WorkspaceId const& targetId);
-    void onDeleteResource(BrowserLeaf const& leaf);
+    void onDeleteResource(NetworkResourceTreeTO const& treeTO);
     void onToggleLike(NetworkResourceTreeTO const& to, int emojiType);
     void onExpandFolders();
     void onCollapseFolders();
@@ -100,7 +100,6 @@ private:
     void pushTextColor(NetworkResourceTreeTO const& to);
     void popTextColor();
 
-    bool _scheduleRefresh = false;
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
     NetworkResourceTreeTO _emojiPopupTO;
