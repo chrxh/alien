@@ -8,7 +8,6 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
-#include <boost/range/adaptor/indexed.hpp>
 
 #include <imgui.h>
 
@@ -316,37 +315,6 @@ void _BrowserWindow::processToolbar()
     AlienImGui::Separator();
 }
 
-void _BrowserWindow::processWorkspaceSelectionAndFilter()
-{
-    ImGui::Spacing();
-    if (ImGui::BeginTable("##", 2, 0, ImVec2(-1, 0))) {
-        ImGui::TableSetupColumn("##workspaceType");
-        ImGui::TableSetupColumn("##textFilter");
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        auto userName = NetworkService::getLoggedInUserName();
-        auto privateWorkspaceString = userName.has_value() ? *userName + "'s private workspace": "Private workspace (need to login)";
-        auto workspaceType_reordered = 2 - _currentWorkspace.workspaceType;  //change the order for display
-        AlienImGui::Switcher(
-            AlienImGui::SwitcherParameters()
-                .textWidth(48.0f)
-                .tooltip(Const::BrowserWorkspaceTooltip)
-                .values({privateWorkspaceString, std::string("alien-project's workspace"), std::string("Public workspace")}),
-            workspaceType_reordered);
-        _currentWorkspace.workspaceType = 2 - workspaceType_reordered;
-        ImGui::SameLine();
-        AlienImGui::VerticalSeparator();
-
-        ImGui::TableSetColumnIndex(1); 
-        if (AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Filter").textWidth(0), _filter)) {
-            createTreeTOs(_workspaces.at(_currentWorkspace));
-        }
-
-        ImGui::EndTable();
-    }
-}
-
 void _BrowserWindow::processWorkspace()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
@@ -357,12 +325,18 @@ void _BrowserWindow::processWorkspace()
             ImGuiWindowFlags_HorizontalScrollbar)) {
         if (ImGui::BeginTabBar("##Type", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
             if (ImGui::BeginTabItem("Simulations", nullptr, ImGuiTabItemFlags_None)) {
-                _currentWorkspace.resourceType = NetworkResourceType_Simulation;
+                if (_currentWorkspace.resourceType != NetworkResourceType_Simulation) {
+                    _currentWorkspace.resourceType = NetworkResourceType_Simulation;
+                    _selectedTreeTO = nullptr;
+                }
                 processSimulationList();
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Genomes", nullptr, ImGuiTabItemFlags_None)) {
-                _currentWorkspace.resourceType = NetworkResourceType_Genome;
+                if (_currentWorkspace.resourceType != NetworkResourceType_Genome) {
+                    _currentWorkspace.resourceType = NetworkResourceType_Genome;
+                    _selectedTreeTO = nullptr;
+                }
                 processGenomeList();
                 ImGui::EndTabItem();
             }
@@ -371,6 +345,39 @@ void _BrowserWindow::processWorkspace()
         processWorkspaceSelectionAndFilter();
     }
     ImGui::EndChild();
+}
+
+void _BrowserWindow::processWorkspaceSelectionAndFilter()
+{
+    ImGui::Spacing();
+    if (ImGui::BeginTable("##", 2, 0, ImVec2(-1, 0))) {
+        ImGui::TableSetupColumn("##workspaceType");
+        ImGui::TableSetupColumn("##textFilter");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        auto userName = NetworkService::getLoggedInUserName();
+        auto privateWorkspaceString = userName.has_value() ? *userName + "'s private workspace" : "Private workspace (need to login)";
+        auto workspaceType_reordered = 2 - _currentWorkspace.workspaceType;  //change the order for display
+        if (AlienImGui::Switcher(
+                AlienImGui::SwitcherParameters()
+                    .textWidth(48.0f)
+                    .tooltip(Const::BrowserWorkspaceTooltip)
+                    .values({privateWorkspaceString, std::string("alien-project's workspace"), std::string("Public workspace")}),
+                workspaceType_reordered)) {
+            _selectedTreeTO = nullptr;
+        }
+        _currentWorkspace.workspaceType = 2 - workspaceType_reordered;
+        ImGui::SameLine();
+        AlienImGui::VerticalSeparator();
+
+        ImGui::TableSetColumnIndex(1);
+        if (AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Filter").textWidth(0), _filter)) {
+            createTreeTOs(_workspaces.at(_currentWorkspace));
+        }
+
+        ImGui::EndTable();
+    }
 }
 
 void _BrowserWindow::processMovableSeparator()
