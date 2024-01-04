@@ -366,8 +366,8 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationUniformColorProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationUniformColorProbability,
+            parameters.baseValues.cellFunctionConstructorMutationGenomeColorProbability,
+            defaultParameters.baseValues.cellFunctionConstructorMutationGenomeColorProbability,
             "simulation parameters.cell.function.constructor.mutation probability.uniform color",
             parserTask);
         encodeDecodeProperty(
@@ -877,9 +877,9 @@ namespace
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationUniformColorProbability,
+                spot.values.cellFunctionConstructorMutationGenomeColorProbability,
                 spot.activatedValues.cellFunctionConstructorMutationUniformColorProbability,
-                defaultSpot.values.cellFunctionConstructorMutationUniformColorProbability,
+                defaultSpot.values.cellFunctionConstructorMutationGenomeColorProbability,
                 base + "cell.function.constructor.mutation probability.uniform color",
                 parserTask);
         }

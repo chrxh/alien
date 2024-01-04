@@ -767,10 +767,10 @@ void _SimulationParametersWindow::processBase(
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationUniformColorProbability)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationGenomeColorProbability)
                     .tooltip(
                         "This type of mutation alters the color of all cell descriptions in a genome by using the specified color transitions."),
-                simParameters.baseValues.cellFunctionConstructorMutationUniformColorProbability);
+                simParameters.baseValues.cellFunctionConstructorMutationGenomeColorProbability);
             AlienImGui::CheckboxColorMatrix(
                 AlienImGui::CheckboxColorMatrixParameters()
                     .name("Color transitions")
@@ -1752,9 +1752,9 @@ void _SimulationParametersWindow::processSpot(
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellFunctionConstructorMutationUniformColorProbability)
-                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationUniformColorProbability),
-                spot.values.cellFunctionConstructorMutationUniformColorProbability,
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationGenomeColorProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationGenomeColorProbability),
+                spot.values.cellFunctionConstructorMutationGenomeColorProbability,
                 &spot.activatedValues.cellFunctionConstructorMutationUniformColorProbability);
             ImGui::TreePop();
         }

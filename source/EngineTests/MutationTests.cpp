@@ -893,7 +893,7 @@ TEST_F(MutationTests, subgenomeColorMutation)
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
-        _simController->testOnly_mutate(1, MutationType::Color);
+        _simController->testOnly_mutate(1, MutationType::SubgenomeColor);
     }
 
     auto actualData = _simController->getSimulationData();
@@ -903,7 +903,7 @@ TEST_F(MutationTests, subgenomeColorMutation)
     EXPECT_TRUE(compareColorMutation(genome, actualConstructor.genome, {1, 2, 4, 5}));
 }
 
-TEST_F(MutationTests, uniformColorMutation)
+TEST_F(MutationTests, genomeColorMutation)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
@@ -923,7 +923,7 @@ TEST_F(MutationTests, uniformColorMutation)
 
     _simController->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
-        _simController->testOnly_mutate(1, MutationType::UniformColor);
+        _simController->testOnly_mutate(1, MutationType::GenomeColor);
     }
 
     auto actualData = _simController->getSimulationData();

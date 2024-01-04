@@ -22,8 +22,8 @@ public:
     __inline__ __device__ static void deleteMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void translateMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void duplicateMutation(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void colorMutation(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void uniformColorMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void subgenomeColorMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void genomeColorMutation(SimulationData& data, Cell* cell);
 
 private:
     __inline__ __device__ static bool adaptMutationId(SimulationData& data, ConstructorFunction& constructor);
@@ -98,7 +98,7 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationUniformColorProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationUniformColorProbability,
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationGenomeColorProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationUniformColorProbability,
         data,
         cell->pos,
@@ -132,10 +132,10 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         duplicateMutation(data, cell);
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationColorProbability)) {
-        colorMutation(data, cell);
+        subgenomeColorMutation(data, cell);
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationUniformColorProbability)) {
-        uniformColorMutation(data, cell);
+        genomeColorMutation(data, cell);
     }
 }
 
@@ -703,7 +703,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     adaptMutationId(data, constructor);
 }
 
-__inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::subgenomeColorMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
     if (GenomeDecoder::hasEmptyGenome(constructor)) {
@@ -740,7 +740,7 @@ __inline__ __device__ void MutationProcessor::colorMutation(SimulationData& data
     }
 }
 
-__inline__ __device__ void MutationProcessor::uniformColorMutation(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::genomeColorMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
     if (GenomeDecoder::hasEmptyGenome(constructor)) {
