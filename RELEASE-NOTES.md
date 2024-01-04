@@ -1,5 +1,20 @@
 # Release notes
 
+## [4.7.0] - 2024-01-04
+### Added
+- gui/browser: private workspace for each user account added
+- gui/browser: move simulations, genomes or folders to other workspace (via toolbar buttons)
+- gui/browser: edit simulations, genomes or foldcers (via toolbar buttons)
+- gui/browser: expand and collapse folder content (via toolbar buttons)
+- gui/browser: cache for speeding up downloading simulations
+- gui/upload dialog: validation of user input to allowed characters
+- gui/upload dialog: upload simulation or genome to folder
+- gui/simulation parameters, model: individual cell color mutation
+
+### Changed
+- gui/browser: layout (in particular, new widget for selecting workspace)
+- model: restrict the fusion of energy particles to certain energies
+
 ## [4.6.0] - 2023-12-29
 ### Added
 - gui/browser: support for displaying folders and subfolders
