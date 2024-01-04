@@ -49,6 +49,7 @@ public:
     static bool toggleReactToResource(std::string const& simId, int likeType);
 
     static bool uploadResource(
+        std::string& resourceId,
         std::string const& resourceName,
         std::string const& description,
         IntVector2D const& size,

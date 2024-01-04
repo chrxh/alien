@@ -42,18 +42,20 @@
         exit;
     }
 
-    if ($db->query("INSERT INTO simulation (ID, USER_ID, NAME, WIDTH, HEIGHT, PARTICLES, VERSION, DESCRIPTION, CONTENT, SETTINGS, SYMBOL_MAP, PICTURE, TIMESTAMP, FROM_RELEASE, SIZE, TYPE, STATISTICS)
+    if (!$db->query("INSERT INTO simulation (ID, USER_ID, NAME, WIDTH, HEIGHT, PARTICLES, VERSION, DESCRIPTION, CONTENT, SETTINGS, SYMBOL_MAP, PICTURE, TIMESTAMP, FROM_RELEASE, SIZE, TYPE, STATISTICS)
                     VALUES (NULL, {$obj->id}, '" . addslashes($simName) . "', $width, $height, $particles, '" . addslashes($version) . "', '" . addslashes($simDesc) . "', '" . addslashes($content) . "', '" . addslashes($settings) . "', '" . addslashes($symbolMap) . "', '" . "" . "', " . "NULL, " .addslashes($workspace) . ", " . addslashes($size) . ", " . addslashes($type) . ", '" . addslashes($statistics) . "')")) {
-        $success = true;
-
-        // create Discord message
-        if ($workspace != PRIVATE_WORKSPACE_TYPE) {
-            $discordPayload = createAddResourceMessage($type, $simName, $userName, $simDesc, $width, $height, $particles);
-            sendDiscordMessage($discordPayload);
-        }
+        echo json_encode(["result"=>false]);
+        $db->close();
+        exit;
     }
 
-    echo json_encode(["result"=>$success]);
+    // create Discord message
+    if ($workspace != PRIVATE_WORKSPACE_TYPE) {
+        $discordPayload = createAddResourceMessage($type, $simName, $userName, $simDesc, $width, $height, $particles);
+        sendDiscordMessage($discordPayload);
+    }
+
+    echo json_encode(["result"=>true, "simId"=>strval($db->insert_id)]);
 
     $db->commit();
     $db->close();
