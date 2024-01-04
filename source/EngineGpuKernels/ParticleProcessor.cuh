@@ -17,6 +17,9 @@ public:
     __inline__ __device__ static void collision(SimulationData& data);
     __inline__ __device__ static void transformation(SimulationData& data);
     __inline__ __device__ static void radiate(SimulationData& data, float2 pos, float2 vel, int color, float energy);  //return needed energy
+
+private:
+    static auto constexpr MaxFusionEnergy = 5.0f;
 };
 
 
@@ -60,12 +63,15 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
             if (lock.tryLock()) {
 
                 if (particle->energy > NEAR_ZERO && otherParticle->energy > NEAR_ZERO) {
-                    auto factor1 = particle->energy / (particle->energy + otherParticle->energy);
-                    otherParticle->vel = particle->vel * factor1 + otherParticle->vel * (1.0f - factor1);
-                    otherParticle->energy += particle->energy;
-                    otherParticle->lastAbsorbedCell = nullptr;
-                    particle->energy = 0;
-                    particle = nullptr;
+                    if (cudaSimulationParameters.particleTransformationAllowed
+                        || particle->energy + otherParticle->energy < MaxFusionEnergy) {
+                        auto factor1 = particle->energy / (particle->energy + otherParticle->energy);
+                        otherParticle->vel = particle->vel * factor1 + otherParticle->vel * (1.0f - factor1);
+                        otherParticle->energy += particle->energy;
+                        otherParticle->lastAbsorbedCell = nullptr;
+                        particle->energy = 0;
+                        particle = nullptr;
+                    }
                 }
 
                 lock.releaseLock();

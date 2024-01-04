@@ -44,20 +44,14 @@ namespace
     }
 }
 
-WindowController::WindowController()
-{
-}
-
-WindowController& WindowController::getInstance()
-{
-    static WindowController instance;
-    return instance;
-}
-
-WindowController::~WindowController()
-{
-    delete _desktopVideoMode;
-}
+WindowController::WindowData WindowController::_windowData;
+std::shared_ptr<GLFWvidmode> WindowController::_desktopVideoMode;
+IntVector2D WindowController::_startupSize;
+IntVector2D WindowController::_sizeInWindowedMode = {1920 * 3 / 4, 1080 * 3 / 4};
+float WindowController::_contentScaleFactor = 1.0f;
+float WindowController::_lastContentScaleFactor = 1.0f;
+int WindowController::_fps = 40;
+std::string WindowController::_mode;
 
 void WindowController::init()
 {
@@ -71,7 +65,7 @@ void WindowController::init()
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
     _windowData.mode = glfwGetVideoMode(primaryMonitor);
 
-    _desktopVideoMode = new GLFWvidmode;
+    _desktopVideoMode = std::make_shared<GLFWvidmode>();
     *_desktopVideoMode = *_windowData.mode;
 
     _windowData.window = [&] {
@@ -116,12 +110,12 @@ void WindowController::shutdown()
 
 }
 
-auto WindowController::getWindowData() const -> WindowData
+auto WindowController::getWindowData() -> WindowData
 {
     return _windowData;
 }
 
-bool WindowController::isWindowedMode() const
+bool WindowController::isWindowedMode()
 {
     return _mode == WindowedMode;
 }
@@ -131,7 +125,7 @@ void WindowController::setWindowedMode()
     setMode(WindowedMode);
 }
 
-bool WindowController::isDesktopMode() const
+bool WindowController::isDesktopMode()
 {
     return _mode == DesktopMode;
 }
@@ -141,7 +135,7 @@ void WindowController::setDesktopMode()
     setMode(DesktopMode);
 }
 
-GLFWvidmode WindowController::getUserDefinedResolution() const
+GLFWvidmode WindowController::getUserDefinedResolution()
 {
     return convert(_mode);
 }
@@ -151,12 +145,12 @@ void WindowController::setUserDefinedResolution(GLFWvidmode const& videoMode)
     setMode(convert(videoMode));
 }
 
-IntVector2D WindowController::getStartupWindowSize() const
+IntVector2D WindowController::getStartupWindowSize()
 {
     return _startupSize;
 }
 
-std::string WindowController::getMode() const
+std::string WindowController::getMode()
 {
     return _mode;
 }
@@ -208,14 +202,14 @@ void WindowController::updateWindowSize()
     glfwGetWindowSize(_windowData.window, &_sizeInWindowedMode.x, &_sizeInWindowedMode.y);
 }
 
-std::string WindowController::createLogString(GLFWvidmode const& videoMode) const
+std::string WindowController::createLogString(GLFWvidmode const& videoMode)
 {
     std::stringstream ss;
     ss << videoMode.width << " x " << videoMode.height << " @ " << videoMode.refreshRate << "Hz";
     return ss.str();
 }
 
-int WindowController::getFps() const
+int WindowController::getFps()
 {
     return _fps;
 }
@@ -225,12 +219,12 @@ void WindowController::setFps(int value)
     _fps = value;
 }
 
-float WindowController::getContentScaleFactor() const
+float WindowController::getContentScaleFactor()
 {
     return _contentScaleFactor;
 }
 
-float WindowController::getLastContentScaleFactor() const
+float WindowController::getLastContentScaleFactor()
 {
     return _lastContentScaleFactor;
 }

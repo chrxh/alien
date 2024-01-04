@@ -12,17 +12,23 @@ DelayedExecutionController& DelayedExecutionController::getInstance()
 
 void DelayedExecutionController::process()
 {
-    if (_timer == 0) {
-        return;
+    std::vector<ExecutionData> delayedExecDatas;
+    std::vector<ExecutionData> toExecute;
+    for (auto& execData : _execDatas) {
+        if (--execData.timer == 0) {
+            toExecute.emplace_back(execData);
+        } else {
+            delayedExecDatas.emplace_back(execData);
+        }
     }
-    --_timer;
-    if (_timer == 0) {
-        _execFunc();
+    _execDatas = delayedExecDatas;
+
+    for (auto& execData : toExecute) {
+        execData.func();
     }
 }
 
 void DelayedExecutionController::executeLater(std::function<void()> const& execFunc)
 {
-    _execFunc = execFunc;
-    _timer = 2;
+    _execDatas.emplace_back(execFunc, 2);
 }

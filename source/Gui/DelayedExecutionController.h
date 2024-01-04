@@ -12,8 +12,12 @@ public:
     void executeLater(std::function<void(void)> const& execFunc);
 
 private:
-    std::function<void(void)> _execFunc;
-    int _timer = 0;
+    struct ExecutionData
+    {
+        std::function<void(void)> func;
+        int timer = 0;
+    };
+    std::vector<ExecutionData> _execDatas;
 };
 
 inline void delayedExecution(std::function<void(void)> const& execFunc)

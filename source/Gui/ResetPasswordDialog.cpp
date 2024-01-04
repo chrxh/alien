@@ -52,9 +52,7 @@ void _ResetPasswordDialog::processIntern()
 
 void _ResetPasswordDialog::onResetPassword()
 {
-    auto& networkService = NetworkService::getInstance();
-
-    if (networkService.resetPassword(_userName, _email)) {
+    if (NetworkService::resetPassword(_userName, _email)) {
         _newPasswordDialog->open(_userName, _userInfo);
     } else {
         MessageDialog::getInstance().information(

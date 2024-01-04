@@ -3,13 +3,19 @@
 #include <chrono>
 
 #include "Base/Hashes.h"
+#include "Base/Cache.h"
 #include "EngineInterface/Definitions.h"
 #include "Network/NetworkResourceTreeTO.h"
 #include "Network/NetworkResourceRawTO.h"
 #include "Network/UserTO.h"
+#include "EngineInterface/SerializerService.h"
 
 #include "AlienWindow.h"
 #include "Definitions.h"
+
+struct ImGuiTableColumnSortSpecs;
+
+using BrowserCache = Cache<std::string, DeserializedSimulation, 5>;
 
 class _BrowserWindow : public _AlienWindow
 {
@@ -22,16 +28,28 @@ public:
         EditorController const& editorController);
     ~_BrowserWindow();
 
-    void registerCyclicReferences(LoginDialogWeakPtr const& loginDialog, UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
+    void registerCyclicReferences(
+        LoginDialogWeakPtr const& loginDialog,
+        UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
+        EditSimulationDialogWeakPtr const& editSimulationDialog);
 
     void onRefresh();
+    WorkspaceType getCurrentWorkspaceType() const;
+
+    BrowserCache& getSimulationCache();
 
 private:
-    struct ResourceData
+    struct WorkspaceId
     {
-        int numResources = 0;
-        std::vector<NetworkResourceRawTO> rawTOs;
-        std::vector<NetworkResourceTreeTO> treeTOs;
+        NetworkResourceType resourceType;
+        WorkspaceType workspaceType;
+        auto operator<=>(WorkspaceId const&) const = default;
+    };
+    struct Workspace
+    {
+        std::vector<ImGuiTableColumnSortSpecs> sortSpecs;
+        std::vector<NetworkResourceRawTO> rawTOs;    //unfiltered, sorted
+        std::vector<NetworkResourceTreeTO> treeTOs;  //filtered, sorted
         std::set<std::vector<std::string>> collapsedFolderNames;
     };
 
@@ -40,15 +58,17 @@ private:
     void processIntern() override;
     void processBackground() override;
 
+    void processToolbar();
+    void processWorkspaceSelectionAndFilter();
+    void processWorkspace();
+    void processMovableSeparator();
+    void processUserList();
+    void processStatus();
+
     void processSimulationList();
     void processGenomeList();
-    void processUserList();
 
-    void processStatus();
-    void processFilter();
-    void processToolbar();
-
-    void processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);
+    bool processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);   //return true if folder symbol clicked
     void processDescriptionField(NetworkResourceTreeTO const& treeTO);
     void processReactionList(NetworkResourceTreeTO const& treeTO);
     void processTimestampField(NetworkResourceTreeTO const& treeTO);
@@ -60,7 +80,7 @@ private:
     void processSizeField(NetworkResourceTreeTO const& treeTO, bool kbyte);
     void processVersionField(NetworkResourceTreeTO const& treeTO);
 
-    void processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);
+    bool processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);   //return true if folder symbol clicked
     void processEmojiWindow();
     void processEmojiButton(int emojiType);
 
@@ -72,50 +92,42 @@ private:
 
     void processActivated() override;
 
-    void scheduleCreateTreeTOs();
-
-    void sortRawTOs(std::vector<NetworkResourceRawTO>& tos, ImGuiTableSortSpecs* sortSpecs);
+    void createTreeTOs(Workspace& workspace);
     void sortUserList();
 
-    void filterRawTOs();
-
-    void onDownloadItem(BrowserLeaf const& leaf);
-    void onDeleteItem(BrowserLeaf const& leaf);
+    void onDownloadResource(BrowserLeaf const& leaf);
+    void onMoveResource(NetworkResourceTreeTO const& treeTO, WorkspaceId const& sourceId, WorkspaceId const& targetId);
+    void onDeleteResource(NetworkResourceTreeTO const& treeTO);
     void onToggleLike(NetworkResourceTreeTO const& to, int emojiType);
+    void onExpandFolders();
+    void onCollapseFolders();
     void openWeblink(std::string const& link);
 
-    bool isLiked(std::string const& simId);
-    std::string getUserNamesToEmojiType(std::string const& simId, int emojiType);
+    bool isOwner(NetworkResourceTreeTO const& treeTO) const;
+    std::string getUserNamesToEmojiType(std::string const& resourceId, int emojiType);
 
     void pushTextColor(NetworkResourceTreeTO const& to);
     void popTextColor();
 
-    NetworkResourceType _selectedDataType = NetworkResourceType_Simulation; 
-    bool _scheduleRefresh = false;
-    bool _scheduleCreateSimulationTreeTOs = false;
-    bool _scheduleCreateGenomeTreeTOs = false;
-
-    std::string _filter;
-    bool _showCommunityCreations = false;
-    float _userTableWidth = 0;
-    std::unordered_set<std::string> _selectionIds;
-    std::unordered_map<std::string, int> _ownEmojiTypeBySimId;
-    std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByEmojiTypeBySimIdCache;
-
-    std::vector<NetworkResourceRawTO> _unfilteredRawTOs;
-    NetworkResourceTreeTO _selectedResource;
-    ResourceData _genomes;
-    ResourceData _simulations;
-
-    std::vector<UserTO> _userTOs;
-
-    std::vector<TextureData> _emojis;
-
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
     NetworkResourceTreeTO _emojiPopupTO;
-
     std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
+
+    std::vector<UserTO> _userTOs;
+    WorkspaceId _currentWorkspace = {NetworkResourceType_Simulation, WorkspaceType_AlienProject};
+    std::map<WorkspaceId, Workspace> _workspaces;
+
+    NetworkResourceTreeTO _selectedTreeTO;
+
+    std::string _filter;
+    float _userTableWidth = 0;
+    std::unordered_map<std::string, int> _ownEmojiTypeBySimId;
+    std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByEmojiTypeBySimIdCache;
+
+    std::vector<TextureData> _emojis;
+
+    BrowserCache _simulationCache;
 
     SimulationController _simController;
     StatisticsWindow _statisticsWindow;
@@ -124,4 +136,5 @@ private:
     LoginDialogWeakPtr _loginDialog;
     EditorController _editorController;
     UploadSimulationDialogWeakPtr _uploadSimulationDialog;
+    EditSimulationDialogWeakPtr _editSimulationDialog;
 };

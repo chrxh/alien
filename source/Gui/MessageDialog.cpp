@@ -53,8 +53,7 @@ void MessageDialog::processInformation()
     if (ImGui::BeginPopupModal((_title + "##msg").c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         if (!_sizeInitialized) {
             auto size = ImGui::GetWindowSize();
-            auto& windowController = WindowController::getInstance();
-            auto factor = windowController.getContentScaleFactor() / windowController.getLastContentScaleFactor();
+            auto factor = WindowController::getContentScaleFactor() / WindowController::getLastContentScaleFactor();
             ImGui::SetWindowSize({size.x * factor, size.y * factor});
             _sizeInitialized = true;
         }
@@ -77,8 +76,7 @@ void MessageDialog::processYesNo()
     if (ImGui::BeginPopupModal(_title.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         if (!_sizeInitialized) {
             auto size = ImGui::GetWindowSize();
-            auto& windowController = WindowController::getInstance();
-            auto factor = windowController.getContentScaleFactor() / windowController.getLastContentScaleFactor();
+            auto factor = WindowController::getContentScaleFactor() / WindowController::getLastContentScaleFactor();
             ImGui::SetWindowSize({size.x * factor, size.y * factor});
             _sizeInitialized = true;
         }
