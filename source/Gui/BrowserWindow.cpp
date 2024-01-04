@@ -93,7 +93,7 @@ namespace
         {NetworkResourceType_Simulation, std::string("simulations")},
         {NetworkResourceType_Genome, std::string("genomes")}};
     std::unordered_map<WorkspaceType, std::string> const workspaceTypeToString = {
-        {WorkspaceType_Shared, std::string("shared")},
+        {WorkspaceType_Shared, std::string("public")},
         {WorkspaceType_AlienProject, std::string("alien-project")},
         {WorkspaceType_Private, std::string("private")}};
 }
@@ -196,8 +196,10 @@ void _BrowserWindow::processIntern()
     processToolbar();
 
     processWorkspace();
+
     ImGui::SameLine();
     processMovableSeparator();
+
     ImGui::SameLine();
     processUserList();
 
@@ -294,7 +296,9 @@ void _BrowserWindow::processToolbar()
         onMoveResource(_selectedTreeTO, _currentWorkspace, targetWorkspaceId);
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Move to " + workspaceTypeToString.at(targetWorkspaceId.workspaceType) + " workspace");
+    auto moveButtonTooltip = targetWorkspaceId.workspaceType == WorkspaceType_Shared ? "Move to public workspace in order to share it with other users"
+                                                                        : "Move to " + workspaceTypeToString.at(targetWorkspaceId.workspaceType) + " workspace";
+    AlienImGui::Tooltip(moveButtonTooltip);
 
     //delete button
     ImGui::SameLine();
