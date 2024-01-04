@@ -239,7 +239,7 @@ public:
     __device__ __inline__ T& at(int index) { return (*_data)[index]; }
     __device__ __inline__ T const& at(int index) const { return (*_data)[index]; }
 
-    //returns index if successfull, otherwise -1
+    //returns index if successful, otherwise -1
     __device__ __inline__ int tryAddEntry(T const& entry)   
     {
         auto index = atomicAdd(_numEntries, 1);
