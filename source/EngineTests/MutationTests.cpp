@@ -521,7 +521,42 @@ protected:
         return beforeGenomeRollout == afterGenomeRollout;
     }
 
-    bool compareColorMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after, std::set<int> const& allowedColors)
+    bool compareCellColorMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after, std::set<int> const& allowedColors)
+    {
+        auto beforeGenome = GenomeDescriptionService::convertBytesToDescription(before);
+        auto afterGenome = GenomeDescriptionService::convertBytesToDescription(after);
+        if (afterGenome.header != beforeGenome.header) {
+            return false;
+        }
+
+        for (auto const& [beforeCell, afterCell] : boost::combine(beforeGenome.cells, afterGenome.cells)) {
+
+            auto beforeCellClone = beforeCell;
+            auto afterCellClone = afterCell;
+            beforeCellClone.color = 0;
+            beforeCellClone.cellFunction = std::nullopt;
+            afterCellClone.color = 0;
+            afterCellClone.cellFunction = std::nullopt;
+            if (beforeCellClone != afterCellClone) {
+                return false;
+            }
+            if (!allowedColors.contains(afterCell.color)) {
+                return false;
+            }
+            if (beforeCell.getCellFunctionType() == CellFunction_Constructor || beforeCell.getCellFunctionType() == CellFunction_Injector) {
+                auto beforeSubGenome = beforeCell.getGenome();
+                auto afterSubGenome = afterCell.getGenome();
+                if (beforeSubGenome && afterSubGenome) {
+                    if (!compareCellColorMutation(*beforeSubGenome, *afterSubGenome, allowedColors)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    bool compareSubgenomeColorMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after, std::set<int> const& allowedColors)
     {
         auto beforeGenome = GenomeDescriptionService::convertBytesToDescription(before);
         auto afterGenome = GenomeDescriptionService::convertBytesToDescription(after);
@@ -552,7 +587,7 @@ protected:
                 auto beforeSubGenome = beforeCell.getGenome();
                 auto afterSubGenome = afterCell.getGenome();
                 if (beforeSubGenome && afterSubGenome) {
-                    if (!compareColorMutation(*beforeSubGenome, *afterSubGenome, allowedColors)) {
+                    if (!compareSubgenomeColorMutation(*beforeSubGenome, *afterSubGenome, allowedColors)) {
                         return false;
                     }
                 }
@@ -561,7 +596,7 @@ protected:
         return true;
     }
 
-    bool compareUniformColorMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after, std::optional<int> const& allowedColor)
+    bool compareGenomeColorMutation(std::vector<uint8_t> const& before, std::vector<uint8_t> const& after, std::optional<int> const& allowedColor)
     {
         auto beforeGenome = GenomeDescriptionService::convertBytesToDescription(before);
         auto afterGenome = GenomeDescriptionService::convertBytesToDescription(after);
@@ -589,7 +624,7 @@ protected:
                 auto beforeSubGenome = beforeCell.getGenome();
                 auto afterSubGenome = afterCell.getGenome();
                 if (beforeSubGenome && afterSubGenome) {
-                    if (!compareUniformColorMutation(*beforeSubGenome, *afterSubGenome, uniformColor)) {
+                    if (!compareGenomeColorMutation(*beforeSubGenome, *afterSubGenome, uniformColor)) {
                         return false;
                     }
                 }
@@ -873,6 +908,36 @@ TEST_F(MutationTests, translateMutation)
     EXPECT_TRUE(compareTranslateMutation(genome, actualConstructor.genome));
 }
 
+TEST_F(MutationTests, cellColorMutation)
+{
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        for (int j = 0; j < MAX_COLORS; ++j) {
+            _parameters.cellFunctionConstructorMutationColorTransitions[i][j] = false;
+        }
+    }
+    _parameters.cellFunctionConstructorMutationColorTransitions[0][3] = true;
+    _parameters.cellFunctionConstructorMutationColorTransitions[0][5] = true;
+    _parameters.cellFunctionConstructorMutationColorTransitions[4][2] = true;
+    _parameters.cellFunctionConstructorMutationColorTransitions[4][5] = true;
+    _simController->setSimulationParameters(_parameters);
+
+    auto genome = createGenomeWithUniformColorPerSubgenome();
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0)).setExecutionOrderNumber(0)});
+
+    _simController->setSimulationData(data);
+    for (int i = 0; i < 10000; ++i) {
+        _simController->testOnly_mutate(1, MutationType::CellColor);
+    }
+
+    auto actualData = _simController->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    EXPECT_TRUE(compareCellColorMutation(genome, actualConstructor.genome, {1, 2, 4, 5}));
+}
+
 TEST_F(MutationTests, subgenomeColorMutation)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
@@ -900,7 +965,7 @@ TEST_F(MutationTests, subgenomeColorMutation)
     auto actualCellById = getCellById(actualData);
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
-    EXPECT_TRUE(compareColorMutation(genome, actualConstructor.genome, {1, 2, 4, 5}));
+    EXPECT_TRUE(compareSubgenomeColorMutation(genome, actualConstructor.genome, {1, 2, 4, 5}));
 }
 
 TEST_F(MutationTests, genomeColorMutation)
@@ -930,5 +995,5 @@ TEST_F(MutationTests, genomeColorMutation)
     auto actualCellById = getCellById(actualData);
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
-    EXPECT_TRUE(compareUniformColorMutation(genome, actualConstructor.genome, std::nullopt));
+    EXPECT_TRUE(compareGenomeColorMutation(genome, actualConstructor.genome, std::nullopt));
 }

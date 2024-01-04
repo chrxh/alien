@@ -748,6 +748,18 @@ void _SimulationParametersWindow::processBase(
                 simParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
+                    .name("Individual cell color")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.7f")
+                    .logarithmic(true)
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationCellColorProbability)
+                    .tooltip("This type of mutation alters the color of a single cell descriptions in a genome by using the specified color transitions."),
+                simParameters.baseValues.cellFunctionConstructorMutationCellColorProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
                     .name("Sub-genome color")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
@@ -1742,7 +1754,7 @@ void _SimulationParametersWindow::processSpot(
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationSubgenomeColorProbability)
                     .disabledValue(parameters.baseValues.cellFunctionConstructorMutationSubgenomeColorProbability),
                 spot.values.cellFunctionConstructorMutationSubgenomeColorProbability,
-                &spot.activatedValues.cellFunctionConstructorMutationColorProbability);
+                &spot.activatedValues.cellFunctionConstructorMutationSubgenomeColorProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Uniform color")
@@ -1755,7 +1767,7 @@ void _SimulationParametersWindow::processSpot(
                     .defaultValue(origSpot.values.cellFunctionConstructorMutationGenomeColorProbability)
                     .disabledValue(parameters.baseValues.cellFunctionConstructorMutationGenomeColorProbability),
                 spot.values.cellFunctionConstructorMutationGenomeColorProbability,
-                &spot.activatedValues.cellFunctionConstructorMutationUniformColorProbability);
+                &spot.activatedValues.cellFunctionConstructorMutationGenomeColorProbability);
             ImGui::TreePop();
         }
 

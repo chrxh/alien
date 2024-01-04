@@ -11,6 +11,7 @@ enum class MutationType
     Deletion,
     Translation,
     Duplication,
+    CellColor,
     SubgenomeColor,
     GenomeColor
 };
