@@ -4,7 +4,7 @@
 ### Added
 - gui/browser: private workspace for each user account added
 - gui/browser: move simulations, genomes or folders to other workspace (via toolbar buttons)
-- gui/browser: edit simulations, genomes or foldcers (via toolbar buttons)
+- gui/browser: edit simulations, genomes or folders (via toolbar buttons)
 - gui/browser: expand and collapse folder content (via toolbar buttons)
 - gui/browser: cache for speeding up downloading simulations
 - gui/upload dialog: validation of user input to allowed characters
