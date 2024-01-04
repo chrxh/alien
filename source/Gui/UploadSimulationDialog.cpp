@@ -154,8 +154,8 @@ void _UploadSimulationDialog::onUpload()
         IntVector2D size;
         int numObjects = 0;
 
+        DeserializedSimulation deserializedSim;
         if (_resourceType == NetworkResourceType_Simulation) {
-            DeserializedSimulation deserializedSim;
             deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
             deserializedSim.auxiliaryData.zoom = _viewport->getZoomFactor();
             deserializedSim.auxiliaryData.center = _viewport->getCenterInWorldPos();
@@ -190,12 +190,17 @@ void _UploadSimulationDialog::onUpload()
             }
         }
 
-        if (!NetworkService::uploadResource(_folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, _workspaceType)) {
+        std::string resourceId;
+        if (!NetworkService::uploadResource(
+                resourceId, _folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, _workspaceType)) {
             showMessage(
                 "Error",
                 "Failed to upload " + BrowserDataTypeToLowerString.at(_resourceType)
                     + ".\n\nPossible reasons:\n\n" ICON_FA_CHEVRON_RIGHT " The server is not reachable.\n\n" ICON_FA_CHEVRON_RIGHT " The total size of your uploads exceeds the allowed storage limit.");
             return;
+        }
+        if (_resourceType == NetworkResourceType_Simulation) {
+            _browserWindow->getSimulationCache().insert(resourceId, deserializedSim);
         }
         _browserWindow->onRefresh();
     });

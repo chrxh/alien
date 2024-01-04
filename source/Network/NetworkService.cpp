@@ -45,12 +45,18 @@ namespace
         log(Priority::Important, "network: an error occurred");
     }
 
-    bool parseBoolResult(std::string const& serverResponse)
+    template<typename T>
+    T parseValueFromKey(std::string const& jsonString, std::string const& key)
     {
-        std::stringstream stream(serverResponse);
+        std::stringstream stream(jsonString);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
-        auto result = tree.get<bool>("result");
+        return tree.get<T>(key);
+    }
+
+    bool parseBoolResult(std::string const& serverResponse)
+    {
+        auto result = parseValueFromKey<bool>(serverResponse, "result");
         if (!result) {
             log(Priority::Important, "network: negative response received from server");
         }
@@ -373,7 +379,7 @@ bool NetworkService::getEmojiTypeByResourceId(std::unordered_map<std::string, in
 
 bool NetworkService::getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
 {
-    log(Priority::Important, "network: get user reactions for resource with id=" + simId + " and likeType=" + std::to_string(likeType));
+    log(Priority::Important, "network: get user reactions for resource with id=" + simId + " and reaction type=" + std::to_string(likeType));
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -424,6 +430,7 @@ bool NetworkService::toggleReactToResource(std::string const& simId, int likeTyp
 }
 
 bool NetworkService::uploadResource(
+    std::string& resourceId,
     std::string const& resourceName,
     std::string const& description,
     IntVector2D const& size,
@@ -458,7 +465,13 @@ bool NetworkService::uploadResource(
 
     try {
         auto result = executeRequest([&] { return client.Post("/alien-server/uploadsimulation.php", items); });
-        return parseBoolResult(result->body);
+        if (parseBoolResult(result->body)) {
+            resourceId = parseValueFromKey<std::string>(result->body, "simId");
+            _downloadCache.insert(resourceId, ResourceData{mainData, settings, statistics});
+            return true;
+        } else {
+            return false;
+        }
     } catch (...) {
         logNetworkError();
         return false;

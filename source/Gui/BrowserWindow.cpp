@@ -146,6 +146,11 @@ WorkspaceType _BrowserWindow::getCurrentWorkspaceType() const
     return _currentWorkspace.workspaceType;
 }
 
+BrowserCache& _BrowserWindow::getSimulationCache()
+{
+    return _simulationCache;
+}
+
 void _BrowserWindow::refreshIntern(bool withRetry)
 {
     try {
@@ -1196,7 +1201,7 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
                 }
                 _simulationCache.insert(leaf.rawTO->id, deserializedSim);
             } else {
-                log(Priority::Important, "browser: get resource with id=" + leaf.rawTO->id + " from browser cache");
+                log(Priority::Important, "browser: get resource with id=" + leaf.rawTO->id + " from simulation cache");
                 std::swap(deserializedSim, *cachedSimulation);
                 NetworkService::incDownloadCounter(leaf.rawTO->id);
             }
