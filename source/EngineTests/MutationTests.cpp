@@ -873,7 +873,7 @@ TEST_F(MutationTests, translateMutation)
     EXPECT_TRUE(compareTranslateMutation(genome, actualConstructor.genome));
 }
 
-TEST_F(MutationTests, colorMutation)
+TEST_F(MutationTests, subgenomeColorMutation)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
