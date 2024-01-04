@@ -82,25 +82,29 @@ void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string
 void _UploadSimulationDialog::processIntern()
 {
     auto resourceTypeString = BrowserDataTypeToLowerString.at(_resourceType);
-    AlienImGui::Text("Data privacy policy");
-    AlienImGui::HelpMarker(
-        "The " + resourceTypeString + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
+    if (ImGui::BeginChild("##header", ImVec2(0, scale(52.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+        AlienImGui::Text("Data privacy policy");
+        AlienImGui::HelpMarker(
+            "The " + resourceTypeString + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
 
-    AlienImGui::Text("How to use or create folders?");
-    AlienImGui::HelpMarker("If you want to upload the " + resourceTypeString
-        + " to a folder, you can use the `/`-notation. The folder will be created automatically if it does not exist.\nFor instance, naming a simulation as `Biome/Water "
-          "world/Initial/Variant 1` will create the nested folders `Biome`, `Water world` and `Initial`.");
-
-    AlienImGui::Separator();
+        AlienImGui::Text("How to use or create folders?");
+        AlienImGui::HelpMarker(
+            "If you want to upload the " + resourceTypeString
+            + " to a folder, you can use the `/`-notation. The folder will be created automatically if it does not exist.\nFor instance, naming a simulation "
+              "as `Biome/Water "
+              "world/Initial/Variant 1` will create the nested folders `Biome`, `Water world` and `Initial`.");
+    }
+    ImGui::EndChild();
 
     if (!_folder.empty()) {
-        std::string text = "The following folder has been selected and will used for the upload:\n" + _folder;
-        ImGui::PushID("folder info");
-        ImGui::BeginDisabled();
-        AlienImGui::InputTextMultiline(AlienImGui::InputTextMultilineParameters().hint(_folder).textWidth(0).height(FolderWidgetHeight), text);
-        ImGui::EndDisabled();
-        ImGui::PopID();
+        if (ImGui::BeginChild("##folder info", ImVec2(0, scale(85.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+            AlienImGui::Text("The following folder has been selected in the browser\nand will used for the upload:\n\n");
+            AlienImGui::BoldText(_folder);
+        }
+        ImGui::EndChild();
     }
+
+    AlienImGui::Separator();
 
     AlienImGui::InputText(AlienImGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_resourceType)  + " name").textWidth(0), _resourceName);
 
