@@ -24,6 +24,8 @@ namespace Const
         "If the conditions are met and the error still occurs, please start ALIEN with the command line parameter '-d', try to reproduce the error and "
         "then create a GitHub issue on https://github.com/chrxh/alien/issues where the log.txt is attached.";
 
+    std::string const NotAllowedCharacters = "Your input contains not allowed characters.";
+
     std::string const NeuronTooltip =
         "This function equips the cell with a small network of 8 neurons with 8x8 configurable weights, 8 bias values and activation functions. It processes "
         "the input from channel #0 to #7 and provides the output to those channels. More precisely, the output of each neuron calculates as\noutput_j := "
@@ -448,4 +450,12 @@ namespace Const
         "As a result, you will be able to see the GPU information of other registered users who have shared it.";
 
     std::vector<std::string> const ActivationFunctions = {"Sigmoid", "Binary step", "Identity", "Absolute value", "Gaussian"};
+
+    std::string const BrowserWorkspaceTooltip =
+        "There are three different workspaces where you can find and possibly upload simulations and genomes:\n\n" ICON_FA_CHEVRON_RIGHT " alien-project: This "
+        "workspace contains simulations that come along with the released versions. They cover a wide range and exploit different "
+        "features.\n\n" ICON_FA_CHEVRON_RIGHT " Public: All logged-in users can share their simulations and genomes with the public. The files stored here are "
+        "visible to all users.\n\n" ICON_FA_CHEVRON_RIGHT " Private: Each user account has its own private space. The simulations and genomes are only visible to "
+        "the logged-in user.";
+
 }

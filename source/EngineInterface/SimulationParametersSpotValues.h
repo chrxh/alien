@@ -48,8 +48,9 @@ struct SimulationParametersSpotValues
     ColorVector<float> cellFunctionConstructorMutationDeletionProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationTranslationProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationDuplicationProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationColorProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationUniformColorProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationCellColorProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationSubgenomeColorProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationGenomeColorProbability = {0, 0, 0, 0, 0, 0, 0};
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {
@@ -67,7 +68,10 @@ struct SimulationParametersSpotValues
             }
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
-            if (cellFunctionConstructorMutationUniformColorProbability[i] != other.cellFunctionConstructorMutationUniformColorProbability[i]) {
+            if (cellFunctionConstructorMutationCellColorProbability[i] != other.cellFunctionConstructorMutationCellColorProbability[i]) {
+                return false;
+            }
+            if (cellFunctionConstructorMutationGenomeColorProbability[i] != other.cellFunctionConstructorMutationGenomeColorProbability[i]) {
                 return false;
             }
             if (cellFunctionConstructorMutationGeometryProbability[i] != other.cellFunctionConstructorMutationGeometryProbability[i]) {
@@ -115,7 +119,7 @@ struct SimulationParametersSpotValues
             if (cellFunctionConstructorMutationDuplicationProbability[i] != other.cellFunctionConstructorMutationDuplicationProbability[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationColorProbability[i] != other.cellFunctionConstructorMutationColorProbability[i]) {
+            if (cellFunctionConstructorMutationSubgenomeColorProbability[i] != other.cellFunctionConstructorMutationSubgenomeColorProbability[i]) {
                 return false;
             }
         }

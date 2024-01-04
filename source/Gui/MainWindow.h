@@ -62,6 +62,7 @@ private:
     LoginDialog _loginDialog;
     CreateUserDialog _createUserDialog;
     UploadSimulationDialog _uploadSimulationDialog;
+    EditSimulationDialog _editSimulationDialog;
     ActivateUserDialog _activateUserDialog;
     DeleteUserDialog _deleteUserDialog;
     NetworkSettingsDialog _networkSettingsDialog;

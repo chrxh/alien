@@ -8,7 +8,17 @@ using NetworkResourceType = int;
 enum NetworkResourceType_
 {
     NetworkResourceType_Simulation,
-    NetworkResourceType_Genome
+    NetworkResourceType_Genome,
+    NetworkResourceType_Count
+};
+
+using WorkspaceType = int;
+enum WorkspaceType_
+{
+    WorkspaceType_Shared,
+    WorkspaceType_AlienProject,
+    WorkspaceType_Private,
+    WorkspaceType_Count
 };
 
 

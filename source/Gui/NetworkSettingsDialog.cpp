@@ -41,14 +41,12 @@ void _NetworkSettingsDialog::processIntern()
 
 void _NetworkSettingsDialog::openIntern()
 {
-    auto& networkService = NetworkService::getInstance();
-    _origServerAddress = networkService.getServerAddress();
+    _origServerAddress = NetworkService::getServerAddress();
     _serverAddress = _origServerAddress;
 }
 
 void _NetworkSettingsDialog::onChangeSettings()
 {
-    auto& networkService = NetworkService::getInstance();
-    networkService.setServerAddress(_serverAddress);
+    NetworkService::setServerAddress(_serverAddress);
     _browserWindow->onRefresh();
 }

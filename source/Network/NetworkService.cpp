@@ -1,5 +1,6 @@
 #include "NetworkService.h"
 
+#include <ranges>
 #include <boost/property_tree/json_parser.hpp>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
@@ -13,7 +14,7 @@
 
 namespace
 {
-    auto RefreshInterval = 20;  //in minutes
+    auto constexpr RefreshInterval = 20;  //in minutes
 
     void configureClient(httplib::SSLClient& client)
     {
@@ -44,12 +45,18 @@ namespace
         log(Priority::Important, "network: an error occurred");
     }
 
-    bool parseBoolResult(std::string const& serverResponse)
+    template<typename T>
+    T parseValueFromKey(std::string const& jsonString, std::string const& key)
     {
-        std::stringstream stream(serverResponse);
+        std::stringstream stream(jsonString);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
-        auto result = tree.get<bool>("result");
+        return tree.get<T>(key);
+    }
+
+    bool parseBoolResult(std::string const& serverResponse)
+    {
+        auto result = parseValueFromKey<bool>(serverResponse, "result");
         if (!result) {
             log(Priority::Important, "network: negative response received from server");
         }
@@ -57,13 +64,24 @@ namespace
     }
 }
 
-NetworkService& NetworkService::getInstance()
+std::string NetworkService::_serverAddress;
+std::optional<std::string> NetworkService::_loggedInUserName;
+std::optional<std::string> NetworkService::_password;
+std::optional<std::chrono::steady_clock::time_point> NetworkService::_lastRefreshTime;
+Cache<std::string, NetworkService::ResourceData, 20> NetworkService::_downloadCache;
+
+void NetworkService::init()
 {
-    static NetworkService instance;
-    return instance;
+    _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
 }
 
-std::string NetworkService::getServerAddress() const
+void NetworkService::shutdown()
+{
+    GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
+    logout();
+}
+
+std::string NetworkService::getServerAddress()
 {
     return _serverAddress;
 }
@@ -74,12 +92,12 @@ void NetworkService::setServerAddress(std::string const& value)
     logout();
 }
 
-std::optional<std::string> NetworkService::getLoggedInUserName() const
+std::optional<std::string> NetworkService::getLoggedInUserName()
 {
     return _loggedInUserName;
 }
 
-std::optional<std::string> NetworkService::getPassword() const
+std::optional<std::string> NetworkService::getPassword()
 {
     return _password;
 }
@@ -191,12 +209,6 @@ bool NetworkService::logout()
     return result;
 }
 
-void NetworkService::shutdown()
-{
-    GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
-    logout();
-}
-
 void NetworkService::refreshLogin()
 {
     if (_loggedInUserName && _password) {
@@ -282,15 +294,19 @@ bool NetworkService::setNewPassword(std::string const& userName, std::string con
     }
 }
 
-bool NetworkService::getRemoteSimulationList(std::vector<NetworkResourceRawTO>& result, bool withRetry) const
+bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& result, bool withRetry)
 {
-    log(Priority::Important, "network: get simulation list");
+    log(Priority::Important, "network: get resource list");
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
     httplib::Params params;
     params.emplace("version", Const::ProgramVersion);
+    if (_loggedInUserName && _password) {
+        params.emplace("userName", *_loggedInUserName);
+        params.emplace("password", *_password);
+    }
 
     try {
         auto postResult = executeRequest([&] { return client.Post("/alien-server/getversionedsimulationlist.php", params); }, withRetry);
@@ -306,7 +322,7 @@ bool NetworkService::getRemoteSimulationList(std::vector<NetworkResourceRawTO>& 
     }
 }
 
-bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry) const
+bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry)
 {
     log(Priority::Important, "network: get user list");
 
@@ -332,9 +348,9 @@ bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry) co
     }
 }
 
-bool NetworkService::getEmojiTypeBySimId(std::unordered_map<std::string, int>& result) const
+bool NetworkService::getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result)
 {
-    log(Priority::Important, "network: get liked simulations");
+    log(Priority::Important, "network: get liked resources");
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -361,9 +377,9 @@ bool NetworkService::getEmojiTypeBySimId(std::unordered_map<std::string, int>& r
     }
 }
 
-bool NetworkService::getUserNamesForSimulationAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
+bool NetworkService::getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType)
 {
-    log(Priority::Important, "network: get user likes for simulation with id=" + simId + " and likeType=" + std::to_string(likeType));
+    log(Priority::Important, "network: get user reactions for resource with id=" + simId + " and reaction type=" + std::to_string(likeType));
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -390,9 +406,9 @@ bool NetworkService::getUserNamesForSimulationAndEmojiType(std::set<std::string>
     }
 }
 
-bool NetworkService::toggleLikeSimulation(std::string const& simId, int likeType)
+bool NetworkService::toggleReactToResource(std::string const& simId, int likeType)
 {
-    log(Priority::Important, "network: toggle like for simulation with id=" + simId);
+    log(Priority::Important, "network: toggle like for resource with id=" + simId);
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -413,17 +429,19 @@ bool NetworkService::toggleLikeSimulation(std::string const& simId, int likeType
     }
 }
 
-bool NetworkService::uploadSimulation(
-    std::string const& simulationName,
+bool NetworkService::uploadResource(
+    std::string& resourceId,
+    std::string const& resourceName,
     std::string const& description,
     IntVector2D const& size,
     int particles,
     std::string const& mainData,
     std::string const& settings,
     std::string const& statistics,
-    NetworkResourceType type)
+    NetworkResourceType resourceType,
+    WorkspaceType workspaceType)
 {
-    log(Priority::Important, "network: upload simulation with name='" + simulationName + "'");
+    log(Priority::Important, "network: upload resource with name='" + resourceName + "'");
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -431,7 +449,7 @@ bool NetworkService::uploadSimulation(
     httplib::MultipartFormDataItems items = {
         {"userName", *_loggedInUserName, "", ""},
         {"password", *_password, "", ""},
-        {"simName", simulationName, "", ""},
+        {"simName", resourceName, "", ""},
         {"simDesc", description, "", ""},
         {"width", std::to_string(size.x), "", ""},
         {"height", std::to_string(size.y), "", ""},
@@ -440,12 +458,98 @@ bool NetworkService::uploadSimulation(
         {"content", mainData, "", "application/octet-stream"},
         {"settings", settings, "", ""},
         {"symbolMap", "", "", ""},
-        {"type", std::to_string(type), "", ""},
+        {"type", std::to_string(resourceType), "", ""},
+        {"workspace", std::to_string(workspaceType), "", ""},
         {"statistics", statistics, "", ""},
     };
 
     try {
         auto result = executeRequest([&] { return client.Post("/alien-server/uploadsimulation.php", items); });
+        if (parseBoolResult(result->body)) {
+            resourceId = parseValueFromKey<std::string>(result->body, "simId");
+            _downloadCache.insert(resourceId, ResourceData{mainData, settings, statistics});
+            return true;
+        } else {
+            return false;
+        }
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
+}
+
+bool NetworkService::downloadResource(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
+{
+    try {
+        if (auto cachedEntry = _downloadCache.find(simId)) {
+            log(Priority::Important, "network: get resource with id=" + simId + " from download cache");
+            mainData = cachedEntry->content;
+            auxiliaryData = cachedEntry->auxiliaryData;
+            statistics = cachedEntry->statistics;
+            incDownloadCounter(simId);
+            return true;
+        } else {
+            log(Priority::Important, "network: download resource with id=" + simId);
+
+            httplib::SSLClient client(_serverAddress);
+            configureClient(client);
+
+            httplib::Params params;
+            params.emplace("id", simId);
+            {
+                auto result = executeRequest([&] { return client.Get("/alien-server/downloadcontent.php", params, {}); });
+                mainData = result->body;
+            }
+            {
+                auto result = executeRequest([&] { return client.Get("/alien-server/downloadsettings.php", params, {}); });
+                auxiliaryData = result->body;
+            }
+            {
+                auto result = executeRequest([&] { return client.Get("/alien-server/downloadstatistics.php", params, {}); });
+                statistics = result->body;
+            }
+            _downloadCache.insert(simId, ResourceData{mainData, auxiliaryData, statistics});
+            return true;
+        }
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
+}
+
+void NetworkService::incDownloadCounter(std::string const& simId)
+{
+    try {
+        log(Priority::Important, "network: increment download counter for resource with id=" + simId);
+
+        httplib::SSLClient client(_serverAddress);
+        configureClient(client);
+
+        httplib::Params params;
+        params.emplace("id", simId);
+        executeRequest([&] { return client.Get("/alien-server/incdownloadcount.php", params, {}); });
+    }
+    catch(...) {
+       //do nothing 
+    }
+}
+
+bool NetworkService::editResource(std::string const& simId, std::string const& newName, std::string const& newDescription)
+{
+    log(Priority::Important, "network: edit resource with id=" + simId);
+
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::Params params;
+    params.emplace("userName", *_loggedInUserName);
+    params.emplace("password", *_password);
+    params.emplace("simId", simId);
+    params.emplace("newName", newName);
+    params.emplace("newDescription", newDescription);
+
+    try {
+        auto result = executeRequest([&] { return client.Post("/alien-server/editsimulation.php", params); });
         return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
@@ -453,39 +557,31 @@ bool NetworkService::uploadSimulation(
     }
 }
 
-bool NetworkService::downloadSimulation(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
+bool NetworkService::moveResource(std::string const& simId, WorkspaceType targetWorkspace)
 {
-    log(Priority::Important, "network: download simulation with id=" + simId);
+    log(Priority::Important, "network: move resource with id=" + simId + " to other workspace");
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
     httplib::Params params;
-    params.emplace("id", simId);
+    params.emplace("userName", *_loggedInUserName);
+    params.emplace("password", *_password);
+    params.emplace("simId", simId);
+    params.emplace("targetWorkspace", std::to_string(targetWorkspace));
 
     try {
-        {
-            auto result = executeRequest([&] { return client.Get("/alien-server/downloadcontent.php", params, {}); });
-            mainData = result->body;
-        }
-        {
-            auto result = executeRequest([&] { return client.Get("/alien-server/downloadsettings.php", params, {}); });
-            auxiliaryData = result->body;
-        }
-        {
-            auto result = executeRequest([&] { return client.Get("/alien-server/downloadstatistics.php", params, {}); });
-            statistics = result->body;
-        }
-        return true;
+        auto result = executeRequest([&] { return client.Post("/alien-server/movesimulation.php", params); });
+        return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
         return false;
     }
 }
 
-bool NetworkService::deleteSimulation(std::string const& simId)
+bool NetworkService::deleteResource(std::string const& simId)
 {
-    log(Priority::Important, "network: delete simulation with id=" + simId);
+    log(Priority::Important, "network: delete resource with id=" + simId);
 
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -496,19 +592,10 @@ bool NetworkService::deleteSimulation(std::string const& simId)
     params.emplace("simId", simId);
 
     try {
-    auto result = executeRequest([&] { return client.Post("/alien-server/deletesimulation.php", params); });
-    return parseBoolResult(result->body);
+        auto result = executeRequest([&] { return client.Post("/alien-server/deletesimulation.php", params); });
+        return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
         return false;
     }
-}
-
-NetworkService::NetworkService()
-{
-    _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
-}
-
-NetworkService::~NetworkService()
-{
 }

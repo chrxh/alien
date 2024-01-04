@@ -17,7 +17,7 @@ public:
         GenomeEditorWindow const& genomeEditorWindow);
     ~_UploadSimulationDialog();
 
-    void open(NetworkResourceType dataType, std::string const& folder = "");
+    void open(NetworkResourceType resourceType, std::string const& folder = "");
 
 private:
     void processIntern();
@@ -32,7 +32,8 @@ private:
     std::string _origResourceName;
     std::string _origResourceDescription;
 
-    NetworkResourceType _dataType = NetworkResourceType_Simulation;
+    NetworkResourceType _resourceType = NetworkResourceType_Simulation;
+    WorkspaceType _workspaceType = WorkspaceType_Shared;
 
     BrowserWindow _browserWindow;
     LoginDialog _loginDialog;

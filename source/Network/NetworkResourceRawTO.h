@@ -5,7 +5,7 @@
 
 #include "Definitions.h"
 
-class ImGuiTableSortSpecs;
+struct ImGuiTableColumnSortSpecs;
 
 enum NetworkResourceColumnId
 {
@@ -37,10 +37,10 @@ struct _NetworkResourceRawTO
     uint64_t contentSize;
     std::string description;
     std::string version;
-    bool fromRelease;
-    NetworkResourceType type;
+    int workspaceType;
+    NetworkResourceType resourceType;
 
-    static int compare(NetworkResourceRawTO const& left, NetworkResourceRawTO const& right, ImGuiTableSortSpecs const* specs);
+    static int compare(NetworkResourceRawTO const& left, NetworkResourceRawTO const& right, std::vector<ImGuiTableColumnSortSpecs> const& sortSpecs);
     bool matchWithFilter(std::string const& filter) const;
 
     int getTotalLikes() const;

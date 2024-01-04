@@ -748,29 +748,41 @@ void _SimulationParametersWindow::processBase(
                 simParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Color")
+                    .name("Individual cell color")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationColorProbability)
-                    .tooltip("This type of mutation alters the color of all cell descriptions in a sub-genome by using the specified color transitions."),
-                simParameters.baseValues.cellFunctionConstructorMutationColorProbability);
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationCellColorProbability)
+                    .tooltip("This type of mutation alters the color of a single cell descriptions in a genome by using the specified color transitions."),
+                simParameters.baseValues.cellFunctionConstructorMutationCellColorProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Uniform color")
+                    .name("Sub-genome color")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(0.1f)
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationUniformColorProbability)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationSubgenomeColorProbability)
+                    .tooltip("This type of mutation alters the color of all cell descriptions in a sub-genome by using the specified color transitions."),
+                simParameters.baseValues.cellFunctionConstructorMutationSubgenomeColorProbability);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Genome color")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.1f)
+                    .format("%.7f")
+                    .logarithmic(true)
+                    .colorDependence(true)
+                    .defaultValue(origSimParameters.baseValues.cellFunctionConstructorMutationGenomeColorProbability)
                     .tooltip(
                         "This type of mutation alters the color of all cell descriptions in a genome by using the specified color transitions."),
-                simParameters.baseValues.cellFunctionConstructorMutationUniformColorProbability);
+                simParameters.baseValues.cellFunctionConstructorMutationGenomeColorProbability);
             AlienImGui::CheckboxColorMatrix(
                 AlienImGui::CheckboxColorMatrixParameters()
                     .name("Color transitions")
@@ -1739,10 +1751,10 @@ void _SimulationParametersWindow::processSpot(
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellFunctionConstructorMutationColorProbability)
-                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationColorProbability),
-                spot.values.cellFunctionConstructorMutationColorProbability,
-                &spot.activatedValues.cellFunctionConstructorMutationColorProbability);
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationSubgenomeColorProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationSubgenomeColorProbability),
+                spot.values.cellFunctionConstructorMutationSubgenomeColorProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationSubgenomeColorProbability);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Uniform color")
@@ -1752,10 +1764,10 @@ void _SimulationParametersWindow::processSpot(
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellFunctionConstructorMutationUniformColorProbability)
-                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationUniformColorProbability),
-                spot.values.cellFunctionConstructorMutationUniformColorProbability,
-                &spot.activatedValues.cellFunctionConstructorMutationUniformColorProbability);
+                    .defaultValue(origSpot.values.cellFunctionConstructorMutationGenomeColorProbability)
+                    .disabledValue(parameters.baseValues.cellFunctionConstructorMutationGenomeColorProbability),
+                spot.values.cellFunctionConstructorMutationGenomeColorProbability,
+                &spot.activatedValues.cellFunctionConstructorMutationGenomeColorProbability);
             ImGui::TreePop();
         }
 

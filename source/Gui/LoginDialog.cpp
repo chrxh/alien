@@ -29,7 +29,6 @@ _LoginDialog::_LoginDialog(
     , _resetPasswordDialog(resetPasswordDialog)
 
 {
-    auto& networkService = NetworkService::getInstance();
     auto& settings = GlobalSettings::getInstance();
     _remember = settings.getBoolState("dialogs.login.remember", _remember);
     _shareGpuInfo = settings.getBoolState("dialogs.login.share gpu info", _shareGpuInfo);
@@ -39,7 +38,7 @@ _LoginDialog::_LoginDialog(
         _password = settings.getStringState("dialogs.login.password", "");
         if (!_userName.empty()) {
             LoginErrorCode errorCode;
-            if (!networkService.login(errorCode, _userName, _password, getUserInfo())) {
+            if (!NetworkService::login(errorCode, _userName, _password, getUserInfo())) {
                 if (errorCode != LoginErrorCode_UnconfirmedUser) {
                     MessageDialog::getInstance().information("Error", "Login failed.");
                 }
@@ -130,9 +129,8 @@ void _LoginDialog::onLogin()
     LoginErrorCode errorCode;
 
     auto userInfo = getUserInfo();
-    auto& networkService = NetworkService::getInstance();
 
-    if (!networkService.login(errorCode, _userName, _password, userInfo)) {
+    if (!NetworkService::login(errorCode, _userName, _password, userInfo)) {
         switch (errorCode) {
         case LoginErrorCode_UnconfirmedUser: {
             _activateUserDialog->open(_userName, _password, userInfo);

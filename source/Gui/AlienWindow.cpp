@@ -32,8 +32,7 @@ void _AlienWindow::process()
     if (ImGui::Begin(_title.c_str(), &_on)) {
         if (!_sizeInitialized) {
             auto size = ImGui::GetWindowSize();
-            auto& windowController = WindowController::getInstance();
-            auto factor = windowController.getContentScaleFactor() / windowController.getLastContentScaleFactor();
+            auto factor = WindowController::getContentScaleFactor() / WindowController::getLastContentScaleFactor();
             ImGui::SetWindowSize({size.x * factor, size.y * factor});
             _sizeInitialized = true;
         }

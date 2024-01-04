@@ -8,13 +8,13 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
-#include <boost/range/adaptor/indexed.hpp>
 
 #include <imgui.h>
 
 #include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/GlobalSettings.h"
+#include "Base/LoggingService.h"
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "Base/VersionChecker.h"
@@ -36,16 +36,19 @@
 #include "UploadSimulationDialog.h"
 #include "DelayedExecutionController.h"
 #include "EditorController.h"
+#include "EditSimulationDialog.h"
 #include "OpenGLHelper.h"
 #include "OverlayMessageController.h"
 #include "GenomeEditorWindow.h"
+#include "HelpStrings.h"
 
 namespace
 {
     auto constexpr RefreshInterval = 20;  //in minutes
 
     auto constexpr UserTableWidth = 300.0f;
-    auto constexpr BrowserBottomHeight = 68.0f;
+    auto constexpr BrowserBottomSpace = 41.0f;
+    auto constexpr WorkspaceBottomSpace = 34.0f;
     auto constexpr RowHeight = 25.0f;
 
     auto constexpr NumEmojiBlocks = 4;
@@ -66,7 +69,8 @@ _BrowserWindow::_BrowserWindow(
     , _temporalControlWindow(temporalControlWindow)
     , _editorController(editorController)
 {
-    _showCommunityCreations = GlobalSettings::getInstance().getBoolState("windows.browser.show community creations", _showCommunityCreations);
+    _currentWorkspace.resourceType = GlobalSettings::getInstance().getIntState("windows.browser.resource type", _currentWorkspace.resourceType);
+    _currentWorkspace.workspaceType = GlobalSettings::getInstance().getIntState("windows.browser.workspace type", _currentWorkspace.workspaceType);
     _userTableWidth = GlobalSettings::getInstance().getFloatState("windows.browser.user table width", scale(UserTableWidth));
 
     int numEmojis = 0;
@@ -76,37 +80,60 @@ _BrowserWindow::_BrowserWindow(
     for (int i = 1; i <= numEmojis; ++i) {
         _emojis.emplace_back(OpenGLHelper::loadTexture(Const::BasePath + "emoji" + std::to_string(i) + ".png"));
     }
+    for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
+        for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+            _workspaces.emplace(WorkspaceId{resourceType, workspaceType}, Workspace());
+        }
+    }
+}
+
+namespace
+{
+    std::unordered_map<NetworkResourceType, std::string> const networkResourceTypeToString = {
+        {NetworkResourceType_Simulation, std::string("simulations")},
+        {NetworkResourceType_Genome, std::string("genomes")}};
+    std::unordered_map<WorkspaceType, std::string> const workspaceTypeToString = {
+        {WorkspaceType_Shared, std::string("public")},
+        {WorkspaceType_AlienProject, std::string("alien-project")},
+        {WorkspaceType_Private, std::string("private")}};
 }
 
 _BrowserWindow::~_BrowserWindow()
 {
-    GlobalSettings::getInstance().setBoolState("windows.browser.show community creations", _showCommunityCreations);
+    GlobalSettings::getInstance().setIntState("windows.browser.resource type", _currentWorkspace.resourceType);
+    GlobalSettings::getInstance().setIntState("windows.browser.workspace type", _currentWorkspace.workspaceType);
     GlobalSettings::getInstance().setBoolState("windows.browser.first start", false);
     GlobalSettings::getInstance().setFloatState("windows.browser.user table width", _userTableWidth);
-    GlobalSettings::getInstance().setStringState(
-        "windows.browser.simulations.collapsed folders", NetworkResourceService::convertFolderNamesToSettings(_simulations.collapsedFolderNames));
-    GlobalSettings::getInstance().setStringState(
-        "windows.browser.genomes.collapsed folders", NetworkResourceService::convertFolderNamesToSettings(_genomes.collapsedFolderNames));
-    NetworkService::getInstance().shutdown();
+    for (auto const& [workspaceId, workspace] : _workspaces) {
+        GlobalSettings::getInstance().setStringState(
+            "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
+                + workspaceTypeToString.at(workspaceId.workspaceType),
+            NetworkResourceService::convertFolderNamesToSettings(workspace.collapsedFolderNames));
+    }
 }
 
-void _BrowserWindow::registerCyclicReferences(LoginDialogWeakPtr const& loginDialog, UploadSimulationDialogWeakPtr const& uploadSimulationDialog)
+void _BrowserWindow::registerCyclicReferences(
+    LoginDialogWeakPtr const& loginDialog,
+    UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
+    EditSimulationDialogWeakPtr const& editSimulationDialog)
 {
     _loginDialog = loginDialog;
     _uploadSimulationDialog = uploadSimulationDialog;
+    _editSimulationDialog = editSimulationDialog;
 
     auto firstStart = GlobalSettings::getInstance().getBoolState("windows.browser.first start", true);
     refreshIntern(firstStart);
 
-    auto initialCollapsedSimulationFolders = NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::calcInitialCollapsedFolderNames(_simulations.rawTOs));
-    auto collapsedSimulationFolders = GlobalSettings::getInstance().getStringState("windows.browser.simulations.collapsed folders", initialCollapsedSimulationFolders);
-    _simulations.collapsedFolderNames = NetworkResourceService::convertSettingsToFolderNames(collapsedSimulationFolders);
-
-    auto initialCollapsedGenomeFolders =
-        NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::calcInitialCollapsedFolderNames(_simulations.rawTOs));
-    auto collapsedGenomeFolders =
-        GlobalSettings::getInstance().getStringState("windows.browser.genomes.collapsed folders", initialCollapsedGenomeFolders);
-    _genomes.collapsedFolderNames = NetworkResourceService::convertSettingsToFolderNames(collapsedGenomeFolders);
+    for (auto& [workspaceId, workspace] : _workspaces) {
+        auto initialCollapsedSimulationFolders =
+            NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::getFolderNames(workspace.rawTOs));
+        auto collapsedSimulationFolders = GlobalSettings::getInstance().getStringState(
+            "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
+                + workspaceTypeToString.at(workspaceId.workspaceType),
+            initialCollapsedSimulationFolders);
+        workspace.collapsedFolderNames = NetworkResourceService::convertSettingsToFolderNames(collapsedSimulationFolders);
+        createTreeTOs(workspace);
+    }
 }
 
 void _BrowserWindow::onRefresh()
@@ -114,35 +141,43 @@ void _BrowserWindow::onRefresh()
     refreshIntern(true);
 }
 
+WorkspaceType _BrowserWindow::getCurrentWorkspaceType() const
+{
+    return _currentWorkspace.workspaceType;
+}
+
+BrowserCache& _BrowserWindow::getSimulationCache()
+{
+    return _simulationCache;
+}
+
 void _BrowserWindow::refreshIntern(bool withRetry)
 {
     try {
-        auto& networkService = NetworkService::getInstance();
-        networkService.refreshLogin();
+        NetworkService::refreshLogin();
 
-        bool success = networkService.getRemoteSimulationList(_unfilteredRawTOs, withRetry);
-        success &= networkService.getUserList(_userTOs, withRetry);
+        std::vector<NetworkResourceRawTO> rawTOs;
+        bool success = NetworkService::getNetworkResources(rawTOs, withRetry);
+        success &= NetworkService::getUserList(_userTOs, withRetry);
 
         if (!success) {
             if (withRetry) {
                 MessageDialog::getInstance().information("Error", "Failed to retrieve browser data. Please try again.");
             }
         } else {
-            _simulations.numResources = 0;
-            _genomes.numResources = 0;
-            for (auto const& entry : _unfilteredRawTOs) {
-                if (entry->type == NetworkResourceType_Simulation) {
-                    ++_simulations.numResources;
-                } else {
-                    ++_genomes.numResources;
+            for (auto& [workspaceId, workspace] : _workspaces) {
+                workspace.rawTOs.clear();
+                for (auto const& rawTO : rawTOs) {
+                    if (rawTO->resourceType == workspaceId.resourceType && rawTO->workspaceType == workspaceId.workspaceType) {
+                        workspace.rawTOs.emplace_back(rawTO);
+                    }
                 }
+                createTreeTOs(workspace);
             }
         }
-        filterRawTOs();
-        scheduleCreateTreeTOs();
 
-        if (networkService.getLoggedInUserName()) {
-            if (!networkService.getEmojiTypeBySimId(_ownEmojiTypeBySimId)) {
+        if (NetworkService::getLoggedInUserName()) {
+            if (!NetworkService::getEmojiTypeByResourceId(_ownEmojiTypeBySimId)) {
                 MessageDialog::getInstance().information("Error", "Failed to retrieve browser data. Please try again.");
             }
         } else {
@@ -160,49 +195,16 @@ void _BrowserWindow::processIntern()
 {
     processToolbar();
 
-    {
-        auto sizeAvailable = ImGui::GetContentRegionAvail();
-        if (ImGui::BeginChild(
-                "##1",
-                ImVec2(sizeAvailable.x - scale(_userTableWidth), sizeAvailable.y - scale(BrowserBottomHeight)),
-                false,
-                ImGuiWindowFlags_HorizontalScrollbar)) {
-            if (ImGui::BeginTabBar("##Type", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
-                if (ImGui::BeginTabItem("Simulations", nullptr, ImGuiTabItemFlags_None)) {
-                    processSimulationList();
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Genomes", nullptr, ImGuiTabItemFlags_None)) {
-                    processGenomeList();
-                    ImGui::EndTabItem();
-                }
-                ImGui::EndTabBar();
-            }
-        }
-        ImGui::EndChild();
-    }
-    ImGui::SameLine();
-
-    {
-        auto sizeAvailable = ImGui::GetContentRegionAvail();
-        ImGui::Button("", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomHeight)));
-        if (ImGui::IsItemActive()) {
-            _userTableWidth -= ImGui::GetIO().MouseDelta.x;
-        }
-    }
+    processWorkspace();
 
     ImGui::SameLine();
-    {
-        auto sizeAvailable = ImGui::GetContentRegionAvail();
-        if (ImGui::BeginChild(
-                "##2", ImVec2(sizeAvailable.x, sizeAvailable.y - scale(BrowserBottomHeight)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            processUserList();
-        }
-        ImGui::EndChild();
-    }
+    processMovableSeparator();
+
+    ImGui::SameLine();
+    processUserList();
 
     processStatus();
-    processFilter();
+
     processEmojiWindow();
 }
 
@@ -216,25 +218,22 @@ void _BrowserWindow::processBackground()
         _lastRefreshTime = now;
         refreshIntern(false);
     }
-
-    if (_scheduleRefresh) {
-        onRefresh();
-        _scheduleRefresh = false;
-    }
 }
 
 void _BrowserWindow::processToolbar()
 {
-    auto& networkService = NetworkService::getInstance();
-    std::string resourceTypeString = _selectedDataType == NetworkResourceType_Simulation ? "simulation" : "genome";
+    std::string resourceTypeString = _currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
+    auto isOwnerForSelectedItem = isOwner(_selectedTreeTO);
 
+    //refresh button
     if (AlienImGui::ToolbarButton(ICON_FA_SYNC)) {
         onRefresh();
     }
     AlienImGui::Tooltip("Refresh");
 
+    //login button
     ImGui::SameLine();
-    ImGui::BeginDisabled(networkService.getLoggedInUserName().has_value());
+    ImGui::BeginDisabled(NetworkService::getLoggedInUserName().has_value());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_IN_ALT)) {
         if (auto loginDialog = _loginDialog.lock()) {
             loginDialog->open();
@@ -243,50 +242,97 @@ void _BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Login or register");
 
+    //logout button
     ImGui::SameLine();
-    ImGui::BeginDisabled(!networkService.getLoggedInUserName());
+    ImGui::BeginDisabled(!NetworkService::getLoggedInUserName());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_OUT_ALT)) {
         if (auto loginDialog = _loginDialog.lock()) {
-            networkService.logout();
+            NetworkService::logout();
             onRefresh();
         }
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Logout");
 
+    //separator
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
 
+    //upload button
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_UPLOAD)) {
         std::string prefix = [&] {
-            if (_selectedResource == nullptr || _selectedResource->isLeaf()) {
+            if (_selectedTreeTO == nullptr || _selectedTreeTO->isLeaf()) {
                 return std::string();
             }
-            return NetworkResourceService::concatenateFolderNames(_selectedResource->folderNames, true);
+            return NetworkResourceService::concatenateFolderName(_selectedTreeTO->folderNames, true);
         }();
-        _uploadSimulationDialog.lock()->open(_selectedDataType, prefix);
+        _uploadSimulationDialog.lock()->open(_currentWorkspace.resourceType, prefix);
     }
     AlienImGui::Tooltip(
         "Share your current " + resourceTypeString + " with other users:\nThe " + resourceTypeString
         + " will be uploaded to the server and made visible in the browser.\nIf you have already selected a folder, your " + resourceTypeString
         + " will be uploaded there.");
 
+    //edit button
     ImGui::SameLine();
-    ImGui::BeginDisabled(
-        _selectedResource == nullptr || !_selectedResource->isLeaf()
-        || _selectedResource->getLeaf().rawTO->userName != networkService.getLoggedInUserName().value_or(""));
+    ImGui::BeginDisabled(!isOwnerForSelectedItem);
+    if (AlienImGui::ToolbarButton(ICON_FA_EDIT)) {
+        if (_selectedTreeTO->isLeaf()) {
+            _editSimulationDialog.lock()->openForLeaf(_selectedTreeTO);
+        } else {
+            auto rawTOs = NetworkResourceService::getMatchingRawTOs(_selectedTreeTO, _workspaces.at(_currentWorkspace).rawTOs);
+            _editSimulationDialog.lock()->openForFolder(_selectedTreeTO, rawTOs);
+        }
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Change name or description");
+
+    //move to other workspace button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!isOwnerForSelectedItem);
+    WorkspaceId targetWorkspaceId{.resourceType = _currentWorkspace.resourceType, .workspaceType = 2 - _currentWorkspace.workspaceType};
+    if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
+        onMoveResource(_selectedTreeTO, _currentWorkspace, targetWorkspaceId);
+    }
+    ImGui::EndDisabled();
+    auto moveButtonTooltip = targetWorkspaceId.workspaceType == WorkspaceType_Shared ? "Move to public workspace in order to share it with other users"
+                                                                        : "Move to " + workspaceTypeToString.at(targetWorkspaceId.workspaceType) + " workspace";
+    AlienImGui::Tooltip(moveButtonTooltip);
+
+    //delete button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!isOwnerForSelectedItem);
     if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
-        onDeleteItem(_selectedResource->getLeaf());
-        _selectedResource = nullptr;
+        onDeleteResource(_selectedTreeTO);
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Delete selected " + resourceTypeString);
 
-#ifdef _WIN32
+    //separator
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
 
+    //expand button
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
+        onExpandFolders();
+    }
+    AlienImGui::Tooltip("Expand all folders");
+
+    //collapse button
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(ICON_FA_COMPRESS_ARROWS_ALT)) {
+        onCollapseFolders();
+    }
+    AlienImGui::Tooltip("Collapse all folders");
+
+#ifdef _WIN32
+    //separator
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    //Discord button
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COMMENTS)) {
         openWeblink(Const::DiscordLink);
@@ -297,15 +343,212 @@ void _BrowserWindow::processToolbar()
     AlienImGui::Separator();
 }
 
+void _BrowserWindow::processWorkspace()
+{
+    auto sizeAvailable = ImGui::GetContentRegionAvail();
+    if (ImGui::BeginChild(
+            "##1",
+            ImVec2(sizeAvailable.x - scale(_userTableWidth), sizeAvailable.y - scale(BrowserBottomSpace)),
+            false,
+            ImGuiWindowFlags_HorizontalScrollbar)) {
+        if (ImGui::BeginTabBar("##Type", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+            if (ImGui::BeginTabItem("Simulations", nullptr, ImGuiTabItemFlags_None)) {
+                if (_currentWorkspace.resourceType != NetworkResourceType_Simulation) {
+                    _currentWorkspace.resourceType = NetworkResourceType_Simulation;
+                    _selectedTreeTO = nullptr;
+                }
+                processSimulationList();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Genomes", nullptr, ImGuiTabItemFlags_None)) {
+                if (_currentWorkspace.resourceType != NetworkResourceType_Genome) {
+                    _currentWorkspace.resourceType = NetworkResourceType_Genome;
+                    _selectedTreeTO = nullptr;
+                }
+                processGenomeList();
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+        processWorkspaceSelectionAndFilter();
+    }
+    ImGui::EndChild();
+}
+
+void _BrowserWindow::processWorkspaceSelectionAndFilter()
+{
+    ImGui::Spacing();
+    if (ImGui::BeginTable("##", 2, 0, ImVec2(-1, 0))) {
+        ImGui::TableSetupColumn("##workspaceType");
+        ImGui::TableSetupColumn("##textFilter");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        auto userName = NetworkService::getLoggedInUserName();
+        auto privateWorkspaceString = userName.has_value() ? *userName + "'s private workspace" : "Private workspace (need to login)";
+        auto workspaceType_reordered = 2 - _currentWorkspace.workspaceType;  //change the order for display
+        if (AlienImGui::Switcher(
+                AlienImGui::SwitcherParameters()
+                    .textWidth(48.0f)
+                    .tooltip(Const::BrowserWorkspaceTooltip)
+                    .values({privateWorkspaceString, std::string("alien-project's workspace"), std::string("Public workspace")}),
+                workspaceType_reordered)) {
+            _selectedTreeTO = nullptr;
+        }
+        _currentWorkspace.workspaceType = 2 - workspaceType_reordered;
+        ImGui::SameLine();
+        AlienImGui::VerticalSeparator();
+
+        ImGui::TableSetColumnIndex(1);
+        if (AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Filter").textWidth(0), _filter)) {
+            createTreeTOs(_workspaces.at(_currentWorkspace));
+        }
+
+        ImGui::EndTable();
+    }
+}
+
+void _BrowserWindow::processMovableSeparator()
+{
+    auto sizeAvailable = ImGui::GetContentRegionAvail();
+    ImGui::Button("", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomSpace)));
+    if (ImGui::IsItemActive()) {
+        _userTableWidth -= ImGui::GetIO().MouseDelta.x;
+    }
+}
+
+namespace
+{
+    std::string getGpuString(std::string const& gpu)
+    {
+        if (gpu.substr(0, 6) == "NVIDIA") {
+            return gpu.substr(7);
+        }
+        return gpu;
+    }
+}
+
+void _BrowserWindow::processUserList()
+{
+    auto sizeAvailable = ImGui::GetContentRegionAvail();
+    if (ImGui::BeginChild("##2", ImVec2(sizeAvailable.x, sizeAvailable.y - scale(BrowserBottomSpace)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+
+
+        ImGui::PushID("User list");
+        auto& styleRepository = StyleRepository::getInstance();
+        static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
+            | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
+
+        AlienImGui::Group("Simulators");
+        if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+            auto isLoggedIn = NetworkService::getLoggedInUserName().has_value();
+            ImGui::TableSetupColumn(
+                isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
+                ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
+                styleRepository.scale(200.0f));
+            ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
+            ImGui::TableSetupColumn(
+                "Reactions received",
+                ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
+                scale(120.0f));
+            ImGui::TableSetupColumn("Reactions given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
+            ImGui::TableSetupScrollFreeze(0, 1);
+            ImGui::TableHeadersRow();
+
+            ImGuiListClipper clipper;
+            clipper.Begin(_userTOs.size());
+            while (clipper.Step()) {
+                for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
+                    auto item = &_userTOs[row];
+
+                    ImGui::PushID(row);
+                    ImGui::TableNextRow(0, scale(RowHeight));
+
+                    ImGui::TableNextColumn();
+                    auto isBoldFont = isLoggedIn && *NetworkService::getLoggedInUserName() == item->userName;
+
+                    if (item->online) {
+                        AlienImGui::OnlineSymbol();
+                        ImGui::SameLine();
+                    } else if (item->lastDayOnline) {
+                        AlienImGui::LastDayOnlineSymbol();
+                        ImGui::SameLine();
+                    }
+                    processShortenedText(item->userName, isBoldFont);
+
+                    ImGui::TableNextColumn();
+                    if (isLoggedIn && _loginDialog.lock()->isShareGpuInfo()) {
+                        processShortenedText(getGpuString(item->gpu), isBoldFont);
+                    }
+
+                    ImGui::TableNextColumn();
+                    if (item->timeSpent > 0) {
+                        processShortenedText(StringHelper::format(item->timeSpent) + "h", isBoldFont);
+                    }
+
+                    ImGui::TableNextColumn();
+                    processShortenedText(std::to_string(item->starsReceived), isBoldFont);
+
+                    ImGui::TableNextColumn();
+                    processShortenedText(std::to_string(item->starsGiven), isBoldFont);
+
+                    ImGui::PopID();
+                }
+            }
+            ImGui::EndTable();
+        }
+        ImGui::PopID();
+    }
+    ImGui::EndChild();
+}
+
+void _BrowserWindow::processStatus()
+{
+    AlienImGui::Separator();
+    auto numSimulations = 0;
+    for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+        numSimulations += toInt(_workspaces.at(WorkspaceId{NetworkResourceType_Simulation, workspaceType}).rawTOs.size());
+    }
+    auto numGenomes = 0;
+    for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+        numGenomes += toInt(_workspaces.at(WorkspaceId{NetworkResourceType_Genome, workspaceType}).rawTOs.size());
+    }
+
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
+    std::string statusText;
+    statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
+    statusText += std::to_string(numSimulations) + " simulations found";
+
+    statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
+    statusText += std::to_string(numGenomes) + " genomes found";
+
+    statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
+    statusText += std::to_string(_userTOs.size()) + " simulators found";
+
+    statusText += std::string("  " ICON_FA_INFO_CIRCLE " ");
+    if (auto userName = NetworkService::getLoggedInUserName()) {
+        statusText += "Logged in as " + *userName + " @ " + NetworkService::getServerAddress();  // + ": ";
+    } else {
+        statusText += "Not logged in to " + NetworkService::getServerAddress();  // + ": ";
+    }
+
+    if (!NetworkService::getLoggedInUserName()) {
+        statusText += std::string("   " ICON_FA_INFO_CIRCLE " ");
+        statusText += "In order to share and upvote simulations you need to log in.";
+    }
+    AlienImGui::Text(statusText);
+    ImGui::PopStyleColor();
+}
+
 void _BrowserWindow::processSimulationList()
 {
     ImGui::PushID("SimulationList");
-    _selectedDataType = NetworkResourceType_Simulation;
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, 0), 0.0f)) {
+    if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, - scale(WorkspaceBottomSpace)), 0.0f)) {
         ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
         ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Description);
         ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_Likes);
@@ -324,39 +567,49 @@ void _BrowserWindow::processSimulationList()
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
-        //create table data if necessary
-        if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
-            if (sortSpecs->SpecsDirty || _scheduleCreateSimulationTreeTOs) {
-                sortRawTOs(_simulations.rawTOs, sortSpecs);
+        //create treeTOs if sorting changed
+        if (auto sortSpecs = ImGui::TableGetSortSpecs()) {
+            if (sortSpecs->SpecsDirty) {
+                for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+                    auto& workspace = _workspaces.at(WorkspaceId{NetworkResourceType_Simulation, workspaceType});
+                    workspace.sortSpecs.clear();
+                    for (int i = 0; i < sortSpecs->SpecsCount; ++i) {
+                        workspace.sortSpecs.emplace_back(sortSpecs->Specs[i]);
+                    }
+                    createTreeTOs(workspace);
+                }
                 sortSpecs->SpecsDirty = false;
-                _scheduleCreateSimulationTreeTOs = false;
-
-                _simulations.treeTOs = NetworkResourceService::createTreeTOs(_simulations.rawTOs, _simulations.collapsedFolderNames);
             }
         }
+
+        //process treeTOs
+        auto& workspace = _workspaces.at(_currentWorkspace);
+        auto scheduleRecreateTreeTOs = false;
         ImGuiListClipper clipper;
-        clipper.Begin(_simulations.treeTOs.size());
+        clipper.Begin(workspace.treeTOs.size());
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto treeTO = _simulations.treeTOs[row];
+                auto treeTO = workspace.treeTOs.at(row);
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
                 ImGui::TableNextColumn();
 
-                auto selected = _selectedResource == treeTO;
+                auto selected = _selectedTreeTO == treeTO;
                 if (ImGui::Selectable(
                         "",
                         &selected,
                         ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
                         ImVec2(0, scale(RowHeight) - ImGui::GetStyle().FramePadding.y))) {
-                    _selectedResource = selected ? treeTO : nullptr;
+                    _selectedTreeTO = selected ? treeTO : nullptr;
                 }
                 ImGui::SameLine();
 
                 pushTextColor(treeTO);
 
-                processResourceNameField(treeTO, _simulations.collapsedFolderNames);
+                if (processResourceNameField(treeTO, workspace.collapsedFolderNames)) {
+                    scheduleRecreateTreeTOs = true;
+                }
                 ImGui::TableNextColumn();
                 processDescriptionField(treeTO);
                 ImGui::TableNextColumn();
@@ -383,6 +636,10 @@ void _BrowserWindow::processSimulationList()
                 ImGui::PopID();
             }
         ImGui::EndTable();
+
+        if (scheduleRecreateTreeTOs) {
+            createTreeTOs(workspace);
+        }
     }
     ImGui::PopID();
 }
@@ -390,22 +647,20 @@ void _BrowserWindow::processSimulationList()
 void _BrowserWindow::processGenomeList()
 {
     ImGui::PushID("GenomeList");
-    _selectedDataType = NetworkResourceType_Genome;
-    auto& styleRepository = StyleRepository::getInstance();
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Browser", 9, flags, ImVec2(0, 0), 0.0f)) {
-        ImGui::TableSetupColumn("Genome", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(210.0f), NetworkResourceColumnId_SimulationName);
-        ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(200.0f), NetworkResourceColumnId_Description);
-        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_Likes);
+    if (ImGui::BeginTable("Browser", 9, flags, ImVec2(0, -scale(WorkspaceBottomSpace)), 0.0f)) {
+        ImGui::TableSetupColumn("Genome", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
+        ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Description);
+        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_Likes);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             scale(135.0f),
             NetworkResourceColumnId_Timestamp);
-        ImGui::TableSetupColumn("User name", ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(120.0f), NetworkResourceColumnId_UserName);
+        ImGui::TableSetupColumn("User name", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_UserName);
         ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
         ImGui::TableSetupColumn("Cells", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Particles);
         ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_FileSize);
@@ -413,40 +668,50 @@ void _BrowserWindow::processGenomeList()
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
-        //create table data if necessary
-        if (ImGuiTableSortSpecs* sortSpecs = ImGui::TableGetSortSpecs()) {
-            if (sortSpecs->SpecsDirty || _scheduleCreateGenomeTreeTOs) {
-                sortRawTOs(_genomes.rawTOs, sortSpecs);
+        //create treeTOs if sorting changed
+        if (auto sortSpecs = ImGui::TableGetSortSpecs()) {
+            if (sortSpecs->SpecsDirty) {
+                for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+                    auto& workspace = _workspaces.at(WorkspaceId{NetworkResourceType_Genome, workspaceType});
+                    workspace.sortSpecs.clear();
+                    for (int i = 0; i < sortSpecs->SpecsCount; ++i) {
+                        workspace.sortSpecs.emplace_back(sortSpecs->Specs[i]);
+                    }
+                    createTreeTOs(workspace);
+                }
                 sortSpecs->SpecsDirty = false;
-                _scheduleCreateGenomeTreeTOs = false;
-
-                _genomes.treeTOs = NetworkResourceService::createTreeTOs(_genomes.rawTOs, _simulations.collapsedFolderNames);
             }
         }
+
+        //process treeTOs
+        auto& workspace = _workspaces.at(_currentWorkspace);
+        auto scheduleRecreateTreeTOs = false;
         ImGuiListClipper clipper;
-        clipper.Begin(_genomes.treeTOs.size());
+        clipper.Begin(workspace.treeTOs.size());
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
 
-                auto& treeTO = _genomes.treeTOs[row];
+                auto& treeTO = workspace.treeTOs.at(row);
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
                 ImGui::TableNextColumn();
 
-                auto selected = _selectedResource == treeTO;
+                auto selected = _selectedTreeTO == treeTO;
                 if (ImGui::Selectable(
                         "",
                         &selected,
                         ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
                         ImVec2(0, scale(RowHeight) - ImGui::GetStyle().FramePadding.y))) {
-                    _selectedResource = selected ? treeTO : nullptr;
+                    _selectedTreeTO = selected ? treeTO : nullptr;
                 }
                 ImGui::SameLine();
 
                 pushTextColor(treeTO);
 
-                processResourceNameField(treeTO, _genomes.collapsedFolderNames);
+                if (processResourceNameField(treeTO, workspace.collapsedFolderNames)) {
+                    scheduleRecreateTreeTOs = true;
+                }
                 ImGui::TableNextColumn();
                 processDescriptionField(treeTO);
                 ImGui::TableNextColumn();
@@ -469,152 +734,29 @@ void _BrowserWindow::processGenomeList()
                 ImGui::PopID();
             }
         ImGui::EndTable();
+
+        if (scheduleRecreateTreeTOs) {
+            createTreeTOs(workspace);
+        }
     }
     ImGui::PopID();
 }
 
-namespace
+bool _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
 {
-    std::string getGpuString(std::string const& gpu)
-    {
-        if (gpu.substr(0, 6) == "NVIDIA") {
-            return gpu.substr(7);
-        }
-        return gpu;
-    }
-}
+    auto result = false;
 
-void _BrowserWindow::processUserList()
-{
-    auto& networkService = NetworkService::getInstance();
-
-    ImGui::PushID("User list");
-    auto& styleRepository = StyleRepository::getInstance();
-    static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable
-         | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
-        | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
-
-    AlienImGui::Group("Simulators");
-    if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
-        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
-        auto isLoggedIn = networkService.getLoggedInUserName().has_value();
-        ImGui::TableSetupColumn(
-            isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
-            ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
-            styleRepository.scale(200.0f));
-        ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
-        ImGui::TableSetupColumn(
-            "Reactions received", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending, scale(120.0f));
-        ImGui::TableSetupColumn("Reactions given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
-        ImGui::TableSetupScrollFreeze(0, 1);
-        ImGui::TableHeadersRow();
-
-        ImGuiListClipper clipper;
-        clipper.Begin(_userTOs.size());
-        while (clipper.Step()) {
-            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto item = &_userTOs[row];
-
-                ImGui::PushID(row);
-                ImGui::TableNextRow(0, scale(RowHeight));
-
-                ImGui::TableNextColumn();
-                auto isBoldFont = isLoggedIn && *networkService.getLoggedInUserName() == item->userName;
-
-                if (item->online) {
-                    AlienImGui::OnlineSymbol();
-                    ImGui::SameLine();
-                } else if (item->lastDayOnline) {
-                    AlienImGui::LastDayOnlineSymbol();
-                    ImGui::SameLine();
-                }
-                processShortenedText(item->userName, isBoldFont);
-
-                ImGui::TableNextColumn();
-                if (isLoggedIn && _loginDialog.lock()->isShareGpuInfo()) {
-                    processShortenedText(getGpuString(item->gpu), isBoldFont);
-                }
-
-                ImGui::TableNextColumn();
-                if (item->timeSpent > 0) {
-                    processShortenedText(StringHelper::format(item->timeSpent) + "h", isBoldFont);
-                }
-
-                ImGui::TableNextColumn();
-                processShortenedText(std::to_string(item->starsReceived), isBoldFont);
-
-                ImGui::TableNextColumn();
-                processShortenedText(std::to_string(item->starsGiven), isBoldFont);
-
-                ImGui::PopID();
-            }
-        }
-        ImGui::EndTable();
-    }
-    ImGui::PopID();
-}
-
-void _BrowserWindow::processStatus()
-{
-    auto& styleRepository = StyleRepository::getInstance();
-    auto& networkService = NetworkService::getInstance();
-
-    if (ImGui::BeginChild("##", ImVec2(0, styleRepository.scale(33.0f)), true)) {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
-        std::string statusText;
-        statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-        statusText += std::to_string(_simulations.numResources) + " simulations found";
-
-        statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-        statusText += std::to_string(_genomes.numResources) + " genomes found";
-
-        statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-        statusText += std::to_string(_userTOs.size()) + " simulators found";
-
-        statusText += std::string("  " ICON_FA_INFO_CIRCLE " ");
-        if (auto userName = networkService.getLoggedInUserName()) {
-            statusText += "Logged in as " + *userName + " @ " + networkService.getServerAddress();// + ": ";
-        } else {
-            statusText += "Not logged in to " + networkService.getServerAddress();// + ": ";
-        }
-
-        if (!networkService.getLoggedInUserName()) {
-            statusText += std::string("   " ICON_FA_INFO_CIRCLE " ");
-            statusText += "In order to share and upvote simulations you need to log in.";
-        }
-        AlienImGui::Text(statusText);
-        ImGui::PopStyleColor();
-    }
-    ImGui::EndChild();
-}
-
-void _BrowserWindow::processFilter()
-{
-    ImGui::Spacing();
-    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Community creations"), _showCommunityCreations)) {
-        filterRawTOs();
-        scheduleCreateTreeTOs();
-    }
-    ImGui::SameLine();
-    if (AlienImGui::InputText(AlienImGui::InputTextParameters().name("Filter"), _filter)) {
-        filterRawTOs();
-        scheduleCreateTreeTOs();
-    }
-}
-
-void _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
-{
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
 
-        processFolderTreeSymbols(treeTO, _simulations.collapsedFolderNames);
+        result |= processFolderTreeSymbols(treeTO, collapsedFolderNames);
         processDownloadButton(leaf);
         ImGui::SameLine();
         processShortenedText(leaf.leafName, true);
     } else {
         auto& folder = treeTO->getFolder();
 
-        processFolderTreeSymbols(treeTO, _simulations.collapsedFolderNames);
+        result |= processFolderTreeSymbols(treeTO, collapsedFolderNames);
         processShortenedText(treeTO->folderNames.back());
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
@@ -628,6 +770,7 @@ void _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
         AlienImGui::Text("(" + std::to_string(folder.numLeafs) + " " + resourceTypeString + ")");
         ImGui::PopStyleColor();
     }
+    return result;
 }
 
 void _BrowserWindow::processDescriptionField(NetworkResourceTreeTO const& treeTO)
@@ -789,8 +932,9 @@ void _BrowserWindow::processVersionField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
+bool _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
 {
+    auto result = false;
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderSymbolColor);
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
     auto const& treeSymbols = treeTO->treeSymbols;
@@ -801,13 +945,13 @@ void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeT
         case FolderTreeSymbols::Expanded: {
             if (AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f)) {
                 collapsedFolderNames.insert(treeTO->folderNames);
-                scheduleCreateTreeTOs();
+                result = true;
             }
         } break;
         case FolderTreeSymbols::Collapsed: {
             if (AlienImGui::Button(ICON_FA_PLUS_SQUARE, 20.0f)) {
                 collapsedFolderNames.erase(treeTO->folderNames);
-                scheduleCreateTreeTOs();
+                result = true;
             }
         } break;
         case FolderTreeSymbols::Continue: {
@@ -856,6 +1000,7 @@ void _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeT
         ImGui::SameLine();
     }
     ImGui::PopStyleColor(2);
+    return result;
 }
 
 void _BrowserWindow::processEmojiWindow()
@@ -938,7 +1083,7 @@ void _BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
     auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
     ImGui::PopStyleColor();
     if (downloadButtonResult) {
-        onDownloadItem(leaf);
+        onDownloadResource(leaf);
     }
     AlienImGui::Tooltip("Download");
 }
@@ -1005,19 +1150,26 @@ void _BrowserWindow::processActivated()
     onRefresh();
 }
 
-void _BrowserWindow::scheduleCreateTreeTOs()
+void _BrowserWindow::createTreeTOs(Workspace& workspace)
 {
-    _scheduleCreateSimulationTreeTOs = true;
-    _scheduleCreateGenomeTreeTOs = true;
-}
-
-void _BrowserWindow::sortRawTOs(std::vector<NetworkResourceRawTO>& tos, ImGuiTableSortSpecs* sortSpecs)
-{
-    if (tos.size() > 1) {
-        std::sort(tos.begin(), tos.end(), [&](auto const& left, auto const& right) {
-            return _NetworkResourceRawTO::compare(left, right, sortSpecs) < 0;
+    //sorting
+    if (workspace.rawTOs.size() > 1) {
+        std::sort(workspace.rawTOs.begin(), workspace.rawTOs.end(), [&](auto const& left, auto const& right) {
+            return _NetworkResourceRawTO::compare(left, right, workspace.sortSpecs) < 0;
         });
     }
+
+    //filtering
+    std::vector<NetworkResourceRawTO> filteredRawTOs;
+    for (auto const& rawTO : workspace.rawTOs) {
+        if (rawTO->matchWithFilter(_filter)) {
+            filteredRawTOs.emplace_back(rawTO);
+        }
+    }
+
+    //create treeTOs
+    workspace.treeTOs = NetworkResourceService::createTreeTOs(filteredRawTOs, workspace.collapsedFolderNames);
+    _selectedTreeTO = nullptr;
 }
 
 void _BrowserWindow::sortUserList()
@@ -1025,41 +1177,37 @@ void _BrowserWindow::sortUserList()
     std::sort(_userTOs.begin(), _userTOs.end(), [&](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
 }
 
-void _BrowserWindow::filterRawTOs()
-{
-    _simulations.rawTOs.clear();
-    _simulations.rawTOs.reserve(_unfilteredRawTOs.size());
-    _genomes.rawTOs.clear();
-    _genomes.rawTOs.reserve(_unfilteredRawTOs.size());
-    for (auto const& to : _unfilteredRawTOs) {
-        if (to->matchWithFilter(_filter) && _showCommunityCreations != to->fromRelease) {
-            if (to->type == NetworkResourceType_Simulation) {
-                _simulations.rawTOs.emplace_back(to);
-            } else {
-                _genomes.rawTOs.emplace_back(to);
-            }
-        }
-    }
-}
-
-void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
+void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
 {
     printOverlayMessage("Downloading ...");
+    ++leaf.rawTO->numDownloads;
 
     delayedExecution([=, this] {
-        auto& networkService = NetworkService::getInstance();
-        std::string dataTypeString = _selectedDataType == NetworkResourceType_Simulation ? "simulation" : "genome";
+        std::string dataTypeString = _currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
+        std::optional<DeserializedSimulation> cachedSimulation;
+        if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
+            cachedSimulation = _simulationCache.find(leaf.rawTO->id);
+        }
         SerializedSimulation serializedSim;
-        if (!networkService.downloadSimulation(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.rawTO->id)) {
-            MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
-            return;
+        if (!cachedSimulation.has_value()) {
+            if (!NetworkService::downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.rawTO->id)) {
+                MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
+                return;
+            }
         }
 
-        if (_selectedDataType == NetworkResourceType_Simulation) {
+        if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
             DeserializedSimulation deserializedSim;
-            if (!SerializerService::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
-                MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
-                return;
+            if (!cachedSimulation.has_value()) {
+                if (!SerializerService::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
+                    MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
+                    return;
+                }
+                _simulationCache.insert(leaf.rawTO->id, deserializedSim);
+            } else {
+                log(Priority::Important, "browser: get resource with id=" + leaf.rawTO->id + " from simulation cache");
+                std::swap(deserializedSim, *cachedSimulation);
+                NetworkService::incDownloadCounter(leaf.rawTO->id);
             }
 
             _simController->closeSimulation();
@@ -1106,18 +1254,65 @@ void _BrowserWindow::onDownloadItem(BrowserLeaf const& leaf)
     });
 }
 
-void _BrowserWindow::onDeleteItem(BrowserLeaf const& leaf)
+void _BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO, WorkspaceId const& sourceId, WorkspaceId const& targetId)
 {
-    MessageDialog::getInstance().yesNo("Delete item", "Do you really want to delete the selected item?", [leaf, this]() {
-        printOverlayMessage("Deleting ...");
+    auto& source = _workspaces.at(sourceId);
+    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, source.rawTOs);
 
-        delayedExecution([leafCopy = leaf, this] {
-            auto& networkService = NetworkService::getInstance();
-            if (!networkService.deleteSimulation(leafCopy.rawTO->id)) {
-                MessageDialog::getInstance().information("Error", "Failed to delete item. Please try again later.");
+    //remove resources form source workspace
+    for (auto const& rawTO : rawTOs) {
+        auto findResult = std::ranges::find_if(source.rawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
+        if (findResult != source.rawTOs.end()) {
+            source.rawTOs.erase(findResult);
+        }
+    }
+    createTreeTOs(source);
+
+    //add resources to target workspace
+    auto& target = _workspaces.at(targetId);
+    target.rawTOs.insert(target.rawTOs.end(), rawTOs.begin(), rawTOs.end());
+    createTreeTOs(target);
+
+    //apply changes to server
+    delayedExecution([targetId = targetId, rawTOs = rawTOs, this] {
+        for (auto const& rawTO : rawTOs) {
+            if (!NetworkService::moveResource(rawTO->id, targetId.workspaceType)) {
+                MessageDialog::getInstance().information("Error", "Failed to move item.");
+                refreshIntern(true);
                 return;
             }
-            _scheduleRefresh = true;
+        }
+    });
+    printOverlayMessage("Moving to " + workspaceTypeToString.at(targetId.workspaceType) + " workspace ...");
+}
+
+void _BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
+{
+    auto& workspace = _workspaces.at(_currentWorkspace);
+    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, workspace.rawTOs);
+
+    auto message = treeTO->isLeaf() ? "Do you really want to delete the selected item?" : "Do you really want to delete the selected folder?";
+    MessageDialog::getInstance().yesNo("Delete", message, [rawTOs = rawTOs, &workspace, this]() {
+
+        //remove resources form workspace
+        for (auto const& rawTO : rawTOs) {
+            auto findResult = std::ranges::find_if(workspace.rawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
+            if (findResult != workspace.rawTOs.end()) {
+                workspace.rawTOs.erase(findResult);
+            }
+        }
+        createTreeTOs(workspace);
+
+        //apply changes to server
+        printOverlayMessage("Deleting ...");
+        delayedExecution([rawTOs = rawTOs, this] {
+            for (auto const& rawTO : rawTOs) {
+                if (!NetworkService::deleteResource(rawTO->id)) {
+                    MessageDialog::getInstance().information("Error", "Failed to delete item. Please try again later.");
+                    refreshIntern(true);
+                    return;
+                }
+            }
         });
     });
 }
@@ -1126,8 +1321,7 @@ void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType
 {
     CHECK(to->isLeaf());
     auto& leaf = to->getLeaf();
-    auto& networkService = NetworkService::getInstance();
-    if (networkService.getLoggedInUserName()) {
+    if (NetworkService::getLoggedInUserName()) {
 
         //remove existing like
         auto findResult = _ownEmojiTypeBySimId.find(leaf.rawTO->id);
@@ -1153,10 +1347,24 @@ void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType
         }
 
         _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  //invalidate cache entry
-        networkService.toggleLikeSimulation(leaf.rawTO->id, emojiType);
+        NetworkService::toggleReactToResource(leaf.rawTO->id, emojiType);
     } else {
         _loginDialog.lock()->open();
     }
+}
+
+void _BrowserWindow::onExpandFolders()
+{
+    auto& workspace = _workspaces.at(_currentWorkspace);
+    workspace.collapsedFolderNames.clear();
+    createTreeTOs(workspace);
+}
+
+void _BrowserWindow::onCollapseFolders()
+{
+    auto& workspace = _workspaces.at(_currentWorkspace);
+    workspace.collapsedFolderNames = NetworkResourceService::getFolderNames(workspace.rawTOs, 1);
+    createTreeTOs(workspace);
 }
 
 void _BrowserWindow::openWeblink(std::string const& link)
@@ -1166,23 +1374,28 @@ void _BrowserWindow::openWeblink(std::string const& link)
 #endif
 }
 
-bool _BrowserWindow::isLiked(std::string const& simId)
+bool _BrowserWindow::isOwner(NetworkResourceTreeTO const& treeTO) const
 {
-    return _ownEmojiTypeBySimId.contains(simId);
+    if (treeTO == nullptr) {
+        return false;
+    }
+    auto const& workspace = _workspaces.at(_currentWorkspace);
+
+    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, workspace.rawTOs);
+    auto userName = NetworkService::getLoggedInUserName().value_or("");
+    return std::ranges::all_of(rawTOs, [&](NetworkResourceRawTO const& rawTO) { return rawTO->userName == userName; });
 }
 
-std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& simId, int emojiType)
+std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& resourceId, int emojiType)
 {
-    auto& networkService = NetworkService::getInstance();
-
     std::set<std::string> userNames;
 
-    auto findResult = _userNamesByEmojiTypeBySimIdCache.find(std::make_pair(simId, emojiType));
+    auto findResult = _userNamesByEmojiTypeBySimIdCache.find(std::make_pair(resourceId, emojiType));
     if (findResult != _userNamesByEmojiTypeBySimIdCache.end()) {
         userNames = findResult->second;
     } else {
-        networkService.getUserNamesForSimulationAndEmojiType(userNames, simId, emojiType);
-        _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(simId, emojiType), userNames);
+        NetworkService::getUserNamesForResourceAndEmojiType(userNames, resourceId, emojiType);
+        _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(resourceId, emojiType), userNames);
     }
 
     return boost::algorithm::join(userNames, ", ");

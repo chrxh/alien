@@ -79,11 +79,10 @@ void _ActivateUserDialog::processIntern()
 
 void _ActivateUserDialog::onActivateUser()
 {
-    auto& networkService = NetworkService::getInstance();
-    auto result = networkService.activateUser(_userName, _password, _userInfo, _confirmationCode);
+    auto result = NetworkService::activateUser(_userName, _password, _userInfo, _confirmationCode);
     if (result) {
         LoginErrorCode errorCode;
-        result |= networkService.login(errorCode, _userName, _password, _userInfo);
+        result |= NetworkService::login(errorCode, _userName, _password, _userInfo);
     }
     if (!result) {
         MessageDialog::getInstance().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");

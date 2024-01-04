@@ -1,12 +1,14 @@
 #include "UploadSimulationDialog.h"
 
 #include <imgui.h>
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "Network/NetworkService.h"
+#include "Network/ValidationService.h"
 
 #include "AlienImGui.h"
 #include "MessageDialog.h"
@@ -16,6 +18,7 @@
 #include "OverlayMessageController.h"
 #include "Viewport.h"
 #include "GenomeEditorWindow.h"
+#include "HelpStrings.h"
 #include "LoginDialog.h"
 
 namespace
@@ -55,12 +58,20 @@ _UploadSimulationDialog::~_UploadSimulationDialog()
     settings.setStringState("dialogs.upload.simulation description", _resourceDescription);
 }
 
-void _UploadSimulationDialog::open(NetworkResourceType dataType, std::string const& folder)
+void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder)
 {
-    auto& networkService = NetworkService::getInstance();
-    if (networkService.getLoggedInUserName()) {
-        changeTitle("Upload " + BrowserDataTypeToLowerString.at(dataType));
-        _dataType = dataType;
+    if (NetworkService::getLoggedInUserName()) {
+        auto workspaceType = _browserWindow->getCurrentWorkspaceType();
+        if (workspaceType == WorkspaceType_AlienProject && *NetworkService::getLoggedInUserName() != "alien-project") {
+            MessageDialog::getInstance().information(
+                "Upload " + BrowserDataTypeToLowerString.at(resourceType),
+                "You are not allowed to upload to alien-project's workspace.\nPlease choose the public or private workspace in the browser.");
+            return;
+        }
+
+        changeTitle("Upload " + BrowserDataTypeToLowerString.at(resourceType));
+        _resourceType = resourceType;
+        _workspaceType = workspaceType;
         _folder = folder;
         _AlienDialog::open();
     } else {
@@ -70,28 +81,32 @@ void _UploadSimulationDialog::open(NetworkResourceType dataType, std::string con
 
 void _UploadSimulationDialog::processIntern()
 {
-    auto resourceTypeString = BrowserDataTypeToLowerString.at(_dataType);
-    AlienImGui::Text("Data privacy policy");
-    AlienImGui::HelpMarker(
-        "The " + resourceTypeString + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
+    auto resourceTypeString = BrowserDataTypeToLowerString.at(_resourceType);
+    if (ImGui::BeginChild("##header", ImVec2(0, scale(52.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+        AlienImGui::Text("Data privacy policy");
+        AlienImGui::HelpMarker(
+            "The " + resourceTypeString + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
 
-    AlienImGui::Text("How to use or create folders?");
-    AlienImGui::HelpMarker("If you want to upload the " + resourceTypeString
-        + " to a folder, you can use the `/`-notation. The folder will be created automatically if it does not exist.\nFor instance, naming a simulation as `Biome/Water "
-          "world/Initial/Variant 1` will create the nested folders `Biome`, `Water world` and `Initial`.");
+        AlienImGui::Text("How to use or create folders?");
+        AlienImGui::HelpMarker(
+            "If you want to upload the " + resourceTypeString
+            + " to a folder, you can use the `/`-notation. The folder will be created automatically if it does not exist.\nFor instance, naming a simulation "
+              "as `Biome/Water "
+              "world/Initial/Variant 1` will create the nested folders `Biome`, `Water world` and `Initial`.");
+    }
+    ImGui::EndChild();
+
+    if (!_folder.empty()) {
+        if (ImGui::BeginChild("##folder info", ImVec2(0, scale(85.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+            AlienImGui::Text("The following folder has been selected in the browser\nand will used for the upload:\n\n");
+            AlienImGui::BoldText(_folder);
+        }
+        ImGui::EndChild();
+    }
 
     AlienImGui::Separator();
 
-    if (!_folder.empty()) {
-        std::string text = "The following folder has been selected and will used for the upload:\n" + _folder;
-        ImGui::PushID("folder info");
-        ImGui::BeginDisabled();
-        AlienImGui::InputTextMultiline(AlienImGui::InputTextMultilineParameters().hint(_folder).textWidth(0).height(FolderWidgetHeight), text);
-        ImGui::EndDisabled();
-        ImGui::PopID();
-    }
-
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_dataType)  + " name").textWidth(0), _resourceName);
+    AlienImGui::InputText(AlienImGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_resourceType)  + " name").textWidth(0), _resourceName);
 
     AlienImGui::Separator();
 
@@ -108,8 +123,12 @@ void _UploadSimulationDialog::processIntern()
 
     ImGui::BeginDisabled(_resourceName.empty());
     if (AlienImGui::Button("OK")) {
-        close();
-        onUpload();
+        if (ValidationService::isStringValidForDatabase(_resourceName) && ValidationService::isStringValidForDatabase(_resourceDescription)) {
+            close();
+            onUpload();
+        } else {
+            showMessage("Error", Const::NotAllowedCharacters);
+        }
     }
     ImGui::EndDisabled();
     ImGui::SetItemDefaultFocus();
@@ -139,8 +158,8 @@ void _UploadSimulationDialog::onUpload()
         IntVector2D size;
         int numObjects = 0;
 
-        if (_dataType == NetworkResourceType_Simulation) {
-            DeserializedSimulation deserializedSim;
+        DeserializedSimulation deserializedSim;
+        if (_resourceType == NetworkResourceType_Simulation) {
             deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
             deserializedSim.auxiliaryData.zoom = _viewport->getZoomFactor();
             deserializedSim.auxiliaryData.center = _viewport->getCenterInWorldPos();
@@ -175,10 +194,17 @@ void _UploadSimulationDialog::onUpload()
             }
         }
 
-        auto& networkService = NetworkService::getInstance();
-        if (!networkService.uploadSimulation(_folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _dataType)) {
-            showMessage("Error", "Failed to upload " + BrowserDataTypeToLowerString.at(_dataType) + ".");
+        std::string resourceId;
+        if (!NetworkService::uploadResource(
+                resourceId, _folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, _workspaceType)) {
+            showMessage(
+                "Error",
+                "Failed to upload " + BrowserDataTypeToLowerString.at(_resourceType)
+                    + ".\n\nPossible reasons:\n\n" ICON_FA_CHEVRON_RIGHT " The server is not reachable.\n\n" ICON_FA_CHEVRON_RIGHT " The total size of your uploads exceeds the allowed storage limit.");
             return;
+        }
+        if (_resourceType == NetworkResourceType_Simulation) {
+            _browserWindow->getSimulationCache().insert(resourceId, deserializedSim);
         }
         _browserWindow->onRefresh();
     });

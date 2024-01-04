@@ -27,8 +27,9 @@ struct SimulationParametersSpotActivatedValues
     bool cellFunctionConstructorMutationDeletionProbability = false;
     bool cellFunctionConstructorMutationTranslationProbability = false;
     bool cellFunctionConstructorMutationDuplicationProbability = false;
-    bool cellFunctionConstructorMutationColorProbability = false;
-    bool cellFunctionConstructorMutationUniformColorProbability = false;
+    bool cellFunctionConstructorMutationCellColorProbability = false;
+    bool cellFunctionConstructorMutationSubgenomeColorProbability = false;
+    bool cellFunctionConstructorMutationGenomeColorProbability = false;
 
     bool operator==(SimulationParametersSpotActivatedValues const& other) const
     {
@@ -46,11 +47,12 @@ struct SimulationParametersSpotActivatedValues
             && cellFunctionConstructorMutationDeletionProbability == other.cellFunctionConstructorMutationDeletionProbability
             && cellFunctionConstructorMutationTranslationProbability == other.cellFunctionConstructorMutationTranslationProbability
             && cellFunctionConstructorMutationDuplicationProbability == other.cellFunctionConstructorMutationDuplicationProbability
-            && cellFunctionConstructorMutationColorProbability == other.cellFunctionConstructorMutationColorProbability
+            && cellFunctionConstructorMutationSubgenomeColorProbability == other.cellFunctionConstructorMutationSubgenomeColorProbability
             && radiationAbsorption == other.radiationAbsorption
             && cellFunctionConstructorMutationCustomGeometryProbability == other.cellFunctionConstructorMutationCustomGeometryProbability
             && cellFunctionConstructorMutationGeometryProbability == other.cellFunctionConstructorMutationGeometryProbability
-            && cellFunctionConstructorMutationUniformColorProbability == other.cellFunctionConstructorMutationUniformColorProbability
+            && cellFunctionConstructorMutationGenomeColorProbability == other.cellFunctionConstructorMutationGenomeColorProbability
+            && cellFunctionConstructorMutationCellColorProbability == other.cellFunctionConstructorMutationCellColorProbability
         ;
     }
 };
