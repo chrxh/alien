@@ -92,7 +92,7 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         cell->pos,
         cell->color);
     auto cellFunctionConstructorMutationColorProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationColorProbability,
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationSubgenomeColorProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationColorProbability,
         data,
         cell->pos,
