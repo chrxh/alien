@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <list>
 #include <optional>
 
 template<typename Key, typename Value, int MaxEntries>
