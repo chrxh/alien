@@ -38,11 +38,11 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationTyp
             case MutationType::Duplication:
                 MutationProcessor::duplicateMutation(data, cell);
                 break;
-            case MutationType::Color:
-                MutationProcessor::colorMutation(data, cell);
+            case MutationType::SubgenomeColor:
+                MutationProcessor::subgenomeColorMutation(data, cell);
                 break;
-            case MutationType::UniformColor:
-                MutationProcessor::uniformColorMutation(data, cell);
+            case MutationType::GenomeColor:
+                MutationProcessor::genomeColorMutation(data, cell);
                 break;
             }
         }
