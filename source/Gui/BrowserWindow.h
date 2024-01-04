@@ -3,10 +3,12 @@
 #include <chrono>
 
 #include "Base/Hashes.h"
+#include "Base/Cache.h"
 #include "EngineInterface/Definitions.h"
 #include "Network/NetworkResourceTreeTO.h"
 #include "Network/NetworkResourceRawTO.h"
 #include "Network/UserTO.h"
+#include "EngineInterface/SerializerService.h"
 
 #include "AlienWindow.h"
 #include "Definitions.h"
@@ -120,6 +122,8 @@ private:
     std::unordered_map<std::pair<std::string, int>, std::set<std::string>> _userNamesByEmojiTypeBySimIdCache;
 
     std::vector<TextureData> _emojis;
+
+    Cache<std::string, DeserializedSimulation, 5> _simulationCache;
 
     SimulationController _simController;
     StatisticsWindow _statisticsWindow;

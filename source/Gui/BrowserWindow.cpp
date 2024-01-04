@@ -14,6 +14,7 @@
 #include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/GlobalSettings.h"
+#include "Base/LoggingService.h"
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "Base/VersionChecker.h"
@@ -1174,17 +1175,30 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
 
     delayedExecution([=, this] {
         std::string dataTypeString = _currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
+        std::optional<DeserializedSimulation> cachedSimulation;
+        if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
+            cachedSimulation = _simulationCache.find(leaf.rawTO->id);
+        }
         SerializedSimulation serializedSim;
-        if (!NetworkService::downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.rawTO->id)) {
-            MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
-            return;
+        if (!cachedSimulation.has_value()) {
+            if (!NetworkService::downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.rawTO->id)) {
+                MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
+                return;
+            }
         }
 
         if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
             DeserializedSimulation deserializedSim;
-            if (!SerializerService::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
-                MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
-                return;
+            if (!cachedSimulation.has_value()) {
+                if (!SerializerService::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
+                    MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
+                    return;
+                }
+                _simulationCache.insert(leaf.rawTO->id, deserializedSim);
+            } else {
+                log(Priority::Important, "browser: get resource with id=" + leaf.rawTO->id + " from browser cache");
+                std::swap(deserializedSim, *cachedSimulation);
+                NetworkService::incDownloadCounter(leaf.rawTO->id);
             }
 
             _simController->closeSimulation();

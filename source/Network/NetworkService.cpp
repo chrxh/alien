@@ -1,5 +1,6 @@
 #include "NetworkService.h"
 
+#include <ranges>
 #include <boost/property_tree/json_parser.hpp>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
@@ -13,7 +14,7 @@
 
 namespace
 {
-    auto RefreshInterval = 20;  //in minutes
+    auto constexpr RefreshInterval = 20;  //in minutes
 
     void configureClient(httplib::SSLClient& client)
     {
@@ -61,6 +62,7 @@ std::string NetworkService::_serverAddress;
 std::optional<std::string> NetworkService::_loggedInUserName;
 std::optional<std::string> NetworkService::_password;
 std::optional<std::chrono::steady_clock::time_point> NetworkService::_lastRefreshTime;
+Cache<std::string, NetworkService::ResourceData, 20> NetworkService::_downloadCache;
 
 void NetworkService::init()
 {
@@ -465,31 +467,57 @@ bool NetworkService::uploadResource(
 
 bool NetworkService::downloadResource(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
 {
-    log(Priority::Important, "network: download resource with id=" + simId);
-
-    httplib::SSLClient client(_serverAddress);
-    configureClient(client);
-
-    httplib::Params params;
-    params.emplace("id", simId);
-
     try {
-        {
-            auto result = executeRequest([&] { return client.Get("/alien-server/downloadcontent.php", params, {}); });
-            mainData = result->body;
+        if (auto cachedEntry = _downloadCache.find(simId)) {
+            log(Priority::Important, "network: get resource with id=" + simId + " from download cache");
+            mainData = cachedEntry->content;
+            auxiliaryData = cachedEntry->auxiliaryData;
+            statistics = cachedEntry->statistics;
+            incDownloadCounter(simId);
+            return true;
+        } else {
+            log(Priority::Important, "network: download resource with id=" + simId);
+
+            httplib::SSLClient client(_serverAddress);
+            configureClient(client);
+
+            httplib::Params params;
+            params.emplace("id", simId);
+            {
+                auto result = executeRequest([&] { return client.Get("/alien-server/downloadcontent.php", params, {}); });
+                mainData = result->body;
+            }
+            {
+                auto result = executeRequest([&] { return client.Get("/alien-server/downloadsettings.php", params, {}); });
+                auxiliaryData = result->body;
+            }
+            {
+                auto result = executeRequest([&] { return client.Get("/alien-server/downloadstatistics.php", params, {}); });
+                statistics = result->body;
+            }
+            _downloadCache.insert(simId, ResourceData{mainData, auxiliaryData, statistics});
+            return true;
         }
-        {
-            auto result = executeRequest([&] { return client.Get("/alien-server/downloadsettings.php", params, {}); });
-            auxiliaryData = result->body;
-        }
-        {
-            auto result = executeRequest([&] { return client.Get("/alien-server/downloadstatistics.php", params, {}); });
-            statistics = result->body;
-        }
-        return true;
     } catch (...) {
         logNetworkError();
         return false;
+    }
+}
+
+void NetworkService::incDownloadCounter(std::string const& simId)
+{
+    try {
+        log(Priority::Important, "network: increment download counter for resource with id=" + simId);
+
+        httplib::SSLClient client(_serverAddress);
+        configureClient(client);
+
+        httplib::Params params;
+        params.emplace("id", simId);
+        executeRequest([&] { return client.Get("/alien-server/incdownloadcount.php", params, {}); });
+    }
+    catch(...) {
+       //do nothing 
     }
 }
 

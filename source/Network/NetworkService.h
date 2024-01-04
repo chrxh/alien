@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+#include "Base/Cache.h"
 #include "NetworkResourceRawTO.h"
 #include "UserTO.h"
 #include "Definitions.h"
@@ -58,6 +59,7 @@ public:
         NetworkResourceType resourceType,
         WorkspaceType workspaceType);
     static bool downloadResource(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
+    static void incDownloadCounter(std::string const& simId);
     static bool editResource(std::string const& simId, std::string const& newName, std::string const& newDescription);
     static bool moveResource(std::string const& simId, WorkspaceType targetWorkspace);
     static bool deleteResource(std::string const& simId);
@@ -67,4 +69,12 @@ private:
     static std::optional<std::string> _loggedInUserName;
     static std::optional<std::string> _password;
     static std::optional<std::chrono::steady_clock::time_point> _lastRefreshTime;
+
+    struct ResourceData
+    {
+        std::string content;
+        std::string auxiliaryData;
+        std::string statistics;
+    };
+    static Cache<std::string, ResourceData, 20> _downloadCache;
 };
