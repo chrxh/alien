@@ -1,5 +1,6 @@
 
 add_library(Base
+    Cache.h
     Definitions.cpp
     Definitions.h
     Exceptions.h
