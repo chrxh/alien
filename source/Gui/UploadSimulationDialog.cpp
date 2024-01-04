@@ -46,16 +46,10 @@ _UploadSimulationDialog::_UploadSimulationDialog(
     , _viewport(viewport)
     , _genomeEditorWindow(genomeEditorWindow)
 {
-    auto& settings = GlobalSettings::getInstance();
-    _resourceName = settings.getStringState("dialogs.upload.simulation name", "");
-    _resourceDescription = settings.getStringState("dialogs.upload.simulation description", "");
 }
 
 _UploadSimulationDialog::~_UploadSimulationDialog()
 {
-    auto& settings = GlobalSettings::getInstance();
-    settings.setStringState("dialogs.upload.simulation name", _resourceName);
-    settings.setStringState("dialogs.upload.simulation description", _resourceDescription);
 }
 
 void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder)
@@ -73,6 +67,8 @@ void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string
         _resourceType = resourceType;
         _workspaceType = workspaceType;
         _folder = folder;
+        _resourceName = _resourceNameByFolder[_folder];
+        _resourceDescription = _resourceDescriptionByFolder[_folder];
         _AlienDialog::open();
     } else {
         _loginDialog->open();
@@ -129,6 +125,8 @@ void _UploadSimulationDialog::processIntern()
         } else {
             showMessage("Error", Const::NotAllowedCharacters);
         }
+        _resourceNameByFolder[_folder] = _resourceName;
+        _resourceDescriptionByFolder[_folder] = _resourceDescription;
     }
     ImGui::EndDisabled();
     ImGui::SetItemDefaultFocus();
@@ -136,15 +134,7 @@ void _UploadSimulationDialog::processIntern()
     ImGui::SameLine();
     if (AlienImGui::Button("Cancel")) {
         close();
-        _resourceName = _origResourceName;
-        _resourceDescription = _origResourceDescription;
     }
-}
-
-void _UploadSimulationDialog::openIntern()
-{
-    _origResourceName = _resourceName;
-    _origResourceDescription = _resourceDescription;
 }
 
 void _UploadSimulationDialog::onUpload()
