@@ -22,6 +22,7 @@ public:
     __inline__ __device__ static void deleteMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void translateMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void duplicateMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void cellColorMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void subgenomeColorMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void genomeColorMutation(SimulationData& data, Cell* cell);
 
@@ -91,15 +92,21 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         data,
         cell->pos,
         cell->color);
-    auto cellFunctionConstructorMutationColorProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationSubgenomeColorProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationColorProbability,
+    auto cellFunctionConstructorMutationCellColorProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationCellColorProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCellColorProbability,
         data,
         cell->pos,
         cell->color);
-    auto cellFunctionConstructorMutationUniformColorProbability = SpotCalculator::calcParameter(
+    auto cellFunctionConstructorMutationSubgenomeColorProbability = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellFunctionConstructorMutationSubgenomeColorProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationSubgenomeColorProbability,
+        data,
+        cell->pos,
+        cell->color);
+    auto cellFunctionConstructorMutationGenomeColorProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationGenomeColorProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationUniformColorProbability,
+        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationGenomeColorProbability,
         data,
         cell->pos,
         cell->color);
@@ -131,10 +138,13 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
     if (isRandomEvent(data, cellFunctionConstructorMutationDuplicationProbability)) {
         duplicateMutation(data, cell);
     }
-    if (isRandomEvent(data, cellFunctionConstructorMutationColorProbability)) {
+    if (isRandomEvent(data, cellFunctionConstructorMutationCellColorProbability)) {
+        cellColorMutation(data, cell);
+    }
+    if (isRandomEvent(data, cellFunctionConstructorMutationSubgenomeColorProbability)) {
         subgenomeColorMutation(data, cell);
     }
-    if (isRandomEvent(data, cellFunctionConstructorMutationUniformColorProbability)) {
+    if (isRandomEvent(data, cellFunctionConstructorMutationGenomeColorProbability)) {
         genomeColorMutation(data, cell);
     }
 }
@@ -701,6 +711,34 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
     adaptMutationId(data, constructor);
+}
+
+__inline__ __device__ void MutationProcessor::cellColorMutation(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    if (GenomeDecoder::hasEmptyGenome(constructor)) {
+        return;
+    }
+
+    auto& genome = constructor.genome;
+    auto const& genomeSize = constructor.genomeSize;
+    auto numNodes = GenomeDecoder::getNumNodesRecursively(genome, genomeSize, false, true);
+    auto randomNode = data.numberGen1.random(numNodes - 1);
+    auto sequenceNumber = 0;
+    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, [&](int depth, int nodeAddress, int repetition) {
+        if (sequenceNumber++ != randomNode) {
+            return;
+        }
+        auto origColor = GenomeDecoder::getNextCellColor(genome, nodeAddress);
+        auto newColor = getNewColorFromTransition(data, origColor);
+        if (newColor == -1) {
+            return;
+        }
+        if (origColor != newColor) {
+            adaptMutationId(data, constructor);
+        }
+        GenomeDecoder::setNextCellColor(genome, nodeAddress, newColor);
+    });
 }
 
 __inline__ __device__ void MutationProcessor::subgenomeColorMutation(SimulationData& data, Cell* cell)

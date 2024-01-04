@@ -48,6 +48,7 @@ struct SimulationParametersSpotValues
     ColorVector<float> cellFunctionConstructorMutationDeletionProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationTranslationProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationDuplicationProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellFunctionConstructorMutationCellColorProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationSubgenomeColorProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationGenomeColorProbability = {0, 0, 0, 0, 0, 0, 0};
 
@@ -67,6 +68,9 @@ struct SimulationParametersSpotValues
             }
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (cellFunctionConstructorMutationCellColorProbability[i] != other.cellFunctionConstructorMutationCellColorProbability[i]) {
+                return false;
+            }
             if (cellFunctionConstructorMutationGenomeColorProbability[i] != other.cellFunctionConstructorMutationGenomeColorProbability[i]) {
                 return false;
             }
