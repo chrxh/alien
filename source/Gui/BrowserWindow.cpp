@@ -278,7 +278,7 @@ void _BrowserWindow::processToolbar()
         _uploadSimulationDialog.lock()->open(_currentWorkspace.resourceType, prefix);
     }
     AlienImGui::Tooltip(
-        "Uploads your current " + resourceTypeString
+        "Upload your current " + resourceTypeString
         + " to the server and made visible in the browser. You can choose whether you want to share it with other users or whether it should only be visible "
           "in your private workspace.\nIf you have already selected a folder, your " + resourceTypeString + " will be uploaded there.");
 
@@ -298,7 +298,7 @@ void _BrowserWindow::processToolbar()
         onMoveResource(_selectedTreeTO);
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Changes visibility: public " ICON_FA_LONG_ARROW_ALT_RIGHT " private and private " ICON_FA_LONG_ARROW_ALT_RIGHT " public");
+    AlienImGui::Tooltip("Change visibility: public " ICON_FA_LONG_ARROW_ALT_RIGHT " private and private " ICON_FA_LONG_ARROW_ALT_RIGHT " public");
 
     //delete button
     ImGui::SameLine();
