@@ -37,7 +37,7 @@ struct _NetworkResourceRawTO
     uint64_t contentSize;
     std::string description;
     std::string version;
-    int workspaceType;
+    WorkspaceType workspaceType;
     NetworkResourceType resourceType;
 
     static int compare(NetworkResourceRawTO const& left, NetworkResourceRawTO const& right, std::vector<ImGuiTableColumnSortSpecs> const& sortSpecs);
