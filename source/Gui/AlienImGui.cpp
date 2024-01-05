@@ -923,9 +923,11 @@ void AlienImGui::Tooltip(std::string const& text, bool delay)
 {
     if (ImGui::IsItemHovered() && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
         ImGui::BeginTooltip();
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TooltipTextColor);
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
         ImGui::TextUnformatted(text.c_str());
         ImGui::PopTextWrapPos();
+        ImGui::PopStyleColor();
         ImGui::EndTooltip();
     }
 }
