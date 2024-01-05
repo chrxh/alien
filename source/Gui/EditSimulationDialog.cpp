@@ -8,9 +8,11 @@
 
 #include "AlienImGui.h"
 #include "BrowserWindow.h"
+#include "DelayedExecutionController.h"
 #include "HelpStrings.h"
 #include "StyleRepository.h"
 #include "MessageDialog.h"
+#include "OverlayMessageController.h"
 
 _EditSimulationDialog::_EditSimulationDialog(BrowserWindow const& browserWindow)
     : _AlienDialog("")
@@ -70,11 +72,13 @@ void _EditSimulationDialog::processForLeaf()
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
         if (ValidationService::isStringValidForDatabase(_newName) && ValidationService::isStringValidForDatabase(_newDescription)) {
-            if (!NetworkService::editResource(rawTO->id, _newName, _newDescription)) {
-                showMessage("Error", "Failed to edit " + resourceTypeString + ".");
-            } else {
+            delayedExecution([rawTO = rawTO, resourceTypeString = resourceTypeString, this] {
+                if (!NetworkService::editResource(rawTO->id, _newName, _newDescription)) {
+                    showMessage("Error", "Failed to edit " + resourceTypeString + ".");
+                }
                 _browserWindow->onRefresh();
-            }
+            });
+            printOverlayMessage("Applying changes ...");
             close();
         } else {
             showMessage("Error", Const::NotAllowedCharacters);
@@ -101,15 +105,18 @@ void _EditSimulationDialog::processForFolder()
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
         if (ValidationService::isStringValidForDatabase(_newName)) {
-            for (auto const& rawTO : _rawTOs) {
-                auto nameWithoutFolder = NetworkResourceService::removeFoldersFromName(rawTO->resourceName);
-                auto newName = NetworkResourceService::concatenateFolderName({_newName, nameWithoutFolder}, false);
-                if (!NetworkService::editResource(rawTO->id, newName, rawTO->description)) {
-                    showMessage("Error", "Failed to change folder name.");
-                    break;
+            delayedExecution([this] {
+                for (auto const& rawTO : _rawTOs) {
+                    auto nameWithoutFolder = NetworkResourceService::removeFoldersFromName(rawTO->resourceName);
+                    auto newName = NetworkResourceService::concatenateFolderName({_newName, nameWithoutFolder}, false);
+                    if (!NetworkService::editResource(rawTO->id, newName, rawTO->description)) {
+                        showMessage("Error", "Failed to change folder name.");
+                        break;
+                    }
                 }
-            }
-            _browserWindow->onRefresh();
+                _browserWindow->onRefresh();
+            });
+            printOverlayMessage("Applying changes ...");
             close();
         } else {
             showMessage("Error", Const::NotAllowedCharacters);
