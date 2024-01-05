@@ -93,7 +93,7 @@ namespace
         {NetworkResourceType_Simulation, std::string("simulations")},
         {NetworkResourceType_Genome, std::string("genomes")}};
     std::unordered_map<WorkspaceType, std::string> const workspaceTypeToString = {
-        {WorkspaceType_Shared, std::string("public")},
+        {WorkspaceType_Public, std::string("public")},
         {WorkspaceType_AlienProject, std::string("alien-project")},
         {WorkspaceType_Private, std::string("private")}};
 }
@@ -167,9 +167,16 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         } else {
             for (auto& [workspaceId, workspace] : _workspaces) {
                 workspace.rawTOs.clear();
+                auto userName = NetworkService::getLoggedInUserName().value_or("");
                 for (auto const& rawTO : rawTOs) {
-                    if (rawTO->resourceType == workspaceId.resourceType && rawTO->workspaceType == workspaceId.workspaceType) {
-                        workspace.rawTOs.emplace_back(rawTO);
+                    if (rawTO->resourceType == workspaceId.resourceType) {
+                        //public user items should also be visible in private workspace
+                        if ((workspaceId.workspaceType == WorkspaceType_Private && rawTO->userName == userName
+                             && (rawTO->workspaceType == WorkspaceType_Private || rawTO->workspaceType == WorkspaceType_Public))
+                            || ((workspaceId.workspaceType == WorkspaceType_Public || workspaceId.workspaceType == WorkspaceType_AlienProject)
+                                && rawTO->workspaceType == workspaceId.workspaceType)) {
+                            workspace.rawTOs.emplace_back(rawTO);
+                        }
                     }
                 }
                 createTreeTOs(workspace);
@@ -227,7 +234,8 @@ void _BrowserWindow::processToolbar()
 
     //refresh button
     if (AlienImGui::ToolbarButton(ICON_FA_SYNC)) {
-        onRefresh();
+        delayedExecution([this] { onRefresh(); });
+        printOverlayMessage("Refreshing ...");
     }
     AlienImGui::Tooltip("Refresh");
 
@@ -270,20 +278,15 @@ void _BrowserWindow::processToolbar()
         _uploadSimulationDialog.lock()->open(_currentWorkspace.resourceType, prefix);
     }
     AlienImGui::Tooltip(
-        "Share your current " + resourceTypeString + " with other users:\nThe " + resourceTypeString
-        + " will be uploaded to the server and made visible in the browser.\nIf you have already selected a folder, your " + resourceTypeString
-        + " will be uploaded there.");
+        "Upload your current " + resourceTypeString
+        + " to the server and made visible in the browser. You can choose whether you want to share it with other users or whether it should only be visible "
+          "in your private workspace.\nIf you have already selected a folder, your " + resourceTypeString + " will be uploaded there.");
 
     //edit button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
     if (AlienImGui::ToolbarButton(ICON_FA_EDIT)) {
-        if (_selectedTreeTO->isLeaf()) {
-            _editSimulationDialog.lock()->openForLeaf(_selectedTreeTO);
-        } else {
-            auto rawTOs = NetworkResourceService::getMatchingRawTOs(_selectedTreeTO, _workspaces.at(_currentWorkspace).rawTOs);
-            _editSimulationDialog.lock()->openForFolder(_selectedTreeTO, rawTOs);
-        }
+        onEditResource(_selectedTreeTO);
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Change name or description");
@@ -291,14 +294,11 @@ void _BrowserWindow::processToolbar()
     //move to other workspace button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
-    WorkspaceId targetWorkspaceId{.resourceType = _currentWorkspace.resourceType, .workspaceType = 2 - _currentWorkspace.workspaceType};
-    if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
-        onMoveResource(_selectedTreeTO, _currentWorkspace, targetWorkspaceId);
+    if (AlienImGui::ToolbarButton(ICON_FA_SHARE_ALT)) {
+        onMoveResource(_selectedTreeTO);
     }
     ImGui::EndDisabled();
-    auto moveButtonTooltip = targetWorkspaceId.workspaceType == WorkspaceType_Shared ? "Move to public workspace in order to share it with other users"
-                                                                        : "Move to " + workspaceTypeToString.at(targetWorkspaceId.workspaceType) + " workspace";
-    AlienImGui::Tooltip(moveButtonTooltip);
+    AlienImGui::Tooltip("Change visibility: public " ICON_FA_LONG_ARROW_ALT_RIGHT " private and private " ICON_FA_LONG_ARROW_ALT_RIGHT " public");
 
     //delete button
     ImGui::SameLine();
@@ -506,15 +506,17 @@ void _BrowserWindow::processUserList()
 void _BrowserWindow::processStatus()
 {
     AlienImGui::Separator();
-    auto numSimulations = 0;
+    std::unordered_set<NetworkResourceRawTO> simulations;
+    std::unordered_set<NetworkResourceRawTO> genomes;
     for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
-        numSimulations += toInt(_workspaces.at(WorkspaceId{NetworkResourceType_Simulation, workspaceType}).rawTOs.size());
-    }
-    auto numGenomes = 0;
-    for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
-        numGenomes += toInt(_workspaces.at(WorkspaceId{NetworkResourceType_Genome, workspaceType}).rawTOs.size());
+        auto const& simWorkspace = _workspaces.at(WorkspaceId{NetworkResourceType_Simulation, workspaceType});
+        auto const& genomeWorkspace = _workspaces.at(WorkspaceId{NetworkResourceType_Genome, workspaceType});
+        simulations.insert(simWorkspace.rawTOs.begin(), simWorkspace.rawTOs.end());
+        genomes.insert(genomeWorkspace.rawTOs.begin(), genomeWorkspace.rawTOs.end());
     }
 
+    auto numSimulations = toInt(simulations.size());
+    auto numGenomes = toInt(genomes.size());
     ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
     std::string statusText;
     statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
@@ -548,7 +550,7 @@ void _BrowserWindow::processSimulationList()
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, - scale(WorkspaceBottomSpace)), 0.0f)) {
+    if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, -scale(WorkspaceBottomSpace)), 0.0f)) {
         ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
         ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Description);
         ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_Likes);
@@ -752,6 +754,11 @@ bool _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
         result |= processFolderTreeSymbols(treeTO, collapsedFolderNames);
         processDownloadButton(leaf);
         ImGui::SameLine();
+        if (_currentWorkspace.workspaceType == WorkspaceType_Private && leaf.rawTO->workspaceType == WorkspaceType_Public) {
+            AlienImGui::Text(ICON_FA_SHARE_ALT);
+            AlienImGui::Tooltip("Visible in the public workspace");
+        }
+        ImGui::SameLine();
         processShortenedText(leaf.leafName, true);
     } else {
         auto& folder = treeTO->getFolder();
@@ -788,7 +795,7 @@ void _BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDownloadButtonTextColor);
         auto isAddReaction = processActionButton(ICON_FA_PLUS);
         ImGui::PopStyleColor();
-        AlienImGui::Tooltip("Add a reaction");
+        AlienImGui::Tooltip("Add a reaction", false);
         if (isAddReaction) {
             _activateEmojiPopup = true;
             _emojiPopupTO = treeTO;
@@ -1081,11 +1088,11 @@ void _BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
 {
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDownloadButtonTextColor);
     auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
+    AlienImGui::Tooltip("Download", false);
     ImGui::PopStyleColor();
     if (downloadButtonResult) {
         onDownloadResource(leaf);
     }
-    AlienImGui::Tooltip("Download");
 }
 
 namespace
@@ -1254,54 +1261,76 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
     });
 }
 
-void _BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO, WorkspaceId const& sourceId, WorkspaceId const& targetId)
+void _BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
 {
-    auto& source = _workspaces.at(sourceId);
+    if (treeTO->isLeaf()) {
+        _editSimulationDialog.lock()->openForLeaf(treeTO);
+    } else {
+        auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, _workspaces.at(_currentWorkspace).rawTOs);
+        _editSimulationDialog.lock()->openForFolder(treeTO, rawTOs);
+    }
+}
+
+void _BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
+{
+    auto& source = _workspaces.at(_currentWorkspace);
     auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, source.rawTOs);
 
-    //remove resources form source workspace
     for (auto const& rawTO : rawTOs) {
-        auto findResult = std::ranges::find_if(source.rawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
-        if (findResult != source.rawTOs.end()) {
-            source.rawTOs.erase(findResult);
+        switch (rawTO->workspaceType) {
+        case WorkspaceType_Private: {
+            rawTO->workspaceType = WorkspaceType_Public;
+            auto& publicWorkspace = _workspaces.at(WorkspaceId{_currentWorkspace.resourceType, WorkspaceType_Public});
+            publicWorkspace.rawTOs.emplace_back(rawTO);
+        } break;
+        case WorkspaceType_Public: {
+            rawTO->workspaceType = WorkspaceType_Private;
+            auto& publicWorkspace = _workspaces.at(WorkspaceId{_currentWorkspace.resourceType, WorkspaceType_Public});
+            auto findResult = std::ranges::find_if(publicWorkspace.rawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
+            if (findResult != publicWorkspace.rawTOs.end()) {
+                publicWorkspace.rawTOs.erase(findResult);
+            }
+        } break;
+        default:
+            break;
         }
     }
-    createTreeTOs(source);
-
-    //add resources to target workspace
-    auto& target = _workspaces.at(targetId);
-    target.rawTOs.insert(target.rawTOs.end(), rawTOs.begin(), rawTOs.end());
-    createTreeTOs(target);
+    for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+        createTreeTOs(_workspaces.at(WorkspaceId{_currentWorkspace.resourceType, workspaceType}));
+    }
 
     //apply changes to server
-    delayedExecution([targetId = targetId, rawTOs = rawTOs, this] {
+    delayedExecution([rawTOs = rawTOs, this] {
         for (auto const& rawTO : rawTOs) {
-            if (!NetworkService::moveResource(rawTO->id, targetId.workspaceType)) {
+            if (!NetworkService::moveResource(rawTO->id, rawTO->workspaceType)) {
                 MessageDialog::getInstance().information("Error", "Failed to move item.");
                 refreshIntern(true);
                 return;
             }
         }
     });
-    printOverlayMessage("Moving to " + workspaceTypeToString.at(targetId.workspaceType) + " workspace ...");
+    printOverlayMessage("Changing visibility ...");
 }
 
 void _BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
 {
-    auto& workspace = _workspaces.at(_currentWorkspace);
-    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, workspace.rawTOs);
+    auto& currentWorkspace = _workspaces.at(_currentWorkspace);
+    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, currentWorkspace.rawTOs);
 
     auto message = treeTO->isLeaf() ? "Do you really want to delete the selected item?" : "Do you really want to delete the selected folder?";
-    MessageDialog::getInstance().yesNo("Delete", message, [rawTOs = rawTOs, &workspace, this]() {
+    MessageDialog::getInstance().yesNo("Delete", message, [rawTOs = rawTOs, this]() {
 
         //remove resources form workspace
-        for (auto const& rawTO : rawTOs) {
-            auto findResult = std::ranges::find_if(workspace.rawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
-            if (findResult != workspace.rawTOs.end()) {
-                workspace.rawTOs.erase(findResult);
+        for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+            auto& workspace = _workspaces.at(WorkspaceId{_currentWorkspace.resourceType, workspaceType});
+            for (auto const& rawTO : rawTOs) {
+                auto findResult = std::ranges::find_if(workspace.rawTOs, [&](NetworkResourceRawTO const& otherRawTO) { return otherRawTO->id == rawTO->id; });
+                if (findResult != workspace.rawTOs.end()) {
+                    workspace.rawTOs.erase(findResult);
+                }
             }
+            createTreeTOs(workspace);
         }
-        createTreeTOs(workspace);
 
         //apply changes to server
         printOverlayMessage("Deleting ...");

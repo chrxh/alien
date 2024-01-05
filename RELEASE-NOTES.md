@@ -1,10 +1,21 @@
 # Release notes
 
+## [4.7.1] - 2024-01-05
+### Added
+- gui/browser: shared symbol in private workspace in front of items to indicate if it is public
+- gui/upload dialog: toggle if simulation or genome should be shared in public workspace or not
+
+### Changed
+- gui/browser: private workspace also shows items from the public workspace if they belong to the same user
+
+### Fixed
+- gui/browser: tooltip for downloading and reacting was broken
+
 ## [4.7.0] - 2024-01-04
 ### Added
 - gui/browser: private workspace for each user account added
 - gui/browser: move simulations, genomes or folders to other workspace (via toolbar buttons)
-- gui/browser: edit simulations, genomes or foldcers (via toolbar buttons)
+- gui/browser: edit simulations, genomes or folders (via toolbar buttons)
 - gui/browser: expand and collapse folder content (via toolbar buttons)
 - gui/browser: cache for speeding up downloading simulations
 - gui/upload dialog: validation of user input to allowed characters

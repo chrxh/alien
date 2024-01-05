@@ -96,7 +96,8 @@ private:
     void sortUserList();
 
     void onDownloadResource(BrowserLeaf const& leaf);
-    void onMoveResource(NetworkResourceTreeTO const& treeTO, WorkspaceId const& sourceId, WorkspaceId const& targetId);
+    void onEditResource(NetworkResourceTreeTO const& treeTO);
+    void onMoveResource(NetworkResourceTreeTO const& treeTO);
     void onDeleteResource(NetworkResourceTreeTO const& treeTO);
     void onToggleLike(NetworkResourceTreeTO const& to, int emojiType);
     void onExpandFolders();

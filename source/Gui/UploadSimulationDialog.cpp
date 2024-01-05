@@ -47,32 +47,23 @@ _UploadSimulationDialog::_UploadSimulationDialog(
     , _genomeEditorWindow(genomeEditorWindow)
 {
     auto& settings = GlobalSettings::getInstance();
-    _resourceName = settings.getStringState("dialogs.upload.simulation name", "");
-    _resourceDescription = settings.getStringState("dialogs.upload.simulation description", "");
+    _share = settings.getBoolState("dialogs.upload.share", _share);
 }
 
 _UploadSimulationDialog::~_UploadSimulationDialog()
 {
     auto& settings = GlobalSettings::getInstance();
-    settings.setStringState("dialogs.upload.simulation name", _resourceName);
-    settings.setStringState("dialogs.upload.simulation description", _resourceDescription);
+    settings.setBoolState("dialogs.upload.share", _share);
 }
 
 void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder)
 {
     if (NetworkService::getLoggedInUserName()) {
-        auto workspaceType = _browserWindow->getCurrentWorkspaceType();
-        if (workspaceType == WorkspaceType_AlienProject && *NetworkService::getLoggedInUserName() != "alien-project") {
-            MessageDialog::getInstance().information(
-                "Upload " + BrowserDataTypeToLowerString.at(resourceType),
-                "You are not allowed to upload to alien-project's workspace.\nPlease choose the public or private workspace in the browser.");
-            return;
-        }
-
         changeTitle("Upload " + BrowserDataTypeToLowerString.at(resourceType));
         _resourceType = resourceType;
-        _workspaceType = workspaceType;
         _folder = folder;
+        _resourceName = _resourceNameByFolder[_folder];
+        _resourceDescription = _resourceDescriptionByFolder[_folder];
         _AlienDialog::open();
     } else {
         _loginDialog->open();
@@ -115,9 +106,17 @@ void _UploadSimulationDialog::processIntern()
         AlienImGui::InputTextMultilineParameters()
             .hint("Description (optional)")
             .textWidth(0)
-            .height(ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(50.0f)),
+            .height(ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(70.0f)),
         _resourceDescription);
     ImGui::PopID();
+
+    AlienImGui::ToggleButton(
+        AlienImGui::ToggleButtonParameters()
+            .name("Make public")
+            .tooltip(
+                "If true, the " + resourceTypeString + " will be visible to all users. If false, the " + resourceTypeString
+                + " will only be visible in the private workspace. This property can also be changed later if desired."),
+        _share);
 
     AlienImGui::Separator();
 
@@ -129,6 +128,8 @@ void _UploadSimulationDialog::processIntern()
         } else {
             showMessage("Error", Const::NotAllowedCharacters);
         }
+        _resourceNameByFolder[_folder] = _resourceName;
+        _resourceDescriptionByFolder[_folder] = _resourceDescription;
     }
     ImGui::EndDisabled();
     ImGui::SetItemDefaultFocus();
@@ -136,15 +137,7 @@ void _UploadSimulationDialog::processIntern()
     ImGui::SameLine();
     if (AlienImGui::Button("Cancel")) {
         close();
-        _resourceName = _origResourceName;
-        _resourceDescription = _origResourceDescription;
     }
-}
-
-void _UploadSimulationDialog::openIntern()
-{
-    _origResourceName = _resourceName;
-    _origResourceDescription = _resourceDescription;
 }
 
 void _UploadSimulationDialog::onUpload()
@@ -195,8 +188,9 @@ void _UploadSimulationDialog::onUpload()
         }
 
         std::string resourceId;
+        auto workspaceType = _share ? WorkspaceType_Public : WorkspaceType_Private;
         if (!NetworkService::uploadResource(
-                resourceId, _folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, _workspaceType)) {
+                resourceId, _folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, workspaceType)) {
             showMessage(
                 "Error",
                 "Failed to upload " + BrowserDataTypeToLowerString.at(_resourceType)

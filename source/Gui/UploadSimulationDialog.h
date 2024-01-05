@@ -21,19 +21,18 @@ public:
 
 private:
     void processIntern();
-    void openIntern();
 
     void onUpload();
 
     std::string _folder;
+    std::unordered_map<std::string, std::string> _resourceNameByFolder;
+    std::unordered_map<std::string, std::string> _resourceDescriptionByFolder;
+
     std::string _resourceName;
     std::string _resourceDescription;
 
-    std::string _origResourceName;
-    std::string _origResourceDescription;
-
     NetworkResourceType _resourceType = NetworkResourceType_Simulation;
-    WorkspaceType _workspaceType = WorkspaceType_Shared;
+    bool _share = false;
 
     BrowserWindow _browserWindow;
     LoginDialog _loginDialog;
