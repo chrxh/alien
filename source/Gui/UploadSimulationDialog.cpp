@@ -112,7 +112,7 @@ void _UploadSimulationDialog::processIntern()
 
     AlienImGui::ToggleButton(
         AlienImGui::ToggleButtonParameters()
-            .name("Share with public")
+            .name("Make public")
             .tooltip(
                 "If true, the " + resourceTypeString + " will be visible to all users. If false, the " + resourceTypeString
                 + " will only be visible in the private workspace. This property can also be changed later if desired."),
