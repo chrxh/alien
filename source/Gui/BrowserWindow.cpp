@@ -294,7 +294,7 @@ void _BrowserWindow::processToolbar()
     //move to other workspace button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
-    if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_SHARE_ALT)) {
         onMoveResource(_selectedTreeTO);
     }
     ImGui::EndDisabled();
