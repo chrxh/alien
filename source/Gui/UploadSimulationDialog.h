@@ -32,7 +32,7 @@ private:
     std::string _resourceDescription;
 
     NetworkResourceType _resourceType = NetworkResourceType_Simulation;
-    WorkspaceType _workspaceType = WorkspaceType_Shared;
+    bool _share = false;
 
     BrowserWindow _browserWindow;
     LoginDialog _loginDialog;
