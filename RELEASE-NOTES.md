@@ -1,5 +1,12 @@
 # Release notes
 
+## [4.7.2] - 2024-01-06
+### Added
+- engine, gui/simulation parameters: splitting of energy particles above a certain minimum energy
+
+### Fixed
+- gui/browser: beginning and ending whitespaces of folder names are ignored for automatic grouping
+
 ## [4.7.1] - 2024-01-05
 ### Added
 - gui/browser: shared symbol in private workspace in front of items to indicate if it is public
@@ -20,11 +27,11 @@
 - gui/browser: cache for speeding up downloading simulations
 - gui/upload dialog: validation of user input to allowed characters
 - gui/upload dialog: upload simulation or genome to folder
-- gui/simulation parameters, model: individual cell color mutation
+- engine, gui/simulation parameters: individual cell color mutation
 
 ### Changed
 - gui/browser: layout (in particular, new widget for selecting workspace)
-- model: restrict the fusion of energy particles to certain energies
+- engine: restrict the fusion of energy particles to certain energies
 
 ## [4.6.0] - 2023-12-29
 ### Added
