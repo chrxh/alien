@@ -61,6 +61,8 @@ __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData dat
 {
     CellProcessor::verletPositionUpdate(data);
     CellProcessor::checkConnections(data);
+
+    ParticleProcessor::splitting(data);
 }
 
 __global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData data, bool considerAngles)

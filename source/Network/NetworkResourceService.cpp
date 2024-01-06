@@ -40,6 +40,26 @@ namespace
         }
         return true;
     }
+
+    std::string trimWhitespace(const std::string& input)
+    {
+        auto start = input.find_first_not_of(" \t\n\r\f\v");
+        if (start == std::string::npos) {
+            return "";
+        }
+        auto end = input.find_last_not_of(" \t\n\r\f\v");
+        return input.substr(start, end - start + 1);
+    }
+
+    std::vector<std::string> getNameParts(std::string const& resourceName)
+    {
+        std::vector<std::string> parts;
+        boost::split(parts, resourceName, boost::is_any_of(FolderSeparator));
+        for (auto& part : parts) {
+            part = trimWhitespace(part);
+        }
+        return parts;
+    }
 }
 
 std::unordered_map<NetworkResourceTreeTO, std::vector<NetworkResourceRawTO>> NetworkResourceService::_treeTOtoRawTOcache;
@@ -50,13 +70,12 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
 {
     NetworkResourceService::invalidateCache();
 
-    std::list<NetworkResourceTreeTO> treeToList;
+    std::list<NetworkResourceTreeTO> treeTOlist;
     for (auto const& rawTO : rawTOs) {
 
         //parse folder names
-        std::vector<std::string> folderNames;
         std::string nameWithoutFolders;
-        boost::split(folderNames, rawTO->resourceName, boost::is_any_of(FolderSeparator));
+        std::vector<std::string> folderNames = getNameParts(rawTO->resourceName);
         if (!folderNames.empty()) {
             nameWithoutFolders = folderNames.back();
             folderNames.pop_back();
@@ -64,16 +83,16 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
 
         std::list<NetworkResourceTreeTO>::iterator bestMatchIter;
         int bestMatchEqualFolders;
-        if (!treeToList.empty()) {
+        if (!treeTOlist.empty()) {
 
             //find matching node
-            auto searchIter = treeToList.end();
+            auto searchIter = treeTOlist.end();
             bestMatchIter = searchIter;
             bestMatchEqualFolders = -1;
-            for (int i = 0; i < treeToList.size(); ++i) {
+            for (int i = 0; i < treeTOlist.size(); ++i) {
                 --searchIter;
-                auto otherRawTO = *searchIter;
-                auto equalFolders = getNumEqualFolders(folderNames, otherRawTO->folderNames);
+                auto otherTreeTO = *searchIter;
+                auto equalFolders = getNumEqualFolders(folderNames, otherTreeTO->folderNames);
                 if (equalFolders < bestMatchEqualFolders) {
                     break;
                 }
@@ -84,7 +103,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
             }
             ++bestMatchIter;
         } else {
-            bestMatchIter = treeToList.begin();
+            bestMatchIter = treeTOlist.begin();
             bestMatchEqualFolders = 0;
         }
 
@@ -94,7 +113,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
             treeTO->folderNames = std::vector(folderNames.begin(), folderNames.begin() + i + 1);
             treeTO->type = rawTO->resourceType;
             treeTO->node = BrowserFolder();
-            bestMatchIter = treeToList.insert(bestMatchIter, treeTO);
+            bestMatchIter = treeTOlist.insert(bestMatchIter, treeTO);
             ++bestMatchIter;
         }
 
@@ -104,11 +123,11 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
         treeTO->type = rawTO->resourceType;
         treeTO->folderNames = folderNames;
         treeTO->node = leaf;
-        treeToList.insert(bestMatchIter, treeTO);
+        treeTOlist.insert(bestMatchIter, treeTO);
     }
 
     //calc folder lines
-    std::vector treeTOs(treeToList.begin(), treeToList.end());
+    std::vector treeTOs(treeTOlist.begin(), treeTOlist.end());
     for (int i = 0; i < treeTOs.size(); ++i) {
         auto& treeTO = treeTOs.at(i);
 
@@ -268,16 +287,14 @@ void NetworkResourceService::invalidateCache()
 
 std::vector<std::string> NetworkResourceService::getFolderNames(std::string const& resourceName)
 {
-    std::vector<std::string> result;
-    boost::split(result, resourceName, boost::is_any_of(FolderSeparator));
+    std::vector<std::string> result = getNameParts(resourceName);
     result.pop_back();
     return result;
 }
 
 std::string NetworkResourceService::removeFoldersFromName(std::string const& resourceName)
 {
-    std::vector<std::string> parts;
-    boost::split(parts, resourceName, boost::is_any_of(FolderSeparator));
+    std::vector<std::string> parts = getNameParts(resourceName);
     return parts.back();
 }
 
@@ -285,8 +302,7 @@ std::set<std::vector<std::string>> NetworkResourceService::getFolderNames(std::v
 {
     std::set<std::vector<std::string>> result;
     for (auto const& rawTO : rawTOs) {
-        std::vector<std::string> folderNames;
-        boost::split(folderNames, rawTO->resourceName, boost::is_any_of(FolderSeparator));
+        std::vector<std::string> folderNames = getNameParts(rawTO->resourceName);
         for (int i = 0; i < toInt(folderNames.size()) - minNesting; ++i) {
             result.insert(std::vector(folderNames.begin(), folderNames.begin() + minNesting + i));
         }
@@ -319,8 +335,7 @@ std::set<std::vector<std::string>> NetworkResourceService::convertSettingsToFold
 
     std::set<std::vector<std::string>> result;
     for (auto const& part : parts) {
-        std::vector<std::string> splittedParts;
-        boost::split(splittedParts, part, boost::is_any_of(FolderSeparator));
+        std::vector<std::string> splittedParts = getNameParts(part);
         result.insert(splittedParts);
     }
     return result;
