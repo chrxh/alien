@@ -15,6 +15,7 @@ public:
     __inline__ __device__ static void updateMap(SimulationData& data);
     __inline__ __device__ static void movement(SimulationData& data);
     __inline__ __device__ static void collision(SimulationData& data);
+    __inline__ __device__ static void splitting(SimulationData& data);
     __inline__ __device__ static void transformation(SimulationData& data);
     __inline__ __device__ static void radiate(SimulationData& data, float2 pos, float2 vel, int color, float energy);  //return needed energy
 
@@ -29,7 +30,7 @@ private:
 
 __inline__ __device__ void ParticleProcessor::updateMap(SimulationData& data)
 {
-    auto partition = calcPartition(data.objects.particlePointers.getNumEntries(), blockIdx.x, gridDim.x);
+    auto partition = calcPartition(data.objects.particlePointers.getNumOrigEntries(), blockIdx.x, gridDim.x);
 
     Particle** particlePointers = &data.objects.particlePointers.at(partition.startIndex);
     data.particleMap.set_block(partition.numElements(), particlePointers);
@@ -37,8 +38,7 @@ __inline__ __device__ void ParticleProcessor::updateMap(SimulationData& data)
 
 __inline__ __device__ void ParticleProcessor::movement(SimulationData& data)
 {
-    auto partition = calcPartition(
-        data.objects.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.objects.particlePointers.at(particleIndex);
@@ -49,8 +49,7 @@ __inline__ __device__ void ParticleProcessor::movement(SimulationData& data)
 
 __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
 {
-    auto partition = calcPartition(
-        data.objects.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.objects.particlePointers.at(particleIndex);
@@ -63,15 +62,12 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
             if (lock.tryLock()) {
 
                 if (particle->energy > NEAR_ZERO && otherParticle->energy > NEAR_ZERO) {
-                    if (cudaSimulationParameters.particleTransformationAllowed
-                        || particle->energy + otherParticle->energy < MaxFusionEnergy) {
-                        auto factor1 = particle->energy / (particle->energy + otherParticle->energy);
-                        otherParticle->vel = particle->vel * factor1 + otherParticle->vel * (1.0f - factor1);
-                        otherParticle->energy += particle->energy;
-                        otherParticle->lastAbsorbedCell = nullptr;
-                        particle->energy = 0;
-                        particle = nullptr;
-                    }
+                    auto factor1 = particle->energy / (particle->energy + otherParticle->energy);
+                    otherParticle->vel = particle->vel * factor1 + otherParticle->vel * (1.0f - factor1);
+                    otherParticle->energy += particle->energy;
+                    otherParticle->lastAbsorbedCell = nullptr;
+                    particle->energy = 0;
+                    particle = nullptr;
                 }
 
                 lock.releaseLock();
@@ -128,6 +124,40 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                     cell->releaseLock();
                 }
             }
+        }
+    }
+}
+
+__inline__ __device__ void ParticleProcessor::splitting(SimulationData& data)
+{
+    auto partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());
+
+    for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
+        auto& particle = data.objects.particlePointers.at(particleIndex);
+        if (particle == nullptr) {
+            continue;
+        }
+        if (data.numberGen1.random() >= 0.01f) {
+            continue;
+        }
+
+        if (particle->energy > cudaSimulationParameters.particleSplitEnergy[particle->color]) {
+            particle->energy *= 0.5f;
+            auto velPerturbation = Math::unitVectorOfAngle(data.numberGen1.random() * 360);
+
+            float2 otherPos = particle->absPos + velPerturbation / 5;
+            data.particleMap.correctPosition(otherPos);
+
+            particle->absPos -= velPerturbation / 5;
+            data.particleMap.correctPosition(particle->absPos);
+
+            velPerturbation *= cudaSimulationParameters.radiationVelocityPerturbation / (particle->energy + 1.0f);
+            float2 otherVel = particle->vel + velPerturbation;
+
+            particle->vel -= velPerturbation;
+            ObjectFactory factory;
+            factory.init(&data);
+            factory.createParticle(particle->energy, otherPos, otherVel, particle->color);
         }
     }
 }

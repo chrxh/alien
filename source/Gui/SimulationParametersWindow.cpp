@@ -530,12 +530,26 @@ void _SimulationParametersWindow::processBase(
                     .colorDependence(true)
                     .infinity(true)
                     .min(0)
-                    .max(100000)
+                    .max(100000.0f)
                     .logarithmic(true)
                     .format("%.1f")
                     .defaultValue(origSimParameters.highRadiationMinCellEnergy)
                     .tooltip("The minimum energy of a cell can be defined here, from which it emits energy particles."),
                 simParameters.highRadiationMinCellEnergy);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Split energy")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .infinity(true)
+                    .min(1.0f)
+                    .max(10000.0f)
+                    .logarithmic(true)
+                    .format("%.0f")
+                    .defaultValue(origSimParameters.particleSplitEnergy)
+                    .tooltip("The minimum energy of an energy particle after which it can split into two particles, whereby it receives a small momentum. The "
+                             "splitting does not occur immediately, but only after a certain time."),
+                simParameters.particleSplitEnergy);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Energy to cell transformation")
@@ -1924,6 +1938,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.cellFunctionConstructorExternalEnergySupplyRate[i] =
             std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorExternalEnergySupplyRate[i]));
         parameters.baseValues.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
+        parameters.particleSplitEnergy[i] = std::max(0.0f, parameters.particleSplitEnergy[i]);
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
