@@ -3,7 +3,7 @@
 ## [4.7.2] - 2024-01-06
 ### Added
 - engine, gui/simulation parameters: splitting of energy particles above a certain minimum energy
-- engine: flow fields also affect energy particles
+- engine: force fields also affect energy particles
 
 ### Fixed
 - gui/browser: beginning and ending whitespaces of folder names are ignored for automatic grouping
