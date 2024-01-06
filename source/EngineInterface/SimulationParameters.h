@@ -66,6 +66,14 @@ struct SimulationParameters
     bool particleTransformationAllowed = false;
     bool particleTransformationRandomCellFunction = false;
     int particleTransformationMaxGenomeSize = 300;
+    ColorVector<float> particleSplitEnergy = {
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value};
     
     ColorVector<float> cellFunctionConstructorOffspringDistance = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
     ColorVector<float> cellFunctionConstructorConnectingCellMaxDistance = {1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f};
@@ -174,6 +182,9 @@ struct SimulationParameters
         }
          
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (particleSplitEnergy[i] != other.particleSplitEnergy[i]) {
+                return false;
+            }
             if (cellFunctionAttackerSensorDetectionFactor[i] != other.cellFunctionAttackerSensorDetectionFactor[i]) {
                 return false;
             }

@@ -592,6 +592,8 @@ namespace
             defaultParameters.particleTransformationMaxGenomeSize,
             "simulation parameters.particle.transformation.max genome size",
             parserTask);
+        encodeDecodeProperty(
+            tree, parameters.particleSplitEnergy, defaultParameters.particleSplitEnergy, "simulation parameters.particle.split energy", parserTask);
 
         encodeDecodeProperty(
             tree,

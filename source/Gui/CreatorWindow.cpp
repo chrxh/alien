@@ -141,8 +141,10 @@ void _CreatorWindow::processIntern()
         if (_mode != CreationMode_CreateParticle & _mode != CreationMode_CreateCell) {
             AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
         }
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Indestructible").textWidth(RightColumnWidth).tooltip(Const::CellIndestructibleTooltip), _barrier);
+        if (_mode != CreationMode_CreateParticle) {
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters().name("Indestructible").textWidth(RightColumnWidth).tooltip(Const::CellIndestructibleTooltip), _barrier);
+        }
     }
     ImGui::EndChild();
 
