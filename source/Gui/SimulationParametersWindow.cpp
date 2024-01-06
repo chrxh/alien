@@ -538,7 +538,7 @@ void _SimulationParametersWindow::processBase(
                 simParameters.highRadiationMinCellEnergy);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Split energy")
+                    .name("Minimum split energy")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .infinity(true)
