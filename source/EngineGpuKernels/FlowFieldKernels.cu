@@ -47,24 +47,43 @@ namespace
 
 __global__ void cudaApplyFlowFieldSettings(SimulationData data)
 {
-    auto& cells = data.objects.cellPointers;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
-
     float2 accelerations[MAX_SPOTS];
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
-        if (cell->barrier) {
-            continue;
-        }
-        int numFlowFields = 0; 
-        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+    {
+        auto& cells = data.objects.cellPointers;
+        auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
-            if (cudaSimulationParameters.spots[i].flowType != FlowType_None) {
-                accelerations[numFlowFields] = calcAcceleration(data.cellMap, cell->pos, i);
-                ++numFlowFields;
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& cell = cells.at(index);
+            if (cell->barrier) {
+                continue;
             }
+            int numFlowFields = 0;
+            for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+
+                if (cudaSimulationParameters.spots[i].flowType != FlowType_None) {
+                    accelerations[numFlowFields] = calcAcceleration(data.cellMap, cell->pos, i);
+                    ++numFlowFields;
+                }
+            }
+            auto resultingAcceleration = SpotCalculator::calcResultingFlowField(data.cellMap, cell->pos, float2{0, 0}, accelerations);
+            cell->shared1 += resultingAcceleration;
         }
-        auto resultingAcceleration = SpotCalculator::calcResultingFlowField(data.cellMap, cell->pos, float2{0, 0}, accelerations);
-        cell->shared1 += resultingAcceleration;
+    }
+    {
+        auto& particles = data.objects.particlePointers;
+        auto partition = calcAllThreadsPartition(particles.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& particle = particles.at(index);
+            int numFlowFields = 0;
+            for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+
+                if (cudaSimulationParameters.spots[i].flowType != FlowType_None) {
+                    accelerations[numFlowFields] = calcAcceleration(data.cellMap, particle->absPos, i);
+                    ++numFlowFields;
+                }
+            }
+            auto resultingAcceleration = SpotCalculator::calcResultingFlowField(data.cellMap, particle->absPos, float2{0, 0}, accelerations);
+            particle->vel += resultingAcceleration;
+        }
     }
 }
