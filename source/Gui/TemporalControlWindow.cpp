@@ -12,6 +12,7 @@
 #include "StyleRepository.h"
 #include "StatisticsWindow.h"
 #include "AlienImGui.h"
+#include "DelayedExecutionController.h"
 #include "OverlayMessageController.h"
 
 namespace
@@ -137,7 +138,9 @@ void _TemporalControlWindow::processStepBackwardButton()
     ImGui::BeginDisabled(_history.empty() || _simController->isSimulationRunning());
     if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_LEFT)) {
         auto const& snapshot = _history.back();
-        applySnapshot(snapshot);
+        delayedExecution([=, this] { applySnapshot(snapshot); });
+        printOverlayMessage("Loading flashback ...");
+
         _history.pop_back();
     }
     ImGui::EndDisabled();
@@ -156,8 +159,9 @@ void _TemporalControlWindow::processStepForwardButton()
 void _TemporalControlWindow::processSnapshotButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_CAMERA)) {
-        onSnapshot();
-        printOverlayMessage("Snapshot taken");
+        delayedExecution([=, this] { onSnapshot(); });
+        
+        printOverlayMessage("Creating flashback ...");
     }
 }
 
@@ -165,11 +169,11 @@ void _TemporalControlWindow::processRestoreButton()
 {
     ImGui::BeginDisabled(!_snapshot);
     if (AlienImGui::ToolbarButton(ICON_FA_UNDO)) {
-        applySnapshot(*_snapshot);
+        delayedExecution([this] { applySnapshot(*_snapshot); });
         _simController->removeSelection();
         _history.clear();
 
-        printOverlayMessage("Snapshot restored");   //flashback?
+        printOverlayMessage("Applying flashback ...");
     }
     ImGui::EndDisabled();
 }
