@@ -363,7 +363,7 @@ void _MainWindow::processMenubar()
 
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
-            _exitDialog->open();
+            onExit();
         }
         ImGui::Dummy(ImVec2(10.0f, 0.0f));
         if (AlienImGui::BeginMenuButton(" " ICON_FA_GAMEPAD "  Simulation ", _simulationMenuToggled, "Simulation")) {
@@ -581,10 +581,8 @@ void _MainWindow::processMenubar()
         if (ImGui::IsKeyPressed(GLFW_KEY_SPACE)) {
             if (_simController->isSimulationRunning()) {
                 onPauseSimulation();
-                printOverlayMessage("Pause");
             } else {
                 onRunSimulation();
-                printOverlayMessage("Run");
             }
             
         }
@@ -829,11 +827,19 @@ void _MainWindow::onSaveSimulation()
 void _MainWindow::onRunSimulation()
 {
     _simController->runSimulation();
+    printOverlayMessage("Run");
 }
 
 void _MainWindow::onPauseSimulation()
 {
     _simController->pauseSimulation();
+    printOverlayMessage("Pause");
+}
+
+void _MainWindow::onExit()
+{
+    delayedExecution([this] { _exitDialog->open(); });
+    printOverlayMessage("Exiting ...");
 }
 
 void _MainWindow::pushGlobalStyle()
