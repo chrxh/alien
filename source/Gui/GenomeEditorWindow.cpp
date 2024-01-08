@@ -441,7 +441,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 
         float h, s, v;
         AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.3f, v));
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.4f, v));
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Framed;
 
         //auto treeNodeColor = ImColor::HSV(h, s * 1.0f, v * 0.0f);
@@ -471,8 +471,10 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
         if (_expandNodes) {
             ImGui::SetNextTreeNodeOpen(*_expandNodes);
         }
+        ImGui::PushFont(StyleRepository::getInstance().getSmallBoldFont());
         auto treeNodeOpen =
             ImGui::TreeNodeEx((generateShortDescription(index, cell, shapeGeneratorResult, isFirstOrLast) + "###").c_str(), flags);
+        ImGui::PopFont();
         ImGui::PopStyleColor(4);
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
             if (tab.selectedNode && *tab.selectedNode == index) {

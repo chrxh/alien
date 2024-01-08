@@ -97,9 +97,9 @@ namespace Const
     ImColor const BrowserVersionOutdatedTextColor = ImColor::HSV(0.0f, 0.0f, 0.6f);
     ImColor const BrowserVersionNewerTextColor = ImColor::HSV(0.0f, 0.2f, 1.0f);
 
-    ImColor const ParametersFeatureColor = ImColor::HSV(0.7f, 0.6f, 0.55f);
-    ImColor const ParametersFeatureHoveredColor = ImColor::HSV(0.7f, 0.6f, 0.65f);
-    ImColor const ParametersFeatureActiveColor = ImColor::HSV(0.7f, 0.6f, 0.75f);
+    ImColor const ParametersFeatureColor = ImColor::HSV(0.9f, 0.6f, 0.55f);
+    ImColor const ParametersFeatureHoveredColor = ImColor::HSV(0.9f, 0.6f, 0.65f);
+    ImColor const ParametersFeatureActiveColor = ImColor::HSV(0.9f, 0.6f, 0.75f);
 }
 
 class StyleRepository
