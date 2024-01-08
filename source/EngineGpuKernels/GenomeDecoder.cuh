@@ -46,7 +46,7 @@ public:
 
     //node-wide methods
     __inline__ __device__ static int getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeAddress, bool withSubgenomes = true);
-    __inline__ __device__ static int getNextCellFunctionType(uint8_t* genome, int nodeAddress);
+    __inline__ __device__ static CellFunction getNextCellFunctionType(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static bool isNextCellSelfReplication(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static int getNextCellColor(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static void setNextCellFunctionType(uint8_t* genome, int nodeAddress, CellFunction cellFunction);
@@ -568,7 +568,7 @@ __inline__ __device__ int GenomeDecoder::getNextCellFunctionDataSize(uint8_t* ge
     }
 }
 
-__inline__ __device__ int GenomeDecoder::getNextCellFunctionType(uint8_t* genome, int nodeAddress)
+__inline__ __device__ CellFunction GenomeDecoder::getNextCellFunctionType(uint8_t* genome, int nodeAddress)
 {
     return genome[nodeAddress] % CellFunction_Count;
 }

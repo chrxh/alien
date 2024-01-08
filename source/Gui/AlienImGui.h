@@ -246,6 +246,8 @@ public:
 
     static void NegativeSpacing();
     static void Separator();
+    static void MovableSeparator(float& height);
+
     static void Group(std::string const& text);
 
     static bool ToolbarButton(std::string const& text);
@@ -255,6 +257,9 @@ public:
     static void ToolbarSeparator();
     static bool Button(std::string const& text, float size = 0);
     static bool CollapseButton(bool collapsed);
+
+    static bool BeginTreeNode(std::string const& text, bool defaultOpen = true);
+    static void EndTreeNode();
 
     struct ButtonParameters
     {
