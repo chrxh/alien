@@ -19,8 +19,10 @@ private:
     void createDefaultSpotData(SimulationParametersSpot& spot);
 
     void processToolbar();
+    void processTabWidget();
     void processBase(SimulationParameters& simParameters, SimulationParameters const& origSimParameters);
     void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot, SimulationParameters const& parameters);
+    void processFeatureList();
 
     void onOpenParameters();
     void onSaveParameters();
@@ -36,4 +38,7 @@ private:
     std::string _startingPath;
     std::optional<SimulationParameters> _copiedParameters;
     std::optional<int> _numSpotsLastTime;
+
+    bool _featureListOpen = false;
+    float _featureListHeight = 200.0f;
 };

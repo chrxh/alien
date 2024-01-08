@@ -318,7 +318,7 @@ __inline__ __device__ void MutationProcessor::customGeometryMutation(SimulationD
             GenomeDecoder::setNextConstructionAngle2(genome, nodeAddress, data.numberGen1.randomByte());
             break;
         }
-        adaptMutationId(data, constructor);
+        //adaptMutationId(data, constructor);
     });
 }
 
@@ -388,7 +388,7 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
-    adaptMutationId(data, constructor);
+    //adaptMutationId(data, constructor);
 }
 
 __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& data, Cell* cell)
@@ -472,7 +472,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
-    adaptMutationId(data, constructor);
+    //adaptMutationId(data, constructor);
 }
 
 __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& data, Cell* cell)
@@ -497,6 +497,10 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
             return;
         }
     }
+    auto deletedCellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
+    if (deletedCellFunctionType == CellFunction_Constructor || deletedCellFunctionType == CellFunction_Injector) {
+        adaptMutationId(data, constructor);
+    }
 
     auto targetGenomeSize = genomeSize - deleteSize;
     for (int i = nodeAddress; i < targetGenomeSize; ++i) {
@@ -509,7 +513,7 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
     }
     constructor.genomeCurrentNodeIndex = 0;
     constructor.genomeSize = targetGenomeSize;
-    adaptMutationId(data, constructor);
+    //adaptMutationId(data, constructor);
 }
 
 __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& data, Cell* cell)

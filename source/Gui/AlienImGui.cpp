@@ -683,9 +683,9 @@ bool AlienImGui::ShutdownButton()
 {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2);
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ShutdownButtonColor);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ShutdownButtonHoveredColor);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ShutdownButtonActiveColor);
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ImportantButtonColor);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ImportantButtonHoveredColor);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ImportantButtonActiveColor);
     auto result = ImGui::Button(ICON_FA_POWER_OFF);
     ImGui::PopStyleColor(3);
     ImGui::PopStyleVar(2);
@@ -785,6 +785,14 @@ void AlienImGui::Separator()
     ImGui::Separator();
     ImGui::Spacing();
     ImGui::Spacing();
+}
+
+void AlienImGui::MovableSeparator(float& height)
+{
+    ImGui::Button("", ImVec2(-1, scale(5.0f)));
+    if (ImGui::IsItemActive()) {
+        height -= ImGui::GetIO().MouseDelta.y;
+    }
 }
 
 void AlienImGui::Group(std::string const& text)
@@ -898,6 +906,33 @@ bool AlienImGui::CollapseButton(bool collapsed)
     auto result = AlienImGui::Button(collapsed ? ICON_FA_CARET_RIGHT "##collapseButton" : ICON_FA_CARET_DOWN "##collapseButton", 20.0f);
     ImGui::PopStyleColor(1);
     return result;
+}
+
+bool AlienImGui::BeginTreeNode(std::string const& text, bool defaultOpen)
+{
+    ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(Const::TreeNodeColor));
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, static_cast<ImVec4>(Const::TreeNodeHoveredColor));
+    ImGui::PushStyleColor(ImGuiCol_HeaderActive, static_cast<ImVec4>(Const::TreeNodeActiveColor));
+    ImGuiTreeNodeFlags treeNodeClosedFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_Framed;
+    ImGuiTreeNodeFlags treeNodeOpenFlags = treeNodeClosedFlags | ImGuiTreeNodeFlags_DefaultOpen;
+    ImGui::PushFont(StyleRepository::getInstance().getSmallBoldFont());
+    auto result = ImGui::TreeNodeEx(text.c_str(), defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
+    ImGui::PopFont();
+    ImGui::PopStyleColor(3);
+    return result;
+    //ImGui::ArrowButton("##", defaultOpen ? ImGuiDir_Down : ImGuiDir_Right);
+    //ImGui::SameLine();
+    //AlienImGui::Text(text);
+    //ImGui::PopStyleColor(2);
+    //ImGui::Dummy({scale(17.0f),0});
+    //ImGui::SameLine();
+    //ImGui::BeginGroup();
+    //return true;
+}
+
+void AlienImGui::EndTreeNode()
+{
+    ImGui::TreePop();
 }
 
 bool AlienImGui::Button(ButtonParameters const& parameters)

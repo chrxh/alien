@@ -293,10 +293,8 @@ void _GenomeEditorWindow::processTab(TabData& tab)
     }
     ImGui::EndChild();
 
-    ImGui::Button("", ImVec2(-1, scale(5.0f)));
-    if (ImGui::IsItemActive()) {
-        _previewHeight -= ImGui::GetIO().MouseDelta.y;
-    }
+    AlienImGui::MovableSeparator(_previewHeight);
+
     AlienImGui::Group("Preview (reference configuration)");
     if (ImGui::BeginChild("##child4", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         showPreview(tab);
