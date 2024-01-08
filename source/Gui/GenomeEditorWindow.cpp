@@ -441,27 +441,14 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 
         float h, s, v;
         AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.4f, v));
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.5f, v));
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Framed;
 
-        //auto treeNodeColor = ImColor::HSV(h, s * 1.0f, v * 0.0f);
-        //auto treeNodeHoveredColor = ImColor::HSV(h, s * 1.0f, v * 0.5f);
-        //auto treeNodeActiveColor = ImColor::HSV(h, s * 1.0f, v * 0.6f);
-        if (tab.selectedNode && *tab.selectedNode == index) {
+        auto isNodeSelected = tab.selectedNode && *tab.selectedNode == index;
+        if (isNodeSelected) {
             flags |= ImGuiTreeNodeFlags_Selected;
-            //ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(treeNodeActiveColor));
-            //ImGui::PushStyleColor(ImGuiCol_HeaderHovered, static_cast<ImVec4>(treeNodeActiveColor));
-            //ImGui::PushStyleColor(ImGuiCol_HeaderActive, static_cast<ImVec4>(treeNodeActiveColor));
-            ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(Const::TreeNodeActiveColor));
-            ImGui::PushStyleColor(ImGuiCol_HeaderHovered, static_cast<ImVec4>(Const::TreeNodeActiveColor));
-            ImGui::PushStyleColor(ImGuiCol_HeaderActive, static_cast<ImVec4>(Const::TreeNodeActiveColor));
         } else {
-            //ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(treeNodeColor));
-            //ImGui::PushStyleColor(ImGuiCol_HeaderHovered, static_cast<ImVec4>(treeNodeHoveredColor));
-            //ImGui::PushStyleColor(ImGuiCol_HeaderActive, static_cast<ImVec4>(treeNodeActiveColor));
-            ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(ImColor::HSV(0, 0, 0)));
-            ImGui::PushStyleColor(ImGuiCol_HeaderHovered, static_cast<ImVec4>(Const::TreeNodeHoveredColor));
-            ImGui::PushStyleColor(ImGuiCol_HeaderActive, static_cast<ImVec4>(Const::TreeNodeActiveColor));
+            ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(ImColor::HSV(0, 0, 0, 0)));
         }
         if (_nodeIndexToJump && *_nodeIndexToJump == index) {
             ImGui::SetScrollHereY();
@@ -475,7 +462,10 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
         auto treeNodeOpen =
             ImGui::TreeNodeEx((generateShortDescription(index, cell, shapeGeneratorResult, isFirstOrLast) + "###").c_str(), flags);
         ImGui::PopFont();
-        ImGui::PopStyleColor(4);
+        if (!isNodeSelected) {
+            ImGui::PopStyleColor();
+        }
+        ImGui::PopStyleColor();
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
             if (tab.selectedNode && *tab.selectedNode == index) {
                 tab.selectedNode.reset();
