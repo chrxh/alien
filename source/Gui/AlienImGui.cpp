@@ -544,8 +544,8 @@ void AlienImGui::InputColorTransition(InputColorTransitionParameters const& para
 bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
 {
     auto result = ImGui::Checkbox(("##" + parameters._name).c_str(), &value);
-    ImGui::SameLine();
     if (parameters._textWidth != 0) {
+        ImGui::SameLine();
         ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth), 0.0f));
     }
 
@@ -916,18 +916,10 @@ bool AlienImGui::BeginTreeNode(std::string const& text, bool defaultOpen)
     ImGuiTreeNodeFlags treeNodeClosedFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_Framed;
     ImGuiTreeNodeFlags treeNodeOpenFlags = treeNodeClosedFlags | ImGuiTreeNodeFlags_DefaultOpen;
     ImGui::PushFont(StyleRepository::getInstance().getSmallBoldFont());
-    auto result = ImGui::TreeNodeEx(text.c_str(), defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
+    bool result = ImGui::TreeNodeEx(text.c_str(), defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
     ImGui::PopFont();
     ImGui::PopStyleColor(3);
     return result;
-    //ImGui::ArrowButton("##", defaultOpen ? ImGuiDir_Down : ImGuiDir_Right);
-    //ImGui::SameLine();
-    //AlienImGui::Text(text);
-    //ImGui::PopStyleColor(2);
-    //ImGui::Dummy({scale(17.0f),0});
-    //ImGui::SameLine();
-    //ImGui::BeginGroup();
-    //return true;
 }
 
 void AlienImGui::EndTreeNode()

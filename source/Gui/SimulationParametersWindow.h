@@ -19,14 +19,15 @@ private:
     void createDefaultSpotData(SimulationParametersSpot& spot);
 
     void processToolbar();
-    void processTabWidget();
-    void processBase(SimulationParameters& simParameters, SimulationParameters const& origSimParameters);
+    void processTabWidget(SimulationParameters& parameters, SimulationParameters const& lastParameters, SimulationParameters& origParameters);
+    void processBase(SimulationParameters& parameters, SimulationParameters const& origParameters);
     void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot, SimulationParameters const& parameters);
-    void processFeatureList();
+    void processFeatureList(SimulationParameters& parameters, SimulationParameters const& lastParameters, SimulationParameters const& origParameters);
 
     void onOpenParameters();
     void onSaveParameters();
 
+    void validationAndCorrectionLayout();
     void validationAndCorrection(SimulationParameters& parameters) const;
     void validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const;
 
