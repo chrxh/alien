@@ -12,6 +12,7 @@
 #include "StyleRepository.h"
 #include "StatisticsWindow.h"
 #include "AlienImGui.h"
+#include "DelayedExecutionController.h"
 #include "OverlayMessageController.h"
 
 namespace
@@ -116,9 +117,12 @@ void _TemporalControlWindow::processTpsRestriction()
 void _TemporalControlWindow::processRunButton()
 {
     ImGui::BeginDisabled(_simController->isSimulationRunning());
-    if (AlienImGui::ToolbarButton(ICON_FA_PLAY)) {
+    auto result = AlienImGui::ToolbarButton(ICON_FA_PLAY);
+    AlienImGui::Tooltip("Run");
+    if (result) {
         _history.clear();
         _simController->runSimulation();
+        printOverlayMessage("Run");
     }
     ImGui::EndDisabled();
 }
@@ -126,8 +130,11 @@ void _TemporalControlWindow::processRunButton()
 void _TemporalControlWindow::processPauseButton()
 {
     ImGui::BeginDisabled(!_simController->isSimulationRunning());
-    if (AlienImGui::ToolbarButton(ICON_FA_PAUSE)) {
+    auto result = AlienImGui::ToolbarButton(ICON_FA_PAUSE);
+    AlienImGui::Tooltip("Pause");
+    if (result) {
         _simController->pauseSimulation();
+        printOverlayMessage("Pause");
     }
     ImGui::EndDisabled();
 }
@@ -135,9 +142,13 @@ void _TemporalControlWindow::processPauseButton()
 void _TemporalControlWindow::processStepBackwardButton()
 {
     ImGui::BeginDisabled(_history.empty() || _simController->isSimulationRunning());
-    if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_LEFT)) {
+    auto result = AlienImGui::ToolbarButton(ICON_FA_CHEVRON_LEFT);
+    AlienImGui::Tooltip("Load previous time step");
+    if (result) {
         auto const& snapshot = _history.back();
-        applySnapshot(snapshot);
+        delayedExecution([this, snapshot] { applySnapshot(snapshot); });
+        printOverlayMessage("Loading previous time step ...");
+
         _history.pop_back();
     }
     ImGui::EndDisabled();
@@ -146,7 +157,9 @@ void _TemporalControlWindow::processStepBackwardButton()
 void _TemporalControlWindow::processStepForwardButton()
 {
     ImGui::BeginDisabled(_simController->isSimulationRunning());
-    if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_RIGHT)) {
+    auto result = AlienImGui::ToolbarButton(ICON_FA_CHEVRON_RIGHT);
+    AlienImGui::Tooltip("Process single time step");
+    if (result) {
         _history.emplace_back(createSnapshot());
         _simController->calcTimesteps(1);
     }
@@ -155,21 +168,26 @@ void _TemporalControlWindow::processStepForwardButton()
 
 void _TemporalControlWindow::processSnapshotButton()
 {
-    if (AlienImGui::ToolbarButton(ICON_FA_CAMERA)) {
-        onSnapshot();
-        printOverlayMessage("Snapshot taken");
+    auto result = AlienImGui::ToolbarButton(ICON_FA_CAMERA);
+    AlienImGui::Tooltip("Create flashback");
+    if (result) {
+        delayedExecution([this] { onSnapshot(); });
+        
+        printOverlayMessage("Creating flashback ...");
     }
 }
 
 void _TemporalControlWindow::processRestoreButton()
 {
     ImGui::BeginDisabled(!_snapshot);
-    if (AlienImGui::ToolbarButton(ICON_FA_UNDO)) {
-        applySnapshot(*_snapshot);
+    auto result = AlienImGui::ToolbarButton(ICON_FA_UNDO);
+    AlienImGui::Tooltip("Load flashback");
+    if (result) {
+        delayedExecution([this] { applySnapshot(*_snapshot); });
         _simController->removeSelection();
         _history.clear();
 
-        printOverlayMessage("Snapshot restored");   //flashback?
+        printOverlayMessage("Loading flashback ...");
     }
     ImGui::EndDisabled();
 }
