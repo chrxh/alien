@@ -1881,7 +1881,7 @@ TEST_F(ConstructorTests, allowLargeConstructionAngle2)
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle1(-170.0f)),
+            .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle1(-180.0f)),
         CellDescription().setId(2).setPos({11.0f, 9.0f}).setEnergy(100).setMaxConnections(1).setExecutionOrderNumber(5),
         CellDescription().setId(3).setPos({11.0f, 11.0f}).setEnergy(100).setMaxConnections(1).setExecutionOrderNumber(5),
     });
