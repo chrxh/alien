@@ -1836,3 +1836,65 @@ TEST_F(ConstructorTests, restartIfLastConstructedCellHasLowNumConnections)
     EXPECT_EQ(1, actualConstructor.genomeCurrentNodeIndex);
     EXPECT_EQ(0, actualConstructor.genomeCurrentRepetition);
 }
+
+TEST_F(ConstructorTests, allowLargeConstructionAngle1)
+{
+    auto genome =
+        GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setHeader(GenomeHeaderDescription()).setCells({CellGenomeDescription()}));
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle1(180.0f)),
+        CellDescription().setId(2).setPos({11.0f, 9.0f}).setEnergy(100).setMaxConnections(1).setExecutionOrderNumber(5),
+        CellDescription().setId(3).setPos({11.0f, 11.0f}).setEnergy(100).setMaxConnections(1).setExecutionOrderNumber(5),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(4, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
+
+    EXPECT_TRUE(approxCompare(11.0f, actualConstructedCell.pos.x));
+    EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.y));
+}
+
+TEST_F(ConstructorTests, allowLargeConstructionAngle2)
+{
+    auto genome =
+        GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setHeader(GenomeHeaderDescription()).setCells({CellGenomeDescription()}));
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle1(-170.0f)),
+        CellDescription().setId(2).setPos({11.0f, 9.0f}).setEnergy(100).setMaxConnections(1).setExecutionOrderNumber(5),
+        CellDescription().setId(3).setPos({11.0f, 11.0f}).setEnergy(100).setMaxConnections(1).setExecutionOrderNumber(5),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(4, actualData.cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
+
+    EXPECT_TRUE(approxCompare(11.0f, actualConstructedCell.pos.x));
+    EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.y));
+}
