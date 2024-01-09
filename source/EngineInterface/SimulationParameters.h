@@ -23,6 +23,10 @@ enum CellColorization_
 
 struct SimulationParameters
 {
+    //features
+    bool externalEnergyFeature = false;
+
+    //parameters
     SimulationParametersSpotValues baseValues;
 
     uint32_t backgroundColor = 0x1b0000;
@@ -351,7 +355,7 @@ struct SimulationParameters
             && cellFunctionConstructorCheckCompletenessForSelfReplication == other.cellFunctionConstructorCheckCompletenessForSelfReplication
             && cellFunctionAttackerDestroyCells == other.cellFunctionAttackerDestroyCells
             && cellFunctionReconnectorActivityThreshold == other.cellFunctionReconnectorActivityThreshold
-            && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold;
+            && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold && externalEnergyFeature == other.externalEnergyFeature;
     }
 
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }
