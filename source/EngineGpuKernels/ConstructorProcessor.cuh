@@ -737,9 +737,9 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     }
 
     auto cellFunctionConstructorPumpEnergyFactor = cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[hostCell->color];
-    if (isSelfReplicator(hostCell)) {
-        cellFunctionConstructorPumpEnergyFactor = 0;
-    }
+    //if (isSelfReplicator(hostCell)) {
+    //    cellFunctionConstructorPumpEnergyFactor = 0;
+    //}
 
     auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.cellNormalEnergy[hostCell->color])
         + min(constructionData.energy, cudaSimulationParameters.cellNormalEnergy[hostCell->color]) * (1.0f - cellFunctionConstructorPumpEnergyFactor);
