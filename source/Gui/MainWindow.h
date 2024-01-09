@@ -32,6 +32,7 @@ private:
     void onSaveSimulation();
     void onRunSimulation();
     void onPauseSimulation();
+    void onExit();
 
     void pushGlobalStyle();
     void popGlobalStyle();
