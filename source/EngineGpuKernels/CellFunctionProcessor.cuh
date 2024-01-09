@@ -156,9 +156,9 @@ CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& dat
         if (angleDeviation < -angleFromPrev / 2) {
             angleDeviation += angleFromPrev / 2;
             index = (index + numConnections - 1) % numConnections;
-            angleOfLargestAngleGap -= angleFromPrev;
             angleFromPrev = cell->connections[index].angleFromPrevious;
             angleDeviation = angleDeviation + angleFromPrev / 2;
+            angleOfLargestAngleGap -= angleFromPrev;
         }
     }
     auto angleFromPreviousConnection = angleFromPrev / 2 + angleDeviation;
