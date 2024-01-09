@@ -1,5 +1,10 @@
 # Release notes
 
+## [4.7.3] - 2024-01-09
+### Fixed
+- engine: drop restriction on start construction angle
+- engine: truncate neural activities to avoid overflow
+
 ## [4.7.2] - 2024-01-06
 ### Added
 - engine, gui/simulation parameters: splitting of energy particles above a certain minimum energy
