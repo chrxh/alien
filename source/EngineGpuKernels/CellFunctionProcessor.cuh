@@ -107,6 +107,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 result.channels[i] += connectedCell->activity.channels[i];
+                result.channels[i] = max(-1000000.0f, min(1000000.0f, result.channels[i])); //truncate value to avoid overflow
             }
         }
     }
@@ -142,15 +143,30 @@ CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& dat
         }
         angle += angleDiff;
     }
-    auto angleFromPreviousConnection = cell->connections[index].angleFromPrevious / 2 + angleDeviation;
-    if (angleFromPreviousConnection < 30.0f || angleFromPreviousConnection > cell->connections[index].angleFromPrevious - 30.0f) {
-        angleFromPreviousConnection = cell->connections[index].angleFromPrevious / 2;
+
+    auto angleFromPrev = cell->connections[index].angleFromPrevious;
+    for (int i = 0; i < numConnections - 1; ++i) {
+        if (angleDeviation > angleFromPrev / 2) {
+            angleDeviation -= angleFromPrev / 2;
+            index = (index + 1) % numConnections;
+            angleOfLargestAngleGap += angleFromPrev; 
+            angleFromPrev = cell->connections[index].angleFromPrevious;
+            angleDeviation = angleDeviation - angleFromPrev / 2;
+        }
+        if (angleDeviation < -angleFromPrev / 2) {
+            angleDeviation += angleFromPrev / 2;
+            index = (index + numConnections - 1) % numConnections;
+            angleOfLargestAngleGap -= angleFromPrev;
+            angleFromPrev = cell->connections[index].angleFromPrevious;
+            angleDeviation = angleDeviation + angleFromPrev / 2;
+        }
     }
+    auto angleFromPreviousConnection = angleFromPrev / 2 + angleDeviation;
+
     if (angleFromPreviousConnection > 360.0f) {
         angleFromPreviousConnection -= 360;
     }
-
-    angleFromPreviousConnection = max(min(angleFromPreviousConnection, cell->connections[index].angleFromPrevious), 0.0f);
+    angleFromPreviousConnection = max(30.0f, min(angleFromPrev - 30.0f, angleFromPreviousConnection));
 
     return ReferenceAndActualAngle{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
 }

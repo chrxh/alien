@@ -260,7 +260,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
             result.angle = result.genomeHeader.concatenationAngle1;
         }
     }
-    if (result.isLastNode) {
+    if (result.isLastNode && !isAtFirstNode) {
         if (result.isLastNodeOfLastRepetition) {
             result.angle = constructor.constructionAngle2;
         } else {
@@ -345,7 +345,6 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, true)) {
         return false;
     }
-
     auto anglesForNewConnection = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
 
     auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
