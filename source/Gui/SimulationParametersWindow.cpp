@@ -7,6 +7,7 @@
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationParametersService.h"
 
 #include "AlienImGui.h"
 #include "GenericFileDialogs.h"
@@ -1238,66 +1239,73 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
-         * Danger zone
+         * External energy
          */
-        if (AlienImGui::BeginTreeNode("External energy source")) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("External energy amount")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.0f)
-                    .max(100000000.0f)
-                    .format("%.0f")
-                    .logarithmic(true)
-                    .infinity(true)
-                    .defaultValue(origParameters.cellFunctionConstructorExternalEnergy)
-                    .tooltip("This parameter can be used to set the amount of energy (per color) of an external energy source. This type of energy is "
-                             "transferred to all constructor cells at a certain rate.\n\nTip: You can explicitly enter a numerical value by selecting the "
-                             "slider and then pressing TAB.\n\nWarning: Too much external energy can result in a massive production of cells and slow down or "
-                             "even crash the simulation."),
-                parameters.cellFunctionConstructorExternalEnergy);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("External energy supply rate")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.0f)
-                    .max(1.0f)
-                    .defaultValue(origParameters.cellFunctionConstructorExternalEnergySupplyRate)
-                    .tooltip("The energy from the external source is transferred to all constructor cells at a rate defined here: 0 = no energy transfer, 1 = "
-                             "constructor cells receive all the required energy"),
-                parameters.cellFunctionConstructorExternalEnergySupplyRate);
-            AlienImGui::EndTreeNode();
+        if (parameters.features.externalEnergy) {
+            if (AlienImGui::BeginTreeNode("External energy source")) {
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("External energy amount")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0.0f)
+                        .max(100000000.0f)
+                        .format("%.0f")
+                        .logarithmic(true)
+                        .infinity(true)
+                        .defaultValue(origParameters.cellFunctionConstructorExternalEnergy)
+                        .tooltip(
+                            "This parameter can be used to set the amount of energy (per color) of an external energy source. This type of energy is "
+                            "transferred to all constructor cells at a certain rate.\n\nTip: You can explicitly enter a numerical value by selecting the "
+                            "slider and then pressing TAB.\n\nWarning: Too much external energy can result in a massive production of cells and slow down or "
+                            "even crash the simulation."),
+                    parameters.cellFunctionConstructorExternalEnergy);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("External energy supply rate")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0.0f)
+                        .max(1.0f)
+                        .defaultValue(origParameters.cellFunctionConstructorExternalEnergySupplyRate)
+                        .tooltip(
+                            "The energy from the external source is transferred to all constructor cells at a rate defined here: 0 = no energy transfer, 1 = "
+                            "constructor cells receive all the required energy"),
+                    parameters.cellFunctionConstructorExternalEnergySupplyRate);
+                AlienImGui::EndTreeNode();
+            }
         }
 
         /**
          * Cell color transition rules
          */
-        if (AlienImGui::BeginTreeNode("Cell color transition rules", false)) {
-            for (int color = 0; color < MAX_COLORS; ++color) {
-                ImGui::PushID(color);
-                auto widgetParameters = AlienImGui::InputColorTransitionParameters()
-                                      .textWidth(RightColumnWidth)
-                                      .color(color)
-                                      .defaultTargetColor(origParameters.baseValues.cellColorTransitionTargetColor[color])
-                                      .defaultTransitionAge(origParameters.baseValues.cellColorTransitionDuration[color])
-                                      .logarithmic(true)
-                                      .infinity(true);
-                if (0 == color) {
-                    widgetParameters.name("Target color and duration")
-                        .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent color can "
-                                 "be defined for each cell color. In addition, durations must be specified that define how many time steps the corresponding "
-                                 "color are kept.");
+        if (parameters.features.colorTransitions) {
+            if (AlienImGui::BeginTreeNode("Cell color transition rules")) {
+                for (int color = 0; color < MAX_COLORS; ++color) {
+                    ImGui::PushID(color);
+                    auto widgetParameters = AlienImGui::InputColorTransitionParameters()
+                                                .textWidth(RightColumnWidth)
+                                                .color(color)
+                                                .defaultTargetColor(origParameters.baseValues.cellColorTransitionTargetColor[color])
+                                                .defaultTransitionAge(origParameters.baseValues.cellColorTransitionDuration[color])
+                                                .logarithmic(true)
+                                                .infinity(true);
+                    if (0 == color) {
+                        widgetParameters.name("Target color and duration")
+                            .tooltip(
+                                "Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent color can "
+                                "be defined for each cell color. In addition, durations must be specified that define how many time steps the corresponding "
+                                "color are kept.");
+                    }
+                    AlienImGui::InputColorTransition(
+                        widgetParameters,
+                        color,
+                        parameters.baseValues.cellColorTransitionTargetColor[color],
+                        parameters.baseValues.cellColorTransitionDuration[color]);
+                    ImGui::PopID();
                 }
-                AlienImGui::InputColorTransition(
-                    widgetParameters,
-                    color,
-                    parameters.baseValues.cellColorTransitionTargetColor[color],
-                    parameters.baseValues.cellColorTransitionDuration[color]);
-                ImGui::PopID();
+                AlienImGui::EndTreeNode();
             }
-            AlienImGui::EndTreeNode();
         }
     }
     ImGui::EndChild();
@@ -1863,34 +1871,36 @@ void _SimulationParametersWindow::processSpot(
         /**
          * Cell color transition rules
          */
-        if (AlienImGui::BeginTreeNode("Cell color transition rules", false)) {
-            ImGui::Checkbox("##cellColorTransition", &spot.activatedValues.cellColorTransition);
-            ImGui::SameLine();
-            ImGui::BeginDisabled(!spot.activatedValues.cellColorTransition);
-            auto posX = ImGui::GetCursorPos().x;
-            for (int color = 0; color < MAX_COLORS; ++color) {
-                ImGui::SetCursorPosX(posX);
-                ImGui::PushID(color);
-                auto parameters = AlienImGui::InputColorTransitionParameters()
-                                      .textWidth(RightColumnWidth)
-                                      .color(color)
-                                      .defaultTargetColor(origSpot.values.cellColorTransitionTargetColor[color])
-                                      .defaultTransitionAge(origSpot.values.cellColorTransitionDuration[color])
-                                      .logarithmic(true)
-                                      .infinity(true);
-                if (0 == color) {
-                    parameters.name("Target color and duration");
-                }
-                AlienImGui::InputColorTransition(
-                    parameters, color, spot.values.cellColorTransitionTargetColor[color], spot.values.cellColorTransitionDuration[color]);
-                ImGui::PopID();
-            }
-            ImGui::EndDisabled();
-            AlienImGui::EndTreeNode();
-            if (!spot.activatedValues.cellColorTransition) {
+        if (parameters.features.colorTransitions) {
+            if (AlienImGui::BeginTreeNode("Cell color transition rules")) {
+                ImGui::Checkbox("##cellColorTransition", &spot.activatedValues.cellColorTransition);
+                ImGui::SameLine();
+                ImGui::BeginDisabled(!spot.activatedValues.cellColorTransition);
+                auto posX = ImGui::GetCursorPos().x;
                 for (int color = 0; color < MAX_COLORS; ++color) {
-                    spot.values.cellColorTransitionTargetColor[color] = parameters.baseValues.cellColorTransitionTargetColor[color];
-                    spot.values.cellColorTransitionDuration[color] = parameters.baseValues.cellColorTransitionDuration[color];
+                    ImGui::SetCursorPosX(posX);
+                    ImGui::PushID(color);
+                    auto parameters = AlienImGui::InputColorTransitionParameters()
+                                          .textWidth(RightColumnWidth)
+                                          .color(color)
+                                          .defaultTargetColor(origSpot.values.cellColorTransitionTargetColor[color])
+                                          .defaultTransitionAge(origSpot.values.cellColorTransitionDuration[color])
+                                          .logarithmic(true)
+                                          .infinity(true);
+                    if (0 == color) {
+                        parameters.name("Target color and duration");
+                    }
+                    AlienImGui::InputColorTransition(
+                        parameters, color, spot.values.cellColorTransitionTargetColor[color], spot.values.cellColorTransitionDuration[color]);
+                    ImGui::PopID();
+                }
+                ImGui::EndDisabled();
+                AlienImGui::EndTreeNode();
+                if (!spot.activatedValues.cellColorTransition) {
+                    for (int color = 0; color < MAX_COLORS; ++color) {
+                        spot.values.cellColorTransitionTargetColor[color] = parameters.baseValues.cellColorTransitionTargetColor[color];
+                        spot.values.cellColorTransitionDuration[color] = parameters.baseValues.cellColorTransitionDuration[color];
+                    }
                 }
             }
         }
@@ -1923,12 +1933,12 @@ void _SimulationParametersWindow::processFeatureList(
 
         if (_featureListOpen) {
             AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("External energy control")
-                    .textWidth(0)
-                    .defaultValue(origParameters.externalEnergyFeature)
-                    .tooltip(""),
-                parameters.externalEnergyFeature);
+                AlienImGui::CheckboxParameters().name("External energy control").textWidth(0).defaultValue(origParameters.features.externalEnergy).tooltip(""),
+                parameters.features.externalEnergy);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters().name("Color transitions").textWidth(0).defaultValue(origParameters.features.colorTransitions).tooltip(""),
+                parameters.features.colorTransitions);
+            SimulationParametersService::resetParametersBasedOnFeatures(parameters);
             ImGui::TreePop();
         }
     }
