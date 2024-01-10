@@ -908,15 +908,21 @@ bool AlienImGui::CollapseButton(bool collapsed)
     return result;
 }
 
-bool AlienImGui::BeginTreeNode(std::string const& text, bool defaultOpen)
+bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
 {
-    ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(Const::TreeNodeColor));
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, static_cast<ImVec4>(Const::TreeNodeHoveredColor));
-    ImGui::PushStyleColor(ImGuiCol_HeaderActive, static_cast<ImVec4>(Const::TreeNodeActiveColor));
+    if (parameters._highlighted) {
+        ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(Const::TreeNodeHighlightedColor));
+        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, static_cast<ImVec4>(Const::TreeNodeHighlightedHoveredColor));
+        ImGui::PushStyleColor(ImGuiCol_HeaderActive, static_cast<ImVec4>(Const::TreeNodeHighlightedActiveColor));
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(Const::TreeNodeColor));
+        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, static_cast<ImVec4>(Const::TreeNodeHoveredColor));
+        ImGui::PushStyleColor(ImGuiCol_HeaderActive, static_cast<ImVec4>(Const::TreeNodeActiveColor));
+    }
     ImGuiTreeNodeFlags treeNodeClosedFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_Framed;
     ImGuiTreeNodeFlags treeNodeOpenFlags = treeNodeClosedFlags | ImGuiTreeNodeFlags_DefaultOpen;
     ImGui::PushFont(StyleRepository::getInstance().getSmallBoldFont());
-    bool result = ImGui::TreeNodeEx(text.c_str(), defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
+    bool result = ImGui::TreeNodeEx(parameters._text.c_str(), parameters._defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
     ImGui::PopFont();
     ImGui::PopStyleColor(3);
     return result;

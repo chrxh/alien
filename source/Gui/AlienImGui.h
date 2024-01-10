@@ -258,7 +258,13 @@ public:
     static bool Button(std::string const& text, float size = 0);
     static bool CollapseButton(bool collapsed);
 
-    static bool BeginTreeNode(std::string const& text, bool defaultOpen = true);
+    struct TreeNodeParameters
+    {
+        MEMBER_DECLARATION(TreeNodeParameters, std::string, text, "");
+        MEMBER_DECLARATION(TreeNodeParameters, bool, highlighted, false);
+        MEMBER_DECLARATION(TreeNodeParameters, bool, defaultOpen, true);
+    };
+    static bool BeginTreeNode(TreeNodeParameters const& parameters);
     static void EndTreeNode();
 
     struct ButtonParameters
