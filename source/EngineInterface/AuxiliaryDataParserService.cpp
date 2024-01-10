@@ -2,6 +2,7 @@
 
 #include "GeneralSettings.h"
 #include "Settings.h"
+#include "SimulationParametersService.h"
 
 namespace
 {
@@ -123,8 +124,8 @@ namespace
 
     void encodeDecode(boost::property_tree::ptree& tree, SimulationParameters& parameters, ParserTask parserTask)
     {
-        //simulation parameters
         SimulationParameters defaultParameters;
+
         encodeDecodeProperty(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
         encodeDecodeProperty(tree, parameters.cellColorization, defaultParameters.cellColorization, "simulation parameters.cell colorization", parserTask);
         encodeDecodeProperty(
@@ -890,6 +891,19 @@ namespace
                 defaultSpot.values.cellFunctionConstructorMutationGenomeColorProbability,
                 base + "cell.function.constructor.mutation probability.uniform color",
                 parserTask);
+        }
+
+        //features
+        encodeDecodeProperty(
+            tree, parameters.features.externalEnergy, defaultParameters.features.externalEnergy, "simulation parameters.features.external energy", parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.features.colorTransitions,
+            defaultParameters.features.colorTransitions,
+            "simulation parameters.features.color transitions",
+            parserTask);
+        if (parserTask == ParserTask::Decode) {
+            SimulationParametersService::activateFeaturesBasedOnParameters(parameters);
         }
     }
 
