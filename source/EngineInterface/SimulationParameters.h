@@ -6,6 +6,7 @@
 #include "RadiationSource.h"
 #include "SimulationParametersSpot.h"
 #include "Motion.h"
+#include "Features.h"
 
 /**
  * NOTE: header is also included in kernel code
@@ -19,14 +20,6 @@ enum CellColorization_
     CellColorization_MutationId,
     CellColorization_LivingState,
     CellColorization_GenomeSize
-};
-
-struct Features
-{
-    bool externalEnergy = false;
-    bool colorTransitions = false;
-
-    bool operator==(Features const& other) const;
 };
 
 struct SimulationParameters

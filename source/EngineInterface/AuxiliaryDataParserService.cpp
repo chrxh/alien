@@ -895,12 +895,18 @@ namespace
 
         //features
         encodeDecodeProperty(
-            tree, parameters.features.externalEnergy, defaultParameters.features.externalEnergy, "simulation parameters.features.external energy", parserTask);
+            tree, parameters.features.externalEnergyControl, defaultParameters.features.externalEnergyControl, "simulation parameters.features.external energy", parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.features.colorTransitions,
-            defaultParameters.features.colorTransitions,
-            "simulation parameters.features.color transitions",
+            parameters.features.cellColorTransitionRules,
+            defaultParameters.features.cellColorTransitionRules,
+            "simulation parameters.features.cell color transition rules",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.features.additionalAbsorptionControl,
+            defaultParameters.features.additionalAbsorptionControl,
+            "simulation parameters.features.additional absorption control",
             parserTask);
         if (parserTask == ParserTask::Decode) {
             SimulationParametersService::activateFeaturesBasedOnParameters(parameters);

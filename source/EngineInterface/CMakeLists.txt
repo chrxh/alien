@@ -14,6 +14,8 @@ add_library(EngineInterface
     Descriptions.cpp
     Descriptions.h
     EngineConstants.h
+    Features.cpp
+    Features.h
     GenomeConstants.h
     GenomeDescriptionService.cpp
     GenomeDescriptionService.h

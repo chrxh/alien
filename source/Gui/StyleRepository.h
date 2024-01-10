@@ -43,6 +43,9 @@ namespace Const
     ImColor const TreeNodeColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
     ImColor const TreeNodeHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
     ImColor const TreeNodeActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
+    ImColor const TreeNodeHighlightedColor = ImColor::HSV(0.9f, 0.4f, 0.55f);
+    ImColor const TreeNodeHighlightedHoveredColor = ImColor::HSV(0.9f, 0.4f, 0.65f);
+    ImColor const TreeNodeHighlightedActiveColor = ImColor::HSV(0.9f, 0.4f, 0.75f);
 
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 
@@ -96,10 +99,6 @@ namespace Const
     ImColor const BrowserVersionOkTextColor = ImColor::HSV(0.58f, 0.2f, 1.0f);
     ImColor const BrowserVersionOutdatedTextColor = ImColor::HSV(0.0f, 0.0f, 0.6f);
     ImColor const BrowserVersionNewerTextColor = ImColor::HSV(0.0f, 0.2f, 1.0f);
-
-    ImColor const ParametersFeatureColor = ImColor::HSV(0.9f, 0.4f, 0.55f);
-    ImColor const ParametersFeatureHoveredColor = ImColor::HSV(0.9f, 0.4f, 0.65f);
-    ImColor const ParametersFeatureActiveColor = ImColor::HSV(0.9f, 0.4f, 0.75f);
 }
 
 class StyleRepository

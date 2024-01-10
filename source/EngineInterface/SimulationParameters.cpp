@@ -1,10 +1,5 @@
 #include "SimulationParameters.h"
 
-bool Features::operator==(Features const& other) const
-{
-    return externalEnergy == other.externalEnergy && colorTransitions == other.colorTransitions;
-}
-
 bool SimulationParameters::operator==(SimulationParameters const& other) const
 {
     if (motionType != other.motionType) {
