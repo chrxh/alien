@@ -717,7 +717,7 @@ ConstructorProcessor::constructCellIntern(
 
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
-    if (hostCell->energy < constructionData.energy + cudaSimulationParameters.cellNormalEnergy[hostCell->color]
+    if (cudaSimulationParameters.features.externalEnergyControl && hostCell->energy < constructionData.energy + cudaSimulationParameters.cellNormalEnergy[hostCell->color]
         && cudaSimulationParameters.cellFunctionConstructorExternalEnergySupplyRate[hostCell->color] > 0) {
         auto externalEnergyPortion = constructionData.energy * cudaSimulationParameters.cellFunctionConstructorExternalEnergySupplyRate[hostCell->color];
 
