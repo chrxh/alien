@@ -1945,7 +1945,6 @@ void _SimulationParametersWindow::processFeatureList(
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters().name("Cell color transition rules").textWidth(0).defaultValue(origParameters.features.cellColorTransitionRules).tooltip(""),
                 parameters.features.cellColorTransitionRules);
-            SimulationParametersService::resetParametersBasedOnFeatures(parameters);
             AlienImGui::EndTreeNode();
         }
     }

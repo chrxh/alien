@@ -561,22 +561,24 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
         if (cell->barrier) {
             continue;
         }
-
-        int transitionDuration;
-        int targetColor;
-        auto color = calcMod(cell->color, MAX_COLORS);
-        auto spotIndex = SpotCalculator::getFirstMatchingSpotOrBase(data, cell->pos, &SimulationParametersSpotActivatedValues::cellColorTransition);
-        if (spotIndex == -1) {
-            transitionDuration = cudaSimulationParameters.baseValues.cellColorTransitionDuration[color];
-            targetColor = cudaSimulationParameters.baseValues.cellColorTransitionTargetColor[color];
-        } else {
-            transitionDuration = cudaSimulationParameters.spots[spotIndex].values.cellColorTransitionDuration[color];
-            targetColor = cudaSimulationParameters.spots[spotIndex].values.cellColorTransitionTargetColor[color];
-        }
         ++cell->age;
-        if (transitionDuration > 0 && cell->age > transitionDuration) {
-            cell->color = targetColor;
-            cell->age = 0;
+
+        if (cudaSimulationParameters.features.cellColorTransitionRules) {
+            int transitionDuration;
+            int targetColor;
+            auto color = calcMod(cell->color, MAX_COLORS);
+            auto spotIndex = SpotCalculator::getFirstMatchingSpotOrBase(data, cell->pos, &SimulationParametersSpotActivatedValues::cellColorTransition);
+            if (spotIndex == -1) {
+                transitionDuration = cudaSimulationParameters.baseValues.cellColorTransitionDuration[color];
+                targetColor = cudaSimulationParameters.baseValues.cellColorTransitionTargetColor[color];
+            } else {
+                transitionDuration = cudaSimulationParameters.spots[spotIndex].values.cellColorTransitionDuration[color];
+                targetColor = cudaSimulationParameters.spots[spotIndex].values.cellColorTransitionTargetColor[color];
+            }
+            if (transitionDuration > 0 && cell->age > transitionDuration) {
+                cell->color = targetColor;
+                cell->age = 0;
+            }
         }
         if (cell->livingState == LivingState_Ready && cell->activationTime > 0) {
             --cell->activationTime;
