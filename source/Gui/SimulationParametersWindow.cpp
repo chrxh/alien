@@ -479,32 +479,6 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origParameters.baseValues.radiationAbsorption)
                     .tooltip("The fraction of energy that a cell can absorb from an incoming energy particle can be specified here."),
                 parameters.baseValues.radiationAbsorption);
-            if (parameters.features.additionalAbsorptionControl) {
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Absorption low connection penalty")
-                        .textWidth(RightColumnWidth)
-                        .colorDependence(true)
-                        .min(0)
-                        .max(5.0f)
-                        .format("%.1f")
-                        .defaultValue(origParameters.radiationAbsorptionLowConnectionPenalty)
-                        .tooltip(
-                            "When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy particle."),
-                    parameters.radiationAbsorptionLowConnectionPenalty);
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Absorption velocity penalty")
-                        .textWidth(RightColumnWidth)
-                        .colorDependence(true)
-                        .min(0)
-                        .max(30.0f)
-                        .logarithmic(true)
-                        .format("%.1f")
-                        .defaultValue(origParameters.radiationAbsorptionVelocityPenalty)
-                        .tooltip("When this parameter is increased, cells with higher velocity will absorb less energy from an incoming energy particle."),
-                    parameters.radiationAbsorptionVelocityPenalty);
-            }
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Radiation type I: Strength")
@@ -1242,7 +1216,40 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
-         * External energy
+         * Addon: Additional absorption control
+         */
+        if (parameters.features.additionalAbsorptionControl) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Additional absorption control"))) {
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Absorption low connection penalty")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(5.0f)
+                        .format("%.1f")
+                        .defaultValue(origParameters.radiationAbsorptionLowConnectionPenalty)
+                        .tooltip(
+                            "When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy particle."),
+                    parameters.radiationAbsorptionLowConnectionPenalty);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Absorption velocity penalty")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(30.0f)
+                        .logarithmic(true)
+                        .format("%.1f")
+                        .defaultValue(origParameters.radiationAbsorptionVelocityPenalty)
+                        .tooltip("When this parameter is increased, cells with higher velocity will absorb less energy from an incoming energy particle."),
+                    parameters.radiationAbsorptionVelocityPenalty);
+                AlienImGui::EndTreeNode();
+            }
+        }
+
+        /**
+         * Addon: External energy control
          */
         if (parameters.features.externalEnergyControl) {
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: External energy control").highlighted(false))) {
@@ -1280,7 +1287,7 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
-         * Cell color transition rules
+         * Addon: Cell color transition rules
          */
         if (parameters.features.cellColorTransitionRules) {
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell color transition rules").highlighted(false))) {
@@ -1872,10 +1879,10 @@ void _SimulationParametersWindow::processSpot(
         }
 
         /**
-         * Cell color transition rules
+         * Addon: Cell color transition rules
          */
         if (parameters.features.cellColorTransitionRules) {
-            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Cell color transition rules").highlighted(false))) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell color transition rules").highlighted(false))) {
                 ImGui::Checkbox("##cellColorTransition", &spot.activatedValues.cellColorTransition);
                 ImGui::SameLine();
                 ImGui::BeginDisabled(!spot.activatedValues.cellColorTransition);
