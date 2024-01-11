@@ -74,6 +74,7 @@ void _ResizeWorldDialog::onResizing()
     auto generalSettings = _simController->getGeneralSettings();
     auto parameters = _simController->getSimulationParameters();
     auto content = _simController->getClusteredSimulationData();
+    auto const& statistics = _simController->getStatisticsHistory();
 
     _simController->closeSimulation();
 
@@ -88,4 +89,5 @@ void _ResizeWorldDialog::onResizing()
         DescriptionEditService::duplicate(content, origWorldSize, {_width, _height});
     }
     _simController->setClusteredSimulationData(content);
+    _simController->setStatisticsHistory(statistics.getCopiedData());
 }
