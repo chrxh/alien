@@ -1245,7 +1245,7 @@ void _SimulationParametersWindow::processBase(
          * External energy
          */
         if (parameters.features.externalEnergyControl) {
-            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Feature: External energy control").highlighted(false))) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: External energy control").highlighted(false))) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("External energy amount")
@@ -1283,7 +1283,7 @@ void _SimulationParametersWindow::processBase(
          * Cell color transition rules
          */
         if (parameters.features.cellColorTransitionRules) {
-            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Feature: Cell color transition rules").highlighted(false))) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell color transition rules").highlighted(false))) {
                 for (int color = 0; color < MAX_COLORS; ++color) {
                     ImGui::PushID(color);
                     auto widgetParameters = AlienImGui::InputColorTransitionParameters()
@@ -1926,7 +1926,7 @@ void _SimulationParametersWindow::processFeatureList(
     }
 
     if (ImGui::BeginChild("##test", {scale(-14.0f), 0})) {
-        _featureListOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Feature list").highlighted(true));
+        _featureListOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true));
 
         if (_featureListOpen) {
             AlienImGui::Checkbox(
