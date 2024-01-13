@@ -277,7 +277,8 @@ namespace Const
 
     std::string const GenomeRepetitionsPerConstructionTooltip =
         "This value specifies how many times the cell network described in the genome should be concatenated for each construction. For a value greater "
-        "than 1, the cell network geometry has to fulfill certain requirements (e.g. rectangle, hexagon, loop and lolli geometries are not suitable for concatenation).";
+        "than 1, the cell network geometry has to fulfill certain requirements (e.g. rectangle, hexagon, loop and lolli geometries are not suitable for "
+        "concatenation). A value of infinity is also possible, but should not be used for an activated completeness check (see simulation parameters).";
 
     std::string const GenomeConcatenationAngle1 =
         "This value describes the angle between two concatenated cell networks viewed from the first cell of the subsequent cell network.";

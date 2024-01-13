@@ -306,7 +306,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.constructor.lastConstructedCellId = 0;
             cell->cellFunctionData.constructor.genomeCurrentNodeIndex = 0;
             cell->cellFunctionData.constructor.genomeCurrentRepetition = 0;
-            cell->cellFunctionData.constructor.setConstructionBuilt(false);
+            cell->cellFunctionData.constructor.stateFlags = 0;
             cell->cellFunctionData.constructor.genomeGeneration = 0;
             cell->cellFunctionData.constructor.constructionAngle1 = 0;
             cell->cellFunctionData.constructor.constructionAngle2 = 0;

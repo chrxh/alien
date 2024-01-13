@@ -392,6 +392,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                     desc.genome = GenomeDescriptionService::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
                     if constexpr (std::is_same<Description, ConstructorDescription>()) {
                         desc.genomeCurrentNodeIndex = 0;
+                        desc.setInherited(true);
                     }
                 }
                 ImGui::TreePop();

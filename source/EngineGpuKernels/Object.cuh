@@ -79,15 +79,15 @@ struct ConstructorFunction
     int genomeCurrentRepetition;
     int offspringCreatureId;  //will be filled when self-replication starts
     int offspringMutationId;
-    uint32_t stateFlags;  //bit 0: isConstructionBuilt, bit 1: isInjected
+    uint32_t stateFlags;  //bit 0: isConstructionBuilt, bit 1: isInherited
 
     //temp
     bool isComplete;
 
     __device__ __inline__ bool isConstructionBuilt() const { return (stateFlags & 0x1) != 0; }
     __device__ __inline__ void setConstructionBuilt(bool value) { stateFlags = (stateFlags & (~0x1)) | (value ? 0x1 : 0); }
-    __device__ __inline__ bool isInjected() const { return (stateFlags & 0x2) != 0; }
-    __device__ __inline__ void setInjected(bool value) { stateFlags = (stateFlags & (~0x2)) | (value ? 0x2 : 0); }
+    __device__ __inline__ bool isInherited() const { return (stateFlags & 0x2) != 0; }
+    __device__ __inline__ void setInherited(bool value) { stateFlags = (stateFlags & (~0x2)) | (value ? 0x2 : 0); }
 };
 
 struct SensorFunction

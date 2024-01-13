@@ -1388,7 +1388,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
 TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
 {
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
-        GenomeDescription().setHeader(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setHeader(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription(), CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -1398,7 +1398,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle2(-90.0f)),
+            .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle2(-90.0f).setGenomeCurrentNodeIndex(1)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - _parameters.cellFunctionConstructorOffspringDistance[0], 10.0f})
