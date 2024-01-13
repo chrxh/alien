@@ -609,7 +609,7 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
                       && GenomeDecoder::containsSelfReplication(constructor)
                       && !GenomeDecoder::isSeparating(constructor.genome)) {
                     constructor.genomeCurrentNodeIndex = 0;
-                    constructor.isConstructionBuilt = true;
+                    constructor.setConstructionBuilt(true);
                 } else if(connectedCell->creatureId == cell->creatureId) {
                     atomicExch(&connectedCell->livingState, LivingState_Dying);
                 }

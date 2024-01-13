@@ -64,9 +64,9 @@ struct ConstructorTO
     uint64_t lastConstructedCellId;
     int genomeCurrentNodeIndex;
     int genomeCurrentRepetition;
-    bool isConstructionBuilt;
     int offspringCreatureId;
     int offspringMutationId;
+    uint32_t stateFlags;  //bit 0: isConstructionBuilt, bit 1: isInjected
 };
 
 struct SensorTO

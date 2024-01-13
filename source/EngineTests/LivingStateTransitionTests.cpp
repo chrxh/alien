@@ -160,7 +160,7 @@ TEST_F(LivingStateTransitionTests, noSeparatingSelfReplicatorStaysReadyIfAdjacen
     auto actualData = _simController->getSimulationData();
     auto actualCell1 = getCell(actualData, 1);
     auto actualConstructor = std::get<ConstructorDescription>(*actualCell1.cellFunction);
-    EXPECT_TRUE(actualConstructor.isConstructionBuilt);
+    EXPECT_TRUE(actualConstructor.isConstructionBuilt());
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
     EXPECT_EQ(LivingState_Ready, actualCell1.livingState);
     EXPECT_EQ(LivingState_Dying, getCell(actualData, 2).livingState);

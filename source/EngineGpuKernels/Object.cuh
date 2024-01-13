@@ -77,12 +77,15 @@ struct ConstructorFunction
     uint64_t lastConstructedCellId;
     int genomeCurrentNodeIndex;
     int genomeCurrentRepetition;
-    bool isConstructionBuilt;
     int offspringCreatureId;  //will be filled when self-replication starts
     int offspringMutationId;
+    uint32_t stateFlags;  //bit 0: isConstructionBuilt, bit 1: isInjected
 
     //temp
     bool isComplete;
+
+    __device__ __inline__ bool isConstructionBuilt() const { return (stateFlags & 0x1) != 0; }
+    __device__ __inline__ void setConstructionBuilt(bool value) { stateFlags = (stateFlags & 0xFFFFFFFE) | (value ? 1 : 0); }
 };
 
 struct SensorFunction
