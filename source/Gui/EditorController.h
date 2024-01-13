@@ -47,13 +47,13 @@ private:
     void processInspectorWindows();
 
     void selectObjects(RealVector2D const& viewPos, bool modifierKeyPressed);
-    void moveSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
+    void moveSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
     void fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& initialViewPos);
-    void accelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
-    void applyForces(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
+    void accelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
+    void applyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
 
     void createSelectionRect(RealVector2D const& viewPos);
-    void resizeSelectionRect(RealVector2D const& viewPos, RealVector2D const& prevViewPos);
+    void resizeSelectionRect(RealVector2D const& viewPos);
     void removeSelectionRect();
 
 private:
@@ -78,6 +78,6 @@ private:
     std::vector<InspectorWindow> _inspectorWindows;
     DataDescription _drawing;
     std::optional<RealVector2D> _selectionPositionOnClick;
-    std::optional<RealVector2D> _mousePosOnClick;
-    std::optional<RealVector2D> _prevMousePos;
+    std::optional<RealVector2D> _worldPosOnClick;
+    std::optional<RealVector2D> _prevWorldPos;
 };
