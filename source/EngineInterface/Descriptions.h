@@ -146,7 +146,13 @@ struct ConstructorDescription
     }
     ConstructorDescription& setConstructionBuilt(bool value)
     {
-        stateFlags = (stateFlags & 0xFFFFFFFE) | (value ? 1 : 0);
+        stateFlags = (stateFlags & (~0x1)) | (value ? 0x1 : 0);
+        return *this;
+    }
+    bool isInjected() const { return (stateFlags & 0x2) != 0; }
+    ConstructorDescription& setInjected(bool value)
+    {
+        stateFlags = (stateFlags & (~0x2)) | (value ? 0x2 : 0);
         return *this;
     }
     ConstructorDescription& setGenomeGeneration(int value)
