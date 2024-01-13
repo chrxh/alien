@@ -359,7 +359,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
 
     if (GenomeDecoder::containsSelfReplication(constructor)) {
         constructor.offspringCreatureId = 1 + data.numberGen1.random(65535);
-        hostCell->genomeNumNodes = GenomeDecoder::getWeightedNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
+        hostCell->genomeNumNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize), true, false);
     } else {
         constructor.offspringCreatureId = hostCell->creatureId;
     }
