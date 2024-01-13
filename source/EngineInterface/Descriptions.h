@@ -110,7 +110,7 @@ struct ConstructorDescription
     int genomeCurrentRepetition = 0;
     int offspringCreatureId = 0;
     int offspringMutationId = 0;
-    uint32_t stateFlags = 0;  //bit 0: isConstructionBuilt, bit 1: isInjected
+    uint32_t stateFlags = 0x0;  //bit 0: isConstructionBuilt, bit 1: isInherited
 
     ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
@@ -149,8 +149,8 @@ struct ConstructorDescription
         stateFlags = (stateFlags & (~0x1)) | (value ? 0x1 : 0);
         return *this;
     }
-    bool isInjected() const { return (stateFlags & 0x2) != 0; }
-    ConstructorDescription& setInjected(bool value)
+    bool isInherited() const { return (stateFlags & 0x2) != 0; }
+    ConstructorDescription& setInherited(bool value)
     {
         stateFlags = (stateFlags & (~0x2)) | (value ? 0x2 : 0);
         return *this;
