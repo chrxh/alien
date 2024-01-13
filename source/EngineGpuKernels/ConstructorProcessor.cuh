@@ -664,7 +664,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.lastConstructedCellId = 0;
         newConstructor.genomeCurrentNodeIndex = 0;
         newConstructor.genomeCurrentRepetition = 0;
-        newConstructor.setConstructionBuilt(false);
+        newConstructor.stateFlags = 0;
         newConstructor.constructionAngle1 = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
         newConstructor.constructionAngle2 = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
         GenomeDecoder::copyGenome(data, constructor, genomeCurrentBytePosition, newConstructor);

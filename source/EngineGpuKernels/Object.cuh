@@ -85,7 +85,9 @@ struct ConstructorFunction
     bool isComplete;
 
     __device__ __inline__ bool isConstructionBuilt() const { return (stateFlags & 0x1) != 0; }
-    __device__ __inline__ void setConstructionBuilt(bool value) { stateFlags = (stateFlags & 0xFFFFFFFE) | (value ? 1 : 0); }
+    __device__ __inline__ void setConstructionBuilt(bool value) { stateFlags = (stateFlags & (~0x1)) | (value ? 0x1 : 0); }
+    __device__ __inline__ bool isInjected() const { return (stateFlags & 0x2) != 0; }
+    __device__ __inline__ void setInjected(bool value) { stateFlags = (stateFlags & (~0x2)) | (value ? 0x2 : 0); }
 };
 
 struct SensorFunction
