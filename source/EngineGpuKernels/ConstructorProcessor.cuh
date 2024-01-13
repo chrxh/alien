@@ -61,7 +61,6 @@ private:
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static bool isSelfReplicator(Cell* cell);
-    __inline__ __device__ static bool isConstructionBuild(Cell* cell);
 };
 
 /************************************************************************/
@@ -121,7 +120,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
                     goBack = true;
                 } else {
                     if (nextCell->cellFunction == CellFunction_Constructor && !GenomeDecoder::hasEmptyGenome(nextCell->cellFunctionData.constructor)
-                        && !nextCell->cellFunctionData.constructor.isConstructionBuilt
+                        && !nextCell->cellFunctionData.constructor.isConstructionBuilt()
                         && !GenomeDecoder::containsSectionSelfReplication(
                             nextCell->cellFunctionData.constructor.genome + Const::GenomeHeaderSize,
                             nextCell->cellFunctionData.constructor.genomeSize - Const::GenomeHeaderSize)) {
@@ -178,12 +177,12 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                 if (!constructionData.genomeHeader.hasInfiniteRepetitions()) {
                     ++constructor.genomeCurrentRepetition;
                     if (constructor.genomeCurrentRepetition == constructionData.genomeHeader.numRepetitions) {
-                        constructor.isConstructionBuilt = true;
+                        constructor.setConstructionBuilt(true);
                         constructor.genomeCurrentRepetition = 0;
                     }
                 }
                 else {
-                    constructor.isConstructionBuilt = true;
+                    constructor.setConstructionBuilt(true);
                 }
             } else {
                 ++constructor.genomeCurrentNodeIndex;
@@ -364,7 +363,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
 
     if (GenomeDecoder::containsSelfReplication(constructor)) {
         constructor.offspringCreatureId = 1 + data.numberGen1.random(65535);
-        hostCell->genomeNumNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize), true, false);
+        hostCell->genomeNumNodes = GenomeDecoder::getWeightedNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
     } else {
         constructor.offspringCreatureId = hostCell->creatureId;
     }
@@ -665,7 +664,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.lastConstructedCellId = 0;
         newConstructor.genomeCurrentNodeIndex = 0;
         newConstructor.genomeCurrentRepetition = 0;
-        newConstructor.isConstructionBuilt = false;
+        newConstructor.setConstructionBuilt(false);
         newConstructor.constructionAngle1 = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
         newConstructor.constructionAngle2 = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
         GenomeDecoder::copyGenome(data, constructor, genomeCurrentBytePosition, newConstructor);
@@ -767,9 +766,4 @@ __inline__ __device__ bool ConstructorProcessor::isSelfReplicator(Cell* cell)
         return false;
     }
     return GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor);
-}
-
-__inline__ __device__ bool ConstructorProcessor::isConstructionBuild(Cell* cell)
-{
-    return GenomeDecoder::hasEmptyGenome(cell->cellFunctionData.constructor) || cell->cellFunctionData.constructor.isConstructionBuilt;
 }

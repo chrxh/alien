@@ -17,6 +17,7 @@ public:
     __inline__ __device__ static void executeForEachNodeRecursively(uint8_t* genome, int genomeSize, bool includedSeparatedParts, Func func);
     __inline__ __device__ static GenomeHeader readGenomeHeader(ConstructorFunction const& constructor);
     __inline__ __device__ static int getGenomeDepth(uint8_t* genome, int genomeSize);
+    __inline__ __device__ static int getWeightedNumNodesRecursively(uint8_t* genome, int genomeSize);
     __inline__ __device__ static int getNumNodesRecursively(uint8_t* genome, int genomeSize, bool includeRepetitions, bool includedSeparatedParts);
     __inline__ __device__ static int getRandomGenomeNodeAddress(
         SimulationData& data,
@@ -158,6 +159,13 @@ __inline__ __device__ int GenomeDecoder::getGenomeDepth(uint8_t* genome, int gen
     auto result = 0;
     executeForEachNodeRecursively(genome, genomeSize, true, [&result](int depth, int nodeAddress, int repetition) { result = max(result, depth); });
     return result;
+}
+
+__inline__ __device__ int GenomeDecoder::getWeightedNumNodesRecursively(uint8_t* genome, int genomeSize)
+{
+    auto result = 0.0f;
+        executeForEachNodeRecursively(genome, genomeSize, false, [&result](int depth, int nodeAddress, int repetitions) { result += pow(2.0f, depth); });
+    return toInt(result);
 }
 
 __inline__ __device__ int GenomeDecoder::getNumNodesRecursively(uint8_t* genome, int genomeSize, bool includeRepetitions, bool includedSeparatedParts)
@@ -326,7 +334,7 @@ __inline__ __device__ bool GenomeDecoder::isFinished(ConstructorFunction const& 
         return true;
     }
     if (isSingleConstruction(constructor.genome)) {
-        return constructor.isConstructionBuilt;
+        return constructor.isConstructionBuilt();
     }
     return false;
 }
