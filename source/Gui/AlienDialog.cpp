@@ -3,6 +3,8 @@
 #include "AlienDialog.h"
 #include "StyleRepository.h"
 #include "WindowController.h"
+#include "DelayedExecutionController.h"
+#include "OverlayMessageController.h"
 
 _AlienDialog::_AlienDialog(std::string const& title)
     : _title(title)
@@ -48,8 +50,11 @@ void _AlienDialog::open()
 
 void _AlienDialog::close()
 {
-    ImGui::CloseCurrentPopup();
-    _state = DialogState::Closed;
+    delayedExecution([this] {
+        ImGui::CloseCurrentPopup();
+        _state = DialogState::Closed;
+    });
+    printOverlayMessage("Exiting ...");
 }
 
 void _AlienDialog::changeTitle(std::string const& title)

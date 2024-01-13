@@ -838,8 +838,7 @@ void _MainWindow::onPauseSimulation()
 
 void _MainWindow::onExit()
 {
-    delayedExecution([this] { _exitDialog->open(); });
-    printOverlayMessage("Exiting ...");
+    _exitDialog->open();
 }
 
 void _MainWindow::pushGlobalStyle()
