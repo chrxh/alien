@@ -1,5 +1,6 @@
 <?php
     require './helpers.php';
+    require './hooks.php';
 
     $db = connectToDB();
     $db->begin_transaction();
