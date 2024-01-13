@@ -244,8 +244,9 @@ void _EditorController::processEvents()
     auto running = _simController->isSimulationRunning();
 
     RealVector2D mousePos{ImGui::GetMousePos().x, ImGui::GetMousePos().y};
-    RealVector2D prevMousePos = _prevMousePos ? *_prevMousePos : mousePos;
-
+    RealVector2D worldPos = _viewport->mapViewToWorldPosition(mousePos);
+    RealVector2D prevWorldPos = _prevWorldPos ? *_prevWorldPos : worldPos;
+    
     auto& io = ImGui::GetIO();
     if (!io.WantCaptureMouse && !io.KeyAlt) {
 
@@ -261,18 +262,18 @@ void _EditorController::processEvents()
                 _simController->setDetached(true);
                 auto shallowData = _simController->getSelectionShallowData();
                 _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
-                _mousePosOnClick = mousePos;
+                _worldPosOnClick = worldPos;
             }
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
             if (!running) {
                 if (!_editorModel->isDrawMode()) {
-                    moveSelectedObjects(mousePos, prevMousePos);
+                    moveSelectedObjects(mousePos, prevWorldPos);
                 } else {
                     _creatorWindow->onDrawing();
                 }
             } else {
-                fixateSelectedObjects(mousePos, *_mousePosOnClick);
+                fixateSelectedObjects(mousePos, *_worldPosOnClick);
             }
         }
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
@@ -282,10 +283,10 @@ void _EditorController::processEvents()
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
             if (!running && !_editorModel->isDrawMode()) {
-                resizeSelectionRect(mousePos, prevMousePos);
+                resizeSelectionRect(mousePos);
             }
             if (running) {
-                applyForces(mousePos, prevMousePos);
+                applyForces(mousePos, prevWorldPos);
             }
         }
     }
@@ -297,7 +298,7 @@ void _EditorController::processEvents()
             }
         } else {
             _simController->setDetached(false);
-            accelerateSelectedObjects(mousePos, prevMousePos);
+            accelerateSelectedObjects(mousePos, prevWorldPos);
         }
     }
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
@@ -309,7 +310,7 @@ void _EditorController::processEvents()
     if (_simController->updateSelectionIfNecessary()) {
         _editorModel->update();
     }
-    _prevMousePos = mousePos;
+    _prevWorldPos = worldPos;
 }
 
 void _EditorController::processSelectionRect()
@@ -380,10 +381,11 @@ void _EditorController::selectObjects(RealVector2D const& viewPos, bool modifier
 
 void _EditorController::moveSelectedObjects(
     RealVector2D const& viewPos,
-    RealVector2D const& prevViewPos)
+    RealVector2D const& prevWorldPos)
 {
-    auto start = _viewport->mapViewToWorldPosition({prevViewPos.x, prevViewPos.y});
+    auto start = prevWorldPos;
     auto end = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
+    printf("%f, %f: \n", end.x, end.y);
     auto zoom = _viewport->getZoomFactor();
     auto delta = end - start;
 
@@ -395,14 +397,14 @@ void _EditorController::moveSelectedObjects(
     _editorModel->update();
 }
 
-void _EditorController::fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
+void _EditorController::fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
     auto shallowData = _simController->getSelectionShallowData();
     auto selectionPosition = RealVector2D{shallowData.centerPosX, shallowData.centerPosY};
     auto selectionDelta = selectionPosition - *_selectionPositionOnClick;
 
     auto mouseStart = _viewport->mapViewToWorldPosition(viewPos);
-    auto mouseEnd = _viewport->mapViewToWorldPosition(prevViewPos);
+    auto mouseEnd = prevWorldPos;
     auto mouseDelta = mouseStart - mouseEnd;
 
     auto selectionCorrectionDelta = mouseDelta - selectionDelta;
@@ -416,9 +418,9 @@ void _EditorController::fixateSelectedObjects(RealVector2D const& viewPos, RealV
     }
 }
 
-void _EditorController::accelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
+void _EditorController::accelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
-    auto start = _viewport->mapViewToWorldPosition({prevViewPos.x, prevViewPos.y});
+    auto start = prevWorldPos;
     auto end = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
     auto delta = end - start;
 
@@ -430,9 +432,9 @@ void _EditorController::accelerateSelectedObjects(RealVector2D const& viewPos, R
     _simController->shallowUpdateSelectedObjects(updateData);
 }
 
-void _EditorController::applyForces(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
+void _EditorController::applyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
-    auto start = _viewport->mapViewToWorldPosition({prevViewPos.x, prevViewPos.y});
+    auto start = prevWorldPos;
     auto end = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
     auto zoom = _viewport->getZoomFactor();
     _simController->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
@@ -444,7 +446,7 @@ void _EditorController::createSelectionRect(RealVector2D const& viewPos)
     _selectionRect = rect;
 }
 
-void _EditorController::resizeSelectionRect(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
+void _EditorController::resizeSelectionRect(RealVector2D const& viewPos)
 {
     _selectionRect->endPos = viewPos;
     auto startPos = _viewport->mapViewToWorldPosition(_selectionRect->startPos);
