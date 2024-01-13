@@ -759,10 +759,10 @@ void _MainWindow::onOpenSimulation()
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
 
-            DeserializedSimulation deserializedData;
-            if (SerializerService::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
-                printOverlayMessage("Loading ...");
-                delayedExecution([=, this] {
+            printOverlayMessage("Loading ...");
+            delayedExecution([firstFilename = firstFilename, this] {
+                DeserializedSimulation deserializedData;
+                if (SerializerService::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
                     _simController->closeSimulation();
 
                     std::optional<std::string> errorMessage;
@@ -792,10 +792,10 @@ void _MainWindow::onOpenSimulation()
                     _viewport->setZoomFactor(deserializedData.auxiliaryData.zoom);
                     _temporalControlWindow->onSnapshot();
                     printOverlayMessage(firstFilename.filename().string());
-                });
-            } else {
-                showMessage("Open simulation", "The selected file could not be opened.");
-            }
+                } else {
+                    showMessage("Open simulation", "The selected file could not be opened.");
+                }
+            });
         });
 }
 
