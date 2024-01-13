@@ -385,7 +385,6 @@ void _EditorController::moveSelectedObjects(
 {
     auto start = prevWorldPos;
     auto end = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
-    printf("%f, %f: \n", end.x, end.y);
     auto zoom = _viewport->getZoomFactor();
     auto delta = end - start;
 
