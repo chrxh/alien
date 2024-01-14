@@ -613,6 +613,7 @@ EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::ch
         auto timePassed = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint);
         if (maxDuration) {
             if (timePassed > *maxDuration) {
+                _isTimeout = true;
                 break;
             }
         } else {
