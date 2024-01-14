@@ -472,6 +472,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
+    constructor.setInherited(false);
     //adaptMutationId(data, constructor);
 }
 
@@ -714,6 +715,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
+    constructor.setInherited(false);
     adaptMutationId(data, constructor);
 }
 
