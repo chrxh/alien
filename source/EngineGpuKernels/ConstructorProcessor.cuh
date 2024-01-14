@@ -95,7 +95,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
         return;
     }
 
-    if (!constructor.isInherited() || !GenomeDecoder::containsSelfReplication(constructor)) {
+    if (!constructor.isInherited() || constructor.isConstructionBuilt() || !GenomeDecoder::containsSelfReplication(constructor)) {
         constructor.isComplete = true;
         return;
     }
@@ -112,7 +112,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
     auto connectionIndex = 0;
     Cell* lastCells[ContainerSize];
     int lastIndices[ContainerSize];
-    int scannedCells = 1;
+    int actualCells = 1;
     do {
         auto goBack = false;
         if (connectionIndex < currentCell->numConnections) {
@@ -122,7 +122,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
                 if (nextCell->creatureId != cell->creatureId) {
                     goBack = true;
                 } else {
-                    ++scannedCells;
+                    ++actualCells;
                     lastCells[depth] = currentCell;
                     lastIndices[depth] = connectionIndex;
                     currentCell = nextCell;
@@ -148,7 +148,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
         }
     } while (true);
 
-    constructor.isComplete = scannedCells == numConnectedGenomeNodes;
+    constructor.isComplete = (actualCells >= numConnectedGenomeNodes);
 }
 
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
