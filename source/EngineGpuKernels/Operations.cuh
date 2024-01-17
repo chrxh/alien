@@ -9,10 +9,6 @@ struct AddConnectionPairOperation {
     Cell* otherCell;
 };
 
-struct DelAllConnectionsOperation
-{
-};
-
 struct DelConnectionOperation
 {
     Cell* connectedCell;
@@ -26,7 +22,6 @@ struct DelCellOperation
 union StructureOperationData
 {
     AddConnectionPairOperation addConnection;
-    DelAllConnectionsOperation delAllConnections;
     DelConnectionOperation delConnection;
     DelCellOperation delCell;
 };
@@ -36,7 +31,6 @@ struct StructuralOperation
     enum class Type : int
     {
         AddConnectionPair,
-        DelAllConnections,
         DelConnection,
         DelCell,
     };
