@@ -8,7 +8,7 @@
 #include "ConstantMemory.cuh"
 #include "TOs.cuh"
 #include "Map.cuh"
-#include "Particle.cuh"
+#include "Object.cuh"
 #include "Physics.cuh"
 #include "SimulationData.cuh"
 
@@ -25,7 +25,8 @@ public:
     __inline__ __device__ Cell* createCell();
 
 private:
-    __inline__ __device__ void createAuxiliaryData(int sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, int& targetSize, uint8_t*& target);
+    template<typename T>
+    __inline__ __device__ void createAuxiliaryData(T sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, T& targetSize, uint8_t*& target);
     __inline__ __device__ void createAuxiliaryDataWithFixedSize(uint64_t size, uint64_t sourceIndex, uint8_t* auxiliaryData, uint8_t*& target);
 
     BaseMap _map;
@@ -206,8 +207,8 @@ __inline__ __device__ void ObjectFactory::changeParticleFromTO(ParticleTO const&
     particle->color = particleTO.color;
 }
 
-__inline__ __device__ void
-ObjectFactory::createAuxiliaryData(int sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, int& targetSize, uint8_t*& target)
+template <typename T>
+__inline__ __device__ void ObjectFactory::createAuxiliaryData(T sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, T& targetSize, uint8_t*& target)
 {
     targetSize = sourceSize;
     createAuxiliaryDataWithFixedSize(sourceSize, sourceIndex, auxiliaryData, target);

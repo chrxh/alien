@@ -4,7 +4,6 @@
 
 #include "Base.cuh"
 #include "Object.cuh"
-#include "Particle.cuh"
 #include "Math.cuh"
 #include "Array.cuh"
 

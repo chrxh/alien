@@ -38,8 +38,8 @@ namespace
         }
     }
 
-    template<typename Container>
-    void convert(DataTO const& dataTO, Container const& source, int& targetSize, uint64_t& targetIndex)
+    template<typename Container, typename SizeType>
+    void convert(DataTO const& dataTO, Container const& source, SizeType& targetSize, uint64_t& targetIndex)
     {
         targetSize = source.size();
         if (targetSize > 0) {

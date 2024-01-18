@@ -2,8 +2,9 @@
 
 namespace
 {
+    template <typename T>
     __device__ void
-    copyAuxiliaryData(int sourceSize, uint8_t* source, int& targetSize, uint64_t& targetIndex, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
+    copyAuxiliaryData(T sourceSize, uint8_t* source, T& targetSize, uint64_t& targetIndex, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
     {
         targetSize = sourceSize;
         if (sourceSize > 0) {
@@ -68,7 +69,7 @@ namespace
         switch (cell->cellFunction) {
         case CellFunction_Neuron: {
             int targetSize;    //not used
-            copyAuxiliaryData(
+            copyAuxiliaryData<int>(
                 sizeof(NeuronFunction::NeuronState),
                 reinterpret_cast<uint8_t*>(cell->cellFunctionData.neuron.neuronState),
                 targetSize,
