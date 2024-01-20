@@ -100,6 +100,7 @@ struct ConstructorDescription
     int activationMode = 13;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     int constructionActivationTime = 100;
     std::vector<uint8_t> genome;
+    int numInheritedGenomeNodes = 0;
     int genomeGeneration = 0;
     float constructionAngle1 = 0;
     float constructionAngle2 = 0;
@@ -110,7 +111,7 @@ struct ConstructorDescription
     int genomeCurrentRepetition = 0;
     int offspringCreatureId = 0;
     int offspringMutationId = 0;
-    uint32_t stateFlags = 0x0;  //bit 0: isConstructionBuilt, bit 1: isInherited
+    uint32_t stateFlags = 0x0;  //bit 0: isConstructionBuilt
 
     ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
@@ -149,10 +150,11 @@ struct ConstructorDescription
         stateFlags = (stateFlags & (~0x1)) | (value ? 0x1 : 0);
         return *this;
     }
-    bool isInherited() const { return (stateFlags & 0x2) != 0; }
-    ConstructorDescription& setInherited(bool value)
+    int getNumInheritedGenomeNodes() const { return numInheritedGenomeNodes; }
+    bool isGenomeInherited() const { return numInheritedGenomeNodes != 0; }
+    ConstructorDescription& setNumInheritedGenomeNodes(int value)
     {
-        stateFlags = (stateFlags & (~0x2)) | (value ? 0x2 : 0);
+        numInheritedGenomeNodes = value;
         return *this;
     }
     ConstructorDescription& setGenomeGeneration(int value)

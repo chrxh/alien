@@ -55,6 +55,8 @@ struct ConstructorTO
     uint32_t constructionActivationTime;
 
     uint16_t genomeSize;
+    uint16_t numInheritedGenomeNodes;
+    uint16_t origGenomeSize;
     uint64_t genomeDataIndex;
     uint32_t genomeGeneration;
     float constructionAngle1;
@@ -66,7 +68,7 @@ struct ConstructorTO
     uint16_t genomeCurrentRepetition;
     uint32_t offspringCreatureId;
     uint32_t offspringMutationId;
-    uint32_t stateFlags;  //bit 0: isConstructionBuilt, bit 1: isInherited
+    uint32_t stateFlags;  //bit 0: isConstructionBuilt
 };
 
 struct SensorTO

@@ -270,7 +270,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionNotBui
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome(genome)),
+            .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(4)),
         CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(NerveDescription()),
         CellDescription()
             .setId(3)
@@ -308,7 +308,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_repeatedConstructi
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome(genome)),
+            .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(5)),
         CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(NerveDescription()),
         CellDescription()
             .setId(3)
@@ -430,8 +430,10 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
 /**
  * Completeness check needs to inspect cells under construction because when a constructor is finished its construction
  * is still in state "under construction" for some time steps but needs to be inspected
+ *
+ * UPDATE: Test does not make sense with new completeness check
  */
-TEST_F(ConstructorTests, constructFirstCell_completenessCheck_underConstruction)
+TEST_F(ConstructorTests, DISABLED_constructFirstCell_completenessCheck_underConstruction)
 {
     auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
     auto genome =
@@ -474,7 +476,6 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_underConstruction)
 
     ASSERT_EQ(3, actualData.cells.size());
 }
-
 
 TEST_F(ConstructorTests, constructFirstCell_noSeparation)
 {

@@ -99,6 +99,7 @@ struct ConstructorFunction
 
     //genome
     uint16_t genomeSize;
+    uint16_t numInheritedGenomeNodes;
     uint8_t* genome;
     uint32_t genomeGeneration;
     float constructionAngle1;
@@ -110,15 +111,13 @@ struct ConstructorFunction
     uint16_t genomeCurrentRepetition;
     uint32_t offspringCreatureId;  //will be filled when self-replication starts
     uint32_t offspringMutationId;
-    uint32_t stateFlags;  //bit 0: isConstructionBuilt, bit 1: isInherited
+    uint32_t stateFlags;  //bit 0: isConstructionBuilt
 
     //temp
     bool isComplete;
 
     __device__ __inline__ bool isConstructionBuilt() const { return (stateFlags & 0x1) != 0; }
     __device__ __inline__ void setConstructionBuilt(bool value) { stateFlags = (stateFlags & (~0x1)) | (value ? 0x1 : 0); }
-    __device__ __inline__ bool isInherited() const { return (stateFlags & 0x2) != 0; }
-    __device__ __inline__ void setInherited(bool value) { stateFlags = (stateFlags & (~0x2)) | (value ? 0x2 : 0); }
 };
 
 struct SensorFunction
