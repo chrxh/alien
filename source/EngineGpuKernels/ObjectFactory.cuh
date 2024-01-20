@@ -143,6 +143,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             dataTO.auxiliaryData,
             cell->cellFunctionData.constructor.genomeSize,
             cell->cellFunctionData.constructor.genome);
+        cell->cellFunctionData.constructor.numInheritedGenomeNodes = cellTO.cellFunctionData.constructor.numInheritedGenomeNodes;
         cell->cellFunctionData.constructor.lastConstructedCellId = cellTO.cellFunctionData.constructor.lastConstructedCellId;
         cell->cellFunctionData.constructor.genomeCurrentNodeIndex = cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex;
         cell->cellFunctionData.constructor.genomeCurrentRepetition = cellTO.cellFunctionData.constructor.genomeCurrentRepetition;
@@ -299,6 +300,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             }
             cell->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
             cell->cellFunctionData.constructor.genomeSize = Const::GenomeHeaderSize;
+            cell->cellFunctionData.constructor.numInheritedGenomeNodes = 0;
             cell->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.constructor.genomeSize);
             auto& genome = cell->cellFunctionData.constructor.genome;
             for (int i = 0; i < cell->cellFunctionData.constructor.genomeSize; ++i) {

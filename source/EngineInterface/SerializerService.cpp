@@ -129,6 +129,7 @@ namespace
     auto constexpr Id_Constructor_GenomeCurrentCopy = 16;
     auto constexpr Id_Constructor_LastConstructedCellId = 17;
     auto constexpr Id_Constructor_StateFlags = 18;
+    auto constexpr Id_Constructor_NumInheritedGenomeNodes = 19;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -514,6 +515,7 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
         loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
         loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
+        loadSave<int>(task, auxiliaries, Id_Constructor_NumInheritedGenomeNodes, data.numInheritedGenomeNodes, defaultObject.numInheritedGenomeNodes);
         if (task == SerializationTask::Save) {
             auxiliaries[Id_Constructor_GenomeHeader] = true;
         }

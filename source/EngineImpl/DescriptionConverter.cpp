@@ -430,6 +430,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
+        constructor.numInheritedGenomeNodes = cellTO.cellFunctionData.constructor.numInheritedGenomeNodes;
         constructor.lastConstructedCellId = cellTO.cellFunctionData.constructor.lastConstructedCellId;
         constructor.genomeCurrentNodeIndex = cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex;
         constructor.genomeCurrentRepetition = cellTO.cellFunctionData.constructor.genomeCurrentRepetition;
@@ -574,9 +575,10 @@ void DescriptionConverter::addCell(
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
         CHECK(constructorDesc.genome.size() >= Const::GenomeHeaderSize)
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
+        constructorTO.numInheritedGenomeNodes = static_cast<uint16_t>(constructorDesc.numInheritedGenomeNodes);
         constructorTO.lastConstructedCellId = constructorDesc.lastConstructedCellId;
-        constructorTO.genomeCurrentNodeIndex = constructorDesc.genomeCurrentNodeIndex;
-        constructorTO.genomeCurrentRepetition = constructorDesc.genomeCurrentRepetition;
+        constructorTO.genomeCurrentNodeIndex = static_cast<uint16_t>(constructorDesc.genomeCurrentNodeIndex);
+        constructorTO.genomeCurrentRepetition = static_cast<uint16_t>(constructorDesc.genomeCurrentRepetition);
         constructorTO.stateFlags = constructorDesc.stateFlags;
         constructorTO.offspringCreatureId = constructorDesc.offspringCreatureId;
         constructorTO.offspringMutationId = constructorDesc.offspringMutationId;

@@ -95,16 +95,14 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
         return;
     }
 
-    if (!constructor.isInherited() || constructor.isConstructionBuilt() || !GenomeDecoder::containsSelfReplication(constructor)) {
+    if (constructor.numInheritedGenomeNodes == 0 || constructor.isConstructionBuilt() || !GenomeDecoder::containsSelfReplication(constructor)) {
         constructor.isComplete = true;
         return;
     }
 
-    auto numConnectedGenomeNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, true, false);
-
-    auto constexpr ContainerSize = 256;
-    Cell* temp[ContainerSize * 8];
-    HashSet<Cell*, HashFunctor<Cell*>> visitedCells(ContainerSize * 8, temp);
+    auto constexpr ContainerSize = 512;
+    Cell* temp[ContainerSize * 4];
+    HashSet<Cell*, HashFunctor<Cell*>> visitedCells(ContainerSize * 4, temp);
     visitedCells.insert(cell);
 
     auto currentCell = cell;
@@ -129,7 +127,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
                     connectionIndex = 0;
                     ++depth;
                     if (depth >= ContainerSize) {
-                        constructor.isComplete = true;
+                        constructor.isComplete = false;
                         return;
                     }
                 }
@@ -148,7 +146,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
         }
     } while (true);
 
-    constructor.isComplete = (actualCells >= numConnectedGenomeNodes);
+    constructor.isComplete = (actualCells >= constructor.numInheritedGenomeNodes);
 }
 
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
@@ -359,7 +357,9 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
 
     if (GenomeDecoder::containsSelfReplication(constructor)) {
         constructor.offspringCreatureId = 1 + data.numberGen1.random(65535);
-        hostCell->genomeNumNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize), true, false);
+
+        //TEST CODE
+        hostCell->genomeNumNodes = GenomeDecoder::getWeightedNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
     } else {
         constructor.offspringCreatureId = hostCell->creatureId;
     }
@@ -661,10 +661,10 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.genomeCurrentNodeIndex = 0;
         newConstructor.genomeCurrentRepetition = 0;
         newConstructor.stateFlags = 0;
-        newConstructor.setInherited(true);
         newConstructor.constructionAngle1 = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
         newConstructor.constructionAngle2 = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
         GenomeDecoder::copyGenome(data, constructor, genomeCurrentBytePosition, newConstructor);
+        newConstructor.numInheritedGenomeNodes = static_cast<uint16_t>(GenomeDecoder::getNumNodesRecursively(newConstructor.genome, newConstructor.genomeSize, true, false));
         newConstructor.genomeGeneration = constructor.genomeGeneration + 1;
         newConstructor.offspringMutationId = constructor.offspringMutationId;
     } break;
