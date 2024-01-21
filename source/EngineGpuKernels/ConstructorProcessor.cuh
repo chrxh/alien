@@ -127,8 +127,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
                     connectionIndex = 0;
                     ++depth;
                     if (depth >= ContainerSize) {
-                        constructor.isComplete = false;
-                        return;
+                        break;
                     }
                 }
             } else {
