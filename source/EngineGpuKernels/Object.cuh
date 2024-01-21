@@ -220,7 +220,7 @@ struct Cell
     CellFunctionData cellFunctionData;
     Activity activity;
     uint32_t activationTime;
-    uint32_t genomeNumNodes;
+    uint32_t attackProtection;
 
     CellMetadataDescription metadata;
 

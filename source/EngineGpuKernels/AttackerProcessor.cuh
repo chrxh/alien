@@ -94,9 +94,9 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 atomicAdd(&otherCell->activity.channels[7], 1.0f);
             }
 
-            if (otherCell->genomeNumNodes > cell->genomeNumNodes) {
+            if (otherCell->attackProtection > cell->attackProtection) {
                 auto genomeSizeBonus = cudaSimulationParameters.cellFunctionAttackerGenomeSizeBonus[cell->color][otherCell->color];
-                energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<float>(otherCell->genomeNumNodes - cell->genomeNumNodes));
+                energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<float>(otherCell->attackProtection - cell->attackProtection));
             }
             if (otherCell->mutationId == cell->mutationId) {
                 auto sameMutantPenalty = cudaSimulationParameters.cellFunctionAttackerSameMutantPenalty[cell->color][otherCell->color];

@@ -394,7 +394,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.barrier = cellTO.barrier;
     result.age = cellTO.age;
     result.color = cellTO.color;
-    result.genomeNumNodes = cellTO.genomeNumNodes;
+    result.attackProtection = cellTO.attackProtection;
 
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
@@ -660,7 +660,7 @@ void DescriptionConverter::addCell(
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;
     cellTO.color = cellDesc.color;
-    cellTO.genomeNumNodes = cellDesc.genomeNumNodes;
+    cellTO.attackProtection = cellDesc.attackProtection;
     convert(dataTO, cellDesc.metadata.name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
     convert(dataTO, cellDesc.metadata.description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
