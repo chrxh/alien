@@ -168,7 +168,7 @@ __inline__ __device__ int GenomeDecoder::getWeightedNumNodesRecursively(uint8_t*
     int acceleration = 1;
     executeForEachNodeRecursively(genome, genomeSize, true, [&result, &lastDepth, &acceleration](int depth, int nodeAddress, int repetitions) {
         float bonus = depth > lastDepth ? 10.0f * toFloat(repetitions)* toFloat(acceleration) : 1.0f;
-        result += /*powf(2.0f, toFloat(depth)) **/ bonus;
+        result += powf(2.0f, toFloat(depth)) * bonus;
 
         lastDepth = depth;
         ++acceleration;

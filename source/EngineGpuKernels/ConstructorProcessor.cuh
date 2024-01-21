@@ -103,33 +103,34 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
         return;
     }
 
-    auto constexpr ContainerSize = 512;
-    Cell* temp[ContainerSize * 4];
-    HashSet<Cell*, HashFunctor<Cell*>> visitedCells(ContainerSize * 4, temp);
-    visitedCells.insert(cell);
+    auto constexpr MaxDepth = 512;
+    cell->tag = 1;
 
     auto currentCell = cell;
     auto depth = 0;
     auto connectionIndex = 0;
-    Cell* lastCells[ContainerSize];
-    int lastIndices[ContainerSize];
     int actualCells = 1;
+    int tagBitPos = 1 << toInt(cell->id % 30);
+
+    Cell* lastCells[MaxDepth];
+    int lastConnectionIndices[MaxDepth];
     do {
         auto goBack = false;
         if (connectionIndex < currentCell->numConnections) {
             auto nextCell = currentCell->connections[connectionIndex].cell;
-            if (!visitedCells.contains(nextCell)) {
-                visitedCells.insert(nextCell);
+            auto tagBit = alienAtomicRead(&nextCell->tag) & (~tagBitPos);
+            if (tagBit == 0) {
+                atomicAdd(&nextCell->tag, tagBit);
                 if (nextCell->creatureId != cell->creatureId) {
                     goBack = true;
                 } else {
                     ++actualCells;
                     lastCells[depth] = currentCell;
-                    lastIndices[depth] = connectionIndex;
+                    lastConnectionIndices[depth] = connectionIndex;
                     currentCell = nextCell;
                     connectionIndex = 0;
                     ++depth;
-                    if (depth >= ContainerSize) {
+                    if (depth >= MaxDepth) {
                         break;
                     }
                 }
@@ -143,7 +144,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
             }
             --depth;
             currentCell = lastCells[depth];
-            connectionIndex = lastIndices[depth];
+            connectionIndex = lastConnectionIndices[depth];
             ++connectionIndex;
         }
     } while (true);
@@ -360,8 +361,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     if (GenomeDecoder::containsSelfReplication(constructor)) {
         constructor.offspringCreatureId = 1 + data.numberGen1.random(65535);
 
-        //TEST CODE
-        hostCell->genomeNumNodes = GenomeDecoder::getWeightedNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
+        hostCell->attackProtection = GenomeDecoder::getWeightedNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
     } else {
         constructor.offspringCreatureId = hostCell->creatureId;
     }
@@ -635,7 +635,7 @@ ConstructorProcessor::constructCellIntern(
     result->outputBlocked = constructionData.outputBlocked;
 
     result->activationTime = constructor.constructionActivationTime;
-    result->genomeNumNodes = hostCell->genomeNumNodes;
+    result->attackProtection = hostCell->attackProtection;
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
     switch (constructionData.cellFunction) {

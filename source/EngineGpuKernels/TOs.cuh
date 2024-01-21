@@ -171,7 +171,7 @@ struct CellTO
     CellFunctionTO cellFunctionData;
     ActivityTO activity;
     uint32_t activationTime;
-    uint32_t genomeNumNodes;
+    uint32_t attackProtection;
 
     CellMetadataTO metadata;
 

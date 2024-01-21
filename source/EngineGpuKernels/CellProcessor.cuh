@@ -62,6 +62,7 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
 
         cell->shared1 = {0, 0};
         cell->nextCell = nullptr;
+        cell->tag = 0;
     }
 }
 
