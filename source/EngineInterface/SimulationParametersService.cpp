@@ -47,29 +47,35 @@ namespace
     }
 }
 
-void SimulationParametersService::activateFeaturesBasedOnParameters(SimulationParameters& parameters)
+void SimulationParametersService::activateFeaturesBasedOnParameters(Features const& missingFeatures, SimulationParameters& parameters)
 {
-    if (!equals(parameters.cellFunctionConstructorExternalEnergy, 0.0f) || !equals(parameters.cellFunctionConstructorExternalEnergySupplyRate, 0.0f)) {
-        parameters.features.externalEnergyControl = true;
+    if (missingFeatures.externalEnergyControl) {
+        if (!equals(parameters.cellFunctionConstructorExternalEnergy, 0.0f) || !equals(parameters.cellFunctionConstructorExternalEnergySupplyRate, 0.0f)) {
+            parameters.features.externalEnergyControl = true;
+        }
     }
 
-    if (!contains(parameters, &SimulationParametersSpotValues::cellColorTransitionDuration, {0, Infinity<int>::value})) {
-        parameters.features.cellColorTransitionRules = true;
-    }
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        if (parameters.baseValues.cellColorTransitionTargetColor[i] != i) {
+    if (missingFeatures.cellColorTransitionRules) {
+        if (!contains(parameters, &SimulationParametersSpotValues::cellColorTransitionDuration, {0, Infinity<int>::value})) {
             parameters.features.cellColorTransitionRules = true;
-            break;
         }
-        for (int j = 0; j < parameters.numSpots; ++j) {
-            if (parameters.spots[j].values.cellColorTransitionTargetColor[i] != i) {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            if (parameters.baseValues.cellColorTransitionTargetColor[i] != i) {
                 parameters.features.cellColorTransitionRules = true;
                 break;
+            }
+            for (int j = 0; j < parameters.numSpots; ++j) {
+                if (parameters.spots[j].values.cellColorTransitionTargetColor[i] != i) {
+                    parameters.features.cellColorTransitionRules = true;
+                    break;
+                }
             }
         }
     }
 
-    if (!equals(parameters.radiationAbsorptionVelocityPenalty, 0.0f) || !equals(parameters.radiationAbsorptionLowConnectionPenalty, 0.0f)) {
-        parameters.features.additionalAbsorptionControl = true;
+    if (missingFeatures.additionalAbsorptionControl) {
+        if (!equals(parameters.radiationAbsorptionVelocityPenalty, 0.0f) || !equals(parameters.radiationAbsorptionLowConnectionPenalty, 0.0f)) {
+            parameters.features.additionalAbsorptionControl = true;
+        }
     }
 }

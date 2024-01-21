@@ -4,5 +4,5 @@
 class SimulationParametersService
 {
 public:
-    static void activateFeaturesBasedOnParameters(SimulationParameters& parameters);
+    static void activateFeaturesBasedOnParameters(Features const& missingFeatures, SimulationParameters& parameters);
 };
