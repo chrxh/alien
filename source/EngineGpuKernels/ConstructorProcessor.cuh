@@ -103,9 +103,8 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
         return;
     }
 
-    int tagBit = 1 << toInt(cell->id % 30);
-    atomicOr(&cell->tag, tagBit);
-
+    uint32_t tagBit = 1 << toInt(cell->id % 30);
+    atomicOr(&cell->tag, toInt(tagBit));
     auto currentCell = cell;
     auto depth = 0;
     auto connectionIndex = 0;
@@ -118,11 +117,11 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
         auto goBack = false;
         if (connectionIndex < currentCell->numConnections) {
             auto nextCell = currentCell->connections[connectionIndex].cell;
-            auto origTagBit = atomicOr(&nextCell->tag, tagBit);
-            if ((origTagBit & (~tagBit)) == 0) {
-                if (nextCell->creatureId != cell->creatureId) {
-                    goBack = true;
-                } else {
+            if (nextCell->creatureId != cell->creatureId) {
+                goBack = true;
+            } else {
+                auto origTagBit = static_cast<uint32_t>(atomicOr(&nextCell->tag, toInt(tagBit)));
+                if ((origTagBit & tagBit) == 0) {
                     ++actualCells;
                     lastCells[depth] = currentCell;
                     lastConnectionIndices[depth] = connectionIndex;
@@ -132,9 +131,9 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
                     if (depth >= MaxDepth) {
                         break;
                     }
+                } else {
+                    ++connectionIndex;
                 }
-            } else {
-                ++connectionIndex;
             }
         }
         if (connectionIndex == currentCell->numConnections || goBack) {
