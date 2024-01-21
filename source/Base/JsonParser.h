@@ -14,13 +14,9 @@ enum class ParserTask
 class JsonParser
 {
 public:
+    //returns true if defaultValue has been applied
     template <typename T>
-    static void encodeDecode(
-        boost::property_tree::ptree& tree,
-        T& parameter,
-        T const& defaultValue,
-        std::string const& node,
-        ParserTask task);
+    static bool encodeDecode(boost::property_tree::ptree& tree, T& value, T const& defaultValue, std::string const& node, ParserTask task);
 };
 
 /**
@@ -37,26 +33,31 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 }
 
 template <typename T>
-void JsonParser::encodeDecode(
+bool JsonParser::encodeDecode(
     boost::property_tree::ptree& tree,
-    T& parameter,
+    T& value,
     T const& defaultValue,
     std::string const& node,
     ParserTask task)
 {
     if (ParserTask::Encode == task) {
-        if constexpr (std::is_same<T, bool>::value) {
-            tree.put(node, parameter ? "true" : "false");
-        } else if constexpr (std::is_same<T, std::string>::value) {
-            tree.put(node, parameter);
-        } else {
-            tree.put(node, to_string_with_precision(parameter, 8));
-        }
+        std::string stringValue = [&] {
+            if constexpr (std::is_same<T, bool>::value) {
+                return value ? std::string("true") : std::string("false");
+            } else if constexpr (std::is_same<T, std::string>::value) {
+                return value;
+            } else {
+                return to_string_with_precision(value, 8);
+            }
+        }();
+        tree.put(node, stringValue);
+        return false;
     } else {
         if constexpr (std::is_same<T, std::string>::value) {
-            parameter = tree.get<std::string>(node, defaultValue);
+            value = tree.get<std::string>(node, defaultValue);
         } else {
-            parameter = tree.get<T>(node, defaultValue);
+            value = tree.get<T>(node, defaultValue);
         }
+        return tree.find(node) == tree.not_found();
     }
 }

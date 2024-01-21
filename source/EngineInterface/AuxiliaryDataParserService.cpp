@@ -7,80 +7,91 @@
 namespace
 {
     template <typename T>
-    void encodeDecodeProperty(boost::property_tree::ptree& tree, T& parameter, T const& defaultValue, std::string const& node, ParserTask task)
+    bool encodeDecodeProperty(boost::property_tree::ptree& tree, T& parameter, T const& defaultValue, std::string const& node, ParserTask task)
     {
-        JsonParser::encodeDecode(tree, parameter, defaultValue, node, task);
+        return JsonParser::encodeDecode(tree, parameter, defaultValue, node, task);
     }
 
     template <>
-    void encodeDecodeProperty(
+    bool encodeDecodeProperty(
         boost::property_tree::ptree& tree,
         ColorVector<float>& parameter,
         ColorVector<float> const& defaultValue,
         std::string const& node,
         ParserTask task)
     {
+        auto result = false;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
+            result |= encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
         }
+        return result;
     }
 
     template <>
-    void encodeDecodeProperty(
+    bool encodeDecodeProperty(
         boost::property_tree::ptree& tree,
         ColorVector<int>& parameter,
         ColorVector<int> const& defaultValue,
         std::string const& node,
         ParserTask task)
     {
+        auto result = false;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
+            result |= encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
         }
+        return result;
     }
 
     template <>
-    void encodeDecodeProperty<ColorMatrix<float>>(
+    bool encodeDecodeProperty<ColorMatrix<float>>(
         boost::property_tree::ptree& tree,
         ColorMatrix<float>& parameter,
         ColorMatrix<float> const& defaultValue,
         std::string const& node,
         ParserTask task)
     {
+        auto result = false;
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {
-                encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
+                result |= encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
             }
         }
+        return result;
     }
 
     template <>
-    void encodeDecodeProperty<ColorMatrix<int>>(
+    bool encodeDecodeProperty<ColorMatrix<int>>(
         boost::property_tree::ptree& tree,
         ColorMatrix<int>& parameter,
         ColorMatrix<int> const& defaultValue,
         std::string const& node,
         ParserTask task)
     {
+        auto result = false;
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {
-                encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
+                result |= encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
             }
         }
+        return result;
     }
 
     template <>
-    void encodeDecodeProperty<ColorMatrix<bool>>(
+    bool encodeDecodeProperty<ColorMatrix<bool>>(
         boost::property_tree::ptree& tree,
         ColorMatrix<bool>& parameter,
         ColorMatrix<bool> const& defaultValue,
         std::string const& node,
         ParserTask task)
     {
+        auto result = false;
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {
-                encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
+                result |=
+                    encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
             }
         }
+        return result;
     }
 
     template <typename T>
@@ -894,22 +905,23 @@ namespace
         }
 
         //features
-        encodeDecodeProperty(
+        Features missingFeatures;
+        missingFeatures.externalEnergyControl = encodeDecodeProperty(
             tree, parameters.features.externalEnergyControl, defaultParameters.features.externalEnergyControl, "simulation parameters.features.external energy", parserTask);
-        encodeDecodeProperty(
+        missingFeatures.cellColorTransitionRules = encodeDecodeProperty(
             tree,
             parameters.features.cellColorTransitionRules,
             defaultParameters.features.cellColorTransitionRules,
             "simulation parameters.features.cell color transition rules",
             parserTask);
-        encodeDecodeProperty(
+        missingFeatures.additionalAbsorptionControl = encodeDecodeProperty(
             tree,
             parameters.features.additionalAbsorptionControl,
             defaultParameters.features.additionalAbsorptionControl,
             "simulation parameters.features.additional absorption control",
             parserTask);
         if (parserTask == ParserTask::Decode) {
-            SimulationParametersService::activateFeaturesBasedOnParameters(parameters);
+            SimulationParametersService::activateFeaturesBasedOnParameters(missingFeatures, parameters);
         }
     }
 
