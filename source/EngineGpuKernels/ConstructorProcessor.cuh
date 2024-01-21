@@ -103,24 +103,23 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
         return;
     }
 
-    auto constexpr MaxDepth = 512;
-    cell->tag = 1;
+    int tagBit = 1 << toInt(cell->id % 30);
+    atomicOr(&cell->tag, tagBit);
 
     auto currentCell = cell;
     auto depth = 0;
     auto connectionIndex = 0;
     int actualCells = 1;
-    int tagBitPos = 1 << toInt(cell->id % 30);
 
+    auto constexpr MaxDepth = 512;
     Cell* lastCells[MaxDepth];
     int lastConnectionIndices[MaxDepth];
     do {
         auto goBack = false;
         if (connectionIndex < currentCell->numConnections) {
             auto nextCell = currentCell->connections[connectionIndex].cell;
-            auto tagBit = alienAtomicRead(&nextCell->tag) & (~tagBitPos);
-            if (tagBit == 0) {
-                atomicAdd(&nextCell->tag, tagBit);
+            auto origTagBit = atomicOr(&nextCell->tag, tagBit);
+            if ((origTagBit & (~tagBit)) == 0) {
                 if (nextCell->creatureId != cell->creatureId) {
                     goBack = true;
                 } else {
