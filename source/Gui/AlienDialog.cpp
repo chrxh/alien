@@ -54,7 +54,6 @@ void _AlienDialog::close()
         ImGui::CloseCurrentPopup();
         _state = DialogState::Closed;
     });
-    printOverlayMessage("Exiting ...");
 }
 
 void _AlienDialog::changeTitle(std::string const& title)
