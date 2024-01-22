@@ -249,8 +249,7 @@ void _SimulationParametersWindow::processBase(
                     .values({"None", "Standard cell colors", "Mutants", "Cell state", "Attack bonus", "Highlight cell function"})
                     .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
                             ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
-                             " Mutants: Different mutants are represented by different colors (except changes in the neuronal networks and cell "
-                             "properties).\n\n" ICON_FA_CHEVRON_RIGHT
+                             " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into account).\n\n" ICON_FA_CHEVRON_RIGHT
                              " Cell state: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT " Attack bonus: blue = creature with low bonus (usually small genome), red = large bonus"),
                 parameters.cellColoring);
             ImGui::BeginDisabled(parameters.cellColoring != CellColoring_CellFunction);
