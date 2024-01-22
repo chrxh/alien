@@ -91,7 +91,7 @@ void _SimulationParametersWindow::processIntern()
         processTabWidget(parameters, lastParameters, origParameters);
     }
     ImGui::EndChild();
-    processFeatureList(parameters, lastParameters, origParameters);
+    processAddonList(parameters, lastParameters, origParameters);
 
     if (parameters != lastParameters) {
         _simController->setSimulationParameters(parameters);
@@ -246,11 +246,13 @@ void _SimulationParametersWindow::processBase(
                     .name("Cell coloring")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origParameters.cellColoring)
-                    .values({"None", "Standard cell colors", "Mutants", "Cell state", "Attack bonus", "Highlight cell function"})
+                    .values({"None", "Standard cell colors", "Mutants", "Cell state", "Genome structure bonus", "Highlight cell function"})
                     .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
                             ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
                              " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into account).\n\n" ICON_FA_CHEVRON_RIGHT
-                             " Cell state: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT " Attack bonus: blue = creature with low bonus (usually small genome), red = large bonus"),
+                        " Cell state: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
+                        " Genome structure bonus: This property is used by attacker cells and when the parameter 'Genome structure bonus' is activated (see tooltip there). The coloring "
+                        "is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large bonus"),
                 parameters.cellColoring);
             ImGui::BeginDisabled(parameters.cellColoring != CellColoring_CellFunction);
             AlienImGui::Switcher(
@@ -884,59 +886,6 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origParameters.cellFunctionAttackerRadius)
                     .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                 parameters.cellFunctionAttackerRadius);
-            AlienImGui::InputFloatColorMatrix(
-                AlienImGui::InputFloatColorMatrixParameters()
-                    .name("Genome size bonus")
-                    .textWidth(RightColumnWidth)
-                    .min(0)
-                    .max(20.0f)
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerGenomeSizeBonus))
-                    .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with larger genomes."),
-                parameters.cellFunctionAttackerGenomeSizeBonus);
-            AlienImGui::InputFloatColorMatrix(
-                AlienImGui::InputFloatColorMatrixParameters()
-                    .name("Same mutant protection")
-                    .textWidth(RightColumnWidth)
-                    .min(0)
-                    .max(1.0f)
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerSameMutantPenalty))
-                    .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
-                parameters.cellFunctionAttackerSameMutantPenalty);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Sensor detection factor")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(1.0f)
-                    .defaultValue(origParameters.cellFunctionAttackerSensorDetectionFactor)
-                    .tooltip(
-                        "This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
-                        "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the attacker "
-                        "cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last time and "
-                        "compares them with the attacked target."),
-                parameters.cellFunctionAttackerSensorDetectionFactor);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Geometry penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(5.0f)
-                    .defaultValue(origParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent)
-                    .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local "
-                             "geometry of the attacked cell does not match the attacking cell."),
-                parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Connections mismatch penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(1.0f)
-                    .defaultValue(origParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty)
-                    .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
-                parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy distribution radius")
@@ -1218,7 +1167,7 @@ void _SimulationParametersWindow::processBase(
                 parameters.cellFunctionDetonatorRadius);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Chain explostion probability")
+                    .name("Chain explosion probability")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(0.0f)
@@ -1230,10 +1179,10 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
-         * Addon: Additional absorption control
+         * Addon: Advanced absorption control
          */
-        if (parameters.features.additionalAbsorptionControl) {
-            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Additional absorption control"))) {
+        if (parameters.features.advancedAbsorptionControl) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced energy absorption control"))) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Absorption low connection penalty")
@@ -1258,6 +1207,69 @@ void _SimulationParametersWindow::processBase(
                         .defaultValue(origParameters.radiationAbsorptionVelocityPenalty)
                         .tooltip("When this parameter is increased, cells with higher velocity will absorb less energy from an incoming energy particle."),
                     parameters.radiationAbsorptionVelocityPenalty);
+                AlienImGui::EndTreeNode();
+            }
+        }
+
+        /**
+         * Addon: Advanced attacker control
+         */
+        if (parameters.features.advancedAttackerControl) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced attacker control"))) {
+                AlienImGui::InputFloatColorMatrix(
+                    AlienImGui::InputFloatColorMatrixParameters()
+                        .name("Genome structure bonus")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(20.0f)
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerGenomeSizeBonus))
+                        .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with larger genomes."),
+                    parameters.cellFunctionAttackerGenomeSizeBonus);
+                AlienImGui::InputFloatColorMatrix(
+                    AlienImGui::InputFloatColorMatrixParameters()
+                        .name("Same mutant protection")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(1.0f)
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerSameMutantPenalty))
+                        .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
+                    parameters.cellFunctionAttackerSameMutantPenalty);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Sensor detection factor")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(1.0f)
+                        .defaultValue(origParameters.cellFunctionAttackerSensorDetectionFactor)
+                        .tooltip(
+                            "This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
+                            "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
+                            "attacker "
+                            "cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last time and "
+                            "compares them with the attacked target."),
+                    parameters.cellFunctionAttackerSensorDetectionFactor);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Geometry penalty")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(5.0f)
+                        .defaultValue(origParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent)
+                        .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local "
+                                 "geometry of the attacked cell does not match the attacking cell."),
+                    parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Connections mismatch penalty")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(1.0f)
+                        .defaultValue(origParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty)
+                        .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
+                    parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty);
                 AlienImGui::EndTreeNode();
             }
         }
@@ -1933,7 +1945,7 @@ void _SimulationParametersWindow::processSpot(
     validationAndCorrection(spot, parameters);
 }
 
-void _SimulationParametersWindow::processFeatureList(
+void _SimulationParametersWindow::processAddonList(
     SimulationParameters& parameters,
     SimulationParameters const& lastParameters,
     SimulationParameters const& origParameters)
@@ -1946,23 +1958,41 @@ void _SimulationParametersWindow::processFeatureList(
         AlienImGui::Separator();
     }
 
-    if (ImGui::BeginChild("##test", {scale(-14.0f), 0})) {
-        _featureListOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true));
-
-        if (_featureListOpen) {
+    _featureListOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true));
+    if (_featureListOpen) {
+        if (ImGui::BeginChild("##addons", {scale(-14.0f), 0})) {
             AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Additional absorption control").textWidth(0).defaultValue(origParameters.features.additionalAbsorptionControl).tooltip(""),
-                parameters.features.additionalAbsorptionControl);
+                AlienImGui::CheckboxParameters()
+                    .name("Advanced absorption control")
+                    .textWidth(0)
+                    .defaultValue(origParameters.features.advancedAbsorptionControl)
+                    .tooltip(""),
+                parameters.features.advancedAbsorptionControl);
             AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("External energy control").textWidth(0).defaultValue(origParameters.features.externalEnergyControl).tooltip(""),
+                AlienImGui::CheckboxParameters()
+                    .name("Advanced attacker control")
+                    .textWidth(0)
+                    .defaultValue(origParameters.features.advancedAttackerControl)
+                    .tooltip(""),
+                parameters.features.advancedAttackerControl);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("External energy control")
+                    .textWidth(0)
+                    .defaultValue(origParameters.features.externalEnergyControl)
+                    .tooltip(""),
                 parameters.features.externalEnergyControl);
             AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Cell color transition rules").textWidth(0).defaultValue(origParameters.features.cellColorTransitionRules).tooltip(""),
+                AlienImGui::CheckboxParameters()
+                    .name("Cell color transition rules")
+                    .textWidth(0)
+                    .defaultValue(origParameters.features.cellColorTransitionRules)
+                    .tooltip(""),
                 parameters.features.cellColorTransitionRules);
-            AlienImGui::EndTreeNode();
         }
+        ImGui::EndChild();
+        AlienImGui::EndTreeNode();
     }
-    ImGui::EndChild();
 }
 
 void _SimulationParametersWindow::onOpenParameters()

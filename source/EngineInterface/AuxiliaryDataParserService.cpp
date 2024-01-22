@@ -143,7 +143,7 @@ namespace
             tree,
             parameters.highlightedCellFunction,
             defaultParameters.highlightedCellFunction,
-            "simulation parameters.cell colorization.cell function",
+            "simulation parameters.highlighted cell function",
             parserTask);
         encodeDecodeProperty(
             tree,
@@ -912,6 +912,18 @@ namespace
 
         //features
         Features missingFeatures;
+        missingFeatures.advancedAbsorptionControl = encodeDecodeProperty(
+            tree,
+            parameters.features.advancedAbsorptionControl,
+            defaultParameters.features.advancedAbsorptionControl,
+            "simulation parameters.features.additional absorption control",
+            parserTask);
+        missingFeatures.advancedAttackerControl = encodeDecodeProperty(
+            tree,
+            parameters.features.advancedAttackerControl,
+            defaultParameters.features.advancedAttackerControl,
+            "simulation parameters.features.additional attacker control",
+            parserTask);
         missingFeatures.externalEnergyControl = encodeDecodeProperty(
             tree, parameters.features.externalEnergyControl, defaultParameters.features.externalEnergyControl, "simulation parameters.features.external energy", parserTask);
         missingFeatures.cellColorTransitionRules = encodeDecodeProperty(
@@ -919,12 +931,6 @@ namespace
             parameters.features.cellColorTransitionRules,
             defaultParameters.features.cellColorTransitionRules,
             "simulation parameters.features.cell color transition rules",
-            parserTask);
-        missingFeatures.additionalAbsorptionControl = encodeDecodeProperty(
-            tree,
-            parameters.features.additionalAbsorptionControl,
-            defaultParameters.features.additionalAbsorptionControl,
-            "simulation parameters.features.additional absorption control",
             parserTask);
         if (parserTask == ParserTask::Decode) {
             SimulationParametersService::activateFeaturesBasedOnParameters(missingFeatures, parameters);

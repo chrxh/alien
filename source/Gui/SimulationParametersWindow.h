@@ -22,7 +22,7 @@ private:
     void processTabWidget(SimulationParameters& parameters, SimulationParameters const& lastParameters, SimulationParameters& origParameters);
     void processBase(SimulationParameters& parameters, SimulationParameters const& origParameters);
     void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot, SimulationParameters const& parameters);
-    void processFeatureList(SimulationParameters& parameters, SimulationParameters const& lastParameters, SimulationParameters const& origParameters);
+    void processAddonList(SimulationParameters& parameters, SimulationParameters const& lastParameters, SimulationParameters const& origParameters);
 
     void onOpenParameters();
     void onSaveParameters();
