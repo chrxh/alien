@@ -254,16 +254,15 @@ void _SimulationParametersWindow::processBase(
                         " Genome structure bonus: This property is used by attacker cells and when the parameter 'Genome structure bonus' is activated (see tooltip there). The coloring "
                         "is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large bonus"),
                 parameters.cellColoring);
-            ImGui::BeginDisabled(parameters.cellColoring != CellColoring_CellFunction);
             AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters()
                     .name("Highlighted cell function")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origParameters.highlightedCellFunction)
                     .values(_cellFunctionStrings)
+                    .disabled(parameters.cellColoring != CellColoring_CellFunction)
                     .tooltip("The specific cell function type to be highlighted can be selected here."),
                 parameters.highlightedCellFunction);
-            ImGui::EndDisabled();
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Zoom level for cell activity")
