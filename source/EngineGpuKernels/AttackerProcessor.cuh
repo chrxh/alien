@@ -67,7 +67,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 return;
             }
 
-            if (cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color] > NEAR_ZERO) {
+            if (cudaSimulationParameters.features.advancedAttackerControl
+                && cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color] > NEAR_ZERO) {
                 bool creatureIdMatch = false;
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto lookupCell = cell->connections[i].cell;
@@ -94,11 +95,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 atomicAdd(&otherCell->activity.channels[7], 1.0f);
             }
 
-            if (otherCell->attackProtection > cell->attackProtection) {
+            if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->attackProtection > cell->attackProtection) {
                 auto genomeSizeBonus = cudaSimulationParameters.cellFunctionAttackerGenomeSizeBonus[cell->color][otherCell->color];
                 energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<float>(otherCell->attackProtection - cell->attackProtection));
             }
-            if (otherCell->mutationId == cell->mutationId) {
+            if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->mutationId == cell->mutationId) {
                 auto sameMutantPenalty = cudaSimulationParameters.cellFunctionAttackerSameMutantPenalty[cell->color][otherCell->color];
                 energyToTransfer *= (1.0f - sameMutantPenalty);
             }
@@ -111,32 +112,36 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (!isHomogene(otherCell)) {
                 energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerColorInhomogeneityFactor[cell->color];
             }
-            auto cellFunctionAttackerGeometryDeviationExponent = SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::cellFunctionAttackerGeometryDeviationExponent,
-                &SimulationParametersSpotActivatedValues::cellFunctionAttackerGeometryDeviationExponent,
-                data,
-                cell->pos,
-                cell->color);
+            if (cudaSimulationParameters.features.advancedAttackerControl) {
+                auto cellFunctionAttackerGeometryDeviationExponent = SpotCalculator::calcParameter(
+                    &SimulationParametersSpotValues::cellFunctionAttackerGeometryDeviationExponent,
+                    &SimulationParametersSpotActivatedValues::cellFunctionAttackerGeometryDeviationExponent,
+                    data,
+                    cell->pos,
+                    cell->color);
 
-            if (abs(cellFunctionAttackerGeometryDeviationExponent) > 0) {
-                auto d = otherCell->pos - cell->pos;
-                auto angle1 = calcOpenAngle(cell, d);
-                auto angle2 = calcOpenAngle(otherCell, d * (-1));
-                auto deviation = 1.0f - abs(360.0f - (angle1 + angle2)) / 360.0f;  //1 = no deviation, 0 = max deviation
-                energyToTransfer *= powf(max(0.0f, min(1.0f, deviation)), cellFunctionAttackerGeometryDeviationExponent);
+                if (abs(cellFunctionAttackerGeometryDeviationExponent) > 0) {
+                    auto d = otherCell->pos - cell->pos;
+                    auto angle1 = calcOpenAngle(cell, d);
+                    auto angle2 = calcOpenAngle(otherCell, d * (-1));
+                    auto deviation = 1.0f - abs(360.0f - (angle1 + angle2)) / 360.0f;  //1 = no deviation, 0 = max deviation
+                    energyToTransfer *= powf(max(0.0f, min(1.0f, deviation)), cellFunctionAttackerGeometryDeviationExponent);
+                }
             }
 
-            auto cellFunctionAttackerConnectionsMismatchPenalty = SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::cellFunctionAttackerConnectionsMismatchPenalty,
-                &SimulationParametersSpotActivatedValues::cellFunctionAttackerConnectionsMismatchPenalty,
-                data,
-                cell->pos,
-                cell->color);
-            if (otherCell->numConnections > cell->numConnections + 1) {
-                energyToTransfer *= (1.0f - cellFunctionAttackerConnectionsMismatchPenalty) * (1.0f - cellFunctionAttackerConnectionsMismatchPenalty);
-            }
-            if (otherCell->numConnections == cell->numConnections + 1) {
-                energyToTransfer *= (1.0f - cellFunctionAttackerConnectionsMismatchPenalty);
+            if (cudaSimulationParameters.features.advancedAttackerControl) {
+                auto cellFunctionAttackerConnectionsMismatchPenalty = SpotCalculator::calcParameter(
+                    &SimulationParametersSpotValues::cellFunctionAttackerConnectionsMismatchPenalty,
+                    &SimulationParametersSpotActivatedValues::cellFunctionAttackerConnectionsMismatchPenalty,
+                    data,
+                    cell->pos,
+                    cell->color);
+                if (otherCell->numConnections > cell->numConnections + 1) {
+                    energyToTransfer *= (1.0f - cellFunctionAttackerConnectionsMismatchPenalty) * (1.0f - cellFunctionAttackerConnectionsMismatchPenalty);
+                }
+                if (otherCell->numConnections == cell->numConnections + 1) {
+                    energyToTransfer *= (1.0f - cellFunctionAttackerConnectionsMismatchPenalty);
+                }
             }
 
             auto color = calcMod(cell->color, MAX_COLORS);

@@ -45,10 +45,38 @@ namespace
         }
         return true;
     }
+
+    template <typename T>
+    bool equals(ColorMatrix<T> const& parameter, T const& value)
+    {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            for (int j = 0; j < MAX_COLORS; ++i) {
+                if (parameter[i][j] != value) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
 
 void SimulationParametersService::activateFeaturesBasedOnParameters(Features const& missingFeatures, SimulationParameters& parameters)
 {
+    if (missingFeatures.advancedAbsorptionControl) {
+        if (!equals(parameters.radiationAbsorptionVelocityPenalty, 0.0f) || !equals(parameters.radiationAbsorptionLowConnectionPenalty, 0.0f)) {
+            parameters.features.advancedAbsorptionControl = true;
+        }
+    }
+
+    if (missingFeatures.advancedAbsorptionControl) {
+        if (!equals(parameters.cellFunctionAttackerGenomeSizeBonus, 0.0f) || !equals(parameters.cellFunctionAttackerSameMutantPenalty, 0.0f)
+            || !equals(parameters.cellFunctionAttackerSensorDetectionFactor, 0.0f)
+            || !equals(parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent, 0.0f)
+            || !equals(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty, 0.0f)) {
+            parameters.features.advancedAttackerControl = true;
+        }
+    }
+
     if (missingFeatures.externalEnergyControl) {
         if (!equals(parameters.cellFunctionConstructorExternalEnergy, 0.0f) || !equals(parameters.cellFunctionConstructorExternalEnergySupplyRate, 0.0f)) {
             parameters.features.externalEnergyControl = true;
@@ -70,12 +98,6 @@ void SimulationParametersService::activateFeaturesBasedOnParameters(Features con
                     break;
                 }
             }
-        }
-    }
-
-    if (missingFeatures.additionalAbsorptionControl) {
-        if (!equals(parameters.radiationAbsorptionVelocityPenalty, 0.0f) || !equals(parameters.radiationAbsorptionLowConnectionPenalty, 0.0f)) {
-            parameters.features.additionalAbsorptionControl = true;
         }
     }
 }
