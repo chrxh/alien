@@ -738,9 +738,6 @@ __inline__ __device__ void MutationProcessor::cellColorMutation(SimulationData& 
         if (newColor == -1) {
             return;
         }
-        if (origColor != newColor) {
-            adaptMutationId(data, constructor);
-        }
         GenomeDecoder::setNextCellColor(genome, nodeAddress, newColor);
     });
 }
