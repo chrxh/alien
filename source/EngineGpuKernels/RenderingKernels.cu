@@ -74,11 +74,19 @@ namespace
 
     __device__ __inline__ float3 calcColor(Cell* cell, int selected)
     {
+        float factor = min(300.0f, cell->energy) / 320.0f;
+        if (1 == selected) {
+            factor *= 2.5f;
+        }
+        if (2 == selected) {
+            factor *= 1.75f;
+        }
+
         uint32_t cellColor;
-        if (cudaSimulationParameters.cellColorization == CellColorization_None) {
+        if (cudaSimulationParameters.cellColoring == CellColoring_None) {
             cellColor = 0xbfbfbf;
         }
-        if (cudaSimulationParameters.cellColorization == CellColorization_CellColor) {
+        if (cudaSimulationParameters.cellColoring == CellColoring_CellColor) {
             switch (calcMod(cell->color, 7)) {
             case 0: {
                 cellColor = Const::IndividualCellColor1;
@@ -110,13 +118,13 @@ namespace
             }
             }
         }
-        if (cudaSimulationParameters.cellColorization == CellColorization_MutationId) {
+        if (cudaSimulationParameters.cellColoring == CellColoring_MutationId) {
             auto h = abs(toInt((cell->mutationId * 12107) % 360));
             auto s = 0.3f + toFloat(abs(toInt(cell->mutationId * 12107)) % 700) / 1000;
             auto rgb = convertHSVtoRGB(toFloat(h), s, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
-        if (cudaSimulationParameters.cellColorization == CellColorization_LivingState) {
+        if (cudaSimulationParameters.cellColoring == CellColoring_LivingState) {
             switch (cell->livingState) {
             case LivingState_Ready:
                 cellColor = 0x0000ff;
@@ -130,20 +138,26 @@ namespace
             case LivingState_Dying:
                 cellColor = 0xff0000;
                 break;
+            default:
+                cellColor = 0x000000;
+                break;
             }
         }
 
-        if (cudaSimulationParameters.cellColorization == CellColorization_GenomeSize) {
+        if (cudaSimulationParameters.cellColoring == CellColoring_GenomeSize) {
             auto rgb = convertHSVtoRGB(toFloat(min(360.0f, 240.0f + powf(toFloat(cell->attackProtection), 0.3f) * 5.0f)),  1.0f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
 
-        float factor = min(300.0f, cell->energy) / 320.0f;
-        if (1 == selected) {
-            factor *= 2.5f;
-        }
-        if (2 == selected) {
-            factor *= 1.75f;
+        if (cudaSimulationParameters.cellColoring == CellColoring_CellFunction) {
+            if (cell->cellFunction == cudaSimulationParameters.highlightedCellFunction) {
+                auto h = (toFloat(cell->cellFunction) / toFloat(CellFunction_Count - 1)) * 360.0f;
+                auto rgb = convertHSVtoRGB(toFloat(h), 0.7f, 1.0f);
+                cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
+                factor = 5.0f;
+            } else {
+                cellColor = 0x303030;
+            }
         }
 
         return {
