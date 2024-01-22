@@ -39,6 +39,7 @@ private:
     std::string _startingPath;
     std::optional<SimulationParameters> _copiedParameters;
     std::optional<int> _numSpotsLastTime;
+    std::vector<std::string> _cellFunctionStrings;
 
     bool _featureListOpen = false;
     float _featureListHeight = 200.0f;

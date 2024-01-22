@@ -10,6 +10,7 @@
 #include "EngineInterface/SimulationParametersService.h"
 
 #include "AlienImGui.h"
+#include "CellFunctionStrings.h"
 #include "GenericFileDialogs.h"
 #include "MessageDialog.h"
 #include "RadiationSourcesWindow.h"
@@ -66,6 +67,10 @@ _SimulationParametersWindow::_SimulationParametersWindow(
     _startingPath = GlobalSettings::getInstance().getStringState("windows.simulation parameters.starting path", path.string());
     _featureListOpen = GlobalSettings::getInstance().getBoolState("windows.simulation parameters.feature list.open", _featureListOpen);
     _featureListHeight = GlobalSettings::getInstance().getFloatState("windows.simulation parameters.feature list.height", _featureListHeight);
+
+    for (int i = 0; i < CellFunction_Count; ++i) {
+        _cellFunctionStrings.emplace_back(Const::CellFunctionToStringMap.at(i));
+    }
 }
 
 _SimulationParametersWindow::~_SimulationParametersWindow()
@@ -240,14 +245,24 @@ void _SimulationParametersWindow::processBase(
                 AlienImGui::SwitcherParameters()
                     .name("Cell coloring")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.cellColorization)
-                    .values({"None", "Standard cell colors", "Mutants", "Cell state", "Attack bonus"})
+                    .defaultValue(origParameters.cellColoring)
+                    .values({"None", "Standard cell colors", "Mutants", "Cell state", "Attack bonus", "Highlight cell function"})
                     .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
                             ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
                              " Mutants: Different mutants are represented by different colors (except changes in the neuronal networks and cell "
                              "properties).\n\n" ICON_FA_CHEVRON_RIGHT
                              " Cell state: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT " Attack bonus: blue = creature with low bonus (usually small genome), red = large bonus"),
-                parameters.cellColorization);
+                parameters.cellColoring);
+            ImGui::BeginDisabled(parameters.cellColoring != CellColoring_CellFunction);
+            AlienImGui::Switcher(
+                AlienImGui::SwitcherParameters()
+                    .name("Highlighted cell function")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origParameters.highlightedCellFunction)
+                    .values(_cellFunctionStrings)
+                    .tooltip("The specific cell function type to be highlighted can be selected here."),
+                parameters.highlightedCellFunction);
+            ImGui::EndDisabled();
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Zoom level for cell activity")

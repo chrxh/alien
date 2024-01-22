@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+#include "CellFunctionConstants.h"
 #include "SimulationParametersSpotValues.h"
 #include "RadiationSource.h"
 #include "SimulationParametersSpot.h"
@@ -12,14 +13,15 @@
  * NOTE: header is also included in kernel code
  */
 
-using CellColorization = int;
-enum CellColorization_
+using CellColoring = int;
+enum CellColoring_
 {
-    CellColorization_None,
-    CellColorization_CellColor,
-    CellColorization_MutationId,
-    CellColorization_LivingState,
-    CellColorization_GenomeSize
+    CellColoring_None,
+    CellColoring_CellColor,
+    CellColoring_MutationId,
+    CellColoring_LivingState,
+    CellColoring_GenomeSize,
+    CellColoring_CellFunction
 };
 
 struct SimulationParameters
@@ -36,13 +38,15 @@ struct SimulationParameters
     int numSpots = 0;
     SimulationParametersSpot spots[MAX_SPOTS];
 
-    //parameters
-    SimulationParametersSpotValues baseValues;
-
+    //rendering
     uint32_t backgroundColor = 0x1b0000;
-    CellColorization cellColorization = CellColorization_CellColor;
+    CellColoring cellColoring = CellColoring_CellColor;
+    CellFunction highlightedCellFunction = CellFunction_Constructor;
     float zoomLevelNeuronalActivity = 2.0f;
     bool showDetonations = true;
+
+    //all other parameters
+    SimulationParametersSpotValues baseValues;
 
     float timestepSize = 1.0f;
     MotionType motionType = MotionType_Fluid;
