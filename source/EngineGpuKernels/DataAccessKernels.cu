@@ -33,7 +33,6 @@ namespace
         cellTO.creatureId = cell->creatureId;
         cellTO.mutationId = cell->mutationId;
         cellTO.attackProtection = cell->attackProtection;
-        cellTO.numGenomeNodes = cell->numGenomeNodes;
         cellTO.inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
         cellTO.outputBlocked = cell->outputBlocked;
         cellTO.cellFunction = cell->cellFunction;
