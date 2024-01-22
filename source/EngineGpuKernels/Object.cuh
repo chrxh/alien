@@ -222,6 +222,9 @@ struct Cell
     uint32_t activationTime;
     uint32_t attackProtection;
 
+    //visualization
+    uint32_t numGenomeNodes;
+
     //annotations
     CellMetadataDescription metadata;
 

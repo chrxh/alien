@@ -134,7 +134,7 @@ namespace
         }
 
         if (cudaSimulationParameters.cellColorization == CellColorization_GenomeSize) {
-            auto rgb = convertHSVtoRGB(toFloat(min(360, 240 + cell->attackProtection)),  1.0f, 1.0f);
+            auto rgb = convertHSVtoRGB(toFloat(min(360.0f, 240.0f + sqrtf(toFloat(cell->numGenomeNodes))*6.0f)),  1.0f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
 

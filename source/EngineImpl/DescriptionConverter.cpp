@@ -386,15 +386,16 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     }
     result.connections = connections;
     result.livingState = cellTO.livingState;
-    result.creatureId = cellTO.creatureId;
-    result.mutationId = cellTO.mutationId;
+    result.creatureId = toInt(cellTO.creatureId);
+    result.mutationId = toInt(cellTO.mutationId);
     result.inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber >= 0 ? std::make_optional(cellTO.inputExecutionOrderNumber) : std::nullopt;
     result.outputBlocked = cellTO.outputBlocked;
     result.executionOrderNumber = cellTO.executionOrderNumber;
     result.barrier = cellTO.barrier;
-    result.age = cellTO.age;
+    result.age = toInt(cellTO.age);
     result.color = cellTO.color;
-    result.attackProtection = cellTO.attackProtection;
+    result.attackProtection = toInt(cellTO.attackProtection);
+    result.numGenomeNodes = toInt(cellTO.numGenomeNodes);
 
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
@@ -591,7 +592,7 @@ void DescriptionConverter::addCell(
         auto const& sensorDesc = std::get<SensorDescription>(*cellDesc.cellFunction);
         SensorTO sensorTO;
         sensorTO.mode = sensorDesc.getSensorMode();
-        sensorTO.color = sensorDesc.color;
+        sensorTO.color = static_cast<uint8_t>(sensorDesc.color);
         sensorTO.minDensity = sensorDesc.minDensity;
         sensorTO.angle = sensorDesc.fixedAngle.value_or(0);
         sensorTO.targetedCreatureId = sensorDesc.targetedCreatureId;
@@ -603,8 +604,8 @@ void DescriptionConverter::addCell(
     case CellFunction_Nerve: {
         auto const& nerveDesc = std::get<NerveDescription>(*cellDesc.cellFunction);
         NerveTO nerveTO;
-        nerveTO.pulseMode = nerveDesc.pulseMode;
-        nerveTO.alternationMode = nerveDesc.alternationMode;
+        nerveTO.pulseMode = static_cast<uint8_t>(nerveDesc.pulseMode);
+        nerveTO.alternationMode = static_cast<uint8_t>(nerveDesc.alternationMode);
         cellTO.cellFunctionData.nerve = nerveTO;
     } break;
     case CellFunction_Attacker: {
@@ -628,7 +629,7 @@ void DescriptionConverter::addCell(
         MuscleTO muscleTO;
         muscleTO.mode = muscleDesc.mode;
         muscleTO.lastBendingDirection = muscleDesc.lastBendingDirection;
-        muscleTO.lastBendingSourceIndex = muscleDesc.lastBendingSourceIndex;
+        muscleTO.lastBendingSourceIndex = static_cast<uint8_t>(muscleDesc.lastBendingSourceIndex);
         muscleTO.consecutiveBendingAngle = muscleDesc.consecutiveBendingAngle;
         cellTO.cellFunctionData.muscle = muscleTO;
     } break;
@@ -641,7 +642,7 @@ void DescriptionConverter::addCell(
     case CellFunction_Reconnector: {
         auto const& reconnectorDesc = std::get<ReconnectorDescription>(*cellDesc.cellFunction);
         ReconnectorTO reconnectorTO;
-        reconnectorTO.color = reconnectorDesc.color;
+        reconnectorTO.color = static_cast<uint8_t>(reconnectorDesc.color);
         cellTO.cellFunctionData.reconnector = reconnectorTO;
     } break;
     case CellFunction_Detonator: {
@@ -659,8 +660,9 @@ void DescriptionConverter::addCell(
     cellTO.numConnections = 0;
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;
-    cellTO.color = cellDesc.color;
+    cellTO.color = static_cast<uint8_t>(cellDesc.color);
     cellTO.attackProtection = cellDesc.attackProtection;
+    cellTO.numGenomeNodes = cellDesc.numGenomeNodes;
     convert(dataTO, cellDesc.metadata.name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
     convert(dataTO, cellDesc.metadata.description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
