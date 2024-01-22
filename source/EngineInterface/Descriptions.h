@@ -366,6 +366,10 @@ struct CellDescription
     int activationTime = 0;
     int attackProtection = 0;
 
+    //visualization
+    int numGenomeNodes = 0;
+
+    //visualization
     CellMetadataDescription metadata;
 
     CellDescription() = default;

@@ -360,6 +360,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         constructor.offspringCreatureId = 1 + data.numberGen1.random(65535);
 
         hostCell->attackProtection = GenomeDecoder::getWeightedNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize));
+        hostCell->numGenomeNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, toInt(constructor.genomeSize), true, true);
     } else {
         constructor.offspringCreatureId = hostCell->creatureId;
     }
@@ -634,6 +635,7 @@ ConstructorProcessor::constructCellIntern(
 
     result->activationTime = constructor.constructionActivationTime;
     result->attackProtection = hostCell->attackProtection;
+    result->numGenomeNodes = hostCell->numGenomeNodes;
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
     switch (constructionData.cellFunction) {
