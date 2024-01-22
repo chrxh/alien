@@ -222,6 +222,7 @@ struct Cell
     uint32_t activationTime;
     uint32_t attackProtection;
 
+    //annotations
     CellMetadataDescription metadata;
 
     //editing data

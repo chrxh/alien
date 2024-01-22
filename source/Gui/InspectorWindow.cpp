@@ -466,12 +466,11 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 
 void _InspectorWindow::processCellMetadataTab(CellDescription& cell)
 {
-    if (ImGui::BeginTabItem("Metadata", nullptr, ImGuiTabItemFlags_None)) {
-        if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(CellMetadataContentTextWidth), cell.metadata.name);
+    if (ImGui::BeginTabItem("Annotation", nullptr, ImGuiTabItemFlags_None)) {
+        if (ImGui::BeginChild("##", ImVec2(0, 0), false, 0)) {
+            AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Name").textWidth(0), cell.metadata.name);
 
-            AlienImGui::InputTextMultiline(
-                AlienImGui::InputTextMultilineParameters().name("Notes").textWidth(CellMetadataContentTextWidth).height(100), cell.metadata.description);
+            AlienImGui::InputTextMultiline(AlienImGui::InputTextMultilineParameters().hint("Notes").textWidth(0).height(100), cell.metadata.description);
         }
         ImGui::EndChild();
         ImGui::EndTabItem();
