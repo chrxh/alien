@@ -173,13 +173,8 @@ struct CellTO
     uint32_t activationTime;
     uint32_t attackProtection;
 
-    //visualization
-    uint32_t numGenomeNodes;
-
-    //annotations
     CellMetadataTO metadata;
 
-    //editing data
     uint8_t selected;
 };
 
