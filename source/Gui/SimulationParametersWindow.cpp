@@ -246,13 +246,13 @@ void _SimulationParametersWindow::processBase(
                     .name("Cell coloring")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origParameters.cellColoring)
-                    .values({"None", "Standard cell colors", "Mutants", "Cell state", "Genome structure bonus", "Highlight cell function"})
+                    .values({"None", "Standard cell colors", "Mutants", "Cell state", "Complex genome protection", "Highlight cell function"})
                     .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
                             ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
                              " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into account).\n\n" ICON_FA_CHEVRON_RIGHT
                         " Cell state: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
-                        " Genome structure bonus: This property is used by attacker cells and when the parameter 'Genome structure bonus' is activated (see tooltip there). The coloring "
-                        "is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large bonus"),
+                        " Complex genome protection: This property is utilized by attacker cells when the same-named parameter 'Complex genome protection' is "
+                        "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large bonus"),
                 parameters.cellColoring);
             AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters()
@@ -1217,7 +1217,7 @@ void _SimulationParametersWindow::processBase(
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced attacker control"))) {
                 AlienImGui::InputFloatColorMatrix(
                     AlienImGui::InputFloatColorMatrixParameters()
-                        .name("Genome structure bonus")
+                        .name("Complex genome protection")
                         .textWidth(RightColumnWidth)
                         .min(0)
                         .max(20.0f)
