@@ -665,8 +665,9 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.constructionAngle1 = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
         newConstructor.constructionAngle2 = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
         GenomeDecoder::copyGenome(data, constructor, genomeCurrentBytePosition, newConstructor);
-        newConstructor.numInheritedGenomeNodes =
-            static_cast<uint16_t>(GenomeDecoder::getNumNodesRecursively(newConstructor.genome, newConstructor.genomeSize, true, false));
+        auto numInheritedGenomeNodes = 
+            GenomeDecoder::getNumNodesRecursively(newConstructor.genome, newConstructor.genomeSize, true, false);
+        newConstructor.numInheritedGenomeNodes = static_cast<uint16_t>(min(NPP_MAX_16U, numInheritedGenomeNodes));
         newConstructor.genomeGeneration = constructor.genomeGeneration + 1;
         newConstructor.offspringMutationId = constructor.offspringMutationId;
     } break;
