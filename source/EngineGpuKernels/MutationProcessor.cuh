@@ -426,6 +426,9 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
         }
     }
     nodeAddress = GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, true, subGenomesSizeIndices, &numSubGenomesSizeIndices, nodeAddress);
+    if (numSubGenomesSizeIndices >= GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH - 2) {
+        return;
+    }
 
     auto newColor = cell->color;
     if (nodeAddress < genomeSize) {
@@ -562,12 +565,15 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
     if (startTargetIndex >= startSourceIndex && startTargetIndex <= endSourceIndex) {
         return;
     }
+    auto sourceRangeDepth = GenomeDecoder::getGenomeDepth(subGenome, subGenomeSize);
     if (cudaSimulationParameters.cellFunctionConstructorMutationPreventDepthIncrease) {
         auto genomeDepth = GenomeDecoder::getGenomeDepth(genome, genomeSize);
-        auto sourceRangeDepth = GenomeDecoder::getGenomeDepth(subGenome, subGenomeSize);
         if (genomeDepth < sourceRangeDepth + numSubGenomesSizeIndices2) {
             return;
         }
+    }
+    if (sourceRangeDepth + numSubGenomesSizeIndices2 >= GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH - 2) {
+        return;
     }
 
     auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(genomeSize);
@@ -694,12 +700,15 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
         return;
     }
 
+    auto sourceRangeDepth = GenomeDecoder::getGenomeDepth(subGenome, subGenomeSize);
     if (cudaSimulationParameters.cellFunctionConstructorMutationPreventDepthIncrease) {
         auto genomeDepth = GenomeDecoder::getGenomeDepth(genome, genomeSize);
-        auto sourceRangeDepth = GenomeDecoder::getGenomeDepth(subGenome, subGenomeSize);
         if (genomeDepth < sourceRangeDepth + numSubGenomesSizeIndices) {
             return;
         }
+    }
+    if (sourceRangeDepth + numSubGenomesSizeIndices >= GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH - 2) {
+        return;
     }
 
     auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(targetGenomeSize);
