@@ -548,6 +548,11 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
         return;
     }
     auto sourceRangeSize = endSourceIndex - startSourceIndex;
+    if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
+        if (GenomeDecoder::containsSectionSelfReplication(genome + startSourceIndex, sourceRangeSize)) {
+            return;
+        }
+    }
 
     //calc target insertion point
     int subGenomesSizeIndices2[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH + 1];
