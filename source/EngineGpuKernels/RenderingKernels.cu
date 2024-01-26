@@ -120,7 +120,7 @@ namespace
         }
         if (cudaSimulationParameters.cellColoring == CellColoring_MutationId) {
             auto h = abs(toInt((cell->mutationId * 12107) % 360));
-            auto s = 0.3f + toFloat(abs(toInt(cell->mutationId * 12107)) % 700) / 1000;
+            auto s = 0.6f + toFloat(abs(toInt(cell->mutationId * 12107)) % 400) / 1000;
             auto rgb = convertHSVtoRGB(toFloat(h), s, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
