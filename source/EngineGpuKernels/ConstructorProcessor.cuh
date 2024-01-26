@@ -772,7 +772,8 @@ __inline__ __device__ int ConstructorProcessor::calcAttackProtection(uint8_t* ge
     int lastDepth = 0;
     auto result = 0.0f;
     int acceleration = 1;
-    GenomeDecoder::executeForEachNodeRecursively(genome, toInt(genomeSize), true, [&result, &lastDepth, &acceleration](int depth, int nodeAddress, int repetitions) {
+    GenomeDecoder::executeForEachNodeRecursively(
+        genome, toInt(genomeSize), false, [&result, &lastDepth, &acceleration](int depth, int nodeAddress, int repetitions) {
         float bonus = depth > lastDepth ? 10.0f * toFloat(repetitions) * toFloat(acceleration) : 1.0f;
         result += powf(2.0f, toFloat(depth)) * bonus;
 

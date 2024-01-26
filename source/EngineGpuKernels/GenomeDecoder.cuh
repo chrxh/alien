@@ -87,7 +87,7 @@ public:
     __inline__ __device__ static float convertByteToAngle(uint8_t b);
     __inline__ __device__ static uint8_t convertOptionalByteToByte(int value);
 
-    static auto constexpr MAX_SUBGENOME_RECURSION_DEPTH = 20;
+    static auto constexpr MAX_SUBGENOME_RECURSION_DEPTH = 15;
 
 private:
     __inline__ __device__ static int findStartNodeAddress(uint8_t* genome, int genomeSize, int refIndex);
