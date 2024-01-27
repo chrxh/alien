@@ -112,6 +112,17 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (!isHomogene(otherCell)) {
                 energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerColorInhomogeneityFactor[cell->color];
             }
+
+            bool active = false;
+            for (int i = 0; i < 6; ++i) {
+                if(abs(otherCell->activity.channels[i]) > NEAR_ZERO) {
+                    active = true;
+                }
+            }
+            if (active) {
+                //energyToTransfer *= 0.3f;
+            }
+
             if (cudaSimulationParameters.features.advancedAttackerControl) {
                 auto cellFunctionAttackerGeometryDeviationExponent = SpotCalculator::calcParameter(
                     &SimulationParametersSpotValues::cellFunctionAttackerGeometryDeviationExponent,
