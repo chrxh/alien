@@ -598,20 +598,14 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
         auto livingState = atomicCAS(&cell->livingState, LivingState_Activating, LivingState_Ready);
         if (livingState == LivingState_Activating) {
             for (int i = 0; i < cell->numConnections; ++i) {
-                auto connectedCell = cell->connections[i].cell;
+                auto const& connectedCell = cell->connections[i].cell;
                 atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_Activating);
             }
         }
         if (livingState == LivingState_Dying) {
             for (int i = 0; i < cell->numConnections; ++i) {
-                auto connectedCell = cell->connections[i].cell;
-                auto& constructor = connectedCell->cellFunctionData.constructor;
-                if (connectedCell->cellFunction == CellFunction_Constructor
-                      && GenomeDecoder::containsSelfReplication(constructor)
-                      && !GenomeDecoder::isSeparating(constructor.genome)) {
-                    constructor.genomeCurrentNodeIndex = 0;
-                    constructor.setConstructionBuilt(true);
-                } else if(connectedCell->creatureId == cell->creatureId) {
+                auto const& connectedCell = cell->connections[i].cell;
+                if (connectedCell->creatureId == cell->creatureId) {
                     atomicExch(&connectedCell->livingState, LivingState_Dying);
                 }
             }
