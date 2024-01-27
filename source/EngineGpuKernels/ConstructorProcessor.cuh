@@ -133,18 +133,24 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
                         break;
                     }
                 } else {
-                    ++connectionIndex;
+                    goBack = true;
                 }
             }
         }
-        if (connectionIndex == currentCell->numConnections || goBack) {
-            if (depth == 0) {
-                break;
+
+        if (goBack || connectionIndex == currentCell->numConnections) {
+            if (connectionIndex < currentCell->numConnections) {
+                ++connectionIndex;
             }
-            --depth;
-            currentCell = lastCells[depth];
-            connectionIndex = lastConnectionIndices[depth];
-            ++connectionIndex;
+            if (connectionIndex == currentCell->numConnections) {
+                if (depth == 0) {
+                    break;
+                }
+                --depth;
+                currentCell = lastCells[depth];
+                connectionIndex = lastConnectionIndices[depth];
+                ++connectionIndex;
+            }
         }
     } while (true);
 
@@ -305,10 +311,14 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
 
 __inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCell(Cell* hostCell)
 {
-    if (hostCell->cellFunctionData.constructor.lastConstructedCellId != 0) {
+    auto const& constructor = hostCell->cellFunctionData.constructor;
+    if (constructor.genomeCurrentNodeIndex == 0) {
+        return nullptr;
+    }
+    if (constructor.lastConstructedCellId != 0) {
         for (int i = 0; i < hostCell->numConnections; ++i) {
             auto const& connectedCell = hostCell->connections[i].cell;
-            if (connectedCell->id == hostCell->cellFunctionData.constructor.lastConstructedCellId) {
+            if (connectedCell->id == constructor.lastConstructedCellId) {
                 return connectedCell;
             }
         }

@@ -246,12 +246,12 @@ void _SimulationParametersWindow::processBase(
                     .name("Cell coloring")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origParameters.cellColoring)
-                    .values({"None", "Standard cell colors", "Mutants", "Cell state", "Complex genome protection", "Highlight cell function"})
+                    .values({"None", "Standard cell colors", "Mutants", "Cell state", "Genome complexity", "Highlight cell function"})
                     .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
                             ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
                              " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into account).\n\n" ICON_FA_CHEVRON_RIGHT
                         " Cell state: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
-                        " Complex genome protection: This property is utilized by attacker cells when the same-named parameter 'Complex genome protection' is "
+                        " Genome complexity: This property can be utilized by attacker cells when the parameter 'Complex genome protection' is "
                         "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large bonus"),
                 parameters.cellColoring);
             AlienImGui::Switcher(
