@@ -364,7 +364,7 @@ struct CellDescription
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
     int activationTime = 0;
-    int attackProtection = 0;
+    int genomeComplexity = 0;
 
     CellMetadataDescription metadata;
 

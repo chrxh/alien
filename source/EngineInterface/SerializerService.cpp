@@ -108,7 +108,7 @@ namespace
     auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
     auto constexpr Id_Cell_OutputBlocked = 7;
     auto constexpr Id_Cell_ActivationTime = 8;
-    auto constexpr Id_Cell_AttackProtection = 13;
+    auto constexpr Id_Cell_GenomeComplexity = 13;
 
     auto constexpr Id_Neuron_ActivationFunctions = 0;
 
@@ -702,7 +702,7 @@ namespace cereal
             task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
-        loadSave<int>(task, auxiliaries, Id_Cell_AttackProtection, data.attackProtection, defaultObject.attackProtection);
+        loadSave<int>(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
         setLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
