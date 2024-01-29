@@ -106,51 +106,31 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
 
     uint32_t tagBit = 1 << toInt(cell->id % 30);
     atomicOr(&cell->tag, toInt(tagBit));
-    auto currentCell = cell;
-    auto depth = 0;
-    auto connectionIndex = 0;
-    int actualCells = 1;
+    auto actualCells = 1;
 
-    auto constexpr MaxDepth = 512;
-    Cell* lastCells[MaxDepth];
-    int lastConnectionIndices[MaxDepth];
+    auto constexpr QueueLength = 512;
+    Cell* taggedCells[QueueLength];
+    taggedCells[0] = cell;
+    int numTaggedCells = 1;
+    int currentTaggedCellIndex = 0;
     do {
-        auto goBack = false;
-        if (connectionIndex < currentCell->numConnections) {
-            auto nextCell = currentCell->connections[connectionIndex].cell;
-            if (nextCell->creatureId != cell->creatureId) {
-                goBack = true;
-            } else {
+        auto currentCell = taggedCells[currentTaggedCellIndex];
+
+        if ((numTaggedCells + 1) % QueueLength != currentTaggedCellIndex) {
+            for (int i = 0, j = currentCell->numConnections; i < j; ++i) {
+                auto& nextCell = currentCell->connections[i].cell;
                 auto origTagBit = static_cast<uint32_t>(atomicOr(&nextCell->tag, toInt(tagBit)));
                 if ((origTagBit & tagBit) == 0) {
+                    taggedCells[numTaggedCells] = nextCell;
+                    numTaggedCells = (numTaggedCells + 1) % QueueLength;
                     ++actualCells;
-                    lastCells[depth] = currentCell;
-                    lastConnectionIndices[depth] = connectionIndex;
-                    currentCell = nextCell;
-                    connectionIndex = 0;
-                    ++depth;
-                    if (depth >= MaxDepth) {
-                        break;
-                    }
-                } else {
-                    goBack = true;
                 }
             }
         }
 
-        if (goBack || connectionIndex == currentCell->numConnections) {
-            if (connectionIndex < currentCell->numConnections) {
-                ++connectionIndex;
-            }
-            if (connectionIndex == currentCell->numConnections) {
-                if (depth == 0) {
-                    break;
-                }
-                --depth;
-                currentCell = lastCells[depth];
-                connectionIndex = lastConnectionIndices[depth];
-                ++connectionIndex;
-            }
+        currentTaggedCellIndex = (currentTaggedCellIndex + 1) % QueueLength;
+        if (currentTaggedCellIndex == numTaggedCells) {
+            break;
         }
     } while (true);
 
