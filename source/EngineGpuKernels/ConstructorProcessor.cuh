@@ -119,11 +119,13 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
         if ((numTaggedCells + 1) % QueueLength != currentTaggedCellIndex) {
             for (int i = 0, j = currentCell->numConnections; i < j; ++i) {
                 auto& nextCell = currentCell->connections[i].cell;
-                auto origTagBit = static_cast<uint32_t>(atomicOr(&nextCell->tag, toInt(tagBit)));
-                if ((origTagBit & tagBit) == 0) {
-                    taggedCells[numTaggedCells] = nextCell;
-                    numTaggedCells = (numTaggedCells + 1) % QueueLength;
-                    ++actualCells;
+                if (nextCell->creatureId == cell->creatureId) {
+                    auto origTagBit = static_cast<uint32_t>(atomicOr(&nextCell->tag, toInt(tagBit)));
+                    if ((origTagBit & tagBit) == 0) {
+                        taggedCells[numTaggedCells] = nextCell;
+                        numTaggedCells = (numTaggedCells + 1) % QueueLength;
+                        ++actualCells;
+                    }
                 }
             }
         }
