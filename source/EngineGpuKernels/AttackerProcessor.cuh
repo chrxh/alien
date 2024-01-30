@@ -96,7 +96,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->genomeComplexity > cell->genomeComplexity) {
-                auto genomeSizeBonus = cudaSimulationParameters.cellFunctionAttackerGenomeSizeBonus[cell->color][otherCell->color];
+                auto genomeSizeBonus = cudaSimulationParameters.cellFunctionAttackerGenomeComplexityBonus[cell->color][otherCell->color];
                 energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<float>(otherCell->genomeComplexity - cell->genomeComplexity));
             }
             if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->mutationId == cell->mutationId) {

@@ -248,6 +248,18 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.genomeComplexityRamificationFactor,
+            defaultParameters.genomeComplexityRamificationFactor,
+            "simulation parameters.genome complexity.genome complexity ramification factor",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.genomeComplexitySizeFactor,
+            defaultParameters.genomeComplexitySizeFactor,
+            "simulation parameters.genome complexity.genome complexity size factor",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.baseValues.radiationCellAgeStrength,
             defaultParameters.baseValues.radiationCellAgeStrength,
             "simulation parameters.radiation.factor",
@@ -282,6 +294,12 @@ namespace
             parameters.radiationAbsorptionLowConnectionPenalty,
             defaultParameters.radiationAbsorptionLowConnectionPenalty,
             "simulation parameters.radiation.absorption low connection penalty",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.radiationAbsorptionLowGenomeComplexityPenalty,
+            defaultParameters.radiationAbsorptionLowGenomeComplexityPenalty,
+            "simulation parameters.radiation.absorption low genome complexity penalty",
             parserTask);
         encodeDecodeProperty(
             tree,
@@ -506,8 +524,8 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.cellFunctionAttackerGenomeSizeBonus,
-            defaultParameters.cellFunctionAttackerGenomeSizeBonus,
+            parameters.cellFunctionAttackerGenomeComplexityBonus,
+            defaultParameters.cellFunctionAttackerGenomeComplexityBonus,
             "simulation parameters.cell.function.attacker.genome size bonus",
             parserTask);
         encodeDecodeProperty(

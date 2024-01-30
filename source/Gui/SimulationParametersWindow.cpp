@@ -1184,6 +1184,18 @@ void _SimulationParametersWindow::processBase(
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced energy absorption control"))) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
+                        .name("Absorption low genome complexity penalty")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(1.0f)
+                        .format("%.2f")
+                        .defaultValue(origParameters.radiationAbsorptionLowGenomeComplexityPenalty)
+                        .tooltip(
+                            "When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle."),
+                    parameters.radiationAbsorptionLowGenomeComplexityPenalty);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
                         .name("Absorption low connection penalty")
                         .textWidth(RightColumnWidth)
                         .colorDependence(true)
@@ -1221,9 +1233,9 @@ void _SimulationParametersWindow::processBase(
                         .textWidth(RightColumnWidth)
                         .min(0)
                         .max(20.0f)
-                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerGenomeSizeBonus))
-                        .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with larger genomes."),
-                    parameters.cellFunctionAttackerGenomeSizeBonus);
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerGenomeComplexityBonus))
+                        .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
+                    parameters.cellFunctionAttackerGenomeComplexityBonus);
                 AlienImGui::InputFloatColorMatrix(
                     AlienImGui::InputFloatColorMatrixParameters()
                         .name("Same mutant protection")
@@ -2038,7 +2050,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
             parameters.cellFunctionAttackerSameMutantPenalty[i][j] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSameMutantPenalty[i][j]));
-            parameters.cellFunctionAttackerGenomeSizeBonus[i][j] = std::max(0.0f, parameters.cellFunctionAttackerGenomeSizeBonus[i][j]);
+            parameters.cellFunctionAttackerGenomeComplexityBonus[i][j] = std::max(0.0f, parameters.cellFunctionAttackerGenomeComplexityBonus[i][j]);
         }
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
         parameters.radiationAbsorptionVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionVelocityPenalty[i]);
@@ -2052,6 +2064,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorExternalEnergySupplyRate[i]));
         parameters.baseValues.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
         parameters.particleSplitEnergy[i] = std::max(0.0f, parameters.particleSplitEnergy[i]);
+        parameters.radiationAbsorptionLowGenomeComplexityPenalty[i] =
+            std::max(0.0f, std::min(1.0f, parameters.radiationAbsorptionLowGenomeComplexityPenalty[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
