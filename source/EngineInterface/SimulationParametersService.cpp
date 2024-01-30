@@ -68,8 +68,8 @@ void SimulationParametersService::activateFeaturesBasedOnParameters(Features con
         }
     }
 
-    if (missingFeatures.advancedAbsorptionControl) {
-        if (!equals(parameters.cellFunctionAttackerGenomeSizeBonus, 0.0f) || !equals(parameters.cellFunctionAttackerSameMutantPenalty, 0.0f)
+    if (missingFeatures.advancedAttackerControl) {
+        if (!equals(parameters.cellFunctionAttackerGenomeComplexityBonus, 0.0f) || !equals(parameters.cellFunctionAttackerSameMutantPenalty, 0.0f)
             || !equals(parameters.cellFunctionAttackerSensorDetectionFactor, 0.0f)
             || !equals(parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent, 0.0f)
             || !equals(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty, 0.0f)) {

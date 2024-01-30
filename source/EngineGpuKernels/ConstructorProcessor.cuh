@@ -61,7 +61,7 @@ private:
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static bool isSelfReplicator(Cell* cell);
-    __inline__ __device__ static int calcGenomeComplexity(uint8_t* genome, uint16_t genomeSize);
+    __inline__ __device__ static int calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize);
 };
 
 /************************************************************************/
@@ -352,7 +352,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     if (GenomeDecoder::containsSelfReplication(constructor)) {
         constructor.offspringCreatureId = 1 + data.numberGen1.random(65535);
 
-        hostCell->genomeComplexity = calcGenomeComplexity(constructor.genome, constructor.genomeSize);
+        hostCell->genomeComplexity = calcGenomeComplexity(hostCell->color, constructor.genome, constructor.genomeSize);
     } else {
         constructor.offspringCreatureId = hostCell->creatureId;
     }
@@ -760,15 +760,16 @@ __inline__ __device__ bool ConstructorProcessor::isSelfReplicator(Cell* cell)
     return GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor);
 }
 
-__inline__ __device__ int ConstructorProcessor::calcGenomeComplexity(uint8_t* genome, uint16_t genomeSize)
+__inline__ __device__ int ConstructorProcessor::calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize)
 {
     int lastDepth = 0;
     auto result = 0.0f;
     int acceleration = 1;
     GenomeDecoder::executeForEachNodeRecursively(
-        genome, toInt(genomeSize), false, [&result, &lastDepth, &acceleration](int depth, int nodeAddress, int repetitions) {
-        float bonus = depth > lastDepth ? 10.0f * toFloat(repetitions) * toFloat(acceleration) : 1.0f;
-        result += powf(2.0f, toFloat(depth)) * bonus;
+        genome, toInt(genomeSize), false, [&result, &lastDepth, &acceleration, &color](int depth, int nodeAddress, int repetitions) {
+            float multiplier =
+                depth > lastDepth ? cudaSimulationParameters.genomeComplexityRamificationFactor[color] * toFloat(repetitions) * toFloat(acceleration) : 0.0f;
+            result += powf(2.0f, toFloat(depth)) * (multiplier + cudaSimulationParameters.genomeComplexitySizeFactor[color]);
 
         lastDepth = depth;
         ++acceleration;

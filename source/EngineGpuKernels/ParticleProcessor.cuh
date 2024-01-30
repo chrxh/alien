@@ -107,6 +107,8 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                                 max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionVelocityPenalty[cell->color]);
                             energyToTransfer *=
                                 powf(toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty[cell->color]);
+                            energyToTransfer *=
+                                1.0f - cudaSimulationParameters.radiationAbsorptionLowGenomeComplexityPenalty[cell->color] / powf(1.0f + toFloat(cell->genomeComplexity), 0.1f);
                         }
 
                         if (particle->energy < 1) {
