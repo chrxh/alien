@@ -2,6 +2,7 @@
 
 struct Features
 {
+    bool genomeComplexityMeasurement = false;
     bool advancedAbsorptionControl = false;
     bool advancedAttackerControl = false;
     bool externalEnergyControl = false;

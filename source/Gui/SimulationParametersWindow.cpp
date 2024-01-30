@@ -1178,6 +1178,37 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
+         * Addon: Genome complexity measurement
+         */
+        if (parameters.features.genomeComplexityMeasurement) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Genome complexity measurement").highlighted(false))) {
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Size factor")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0.0f)
+                        .max(1.0f)
+                        .format("%.2f")
+                        .defaultValue(origParameters.genomeComplexitySizeFactor)
+                        .tooltip(""),
+                    parameters.genomeComplexitySizeFactor);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Ramification factor")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0.0f)
+                        .max(20.0f)
+                        .format("%.1f")
+                        .defaultValue(origParameters.genomeComplexityRamificationFactor)
+                        .tooltip(""),
+                    parameters.genomeComplexityRamificationFactor);
+                AlienImGui::EndTreeNode();
+            }
+        }
+
+        /**
          * Addon: Advanced absorption control
          */
         if (parameters.features.advancedAbsorptionControl) {
@@ -1972,6 +2003,13 @@ void _SimulationParametersWindow::processAddonList(
     _featureListOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true));
     if (_featureListOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Genome complexity measurement")
+                    .textWidth(0)
+                    .defaultValue(origParameters.features.genomeComplexityMeasurement)
+                    .tooltip(""),
+                parameters.features.genomeComplexityMeasurement);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Advanced absorption control")
