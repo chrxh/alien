@@ -930,6 +930,12 @@ namespace
 
         //features
         Features missingFeatures;
+        missingFeatures.genomeComplexityMeasurement = encodeDecodeProperty(
+            tree,
+            parameters.features.genomeComplexityMeasurement,
+            defaultParameters.features.genomeComplexityMeasurement,
+            "simulation parameters.features.genome complexity measurement",
+            parserTask);
         missingFeatures.advancedAbsorptionControl = encodeDecodeProperty(
             tree,
             parameters.features.advancedAbsorptionControl,
