@@ -1184,7 +1184,7 @@ void _SimulationParametersWindow::processBase(
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced energy absorption control"))) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
-                        .name("Absorption low genome complexity penalty")
+                        .name("Low genome complexity penalty")
                         .textWidth(RightColumnWidth)
                         .colorDependence(true)
                         .min(0)
@@ -1196,7 +1196,7 @@ void _SimulationParametersWindow::processBase(
                     parameters.radiationAbsorptionLowGenomeComplexityPenalty);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
-                        .name("Absorption low connection penalty")
+                        .name("Low connection penalty")
                         .textWidth(RightColumnWidth)
                         .colorDependence(true)
                         .min(0)
@@ -1208,7 +1208,7 @@ void _SimulationParametersWindow::processBase(
                     parameters.radiationAbsorptionLowConnectionPenalty);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
-                        .name("Absorption velocity penalty")
+                        .name("Velocity penalty")
                         .textWidth(RightColumnWidth)
                         .colorDependence(true)
                         .min(0)
