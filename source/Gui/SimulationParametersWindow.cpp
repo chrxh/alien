@@ -1971,7 +1971,7 @@ void _SimulationParametersWindow::processAddonList(
 
     _featureListOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true));
     if (_featureListOpen) {
-        if (ImGui::BeginChild("##addons", {scale(-14.0f), 0})) {
+        if (ImGui::BeginChild("##addons", {scale(0), 0})) {
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Advanced absorption control")
