@@ -274,6 +274,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
         cell->activity.channels[i] = 0;
     }
     cell->density = 1.0f;
+    cell->creatureId = 0;
+    cell->mutationId = 0;
 
     if (cudaSimulationParameters.particleTransformationRandomCellFunction) {
         cell->cellFunction = _data->numberGen1.random(CellFunction_Count - 1);
