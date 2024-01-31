@@ -56,7 +56,13 @@ private:
 
     __inline__ __device__ static bool isConnectable(int numConnections, int maxConnections, bool adaptMaxConnections);
 
-    __inline__ __device__ static Cell* constructCellIntern(SimulationData& data, Cell* hostCell, float2 const& newCellPos, int maxConnections, ConstructionData const& constructionData);
+    __inline__ __device__ static Cell* constructCellIntern(
+        SimulationData& data,
+        uint64_t& cellPointerIndex,
+        Cell* hostCell,
+        float2 const& newCellPos,
+        int maxConnections,
+        ConstructionData const& constructionData);
 
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
 
@@ -357,17 +363,21 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         constructor.offspringCreatureId = hostCell->creatureId;
     }
 
-    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, 0, constructionData);
+    uint64_t cellPointerIndex;
+    Cell* newCell = constructCellIntern(data, cellPointerIndex, hostCell, newCellPos, 0, constructionData);
 
     if (!newCell->tryLock()) {
         return false;
     }
 
     if (!constructionData.isLastNodeOfLastRepetition || !constructionData.genomeHeader.separateConstruction) {
-        auto distance = constructionData.isLastNodeOfLastRepetition && !constructionData.genomeHeader.separateConstruction && constructionData.genomeHeader.singleConstruction
+        auto distance = constructionData.isLastNodeOfLastRepetition && !constructionData.genomeHeader.separateConstruction
+                && constructionData.genomeHeader.singleConstruction
             ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
-        CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance);
+        if(!CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance)) {
+            CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
+        }
     }
     if (constructionData.isLastNodeOfLastRepetition || (constructionData.isLastNode && constructionData.hasInfiniteRepetitions)) {
         newCell->livingState = LivingState_Activating;
@@ -444,7 +454,8 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     if (!checkAndReduceHostEnergy(data, hostCell, constructionData)) {
         return false;
     }
-    Cell* newCell = constructCellIntern(data, hostCell, newCellPos, 0, constructionData);
+    uint64_t cellPointerIndex;
+    Cell* newCell = constructCellIntern(data, cellPointerIndex, hostCell, newCellPos, 0, constructionData);
 
     if (!newCell->tryLock()) {
         return false;
@@ -503,6 +514,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
             angleFromPreviousForUnderConstructionCell,
             desiredDistance)) {
         adaptReferenceAngle = false;
+        CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
     }
 
     Math::normalize(posDelta);
@@ -598,6 +610,7 @@ __inline__ __device__ bool ConstructorProcessor::isConnectable(int numConnection
 __inline__ __device__ Cell*
 ConstructorProcessor::constructCellIntern(
     SimulationData& data,
+    uint64_t& cellPointerIndex,
     Cell* hostCell,
     float2 const& posOfNewCell,
     int maxConnections,
@@ -608,7 +621,7 @@ ConstructorProcessor::constructCellIntern(
     ObjectFactory factory;
     factory.init(&data);
 
-    Cell * result = factory.createCell();
+    Cell* result = factory.createCell(cellPointerIndex);
     constructor.lastConstructedCellId = result->id;
     result->energy = constructionData.energy;
     result->stiffness = constructionData.genomeHeader.stiffness;
