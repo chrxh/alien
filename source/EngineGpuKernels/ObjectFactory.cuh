@@ -22,7 +22,7 @@ public:
     __inline__ __device__ void changeParticleFromTO(ParticleTO const& particleTO, Particle* particle);
     __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel, int color);
     __inline__ __device__ Cell* createRandomCell(float energy, float2 const& pos, float2 const& vel);
-    __inline__ __device__ Cell* createCell();
+    __inline__ __device__ Cell* createCell(uint64_t& cellPointerIndex);
 
 private:
     template<typename T>
@@ -364,10 +364,10 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     return cell;
 }
 
-__inline__ __device__ Cell* ObjectFactory::createCell()
+__inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex)
 {
     auto cell = _data->objects.cells.getNewElement();
-    auto cellPointer = _data->objects.cellPointers.getNewElement();
+    auto cellPointer = _data->objects.cellPointers.getNewElement(&cellPointerIndex);
     *cellPointer = cell;
 
     cell->id = _data->numberGen1.createNewId();

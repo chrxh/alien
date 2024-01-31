@@ -364,7 +364,7 @@ namespace Const
 
     std::string const GenomeGenerationTooltip = "This value indicates the number of times this genome has been inherited by offspring.";
 
-    std::string const GenomeNumCellsTooltip = "The number of all encoded cells in the genome excluding its sub-genomes.";
+    std::string const GenomeNumCellsTooltip = "The number of the encoded cells per repetition in the genome. Cells of sub-genomes are not counted here.";
 
     std::string const GenomeCurrentCellTooltip = "The sequence number of the cell in the genome that will be constructed next.";
 
