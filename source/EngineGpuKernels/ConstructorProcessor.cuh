@@ -778,12 +778,14 @@ __inline__ __device__ int ConstructorProcessor::calcGenomeComplexity(int color, 
     int lastDepth = 0;
     auto result = 0.0f;
     int acceleration = 1;
-    GenomeDecoder::executeForEachNodeRecursively(
-        genome, toInt(genomeSize), false, [&result, &lastDepth, &acceleration, &color](int depth, int nodeAddress, int repetitions) {
-            float multiplier =
-                depth > lastDepth ? cudaSimulationParameters.genomeComplexityRamificationFactor[color] * toFloat(repetitions) * toFloat(acceleration) : 0.0f;
-            result += powf(2.0f, toFloat(depth)) * (multiplier + cudaSimulationParameters.genomeComplexitySizeFactor[color]);
 
+    auto genomeComplexityRamificationFactor =
+        cudaSimulationParameters.features.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityRamificationFactor[color] : 0.0f;
+    auto genomeComplexitySizeFactor =
+        cudaSimulationParameters.features.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexitySizeFactor[color] : 1.0f;
+    GenomeDecoder::executeForEachNodeRecursively(genome, toInt(genomeSize), false, [&](int depth, int nodeAddress, int repetitions) {
+        float multiplier = depth > lastDepth ? genomeComplexityRamificationFactor * toFloat(repetitions) * toFloat(acceleration) : 0.0f;
+        result += powf(2.0f, toFloat(depth)) * (multiplier + genomeComplexitySizeFactor);
         lastDepth = depth;
         ++acceleration;
     });
