@@ -885,37 +885,6 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origParameters.cellFunctionAttackerRadius)
                     .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                 parameters.cellFunctionAttackerRadius);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Energy distribution radius")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(5.0f)
-                    .defaultValue(origParameters.cellFunctionAttackerEnergyDistributionRadius)
-                    .tooltip("The maximum distance over which an attacker cell transfers its energy captured during an attack to nearby transmitter or "
-                             "constructor cells."),
-                parameters.cellFunctionAttackerEnergyDistributionRadius);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Energy distribution Value")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(20.0f)
-                    .defaultValue(origParameters.cellFunctionAttackerEnergyDistributionValue)
-                    .tooltip("The amount of energy which a attacker cell can transfer to nearby transmitter or constructor cells or to connected cells."),
-                parameters.cellFunctionAttackerEnergyDistributionValue);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Color inhomogeneity factor")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(2.0f)
-                    .defaultValue(origParameters.cellFunctionAttackerColorInhomogeneityFactor)
-                    .tooltip("If the attacked cell is connected to cells with different colors, this factor affects the energy of the captured energy."),
-                parameters.cellFunctionAttackerColorInhomogeneityFactor);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Destroy cells")
@@ -1312,6 +1281,37 @@ void _SimulationParametersWindow::processBase(
                         .defaultValue(origParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty)
                         .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
                     parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Color inhomogeneity factor")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(2.0f)
+                        .defaultValue(origParameters.cellFunctionAttackerColorInhomogeneityFactor)
+                        .tooltip("If the attacked cell is connected to cells with different colors, this factor affects the energy of the captured energy."),
+                    parameters.cellFunctionAttackerColorInhomogeneityFactor);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Energy distribution radius")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(5.0f)
+                        .defaultValue(origParameters.cellFunctionAttackerEnergyDistributionRadius)
+                        .tooltip("The maximum distance over which an attacker cell transfers its energy captured during an attack to nearby transmitter or "
+                                 "constructor cells."),
+                    parameters.cellFunctionAttackerEnergyDistributionRadius);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Energy distribution Value")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(20.0f)
+                        .defaultValue(origParameters.cellFunctionAttackerEnergyDistributionValue)
+                        .tooltip("The amount of energy which a attacker cell can transfer to nearby transmitter or constructor cells or to connected cells."),
+                    parameters.cellFunctionAttackerEnergyDistributionValue);
                 AlienImGui::EndTreeNode();
             }
         }
@@ -1907,7 +1907,6 @@ void _SimulationParametersWindow::processSpot(
                     }
                 }
             }
-
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy cost")
@@ -1921,29 +1920,38 @@ void _SimulationParametersWindow::processSpot(
                     .disabledValue(parameters.baseValues.cellFunctionAttackerEnergyCost),
                 spot.values.cellFunctionAttackerEnergyCost,
                 &spot.activatedValues.cellFunctionAttackerEnergyCost);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Geometry penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(5.0f)
-                    .defaultValue(origSpot.values.cellFunctionAttackerGeometryDeviationExponent)
-                    .disabledValue(parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent),
-                spot.values.cellFunctionAttackerGeometryDeviationExponent,
-                &spot.activatedValues.cellFunctionAttackerGeometryDeviationExponent);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Connections mismatch penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(1.0f)
-                    .defaultValue(origSpot.values.cellFunctionAttackerConnectionsMismatchPenalty)
-                    .disabledValue(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty),
-                spot.values.cellFunctionAttackerConnectionsMismatchPenalty,
-                &spot.activatedValues.cellFunctionAttackerConnectionsMismatchPenalty);
             AlienImGui::EndTreeNode();
+        }
+
+        /**
+         * Addon: Advanced attacker control
+         */
+        if (parameters.features.advancedAttackerControl) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced attacker control"))) {
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Geometry penalty")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(5.0f)
+                        .defaultValue(origSpot.values.cellFunctionAttackerGeometryDeviationExponent)
+                        .disabledValue(parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent),
+                    spot.values.cellFunctionAttackerGeometryDeviationExponent,
+                    &spot.activatedValues.cellFunctionAttackerGeometryDeviationExponent);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Connections mismatch penalty")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(1.0f)
+                        .defaultValue(origSpot.values.cellFunctionAttackerConnectionsMismatchPenalty)
+                        .disabledValue(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty),
+                    spot.values.cellFunctionAttackerConnectionsMismatchPenalty,
+                    &spot.activatedValues.cellFunctionAttackerConnectionsMismatchPenalty);
+                AlienImGui::EndTreeNode();
+            }
         }
 
         /**
