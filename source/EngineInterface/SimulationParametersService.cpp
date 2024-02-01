@@ -69,10 +69,22 @@ void SimulationParametersService::activateFeaturesBasedOnParameters(Features con
     }
 
     if (missingFeatures.advancedAttackerControl) {
-        if (!equals(parameters.cellFunctionAttackerGenomeComplexityBonus, 0.0f) || !equals(parameters.cellFunctionAttackerSameMutantPenalty, 0.0f)
+        auto advancedAttackerControlForSpot = false;
+        for (int i = 0; i < parameters.numSpots; ++i) {
+            auto const& spotValues = parameters.spots[i].values;
+            if (!equals(spotValues.cellFunctionAttackerGeometryDeviationExponent, 0.0f)
+                || !equals(spotValues.cellFunctionAttackerConnectionsMismatchPenalty, 0.0f)) {
+                advancedAttackerControlForSpot = true;
+            }
+        }
+        if (advancedAttackerControlForSpot || !equals(parameters.cellFunctionAttackerGenomeComplexityBonus, 0.0f)
+            || !equals(parameters.cellFunctionAttackerSameMutantPenalty, 0.0f)
             || !equals(parameters.cellFunctionAttackerSensorDetectionFactor, 0.0f)
             || !equals(parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent, 0.0f)
-            || !equals(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty, 0.0f)) {
+            || !equals(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty, 0.0f)
+            || !equals(parameters.cellFunctionAttackerColorInhomogeneityFactor, 1.0f)
+            || !equals(parameters.cellFunctionAttackerEnergyDistributionRadius, 3.6f)
+            || !equals(parameters.cellFunctionAttackerEnergyDistributionValue, 10.0f)) {
             parameters.features.advancedAttackerControl = true;
         }
     }
