@@ -459,4 +459,6 @@ namespace Const
         "visible to all users.\n\n" ICON_FA_CHEVRON_RIGHT " Private: Each user account has its own private space. The simulations and genomes are only visible to "
         "the logged-in user.";
 
+    std::string const ParameterRadiationAbsorptionLowGenomeComplexityPenaltyTooltip =
+        "When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle.";
 }

@@ -297,8 +297,8 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.radiationAbsorptionLowGenomeComplexityPenalty,
-            defaultParameters.radiationAbsorptionLowGenomeComplexityPenalty,
+            parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty,
+            defaultParameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty,
             "simulation parameters.radiation.absorption low genome complexity penalty",
             parserTask);
         encodeDecodeProperty(
@@ -524,8 +524,8 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.cellFunctionAttackerGenomeComplexityBonus,
-            defaultParameters.cellFunctionAttackerGenomeComplexityBonus,
+            parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus,
+            defaultParameters.baseValues.cellFunctionAttackerGenomeComplexityBonus,
             "simulation parameters.cell.function.attacker.genome size bonus",
             parserTask);
         encodeDecodeProperty(
@@ -774,6 +774,12 @@ namespace
                 defaultSpot.values.radiationAbsorption,
                 base + "radiation.absorption",
                 parserTask);
+            encodeDecodeProperty(
+                tree,
+                spot.values.radiationAbsorptionLowGenomeComplexityPenalty,
+                defaultSpot.values.radiationAbsorptionLowGenomeComplexityPenalty,
+                base +"radiation.absorption low genome complexity penalty",
+                parserTask);
             encodeDecodeSpotProperty(
                 tree,
                 spot.values.radiationCellAgeStrength,
@@ -833,6 +839,12 @@ namespace
                 spot.values.cellFunctionAttackerFoodChainColorMatrix,
                 defaultSpot.values.cellFunctionAttackerFoodChainColorMatrix,
                 base + "cell.function.attacker.food chain color matrix",
+                parserTask);
+            encodeDecodeProperty(
+                tree,
+                spot.values.cellFunctionAttackerGenomeComplexityBonus,
+                defaultSpot.values.cellFunctionAttackerGenomeComplexityBonus,
+                base + "cell.function.attacker.genome size bonus",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,

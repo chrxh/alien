@@ -12,6 +12,7 @@
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
 #include "GenericFileDialogs.h"
+#include "HelpStrings.h"
 #include "MessageDialog.h"
 #include "RadiationSourcesWindow.h"
 #include "OverlayMessageController.h"
@@ -1190,10 +1191,9 @@ void _SimulationParametersWindow::processBase(
                         .min(0)
                         .max(1.0f)
                         .format("%.2f")
-                        .defaultValue(origParameters.radiationAbsorptionLowGenomeComplexityPenalty)
-                        .tooltip(
-                            "When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle."),
-                    parameters.radiationAbsorptionLowGenomeComplexityPenalty);
+                        .defaultValue(origParameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty)
+                        .tooltip(Const::ParameterRadiationAbsorptionLowGenomeComplexityPenaltyTooltip),
+                    parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Low connection penalty")
@@ -1233,9 +1233,9 @@ void _SimulationParametersWindow::processBase(
                         .textWidth(RightColumnWidth)
                         .min(0)
                         .max(20.0f)
-                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerGenomeComplexityBonus))
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellFunctionAttackerGenomeComplexityBonus))
                         .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
-                    parameters.cellFunctionAttackerGenomeComplexityBonus);
+                    parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus);
                 AlienImGui::InputFloatColorMatrix(
                     AlienImGui::InputFloatColorMatrixParameters()
                         .name("Same mutant protection")
@@ -1924,10 +1924,52 @@ void _SimulationParametersWindow::processSpot(
         }
 
         /**
+         * Addon: Advanced absorption control
+         */
+        if (parameters.features.advancedAbsorptionControl) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced energy absorption control"))) {
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Low genome complexity penalty")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(1.0f)
+                        .format("%.2f")
+                        .defaultValue(origSpot.values.radiationAbsorptionLowGenomeComplexityPenalty)
+                        .disabledValue(parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty),
+                    spot.values.radiationAbsorptionLowGenomeComplexityPenalty,
+                    &spot.activatedValues.radiationAbsorptionLowGenomeComplexityPenalty);
+                AlienImGui::EndTreeNode();
+            }
+        }
+
+        /**
          * Addon: Advanced attacker control
          */
         if (parameters.features.advancedAttackerControl) {
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced attacker control"))) {
+                ImGui::Checkbox("##cellFunctionAttackerGenomeComplexityBonus", &spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
+                ImGui::SameLine();
+                ImGui::BeginDisabled(!spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
+                AlienImGui::InputFloatColorMatrix(
+                    AlienImGui::InputFloatColorMatrixParameters()
+                        .name("Complex genome protection")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(20.0f)
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerGenomeComplexityBonus)),
+                    spot.values.cellFunctionAttackerGenomeComplexityBonus);
+                ImGui::EndDisabled();
+                if (!spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus) {
+                    for (int i = 0; i < MAX_COLORS; ++i) {
+                        for (int j = 0; j < MAX_COLORS; ++j) {
+                            spot.values.cellFunctionAttackerGenomeComplexityBonus[i][j] = parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j];
+                            spot.values.cellFunctionAttackerGenomeComplexityBonus[i][j] = parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j];
+                        }
+                    }
+                }
+
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Geometry penalty")
@@ -2096,7 +2138,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
             parameters.cellFunctionAttackerSameMutantPenalty[i][j] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSameMutantPenalty[i][j]));
-            parameters.cellFunctionAttackerGenomeComplexityBonus[i][j] = std::max(0.0f, parameters.cellFunctionAttackerGenomeComplexityBonus[i][j]);
+            parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j] =
+                std::max(0.0f, parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j]);
         }
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
         parameters.radiationAbsorptionVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionVelocityPenalty[i]);
@@ -2110,8 +2153,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorExternalEnergySupplyRate[i]));
         parameters.baseValues.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
         parameters.particleSplitEnergy[i] = std::max(0.0f, parameters.particleSplitEnergy[i]);
-        parameters.radiationAbsorptionLowGenomeComplexityPenalty[i] =
-            std::max(0.0f, std::min(1.0f, parameters.radiationAbsorptionLowGenomeComplexityPenalty[i]));
+        parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i] =
+            std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
@@ -2124,9 +2167,12 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSp
         for (int j = 0; j < MAX_COLORS; ++j) {
             spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j]));
+            spot.values.cellFunctionAttackerGenomeComplexityBonus[i][j] = std::max(0.0f, spot.values.cellFunctionAttackerGenomeComplexityBonus[i][j]);
         }
         spot.values.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorption[i]));
         spot.values.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
+        spot.values.radiationAbsorptionLowGenomeComplexityPenalty[i] =
+            std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorptionLowGenomeComplexityPenalty[i]));
     }
     spot.values.cellMaxBindingEnergy = std::max(10.0f, spot.values.cellMaxBindingEnergy);
 }
