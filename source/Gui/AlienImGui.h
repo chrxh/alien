@@ -130,8 +130,9 @@ public:
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, float, textWidth, 100);
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, disabledValue, std::nullopt);
     };
-    static void InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS]);
+    static void InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
 
     struct InputTextParameters
     {
@@ -353,9 +354,10 @@ private:
         MEMBER_DECLARATION(BasicInputColorMatrixParameters, float, textWidth, 100);
         MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, disabledValue, std::nullopt);
     };
     template <typename T>
-    static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS]);
+    static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
 
     static ImVec2 RotationCenter(ImDrawList* drawList);
 

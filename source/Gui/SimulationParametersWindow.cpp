@@ -1888,25 +1888,15 @@ void _SimulationParametersWindow::processSpot(
          * Attacker
          */
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Cell function: Attacker"))) {
-            ImGui::Checkbox("##foodChainColorMatrix", &spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
-            ImGui::SameLine();
-            ImGui::BeginDisabled(!spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
             AlienImGui::InputFloatColorMatrix(
                 AlienImGui::InputFloatColorMatrixParameters()
                     .name("Food chain color matrix")
                     .max(1)
                     .textWidth(RightColumnWidth)
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerFoodChainColorMatrix)),
-                spot.values.cellFunctionAttackerFoodChainColorMatrix);
-            ImGui::EndDisabled();
-            if (!spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix) {
-                for (int i = 0; i < MAX_COLORS; ++i) {
-                    for (int j = 0; j < MAX_COLORS; ++j) {
-                        spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j] = parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j];
-                        spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j] = parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j];
-                    }
-                }
-            }
+                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerFoodChainColorMatrix))
+                    .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix)),
+                spot.values.cellFunctionAttackerFoodChainColorMatrix,
+                &spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy cost")
@@ -1949,26 +1939,16 @@ void _SimulationParametersWindow::processSpot(
          */
         if (parameters.features.advancedAttackerControl) {
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced attacker control"))) {
-                ImGui::Checkbox("##cellFunctionAttackerGenomeComplexityBonus", &spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
-                ImGui::SameLine();
-                ImGui::BeginDisabled(!spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
                 AlienImGui::InputFloatColorMatrix(
                     AlienImGui::InputFloatColorMatrixParameters()
                         .name("Complex genome protection")
                         .textWidth(RightColumnWidth)
                         .min(0)
                         .max(20.0f)
-                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerGenomeComplexityBonus)),
-                    spot.values.cellFunctionAttackerGenomeComplexityBonus);
-                ImGui::EndDisabled();
-                if (!spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus) {
-                    for (int i = 0; i < MAX_COLORS; ++i) {
-                        for (int j = 0; j < MAX_COLORS; ++j) {
-                            spot.values.cellFunctionAttackerGenomeComplexityBonus[i][j] = parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j];
-                            spot.values.cellFunctionAttackerGenomeComplexityBonus[i][j] = parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j];
-                        }
-                    }
-                }
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerGenomeComplexityBonus))
+                        .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus)),
+                    spot.values.cellFunctionAttackerGenomeComplexityBonus,
+                    &spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
 
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()

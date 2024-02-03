@@ -248,7 +248,7 @@ void AlienImGui::InputIntColorMatrix(InputIntColorMatrixParameters const& parame
     BasicInputColorMatrix(basicParameters, value);
 }
 
-void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS])
+void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS], bool* enabled)
 {
     BasicInputColorMatrixParameters<float> basicParameters;
     basicParameters._name = parameters._name; 
@@ -259,7 +259,8 @@ void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& pa
     basicParameters._textWidth = parameters._textWidth;
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
-    BasicInputColorMatrix(basicParameters, value);
+    basicParameters._disabledValue = parameters._disabledValue;
+    BasicInputColorMatrix(basicParameters, value, enabled);
 }
 
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
@@ -1697,9 +1698,24 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
 }
 
 template <typename T>
-void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS])
+void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled)
 {
     ImGui::PushID(parameters._name.c_str());
+
+    if (enabled) {
+        ImGui::Checkbox("##cellFunctionAttackerGenomeComplexityBonus", enabled);
+        if (!(*enabled)) {
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                for (int j = 0; j < MAX_COLORS; ++j) {
+                    value[i][j] = (*parameters._disabledValue)[i][j];
+                    value[i][j] = (*parameters._disabledValue)[i][j];
+                }
+            }
+        }
+        ImGui::SameLine();
+        ImGui::BeginDisabled(!(*enabled));
+    }
+
     auto toggleButtonId = ImGui::GetID("expanded");
     auto isExpanded = _basicSilderExpanded.contains(toggleButtonId);
     auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
@@ -1838,9 +1854,14 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
 
+    if (enabled) {
+        ImGui::EndDisabled();
+    }
+
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
+
     ImGui::PopID();
 }
 
