@@ -430,11 +430,14 @@ void _StatisticsWindow::processBackground()
 
 namespace
 {
-    double getMaxWithDataPointStride(double const* data, int count)
+    double getMaxWithDataPointStride(double const* data, double const* timePoints, double startTime, int count)
     {
-        double result = 0;
+        auto result = 0.0;
+        auto stride = toInt(sizeof(DataPointCollection) / sizeof(double));
         for (int i = count / 20; i < count; ++i) {
-            result = std::max(result, *reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(data) + i));
+            if (timePoints[i * stride] >= startTime - NEAR_ZERO) {
+                result = std::max(result, *reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(data) + i));
+            }
         }
         return result;
     }
@@ -450,7 +453,7 @@ void _StatisticsWindow::plotSumColorsIntern(
     int fracPartDecimals)
 {
     double const* plotDataY = reinterpret_cast<double const*>(dataPoint) + MAX_COLORS;
-    double upperBound = getMaxWithDataPointStride(plotDataY, count);
+    double upperBound = getMaxWithDataPointStride(plotDataY, timePoints, startTime, count);
     double endValue = count > 0 ? *(reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(dataPoint) + count - 1) + MAX_COLORS): 0.0;
     auto stride = toInt(sizeof(DataPointCollection));
     upperBound *= 1.5;
@@ -494,7 +497,7 @@ void _StatisticsWindow::plotByColorIntern(
 {
     auto upperBound = 0.0;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        upperBound = std::max(upperBound, getMaxWithDataPointStride(reinterpret_cast<double const*>(values) + i, count));
+        upperBound = std::max(upperBound, getMaxWithDataPointStride(reinterpret_cast<double const*>(values) + i, timePoints, startTime, count));
     }
     upperBound *= 1.5;
 
@@ -540,7 +543,7 @@ void _StatisticsWindow::plotForColorIntern(
     int fracPartDecimals)
 {
     auto valuesForColor = reinterpret_cast<double const*>(values) + colorIndex;
-    auto upperBound = getMaxWithDataPointStride(valuesForColor, count) * 1.5;
+    auto upperBound = getMaxWithDataPointStride(valuesForColor, timePoints, startTime, count) * 1.5;
     auto endValue = count > 0 ? *reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(valuesForColor) + count - 1) : 0.0;
 
     ImGui::PushID(row);
