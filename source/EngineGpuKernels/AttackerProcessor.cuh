@@ -67,6 +67,9 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 return;
             }
 
+            auto color = calcMod(cell->color, MAX_COLORS);
+            auto otherColor = calcMod(otherCell->color, MAX_COLORS);
+
             if (cudaSimulationParameters.features.advancedAttackerControl
                 && cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color] > NEAR_ZERO) {
                 bool creatureIdMatch = false;
@@ -86,7 +89,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     }
                 }
                 if (!creatureIdMatch) {
-                    energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color]);
+                    energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[color]);
                 }
             }
 
@@ -96,21 +99,26 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->genomeComplexity > cell->genomeComplexity) {
-                auto genomeSizeBonus = cudaSimulationParameters.cellFunctionAttackerGenomeComplexityBonus[cell->color][otherCell->color];
-                energyToTransfer /= (1.0f + genomeSizeBonus * static_cast<float>(otherCell->genomeComplexity - cell->genomeComplexity));
+                auto cellFunctionAttackerGenomeComplexityBonus = SpotCalculator::calcParameter(
+                    &SimulationParametersSpotValues::cellFunctionAttackerGenomeComplexityBonus,
+                    &SimulationParametersSpotActivatedValues::cellFunctionAttackerGenomeComplexityBonus,
+                    data,
+                    cell->pos,
+                    color,
+                    otherColor);
             }
             if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->mutationId == cell->mutationId) {
-                auto sameMutantPenalty = cudaSimulationParameters.cellFunctionAttackerSameMutantPenalty[cell->color][otherCell->color];
+                auto sameMutantPenalty = cudaSimulationParameters.cellFunctionAttackerSameMutantPenalty[color][otherColor];
                 energyToTransfer *= (1.0f - sameMutantPenalty);
             }
 
             auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);
             float defendStrength =
-                numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.cellFunctionDefenderAgainstAttackerStrength[cell->color], numDefenderCells);
+                numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.cellFunctionDefenderAgainstAttackerStrength[color], numDefenderCells);
             energyToTransfer /= defendStrength;
 
             if (!isHomogene(otherCell)) {
-                energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerColorInhomogeneityFactor[cell->color];
+                energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerColorInhomogeneityFactor[color];
             }
 
             bool active = false;
@@ -155,8 +163,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 }
             }
 
-            auto color = calcMod(cell->color, MAX_COLORS);
-            auto otherColor = calcMod(otherCell->color, MAX_COLORS);
             energyToTransfer *= SpotCalculator::calcParameter(
                 &SimulationParametersSpotValues::cellFunctionAttackerFoodChainColorMatrix,
                 &SimulationParametersSpotActivatedValues::cellFunctionAttackerFoodChainColorMatrix,

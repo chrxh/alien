@@ -134,9 +134,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (genomeComplexitySizeFactor[i] != other.genomeComplexitySizeFactor[i]) {
             return false;
         }
-        if (radiationAbsorptionLowGenomeComplexityPenalty[i] != other.radiationAbsorptionLowGenomeComplexityPenalty[i]) {
-            return false;
-        }
     }
     if (numParticleSources != other.numParticleSources) {
         return false;
@@ -152,9 +149,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
                 return false;
             }
             if (cellFunctionInjectorDurationColorMatrix[i][j] != other.cellFunctionInjectorDurationColorMatrix[i][j]) {
-                return false;
-            }
-            if (cellFunctionAttackerGenomeComplexityBonus[i][j] != other.cellFunctionAttackerGenomeComplexityBonus[i][j]) {
                 return false;
             }
             if (cellFunctionAttackerSameMutantPenalty[i][j] != other.cellFunctionAttackerSameMutantPenalty[i][j]) {

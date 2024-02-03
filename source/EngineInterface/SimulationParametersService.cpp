@@ -77,7 +77,7 @@ void SimulationParametersService::activateFeaturesBasedOnParameters(Features con
                 advancedAttackerControlForSpot = true;
             }
         }
-        if (advancedAttackerControlForSpot || !equals(parameters.cellFunctionAttackerGenomeComplexityBonus, 0.0f)
+        if (advancedAttackerControlForSpot || !equals(parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus, 0.0f)
             || !equals(parameters.cellFunctionAttackerSameMutantPenalty, 0.0f)
             || !equals(parameters.cellFunctionAttackerSensorDetectionFactor, 0.0f)
             || !equals(parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent, 0.0f)

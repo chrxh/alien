@@ -12,6 +12,7 @@ struct SimulationParametersSpotValues
     float friction = 0.001f;
     float rigidity = 0.0f;
     ColorVector<float> radiationAbsorption = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    ColorVector<float> radiationAbsorptionLowGenomeComplexityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> radiationCellAgeStrength = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f};
     float cellMaxForce = 0.8f;
     ColorVector<float> cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
@@ -38,6 +39,14 @@ struct SimulationParametersSpotValues
 
     ColorVector<float> cellFunctionAttackerGeometryDeviationExponent = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionAttackerConnectionsMismatchPenalty = {0, 0, 0, 0, 0, 0, 0};
+    ColorMatrix<float> cellFunctionAttackerGenomeComplexityBonus = {
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
 
     ColorVector<float> cellFunctionConstructorMutationNeuronDataProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationPropertiesProbability = {0, 0, 0, 0, 0, 0, 0};
@@ -59,15 +68,21 @@ struct SimulationParametersSpotValues
                 if (cellFunctionAttackerFoodChainColorMatrix[i][j] != other.cellFunctionAttackerFoodChainColorMatrix[i][j]) {
                     return false;
                 }
+                if (cellFunctionAttackerGenomeComplexityBonus[i][j] != other.cellFunctionAttackerGenomeComplexityBonus[i][j]) {
+                    return false;
+                }
             }
+        }
+        for (int i = 0; i < MAX_COLORS; ++i) {
             if (cellColorTransitionDuration[i] != other.cellColorTransitionDuration[i]) {
                 return false;
             }
             if (cellColorTransitionTargetColor[i] != other.cellColorTransitionTargetColor[i]) {
                 return false;
             }
-        }
-        for (int i = 0; i < MAX_COLORS; ++i) {
+            if (radiationAbsorptionLowGenomeComplexityPenalty[i] != other.radiationAbsorptionLowGenomeComplexityPenalty[i]) {
+                return false;
+            }
             if (cellFunctionConstructorMutationCellColorProbability[i] != other.cellFunctionConstructorMutationCellColorProbability[i]) {
                 return false;
             }
