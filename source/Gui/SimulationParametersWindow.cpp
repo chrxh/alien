@@ -1457,7 +1457,7 @@ void _SimulationParametersWindow::processSpot(
                     .defaultValue(&origSpot.velY)
                     .format("%.2f"),
                 &spot.velY);
-            auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y));
+            auto maxRadius = toFloat(std::max(worldSize.x, worldSize.y));
             if (spot.shapeType == SpotShapeType_Circular) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
