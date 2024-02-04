@@ -133,6 +133,19 @@ namespace
         encodeDecodeProperty(tree, parameter, defaultValue, node, task);
     }
 
+    template <typename T>
+    void encodeDecodeSpotProperty(
+        boost::property_tree::ptree& tree,
+        ColorMatrix<T>& parameter,
+        bool& isActivated,
+        ColorMatrix<bool> const& defaultValue,
+        std::string const& node,
+        ParserTask task)
+    {
+        encodeDecodeProperty(tree, isActivated, false, node + ".activated", task);
+        encodeDecodeProperty(tree, parameter, defaultValue, node, task);
+    }
+
     void encodeDecode(boost::property_tree::ptree& tree, SimulationParameters& parameters, ParserTask parserTask)
     {
         SimulationParameters defaultParameters;
@@ -774,9 +787,10 @@ namespace
                 defaultSpot.values.radiationAbsorption,
                 base + "radiation.absorption",
                 parserTask);
-            encodeDecodeProperty(
+            encodeDecodeSpotProperty(
                 tree,
                 spot.values.radiationAbsorptionLowGenomeComplexityPenalty,
+                spot.activatedValues.radiationAbsorptionLowGenomeComplexityPenalty,
                 defaultSpot.values.radiationAbsorptionLowGenomeComplexityPenalty,
                 base +"radiation.absorption low genome complexity penalty",
                 parserTask);
@@ -828,21 +842,18 @@ namespace
                 defaultSpot.values.cellFunctionAttackerEnergyCost,
                 base + "cell.function.attacker.energy cost",
                 parserTask);
-            encodeDecodeProperty(
-                tree,
-                spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix,
-                false,
-                base + "cell.function.attacker.food chain color matrix.activated",
-                parserTask);
-            encodeDecodeProperty(
+
+            encodeDecodeSpotProperty(
                 tree,
                 spot.values.cellFunctionAttackerFoodChainColorMatrix,
+                spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix,
                 defaultSpot.values.cellFunctionAttackerFoodChainColorMatrix,
                 base + "cell.function.attacker.food chain color matrix",
                 parserTask);
-            encodeDecodeProperty(
+            encodeDecodeSpotProperty(
                 tree,
                 spot.values.cellFunctionAttackerGenomeComplexityBonus,
+                spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus,
                 defaultSpot.values.cellFunctionAttackerGenomeComplexityBonus,
                 base + "cell.function.attacker.genome size bonus",
                 parserTask);
