@@ -362,7 +362,7 @@ void _SimulationView::processControls(bool renderSimulation)
 {
     if (renderSimulation) {
         ImGuiViewport* viewport = ImGui::GetMainViewport();
-        auto mainMenubarHeight = StyleRepository::getInstance().scale(22);
+        auto mainMenubarHeight = scale(22);
         auto scrollbarThickness = 17;  //fixed
         _scrollbarX->process({{viewport->Pos.x, viewport->Size.y - scrollbarThickness}, {viewport->Size.x - 1 - scrollbarThickness, 1}});
         _scrollbarY->process({{viewport->Size.x - scrollbarThickness, viewport->Pos.y + mainMenubarHeight}, {1, viewport->Size.y - 1 - scrollbarThickness}});
@@ -416,6 +416,7 @@ void _SimulationView::updateImageFromSimulation()
         _overlay = std::nullopt;
     }
 
+    //draw overlay
     if (_overlay) {
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         for (auto const& overlayElement : _overlay->elements) {
@@ -491,6 +492,9 @@ void _SimulationView::drawEditCursor()
             float h, s, v;
             AlienImGui::ConvertRGBtoHSV(color, h, s, v);
             drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));
+        }
+        if (!ImGui::GetIO().WantCaptureMouse) {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_None);
         }
     }
 }

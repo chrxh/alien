@@ -60,7 +60,7 @@ private:
     float _innerRadius = 5.0f;
 
     //drawing
-    DataDescription _drawing;
+    DataDescription _drawingDataDescription;
     DescriptionEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
 
