@@ -6,10 +6,12 @@
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
+#include "TemporalControlWindow.h"
 
-_ResizeWorldDialog::_ResizeWorldDialog(SimulationController const& simController)
+_ResizeWorldDialog::_ResizeWorldDialog(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow)
     : _AlienDialog("Resize world")
     , _simController(simController)
+    , _temporalControlWindow(temporalControlWindow)
 {}
 
 void _ResizeWorldDialog::open()
@@ -89,4 +91,5 @@ void _ResizeWorldDialog::onResizing()
     }
     _simController->setClusteredSimulationData(content);
     _simController->setStatisticsHistory(statistics);
+    _temporalControlWindow->onSnapshot();
 }
