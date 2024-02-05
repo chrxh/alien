@@ -484,10 +484,17 @@ void _SimulationView::drawEditCursor()
     if (_modeWindow->getMode() == _ModeController::Mode::Editor) {
         auto mousePos = ImGui::GetMousePos();
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+        auto zoom = _viewport->getZoomFactor();
         if (!_editorModel->isDrawMode() || _simController->isSimulationRunning()) {
-            drawList->AddCircleFilled(mousePos, EditCursorRadius, Const::NavigationCursorColor);
+            auto cursorSize = scale(EditCursorRadius);
+            drawList->AddRectFilled(
+                {mousePos.x - cursorSize / 5, mousePos.y - cursorSize}, {mousePos.x + cursorSize / 5, mousePos.y + cursorSize},
+                Const::NavigationCursorColor);
+            drawList->AddRectFilled(
+                {mousePos.x - cursorSize, mousePos.y - cursorSize / 5}, {mousePos.x + cursorSize, mousePos.y + cursorSize / 5},
+                Const::NavigationCursorColor);
         } else {
-            auto radius = _editorModel->getPencilWidth() * _viewport->getZoomFactor();
+            auto radius = _editorModel->getPencilWidth() * zoom;
             auto color = Const::IndividualCellColors[_editorModel->getDefaultColorCode()];
             float h, s, v;
             AlienImGui::ConvertRGBtoHSV(color, h, s, v);
