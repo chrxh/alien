@@ -74,8 +74,7 @@ void _ResizeWorldDialog::onResizing()
     auto generalSettings = _simController->getGeneralSettings();
     auto parameters = _simController->getSimulationParameters();
     auto content = _simController->getClusteredSimulationData();
-    auto const& statistics = _simController->getStatisticsHistory();
-
+    auto const& statistics = _simController->getStatisticsHistory().getCopiedData();
     _simController->closeSimulation();
 
     IntVector2D origWorldSize{generalSettings.worldSizeX, generalSettings.worldSizeY};
@@ -89,5 +88,5 @@ void _ResizeWorldDialog::onResizing()
         DescriptionEditService::duplicate(content, origWorldSize, {_width, _height});
     }
     _simController->setClusteredSimulationData(content);
-    _simController->setStatisticsHistory(statistics.getCopiedData());
+    _simController->setStatisticsHistory(statistics);
 }
