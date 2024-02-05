@@ -75,18 +75,17 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
         } else {
             if (auto cell = data.cellMap.getFirst(particle->absPos + particle->vel)) {
                 if (cell->barrier) {
-                    //auto vr = particle->vel - cell->vel;
-                    //auto r = data.cellMap.getCorrectedDirection(particle->absPos - cell->pos);
-                    //auto dot_vr_r = Math::dot(vr, r);
-                    //if (dot_vr_r < 0) {
-                    //    auto truncated_r_squared = max(0.1f, Math::lengthSquared(r));
-                    //    particle->vel = vr - r * 2 * dot_vr_r / truncated_r_squared + cell->vel;
-                    //}
+                    auto vr = particle->vel - cell->vel;
+                    auto r = data.cellMap.getCorrectedDirection(particle->absPos - cell->pos);
+                    auto dot_vr_r = Math::dot(vr, r);
+                    if (dot_vr_r < 0) {
+                        auto truncated_r_squared = max(0.1f, Math::lengthSquared(r));
+                        particle->vel = vr - r * 2 * dot_vr_r / truncated_r_squared + cell->vel;
+                    }
                 } else {
                     if (particle->lastAbsorbedCell == cell) {
                         continue;
                     }
-                    printf("1\n");
                     auto radiationAbsorption = SpotCalculator::calcParameter(
                         &SimulationParametersSpotValues::radiationAbsorption,
                         &SimulationParametersSpotActivatedValues::radiationAbsorption,
@@ -103,7 +102,6 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                     if (particle->tryLock()) {
 
                         auto energyToTransfer = particle->energy * radiationAbsorption;
-                        printf("2\n");
                         if (cudaSimulationParameters.features.advancedAbsorptionControl) {
                             energyToTransfer *=
                                 max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionVelocityPenalty[cell->color]);
@@ -116,7 +114,6 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                                 data,
                                 cell->pos,
                                 cell->color);
-                            printf("f: %f\n", radiationAbsorptionLowGenomeComplexityPenalty);
                             energyToTransfer *= 1.0f - radiationAbsorptionLowGenomeComplexityPenalty / powf(1.0f + toFloat(cell->genomeComplexity), 0.1f);
                         }
 
