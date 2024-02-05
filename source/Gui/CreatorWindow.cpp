@@ -182,7 +182,7 @@ void _CreatorWindow::onDrawing()
 {
     auto mousePos = ImGui::GetMousePos();
     auto pos = _viewport->mapViewToWorldPosition({mousePos.x, mousePos.y});
-    if (!_drawing.isEmpty()) {
+    if (!_drawingDataDescription.isEmpty()) {
         _simController->removeSelectedObjects(false);
     }
 
@@ -202,8 +202,8 @@ void _CreatorWindow::onDrawing()
                                                               .barrier(_barrier));
     };
 
-    if (_drawing.isEmpty()) {
-        DescriptionEditService::addIfSpaceAvailable(_drawing, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simController->getWorldSize());
+    if (_drawingDataDescription.isEmpty()) {
+        DescriptionEditService::addIfSpaceAvailable(_drawingDataDescription, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simController->getWorldSize());
         _lastDrawPos = pos;
     } else {
         auto posDelta = Math::length(pos - _lastDrawPos);
@@ -212,19 +212,19 @@ void _CreatorWindow::onDrawing()
             for (float interDelta = 0; interDelta < posDelta; interDelta += 1.0f) {
                 auto drawPos = lastDrawPos + (pos - lastDrawPos) * interDelta / posDelta;
                 auto toAdd = createAlignedCircle(drawPos);
-                DescriptionEditService::addIfSpaceAvailable(_drawing, _drawingOccupancy, toAdd, 0.5f, _simController->getWorldSize());
+                DescriptionEditService::addIfSpaceAvailable(_drawingDataDescription, _drawingOccupancy, toAdd, 0.5f, _simController->getWorldSize());
                 _lastDrawPos = drawPos;
             }
         }
     }
-    DescriptionEditService::reconnectCells(_drawing, 1.5f);
+    DescriptionEditService::reconnectCells(_drawingDataDescription, 1.5f);
     if (!_makeSticky) {
-        auto origDrawing = _drawing;
-        DescriptionEditService::removeStickiness(_drawing);
-        _simController->addAndSelectSimulationData(_drawing);
-        _drawing = origDrawing;
+        auto origDrawing = _drawingDataDescription;
+        DescriptionEditService::removeStickiness(_drawingDataDescription);
+        _simController->addAndSelectSimulationData(_drawingDataDescription);
+        _drawingDataDescription = origDrawing;
     } else {
-        _simController->addAndSelectSimulationData(_drawing);
+        _simController->addAndSelectSimulationData(_drawingDataDescription);
     }
 
     _simController->reconnectSelectedObjects();
@@ -233,7 +233,7 @@ void _CreatorWindow::onDrawing()
 
 void _CreatorWindow::finishDrawing()
 {
-    _drawing.clear();
+    _drawingDataDescription.clear();
     _drawingOccupancy.clear();
 }
 
@@ -271,7 +271,6 @@ void _CreatorWindow::createRectangle()
         return;
     }
 
-    auto parameters = _simController->getSimulationParameters();
     auto data = DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters()
                                                   .width(_rectHorizontalCells)
                                                   .height(_rectVerticalCells)

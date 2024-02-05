@@ -121,7 +121,6 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     _viewport = std::make_shared<_Viewport>();
     _uiController = std::make_shared<_UiController>();
     _autosaveController = std::make_shared<_AutosaveController>(_simController, _viewport);
-
     _editorController =
         std::make_shared<_EditorController>(_simController, _viewport);
     _modeController = std::make_shared<_ModeController>(_editorController);
