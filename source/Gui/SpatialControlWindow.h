@@ -9,7 +9,7 @@
 class _SpatialControlWindow : public _AlienWindow
 {
 public:
-    _SpatialControlWindow(SimulationController const& simController, Viewport const& viewport);
+    _SpatialControlWindow(SimulationController const& simController, Viewport const& viewport, TemporalControlWindow const& temporalControlWindow);
 
 private:
     void processIntern() override;
@@ -17,6 +17,7 @@ private:
 
     void processZoomInButton();
     void processZoomOutButton();
+    void processCenterButton();
     void processResizeButton();
 
     void processCenterOnSelection();

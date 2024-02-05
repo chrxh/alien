@@ -13,12 +13,15 @@
 #include "AlienImGui.h"
 #include "ResizeWorldDialog.h"
 
-_SpatialControlWindow::_SpatialControlWindow(SimulationController const& simController, Viewport const& viewport)
+_SpatialControlWindow::_SpatialControlWindow(
+    SimulationController const& simController,
+    Viewport const& viewport,
+    TemporalControlWindow const& temporalControlWindow)
     : _AlienWindow("Spatial control", "windows.spatial control", true)
     , _simController(simController)
     , _viewport(viewport)
 {
-    _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simController);
+    _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simController, temporalControlWindow);
 }
 
 void _SpatialControlWindow::processIntern()
@@ -26,6 +29,8 @@ void _SpatialControlWindow::processIntern()
     processZoomInButton();
     ImGui::SameLine();
     processZoomOutButton();
+    ImGui::SameLine();
+    processCenterButton();
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
     ImGui::SameLine();
@@ -97,6 +102,16 @@ void _SpatialControlWindow::processZoomOutButton()
         _viewport->setZoomFactor(_viewport->getZoomFactor() / 2);
     }
     AlienImGui::Tooltip("Zoom out");
+}
+
+void _SpatialControlWindow::processCenterButton()
+{
+    if (AlienImGui::ToolbarButton(ICON_FA_CROSSHAIRS)) {
+        _viewport->setZoomFactor(1.0f);
+        auto worldSize = toRealVector2D(_simController->getWorldSize());
+        _viewport->setCenterInWorldPos({worldSize.x / 2, worldSize.y / 2});
+    }
+    AlienImGui::Tooltip("Center");
 }
 
 void _SpatialControlWindow::processResizeButton()
