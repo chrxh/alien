@@ -38,7 +38,8 @@ private:
     uint32_t _backupColor;
     std::string _startingPath;
     std::optional<SimulationParameters> _copiedParameters;
-    std::optional<int> _numSpotsLastTime;
+    std::optional<int> _sessionId;
+    bool _focusBaseTab = false;
     std::vector<std::string> _cellFunctionStrings;
 
     bool _featureListOpen = false;
