@@ -2038,35 +2038,37 @@ void _SimulationParametersWindow::processAddonList(
                     .name("Genome complexity measurement")
                     .textWidth(0)
                     .defaultValue(origParameters.features.genomeComplexityMeasurement)
-                    .tooltip(""),
+                    .tooltip("Parameters for the calculation of genome complexity are activated here. This genome complexity can be used for 'Advanced absorption control' "
+                             "and 'Advanced attacker control' to favor more complex genomes in natural selection. If it is deactivated, default values are "
+                             "used that simply take the genome size into account."),
                 parameters.features.genomeComplexityMeasurement);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Advanced absorption control")
                     .textWidth(0)
                     .defaultValue(origParameters.features.advancedAbsorptionControl)
-                    .tooltip(""),
+                    .tooltip("This addon offers extended possibilities for controlling the absorption of energy particles by cells."),
                 parameters.features.advancedAbsorptionControl);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Advanced attacker control")
                     .textWidth(0)
                     .defaultValue(origParameters.features.advancedAttackerControl)
-                    .tooltip(""),
+                    .tooltip("It contains further settings that influence how much energy can be obtained from an attack by attacker cells."),
                 parameters.features.advancedAttackerControl);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("External energy control")
                     .textWidth(0)
                     .defaultValue(origParameters.features.externalEnergyControl)
-                    .tooltip(""),
+                    .tooltip("This addon is used to add an external energy source. The energy is gradually transferred to the cells in the simulation."),
                 parameters.features.externalEnergyControl);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Cell color transition rules")
                     .textWidth(0)
                     .defaultValue(origParameters.features.cellColorTransitionRules)
-                    .tooltip(""),
+                    .tooltip("This can be used to define color transitions for cells depending on their age."),
                 parameters.features.cellColorTransitionRules);
         }
         ImGui::EndChild();
