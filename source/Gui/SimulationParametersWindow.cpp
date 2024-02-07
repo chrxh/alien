@@ -170,7 +170,7 @@ void _SimulationParametersWindow::processTabWidget(
     SimulationParameters const& lastParameters,
     SimulationParameters& origParameters)
 {
-    auto focusBaseTab = !_numSpotsLastTime.has_value() || parameters.numSpots != *_numSpotsLastTime;
+    auto currentSessionId = _simController->getSessionId();
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
 
@@ -184,14 +184,14 @@ void _SimulationParametersWindow::processTabWidget(
                     origParameters.spots[index] = createSpot(parameters, index);
                     ++parameters.numSpots;
                     ++origParameters.numSpots;
-                    _numSpotsLastTime = parameters.numSpots;
                     _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
                 AlienImGui::Tooltip("Add parameter zone");
             }
 
-            if (ImGui::BeginTabItem("Base", nullptr, focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+                bool open = true;
+            if (ImGui::BeginTabItem("Base", &open, _focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
                 processBase(parameters, origParameters);
                 ImGui::EndTabItem();
             }
@@ -199,7 +199,6 @@ void _SimulationParametersWindow::processTabWidget(
             for (int tab = 0; tab < parameters.numSpots; ++tab) {
                 SimulationParametersSpot& spot = parameters.spots[tab];
                 SimulationParametersSpot const& origSpot = origParameters.spots[tab];
-                bool open = true;
                 std::string name = "Zone " + std::to_string(tab + 1);
                 if (ImGui::BeginTabItem(name.c_str(), &open, ImGuiTabItemFlags_None)) {
                     processSpot(spot, origSpot, parameters);
@@ -214,7 +213,6 @@ void _SimulationParametersWindow::processTabWidget(
                     }
                     --parameters.numSpots;
                     --origParameters.numSpots;
-                    _numSpotsLastTime = parameters.numSpots;
                     _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
@@ -224,7 +222,9 @@ void _SimulationParametersWindow::processTabWidget(
         }
     }
     ImGui::EndChild();
-    _numSpotsLastTime = parameters.numSpots;
+
+    _focusBaseTab = !_sessionId.has_value() || currentSessionId != *_sessionId;
+    _sessionId= currentSessionId;
 }
 
 void _SimulationParametersWindow::processBase(
