@@ -17,6 +17,12 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
     }
 
     for (int i = 0; i < MAX_COLORS; ++i) {
+        if (radiationAbsorptionHighVelocityPenalty[i] != other.radiationAbsorptionHighVelocityPenalty[i]) {
+            return false;
+        }
+        if (radiationAbsorptionLowVelocityPenalty[i] != other.radiationAbsorptionLowVelocityPenalty[i]) {
+            return false;
+        }
         if (particleSplitEnergy[i] != other.particleSplitEnergy[i]) {
             return false;
         }
@@ -27,9 +33,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
             return false;
         }
         if (cellMaxAge[i] != other.cellMaxAge[i]) {
-            return false;
-        }
-        if (radiationAbsorptionVelocityPenalty[i] != other.radiationAbsorptionVelocityPenalty[i]) {
             return false;
         }
         if (radiationAbsorptionLowConnectionPenalty[i] != other.radiationAbsorptionLowConnectionPenalty[i]) {

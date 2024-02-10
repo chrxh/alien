@@ -298,9 +298,15 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.radiationAbsorptionVelocityPenalty,
-            defaultParameters.radiationAbsorptionVelocityPenalty,
+            parameters.radiationAbsorptionHighVelocityPenalty,
+            defaultParameters.radiationAbsorptionHighVelocityPenalty,
             "simulation parameters.radiation.absorption velocity penalty",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.radiationAbsorptionLowVelocityPenalty,
+            defaultParameters.radiationAbsorptionLowVelocityPenalty,
+            "simulation parameters.radiation.absorption low velocity penalty",
             parserTask);
         encodeDecodeProperty(
             tree,

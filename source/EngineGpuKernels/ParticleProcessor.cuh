@@ -104,7 +104,9 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                         auto energyToTransfer = particle->energy * radiationAbsorption;
                         if (cudaSimulationParameters.features.advancedAbsorptionControl) {
                             energyToTransfer *=
-                                max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionVelocityPenalty[cell->color]);
+                                max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty[cell->color]);
+                            energyToTransfer *= 1.0f
+                                - cudaSimulationParameters.radiationAbsorptionLowVelocityPenalty[cell->color] / powf(1.0f + Math::length(cell->vel), 10.0f);
                             energyToTransfer *=
                                 powf(toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty[cell->color]);
 
@@ -117,7 +119,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                             energyToTransfer *= 1.0f - radiationAbsorptionLowGenomeComplexityPenalty / powf(1.0f + toFloat(cell->genomeComplexity), 0.1f);
                         }
 
-                        if (particle->energy < 1) {
+                        if (particle->energy < 0.01f/* && energyToTransfer > 0.1f*/) {
                             energyToTransfer = particle->energy;
                         }
                         cell->energy += energyToTransfer;
