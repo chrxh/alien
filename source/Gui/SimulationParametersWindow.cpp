@@ -1226,9 +1226,9 @@ void _SimulationParametersWindow::processBase(
                         .min(0)
                         .max(1.0f)
                         .format("%.2f")
-                        .defaultValue(origParameters.radiationAbsorptionHighVelocityPenalty)
+                        .defaultValue(origParameters.radiationAbsorptionLowVelocityPenalty)
                         .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
-                    parameters.radiationAbsorptionHighVelocityPenalty);
+                    parameters.radiationAbsorptionLowVelocityPenalty);
                 AlienImGui::EndTreeNode();
             }
         }
