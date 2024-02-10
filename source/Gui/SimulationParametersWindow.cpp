@@ -1208,16 +1208,27 @@ void _SimulationParametersWindow::processBase(
                     parameters.radiationAbsorptionLowConnectionPenalty);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
-                        .name("Velocity penalty")
+                        .name("High velocity penalty")
                         .textWidth(RightColumnWidth)
                         .colorDependence(true)
                         .min(0)
                         .max(30.0f)
                         .logarithmic(true)
-                        .format("%.1f")
-                        .defaultValue(origParameters.radiationAbsorptionVelocityPenalty)
-                        .tooltip("When this parameter is increased, cells with higher velocity will absorb less energy from an incoming energy particle."),
-                    parameters.radiationAbsorptionVelocityPenalty);
+                        .format("%.2f")
+                        .defaultValue(origParameters.radiationAbsorptionHighVelocityPenalty)
+                        .tooltip("When this parameter is increased, fast moving cells will absorb less energy from an incoming energy particle."),
+                    parameters.radiationAbsorptionHighVelocityPenalty);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Low velocity penalty")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(1.0f)
+                        .format("%.2f")
+                        .defaultValue(origParameters.radiationAbsorptionHighVelocityPenalty)
+                        .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
+                    parameters.radiationAbsorptionHighVelocityPenalty);
                 AlienImGui::EndTreeNode();
             }
         }
@@ -2124,7 +2135,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
                 std::max(0.0f, parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j]);
         }
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
-        parameters.radiationAbsorptionVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionVelocityPenalty[i]);
+        parameters.radiationAbsorptionHighVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionHighVelocityPenalty[i]);
         parameters.radiationAbsorptionLowConnectionPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionLowConnectionPenalty[i]);
         parameters.cellFunctionConstructorPumpEnergyFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorPumpEnergyFactor[i]));
         parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
@@ -2137,6 +2148,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.particleSplitEnergy[i] = std::max(0.0f, parameters.particleSplitEnergy[i]);
         parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i] =
             std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i]));
+        parameters.radiationAbsorptionLowVelocityPenalty[i] = std::max(0.0f, std::min(1.0f, parameters.radiationAbsorptionLowVelocityPenalty[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
