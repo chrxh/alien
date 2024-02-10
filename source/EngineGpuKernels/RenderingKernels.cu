@@ -16,10 +16,12 @@ namespace
         imageData[index] = toUInt64(color.y * 225.0f) << 16 | toUInt64(color.x * 225.0f) << 0 | toUInt64(color.z * 225.0f) << 32;
     }
 
-    __device__ __inline__ void drawAddingPixel(uint64_t* imageData, unsigned int index, float3 const& colorToAdd)
+    __device__ __inline__ void drawAddingPixel(uint64_t* imageData, unsigned int const& numPixels, unsigned int index, float3 const& colorToAdd)
     {
-        uint64_t rawColorToAdd = toUInt64(colorToAdd.y * 255.0f) << 16 | toUInt64(colorToAdd.x * 255.0f) << 0 | toUInt64(colorToAdd.z * 255.0f) << 32;
-        alienAtomicAdd64(&imageData[index], rawColorToAdd);
+        if (index < numPixels) {
+            uint64_t rawColorToAdd = toUInt64(colorToAdd.y * 255.0f) << 16 | toUInt64(colorToAdd.x * 255.0f) << 0 | toUInt64(colorToAdd.z * 255.0f) << 32;
+            alienAtomicAdd64(&imageData[index], rawColorToAdd);
+        }
     }
 
     __device__ __inline__ float3 colorToFloat3(unsigned int value)
@@ -27,9 +29,17 @@ namespace
         return float3{toFloat(value & 0xff) / 255, toFloat((value >> 8) & 0xff) / 255, toFloat((value >> 16) & 0xff) / 255};
     }
 
-    __device__ __inline__ float2 mapUniversePosToVectorImagePos(float2 const& rectUpperLeft, float2 const& pos, float zoom)
+    __device__ __inline__ float2 mapWorldPosToVectorImagePos(
+        float2 const& rectUpperLeft,
+        float2 const& pos,
+        float2 const& universeImageSize,
+        int2 const& imageSize,
+        float zoom)
     {
-        return float2{(pos.x - rectUpperLeft.x) * zoom, (pos.y - rectUpperLeft.y) * zoom};
+        auto result = float2{(pos.x - rectUpperLeft.x) * zoom, (pos.y - rectUpperLeft.y) * zoom};
+        result.x = fmodf(fmodf(result.x, universeImageSize.x) + universeImageSize.x, universeImageSize.x);
+        result.y = fmodf(fmodf(result.y, universeImageSize.y) + universeImageSize.y, universeImageSize.y);
+        return result;
     }
 
     __device__ __inline__ int3 convertHSVtoRGB(float h, float s, float v)
@@ -179,22 +189,23 @@ namespace
     __device__ __inline__ void drawDot(uint64_t* imageData, int2 const& imageSize, float2 const& pos, float3 const& colorToAdd)
     {
         int2 intPos{toInt(pos.x), toInt(pos.y)};
-        if (intPos.x >= 1 && intPos.x < imageSize.x - 1 && intPos.y >= 1 && intPos.y < imageSize.y - 1) {
+        if (intPos.x >= 0 && intPos.x < imageSize.x && intPos.y >= 0 && intPos.y < imageSize.y) {
 
             float2 posFrac{pos.x - intPos.x, pos.y - intPos.y};
             unsigned int index = intPos.x + intPos.y * imageSize.x;
+            auto numPixels = imageSize.x * imageSize.y;
 
             float3 colorToAdd1 = colorToAdd * (1.0f - posFrac.x) * (1.0f - posFrac.y);
-            drawAddingPixel(imageData, index, colorToAdd1);
+            drawAddingPixel(imageData, numPixels, index, colorToAdd1);
 
             float3 colorToAdd2 = colorToAdd * posFrac.x * (1.0f - posFrac.y);
-            drawAddingPixel(imageData, index + 1, colorToAdd2);
+            drawAddingPixel(imageData, numPixels, index + 1, colorToAdd2);
 
             float3 colorToAdd3 = colorToAdd * (1.0f - posFrac.x) * posFrac.y;
-            drawAddingPixel(imageData, index + imageSize.x, colorToAdd3);
+            drawAddingPixel(imageData, numPixels, index + imageSize.x, colorToAdd3);
 
             float3 colorToAdd4 = colorToAdd * posFrac.x * posFrac.y;
-            drawAddingPixel(imageData, index + imageSize.x + 1, colorToAdd4);
+            drawAddingPixel(imageData, numPixels, index + imageSize.x + 1, colorToAdd4);
         }
     }
 
@@ -245,6 +256,11 @@ namespace
             pos = pos + v;
         }
     }
+
+    __device__ __inline bool isLineVisible(float2 const& startImagePos, float2 const& endImagePos, float2 const& universeImageSize)
+    {
+        return abs(startImagePos.x - endImagePos.x) < universeImageSize.x / 2 && abs(startImagePos.y - endImagePos.y) < universeImageSize.y / 2;
+    }
 }
 
 /************************************************************************/
@@ -252,10 +268,6 @@ namespace
 /************************************************************************/
 __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float2 rectUpperLeft, float2 rectLowerRight)
 {
-    int2 outsideRectUpperLeft{-min(toInt(rectUpperLeft.x * zoom), 0), -min(toInt(rectUpperLeft.y * zoom), 0)};
-    int2 outsideRectLowerRight{
-        imageSize.x - max(toInt((rectLowerRight.x - worldSize.x) * zoom), 0), imageSize.y - max(toInt((rectLowerRight.y - worldSize.y) * zoom), 0)};
-
     BaseMap map;
     map.init(worldSize);
     auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
@@ -264,36 +276,32 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
         spotColors[i] = colorToFloat3(cudaSimulationParameters.spots[i].color);
     }
 
-    auto const block = calcPartition(imageSize.x * imageSize.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    for (int index = block.startIndex; index <= block.endIndex; ++index) {
+    auto const partition = calcAllThreadsPartition(imageSize.x * imageSize.y);
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto x = index % imageSize.x;
         auto y = index / imageSize.x;
-        if (x < outsideRectUpperLeft.x || y < outsideRectUpperLeft.y || x >= outsideRectLowerRight.x || y >= outsideRectLowerRight.y) {
-            imageData[index] = 0;
-        } else {
-            float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
+        float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
 
-            auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors);
-            drawPixel(imageData, index, color);
-        }
+        auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors);
+        drawPixel(imageData, index, color);
     }
 }
 
-__global__ void cudaDrawCells(uint64_t timestep, int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
+__global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
 {
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     BaseMap map;
-    map.init(universeSize);
+    map.init(worldSize);
 
     auto shadedCells = zoom >= ZoomLevelForShadedCells;
+    auto universeImageSize = toFloat2(worldSize) * zoom;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
 
         auto cellPos = cell->pos;
-        map.correctPosition(cellPos);
-        if (isContainedInRect(rectUpperLeft, rectLowerRight, cellPos)) {
-            auto cellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos, zoom);
+        auto cellImagePos = mapWorldPosToVectorImagePos(rectUpperLeft, cellPos, universeImageSize, imageSize, zoom);
+        if (isContainedInRect({0, 0}, toFloat2(imageSize), cellImagePos)) {
 
             //draw cell
             auto color = calcColor(cell, cell->selected);
@@ -326,15 +334,19 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 universeSize, float2 rectU
             if (zoom >= ZoomLevelForConnections) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const otherCell = cell->connections[i].cell;
-                    auto const otherCellPos = otherCell->pos;
+                    auto otherCellPos = otherCell->pos;
                     auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
+                    otherCellPos += topologyCorrection;
 
-                    if (Math::lengthSquared(topologyCorrection) < NEAR_ZERO) {
-                        auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) / 3;
-                        auto const startImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos + distFromCellCenter, zoom);
-                        auto const endImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, zoom);
+                    //if (Math::lengthSquared(topologyCorrection) < NEAR_ZERO) {
+                    auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) / 3;
+                    auto const startImagePos = mapWorldPosToVectorImagePos(rectUpperLeft, cellPos + distFromCellCenter, universeImageSize, imageSize, zoom);
+                    auto const endImagePos =
+                        mapWorldPosToVectorImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, imageSize, zoom);
+                    if (isLineVisible(startImagePos, endImagePos, universeImageSize)) {
                         drawLine(startImagePos, endImagePos, color, imageData, imageSize);
                     }
+                    //}
                 }
             }
 
@@ -345,24 +357,37 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 universeSize, float2 rectU
                     for (int i = 0; i < cell->numConnections; ++i) {
                         auto const& otherCell = cell->connections[i].cell;
                         if (otherCell->executionOrderNumber == inputExecutionOrderNumber && !otherCell->outputBlocked) {
-                            auto const otherCellPos = otherCell->pos;
+                            auto otherCellPos = otherCell->pos;
                             auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
-                            if (Math::lengthSquared(topologyCorrection) > NEAR_ZERO) {
+                            otherCellPos += topologyCorrection;
+
+                            //if (Math::lengthSquared(topologyCorrection) > NEAR_ZERO) {
+                            //    continue;
+                            //}
+
+                            auto const otherCellImagePos = mapWorldPosToVectorImagePos(rectUpperLeft, otherCellPos, universeImageSize, imageSize, zoom);
+                            if (!isContainedInRect({0, 0}, toFloat2(imageSize), otherCellImagePos)) {
                                 continue;
                             }
-
-                            auto const otherCellImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, otherCellPos, zoom);
-                            auto const arrowEnd = mapUniversePosToVectorImagePos(rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 3, zoom);
+                            auto const arrowEnd = mapWorldPosToVectorImagePos(
+                                rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 3, universeImageSize, imageSize, zoom);
+                            if (!isContainedInRect({0, 0}, toFloat2(imageSize), arrowEnd)) {
+                                continue;
+                            }
                             auto direction = Math::normalized(arrowEnd - otherCellImagePos);
                             {
                                 float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
                                 arrowPartStart = arrowPartStart * zoom / 8 + arrowEnd;
-                                drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                                if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
+                                    drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                                }
                             }
                             {
                                 float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
                                 arrowPartStart = arrowPartStart * zoom / 8 + arrowEnd;
-                                drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                                if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
+                                    drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                                }
                             }
                         }
                     }
@@ -373,19 +398,20 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 universeSize, float2 rectU
 }
 
 __global__ void
-cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Particle*> particles, uint64_t* imageData, int2 imageSize, float zoom)
+cudaDrawParticles(int2 worldSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Particle*> particles, uint64_t* imageData, int2 imageSize, float zoom)
 {
     BaseMap map;
-    map.init(universeSize);
+    map.init(worldSize);
 
     auto const partition = calcPartition(particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
+    auto universeImageSize = toFloat2(worldSize) * zoom;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& particle = particles.at(index);
         auto particlePos = particle->absPos;
         map.correctPosition(particlePos);
 
-        auto const particleImagePos = mapUniversePosToVectorImagePos(rectUpperLeft, particlePos, zoom);
+        auto const particleImagePos = mapWorldPosToVectorImagePos(rectUpperLeft, particlePos, universeImageSize, imageSize, zoom);
         if (isContainedInRect({0, 0}, imageSize, particleImagePos)) {
             auto const color = calcColor(particle, 0 != particle->selected);
             auto radius = zoom / 3;
@@ -394,26 +420,51 @@ cudaDrawParticles(int2 universeSize, float2 rectUpperLeft, float2 rectLowerRight
     }
 }
 
-__global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpperLeft, int2 imageSize, float zoom)
+__global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpperLeft, int2 worldSize, int2 imageSize, float zoom)
 {
+    auto universeImageSize = toFloat2(worldSize) * zoom;
     for (int i = 0; i < cudaSimulationParameters.numParticleSources; ++i) {
-        auto const& particleSource = cudaSimulationParameters.particleSources[i];
-        int screenPosX = toInt(particleSource.posX * zoom) - rectUpperLeft.x * zoom;
-        int screenPosY = toInt(particleSource.posY * zoom) - rectUpperLeft.y * zoom;
-        for (int dx = -5; dx <= 5; ++dx) {
-            auto drawX = screenPosX + dx;
-            auto drawY = screenPosY;
-            if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
-                int index = drawX + drawY * imageSize.x;
-                targetImage[index] = 0x0000000001ff;
+        float2 sourcePos{cudaSimulationParameters.particleSources[i].posX, cudaSimulationParameters.particleSources[i].posY};
+        auto imagePos = mapWorldPosToVectorImagePos(rectUpperLeft, sourcePos, universeImageSize, imageSize, zoom);
+        if (isContainedInRect({0, 0}, toFloat2(imageSize), imagePos)) {
+            for (int dx = -5; dx <= 5; ++dx) {
+                auto drawX = toInt(imagePos.x) + dx;
+                auto drawY = toInt(imagePos.y);
+                if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
+                    int index = drawX + drawY * imageSize.x;
+                    targetImage[index] = 0x0000000001ff;
+                }
+            }
+            for (int dy = -5; dy <= 5; ++dy) {
+                auto drawX = toInt(imagePos.x);
+                auto drawY = toInt(imagePos.y) + dy;
+                if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
+                    int index = drawX + drawY * imageSize.x;
+                    targetImage[index] = 0x0000000001ff;
+                }
             }
         }
-        for (int dy = -5; dy <= 5; ++dy) {
-            auto drawX = screenPosX;
-            auto drawY = screenPosY + dy;
-            if (0 <= drawX && drawX < imageSize.x && 0 <= drawY && drawY < imageSize.y) {
-                int index = drawX + drawY * imageSize.x;
-                targetImage[index] = 0x0000000001ff;
+    }
+}
+
+__global__ void cudaDrawRepetition(int2 worldSize, int2 imageSize, float2 rectUpperLeft, float2 rectLowerRight, uint64_t* imageData, float zoom)
+{
+    BaseMap map;
+    map.init(worldSize);
+
+    auto universeImageSize = toFloat2(worldSize) * zoom;
+    auto const partition = calcAllThreadsPartition(imageSize.x * imageSize.y);
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto x = index % imageSize.x;
+        auto y = index / imageSize.x;
+        if (x >= toInt(universeImageSize.x) || y >= toInt(universeImageSize.y)) {
+            float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
+
+            auto refPos = mapWorldPosToVectorImagePos(rectUpperLeft, worldPos, universeImageSize, imageSize, zoom);
+            int2 refIntPos{toInt(refPos.x), toInt(refPos.y)};
+            if (refIntPos.x >= 0 && refIntPos.x < imageSize.x && refIntPos.y >= 0 && refIntPos.y < imageSize.y) {
+                atomicExch(&imageData[index], imageData[refIntPos.x + refIntPos.y * imageSize.x]);
+                //imageData[index] = imageData[refIntPos.x + refIntPos.y * imageSize.x];
             }
         }
     }
