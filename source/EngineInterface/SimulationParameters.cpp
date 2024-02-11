@@ -20,9 +20,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (radiationAbsorptionHighVelocityPenalty[i] != other.radiationAbsorptionHighVelocityPenalty[i]) {
             return false;
         }
-        if (radiationAbsorptionLowVelocityPenalty[i] != other.radiationAbsorptionLowVelocityPenalty[i]) {
-            return false;
-        }
         if (particleSplitEnergy[i] != other.particleSplitEnergy[i]) {
             return false;
         }
@@ -189,5 +186,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellFunctionAttackerDestroyCells == other.cellFunctionAttackerDestroyCells
         && cellFunctionReconnectorActivityThreshold == other.cellFunctionReconnectorActivityThreshold
         && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold && features == other.features
-        && highlightedCellFunction == other.highlightedCellFunction;
+        && highlightedCellFunction == other.highlightedCellFunction
+        && borderlessRendering == other.borderlessRendering;
 }
