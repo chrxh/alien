@@ -7,6 +7,7 @@ struct SimulationParametersSpotActivatedValues
     bool friction = false;
     bool rigidity = false;
     bool radiationAbsorption = false;
+    bool radiationAbsorptionLowVelocityPenalty = false;
     bool radiationAbsorptionLowGenomeComplexityPenalty = false;
     bool radiationCellAgeStrength = false;
     bool cellMaxForce = false;
@@ -57,6 +58,7 @@ struct SimulationParametersSpotActivatedValues
             && cellFunctionConstructorMutationCellColorProbability == other.cellFunctionConstructorMutationCellColorProbability
             && radiationAbsorptionLowGenomeComplexityPenalty == other.radiationAbsorptionLowGenomeComplexityPenalty
             && cellFunctionAttackerGenomeComplexityBonus == other.cellFunctionAttackerGenomeComplexityBonus
+            && radiationAbsorptionLowVelocityPenalty == other.radiationAbsorptionLowVelocityPenalty
         ;
     }
 };

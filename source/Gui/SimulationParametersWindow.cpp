@@ -276,6 +276,13 @@ void _SimulationParametersWindow::processBase(
                 &parameters.zoomLevelNeuronalActivity);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
+                    .name("Borderless rendering")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origParameters.borderlessRendering)
+                    .tooltip("If activated, the simulation is rendered periodically in the view port."),
+                parameters.borderlessRendering);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
                     .name("Show detonations")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origParameters.showDetonations)
@@ -1226,9 +1233,9 @@ void _SimulationParametersWindow::processBase(
                         .min(0)
                         .max(1.0f)
                         .format("%.2f")
-                        .defaultValue(origParameters.radiationAbsorptionLowVelocityPenalty)
+                        .defaultValue(origParameters.baseValues.radiationAbsorptionLowVelocityPenalty)
                         .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
-                    parameters.radiationAbsorptionLowVelocityPenalty);
+                    parameters.baseValues.radiationAbsorptionLowVelocityPenalty);
                 AlienImGui::EndTreeNode();
             }
         }
@@ -1931,6 +1938,18 @@ void _SimulationParametersWindow::processSpot(
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced energy absorption control"))) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
+                        .name("Low velocity penalty")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(1.0f)
+                        .format("%.2f")
+                        .defaultValue(origSpot.values.radiationAbsorptionLowVelocityPenalty)
+                        .disabledValue(parameters.baseValues.radiationAbsorptionLowVelocityPenalty),
+                    spot.values.radiationAbsorptionLowVelocityPenalty,
+                    &spot.activatedValues.radiationAbsorptionLowVelocityPenalty);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
                         .name("Low genome complexity penalty")
                         .textWidth(RightColumnWidth)
                         .colorDependence(true)
@@ -2148,7 +2167,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.particleSplitEnergy[i] = std::max(0.0f, parameters.particleSplitEnergy[i]);
         parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i] =
             std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i]));
-        parameters.radiationAbsorptionLowVelocityPenalty[i] = std::max(0.0f, std::min(1.0f, parameters.radiationAbsorptionLowVelocityPenalty[i]));
+        parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i] =
+            std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i]));
     }
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
@@ -2167,6 +2187,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSp
         spot.values.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
         spot.values.radiationAbsorptionLowGenomeComplexityPenalty[i] =
             std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorptionLowGenomeComplexityPenalty[i]));
+        spot.values.radiationAbsorptionLowVelocityPenalty[i] = std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorptionLowVelocityPenalty[i]));
     }
     spot.values.cellMaxBindingEnergy = std::max(10.0f, spot.values.cellMaxBindingEnergy);
 }

@@ -176,8 +176,7 @@ void _SimulationCudaFacade::drawVectorGraphics(
 
     _cudaRenderingData->resizeImageIfNecessary(imageSize);
 
-    _renderingKernels->drawImage(
-        _settings.gpuSettings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), getSimulationDataIntern(), *_cudaRenderingData);
+    _renderingKernels->drawImage(_settings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), getSimulationDataIntern(), *_cudaRenderingData);
     syncAndCheck();
 
     const size_t widthBytes = sizeof(uint64_t) * imageSize.x;

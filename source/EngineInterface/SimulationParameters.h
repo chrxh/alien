@@ -40,6 +40,7 @@ struct SimulationParameters
 
     //rendering
     uint32_t backgroundColor = 0x1b0000;
+    bool borderlessRendering = false;
     CellColoring cellColoring = CellColoring_CellColor;
     CellFunction highlightedCellFunction = CellFunction_Constructor;
     float zoomLevelNeuronalActivity = 2.0f;
@@ -69,7 +70,6 @@ struct SimulationParameters
     float radiationVelocityPerturbation = 0.5f;
     ColorVector<int> radiationMinCellAge = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> radiationAbsorptionHighVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> radiationAbsorptionLowVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> radiationAbsorptionLowConnectionPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> highRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};

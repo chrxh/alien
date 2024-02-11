@@ -105,8 +105,14 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                         if (cudaSimulationParameters.features.advancedAbsorptionControl) {
                             energyToTransfer *=
                                 max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty[cell->color]);
-                            energyToTransfer *= 1.0f
-                                - cudaSimulationParameters.radiationAbsorptionLowVelocityPenalty[cell->color] / powf(1.0f + Math::length(cell->vel), 10.0f);
+
+                            auto radiationAbsorptionLowVelocityPenalty = SpotCalculator::calcParameter(
+                                &SimulationParametersSpotValues::radiationAbsorptionLowVelocityPenalty,
+                                &SimulationParametersSpotActivatedValues::radiationAbsorptionLowVelocityPenalty,
+                                data,
+                                cell->pos,
+                                cell->color);
+                            energyToTransfer *= 1.0f - radiationAbsorptionLowVelocityPenalty / powf(1.0f + Math::length(cell->vel), 10.0f);
                             energyToTransfer *=
                                 powf(toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty[cell->color]);
 

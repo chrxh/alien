@@ -37,8 +37,10 @@ namespace
         float zoom)
     {
         auto result = float2{(pos.x - rectUpperLeft.x) * zoom, (pos.y - rectUpperLeft.y) * zoom};
-        result.x = fmodf(fmodf(result.x, universeImageSize.x) + universeImageSize.x, universeImageSize.x);
-        result.y = fmodf(fmodf(result.y, universeImageSize.y) + universeImageSize.y, universeImageSize.y);
+        if (cudaSimulationParameters.borderlessRendering) {
+            result.x = fmodf(fmodf(result.x, universeImageSize.x) + universeImageSize.x, universeImageSize.x);
+            result.y = fmodf(fmodf(result.y, universeImageSize.y) + universeImageSize.y, universeImageSize.y);
+        }
         return result;
     }
 
@@ -270,6 +272,11 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
 {
     BaseMap map;
     map.init(worldSize);
+
+    int2 outsideRectUpperLeft{-min(toInt(rectUpperLeft.x * zoom), 0), -min(toInt(rectUpperLeft.y * zoom), 0)};
+    int2 outsideRectLowerRight{
+        imageSize.x - max(toInt((rectLowerRight.x - worldSize.x) * zoom), 0), imageSize.y - max(toInt((rectLowerRight.y - worldSize.y) * zoom), 0)};
+
     auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
     float3 spotColors[MAX_SPOTS];
     for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
@@ -282,8 +289,12 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
         auto y = index / imageSize.x;
         float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
 
-        auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors);
-        drawPixel(imageData, index, color);
+        if (!cudaSimulationParameters.borderlessRendering && (x < outsideRectUpperLeft.x || y < outsideRectUpperLeft.y || x >= outsideRectLowerRight.x || y >= outsideRectLowerRight.y)) {
+            imageData[index] = 0;
+        } else {
+            auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors);
+            drawPixel(imageData, index, color);
+        }
     }
 }
 

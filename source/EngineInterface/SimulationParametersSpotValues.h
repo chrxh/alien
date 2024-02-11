@@ -12,6 +12,7 @@ struct SimulationParametersSpotValues
     float friction = 0.001f;
     float rigidity = 0.0f;
     ColorVector<float> radiationAbsorption = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    ColorVector<float> radiationAbsorptionLowVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> radiationAbsorptionLowGenomeComplexityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> radiationCellAgeStrength = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f};
     float cellMaxForce = 0.8f;
@@ -135,6 +136,9 @@ struct SimulationParametersSpotValues
                 return false;
             }
             if (cellFunctionConstructorMutationSubgenomeColorProbability[i] != other.cellFunctionConstructorMutationSubgenomeColorProbability[i]) {
+                return false;
+            }
+            if (radiationAbsorptionLowVelocityPenalty[i] != other.radiationAbsorptionLowVelocityPenalty[i]) {
                 return false;
             }
         }

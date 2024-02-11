@@ -165,6 +165,7 @@ namespace
             "simulation parameters.zoom level.neural activity",
             parserTask);
         encodeDecodeProperty(tree, parameters.showDetonations, defaultParameters.showDetonations, "simulation parameters.show detonations", parserTask);
+        encodeDecodeProperty(tree, parameters.borderlessRendering, defaultParameters.borderlessRendering, "simulation parameters.borderless rendering", parserTask);
         encodeDecodeProperty(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);
 
         encodeDecodeProperty(tree, parameters.motionType, defaultParameters.motionType, "simulation parameters.motion.type", parserTask);
@@ -304,8 +305,8 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.radiationAbsorptionLowVelocityPenalty,
-            defaultParameters.radiationAbsorptionLowVelocityPenalty,
+            parameters.baseValues.radiationAbsorptionLowVelocityPenalty,
+            defaultParameters.baseValues.radiationAbsorptionLowVelocityPenalty,
             "simulation parameters.radiation.absorption low velocity penalty",
             parserTask);
         encodeDecodeProperty(
@@ -792,6 +793,13 @@ namespace
                 spot.activatedValues.radiationAbsorption,
                 defaultSpot.values.radiationAbsorption,
                 base + "radiation.absorption",
+                parserTask);
+            encodeDecodeSpotProperty(
+                tree,
+                spot.values.radiationAbsorptionLowVelocityPenalty,
+                spot.activatedValues.radiationAbsorptionLowVelocityPenalty,
+                defaultSpot.values.radiationAbsorptionLowVelocityPenalty,
+                base + "radiation.absorption low velocity penalty",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
