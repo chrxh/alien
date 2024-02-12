@@ -474,8 +474,7 @@ __global__ void cudaDrawRepetition(int2 worldSize, int2 imageSize, float2 rectUp
             auto refPos = mapWorldPosToVectorImagePos(rectUpperLeft, worldPos, universeImageSize, imageSize, zoom);
             int2 refIntPos{toInt(refPos.x), toInt(refPos.y)};
             if (refIntPos.x >= 0 && refIntPos.x < imageSize.x && refIntPos.y >= 0 && refIntPos.y < imageSize.y) {
-                alienAtomicExch(&imageData[index], imageData[refIntPos.x + refIntPos.y * imageSize.x]);
-                //imageData[index] = imageData[refIntPos.x + refIntPos.y * imageSize.x];
+                alienAtomicExch64(&imageData[index], imageData[refIntPos.x + refIntPos.y * imageSize.x]);
             }
         }
     }
