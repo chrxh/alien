@@ -137,6 +137,13 @@ __device__ __inline__ T alienAtomicMin64(T* address, T const& value)
 }
 
 template <typename T>
+__device__ __inline__ T alienAtomicExch(T* address, T const& value)
+{
+    static_assert(sizeof(unsigned long long) == sizeof(T));
+    return atomicAdd(reinterpret_cast<unsigned long long*>(address), static_cast<unsigned long long>(value));
+}
+
+template <typename T>
 __device__ __inline__ T* alienAtomicExch(T** address, T* value)
 {
     static_assert(sizeof(unsigned long long) == sizeof(T*));
