@@ -7,6 +7,7 @@
 
     $userName = $_POST["userName"];
     $pw = $_POST["password"];
+    $chunkIndex = (int)$_POST["chunkIndex"];
 
     if (!checkPw($db, $userName, $pw)) {
         echo json_encode(["result"=>false]);
@@ -34,7 +35,7 @@
 
     $newSize = (int)$obj->size + $size;
 
-    if (!$db->query("UPDATE simulation SET content = CONCAT(content,'" . addslashes($content) . "'), size = $newSize WHERE ID = $simId")) {
+    if (!$db->query("UPDATE simulation SET content" . (string)($chunkIndex + 1) . " = '" . addslashes($content) . "', size = $newSize WHERE ID = $simId")) {
         echo json_encode(["result"=>false]);
         $db->close();
         exit;
