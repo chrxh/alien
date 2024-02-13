@@ -66,7 +66,7 @@ public:
     static bool deleteResource(std::string const& simId);
 
 private:
-    static bool appendResourceData(std::string& resourceId, std::string const& data);
+    static bool appendResourceData(std::string& resourceId, std::string const& data, int chunkIndex);
 
     static std::string _serverAddress;
     static std::optional<std::string> _loggedInUserName;

@@ -4,6 +4,8 @@
 #include <boost/property_tree/json_parser.hpp>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
+#include <boost/range/adaptor/indexed.hpp>
+
 #include <cpp-httplib/httplib.h>
 
 #include "Base/GlobalSettings.h"
@@ -483,8 +485,8 @@ bool NetworkService::uploadResource(
         return false;
     }
 
-    for (auto const& chunk: chunks | std::views::drop(1)) {
-        if (!appendResourceData(resourceId, chunk)) {
+    for (auto const& [index, chunk] : chunks | boost::adaptors::indexed(0) | std::views::drop(1)) {
+        if (!appendResourceData(resourceId, chunk, toInt(index))) {
             deleteResource(resourceId);
             return false;
         }
@@ -513,8 +515,16 @@ bool NetworkService::downloadResource(std::string& mainData, std::string& auxili
             httplib::Params params;
             params.emplace("id", simId);
             {
-                auto result = executeRequest([&] { return client.Get("/alien-server/downloadcontent.php", params, {}); });
-                mainData = result->body;
+                
+                for (int chunkIndex = 0; chunkIndex < 6; ++chunkIndex) {
+                    auto paramsClone = params;
+                    paramsClone.emplace("chunkIndex", std::to_string(chunkIndex));
+                    auto result = executeRequest([&] { return client.Get("/alien-server/downloadcontent.php", paramsClone, {}); });
+                    if (result->body.empty()) {
+                        break;
+                    }
+                    mainData.append(result->body);
+                }
             }
             {
                 auto result = executeRequest([&] { return client.Get("/alien-server/downloadsettings.php", params, {}); });
@@ -616,7 +626,7 @@ bool NetworkService::deleteResource(std::string const& simId)
     }
 }
 
-bool NetworkService::appendResourceData(std::string& resourceId, std::string const& data)
+bool NetworkService::appendResourceData(std::string& resourceId, std::string const& data, int chunkIndex)
 {
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
@@ -626,6 +636,7 @@ bool NetworkService::appendResourceData(std::string& resourceId, std::string con
         {"password", *_password, "", ""},
         {"simId", resourceId, "", ""},
         {"content", data, "", "application/octet-stream"},
+        {"chunkIndex", std::to_string(chunkIndex), "", ""},
     };
 
     try {
