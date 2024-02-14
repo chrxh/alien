@@ -485,11 +485,13 @@ bool NetworkService::uploadResource(
         return false;
     }
 
-    for (auto const& [index, chunk] : chunks | boost::adaptors::indexed(0) | std::views::drop(1)) {
+    int index = 1;
+    for (auto const& chunk : chunks | std::views::drop(1)) {
         if (!appendResourceData(resourceId, chunk, toInt(index))) {
             deleteResource(resourceId);
             return false;
         }
+        ++index;
     }
     _downloadCache.insert(resourceId, ResourceData{mainData, settings, statistics});
 
