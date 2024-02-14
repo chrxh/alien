@@ -325,7 +325,7 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
             }
 
             //draw detonation
-            if (cudaSimulationParameters.showDetonations && cell->cellFunction == CellFunction_Detonator) {
+            if (cell->cellFunction == CellFunction_Detonator) {
                 auto const& detonator = cell->cellFunctionData.detonator;
                 if (detonator.state == DetonatorState_Activated && detonator.countdown < 2) {
                     auto radius = toFloat((timestep - cell->executionOrderNumber + 5) % 6 + (6 - detonator.countdown * 6));
