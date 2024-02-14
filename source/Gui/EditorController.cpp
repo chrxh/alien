@@ -153,6 +153,8 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
     if (entities.empty()) {
         return;
     }
+    auto borderlessRendering = _simController->getSimulationParameters().borderlessRendering;
+
     std::set<uint64_t> inspectedIds;
     for (auto const& inspectorWindow : _inspectorWindows) {
         inspectedIds.insert(inspectorWindow->getId());
@@ -177,7 +179,7 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
     RealVector2D center;
     int num = 0;
     for (auto const& entity : entities) {
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity));
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         center += entityPos;
         ++num;
     }
@@ -185,7 +187,7 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
 
     float maxDistanceFromCenter = 0;
     for (auto const& entity : entities) {
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity));
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         auto distanceFromCenter = toFloat(Math::length(entityPos - center));
         maxDistanceFromCenter = std::max(maxDistanceFromCenter, distanceFromCenter);
     }
@@ -196,7 +198,7 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
     for (auto const& entity : newEntities) {
         auto id = DescriptionEditService::getId(entity);
         _editorModel->addInspectedEntity(entity);
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity));
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         auto windowPosX = (entityPos.x - center.x) * factorX + center.x;
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;

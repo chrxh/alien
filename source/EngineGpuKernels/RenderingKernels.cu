@@ -38,8 +38,8 @@ namespace
     {
         auto result = float2{(pos.x - rectUpperLeft.x) * zoom, (pos.y - rectUpperLeft.y) * zoom};
         if (cudaSimulationParameters.borderlessRendering) {
-            result.x = fmodf(fmodf(result.x, universeImageSize.x) + universeImageSize.x, universeImageSize.x);
-            result.y = fmodf(fmodf(result.y, universeImageSize.y) + universeImageSize.y, universeImageSize.y);
+            result.x = Math::modulo(result.x, universeImageSize.x);
+            result.y = Math::modulo(result.y, universeImageSize.y);
         }
         return result;
     }

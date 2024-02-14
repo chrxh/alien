@@ -66,6 +66,7 @@ void _InspectorWindow::process()
     auto width = calcWindowWidth();
     auto height = isCell() ? StyleRepository::getInstance().scale(370.0f)
                            : StyleRepository::getInstance().scale(70.0f);
+    auto borderlessRendering = _simController->getSimulationParameters().borderlessRendering;
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
@@ -78,7 +79,7 @@ void _InspectorWindow::process()
             processParticle(std::get<ParticleDescription>(entity));
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity));
+        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         auto factor = StyleRepository::getInstance().scale(1);
 
         drawList->AddLine(

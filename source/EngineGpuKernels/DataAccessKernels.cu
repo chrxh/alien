@@ -258,11 +258,13 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cell = cells.at(index);
 
-            auto pos = cell->pos;
-            data.cellMap.correctPosition(pos);
-            if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
+            if (!Math::isInBetweenModulo(toFloat(rectUpperLeft.x), toFloat(rectLowerRight.x), cell->pos.x, toFloat(data.worldSize.x))) {
                 continue;
             }
+            if (!Math::isInBetweenModulo(toFloat(rectUpperLeft.y), toFloat(rectLowerRight.y), cell->pos.y, toFloat(data.worldSize.y))) {
+                continue;
+            }
+
             auto cellTOIndex = alienAtomicAdd64(dataTO.numCells, uint64_t(1));
             auto& cellTO = dataTO.cells[cellTOIndex];
 
