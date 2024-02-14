@@ -234,7 +234,7 @@ void _SimulationParametersWindow::processBase(
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
         /**
-         * Coloring
+         * Rendering
          */
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Visualization"))) {
             AlienImGui::ColorButtonWithPicker(
@@ -255,15 +255,16 @@ void _SimulationParametersWindow::processBase(
                         " Genome complexity: This property can be utilized by attacker cells when the parameter 'Complex genome protection' is "
                         "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large bonus"),
                 parameters.cellColoring);
-            AlienImGui::Switcher(
-                AlienImGui::SwitcherParameters()
-                    .name("Highlighted cell function")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.highlightedCellFunction)
-                    .values(_cellFunctionStrings)
-                    .disabled(parameters.cellColoring != CellColoring_CellFunction)
-                    .tooltip("The specific cell function type to be highlighted can be selected here."),
-                parameters.highlightedCellFunction);
+            if (parameters.cellColoring == CellColoring_CellFunction) {
+                AlienImGui::Switcher(
+                    AlienImGui::SwitcherParameters()
+                        .name("Highlighted cell function")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origParameters.highlightedCellFunction)
+                        .values(_cellFunctionStrings)
+                        .tooltip("The specific cell function type to be highlighted can be selected here."),
+                    parameters.highlightedCellFunction);
+            }
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Zoom level for cell activity")
@@ -283,11 +284,11 @@ void _SimulationParametersWindow::processBase(
                 parameters.borderlessRendering);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Show detonations")
+                    .name("Mark reference domain")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.showDetonations)
-                    .tooltip("If activated, the explosions of detonator cells will be visualized."),
-                parameters.showDetonations);
+                    .defaultValue(origParameters.markReferenceDomain)
+                    .tooltip("Draws borders along the world before it repeats itself."),
+                parameters.markReferenceDomain);
             AlienImGui::EndTreeNode();
         }
 

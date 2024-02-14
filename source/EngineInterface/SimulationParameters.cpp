@@ -166,7 +166,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
     }
 
     return backgroundColor == other.backgroundColor && cellColoring == other.cellColoring
-        && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity && showDetonations == other.showDetonations && baseValues == other.baseValues
+        && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity && baseValues == other.baseValues
         && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance
         && cellMinDistance == other.cellMinDistance && cellMaxForceDecayProb == other.cellMaxForceDecayProb
         && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers && radiationProb == other.radiationProb
@@ -187,5 +187,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellFunctionReconnectorActivityThreshold == other.cellFunctionReconnectorActivityThreshold
         && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold && features == other.features
         && highlightedCellFunction == other.highlightedCellFunction
-        && borderlessRendering == other.borderlessRendering;
+        && borderlessRendering == other.borderlessRendering
+        && markReferenceDomain == other.markReferenceDomain;
 }
