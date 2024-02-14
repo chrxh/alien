@@ -118,7 +118,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     NetworkService::init();
 
     //init controllers, windows and dialogs
-    _viewport = std::make_shared<_Viewport>();
+    _viewport = std::make_shared<_Viewport>(_simController);
     _uiController = std::make_shared<_UiController>();
     _autosaveController = std::make_shared<_AutosaveController>(_simController, _viewport);
     _editorController =

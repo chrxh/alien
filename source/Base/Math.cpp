@@ -120,6 +120,11 @@ bool Math::crossing(
     return lambda >= NEAR_ZERO && lambda <= 1 - NEAR_ZERO;
 }
 
+float Math::modulo(float value, float size)
+{
+    return fmodf(fmodf(value, size) + size, size);
+}
+
 float Math::sigmoid(float x)
 {
     return 2.0f / (1.0f + expf(-x)) - 1.0f;

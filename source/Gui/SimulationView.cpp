@@ -7,7 +7,9 @@
 
 #include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
+#include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SpaceCalculator.h"
 
 #include "AlienImGui.h"
 #include "Shader.h"
@@ -17,7 +19,6 @@
 #include "StyleRepository.h"
 #include "CellFunctionStrings.h"
 #include "EditorModel.h"
-#include "EngineInterface/Colors.h"
 
 namespace
 {
@@ -315,9 +316,9 @@ void _SimulationView::draw(bool renderSimulation)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto p1 = _viewport->mapWorldToViewPosition({0, 0});
+        auto p1 = _viewport->mapWorldToViewPosition({0, 0}, false);
         auto worldSize = _simController->getWorldSize();
-        auto p2 = _viewport->mapWorldToViewPosition(toRealVector2D(worldSize));
+        auto p2 = _viewport->mapWorldToViewPosition(toRealVector2D(worldSize), false);
         auto color = ImColor::HSV(0.66f, 1.0f, 1.0f, 0.8f);
         drawList->AddLine({p1.x, p1.y}, {p2.x, p1.y}, color);
         drawList->AddLine({p2.x, p1.y}, {p2.x, p2.y}, color);
@@ -400,6 +401,7 @@ void _SimulationView::updateImageFromSimulation()
     auto worldRect = _viewport->getVisibleWorldRect();
     auto viewSize = _viewport->getViewSize();
     auto zoomFactor = _viewport->getZoomFactor();
+    auto worldSize = _simController->getWorldSize();
 
     if (zoomFactor >= ZoomFactorForOverlay) {
         auto overlay = _simController->tryDrawVectorGraphicsAndReturnOverlay(
@@ -419,11 +421,12 @@ void _SimulationView::updateImageFromSimulation()
     //draw overlay
     if (_overlay) {
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+        auto borderlessRendering = _simController->getSimulationParameters().borderlessRendering;
         for (auto const& overlayElement : _overlay->elements) {
             if (_isCellDetailOverlayActive && overlayElement.cell) {
                 {
                     auto fontSize = std::min(40.0f, _viewport->getZoomFactor()) / 2;
-                    auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
+                    auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f}, borderlessRendering);
                     if (overlayElement.cellType != CellFunction_None) {
                         auto text = Const::CellFunctionToStringMap.at(overlayElement.cellType);
                         drawList->AddText(
@@ -441,7 +444,7 @@ void _SimulationView::updateImageFromSimulation()
                     }
                 }
                 {
-                    auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f});
+                    auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f}, borderlessRendering);
                     auto fontSize = _viewport->getZoomFactor() / 2;
                     drawList->AddText(
                         StyleRepository::getInstance().getLargeFont(),
@@ -459,7 +462,7 @@ void _SimulationView::updateImageFromSimulation()
             }
 
             if (overlayElement.selected == 1) {
-                auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y});
+                auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, borderlessRendering);
                 if (_viewport->isVisible(viewPos)) {
                     drawList->AddCircle({viewPos.x, viewPos.y}, _viewport->getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
                 }

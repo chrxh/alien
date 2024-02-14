@@ -2,9 +2,13 @@
 
 #include <GLFW/glfw3.h>
 
+#include "Base/Math.h"
+#include "EngineInterface/SimulationController.h"
+
 #include "WindowController.h"
 
-_Viewport::_Viewport()
+_Viewport::_Viewport(SimulationController const& simController)
+    : _simController(simController)
 {
     _viewSize = WindowController::getStartupWindowSize();
 }
@@ -73,8 +77,14 @@ RealVector2D _Viewport::mapViewToWorldPosition(RealVector2D const& viewPos) cons
     return _worldCenter - relCenter + relWorldPos;
 }
 
-RealVector2D _Viewport::mapWorldToViewPosition(RealVector2D const& worldPos) const
+RealVector2D _Viewport::mapWorldToViewPosition(RealVector2D worldPos, bool borderlessRendering) const
 {
+    if (borderlessRendering) {
+        auto worldSize = toRealVector2D(_simController->getWorldSize());
+        auto offset = _worldCenter - worldSize / 2;
+        worldPos.x = Math::modulo(worldPos.x - offset.x, worldSize.x) + offset.x;
+        worldPos.y = Math::modulo(worldPos.y - offset.y, worldSize.y) + offset.y;
+    }
     return {
         worldPos.x * _zoomFactor - _worldCenter.x * _zoomFactor + _viewSize.x / 2,
         worldPos.y * _zoomFactor - _worldCenter.y * _zoomFactor + _viewSize.y / 2};
