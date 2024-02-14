@@ -52,6 +52,7 @@ private:
     void updateMotionBlur();
 
     void drawEditCursor();
+    void markReferenceDomain();
     float calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint);
 
     //widgets

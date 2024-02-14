@@ -41,10 +41,10 @@ struct SimulationParameters
     //rendering
     uint32_t backgroundColor = 0x1b0000;
     bool borderlessRendering = false;
+    bool markReferenceDomain = true;
     CellColoring cellColoring = CellColoring_CellColor;
     CellFunction highlightedCellFunction = CellFunction_Constructor;
     float zoomLevelNeuronalActivity = 2.0f;
-    bool showDetonations = true;
 
     //all other parameters
     SimulationParametersSpotValues baseValues;

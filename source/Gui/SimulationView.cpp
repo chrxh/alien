@@ -315,15 +315,9 @@ void _SimulationView::draw(bool renderSimulation)
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto p1 = _viewport->mapWorldToViewPosition({0, 0}, false);
-        auto worldSize = _simController->getWorldSize();
-        auto p2 = _viewport->mapWorldToViewPosition(toRealVector2D(worldSize), false);
-        auto color = ImColor::HSV(0.66f, 1.0f, 1.0f, 0.8f);
-        drawList->AddLine({p1.x, p1.y}, {p2.x, p1.y}, color);
-        drawList->AddLine({p2.x, p1.y}, {p2.x, p2.y}, color);
-        drawList->AddLine({p2.x, p2.y}, {p1.x, p2.y}, color);
-        drawList->AddLine({p1.x, p2.y}, {p1.x, p1.y}, color);
+        if (_simController->getSimulationParameters().markReferenceDomain) {
+            markReferenceDomain();
+        }
 
     } else {
         glClearColor(0, 0, 0.0f, 1.0f);
@@ -507,6 +501,19 @@ void _SimulationView::drawEditCursor()
             ImGui::SetMouseCursor(ImGuiMouseCursor_None);
         }
     }
+}
+
+void _SimulationView::markReferenceDomain()
+{
+    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+    auto p1 = _viewport->mapWorldToViewPosition({0, 0}, false);
+    auto worldSize = _simController->getWorldSize();
+    auto p2 = _viewport->mapWorldToViewPosition(toRealVector2D(worldSize), false);
+    auto color = ImColor::HSV(0.66f, 1.0f, 1.0f, 0.8f);
+    drawList->AddLine({p1.x, p1.y}, {p2.x, p1.y}, color);
+    drawList->AddLine({p2.x, p1.y}, {p2.x, p2.y}, color);
+    drawList->AddLine({p2.x, p2.y}, {p1.x, p2.y}, color);
+    drawList->AddLine({p1.x, p2.y}, {p1.x, p1.y}, color);
 }
 
 float _SimulationView::calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint)
