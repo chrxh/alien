@@ -86,8 +86,8 @@ RealVector2D _Viewport::mapWorldToViewPosition(RealVector2D worldPos, bool borde
         worldPos.y = Math::modulo(worldPos.y - offset.y, worldSize.y) + offset.y;
     }
     return {
-        worldPos.x * _zoomFactor - _worldCenter.x * _zoomFactor + _viewSize.x / 2,
-        worldPos.y * _zoomFactor - _worldCenter.y * _zoomFactor + _viewSize.y / 2};
+        worldPos.x * _zoomFactor - _worldCenter.x * _zoomFactor + toFloat(_viewSize.x) / 2,
+        worldPos.y * _zoomFactor - _worldCenter.y * _zoomFactor + toFloat(_viewSize.y) / 2};
 }
 
 RealRect _Viewport::getVisibleWorldRect() const

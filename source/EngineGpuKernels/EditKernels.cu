@@ -437,11 +437,13 @@ __global__ void cudaSetSelection(float2 pos, float radius, SimulationData data)
 
 __global__ void cudaSetSelection(AreaSelectionData selectionData, SimulationData data)
 {
-    auto const cellBlock = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
 
-    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = data.objects.cellPointers.at(index);
-        if (isContainedInRect(selectionData.startPos, selectionData.endPos, cell->pos)) {
+
+        if (Math::isInBetweenModulo(toFloat(selectionData.startPos.x), toFloat(selectionData.endPos.x), cell->pos.x, toFloat(data.worldSize.x))
+            && Math::isInBetweenModulo(toFloat(selectionData.startPos.y), toFloat(selectionData.endPos.y), cell->pos.y, toFloat(data.worldSize.y))) {
             cell->selected = 1;
         } else {
             cell->selected = 0;
@@ -539,11 +541,12 @@ __global__ void cudaRolloutSelectionStep(SimulationData data, int* result)
 __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData)
 {
     {
-        auto const cellBlock = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+        auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
 
-        for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = data.objects.cellPointers.at(index);
-            auto const& pos = cell->pos;
+            auto pos = cell->pos;
+            pos += data.cellMap.getCorrectionIncrement(applyData.startPos, pos);
             auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
             if (distanceToSegment < applyData.radius && !cell->barrier) {
                 auto weightedForce = applyData.force;
