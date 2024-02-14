@@ -437,9 +437,8 @@ __global__ void cudaSetSelection(float2 pos, float radius, SimulationData data)
 
 __global__ void cudaSetSelection(AreaSelectionData selectionData, SimulationData data)
 {
-    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cellPointers.at(index);
 
         if (Math::isInBetweenModulo(toFloat(selectionData.startPos.x), toFloat(selectionData.endPos.x), cell->pos.x, toFloat(data.worldSize.x))
@@ -450,11 +449,11 @@ __global__ void cudaSetSelection(AreaSelectionData selectionData, SimulationData
         }
     }
 
-    auto const particleBlock = calcAllThreadsPartition(data.objects.particlePointers.getNumEntries());
-
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+    auto const particlePartition = calcAllThreadsPartition(data.objects.particlePointers.getNumEntries());
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
         auto const& particle = data.objects.particlePointers.at(index);
-        if (isContainedInRect(selectionData.startPos, selectionData.endPos, particle->absPos)) {
+        if (Math::isInBetweenModulo(toFloat(selectionData.startPos.x), toFloat(selectionData.endPos.x), particle->absPos.x, toFloat(data.worldSize.x))
+            && Math::isInBetweenModulo(toFloat(selectionData.startPos.y), toFloat(selectionData.endPos.y), particle->absPos.y, toFloat(data.worldSize.y))) {
             particle->selected = 1;
         } else {
             particle->selected = 0;
