@@ -191,23 +191,26 @@ namespace
     __device__ __inline__ void drawDot(uint64_t* imageData, int2 const& imageSize, float2 const& pos, float3 const& colorToAdd)
     {
         int2 intPos{toInt(pos.x), toInt(pos.y)};
-        if (intPos.x >= 0 && intPos.x < imageSize.x && intPos.y >= 0 && intPos.y < imageSize.y) {
+        if (intPos.x >= 0 && intPos.y >= 0 && intPos.y < imageSize.y) {
 
             float2 posFrac{pos.x - intPos.x, pos.y - intPos.y};
             unsigned int index = intPos.x + intPos.y * imageSize.x;
             auto numPixels = imageSize.x * imageSize.y;
 
-            float3 colorToAdd1 = colorToAdd * (1.0f - posFrac.x) * (1.0f - posFrac.y);
-            drawAddingPixel(imageData, numPixels, index, colorToAdd1);
+            if (intPos.x < imageSize.x) {
+                float3 colorToAdd1 = colorToAdd * (1.0f - posFrac.x) * (1.0f - posFrac.y);
+                drawAddingPixel(imageData, numPixels, index, colorToAdd1);
 
-            float3 colorToAdd2 = colorToAdd * posFrac.x * (1.0f - posFrac.y);
-            drawAddingPixel(imageData, numPixels, index + 1, colorToAdd2);
+                float3 colorToAdd3 = colorToAdd * (1.0f - posFrac.x) * posFrac.y;
+                drawAddingPixel(imageData, numPixels, index + imageSize.x, colorToAdd3);
+            }
+            if (intPos.x + 1 < imageSize.x) {
+                float3 colorToAdd2 = colorToAdd * posFrac.x * (1.0f - posFrac.y);
+                drawAddingPixel(imageData, numPixels, index + 1, colorToAdd2);
 
-            float3 colorToAdd3 = colorToAdd * (1.0f - posFrac.x) * posFrac.y;
-            drawAddingPixel(imageData, numPixels, index + imageSize.x, colorToAdd3);
-
-            float3 colorToAdd4 = colorToAdd * posFrac.x * posFrac.y;
-            drawAddingPixel(imageData, numPixels, index + imageSize.x + 1, colorToAdd4);
+                float3 colorToAdd4 = colorToAdd * posFrac.x * posFrac.y;
+                drawAddingPixel(imageData, numPixels, index + imageSize.x + 1, colorToAdd4);
+            }
         }
     }
 

@@ -574,14 +574,14 @@ __global__ void cudaResetSelectionResult(SelectionResult result)
     result.reset();
 }
 
-__global__ void cudaGetSelectionShallowData(SimulationData data, SelectionResult result)
+__global__ void cudaGetSelectionShallowData(SimulationData data, float2 refPos, SelectionResult result)
 {
     auto const cellBlock = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
         auto const& cell = data.objects.cellPointers.at(index);
         if (0 != cell->selected) {
-            result.collectCell(cell);
+            result.collectCell(cell, refPos, data.cellMap);
         }
     }
 
@@ -590,14 +590,14 @@ __global__ void cudaGetSelectionShallowData(SimulationData data, SelectionResult
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.objects.particlePointers.at(index);
         if (0 != particle->selected) {
-            result.collectParticle(particle);
+            result.collectParticle(particle, refPos, data.cellMap);
         }
     }
 }
 
-__global__ void cudaFinalizeSelectionResult(SelectionResult result)
+__global__ void cudaFinalizeSelectionResult(SelectionResult result, BaseMap map)
 {
-    result.finalize();
+    result.finalize(map, !cudaSimulationParameters.borderlessRendering);
 }
 
 __global__ void cudaSetDetached(SimulationData data, bool value)

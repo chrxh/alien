@@ -18,8 +18,10 @@ private:
     bool _show = false;
     bool _withLightning = false;
     std::string _message;
+    int _counter = 0;
 
     std::optional<std::chrono::steady_clock::time_point> _startTimePoint;
+    std::optional<std::chrono::steady_clock::time_point> _ticksLaterTimePoint;
 };
 
 inline void printOverlayMessage(std::string const& message, bool withLightning = false)

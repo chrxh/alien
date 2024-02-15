@@ -261,7 +261,7 @@ void _EditorController::processEvents()
             } else {
                 selectObjects(mousePos, ImGui::GetIO().KeyCtrl);
                 _simController->setDetached(true);
-                auto shallowData = _simController->getSelectionShallowData();
+                auto shallowData = _simController->getSelectionShallowData(worldPos);
                 _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
                 _worldPosOnClick = worldPos;
             }
@@ -399,7 +399,7 @@ void _EditorController::moveSelectedObjects(
 
 void _EditorController::fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
-    auto shallowData = _simController->getSelectionShallowData();
+    auto shallowData = _simController->getSelectionShallowData(*_selectionPositionOnClick);
     auto selectionPosition = RealVector2D{shallowData.centerPosX, shallowData.centerPosY};
     auto selectionDelta = selectionPosition - *_selectionPositionOnClick;
 
