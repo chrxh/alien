@@ -40,11 +40,10 @@ namespace
     auto const SubWindowRightMargin = 0.0f;
 }
 
-_GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController, Viewport const& viewport)
+_GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController)
     : _AlienWindow("Genome editor", "windows.genome editor", false)
     , _editorModel(editorModel)
     , _simController(simulationController)
-    , _viewport(viewport)
 {
     _tabDatas = {TabData()};
 
@@ -901,7 +900,7 @@ void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
 
 void _GenomeEditorWindow::onCreateSpore()
 {
-    auto pos = _viewport->getCenterInWorldPos();
+    auto pos = Viewport::getCenterInWorldPos();
     pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
 

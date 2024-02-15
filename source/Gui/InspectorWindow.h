@@ -12,7 +12,6 @@ class _InspectorWindow
 public:
     _InspectorWindow(
         SimulationController const& simController,
-        Viewport const& viewport,
         EditorModel const& editorModel,
         GenomeEditorWindow const& genomeEditorWindow,
         uint64_t entityId,
@@ -57,7 +56,6 @@ private:
 
 private:
     SimulationController _simController;
-    Viewport _viewport; 
     EditorModel _editorModel;
     GenomeEditorWindow _genomeEditorWindow;
 

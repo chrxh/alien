@@ -17,8 +17,7 @@ using Shader = std::shared_ptr<_Shader>;
 class _SimulationScrollbar;
 using SimulationScrollbar = std::shared_ptr<_SimulationScrollbar>;
 
-class _Viewport;
-using Viewport = std::shared_ptr<_Viewport>;
+class Viewport;
 
 class StyleRepository;
 

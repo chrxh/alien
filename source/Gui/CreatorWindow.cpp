@@ -34,10 +34,9 @@ namespace
     auto const RightColumnWidth = 160.0f;
 }
 
-_CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport)
+_CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationController const& simController)
     : _AlienWindow("Creator", "editors.creator", false), _editorModel(editorModel)
     , _simController(simController)
-    , _viewport(viewport)
 {
 }
 
@@ -181,7 +180,7 @@ void _CreatorWindow::processIntern()
 void _CreatorWindow::onDrawing()
 {
     auto mousePos = ImGui::GetMousePos();
-    auto pos = _viewport->mapViewToWorldPosition({mousePos.x, mousePos.y});
+    auto pos = Viewport::mapViewToWorldPosition({mousePos.x, mousePos.y});
     if (!_drawingDataDescription.isEmpty()) {
         _simController->removeSelectedObjects(false);
     }
@@ -358,7 +357,7 @@ void _CreatorWindow::validationAndCorrection()
 
 RealVector2D _CreatorWindow::getRandomPos() const
 {
-    auto result = _viewport->getCenterInWorldPos();
+    auto result = Viewport::getCenterInWorldPos();
     result.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     result.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     return result;
