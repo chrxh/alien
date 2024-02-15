@@ -9,7 +9,7 @@
 class _SpatialControlWindow : public _AlienWindow
 {
 public:
-    _SpatialControlWindow(SimulationController const& simController, Viewport const& viewport, TemporalControlWindow const& temporalControlWindow);
+    _SpatialControlWindow(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow);
 
 private:
     void processIntern() override;
@@ -23,7 +23,6 @@ private:
     void processCenterOnSelection();
 
     SimulationController _simController;
-    Viewport _viewport;
     ResizeWorldDialog _resizeWorldDialog;
 
     bool _centerSelection = false;

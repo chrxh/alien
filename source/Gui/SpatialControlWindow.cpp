@@ -15,11 +15,9 @@
 
 _SpatialControlWindow::_SpatialControlWindow(
     SimulationController const& simController,
-    Viewport const& viewport,
     TemporalControlWindow const& temporalControlWindow)
     : _AlienWindow("Spatial control", "windows.spatial control", true)
     , _simController(simController)
-    , _viewport(viewport)
 {
     _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simController, temporalControlWindow);
 }
@@ -56,14 +54,14 @@ void _SpatialControlWindow::processIntern()
         ImGui::Text("Zoom factor");
         ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        ImGui::TextUnformatted(StringHelper::format(_viewport->getZoomFactor(), 2).c_str());
+        ImGui::TextUnformatted(StringHelper::format(Viewport::getZoomFactor(), 2).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
         ImGui::Text("Center position");
         ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        auto centerPos = _viewport->getCenterInWorldPos();
+        auto centerPos = Viewport::getCenterInWorldPos();
         ImGui::TextUnformatted(
             (StringHelper::format(centerPos.x, 1) + ", " + StringHelper::format(centerPos.y, 1)).c_str());
         ImGui::PopStyleColor();
@@ -73,9 +71,9 @@ void _SpatialControlWindow::processIntern()
         AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Autotracking on selection"), _centerSelection);
         ImGui::Spacing();
         ImGui::Spacing();
-        float sensitivity = _viewport->getZoomSensitivity();
+        float sensitivity = Viewport::getZoomSensitivity();
         if (AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Zoom sensitivity").min(1.0f).max(1.05f).textWidth(130).format(""), &sensitivity)) {
-            _viewport->setZoomSensitivity(sensitivity);
+            Viewport::setZoomSensitivity(sensitivity);
         }
     }
     ImGui::EndChild();
@@ -91,7 +89,7 @@ void _SpatialControlWindow::processBackground()
 void _SpatialControlWindow::processZoomInButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_SEARCH_PLUS)) {
-        _viewport->setZoomFactor(_viewport->getZoomFactor() * 2);
+        Viewport::setZoomFactor(Viewport::getZoomFactor() * 2);
     }
     AlienImGui::Tooltip("Zoom in");
 }
@@ -99,7 +97,7 @@ void _SpatialControlWindow::processZoomInButton()
 void _SpatialControlWindow::processZoomOutButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_SEARCH_MINUS)) {
-        _viewport->setZoomFactor(_viewport->getZoomFactor() / 2);
+        Viewport::setZoomFactor(Viewport::getZoomFactor() / 2);
     }
     AlienImGui::Tooltip("Zoom out");
 }
@@ -107,9 +105,9 @@ void _SpatialControlWindow::processZoomOutButton()
 void _SpatialControlWindow::processCenterButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_CROSSHAIRS)) {
-        _viewport->setZoomFactor(1.0f);
+        Viewport::setZoomFactor(1.0f);
         auto worldSize = toRealVector2D(_simController->getWorldSize());
-        _viewport->setCenterInWorldPos({worldSize.x / 2, worldSize.y / 2});
+        Viewport::setCenterInWorldPos({worldSize.x / 2, worldSize.y / 2});
     }
     AlienImGui::Tooltip("Center");
 }
@@ -127,7 +125,7 @@ void _SpatialControlWindow::processCenterOnSelection()
     if (_centerSelection && _simController->isSimulationRunning()) {
         auto shallowData = _simController->getSelectionShallowData();
         if (shallowData.numCells > 0 || shallowData.numParticles > 0) {
-            _viewport->setCenterInWorldPos({shallowData.centerPosX, shallowData.centerPosY});
+            Viewport::setCenterInWorldPos({shallowData.centerPosX, shallowData.centerPosY});
         }
     }
 }

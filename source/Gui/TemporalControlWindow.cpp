@@ -47,9 +47,9 @@ void _TemporalControlWindow::processIntern()
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
     ImGui::SameLine();
-    processSnapshotButton();
+    processCreateFlashbackButton();
     ImGui::SameLine();
-    processRestoreButton();
+    processLoadFlashbackButton();
 
     AlienImGui::Separator();
 
@@ -166,18 +166,18 @@ void _TemporalControlWindow::processStepForwardButton()
     ImGui::EndDisabled();
 }
 
-void _TemporalControlWindow::processSnapshotButton()
+void _TemporalControlWindow::processCreateFlashbackButton()
 {
     auto result = AlienImGui::ToolbarButton(ICON_FA_CAMERA);
     AlienImGui::Tooltip("Create flashback");
     if (result) {
         delayedExecution([this] { onSnapshot(); });
         
-        printOverlayMessage("Creating flashback ...");
+        printOverlayMessage("Creating flashback ...", true);
     }
 }
 
-void _TemporalControlWindow::processRestoreButton()
+void _TemporalControlWindow::processLoadFlashbackButton()
 {
     ImGui::BeginDisabled(!_snapshot);
     auto result = AlienImGui::ToolbarButton(ICON_FA_UNDO);
@@ -187,7 +187,7 @@ void _TemporalControlWindow::processRestoreButton()
         _simController->removeSelection();
         _history.clear();
 
-        printOverlayMessage("Loading flashback ...");
+        printOverlayMessage("Loading flashback ...", true);
     }
     ImGui::EndDisabled();
 }

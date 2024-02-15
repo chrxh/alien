@@ -40,7 +40,6 @@ namespace
 
 _InspectorWindow::_InspectorWindow(
     SimulationController const& simController,
-    Viewport const& viewport,
     EditorModel const& editorModel,
     GenomeEditorWindow const& genomeEditorWindow,
     uint64_t entityId,
@@ -48,7 +47,6 @@ _InspectorWindow::_InspectorWindow(
     bool selectGenomeTab)
     : _entityId(entityId)
     , _initialPos(initialPos)
-    , _viewport(viewport)
     , _editorModel(editorModel)
     , _simController(simController)
     , _genomeEditorWindow(genomeEditorWindow)
@@ -79,7 +77,7 @@ void _InspectorWindow::process()
             processParticle(std::get<ParticleDescription>(entity));
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
+        auto entityPos = Viewport::mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         auto factor = StyleRepository::getInstance().scale(1);
 
         drawList->AddLine(

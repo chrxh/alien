@@ -13,7 +13,6 @@ public:
     _SimulationView(
         SimulationController const& simController,
         ModeController const& modeWindow,
-        Viewport const& viewport,
         EditorModel const& editorModel);
     ~_SimulationView();
 
@@ -92,7 +91,6 @@ private:
     };
     std::optional<MouseWheelAction> _mouseWheelAction;
 
-    Viewport _viewport;
     ModeController _modeWindow;
     SimulationController _simController;
     EditorModel _editorModel;

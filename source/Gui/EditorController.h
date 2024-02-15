@@ -8,7 +8,7 @@
 class _EditorController
 {
 public:
-    _EditorController(SimulationController const& simController, Viewport const& viewport);
+    _EditorController(SimulationController const& simController);
 
     void registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
 
@@ -65,7 +65,6 @@ private:
     GenomeEditorWindow _genomeEditorWindow;
 
     SimulationController _simController;
-    Viewport _viewport;
 
     bool _on = false;
 

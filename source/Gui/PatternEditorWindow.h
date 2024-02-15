@@ -12,7 +12,6 @@ public:
     _PatternEditorWindow(
         EditorModel const& editorModel,
         SimulationController const& simController,
-        Viewport const& viewport,
         EditorControllerWeakPtr const& editorController);
     ~_PatternEditorWindow();
 
@@ -40,7 +39,6 @@ private:
 
     EditorModel _editorModel;
     SimulationController _simController;
-    Viewport _viewport;
     EditorControllerWeakPtr _editorController;
 
     std::string _startingPath;

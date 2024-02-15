@@ -25,13 +25,9 @@ namespace
     auto constexpr InitialLineDistance = 15.0f;
 }
 
-_StartupController::_StartupController(
-    SimulationController const& simController,
-    TemporalControlWindow const& temporalControlWindow,
-    Viewport const& viewport)
+_StartupController::_StartupController(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow)
     : _simController(simController)
     , _temporalControlWindow(temporalControlWindow)
-    , _viewport(viewport)
 {
     log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
@@ -68,8 +64,8 @@ void _StartupController::process()
             deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
         _simController->setClusteredSimulationData(deserializedSim.mainData);
         _simController->setStatisticsHistory(deserializedSim.statistics);
-        _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
-        _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
+        Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+        Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
         _temporalControlWindow->onSnapshot();
 
         _lastActivationTimepoint = std::chrono::steady_clock::now();
