@@ -47,7 +47,7 @@ __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data)
 __global__ void cudaRolloutSelectionStep(SimulationData data, int* result);
 __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData);
 __global__ void cudaResetSelectionResult(SelectionResult result);
-__global__ void cudaGetSelectionShallowData(SimulationData data, SelectionResult result);
-__global__ void cudaFinalizeSelectionResult(SelectionResult result);
+__global__ void cudaGetSelectionShallowData(SimulationData data, float2 refPos, SelectionResult result);
+__global__ void cudaFinalizeSelectionResult(SelectionResult result, BaseMap map);
 __global__ void cudaSetDetached(SimulationData data, bool value);
 __global__ void cudaApplyCataclysm(SimulationData data);

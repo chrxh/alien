@@ -278,9 +278,9 @@ void _SimulationControllerImpl::swapSelection(RealVector2D const& pos, float rad
     _worker.swapSelection(pos, radius);
 }
 
-SelectionShallowData _SimulationControllerImpl::getSelectionShallowData()
+SelectionShallowData _SimulationControllerImpl::getSelectionShallowData(RealVector2D const& refPos)
 {
-    return _worker.getSelectionShallowData();
+    return _worker.getSelectionShallowData(refPos);
 }
 
 void _SimulationControllerImpl::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData)

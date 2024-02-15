@@ -41,3 +41,10 @@ RealVector2D SpaceCalculator::getCorrectedPosition(RealVector2D const& pos) cons
     correctPosition(result);
     return result;
 }
+
+RealVector2D SpaceCalculator::getCorrectedDirection(RealVector2D const& pos) const
+{
+    auto result = pos + RealVector2D{_worldSizeFloat.x / 2, _worldSizeFloat.y / 2};
+    correctPosition(result);
+    return result - RealVector2D{_worldSizeFloat.x / 2, _worldSizeFloat.y / 2};
+}

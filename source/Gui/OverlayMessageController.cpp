@@ -30,6 +30,9 @@ void OverlayMessageController::process()
     if (duration.count() > ShowDuration + FadeoutTextDuration) {
         _show = false;
     }
+    if (_counter == 2) {
+        _ticksLaterTimePoint = std::chrono::steady_clock::now();
+    }
 
     float textAlpha = 1.0f;
     if (duration.count() > ShowDuration) {
@@ -50,8 +53,9 @@ void OverlayMessageController::process()
     fontSize.y *= fontScaling;
     ImGui::PopFont();
 
-    if (_withLightning) {
-        float lightningAlpha = std::max(0.0f, 0.7f - static_cast<float>(duration.count()) / FadeoutLightningDuration);
+    if (_withLightning && ++_counter > 2) {
+        auto durationAfterSomeTicks = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_ticksLaterTimePoint);
+        float lightningAlpha = std::max(0.0f, 0.7f - static_cast<float>(durationAfterSomeTicks.count()) / FadeoutLightningDuration);
         auto viewSize = toRealVector2D(Viewport::getViewSize());
         drawList->AddRectFilled({0, 0}, {viewSize.x, viewSize.y}, ImColor::HSV(0.0f, 0.0f, 1.0f, lightningAlpha));
     }
@@ -76,4 +80,5 @@ void OverlayMessageController::show(std::string const& message, bool withLightni
     _message = message;
     _startTimePoint = std::chrono::steady_clock::now();
     _withLightning = withLightning;
+    _counter = 0;
 }
