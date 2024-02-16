@@ -49,24 +49,34 @@ __device__ void SimulationData::prepareForNextTimestep()
     objects.saveNumEntries();
 }
 
+namespace
+{
+    void calcArraySizes(uint64_t& cellArraySizeResult, uint64_t& particleArraySizeResult, uint64_t desiredCellArraySize, uint64_t desiredParticleArraySize)
+    {
+        auto max = std::max(desiredCellArraySize, desiredParticleArraySize);
+        cellArraySizeResult =  desiredCellArraySize * 7 / 10 + max * 3 / 10;
+        particleArraySizeResult = desiredParticleArraySize * 7 / 10 + max * 3 / 10;
+    }
+}
+
 bool SimulationData::shouldResize(ArraySizes const& additionals)
 {
-    auto cellAndParticleArraySizeInc = std::max(additionals.cellArraySize, additionals.particleArraySize);
-    return objects.cells.shouldResize_host(cellAndParticleArraySizeInc)
-        || objects.cellPointers.shouldResize_host(cellAndParticleArraySizeInc * 10)
-        || objects.particles.shouldResize_host(cellAndParticleArraySizeInc)
-        || objects.particlePointers.shouldResize_host(cellAndParticleArraySizeInc * 10)
+    uint64_t cellArraySizeResult, particleArraySizeResult;
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, additionals.cellArraySize, additionals.particleArraySize);
+    return objects.cells.shouldResize_host(cellArraySizeResult) || objects.cellPointers.shouldResize_host(cellArraySizeResult * 5)
+        || objects.particles.shouldResize_host(particleArraySizeResult) || objects.particlePointers.shouldResize_host(particleArraySizeResult * 5)
         || objects.auxiliaryData.shouldResize_host(additionals.auxiliaryDataSize);
 }
 
 void SimulationData::resizeTargetObjects(ArraySizes const& additionals)
 {
-    auto cellAndParticleArraySizeInc = std::max(additionals.cellArraySize, additionals.particleArraySize);
+    uint64_t cellArraySizeResult, particleArraySizeResult;
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, additionals.cellArraySize, additionals.particleArraySize);
 
-    resizeTargetIntern(objects.cells, tempObjects.cells, cellAndParticleArraySizeInc);
-    resizeTargetIntern(objects.cellPointers, tempObjects.cellPointers, cellAndParticleArraySizeInc * 10);
-    resizeTargetIntern(objects.particles, tempObjects.particles, cellAndParticleArraySizeInc);
-    resizeTargetIntern(objects.particlePointers, tempObjects.particlePointers, cellAndParticleArraySizeInc * 10);
+    resizeTargetIntern(objects.cells, tempObjects.cells, cellArraySizeResult);
+    resizeTargetIntern(objects.cellPointers, tempObjects.cellPointers, cellArraySizeResult * 5);
+    resizeTargetIntern(objects.particles, tempObjects.particles, particleArraySizeResult);
+    resizeTargetIntern(objects.particlePointers, tempObjects.particlePointers, particleArraySizeResult * 5);
     resizeTargetIntern(objects.auxiliaryData, tempObjects.auxiliaryData, additionals.auxiliaryDataSize);
 }
 
@@ -112,7 +122,7 @@ void SimulationData::free()
 }
 
 template <typename Entity>
-void SimulationData::resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, int additionalEntities)
+void SimulationData::resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, uint64_t additionalEntities)
 {
     if (sourceArray.shouldResize_host(additionalEntities)) {
         auto newSize = (sourceArray.getSize_host() + additionalEntities) * 3;
