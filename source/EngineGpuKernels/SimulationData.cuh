@@ -51,5 +51,5 @@ struct SimulationData
 
 private:
     template <typename Entity>
-    void resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, int additionalEntities);
+    void resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, uint64_t additionalEntities);
 };
