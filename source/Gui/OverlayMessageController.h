@@ -14,9 +14,12 @@ public:
 
     void show(std::string const& message, bool withLightning = false);
 
+    void setOn(bool value);
+
 private:
     bool _show = false;
     bool _withLightning = false;
+    bool _on = true;
     std::string _message;
     int _counter = 0;
 

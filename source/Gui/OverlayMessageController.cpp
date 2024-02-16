@@ -22,7 +22,7 @@ OverlayMessageController& OverlayMessageController::getInstance()
 
 void OverlayMessageController::process()
 {
-    if (!_show) {
+    if (!_show || !_on) {
         return;
     }
     auto now= std::chrono::steady_clock::now();
@@ -81,4 +81,9 @@ void OverlayMessageController::show(std::string const& message, bool withLightni
     _startTimePoint = std::chrono::steady_clock::now();
     _withLightning = withLightning;
     _counter = 0;
+}
+
+void OverlayMessageController::setOn(bool value)
+{
+    _on = value;
 }
