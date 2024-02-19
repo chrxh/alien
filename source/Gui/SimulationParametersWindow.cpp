@@ -293,9 +293,9 @@ void _SimulationParametersWindow::processBase(
                 AlienImGui::CheckboxParameters()
                     .name("Grid lines")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.markReferenceDomain)
+                    .defaultValue(origParameters.gridLines)
                     .tooltip("Draws a suitable grid in the background depending on the zoom level."),
-                parameters.markReferenceDomain);
+                parameters.gridLines);
             AlienImGui::EndTreeNode();
         }
 
