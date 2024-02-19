@@ -249,7 +249,7 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numNeuronActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Neuron activities");
+        AlienImGui::Text("Neural activities");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
