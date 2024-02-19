@@ -289,6 +289,13 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origParameters.markReferenceDomain)
                     .tooltip("Draws borders along the world before it repeats itself."),
                 parameters.markReferenceDomain);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Grid lines")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origParameters.markReferenceDomain)
+                    .tooltip("Draws a suitable grid in the background depending on the zoom level."),
+                parameters.markReferenceDomain);
             AlienImGui::EndTreeNode();
         }
 

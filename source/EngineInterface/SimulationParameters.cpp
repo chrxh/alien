@@ -165,12 +165,12 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         }
     }
 
-    return backgroundColor == other.backgroundColor && cellColoring == other.cellColoring
-        && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity && baseValues == other.baseValues
-        && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity && cellMaxBindingDistance == other.cellMaxBindingDistance
-        && cellMinDistance == other.cellMinDistance && cellMaxForceDecayProb == other.cellMaxForceDecayProb
-        && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers && radiationProb == other.radiationProb
-        && radiationVelocityMultiplier == other.radiationVelocityMultiplier && radiationVelocityPerturbation == other.radiationVelocityPerturbation
+    return backgroundColor == other.backgroundColor && cellColoring == other.cellColoring && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity
+        && baseValues == other.baseValues && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity
+        && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
+        && cellMaxForceDecayProb == other.cellMaxForceDecayProb && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers
+        && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
+        && radiationVelocityPerturbation == other.radiationVelocityPerturbation
         && cellFunctionAttackerActivityThreshold == other.cellFunctionAttackerActivityThreshold
         && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
         && cellFunctionTransmitterEnergyDistributionSameCreature == other.cellFunctionTransmitterEnergyDistributionSameCreature
@@ -186,7 +186,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellFunctionAttackerDestroyCells == other.cellFunctionAttackerDestroyCells
         && cellFunctionReconnectorActivityThreshold == other.cellFunctionReconnectorActivityThreshold
         && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold && features == other.features
-        && highlightedCellFunction == other.highlightedCellFunction
-        && borderlessRendering == other.borderlessRendering
-        && markReferenceDomain == other.markReferenceDomain;
+        && highlightedCellFunction == other.highlightedCellFunction && borderlessRendering == other.borderlessRendering
+        && markReferenceDomain == other.markReferenceDomain && gridLines == other.gridLines;
+    ;
 }

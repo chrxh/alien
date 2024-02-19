@@ -287,6 +287,11 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
     }
 
     auto const partition = calcAllThreadsPartition(imageSize.x * imageSize.y);
+    auto const viewWidth = max(1.0f, rectLowerRight.x - rectUpperLeft.x);
+    auto const PixelInWorldSize = viewWidth / toFloat(worldSize.x);
+    auto const gridDistance = powf(10.0f, truncf(log10f(viewWidth))) / 10.0f;
+    auto const maxGridDistance = viewWidth / 10;
+    auto const gridRemainder = (maxGridDistance - gridDistance) / maxGridDistance;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto x = index % imageSize.x;
         auto y = index / imageSize.x;
@@ -297,6 +302,37 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
         } else {
             auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors);
             drawPixel(imageData, index, color);
+        }
+
+        if (cudaSimulationParameters.gridLines) {
+            {
+                auto distanceX = Math::modulo(worldPos.x + gridDistance / 2, gridDistance) - gridDistance / 2;
+                auto distanceY = Math::modulo(worldPos.y + gridDistance / 2, gridDistance) - gridDistance / 2;
+                if (abs(distanceX) <= PixelInWorldSize * 8) {
+
+                    auto viewDistance = max(0.0f, 0.1f - abs(distanceX) * zoom / 10) * gridRemainder * 0.7f;
+                    drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
+                }
+                if (abs(distanceY) <= PixelInWorldSize * 8) {
+
+                    auto viewDistance = max(0.0f, 0.1f - abs(distanceY) * zoom / 10) * gridRemainder * 0.7f;
+                    drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
+                }
+            }
+            {
+                auto distanceX = Math::modulo(worldPos.x + gridDistance / 20, gridDistance / 10) - gridDistance / 20;
+                auto distanceY = Math::modulo(worldPos.y + gridDistance / 20, gridDistance / 10) - gridDistance / 20;
+                if (abs(distanceX) <= PixelInWorldSize * 8) {
+
+                    auto viewDistance = max(0.0f, 0.1f - abs(distanceX) * zoom / 10) * (1.0f - gridRemainder) * 0.7f;
+                    drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
+                }
+                if (abs(distanceY) <= PixelInWorldSize * 8) {
+
+                    auto viewDistance = max(0.0f, 0.1f - abs(distanceY) * zoom / 10) * (1.0f - gridRemainder) * 0.7f;
+                    drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
+                }
+            }
         }
     }
 }
