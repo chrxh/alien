@@ -284,18 +284,18 @@ void _SimulationParametersWindow::processBase(
                 parameters.borderlessRendering);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Mark reference domain")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.markReferenceDomain)
-                    .tooltip("Draws borders along the world before it repeats itself."),
-                parameters.markReferenceDomain);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
                     .name("Adaptive space grid")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origParameters.gridLines)
                     .tooltip("Draws a suitable grid in the background depending on the zoom level."),
                 parameters.gridLines);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Mark reference domain")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origParameters.markReferenceDomain)
+                    .tooltip("Draws borders along the world before it repeats itself."),
+                parameters.markReferenceDomain);
             AlienImGui::EndTreeNode();
         }
 
