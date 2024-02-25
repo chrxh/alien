@@ -291,7 +291,7 @@ void _SimulationParametersWindow::processBase(
                 parameters.markReferenceDomain);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Grid lines")
+                    .name("Adaptive space grid")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origParameters.gridLines)
                     .tooltip("Draws a suitable grid in the background depending on the zoom level."),
