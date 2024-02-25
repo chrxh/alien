@@ -228,6 +228,7 @@ void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
         }
     }
     _simController->setCurrentTimestep(snapshot.timestep);
+    _simController->clear();
     _simController->setSimulationData(snapshot.data);
     _simController->setSimulationParameters(parameters);
 }
