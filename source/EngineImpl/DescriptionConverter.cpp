@@ -38,8 +38,8 @@ namespace
         }
     }
 
-    template<typename Container>
-    void convert(DataTO const& dataTO, Container const& source, int& targetSize, uint64_t& targetIndex)
+    template<typename Container, typename SizeType>
+    void convert(DataTO const& dataTO, Container const& source, SizeType& targetSize, uint64_t& targetIndex)
     {
         targetSize = source.size();
         if (targetSize > 0) {
@@ -394,7 +394,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.barrier = cellTO.barrier;
     result.age = cellTO.age;
     result.color = cellTO.color;
-    result.genomeNumNodes = cellTO.genomeNumNodes;
+    result.genomeComplexity = cellTO.genomeComplexity;
 
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
@@ -430,10 +430,11 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
         constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
+        constructor.numInheritedGenomeNodes = cellTO.cellFunctionData.constructor.numInheritedGenomeNodes;
         constructor.lastConstructedCellId = cellTO.cellFunctionData.constructor.lastConstructedCellId;
         constructor.genomeCurrentNodeIndex = cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex;
         constructor.genomeCurrentRepetition = cellTO.cellFunctionData.constructor.genomeCurrentRepetition;
-        constructor.isConstructionBuilt = cellTO.cellFunctionData.constructor.isConstructionBuilt;
+        constructor.stateFlags = cellTO.cellFunctionData.constructor.stateFlags;
         constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
         constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
         constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
@@ -574,10 +575,11 @@ void DescriptionConverter::addCell(
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
         CHECK(constructorDesc.genome.size() >= Const::GenomeHeaderSize)
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
+        constructorTO.numInheritedGenomeNodes = static_cast<uint16_t>(constructorDesc.numInheritedGenomeNodes);
         constructorTO.lastConstructedCellId = constructorDesc.lastConstructedCellId;
-        constructorTO.genomeCurrentNodeIndex = constructorDesc.genomeCurrentNodeIndex;
-        constructorTO.genomeCurrentRepetition = constructorDesc.genomeCurrentRepetition;
-        constructorTO.isConstructionBuilt = constructorDesc.isConstructionBuilt;
+        constructorTO.genomeCurrentNodeIndex = static_cast<uint16_t>(constructorDesc.genomeCurrentNodeIndex);
+        constructorTO.genomeCurrentRepetition = static_cast<uint16_t>(constructorDesc.genomeCurrentRepetition);
+        constructorTO.stateFlags = constructorDesc.stateFlags;
         constructorTO.offspringCreatureId = constructorDesc.offspringCreatureId;
         constructorTO.offspringMutationId = constructorDesc.offspringMutationId;
         constructorTO.genomeGeneration = constructorDesc.genomeGeneration;
@@ -658,7 +660,7 @@ void DescriptionConverter::addCell(
     cellTO.barrier = cellDesc.barrier;
     cellTO.age = cellDesc.age;
     cellTO.color = cellDesc.color;
-    cellTO.genomeNumNodes = cellDesc.genomeNumNodes;
+    cellTO.genomeComplexity = cellDesc.genomeComplexity;
     convert(dataTO, cellDesc.metadata.name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
     convert(dataTO, cellDesc.metadata.description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);

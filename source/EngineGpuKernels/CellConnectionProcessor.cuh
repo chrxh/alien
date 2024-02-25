@@ -174,7 +174,7 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(
 
 __inline__ __device__ void CellConnectionProcessor::processDeleteConnectionOperations(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.objects.cellPointers.getNumOrigEntries());
+    auto partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = data.objects.cellPointers.at(index);
@@ -185,7 +185,7 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteConnectionOpera
         if (scheduledOperationIndex != -1) {
             for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
 
-                //#TODO should actually never occur
+                //#TODO check if following `if` can be removed because the condition should never be true
                 if (scheduledOperationIndex < 0 || scheduledOperationIndex >= data.structuralOperations.getNumEntries()) {
                     break;
                 }
@@ -194,9 +194,8 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteConnectionOpera
                 case StructuralOperation::Type::DelConnection: {
                     deleteConnectionOneWay(cell, operation.data.delConnection.connectedCell);
                 } break;
-                case StructuralOperation::Type::DelAllConnections: {
-                    cell->numConnections = 0;
-                } break;
+                default:
+                    break;
                 }
                 scheduledOperationIndex = operation.nextOperationIndex;
                 if (scheduledOperationIndex == -1) {

@@ -102,11 +102,30 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                     if (particle->tryLock()) {
 
                         auto energyToTransfer = particle->energy * radiationAbsorption;
-                        energyToTransfer *= max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionVelocityPenalty[cell->color]);
-                        energyToTransfer *= powf(toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty[cell->color]);
+                        if (cudaSimulationParameters.features.advancedAbsorptionControl) {
+                            energyToTransfer *=
+                                max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty[cell->color]);
 
+                            auto radiationAbsorptionLowVelocityPenalty = SpotCalculator::calcParameter(
+                                &SimulationParametersSpotValues::radiationAbsorptionLowVelocityPenalty,
+                                &SimulationParametersSpotActivatedValues::radiationAbsorptionLowVelocityPenalty,
+                                data,
+                                cell->pos,
+                                cell->color);
+                            energyToTransfer *= 1.0f - radiationAbsorptionLowVelocityPenalty / powf(1.0f + Math::length(cell->vel), 10.0f);
+                            energyToTransfer *=
+                                powf(toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty[cell->color]);
 
-                        if (particle->energy < 1) {
+                            auto radiationAbsorptionLowGenomeComplexityPenalty = SpotCalculator::calcParameter(
+                                &SimulationParametersSpotValues::radiationAbsorptionLowGenomeComplexityPenalty,
+                                &SimulationParametersSpotActivatedValues::radiationAbsorptionLowGenomeComplexityPenalty,
+                                data,
+                                cell->pos,
+                                cell->color);
+                            energyToTransfer *= 1.0f - radiationAbsorptionLowGenomeComplexityPenalty / powf(1.0f + toFloat(cell->genomeComplexity), 0.1f);
+                        }
+
+                        if (particle->energy < 0.01f/* && energyToTransfer > 0.1f*/) {
                             energyToTransfer = particle->energy;
                         }
                         cell->energy += energyToTransfer;

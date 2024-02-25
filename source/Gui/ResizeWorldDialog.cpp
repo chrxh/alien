@@ -6,10 +6,12 @@
 #include "EngineInterface/SimulationController.h"
 
 #include "AlienImGui.h"
+#include "TemporalControlWindow.h"
 
-_ResizeWorldDialog::_ResizeWorldDialog(SimulationController const& simController)
+_ResizeWorldDialog::_ResizeWorldDialog(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow)
     : _AlienDialog("Resize world")
     , _simController(simController)
+    , _temporalControlWindow(temporalControlWindow)
 {}
 
 void _ResizeWorldDialog::open()
@@ -74,7 +76,7 @@ void _ResizeWorldDialog::onResizing()
     auto generalSettings = _simController->getGeneralSettings();
     auto parameters = _simController->getSimulationParameters();
     auto content = _simController->getClusteredSimulationData();
-
+    auto const& statistics = _simController->getStatisticsHistory().getCopiedData();
     _simController->closeSimulation();
 
     IntVector2D origWorldSize{generalSettings.worldSizeX, generalSettings.worldSizeY};
@@ -88,4 +90,6 @@ void _ResizeWorldDialog::onResizing()
         DescriptionEditService::duplicate(content, origWorldSize, {_width, _height});
     }
     _simController->setClusteredSimulationData(content);
+    _simController->setStatisticsHistory(statistics);
+    _temporalControlWindow->onSnapshot();
 }

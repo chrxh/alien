@@ -2,8 +2,9 @@
 
 namespace
 {
+    template <typename T>
     __device__ void
-    copyAuxiliaryData(int sourceSize, uint8_t* source, int& targetSize, uint64_t& targetIndex, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
+    copyAuxiliaryData(T sourceSize, uint8_t* source, T& targetSize, uint64_t& targetIndex, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
     {
         targetSize = sourceSize;
         if (sourceSize > 0) {
@@ -31,7 +32,7 @@ namespace
         cellTO.livingState = cell->livingState;
         cellTO.creatureId = cell->creatureId;
         cellTO.mutationId = cell->mutationId;
-        cellTO.genomeNumNodes = cell->genomeNumNodes;
+        cellTO.genomeComplexity = cell->genomeComplexity;
         cellTO.inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
         cellTO.outputBlocked = cell->outputBlocked;
         cellTO.cellFunction = cell->cellFunction;
@@ -68,7 +69,7 @@ namespace
         switch (cell->cellFunction) {
         case CellFunction_Neuron: {
             int targetSize;    //not used
-            copyAuxiliaryData(
+            copyAuxiliaryData<int>(
                 sizeof(NeuronFunction::NeuronState),
                 reinterpret_cast<uint8_t*>(cell->cellFunctionData.neuron.neuronState),
                 targetSize,
@@ -92,10 +93,11 @@ namespace
                 cellTO.cellFunctionData.constructor.genomeDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
+            cellTO.cellFunctionData.constructor.numInheritedGenomeNodes = cell->cellFunctionData.constructor.numInheritedGenomeNodes;
             cellTO.cellFunctionData.constructor.lastConstructedCellId = cell->cellFunctionData.constructor.lastConstructedCellId;
             cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex = cell->cellFunctionData.constructor.genomeCurrentNodeIndex;
             cellTO.cellFunctionData.constructor.genomeCurrentRepetition = cell->cellFunctionData.constructor.genomeCurrentRepetition;
-            cellTO.cellFunctionData.constructor.isConstructionBuilt = cell->cellFunctionData.constructor.isConstructionBuilt;
+            cellTO.cellFunctionData.constructor.stateFlags = cell->cellFunctionData.constructor.stateFlags;
             cellTO.cellFunctionData.constructor.offspringCreatureId = cell->cellFunctionData.constructor.offspringCreatureId;
             cellTO.cellFunctionData.constructor.offspringMutationId = cell->cellFunctionData.constructor.offspringMutationId;
             cellTO.cellFunctionData.constructor.genomeGeneration = cell->cellFunctionData.constructor.genomeGeneration;
@@ -256,11 +258,13 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cell = cells.at(index);
 
-            auto pos = cell->pos;
-            data.cellMap.correctPosition(pos);
-            if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
+            if (!Math::isInBetweenModulo(toFloat(rectUpperLeft.x), toFloat(rectLowerRight.x), cell->pos.x, toFloat(data.worldSize.x))) {
                 continue;
             }
+            if (!Math::isInBetweenModulo(toFloat(rectUpperLeft.y), toFloat(rectLowerRight.y), cell->pos.y, toFloat(data.worldSize.y))) {
+                continue;
+            }
+
             auto cellTOIndex = alienAtomicAdd64(dataTO.numCells, uint64_t(1));
             auto& cellTO = dataTO.cells[cellTOIndex];
 

@@ -8,7 +8,7 @@
 class _StartupController
 {
 public:
-    _StartupController(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow, Viewport const& viewport);
+    _StartupController(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow);
 
     void process();
     enum class State
@@ -30,7 +30,6 @@ private:
 
     SimulationController _simController;
     TemporalControlWindow _temporalControlWindow;
-    Viewport _viewport;
 
     State _state = State::Unintialized;
     TextureData _logo;

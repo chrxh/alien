@@ -18,9 +18,8 @@
 #include "GenericFileDialogs.h"
 
 
-_ImageToPatternDialog::_ImageToPatternDialog(Viewport const& viewport, SimulationController const& simController)
-    : _viewport(viewport)
-    , _simController(simController)
+_ImageToPatternDialog::_ImageToPatternDialog(SimulationController const& simController)
+    : _simController(simController)
 {
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
@@ -113,7 +112,7 @@ void _ImageToPatternDialog::show()
         }
 
         DescriptionEditService::reconnectCells(dataDesc, 1 * 1.5f);
-        dataDesc.setCenter(_viewport->getCenterInWorldPos());
+        dataDesc.setCenter(Viewport::getCenterInWorldPos());
 
         _simController->addAndSelectSimulationData(dataDesc);
         //TODO: update pattern editor

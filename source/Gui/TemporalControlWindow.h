@@ -32,8 +32,8 @@ private:
     void processPauseButton();
     void processStepBackwardButton();
     void processStepForwardButton();
-    void processSnapshotButton();
-    void processRestoreButton();
+    void processCreateFlashbackButton();
+    void processLoadFlashbackButton();
 
     Snapshot createSnapshot();
     void applySnapshot(Snapshot const& snapshot);

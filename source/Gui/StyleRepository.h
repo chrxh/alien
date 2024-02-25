@@ -8,6 +8,10 @@
 
 namespace Const
 {
+    float const WindowAlpha = 0.9f;
+    float const SliderBarWidth = 30.0f;
+    float const WindowsRounding = 10.0f;
+
     ImColor const ProgramVersionTextColor = ImColor::HSV(0.5f, 0.1f, 1.0f, 1.0f);
 
     ImColor const RenderingDisabledTextColor = ImColor::HSV(0.5f, 0.1f, 1.0f, 0.2f);
@@ -23,19 +27,25 @@ namespace Const
     ImColor const HeaderActiveColor = ImColor::HSV(0.58f, 0.7f, 0.5f);
     ImColor const HeaderHoveredColor = ImColor::HSV(0.58f, 0.7f, 0.4f);
 
-
     ImColor const MenuButtonColor = ImColor::HSV(0.6f, 0.6f, 0.5f);
     ImColor const MenuButtonHoveredColor = ImColor::HSV(0.6f, 1.0f, 1.0f);
     ImColor const MenuButtonActiveColor = ImColor::HSV(0.6f, 0.8f, 0.7f);
 
-    ImColor const ShutdownButtonColor = ImColor::HSV(0.0f, 0.6f, 0.6f);
-    ImColor const ShutdownButtonHoveredColor = ImColor::HSV(0.0f, 1.0f, 1.0f);
-    ImColor const ShutdownButtonActiveColor = ImColor::HSV(0.0f, 1.0f, 1.0f);
+    ImColor const ImportantButtonColor = ImColor::HSV(0.0f, 0.6f, 0.6f);
+    ImColor const ImportantButtonHoveredColor = ImColor::HSV(0.0f, 0.6f, 0.8f);
+    ImColor const ImportantButtonActiveColor = ImColor::HSV(0.0f, 0.6f, 1.0f);
 
     ImColor const ToggleButtonColor = ImColor::HSV(0.0f, 0.0f, 0.2f);
     ImColor const ToggleButtonHoveredColor = ImColor::HSV(0.14, 0.8, 0.5);
     ImColor const ToggleButtonActiveColor = ImColor::HSV(0.14, 0.8, 0.7);
     ImColor const ToggleButtonActiveHoveredColor = ImColor::HSV(0.14, 0.8, 0.8);
+
+    ImColor const TreeNodeColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
+    ImColor const TreeNodeHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
+    ImColor const TreeNodeActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
+    ImColor const TreeNodeHighlightedColor = ImColor::HSV(0.3f, 0.4f, 0.45f);
+    ImColor const TreeNodeHighlightedHoveredColor = ImColor::HSV(0.3f, 0.4f, 0.55f);
+    ImColor const TreeNodeHighlightedActiveColor = ImColor::HSV(0.3f, 0.4f, 0.65f);
 
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 
@@ -89,10 +99,6 @@ namespace Const
     ImColor const BrowserVersionOkTextColor = ImColor::HSV(0.58f, 0.2f, 1.0f);
     ImColor const BrowserVersionOutdatedTextColor = ImColor::HSV(0.0f, 0.0f, 0.6f);
     ImColor const BrowserVersionNewerTextColor = ImColor::HSV(0.0f, 0.2f, 1.0f);
-
-    float const WindowAlpha = 0.9f;
-    float const SliderBarWidth = 30.0f;
-    float const WindowsRounding = 10.0f;
 }
 
 class StyleRepository

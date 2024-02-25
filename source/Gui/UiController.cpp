@@ -3,6 +3,7 @@
 #include <imgui.h>
 
 #include "Base/Definitions.h"
+#include "OverlayMessageController.h"
 
 namespace
 {
@@ -26,6 +27,7 @@ void _UiController::setOn(bool value)
         _lastChangeTimePoint = std::chrono::steady_clock::now() - std::chrono::milliseconds(FadeInOutDuration - duration);
     }
     _on = value;
+    OverlayMessageController::getInstance().setOn(value);
 }
 
 void _UiController::process()

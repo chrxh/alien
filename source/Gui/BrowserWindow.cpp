@@ -59,13 +59,11 @@ namespace
 _BrowserWindow::_BrowserWindow(
     SimulationController const& simController,
     StatisticsWindow const& statisticsWindow,
-    Viewport const& viewport,
     TemporalControlWindow const& temporalControlWindow,
     EditorController const& editorController)
     : _AlienWindow("Browser", "windows.browser", true)
     , _simController(simController)
     , _statisticsWindow(statisticsWindow)
-    , _viewport(viewport)
     , _temporalControlWindow(temporalControlWindow)
     , _editorController(editorController)
 {
@@ -1238,8 +1236,8 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
                     deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
             }
 
-            _viewport->setCenterInWorldPos(deserializedSim.auxiliaryData.center);
-            _viewport->setZoomFactor(deserializedSim.auxiliaryData.zoom);
+            Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+            Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
             _temporalControlWindow->onSnapshot();
 
         } else {

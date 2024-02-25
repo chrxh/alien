@@ -13,11 +13,7 @@ public:
         Horizontal,
         Vertical
     };
-    _SimulationScrollbar(
-        std::string const& id,
-        Orientation orientation,
-        SimulationController const& simController,
-        Viewport const& viewport);
+    _SimulationScrollbar(std::string const& id, Orientation orientation, SimulationController const& simController);
 
     void process(RealRect const& rect);
 
@@ -29,7 +25,6 @@ private:
     std::string _id;
     Orientation _orientation = Orientation::Horizontal;
     SimulationController _simController;
-    Viewport _viewport;
 
     std::optional<RealVector2D> _worldCenterForDragging;
 };

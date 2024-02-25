@@ -7,7 +7,9 @@
 
 #include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
+#include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SpaceCalculator.h"
 
 #include "AlienImGui.h"
 #include "Shader.h"
@@ -17,7 +19,6 @@
 #include "StyleRepository.h"
 #include "CellFunctionStrings.h"
 #include "EditorModel.h"
-#include "EngineInterface/Colors.h"
 
 namespace
 {
@@ -30,10 +31,8 @@ namespace
 _SimulationView::_SimulationView(
     SimulationController const& simController,
     ModeController const& modeWindow,
-    Viewport const& viewport,
     EditorModel const& editorModel)
-    : _viewport(viewport)
-    , _editorModel(editorModel)
+    : _editorModel(editorModel)
 {
     _isCellDetailOverlayActive = GlobalSettings::getInstance().getBoolState("settings.simulation view.overlay", _isCellDetailOverlayActive);
     _modeWindow = modeWindow;
@@ -42,9 +41,9 @@ _SimulationView::_SimulationView(
     _shader = std::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
 
     _scrollbarX = std::make_shared<_SimulationScrollbar>(
-        "SimScrollbarX", _SimulationScrollbar ::Orientation::Horizontal, _simController, _viewport);
+        "SimScrollbarX", _SimulationScrollbar ::Orientation::Horizontal, _simController);
     _scrollbarY = std::make_shared<_SimulationScrollbar>(
-        "SimScrollbarY", _SimulationScrollbar::Orientation::Vertical, _simController, _viewport);
+        "SimScrollbarY", _SimulationScrollbar::Orientation::Vertical, _simController);
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -83,7 +82,7 @@ _SimulationView::_SimulationView(
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    resize(_viewport->getViewSize());
+    resize(Viewport::getViewSize());
 
     _shader->use();
     _shader->setInt("texture1", 0);
@@ -146,7 +145,7 @@ void _SimulationView::resize(IntVector2D const& size)
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId2, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);  
 
-    _viewport->setViewSize(size);
+    Viewport::setViewSize(size);
 }
 
 void _SimulationView::leftMouseButtonPressed(IntVector2D const& viewPos)
@@ -159,7 +158,7 @@ void _SimulationView::leftMouseButtonPressed(IntVector2D const& viewPos)
 void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
 {
     if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
-        _viewport->zoom(viewPos, calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
+        Viewport::zoom(viewPos, calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
     }
 }
 
@@ -185,7 +184,7 @@ void _SimulationView::rightMouseButtonPressed()
 void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
 {
     if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
-        _viewport->zoom(viewPos, 1.0f / calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
+        Viewport::zoom(viewPos, 1.0f / calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
     }
 }
 
@@ -207,7 +206,7 @@ void _SimulationView::processMouseWheel(IntVector2D const& viewPos)
         auto zoomFactor = powf(calcZoomFactor(_mouseWheelAction->lastTime), 2.2f * _mouseWheelAction->strongness);
         auto now = std::chrono::steady_clock::now();
         _mouseWheelAction->lastTime = now;
-        _viewport->zoom(viewPos, _mouseWheelAction->up ? zoomFactor : 1.0f / zoomFactor);
+        Viewport::zoom(viewPos, _mouseWheelAction->up ? zoomFactor : 1.0f / zoomFactor);
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - _mouseWheelAction->start).count() > 100) {
             _mouseWheelAction.reset();
         }
@@ -216,12 +215,12 @@ void _SimulationView::processMouseWheel(IntVector2D const& viewPos)
 
 void _SimulationView::middleMouseButtonPressed(IntVector2D const& viewPos)
 {
-    _worldPosForMovement = _viewport->mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
+    _worldPosForMovement = Viewport::mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
 }
 
 void _SimulationView::middleMouseButtonHold(IntVector2D const& viewPos)
 {
-    _viewport->centerTo(*_worldPosForMovement, viewPos);
+    Viewport::centerTo(*_worldPosForMovement, viewPos);
 }
 
 void _SimulationView::middleMouseButtonReleased()
@@ -314,15 +313,9 @@ void _SimulationView::draw(bool renderSimulation)
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto p1 = _viewport->mapWorldToViewPosition({0, 0});
-        auto worldSize = _simController->getWorldSize();
-        auto p2 = _viewport->mapWorldToViewPosition(toRealVector2D(worldSize));
-        auto color = ImColor::HSV(0.66f, 1.0f, 1.0f, 0.8f);
-        drawList->AddLine({p1.x, p1.y}, {p2.x, p1.y}, color);
-        drawList->AddLine({p2.x, p1.y}, {p2.x, p2.y}, color);
-        drawList->AddLine({p2.x, p2.y}, {p1.x, p2.y}, color);
-        drawList->AddLine({p1.x, p2.y}, {p1.x, p1.y}, color);
+        if (_simController->getSimulationParameters().markReferenceDomain) {
+            markReferenceDomain();
+        }
 
     } else {
         glClearColor(0, 0, 0.0f, 1.0f);
@@ -362,7 +355,7 @@ void _SimulationView::processControls(bool renderSimulation)
 {
     if (renderSimulation) {
         ImGuiViewport* viewport = ImGui::GetMainViewport();
-        auto mainMenubarHeight = StyleRepository::getInstance().scale(22);
+        auto mainMenubarHeight = scale(22);
         auto scrollbarThickness = 17;  //fixed
         _scrollbarX->process({{viewport->Pos.x, viewport->Size.y - scrollbarThickness}, {viewport->Size.x - 1 - scrollbarThickness, 1}});
         _scrollbarY->process({{viewport->Size.x - scrollbarThickness, viewport->Pos.y + mainMenubarHeight}, {1, viewport->Size.y - 1 - scrollbarThickness}});
@@ -397,9 +390,10 @@ void _SimulationView::setMotionBlur(float value)
 
 void _SimulationView::updateImageFromSimulation()
 {
-    auto worldRect = _viewport->getVisibleWorldRect();
-    auto viewSize = _viewport->getViewSize();
-    auto zoomFactor = _viewport->getZoomFactor();
+    auto worldRect = Viewport::getVisibleWorldRect();
+    auto viewSize = Viewport::getViewSize();
+    auto zoomFactor = Viewport::getZoomFactor();
+    auto worldSize = _simController->getWorldSize();
 
     if (zoomFactor >= ZoomFactorForOverlay) {
         auto overlay = _simController->tryDrawVectorGraphicsAndReturnOverlay(
@@ -416,13 +410,15 @@ void _SimulationView::updateImageFromSimulation()
         _overlay = std::nullopt;
     }
 
+    //draw overlay
     if (_overlay) {
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+        auto borderlessRendering = _simController->getSimulationParameters().borderlessRendering;
         for (auto const& overlayElement : _overlay->elements) {
             if (_isCellDetailOverlayActive && overlayElement.cell) {
                 {
-                    auto fontSize = std::min(40.0f, _viewport->getZoomFactor()) / 2;
-                    auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f});
+                    auto fontSize = std::min(40.0f, Viewport::getZoomFactor()) / 2;
+                    auto viewPos = Viewport::mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f}, borderlessRendering);
                     if (overlayElement.cellType != CellFunction_None) {
                         auto text = Const::CellFunctionToStringMap.at(overlayElement.cellType);
                         drawList->AddText(
@@ -440,8 +436,8 @@ void _SimulationView::updateImageFromSimulation()
                     }
                 }
                 {
-                    auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f});
-                    auto fontSize = _viewport->getZoomFactor() / 2;
+                    auto viewPos = Viewport::mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f}, borderlessRendering);
+                    auto fontSize = Viewport::getZoomFactor() / 2;
                     drawList->AddText(
                         StyleRepository::getInstance().getLargeFont(),
                         fontSize,
@@ -458,9 +454,9 @@ void _SimulationView::updateImageFromSimulation()
             }
 
             if (overlayElement.selected == 1) {
-                auto viewPos = _viewport->mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y});
-                if (_viewport->isVisible(viewPos)) {
-                    drawList->AddCircle({viewPos.x, viewPos.y}, _viewport->getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
+                auto viewPos = Viewport::mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, borderlessRendering);
+                if (Viewport::isVisible(viewPos)) {
+                    drawList->AddCircle({viewPos.x, viewPos.y}, Viewport::getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
                 }
             }
         }
@@ -483,16 +479,39 @@ void _SimulationView::drawEditCursor()
     if (_modeWindow->getMode() == _ModeController::Mode::Editor) {
         auto mousePos = ImGui::GetMousePos();
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+        auto zoom = Viewport::getZoomFactor();
         if (!_editorModel->isDrawMode() || _simController->isSimulationRunning()) {
-            drawList->AddCircleFilled(mousePos, EditCursorRadius, Const::NavigationCursorColor);
+            auto cursorSize = scale(EditCursorRadius);
+            drawList->AddRectFilled(
+                {mousePos.x - cursorSize / 5, mousePos.y - cursorSize}, {mousePos.x + cursorSize / 5, mousePos.y + cursorSize},
+                Const::NavigationCursorColor);
+            drawList->AddRectFilled(
+                {mousePos.x - cursorSize, mousePos.y - cursorSize / 5}, {mousePos.x + cursorSize, mousePos.y + cursorSize / 5},
+                Const::NavigationCursorColor);
         } else {
-            auto radius = _editorModel->getPencilWidth() * _viewport->getZoomFactor();
+            auto radius = _editorModel->getPencilWidth() * zoom;
             auto color = Const::IndividualCellColors[_editorModel->getDefaultColorCode()];
             float h, s, v;
             AlienImGui::ConvertRGBtoHSV(color, h, s, v);
             drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));
         }
+        if (!ImGui::GetIO().WantCaptureMouse) {
+            ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+        }
     }
+}
+
+void _SimulationView::markReferenceDomain()
+{
+    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+    auto p1 = Viewport::mapWorldToViewPosition({0, 0}, false);
+    auto worldSize = _simController->getWorldSize();
+    auto p2 = Viewport::mapWorldToViewPosition(toRealVector2D(worldSize), false);
+    auto color = ImColor::HSV(0.66f, 1.0f, 1.0f, 0.8f);
+    drawList->AddLine({p1.x, p1.y}, {p2.x, p1.y}, color);
+    drawList->AddLine({p2.x, p1.y}, {p2.x, p2.y}, color);
+    drawList->AddLine({p2.x, p2.y}, {p1.x, p2.y}, color);
+    drawList->AddLine({p1.x, p2.y}, {p1.x, p1.y}, color);
 }
 
 float _SimulationView::calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint)
@@ -500,6 +519,6 @@ float _SimulationView::calcZoomFactor(std::chrono::steady_clock::time_point cons
     auto now = std::chrono::steady_clock::now();
     auto duration = toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTimepoint).count());
     _lastZoomTimepoint = now;
-    return pow(_viewport->getZoomSensitivity(), duration / 15);
+    return pow(Viewport::getZoomSensitivity(), duration / 15);
 }
 

@@ -100,6 +100,7 @@ struct ConstructorDescription
     int activationMode = 13;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     int constructionActivationTime = 100;
     std::vector<uint8_t> genome;
+    int numInheritedGenomeNodes = 0;
     int genomeGeneration = 0;
     float constructionAngle1 = 0;
     float constructionAngle2 = 0;
@@ -108,9 +109,9 @@ struct ConstructorDescription
     uint64_t lastConstructedCellId = 0;
     int genomeCurrentNodeIndex = 0;
     int genomeCurrentRepetition = 0;
-    bool isConstructionBuilt = false;
     int offspringCreatureId = 0;
     int offspringMutationId = 0;
+    uint32_t stateFlags = 0x0;  //bit 0: isConstructionBuilt
 
     ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
@@ -140,9 +141,20 @@ struct ConstructorDescription
         genomeCurrentRepetition = value;
         return *this;
     }
-    ConstructorDescription& setIsConstructionBuilt(bool value)
+    bool isConstructionBuilt() const
     {
-        isConstructionBuilt = value;
+        return (stateFlags & 0x1) != 0;
+    }
+    ConstructorDescription& setConstructionBuilt(bool value)
+    {
+        stateFlags = (stateFlags & (~0x1)) | (value ? 0x1 : 0);
+        return *this;
+    }
+    int getNumInheritedGenomeNodes() const { return numInheritedGenomeNodes; }
+    bool isGenomeInherited() const { return numInheritedGenomeNodes != 0; }
+    ConstructorDescription& setNumInheritedGenomeNodes(int value)
+    {
+        numInheritedGenomeNodes = value;
         return *this;
     }
     ConstructorDescription& setGenomeGeneration(int value)
@@ -352,7 +364,7 @@ struct CellDescription
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
     int activationTime = 0;
-    int genomeNumNodes = 0;
+    int genomeComplexity = 0;
 
     CellMetadataDescription metadata;
 

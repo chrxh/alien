@@ -14,6 +14,8 @@ add_library(EngineInterface
     Descriptions.cpp
     Descriptions.h
     EngineConstants.h
+    Features.cpp
+    Features.h
     GenomeConstants.h
     GenomeDescriptionService.cpp
     GenomeDescriptionService.h
@@ -37,7 +39,10 @@ add_library(EngineInterface
     ShapeGenerator.cpp
     ShapeGenerator.h
     SimulationController.h
+    SimulationParameters.cpp
     SimulationParameters.h
+    SimulationParametersService.cpp
+    SimulationParametersService.h
     SimulationParametersSpot.h
     SimulationParametersSpotActivatedValues.h
     SimulationParametersSpotValues.h

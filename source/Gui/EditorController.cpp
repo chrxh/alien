@@ -24,16 +24,15 @@ namespace
     auto const MaxInspectorWindowsToAdd = 10;
 }
 
-_EditorController::_EditorController(SimulationController const& simController, Viewport const& viewport)
+_EditorController::_EditorController(SimulationController const& simController)
     : _simController(simController)
-    , _viewport(viewport)
 {
     _editorModel = std::make_shared<_EditorModel>(_simController);
-    _genomeEditorWindow = std::make_shared<_GenomeEditorWindow>(_editorModel, _simController, _viewport);
+    _genomeEditorWindow = std::make_shared<_GenomeEditorWindow>(_editorModel, _simController);
     _selectionWindow = std::make_shared<_SelectionWindow>(_editorModel);
-    _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simController, _viewport, this);
-    _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simController, _viewport);
-    _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simController, _viewport);
+    _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simController, this);
+    _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simController);
+    _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simController);
 }
 
 void _EditorController::registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog)
@@ -153,6 +152,8 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
     if (entities.empty()) {
         return;
     }
+    auto borderlessRendering = _simController->getSimulationParameters().borderlessRendering;
+
     std::set<uint64_t> inspectedIds;
     for (auto const& inspectorWindow : _inspectorWindows) {
         inspectedIds.insert(inspectorWindow->getId());
@@ -177,7 +178,7 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
     RealVector2D center;
     int num = 0;
     for (auto const& entity : entities) {
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity));
+        auto entityPos = Viewport::mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         center += entityPos;
         ++num;
     }
@@ -185,24 +186,24 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
 
     float maxDistanceFromCenter = 0;
     for (auto const& entity : entities) {
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity));
+        auto entityPos = Viewport::mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         auto distanceFromCenter = toFloat(Math::length(entityPos - center));
         maxDistanceFromCenter = std::max(maxDistanceFromCenter, distanceFromCenter);
     }
-    auto viewSize = _viewport->getViewSize();
+    auto viewSize = Viewport::getViewSize();
     auto factorX = maxDistanceFromCenter == 0 ? 1.0f : viewSize.x / maxDistanceFromCenter / 3.8f;
     auto factorY = maxDistanceFromCenter == 0 ? 1.0f : viewSize.y / maxDistanceFromCenter / 3.4f;
 
     for (auto const& entity : newEntities) {
         auto id = DescriptionEditService::getId(entity);
         _editorModel->addInspectedEntity(entity);
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity));
+        auto entityPos = Viewport::mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         auto windowPosX = (entityPos.x - center.x) * factorX + center.x;
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
         windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 500.0f) + 40.0f;
         _inspectorWindows.emplace_back(
-            std::make_shared<_InspectorWindow>(_simController, _viewport, _editorModel, _genomeEditorWindow, id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
+            std::make_shared<_InspectorWindow>(_simController, _editorModel, _genomeEditorWindow, id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
     }
 }
 
@@ -244,8 +245,9 @@ void _EditorController::processEvents()
     auto running = _simController->isSimulationRunning();
 
     RealVector2D mousePos{ImGui::GetMousePos().x, ImGui::GetMousePos().y};
-    RealVector2D prevMousePos = _prevMousePos ? *_prevMousePos : mousePos;
-
+    RealVector2D worldPos = Viewport::mapViewToWorldPosition(mousePos);
+    RealVector2D prevWorldPos = _prevWorldPos ? *_prevWorldPos : worldPos;
+    
     auto& io = ImGui::GetIO();
     if (!io.WantCaptureMouse && !io.KeyAlt) {
 
@@ -259,20 +261,20 @@ void _EditorController::processEvents()
             } else {
                 selectObjects(mousePos, ImGui::GetIO().KeyCtrl);
                 _simController->setDetached(true);
-                auto shallowData = _simController->getSelectionShallowData();
+                auto shallowData = _simController->getSelectionShallowData(worldPos);
                 _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
-                _mousePosOnClick = mousePos;
+                _worldPosOnClick = worldPos;
             }
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
             if (!running) {
                 if (!_editorModel->isDrawMode()) {
-                    moveSelectedObjects(mousePos, prevMousePos);
+                    moveSelectedObjects(mousePos, prevWorldPos);
                 } else {
                     _creatorWindow->onDrawing();
                 }
             } else {
-                fixateSelectedObjects(mousePos, *_mousePosOnClick);
+                fixateSelectedObjects(mousePos, *_worldPosOnClick);
             }
         }
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
@@ -282,10 +284,10 @@ void _EditorController::processEvents()
         }
         if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
             if (!running && !_editorModel->isDrawMode()) {
-                resizeSelectionRect(mousePos, prevMousePos);
+                resizeSelectionRect(mousePos);
             }
             if (running) {
-                applyForces(mousePos, prevMousePos);
+                applyForces(mousePos, prevWorldPos);
             }
         }
     }
@@ -297,7 +299,7 @@ void _EditorController::processEvents()
             }
         } else {
             _simController->setDetached(false);
-            accelerateSelectedObjects(mousePos, prevMousePos);
+            accelerateSelectedObjects(mousePos, prevWorldPos);
         }
     }
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
@@ -309,7 +311,7 @@ void _EditorController::processEvents()
     if (_simController->updateSelectionIfNecessary()) {
         _editorModel->update();
     }
-    _prevMousePos = mousePos;
+    _prevWorldPos = worldPos;
 }
 
 void _EditorController::processSelectionRect()
@@ -367,8 +369,8 @@ void _EditorController::processInspectorWindows()
 
 void _EditorController::selectObjects(RealVector2D const& viewPos, bool modifierKeyPressed)
 {
-    auto pos = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
-    auto zoom = _viewport->getZoomFactor();
+    auto pos = Viewport::mapViewToWorldPosition({viewPos.x, viewPos.y});
+    auto zoom = Viewport::getZoomFactor();
     if (!modifierKeyPressed) {
         _simController->switchSelection(pos, std::max(0.5f, 10.0f / zoom));
     } else {
@@ -380,11 +382,11 @@ void _EditorController::selectObjects(RealVector2D const& viewPos, bool modifier
 
 void _EditorController::moveSelectedObjects(
     RealVector2D const& viewPos,
-    RealVector2D const& prevViewPos)
+    RealVector2D const& prevWorldPos)
 {
-    auto start = _viewport->mapViewToWorldPosition({prevViewPos.x, prevViewPos.y});
-    auto end = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
-    auto zoom = _viewport->getZoomFactor();
+    auto start = prevWorldPos;
+    auto end = Viewport::mapViewToWorldPosition({viewPos.x, viewPos.y});
+    auto zoom = Viewport::getZoomFactor();
     auto delta = end - start;
 
     ShallowUpdateSelectionData updateData;
@@ -395,14 +397,14 @@ void _EditorController::moveSelectedObjects(
     _editorModel->update();
 }
 
-void _EditorController::fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
+void _EditorController::fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
-    auto shallowData = _simController->getSelectionShallowData();
+    auto shallowData = _simController->getSelectionShallowData(*_selectionPositionOnClick);
     auto selectionPosition = RealVector2D{shallowData.centerPosX, shallowData.centerPosY};
     auto selectionDelta = selectionPosition - *_selectionPositionOnClick;
 
-    auto mouseStart = _viewport->mapViewToWorldPosition(viewPos);
-    auto mouseEnd = _viewport->mapViewToWorldPosition(prevViewPos);
+    auto mouseStart = Viewport::mapViewToWorldPosition(viewPos);
+    auto mouseEnd = prevWorldPos;
     auto mouseDelta = mouseStart - mouseEnd;
 
     auto selectionCorrectionDelta = mouseDelta - selectionDelta;
@@ -416,13 +418,13 @@ void _EditorController::fixateSelectedObjects(RealVector2D const& viewPos, RealV
     }
 }
 
-void _EditorController::accelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
+void _EditorController::accelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
-    auto start = _viewport->mapViewToWorldPosition({prevViewPos.x, prevViewPos.y});
-    auto end = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
+    auto start = prevWorldPos;
+    auto end = Viewport::mapViewToWorldPosition({viewPos.x, viewPos.y});
     auto delta = end - start;
 
-    auto zoom = _viewport->getZoomFactor();
+    auto zoom = Viewport::getZoomFactor();
     ShallowUpdateSelectionData updateData;
     updateData.considerClusters = true;
     updateData.velDeltaX = delta.x / 10;
@@ -430,11 +432,11 @@ void _EditorController::accelerateSelectedObjects(RealVector2D const& viewPos, R
     _simController->shallowUpdateSelectedObjects(updateData);
 }
 
-void _EditorController::applyForces(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
+void _EditorController::applyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
-    auto start = _viewport->mapViewToWorldPosition({prevViewPos.x, prevViewPos.y});
-    auto end = _viewport->mapViewToWorldPosition({viewPos.x, viewPos.y});
-    auto zoom = _viewport->getZoomFactor();
+    auto start = prevWorldPos;
+    auto end = Viewport::mapViewToWorldPosition({viewPos.x, viewPos.y});
+    auto zoom = Viewport::getZoomFactor();
     _simController->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
 }
 
@@ -444,11 +446,11 @@ void _EditorController::createSelectionRect(RealVector2D const& viewPos)
     _selectionRect = rect;
 }
 
-void _EditorController::resizeSelectionRect(RealVector2D const& viewPos, RealVector2D const& prevViewPos)
+void _EditorController::resizeSelectionRect(RealVector2D const& viewPos)
 {
     _selectionRect->endPos = viewPos;
-    auto startPos = _viewport->mapViewToWorldPosition(_selectionRect->startPos);
-    auto endPos = _viewport->mapViewToWorldPosition(_selectionRect->endPos);
+    auto startPos = Viewport::mapViewToWorldPosition(_selectionRect->startPos);
+    auto endPos = Viewport::mapViewToWorldPosition(_selectionRect->endPos);
     auto topLeft = RealVector2D{std::min(startPos.x, endPos.x), std::min(startPos.y, endPos.y)};
     auto bottomRight = RealVector2D{std::max(startPos.x, endPos.x), std::max(startPos.y, endPos.y)};
 

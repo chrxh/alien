@@ -108,7 +108,7 @@ namespace
     auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
     auto constexpr Id_Cell_OutputBlocked = 7;
     auto constexpr Id_Cell_ActivationTime = 8;
-    auto constexpr Id_Cell_GenomeNumNodes = 13;
+    auto constexpr Id_Cell_GenomeComplexity = 13;
 
     auto constexpr Id_Neuron_ActivationFunctions = 0;
 
@@ -125,9 +125,11 @@ namespace
     auto constexpr Id_Constructor_ConstructionAngle2 = 12;
     auto constexpr Id_Constructor_OffspringCreatureId = 13;
     auto constexpr Id_Constructor_OffspringMutationId = 14;
-    auto constexpr Id_Constructor_IsConstructionBuilt = 15;
+    auto constexpr Id_Constructor_IsConstructionBuilt = 15; //unused
     auto constexpr Id_Constructor_GenomeCurrentCopy = 16;
     auto constexpr Id_Constructor_LastConstructedCellId = 17;
+    auto constexpr Id_Constructor_StateFlags = 18;
+    auto constexpr Id_Constructor_NumInheritedGenomeNodes = 19;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -169,7 +171,7 @@ namespace
 
 namespace cereal
 {
-    using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>, std::optional<int>, std::vector<int>>;
+    using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>, std::optional<int>, std::vector<int>, uint32_t>;
 
     template <class Archive>
     std::unordered_map<int, VariantData> getLoadSaveMap(SerializationTask task, Archive& ar)
@@ -507,12 +509,13 @@ namespace cereal
         loadSave<uint64_t>(task, auxiliaries, Id_Constructor_LastConstructedCellId, data.lastConstructedCellId, defaultObject.lastConstructedCellId);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data.genomeCurrentNodeIndex, defaultObject.genomeCurrentNodeIndex);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeCurrentCopy, data.genomeCurrentRepetition, defaultObject.genomeCurrentRepetition);
-        loadSave<bool>(task, auxiliaries, Id_Constructor_IsConstructionBuilt, data.isConstructionBuilt, defaultObject.isConstructionBuilt);
+        loadSave<uint32_t>(task, auxiliaries, Id_Constructor_StateFlags, data.stateFlags, defaultObject.stateFlags);
         loadSave<int>(task, auxiliaries, Id_Constructor_OffspringCreatureId, data.offspringCreatureId, defaultObject.offspringCreatureId);
         loadSave<int>(task, auxiliaries, Id_Constructor_OffspringMutationId, data.offspringMutationId, defaultObject.offspringMutationId);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
         loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
         loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
+        loadSave<int>(task, auxiliaries, Id_Constructor_NumInheritedGenomeNodes, data.numInheritedGenomeNodes, defaultObject.numInheritedGenomeNodes);
         if (task == SerializationTask::Save) {
             auxiliaries[Id_Constructor_GenomeHeader] = true;
         }
@@ -539,7 +542,7 @@ namespace cereal
                 genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
                 data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
 
-                data.isConstructionBuilt = toInt(data.genome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
+                data.setConstructionBuilt(toInt(data.genome.size()) <= data.genomeCurrentNodeIndex);  //in old versions genomeCurrentNodeIndex was the byte index
                 data.genomeCurrentNodeIndex = 0;
 
                 if (!genomeDesc.cells.empty()) {
@@ -556,7 +559,7 @@ namespace cereal
                 auto oldVersionSpec =
                     GenomeEncodingSpecification().numRepetitions(false).concatenationAngle1(false).concatenationAngle2(false);
                 auto oldGenome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc, oldVersionSpec);
-                data.isConstructionBuilt = toInt(oldGenome.size()) <= data.genomeCurrentNodeIndex;  //in old versions genomeCurrentNodeIndex was the byte index
+                data.setConstructionBuilt(toInt(oldGenome.size()) <= data.genomeCurrentNodeIndex);  //in old versions genomeCurrentNodeIndex was the byte index
                 data.genomeCurrentNodeIndex = GenomeDescriptionService::convertNodeAddressToNodeIndex(oldGenome, data.genomeCurrentNodeIndex, oldVersionSpec);
                 if (data.genomeCurrentNodeIndex >= toInt(genomeDesc.cells.size())) {
                     data.genomeCurrentNodeIndex = 0;
@@ -699,7 +702,7 @@ namespace cereal
             task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
-        loadSave<int>(task, auxiliaries, Id_Cell_GenomeNumNodes, data.genomeNumNodes, defaultObject.genomeNumNodes);
+        loadSave<int>(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
         setLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);

@@ -40,7 +40,6 @@ namespace
 
 _InspectorWindow::_InspectorWindow(
     SimulationController const& simController,
-    Viewport const& viewport,
     EditorModel const& editorModel,
     GenomeEditorWindow const& genomeEditorWindow,
     uint64_t entityId,
@@ -48,7 +47,6 @@ _InspectorWindow::_InspectorWindow(
     bool selectGenomeTab)
     : _entityId(entityId)
     , _initialPos(initialPos)
-    , _viewport(viewport)
     , _editorModel(editorModel)
     , _simController(simController)
     , _genomeEditorWindow(genomeEditorWindow)
@@ -66,6 +64,7 @@ void _InspectorWindow::process()
     auto width = calcWindowWidth();
     auto height = isCell() ? StyleRepository::getInstance().scale(370.0f)
                            : StyleRepository::getInstance().scale(70.0f);
+    auto borderlessRendering = _simController->getSimulationParameters().borderlessRendering;
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
@@ -78,7 +77,7 @@ void _InspectorWindow::process()
             processParticle(std::get<ParticleDescription>(entity));
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto entityPos = _viewport->mapWorldToViewPosition(DescriptionEditService::getPos(entity));
+        auto entityPos = Viewport::mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         auto factor = StyleRepository::getInstance().scale(1);
 
         drawList->AddLine(
@@ -392,6 +391,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                     desc.genome = GenomeDescriptionService::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
                     if constexpr (std::is_same<Description, ConstructorDescription>()) {
                         desc.genomeCurrentNodeIndex = 0;
+                        desc.setNumInheritedGenomeNodes(0);
                     }
                 }
                 ImGui::TreePop();
@@ -465,12 +465,11 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 
 void _InspectorWindow::processCellMetadataTab(CellDescription& cell)
 {
-    if (ImGui::BeginTabItem("Metadata", nullptr, ImGuiTabItemFlags_None)) {
-        if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(CellMetadataContentTextWidth), cell.metadata.name);
+    if (ImGui::BeginTabItem("Annotation", nullptr, ImGuiTabItemFlags_None)) {
+        if (ImGui::BeginChild("##", ImVec2(0, 0), false, 0)) {
+            AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Name").textWidth(0), cell.metadata.name);
 
-            AlienImGui::InputTextMultiline(
-                AlienImGui::InputTextMultilineParameters().name("Notes").textWidth(CellMetadataContentTextWidth).height(100), cell.metadata.description);
+            AlienImGui::InputTextMultiline(AlienImGui::InputTextMultilineParameters().hint("Notes").textWidth(0).height(100), cell.metadata.description);
         }
         ImGui::EndChild();
         ImGui::EndTabItem();

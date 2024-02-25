@@ -7,6 +7,8 @@ struct SimulationParametersSpotActivatedValues
     bool friction = false;
     bool rigidity = false;
     bool radiationAbsorption = false;
+    bool radiationAbsorptionLowVelocityPenalty = false;
+    bool radiationAbsorptionLowGenomeComplexityPenalty = false;
     bool radiationCellAgeStrength = false;
     bool cellMaxForce = false;
     bool cellMinEnergy = false;
@@ -15,6 +17,7 @@ struct SimulationParametersSpotActivatedValues
     bool cellColorTransition = false;
     bool cellFunctionAttackerEnergyCost = false;
     bool cellFunctionAttackerFoodChainColorMatrix = false;
+    bool cellFunctionAttackerGenomeComplexityBonus = false;
     bool cellFunctionAttackerGeometryDeviationExponent = false;
     bool cellFunctionAttackerConnectionsMismatchPenalty = false;
 
@@ -53,6 +56,9 @@ struct SimulationParametersSpotActivatedValues
             && cellFunctionConstructorMutationGeometryProbability == other.cellFunctionConstructorMutationGeometryProbability
             && cellFunctionConstructorMutationGenomeColorProbability == other.cellFunctionConstructorMutationGenomeColorProbability
             && cellFunctionConstructorMutationCellColorProbability == other.cellFunctionConstructorMutationCellColorProbability
+            && radiationAbsorptionLowGenomeComplexityPenalty == other.radiationAbsorptionLowGenomeComplexityPenalty
+            && cellFunctionAttackerGenomeComplexityBonus == other.cellFunctionAttackerGenomeComplexityBonus
+            && radiationAbsorptionLowVelocityPenalty == other.radiationAbsorptionLowVelocityPenalty
         ;
     }
 };

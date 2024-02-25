@@ -20,7 +20,7 @@ enum CreationMode_
 class _CreatorWindow : public _AlienWindow
 {
 public:
-    _CreatorWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport);
+    _CreatorWindow(EditorModel const& editorModel, SimulationController const& simController);
 
     void onDrawing();
     void finishDrawing();
@@ -60,7 +60,7 @@ private:
     float _innerRadius = 5.0f;
 
     //drawing
-    DataDescription _drawing;
+    DataDescription _drawingDataDescription;
     DescriptionEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
 
@@ -68,5 +68,4 @@ private:
 
     EditorModel _editorModel;
     SimulationController _simController;
-    Viewport _viewport;
 };

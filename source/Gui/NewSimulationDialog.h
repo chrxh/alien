@@ -11,7 +11,6 @@ public:
     _NewSimulationDialog(
         SimulationController const& simController,
         TemporalControlWindow const& temporalControlWindow,
-        Viewport const& viewport,
         StatisticsWindow const& statisticsWindow);
 
     ~_NewSimulationDialog();
@@ -24,7 +23,6 @@ private:
 
     SimulationController _simController;
     TemporalControlWindow _temporalControlWindow;
-    Viewport _viewport;
     StatisticsWindow _statisticsWindow;
 
     bool _adoptSimulationParameters = true;

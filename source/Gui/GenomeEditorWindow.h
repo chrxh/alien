@@ -9,7 +9,7 @@
 class _GenomeEditorWindow : public _AlienWindow
 {
 public:
-    _GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController, Viewport const& viewport);
+    _GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController);
     ~_GenomeEditorWindow() override;
 
     void registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
@@ -71,7 +71,6 @@ private:
 
     EditorModel _editorModel;
     SimulationController _simController;
-    Viewport _viewport;
     UploadSimulationDialogWeakPtr _uploadSimulationDialog;
     ChangeColorDialog _changeColorDialog;
 };

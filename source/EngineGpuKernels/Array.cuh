@@ -142,13 +142,16 @@ public:
         return &(*_data)[oldIndex];
     }
 
-    __device__ __inline__ T* getNewElement()
+    __device__ __inline__ T* getNewElement(uint64_t* index = nullptr)
     {
         uint64_t oldIndex = alienAtomicAdd64(_numEntries, uint64_t(1));
         if (oldIndex >= *_size) {
             alienAtomicAdd64(_numEntries, uint64_t(-1));
             printf("Not enough fixed memory!\n");
             ABORT();
+        }
+        if (index) {
+            *index = oldIndex;
         }
         return &(*_data)[oldIndex];
     }

@@ -28,12 +28,10 @@ namespace
 _PatternEditorWindow::_PatternEditorWindow(
     EditorModel const& editorModel,
     SimulationController const& simController,
-    Viewport const& viewport,
     EditorControllerWeakPtr const& editorController)
     : _AlienWindow("Pattern editor", "editors.pattern editor", true)
     , _editorModel(editorModel)
     , _simController(simController)
-    , _viewport(viewport)
     , _editorController(editorController)
 {
     auto path = std::filesystem::current_path();
@@ -336,7 +334,7 @@ void _PatternEditorWindow::onOpenPattern()
             _startingPath = firstFilenameCopy.remove_filename().string();
             ClusteredDataDescription content;
             if (SerializerService::deserializeContentFromFile(content, firstFilename.string())) {
-                auto center = _viewport->getCenterInWorldPos();
+                auto center = Viewport::getCenterInWorldPos();
                 content.setCenter(center);
                 _simController->addAndSelectSimulationData(DataDescription(content));
                 _editorModel->update();
@@ -389,7 +387,7 @@ bool _PatternEditorWindow::isPastingPossible() const
 void _PatternEditorWindow::onPaste()
 {
     auto data = *_copiedSelection;
-    auto center = _viewport->getCenterInWorldPos();
+    auto center = Viewport::getCenterInWorldPos();
     data.setCenter(center);
     DescriptionEditService::generateNewCreatureIds(data);
     _simController->addAndSelectSimulationData(data);

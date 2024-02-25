@@ -11,9 +11,8 @@
 #include "DelayedExecutionController.h"
 #include "OverlayMessageController.h"
 
-_AutosaveController::_AutosaveController(SimulationController const& simController, Viewport const& viewport)
+_AutosaveController::_AutosaveController(SimulationController const& simController)
     : _simController(simController)
-    , _viewport(viewport)
 {
     _startTimePoint = std::chrono::steady_clock::now();
     _on = GlobalSettings::getInstance().getBoolState("controllers.auto save.active", true);
@@ -63,8 +62,8 @@ void _AutosaveController::onSave()
 {
     DeserializedSimulation sim;
     sim.auxiliaryData.timestep = _simController->getCurrentTimestep();
-    sim.auxiliaryData.zoom = _viewport->getZoomFactor();
-    sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
+    sim.auxiliaryData.zoom = Viewport::getZoomFactor();
+    sim.auxiliaryData.center = Viewport::getCenterInWorldPos();
     sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
     sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
     sim.mainData = _simController->getClusteredSimulationData();

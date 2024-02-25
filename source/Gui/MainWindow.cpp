@@ -118,44 +118,43 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     NetworkService::init();
 
     //init controllers, windows and dialogs
-    _viewport = std::make_shared<_Viewport>();
+    Viewport::init(_simController);
     _uiController = std::make_shared<_UiController>();
-    _autosaveController = std::make_shared<_AutosaveController>(_simController, _viewport);
-
+    _autosaveController = std::make_shared<_AutosaveController>(_simController);
     _editorController =
-        std::make_shared<_EditorController>(_simController, _viewport);
+        std::make_shared<_EditorController>(_simController);
     _modeController = std::make_shared<_ModeController>(_editorController);
-    _simulationView = std::make_shared<_SimulationView>(_simController, _modeController, _viewport, _editorController->getEditorModel());
+    _simulationView = std::make_shared<_SimulationView>(_simController, _modeController, _editorController->getEditorModel());
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simController);
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
-    _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _viewport);
+    _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _temporalControlWindow);
     _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController);
     _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
-    _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow, _viewport);
+    _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow);
     _exitDialog = std::make_shared<_ExitDialog>(_onExit);
     _aboutDialog = std::make_shared<_AboutDialog>();
     _massOperationsDialog = std::make_shared<_MassOperationsDialog>(_simController);
     _logWindow = std::make_shared<_LogWindow>(_logger);
     _gettingStartedWindow = std::make_shared<_GettingStartedWindow>();
-    _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simController, _temporalControlWindow, _viewport, _statisticsWindow);
+    _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simController, _temporalControlWindow, _statisticsWindow);
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
     _browserWindow =
-        std::make_shared<_BrowserWindow>(_simController, _statisticsWindow, _viewport, _temporalControlWindow, _editorController);
+        std::make_shared<_BrowserWindow>(_simController, _statisticsWindow, _temporalControlWindow, _editorController);
     _activateUserDialog = std::make_shared<_ActivateUserDialog>(_simController, _browserWindow);
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simController, _browserWindow);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
     _loginDialog = std::make_shared<_LoginDialog>(_simController, _browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(
-        _browserWindow, _loginDialog, _simController, _viewport, _editorController->getGenomeEditorWindow());
+        _browserWindow, _loginDialog, _simController, _editorController->getGenomeEditorWindow());
     _editSimulationDialog = std::make_shared<_EditSimulationDialog>(_browserWindow);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow);
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow);
-    _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_viewport, _simController);
+    _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_simController);
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
 
     //cyclic references
@@ -759,10 +758,10 @@ void _MainWindow::onOpenSimulation()
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
 
-            DeserializedSimulation deserializedData;
-            if (SerializerService::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
-                printOverlayMessage("Loading ...");
-                delayedExecution([=, this] {
+            printOverlayMessage("Loading ...");
+            delayedExecution([firstFilename = firstFilename, this] {
+                DeserializedSimulation deserializedData;
+                if (SerializerService::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
                     _simController->closeSimulation();
 
                     std::optional<std::string> errorMessage;
@@ -788,14 +787,14 @@ void _MainWindow::onOpenSimulation()
                             deserializedData.auxiliaryData.simulationParameters);
                     }
 
-                    _viewport->setCenterInWorldPos(deserializedData.auxiliaryData.center);
-                    _viewport->setZoomFactor(deserializedData.auxiliaryData.zoom);
+                    Viewport::setCenterInWorldPos(deserializedData.auxiliaryData.center);
+                    Viewport::setZoomFactor(deserializedData.auxiliaryData.zoom);
                     _temporalControlWindow->onSnapshot();
                     printOverlayMessage(firstFilename.filename().string());
-                });
-            } else {
-                showMessage("Open simulation", "The selected file could not be opened.");
-            }
+                } else {
+                    showMessage("Open simulation", "The selected file could not be opened.");
+                }
+            });
         });
 }
 
@@ -810,8 +809,8 @@ void _MainWindow::onSaveSimulation()
             delayedExecution([=, this] {
                 DeserializedSimulation sim;
                 sim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-                sim.auxiliaryData.zoom = _viewport->getZoomFactor();
-                sim.auxiliaryData.center = _viewport->getCenterInWorldPos();
+                sim.auxiliaryData.zoom = Viewport::getZoomFactor();
+                sim.auxiliaryData.center = Viewport::getCenterInWorldPos();
                 sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
                 sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
                 sim.mainData = _simController->getClusteredSimulationData();
@@ -838,8 +837,7 @@ void _MainWindow::onPauseSimulation()
 
 void _MainWindow::onExit()
 {
-    delayedExecution([this] { _exitDialog->open(); });
-    printOverlayMessage("Exiting ...");
+    _exitDialog->open();
 }
 
 void _MainWindow::pushGlobalStyle()

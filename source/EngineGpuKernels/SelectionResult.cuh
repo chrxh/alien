@@ -44,37 +44,41 @@ public:
         _selectionShallowData->clusterCenterVelY = 0;
     }
 
-    __device__ void collectCell(Cell* cell)
+    __device__ void collectCell(Cell* cell, float2 refPos, BaseMap const& map)
     {
+        auto pos = cell->pos + map.getCorrectionIncrement(refPos, cell->pos);
+
         if (1 == cell->selected) {
             atomicAdd(&_selectionShallowData->numCells, 1);
-            atomicAdd(&_selectionShallowData->centerPosX, cell->pos.x);
-            atomicAdd(&_selectionShallowData->centerPosY, cell->pos.y);
+            atomicAdd(&_selectionShallowData->centerPosX, pos.x);
+            atomicAdd(&_selectionShallowData->centerPosY, pos.y);
             atomicAdd(&_selectionShallowData->centerVelX, cell->vel.x);
             atomicAdd(&_selectionShallowData->centerVelY, cell->vel.y);
         }
 
         atomicAdd(&_selectionShallowData->numClusterCells, 1);
-        atomicAdd(&_selectionShallowData->clusterCenterPosX, cell->pos.x);
-        atomicAdd(&_selectionShallowData->clusterCenterPosY, cell->pos.y);
+        atomicAdd(&_selectionShallowData->clusterCenterPosX, pos.x);
+        atomicAdd(&_selectionShallowData->clusterCenterPosY, pos.y);
         atomicAdd(&_selectionShallowData->clusterCenterVelX, cell->vel.x);
         atomicAdd(&_selectionShallowData->clusterCenterVelY, cell->vel.y);
     }
 
-    __device__ void collectParticle(Particle* particle)
+    __device__ void collectParticle(Particle* particle, float2 refPos, BaseMap const& map)
     {
+        auto pos = particle->absPos + map.getCorrectionIncrement(refPos, particle->absPos);
+
         atomicAdd(&_selectionShallowData->numParticles, 1);
-        atomicAdd(&_selectionShallowData->centerPosX, particle->absPos.x);
-        atomicAdd(&_selectionShallowData->centerPosY, particle->absPos.y);
+        atomicAdd(&_selectionShallowData->centerPosX, pos.x);
+        atomicAdd(&_selectionShallowData->centerPosY, pos.y);
         atomicAdd(&_selectionShallowData->centerVelX, particle->vel.x);
         atomicAdd(&_selectionShallowData->centerVelY, particle->vel.y);
-        atomicAdd(&_selectionShallowData->clusterCenterPosX, particle->absPos.x);
-        atomicAdd(&_selectionShallowData->clusterCenterPosY, particle->absPos.y);
+        atomicAdd(&_selectionShallowData->clusterCenterPosX, pos.x);
+        atomicAdd(&_selectionShallowData->clusterCenterPosY, pos.y);
         atomicAdd(&_selectionShallowData->clusterCenterVelX, particle->vel.x);
         atomicAdd(&_selectionShallowData->clusterCenterVelY, particle->vel.y);
     }
 
-    __device__ void finalize()
+    __device__ void finalize(BaseMap const& map, bool mapCorrection)
     {
         auto numEntities = _selectionShallowData->numCells + _selectionShallowData->numParticles;
         if (numEntities > 0) {
@@ -82,6 +86,11 @@ public:
             _selectionShallowData->centerPosY /= numEntities;
             _selectionShallowData->centerVelX /= numEntities;
             _selectionShallowData->centerVelY /= numEntities;
+            if (mapCorrection) {
+                auto correctedPos = map.getCorrectedPosition({_selectionShallowData->centerPosX, _selectionShallowData->centerPosY});
+                _selectionShallowData->centerPosX = correctedPos.x;
+                _selectionShallowData->centerPosY = correctedPos.y;
+            }
         }
 
         auto numExtEntities = _selectionShallowData->numClusterCells + _selectionShallowData->numParticles;
@@ -90,6 +99,11 @@ public:
             _selectionShallowData->clusterCenterPosY /= numExtEntities;
             _selectionShallowData->clusterCenterVelX /= numExtEntities;
             _selectionShallowData->clusterCenterVelY /= numExtEntities;
+            if (mapCorrection) {
+                auto correctedPos = map.getCorrectedPosition({_selectionShallowData->clusterCenterPosX, _selectionShallowData->clusterCenterPosY});
+                _selectionShallowData->clusterCenterPosX = correctedPos.x;
+                _selectionShallowData->clusterCenterPosY = correctedPos.y;
+            }
         }
     }
 

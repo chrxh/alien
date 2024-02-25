@@ -8,7 +8,7 @@
 
 #include "Base.cuh"
 #include "CudaNumberGenerator.cuh"
-#include "ProprocessedCellFunctionData.cuh"
+#include "PreprocessedCellFunctionData.cuh"
 #include "Definitions.cuh"
 #include "Objects.cuh"
 #include "Map.cuh"
@@ -51,5 +51,5 @@ struct SimulationData
 
 private:
     template <typename Entity>
-    void resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, int additionalEntities);
+    void resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, uint64_t additionalEntities);
 };

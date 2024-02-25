@@ -408,10 +408,10 @@ void EngineWorker::swapSelection(RealVector2D const& pos, float radius)
     _simulationCudaFacade->swapSelection(PointSelectionData{{pos.x, pos.y}, radius});
 }
 
-SelectionShallowData EngineWorker::getSelectionShallowData()
+SelectionShallowData EngineWorker::getSelectionShallowData(RealVector2D const& refPos)
 {
     EngineWorkerGuard access(this);
-    return _simulationCudaFacade->getSelectionShallowData();
+    return _simulationCudaFacade->getSelectionShallowData({refPos.x, refPos.y});
 }
 
 void EngineWorker::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)
@@ -613,6 +613,7 @@ EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::ch
         auto timePassed = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint);
         if (maxDuration) {
             if (timePassed > *maxDuration) {
+                _isTimeout = true;
                 break;
             }
         } else {

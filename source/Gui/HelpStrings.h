@@ -277,7 +277,8 @@ namespace Const
 
     std::string const GenomeRepetitionsPerConstructionTooltip =
         "This value specifies how many times the cell network described in the genome should be concatenated for each construction. For a value greater "
-        "than 1, the cell network geometry has to fulfill certain requirements (e.g. rectangle, hexagon, loop and lolli geometries are not suitable for concatenation).";
+        "than 1, the cell network geometry has to fulfill certain requirements (e.g. rectangle, hexagon, loop and lolli geometries are not suitable for "
+        "concatenation). A value of infinity is also possible, but should not be used for an activated completeness check (see simulation parameters).";
 
     std::string const GenomeConcatenationAngle1 =
         "This value describes the angle between two concatenated cell networks viewed from the first cell of the subsequent cell network.";
@@ -363,7 +364,7 @@ namespace Const
 
     std::string const GenomeGenerationTooltip = "This value indicates the number of times this genome has been inherited by offspring.";
 
-    std::string const GenomeNumCellsTooltip = "The number of all encoded cells in the genome excluding its sub-genomes.";
+    std::string const GenomeNumCellsTooltip = "The number of the encoded cells per repetition in the genome. Cells of sub-genomes are not counted here.";
 
     std::string const GenomeCurrentCellTooltip = "The sequence number of the cell in the genome that will be constructed next.";
 
@@ -458,4 +459,6 @@ namespace Const
         "visible to all users.\n\n" ICON_FA_CHEVRON_RIGHT " Private: Each user account has its own private space. The simulations and genomes are only visible to "
         "the logged-in user.";
 
+    std::string const ParameterRadiationAbsorptionLowGenomeComplexityPenaltyTooltip =
+        "When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle.";
 }

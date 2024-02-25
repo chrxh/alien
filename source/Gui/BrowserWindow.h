@@ -23,7 +23,6 @@ public:
     _BrowserWindow(
         SimulationController const& simController,
         StatisticsWindow const& statisticsWindow,
-        Viewport const& viewport,
         TemporalControlWindow const& temporalControlWindow,
         EditorController const& editorController);
     ~_BrowserWindow();
@@ -132,7 +131,6 @@ private:
 
     SimulationController _simController;
     StatisticsWindow _statisticsWindow;
-    Viewport _viewport;
     TemporalControlWindow _temporalControlWindow;
     LoginDialogWeakPtr _loginDialog;
     EditorController _editorController;
