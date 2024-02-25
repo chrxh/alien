@@ -116,6 +116,8 @@ namespace
         std::optional<float> const& lastReferenceAngle,
         SimulationParameters const& parameters)
     {
+        auto constexpr uniformConnectingCellMaxyDistance = 1.6f;
+
         ProcessedGenomeDescriptionResult result;
         result.direction = RealVector2D{0, 1};
 
@@ -194,7 +196,7 @@ namespace
                 //find nearby cells
                 std::vector<int> nearbyCellIndices;
                 IntVector2D intPos{toInt(pos.x), toInt(pos.y)};
-                auto constexpr radius = 2;
+                auto radius = toInt(uniformConnectingCellMaxyDistance) + 1;
                 for (int dx = -radius; dx <= radius; ++dx) {
                     for (int dy = -radius; dy <= radius; ++dy) {
                         auto const& findResult = cellInternIndicesBySlot.find({intPos.x + dx, intPos.y + dy});
@@ -202,7 +204,7 @@ namespace
                             for (auto const& otherCellIndex : findResult->second) {
                                 auto& otherCell = result.previewDescription.cells.at(otherCellIndex);
                                 if (otherCellIndex != index && otherCellIndex != index - 1
-                                    && Math::length(otherCell.pos - pos) < 1.6f) {
+                                    && Math::length(otherCell.pos - pos) < uniformConnectingCellMaxyDistance) {
                                     if (otherCell.connectionIndices.size() < MAX_CELL_BONDS && cellIntern.connectionIndices.size() < MAX_CELL_BONDS) {
                                         nearbyCellIndices.emplace_back(otherCellIndex);
                                     }
