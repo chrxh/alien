@@ -28,7 +28,7 @@ protected:
     std::vector<uint8_t> createGenomeWithMultipleCellsWithDifferentFunctions() const
     {
         std::vector<uint8_t> subGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription());
-        for (int i = 0; i < 15; ++i) {
+        for (int i = 0; i < 14; ++i) {
             subGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({
                 CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
                 CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(genomeCellColors[1]),

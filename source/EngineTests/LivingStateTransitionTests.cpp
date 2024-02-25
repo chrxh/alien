@@ -148,20 +148,23 @@ TEST_F(LivingStateTransitionTests, noSeparatingSelfReplicatorStaysReadyIfAdjacen
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setMaxConnections(1)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
+            .setMaxConnections(2)
             .setCellFunction(ConstructorDescription().setGenome(genome))
             .setLivingState(LivingState_Ready),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Dying),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(2).setLivingState(LivingState_Ready),
+        CellDescription().setId(3).setPos({12.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Dying),
     });
     data.addConnection(1, 2);
+    data.addConnection(2, 3);
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
     auto actualData = _simController->getSimulationData();
     auto actualCell1 = getCell(actualData, 1);
     auto actualConstructor = std::get<ConstructorDescription>(*actualCell1.cellFunction);
-    EXPECT_TRUE(actualConstructor.isConstructionBuilt());
-    EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
+    EXPECT_EQ(4, actualData.cells.size());
+    EXPECT_EQ(1, actualConstructor.genomeCurrentNodeIndex);
     EXPECT_EQ(LivingState_Ready, actualCell1.livingState);
     EXPECT_EQ(LivingState_Dying, getCell(actualData, 2).livingState);
 }

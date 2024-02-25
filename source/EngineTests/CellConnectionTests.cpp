@@ -19,6 +19,9 @@ public:
 TEST_F(CellConnectionTests, decay)
 {
     _parameters.baseValues.radiationAbsorption[0] = 0;
+    _parameters.clusterDecay = false;
+    _parameters.clusterDecayProb[0] = 0.5f;
+
     _simController->setSimulationParameters(_parameters);
     auto origData =
         DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().width(10).height(10).energy(_parameters.baseValues.cellMinEnergy[0] / 2));
