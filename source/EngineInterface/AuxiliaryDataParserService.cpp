@@ -2,84 +2,96 @@
 
 #include "GeneralSettings.h"
 #include "Settings.h"
+#include "SimulationParametersService.h"
 
 namespace
 {
     template <typename T>
-    void encodeDecodeProperty(boost::property_tree::ptree& tree, T& parameter, T const& defaultValue, std::string const& node, ParserTask task)
+    bool encodeDecodeProperty(boost::property_tree::ptree& tree, T& parameter, T const& defaultValue, std::string const& node, ParserTask task)
     {
-        JsonParser::encodeDecode(tree, parameter, defaultValue, node, task);
+        return JsonParser::encodeDecode(tree, parameter, defaultValue, node, task);
     }
 
     template <>
-    void encodeDecodeProperty(
+    bool encodeDecodeProperty(
         boost::property_tree::ptree& tree,
         ColorVector<float>& parameter,
         ColorVector<float> const& defaultValue,
         std::string const& node,
         ParserTask task)
     {
+        auto result = false;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
+            result |= encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
         }
+        return result;
     }
 
     template <>
-    void encodeDecodeProperty(
+    bool encodeDecodeProperty(
         boost::property_tree::ptree& tree,
         ColorVector<int>& parameter,
         ColorVector<int> const& defaultValue,
         std::string const& node,
         ParserTask task)
     {
+        auto result = false;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
+            result |= encodeDecodeProperty(tree, parameter[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
         }
+        return result;
     }
 
     template <>
-    void encodeDecodeProperty<ColorMatrix<float>>(
+    bool encodeDecodeProperty<ColorMatrix<float>>(
         boost::property_tree::ptree& tree,
         ColorMatrix<float>& parameter,
         ColorMatrix<float> const& defaultValue,
         std::string const& node,
         ParserTask task)
     {
+        auto result = false;
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {
-                encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
+                result |= encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
             }
         }
+        return result;
     }
 
     template <>
-    void encodeDecodeProperty<ColorMatrix<int>>(
+    bool encodeDecodeProperty<ColorMatrix<int>>(
         boost::property_tree::ptree& tree,
         ColorMatrix<int>& parameter,
         ColorMatrix<int> const& defaultValue,
         std::string const& node,
         ParserTask task)
     {
+        auto result = false;
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {
-                encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
+                result |= encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
             }
         }
+        return result;
     }
 
     template <>
-    void encodeDecodeProperty<ColorMatrix<bool>>(
+    bool encodeDecodeProperty<ColorMatrix<bool>>(
         boost::property_tree::ptree& tree,
         ColorMatrix<bool>& parameter,
         ColorMatrix<bool> const& defaultValue,
         std::string const& node,
         ParserTask task)
     {
+        auto result = false;
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {
-                encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
+                result |=
+                    encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
             }
         }
+        return result;
     }
 
     template <typename T>
@@ -121,19 +133,42 @@ namespace
         encodeDecodeProperty(tree, parameter, defaultValue, node, task);
     }
 
+    template <typename T>
+    void encodeDecodeSpotProperty(
+        boost::property_tree::ptree& tree,
+        ColorMatrix<T>& parameter,
+        bool& isActivated,
+        ColorMatrix<bool> const& defaultValue,
+        std::string const& node,
+        ParserTask task)
+    {
+        encodeDecodeProperty(tree, isActivated, false, node + ".activated", task);
+        encodeDecodeProperty(tree, parameter, defaultValue, node, task);
+    }
+
     void encodeDecode(boost::property_tree::ptree& tree, SimulationParameters& parameters, ParserTask parserTask)
     {
-        //simulation parameters
         SimulationParameters defaultParameters;
+
         encodeDecodeProperty(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
-        encodeDecodeProperty(tree, parameters.cellColorization, defaultParameters.cellColorization, "simulation parameters.cell colorization", parserTask);
+        encodeDecodeProperty(tree, parameters.cellColoring, defaultParameters.cellColoring, "simulation parameters.cell colorization", parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.highlightedCellFunction,
+            defaultParameters.highlightedCellFunction,
+            "simulation parameters.highlighted cell function",
+            parserTask);
         encodeDecodeProperty(
             tree,
             parameters.zoomLevelNeuronalActivity,
             defaultParameters.zoomLevelNeuronalActivity,
             "simulation parameters.zoom level.neural activity",
             parserTask);
-        encodeDecodeProperty(tree, parameters.showDetonations, defaultParameters.showDetonations, "simulation parameters.show detonations", parserTask);
+        encodeDecodeProperty(
+            tree, parameters.borderlessRendering, defaultParameters.borderlessRendering, "simulation parameters.borderless rendering", parserTask);
+        encodeDecodeProperty(
+            tree, parameters.markReferenceDomain, defaultParameters.markReferenceDomain, "simulation parameters.mark reference domain", parserTask);
+        encodeDecodeProperty(tree, parameters.gridLines, defaultParameters.gridLines, "simulation parameters.grid lines", parserTask);
         encodeDecodeProperty(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);
 
         encodeDecodeProperty(tree, parameters.motionType, defaultParameters.motionType, "simulation parameters.motion.type", parserTask);
@@ -230,6 +265,18 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.genomeComplexityRamificationFactor,
+            defaultParameters.genomeComplexityRamificationFactor,
+            "simulation parameters.genome complexity.genome complexity ramification factor",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.genomeComplexitySizeFactor,
+            defaultParameters.genomeComplexitySizeFactor,
+            "simulation parameters.genome complexity.genome complexity size factor",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.baseValues.radiationCellAgeStrength,
             defaultParameters.baseValues.radiationCellAgeStrength,
             "simulation parameters.radiation.factor",
@@ -255,15 +302,27 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.radiationAbsorptionVelocityPenalty,
-            defaultParameters.radiationAbsorptionVelocityPenalty,
+            parameters.radiationAbsorptionHighVelocityPenalty,
+            defaultParameters.radiationAbsorptionHighVelocityPenalty,
             "simulation parameters.radiation.absorption velocity penalty",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.baseValues.radiationAbsorptionLowVelocityPenalty,
+            defaultParameters.baseValues.radiationAbsorptionLowVelocityPenalty,
+            "simulation parameters.radiation.absorption low velocity penalty",
             parserTask);
         encodeDecodeProperty(
             tree,
             parameters.radiationAbsorptionLowConnectionPenalty,
             defaultParameters.radiationAbsorptionLowConnectionPenalty,
             "simulation parameters.radiation.absorption low connection penalty",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty,
+            defaultParameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty,
+            "simulation parameters.radiation.absorption low genome complexity penalty",
             parserTask);
         encodeDecodeProperty(
             tree,
@@ -488,8 +547,8 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.cellFunctionAttackerGenomeSizeBonus,
-            defaultParameters.cellFunctionAttackerGenomeSizeBonus,
+            parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus,
+            defaultParameters.baseValues.cellFunctionAttackerGenomeComplexityBonus,
             "simulation parameters.cell.function.attacker.genome size bonus",
             parserTask);
         encodeDecodeProperty(
@@ -740,6 +799,20 @@ namespace
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
+                spot.values.radiationAbsorptionLowVelocityPenalty,
+                spot.activatedValues.radiationAbsorptionLowVelocityPenalty,
+                defaultSpot.values.radiationAbsorptionLowVelocityPenalty,
+                base + "radiation.absorption low velocity penalty",
+                parserTask);
+            encodeDecodeSpotProperty(
+                tree,
+                spot.values.radiationAbsorptionLowGenomeComplexityPenalty,
+                spot.activatedValues.radiationAbsorptionLowGenomeComplexityPenalty,
+                defaultSpot.values.radiationAbsorptionLowGenomeComplexityPenalty,
+                base +"radiation.absorption low genome complexity penalty",
+                parserTask);
+            encodeDecodeSpotProperty(
+                tree,
                 spot.values.radiationCellAgeStrength,
                 spot.activatedValues.radiationCellAgeStrength,
                 defaultSpot.values.radiationCellAgeStrength,
@@ -786,17 +859,20 @@ namespace
                 defaultSpot.values.cellFunctionAttackerEnergyCost,
                 base + "cell.function.attacker.energy cost",
                 parserTask);
-            encodeDecodeProperty(
-                tree,
-                spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix,
-                false,
-                base + "cell.function.attacker.food chain color matrix.activated",
-                parserTask);
-            encodeDecodeProperty(
+
+            encodeDecodeSpotProperty(
                 tree,
                 spot.values.cellFunctionAttackerFoodChainColorMatrix,
+                spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix,
                 defaultSpot.values.cellFunctionAttackerFoodChainColorMatrix,
                 base + "cell.function.attacker.food chain color matrix",
+                parserTask);
+            encodeDecodeSpotProperty(
+                tree,
+                spot.values.cellFunctionAttackerGenomeComplexityBonus,
+                spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus,
+                defaultSpot.values.cellFunctionAttackerGenomeComplexityBonus,
+                base + "cell.function.attacker.genome size bonus",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
@@ -890,6 +966,38 @@ namespace
                 defaultSpot.values.cellFunctionConstructorMutationGenomeColorProbability,
                 base + "cell.function.constructor.mutation probability.uniform color",
                 parserTask);
+        }
+
+        //features
+        Features missingFeatures;
+        missingFeatures.genomeComplexityMeasurement = encodeDecodeProperty(
+            tree,
+            parameters.features.genomeComplexityMeasurement,
+            defaultParameters.features.genomeComplexityMeasurement,
+            "simulation parameters.features.genome complexity measurement",
+            parserTask);
+        missingFeatures.advancedAbsorptionControl = encodeDecodeProperty(
+            tree,
+            parameters.features.advancedAbsorptionControl,
+            defaultParameters.features.advancedAbsorptionControl,
+            "simulation parameters.features.additional absorption control",
+            parserTask);
+        missingFeatures.advancedAttackerControl = encodeDecodeProperty(
+            tree,
+            parameters.features.advancedAttackerControl,
+            defaultParameters.features.advancedAttackerControl,
+            "simulation parameters.features.additional attacker control",
+            parserTask);
+        missingFeatures.externalEnergyControl = encodeDecodeProperty(
+            tree, parameters.features.externalEnergyControl, defaultParameters.features.externalEnergyControl, "simulation parameters.features.external energy", parserTask);
+        missingFeatures.cellColorTransitionRules = encodeDecodeProperty(
+            tree,
+            parameters.features.cellColorTransitionRules,
+            defaultParameters.features.cellColorTransitionRules,
+            "simulation parameters.features.cell color transition rules",
+            parserTask);
+        if (parserTask == ParserTask::Decode) {
+            SimulationParametersService::activateFeaturesBasedOnParameters(missingFeatures, parameters);
         }
     }
 

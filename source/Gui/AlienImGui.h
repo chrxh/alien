@@ -130,8 +130,9 @@ public:
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, float, textWidth, 100);
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, disabledValue, std::nullopt);
     };
-    static void InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS]);
+    static void InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
 
     struct InputTextParameters
     {
@@ -172,6 +173,7 @@ public:
         MEMBER_DECLARATION(SwitcherParameters, std::string, name, "");
         MEMBER_DECLARATION(SwitcherParameters, float, width, 0);
         MEMBER_DECLARATION(SwitcherParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(SwitcherParameters, bool, disabled, false);
         MEMBER_DECLARATION(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER_DECLARATION(SwitcherParameters, std::optional<std::string>, tooltip, std::nullopt);
@@ -246,6 +248,8 @@ public:
 
     static void NegativeSpacing();
     static void Separator();
+    static void MovableSeparator(float& height);
+
     static void Group(std::string const& text);
 
     static bool ToolbarButton(std::string const& text);
@@ -255,6 +259,15 @@ public:
     static void ToolbarSeparator();
     static bool Button(std::string const& text, float size = 0);
     static bool CollapseButton(bool collapsed);
+
+    struct TreeNodeParameters
+    {
+        MEMBER_DECLARATION(TreeNodeParameters, std::string, text, "");
+        MEMBER_DECLARATION(TreeNodeParameters, bool, highlighted, false);
+        MEMBER_DECLARATION(TreeNodeParameters, bool, defaultOpen, true);
+    };
+    static bool BeginTreeNode(TreeNodeParameters const& parameters);
+    static void EndTreeNode();
 
     struct ButtonParameters
     {
@@ -341,9 +354,10 @@ private:
         MEMBER_DECLARATION(BasicInputColorMatrixParameters, float, textWidth, 100);
         MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, disabledValue, std::nullopt);
     };
     template <typename T>
-    static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS]);
+    static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
 
     static ImVec2 RotationCenter(ImDrawList* drawList);
 

@@ -58,7 +58,7 @@ void _GettingStartedWindow::processIntern()
             "In order to upload own simulations to the server or rate other simulations, you need to register a new user, which can be accomplished in "
             "the login dialog.");
             
-        ImGui::Text("For the beginning, however, you can use the evolution example already loaded. Initially, it is advisable to become acquainted with the "
+        ImGui::Text("For the beginning, however, you can use the example already loaded. Initially, it is advisable to become acquainted with the "
                     "windows for temporal and spatial controls. The handling should be intuitive and requires no deeper knowledge.");
         drawItemText("In the temporal control window, a simulation can be started or paused. The execution speed "
                      "may be regulated if necessary. In addition, it is possible to calculate and revert single time steps as "
@@ -114,8 +114,9 @@ void _GettingStartedWindow::processIntern()
 
         drawHeading2("Evolution of self-replicators");
         drawParagraph("By attaching higher-level functions to particle networks, complex multi-cellular organisms can be modeled. They can evolve over time as "
-                      "they are subject to mutations. The following examples consist of homogeneous worlds populated by self-replicating agents. Different "
+                      "they are subject to mutations. The following examples consist of homogeneous as well as changing worlds populated by self-replicating agents. Different "
                       "selection pressures control evolution.");
+        drawItemText("v4.8-Evolution/Gradient/Selected Results");
         drawItemText("Evolution Sandbox/Example");
         drawItemText("Complex Evolution Testbed/Example");
         drawItemText("Diversity/Example");

@@ -4,7 +4,6 @@
 
 #include "Base.cuh"
 #include "Object.cuh"
-#include "Particle.cuh"
 #include "Math.cuh"
 #include "Array.cuh"
 
@@ -26,6 +25,13 @@ public:
         pos = {static_cast<float>(intPart.x) + fracPart.x, static_cast<float>(intPart.y) + fracPart.y};
     }
 
+    __inline__ __device__ float2 getCorrectedPosition(float2 const& pos) const
+    {
+        auto copy = pos;
+        correctPosition(copy);
+        return copy;
+    }
+
     __inline__ __device__ void correctDirection(float2& disp) const
     {
         disp.x = remainderf(disp.x, toFloat(_size.x));
@@ -33,7 +39,8 @@ public:
     }
 
     __inline__ __device__ float2 getCorrectedDirection(float2 const& disp) const
-    {return {remainderf(disp.x, toFloat(_size.x)), remainderf(disp.y, toFloat(_size.y)) };
+    {
+        return {remainderf(disp.x, toFloat(_size.x)), remainderf(disp.y, toFloat(_size.y))};
     }
 
     __inline__ __device__ float getDistance(float2 const& p, float2 const& q) const
@@ -45,20 +52,8 @@ public:
 
     __inline__ __device__ float2 getCorrectionIncrement(float2 pos1, float2 pos2) const
     {
-        float2 result{0.0f, 0.0f};
-        if (pos2.x - pos1.x > toFloat(_size.x) / 2) {
-            result.x = -toFloat(_size.x);
-        }
-        if (pos1.x - pos2.x > toFloat(_size.x) / 2) {
-            result.x = toFloat(_size.x);
-        }
-        if (pos2.y - pos1.y > toFloat(_size.y) / 2) {
-            result.y = -toFloat(_size.y);
-        }
-        if (pos1.y - pos2.y > toFloat(_size.y) / 2) {
-            result.y = toFloat(_size.y);
-        }
-        return result;
+        auto delta = pos1 - pos2 + toFloat2(_size) / 2;
+        return {delta.x - Math::modulo(delta.x, toFloat(_size.x)), delta.y - Math::modulo(delta.y, toFloat(_size.y))};
     }
 
     __inline__ __device__ int getMaxRadius() const { return min(_size.x, _size.y) / 4; }

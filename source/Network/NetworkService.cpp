@@ -4,6 +4,8 @@
 #include <boost/property_tree/json_parser.hpp>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
+#include <boost/range/adaptor/indexed.hpp>
+
 #include <cpp-httplib/httplib.h>
 
 #include "Base/GlobalSettings.h"
@@ -15,6 +17,7 @@
 namespace
 {
     auto constexpr RefreshInterval = 20;  //in minutes
+    auto constexpr MaxChunkSize = 24 * 1024 * 1024;
 
     void configureClient(httplib::SSLClient& client)
     {
@@ -443,6 +446,13 @@ bool NetworkService::uploadResource(
 {
     log(Priority::Important, "network: upload resource with name='" + resourceName + "'");
 
+    std::vector<std::string> chunks;
+
+    for (size_t i = 0; i < mainData.length(); i += MaxChunkSize) {
+        std::string chunk = mainData.substr(i, MaxChunkSize);
+        chunks.emplace_back(chunk);
+    }
+
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
 
@@ -455,7 +465,7 @@ bool NetworkService::uploadResource(
         {"height", std::to_string(size.y), "", ""},
         {"particles", std::to_string(particles), "", ""},
         {"version", Const::ProgramVersion, "", ""},
-        {"content", mainData, "", "application/octet-stream"},
+        {"content", chunks.front(), "", "application/octet-stream"},
         {"settings", settings, "", ""},
         {"symbolMap", "", "", ""},
         {"type", std::to_string(resourceType), "", ""},
@@ -467,8 +477,6 @@ bool NetworkService::uploadResource(
         auto result = executeRequest([&] { return client.Post("/alien-server/uploadsimulation.php", items); });
         if (parseBoolResult(result->body)) {
             resourceId = parseValueFromKey<std::string>(result->body, "simId");
-            _downloadCache.insert(resourceId, ResourceData{mainData, settings, statistics});
-            return true;
         } else {
             return false;
         }
@@ -476,6 +484,18 @@ bool NetworkService::uploadResource(
         logNetworkError();
         return false;
     }
+
+    int index = 1;
+    for (auto const& chunk : chunks | std::views::drop(1)) {
+        if (!appendResourceData(resourceId, chunk, toInt(index))) {
+            deleteResource(resourceId);
+            return false;
+        }
+        ++index;
+    }
+    _downloadCache.insert(resourceId, ResourceData{mainData, settings, statistics});
+
+    return true;
 }
 
 bool NetworkService::downloadResource(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId)
@@ -497,8 +517,16 @@ bool NetworkService::downloadResource(std::string& mainData, std::string& auxili
             httplib::Params params;
             params.emplace("id", simId);
             {
-                auto result = executeRequest([&] { return client.Get("/alien-server/downloadcontent.php", params, {}); });
-                mainData = result->body;
+                
+                for (int chunkIndex = 0; chunkIndex < 6; ++chunkIndex) {
+                    auto paramsClone = params;
+                    paramsClone.emplace("chunkIndex", std::to_string(chunkIndex));
+                    auto result = executeRequest([&] { return client.Get("/alien-server/downloadcontent.php", paramsClone, {}); });
+                    if (result->body.empty()) {
+                        break;
+                    }
+                    mainData.append(result->body);
+                }
             }
             {
                 auto result = executeRequest([&] { return client.Get("/alien-server/downloadsettings.php", params, {}); });
@@ -598,4 +626,29 @@ bool NetworkService::deleteResource(std::string const& simId)
         logNetworkError();
         return false;
     }
+}
+
+bool NetworkService::appendResourceData(std::string& resourceId, std::string const& data, int chunkIndex)
+{
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::MultipartFormDataItems items = {
+        {"userName", *_loggedInUserName, "", ""},
+        {"password", *_password, "", ""},
+        {"simId", resourceId, "", ""},
+        {"content", data, "", "application/octet-stream"},
+        {"chunkIndex", std::to_string(chunkIndex), "", ""},
+    };
+
+    try {
+        auto result = executeRequest([&] { return client.Post("/alien-server/appendsimulationdata.php", items); });
+        if (!parseBoolResult(result->body)) {
+            return false;
+        }
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
+    return true;
 }

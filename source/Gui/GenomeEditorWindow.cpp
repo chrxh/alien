@@ -40,11 +40,10 @@ namespace
     auto const SubWindowRightMargin = 0.0f;
 }
 
-_GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController, Viewport const& viewport)
+_GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController)
     : _AlienWindow("Genome editor", "windows.genome editor", false)
     , _editorModel(editorModel)
     , _simController(simulationController)
-    , _viewport(viewport)
 {
     _tabDatas = {TabData()};
 
@@ -293,10 +292,8 @@ void _GenomeEditorWindow::processTab(TabData& tab)
     }
     ImGui::EndChild();
 
-    ImGui::Button("", ImVec2(-1, scale(5.0f)));
-    if (ImGui::IsItemActive()) {
-        _previewHeight -= ImGui::GetIO().MouseDelta.y;
-    }
+    AlienImGui::MovableSeparator(_previewHeight);
+
     AlienImGui::Group("Preview (reference configuration)");
     if (ImGui::BeginChild("##child4", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         showPreview(tab);
@@ -444,9 +441,13 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
         float h, s, v;
         AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.5f, v));
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow;
-        if (tab.selectedNode && *tab.selectedNode == index) {
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Framed;
+
+        auto isNodeSelected = tab.selectedNode && *tab.selectedNode == index;
+        if (isNodeSelected) {
             flags |= ImGuiTreeNodeFlags_Selected;
+        } else {
+            ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(ImColor::HSV(0, 0, 0, 0)));
         }
         if (_nodeIndexToJump && *_nodeIndexToJump == index) {
             ImGui::SetScrollHereY();
@@ -456,8 +457,13 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
         if (_expandNodes) {
             ImGui::SetNextTreeNodeOpen(*_expandNodes);
         }
+        ImGui::PushFont(StyleRepository::getInstance().getSmallBoldFont());
         auto treeNodeOpen =
             ImGui::TreeNodeEx((generateShortDescription(index, cell, shapeGeneratorResult, isFirstOrLast) + "###").c_str(), flags);
+        ImGui::PopFont();
+        if (!isNodeSelected) {
+            ImGui::PopStyleColor();
+        }
         ImGui::PopStyleColor();
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
             if (tab.selectedNode && *tab.selectedNode == index) {
@@ -894,7 +900,7 @@ void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
 
 void _GenomeEditorWindow::onCreateSpore()
 {
-    auto pos = _viewport->getCenterInWorldPos();
+    auto pos = Viewport::getCenterInWorldPos();
     pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
 

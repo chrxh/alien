@@ -18,7 +18,7 @@ public:
     void setSelection(GpuSettings const& gpuSettings, SimulationData const& data, AreaSelectionData const& setData);
     void updateSelection(GpuSettings const& gpuSettings, SimulationData const& data);
 
-    void getSelectionShallowData(GpuSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult);
+    void getSelectionShallowData(GpuSettings const& gpuSettings, SimulationData const& data, float2 const& refPos, SelectionResult const& selectionResult);
     void shallowUpdateSelectedObjects(
         GpuSettings const& gpuSettings,
         SimulationData const& data,

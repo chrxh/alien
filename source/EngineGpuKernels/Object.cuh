@@ -7,6 +7,37 @@
 
 #include "Base.cuh"
 
+struct Particle
+{
+    uint64_t id;
+    float2 absPos;
+    float2 vel;
+    uint8_t color;
+    float energy;
+    Cell* lastAbsorbedCell;  //could be invalid
+
+    //editing data
+    uint8_t selected;  //0 = no, 1 = selected
+
+    //auxiliary data
+    int locked;  //0 = unlocked, 1 = locked
+
+    __device__ __inline__ bool tryLock()
+    {
+        auto result = 0 == atomicExch(&locked, 1);
+        if (result) {
+            __threadfence();
+        }
+        return result;
+    }
+
+    __device__ __inline__ void releaseLock()
+    {
+        __threadfence();
+        atomicExch(&locked, 0);
+    }
+};
+
 struct GenomeHeader
 {
     ConstructionShape shape;
@@ -24,10 +55,10 @@ struct GenomeHeader
 
 struct CellMetadataDescription
 {
-    int nameSize;
+    uint16_t nameSize;
     uint8_t* name;
 
-    int descriptionSize;
+    uint16_t descriptionSize;
     uint8_t* description;
 };
 
@@ -63,26 +94,30 @@ struct TransmitterFunction
 struct ConstructorFunction
 {
     //settings
-    int activationMode; //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    int constructionActivationTime;
+    uint32_t activationMode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    uint32_t constructionActivationTime;
 
     //genome
-    int genomeSize;
+    uint16_t genomeSize;
+    uint16_t numInheritedGenomeNodes;
     uint8_t* genome;
-    int genomeGeneration;
+    uint32_t genomeGeneration;
     float constructionAngle1;
     float constructionAngle2;
 
     //process data
     uint64_t lastConstructedCellId;
-    int genomeCurrentNodeIndex;
-    int genomeCurrentRepetition;
-    bool isConstructionBuilt;
-    int offspringCreatureId;  //will be filled when self-replication starts
-    int offspringMutationId;
+    uint16_t genomeCurrentNodeIndex;
+    uint16_t genomeCurrentRepetition;
+    uint32_t offspringCreatureId;  //will be filled when self-replication starts
+    uint32_t offspringMutationId;
+    uint32_t stateFlags;  //bit 0: isConstructionBuilt
 
     //temp
     bool isComplete;
+
+    __device__ __inline__ bool isConstructionBuilt() const { return (stateFlags & 0x1) != 0; }
+    __device__ __inline__ void setConstructionBuilt(bool value) { stateFlags = (stateFlags & (~0x1)) | (value ? 0x1 : 0); }
 };
 
 struct SensorFunction
@@ -90,8 +125,8 @@ struct SensorFunction
     SensorMode mode;
     float angle;
     float minDensity;
-    int color;
-    int targetedCreatureId;
+    uint8_t color;
+    uint32_t targetedCreatureId;
 
     //process data
     float memoryChannel1;
@@ -101,8 +136,8 @@ struct SensorFunction
 
 struct NerveFunction
 {
-    int pulseMode;        //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    int alternationMode;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+    uint8_t pulseMode;   //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    uint8_t alternationMode;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
 };
 
 struct AttackerFunction
@@ -113,17 +148,17 @@ struct AttackerFunction
 struct InjectorFunction
 {
     InjectorMode mode;
-    int counter;
-    int genomeSize;
+    uint32_t counter;
+    uint16_t genomeSize;
     uint8_t* genome;
-    int genomeGeneration;
+    uint32_t genomeGeneration;
 };
 
 struct MuscleFunction
 {
     MuscleMode mode;
     MuscleBendingDirection lastBendingDirection;
-    int lastBendingSourceIndex;
+    uint8_t lastBendingSourceIndex;
     float consecutiveBendingAngle;
 };
 
@@ -134,13 +169,13 @@ struct DefenderFunction
 
 struct ReconnectorFunction
 {
-    int color;
+    uint8_t color;
 };
 
 struct DetonatorFunction
 {
     DetonatorState state;
-    int countdown;
+    int32_t countdown;
 };
 
 union CellFunctionData
@@ -166,50 +201,51 @@ struct Cell
     CellConnection connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
-    int maxConnections;
-    int numConnections;
+    uint8_t maxConnections;
+    uint8_t numConnections;
     float energy;
     float stiffness;
-    int color;
+    uint8_t color;
     bool barrier;
-    int age;
+    uint32_t age;
     LivingState livingState;
-    int creatureId;
-    int mutationId;
+    uint32_t creatureId;
+    uint32_t mutationId;
 
     //cell function
-    int executionOrderNumber;
-    int inputExecutionOrderNumber;
+    uint8_t executionOrderNumber;
+    int8_t inputExecutionOrderNumber;
     bool outputBlocked;
     CellFunction cellFunction;
     CellFunctionData cellFunctionData;
     Activity activity;
-    int activationTime;
-    int genomeNumNodes;
+    uint32_t activationTime;
+    uint32_t genomeComplexity;
 
+    //annotations
     CellMetadataDescription metadata;
 
     //editing data
-    int selected;   //0 = no, 1 = selected, 2 = cluster selected
-    int detached;  //0 = no, 1 = yes
+    uint8_t selected;  //0 = no, 1 = selected, 2 = cluster selected
+    uint8_t detached;  //0 = no, 1 = yes
 
     //internal algorithm data
-    int locked;	//0 = unlocked, 1 = locked
+    int locked;  //0 = unlocked, 1 = locked
     int tag;
     float density;
     Cell* nextCell; //linked list for finding all overlapping cells
-    int scheduledOperationIndex;    // -1 = no operation scheduled
+    int32_t scheduledOperationIndex;  // -1 = no operation scheduled
     float2 shared1; //variable with different meanings depending on context
     float2 shared2;
 
     //cluster data
-    int clusterIndex;
-    int clusterBoundaries;    //1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
+    uint32_t clusterIndex;
+    int32_t clusterBoundaries;  //1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
     float2 clusterPos;
     float2 clusterVel;
     float clusterAngularMomentum;
     float clusterAngularMass;
-    int numCellsInCluster;
+    uint32_t numCellsInCluster;
 
     __device__ __inline__ bool isActive()
     {

@@ -8,7 +8,7 @@
 #include "ConstantMemory.cuh"
 #include "TOs.cuh"
 #include "Map.cuh"
-#include "Particle.cuh"
+#include "Object.cuh"
 #include "Physics.cuh"
 #include "SimulationData.cuh"
 
@@ -22,10 +22,11 @@ public:
     __inline__ __device__ void changeParticleFromTO(ParticleTO const& particleTO, Particle* particle);
     __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel, int color);
     __inline__ __device__ Cell* createRandomCell(float energy, float2 const& pos, float2 const& vel);
-    __inline__ __device__ Cell* createCell();
+    __inline__ __device__ Cell* createCell(uint64_t& cellPointerIndex);
 
 private:
-    __inline__ __device__ void createAuxiliaryData(int sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, int& targetSize, uint8_t*& target);
+    template<typename T>
+    __inline__ __device__ void createAuxiliaryData(T sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, T& targetSize, uint8_t*& target);
     __inline__ __device__ void createAuxiliaryDataWithFixedSize(uint64_t size, uint64_t sourceIndex, uint8_t* auxiliaryData, uint8_t*& target);
 
     BaseMap _map;
@@ -103,7 +104,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->age = cellTO.age;
     cell->color = cellTO.color;
     cell->activationTime = cellTO.activationTime;
-    cell->genomeNumNodes = cellTO.genomeNumNodes;
+    cell->genomeComplexity = cellTO.genomeComplexity;
 
     createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
 
@@ -142,10 +143,11 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             dataTO.auxiliaryData,
             cell->cellFunctionData.constructor.genomeSize,
             cell->cellFunctionData.constructor.genome);
+        cell->cellFunctionData.constructor.numInheritedGenomeNodes = cellTO.cellFunctionData.constructor.numInheritedGenomeNodes;
         cell->cellFunctionData.constructor.lastConstructedCellId = cellTO.cellFunctionData.constructor.lastConstructedCellId;
         cell->cellFunctionData.constructor.genomeCurrentNodeIndex = cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex;
         cell->cellFunctionData.constructor.genomeCurrentRepetition = cellTO.cellFunctionData.constructor.genomeCurrentRepetition;
-        cell->cellFunctionData.constructor.isConstructionBuilt = cellTO.cellFunctionData.constructor.isConstructionBuilt;
+        cell->cellFunctionData.constructor.stateFlags = cellTO.cellFunctionData.constructor.stateFlags;
         cell->cellFunctionData.constructor.offspringCreatureId = cellTO.cellFunctionData.constructor.offspringCreatureId;
         cell->cellFunctionData.constructor.offspringMutationId = cellTO.cellFunctionData.constructor.offspringMutationId;
         cell->cellFunctionData.constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
@@ -206,8 +208,8 @@ __inline__ __device__ void ObjectFactory::changeParticleFromTO(ParticleTO const&
     particle->color = particleTO.color;
 }
 
-__inline__ __device__ void
-ObjectFactory::createAuxiliaryData(int sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, int& targetSize, uint8_t*& target)
+template <typename T>
+__inline__ __device__ void ObjectFactory::createAuxiliaryData(T sourceSize, uint64_t sourceIndex, uint8_t* auxiliaryData, T& targetSize, uint8_t*& target)
 {
     targetSize = sourceSize;
     createAuxiliaryDataWithFixedSize(sourceSize, sourceIndex, auxiliaryData, target);
@@ -265,13 +267,15 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->barrier = false;
     cell->age = 0;
     cell->activationTime = 0;
-    cell->genomeNumNodes = 0;
+    cell->genomeComplexity = 0;
     cell->inputExecutionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellNumExecutionOrderNumbers - 1);
     cell->outputBlocked = _data->numberGen1.randomBool();
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->activity.channels[i] = 0;
     }
     cell->density = 1.0f;
+    cell->creatureId = 0;
+    cell->mutationId = 0;
 
     if (cudaSimulationParameters.particleTransformationRandomCellFunction) {
         cell->cellFunction = _data->numberGen1.random(CellFunction_Count - 1);
@@ -298,6 +302,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             }
             cell->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
             cell->cellFunctionData.constructor.genomeSize = Const::GenomeHeaderSize;
+            cell->cellFunctionData.constructor.numInheritedGenomeNodes = 0;
             cell->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.constructor.genomeSize);
             auto& genome = cell->cellFunctionData.constructor.genome;
             for (int i = 0; i < cell->cellFunctionData.constructor.genomeSize; ++i) {
@@ -306,7 +311,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.constructor.lastConstructedCellId = 0;
             cell->cellFunctionData.constructor.genomeCurrentNodeIndex = 0;
             cell->cellFunctionData.constructor.genomeCurrentRepetition = 0;
-            cell->cellFunctionData.constructor.isConstructionBuilt = false;
+            cell->cellFunctionData.constructor.stateFlags = 0;
             cell->cellFunctionData.constructor.genomeGeneration = 0;
             cell->cellFunctionData.constructor.constructionAngle1 = 0;
             cell->cellFunctionData.constructor.constructionAngle2 = 0;
@@ -361,10 +366,10 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     return cell;
 }
 
-__inline__ __device__ Cell* ObjectFactory::createCell()
+__inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex)
 {
     auto cell = _data->objects.cells.getNewElement();
-    auto cellPointer = _data->objects.cellPointers.getNewElement();
+    auto cellPointer = _data->objects.cellPointers.getNewElement(&cellPointerIndex);
     *cellPointer = cell;
 
     cell->id = _data->numberGen1.createNewId();

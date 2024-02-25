@@ -19,12 +19,10 @@ namespace
 _NewSimulationDialog::_NewSimulationDialog(
     SimulationController const& simController,
     TemporalControlWindow const& temporalControlWindow,
-    Viewport const& viewport,
     StatisticsWindow const& statisticsWindow)
     : _AlienDialog("New simulation")
     , _simController(simController)
     , _temporalControlWindow(temporalControlWindow)
-    , _viewport(viewport)
     , _statisticsWindow(statisticsWindow)
 {
     _adoptSimulationParameters = GlobalSettings::getInstance().getBoolState("dialogs.new simulation.adopt simulation parameters", true);
@@ -80,7 +78,7 @@ void _NewSimulationDialog::onNewSimulation()
     generalSettings.worldSizeX = _width;
     generalSettings.worldSizeY = _height;
     _simController->newSimulation(0, generalSettings, parameters);
-    _viewport->setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
-    _viewport->setZoomFactor(4.0f);
+    Viewport::setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
+    Viewport::setZoomFactor(4.0f);
     _temporalControlWindow->onSnapshot();
 }

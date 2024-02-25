@@ -64,11 +64,15 @@ void _EditKernelsLauncher::updateSelection(GpuSettings const& gpuSettings, Simul
     rolloutSelection(gpuSettings, data);
 }
 
-void _EditKernelsLauncher::getSelectionShallowData(GpuSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult)
+void _EditKernelsLauncher::getSelectionShallowData(
+    GpuSettings const& gpuSettings,
+    SimulationData const& data,
+    float2 const& refPos,
+    SelectionResult const& selectionResult)
 {
     KERNEL_CALL_1_1(cudaResetSelectionResult, selectionResult);
-    KERNEL_CALL(cudaGetSelectionShallowData, data, selectionResult);
-    KERNEL_CALL_1_1(cudaFinalizeSelectionResult, selectionResult);
+    KERNEL_CALL(cudaGetSelectionShallowData, data, refPos, selectionResult);
+    KERNEL_CALL_1_1(cudaFinalizeSelectionResult, selectionResult, data.cellMap);
 }
 
 void _EditKernelsLauncher::shallowUpdateSelectedObjects(

@@ -1,7 +1,6 @@
 ﻿#include "Objects.cuh"
 
 #include "Object.cuh"
-#include "Particle.cuh"
 
 void Objects::init()
 {

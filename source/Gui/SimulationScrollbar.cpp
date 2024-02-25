@@ -11,12 +11,10 @@
 _SimulationScrollbar::_SimulationScrollbar(
     std::string const& id,
     Orientation orientation,
-    SimulationController const& simController,
-    Viewport const& viewport)
+    SimulationController const& simController)
     : _id(id)
     , _orientation(orientation)
     , _simController(simController)
-    , _viewport(viewport)
 {}
 
 void _SimulationScrollbar::process(RealRect const& rect)
@@ -51,7 +49,7 @@ void _SimulationScrollbar::processEvents(RealRect const& rect)
 {
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         if (doesMouseCursorIntersectSliderBar(rect)) {
-            _worldCenterForDragging = _viewport->getCenterInWorldPos();
+            _worldCenterForDragging = Viewport::getCenterInWorldPos();
         }
     }
     if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && _worldCenterForDragging) {
@@ -60,13 +58,13 @@ void _SimulationScrollbar::processEvents(RealRect const& rect)
         auto worldSize = _simController->getWorldSize();
         auto dragWorldDelta = RealVector2D{
             dragViewDelta.x / scrollbarSize.x * worldSize.x, dragViewDelta.y / scrollbarSize.y * worldSize.y};
-        auto centerInWorldPos = _viewport->getCenterInWorldPos();
+        auto centerInWorldPos = Viewport::getCenterInWorldPos();
         if (Orientation::Horizontal == _orientation) {
             centerInWorldPos.x = _worldCenterForDragging->x + dragWorldDelta.x;
         } else {
             centerInWorldPos.y = _worldCenterForDragging->y + dragWorldDelta.y;
         }
-        _viewport->setCenterInWorldPos(centerInWorldPos);
+        Viewport::setCenterInWorldPos(centerInWorldPos);
     }
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
         _worldCenterForDragging = std::nullopt;
@@ -80,7 +78,7 @@ RealRect _SimulationScrollbar::calcSliderbarRect(RealRect const& scrollbarRect) 
         Orientation::Horizontal == _orientation ? _simController->getWorldSize().x : _simController->getWorldSize().y;
     auto size = Orientation::Horizontal == _orientation ? size2d.x : size2d.y;
 
-    auto worldRect = _viewport->getVisibleWorldRect();
+    auto worldRect = Viewport::getVisibleWorldRect();
     auto startWorldPos = Orientation::Horizontal == _orientation ? worldRect.topLeft.x : worldRect.topLeft.y;
     auto endWorldPos = Orientation::Horizontal == _orientation ? worldRect.bottomRight.x : worldRect.bottomRight.y;
 

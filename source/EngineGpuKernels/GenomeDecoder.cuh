@@ -17,6 +17,7 @@ public:
     __inline__ __device__ static void executeForEachNodeRecursively(uint8_t* genome, int genomeSize, bool includedSeparatedParts, Func func);
     __inline__ __device__ static GenomeHeader readGenomeHeader(ConstructorFunction const& constructor);
     __inline__ __device__ static int getGenomeDepth(uint8_t* genome, int genomeSize);
+    __inline__ __device__ static int getWeightedNumNodesRecursively(uint8_t* genome, int genomeSize);
     __inline__ __device__ static int getNumNodesRecursively(uint8_t* genome, int genomeSize, bool includeRepetitions, bool includedSeparatedParts);
     __inline__ __device__ static int getRandomGenomeNodeAddress(
         SimulationData& data,
@@ -46,7 +47,7 @@ public:
 
     //node-wide methods
     __inline__ __device__ static int getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeAddress, bool withSubgenomes = true);
-    __inline__ __device__ static int getNextCellFunctionType(uint8_t* genome, int nodeAddress);
+    __inline__ __device__ static CellFunction getNextCellFunctionType(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static bool isNextCellSelfReplication(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static int getNextCellColor(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static void setNextCellFunctionType(uint8_t* genome, int nodeAddress, CellFunction cellFunction);
@@ -86,7 +87,7 @@ public:
     __inline__ __device__ static float convertByteToAngle(uint8_t b);
     __inline__ __device__ static uint8_t convertOptionalByteToByte(int value);
 
-    static auto constexpr MAX_SUBGENOME_RECURSION_DEPTH = 30;
+    static auto constexpr MAX_SUBGENOME_RECURSION_DEPTH = 15;
 
 private:
     __inline__ __device__ static int findStartNodeAddress(uint8_t* genome, int genomeSize, int refIndex);
@@ -158,6 +159,21 @@ __inline__ __device__ int GenomeDecoder::getGenomeDepth(uint8_t* genome, int gen
     auto result = 0;
     executeForEachNodeRecursively(genome, genomeSize, true, [&result](int depth, int nodeAddress, int repetition) { result = max(result, depth); });
     return result;
+}
+
+__inline__ __device__ int GenomeDecoder::getWeightedNumNodesRecursively(uint8_t* genome, int genomeSize)
+{
+    int lastDepth = 0;
+    auto result = 0.0f;
+    int acceleration = 1;
+    executeForEachNodeRecursively(genome, genomeSize, true, [&result, &lastDepth, &acceleration](int depth, int nodeAddress, int repetitions) {
+        float bonus = depth > lastDepth ? 10.0f * toFloat(repetitions)* toFloat(acceleration) : 1.0f;
+        result += powf(2.0f, toFloat(depth)) * bonus;
+
+        lastDepth = depth;
+        ++acceleration;
+    });
+    return toInt(result);
 }
 
 __inline__ __device__ int GenomeDecoder::getNumNodesRecursively(uint8_t* genome, int genomeSize, bool includeRepetitions, bool includedSeparatedParts)
@@ -326,7 +342,7 @@ __inline__ __device__ bool GenomeDecoder::isFinished(ConstructorFunction const& 
         return true;
     }
     if (isSingleConstruction(constructor.genome)) {
-        return constructor.isConstructionBuilt;
+        return constructor.isConstructionBuilt();
     }
     return false;
 }
@@ -568,7 +584,7 @@ __inline__ __device__ int GenomeDecoder::getNextCellFunctionDataSize(uint8_t* ge
     }
 }
 
-__inline__ __device__ int GenomeDecoder::getNextCellFunctionType(uint8_t* genome, int nodeAddress)
+__inline__ __device__ CellFunction GenomeDecoder::getNextCellFunctionType(uint8_t* genome, int nodeAddress)
 {
     return genome[nodeAddress] % CellFunction_Count;
 }

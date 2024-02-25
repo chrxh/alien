@@ -1,5 +1,32 @@
 # Release notes
 
+## [4.8.0] - 2024-02-25
+### Added
+- gui/simulation view: borderless rendering (world is rendered periodically) + parameter to (de)activate
+- gui/simulation view: adaptive space grid for orientation + parameter to (de)activate
+- gui/simulation view: new coloring which highlights particular cell functions
+- gui/simulation parameters: addon widget introduced
+- gui/simulation parameters: center button in spatial control
+- engine, gui/simulation parameters: attacker and particle absorption depending on genome complexity
+- engine, gui/simulation parameters: addon for genome complexity measurement
+- engine, gui/simulation parameters: low and high velocity penalty for energy particle absorption
+
+### Changed
+- gui/simulation parameters: move expert settings for absorption, attacker, external energy and color transition to addons
+- gui/simulation view: short white background flash after creating and loading snapshots (now called flashbacks)
+- gui/simulation view: cross cursor in edit mode
+- gui/simulation view: mutation coloring adapted such that color changes occur only after major structural mutations
+- gui/statistics: adapt plot heights depending on the visible data points
+- engine: memory consumption reduced (~ 10% depending on the data)
+- server: support for large simulation files (up to 144 MB)
+
+### Fixed
+- gui/simulation parameters: show base tab when new simulation is loaded
+- gui/statistics: maintain previous statistics data after resizing the simulation
+- engine: fixed rare and spontaneous crashes that occur when many cells and connections are destroyed
+- engine: new completeness check counting the actual cells of the creature against the cells in the genome 
+- engine: wrong displacement calculation in case of zooming and moving objects fixed
+
 ## [4.7.3] - 2024-01-09
 ### Fixed
 - engine: drop restriction on start construction angle

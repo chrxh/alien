@@ -12,6 +12,12 @@ void _SimulationControllerImpl::newSimulation(uint64_t timestep, GeneralSettings
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 
     _selectionNeedsUpdate = true;
+    ++_sessionId;
+}
+
+int _SimulationControllerImpl::getSessionId() const
+{
+    return _sessionId;
 }
 
 void _SimulationControllerImpl::clear()
@@ -272,9 +278,9 @@ void _SimulationControllerImpl::swapSelection(RealVector2D const& pos, float rad
     _worker.swapSelection(pos, radius);
 }
 
-SelectionShallowData _SimulationControllerImpl::getSelectionShallowData()
+SelectionShallowData _SimulationControllerImpl::getSelectionShallowData(RealVector2D const& refPos)
 {
-    return _worker.getSelectionShallowData();
+    return _worker.getSelectionShallowData(refPos);
 }
 
 void _SimulationControllerImpl::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData)

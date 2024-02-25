@@ -13,6 +13,7 @@ class _SimulationController
 {
 public:
     virtual void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& simulationParameters) = 0;
+    virtual int getSessionId() const = 0;
     virtual void clear() = 0;
 
     virtual void setImageResource(void* image) = 0;
@@ -77,7 +78,7 @@ public:
 
     virtual void switchSelection(RealVector2D const& pos, float radius) = 0;
     virtual void swapSelection(RealVector2D const& pos, float radius) = 0;
-    virtual SelectionShallowData getSelectionShallowData() = 0;
+    virtual SelectionShallowData getSelectionShallowData(RealVector2D const& refPos = RealVector2D()) = 0;
     virtual void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData) = 0;
     virtual void setSelection(RealVector2D const& startPos, RealVector2D const& endPos) = 0;
     virtual void removeSelection() = 0;

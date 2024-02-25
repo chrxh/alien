@@ -16,6 +16,8 @@ class _SimulationControllerImpl : public _SimulationController
 {
 public:
     void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters) override;
+    int getSessionId() const override;
+
     void clear() override;
 
     void setImageResource(void* image) override;
@@ -88,7 +90,7 @@ public:
 
     void switchSelection(RealVector2D const& pos, float radius) override;
     void swapSelection(RealVector2D const& pos, float radius) override;
-    SelectionShallowData getSelectionShallowData() override;
+    SelectionShallowData getSelectionShallowData(RealVector2D const& refPos = RealVector2D()) override;
     void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData) override;
     void setSelection(RealVector2D const& startPos, RealVector2D const& endPos) override;
     void removeSelection() override;
@@ -110,6 +112,7 @@ public:
 
 private:
     bool _selectionNeedsUpdate = false;
+    int _sessionId = 0;
 
     Settings _origSettings;
     GeneralSettings _generalSettings;

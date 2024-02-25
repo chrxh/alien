@@ -21,11 +21,10 @@ namespace
     auto const RightColumnWidth = 200.0f;
 }
 
-_MultiplierWindow::_MultiplierWindow(EditorModel const& editorModel, SimulationController const& simController, Viewport const& viewport)
+_MultiplierWindow::_MultiplierWindow(EditorModel const& editorModel, SimulationController const& simController)
     : _AlienWindow("Multiplier", "editors.multiplier", false)
     , _editorModel(editorModel)
     , _simController(simController)
-    , _viewport(viewport)
 {}
 
 void _MultiplierWindow::processIntern()

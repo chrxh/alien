@@ -22,6 +22,7 @@ public:
     __inline__ __device__ static float2 applyMatrix(float2 const& vec, Matrix const& matrix);
     __inline__ __device__ static void angleCorrection(float& angle);
     __inline__ __device__ static void angleCorrection(int& angle);
+    __inline__ __device__ static bool isInBetweenModulo(float value1, float value2, float candidate, float size);
     __inline__ __device__ static bool isAngleInBetween(float angle1, float angle2, float angleBetweenCandidate);
     __inline__ __device__ static void rotateQuarterClockwise(float2& v);
     __inline__ __device__ static void rotateQuarterCounterClockwise(float2& v);
@@ -31,17 +32,17 @@ public:
     __inline__ __device__ static float2 normalized(float2 vec);
     __inline__ __device__ static float dot(float2 const& p, float2 const& q);
     __inline__ __device__ static float2 crossProdProjected(float3 const& p, float3 const& q);
-    __inline__ __host__ __device__ static float length(float2 const& v);
-    __inline__ __host__ __device__ static float lengthMax(float2 const& v);
-    __inline__ __host__ __device__ static float length(int2 const& v);
-    __inline__ __host__ __device__ static float lengthSquared(float2 const& v);
+    __inline__ __device__ static float length(float2 const& v);
+    __inline__ __device__ static float lengthMax(float2 const& v);
+    __inline__ __device__ static float length(int2 const& v);
+    __inline__ __device__ static float lengthSquared(float2 const& v);
     __inline__ __device__ static float2 rotateClockwise(float2 const& v, float angle);
     __inline__ __device__ static float subtractAngle(float angleMinuend, float angleSubtrahend);
     __inline__ __device__ static float calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, float boundary = 0);
     __inline__ __device__ static float alignAngle(float angle, ConstructorAngleAlignment alignment);
     __inline__ __device__ static float alignAngleOnBoundaries(float angle, float maxAngle, ConstructorAngleAlignment alignment);
-    __inline__ __device__ static bool
-    crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd);
+    __inline__ __device__ static bool crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd);
+    __inline__ __device__ static float modulo(float value, float size);
 };
 
 __inline__ __device__ __host__ float2 operator+(float2 const& p, float2 const& q)
@@ -190,6 +191,25 @@ __inline__ __device__ void Math::angleCorrection(int &angle)
     angle = ((angle % 360) + 360) % 360;
 }
 
+__inline__ __device__ bool Math::isInBetweenModulo(float value1, float value2, float candidate, float size)
+{
+    auto valueMod1 = modulo(value1, size);
+    auto valueMod2 = modulo(value2, size);
+    auto candidateMod = modulo(candidate, size);
+
+    if (valueMod1 == valueMod2 && valueMod1 != candidateMod) {
+        return false;
+    }
+    if (candidateMod < valueMod1) {
+        candidateMod += size;
+        valueMod2 += size;
+    }
+    if (valueMod2 < candidateMod) {
+        valueMod2 += size;
+    }
+    return valueMod2 - valueMod1 < size;
+}
+
 __inline__ __device__ bool Math::isAngleInBetween(float angle1, float angle2, float angleBetweenCandidate)
 {
     if (angle1 == angle2 && angle1 != angleBetweenCandidate) {
@@ -240,22 +260,22 @@ __inline__ __device__ float2 Math::crossProdProjected(float3 const& p, float3 co
     return {p.y * q.z - p.z * q.y, p.z * q.x - p.x * q.z};
 }
 
-__host__ __device__ __inline__ float Math::length(float2 const & v)
+__device__ __inline__ float Math::length(float2 const & v)
 {
     return sqrt(v.x * v.x + v.y * v.y);
 }
 
-__host__ __device__ __inline__ float Math::lengthMax(float2 const& v)
+__device__ __inline__ float Math::lengthMax(float2 const& v)
 {
     return max(abs(v.x), abs(v.y));
 }
 
-__host__ __device__ __inline__ float Math::length(int2 const & v)
+__device__ __inline__ float Math::length(int2 const & v)
 {
     return sqrt(static_cast<float>(v.x * v.x + v.y * v.y));
 }
 
-__host__ __device__ __inline__ float Math::lengthSquared(float2 const & v)
+__device__ __inline__ float Math::lengthSquared(float2 const & v)
 {
     return v.x * v.x + v.y * v.y;
 }
@@ -356,4 +376,9 @@ __inline__ __device__ bool Math::crossing(float2 const& segmentStart, float2 con
     }
 
     return lambda >= NEAR_ZERO && lambda <= 1 - NEAR_ZERO;
+}
+
+__inline__ __device__ float Math::modulo(float value, float size)
+{
+    return fmodf(fmodf(value, size) + size, size);
 }

@@ -91,7 +91,7 @@ void _RadiationSourcesWindow::processIntern()
                         .textWidth(RightColumnWidth)
                         .min(-4.0f)
                         .max(4.0f)
-                        .format("%.2f")
+                        .format("%.3f")
                         .defaultValue(&origSource.velX),
                     &source.velX);
                 AlienImGui::SliderFloat(
@@ -100,7 +100,7 @@ void _RadiationSourcesWindow::processIntern()
                         .textWidth(RightColumnWidth)
                         .min(-4.0f)
                         .max(4.0f)
-                        .format("%.2f")
+                        .format("%.3f")
                         .defaultValue(&origSource.velY),
                     &source.velY);
                 AlienImGui::SliderFloat(
