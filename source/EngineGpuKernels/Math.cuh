@@ -193,6 +193,9 @@ __inline__ __device__ void Math::angleCorrection(int &angle)
 
 __inline__ __device__ bool Math::isInBetweenModulo(float value1, float value2, float candidate, float size)
 {
+    if (value2 - value1 >= size) {
+        return true;
+    }
     auto valueMod1 = modulo(value1, size);
     auto valueMod2 = modulo(value2, size);
     auto candidateMod = modulo(candidate, size);
