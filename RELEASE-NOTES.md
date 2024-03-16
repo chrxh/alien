@@ -1,5 +1,13 @@
 # Release notes
 
+## [4.8.1] - 2024-03-16
+### Changed
+- engine: the dying state of cells can spread to cells under construction even if they belong to other an other creature
+
+### Fixed
+- engine: construction with infinite repetitions fixed
+- gui: selection of large sections in edit mode fixed
+
 ## [4.8.0] - 2024-02-25
 ### Added
 - gui/simulation view: borderless rendering (world is rendered periodically) + parameter to (de)activate
