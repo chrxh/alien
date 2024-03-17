@@ -607,6 +607,8 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
                 auto const& connectedCell = cell->connections[i].cell;
                 if (connectedCell->creatureId == cell->creatureId) {
                     atomicExch(&connectedCell->livingState, LivingState_Dying);
+                } else {
+                    atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_Dying);
                 }
             }
         }

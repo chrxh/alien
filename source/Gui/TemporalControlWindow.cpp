@@ -169,7 +169,7 @@ void _TemporalControlWindow::processStepForwardButton()
 void _TemporalControlWindow::processCreateFlashbackButton()
 {
     auto result = AlienImGui::ToolbarButton(ICON_FA_CAMERA);
-    AlienImGui::Tooltip("Create flashback");
+    AlienImGui::Tooltip("Create flashback: It saves the content of the current world to the memory.");
     if (result) {
         delayedExecution([this] { onSnapshot(); });
         
@@ -181,7 +181,7 @@ void _TemporalControlWindow::processLoadFlashbackButton()
 {
     ImGui::BeginDisabled(!_snapshot);
     auto result = AlienImGui::ToolbarButton(ICON_FA_UNDO);
-    AlienImGui::Tooltip("Load flashback");
+    AlienImGui::Tooltip("Load flashback: It loads the saved world from the memory.");
     if (result) {
         delayedExecution([this] { applySnapshot(*_snapshot); });
         _simController->removeSelection();
