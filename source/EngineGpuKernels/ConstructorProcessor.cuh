@@ -191,9 +191,14 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 
     ConstructionData result;
     result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
-    result.lastConstructionCell = getLastConstructedCell(cell);
-    if (!result.lastConstructionCell) {
+    result.hasInfiniteRepetitions = GenomeDecoder::hasInfiniteRepetitions(constructor);
+    if (!GenomeDecoder::hasInfiniteRepetitions(constructor) && constructor.genomeCurrentNodeIndex == 0 && constructor.genomeCurrentRepetition == 0) {
+        result.lastConstructionCell = nullptr;
+    } else {
+        result.lastConstructionCell = getLastConstructedCell(cell);
+    }
 
+    if (!result.lastConstructionCell) {
         //finished => reset indices
         constructor.genomeCurrentNodeIndex = 0;
         constructor.genomeCurrentRepetition = 0;
@@ -209,7 +214,6 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.genomeCurrentBytePosition = GenomeDecoder::getNodeAddress(constructor.genome, constructor.genomeSize, constructor.genomeCurrentNodeIndex);
     result.isLastNode = GenomeDecoder::isLastNode(constructor);
     result.isLastNodeOfLastRepetition = result.isLastNode && GenomeDecoder::isLastRepetition(constructor);
-    result.hasInfiniteRepetitions = GenomeDecoder::hasInfiniteRepetitions(constructor);
 
     CudaShapeGenerator shapeGenerator;
     auto shape = result.genomeHeader.shape % ConstructionShape_Count;
@@ -300,9 +304,6 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
 __inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCell(Cell* hostCell)
 {
     auto const& constructor = hostCell->cellFunctionData.constructor;
-    if (constructor.genomeCurrentNodeIndex == 0) {
-        return nullptr;
-    }
     if (constructor.lastConstructedCellId != 0) {
         for (int i = 0; i < hostCell->numConnections; ++i) {
             auto const& connectedCell = hostCell->connections[i].cell;
