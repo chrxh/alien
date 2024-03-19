@@ -208,7 +208,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
 
 TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
 {
-    auto genome = GenomeDescription().setHeader(GenomeHeaderDescription().setSingleConstruction(true));
+    auto genome = GenomeDescription().setHeader(GenomeHeaderDescription().setNumBranches(ConstructorNumBranches_1));
     
     DataDescription data;
     data.addCells({

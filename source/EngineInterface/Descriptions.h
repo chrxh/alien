@@ -109,9 +109,9 @@ struct ConstructorDescription
     uint64_t lastConstructedCellId = 0;
     int genomeCurrentNodeIndex = 0;
     int genomeCurrentRepetition = 0;
+    int currentBranch = 0;
     int offspringCreatureId = 0;
     int offspringMutationId = 0;
-    uint32_t stateFlags = 0x0;  //bit 0: isConstructionBuilt
 
     ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
@@ -139,15 +139,6 @@ struct ConstructorDescription
     ConstructorDescription& setGenomeCurrentRepetition(int value)
     {
         genomeCurrentRepetition = value;
-        return *this;
-    }
-    bool isConstructionBuilt() const
-    {
-        return (stateFlags & 0x1) != 0;
-    }
-    ConstructorDescription& setConstructionBuilt(bool value)
-    {
-        stateFlags = (stateFlags & (~0x1)) | (value ? 0x1 : 0);
         return *this;
     }
     int getNumInheritedGenomeNodes() const { return numInheritedGenomeNodes; }
