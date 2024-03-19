@@ -137,7 +137,7 @@ protected:
         }
         auto expectedGenome = GenomeDescriptionService::convertBytesToDescription(expected);
         auto actualGenome = GenomeDescriptionService::convertBytesToDescription(actual);
-        if (expectedGenome.header.shape != actualGenome.header.shape) {
+        if (expectedGenome.header != actualGenome.header) {
             return false;
         }
         if (expectedGenome.cells.size() != actualGenome.cells.size()) {

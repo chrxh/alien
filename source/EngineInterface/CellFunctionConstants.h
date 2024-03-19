@@ -94,6 +94,17 @@ enum ConstructorAlignment_
     ConstructorAngleAlignment_Count = 6
 };
 
+using ConstructorNumBranches = int;
+enum ConstructorNumBranches_
+{
+    ConstructorNumBranches_1 = 0,
+    ConstructorNumBranches_2 = 1,
+    ConstructorNumBranches_3 = 2,
+    ConstructorNumBranches_4 = 3,
+    ConstructorNumBranches_5 = 4,
+    ConstructorNumBranches_Count = 5,
+};
+
 using InjectorMode = int;
 enum InjectorMode_
 {

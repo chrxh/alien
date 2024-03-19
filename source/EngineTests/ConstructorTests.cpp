@@ -15,8 +15,6 @@ public:
     static SimulationParameters getParameters()
     {
         SimulationParameters result;
-        result.innerFriction = 0;
-        result.baseValues.friction = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
             result.baseValues.radiationCellAgeStrength[i] = 0;
         }
@@ -75,7 +73,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     DataDescription data;
 
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
-        GenomeDescription().setHeader(GenomeHeaderDescription().setSingleConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setHeader(GenomeHeaderDescription().setNumBranches(ConstructorNumBranches_1)).setCells({CellGenomeDescription()}));
 
     auto constructor = ConstructorDescription().setGenome(genome).setConstructionBuilt(true);
 
@@ -104,7 +102,7 @@ TEST_F(ConstructorTests, notActivated)
     DataDescription data;
 
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
-        GenomeDescription().setHeader(GenomeHeaderDescription().setSingleConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setHeader(GenomeHeaderDescription().setNumBranches(ConstructorNumBranches_1)).setCells({CellGenomeDescription()}));
     auto constructor = ConstructorDescription().setGenome(genome);
 
     data.addCell(CellDescription()
@@ -442,9 +440,8 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
 TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
 {
     auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
-    auto genome = GenomeDescriptionService::convertDescriptionToBytes(
-        GenomeDescription()
-            .setHeader(GenomeHeaderDescription().setSingleConstruction(false))
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()
+                                                                          .setHeader(GenomeHeaderDescription().setNumBranches(ConstructorNumBranches_2))
                                                                           .setCells(
                                                                               {CellGenomeDescription(),
                                                                                CellGenomeDescription(),
@@ -689,7 +686,7 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
 TEST_F(ConstructorTests, constructFirstCell_singleConstruction)
 {
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
-        GenomeDescription().setHeader(GenomeHeaderDescription().setSeparateConstruction(true).setSingleConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setHeader(GenomeHeaderDescription().setSeparateConstruction(true).setNumBranches(ConstructorNumBranches_1)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -1692,7 +1689,7 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
 TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
 {
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
-        GenomeDescription().setHeader(GenomeHeaderDescription().setSeparateConstruction(false).setSingleConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setHeader(GenomeHeaderDescription().setSeparateConstruction(false).setNumBranches(ConstructorNumBranches_1)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -2014,4 +2011,32 @@ TEST_F(ConstructorTests, allowLargeConstructionAngle2)
 
     EXPECT_TRUE(approxCompare(11.0f, actualConstructedCell.pos.x));
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.y));
+}
+
+TEST_F(ConstructorTests, repetitionsAndBranches)
+{
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(
+        GenomeDescription()
+            .setHeader(GenomeHeaderDescription().setNumBranches(ConstructorNumBranches_3).setNumRepetitions(4).setSeparateConstruction(false))
+            .setCells({CellGenomeDescription(), CellGenomeDescription(), CellGenomeDescription()}));
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2 * 3 * 4 * 3)
+            .setMaxConnections(6)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome).setActivationMode(20)),
+    });
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(13 * 3 * 4 * 3 * 20);
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(1 + 3 * 4 * 3, actualData.cells.size());
+    auto actualConstructor = getCell(actualData, 1);
+
+    EXPECT_EQ(3, actualConstructor.connections.size());
 }

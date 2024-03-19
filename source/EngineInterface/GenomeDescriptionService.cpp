@@ -157,7 +157,7 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
     std::vector<uint8_t> result;
     result.reserve(cells.size() * (Const::CellBasicBytes + Const::ConstructorFixedBytes) + Const::GenomeHeaderSize);
     writeByte(result, genome.header.shape);
-    writeBool(result, genome.header.singleConstruction);
+    writeByte(result, genome.header.numBranches);
     writeBool(result, genome.header.separateConstruction);
     writeByte(result, genome.header.angleAlignment);
     writeStiffness(result, genome.header.stiffness);
@@ -271,7 +271,7 @@ namespace
         auto& bytePosition = result.lastBytePosition;
 
         result.genome.header.shape = readByte(data, bytePosition) % ConstructionShape_Count;
-        result.genome.header.singleConstruction = readBool(data, bytePosition);
+        result.genome.header.numBranches = readByte(data, bytePosition) % ConstructorNumBranches_Count;
         result.genome.header.separateConstruction = readBool(data, bytePosition);
         result.genome.header.angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;
         result.genome.header.stiffness = readStiffness(data, bytePosition);
@@ -413,7 +413,7 @@ int GenomeDescriptionService::getNumNodesRecursively(std::vector<uint8_t> const&
     }
 
     auto numRepetitions = genome.header.numRepetitions == std::numeric_limits<int>::max() ? 1 : genome.header.numRepetitions;
-    return includeRepetitions ? result * numRepetitions : result;
+    return includeRepetitions ? result * numRepetitions * (genome.header.numBranches + 1) : result;
 }
 
 int GenomeDescriptionService::getNumRepetitions(std::vector<uint8_t> const& data)
