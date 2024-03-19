@@ -141,6 +141,11 @@ struct ConstructorDescription
         genomeCurrentRepetition = value;
         return *this;
     }
+    ConstructorDescription& setCurrentBranch(int value)
+    {
+        currentBranch = value;
+        return *this;
+    }
     int getNumInheritedGenomeNodes() const { return numInheritedGenomeNodes; }
     bool isGenomeInherited() const { return numInheritedGenomeNodes != 0; }
     ConstructorDescription& setNumInheritedGenomeNodes(int value)

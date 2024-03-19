@@ -345,11 +345,9 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
             tab.genome.header.separateConstruction);
         table.next();
         if (!tab.genome.header.separateConstruction) {
-            int numBranches = tab.genome.header.numBranches + 1;  // +1 because ConstructorNumBranches_1 = 0
             AlienImGui::InputInt(
                 AlienImGui::InputIntParameters().name("Number of constructions").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeNumBranchesTooltip),
-                numBranches);
-            tab.genome.header.numBranches = numBranches - 1;
+                tab.genome.header.numBranches);
             table.next();
         }
         AlienImGui::InputInt(
@@ -941,7 +939,7 @@ void _GenomeEditorWindow::validationAndCorrection(GenomeHeaderDescription& heade
     header.stiffness = std::max(0.0f, std::min(1.0f, header.stiffness));
     header.connectionDistance = std::max(0.5f, std::min(1.5f, header.connectionDistance));
     header.numRepetitions = std::max(1, header.numRepetitions);
-    header.numBranches = (header.numBranches + ConstructorNumBranches_Count) % ConstructorNumBranches_Count;
+    header.numBranches = header.getNumBranches();
 }
 
 void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const

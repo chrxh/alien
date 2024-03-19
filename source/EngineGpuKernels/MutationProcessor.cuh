@@ -259,8 +259,7 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
         return;
     }
     if (delta == Const::GenomeHeaderNumBranchesPos) {
-        auto numBranches = data.numberGen1.randomBool() ? ConstructorNumBranches_1 : data.numberGen1.randomByte();
-        subgenome[delta] = numBranches;
+        subgenome[delta] = data.numberGen1.randomBool() ? 1 : data.numberGen1.randomByte();
     }
 
     auto mutatedByte = data.numberGen1.randomByte();
@@ -468,7 +467,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     GenomeDecoder::setRandomCellFunctionData(data, targetGenome, nodeAddress + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeHeaderSize);
     if (newCellFunction == CellFunction_Constructor && !makeSelfCopy) {
         GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);      //currently no sub-genome with separation property wished
-        auto numBranches = data.numberGen1.randomBool() ? ConstructorNumBranches_1 : data.numberGen1.randomByte();
+        auto numBranches = data.numberGen1.randomBool() ? 1 : data.numberGen1.randomByte();
         GenomeDecoder::setNextConstructorNumBranches(targetGenome, nodeAddress, numBranches);
     }
 
