@@ -43,7 +43,7 @@ public:
     __inline__ __device__ static void copyGenome(SimulationData& data, CellFunctionSource& source, int genomeBytePosition, CellFunctionTarget& target);
     __inline__ __device__ static bool isSeparating(uint8_t* genome);
     __inline__ __device__ static int getNumRepetitions(uint8_t* genome, bool countInfinityAsOne = false);
-    __inline__ __device__ static ConstructorNumBranches getNumBranches(uint8_t* genome);
+    __inline__ __device__ static int getNumBranches(uint8_t* genome);
 
     //node-wide methods
     __inline__ __device__ static int getNextCellFunctionDataSize(uint8_t* genome, int genomeSize, int nodeAddress, bool withSubgenome = true);
@@ -57,7 +57,7 @@ public:
     __inline__ __device__ static void setNextConstructionAngle1(uint8_t* genome, int nodeAddress, uint8_t angle);
     __inline__ __device__ static void setNextConstructionAngle2(uint8_t* genome, int nodeAddress, uint8_t angle);
     __inline__ __device__ static void setNextConstructorSeparation(uint8_t* genome, int nodeAddress, bool separation);
-    __inline__ __device__ static void setNextConstructorNumBranches(uint8_t* genome, int nodeAddress, ConstructorNumBranches numBranches);
+    __inline__ __device__ static void setNextConstructorNumBranches(uint8_t* genome, int nodeAddress, int numBranches);
     __inline__ __device__ static bool containsSectionSelfReplication(uint8_t* genome, int genomeSize);
     __inline__ __device__ static void
     setRandomCellFunctionData(SimulationData& data, uint8_t* genome, int nodeAddress, CellFunction const& cellFunction, bool makeSelfCopy, int subGenomeSize);
@@ -342,7 +342,7 @@ __inline__ __device__ bool GenomeDecoder::isFinished(ConstructorFunction const& 
     if (hasEmptyGenome(constructor)) {
         return true;
     }
-    return (getNumBranches(constructor.genome) + 1) <= constructor.currentBranch;   // +1 since ConstructorNumBranches_1=0
+    return getNumBranches(constructor.genome) <= constructor.currentBranch;
 }
 
 template <typename CellFunctionSource, typename CellFunctionTarget>
@@ -373,9 +373,9 @@ __inline__ __device__ bool GenomeDecoder::isSeparating(uint8_t* genome)
     return GenomeDecoder::convertByteToBool(genome[Const::GenomeHeaderSeparationPos]);
 }
 
-__inline__ __device__ ConstructorNumBranches GenomeDecoder::getNumBranches(uint8_t* genome)
+__inline__ __device__ int GenomeDecoder::getNumBranches(uint8_t* genome)
 {
-    return genome[Const::GenomeHeaderNumBranchesPos] % ConstructorNumBranches_Count;
+    return (genome[Const::GenomeHeaderNumBranchesPos] + 5) % 6 + 1;
 }
 
 __inline__ __device__ int GenomeDecoder::getNumRepetitions(uint8_t* genome, bool countInfinityAsOne)
@@ -638,7 +638,7 @@ __inline__ __device__ void GenomeDecoder::setNextConstructorSeparation(uint8_t* 
     genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorFixedBytes + 3 + Const::GenomeHeaderSeparationPos] = convertBoolToByte(separation);
 }
 
-__inline__ __device__ void GenomeDecoder::setNextConstructorNumBranches(uint8_t* genome, int nodeAddress, ConstructorNumBranches numBranches)
+__inline__ __device__ void GenomeDecoder::setNextConstructorNumBranches(uint8_t* genome, int nodeAddress, int numBranches)
 {
     genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorFixedBytes + 3 + Const::GenomeHeaderNumBranchesPos] = static_cast<uint8_t>(numBranches);
 }

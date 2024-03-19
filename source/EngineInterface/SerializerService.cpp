@@ -44,7 +44,6 @@
 namespace
 {
     auto constexpr Id_GenomeHeader_Shape = 0;
-    auto constexpr Id_GenomeHeader_SingleConstruction = 1;
     auto constexpr Id_GenomeHeader_SeparateConstruction = 2;
     auto constexpr Id_GenomeHeader_AngleAlignment = 3;
     auto constexpr Id_GenomeHeader_Stiffness = 4;
@@ -281,7 +280,7 @@ namespace cereal
                     GenomeDescription genomeDesc;
                     genomeDesc.cells = std::get<std::vector<CellGenomeDescription>>(genomeData);
                     genomeDesc.header.numBranches =
-                        std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SingleConstruction)) ? ConstructorNumBranches_1 : ConstructorNumBranches_2;
+                        std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SingleConstruction)) ? 1 : 2;
                     genomeDesc.header.separateConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SeparateConstruction));
                     genomeDesc.header.angleAlignment = std::get<int>(auxiliaries.at(Id_ConstructorGenome_AngleAlignment));
                     genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_ConstructorGenome_Stiffness));
@@ -459,7 +458,7 @@ namespace cereal
         //>>>
         if (task == SerializationTask::Load) {
             if (auxiliaries.contains(Id_Constructor_SingleConstruction)) {
-                data.numBranches = std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction)) ? ConstructorNumBranches_1 : ConstructorNumBranches_2;
+                data.numBranches = std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction)) ? 1 : 2;
             }
         }
         //<<<
@@ -551,7 +550,7 @@ namespace cereal
                 GenomeDescription genomeDesc;
                 ar(genomeDesc.cells);
                 genomeDesc.header.numBranches =
-                    std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction)) ? ConstructorNumBranches_1 : ConstructorNumBranches_2;
+                    std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction)) ? 1 : 2;
                 genomeDesc.header.separateConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SeparateConstruction));
                 genomeDesc.header.angleAlignment = std::get<int>(auxiliaries.at(Id_Constructor_AngleAlignment));
                 genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));

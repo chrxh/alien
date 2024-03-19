@@ -325,7 +325,7 @@ namespace
                         result.cells.at(cellIndex1).connectionIndices.insert(toInt(cellIndex2));
                         result.cells.at(cellIndex2).connectionIndices.insert(toInt(cellIndex1));
                     }
-                    if (subGenome.header.numBranches != ConstructorNumBranches_1) {
+                    if (subGenome.header.numBranches != 1) {
                         result.cells.at(cellIndex2).multipleConstructor = true;
                     }
                 }
