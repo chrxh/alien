@@ -6,7 +6,7 @@ namespace Const
 
     auto constexpr GenomeHeaderSize = 9;
     auto constexpr GenomeHeaderShapePos = 0;
-    auto constexpr GenomeHeaderSingleConstruction = 1;
+    auto constexpr GenomeHeaderNumBranchesPos = 1;
     auto constexpr GenomeHeaderSeparationPos = 2;
     auto constexpr GenomeHeaderAlignmentPos = 3;
     auto constexpr GenomeHeaderStiffnessPos = 4;

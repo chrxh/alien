@@ -41,7 +41,7 @@ struct Particle
 struct GenomeHeader
 {
     ConstructionShape shape;
-    bool singleConstruction;
+    int numBranches;
     bool separateConstruction;
     ConstructorAngleAlignment angleAlignment;
     float stiffness;
@@ -109,15 +109,12 @@ struct ConstructorFunction
     uint64_t lastConstructedCellId;
     uint16_t genomeCurrentNodeIndex;
     uint16_t genomeCurrentRepetition;
+    uint8_t currentBranch;
     uint32_t offspringCreatureId;  //will be filled when self-replication starts
     uint32_t offspringMutationId;
-    uint32_t stateFlags;  //bit 0: isConstructionBuilt
 
     //temp
     bool isComplete;
-
-    __device__ __inline__ bool isConstructionBuilt() const { return (stateFlags & 0x1) != 0; }
-    __device__ __inline__ void setConstructionBuilt(bool value) { stateFlags = (stateFlags & (~0x1)) | (value ? 0x1 : 0); }
 };
 
 struct SensorFunction
