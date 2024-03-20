@@ -133,7 +133,7 @@ __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t*
                     nodeAddress += deltaSubGenomeStartPos;
                     subGenomeEndAddresses[depth++] = nodeAddress + subGenomeSize;
 
-                    auto repetitions = GenomeDecoder::getNumRepetitions(genome + nodeAddress, true) * (GenomeDecoder::getNumBranches(genome + nodeAddress) + 1);
+                    auto repetitions = GenomeDecoder::getNumRepetitions(genome + nodeAddress, true) * GenomeDecoder::getNumBranches(genome + nodeAddress);
                     subGenomeNumRepetitions[depth] = subGenomeNumRepetitions[depth - 1] * repetitions;
                     nodeAddress += Const::GenomeHeaderSize;
                     goToNextSibling = false;
