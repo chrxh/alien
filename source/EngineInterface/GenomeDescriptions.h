@@ -421,7 +421,7 @@ struct GenomeHeaderDescription
 
     auto operator<=>(GenomeHeaderDescription const&) const = default;
 
-    int getNumBranches() const { return (numBranches + 5) % 6 + 1; }
+    int getNumBranches() const { return separateConstruction ? 1 : (numBranches + 5) % 6 + 1; }
 
     GenomeHeaderDescription& setNumBranches(int value)
     {

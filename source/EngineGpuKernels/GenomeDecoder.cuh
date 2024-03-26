@@ -375,7 +375,7 @@ __inline__ __device__ bool GenomeDecoder::isSeparating(uint8_t* genome)
 
 __inline__ __device__ int GenomeDecoder::getNumBranches(uint8_t* genome)
 {
-    return (genome[Const::GenomeHeaderNumBranchesPos] + 5) % 6 + 1;
+    return isSeparating(genome) ? 1 : (genome[Const::GenomeHeaderNumBranchesPos] + 5) % 6 + 1;
 }
 
 __inline__ __device__ int GenomeDecoder::getNumRepetitions(uint8_t* genome, bool countInfinityAsOne)
