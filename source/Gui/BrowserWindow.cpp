@@ -551,7 +551,7 @@ void _BrowserWindow::processSimulationList()
     if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, -scale(WorkspaceBottomSpace)), 0.0f)) {
         ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
         ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Description);
-        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_Likes);
+        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(140.0f), NetworkResourceColumnId_Likes);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
@@ -654,7 +654,7 @@ void _BrowserWindow::processGenomeList()
     if (ImGui::BeginTable("Browser", 9, flags, ImVec2(0, -scale(WorkspaceBottomSpace)), 0.0f)) {
         ImGui::TableSetupColumn("Genome", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
         ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Description);
-        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_Likes);
+        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(140.0f), NetworkResourceColumnId_Likes);
         ImGui::TableSetupColumn(
             "Timestamp",
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
