@@ -11,6 +11,7 @@
 #include <optional>
 #include <memory>
 #include <initializer_list>
+#include <cstdint>
 
 #include "Exceptions.h"
 #include "Vector2D.h"

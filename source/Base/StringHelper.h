@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "Base/Definitions.h"
+
 class StringHelper
 {
 public:
