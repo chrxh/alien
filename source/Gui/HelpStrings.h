@@ -272,8 +272,7 @@ namespace Const
         "be multiples of certain values. This allows for greater stability of the created networks, as the angles would otherwise be more susceptible to "
         "external influences. Choosing 60 degrees is recommended here, as it allows for the accurate representation of most geometries.";
 
-    std::string const GenomeMultipleConstructionsTooltip =
-        "This flag specifies whether the construction described by the genome (repetitions included) should be built multiple times or not.";
+    std::string const GenomeNumBranchesTooltip = "Specifies how many constructions (including repetitions) should be created and connected to the constructor.";
 
     std::string const GenomeRepetitionsPerConstructionTooltip =
         "This value specifies how many times the cell network described in the genome should be concatenated for each construction. For a value greater "
@@ -358,7 +357,8 @@ namespace Const
         }
     };
 
-    std::string const GenomeNumCellsRecursivelyTooltip = "The number of all encoded cells in the genome including its sub-genomes.";
+    std::string const GenomeNumCellsRecursivelyTooltip =
+        "The number of all encoded cells in the genome including its sub-genomes, repetitions and number of constructions.";
 
     std::string const GenomeBytesTooltip = "The length of the genome in bytes.";
 

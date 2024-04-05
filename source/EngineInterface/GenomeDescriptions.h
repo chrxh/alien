@@ -410,7 +410,7 @@ struct CellGenomeDescription
 struct GenomeHeaderDescription
 {
     ConstructionShape shape = ConstructionShape_Custom;
-    bool singleConstruction = false;
+    int numBranches = 1;    //between 1 and 6 in modulo
     bool separateConstruction = true;
     ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
     float stiffness = 1.0f;
@@ -421,9 +421,11 @@ struct GenomeHeaderDescription
 
     auto operator<=>(GenomeHeaderDescription const&) const = default;
 
-    GenomeHeaderDescription& setSingleConstruction(bool value)
+    int getNumBranches() const { return separateConstruction ? 1 : (numBranches + 5) % 6 + 1; }
+
+    GenomeHeaderDescription& setNumBranches(int value)
     {
-        singleConstruction = value;
+        numBranches = value;
         return *this;
     }
     GenomeHeaderDescription& setSeparateConstruction(bool value)
