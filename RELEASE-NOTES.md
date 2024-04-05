@@ -1,5 +1,14 @@
 # Release notes
 
+## [4.8.2] - 2024-04-05
+### Changed
+- engine, genome editor: multiple construction flag is replaced by number of constructions
+- engine: if construction process failed, destruction is initiated (via dying cell state)
+- engine: gap in the completeness check for multiple constructions closed by taking the number of constructions into account
+
+### Fixed
+- serialization: current position in the genome for constructors was not loaded correctly
+
 ## [4.8.1] - 2024-03-16
 ### Changed
 - engine: the dying state of cells can spread to cells under construction even if they belong to other an other creature
