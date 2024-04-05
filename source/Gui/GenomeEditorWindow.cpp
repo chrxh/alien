@@ -340,12 +340,16 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
                 tab.genome.header.angleAlignment);
         }
         table.next();
-        auto multipleBranches = !tab.genome.header.singleConstruction;
         AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Multiple constructions").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeMultipleConstructionsTooltip),
-            multipleBranches);
-        tab.genome.header.singleConstruction = !multipleBranches;
+            AlienImGui::CheckboxParameters().name("Separation").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeSeparationConstructionTooltip),
+            tab.genome.header.separateConstruction);
         table.next();
+        if (!tab.genome.header.separateConstruction) {
+            AlienImGui::InputInt(
+                AlienImGui::InputIntParameters().name("Number of constructions").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeNumBranchesTooltip),
+                tab.genome.header.numBranches);
+            table.next();
+        }
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
                 .name("Repetitions per construction")
@@ -372,10 +376,6 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
                     .tooltip(Const::GenomeConcatenationAngle2),
                 tab.genome.header.concatenationAngle2);
         }
-        table.next();
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Separation").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeSeparationConstructionTooltip),
-            tab.genome.header.separateConstruction);
         table.end();
     }
     validationAndCorrection(tab.genome.header);
@@ -934,11 +934,12 @@ void _GenomeEditorWindow::showPreview(TabData& tab)
     }
 }
 
-void _GenomeEditorWindow::validationAndCorrection(GenomeHeaderDescription& info) const
+void _GenomeEditorWindow::validationAndCorrection(GenomeHeaderDescription& header) const
 {
-    info.stiffness = std::max(0.0f, std::min(1.0f, info.stiffness));
-    info.connectionDistance = std::max(0.5f, std::min(1.5f, info.connectionDistance));
-    info.numRepetitions = std::max(1, info.numRepetitions);
+    header.stiffness = std::max(0.0f, std::min(1.0f, header.stiffness));
+    header.connectionDistance = std::max(0.5f, std::min(1.5f, header.connectionDistance));
+    header.numRepetitions = std::max(1, header.numRepetitions);
+    header.numBranches = header.getNumBranches();
 }
 
 void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const

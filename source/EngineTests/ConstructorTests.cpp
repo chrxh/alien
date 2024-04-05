@@ -15,8 +15,6 @@ public:
     static SimulationParameters getParameters()
     {
         SimulationParameters result;
-        result.innerFriction = 0;
-        result.baseValues.friction = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
             result.baseValues.radiationCellAgeStrength[i] = 0;
         }
@@ -75,9 +73,9 @@ TEST_F(ConstructorTests, alreadyFinished)
     DataDescription data;
 
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
-        GenomeDescription().setHeader(GenomeHeaderDescription().setSingleConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setHeader(GenomeHeaderDescription().setNumBranches(1)).setCells({CellGenomeDescription()}));
 
-    auto constructor = ConstructorDescription().setGenome(genome).setConstructionBuilt(true);
+    auto constructor = ConstructorDescription().setGenome(genome).setCurrentBranch(1);
 
     data.addCell(
         CellDescription()
@@ -104,7 +102,7 @@ TEST_F(ConstructorTests, notActivated)
     DataDescription data;
 
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
-        GenomeDescription().setHeader(GenomeHeaderDescription().setSingleConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setHeader(GenomeHeaderDescription().setNumBranches(1)).setCells({CellGenomeDescription()}));
     auto constructor = ConstructorDescription().setGenome(genome);
 
     data.addCell(CellDescription()
@@ -199,7 +197,8 @@ TEST_F(ConstructorTests, constructFirstCell_oneCellGenome_infiniteRepetitions)
 
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, {1});
-    EXPECT_TRUE(std::get<ConstructorDescription>(*actualHostCell.cellFunction).isConstructionBuilt());
+    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeCurrentRepetition);
+    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentBranch);
     EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
 }
 
@@ -227,7 +226,8 @@ TEST_F(ConstructorTests, constructFirstCell_twoCellGenome_infiniteRepetitions)
 
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, {1});
-    EXPECT_FALSE(std::get<ConstructorDescription>(*actualHostCell.cellFunction).isConstructionBuilt());
+    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeCurrentRepetition);
+    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentBranch);
     EXPECT_EQ(LivingState_UnderConstruction, actualConstructedCell.livingState);
 }
 
@@ -278,7 +278,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionNotBui
             .setEnergy(100)
             .setMaxConnections(1)
             .setExecutionOrderNumber(4)
-            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setConstructionBuilt(false)),
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome)),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -316,7 +316,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_repeatedConstructi
             .setEnergy(100)
             .setMaxConnections(2)
             .setExecutionOrderNumber(4)
-            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setConstructionBuilt(false).setGenomeCurrentRepetition(1)),
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setGenomeCurrentRepetition(1)),
         CellDescription().setId(4).setPos({10.0f, 11.0f}).setEnergy(100).setMaxConnections(1),
     });
     data.addConnection(1, 2);
@@ -357,7 +357,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionBuilt)
             .setEnergy(100)
             .setMaxConnections(2)
             .setExecutionOrderNumber(4)
-            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setConstructionBuilt(true)),
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setCurrentBranch(1)),
         CellDescription().setId(4).setPos({10.0f, 11.0f}).setEnergy(100).setMaxConnections(1),
     });
     data.addConnection(1, 2);
@@ -399,7 +399,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_infiniteConstructi
             .setEnergy(100)
             .setMaxConnections(2)
             .setExecutionOrderNumber(4)
-            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setConstructionBuilt(true)),
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setCurrentBranch(1)),
         CellDescription().setId(4).setPos({10.0f, 11.0f}).setEnergy(100).setMaxConnections(1),
     });
     data.addConnection(1, 2);
@@ -442,9 +442,8 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
 TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
 {
     auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
-    auto genome = GenomeDescriptionService::convertDescriptionToBytes(
-        GenomeDescription()
-            .setHeader(GenomeHeaderDescription().setSingleConstruction(false))
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()
+                                                                          .setHeader(GenomeHeaderDescription().setNumBranches(2))
                                                                           .setCells(
                                                                               {CellGenomeDescription(),
                                                                                CellGenomeDescription(),
@@ -560,7 +559,7 @@ TEST_F(ConstructorTests, DISABLED_constructFirstCell_completenessCheck_underCons
             .setEnergy(100)
             .setMaxConnections(2)
             .setExecutionOrderNumber(4)
-            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setConstructionBuilt(true)),
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setCurrentBranch(1)),
         CellDescription()
             .setId(3)
             .setPos({12.0f, 10.0f})
@@ -568,7 +567,7 @@ TEST_F(ConstructorTests, DISABLED_constructFirstCell_completenessCheck_underCons
             .setMaxConnections(2)
             .setLivingState(LivingState_UnderConstruction)
             .setExecutionOrderNumber(4)
-            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setConstructionBuilt(false)),
+            .setCellFunction(ConstructorDescription().setGenome(otherGenome).setCurrentBranch(0)),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -608,7 +607,11 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(1, actualHostCell.connections.size());
-    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeCurrentNodeIndex);
+
+    auto const& actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentRepetition);
+    EXPECT_EQ(1, actualConstructor.currentBranch);
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0] * 2, actualHostCell.energy));
     EXPECT_TRUE(approxCompare(1.0f, actualHostCell.activity.channels[0]));
     EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
@@ -648,6 +651,10 @@ TEST_F(ConstructorTests, constructFirstCell_notFinished)
     ASSERT_EQ(2, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, 1);
+    auto const& actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
+    EXPECT_EQ(1, actualConstructor.genomeCurrentNodeIndex);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentRepetition);
+    EXPECT_EQ(0, actualConstructor.currentBranch);
 
     EXPECT_EQ(1, actualHostCell.connections.size());
     EXPECT_EQ(LivingState_Ready, actualHostCell.livingState);
@@ -680,40 +687,13 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
 
     EXPECT_EQ(0, actualHostCell.connections.size());
     EXPECT_EQ(1, actualHostCell.maxConnections);
+    auto const& actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
+    EXPECT_EQ(0, actualConstructor.genomeCurrentRepetition);
+    EXPECT_EQ(0, actualConstructor.currentBranch);
 
     EXPECT_EQ(0, actualConstructedCell.connections.size());
     EXPECT_EQ(0, actualConstructedCell.maxConnections);
-    EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
-}
-
-TEST_F(ConstructorTests, constructFirstCell_singleConstruction)
-{
-    auto genome = GenomeDescriptionService::convertDescriptionToBytes(
-        GenomeDescription().setHeader(GenomeHeaderDescription().setSeparateConstruction(true).setSingleConstruction(true)).setCells({CellGenomeDescription()}));
-
-    DataDescription data;
-    data.addCell(CellDescription()
-                     .setId(1)
-                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
-                     .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
-                     .setCellFunction(ConstructorDescription().setGenome(genome)));
-
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
-
-    ASSERT_EQ(2, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
-    auto actualConstructedCell = getOtherCell(actualData, 1);
-
-    EXPECT_EQ(0, actualHostCell.connections.size());
-    auto const& constructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
-    EXPECT_EQ(0, constructor.genomeCurrentNodeIndex);
-    EXPECT_EQ(0, constructor.genomeCurrentRepetition);
-    EXPECT_TRUE(constructor.isConstructionBuilt());
-
-    EXPECT_EQ(0, actualConstructedCell.connections.size());
     EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
 }
 
@@ -1567,7 +1547,7 @@ TEST_F(ConstructorTests, constructSecondCell_twoCellGenome_infiniteRepetitions)
 
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
-    EXPECT_TRUE(std::get<ConstructorDescription>(*actualHostCell.cellFunction).isConstructionBuilt());
+    EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentBranch);
     EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
 }
 
@@ -1692,7 +1672,7 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
 TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
 {
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
-        GenomeDescription().setHeader(GenomeHeaderDescription().setSeparateConstruction(false).setSingleConstruction(true)).setCells({CellGenomeDescription()}));
+        GenomeDescription().setHeader(GenomeHeaderDescription().setSeparateConstruction(false).setNumBranches(1)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -2014,4 +1994,32 @@ TEST_F(ConstructorTests, allowLargeConstructionAngle2)
 
     EXPECT_TRUE(approxCompare(11.0f, actualConstructedCell.pos.x));
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.y));
+}
+
+TEST_F(ConstructorTests, repetitionsAndBranches)
+{
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(
+        GenomeDescription()
+            .setHeader(GenomeHeaderDescription().setNumBranches(3).setNumRepetitions(4).setSeparateConstruction(false))
+            .setCells({CellGenomeDescription(), CellGenomeDescription(), CellGenomeDescription()}));
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2 * 3 * 4 * 3)
+            .setMaxConnections(6)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome).setActivationMode(20)),
+    });
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(13 * 3 * 4 * 3 * 20);
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(1 + 3 * 4 * 3, actualData.cells.size());
+    auto actualConstructor = getCell(actualData, 1);
+
+    EXPECT_EQ(3, actualConstructor.connections.size());
 }
