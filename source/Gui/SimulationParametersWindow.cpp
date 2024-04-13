@@ -1340,19 +1340,18 @@ void _SimulationParametersWindow::processBase(
                     AlienImGui::SliderFloatParameters()
                         .name("External energy amount")
                         .textWidth(RightColumnWidth)
-                        .colorDependence(true)
                         .min(0.0f)
                         .max(100000000.0f)
                         .format("%.0f")
                         .logarithmic(true)
                         .infinity(true)
-                        .defaultValue(origParameters.externalEnergy)
+                        .defaultValue(&origParameters.externalEnergy)
                         .tooltip(
                             "This parameter can be used to set the amount of energy (per color) of an external energy source. This type of energy can be "
                             "transferred to all constructor cells at a certain rate.\n\nTip: You can explicitly enter a numerical value by selecting the "
                             "slider and then pressing TAB.\n\nWarning: Too much external energy can result in a massive production of cells and slow down or "
                             "even crash the simulation."),
-                    parameters.externalEnergy);
+                    &parameters.externalEnergy);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Inflow")
@@ -1362,7 +1361,7 @@ void _SimulationParametersWindow::processBase(
                         .max(1.0f)
                         .defaultValue(origParameters.externalEnergyInflowFactor)
                         .tooltip(
-                            "Here one can specify the fraction of energy transfer to constructor cells.\n\n For example, a value of 0.05 means that each time "
+                            "Here one can specify the fraction of energy transfer to constructor cells.\n\nFor example, a value of 0.05 means that each time "
                             "a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy source."),
                     parameters.externalEnergyInflowFactor);
                 AlienImGui::SliderFloat(
@@ -2180,7 +2179,6 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
         parameters.cellFunctionDetonatorChainExplosionProbability[i] =
             std::max(0.0f, std::min(1.0f, parameters.cellFunctionDetonatorChainExplosionProbability[i]));
-        parameters.externalEnergy[i] = std::max(0.0f, parameters.externalEnergy[i]);
         parameters.externalEnergyInflowFactor[i] =
             std::max(0.0f, std::min(1.0f, parameters.externalEnergyInflowFactor[i]));
         parameters.baseValues.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
@@ -2190,6 +2188,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i] =
             std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i]));
     }
+    parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
     parameters.cellMaxAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.cellMaxAgeBalancerInterval));

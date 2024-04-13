@@ -125,9 +125,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (cellFunctionDetonatorChainExplosionProbability[i] != other.cellFunctionDetonatorChainExplosionProbability[i]) {
             return false;
         }
-        if (externalEnergy[i] != other.externalEnergy[i]) {
-            return false;
-        }
         if (externalEnergyInflowFactor[i] != other.externalEnergyInflowFactor[i]) {
             return false;
         }
@@ -190,5 +187,5 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellFunctionReconnectorActivityThreshold == other.cellFunctionReconnectorActivityThreshold
         && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold && features == other.features
         && highlightedCellFunction == other.highlightedCellFunction && borderlessRendering == other.borderlessRendering
-        && markReferenceDomain == other.markReferenceDomain && gridLines == other.gridLines;
+        && markReferenceDomain == other.markReferenceDomain && gridLines == other.gridLines && externalEnergy == other.externalEnergy;
 }

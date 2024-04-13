@@ -14,8 +14,8 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     cellMap.init(worldSize);
     particleMap.init(worldSize);
 
-    CudaMemoryManager::getInstance().acquireMemory<ColorVector<double>>(1, externalEnergy);
-    CHECK_FOR_CUDA_ERROR(cudaMemset(externalEnergy, 0, sizeof(ColorVector<double>)));
+    CudaMemoryManager::getInstance().acquireMemory<double>(1, externalEnergy);
+    CHECK_FOR_CUDA_ERROR(cudaMemset(externalEnergy, 0, sizeof(double)));
  
     processMemory.init();
     numberGen1.init(40312357);   //some array size for random numbers (~ 40 MB)
@@ -41,9 +41,7 @@ __device__ void SimulationData::prepareForNextTimestep()
     for (int i = 0; i < CellFunction_WithoutNone_Count; ++i) {
         cellFunctionOperations[i].setMemory(processMemory.getTypedSubArray<CellFunctionOperation>(maxCellFunctionOperations), maxCellFunctionOperations);
     }
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        (*externalEnergy)[i] = cudaSimulationParameters.externalEnergy[i];
-    }
+    *externalEnergy = cudaSimulationParameters.externalEnergy;
 
     objects.saveNumEntries();
 }
