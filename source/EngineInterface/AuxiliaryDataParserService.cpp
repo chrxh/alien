@@ -1001,6 +1001,7 @@ namespace
             parserTask);
         if (parserTask == ParserTask::Decode) {
             SimulationParametersService::activateFeaturesBasedOnParameters(missingFeatures, parameters);
+            SimulationParametersService::activateParametersBasedOnMissingFeatures(missingFeatures, parameters);
         }
     }
 
