@@ -114,3 +114,14 @@ void SimulationParametersService::activateFeaturesBasedOnParameters(Features con
         }
     }
 }
+
+void SimulationParametersService::activateParametersBasedOnMissingFeatures(Features const& missingFeatures, SimulationParameters& parameters)
+{
+    if (missingFeatures.externalEnergyControl) {
+        if (!equals(parameters.externalEnergyConditionalInflowFactor, 0.0f)) {
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                parameters.externalEnergyBackflowFactor[i] = parameters.externalEnergyConditionalInflowFactor[i] / 5;
+            }
+        }
+    }
+}

@@ -1385,7 +1385,7 @@ void _SimulationParametersWindow::processBase(
                         .min(0.0f)
                         .max(1.0f)
                         .defaultValue(origParameters.externalEnergyBackflowFactor)
-                        .tooltip("The proportion of energy that flows back to the external energy source when the cell loses energy or dies. The remaining "
+                        .tooltip("The proportion of energy that flows back to the external energy source when a cell loses energy or dies. The remaining "
                                  "fraction of the energy is used to create a new energy particle."),
                     parameters.externalEnergyBackflowFactor);
                 AlienImGui::EndTreeNode();
