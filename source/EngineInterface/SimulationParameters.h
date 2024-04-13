@@ -21,7 +21,8 @@ enum CellColoring_
     CellColoring_MutationId,
     CellColoring_LivingState,
     CellColoring_GenomeSize,
-    CellColoring_CellFunction
+    CellColoring_CellFunction,
+    CellColoring_AllCellFunction
 };
 
 struct SimulationParameters
@@ -33,6 +34,7 @@ struct SimulationParameters
     int numParticleSources = 0;
     RadiationSource particleSources[MAX_PARTICLE_SOURCES];
     ColorVector<float> cellFunctionConstructorPumpEnergyFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    ColorVector<float> externalEnergyBackflowFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}; 
 
     //spots
     int numSpots = 0;
