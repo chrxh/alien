@@ -28,7 +28,6 @@ struct SimulationData
 
     //additional data for cell functions
     ColorVector<double>* externalEnergy;
-    double* residualEnergy;
     RawMemory processMemory;
     PreprocessedCellFunctionData preprocessedCellFunctionData;
 

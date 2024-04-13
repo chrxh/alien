@@ -220,7 +220,7 @@ void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
     }
 
     for (int i = 0; i < MAX_COLORS; ++i) {
-        parameters.cellFunctionConstructorExternalEnergy[i] = origParameters.cellFunctionConstructorExternalEnergy[i];
+        parameters.externalEnergy[i] = origParameters.externalEnergy[i];
     }
     if (parameters.cellMaxAgeBalancer || origParameters.cellMaxAgeBalancer) {
         for (int i = 0; i < MAX_COLORS; ++i) {

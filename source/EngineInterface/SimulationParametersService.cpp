@@ -90,7 +90,8 @@ void SimulationParametersService::activateFeaturesBasedOnParameters(Features con
     }
 
     if (missingFeatures.externalEnergyControl) {
-        if (!equals(parameters.cellFunctionConstructorExternalEnergy, 0.0f) || !equals(parameters.cellFunctionConstructorExternalEnergySupplyRate, 0.0f)) {
+        if (!equals(parameters.externalEnergy, 0.0f) || !equals(parameters.externalEnergyInflowFactor, 0.0f)
+            || !equals(parameters.externalEnergyConditionalInflowFactor, 0.0f) || !equals(parameters.externalEnergyBackflowFactor, 0.0f)) {
             parameters.features.externalEnergyControl = true;
         }
     }
