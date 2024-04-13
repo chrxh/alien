@@ -17,6 +17,9 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
     }
 
     for (int i = 0; i < MAX_COLORS; ++i) {
+        if (externalEnergyBackflowFactor[i] != other.externalEnergyBackflowFactor[i]) {
+            return false;
+        }
         if (radiationAbsorptionHighVelocityPenalty[i] != other.radiationAbsorptionHighVelocityPenalty[i]) {
             return false;
         }
@@ -26,7 +29,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (cellFunctionAttackerSensorDetectionFactor[i] != other.cellFunctionAttackerSensorDetectionFactor[i]) {
             return false;
         }
-        if (cellFunctionConstructorPumpEnergyFactor[i] != other.cellFunctionConstructorPumpEnergyFactor[i]) {
+        if (externalEnergyConditionalInflowFactor[i] != other.externalEnergyConditionalInflowFactor[i]) {
             return false;
         }
         if (cellMaxAge[i] != other.cellMaxAge[i]) {
@@ -122,10 +125,10 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (cellFunctionDetonatorChainExplosionProbability[i] != other.cellFunctionDetonatorChainExplosionProbability[i]) {
             return false;
         }
-        if (cellFunctionConstructorExternalEnergy[i] != other.cellFunctionConstructorExternalEnergy[i]) {
+        if (externalEnergy[i] != other.externalEnergy[i]) {
             return false;
         }
-        if (cellFunctionConstructorExternalEnergySupplyRate[i] != other.cellFunctionConstructorExternalEnergySupplyRate[i]) {
+        if (externalEnergyInflowFactor[i] != other.externalEnergyInflowFactor[i]) {
             return false;
         }
         if (genomeComplexityRamificationFactor[i] != other.genomeComplexityRamificationFactor[i]) {

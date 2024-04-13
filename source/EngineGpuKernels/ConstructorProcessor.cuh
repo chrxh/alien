@@ -720,8 +720,8 @@ ConstructorProcessor::constructCellIntern(
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
     if (cudaSimulationParameters.features.externalEnergyControl && hostCell->energy < constructionData.energy + cudaSimulationParameters.cellNormalEnergy[hostCell->color]
-        && cudaSimulationParameters.cellFunctionConstructorExternalEnergySupplyRate[hostCell->color] > 0) {
-        auto externalEnergyPortion = constructionData.energy * cudaSimulationParameters.cellFunctionConstructorExternalEnergySupplyRate[hostCell->color];
+        && cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color] > 0) {
+        auto externalEnergyPortion = constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color];
 
         auto externalEnergyPtr = &((*data.externalEnergy)[hostCell->color]);
         auto origExternalEnergy = alienAtomicRead(externalEnergyPtr);
@@ -738,9 +738,9 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }
 
-    auto cellFunctionConstructorPumpEnergyFactor = cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[hostCell->color];
+    auto cellFunctionConstructorPumpEnergyFactor = cudaSimulationParameters.externalEnergyConditionalInflowFactor[hostCell->color];
     //if (isSelfReplicator(hostCell)) {
-    //    cellFunctionConstructorPumpEnergyFactor = 0;
+    //    externalEnergyConditionalInflowFactor = 0;
     //}
 
     auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.cellNormalEnergy[hostCell->color])
@@ -750,9 +750,9 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         return false;
     }
     auto energyNeededFromRadiation = constructionData.energy - energyNeededFromHost;
-    auto orig = atomicAdd(data.residualEnergy, -energyNeededFromRadiation);
+    auto orig = atomicAdd(&((*data.externalEnergy)[hostCell->color]), -energyNeededFromRadiation);
     if (orig < energyNeededFromRadiation) {
-        atomicAdd(data.residualEnergy, energyNeededFromRadiation);
+        atomicAdd(&((*data.externalEnergy)[hostCell->color]), energyNeededFromRadiation);
         if (hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + constructionData.energy) {
             return false;
         }
