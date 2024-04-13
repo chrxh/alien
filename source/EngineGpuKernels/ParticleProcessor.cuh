@@ -285,5 +285,5 @@ __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, floa
         data.cellMap.correctPosition(pos);
         factory.createParticle(particleEnergy, pos, vel, color);
     }
-    atomicAdd(&(*data.externalEnergy)[color], static_cast<double>(energy * externalEnergyBackflowFactor));
+    atomicAdd(data.externalEnergy, toDouble(energy * externalEnergyBackflowFactor));
 }

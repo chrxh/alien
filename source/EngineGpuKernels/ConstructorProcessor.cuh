@@ -723,17 +723,16 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         && cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color] > 0) {
         auto externalEnergyPortion = constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color];
 
-        auto externalEnergyPtr = &((*data.externalEnergy)[hostCell->color]);
-        auto origExternalEnergy = alienAtomicRead(externalEnergyPtr);
+        auto origExternalEnergy = alienAtomicRead(data.externalEnergy);
         if (origExternalEnergy == Infinity<float>::value) {
             hostCell->energy += externalEnergyPortion;
         } else {
             externalEnergyPortion = max(0.0f, min(origExternalEnergy, externalEnergyPortion));
-            auto origExternalEnergy_tickLater = atomicAdd(externalEnergyPtr, -externalEnergyPortion);
+            auto origExternalEnergy_tickLater = atomicAdd(data.externalEnergy, -externalEnergyPortion);
             if (origExternalEnergy_tickLater >= externalEnergyPortion) {
                 hostCell->energy += externalEnergyPortion;
             } else {
-                atomicAdd(externalEnergyPtr, externalEnergyPortion);
+                atomicAdd(data.externalEnergy, externalEnergyPortion);
             }
         }
     }
@@ -750,9 +749,9 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         return false;
     }
     auto energyNeededFromRadiation = constructionData.energy - energyNeededFromHost;
-    auto orig = atomicAdd(&((*data.externalEnergy)[hostCell->color]), -energyNeededFromRadiation);
+    auto orig = atomicAdd(data.externalEnergy, -energyNeededFromRadiation);
     if (orig < energyNeededFromRadiation) {
-        atomicAdd(&((*data.externalEnergy)[hostCell->color]), energyNeededFromRadiation);
+        atomicAdd(data.externalEnergy, energyNeededFromRadiation);
         if (hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + constructionData.energy) {
             return false;
         }
