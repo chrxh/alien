@@ -109,7 +109,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 energyToTransfer /=
                     (1.0f + cellFunctionAttackerGenomeComplexityBonus * static_cast<float>(otherCell->genomeComplexity - cell->genomeComplexity));
             }
-            if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->mutationId == cell->mutationId) {
+            if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->mutationId == cell->mutationId && cell->mutationId != 0) {
                 auto sameMutantPenalty = cudaSimulationParameters.cellFunctionAttackerSameMutantPenalty[color][otherColor];
                 energyToTransfer *= (1.0f - sameMutantPenalty);
             }
