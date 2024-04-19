@@ -919,17 +919,6 @@ void _SimulationParametersWindow::processBase(
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Cell function: Constructor"))) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Pump energy")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.00f)
-                    .max(1.0f)
-                    .defaultValue(origParameters.cellFunctionConstructorPumpEnergyFactor)
-                    .tooltip("This parameter controls the energy pump system. It describes the fraction of the energy cost for a offspring which a constructor "
-                             "can get for free. This additional energy is obtain from radiation of other cells."),
-                parameters.cellFunctionConstructorPumpEnergyFactor);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
                     .name("Offspring distance")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
@@ -1351,31 +1340,53 @@ void _SimulationParametersWindow::processBase(
                     AlienImGui::SliderFloatParameters()
                         .name("External energy amount")
                         .textWidth(RightColumnWidth)
-                        .colorDependence(true)
                         .min(0.0f)
                         .max(100000000.0f)
                         .format("%.0f")
                         .logarithmic(true)
                         .infinity(true)
-                        .defaultValue(origParameters.cellFunctionConstructorExternalEnergy)
+                        .defaultValue(&origParameters.externalEnergy)
                         .tooltip(
-                            "This parameter can be used to set the amount of energy (per color) of an external energy source. This type of energy is "
+                            "This parameter can be used to set the amount of energy (per color) of an external energy source. This type of energy can be "
                             "transferred to all constructor cells at a certain rate.\n\nTip: You can explicitly enter a numerical value by selecting the "
                             "slider and then pressing TAB.\n\nWarning: Too much external energy can result in a massive production of cells and slow down or "
                             "even crash the simulation."),
-                    parameters.cellFunctionConstructorExternalEnergy);
+                    &parameters.externalEnergy);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
-                        .name("External energy supply rate")
+                        .name("Inflow")
                         .textWidth(RightColumnWidth)
                         .colorDependence(true)
                         .min(0.0f)
                         .max(1.0f)
-                        .defaultValue(origParameters.cellFunctionConstructorExternalEnergySupplyRate)
+                        .defaultValue(origParameters.externalEnergyInflowFactor)
                         .tooltip(
-                            "The energy from the external source is transferred to all constructor cells at a rate defined here: 0 = no energy transfer, 1 = "
-                            "constructor cells receive all the required energy"),
-                    parameters.cellFunctionConstructorExternalEnergySupplyRate);
+                            "Here one can specify the fraction of energy transfer to constructor cells.\n\nFor example, a value of 0.05 means that each time "
+                            "a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy source."),
+                    parameters.externalEnergyInflowFactor);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Conditional inflow")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0.00f)
+                        .max(1.0f)
+                        .defaultValue(origParameters.externalEnergyConditionalInflowFactor)
+                        .tooltip("Here one can specify the fraction of energy transfer to constructor cells if they can provide the remaining energy for the "
+                                 "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
+                                 "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself."),
+                    parameters.externalEnergyConditionalInflowFactor);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Backflow")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0.0f)
+                        .max(1.0f)
+                        .defaultValue(origParameters.externalEnergyBackflowFactor)
+                        .tooltip("The proportion of energy that flows back to the external energy source when a cell loses energy or dies. The remaining "
+                                 "fraction of the energy is used to create a new energy particle."),
+                    parameters.externalEnergyBackflowFactor);
                 AlienImGui::EndTreeNode();
             }
         }
@@ -2164,13 +2175,12 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
         parameters.radiationAbsorptionHighVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionHighVelocityPenalty[i]);
         parameters.radiationAbsorptionLowConnectionPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionLowConnectionPenalty[i]);
-        parameters.cellFunctionConstructorPumpEnergyFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorPumpEnergyFactor[i]));
+        parameters.externalEnergyConditionalInflowFactor[i] = std::max(0.0f, std::min(1.0f, parameters.externalEnergyConditionalInflowFactor[i]));
         parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
         parameters.cellFunctionDetonatorChainExplosionProbability[i] =
             std::max(0.0f, std::min(1.0f, parameters.cellFunctionDetonatorChainExplosionProbability[i]));
-        parameters.cellFunctionConstructorExternalEnergy[i] = std::max(0.0f, parameters.cellFunctionConstructorExternalEnergy[i]);
-        parameters.cellFunctionConstructorExternalEnergySupplyRate[i] =
-            std::max(0.0f, std::min(1.0f, parameters.cellFunctionConstructorExternalEnergySupplyRate[i]));
+        parameters.externalEnergyInflowFactor[i] =
+            std::max(0.0f, std::min(1.0f, parameters.externalEnergyInflowFactor[i]));
         parameters.baseValues.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
         parameters.particleSplitEnergy[i] = std::max(0.0f, parameters.particleSplitEnergy[i]);
         parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i] =
@@ -2178,6 +2188,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
         parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i] =
             std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i]));
     }
+    parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
     parameters.cellMaxAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.cellMaxAgeBalancerInterval));

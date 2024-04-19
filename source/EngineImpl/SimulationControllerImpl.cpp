@@ -12,6 +12,9 @@ void _SimulationControllerImpl::newSimulation(uint64_t timestep, GeneralSettings
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 
     _selectionNeedsUpdate = true;
+    _realTime = std::chrono::milliseconds(0);
+    _simRunTimePoint.reset();
+
     ++_sessionId;
 }
 
@@ -185,6 +188,7 @@ void _SimulationControllerImpl::calcTimesteps(uint64_t timesteps)
 
 void _SimulationControllerImpl::runSimulation()
 {
+    _simRunTimePoint = std::chrono::system_clock::now();
     _worker.runSimulation();
 }
 
@@ -192,6 +196,9 @@ void _SimulationControllerImpl::pauseSimulation()
 {
     _worker.pauseSimulation();
     _selectionNeedsUpdate = true;
+
+    _realTime = getRealTime();
+    _simRunTimePoint.reset();
 }
 
 void _SimulationControllerImpl::applyCataclysm(int power)
@@ -221,6 +228,20 @@ uint64_t _SimulationControllerImpl::getCurrentTimestep() const
 void _SimulationControllerImpl::setCurrentTimestep(uint64_t value)
 {
     _worker.setCurrentTimestep(value);
+}
+
+std::chrono::milliseconds _SimulationControllerImpl::getRealTime() const
+{
+    if (_simRunTimePoint) {
+        return _realTime + std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - *_simRunTimePoint);
+    } else {
+        return _realTime;
+    }
+}
+
+void _SimulationControllerImpl::setRealTime(std::chrono::milliseconds const& value)
+{
+    _realTime = value;
 }
 
 SimulationParameters _SimulationControllerImpl::getSimulationParameters() const

@@ -335,16 +335,31 @@ namespace
         encodeDecodeProperty(
             tree, parameters.radiationMinCellAge, defaultParameters.radiationMinCellAge, "simulation parameters.radiation.min cell age", parserTask);
 
+        encodeDecodeProperty(
+            tree, parameters.externalEnergy, defaultParameters.externalEnergy, "simulation parameters.cell.function.constructor.external energy", parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.externalEnergyInflowFactor,
+            defaultParameters.externalEnergyInflowFactor,
+            "simulation parameters.cell.function.constructor.external energy supply rate",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.externalEnergyConditionalInflowFactor,
+            defaultParameters.externalEnergyConditionalInflowFactor,
+            "simulation parameters.cell.function.constructor.pump energy factor",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.externalEnergyBackflowFactor,
+            defaultParameters.externalEnergyBackflowFactor,
+            "simulation parameters.cell.function.constructor.external energy backflow",
+            parserTask);
+
         encodeDecodeProperty(tree, parameters.clusterDecay, defaultParameters.clusterDecay, "simulation parameters.cluster.decay", parserTask);
         encodeDecodeProperty(
             tree, parameters.clusterDecayProb, defaultParameters.clusterDecayProb, "simulation parameters.cluster.decay probability", parserTask);
 
-        encodeDecodeProperty(
-            tree,
-            parameters.cellFunctionConstructorPumpEnergyFactor,
-            defaultParameters.cellFunctionConstructorPumpEnergyFactor,
-            "simulation parameters.cell.function.constructor.pump energy factor",
-            parserTask);
         encodeDecodeProperty(
             tree,
             parameters.cellFunctionConstructorOffspringDistance,
@@ -458,18 +473,6 @@ namespace
             parameters.cellFunctionConstructorCheckCompletenessForSelfReplication,
             defaultParameters.cellFunctionConstructorCheckCompletenessForSelfReplication,
             "simulation parameters.cell.function.constructor.completeness check for self-replication",
-            parserTask);
-        encodeDecodeProperty(
-            tree,
-            parameters.cellFunctionConstructorExternalEnergy,
-            defaultParameters.cellFunctionConstructorExternalEnergy,
-            "simulation parameters.cell.function.constructor.external energy",
-            parserTask);
-        encodeDecodeProperty(
-            tree,
-            parameters.cellFunctionConstructorExternalEnergySupplyRate,
-            defaultParameters.cellFunctionConstructorExternalEnergySupplyRate,
-            "simulation parameters.cell.function.constructor.external energy supply rate",
             parserTask);
 
         encodeDecodeProperty(
@@ -998,6 +1001,7 @@ namespace
             parserTask);
         if (parserTask == ParserTask::Decode) {
             SimulationParametersService::activateFeaturesBasedOnParameters(missingFeatures, parameters);
+            SimulationParametersService::activateParametersBasedOnMissingFeatures(missingFeatures, parameters);
         }
     }
 

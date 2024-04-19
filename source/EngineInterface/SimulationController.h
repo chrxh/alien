@@ -65,6 +65,9 @@ public:
     virtual uint64_t getCurrentTimestep() const = 0;
     virtual void setCurrentTimestep(uint64_t value) = 0;
 
+    virtual std::chrono::milliseconds getRealTime() const = 0;
+    virtual void setRealTime(std::chrono::milliseconds const& value) = 0;
+
     virtual SimulationParameters getSimulationParameters() const = 0;
     virtual SimulationParameters const& getOriginalSimulationParameters() const = 0;
     virtual void setSimulationParameters(SimulationParameters const& parameters) = 0;

@@ -13,7 +13,7 @@ struct DataPoint
 
 struct DataPointCollection
 {
-    double time; //could be a time step or real time
+    double time; //could be a time step or real-time
 
     DataPoint numCells;
     DataPoint numSelfReplicators;
