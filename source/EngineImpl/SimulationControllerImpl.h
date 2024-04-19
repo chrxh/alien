@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>
+#include <chrono>
 
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Settings.h"
@@ -77,6 +78,9 @@ public:
     uint64_t getCurrentTimestep() const override;
     void setCurrentTimestep(uint64_t value) override;
 
+    std::chrono::milliseconds getRealTime() const override;
+    void setRealTime(std::chrono::milliseconds const& value) override;
+
     SimulationParameters getSimulationParameters() const override;
     SimulationParameters const& getOriginalSimulationParameters() const override;
     void setSimulationParameters(SimulationParameters const& parameters) override;
@@ -117,6 +121,8 @@ private:
     Settings _origSettings;
     GeneralSettings _generalSettings;
     GpuSettings _gpuSettings;
+    std::chrono::milliseconds _realTime;
+    std::optional<std::chrono::time_point<std::chrono::system_clock>> _simRunTimePoint;
 
     EngineWorker _worker;
     std::thread* _thread = nullptr;
