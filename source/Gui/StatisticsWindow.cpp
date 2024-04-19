@@ -100,7 +100,7 @@ void _StatisticsWindow::processTimelines()
             .name("Mode")
             .textWidth(RightColumnWidth)
             .values(
-                {"Real time plots", "Entire history plots"}),
+                {"Real-time plots", "Entire history plots"}),
         _mode);
 
     ImGui::BeginDisabled(_mode == 1);
