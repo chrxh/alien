@@ -1,6 +1,8 @@
 #include "StringHelper.h"
 
 #include <algorithm>
+#include <sstream>
+#include <iomanip>
 
 std::string StringHelper::format(uint64_t n)
 {
