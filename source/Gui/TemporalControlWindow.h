@@ -26,6 +26,7 @@ private:
 
     void processTpsInfo();
     void processTotalTimestepsInfo();
+    void processRealTimeInfo();
     void processTpsRestriction();
 
     void processRunButton();
