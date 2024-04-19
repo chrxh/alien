@@ -6,6 +6,7 @@
 
 namespace
 {
+    //return true if value does not exist in tree
     template <typename T>
     bool encodeDecodeProperty(boost::property_tree::ptree& tree, T& parameter, T const& defaultValue, std::string const& node, ParserTask task)
     {
@@ -92,6 +93,26 @@ namespace
             }
         }
         return result;
+    }
+
+    template <>
+    bool encodeDecodeProperty(
+        boost::property_tree::ptree& tree,
+        std::chrono::milliseconds& parameter,
+        std::chrono::milliseconds const& defaultValue,
+        std::string const& node,
+        ParserTask task)
+    {
+        if (ParserTask::Encode == task) {
+            auto parameterAsString = std::to_string(parameter.count());
+            return encodeDecodeProperty(tree, parameterAsString, std::string(), node, task);
+        } else {
+            std::string parameterAsString;
+            auto defaultAsString = std::to_string(defaultValue.count());
+            auto result = encodeDecodeProperty(tree, parameterAsString, defaultAsString, node, task);
+            parameter = std::chrono::milliseconds(std::stoi(parameterAsString));
+            return result;
+        }
     }
 
     template <typename T>
@@ -1011,6 +1032,7 @@ namespace
 
         //general settings
         encodeDecodeProperty(tree, data.timestep, uint64_t(0), "general.time step", parserTask);
+        encodeDecodeProperty(tree, data.realTime, std::chrono::milliseconds(0), "general.real time", parserTask);
         encodeDecodeProperty(tree, data.zoom, 4.0f, "general.zoom", parserTask);
         encodeDecodeProperty(tree, data.center.x, 0.0f, "general.center.x", parserTask);
         encodeDecodeProperty(tree, data.center.y, 0.0f, "general.center.y", parserTask);

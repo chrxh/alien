@@ -208,6 +208,7 @@ _TemporalControlWindow::Snapshot _TemporalControlWindow::createSnapshot()
 {
     Snapshot result;
     result.timestep = _simController->getCurrentTimestep();
+    result.realTime = _simController->getRealTime();
     result.data = _simController->getSimulationData();
     result.parameters = _simController->getSimulationParameters();
     return result;
@@ -238,6 +239,7 @@ void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
         }
     }
     _simController->setCurrentTimestep(snapshot.timestep);
+    _simController->setRealTime(snapshot.realTime);
     _simController->clear();
     _simController->setSimulationData(snapshot.data);
     _simController->setSimulationParameters(parameters);
