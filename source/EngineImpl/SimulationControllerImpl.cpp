@@ -242,6 +242,9 @@ std::chrono::milliseconds _SimulationControllerImpl::getRealTime() const
 void _SimulationControllerImpl::setRealTime(std::chrono::milliseconds const& value)
 {
     _realTime = value;
+    if (_simRunTimePoint) {
+        _simRunTimePoint = std::chrono::system_clock::now();
+    }
 }
 
 SimulationParameters _SimulationControllerImpl::getSimulationParameters() const

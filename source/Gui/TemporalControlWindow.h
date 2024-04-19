@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationParameters.h"
@@ -18,6 +20,7 @@ private:
     struct Snapshot
     {
         uint64_t timestep;
+        std::chrono::milliseconds realTime;
         SimulationParameters parameters;
         DataDescription data;
     };

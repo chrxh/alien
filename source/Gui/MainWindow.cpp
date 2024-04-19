@@ -772,6 +772,7 @@ void _MainWindow::onOpenSimulation()
                             deserializedData.auxiliaryData.simulationParameters);
                         _simController->setClusteredSimulationData(deserializedData.mainData);
                         _simController->setStatisticsHistory(deserializedData.statistics);
+                        _simController->setRealTime(deserializedData.auxiliaryData.realTime);
                     } catch (CudaMemoryAllocationException const& exception) {
                         errorMessage = exception.what();
                     } catch (...) {
@@ -809,6 +810,7 @@ void _MainWindow::onSaveSimulation()
             delayedExecution([=, this] {
                 DeserializedSimulation sim;
                 sim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+                sim.auxiliaryData.realTime = _simController->getRealTime();
                 sim.auxiliaryData.zoom = Viewport::getZoomFactor();
                 sim.auxiliaryData.center = Viewport::getCenterInWorldPos();
                 sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
