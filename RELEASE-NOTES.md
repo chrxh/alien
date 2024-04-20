@@ -12,7 +12,7 @@
 - engine, gui/simulation parameters: external energy becomes a scalar value (no color dependence)
 
 ### Deleted
-- energy pump from constructors (substituted by conditional energy inflow)
+- engine, gui/simulation parameters: energy pump from constructors (substituted by conditional energy inflow)
 
 ## [4.8.2] - 2024-04-05
 ### Changed
