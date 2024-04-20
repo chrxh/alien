@@ -252,16 +252,20 @@ void _SimulationParametersWindow::processBase(
                          "Standard cell colors",
                          "Mutants",
                          "Mutants and cell functions",
-                         "Cell state",
-                         "Genome complexity",
-                         "Highlight cell function",
-                         "Cell function"})
+                         "Cell states",
+                         "Genome complexities",
+                         "Single cell function",
+                         "All cell functions"})
                     .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
-                            ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
-                             " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into account).\n\n" ICON_FA_CHEVRON_RIGHT
-                        " Cell state: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
-                        " Genome complexity: This property can be utilized by attacker cells when the parameter 'Complex genome protection' is "
-                        "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large bonus"),
+                        ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n"
+                        ICON_FA_CHEVRON_RIGHT " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into account).\n\n"
+                        ICON_FA_CHEVRON_RIGHT " Mutants and cell functions: It combines the coloring for mutants and cell functions.\n\n"
+                        ICON_FA_CHEVRON_RIGHT " Cell states: green = under construction, blue = ready, red = dying\n\n"
+                        ICON_FA_CHEVRON_RIGHT " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex genome protection' is "
+                        "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large bonus\n\n"
+                        ICON_FA_CHEVRON_RIGHT " Single cell function: A specific type of cell function can be highlighted, which is selected in the next parameter.\n\n"
+                        ICON_FA_CHEVRON_RIGHT " All cell functions: The cells are colored according to their cell function.\n\n"
+                    ),
                 parameters.cellColoring);
             if (parameters.cellColoring == CellColoring_CellFunction) {
                 AlienImGui::Switcher(

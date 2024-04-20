@@ -176,7 +176,7 @@ namespace
             auto h = (toFloat(cell->cellFunction) / toFloat(CellFunction_Count - 1)) * 360.0f;
             auto rgb = convertHSVtoRGB(toFloat(h), 0.7f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
-            factor = 0.35f;
+            factor = 0.42f;
         }
 
         return {
