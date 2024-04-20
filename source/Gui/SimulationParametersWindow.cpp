@@ -2123,7 +2123,8 @@ void _SimulationParametersWindow::processAddonList(
                     .name("External energy control")
                     .textWidth(0)
                     .defaultValue(origParameters.features.externalEnergyControl)
-                    .tooltip("This addon is used to add an external energy source. The energy is gradually transferred to the cells in the simulation."),
+                    .tooltip("This addon is used to add an external energy source. Its energy can be gradually transferred to the constructor cells in the "
+                             "simulation. Vice versa, the energy from radiation and dying cells can also be transferred back to the external source."),
                 parameters.features.externalEnergyControl);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
