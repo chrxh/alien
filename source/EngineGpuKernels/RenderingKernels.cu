@@ -366,12 +366,12 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
 
             //draw background for cell
             auto backgroundColor = calcColor(cell, cell->selected, backgroundColoring) * 0.85f;
-            drawCircle(imageData, imageSize, cellImagePos, backgroundColor * 0.5f, zoom / 2.5f, false, false);
+            drawCircle(imageData, imageSize, cellImagePos, backgroundColor * 0.6f, zoom / 2.5f, false, false);
 
             //draw foreground for cell
             auto foregroundColor = backgroundColoring == foregroundColoring ? backgroundColor : calcColor(cell, cell->selected, foregroundColoring) * 0.85f;
             auto radius = zoom / 3;
-            drawCircle(imageData, imageSize, cellImagePos, foregroundColor * 0.5f, radius, shadedCells, true);
+            drawCircle(imageData, imageSize, cellImagePos, foregroundColor * 0.4f, radius, shadedCells, true);
 
             //draw activity
             if (cell->isActive() && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
