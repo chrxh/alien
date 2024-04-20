@@ -19,6 +19,7 @@ enum CellColoring_
     CellColoring_None,
     CellColoring_CellColor,
     CellColoring_MutationId,
+    CellColoring_MutationId_AllCellFunction,
     CellColoring_LivingState,
     CellColoring_GenomeSize,
     CellColoring_CellFunction,
