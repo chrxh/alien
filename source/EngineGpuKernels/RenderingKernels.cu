@@ -168,7 +168,7 @@ namespace
                 cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
                 factor = 5.0f;
             } else {
-                cellColor = 0x303030;
+                cellColor = 0x404040;
             }
         }
 
