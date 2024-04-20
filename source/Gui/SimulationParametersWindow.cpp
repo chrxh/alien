@@ -1359,7 +1359,7 @@ void _SimulationParametersWindow::processBase(
                         .infinity(true)
                         .defaultValue(&origParameters.externalEnergy)
                         .tooltip(
-                            "This parameter can be used to set the amount of energy (per color) of an external energy source. This type of energy can be "
+                            "This parameter can be used to set the amount of energy of an external energy source. This type of energy can be "
                             "transferred to all constructor cells at a certain rate.\n\nTip: You can explicitly enter a numerical value by selecting the "
                             "slider and then pressing TAB.\n\nWarning: Too much external energy can result in a massive production of cells and slow down or "
                             "even crash the simulation."),
@@ -1373,7 +1373,7 @@ void _SimulationParametersWindow::processBase(
                         .max(1.0f)
                         .defaultValue(origParameters.externalEnergyInflowFactor)
                         .tooltip(
-                            "Here one can specify the fraction of energy transfer to constructor cells.\n\nFor example, a value of 0.05 means that each time "
+                            "Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that each time "
                             "a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy source."),
                     parameters.externalEnergyInflowFactor);
                 AlienImGui::SliderFloat(
@@ -1384,9 +1384,10 @@ void _SimulationParametersWindow::processBase(
                         .min(0.00f)
                         .max(1.0f)
                         .defaultValue(origParameters.externalEnergyConditionalInflowFactor)
-                        .tooltip("Here one can specify the fraction of energy transfer to constructor cells if they can provide the remaining energy for the "
+                        .tooltip("Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
                                  "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
-                                 "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself."),
+                                 "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
+                                 "Otherwise, no energy will be transferred."),
                     parameters.externalEnergyConditionalInflowFactor);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
