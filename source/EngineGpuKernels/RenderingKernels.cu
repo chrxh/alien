@@ -84,7 +84,7 @@ namespace
         return {toInt((r_ + m) * 255), toInt((g_ + m) * 255), toInt((b_ + m) * 255)};
     }
 
-    __device__ __inline__ float3 calcColor(Cell* cell, int selected)
+    __device__ __inline__ float3 calcColor(Cell* cell, int selected, CellColoring cellColoring)
     {
         float factor = min(300.0f, cell->energy) / 320.0f;
         if (1 == selected) {
@@ -95,10 +95,10 @@ namespace
         }
 
         uint32_t cellColor;
-        if (cudaSimulationParameters.cellColoring == CellColoring_None) {
+        if (cellColoring == CellColoring_None) {
             cellColor = 0xbfbfbf;
         }
-        if (cudaSimulationParameters.cellColoring == CellColoring_CellColor) {
+        if (cellColoring == CellColoring_CellColor) {
             switch (calcMod(cell->color, 7)) {
             case 0: {
                 cellColor = Const::IndividualCellColor1;
@@ -130,13 +130,13 @@ namespace
             }
             }
         }
-        if (cudaSimulationParameters.cellColoring == CellColoring_MutationId) {
+        if (cellColoring == CellColoring_MutationId) {
             auto h = abs(toInt((cell->mutationId * 12107) % 360));
             auto s = 0.6f + toFloat(abs(toInt(cell->mutationId * 12107)) % 400) / 1000;
             auto rgb = convertHSVtoRGB(toFloat(h), s, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
-        if (cudaSimulationParameters.cellColoring == CellColoring_LivingState) {
+        if (cellColoring == CellColoring_LivingState) {
             switch (cell->livingState) {
             case LivingState_Ready:
                 cellColor = 0x0000ff;
@@ -156,12 +156,12 @@ namespace
             }
         }
 
-        if (cudaSimulationParameters.cellColoring == CellColoring_GenomeSize) {
+        if (cellColoring == CellColoring_GenomeSize) {
             auto rgb = convertHSVtoRGB(toFloat(min(360.0f, 240.0f + powf(toFloat(cell->genomeComplexity), 0.3f) * 5.0f)),  1.0f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
 
-        if (cudaSimulationParameters.cellColoring == CellColoring_CellFunction) {
+        if (cellColoring == CellColoring_CellFunction) {
             if (cell->cellFunction == cudaSimulationParameters.highlightedCellFunction) {
                 auto h = (toFloat(cell->cellFunction) / toFloat(CellFunction_Count - 1)) * 360.0f;
                 auto rgb = convertHSVtoRGB(toFloat(h), 0.7f, 1.0f);
@@ -170,6 +170,13 @@ namespace
             } else {
                 cellColor = 0x303030;
             }
+        }
+
+        if (cellColoring == CellColoring_AllCellFunction) {
+            auto h = (toFloat(cell->cellFunction) / toFloat(CellFunction_Count - 1)) * 360.0f;
+            auto rgb = convertHSVtoRGB(toFloat(h), 0.7f, 1.0f);
+            cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
+            factor = 1.0f;
         }
 
         return {
@@ -353,12 +360,15 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
         auto cellImagePos = mapWorldPosToVectorImagePos(rectUpperLeft, cellPos, universeImageSize, imageSize, zoom);
         if (isContainedInRect({0, 0}, toFloat2(imageSize), cellImagePos)) {
 
-            //draw cell
-            auto color = calcColor(cell, cell->selected);
-            auto radius = zoom / 3;
-            drawCircle(imageData, imageSize, cellImagePos, color, radius, shadedCells, true);
+            auto backColor = calcColor(cell, cell->selected, CellColoring_MutationId);
+            drawCircle(imageData, imageSize, cellImagePos, backColor * 0.5f, zoom / 2, false, false);
+            backColor = backColor * min((zoom - 1.0f) / 3, 1.0f);
 
-            color = color * min((zoom - 1.0f) / 3, 1.0f);
+            //draw cell
+            auto color = calcColor(cell, cell->selected, CellColoring_AllCellFunction);
+            auto radius = zoom / 3;
+            drawCircle(imageData, imageSize, cellImagePos, color * 0.15f, radius, shadedCells, true);
+
             if (cell->isActive() && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, radius, shadedCells);
             }
@@ -394,7 +404,7 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
                     auto const endImagePos =
                         mapWorldPosToVectorImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, imageSize, zoom);
                     if (isLineVisible(startImagePos, endImagePos, universeImageSize)) {
-                        drawLine(startImagePos, endImagePos, color, imageData, imageSize);
+                        drawLine(startImagePos, endImagePos, backColor, imageData, imageSize);
                     }
                     //}
                 }
@@ -429,14 +439,14 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
                                 float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
                                 arrowPartStart = arrowPartStart * zoom / 8 + arrowEnd;
                                 if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
-                                    drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                                    drawLine(arrowPartStart, arrowEnd, backColor, imageData, imageSize, 0.5f);
                                 }
                             }
                             {
                                 float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
                                 arrowPartStart = arrowPartStart * zoom / 8 + arrowEnd;
                                 if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
-                                    drawLine(arrowPartStart, arrowEnd, color, imageData, imageSize, 0.5f);
+                                    drawLine(arrowPartStart, arrowEnd, backColor, imageData, imageSize, 0.5f);
                                 }
                             }
                         }
