@@ -40,7 +40,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
         }
             break;
         }
-        stream << " Location: " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "(" << _cudaGetErrorEnum(result) << ") \"" << func
+        stream << std::endl << "Location: " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "(" << _cudaGetErrorEnum(result) << ") \"" << func
                << "\"";
         auto text = stream.str();
         log(Priority::Important, text);

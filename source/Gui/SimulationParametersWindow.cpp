@@ -247,7 +247,15 @@ void _SimulationParametersWindow::processBase(
                     .name("Cell coloring")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origParameters.cellColoring)
-                    .values({"None", "Standard cell colors", "Mutants", "Cell state", "Genome complexity", "Highlight cell function"})
+                    .values(
+                        {"None",
+                         "Standard cell colors",
+                         "Mutants",
+                         "Mutants and cell functions",
+                         "Cell state",
+                         "Genome complexity",
+                         "Highlight cell function",
+                         "Cell function"})
                     .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
                             ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
                              " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into account).\n\n" ICON_FA_CHEVRON_RIGHT
