@@ -16,6 +16,7 @@
 
 ### Fixed
 - serialization: activation of necessary add-ons for old simulation parameter files fixed
+- gui/browser: preserve subfolders when renaming folders
 
 ## [4.8.2] - 2024-04-05
 ### Changed
