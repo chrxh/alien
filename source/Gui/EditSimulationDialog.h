@@ -22,6 +22,7 @@ private:
 
     NetworkResourceTreeTO _treeTO;
     std::vector<NetworkResourceRawTO> _rawTOs;
+    std::string _origFolderName;
     std::string _newName;
     std::string _newDescription;
 
