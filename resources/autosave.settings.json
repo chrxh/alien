@@ -1,6 +1,7 @@
 {
     "general": {
         "time step": "85540",
+        "real time": "0",
         "zoom": "1.16543949",
         "center": {
             "x": "918.00494385",
@@ -86,6 +87,14 @@
             },
             "function": {
                 "constructor": {
+                    "external energy": "0.00000000",
+                    "external energy supply rate[0]": "0.00000000",
+                    "external energy supply rate[1]": "0.00000000",
+                    "external energy supply rate[2]": "0.00000000",
+                    "external energy supply rate[3]": "0.00000000",
+                    "external energy supply rate[4]": "0.00000000",
+                    "external energy supply rate[5]": "0.00000000",
+                    "external energy supply rate[6]": "0.00000000",
                     "pump energy factor[0]": "0.71799999",
                     "pump energy factor[1]": "0.00000000",
                     "pump energy factor[2]": "0.71799999",
@@ -93,6 +102,13 @@
                     "pump energy factor[4]": "0.71799999",
                     "pump energy factor[5]": "0.71799999",
                     "pump energy factor[6]": "0.71799999",
+                    "external energy backflow[0]": "0.14360000",
+                    "external energy backflow[1]": "0.00000000",
+                    "external energy backflow[2]": "0.14360000",
+                    "external energy backflow[3]": "0.14360000",
+                    "external energy backflow[4]": "0.14360000",
+                    "external energy backflow[5]": "0.14360000",
+                    "external energy backflow[6]": "0.14360000",
                     "offspring distance[0]": "2.00000000",
                     "offspring distance[1]": "2.00000000",
                     "offspring distance[2]": "2.00000000",
@@ -251,21 +267,7 @@
                     "mutation color transition[6, 6]": "true",
                     "mutation self replication": "false",
                     "mutation prevent depth increase": "false",
-                    "completeness check for self-replication": "false",
-                    "external energy[0]": "0.00000000",
-                    "external energy[1]": "0.00000000",
-                    "external energy[2]": "0.00000000",
-                    "external energy[3]": "0.00000000",
-                    "external energy[4]": "0.00000000",
-                    "external energy[5]": "0.00000000",
-                    "external energy[6]": "0.00000000",
-                    "external energy supply rate[0]": "0.00000000",
-                    "external energy supply rate[1]": "0.00000000",
-                    "external energy supply rate[2]": "0.00000000",
-                    "external energy supply rate[3]": "0.00000000",
-                    "external energy supply rate[4]": "0.00000000",
-                    "external energy supply rate[5]": "0.00000000",
-                    "external energy supply rate[6]": "0.00000000"
+                    "completeness check for self-replication": "false"
                 },
                 "injector": {
                     "radius[0]": "2.00000000",
@@ -1920,7 +1922,7 @@
             "genome complexity measurement": "false",
             "additional absorption control": "false",
             "additional attacker control": "true",
-            "external energy": "false",
+            "external energy": "true",
             "cell color transition rules": "false"
         }
     }
