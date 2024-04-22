@@ -51,6 +51,7 @@ int main(int argc, char** argv)
         simController->newSimulation(simData.auxiliaryData.timestep, simData.auxiliaryData.generalSettings, simData.auxiliaryData.simulationParameters);
         simController->setClusteredSimulationData(simData.mainData);
         simController->setStatisticsHistory(simData.statistics);
+        simController->setRealTime(simData.auxiliaryData.realTime);
         std::cout << "Device: " << simController->getGpuName() << std::endl;
         std::cout << "Start simulation" << std::endl;
 
@@ -68,6 +69,7 @@ int main(int argc, char** argv)
         simData.mainData = simController->getClusteredSimulationData();
         simData.auxiliaryData.simulationParameters = simController->getSimulationParameters();
         simData.statistics = simController->getStatisticsHistory().getCopiedData();
+        simData.auxiliaryData.realTime = simController->getRealTime();
         if (outputFilename.empty()) {
             std::cout << "No output file given." << std::endl;
             return 1;
