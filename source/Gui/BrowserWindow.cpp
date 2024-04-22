@@ -1221,6 +1221,7 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
             try {
                 _simController->newSimulation(
                     deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+                _simController->setRealTime(deserializedSim.auxiliaryData.realTime);
                 _simController->setClusteredSimulationData(deserializedSim.mainData);
                 _simController->setStatisticsHistory(deserializedSim.statistics);
             } catch (CudaMemoryAllocationException const& exception) {

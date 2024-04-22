@@ -152,6 +152,7 @@ void _UploadSimulationDialog::onUpload()
         DeserializedSimulation deserializedSim;
         if (_resourceType == NetworkResourceType_Simulation) {
             deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+            deserializedSim.auxiliaryData.realTime = _simController->getRealTime();
             deserializedSim.auxiliaryData.zoom = Viewport::getZoomFactor();
             deserializedSim.auxiliaryData.center = Viewport::getCenterInWorldPos();
             deserializedSim.auxiliaryData.generalSettings = _simController->getGeneralSettings();

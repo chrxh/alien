@@ -56,6 +56,7 @@ void _TemporalControlWindow::processIntern()
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         processTpsInfo();
         processTotalTimestepsInfo();
+        processRealTimeInfo();
 
         AlienImGui::Separator();
         processTpsRestriction();
@@ -81,6 +82,17 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
     ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
     ImGui::TextUnformatted(StringHelper::format(_simController->getCurrentTimestep()).c_str());
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+}
+
+void _TemporalControlWindow::processRealTimeInfo()
+{
+    ImGui::Text("Real-time");
+
+    ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
+    ImGui::TextUnformatted(StringHelper::format(_simController->getRealTime()).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }
@@ -196,6 +208,7 @@ _TemporalControlWindow::Snapshot _TemporalControlWindow::createSnapshot()
 {
     Snapshot result;
     result.timestep = _simController->getCurrentTimestep();
+    result.realTime = _simController->getRealTime();
     result.data = _simController->getSimulationData();
     result.parameters = _simController->getSimulationParameters();
     return result;
@@ -219,15 +232,14 @@ void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
         }
     }
 
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        parameters.cellFunctionConstructorExternalEnergy[i] = origParameters.cellFunctionConstructorExternalEnergy[i];
-    }
+    parameters.externalEnergy = origParameters.externalEnergy;
     if (parameters.cellMaxAgeBalancer || origParameters.cellMaxAgeBalancer) {
         for (int i = 0; i < MAX_COLORS; ++i) {
             parameters.cellMaxAge[i] = origParameters.cellMaxAge[i];
         }
     }
     _simController->setCurrentTimestep(snapshot.timestep);
+    _simController->setRealTime(snapshot.realTime);
     _simController->clear();
     _simController->setSimulationData(snapshot.data);
     _simController->setSimulationParameters(parameters);
