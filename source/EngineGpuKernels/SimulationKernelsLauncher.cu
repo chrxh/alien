@@ -131,16 +131,19 @@ bool _SimulationKernelsLauncher::updateSimulationParametersAfterTimestep(
         spot.posY = correctedPosition.y;
     }
 
-    auto externalEnergyPresent = false;
+    auto externalEnergyPresent = settings.simulationParameters.externalEnergy > 0;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        externalEnergyPresent |= settings.simulationParameters.cellFunctionConstructorExternalEnergy[i] > 0;
+        externalEnergyPresent |= settings.simulationParameters.externalEnergyBackflowFactor[i] > 0;
     }
+    externalEnergyPresent &= settings.simulationParameters.features.externalEnergyControl;
     if (externalEnergyPresent) {
+        double temp;
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-            &settings.simulationParameters.cellFunctionConstructorExternalEnergy,
+            &temp,
             simulationData.externalEnergy,
-            sizeof(ColorVector<float>),
+            sizeof(double),
             cudaMemcpyDeviceToHost));
+            settings.simulationParameters.externalEnergy = toFloat(temp);
         result = true;
     }
 

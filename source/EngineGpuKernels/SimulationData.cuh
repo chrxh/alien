@@ -27,8 +27,7 @@ struct SimulationData
     Objects tempObjects;
 
     //additional data for cell functions
-    ColorVector<float>* externalEnergy;
-    double* residualEnergy;
+    double* externalEnergy;
     RawMemory processMemory;
     PreprocessedCellFunctionData preprocessedCellFunctionData;
 

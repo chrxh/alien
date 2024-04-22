@@ -276,15 +276,14 @@ __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, floa
 
     data.cellMap.correctPosition(pos);
 
-    auto residualEnergyPerCell = *data.residualEnergy / max(static_cast<uint64_t>(1), data.objects.cells.getNumOrigEntries());
-    auto cellFunctionConstructorEnergyFromRadiationFactor = residualEnergyPerCell < 0.2 ? cudaSimulationParameters.cellFunctionConstructorPumpEnergyFactor[color] / 3 : 0;
-    auto particleEnergy = energy * (1.0f - cellFunctionConstructorEnergyFromRadiationFactor);
+    auto externalEnergyBackflowFactor = cudaSimulationParameters.externalEnergyBackflowFactor[color];
+    auto particleEnergy =
+        energy * (1.0f - externalEnergyBackflowFactor);
     if (particleEnergy > NEAR_ZERO) {
         ObjectFactory factory;
         factory.init(&data);
         data.cellMap.correctPosition(pos);
         factory.createParticle(particleEnergy, pos, vel, color);
     }
-
-    atomicAdd(data.residualEnergy, energy * cellFunctionConstructorEnergyFromRadiationFactor);
+    atomicAdd(data.externalEnergy, toDouble(energy * externalEnergyBackflowFactor));
 }

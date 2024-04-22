@@ -112,10 +112,11 @@ void _GettingStartedWindow::processIntern()
         drawItemText("Demos/Perpetual Motion Machine");
         drawItemText("Demos/Stormy Night");
 
-        drawHeading2("Evolution of self-replicators");
+        drawHeading2("Evolution simulations");
         drawParagraph("By attaching higher-level functions to particle networks, complex multi-cellular organisms can be modeled. They can evolve over time as "
-                      "they are subject to mutations. The following examples consist of homogeneous as well as changing worlds populated by self-replicating agents. Different "
+                      "they are subject to mutations. The following examples consist of homogeneous as well as changing worlds populated by self-reproducing agents. Different "
                       "selection pressures control evolution.");
+        drawItemText("Primordial World/Selected Results");
         drawItemText("v4.8-Evolution/Gradient/Selected Results");
         drawItemText("Evolution Sandbox/Example");
         drawItemText("Complex Evolution Testbed/Example");

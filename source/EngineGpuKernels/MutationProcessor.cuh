@@ -27,7 +27,7 @@ public:
     __inline__ __device__ static void genomeColorMutation(SimulationData& data, Cell* cell);
 
 private:
-    __inline__ __device__ static bool adaptMutationId(SimulationData& data, ConstructorFunction& constructor);
+    __inline__ __device__ static void adaptMutationId(SimulationData& data, ConstructorFunction& constructor);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
     __inline__ __device__ static int getNewColorFromTransition(SimulationData& data, int origColor);
 };
@@ -822,7 +822,7 @@ __inline__ __device__ void MutationProcessor::genomeColorMutation(SimulationData
         genome, genomeSize, true, [&](int depth, int nodeAddress, int repetition) { GenomeDecoder::setNextCellColor(genome, nodeAddress, newColor); });
 }
 
-__inline__ __device__ bool MutationProcessor::adaptMutationId(SimulationData& data, ConstructorFunction& constructor)
+__inline__ __device__ void MutationProcessor::adaptMutationId(SimulationData& data, ConstructorFunction& constructor)
 {
     if (GenomeDecoder::containsSelfReplication(constructor)) {
         constructor.offspringMutationId = abs(toInt(data.numberGen1.createNewSmalllId()));

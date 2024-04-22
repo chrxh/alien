@@ -1,5 +1,23 @@
 # Release notes
 
+## [4.9.0] - 2024-04-22
+### Added
+- engine, gui/simulation parameters: conditional and unconditional energy inflow from external energy source
+- engine, gui/simulation parameters: energy backflow to the external energy source
+- gui/simulation view: combined mutation and cell function coloring
+- gui/temporal control window: real-time counter
+
+### Changed
+- gui/simulation view: cells are rendered smoother
+- engine, gui/simulation parameters: external energy becomes a scalar value (no color dependence)
+
+### Deleted
+- engine, gui/simulation parameters: energy pump from constructors (substituted by conditional energy inflow)
+
+### Fixed
+- serialization: activation of necessary add-ons for old simulation parameter files fixed
+- gui/browser: preserve subfolders when renaming folders
+
 ## [4.8.2] - 2024-04-05
 ### Changed
 - engine, genome editor: multiple construction flag is replaced by number of constructions

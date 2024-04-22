@@ -60,7 +60,7 @@ namespace
     }
 }
 
-void SimulationParametersService::activateFeaturesBasedOnParameters(Features const& missingFeatures, SimulationParameters& parameters)
+void SimulationParametersService::activateFeaturesForLegacyFiles(Features const& missingFeatures, SimulationParameters& parameters)
 {
     if (missingFeatures.advancedAbsorptionControl) {
         if (!equals(parameters.radiationAbsorptionHighVelocityPenalty, 0.0f) || !equals(parameters.radiationAbsorptionLowConnectionPenalty, 0.0f)) {
@@ -90,7 +90,8 @@ void SimulationParametersService::activateFeaturesBasedOnParameters(Features con
     }
 
     if (missingFeatures.externalEnergyControl) {
-        if (!equals(parameters.cellFunctionConstructorExternalEnergy, 0.0f) || !equals(parameters.cellFunctionConstructorExternalEnergySupplyRate, 0.0f)) {
+        if (parameters.externalEnergy != 0.0f || !equals(parameters.externalEnergyInflowFactor, 0.0f)
+            || !equals(parameters.externalEnergyConditionalInflowFactor, 0.0f) || !equals(parameters.externalEnergyBackflowFactor, 0.0f)) {
             parameters.features.externalEnergyControl = true;
         }
     }
@@ -109,6 +110,17 @@ void SimulationParametersService::activateFeaturesBasedOnParameters(Features con
                     parameters.features.cellColorTransitionRules = true;
                     break;
                 }
+            }
+        }
+    }
+}
+
+void SimulationParametersService::activateParametersForLegacyFiles(MissingParameters const& missingParameters, SimulationParameters& parameters)
+{
+    if (missingParameters.externalEnergyBackflowFactor) {
+        if (!equals(parameters.externalEnergyConditionalInflowFactor, 0.0f)) {
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                parameters.externalEnergyBackflowFactor[i] = parameters.externalEnergyConditionalInflowFactor[i] / 5;
             }
         }
     }

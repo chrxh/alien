@@ -19,9 +19,11 @@ enum CellColoring_
     CellColoring_None,
     CellColoring_CellColor,
     CellColoring_MutationId,
+    CellColoring_MutationId_AllCellFunction,
     CellColoring_LivingState,
     CellColoring_GenomeSize,
-    CellColoring_CellFunction
+    CellColoring_CellFunction,
+    CellColoring_AllCellFunction
 };
 
 struct SimulationParameters
@@ -32,7 +34,10 @@ struct SimulationParameters
     //particle sources
     int numParticleSources = 0;
     RadiationSource particleSources[MAX_PARTICLE_SOURCES];
-    ColorVector<float> cellFunctionConstructorPumpEnergyFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    float externalEnergy = 0.0f;
+    ColorVector<float> externalEnergyInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    ColorVector<float> externalEnergyConditionalInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    ColorVector<float> externalEnergyBackflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; 
 
     //spots
     int numSpots = 0;
@@ -113,8 +118,6 @@ struct SimulationParameters
         {true, true, true, true, true, true, true}};
     bool cellFunctionConstructorMutationPreventDepthIncrease = false;
     bool cellFunctionConstructorMutationSelfReplication = false;
-    ColorVector<float> cellFunctionConstructorExternalEnergy = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> cellFunctionConstructorExternalEnergySupplyRate = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
     ColorVector<float> cellFunctionInjectorRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
     ColorMatrix<int> cellFunctionInjectorDurationColorMatrix = {
