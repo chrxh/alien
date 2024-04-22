@@ -170,6 +170,7 @@ namespace
     void encodeDecode(boost::property_tree::ptree& tree, SimulationParameters& parameters, ParserTask parserTask)
     {
         SimulationParameters defaultParameters;
+        MissingParameters missingParameters;
 
         encodeDecodeProperty(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
         encodeDecodeProperty(tree, parameters.cellColoring, defaultParameters.cellColoring, "simulation parameters.cell colorization", parserTask);
@@ -370,7 +371,7 @@ namespace
             defaultParameters.externalEnergyConditionalInflowFactor,
             "simulation parameters.cell.function.constructor.pump energy factor",
             parserTask);
-        encodeDecodeProperty(
+        missingParameters.externalEnergyBackflowFactor = encodeDecodeProperty(
             tree,
             parameters.externalEnergyBackflowFactor,
             defaultParameters.externalEnergyBackflowFactor,
@@ -1021,8 +1022,8 @@ namespace
             "simulation parameters.features.cell color transition rules",
             parserTask);
         if (parserTask == ParserTask::Decode) {
-            SimulationParametersService::activateFeaturesBasedOnParameters(missingFeatures, parameters);
-            SimulationParametersService::activateParametersBasedOnMissingFeatures(missingFeatures, parameters);
+            SimulationParametersService::activateFeaturesForLegacyFiles(missingFeatures, parameters);
+            SimulationParametersService::activateParametersForLegacyFiles(missingParameters, parameters);
         }
     }
 

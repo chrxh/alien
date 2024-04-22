@@ -60,7 +60,7 @@ namespace
     }
 }
 
-void SimulationParametersService::activateFeaturesBasedOnParameters(Features const& missingFeatures, SimulationParameters& parameters)
+void SimulationParametersService::activateFeaturesForLegacyFiles(Features const& missingFeatures, SimulationParameters& parameters)
 {
     if (missingFeatures.advancedAbsorptionControl) {
         if (!equals(parameters.radiationAbsorptionHighVelocityPenalty, 0.0f) || !equals(parameters.radiationAbsorptionLowConnectionPenalty, 0.0f)) {
@@ -115,12 +115,12 @@ void SimulationParametersService::activateFeaturesBasedOnParameters(Features con
     }
 }
 
-void SimulationParametersService::activateParametersBasedOnMissingFeatures(Features const& missingFeatures, SimulationParameters& parameters)
+void SimulationParametersService::activateParametersForLegacyFiles(MissingParameters const& missingParameters, SimulationParameters& parameters)
 {
-    if (missingFeatures.externalEnergyControl) {
+    if (missingParameters.externalEnergyBackflowFactor) {
         if (!equals(parameters.externalEnergyConditionalInflowFactor, 0.0f)) {
             for (int i = 0; i < MAX_COLORS; ++i) {
-                parameters.externalEnergyConditionalInflowFactor[i] = parameters.externalEnergyConditionalInflowFactor[i] / 5;
+                parameters.externalEnergyBackflowFactor[i] = parameters.externalEnergyConditionalInflowFactor[i] / 5;
             }
         }
     }
