@@ -1360,7 +1360,7 @@ void _SimulationParametersWindow::processBase(
                         .defaultValue(&origParameters.externalEnergy)
                         .tooltip(
                             "This parameter can be used to set the amount of energy of an external energy source. This type of energy can be "
-                            "transferred to all constructor cells at a certain rate.\n\nTip: You can explicitly enter a numerical value by selecting the "
+                            "transferred to all constructor cells at a certain rate (see inflow settings).\n\nTip: You can explicitly enter a numerical value by selecting the "
                             "slider and then pressing TAB.\n\nWarning: Too much external energy can result in a massive production of cells and slow down or "
                             "even crash the simulation."),
                     &parameters.externalEnergy);
