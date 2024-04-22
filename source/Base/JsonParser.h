@@ -58,6 +58,17 @@ bool JsonParser::encodeDecode(
         } else {
             value = tree.get<T>(node, defaultValue);
         }
-        return tree.find(node) == tree.not_found();
+        size_t lastDotIndex = node.find_last_of('.');
+        if (lastDotIndex == std::string::npos) {
+            return true;
+        }
+        std::string path = node.substr(0, lastDotIndex);
+        std::string property = node.substr(lastDotIndex + 1);
+        auto subtree = tree.get_child_optional(path);
+        if (!subtree) {
+            return true;
+        }
+
+        return subtree->find(property) == subtree->not_found();
     }
 }

@@ -1,6 +1,6 @@
 # Release notes
 
-## [4.9.0] - 2024-04-20
+## [4.9.0] - 2024-04-22
 ### Added
 - engine, gui/simulation parameters: conditional and unconditional energy inflow from external energy source
 - engine, gui/simulation parameters: energy backflow to the external energy source
@@ -13,6 +13,9 @@
 
 ### Deleted
 - engine, gui/simulation parameters: energy pump from constructors (substituted by conditional energy inflow)
+
+### Fixed
+- serialization: activation of necessary add-ons for old simulation parameter files fixed
 
 ## [4.8.2] - 2024-04-05
 ### Changed
