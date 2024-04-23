@@ -1043,7 +1043,7 @@ void _BrowserWindow::processEmojiWindow()
                 }
                 ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(8.0f));
 
-                if (AlienImGui::Button("More", ImGui::GetContentRegionAvail().x)) {
+                if (AlienImGui::Button("More", ImGui::GetContentRegionAvailWidth())) {
                     _showAllEmojis = true;
                 }
             }
@@ -1110,8 +1110,8 @@ void _BrowserWindow::processShortenedText(std::string const& text, bool bold) {
     }
     auto& styleRepository = StyleRepository::getInstance();
     auto textSize = ImGui::CalcTextSize(substrings.at(0).c_str());
-    auto needDetailButton = textSize.x > ImGui::GetContentRegionAvail().x || substrings.size() > 1;
-    auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - styleRepository.scale(15.0f);
+    auto needDetailButton = textSize.x > ImGui::GetContentRegionAvailWidth() || substrings.size() > 1;
+    auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - styleRepository.scale(15.0f);
     if (bold) {
         ImGui::PushFont(styleRepository.getSmallBoldFont());
     }
