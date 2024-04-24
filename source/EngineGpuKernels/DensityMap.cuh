@@ -34,12 +34,21 @@ public:
         return 0;
     }
 
+    __device__ __inline__ uint32_t getDensity(float2 const& pos)
+    {
+        auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
+        if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
+            return (_densityMap[index] >> 56) & 0xff;
+        }
+        return 0;
+    }
+
     __device__ __inline__ void addCell(Cell* cell)
     {
         auto index = toInt(cell->pos.x) / _slotSize + toInt(cell->pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             auto color = calcMod(cell->color, MAX_COLORS);
-            alienAtomicAdd64(&_densityMap[index], uint64_t(1) << (color * 8));
+            alienAtomicAdd64(&_densityMap[index], (uint64_t(1) << (color * 8)) | (uint64_t(1) << 56));
         }
     }
 
