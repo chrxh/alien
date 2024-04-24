@@ -21,7 +21,7 @@ private:
     void processToolbar();
     void processTabWidget(SimulationParameters& parameters, SimulationParameters const& lastParameters, SimulationParameters& origParameters);
     void processBase(SimulationParameters& parameters, SimulationParameters const& origParameters);
-    void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot, SimulationParameters const& parameters);
+    void processSpot(int tab, SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot, SimulationParameters const& parameters);
     void processAddonList(SimulationParameters& parameters, SimulationParameters const& lastParameters, SimulationParameters const& origParameters);
 
     void onOpenParameters();
@@ -41,6 +41,7 @@ private:
     std::optional<int> _sessionId;
     bool _focusBaseTab = false;
     std::vector<std::string> _cellFunctionStrings;
+    std::vector<std::string> _zoneNameStrings;
 
     bool _featureListOpen = false;
     float _featureListHeight = 200.0f;

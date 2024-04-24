@@ -72,6 +72,11 @@ _SimulationParametersWindow::_SimulationParametersWindow(
     for (int i = 0; i < CellFunction_Count; ++i) {
         _cellFunctionStrings.emplace_back(Const::CellFunctionToStringMap.at(i));
     }
+
+    for (int i = 0; i < MAX_SPOTS; ++i) {
+        _zoneNameStrings.emplace_back("");
+    }
+    
 }
 
 _SimulationParametersWindow::~_SimulationParametersWindow()
@@ -101,8 +106,12 @@ void _SimulationParametersWindow::processIntern()
 
 SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
 {
-    auto worldSize = _simController->getWorldSize();
     SimulationParametersSpot spot;
+
+    strcpy_s(spot.name, SIM_PARAM_SPOT_NAME_LENGTH, std::string("Zone " + std::to_string(index)).c_str());
+    
+    auto worldSize = _simController->getWorldSize();
+    
     spot.posX = toFloat(worldSize.x / 2);
     spot.posY = toFloat(worldSize.y / 2);
 
@@ -184,6 +193,7 @@ void _SimulationParametersWindow::processTabWidget(
                     origParameters.spots[index] = createSpot(parameters, index);
                     ++parameters.numSpots;
                     ++origParameters.numSpots;
+                    _zoneNameStrings[index] = parameters.spots[index].name;
                     _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
@@ -199,15 +209,15 @@ void _SimulationParametersWindow::processTabWidget(
             for (int tab = 0; tab < parameters.numSpots; ++tab) {
                 SimulationParametersSpot& spot = parameters.spots[tab];
                 SimulationParametersSpot const& origSpot = origParameters.spots[tab];
-                std::string name = "Zone " + std::to_string(tab + 1);
-                if (ImGui::BeginTabItem(name.c_str(), &open, ImGuiTabItemFlags_None)) {
-                    processSpot(spot, origSpot, parameters);
+                if (ImGui::BeginTabItem(std::string(_zoneNameStrings[tab] + "###" + std::to_string(tab)).c_str(), &open, ImGuiTabItemFlags_None)) {
+                    processSpot(tab,spot, origSpot, parameters);
                     ImGui::EndTabItem();
                 }
 
                 //delete spot
                 if (!open) {
                     for (int i = tab; i < parameters.numSpots - 1; ++i) {
+                        _zoneNameStrings[i] = _zoneNameStrings[i + 1];
                         parameters.spots[i] = parameters.spots[i + 1];
                         origParameters.spots[i] = origParameters.spots[i + 1];
                     }
@@ -1442,6 +1452,7 @@ void _SimulationParametersWindow::processBase(
 }
 
 void _SimulationParametersWindow::processSpot(
+        int tab, 
     SimulationParametersSpot& spot,
     SimulationParametersSpot const& origSpot,
     SimulationParameters const& parameters)
@@ -1449,6 +1460,14 @@ void _SimulationParametersWindow::processSpot(
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto worldSize = _simController->getWorldSize();
 
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("General"))) {
+            if(AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(RightColumnWidth), _zoneNameStrings[tab])){
+                strncpy_s(spot.name, SIM_PARAM_SPOT_NAME_LENGTH, _zoneNameStrings[tab].c_str(), SIM_PARAM_SPOT_NAME_LENGTH - 1);
+                _zoneNameStrings[tab] = _zoneNameStrings[tab].substr(0, SIM_PARAM_SPOT_NAME_LENGTH - 1);
+            }
+            AlienImGui::EndTreeNode();
+        }
+        
         /**
          * Colors and location
          */
