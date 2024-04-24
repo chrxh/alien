@@ -200,8 +200,7 @@ void _SimulationParametersWindow::processTabWidget(
                 AlienImGui::Tooltip("Add parameter zone");
             }
 
-                bool open = true;
-            if (ImGui::BeginTabItem("Base", &open, _focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+            if (ImGui::BeginTabItem("Base", nullptr, _focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
                 processBase(parameters, origParameters);
                 ImGui::EndTabItem();
             }
