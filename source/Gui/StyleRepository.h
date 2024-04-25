@@ -94,7 +94,7 @@ namespace Const
     ImColor const BrowserResourceTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
     ImColor const BrowserResourceLineColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
     ImColor const BrowserResourcePropertiesTextColor = ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f);
-    ImColor const BrowserResourceNewTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
+    ImColor const BrowserResourceNewTextColor = ImColor::HSV(0.15f, 0.8f, 1.0f);
     ImColor const BrowserResourceSymbolColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
 
     ImColor const BrowserVersionOkTextColor = ImColor::HSV(0.58f, 0.2f, 1.0f);
