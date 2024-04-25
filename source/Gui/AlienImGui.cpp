@@ -1491,17 +1491,12 @@ void AlienImGui::NeuronSelection(
     ImGui::EndChild();
 }
 
-ImVec4 AlienImGui::GetBlinkingColor()
+void AlienImGui::OnlineSymbol()
 {
     auto counter = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     counter = (((counter % 2000) + 2000) % 2000);
     auto color = ImColor::HSV(0.0f, counter < 1000 ? toFloat(counter) / 1000.0f : 2.0f - toFloat(counter) / 1000.0f, 1.0f);
-    return color.Value;
-}
-
-void AlienImGui::OnlineSymbol()
-{
-    ImGui::PushStyleColor(ImGuiCol_Text, GetBlinkingColor());
+    ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
     ImGui::Text(ICON_FA_GENDERLESS);
     ImGui::PopStyleColor();
 }
@@ -1591,7 +1586,6 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
         }
 
         //slider
-
         T sliderValue;
         T minValue = value[0], maxValue = value[0];
         int sliderValueColor = 0;

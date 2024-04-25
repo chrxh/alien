@@ -770,12 +770,17 @@ bool _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
         ImGui::SameLine();
 
         if (!_simIdsFromLastSession.contains(leaf.rawTO->id)) {
-            ImGui::PushFont(StyleRepository::getInstance().getSmallBoldFont());
-            ImGui::PushStyleColor(ImGuiCol_Text, AlienImGui::GetBlinkingColor());
+            auto font = StyleRepository::getInstance().getSmallBoldFont();
+            auto origSize = font->Scale;
+            font->Scale *= 0.65f;
+            ImGui::PushFont(font);
+            ImGui::PushStyleColor(ImGuiCol_Text, Const::BrowserResourceNewTextColor.Value);
             AlienImGui::Text("NEW");
             ImGui::PopStyleColor();
-            ImGui::SameLine();
+            font->Scale = origSize;
             ImGui::PopFont();
+
+            ImGui::SameLine();
         }
 
         processShortenedText(leaf.leafName, true);
