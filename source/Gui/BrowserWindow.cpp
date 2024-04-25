@@ -105,7 +105,7 @@ _BrowserWindow::~_BrowserWindow()
     settings.setBool("windows.browser.first start", false);
     settings.setFloat("windows.browser.user table width", _userTableWidth);
     for (auto const& [workspaceId, workspace] : _workspaces) {
-        settings.setString(
+        settings.setStringVector(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
             NetworkResourceService::convertFolderNamesToSettings(workspace.collapsedFolderNames));
@@ -128,7 +128,7 @@ void _BrowserWindow::registerCyclicReferences(
     for (auto& [workspaceId, workspace] : _workspaces) {
         auto initialCollapsedSimulationFolders =
             NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::getFolderNames(workspace.rawTOs));
-        auto collapsedSimulationFolders = GlobalSettings::getInstance().getString(
+        auto collapsedSimulationFolders = GlobalSettings::getInstance().getStringVector(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
             initialCollapsedSimulationFolders);

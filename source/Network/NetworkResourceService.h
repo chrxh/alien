@@ -19,8 +19,8 @@ public:
     static std::string removeFoldersFromName(std::string const& resourceName);
     static std::set<std::vector<std::string>> getFolderNames(std::vector<NetworkResourceRawTO> const& browserData, int minNesting = 2);
     static std::string concatenateFolderName(std::vector<std::string> const& folderNames, bool withSlashAtTheEnd);
-    static std::string convertFolderNamesToSettings(std::set<std::vector<std::string>> const& data);
-    static std::set<std::vector<std::string>> convertSettingsToFolderNames(std::string const& data);
+    static std::vector<std::string> convertFolderNamesToSettings(std::set<std::vector<std::string>> const& folderNames);
+    static std::set<std::vector<std::string>> convertSettingsToFolderNames(std::vector<std::string> const& settings);
 
 private:
     static std::unordered_map<NetworkResourceTreeTO, std::vector<NetworkResourceRawTO>> _treeTOtoRawTOcache;
