@@ -314,6 +314,7 @@ public:
         std::vector<float>& biases,
         std::vector<NeuronActivationFunction>& activationFunctions);
 
+    static ImVec4 GetBlinkingColor();
     static void OnlineSymbol();
     static void LastDayOnlineSymbol();
 

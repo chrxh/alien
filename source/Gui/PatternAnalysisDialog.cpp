@@ -22,12 +22,12 @@ _PatternAnalysisDialog::_PatternAnalysisDialog(SimulationController const& simCo
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::getInstance().getStringState("dialogs.pattern analysis.starting path", path.string());
+    _startingPath = GlobalSettings::getInstance().getString("dialogs.pattern analysis.starting path", path.string());
 }
 
 _PatternAnalysisDialog::~_PatternAnalysisDialog()
 {
-    GlobalSettings::getInstance().setStringState("dialogs.pattern analysis.starting path", _startingPath);
+    GlobalSettings::getInstance().setString("dialogs.pattern analysis.starting path", _startingPath);
 }
 
 void _PatternAnalysisDialog::process()

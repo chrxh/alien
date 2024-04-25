@@ -19,8 +19,8 @@ _GpuSettingsDialog::_GpuSettingsDialog(SimulationController const& simController
     , _simController(simController)
 {
     GpuSettings gpuSettings;
-    gpuSettings.numBlocks = GlobalSettings::getInstance().getIntState("settings.gpu.num blocks", gpuSettings.numBlocks);
-    gpuSettings.numThreadsPerBlock = GlobalSettings::getInstance().getIntState("settings.gpu.num threads per block", gpuSettings.numThreadsPerBlock);
+    gpuSettings.numBlocks = GlobalSettings::getInstance().getInt("settings.gpu.num blocks", gpuSettings.numBlocks);
+    gpuSettings.numThreadsPerBlock = GlobalSettings::getInstance().getInt("settings.gpu.num threads per block", gpuSettings.numThreadsPerBlock);
 
     _simController->setGpuSettings_async(gpuSettings);
 }
@@ -28,8 +28,8 @@ _GpuSettingsDialog::_GpuSettingsDialog(SimulationController const& simController
 _GpuSettingsDialog::~_GpuSettingsDialog()
 {
     auto gpuSettings = _simController->getGpuSettings();
-    GlobalSettings::getInstance().setIntState("settings.gpu.num blocks", gpuSettings.numBlocks);
-    GlobalSettings::getInstance().setIntState("settings.gpu.num threads per block", gpuSettings.numThreadsPerBlock);
+    GlobalSettings::getInstance().setInt("settings.gpu.num blocks", gpuSettings.numBlocks);
+    GlobalSettings::getInstance().setInt("settings.gpu.num threads per block", gpuSettings.numThreadsPerBlock);
 }
 
 void _GpuSettingsDialog::processIntern()
