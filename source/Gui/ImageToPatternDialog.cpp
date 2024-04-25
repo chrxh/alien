@@ -25,12 +25,12 @@ _ImageToPatternDialog::_ImageToPatternDialog(SimulationController const& simCont
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::getInstance().getStringState("dialogs.open image.starting path", path.string());
+    _startingPath = GlobalSettings::getInstance().getString("dialogs.open image.starting path", path.string());
 }
 
 _ImageToPatternDialog::~_ImageToPatternDialog()
 {
-    GlobalSettings::getInstance().setStringState("dialogs.open image.starting path", _startingPath);
+    GlobalSettings::getInstance().setString("dialogs.open image.starting path", _startingPath);
 }
 
 namespace

@@ -75,12 +75,12 @@ Cache<std::string, NetworkService::ResourceData, 20> NetworkService::_downloadCa
 
 void NetworkService::init()
 {
-    _serverAddress = GlobalSettings::getInstance().getStringState("settings.server", "alien-project.org");
+    _serverAddress = GlobalSettings::getInstance().getString("settings.server", "alien-project.org");
 }
 
 void NetworkService::shutdown()
 {
-    GlobalSettings::getInstance().setStringState("settings.server", _serverAddress);
+    GlobalSettings::getInstance().setString("settings.server", _serverAddress);
     logout();
 }
 

@@ -91,10 +91,11 @@ namespace Const
     ImColor const BrowserAddReactionButtonTextColor = ImColor::HSV(0.375f, 0.6f, 0.7f, 1.0f);
     ImColor const BrowserDownloadButtonTextColor = ImColor::HSV(0.55f, 0.6f, 1.0f, 1.0f);
     ImColor const BrowserDeleteButtonTextColor = ImColor::HSV(0.0f, 0.6f, 0.8f, 1.0f);
-    ImColor const BrowserFolderTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
-    ImColor const BrowserFolderLineColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
-    ImColor const BrowserFolderPropertiesTextColor = ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f);
-    ImColor const BrowserFolderSymbolColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
+    ImColor const BrowserResourceTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
+    ImColor const BrowserResourceLineColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
+    ImColor const BrowserResourcePropertiesTextColor = ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f);
+    ImColor const BrowserResourceNewTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
+    ImColor const BrowserResourceSymbolColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
 
     ImColor const BrowserVersionOkTextColor = ImColor::HSV(0.58f, 0.2f, 1.0f);
     ImColor const BrowserVersionOutdatedTextColor = ImColor::HSV(0.0f, 0.0f, 0.6f);

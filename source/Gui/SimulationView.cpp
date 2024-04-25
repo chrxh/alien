@@ -34,7 +34,7 @@ _SimulationView::_SimulationView(
     EditorModel const& editorModel)
     : _editorModel(editorModel)
 {
-    _isCellDetailOverlayActive = GlobalSettings::getInstance().getBoolState("settings.simulation view.overlay", _isCellDetailOverlayActive);
+    _isCellDetailOverlayActive = GlobalSettings::getInstance().getBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
     _modeWindow = modeWindow;
 
     _simController = simController;
@@ -97,7 +97,7 @@ _SimulationView::_SimulationView(
 
 _SimulationView::~_SimulationView()
 {
-    GlobalSettings::getInstance().setBoolState("settings.simulation view.overlay", _isCellDetailOverlayActive);
+    GlobalSettings::getInstance().setBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
 }
 
 void _SimulationView::resize(IntVector2D const& size)
