@@ -52,21 +52,28 @@ public:
         std::string& resourceId,
         std::string const& resourceName,
         std::string const& description,
-        IntVector2D const& size,
-        int particles,
+        IntVector2D const& worldSize,
+        int numParticles,
         std::string const& data,
         std::string const& settings,
         std::string const& statistics,
         NetworkResourceType resourceType,
         WorkspaceType workspaceType);
+    static bool replaceResource(
+        std::string const& resourceId,
+        IntVector2D const& worldSize,
+        int numParticles,
+        std::string const& data,
+        std::string const& settings,
+        std::string const& statistics);
     static bool downloadResource(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
-    static void incDownloadCounter(std::string const& simId);
+        static void incDownloadCounter(std::string const& simId);
     static bool editResource(std::string const& simId, std::string const& newName, std::string const& newDescription);
     static bool moveResource(std::string const& simId, WorkspaceType targetWorkspace);
     static bool deleteResource(std::string const& simId);
 
 private:
-    static bool appendResourceData(std::string& resourceId, std::string const& data, int chunkIndex);
+    static bool appendResourceData(std::string const& resourceId, std::string const& data, int chunkIndex);
 
     static std::string _serverAddress;
     static std::optional<std::string> _loggedInUserName;

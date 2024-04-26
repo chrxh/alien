@@ -1,5 +1,16 @@
 # Release notes
 
+## [4.9.1] - 2024-04-26
+### Added
+- gui/browser: label new simulations
+- gui/browser: allow to replace simulations and genomes
+
+### Changed
+- gui/browser: ignore upper and lower case in the browser filter
+
+### Fixed
+- gui/browser: preserve subfolder names when renaming folders
+
 ## [4.9.0] - 2024-04-22
 ### Added
 - engine, gui/simulation parameters: conditional and unconditional energy inflow from external energy source

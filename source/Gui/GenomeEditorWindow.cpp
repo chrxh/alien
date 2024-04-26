@@ -51,16 +51,16 @@ _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, Simula
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::getInstance().getStringState("windows.genome editor.starting path", path.string());
-    _previewHeight = GlobalSettings::getInstance().getFloatState("windows.genome editor.preview height", scale(PreviewHeight));
+    _startingPath = GlobalSettings::getInstance().getString("windows.genome editor.starting path", path.string());
+    _previewHeight = GlobalSettings::getInstance().getFloat("windows.genome editor.preview height", scale(PreviewHeight));
     _changeColorDialog =
         std::make_shared<_ChangeColorDialog>([&] { return getCurrentGenome(); }, [&](GenomeDescription const& genome) { setCurrentGenome(genome); });
 }
 
 _GenomeEditorWindow::~_GenomeEditorWindow()
 {
-    GlobalSettings::getInstance().setStringState("windows.genome editor.starting path", _startingPath);
-    GlobalSettings::getInstance().setFloatState("windows.genome editor.preview height", _previewHeight);
+    GlobalSettings::getInstance().setString("windows.genome editor.starting path", _startingPath);
+    GlobalSettings::getInstance().setFloat("windows.genome editor.preview height", _previewHeight);
 }
 
 void _GenomeEditorWindow::registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog)
