@@ -1349,7 +1349,7 @@ void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
             onRefresh();
         });
     };
-    MessageDialog::getInstance().yesNo("Delete", "Do you really want to replace the selected item?", func);
+    MessageDialog::getInstance().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
 }
 
 void _BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
