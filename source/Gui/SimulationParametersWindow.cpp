@@ -1469,8 +1469,8 @@ void _SimulationParametersWindow::processSpot(
 
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("General"))) {
             if(AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(RightColumnWidth), _spotNameStrings[tab])){
+                _spotNameStrings[tab] = _spotNameStrings[tab].substr(0, SIM_PARAM_SPOT_NAME_LENGTH - 1); 
                 strncpy_s(spot.name, SIM_PARAM_SPOT_NAME_LENGTH, _spotNameStrings[tab].c_str(), SIM_PARAM_SPOT_NAME_LENGTH - 1);
-                _spotNameStrings[tab] = _spotNameStrings[tab].substr(0, SIM_PARAM_SPOT_NAME_LENGTH - 1);
             }
             AlienImGui::EndTreeNode();
         }
@@ -2177,6 +2177,11 @@ void _SimulationParametersWindow::onOpenParameters()
         if (!SerializerService::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
             MessageDialog::getInstance().information("Open simulation parameters", "The selected file could not be opened.");
         } else {
+            for(int spot = 0; spot < parameters.numSpots; ++spot){
+                _spotNameStrings[spot] = std::string(parameters.spots[spot].name, SIM_PARAM_SPOT_NAME_LENGTH);
+                _spotTabIDs[spot] = std::to_string(_serialTabID);
+                ++_serialTabID;
+            }
             _simController->setSimulationParameters(parameters);
         }
     });
