@@ -36,6 +36,7 @@ public:
     WorkspaceType getCurrentWorkspaceType() const;
 
     BrowserCache& getSimulationCache();
+    void registerUploadedSimulation(std::string const& id);
 
 private:
     struct WorkspaceId
@@ -106,6 +107,8 @@ private:
     bool isOwner(NetworkResourceTreeTO const& treeTO) const;
     std::string getUserNamesToEmojiType(std::string const& resourceId, int emojiType);
 
+    std::vector<std::string> getAllSimulationIds() const;
+
     void pushTextColor(NetworkResourceTreeTO const& to);
     void popTextColor();
 
@@ -117,6 +120,7 @@ private:
     std::vector<UserTO> _userTOs;
     WorkspaceId _currentWorkspace = {NetworkResourceType_Simulation, WorkspaceType_AlienProject};
     std::map<WorkspaceId, Workspace> _workspaces;
+    std::unordered_set<std::string> _simIdsFromLastSession;
 
     NetworkResourceTreeTO _selectedTreeTO;
 

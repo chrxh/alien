@@ -14,9 +14,9 @@ _ShaderWindow::_ShaderWindow(SimulationView const& simulationView)
 : _AlienWindow("Shader parameters", "windows.shader", false)
 , _simulationView(simulationView)
 {
-    _brightness = GlobalSettings::getInstance().getFloatState("windows.shader.brightness", _brightness);
-    _contrast = GlobalSettings::getInstance().getFloatState("windows.shader.contrast", _contrast);
-    _motionBlur = GlobalSettings::getInstance().getFloatState("windows.shader.motion blur", _motionBlur);
+    _brightness = GlobalSettings::getInstance().getFloat("windows.shader.brightness", _brightness);
+    _contrast = GlobalSettings::getInstance().getFloat("windows.shader.contrast", _contrast);
+    _motionBlur = GlobalSettings::getInstance().getFloat("windows.shader.motion blur", _motionBlur);
     _simulationView->setBrightness(_brightness);
     _simulationView->setContrast(_contrast);
     _simulationView->setMotionBlur(_motionBlur);
@@ -24,9 +24,9 @@ _ShaderWindow::_ShaderWindow(SimulationView const& simulationView)
 
 _ShaderWindow::~_ShaderWindow()
 {
-    GlobalSettings::getInstance().setFloatState("windows.shader.brightness", _brightness);
-    GlobalSettings::getInstance().setFloatState("windows.shader.contrast", _contrast);
-    GlobalSettings::getInstance().setFloatState("windows.shader.motion blur", _motionBlur);
+    GlobalSettings::getInstance().setFloat("windows.shader.brightness", _brightness);
+    GlobalSettings::getInstance().setFloat("windows.shader.contrast", _contrast);
+    GlobalSettings::getInstance().setFloat("windows.shader.motion blur", _motionBlur);
 }
 
 void _ShaderWindow::processIntern()

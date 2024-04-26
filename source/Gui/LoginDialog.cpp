@@ -30,12 +30,12 @@ _LoginDialog::_LoginDialog(
 
 {
     auto& settings = GlobalSettings::getInstance();
-    _remember = settings.getBoolState("dialogs.login.remember", _remember);
-    _shareGpuInfo = settings.getBoolState("dialogs.login.share gpu info", _shareGpuInfo);
+    _remember = settings.getBool("dialogs.login.remember", _remember);
+    _shareGpuInfo = settings.getBool("dialogs.login.share gpu info", _shareGpuInfo);
 
     if (_remember) {
-        _userName = settings.getStringState("dialogs.login.user name", "");
-        _password = settings.getStringState("dialogs.login.password", "");
+        _userName = settings.getString("dialogs.login.user name", "");
+        _password = settings.getString("dialogs.login.password", "");
         if (!_userName.empty()) {
             LoginErrorCode errorCode;
             if (!NetworkService::login(errorCode, _userName, _password, getUserInfo())) {
@@ -148,11 +148,11 @@ void _LoginDialog::onLogin()
 void _LoginDialog::saveSettings()
 {
     auto& settings = GlobalSettings::getInstance();
-    settings.setBoolState("dialogs.login.remember", _remember);
-    settings.setBoolState("dialogs.login.share gpu info", _shareGpuInfo);
+    settings.setBool("dialogs.login.remember", _remember);
+    settings.setBool("dialogs.login.share gpu info", _shareGpuInfo);
     if (_remember) {
-        settings.setStringState("dialogs.login.user name", _userName);
-        settings.setStringState("dialogs.login.password", _password);
+        settings.setString("dialogs.login.user name", _userName);
+        settings.setString("dialogs.login.password", _password);
     }
 }
 
