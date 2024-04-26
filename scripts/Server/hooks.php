@@ -17,14 +17,23 @@
     // functions for Discord messages
     function createAddResourceMessage($type, $simName, $userName, $simDesc, $width, $height, $particles) {
         if ($type == 0) {
-            return createAddSimulationMessage($simName, $userName, $simDesc, $width, $height, $particles);
+            return createMessageForSimulation("New simulation added to the database", $simName, $userName, $simDesc, $width, $height, $particles);
         }
         else {
-            return createAddGenomeMessage($simName, $userName, $simDesc, $width, $height, $particles);
+            return createMessageForGenome("New genome added to the database", $simName, $userName, $simDesc, $width, $height, $particles);
         }
     }
 
-    function createAddSimulationMessage($simName, $userName, $simDesc, $width, $height, $particles) {
+    function createUpdateResourceMessage($type, $simName, $userName, $simDesc, $width, $height, $particles) {
+        if ($type == 0) {
+            return createMessageForSimulation("Simulation updated in the database", $simName, $userName, $simDesc, $width, $height, $particles);
+        }
+        else {
+            return createMessageForGenome("Genome updated in the database", $simName, $userName, $simDesc, $width, $height, $particles);
+        }
+    }
+
+    function createMessageForSimulation($message, $simName, $userName, $simDesc, $width, $height, $particles) {
         $particlesString = $particles < 1000 ? "{$particles}" : strval((int)($particles/1000)) . " K";
         return json_encode([
             "username" => "alien-project",
@@ -33,7 +42,7 @@
             "embeds" => [
                 [
                     "author" => [
-                        "name" => "New simulation added to the database",
+                        "name" => $message,
                         "icon_url" => "https://alien-project.org/alien-server/galaxy.png"
                     ],
                     "title" => $simName,
@@ -60,7 +69,7 @@
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
-    function createAddGenomeMessage($simName, $userName, $simDesc, $width, $height, $particles) {
+    function createMessageForGenome($message, $simName, $userName, $simDesc, $width, $height, $particles) {
         return json_encode([
             "username" => "alien-project",
             "avatar_url" => "https://alien-project.org/alien-server/logo.png",
@@ -68,7 +77,7 @@
             "embeds" => [
                 [
                     "author" => [
-                        "name" => "New genome added to the database",
+                        "name" => $message,
                         "icon_url" => "https://alien-project.org/alien-server/genome.png"
                     ],
                     "title" => $simName,
