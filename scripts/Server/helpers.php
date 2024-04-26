@@ -1,5 +1,7 @@
 <?php
     const MAX_MINUTES_FOR_INACTIVITY = 60; 
+    const PUBLIC_WORKSPACE_TYPE = 0;
+    const ALIEN_PROJECT_WORKSPACE_TYPE = 1;
     const PRIVATE_WORKSPACE_TYPE = 2;
 
     function connectToDB()

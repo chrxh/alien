@@ -16,16 +16,12 @@
     $pw = $_POST["password"];
 
     if (!checkPw($db, $userName, $pw)) {
-        echo json_encode(["result"=>false]);
-        $db->close();
-        exit;
+        closeAndExit($db);
     }
 
     $obj = $db->query("SELECT u.ID as id FROM user u WHERE u.NAME='".addslashes($userName)."'")->fetch_object();
     if (!$obj) {
-        echo json_encode(["result"=>false]);
-        $db->close();
-        exit;
+        closeAndExit($db);
     }
 
     $success = false;
@@ -35,11 +31,14 @@
     $settings = $_POST['settings'];
     $simId = $_POST['simId'];
     $size = strlen($content);
-    $type = array_key_exists('type', $_POST) ? $_POST['type'] : 0;
-    $workspace = array_key_exists('workspace', $_POST) ? $_POST['workspace'] : 0;
     $statistics = array_key_exists('statistics', $_POST) ? $_POST['statistics'] : "";
 
-    if ($userName != 'alien-project' && $workspace == 1) {
+    $obj = $db->query("SELECT sim.NAME as name, sim.TYPE as type, sim.FROM_RELEASE as workspace FROM simulation sim WHERE sim.ID='".addslashes($simId)."'")->fetch_object();
+    if (!$obj) {
+        closeAndExit($db);
+    }
+
+    if ($userName != 'alien-project' && $obj->workspace == ALIEN_PROJECT_WORKSPACE_TYPE) {
         closeAndExit($db);
     }
 
@@ -56,10 +55,10 @@
     }
 
     // create Discord message
-    //if ($workspace != PRIVATE_WORKSPACE_TYPE) {
-    //    $discordPayload = createAddResourceMessage($type, $simName, $userName, $simDesc, $width, $height, $particles);
-    //    sendDiscordMessage($discordPayload);
-    //}
+    if ($obj->workspace != PRIVATE_WORKSPACE_TYPE) {
+        $discordPayload = createUpdateResourceMessage($obj->type, $obj->name, $userName, $simDesc, $width, $height, $particles);
+        sendDiscordMessage($discordPayload);
+    }
 
     echo json_encode(["result"=>true]);
 
