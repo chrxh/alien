@@ -436,8 +436,8 @@ bool NetworkService::uploadResource(
     std::string& resourceId,
     std::string const& resourceName,
     std::string const& description,
-    IntVector2D const& size,
-    int particles,
+    IntVector2D const& worldSize,
+    int numParticles,
     std::string const& mainData,
     std::string const& settings,
     std::string const& statistics,
@@ -461,9 +461,9 @@ bool NetworkService::uploadResource(
         {"password", *_password, "", ""},
         {"simName", resourceName, "", ""},
         {"simDesc", description, "", ""},
-        {"width", std::to_string(size.x), "", ""},
-        {"height", std::to_string(size.y), "", ""},
-        {"particles", std::to_string(particles), "", ""},
+        {"width", std::to_string(worldSize.x), "", ""},
+        {"height", std::to_string(worldSize.y), "", ""},
+        {"particles", std::to_string(numParticles), "", ""},
         {"version", Const::ProgramVersion, "", ""},
         {"content", chunks.front(), "", "application/octet-stream"},
         {"settings", settings, "", ""},
@@ -493,7 +493,63 @@ bool NetworkService::uploadResource(
         }
         ++index;
     }
-    _downloadCache.insert(resourceId, ResourceData{mainData, settings, statistics});
+    _downloadCache.insertOrAssign(resourceId, ResourceData{mainData, settings, statistics});
+
+    return true;
+}
+
+bool NetworkService::replaceResource(
+    std::string const& resourceId,
+    IntVector2D const& worldSize,
+    int numParticles,
+    std::string const& mainData,
+    std::string const& settings,
+    std::string const& statistics)
+{
+    log(Priority::Important, "network: replace resource with id='" + resourceId + "'");
+
+    std::vector<std::string> chunks;
+    for (size_t i = 0; i < mainData.length(); i += MaxChunkSize) {
+        std::string chunk = mainData.substr(i, MaxChunkSize);
+        chunks.emplace_back(chunk);
+    }
+
+    httplib::SSLClient client(_serverAddress);
+    configureClient(client);
+
+    httplib::MultipartFormDataItems items = {
+        {"userName", *_loggedInUserName, "", ""},
+        {"password", *_password, "", ""},
+        {"simId", resourceId, "", ""},
+        {"width", std::to_string(worldSize.x), "", ""},
+        {"height", std::to_string(worldSize.y), "", ""},
+        {"particles", std::to_string(numParticles), "", ""},
+        {"version", Const::ProgramVersion, "", ""},
+        {"content", chunks.front(), "", "application/octet-stream"},
+        {"settings", settings, "", ""},
+        {"symbolMap", "", "", ""},
+        {"statistics", statistics, "", ""},
+    };
+
+    try {
+        auto result = executeRequest([&] { return client.Post("/alien-server/replacesimulation.php", items); });
+        if (!parseBoolResult(result->body)) {
+            return false;
+        }
+    } catch (...) {
+        logNetworkError();
+        return false;
+    }
+
+    int index = 1;
+    for (auto const& chunk : chunks | std::views::drop(1)) {
+        if (!appendResourceData(resourceId, chunk, toInt(index))) {
+            deleteResource(resourceId);
+            return false;
+        }
+        ++index;
+    }
+    _downloadCache.insertOrAssign(resourceId, ResourceData{mainData, settings, statistics});
 
     return true;
 }
@@ -536,7 +592,7 @@ bool NetworkService::downloadResource(std::string& mainData, std::string& auxili
                 auto result = executeRequest([&] { return client.Get("/alien-server/downloadstatistics.php", params, {}); });
                 statistics = result->body;
             }
-            _downloadCache.insert(simId, ResourceData{mainData, auxiliaryData, statistics});
+            _downloadCache.insertOrAssign(simId, ResourceData{mainData, auxiliaryData, statistics});
             return true;
         }
     } catch (...) {
@@ -628,7 +684,7 @@ bool NetworkService::deleteResource(std::string const& simId)
     }
 }
 
-bool NetworkService::appendResourceData(std::string& resourceId, std::string const& data, int chunkIndex)
+bool NetworkService::appendResourceData(std::string const& resourceId, std::string const& data, int chunkIndex)
 {
     httplib::SSLClient client(_serverAddress);
     configureClient(client);
