@@ -1586,7 +1586,6 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
         }
 
         //slider
-
         T sliderValue;
         T minValue = value[0], maxValue = value[0];
         int sliderValueColor = 0;

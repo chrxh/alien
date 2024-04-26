@@ -36,12 +36,12 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::getInstance().getStringState("windows.statistics.starting path", path.string());
-    _plotHeight = GlobalSettings::getInstance().getFloatState("windows.statistics.plot height", _plotHeight);
-    _mode = GlobalSettings::getInstance().getIntState("windows.statistics.mode", _mode);
-    _liveStatistics.history = GlobalSettings::getInstance().getFloatState("windows.statistics.live statistics horizon", _liveStatistics.history);
-    _plotType = GlobalSettings::getInstance().getIntState("windows.statistics.plot type", _plotType);
-    auto collapsedPlotIndexJoinedString = GlobalSettings::getInstance().getStringState("windows.statistics.collapsed plot indices", "");
+    _startingPath = GlobalSettings::getInstance().getString("windows.statistics.starting path", path.string());
+    _plotHeight = GlobalSettings::getInstance().getFloat("windows.statistics.plot height", _plotHeight);
+    _mode = GlobalSettings::getInstance().getInt("windows.statistics.mode", _mode);
+    _liveStatistics.history = GlobalSettings::getInstance().getFloat("windows.statistics.live statistics horizon", _liveStatistics.history);
+    _plotType = GlobalSettings::getInstance().getInt("windows.statistics.plot type", _plotType);
+    auto collapsedPlotIndexJoinedString = GlobalSettings::getInstance().getString("windows.statistics.collapsed plot indices", "");
     
     if (!collapsedPlotIndexJoinedString.empty()) {
         std::vector<std::string> collapsedPlotIndexStrings;
@@ -54,17 +54,17 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
 
 _StatisticsWindow::~_StatisticsWindow()
 {
-    GlobalSettings::getInstance().setStringState("windows.statistics.starting path", _startingPath);
-    GlobalSettings::getInstance().setFloatState("windows.statistics.plot height", _plotHeight);
-    GlobalSettings::getInstance().setIntState("windows.statistics.mode", _mode);
-    GlobalSettings::getInstance().setFloatState("windows.statistics.live statistics horizon", _liveStatistics.history);
-    GlobalSettings::getInstance().setIntState("windows.statistics.plot type", _plotType);
+    GlobalSettings::getInstance().setString("windows.statistics.starting path", _startingPath);
+    GlobalSettings::getInstance().setFloat("windows.statistics.plot height", _plotHeight);
+    GlobalSettings::getInstance().setInt("windows.statistics.mode", _mode);
+    GlobalSettings::getInstance().setFloat("windows.statistics.live statistics horizon", _liveStatistics.history);
+    GlobalSettings::getInstance().setInt("windows.statistics.plot type", _plotType);
 
     std::vector<std::string> collapsedPlotIndexStrings;
     for (auto const& index : _collapsedPlotIndices) {
         collapsedPlotIndexStrings.emplace_back(std::to_string(index));
     }
-    GlobalSettings::getInstance().setStringState("windows.statistics.collapsed plot indices", boost::join(collapsedPlotIndexStrings, " "));
+    GlobalSettings::getInstance().setString("windows.statistics.collapsed plot indices", boost::join(collapsedPlotIndexStrings, " "));
 }
 
 void _StatisticsWindow::processIntern()

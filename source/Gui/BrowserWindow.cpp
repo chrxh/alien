@@ -41,6 +41,7 @@
 #include "OverlayMessageController.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
+#include "SerializationHelperService.h"
 
 namespace
 {
@@ -67,9 +68,10 @@ _BrowserWindow::_BrowserWindow(
     , _temporalControlWindow(temporalControlWindow)
     , _editorController(editorController)
 {
-    _currentWorkspace.resourceType = GlobalSettings::getInstance().getIntState("windows.browser.resource type", _currentWorkspace.resourceType);
-    _currentWorkspace.workspaceType = GlobalSettings::getInstance().getIntState("windows.browser.workspace type", _currentWorkspace.workspaceType);
-    _userTableWidth = GlobalSettings::getInstance().getFloatState("windows.browser.user table width", scale(UserTableWidth));
+    auto& settings = GlobalSettings::getInstance();
+    _currentWorkspace.resourceType = settings.getInt("windows.browser.resource type", _currentWorkspace.resourceType);
+    _currentWorkspace.workspaceType = settings.getInt("windows.browser.workspace type", _currentWorkspace.workspaceType);
+    _userTableWidth = settings.getFloat("windows.browser.user table width", scale(UserTableWidth));
 
     int numEmojis = 0;
     for (int i = 0; i < NumEmojiBlocks; ++i) {
@@ -98,40 +100,46 @@ namespace
 
 _BrowserWindow::~_BrowserWindow()
 {
-    GlobalSettings::getInstance().setIntState("windows.browser.resource type", _currentWorkspace.resourceType);
-    GlobalSettings::getInstance().setIntState("windows.browser.workspace type", _currentWorkspace.workspaceType);
-    GlobalSettings::getInstance().setBoolState("windows.browser.first start", false);
-    GlobalSettings::getInstance().setFloatState("windows.browser.user table width", _userTableWidth);
+    auto& settings = GlobalSettings::getInstance();
+    settings.setInt("windows.browser.resource type", _currentWorkspace.resourceType);
+    settings.setInt("windows.browser.workspace type", _currentWorkspace.workspaceType);
+    settings.setBool("windows.browser.first start", false);
+    settings.setFloat("windows.browser.user table width", _userTableWidth);
     for (auto const& [workspaceId, workspace] : _workspaces) {
-        GlobalSettings::getInstance().setStringState(
+        settings.setStringVector(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
             NetworkResourceService::convertFolderNamesToSettings(workspace.collapsedFolderNames));
     }
+    _lastSessionData.save(getAllRawTOs());
 }
 
 void _BrowserWindow::registerCyclicReferences(
     LoginDialogWeakPtr const& loginDialog,
     UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
-    EditSimulationDialogWeakPtr const& editSimulationDialog)
+    EditSimulationDialogWeakPtr const& editSimulationDialog,
+    GenomeEditorWindowWeakPtr const& genomeEditorWindow)
 {
     _loginDialog = loginDialog;
     _uploadSimulationDialog = uploadSimulationDialog;
     _editSimulationDialog = editSimulationDialog;
+    _genomeEditorWindow = genomeEditorWindow;
 
-    auto firstStart = GlobalSettings::getInstance().getBoolState("windows.browser.first start", true);
+    auto firstStart = GlobalSettings::getInstance().getBool("windows.browser.first start", true);
     refreshIntern(firstStart);
 
     for (auto& [workspaceId, workspace] : _workspaces) {
         auto initialCollapsedSimulationFolders =
             NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::getFolderNames(workspace.rawTOs));
-        auto collapsedSimulationFolders = GlobalSettings::getInstance().getStringState(
+        auto collapsedSimulationFolders = GlobalSettings::getInstance().getStringVector(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
             initialCollapsedSimulationFolders);
         workspace.collapsedFolderNames = NetworkResourceService::convertSettingsToFolderNames(collapsedSimulationFolders);
         createTreeTOs(workspace);
     }
+
+    _lastSessionData.load(getAllRawTOs());
 }
 
 void _BrowserWindow::onRefresh()
@@ -289,6 +297,15 @@ void _BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Change name or description");
 
+    //replace button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!isOwnerForSelectedItem || !_selectedTreeTO->isLeaf());
+    if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
+        onReplaceResource(_selectedTreeTO->getLeaf());
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Replace the selected " + resourceTypeString + " with the one that is currently open. The name, description and reactions will be maintained.");
+
     //move to other workspace button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
@@ -333,7 +350,7 @@ void _BrowserWindow::processToolbar()
     //Discord button
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COMMENTS)) {
-        openWeblink(Const::DiscordLink);
+        openWeblink(Const::DiscordURL);
     }
     AlienImGui::Tooltip("Open ALIEN Discord server");
 #endif
@@ -757,6 +774,21 @@ bool _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
             AlienImGui::Tooltip("Visible in the public workspace");
         }
         ImGui::SameLine();
+
+        if (!isOwner(treeTO) && _lastSessionData.isNew(leaf.rawTO)) {
+            auto font = StyleRepository::getInstance().getSmallBoldFont();
+            auto origSize = font->Scale;
+            font->Scale *= 0.65f;
+            ImGui::PushFont(font);
+            ImGui::PushStyleColor(ImGuiCol_Text, Const::BrowserResourceNewTextColor.Value);
+            AlienImGui::Text("NEW");
+            ImGui::PopStyleColor();
+            font->Scale = origSize;
+            ImGui::PopFont();
+
+            ImGui::SameLine();
+        }
+
         processShortenedText(leaf.leafName, true);
     } else {
         auto& folder = treeTO->getFolder();
@@ -764,7 +796,7 @@ bool _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
         result |= processFolderTreeSymbols(treeTO, collapsedFolderNames);
         processShortenedText(treeTO->folderNames.back());
         ImGui::SameLine();
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourcePropertiesTextColor);
         std::string resourceTypeString = [&] {
             if (treeTO->type == NetworkResourceType_Simulation) {
                 return folder.numLeafs == 1 ? "sim" : "sims";
@@ -863,7 +895,7 @@ void _BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
 
         auto pos = ImGui::GetCursorScreenPos();
         ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderPropertiesTextColor);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourcePropertiesTextColor);
         AlienImGui::Text("(" + std::to_string(folder.numReactions) + ")");
         ImGui::PopStyleColor();
     }
@@ -940,7 +972,7 @@ void _BrowserWindow::processVersionField(NetworkResourceTreeTO const& treeTO)
 bool _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
 {
     auto result = false;
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserFolderSymbolColor);
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourceSymbolColor);
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0, 0, 0));
     auto const& treeSymbols = treeTO->treeSymbols;
     for (auto const& folderLine : treeSymbols) {
@@ -963,37 +995,37 @@ bool _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeT
             ImGui::GetWindowDrawList()->AddRectFilled(
                 ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
                 ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
-                Const::BrowserFolderLineColor);
+                Const::BrowserResourceLineColor);
             ImGui::Dummy({scale(20.0f), 0});
         } break;
         case FolderTreeSymbols::Branch: {
             ImGui::GetWindowDrawList()->AddRectFilled(
                 ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
                 ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) + style.FramePadding.y),
-                Const::BrowserFolderLineColor);
+                Const::BrowserResourceLineColor);
             ImGui::GetWindowDrawList()->AddRectFilled(
                 ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y),
                 ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
-                Const::BrowserFolderLineColor);
+                Const::BrowserResourceLineColor);
             ImGui::GetWindowDrawList()->AddRectFilled(
                 ImVec2(pos.x + style.FramePadding.x + scale(20.0f - 0.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y - scale(0.5f)),
                 ImVec2(pos.x + style.FramePadding.x + scale(20.0f + 2.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(2.0f)),
-                Const::BrowserFolderLineColor);
+                Const::BrowserResourceLineColor);
             ImGui::Dummy({scale(20.0f), 0});
         } break;
         case FolderTreeSymbols::End: {
             ImGui::GetWindowDrawList()->AddRectFilled(
                 ImVec2(pos.x + style.FramePadding.x + scale(6.0f), pos.y),
                 ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
-                Const::BrowserFolderLineColor);
+                Const::BrowserResourceLineColor);
             ImGui::GetWindowDrawList()->AddRectFilled(
                 ImVec2(pos.x + style.FramePadding.x + scale(7.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y),
                 ImVec2(pos.x + style.FramePadding.x + scale(20.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(1.5f)),
-                Const::BrowserFolderLineColor);
+                Const::BrowserResourceLineColor);
             ImGui::GetWindowDrawList()->AddRectFilled(
                 ImVec2(pos.x + style.FramePadding.x + scale(20.0f - 0.5f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y - scale(0.5f)),
                 ImVec2(pos.x + style.FramePadding.x + scale(20.0f + 2.0f), pos.y + scale(RowHeight) / 2 - style.FramePadding.y + scale(2.0f)),
-                Const::BrowserFolderLineColor);
+                Const::BrowserResourceLineColor);
             ImGui::Dummy({scale(20.0f), 0});
         } break;
         case FolderTreeSymbols::None: {
@@ -1208,7 +1240,7 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
                     MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
                     return;
                 }
-                _simulationCache.insert(leaf.rawTO->id, deserializedSim);
+                _simulationCache.insertOrAssign(leaf.rawTO->id, deserializedSim);
             } else {
                 log(Priority::Important, "browser: get resource with id=" + leaf.rawTO->id + " from simulation cache");
                 std::swap(deserializedSim, *cachedSimulation);
@@ -1258,6 +1290,66 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
                 "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
         }
     });
+}
+
+void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
+{
+    auto func = [&] {
+        printOverlayMessage("Replacing ...");
+
+        delayedExecution([=, this] {
+            std::string mainData;
+            std::string settings;
+            std::string statistics;
+            IntVector2D worldSize;
+            int numObjects = 0;
+
+            DeserializedSimulation deserializedSim;
+            if (leaf.rawTO->resourceType == NetworkResourceType_Simulation) {
+                deserializedSim = SerializationHelperService::getDeserializedSerialization(_simController);
+
+                SerializedSimulation serializedSim;
+                if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
+                    MessageDialog::getInstance().information("Replace simulation", "The simulation could not be serialized for replacing.");
+                    return;
+                }
+                mainData = serializedSim.mainData;
+                settings = serializedSim.auxiliaryData;
+                statistics = serializedSim.statistics;
+                worldSize = {deserializedSim.auxiliaryData.generalSettings.worldSizeX, deserializedSim.auxiliaryData.generalSettings.worldSizeY};
+                numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
+            } else {
+                auto genome = _genomeEditorWindow.lock()->getCurrentGenome();
+                if (genome.cells.empty()) {
+                    showMessage("Replace genome", "The is no valid genome in the genome editor selected.");
+                    return;
+                }
+                auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(genome);
+                numObjects = GenomeDescriptionService::getNumNodesRecursively(genomeData, true);
+
+                if (!SerializerService::serializeGenomeToString(mainData, genomeData)) {
+                    showMessage("Replace genome", "The genome could not be serialized for replacing.");
+                    return;
+                }
+            }
+
+            if (!NetworkService::replaceResource(leaf.rawTO->id, worldSize, numObjects, mainData, settings, statistics)) {
+                std::string type = leaf.rawTO->resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
+                showMessage(
+                    "Error",
+                    "Failed to replace " + type
+                        + ".\n\n"
+                          "Possible reasons:\n\n" ICON_FA_CHEVRON_RIGHT " The server is not reachable.\n\n" ICON_FA_CHEVRON_RIGHT
+                          " The total size of your uploads exceeds the allowed storage limit.");
+                return;
+            }
+            if (leaf.rawTO->resourceType == NetworkResourceType_Simulation) {
+                getSimulationCache().insertOrAssign(leaf.rawTO->id, deserializedSim);
+            }
+            onRefresh();
+        });
+    };
+    MessageDialog::getInstance().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
 }
 
 void _BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
@@ -1429,6 +1521,15 @@ std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& resourceI
     return boost::algorithm::join(userNames, ", ");
 }
 
+std::unordered_set<NetworkResourceRawTO> _BrowserWindow::getAllRawTOs() const
+{
+    std::unordered_set<NetworkResourceRawTO> result;
+    for (auto const& workspace : _workspaces | std::views::values) {
+        result.insert(workspace.rawTOs.begin(), workspace.rawTOs.end());
+    }
+    return result;
+}
+
 void _BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
 {
     if (to->isLeaf()) {
@@ -1441,7 +1542,7 @@ void _BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
             ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionOkTextColor);
         }
     } else {
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserFolderTextColor);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserResourceTextColor);
     }
 }
 

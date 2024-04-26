@@ -20,6 +20,7 @@
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginDialog.h"
+#include "SerializationHelperService.h"
 
 namespace
 {
@@ -45,13 +46,13 @@ _UploadSimulationDialog::_UploadSimulationDialog(
     , _genomeEditorWindow(genomeEditorWindow)
 {
     auto& settings = GlobalSettings::getInstance();
-    _share = settings.getBoolState("dialogs.upload.share", _share);
+    _share = settings.getBool("dialogs.upload.share", _share);
 }
 
 _UploadSimulationDialog::~_UploadSimulationDialog()
 {
     auto& settings = GlobalSettings::getInstance();
-    settings.setBoolState("dialogs.upload.share", _share);
+    settings.setBool("dialogs.upload.share", _share);
 }
 
 void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder)
@@ -151,14 +152,7 @@ void _UploadSimulationDialog::onUpload()
 
         DeserializedSimulation deserializedSim;
         if (_resourceType == NetworkResourceType_Simulation) {
-            deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-            deserializedSim.auxiliaryData.realTime = _simController->getRealTime();
-            deserializedSim.auxiliaryData.zoom = Viewport::getZoomFactor();
-            deserializedSim.auxiliaryData.center = Viewport::getCenterInWorldPos();
-            deserializedSim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
-            deserializedSim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
-            deserializedSim.statistics = _simController->getStatisticsHistory().getCopiedData();
-            deserializedSim.mainData = _simController->getClusteredSimulationData();
+            deserializedSim = SerializationHelperService::getDeserializedSerialization(_simController);
 
             SerializedSimulation serializedSim;
             if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
@@ -197,7 +191,7 @@ void _UploadSimulationDialog::onUpload()
             return;
         }
         if (_resourceType == NetworkResourceType_Simulation) {
-            _browserWindow->getSimulationCache().insert(resourceId, deserializedSim);
+            _browserWindow->getSimulationCache().insertOrAssign(resourceId, deserializedSim);
         }
         _browserWindow->onRefresh();
     });
