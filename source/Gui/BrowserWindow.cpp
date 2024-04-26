@@ -288,14 +288,6 @@ void _BrowserWindow::processToolbar()
         + " to the server and made visible in the browser. You can choose whether you want to share it with other users or whether it should only be visible "
           "in your private workspace.\nIf you have already selected a folder, your " + resourceTypeString + " will be uploaded there.");
 
-    //replace button
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!isOwnerForSelectedItem || !_selectedTreeTO->isLeaf());
-    if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
-        onReplaceResource(_selectedTreeTO->getLeaf());
-    }
-    ImGui::EndDisabled();
-
     //edit button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
@@ -304,6 +296,15 @@ void _BrowserWindow::processToolbar()
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Change name or description");
+
+    //replace button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!isOwnerForSelectedItem || !_selectedTreeTO->isLeaf());
+    if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
+        onReplaceResource(_selectedTreeTO->getLeaf());
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Replace the selected " + resourceTypeString + " with the one that is currently open. The name, description and reactions will be maintained.");
 
     //move to other workspace button
     ImGui::SameLine();
@@ -349,7 +350,7 @@ void _BrowserWindow::processToolbar()
     //Discord button
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COMMENTS)) {
-        openWeblink(Const::DiscordLink);
+        openWeblink(Const::DiscordURL);
     }
     AlienImGui::Tooltip("Open ALIEN Discord server");
 #endif
