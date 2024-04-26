@@ -27,6 +27,8 @@
     $success = false;
     $particles = (int)$_POST['particles'];
     $version = $_POST['version'];
+    $width = (int)$_POST['width'];
+    $height = (int)$_POST['height'];
     $content = $_POST['content'];
     $settings = $_POST['settings'];
     $simId = $_POST['simId'];
