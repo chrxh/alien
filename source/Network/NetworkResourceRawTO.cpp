@@ -1,5 +1,6 @@
 #include "NetworkResourceRawTO.h"
 
+#include <algorithm>
 #include <ranges>
 #include <imgui.h>
 
@@ -54,37 +55,52 @@ int _NetworkResourceRawTO::compare(NetworkResourceRawTO const& left, NetworkReso
     return 0;
 }
 
+namespace
+{
+    bool containsIgnoreCase(std::string const& str, std::string const& substr)
+    {
+        std::string strLower = str;
+        std::string substrLower = substr;
+
+        std::transform(str.begin(), str.end(), strLower.begin(), ::tolower);
+        std::transform(substr.begin(), substr.end(), substrLower.begin(), ::tolower);
+
+        return strLower.find(substrLower) != std::string::npos;
+    }
+}
+
 bool _NetworkResourceRawTO::matchWithFilter(std::string const& filter) const
 {
+
     auto match = false;
-    if (timestamp.find(filter) != std::string::npos) {
+    if (containsIgnoreCase(timestamp, filter)) {
         match = true;
     }
-    if (userName.find(filter) != std::string::npos) {
+    if (containsIgnoreCase(userName, filter)) {
         match = true;
     }
-    if (resourceName.find(filter) != std::string::npos) {
+    if (containsIgnoreCase(resourceName, filter)) {
         match = true;
     }
-    if (std::to_string(numDownloads).find(filter) != std::string::npos) {
+    if (containsIgnoreCase(std::to_string(numDownloads), filter)) {
         match = true;
     }
-    if (std::to_string(width).find(filter) != std::string::npos) {
+    if (containsIgnoreCase(std::to_string(width), filter)) {
         match = true;
     }
-    if (std::to_string(height).find(filter) != std::string::npos) {
+    if (containsIgnoreCase(std::to_string(height), filter)) {
         match = true;
     }
-    if (std::to_string(particles).find(filter) != std::string::npos) {
+    if (containsIgnoreCase(std::to_string(particles), filter)) {
         match = true;
     }
-    if (std::to_string(contentSize).find(filter) != std::string::npos) {
+    if (containsIgnoreCase(std::to_string(contentSize), filter)) {
         match = true;
     }
-    if (description.find(filter) != std::string::npos) {
+    if (containsIgnoreCase(description, filter)) {
         match = true;
     }
-    if (version.find(filter) != std::string::npos) {
+    if (containsIgnoreCase(version, filter)) {
         match = true;
     }
     return match;
