@@ -150,6 +150,7 @@ using ImageToPatternDialog = std::shared_ptr<_ImageToPatternDialog>;
 
 class _GenomeEditorWindow;
 using GenomeEditorWindow = std::shared_ptr<_GenomeEditorWindow>;
+using GenomeEditorWindowWeakPtr = std::weak_ptr<_GenomeEditorWindow>;
 
 class _RadiationSourcesWindow;
 using RadiationSourcesWindow = std::shared_ptr<_RadiationSourcesWindow>;

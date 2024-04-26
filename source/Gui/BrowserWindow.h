@@ -12,6 +12,7 @@
 
 #include "AlienWindow.h"
 #include "Definitions.h"
+#include "LastSessionBrowserData.h"
 
 struct ImGuiTableColumnSortSpecs;
 
@@ -30,13 +31,13 @@ public:
     void registerCyclicReferences(
         LoginDialogWeakPtr const& loginDialog,
         UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
-        EditSimulationDialogWeakPtr const& editSimulationDialog);
+        EditSimulationDialogWeakPtr const& editSimulationDialog,
+        GenomeEditorWindowWeakPtr const& genomeEditorWindow);
 
     void onRefresh();
     WorkspaceType getCurrentWorkspaceType() const;
 
     BrowserCache& getSimulationCache();
-    void registerUploadedSimulation(std::string const& id);
 
 private:
     struct WorkspaceId
@@ -96,6 +97,7 @@ private:
     void sortUserList();
 
     void onDownloadResource(BrowserLeaf const& leaf);
+    void onReplaceResource(BrowserLeaf const& leaf);
     void onEditResource(NetworkResourceTreeTO const& treeTO);
     void onMoveResource(NetworkResourceTreeTO const& treeTO);
     void onDeleteResource(NetworkResourceTreeTO const& treeTO);
@@ -107,7 +109,7 @@ private:
     bool isOwner(NetworkResourceTreeTO const& treeTO) const;
     std::string getUserNamesToEmojiType(std::string const& resourceId, int emojiType);
 
-    std::vector<std::string> getAllSimulationIds() const;
+    std::unordered_set<NetworkResourceRawTO> getAllRawTOs() const;
 
     void pushTextColor(NetworkResourceTreeTO const& to);
     void popTextColor();
@@ -120,7 +122,7 @@ private:
     std::vector<UserTO> _userTOs;
     WorkspaceId _currentWorkspace = {NetworkResourceType_Simulation, WorkspaceType_AlienProject};
     std::map<WorkspaceId, Workspace> _workspaces;
-    std::unordered_set<std::string> _simIdsFromLastSession;
+    LastSessionBrowserData _lastSessionData;
 
     NetworkResourceTreeTO _selectedTreeTO;
 
@@ -140,4 +142,5 @@ private:
     EditorController _editorController;
     UploadSimulationDialogWeakPtr _uploadSimulationDialog;
     EditSimulationDialogWeakPtr _editSimulationDialog;
+    GenomeEditorWindowWeakPtr _genomeEditorWindow;
 };
