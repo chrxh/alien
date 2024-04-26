@@ -73,10 +73,11 @@ _SimulationParametersWindow::_SimulationParametersWindow(
         _cellFunctionStrings.emplace_back(Const::CellFunctionToStringMap.at(i));
     }
 
+    _serialTabID = 0;
     for (int i = 0; i < MAX_SPOTS; ++i) {
-        _zoneNameStrings.emplace_back("");
+        _spotNameStrings.emplace_back("");
+        _spotTabIDs.emplace_back(std::to_string(0));
     }
-    
 }
 
 _SimulationParametersWindow::~_SimulationParametersWindow()
@@ -183,7 +184,7 @@ void _SimulationParametersWindow::processTabWidget(
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
 
-        if (ImGui::BeginTabBar("##Parameters", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+        if (ImGui::BeginTabBar("##Parameters", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
 
             //add spot
             if (parameters.numSpots < MAX_SPOTS) {
@@ -193,30 +194,35 @@ void _SimulationParametersWindow::processTabWidget(
                     origParameters.spots[index] = createSpot(parameters, index);
                     ++parameters.numSpots;
                     ++origParameters.numSpots;
-                    _zoneNameStrings[index] = parameters.spots[index].name;
+                    
+                    _spotNameStrings[index] = parameters.spots[index].name;
+                    _spotTabIDs[index] = std::to_string(_serialTabID);
+                    ++_serialTabID;
+                    
                     _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
                 AlienImGui::Tooltip("Add parameter zone");
             }
 
-            if (ImGui::BeginTabItem("Base", nullptr, _focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+            if (ImGui::BeginTabItem("Base", nullptr, _focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_NoReorder)) {
                 processBase(parameters, origParameters);
                 ImGui::EndTabItem();
             }
-
-            for (int tab = 0; tab < parameters.numSpots; ++tab) {
+            for (int tab = 0; tab < parameters.numSpots;) {
                 SimulationParametersSpot& spot = parameters.spots[tab];
                 SimulationParametersSpot const& origSpot = origParameters.spots[tab];
-                if (ImGui::BeginTabItem(std::string(_zoneNameStrings[tab] + "###" + std::to_string(tab)).c_str(), &open, ImGuiTabItemFlags_None)) {
+                
+                bool open = true;
+                
+                if (ImGui::BeginTabItem(std::string(_spotNameStrings[tab] + "###" + _spotTabIDs[tab]).c_str(), &open, ImGuiTabItemFlags_None)) {
                     processSpot(tab,spot, origSpot, parameters);
                     ImGui::EndTabItem();
                 }
-
-                //delete spot
                 if (!open) {
                     for (int i = tab; i < parameters.numSpots - 1; ++i) {
-                        _zoneNameStrings[i] = _zoneNameStrings[i + 1];
+                        _spotNameStrings[i] = _spotNameStrings[i + 1];
+                        _spotTabIDs[i] = _spotTabIDs[i+1];
                         parameters.spots[i] = parameters.spots[i + 1];
                         origParameters.spots[i] = origParameters.spots[i + 1];
                     }
@@ -224,6 +230,8 @@ void _SimulationParametersWindow::processTabWidget(
                     --origParameters.numSpots;
                     _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
+                }else{
+                    ++tab;
                 }
             }
 
@@ -1460,9 +1468,9 @@ void _SimulationParametersWindow::processSpot(
         auto worldSize = _simController->getWorldSize();
 
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("General"))) {
-            if(AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(RightColumnWidth), _zoneNameStrings[tab])){
-                strncpy_s(spot.name, SIM_PARAM_SPOT_NAME_LENGTH, _zoneNameStrings[tab].c_str(), SIM_PARAM_SPOT_NAME_LENGTH - 1);
-                _zoneNameStrings[tab] = _zoneNameStrings[tab].substr(0, SIM_PARAM_SPOT_NAME_LENGTH - 1);
+            if(AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(RightColumnWidth), _spotNameStrings[tab])){
+                strncpy_s(spot.name, SIM_PARAM_SPOT_NAME_LENGTH, _spotNameStrings[tab].c_str(), SIM_PARAM_SPOT_NAME_LENGTH - 1);
+                _spotNameStrings[tab] = _spotNameStrings[tab].substr(0, SIM_PARAM_SPOT_NAME_LENGTH - 1);
             }
             AlienImGui::EndTreeNode();
         }

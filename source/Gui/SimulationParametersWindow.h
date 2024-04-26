@@ -41,8 +41,11 @@ private:
     std::optional<int> _sessionId;
     bool _focusBaseTab = false;
     std::vector<std::string> _cellFunctionStrings;
-    std::vector<std::string> _zoneNameStrings;
-
+ 
+    std::vector<std::string> _spotNameStrings;
+    std::vector<std::string> _spotTabIDs;
+    int _serialTabID;
+    
     bool _featureListOpen = false;
     float _featureListHeight = 200.0f;
 };
