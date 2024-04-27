@@ -214,8 +214,8 @@ void _SimulationParametersWindow::processTabWidget(
                 SimulationParametersSpot const& origSpot = origParameters.spots[tab];
                 
                 bool open = true;
-                
-                if (ImGui::BeginTabItem(std::string(_spotNameStrings[tab] + "###" + _spotTabIDs[tab]).c_str(), &open, ImGuiTabItemFlags_None)) {
+                std::string label = std::string(_spotNameStrings[tab] + std::string("###") + _spotTabIDs[tab]);
+                if (ImGui::BeginTabItem(label.c_str(), &open, ImGuiTabItemFlags_None)) {
                     processSpot(tab,spot, origSpot, parameters);
                     ImGui::EndTabItem();
                 }
@@ -2178,7 +2178,7 @@ void _SimulationParametersWindow::onOpenParameters()
             MessageDialog::getInstance().information("Open simulation parameters", "The selected file could not be opened.");
         } else {
             for(int spot = 0; spot < parameters.numSpots; ++spot){
-                _spotNameStrings[spot] = std::string(parameters.spots[spot].name, SIM_PARAM_SPOT_NAME_LENGTH);
+                _spotNameStrings[spot] = std::string(parameters.spots[spot].name);
                 _spotTabIDs[spot] = std::to_string(_serialTabID);
                 ++_serialTabID;
             }
