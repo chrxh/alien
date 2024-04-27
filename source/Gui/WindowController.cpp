@@ -56,11 +56,11 @@ std::string WindowController::_mode;
 void WindowController::init()
 {
     auto& settings = GlobalSettings::getInstance();
-    _mode = settings.getStringState("settings.display.mode", DesktopMode);
-    _sizeInWindowedMode.x = settings.getIntState("settings.display.window width", _sizeInWindowedMode.x);
-    _sizeInWindowedMode.y = settings.getIntState("settings.display.window height", _sizeInWindowedMode.y);
-    _fps = settings.getIntState("settings.display.fps", _fps);
-    _lastContentScaleFactor = settings.getFloatState("settings.display.content scale factor", _lastContentScaleFactor);
+    _mode = settings.getString("settings.display.mode", DesktopMode);
+    _sizeInWindowedMode.x = settings.getInt("settings.display.window width", _sizeInWindowedMode.x);
+    _sizeInWindowedMode.y = settings.getInt("settings.display.window height", _sizeInWindowedMode.y);
+    _fps = settings.getInt("settings.display.fps", _fps);
+    _lastContentScaleFactor = settings.getFloat("settings.display.content scale factor", _lastContentScaleFactor);
 
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
     _windowData.mode = glfwGetVideoMode(primaryMonitor);
@@ -102,11 +102,11 @@ void WindowController::shutdown()
         updateWindowSize();
     }
     auto& settings = GlobalSettings::getInstance();
-    settings.setStringState("settings.display.mode", _mode);
-    settings.setIntState("settings.display.window width", _sizeInWindowedMode.x);
-    settings.setIntState("settings.display.window height", _sizeInWindowedMode.y);
-    settings.setIntState("settings.display.fps", _fps);
-    settings.setFloatState("settings.display.content scale factor", _contentScaleFactor);
+    settings.setString("settings.display.mode", _mode);
+    settings.setInt("settings.display.window width", _sizeInWindowedMode.x);
+    settings.setInt("settings.display.window height", _sizeInWindowedMode.y);
+    settings.setInt("settings.display.fps", _fps);
+    settings.setFloat("settings.display.content scale factor", _contentScaleFactor);
 
 }
 

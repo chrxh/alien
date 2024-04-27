@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 struct GlobalSettingsImpl;
 
@@ -16,17 +17,20 @@ public:
     GlobalSettings(GlobalSettings const&) = delete;
     void operator=(GlobalSettings const&) = delete;
 
-    bool getBoolState(std::string const& key, bool defaultValue);
-    void setBoolState(std::string const& key, bool value);
+    bool getBool(std::string const& key, bool defaultValue);
+    void setBool(std::string const& key, bool value);
 
-    int getIntState(std::string const& key, int defaultValue);
-    void setIntState(std::string const& key, int value);
+    int getInt(std::string const& key, int defaultValue);
+    void setInt(std::string const& key, int value);
 
-    float getFloatState(std::string const& key, float defaultValue);
-    void setFloatState(std::string const& key, float value);
+    float getFloat(std::string const& key, float defaultValue);
+    void setFloat(std::string const& key, float value);
 
-    std::string getStringState(std::string const& key, std::string const& defaultValue);
-    void setStringState(std::string const& key, std::string value);
+    std::string getString(std::string const& key, std::string const& defaultValue);
+    void setString(std::string const& key, std::string value);
+
+    std::vector<std::string> getStringVector(std::string const& key, std::vector<std::string> const& defaultValue);
+    void setStringVector(std::string const& key, std::vector<std::string> value);
 
 private:
     GlobalSettings();
