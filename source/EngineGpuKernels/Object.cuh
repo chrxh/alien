@@ -122,7 +122,8 @@ struct SensorFunction
     SensorMode mode;
     float angle;
     float minDensity;
-    uint8_t color;
+    uint8_t restrictToColor;  //0 ... 6 = color restriction, else = no restriction
+    bool restrictToOtherMutants;
     uint32_t targetedCreatureId;
 
     //process data

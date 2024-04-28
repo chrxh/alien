@@ -88,7 +88,10 @@ namespace
 
     auto constexpr Id_SensorGenome_FixedAngle = 0;
     auto constexpr Id_SensorGenome_MinDensity = 1;
-    auto constexpr Id_SensorGenome_Color = 2;
+    auto constexpr Id_SensorGenome_Color_Deprecated = 2;
+    auto constexpr Id_SensorGenome_RestrictToColor = 3;
+    auto constexpr Id_SensorGenome_RestrictToOtherMutants = 4;
+
 
     auto constexpr Id_ReconnectorGenome_Color = 0;
 
@@ -150,11 +153,13 @@ namespace
 
     auto constexpr Id_Sensor_FixedAngle = 0;
     auto constexpr Id_Sensor_MinDensity = 1;
-    auto constexpr Id_Sensor_Color = 2;
+    auto constexpr Id_Sensor_Color_Deprecated = 2;
     auto constexpr Id_Sensor_TargetedCreatureId = 3;
     auto constexpr Id_Sensor_MemoryChannel1 = 4;
     auto constexpr Id_Sensor_MemoryChannel2 = 5;
     auto constexpr Id_Sensor_MemoryChannel3 = 6;
+    auto constexpr Id_Sensor_RestrictToColor = 7;
+    auto constexpr Id_Sensor_RestrictToOtherMutants = 8;
 
     auto constexpr Id_Transmitter_Mode = 0;
 
@@ -311,8 +316,18 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<std::optional<float>>(task, auxiliaries, Id_SensorGenome_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
         loadSave<float>(task, auxiliaries, Id_SensorGenome_MinDensity, data.minDensity, defaultObject.minDensity);
-        loadSave<int>(task, auxiliaries, Id_SensorGenome_Color, data.color, defaultObject.color);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_SensorGenome_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
+        loadSave<bool>(task, auxiliaries, Id_SensorGenome_RestrictToOtherMutants, data.restrictToOtherMutants, defaultObject.restrictToOtherMutants);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        //compatibility with older versions
+        //>>>
+        if (task == SerializationTask::Load) {
+            if (auxiliaries.contains(Id_SensorGenome_Color_Deprecated)) {
+                data.restrictToColor = std::get<int>(auxiliaries.at(Id_SensorGenome_Color_Deprecated));
+            }
+        }
+        //<<<
     }
     SPLIT_SERIALIZATION(SensorGenomeDescription)
 
@@ -593,12 +608,22 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<std::optional<float>>(task, auxiliaries, Id_Sensor_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
         loadSave<float>(task, auxiliaries, Id_Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
-        loadSave<int>(task, auxiliaries, Id_Sensor_Color, data.color, defaultObject.color);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
+        loadSave<bool>(task, auxiliaries, Id_Sensor_RestrictToOtherMutants, data.restrictToOtherMutants, defaultObject.restrictToOtherMutants);
         loadSave<int>(task, auxiliaries, Id_Sensor_TargetedCreatureId, data.targetedCreatureId, defaultObject.targetedCreatureId);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel1, data.memoryChannel1, defaultObject.memoryChannel1);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel2, data.memoryChannel2, defaultObject.memoryChannel2);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel3, data.memoryChannel3, defaultObject.memoryChannel3);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        //compatibility with older versions
+        //>>>
+        if (task == SerializationTask::Load) {
+            if (auxiliaries.contains(Id_Sensor_Color_Deprecated)) {
+                data.restrictToColor = std::get<int>(auxiliaries.at(Id_Sensor_Color_Deprecated));
+            }
+        }
+        //<<<
     }
     SPLIT_SERIALIZATION(SensorDescription)
 

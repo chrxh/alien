@@ -26,7 +26,7 @@ namespace Const
     auto constexpr NeuronBytes = 64 + 8 + 8;
     auto constexpr TransmitterBytes = 1;
     auto constexpr ConstructorFixedBytes = 5;
-    auto constexpr SensorBytes = 4;
+    auto constexpr SensorBytes = 5;
     auto constexpr NerveBytes = 2;
     auto constexpr AttackerBytes = 1;
     auto constexpr InjectorFixedBytes = 1;

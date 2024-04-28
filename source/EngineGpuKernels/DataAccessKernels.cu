@@ -108,7 +108,8 @@ namespace
             cellTO.cellFunctionData.sensor.mode = cell->cellFunctionData.sensor.mode;
             cellTO.cellFunctionData.sensor.angle = cell->cellFunctionData.sensor.angle;
             cellTO.cellFunctionData.sensor.minDensity = cell->cellFunctionData.sensor.minDensity;
-            cellTO.cellFunctionData.sensor.color = cell->cellFunctionData.sensor.color;
+            cellTO.cellFunctionData.sensor.restrictToColor = cell->cellFunctionData.sensor.restrictToColor;
+            cellTO.cellFunctionData.sensor.restrictToOtherMutants = cell->cellFunctionData.sensor.restrictToOtherMutants;
             cellTO.cellFunctionData.sensor.targetedCreatureId = cell->cellFunctionData.sensor.targetedCreatureId;
             cellTO.cellFunctionData.sensor.memoryChannel1 = cell->cellFunctionData.sensor.memoryChannel1;
             cellTO.cellFunctionData.sensor.memoryChannel2 = cell->cellFunctionData.sensor.memoryChannel2;

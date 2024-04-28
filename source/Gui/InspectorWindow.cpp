@@ -659,7 +659,7 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
                 *sensor.fixedAngle);
         }
         AlienImGui::ComboColor(
-            AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.color);
+            AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
                 .name("Min density")

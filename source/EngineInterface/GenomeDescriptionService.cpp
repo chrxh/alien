@@ -213,7 +213,8 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
             writeByte(result, sensor.fixedAngle.has_value() ? SensorMode_FixedAngle : SensorMode_Neighborhood);
             writeAngle(result, sensor.fixedAngle.has_value() ? *sensor.fixedAngle : 0.0f);
             writeDensity(result, sensor.minDensity);
-            writeByte(result, sensor.color);
+            writeOptionalByte(result, sensor.restrictToColor);
+            writeBool(result, sensor.restrictToOtherMutants);
         } break;
         case CellFunction_Nerve: {
             auto const& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
@@ -336,7 +337,8 @@ namespace
                     sensor.fixedAngle = angle;
                 }
                 sensor.minDensity = readDensity(data, bytePosition);
-                sensor.color = readByte(data, bytePosition) % MAX_COLORS;
+                sensor.restrictToColor = readOptionalByte(data, bytePosition, MAX_COLORS);
+                sensor.restrictToOtherMutants = readBool(data, bytePosition);
                 cell.cellFunction = sensor;
             } break;
             case CellFunction_Nerve: {

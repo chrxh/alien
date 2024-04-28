@@ -1040,7 +1040,7 @@ TEST_F(ConstructorTests, constructSensorCell)
     EXPECT_EQ(sensorDesc.fixedAngle.has_value(), actualSensor.fixedAngle.has_value());
     EXPECT_TRUE(lowPrecisionCompare(*sensorDesc.fixedAngle, *actualSensor.fixedAngle));
     EXPECT_TRUE(lowPrecisionCompare(sensorDesc.minDensity, actualSensor.minDensity));
-    EXPECT_EQ(sensorDesc.color, actualSensor.color);
+    EXPECT_EQ(sensorDesc.restrictToColor, actualSensor.restrictToColor);
 }
 
 TEST_F(ConstructorTests, constructInjectorCell)
