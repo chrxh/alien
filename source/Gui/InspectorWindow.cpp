@@ -658,7 +658,7 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
                     .tooltip(Const::GenomeSensorScanAngleTooltip),
                 *sensor.fixedAngle);
         }
-        AlienImGui::ComboColor(
+        AlienImGui::ComboOptionalColor(
             AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
