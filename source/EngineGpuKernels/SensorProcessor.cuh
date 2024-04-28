@@ -72,7 +72,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     if (threadIdx.x == 0) {
         refScanAngle = Math::angleOfVector(CellFunctionProcessor::calcSignalDirection(data, cell));
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 100);
-        color = cell->cellFunctionData.sensor.color;
+        color = cell->cellFunctionData.sensor.restrictToColor;
 
         lookupResult = 0xffffffffffffffff;
     }
@@ -151,7 +151,7 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
 
     if (threadIdx.x == 0) {
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 255);
-        color = cell->cellFunctionData.sensor.color;
+        color = cell->cellFunctionData.sensor.restrictToColor;
 
         searchDelta = CellFunctionProcessor::calcSignalDirection(data, cell);
         searchDelta = Math::rotateClockwise(searchDelta, cell->cellFunctionData.sensor.angle);

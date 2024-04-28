@@ -82,7 +82,8 @@ struct SensorGenomeDescription
 {
     std::optional<float> fixedAngle;   //nullopt = entire neighborhood
     float minDensity = 0.05f;
-    int color = 0;
+    std::optional<int> restrictToColor;
+    bool restrictToOtherMutants = false;
 
     auto operator<=>(SensorGenomeDescription const&) const = default;
 
@@ -102,7 +103,7 @@ struct SensorGenomeDescription
 
     SensorGenomeDescription& setColor(int value)
     {
-        color = value;
+        restrictToColor = value;
         return *this;
     }
 };

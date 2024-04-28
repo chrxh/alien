@@ -174,7 +174,8 @@ struct SensorDescription
 {
     std::optional<float> fixedAngle;  //nullopt = entire neighborhood
     float minDensity = 0.05f;
-    int color = 0;
+    std::optional<int> restrictToColor;
+    bool restrictToOtherMutants = false;
     int targetedCreatureId = 0;
 
     //process data
@@ -192,7 +193,7 @@ struct SensorDescription
     }
     SensorDescription& setColor(int value)
     {
-        color = value;
+        restrictToColor = value;
         return *this;
     }
     SensorDescription& setMinDensity(float value)

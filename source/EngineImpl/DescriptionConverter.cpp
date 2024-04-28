@@ -448,7 +448,8 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
             sensor.fixedAngle = cellTO.cellFunctionData.sensor.angle;
         }
         sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
-        sensor.color = cellTO.cellFunctionData.sensor.color;
+        sensor.restrictToColor = cellTO.cellFunctionData.sensor.restrictToColor != 255 ? std::make_optional(cellTO.cellFunctionData.sensor.restrictToColor) : std::nullopt;
+        sensor.restrictToOtherMutants = cellTO.cellFunctionData.sensor.restrictToOtherMutants;
         sensor.targetedCreatureId = cellTO.cellFunctionData.sensor.targetedCreatureId;
         sensor.memoryChannel1 = cellTO.cellFunctionData.sensor.memoryChannel1;
         sensor.memoryChannel2 = cellTO.cellFunctionData.sensor.memoryChannel2;
@@ -591,7 +592,8 @@ void DescriptionConverter::addCell(
         auto const& sensorDesc = std::get<SensorDescription>(*cellDesc.cellFunction);
         SensorTO sensorTO;
         sensorTO.mode = sensorDesc.getSensorMode();
-        sensorTO.color = sensorDesc.color;
+        sensorTO.restrictToColor = sensorDesc.restrictToColor.value_or(255);
+        sensorTO.restrictToOtherMutants = sensorDesc.restrictToOtherMutants;
         sensorTO.minDensity = sensorDesc.minDensity;
         sensorTO.angle = sensorDesc.fixedAngle.value_or(0);
         sensorTO.targetedCreatureId = sensorDesc.targetedCreatureId;
