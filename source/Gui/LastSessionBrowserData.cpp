@@ -11,16 +11,20 @@ void LastSessionBrowserData::load(std::unordered_set<NetworkResourceRawTO> const
     _identifiers = std::unordered_set(lastIdentifiers.begin(), lastIdentifiers.end());
 }
 
-void LastSessionBrowserData::save(std::unordered_set<NetworkResourceRawTO> const& rawTOs)
+void LastSessionBrowserData::save()
 {
-    auto currentIdentifiers = convertToIdentifiers(rawTOs);
-    GlobalSettings::getInstance().setStringVector(
-        "windows.browser.last session.simulation ids", std::vector(currentIdentifiers.begin(), currentIdentifiers.end()));
+    _identifiers.insert(_newIdentifiers.begin(), _newIdentifiers.end());
+    GlobalSettings::getInstance().setStringVector("windows.browser.last session.simulation ids", std::vector(_identifiers.begin(), _identifiers.end()));
 }
 
 bool LastSessionBrowserData::isNew(NetworkResourceRawTO const& rawTO) const
 {
     return !_identifiers.count(convertToIdentifier(rawTO));
+}
+
+void LastSessionBrowserData::registrate(NetworkResourceRawTO const& rawTO)
+{
+    _newIdentifiers.insert(convertToIdentifier(rawTO));
 }
 
 std::unordered_set<std::string> LastSessionBrowserData::convertToIdentifiers(std::unordered_set<NetworkResourceRawTO> const& rawTOs) const
