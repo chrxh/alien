@@ -465,6 +465,12 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
 
 bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value, bool* enabled)
 {
+    if (enabled) {
+        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
+        ImGui::BeginDisabled(!(*enabled));
+        ImGui::SameLine();
+    }
+
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
     auto textWidth = scale(parameters._textWidth);
     auto comboWidth = width - textWidth;
@@ -472,12 +478,6 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value, 
     auto colorFieldWidth2 = comboWidth - scale(30.0f);
 
     const char* items[] = { "##1", "##2", "##3", "##4", "##5", "##6", "##7" };
-
-    if (enabled) {
-        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
-        ImGui::BeginDisabled(!(*enabled));
-        ImGui::SameLine();
-    }
 
     ImVec2 comboPos = ImGui::GetCursorScreenPos();
 

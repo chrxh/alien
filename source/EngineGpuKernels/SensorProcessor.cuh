@@ -87,7 +87,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             auto delta = Math::unitVectorOfAngle(angle) * radius;
             auto scanPos = cell->pos + delta;
             data.cellMap.correctPosition(scanPos);
-            auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getDensity(scanPos, color));
+            auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getColorDensity(scanPos, color));
             if (density >= minDensity) {
                 float preciseAngle = angle;
                 float preciseDistance = radius;
@@ -166,7 +166,7 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
         auto distance = startRadius + cudaSimulationParameters.cellFunctionSensorRange[cell->color] / NumScanPoints * distanceIndex;
         auto scanPos = cell->pos + searchDelta * distance;
         data.cellMap.correctPosition(scanPos);
-        auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getDensity(scanPos, color));
+        auto density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getColorDensity(scanPos, color));
         if (density >= minDensity) {
             float preciseDistance = distance;
             uint32_t creatureId = [&] {
