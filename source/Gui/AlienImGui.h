@@ -166,7 +166,7 @@ public:
         MEMBER_DECLARATION(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER_DECLARATION(ComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool Combo(ComboParameters& parameters, int& value);
+    static bool Combo(ComboParameters& parameters, int& value, bool* enabled = nullptr);
 
     struct SwitcherParameters
     {
@@ -188,7 +188,8 @@ public:
         MEMBER_DECLARATION(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(ComboColorParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool ComboColor(ComboColorParameters const& parameters, int& value);
+    static bool ComboColor(ComboColorParameters const& parameters, int& value, bool* enabled = nullptr);
+    static bool ComboOptionalColor(ComboColorParameters const& parameters, std::optional<int>& value);
 
     struct InputColorTransitionParameters
     {

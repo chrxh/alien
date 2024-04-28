@@ -627,7 +627,7 @@ void _GenomeEditorWindow::processNode(
                     *sensor.fixedAngle);
             }
             table.next();
-            AlienImGui::ComboColor(
+            AlienImGui::ComboOptionalColor(
                 AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
 
             table.next();

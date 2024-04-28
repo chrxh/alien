@@ -140,14 +140,23 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
     return result;
 }
 
+namespace
+{
+    template <typename Parameters, typename T, typename Callable>
+    bool optionalWidgetAdaptor(Parameters const& parameters, std::optional<T>& optionalValue, T const& defaultValue, Callable const& func)
+    {
+        auto enabled = optionalValue.has_value();
+        auto value = optionalValue.value_or(parameters._defaultValue.value_or(defaultValue));
+        auto result = func(parameters, value, &enabled);
+        result |= (optionalValue.has_value() != enabled);
+        optionalValue = enabled ? std::make_optional(value) : std::nullopt;
+        return result;
+    }
+}
+
 bool AlienImGui::InputOptionalInt(InputIntParameters const& parameters, std::optional<int>& optValue)
 {
-    auto enabled = optValue.has_value();
-    auto value = optValue.value_or(parameters._defaultValue.value_or(0));
-    auto result = InputInt(parameters, value, &enabled);
-    result |= (optValue.has_value() != enabled);
-    optValue = enabled ? std::make_optional(value) : std::nullopt;
-    return result;
+    return optionalWidgetAdaptor(parameters, optValue, 0, &AlienImGui::InputInt);
 }
 
 bool AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value)
@@ -351,13 +360,19 @@ namespace
 
 }
 
-bool AlienImGui::Combo(ComboParameters& parameters, int& value)
+bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
 {
     auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
 
     const char** items = new const char*[parameters._values.size()];
     for (int i = 0; i < parameters._values.size(); ++i) {
         items[i] = parameters._values[i].c_str();
+    }
+
+    if (enabled) {
+        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
+        ImGui::BeginDisabled(!(*enabled));
+        ImGui::SameLine();
     }
 
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
@@ -380,6 +395,11 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value)
     }
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
+
+    if (enabled) {
+        ImGui::EndDisabled();
+    }
+
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
@@ -443,7 +463,7 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
     return result;
 }
 
-bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
+bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value, bool* enabled)
 {
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
     auto textWidth = scale(parameters._textWidth);
@@ -452,6 +472,12 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
     auto colorFieldWidth2 = comboWidth - scale(30.0f);
 
     const char* items[] = { "##1", "##2", "##3", "##4", "##5", "##6", "##7" };
+
+    if (enabled) {
+        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
+        ImGui::BeginDisabled(!(*enabled));
+        ImGui::SameLine();
+    }
 
     ImVec2 comboPos = ImGui::GetCursorScreenPos();
 
@@ -482,11 +508,21 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value)
         ImColor::HSV(h, s, v));
 
     AlienImGui::Text(parameters._name);
+
+    if (enabled) {
+        ImGui::EndDisabled();
+    }
+
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
 
     return true;
+}
+
+bool AlienImGui::ComboOptionalColor(ComboColorParameters const& parameters, std::optional<int>& value)
+{
+    return optionalWidgetAdaptor(parameters, value, 0, &AlienImGui::ComboColor);
 }
 
 void AlienImGui::InputColorTransition(InputColorTransitionParameters const& parameters, int sourceColor, int& targetColor, int& transitionAge)
