@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "AuxiliaryDataParserService.h"
 
 #include "GeneralSettings.h"
@@ -774,7 +776,8 @@ namespace
             encodeDecodeProperty(tree, currentName, defaultName, base + "name", parserTask);
             
             if (parserTask == ParserTask::Decode){
-                strncpy_s(spot.name, SIM_PARAM_SPOT_NAME_LENGTH, currentName.c_str(), SIM_PARAM_SPOT_NAME_LENGTH - 1);
+                currentName = currentName.substr(0, SIM_PARAM_SPOT_NAME_LENGTH - 1); // Leave space for null byte
+                strncpy(spot.name, currentName.c_str(), SIM_PARAM_SPOT_NAME_LENGTH);
             } 
                     
             encodeDecodeProperty(tree, spot.color, defaultSpot.color, base + "color", parserTask);

@@ -111,7 +111,7 @@ SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParam
 {
     SimulationParametersSpot spot;
 
-    strcpy_s(spot.name, SIM_PARAM_SPOT_NAME_LENGTH, std::string("Zone " + std::to_string(index)).c_str());
+    strncpy(spot.name, std::string("Zone " + std::to_string(index)).c_str(), SIM_PARAM_SPOT_NAME_LENGTH);
     
     auto worldSize = _simController->getWorldSize();
     
@@ -1491,8 +1491,8 @@ void _SimulationParametersWindow::processSpot(
 
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("General"))) {
             if(AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(RightColumnWidth), _spotNameStrings[tab])){
-                _spotNameStrings[tab] = _spotNameStrings[tab].substr(0, SIM_PARAM_SPOT_NAME_LENGTH - 1); 
-                strncpy_s(spot.name, SIM_PARAM_SPOT_NAME_LENGTH, _spotNameStrings[tab].c_str(), SIM_PARAM_SPOT_NAME_LENGTH - 1);
+                _spotNameStrings[tab] = _spotNameStrings[tab].substr(0, SIM_PARAM_SPOT_NAME_LENGTH - 1); // Leave space for null byte
+                strncpy(spot.name, _spotNameStrings[tab].c_str(), SIM_PARAM_SPOT_NAME_LENGTH);
             }
             AlienImGui::EndTreeNode();
         }
