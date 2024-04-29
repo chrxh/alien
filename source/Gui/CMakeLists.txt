@@ -54,6 +54,8 @@ PUBLIC
     ImageToPatternDialog.h
     InspectorWindow.cpp
     InspectorWindow.h
+    LastSessionBrowserData.cpp
+    LastSessionBrowserData.h
     LoginDialog.cpp
     LoginDialog.h
     LogWindow.cpp
@@ -91,6 +93,8 @@ PUBLIC
     ResizeWorldDialog.h
     SelectionWindow.cpp
     SelectionWindow.h
+    SerializationHelperService.cpp
+    SerializationHelperService.h
     Shader.cpp
     Shader.h
     ShaderWindow.cpp

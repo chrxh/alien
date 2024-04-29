@@ -8,7 +8,7 @@ template<typename Key, typename Value, int MaxEntries>
 class Cache
 {
 public:
-    void insert(Key const& key, Value const& value);
+    void insertOrAssign(Key const& key, Value const& value);
 
     std::optional<Value> find(Key const& key);
 
@@ -21,7 +21,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 template <typename Key, typename Value, int MaxEntries>
-void Cache<Key, Value, MaxEntries>::insert(Key const& key, Value const& value)
+void Cache<Key, Value, MaxEntries>::insertOrAssign(Key const& key, Value const& value)
 {
     if (_cacheMap.size() >= MaxEntries) {
         _cacheMap.erase(_usedKeys.front());

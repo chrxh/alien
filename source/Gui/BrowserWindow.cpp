@@ -41,6 +41,7 @@
 #include "OverlayMessageController.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
+#include "SerializationHelperService.h"
 
 namespace
 {
@@ -110,17 +111,19 @@ _BrowserWindow::~_BrowserWindow()
                 + workspaceTypeToString.at(workspaceId.workspaceType),
             NetworkResourceService::convertFolderNamesToSettings(workspace.collapsedFolderNames));
     }
-    settings.setStringVector("windows.browser.simulation ids", getAllSimulationIds());
+    _lastSessionData.save();
 }
 
 void _BrowserWindow::registerCyclicReferences(
     LoginDialogWeakPtr const& loginDialog,
     UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
-    EditSimulationDialogWeakPtr const& editSimulationDialog)
+    EditSimulationDialogWeakPtr const& editSimulationDialog,
+    GenomeEditorWindowWeakPtr const& genomeEditorWindow)
 {
     _loginDialog = loginDialog;
     _uploadSimulationDialog = uploadSimulationDialog;
     _editSimulationDialog = editSimulationDialog;
+    _genomeEditorWindow = genomeEditorWindow;
 
     auto firstStart = GlobalSettings::getInstance().getBool("windows.browser.first start", true);
     refreshIntern(firstStart);
@@ -136,8 +139,7 @@ void _BrowserWindow::registerCyclicReferences(
         createTreeTOs(workspace);
     }
 
-    auto simIds = GlobalSettings::getInstance().getStringVector("windows.browser.simulation ids", getAllSimulationIds());
-    _simIdsFromLastSession = std::unordered_set(simIds.begin(), simIds.end());
+    _lastSessionData.load(getAllRawTOs());
 }
 
 void _BrowserWindow::onRefresh()
@@ -153,11 +155,6 @@ WorkspaceType _BrowserWindow::getCurrentWorkspaceType() const
 BrowserCache& _BrowserWindow::getSimulationCache()
 {
     return _simulationCache;
-}
-
-void _BrowserWindow::registerUploadedSimulation(std::string const& id)
-{
-    _simIdsFromLastSession.insert(id);
 }
 
 void _BrowserWindow::refreshIntern(bool withRetry)
@@ -300,6 +297,15 @@ void _BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Change name or description");
 
+    //replace button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!isOwnerForSelectedItem || !_selectedTreeTO->isLeaf());
+    if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
+        onReplaceResource(_selectedTreeTO->getLeaf());
+    }
+    ImGui::EndDisabled();
+    AlienImGui::Tooltip("Replace the selected " + resourceTypeString + " with the one that is currently open. The name, description and reactions will be preserved.");
+
     //move to other workspace button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
@@ -344,7 +350,7 @@ void _BrowserWindow::processToolbar()
     //Discord button
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COMMENTS)) {
-        openWeblink(Const::DiscordLink);
+        openWeblink(Const::DiscordURL);
     }
     AlienImGui::Tooltip("Open ALIEN Discord server");
 #endif
@@ -601,6 +607,9 @@ void _BrowserWindow::processSimulationList()
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
                 auto treeTO = workspace.treeTOs.at(row);
+                if (treeTO->isLeaf()) {
+                    _lastSessionData.registrate(treeTO->getLeaf().rawTO);
+                }
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
@@ -703,6 +712,9 @@ void _BrowserWindow::processGenomeList()
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
 
                 auto& treeTO = workspace.treeTOs.at(row);
+                if (treeTO->isLeaf()) {
+                    _lastSessionData.registrate(treeTO->getLeaf().rawTO);
+                }
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
@@ -769,7 +781,7 @@ bool _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
         }
         ImGui::SameLine();
 
-        if (!_simIdsFromLastSession.contains(leaf.rawTO->id)) {
+        if (!isOwner(treeTO) && _lastSessionData.isNew(leaf.rawTO)) {
             auto font = StyleRepository::getInstance().getSmallBoldFont();
             auto origSize = font->Scale;
             font->Scale *= 0.65f;
@@ -1234,7 +1246,7 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
                     MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
                     return;
                 }
-                _simulationCache.insert(leaf.rawTO->id, deserializedSim);
+                _simulationCache.insertOrAssign(leaf.rawTO->id, deserializedSim);
             } else {
                 log(Priority::Important, "browser: get resource with id=" + leaf.rawTO->id + " from simulation cache");
                 std::swap(deserializedSim, *cachedSimulation);
@@ -1284,6 +1296,66 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
                 "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
         }
     });
+}
+
+void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
+{
+    auto func = [&] {
+        printOverlayMessage("Replacing ...");
+
+        delayedExecution([=, this] {
+            std::string mainData;
+            std::string settings;
+            std::string statistics;
+            IntVector2D worldSize;
+            int numObjects = 0;
+
+            DeserializedSimulation deserializedSim;
+            if (leaf.rawTO->resourceType == NetworkResourceType_Simulation) {
+                deserializedSim = SerializationHelperService::getDeserializedSerialization(_simController);
+
+                SerializedSimulation serializedSim;
+                if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
+                    MessageDialog::getInstance().information("Replace simulation", "The simulation could not be serialized for replacing.");
+                    return;
+                }
+                mainData = serializedSim.mainData;
+                settings = serializedSim.auxiliaryData;
+                statistics = serializedSim.statistics;
+                worldSize = {deserializedSim.auxiliaryData.generalSettings.worldSizeX, deserializedSim.auxiliaryData.generalSettings.worldSizeY};
+                numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
+            } else {
+                auto genome = _genomeEditorWindow.lock()->getCurrentGenome();
+                if (genome.cells.empty()) {
+                    showMessage("Replace genome", "The is no valid genome in the genome editor selected.");
+                    return;
+                }
+                auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(genome);
+                numObjects = GenomeDescriptionService::getNumNodesRecursively(genomeData, true);
+
+                if (!SerializerService::serializeGenomeToString(mainData, genomeData)) {
+                    showMessage("Replace genome", "The genome could not be serialized for replacing.");
+                    return;
+                }
+            }
+
+            if (!NetworkService::replaceResource(leaf.rawTO->id, worldSize, numObjects, mainData, settings, statistics)) {
+                std::string type = leaf.rawTO->resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
+                showMessage(
+                    "Error",
+                    "Failed to replace " + type
+                        + ".\n\n"
+                          "Possible reasons:\n\n" ICON_FA_CHEVRON_RIGHT " The server is not reachable.\n\n" ICON_FA_CHEVRON_RIGHT
+                          " The total size of your uploads exceeds the allowed storage limit.");
+                return;
+            }
+            if (leaf.rawTO->resourceType == NetworkResourceType_Simulation) {
+                getSimulationCache().insertOrAssign(leaf.rawTO->id, deserializedSim);
+            }
+            onRefresh();
+        });
+    };
+    MessageDialog::getInstance().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
 }
 
 void _BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
@@ -1455,15 +1527,13 @@ std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& resourceI
     return boost::algorithm::join(userNames, ", ");
 }
 
-std::vector<std::string> _BrowserWindow::getAllSimulationIds() const
+std::unordered_set<NetworkResourceRawTO> _BrowserWindow::getAllRawTOs() const
 {
-    std::unordered_set<std::string> result;
+    std::unordered_set<NetworkResourceRawTO> result;
     for (auto const& workspace : _workspaces | std::views::values) {
-        for(auto const& rawTO : workspace.rawTOs) {
-            result.insert(rawTO->id);
-        }
+        result.insert(workspace.rawTOs.begin(), workspace.rawTOs.end());
     }
-    return std::vector(result.begin(), result.end());
+    return result;
 }
 
 void _BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)

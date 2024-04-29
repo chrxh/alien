@@ -158,7 +158,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
 
     //cyclic references
-    _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog);
+    _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
     _activateUserDialog->registerCyclicReferences(_createUserDialog);
     _editorController->registerCyclicReferences(_uploadSimulationDialog);
 
