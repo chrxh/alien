@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
+#include <cstring>
 #include "SimulationParametersSpotActivatedValues.h"
 #include "SimulationParametersSpotValues.h"
 

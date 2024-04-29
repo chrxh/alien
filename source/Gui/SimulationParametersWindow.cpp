@@ -1,5 +1,7 @@
 #include "SimulationParametersWindow.h"
 
+#include <cstring>
+
 #include <ImFileDialog.h>
 #include <imgui.h>
 #include <Fonts/IconsFontAwesome5.h>
