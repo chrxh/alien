@@ -660,6 +660,12 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
         }
         AlienImGui::ComboOptionalColor(
             AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters()
+                .name("Restrict to other mutants")
+                .textWidth(CellFunctionTextWidth)
+                .tooltip(Const::GenomeSensorRestrictToOtherMutantsTooltip),
+            sensor.restrictToOtherMutants);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
                 .name("Min density")

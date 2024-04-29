@@ -629,6 +629,13 @@ void _GenomeEditorWindow::processNode(
             table.next();
             AlienImGui::ComboOptionalColor(
                 AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
+            table.next();
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Restrict to other mutants")
+                    .textWidth(ContentTextWidth)
+                    .tooltip(Const::GenomeSensorRestrictToOtherMutantsTooltip),
+                sensor.restrictToOtherMutants);
 
             table.next();
             AlienImGui::InputFloat(

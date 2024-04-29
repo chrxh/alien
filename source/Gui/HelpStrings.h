@@ -195,7 +195,9 @@ namespace Const
         "scan will be performed in the direction derived from the input cell (the cell from which the activity input originates) "
         "towards the sensor cell.";
 
-    std::string const GenomeSensorScanColorTooltip = "Specifies the color of the cells to search for.";
+    std::string const GenomeSensorScanColorTooltip = "Restricts the sensor so that it only scans cells with a certain color.";
+
+    std::string const GenomeSensorRestrictToOtherMutantsTooltip = "Restricts the sensor so that it only scans cells with belong to an other mutant";
 
     std::string const GenomeSensorMinDensityTooltip =
         "The minimum density to search for a cell concentration of a specific color. This value ranges between 0 and 1. It controls the "
