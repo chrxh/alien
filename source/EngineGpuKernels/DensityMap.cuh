@@ -54,7 +54,7 @@ public:
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             auto bucket = mutationId % 8;
-            return (_colorDensityMap[index] >> (bucket * 8)) & 0xff;
+            return (_mutantDensityMap[index] >> (bucket * 8)) & 0xff;
         }
         return 0;
     }
