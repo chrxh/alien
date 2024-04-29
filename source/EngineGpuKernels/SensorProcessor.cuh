@@ -66,7 +66,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 __inline__ __device__ void
 SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
 {
-    __shared__ int minDensity;
+    __shared__ uint32_t minDensity;
     __shared__ uint8_t colorRestriction;
     __shared__ bool otherMutantsRestriction;
     __shared__ float refScanAngle;
@@ -83,6 +83,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
     auto const partition = calcPartition(NumScanAngles, threadIdx.x, blockDim.x);
     auto startRadius = (colorRestriction == 255 || colorRestriction == cell->color) ? 14.0f : 0.0f;
+    auto const& densityMap = data.preprocessedCellFunctionData.densityMap;
     for (float radius = startRadius; radius <= cudaSimulationParameters.cellFunctionSensorRange[cell->color]; radius += ScanStep) {
         for (int angleIndex = partition.startIndex; angleIndex <= partition.endIndex; ++angleIndex) {
             float angle = 360.0f / NumScanAngles * angleIndex;
@@ -91,23 +92,24 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             auto scanPos = cell->pos + delta;
             data.cellMap.correctPosition(scanPos);
 
-            unsigned char density = 0;
-            if (colorRestriction != 255) {
-                density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getColorDensity(scanPos, colorRestriction));
+            uint32_t density;
+            if (colorRestriction != 255 && !otherMutantsRestriction) {
+                density = densityMap.getColorDensity(scanPos, colorRestriction);
             }
-            if (otherMutantsRestriction) {
+            if (colorRestriction == 255 && otherMutantsRestriction) {
+                density = densityMap.getOtherMutantsDensity(scanPos, cell->mutationId);
+            }
+            if (colorRestriction != 255 && otherMutantsRestriction) {
                 density =
-                    max(density,
-                    static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getOtherMutantsDensity(scanPos, cell->mutationId)));
+                    min(densityMap.getOtherMutantsDensity(scanPos, cell->mutationId),
+                        densityMap.getColorDensity(scanPos, colorRestriction));
             }
             if (colorRestriction == 255 && !otherMutantsRestriction) {
-                density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getCellDensity(scanPos));
+                density = densityMap.getCellDensity(scanPos);
             }
-
             if (density < minDensity) {
                 continue;
             }
-
             float preciseAngle = angle;
             float preciseDistance = radius;
             uint32_t creatureId = getCreatureId(data, cell, scanPos, preciseDistance);
@@ -147,7 +149,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 __inline__ __device__ void
 SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
 {
-    __shared__ int minDensity;
+    __shared__ uint32_t minDensity;
     __shared__ uint8_t colorRestriction;
     __shared__ bool otherMutantsRestriction;
     __shared__ float2 searchDelta;
@@ -166,22 +168,25 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
 
     auto const partition = calcPartition(NumScanPoints, threadIdx.x, blockDim.x);
     auto startRadius = (colorRestriction == 255 || colorRestriction == cell->color) ? 14.0f : 0.0f;
+    auto const& densityMap = data.preprocessedCellFunctionData.densityMap;
     for (int distanceIndex = partition.startIndex; distanceIndex <= partition.endIndex; ++distanceIndex) {
         auto distance = startRadius + cudaSimulationParameters.cellFunctionSensorRange[cell->color] / NumScanPoints * distanceIndex;
         auto scanPos = cell->pos + searchDelta * distance;
         data.cellMap.correctPosition(scanPos);
 
-        unsigned char density = 0;
-        if (colorRestriction != 255) {
-            density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getColorDensity(scanPos, colorRestriction));
+        uint32_t density;
+        if (colorRestriction != 255 && !otherMutantsRestriction) {
+            density = densityMap.getColorDensity(scanPos, colorRestriction);
         }
-        if (otherMutantsRestriction) {
-            density = max(density, static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getOtherMutantsDensity(scanPos, cell->mutationId)));
+        if (colorRestriction == 255 && otherMutantsRestriction) {
+            density = densityMap.getOtherMutantsDensity(scanPos, cell->mutationId);
+        }
+        if (colorRestriction != 255 && otherMutantsRestriction) {
+            density = min(densityMap.getOtherMutantsDensity(scanPos, cell->mutationId), densityMap.getColorDensity(scanPos, colorRestriction));
         }
         if (colorRestriction == 255 && !otherMutantsRestriction) {
-            density = static_cast<unsigned char>(data.preprocessedCellFunctionData.densityMap.getCellDensity(scanPos));
+            density = densityMap.getCellDensity(scanPos);
         }
-
         if (density < minDensity) {
             continue;
         }
@@ -244,7 +249,7 @@ __inline__ __device__ uint32_t SensorProcessor::getCreatureId(SimulationData& da
             auto preciseDelta = data.cellMap.getCorrectedDirection(otherCell->pos - cell->pos);
             preciseDistance = Math::length(preciseDelta);
             result = otherCell->creatureId;
-            if (otherCell->mutationId == cell->cellFunctionData.sensor.targetedCreatureId) {
+            if (result == cell->cellFunctionData.sensor.targetedCreatureId) {
                 return result;
             }
         }

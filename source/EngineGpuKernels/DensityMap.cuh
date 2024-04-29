@@ -31,7 +31,7 @@ public:
         }
     }
 
-    __device__ __inline__ uint32_t getCellDensity(float2 const& pos)
+    __device__ __inline__ uint32_t getCellDensity(float2 const& pos) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
@@ -40,7 +40,7 @@ public:
         return 0;
     }
 
-    __device__ __inline__ uint32_t getColorDensity(float2 const& pos, int color)
+    __device__ __inline__ uint32_t getColorDensity(float2 const& pos, int color) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
@@ -49,7 +49,7 @@ public:
         return 0;
     }
 
-    __device__ __inline__ uint32_t getOtherMutantsDensity(float2 const& pos, uint64_t mutationId)
+    __device__ __inline__ uint32_t getOtherMutantsDensity(float2 const& pos, uint64_t mutationId) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
