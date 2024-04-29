@@ -131,7 +131,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             cell->cellFunctionData.sensor.memoryChannel3 = activity.channels[3];
             auto targetCreatureId = lookupResult & 0xffffffff;
             if (targetCreatureId != 0xffffffff) {
-                cell->cellFunctionData.sensor.targetedCreatureId = toInt(targetCreatureId);
+                cell->cellFunctionData.sensor.targetedCreatureId = static_cast<uint32_t>(targetCreatureId);
             }
             statistics.incNumSensorMatches(cell->color);
         } else {
@@ -187,7 +187,7 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
             activity.channels[2] = static_cast<float>(lookupResult >> 48) / 256;           //distance
             auto targetCreatureId = lookupResult & 0xffffffff;
             if (targetCreatureId != 0xffffffff) {
-                cell->cellFunctionData.sensor.targetedCreatureId = toInt(targetCreatureId);
+                cell->cellFunctionData.sensor.targetedCreatureId = static_cast<uint32_t>(targetCreatureId);
             }
             statistics.incNumSensorMatches(cell->color);
         } else {
@@ -199,11 +199,24 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
 __inline__ __device__ uint32_t SensorProcessor::getCreatureId(SimulationData& data, Cell* cell, float2 const& scanPos, float& preciseDistance)
 {
     auto const& color = cell->cellFunctionData.sensor.restrictToColor;
+    auto const& restrictToOtherMutants = cell->cellFunctionData.sensor.restrictToOtherMutants;
     if (cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color] > NEAR_ZERO) {
         for (float dx = -3.0f; dx < 3.0f + NEAR_ZERO; dx += 1.0f) {
             for (float dy = -3.0f; dy < 3.0f + NEAR_ZERO; dy += 1.0f) {
                 auto otherCell = data.cellMap.getFirst(scanPos + float2{dx, dy});
-                if (otherCell && (color == 255 || otherCell->color == color)) {
+                if (!otherCell) {
+                    continue;
+                }
+                if (color != 255 && otherCell->color != color) {
+                    continue;
+                }
+                if (restrictToOtherMutants && cell->mutationId != 0 && cell->mutationId == otherCell->mutationId) {
+                    continue;
+                }
+                if (cell == otherCell) {
+                    continue;
+                }
+                if (color == 255 || otherCell->color == color) {
                     auto preciseDelta = data.cellMap.getCorrectedDirection(otherCell->pos - cell->pos);
                     preciseDistance = Math::length(preciseDelta);
                     return static_cast<uint32_t>(otherCell->creatureId);

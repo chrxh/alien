@@ -66,8 +66,12 @@ public:
             auto color = calcMod(cell->color, MAX_COLORS);
             alienAtomicAdd64(&_colorDensityMap[index], (uint64_t(1) << (color * 8)) | (uint64_t(1) << 56));
 
-            auto bucket = cell->mutationId % 8;
-            alienAtomicAdd64(&_mutantDensityMap[index], 0x0101010101010101u ^ (1 << (bucket * 8)));
+            if (cell->mutationId != 0) {
+                auto bucket = cell->mutationId % 8;
+                alienAtomicAdd64(&_mutantDensityMap[index], 0x0101010101010101ull ^ (1 << (bucket * 8)));
+            } else {
+                alienAtomicAdd64(&_mutantDensityMap[index], 1ull);
+            }
         }
     }
 
