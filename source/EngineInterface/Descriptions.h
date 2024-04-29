@@ -201,6 +201,11 @@ struct SensorDescription
         minDensity = value;
         return *this;
     }
+    SensorDescription& setRestrictToOtherMutants(bool value)
+    {
+        restrictToOtherMutants = value;
+        return *this;
+    }
 };
 
 struct NerveDescription
