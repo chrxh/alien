@@ -158,6 +158,8 @@ void _SimulationParametersWindow::processToolbar()
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
         _copiedParameters = _simController->getSimulationParameters();
+        _copiedSpotNameStrings = _spotNameStrings;
+        _copiedSpotTabIDs = _spotTabIDs;
         printOverlayMessage("Simulation parameters copied");
     }
     AlienImGui::Tooltip("Copy simulation parameters");
@@ -167,6 +169,8 @@ void _SimulationParametersWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
         _simController->setSimulationParameters(*_copiedParameters);
         _simController->setOriginalSimulationParameters(*_copiedParameters);
+        _spotNameStrings = _copiedSpotNameStrings;
+        _spotTabIDs = _copiedSpotTabIDs;
         printOverlayMessage("Simulation parameters pasted");
     }
     ImGui::EndDisabled();
@@ -181,6 +185,25 @@ void _SimulationParametersWindow::processTabWidget(
     SimulationParameters& origParameters)
 {
     auto currentSessionId = _simController->getSessionId();
+    
+    bool sessionChanged = (!_sessionId.has_value() || (currentSessionId != *_sessionId));
+    _focusBaseTab = sessionChanged;
+
+    if (sessionChanged){
+        for (int i = 0; i < parameters.numSpots; ++i) {
+            // Legacy support: version <= 4.9 do not have names for zones
+            if (strcmp(parameters.spots[i].name, "") == 0){
+                _spotNameStrings[i] = std::string("Zone ") + std::to_string(i);
+            }else{
+                _spotNameStrings[i] = parameters.spots[i].name;
+            }
+            _spotTabIDs[i] = std::to_string(_serialTabID);
+            ++_serialTabID;
+        }
+    }
+    
+    _sessionId= currentSessionId;
+    
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
 
@@ -239,9 +262,6 @@ void _SimulationParametersWindow::processTabWidget(
         }
     }
     ImGui::EndChild();
-
-    _focusBaseTab = !_sessionId.has_value() || currentSessionId != *_sessionId;
-    _sessionId= currentSessionId;
 }
 
 void _SimulationParametersWindow::processBase(

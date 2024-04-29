@@ -41,9 +41,12 @@ private:
     std::optional<int> _sessionId;
     bool _focusBaseTab = false;
     std::vector<std::string> _cellFunctionStrings;
- 
+    
     std::vector<std::string> _spotNameStrings;
     std::vector<std::string> _spotTabIDs;
+    std::vector<std::string> _copiedSpotNameStrings;
+    std::vector<std::string> _copiedSpotTabIDs;
+    
     int _serialTabID;
     
     bool _featureListOpen = false;
