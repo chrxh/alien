@@ -130,8 +130,11 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
     }
 
     ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
-    if (enabled) {
+    if (enabled && parameters._keepTextEnabled) {
+        ImGui::EndDisabled();
+    }
+    AlienImGui::Text(parameters._name);
+    if (enabled && !parameters._keepTextEnabled) {
         ImGui::EndDisabled();
     }
     if (parameters._tooltip) {
@@ -143,11 +146,14 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
 namespace
 {
     template <typename Parameters, typename T, typename Callable>
-    bool optionalWidgetAdaptor(Parameters const& parameters, std::optional<T>& optionalValue, T const& defaultValue, Callable const& func)
+    bool optionalWidgetAdaptor(Parameters parameters, std::optional<T>& optionalValue, T const& defaultValue, Callable const& func)
     {
+        auto newParameters = parameters;
+        newParameters.keepTextEnabled(true);
+
         auto enabled = optionalValue.has_value();
         auto value = optionalValue.value_or(parameters._defaultValue.value_or(defaultValue));
-        auto result = func(parameters, value, &enabled);
+        auto result = func(newParameters, value, &enabled);
         result |= (optionalValue.has_value() != enabled);
         optionalValue = enabled ? std::make_optional(value) : std::nullopt;
         return result;
@@ -502,14 +508,21 @@ bool AlienImGui::ComboColor(ComboColorParameters const& parameters, int& value, 
     ImGuiStyle& style = ImGui::GetStyle();
     float h, s, v;
     AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[value], h, s, v);
+    if (enabled && !(*enabled)) {
+        s = 0;
+        v = 0.2f;
+    }
     ImGui::GetWindowDrawList()->AddRectFilled(
         ImVec2(comboPos.x + style.FramePadding.x, comboPos.y + style.FramePadding.y),
         ImVec2(comboPos.x + style.FramePadding.x + colorFieldWidth2, comboPos.y + style.FramePadding.y + ImGui::GetTextLineHeight()),
         ImColor::HSV(h, s, v));
 
-    AlienImGui::Text(parameters._name);
 
-    if (enabled) {
+    if (enabled && parameters._keepTextEnabled) {
+        ImGui::EndDisabled();
+    }
+    AlienImGui::Text(parameters._name);
+    if (enabled && !parameters._keepTextEnabled) {
         ImGui::EndDisabled();
     }
 

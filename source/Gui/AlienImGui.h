@@ -64,6 +64,7 @@ public:
     {
         MEMBER_DECLARATION(InputIntParameters, std::string, name, "");
         MEMBER_DECLARATION(InputIntParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(InputIntParameters, bool, keepTextEnabled, false);
         MEMBER_DECLARATION(InputIntParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(InputIntParameters, bool, infinity, false);
         MEMBER_DECLARATION(InputIntParameters, std::optional<std::string>, tooltip, std::nullopt);
@@ -185,6 +186,7 @@ public:
         MEMBER_DECLARATION(ComboColorParameters, std::string, name, "");
         MEMBER_DECLARATION(ComboColorParameters, float, width, 0);
         MEMBER_DECLARATION(ComboColorParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(ComboColorParameters, bool, keepTextEnabled, false);
         MEMBER_DECLARATION(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(ComboColorParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
