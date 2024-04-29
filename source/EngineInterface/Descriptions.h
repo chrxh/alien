@@ -485,7 +485,11 @@ struct CellDescription
         creatureId = value;
         return *this;
     }
-
+    CellDescription& setMutationId(int value)
+    {
+        mutationId = value;
+        return *this;
+    }
 
     bool hasGenome() const;
     std::vector<uint8_t>& getGenomeRef();

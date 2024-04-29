@@ -219,10 +219,6 @@ __inline__ __device__ uint32_t SensorProcessor::getCreatureId(SimulationData& da
     auto const& color = cell->cellFunctionData.sensor.restrictToColor;
     auto const& restrictToOtherMutants = cell->cellFunctionData.sensor.restrictToOtherMutants;
 
-    //performance optimization
-    if (((data.timestep + cell->age) % (6ull * 4ull)) >= 6ull) {
-        return 0xffffffff;
-    }
     if (cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color] < NEAR_ZERO) {
         return 0xffffffff;
     }
@@ -240,10 +236,7 @@ __inline__ __device__ uint32_t SensorProcessor::getCreatureId(SimulationData& da
             if (color != 255 && otherCell->color != color) {
                 continue;
             }
-            if (restrictToOtherMutants && otherCell->mutationId != 0 && cell->mutationId == otherCell->mutationId) {
-                continue;
-            }
-            if (color != 255 && otherCell->color != color) {
+            if (restrictToOtherMutants && cell->mutationId != 0 && cell->mutationId == otherCell->mutationId) {
                 continue;
             }
             auto preciseDelta = data.cellMap.getCorrectedDirection(otherCell->pos - cell->pos);

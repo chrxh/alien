@@ -24,7 +24,8 @@ DataDescription DescriptionEditService::createRect(CreateRectParameters const& p
                                .setMaxConnections(parameters._maxConnections)
                                .setColor(parameters._color)
                                .setBarrier(parameters._barrier)
-                               .setCreatureId(creatureId));
+                               .setCreatureId(creatureId)
+                               .setMutationId(parameters._mutationId));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
