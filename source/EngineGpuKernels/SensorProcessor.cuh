@@ -218,12 +218,19 @@ __inline__ __device__ uint32_t SensorProcessor::getCreatureId(SimulationData& da
 {
     auto const& color = cell->cellFunctionData.sensor.restrictToColor;
     auto const& restrictToOtherMutants = cell->cellFunctionData.sensor.restrictToOtherMutants;
+    uint32_t result = 0xffffffff;
 
     if (cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color] < NEAR_ZERO) {
-        return 0xffffffff;
+        return result;
     }
 
-    uint32_t result = 0xffffffff;
+    //performance optimization
+    auto& counter = cell->cellFunctionData.sensor.targetedCreatureCounter;
+    counter = (counter + 1) % 4;
+    if (counter != 1) {
+        return result;
+    }
+
     for (float dx = -3.0f; dx < 3.0f + NEAR_ZERO; dx += 1.0f) {
         for (float dy = -3.0f; dy < 3.0f + NEAR_ZERO; dy += 1.0f) {
             auto otherCell = data.cellMap.getFirst(scanPos + float2{dx, dy});

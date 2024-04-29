@@ -130,6 +130,9 @@ struct SensorFunction
     float memoryChannel1;
     float memoryChannel2;
     float memoryChannel3;
+
+    //temp
+    uint8_t targetedCreatureCounter;
 };
 
 struct NerveFunction
