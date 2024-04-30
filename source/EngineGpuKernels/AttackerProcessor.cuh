@@ -70,27 +70,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             auto color = calcMod(cell->color, MAX_COLORS);
             auto otherColor = calcMod(otherCell->color, MAX_COLORS);
 
-            if (cudaSimulationParameters.features.advancedAttackerControl
-                && cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[cell->color] > NEAR_ZERO) {
-                bool creatureIdMatch = false;
-                for (int i = 0; i < cell->numConnections; ++i) {
-                    auto lookupCell = cell->connections[i].cell;
-                    if (lookupCell->cellFunction == CellFunction_Sensor && lookupCell->cellFunctionData.sensor.targetedCreatureId == otherCell->creatureId) {
-                        creatureIdMatch = true;
-                        break;
-                    }
-                    for (int j = 0; j < lookupCell->numConnections; ++j) {
-                        auto otherLookupCell = lookupCell->connections[j].cell;
-                        if (otherLookupCell->cellFunction == CellFunction_Sensor
-                            && otherLookupCell->cellFunctionData.sensor.targetedCreatureId == otherCell->creatureId) {
-                            creatureIdMatch = true;
-                            break;
-                        }
-                    }
-                }
-                if (!creatureIdMatch) {
-                    energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[color]);
-                }
+            if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->detectedByCreatureId != (cell->creatureId & 0xff)) {
+                energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[color]);
             }
 
             //notify attacked cell

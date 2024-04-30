@@ -395,6 +395,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.age = cellTO.age;
     result.color = cellTO.color;
     result.genomeComplexity = cellTO.genomeComplexity;
+    result.detectedByCreatureId = cellTO.detectedByCreatureId;
 
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
@@ -450,7 +451,6 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         sensor.restrictToColor = cellTO.cellFunctionData.sensor.restrictToColor != 255 ? std::make_optional(cellTO.cellFunctionData.sensor.restrictToColor) : std::nullopt;
         sensor.restrictToOtherMutants = cellTO.cellFunctionData.sensor.restrictToOtherMutants;
-        sensor.targetedCreatureId = cellTO.cellFunctionData.sensor.targetedCreatureId;
         sensor.memoryChannel1 = cellTO.cellFunctionData.sensor.memoryChannel1;
         sensor.memoryChannel2 = cellTO.cellFunctionData.sensor.memoryChannel2;
         sensor.memoryChannel3 = cellTO.cellFunctionData.sensor.memoryChannel3;
@@ -550,6 +550,7 @@ void DescriptionConverter::addCell(
     cellTO.inputExecutionOrderNumber = cellDesc.inputExecutionOrderNumber.value_or(-1);
     cellTO.outputBlocked = cellDesc.outputBlocked;
     cellTO.cellFunction = cellDesc.getCellFunctionType();
+    cellTO.detectedByCreatureId = cellDesc.detectedByCreatureId;
     switch (cellDesc.getCellFunctionType()) {
     case CellFunction_Neuron: {
         NeuronTO neuronTO;
@@ -596,7 +597,6 @@ void DescriptionConverter::addCell(
         sensorTO.restrictToOtherMutants = sensorDesc.restrictToOtherMutants;
         sensorTO.minDensity = sensorDesc.minDensity;
         sensorTO.angle = sensorDesc.fixedAngle.value_or(0);
-        sensorTO.targetedCreatureId = sensorDesc.targetedCreatureId;
         sensorTO.memoryChannel1 = sensorDesc.memoryChannel1;
         sensorTO.memoryChannel2 = sensorDesc.memoryChannel2;
         sensorTO.memoryChannel3 = sensorDesc.memoryChannel3;

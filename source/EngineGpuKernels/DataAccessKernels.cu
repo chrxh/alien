@@ -42,6 +42,7 @@ namespace
             cellTO.activity.channels[i] = cell->activity.channels[i];
         }
         cellTO.activationTime = cell->activationTime;
+        cellTO.detectedByCreatureId = cell->detectedByCreatureId;
 
         copyAuxiliaryData(
             cell->metadata.nameSize,
@@ -110,7 +111,6 @@ namespace
             cellTO.cellFunctionData.sensor.minDensity = cell->cellFunctionData.sensor.minDensity;
             cellTO.cellFunctionData.sensor.restrictToColor = cell->cellFunctionData.sensor.restrictToColor;
             cellTO.cellFunctionData.sensor.restrictToOtherMutants = cell->cellFunctionData.sensor.restrictToOtherMutants;
-            cellTO.cellFunctionData.sensor.targetedCreatureId = cell->cellFunctionData.sensor.targetedCreatureId;
             cellTO.cellFunctionData.sensor.memoryChannel1 = cell->cellFunctionData.sensor.memoryChannel1;
             cellTO.cellFunctionData.sensor.memoryChannel2 = cell->cellFunctionData.sensor.memoryChannel2;
             cellTO.cellFunctionData.sensor.memoryChannel3 = cell->cellFunctionData.sensor.memoryChannel3;

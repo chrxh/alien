@@ -676,12 +676,6 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
             sensor.minDensity);
         ImGui::TreePop();
     }
-    if (ImGui::TreeNodeEx("Process data", TreeNodeFlags)) {
-        AlienImGui::InputInt(
-            AlienImGui::InputIntParameters().name("Target creature id").textWidth(CellFunctionTextWidth).tooltip(Const::CellSensorTargetCreatureIdTooltip),
-            sensor.targetedCreatureId);
-        ImGui::TreePop();
-    }
 }
 
 void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconnector)
