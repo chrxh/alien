@@ -401,7 +401,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant)
     data.addCells(
         {CellDescription()
              .setId(1)
-             .setMutationId(2)
+             .setMutationId(6)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
@@ -417,7 +417,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant)
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::createRect(
-        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1)));
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -441,7 +441,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant)
     data.addCells(
         {CellDescription()
              .setId(1)
-             .setMutationId(2)
+             .setMutationId(7)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
@@ -457,7 +457,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant)
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::createRect(
-        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(2)));
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);

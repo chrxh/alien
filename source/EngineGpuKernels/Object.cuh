@@ -124,15 +124,11 @@ struct SensorFunction
     float minDensity;
     uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
     bool restrictToOtherMutants;
-    uint32_t targetedCreatureId;
 
     //process data
     float memoryChannel1;
     float memoryChannel2;
     float memoryChannel3;
-
-    //temp
-    uint8_t targetedCreatureCounter;
 };
 
 struct NerveFunction
@@ -222,6 +218,9 @@ struct Cell
     Activity activity;
     uint32_t activationTime;
     uint32_t genomeComplexity;
+
+    //process data
+    uint8_t detectedByCreatureId;  //only the first 8 bits from the creature id
 
     //annotations
     CellMetadataDescription metadata;

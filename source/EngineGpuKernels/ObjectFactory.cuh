@@ -105,6 +105,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->color = cellTO.color;
     cell->activationTime = cellTO.activationTime;
     cell->genomeComplexity = cellTO.genomeComplexity;
+    cell->detectedByCreatureId = cellTO.detectedByCreatureId;
 
     createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
 
@@ -160,11 +161,9 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         cell->cellFunctionData.sensor.restrictToColor = cellTO.cellFunctionData.sensor.restrictToColor;
         cell->cellFunctionData.sensor.restrictToOtherMutants = cellTO.cellFunctionData.sensor.restrictToOtherMutants;
-        cell->cellFunctionData.sensor.targetedCreatureId = cellTO.cellFunctionData.sensor.targetedCreatureId;
         cell->cellFunctionData.sensor.memoryChannel1 = cellTO.cellFunctionData.sensor.memoryChannel1;
         cell->cellFunctionData.sensor.memoryChannel2 = cellTO.cellFunctionData.sensor.memoryChannel2;
         cell->cellFunctionData.sensor.memoryChannel3 = cellTO.cellFunctionData.sensor.memoryChannel3;
-        cell->cellFunctionData.sensor.targetedCreatureCounter = 0;
     } break;
     case CellFunction_Nerve: {
         cell->cellFunctionData.nerve.pulseMode = cellTO.cellFunctionData.nerve.pulseMode;
@@ -278,6 +277,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->density = 1.0f;
     cell->creatureId = 0;
     cell->mutationId = 0;
+    cell->detectedByCreatureId = 0;
 
     if (cudaSimulationParameters.particleTransformationRandomCellFunction) {
         cell->cellFunction = _data->numberGen1.random(CellFunction_Count - 1);
@@ -324,8 +324,6 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.sensor.minDensity = _data->numberGen1.random(1.0f);
             cell->cellFunctionData.sensor.restrictToColor = _data->numberGen1.randomBool() ? _data->numberGen1.random(MAX_COLORS - 1) : 255;
             cell->cellFunctionData.sensor.restrictToOtherMutants = _data->numberGen1.randomBool();
-            cell->cellFunctionData.sensor.targetedCreatureId = 0;
-            cell->cellFunctionData.sensor.targetedCreatureCounter = 0;
             cell->cellFunctionData.sensor.memoryChannel1 = 0;
             cell->cellFunctionData.sensor.memoryChannel2 = 0;
             cell->cellFunctionData.sensor.memoryChannel3 = 0;
@@ -393,5 +391,6 @@ __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex
         cell->activity.channels[i] = 0;
     }
     cell->density = 1.0f;
+    cell->detectedByCreatureId = 0;
     return cell;
 }

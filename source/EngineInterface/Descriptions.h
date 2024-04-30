@@ -176,7 +176,6 @@ struct SensorDescription
     float minDensity = 0.05f;
     std::optional<int> restrictToColor;
     bool restrictToOtherMutants = false;
-    int targetedCreatureId = 0;
 
     //process data
     float memoryChannel1 = 0;
@@ -367,6 +366,7 @@ struct CellDescription
     ActivityDescription activity;
     int activationTime = 0;
     int genomeComplexity = 0;
+    uint8_t detectedByCreatureId = 0;   //only the first 8 bits from the creature id
 
     CellMetadataDescription metadata;
 

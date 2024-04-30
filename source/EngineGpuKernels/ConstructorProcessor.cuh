@@ -680,7 +680,6 @@ ConstructorProcessor::constructCellIntern(
         result->cellFunctionData.sensor.minDensity = (GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) + 1.0f) / 2;
         result->cellFunctionData.sensor.restrictToColor = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition, MAX_COLORS);
         result->cellFunctionData.sensor.restrictToOtherMutants = GenomeDecoder::readBool(constructor, genomeCurrentBytePosition);
-        result->cellFunctionData.sensor.targetedCreatureCounter = 0;
         result->cellFunctionData.sensor.memoryChannel1 = 0;
         result->cellFunctionData.sensor.memoryChannel2 = 0;
         result->cellFunctionData.sensor.memoryChannel3 = 0;

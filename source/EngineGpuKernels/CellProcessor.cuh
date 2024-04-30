@@ -82,7 +82,7 @@ __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
 {
     auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        data.preprocessedCellFunctionData.densityMap.addCell(data.objects.cellPointers.at(index));
+        data.preprocessedCellFunctionData.densityMap.addCell(data.timestep, data.objects.cellPointers.at(index));
     }
 }
 
