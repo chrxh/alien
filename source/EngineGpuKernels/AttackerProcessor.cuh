@@ -11,7 +11,6 @@
 #include "SimulationStatistics.cuh"
 #include "ObjectFactory.cuh"
 #include "ParticleProcessor.cuh"
-#include "CellFunctionConstants.cuh"
 
 class AttackerProcessor
 {
@@ -144,20 +143,19 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 return;
             }
 
-            //notify attacked cell
-            if (energyToTransfer > NEAR_ZERO && otherCell->cellFunction != CellFunction_None) {
-                atomicExch(&otherCell->activity.channels[7], AttackNotificationActivity);
-            }
-
             someOtherCell = otherCell;
-            if (energyToTransfer >= 0) {
+            if (energyToTransfer > NEAR_ZERO) {
+
+                //notify attacked cell
+                atomicExch(&otherCell->activity.channels[7], AttackNotificationActivity);
+
                 auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
                 if (origEnergy > baseValue + energyToTransfer) {
                     energyDelta += energyToTransfer;
                 } else {
                     atomicAdd(&otherCell->energy, energyToTransfer);  //revert
                 }
-            } else {
+            } else if (energyToTransfer < -NEAR_ZERO) {
                 auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
                 if (origEnergy >= baseValue - (energyDelta + energyToTransfer)) {
                     energyDelta += energyToTransfer;

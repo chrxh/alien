@@ -1384,6 +1384,7 @@ void _SimulationParametersWindow::processBase(
                         .colorDependence(true)
                         .min(0.00f)
                         .max(1.0f)
+                        .format("%.5f")
                         .defaultValue(origParameters.externalEnergyConditionalInflowFactor)
                         .tooltip("Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
                                  "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
