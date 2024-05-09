@@ -1371,6 +1371,7 @@ void _SimulationParametersWindow::processBase(
                         .colorDependence(true)
                         .min(0.0f)
                         .max(1.0f)
+                        .format("%.5f")
                         .defaultValue(origParameters.externalEnergyInflowFactor)
                         .tooltip(
                             "Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that each time "
