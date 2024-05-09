@@ -125,3 +125,5 @@ enum DetonatorState_
     DetonatorState_Activated,
     DetonatorState_Exploded
 };
+
+auto constexpr AttackNotificationActivity = 0.95f;

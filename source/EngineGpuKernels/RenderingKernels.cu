@@ -4,7 +4,6 @@
 
 #include "CellFunctionProcessor.cuh"
 #include "SpotCalculator.cuh"
-#include "CellFunctionConstants.cuh"
 
 namespace
 {
@@ -257,13 +256,13 @@ namespace
         }
     }
 
-    __device__ __inline__ void drawArc(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius1, float radius2)
+    __device__ __inline__ void drawDisc(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius1, float radius2)
     {
         if (radius2 > 2.5 - NEAR_ZERO) {
             auto radiusSquared1 = radius1 * radius1;
             auto radiusSquared2 = radius2 * radius2;
-            for (float x = -radius2 - 1; x <= radius2; x += 1.0f) {
-                for (float y = -radius2 - 1; y <= radius2; y += 1.0f) {
+            for (float x = -radius2; x <= radius2; x += 1.0f) {
+                for (float y = -radius2; y <= radius2; y += 1.0f) {
                     auto rSquared = x * x + y * y;
                     if (rSquared <= radiusSquared2 && rSquared >= radiusSquared1) {
                         drawDot(imageData, imageSize, pos + float2{x, y}, color);
@@ -405,10 +404,10 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
 
             //draw attacks
             if (cell->cellFunction == CellFunction_Attacker && abs(cell->activity.channels[0]) > NEAR_ZERO) {
-                drawArc(imageData, imageSize, cellImagePos, {0.0f, 1.0f, 0.0f}, radius * 1.4f, radius * 2.0f);
+                drawDisc(imageData, imageSize, cellImagePos, {0.0f, 1.0f, 0.0f}, radius * 1.4f, radius * 2.0f);
             }
             if (abs(cell->activity.channels[7] - AttackNotificationActivity) < NEAR_ZERO) {
-                drawArc(imageData, imageSize, cellImagePos, {1.0f, 0.0f, 0.0f}, radius * 1.4f, radius * 2.0f);
+                drawDisc(imageData, imageSize, cellImagePos, {1.0f, 0.0f, 0.0f}, radius * 1.4f, radius * 2.0f);
             }
 
             //draw detonation

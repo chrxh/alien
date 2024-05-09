@@ -5,7 +5,6 @@ add_library(EngineGpuKernels
     Base.cuh
     CellComputationProcessor.cuh
     CellConnectionProcessor.cuh
-    CellFunctionConstants.cuh
     CellFunctionProcessor.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
