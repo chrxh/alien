@@ -11,6 +11,7 @@
 #include "SimulationStatistics.cuh"
 #include "ObjectFactory.cuh"
 #include "ParticleProcessor.cuh"
+#include "CellFunctionConstants.cuh"
 
 class AttackerProcessor
 {
@@ -48,7 +49,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         float energyDelta = 0;
         auto cellMinEnergy = SpotCalculator::calcParameter(
             &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
-        auto baseValue = cudaSimulationParameters.cellFunctionAttackerDestroyCells ? cellMinEnergy * 0.9f : cellMinEnergy;
+        auto baseValue = cudaSimulationParameters.cellFunctionAttackerDestroyCells ? 0.0f : cellMinEnergy;
 
         Cell* someOtherCell = nullptr;
         data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellFunctionAttackerRadius[cell->color], cell->detached, [&](auto const& otherCell) {
@@ -74,11 +75,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[color]);
             }
 
-            //notify attacked cell
-            if (energyToTransfer > NEAR_ZERO && otherCell->cellFunction != CellFunction_None) {
-                atomicAdd(&otherCell->activity.channels[7], 1.0f);
-            }
-
             if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->genomeComplexity > cell->genomeComplexity) {
                 auto cellFunctionAttackerGenomeComplexityBonus = SpotCalculator::calcParameter(
                     &SimulationParametersSpotValues::cellFunctionAttackerGenomeComplexityBonus,
@@ -102,16 +98,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             if (!isHomogene(otherCell)) {
                 energyToTransfer *= cudaSimulationParameters.cellFunctionAttackerColorInhomogeneityFactor[color];
-            }
-
-            bool active = false;
-            for (int i = 0; i < 6; ++i) {
-                if(abs(otherCell->activity.channels[i]) > NEAR_ZERO) {
-                    active = true;
-                }
-            }
-            if (active) {
-                //energyToTransfer *= 0.3f;
             }
 
             if (cudaSimulationParameters.features.advancedAttackerControl) {
@@ -156,6 +142,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             if (abs(energyToTransfer) < NEAR_ZERO) {
                 return;
+            }
+
+            //notify attacked cell
+            if (energyToTransfer > NEAR_ZERO && otherCell->cellFunction != CellFunction_None) {
+                atomicExch(&otherCell->activity.channels[7], AttackNotificationActivity);
             }
 
             someOtherCell = otherCell;
