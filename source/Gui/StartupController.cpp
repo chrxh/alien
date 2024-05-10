@@ -64,6 +64,7 @@ void _StartupController::process()
             deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
         _simController->setClusteredSimulationData(deserializedSim.mainData);
         _simController->setStatisticsHistory(deserializedSim.statistics);
+        _simController->setRealTime(deserializedSim.auxiliaryData.realTime);
         Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
         Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
         _temporalControlWindow->onSnapshot();
