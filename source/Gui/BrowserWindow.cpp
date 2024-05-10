@@ -416,7 +416,11 @@ void _BrowserWindow::processWorkspaceSelectionAndFilter()
 
         ImGui::TableSetColumnIndex(1);
         if (AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Filter").textWidth(0), _filter)) {
-            createTreeTOs(_workspaces.at(_currentWorkspace));
+            for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
+                for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+                    createTreeTOs(_workspaces.at(WorkspaceId{resourceType, workspaceType}));
+                }
+            }
         }
 
         ImGui::EndTable();
