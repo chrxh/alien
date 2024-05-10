@@ -126,4 +126,10 @@ enum DetonatorState_
     DetonatorState_Exploded
 };
 
-auto constexpr AttackNotificationActivity = 0.95f;
+using CellEvent = int;
+enum CellEvent_
+{
+    CellEvent_No,
+    CellEvent_Hit,
+    CellEvent_Attacking
+};

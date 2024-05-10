@@ -74,6 +74,8 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO
     cell->selected = 0;
     cell->scheduledOperationIndex = -1;
     cell->numConnections = cellTO.numConnections;
+    cell->event = CellEvent_No;
+    cell->eventCounter = 0;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connectingCell = cell->connections[i];
         connectingCell.cell = cellTargetArray + cellTO.connections[i].cellIndex;
@@ -278,6 +280,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->creatureId = 0;
     cell->mutationId = 0;
     cell->detectedByCreatureId = 0;
+    cell->event = CellEvent_No;
+    cell->eventCounter = 0;
 
     if (cudaSimulationParameters.particleTransformationRandomCellFunction) {
         cell->cellFunction = _data->numberGen1.random(CellFunction_Count - 1);
@@ -392,5 +396,7 @@ __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex
     }
     cell->density = 1.0f;
     cell->detectedByCreatureId = 0;
+    cell->event = CellEvent_No;
+    cell->eventCounter = 0;
     return cell;
 }
