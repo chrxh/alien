@@ -147,7 +147,9 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (energyToTransfer > NEAR_ZERO) {
 
                 //notify attacked cell
-                atomicExch(&otherCell->activity.channels[7], AttackNotificationActivity);
+                atomicAdd(&otherCell->activity.channels[7], 1.0f);
+                otherCell->event = CellEvent_Hit;
+                otherCell->eventCounter = 6;
 
                 auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
                 if (origEnergy > baseValue + energyToTransfer) {
@@ -180,6 +182,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         activity.channels[0] = energyDelta / 10;
 
         if (energyDelta > NEAR_ZERO) {
+            cell->event = CellEvent_Attacking;
+            cell->eventCounter = 6;
             statistics.incNumAttacks(cell->color);
         }
     }

@@ -10,6 +10,7 @@ class CellFunctionProcessor
 {
 public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
+    __inline__ __device__ static void updateRenderingData(SimulationData& data);
     __inline__ __device__ static void resetFetchedActivities(SimulationData& data);
 
     __inline__ __device__ static Activity calcInputActivity(Cell* cell);
@@ -43,6 +44,19 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
             } else if (cell->livingState == LivingState_Ready && cell->activationTime == 0) {
                 data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
             }
+        }
+    }
+}
+
+__inline__ __device__ void CellFunctionProcessor::updateRenderingData(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->eventCounter > 0) {
+            --cell->eventCounter;
         }
     }
 }

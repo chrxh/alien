@@ -261,11 +261,15 @@ namespace
         if (radius2 > 2.5 - NEAR_ZERO) {
             auto radiusSquared1 = radius1 * radius1;
             auto radiusSquared2 = radius2 * radius2;
+            auto middleRadiusSquared = (radiusSquared1 + radiusSquared2) / 2;
+
             for (float x = -radius2; x <= radius2; x += 1.0f) {
                 for (float y = -radius2; y <= radius2; y += 1.0f) {
                     auto rSquared = x * x + y * y;
                     if (rSquared <= radiusSquared2 && rSquared >= radiusSquared1) {
-                        drawDot(imageData, imageSize, pos + float2{x, y}, color);
+                        auto weight = rSquared < middleRadiusSquared ? (rSquared - radiusSquared1) / (middleRadiusSquared - radiusSquared1)
+                                                                     : (radiusSquared2 - rSquared) / (radiusSquared2 - middleRadiusSquared);
+                        drawDot(imageData, imageSize, pos + float2{x, y}, color * weight * 0.6f);
                     }
                 }
             }
@@ -402,12 +406,14 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, radius, shadedCells);
             }
 
-            //draw attacks
-            if (cell->cellFunction == CellFunction_Attacker && abs(cell->activity.channels[0]) > NEAR_ZERO) {
-                drawDisc(imageData, imageSize, cellImagePos, {0.0f, 1.0f, 0.0f}, radius * 1.4f, radius * 2.0f);
-            }
-            if (abs(cell->activity.channels[7] - AttackNotificationActivity) < NEAR_ZERO) {
-                drawDisc(imageData, imageSize, cellImagePos, {1.0f, 0.0f, 0.0f}, radius * 1.4f, radius * 2.0f);
+            //draw events
+            if (cell->eventCounter > 0) {
+                if (cell->event == CellEvent_Attacking) {
+                    drawDisc(imageData, imageSize, cellImagePos, {0.0f, 1.0f, 0.0f}, radius * 1.4f, radius * 2.0f);
+                }
+                if (cell->event == CellEvent_Hit) {
+                    drawDisc(imageData, imageSize, cellImagePos, {1.0f, 0.0f, 0.0f}, radius * 1.4f, radius * 2.0f);
+                }
             }
 
             //draw detonation

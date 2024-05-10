@@ -225,6 +225,10 @@ struct Cell
     //annotations
     CellMetadataDescription metadata;
 
+    //additional rendering data
+    CellEvent event;
+    uint8_t eventCounter;
+
     //editing data
     uint8_t selected;  //0 = no, 1 = selected, 2 = cluster selected
     uint8_t detached;  //0 = no, 1 = yes
