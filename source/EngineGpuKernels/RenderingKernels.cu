@@ -239,9 +239,13 @@ namespace
                             if (angle < -180.0f) {
                                 angle += 360.0f;
                             }
-                            factor *= 65.0f / (abs(angle) + 1.0f); 
+                            factor *= 65.0f / (abs(angle) + 1.0f);
+                            factor = min(factor, 1.0f);
+                            if (inverted && sqrt(rSquared) > radius - 2.0f) {
+                                factor = 2.0f;
+                            }
                         }
-                        drawDot(imageData, imageSize, pos + float2{x, y}, color * min(factor, 1.0f));
+                        drawDot(imageData, imageSize, pos + float2{x, y}, color * factor);
                     }
                 }
             }
@@ -394,11 +398,11 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
 
             //draw background for cell
             auto backgroundColor = calcColor(cell, cell->selected, backgroundColoring) * 0.85f;
-            drawCircle(imageData, imageSize, cellImagePos, backgroundColor * 0.6f, zoom / 2.5f, false, false);
+            drawCircle(imageData, imageSize, cellImagePos, backgroundColor * 0.45f, zoom / 2.5f, false, false);
 
             //draw foreground for cell
             auto foregroundColor = backgroundColoring == foregroundColoring ? backgroundColor : calcColor(cell, cell->selected, foregroundColoring) * 0.85f;
-            auto radius = zoom / 3;
+            auto radius = zoom / 4;
             drawCircle(imageData, imageSize, cellImagePos, foregroundColor * 0.4f, radius, shadedCells, true);
 
             //draw activity
@@ -442,15 +446,13 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
                     auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                     otherCellPos += topologyCorrection;
 
-                    //if (Math::lengthSquared(topologyCorrection) < NEAR_ZERO) {
-                    auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) / 3;
+                    auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) / 4;
                     auto const startImagePos = mapWorldPosToVectorImagePos(rectUpperLeft, cellPos + distFromCellCenter, universeImageSize, imageSize, zoom);
                     auto const endImagePos =
                         mapWorldPosToVectorImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, imageSize, zoom);
                     if (isLineVisible(startImagePos, endImagePos, universeImageSize)) {
                         drawLine(startImagePos, endImagePos, lineColor, imageData, imageSize);
                     }
-                    //}
                 }
             }
 
@@ -465,16 +467,12 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
                             auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                             otherCellPos += topologyCorrection;
 
-                            //if (Math::lengthSquared(topologyCorrection) > NEAR_ZERO) {
-                            //    continue;
-                            //}
-
                             auto const otherCellImagePos = mapWorldPosToVectorImagePos(rectUpperLeft, otherCellPos, universeImageSize, imageSize, zoom);
                             if (!isContainedInRect({0, 0}, toFloat2(imageSize), otherCellImagePos)) {
                                 continue;
                             }
                             auto const arrowEnd = mapWorldPosToVectorImagePos(
-                                rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 3, universeImageSize, imageSize, zoom);
+                                rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 4, universeImageSize, imageSize, zoom);
                             if (!isContainedInRect({0, 0}, toFloat2(imageSize), arrowEnd)) {
                                 continue;
                             }
