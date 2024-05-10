@@ -191,8 +191,8 @@ namespace
         if (selected) {
             intensity *= 2.5f;
         }
-
-        return {intensity, intensity, 0.08f};
+        intensity = max(0.08f, intensity);
+        return {intensity, intensity, intensity / 2};
     }
 
     __device__ __inline__ void drawDot(uint64_t* imageData, int2 const& imageSize, float2 const& pos, float3 const& colorToAdd)
