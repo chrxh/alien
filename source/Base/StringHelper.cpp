@@ -70,7 +70,7 @@ std::string StringHelper::format(std::chrono::milliseconds duration)
         oss << std::setw(2) << std::setfill('0') << minutes.count() << ":";
     }
     if (seconds.count() > 0 || minutes.count() > 0 || hours.count() > 0 || days.count() > 0 || months.count() > 0) {
-        oss << std::setw(2) << std::setfill('0') << seconds.count() << ":";
+        oss << std::setw(2) << std::setfill('0') << seconds.count() << ".";
     }
     oss << std::setw(3) << std::setfill('0') << duration.count();
 
