@@ -1487,7 +1487,7 @@ void _SimulationParametersWindow::processSpot(
                     .min(0)
                     .max(toFloat(worldSize.x))
                     .defaultValue(&origSpot.posX)
-                    .format("%.1f"),
+                    .format("%.2f"),
                 &spot.posX);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
