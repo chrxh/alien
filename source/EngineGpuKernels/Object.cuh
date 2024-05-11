@@ -228,6 +228,7 @@ struct Cell
     //additional rendering data
     CellEvent event;
     uint8_t eventCounter;
+    float2 eventPos;
 
     //editing data
     uint8_t selected;  //0 = no, 1 = selected, 2 = cluster selected
