@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 using CellFunction = int;
 enum CellFunction_
 {
@@ -126,7 +128,7 @@ enum DetonatorState_
     DetonatorState_Exploded
 };
 
-using CellEvent = int;
+using CellEvent = int8_t;
 enum CellEvent_
 {
     CellEvent_No,

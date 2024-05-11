@@ -416,7 +416,14 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
                     drawDisc(imageData, imageSize, cellImagePos, {0.0f, 1.0f, 0.0f}, radius * 1.4f, radius * 2.0f);
                 }
                 if (cell->event == CellEvent_Hit) {
-                    drawDisc(imageData, imageSize, cellImagePos, {1.0f, 0.0f, 0.0f}, radius * 1.4f, radius * 2.0f);
+                    float3 color{1.0f, 0.0f, 0.0f};
+                    drawDisc(imageData, imageSize, cellImagePos, color, radius * 1.4f, radius * 2.0f);
+
+                    auto const endImagePos = mapWorldPosToVectorImagePos(rectUpperLeft, cell->eventPos, universeImageSize, imageSize, zoom);
+                    if (isLineVisible(cellImagePos, endImagePos, universeImageSize)) {
+                        drawLine(cellImagePos, endImagePos, color, imageData, imageSize);
+                    }
+
                 }
             }
 
