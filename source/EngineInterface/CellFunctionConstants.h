@@ -132,6 +132,6 @@ using CellEvent = int8_t;
 enum CellEvent_
 {
     CellEvent_No,
-    CellEvent_Hit,
-    CellEvent_Attacking
+    CellEvent_Attacking,
+    CellEvent_Attacked
 };

@@ -148,7 +148,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                 //notify attacked cell
                 atomicAdd(&otherCell->activity.channels[7], 1.0f);
-                otherCell->event = CellEvent_Hit;
+                otherCell->event = CellEvent_Attacked;
                 otherCell->eventCounter = 6;
                 otherCell->eventPos = cell->pos;
 
