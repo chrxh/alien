@@ -86,7 +86,7 @@ namespace
 
     __device__ __inline__ float3 calcColor(Cell* cell, int selected, CellColoring cellColoring)
     {
-        float factor = min(300.0f, cell->energy) / 320.0f;
+        float factor = max(10.0f, min(300.0f, cell->energy)) / 320.0f;
         if (1 == selected) {
             factor *= 2.5f;
         }
@@ -166,7 +166,7 @@ namespace
                 auto h = (toFloat(cell->cellFunction) / toFloat(CellFunction_Count - 1)) * 360.0f;
                 auto rgb = convertHSVtoRGB(toFloat(h), 0.7f, 1.0f);
                 cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
-                factor = 5.0f;
+                factor = 2.0f;
             } else {
                 cellColor = 0x404040;
             }
@@ -176,7 +176,6 @@ namespace
             auto h = (toFloat(cell->cellFunction) / toFloat(CellFunction_Count - 1)) * 360.0f;
             auto rgb = convertHSVtoRGB(toFloat(h), 0.7f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
-            factor = 0.42f;
         }
 
         return {
@@ -403,7 +402,7 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
             //draw foreground for cell
             auto foregroundColor = backgroundColoring == foregroundColoring ? backgroundColor : calcColor(cell, cell->selected, foregroundColoring) * 0.85f;
             auto radius = zoom / 4;
-            drawCircle(imageData, imageSize, cellImagePos, foregroundColor * 0.4f, radius, shadedCells, true);
+            drawCircle(imageData, imageSize, cellImagePos, foregroundColor * 0.6f, radius, shadedCells, true);
 
             //draw activity
             if (cell->isActive() && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
