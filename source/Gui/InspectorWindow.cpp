@@ -179,7 +179,7 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
             }
             if (ImGui::TreeNodeEx("Ids##Base", TreeNodeFlags)) {
                 std::stringstream ss;
-                ss << std::hex << std::uppercase << cell.id;
+                ss << "0x" << std::hex << std::uppercase << cell.id;
                 auto cellId = ss.str();
 
                 AlienImGui::InputText(
