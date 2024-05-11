@@ -289,6 +289,13 @@ void _SimulationParametersWindow::processBase(
                 &parameters.zoomLevelNeuronalActivity);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
+                    .name("Attack visualization")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origParameters.attackVisualization)
+                    .tooltip("If activated, successful attacks of attacker cells are visualized."),
+                parameters.attackVisualization);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
                     .name("Borderless rendering")
                     .textWidth(RightColumnWidth)
                     .defaultValue(origParameters.borderlessRendering)

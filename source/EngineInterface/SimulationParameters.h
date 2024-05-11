@@ -51,6 +51,7 @@ struct SimulationParameters
     CellColoring cellColoring = CellColoring_CellColor;
     CellFunction highlightedCellFunction = CellFunction_Constructor;
     float zoomLevelNeuronalActivity = 2.0f;
+    bool attackVisualization = false;
 
     //all other parameters
     SimulationParametersSpotValues baseValues;

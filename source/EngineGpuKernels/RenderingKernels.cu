@@ -411,10 +411,10 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
 
             //draw events
             if (cell->eventCounter > 0) {
-                if (cell->event == CellEvent_Attacking) {
+                if (cudaSimulationParameters.attackVisualization && cell->event == CellEvent_Attacking) {
                     drawDisc(imageData, imageSize, cellImagePos, {0.0f, 0.5f, 0.0f}, radius * 1.4f, radius * 2.0f);
                 }
-                if (cell->event == CellEvent_Attacked) {
+                if (cudaSimulationParameters.attackVisualization && cell->event == CellEvent_Attacked) {
                     float3 color{0.5f, 0.0f, 0.0f};
                     drawDisc(imageData, imageSize, cellImagePos, color, radius * 1.4f, radius * 2.0f);
 
