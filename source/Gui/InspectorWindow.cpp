@@ -294,11 +294,11 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                 ImGui::TreePop();
             }
         }
-        if (type != CellFunction_None && ImGui::TreeNodeEx("Activity states", TreeNodeFlags)) {
+        if (ImGui::TreeNodeEx("Activity states", TreeNodeFlags)) {
             int index = 0;
             for (auto& channel : cell.activity.channels) {
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.2f").step(0.1f).textWidth(ActivityTextWidth),
+                    AlienImGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(ActivityTextWidth),
                     channel);
                 ++index;
             }
