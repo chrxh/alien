@@ -660,7 +660,7 @@ ConstructorProcessor::constructCellIntern(
     case CellFunction_Constructor: {
         auto& newConstructor = result->cellFunctionData.constructor;
         newConstructor.activationMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
-        newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor, genomeCurrentBytePosition);
+        newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor, genomeCurrentBytePosition) % MaxActivationTime;
         newConstructor.lastConstructedCellId = 0;
         newConstructor.currentBranch = 0;
         newConstructor.genomeCurrentNodeIndex = 0;

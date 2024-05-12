@@ -968,6 +968,7 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
         if (constructor.mode < 0) {
             constructor.mode = 0;
         }
+        constructor.constructionActivationTime = ((constructor.constructionActivationTime % MaxActivationTime) + MaxActivationTime) % MaxActivationTime;
     } break;
     case CellFunction_Sensor: {
         auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
