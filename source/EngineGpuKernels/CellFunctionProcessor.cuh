@@ -70,6 +70,9 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->cellFunction == CellFunction_None) {
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                cell->activity.channels[i] = 0;
+            }
             continue;
         }
         int maxOtherExecutionOrderNumber = -1;
