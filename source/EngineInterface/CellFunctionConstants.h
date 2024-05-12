@@ -135,3 +135,5 @@ enum CellEvent_
     CellEvent_Attacking,
     CellEvent_Attacked
 };
+
+auto constexpr MaxActivationTime = 256 * 4;
