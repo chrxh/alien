@@ -486,6 +486,19 @@ void DescriptionEditService::randomizeCountdowns(ClusteredDataDescription& data,
     }
 }
 
+void DescriptionEditService::randomizeMutationIds(ClusteredDataDescription& data)
+{
+    for (auto& cluster : data.clusters) {
+        auto mutationId = NumberGenerator::getInstance().getRandomInt();
+        for (auto& cell : cluster.cells) {
+            cell.mutationId = toInt(mutationId);
+            if (cell.getCellFunctionType() == CellFunction_Constructor) {
+                std::get<ConstructorDescription>(*cell.cellFunction).offspringMutationId = toInt(mutationId);
+            }
+        }
+    }
+}
+
 void DescriptionEditService::generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers)
 {
     std::unordered_map<uint64_t, int> idToIndexMap;
