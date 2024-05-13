@@ -104,6 +104,7 @@ public:
     static void randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy);
     static void randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge);
     static void randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue);
+    static void randomizeMutationIds(ClusteredDataDescription& data);
 
     static void generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers);
 

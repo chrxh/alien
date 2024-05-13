@@ -101,6 +101,11 @@ void _MassOperationsDialog::process()
         AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Maximum value").textWidth(RightColumnWidth), _maxCountdown);
         ImGui::EndDisabled();
 
+        AlienImGui::Group("Mutants");
+        ImGui::Checkbox("##mutationId", &_randomizeMutationId);
+        ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
+        AlienImGui::Text("Randomize mutation ids");
+
         AlienImGui::Group("Options");
         ImGui::Checkbox("##restrictToSelectedClusters", &_restrictToSelectedClusters);
         ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
@@ -184,6 +189,9 @@ void _MassOperationsDialog::onExecute()
     if (_randomizeCountdowns) {
         DescriptionEditService::randomizeCountdowns(content, _minCountdown, _maxCountdown);
     }
+    if (_randomizeMutationId) {
+        DescriptionEditService::randomizeMutationIds(content);
+    }
 
     if (_restrictToSelectedClusters) {
         _simController->removeSelectedObjects(true);
@@ -208,6 +216,7 @@ bool _MassOperationsDialog::isOkEnabled()
             result |= checkColor;
         }
     }
+
     if (_randomizeEnergies) {
         result = true;
     }
@@ -215,6 +224,9 @@ bool _MassOperationsDialog::isOkEnabled()
         result = true;
     }
     if (_randomizeCountdowns) {
+        result = true;
+    }
+    if (_randomizeMutationId) {
         result = true;
     }
     return result;
