@@ -175,7 +175,7 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::totalEnergy);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Total energy");
+        AlienImGui::Text("Contained energy");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
