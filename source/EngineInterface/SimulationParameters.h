@@ -90,6 +90,16 @@ struct SimulationParameters
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value};
+    bool cellFunctionUnusedAgeActive = false;
+    ColorVector<int> cellFunctionUnusedAge = {
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value};
+
     bool cellMaxAgeBalancer = false;
     int cellMaxAgeBalancerInterval = 10000;
     bool particleTransformationAllowed = false;

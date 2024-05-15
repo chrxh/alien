@@ -4,5 +4,5 @@ bool Features::operator==(Features const& other) const
 {
     return genomeComplexityMeasurement == other.genomeComplexityMeasurement && externalEnergyControl == other.externalEnergyControl
         && cellColorTransitionRules == other.cellColorTransitionRules && advancedAbsorptionControl == other.advancedAbsorptionControl
-        && advancedAttackerControl == other.advancedAttackerControl;
+        && advancedAttackerControl == other.advancedAttackerControl && cellAgeLimiter == other.cellAgeLimiter;
 }

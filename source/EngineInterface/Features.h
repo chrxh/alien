@@ -7,6 +7,7 @@ struct Features
     bool advancedAttackerControl = false;
     bool externalEnergyControl = false;
     bool cellColorTransitionRules = false;
+    bool cellAgeLimiter = false;
 
     bool operator==(Features const& other) const;
 };

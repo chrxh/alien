@@ -173,6 +173,7 @@ struct CellTO
     uint32_t activationTime;
     uint32_t genomeComplexity;
     uint8_t detectedByCreatureId;  //only the first 8 bits from the creature id
+    CellFunctionUsed cellFunctionUsed;
 
     CellMetadataTO metadata;
 

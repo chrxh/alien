@@ -1379,6 +1379,7 @@ void _SimulationParametersWindow::processBase(
                         .min(0.0f)
                         .max(1.0f)
                         .format("%.5f")
+                        .logarithmic(true)
                         .defaultValue(origParameters.externalEnergyInflowFactor)
                         .tooltip(
                             "Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that each time "
@@ -1442,6 +1443,29 @@ void _SimulationParametersWindow::processBase(
                     ImGui::PopID();
                 }
                 AlienImGui::EndTreeNode();
+            }
+        }
+
+        /**
+         * Addon: Cell age limiter
+         */
+        if (parameters.features.cellAgeLimiter) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell age limiter").highlighted(false))) {
+                AlienImGui::SliderInt(
+                    AlienImGui::SliderIntParameters()
+                        .name("Maximum inactive cell age")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(1)
+                        .max(10000000)
+                        .logarithmic(true)
+                        .infinity(true)
+                        .disabledValue(parameters.cellFunctionUnusedAge)
+                        .defaultEnabledValue(&origParameters.cellFunctionUnusedAgeActive)
+                        .defaultValue(origParameters.cellFunctionUnusedAge)
+                        .tooltip(""),
+                    parameters.cellFunctionUnusedAge,
+                    &parameters.cellFunctionUnusedAgeActive);
             }
         }
     }
@@ -2142,6 +2166,12 @@ void _SimulationParametersWindow::processAddonList(
                     .defaultValue(origParameters.features.cellColorTransitionRules)
                     .tooltip("This can be used to define color transitions for cells depending on their age."),
                 parameters.features.cellColorTransitionRules);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Cell age limiter")
+                    .textWidth(0).defaultValue(origParameters.features.cellAgeLimiter)
+                    .tooltip(""),
+                parameters.features.cellAgeLimiter);
         }
         ImGui::EndChild();
         AlienImGui::EndTreeNode();

@@ -43,6 +43,7 @@ namespace
         }
         cellTO.activationTime = cell->activationTime;
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
+        cellTO.cellFunctionUsed = cell->cellFunctionUsed;
 
         copyAuxiliaryData(
             cell->metadata.nameSize,

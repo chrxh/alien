@@ -346,13 +346,13 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
         table.next();
         if (!tab.genome.header.separateConstruction) {
             AlienImGui::InputInt(
-                AlienImGui::InputIntParameters().name("Number of constructions").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeNumBranchesTooltip),
+                AlienImGui::InputIntParameters().name("Number of branches").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeNumBranchesTooltip),
                 tab.genome.header.numBranches);
             table.next();
         }
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
-                .name("Repetitions per construction")
+                .name("Repetitions per branch")
                 .infinity(true)
                 .textWidth(ContentHeaderTextWidth)
                 .tooltip(Const::GenomeRepetitionsPerConstructionTooltip),

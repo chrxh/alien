@@ -113,6 +113,7 @@ namespace
     auto constexpr Id_Cell_ActivationTime = 8;
     auto constexpr Id_Cell_GenomeComplexity = 13;
     auto constexpr Id_Cell_DetectedByCreatureId = 14;
+    auto constexpr Id_Cell_CellFunctionUsed = 15;
 
     auto constexpr Id_Neuron_ActivationFunctions = 0;
 
@@ -741,6 +742,7 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
         loadSave<int>(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
         loadSave<uint8_t>(task, auxiliaries, Id_Cell_DetectedByCreatureId, data.detectedByCreatureId, defaultObject.detectedByCreatureId);
+        loadSave<uint8_t>(task, auxiliaries, Id_Cell_CellFunctionUsed, data.cellFunctionUsed, defaultObject.cellFunctionUsed);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);

@@ -128,12 +128,19 @@ enum DetonatorState_
     DetonatorState_Exploded
 };
 
-using CellEvent = int8_t;
+using CellEvent = uint8_t;
 enum CellEvent_
 {
     CellEvent_No,
     CellEvent_Attacking,
     CellEvent_Attacked
+};
+
+using CellFunctionUsed = uint8_t;
+enum CellFunctionUsed_
+{
+    CellFunctionUsed_No,
+    CellFunctionUsed_Yes,
 };
 
 auto constexpr MaxActivationTime = 256 * 4;

@@ -150,10 +150,12 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
     auto& constructor = cell->cellFunctionData.constructor;
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    CellFunctionProcessor::updateInvocationState(cell, activity);
     if (!GenomeDecoder::isFinished(constructor)) {
         auto constructionData = readConstructionData(cell);
         auto cellBuilt = false;
         if (isConstructionTriggered(data, cell, activity)) {
+            cell->cellFunctionUsed = CellFunctionUsed_Yes;
             if (tryConstructCell(data, statistics, cell, constructionData)) {
                 cellBuilt = true;
             } 
@@ -268,7 +270,7 @@ ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* 
         return false;
     }
     if (cell->cellFunctionData.constructor.activationMode > 0
-        && (data.timestep % (cudaSimulationParameters.cellNumExecutionOrderNumbers * cell->cellFunctionData.constructor.activationMode) != cell->executionOrderNumber)) {
+        && ((data.timestep + cell->creatureId) % (cudaSimulationParameters.cellNumExecutionOrderNumbers * cell->cellFunctionData.constructor.activationMode) != cell->executionOrderNumber)) {
         return false;
     }
     return true;
@@ -310,7 +312,7 @@ __inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCell(Cell* h
         }
     }
 
-    //for compatibility with older simulations in case that lastConstructedCellId is not set yet
+    //if lastConstructedCellId is not set (in older version or if cells got new ids)
     else {
         for (int i = 0; i < hostCell->numConnections; ++i) {
             auto const& connectedCell = hostCell->connections[i].cell;
@@ -738,21 +740,21 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }
 
-    auto cellFunctionConstructorPumpEnergyFactor = cudaSimulationParameters.externalEnergyConditionalInflowFactor[hostCell->color];
+    auto externalEnergyConditionalInflowFactor = cudaSimulationParameters.externalEnergyConditionalInflowFactor[hostCell->color];
     //if (isSelfReplicator(hostCell)) {
     //    externalEnergyConditionalInflowFactor = 0;
     //}
 
     auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.cellNormalEnergy[hostCell->color])
-        + min(constructionData.energy, cudaSimulationParameters.cellNormalEnergy[hostCell->color]) * (1.0f - cellFunctionConstructorPumpEnergyFactor);
+        + min(constructionData.energy, cudaSimulationParameters.cellNormalEnergy[hostCell->color]) * (1.0f - externalEnergyConditionalInflowFactor);
 
-    if (cellFunctionConstructorPumpEnergyFactor < 1.0f && hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + energyNeededFromHost) {
+    if (externalEnergyConditionalInflowFactor < 1.0f && hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + energyNeededFromHost) {
         return false;
     }
-    auto energyNeededFromRadiation = constructionData.energy - energyNeededFromHost;
-    auto orig = atomicAdd(data.externalEnergy, -energyNeededFromRadiation);
-    if (orig < energyNeededFromRadiation) {
-        atomicAdd(data.externalEnergy, energyNeededFromRadiation);
+    auto energyNeededFromExternalSource = constructionData.energy - energyNeededFromHost;
+    auto orig = atomicAdd(data.externalEnergy, -energyNeededFromExternalSource);
+    if (orig < energyNeededFromExternalSource) {
+        atomicAdd(data.externalEnergy, energyNeededFromExternalSource);
         if (hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + constructionData.energy) {
             return false;
         }
