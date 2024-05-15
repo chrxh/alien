@@ -223,5 +223,5 @@ __inline__ __device__ float2 CellFunctionProcessor::calcSignalDirection(Simulati
 
 __inline__ __device__ int CellFunctionProcessor::getCurrentExecutionNumber(SimulationData& data, Cell* cell)
 {
-    return toInt((data.timestep + cell->creatureId) % cudaSimulationParameters.cellNumExecutionOrderNumbers);
+    return toInt((data.timestep /*+ cell->creatureId*/) % cudaSimulationParameters.cellNumExecutionOrderNumbers);
 }
