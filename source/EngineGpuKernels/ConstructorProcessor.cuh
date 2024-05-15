@@ -270,7 +270,7 @@ ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* 
         return false;
     }
     if (cell->cellFunctionData.constructor.activationMode > 0
-        && ((data.timestep + cell->creatureId) % (cudaSimulationParameters.cellNumExecutionOrderNumbers * cell->cellFunctionData.constructor.activationMode) != cell->executionOrderNumber)) {
+        && ((data.timestep /*+ cell->creatureId*/) % (cudaSimulationParameters.cellNumExecutionOrderNumbers * cell->cellFunctionData.constructor.activationMode) != cell->executionOrderNumber)) {
         return false;
     }
     return true;
