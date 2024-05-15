@@ -218,6 +218,7 @@ struct Cell
     Activity activity;
     uint32_t activationTime;
     uint32_t genomeComplexity;
+    CellFunctionUsed cellFunctionUsed;
 
     //process data
     uint8_t detectedByCreatureId;  //only the first 8 bits from the creature id

@@ -42,6 +42,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     __shared__ Activity activity;
     if (threadIdx.x == 0) {
         activity = CellFunctionProcessor::calcInputActivity(cell);
+        CellFunctionProcessor::updateInvocationState(cell, activity);
     }
     __syncthreads();
 

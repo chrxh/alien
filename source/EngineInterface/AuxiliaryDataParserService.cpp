@@ -278,6 +278,14 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.cellFunctionUnusedAgeActive,
+            defaultParameters.cellFunctionUnusedAgeActive,
+            "simulation parameters.cell.function.unused age active",
+            parserTask);
+        encodeDecodeProperty(
+            tree, parameters.cellFunctionUnusedAge, defaultParameters.cellFunctionUnusedAge, "simulation parameters.cell.function.unused age", parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.baseValues.cellColorTransitionDuration,
             defaultParameters.baseValues.cellColorTransitionDuration,
             "simulation parameters.cell.color transition rules.duration",

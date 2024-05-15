@@ -43,6 +43,7 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    CellFunctionProcessor::updateInvocationState(cell, activity);
 
     if (abs(activity.channels[0]) >= cudaSimulationParameters.cellFunctionAttackerActivityThreshold) {
         float energyDelta = 0;
@@ -346,6 +347,7 @@ __inline__ __device__ int AttackerProcessor::countAndTrackDefenderCells(Simulati
         auto connectedCell = cell->connections[i].cell;
         if (connectedCell->cellFunction == CellFunction_Defender && connectedCell->cellFunctionData.defender.mode == DefenderMode_DefendAgainstAttacker) {
             statistics.incNumDefenderActivities(connectedCell->color);
+            connectedCell->cellFunctionUsed = CellFunctionUsed_Yes;
             ++result;
         }
     }

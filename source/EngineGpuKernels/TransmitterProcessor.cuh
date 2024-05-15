@@ -35,6 +35,7 @@ __device__ __inline__ void TransmitterProcessor::process(SimulationData& data, S
 __device__ __inline__ void TransmitterProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    CellFunctionProcessor::updateInvocationState(cell, activity);
 
     distributeEnergy(data, statistics, cell);
 

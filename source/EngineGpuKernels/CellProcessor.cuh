@@ -743,6 +743,10 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         auto cellMaxAge = cudaSimulationParameters.cellMaxAge[cell->color];
+        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellFunctionUnusedAgeActive
+            && cell->cellFunctionUsed == CellFunctionUsed_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
+            cellMaxAge = cudaSimulationParameters.cellFunctionUnusedAge[cell->color];
+        }
         if (cellMaxAge > 0 && cell->age > cellMaxAge) {
             cellDestruction = true;
         }

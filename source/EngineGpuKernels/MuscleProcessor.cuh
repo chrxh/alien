@@ -39,6 +39,7 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
 __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    CellFunctionProcessor::updateInvocationState(cell, activity);
 
     switch (cell->cellFunctionData.muscle.mode) {
     case MuscleMode_Movement: {

@@ -425,10 +425,19 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             if (ImGui::TreeNodeEx("Properties (principal genome part)", TreeNodeFlags)) {
 
                 auto genomeDesc = GenomeDescriptionService::convertBytesToDescription(desc.genome);
+                auto numBranches= genomeDesc.header.numBranches;
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters()
+                        .name("Number of branches")
+                        .textWidth(GenomeTabTextWidth)
+                        .readOnly(true)
+                        .tooltip(""),
+                    numBranches);
+
                 auto numRepetitions = genomeDesc.header.numRepetitions;
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters()
-                        .name("Number of repetitions")
+                        .name("Repetitions per branch")
                         .textWidth(GenomeTabTextWidth)
                         .infinity(true)
                         .readOnly(true)
@@ -438,13 +447,19 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                 auto numNodes = toInt(genomeDesc.cells.size());
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters()
-                        .name("Number of cells")
+                        .name("Cells per repetition")
                         .textWidth(GenomeTabTextWidth)
                         .readOnly(true)
                         .tooltip(Const::GenomeNumCellsTooltip),
                     numNodes);
 
                 if constexpr (std::is_same<Description, ConstructorDescription>()) {
+                    AlienImGui::InputInt(
+                        AlienImGui::InputIntParameters()
+                            .name("Current branch index")
+                            .textWidth(GenomeTabTextWidth)
+                            .tooltip(""),
+                        desc.currentBranch);
                     AlienImGui::InputInt(
                         AlienImGui::InputIntParameters()
                             .name("Current repetition index")

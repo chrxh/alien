@@ -38,6 +38,8 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    CellFunctionProcessor::updateInvocationState(cell, activity);
+
     if (activity.channels[0] >= cudaSimulationParameters.cellFunctionReconnectorActivityThreshold) {
         tryCreateConnection(data, statistics, cell, activity);
     } else if (activity.channels[0] <= -cudaSimulationParameters.cellFunctionReconnectorActivityThreshold) {

@@ -367,6 +367,7 @@ struct CellDescription
     int activationTime = 0;
     int genomeComplexity = 0;
     uint8_t detectedByCreatureId = 0;   //only the first 8 bits from the creature id
+    CellFunctionUsed cellFunctionUsed = CellFunctionUsed_No;
 
     CellMetadataDescription metadata;
 

@@ -17,6 +17,9 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
     }
 
     for (int i = 0; i < MAX_COLORS; ++i) {
+        if (cellFunctionUnusedAge[i] != other.cellFunctionUnusedAge[i]) {
+            return false;
+        }
         if (externalEnergyBackflowFactor[i] != other.externalEnergyBackflowFactor[i]) {
             return false;
         }
@@ -188,5 +191,5 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold && features == other.features
         && highlightedCellFunction == other.highlightedCellFunction && borderlessRendering == other.borderlessRendering
         && markReferenceDomain == other.markReferenceDomain && gridLines == other.gridLines && externalEnergy == other.externalEnergy
-        && attackVisualization == other.attackVisualization;
+        && attackVisualization == other.attackVisualization && cellFunctionUnusedAgeActive == other.cellFunctionUnusedAgeActive;
 }

@@ -18,7 +18,7 @@ public:
     __inline__ __device__ void init(SimulationData* data);
     __inline__ __device__ Particle* createParticleFromTO(ParticleTO const& particleTO, bool createIds);
     __inline__ __device__ Cell* createCellFromTO(DataTO const& dataTO, int targetIndex, CellTO const& cellTO, Cell* cellArray, bool createIds);
-    __inline__ __device__ void changeCellFromTO(DataTO const& dataTO, CellTO const& cellTO, Cell* cell);
+    __inline__ __device__ void changeCellFromTO(DataTO const& dataTO, CellTO const& cellTO, Cell* cell, bool createIds);
     __inline__ __device__ void changeParticleFromTO(ParticleTO const& particleTO, Particle* particle);
     __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel, int color);
     __inline__ __device__ Cell* createRandomCell(float energy, float2 const& pos, float2 const& vel);
@@ -67,7 +67,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO
     Cell* cell = cellTargetArray + targetIndex;
     *cellPointer = cell;
 
-    changeCellFromTO(dataTO, cellTO, cell);
+    changeCellFromTO(dataTO, cellTO, cell, createIds);
     cell->id = createIds ? _data->numberGen1.createNewId() : cellTO.id;
     cell->locked = 0;
     cell->detached = 0;
@@ -85,7 +85,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO
     return cell;
 }
 
-__inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO, CellTO const& cellTO, Cell* cell)
+__inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO, CellTO const& cellTO, Cell* cell, bool createIds)
 {
     cell->id = cellTO.id;
     cell->pos = cellTO.pos;
@@ -107,6 +107,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->activationTime = cellTO.activationTime;
     cell->genomeComplexity = cellTO.genomeComplexity;
     cell->detectedByCreatureId = cellTO.detectedByCreatureId;
+    cell->cellFunctionUsed = cellTO.cellFunctionUsed;
 
     createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
 
@@ -146,7 +147,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cell->cellFunctionData.constructor.genomeSize,
             cell->cellFunctionData.constructor.genome);
         cell->cellFunctionData.constructor.numInheritedGenomeNodes = cellTO.cellFunctionData.constructor.numInheritedGenomeNodes;
-        cell->cellFunctionData.constructor.lastConstructedCellId = cellTO.cellFunctionData.constructor.lastConstructedCellId;
+        cell->cellFunctionData.constructor.lastConstructedCellId = createIds ? 0 : cellTO.cellFunctionData.constructor.lastConstructedCellId;
         cell->cellFunctionData.constructor.genomeCurrentNodeIndex = cellTO.cellFunctionData.constructor.genomeCurrentNodeIndex;
         cell->cellFunctionData.constructor.genomeCurrentRepetition = cellTO.cellFunctionData.constructor.genomeCurrentRepetition;
         cell->cellFunctionData.constructor.currentBranch = cellTO.cellFunctionData.constructor.currentBranch;
@@ -280,6 +281,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->mutationId = 0;
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
+    cell->cellFunctionUsed = CellFunctionUsed_No;
 
     if (cudaSimulationParameters.particleTransformationRandomCellFunction) {
         cell->cellFunction = _data->numberGen1.random(CellFunction_Count - 1);
@@ -395,5 +397,6 @@ __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex
     cell->density = 1.0f;
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
+    cell->cellFunctionUsed = CellFunctionUsed_No;
     return cell;
 }
