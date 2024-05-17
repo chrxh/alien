@@ -244,14 +244,13 @@ void _SimulationParametersWindow::processBase(
                 _savedPalette);
             AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters()
-                    .name("Cell coloring")
+                    .name("Primary cell coloring")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.cellColoring)
+                    .defaultValue(origParameters.primaryCellColoring)
                     .values(
                         {"None",
                          "Standard cell colors",
                          "Mutants",
-                         "Mutants and cell functions",
                          "Cell states",
                          "Genome complexities",
                          "Single cell function",
@@ -259,15 +258,22 @@ void _SimulationParametersWindow::processBase(
                     .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
                         ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n"
                         ICON_FA_CHEVRON_RIGHT " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into account).\n\n"
-                        ICON_FA_CHEVRON_RIGHT " Mutants and cell functions: It combines the coloring for mutants and cell functions.\n\n"
                         ICON_FA_CHEVRON_RIGHT " Cell states: green = under construction, blue = ready, red = dying\n\n"
                         ICON_FA_CHEVRON_RIGHT " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex genome protection' is "
                         "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large bonus\n\n"
                         ICON_FA_CHEVRON_RIGHT " Single cell function: A specific type of cell function can be highlighted, which is selected in the next parameter.\n\n"
                         ICON_FA_CHEVRON_RIGHT " All cell functions: The cells are colored according to their cell function.\n\n"
                     ),
-                parameters.cellColoring);
-            if (parameters.cellColoring == CellColoring_CellFunction) {
+                parameters.primaryCellColoring);
+            AlienImGui::Switcher(
+                AlienImGui::SwitcherParameters()
+                    .name("Secondary cell coloring")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origParameters.secondaryCellColoring)
+                    .values({"None", "Standard cell colors", "Mutants", "Cell states", "Genome complexities", "Single cell function", "All cell functions"})
+                    .tooltip(""),
+                parameters.secondaryCellColoring);
+            if (parameters.primaryCellColoring == CellColoring_CellFunction) {
                 AlienImGui::Switcher(
                     AlienImGui::SwitcherParameters()
                         .name("Highlighted cell function")
@@ -1461,11 +1467,11 @@ void _SimulationParametersWindow::processBase(
                         .logarithmic(true)
                         .infinity(true)
                         .disabledValue(parameters.cellFunctionUnusedAge)
-                        .defaultEnabledValue(&origParameters.cellFunctionUnusedAgeActive)
+                        .defaultEnabledValue(&origParameters.cellFunctionUnusedAgeActivated)
                         .defaultValue(origParameters.cellFunctionUnusedAge)
                         .tooltip(""),
                     parameters.cellFunctionUnusedAge,
-                    &parameters.cellFunctionUnusedAgeActive);
+                    &parameters.cellFunctionUnusedAgeActivated);
             }
         }
     }

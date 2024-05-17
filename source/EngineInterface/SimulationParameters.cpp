@@ -168,7 +168,8 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         }
     }
 
-    return backgroundColor == other.backgroundColor && cellColoring == other.cellColoring && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity
+    return backgroundColor == other.backgroundColor && primaryCellColoring == other.primaryCellColoring && secondaryCellColoring == other.secondaryCellColoring
+        && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity
         && baseValues == other.baseValues && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity
         && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
         && cellMaxForceDecayProb == other.cellMaxForceDecayProb && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers
@@ -191,5 +192,5 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold && features == other.features
         && highlightedCellFunction == other.highlightedCellFunction && borderlessRendering == other.borderlessRendering
         && markReferenceDomain == other.markReferenceDomain && gridLines == other.gridLines && externalEnergy == other.externalEnergy
-        && attackVisualization == other.attackVisualization && cellFunctionUnusedAgeActive == other.cellFunctionUnusedAgeActive;
+        && attackVisualization == other.attackVisualization && cellFunctionUnusedAgeActivated == other.cellFunctionUnusedAgeActivated;
 }

@@ -19,7 +19,6 @@ enum CellColoring_
     CellColoring_None,
     CellColoring_CellColor,
     CellColoring_MutationId,
-    CellColoring_MutationId_AllCellFunction,
     CellColoring_LivingState,
     CellColoring_GenomeSize,
     CellColoring_CellFunction,
@@ -48,7 +47,9 @@ struct SimulationParameters
     bool borderlessRendering = false;
     bool markReferenceDomain = true;
     bool gridLines = false;
-    CellColoring cellColoring = CellColoring_CellColor;
+    CellColoring primaryCellColoring = CellColoring_CellColor;
+    bool secondaryCellColoringActivated = false;
+    CellColoring secondaryCellColoring = CellColoring_CellColor;
     CellFunction highlightedCellFunction = CellFunction_Constructor;
     float zoomLevelNeuronalActivity = 2.0f;
     bool attackVisualization = false;
@@ -90,7 +91,7 @@ struct SimulationParameters
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value};
-    bool cellFunctionUnusedAgeActive = false;
+    bool cellFunctionUnusedAgeActivated = false;
     ColorVector<int> cellFunctionUnusedAge = {
         Infinity<int>::value,
         Infinity<int>::value,
