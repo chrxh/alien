@@ -360,7 +360,7 @@ namespace Const
     };
 
     std::string const GenomeNumCellsRecursivelyTooltip =
-        "The number of all encoded cells in the genome including its sub-genomes, repetitions and number of constructions.";
+        "The number of all encoded cells in the genome including its sub-genomes, repetitions and number of branches.";
 
     std::string const GenomeBytesTooltip = "The length of the genome in bytes.";
 

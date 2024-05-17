@@ -173,7 +173,15 @@ namespace
         MissingParameters missingParameters;
 
         encodeDecodeProperty(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
-        encodeDecodeProperty(tree, parameters.cellColoring, defaultParameters.cellColoring, "simulation parameters.cell colorization", parserTask);
+        encodeDecodeProperty(tree, parameters.primaryCellColoring, defaultParameters.primaryCellColoring, "simulation parameters.cell colorization", parserTask);
+        encodeDecodeProperty(
+            tree,
+            parameters.secondaryCellColoringActivated,
+            defaultParameters.secondaryCellColoringActivated,
+            "simulation parameters.secondary cell colorization activated",
+            parserTask);
+        encodeDecodeProperty(
+            tree, parameters.secondaryCellColoring, defaultParameters.secondaryCellColoring, "simulation parameters.secondary cell colorization", parserTask);
         encodeDecodeProperty(
             tree,
             parameters.highlightedCellFunction,
@@ -278,9 +286,9 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.cellFunctionUnusedAgeActive,
-            defaultParameters.cellFunctionUnusedAgeActive,
-            "simulation parameters.cell.function.unused age active",
+            parameters.cellFunctionUnusedAgeActivated,
+            defaultParameters.cellFunctionUnusedAgeActivated,
+            "simulation parameters.cell.function.unused age activated",
             parserTask);
         encodeDecodeProperty(
             tree, parameters.cellFunctionUnusedAge, defaultParameters.cellFunctionUnusedAge, "simulation parameters.cell.function.unused age", parserTask);
@@ -1031,6 +1039,12 @@ namespace
             parameters.features.cellColorTransitionRules,
             defaultParameters.features.cellColorTransitionRules,
             "simulation parameters.features.cell color transition rules",
+            parserTask);
+        missingFeatures.cellAgeLimiter = encodeDecodeProperty(
+            tree,
+            parameters.features.cellAgeLimiter,
+            defaultParameters.features.cellAgeLimiter,
+            "simulation parameters.features.cell age limiter",
             parserTask);
         if (parserTask == ParserTask::Decode) {
             SimulationParametersService::activateFeaturesForLegacyFiles(missingFeatures, parameters);
