@@ -8,7 +8,7 @@ struct Features
     bool externalEnergyControl = false;
     bool cellColorTransitionRules = false;
     bool cellAgeLimiter = false;
-    bool secondaryCellRendering = false;
+    bool cellGlow = false;
 
     bool operator==(Features const& other) const;
 };

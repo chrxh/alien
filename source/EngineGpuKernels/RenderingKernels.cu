@@ -403,7 +403,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
     }
 }
 
-__global__ void cudaDrawCells_primaryColoring(uint64_t timestep, int2 worldSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
+__global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
 {
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -412,9 +412,7 @@ __global__ void cudaDrawCells_primaryColoring(uint64_t timestep, int2 worldSize,
 
     auto shadedCells = zoom >= ZoomLevelForShadedCells;
     auto universeImageSize = toFloat2(worldSize) * zoom;
-    auto primaryColoring = cudaSimulationParameters.primaryCellColoring;
-    auto secondaryColoring = primaryColoring;
-    //cudaSimulationParameters.secondaryCellColoring;
+    auto coloring = cudaSimulationParameters.cellColoring;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
 
@@ -423,13 +421,12 @@ __global__ void cudaDrawCells_primaryColoring(uint64_t timestep, int2 worldSize,
         if (isContainedInRect({0, 0}, toFloat2(imageSize), cellImagePos)) {
 
             //draw primary color for cell
-            auto primaryColor = calcColor(cell, cell->selected, primaryColoring) * 0.85f;
+            auto primaryColor = calcColor(cell, cell->selected, coloring) * 0.85f;
             drawCircle(imageData, imageSize, cellImagePos, primaryColor * 0.45f, zoom / 2.5f, false, false);
 
             //draw secondary color for cell
-            auto secondaryColor = primaryColoring == secondaryColoring ? primaryColor : calcColor(cell, cell->selected, secondaryColoring) * 0.85f;
             auto radius = zoom / 4;
-            drawCircle(imageData, imageSize, cellImagePos, secondaryColor * 0.6f, radius, shadedCells, true);
+            drawCircle(imageData, imageSize, cellImagePos, primaryColor * 0.6f, radius, shadedCells, true);
 
             //draw activity
             if (cell->isActive() && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
@@ -532,7 +529,7 @@ __global__ void cudaDrawCells_primaryColoring(uint64_t timestep, int2 worldSize,
 }
 
 
-__global__ void cudaDrawCells_secondaryColoring(int2 worldSize, float2 rectUpperLeft, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
+__global__ void cudaDrawCellGlow(int2 worldSize, float2 rectUpperLeft, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom)
 {
     __shared__ float2 cellImagePos;
     __shared__ bool isContained;
@@ -547,7 +544,7 @@ __global__ void cudaDrawCells_secondaryColoring(int2 worldSize, float2 rectUpper
     __syncthreads();
 
     auto universeImageSize = toFloat2(worldSize) * zoom;
-    auto secondaryColoring = cudaSimulationParameters.secondaryCellColoring;
+    auto coloring = cudaSimulationParameters.cellGlowColoring;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
 
@@ -561,7 +558,7 @@ __global__ void cudaDrawCells_secondaryColoring(int2 worldSize, float2 rectUpper
 
             //draw background for cell
             if (threadIdx.x == 0) {
-                color = calcColor(cell, cell->selected, secondaryColoring);
+                color = calcColor(cell, cell->selected, coloring);
             }
             __syncthreads();
 
@@ -569,8 +566,8 @@ __global__ void cudaDrawCells_secondaryColoring(int2 worldSize, float2 rectUpper
                 imageData,
                 imageSize,
                 cellImagePos,
-                color * cudaSimulationParameters.secondaryCellColoringStrength * 0.1f,
-                zoom * cudaSimulationParameters.secondaryCellColoringRadius);
+                color * cudaSimulationParameters.cellGlowStrength * 0.1f,
+                zoom * cudaSimulationParameters.cellGlowRadius);
         }
     }
 }

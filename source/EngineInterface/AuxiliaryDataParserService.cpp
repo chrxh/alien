@@ -173,20 +173,20 @@ namespace
         MissingParameters missingParameters;
 
         encodeDecodeProperty(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
-        encodeDecodeProperty(tree, parameters.primaryCellColoring, defaultParameters.primaryCellColoring, "simulation parameters.cell colorization", parserTask);
+        encodeDecodeProperty(tree, parameters.cellColoring, defaultParameters.cellColoring, "simulation parameters.cell colorization", parserTask);
         encodeDecodeProperty(
-            tree, parameters.secondaryCellColoring, defaultParameters.secondaryCellColoring, "simulation parameters.secondary cell colorization.type", parserTask);
+            tree, parameters.cellGlowColoring, defaultParameters.cellGlowColoring, "simulation parameters.cell glow.coloring", parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.secondaryCellColoringRadius,
-            defaultParameters.secondaryCellColoringRadius,
-            "simulation parameters.secondary cell colorization.radius",
+            parameters.cellGlowRadius,
+            defaultParameters.cellGlowRadius,
+            "simulation parameters.cell glow.radius",
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.secondaryCellColoringStrength,
-            defaultParameters.secondaryCellColoringStrength,
-            "simulation parameters.secondary cell colorization.strength",
+            parameters.cellGlowStrength,
+            defaultParameters.cellGlowStrength,
+            "simulation parameters.cell glow.strength",
             parserTask);
         encodeDecodeProperty(
             tree,
@@ -1052,11 +1052,11 @@ namespace
             defaultParameters.features.cellAgeLimiter,
             "simulation parameters.features.cell age limiter",
             parserTask);
-        missingFeatures.secondaryCellRendering = encodeDecodeProperty(
+        missingFeatures.cellGlow = encodeDecodeProperty(
             tree,
-            parameters.features.secondaryCellRendering,
-            defaultParameters.features.secondaryCellRendering,
-            "simulation parameters.features.secondary cell rendering",
+            parameters.features.cellGlow,
+            defaultParameters.features.cellGlow,
+            "simulation parameters.features.cell glow",
             parserTask);
         if (parserTask == ParserTask::Decode) {
             SimulationParametersService::activateFeaturesForLegacyFiles(missingFeatures, parameters);

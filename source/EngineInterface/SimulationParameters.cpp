@@ -168,7 +168,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         }
     }
 
-    return backgroundColor == other.backgroundColor && primaryCellColoring == other.primaryCellColoring && secondaryCellColoring == other.secondaryCellColoring
+    return backgroundColor == other.backgroundColor && cellColoring == other.cellColoring && cellGlowColoring == other.cellGlowColoring
         && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity
         && baseValues == other.baseValues && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity
         && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
@@ -193,5 +193,5 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && highlightedCellFunction == other.highlightedCellFunction && borderlessRendering == other.borderlessRendering
         && markReferenceDomain == other.markReferenceDomain && gridLines == other.gridLines && externalEnergy == other.externalEnergy
         && attackVisualization == other.attackVisualization && cellFunctionUnusedAgeActivated == other.cellFunctionUnusedAgeActivated
-        && secondaryCellColoringStrength == other.secondaryCellColoringStrength && secondaryCellColoringRadius == other.secondaryCellColoringRadius;
+        && cellGlowStrength == other.cellGlowStrength && cellGlowRadius == other.cellGlowRadius;
 }

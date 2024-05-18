@@ -246,7 +246,7 @@ void _SimulationParametersWindow::processBase(
                 AlienImGui::SwitcherParameters()
                     .name("Primary cell coloring")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.primaryCellColoring)
+                    .defaultValue(origParameters.cellColoring)
                     .values(
                         {"None",
                          "Standard cell colors",
@@ -264,8 +264,8 @@ void _SimulationParametersWindow::processBase(
                         ICON_FA_CHEVRON_RIGHT " Single cell function: A specific type of cell function can be highlighted, which is selected in the next parameter.\n\n"
                         ICON_FA_CHEVRON_RIGHT " All cell functions: The cells are colored according to their cell function.\n\n"
                     ),
-                parameters.primaryCellColoring);
-            if (parameters.primaryCellColoring == CellColoring_CellFunction) {
+                parameters.cellColoring);
+            if (parameters.cellColoring == CellColoring_CellFunction) {
                 AlienImGui::Switcher(
                     AlienImGui::SwitcherParameters()
                         .name("Highlighted cell function")
@@ -1469,36 +1469,36 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
-         * Addon: Secondary cell rendering
+         * Addon: Cell glow
          */
-        if (parameters.features.secondaryCellRendering) {
-            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Secondary cell rendering").highlighted(false))) {
+        if (parameters.features.cellGlow) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell glow").highlighted(false))) {
                 AlienImGui::Switcher(
                     AlienImGui::SwitcherParameters()
-                        .name("Secondary cell coloring")
+                        .name("Coloring")
                         .textWidth(RightColumnWidth)
-                        .defaultValue(origParameters.secondaryCellColoring)
+                        .defaultValue(origParameters.cellGlowColoring)
                         .values({"None", "Standard cell colors", "Mutants", "Cell states", "Genome complexities", "Single cell function", "All cell functions"})
                         .tooltip(""),
-                    parameters.secondaryCellColoring);
+                    parameters.cellGlowColoring);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Radius")
                         .textWidth(RightColumnWidth)
                         .min(1.0f)
                         .max(8.0f)
-                        .defaultValue(&origParameters.secondaryCellColoringRadius)
+                        .defaultValue(&origParameters.cellGlowRadius)
                         .tooltip(""),
-                    &parameters.secondaryCellColoringRadius);
+                    &parameters.cellGlowRadius);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Strength")
                         .textWidth(RightColumnWidth)
                         .min(0)
                         .max(1.0f)
-                        .defaultValue(&origParameters.secondaryCellColoringStrength)
+                        .defaultValue(&origParameters.cellGlowStrength)
                         .tooltip(""),
-                    &parameters.secondaryCellColoringStrength);
+                    &parameters.cellGlowStrength);
                 AlienImGui::EndTreeNode();
             }
         }
@@ -2164,15 +2164,6 @@ void _SimulationParametersWindow::processAddonList(
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Genome complexity measurement")
-                    .textWidth(0)
-                    .defaultValue(origParameters.features.genomeComplexityMeasurement)
-                    .tooltip("Parameters for the calculation of genome complexity are activated here. This genome complexity can be used for 'Advanced absorption control' "
-                             "and 'Advanced attacker control' to favor more complex genomes in natural selection. If it is deactivated, default values are "
-                             "used that simply take the genome size into account."),
-                parameters.features.genomeComplexityMeasurement);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
                     .name("Advanced absorption control")
                     .textWidth(0)
                     .defaultValue(origParameters.features.advancedAbsorptionControl)
@@ -2186,13 +2177,8 @@ void _SimulationParametersWindow::processAddonList(
                     .tooltip("It contains further settings that influence how much energy can be obtained from an attack by attacker cells."),
                 parameters.features.advancedAttackerControl);
             AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("External energy control")
-                    .textWidth(0)
-                    .defaultValue(origParameters.features.externalEnergyControl)
-                    .tooltip("This addon is used to add an external energy source. Its energy can be gradually transferred to the constructor cells in the "
-                             "simulation. Vice versa, the energy from radiation and dying cells can also be transferred back to the external source."),
-                parameters.features.externalEnergyControl);
+                AlienImGui::CheckboxParameters().name("Cell age limiter").textWidth(0).defaultValue(origParameters.features.cellAgeLimiter).tooltip(""),
+                parameters.features.cellAgeLimiter);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Cell color transition rules")
@@ -2202,13 +2188,25 @@ void _SimulationParametersWindow::processAddonList(
                 parameters.features.cellColorTransitionRules);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Cell age limiter")
-                    .textWidth(0).defaultValue(origParameters.features.cellAgeLimiter)
-                    .tooltip(""),
-                parameters.features.cellAgeLimiter);
+                    .name("External energy control")
+                    .textWidth(0)
+                    .defaultValue(origParameters.features.externalEnergyControl)
+                    .tooltip("This addon is used to add an external energy source. Its energy can be gradually transferred to the constructor cells in the "
+                             "simulation. Vice versa, the energy from radiation and dying cells can also be transferred back to the external source."),
+                parameters.features.externalEnergyControl);
             AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Secondary cell rendering").textWidth(0).defaultValue(origParameters.features.secondaryCellRendering).tooltip(""),
-                parameters.features.secondaryCellRendering);
+                AlienImGui::CheckboxParameters()
+                    .name("Genome complexity measurement")
+                    .textWidth(0)
+                    .defaultValue(origParameters.features.genomeComplexityMeasurement)
+                    .tooltip("Parameters for the calculation of genome complexity are activated here. This genome complexity can be used for 'Advanced "
+                             "absorption control' "
+                             "and 'Advanced attacker control' to favor more complex genomes in natural selection. If it is deactivated, default values are "
+                             "used that simply take the genome size into account."),
+                parameters.features.genomeComplexityMeasurement);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters().name("Secondary cell rendering").textWidth(0).defaultValue(origParameters.features.cellGlow).tooltip(""),
+                parameters.features.cellGlow);
         }
         ImGui::EndChild();
         AlienImGui::EndTreeNode();
@@ -2282,8 +2280,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
     parameters.cellMaxAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.cellMaxAgeBalancerInterval));
-    parameters.secondaryCellColoringRadius = std::max(1.0f, std::min(8.0f, parameters.secondaryCellColoringRadius));
-    parameters.secondaryCellColoringStrength = std::max(0.0f, std::min(1.0f, parameters.secondaryCellColoringStrength));
+    parameters.cellGlowRadius = std::max(1.0f, std::min(8.0f, parameters.cellGlowRadius));
+    parameters.cellGlowStrength = std::max(0.0f, std::min(1.0f, parameters.cellGlowStrength));
 }
 
 void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const

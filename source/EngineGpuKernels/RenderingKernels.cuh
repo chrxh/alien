@@ -15,7 +15,7 @@
 #include <cuda_runtime.h>
 
 __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float2 rectUpperLeft, float2 rectLowerRight);
-__global__ void cudaDrawCells_primaryColoring(
+__global__ void cudaDrawCells(
     uint64_t timestep,
     int2 worldSize,
     float2 rectUpperLeft,
@@ -24,7 +24,7 @@ __global__ void cudaDrawCells_primaryColoring(
     uint64_t* imageData,
     int2 imageSize,
     float zoom);
-__global__ void cudaDrawCells_secondaryColoring(int2 worldSize, float2 rectUpperLeft, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom);
+__global__ void cudaDrawCellGlow(int2 worldSize, float2 rectUpperLeft, Array<Cell*> cells, uint64_t* imageData, int2 imageSize, float zoom);
 
 __global__ void cudaDrawParticles(int2 worldSize, float2 rectUpperLeft, float2 rectLowerRight, Array<Particle*> particles, uint64_t* imageData, int2 imageSize, float zoom);
 __global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpperLeft, int2 worldSize, int2 imageSize, float zoom);
