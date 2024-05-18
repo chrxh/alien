@@ -619,20 +619,6 @@ void _SimulationParametersWindow::processBase(
                     .defaultValue(origParameters.cellMaxAge)
                     .tooltip("Defines the maximum age of a cell. If a cell exceeds this age it will be transformed to an energy particle."),
                 parameters.cellMaxAge);
-            AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters()
-                    .name("Maximum age balancing")
-                    .textWidth(RightColumnWidth)
-                    .logarithmic(true)
-                    .min(1000)
-                    .max(1000000)
-                    .disabledValue(&parameters.cellMaxAgeBalancerInterval)
-                    .defaultEnabledValue(&origParameters.cellMaxAgeBalancer)
-                    .defaultValue(&origParameters.cellMaxAgeBalancerInterval)
-                    .tooltip("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest replicators exist. "
-                             "Conversely, the maximum age is decreased for the cell color with the most replicators."),
-                &parameters.cellMaxAgeBalancerInterval,
-                &parameters.cellMaxAgeBalancer);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum energy")
@@ -1464,6 +1450,21 @@ void _SimulationParametersWindow::processBase(
                         .tooltip(""),
                     parameters.cellInactiveMaxAge,
                     &parameters.cellInactiveMaxAgeActivated);
+                AlienImGui::SliderInt(
+                    AlienImGui::SliderIntParameters()
+                        .name("Maximum age balancing")
+                        .textWidth(RightColumnWidth)
+                        .logarithmic(true)
+                        .min(1000)
+                        .max(1000000)
+                        .disabledValue(&parameters.cellMaxAgeBalancerInterval)
+                        .defaultEnabledValue(&origParameters.cellMaxAgeBalancer)
+                        .defaultValue(&origParameters.cellMaxAgeBalancerInterval)
+                        .tooltip(
+                            "Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest replicators exist. "
+                            "Conversely, the maximum age is decreased for the cell color with the most replicators."),
+                    &parameters.cellMaxAgeBalancerInterval,
+                    &parameters.cellMaxAgeBalancer);
                 AlienImGui::EndTreeNode();
             }
         }
