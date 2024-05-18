@@ -192,5 +192,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold && features == other.features
         && highlightedCellFunction == other.highlightedCellFunction && borderlessRendering == other.borderlessRendering
         && markReferenceDomain == other.markReferenceDomain && gridLines == other.gridLines && externalEnergy == other.externalEnergy
-        && attackVisualization == other.attackVisualization && cellFunctionUnusedAgeActivated == other.cellFunctionUnusedAgeActivated;
+        && attackVisualization == other.attackVisualization && cellFunctionUnusedAgeActivated == other.cellFunctionUnusedAgeActivated
+        && secondaryCellColoringStrength == other.secondaryCellColoringStrength && secondaryCellColoringRadius == other.secondaryCellColoringRadius;
 }

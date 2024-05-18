@@ -565,7 +565,12 @@ __global__ void cudaDrawCells_secondaryColoring(int2 worldSize, float2 rectUpper
             }
             __syncthreads();
 
-            drawCircle_block(imageData, imageSize, cellImagePos, color * 0.01f, zoom * 4.0f);
+            drawCircle_block(
+                imageData,
+                imageSize,
+                cellImagePos,
+                color * cudaSimulationParameters.secondaryCellColoringStrength * 0.1f,
+                zoom * cudaSimulationParameters.secondaryCellColoringRadius);
         }
     }
 }

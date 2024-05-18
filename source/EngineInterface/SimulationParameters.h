@@ -48,8 +48,9 @@ struct SimulationParameters
     bool markReferenceDomain = true;
     bool gridLines = false;
     CellColoring primaryCellColoring = CellColoring_CellColor;
-    bool secondaryCellColoringActivated = false;
     CellColoring secondaryCellColoring = CellColoring_CellColor;
+    float secondaryCellColoringRadius = 4.0f;
+    float secondaryCellColoringStrength = 0.1f;
     CellFunction highlightedCellFunction = CellFunction_Constructor;
     float zoomLevelNeuronalActivity = 2.0f;
     bool attackVisualization = false;
