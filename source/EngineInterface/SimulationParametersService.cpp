@@ -113,6 +113,10 @@ void SimulationParametersService::activateFeaturesForLegacyFiles(Features const&
             }
         }
     }
+
+    if (missingFeatures.cellAgeLimiter && parameters.cellMaxAgeBalancer) {
+        parameters.features.cellAgeLimiter = true;
+    }
 }
 
 void SimulationParametersService::activateParametersForLegacyFiles(MissingParameters const& missingParameters, SimulationParameters& parameters)
