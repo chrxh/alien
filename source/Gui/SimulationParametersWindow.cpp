@@ -265,14 +265,6 @@ void _SimulationParametersWindow::processBase(
                         ICON_FA_CHEVRON_RIGHT " All cell functions: The cells are colored according to their cell function.\n\n"
                     ),
                 parameters.primaryCellColoring);
-            AlienImGui::Switcher(
-                AlienImGui::SwitcherParameters()
-                    .name("Secondary cell coloring")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.secondaryCellColoring)
-                    .values({"None", "Standard cell colors", "Mutants", "Cell states", "Genome complexities", "Single cell function", "All cell functions"})
-                    .tooltip(""),
-                parameters.secondaryCellColoring);
             if (parameters.primaryCellColoring == CellColoring_CellFunction) {
                 AlienImGui::Switcher(
                     AlienImGui::SwitcherParameters()
@@ -1472,6 +1464,42 @@ void _SimulationParametersWindow::processBase(
                         .tooltip(""),
                     parameters.cellFunctionUnusedAge,
                     &parameters.cellFunctionUnusedAgeActivated);
+                AlienImGui::EndTreeNode();
+            }
+        }
+
+        /**
+         * Addon: Secondary cell rendering
+         */
+        if (parameters.features.secondaryCellRendering) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Secondary cell rendering").highlighted(false))) {
+                AlienImGui::Switcher(
+                    AlienImGui::SwitcherParameters()
+                        .name("Secondary cell coloring")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origParameters.secondaryCellColoring)
+                        .values({"None", "Standard cell colors", "Mutants", "Cell states", "Genome complexities", "Single cell function", "All cell functions"})
+                        .tooltip(""),
+                    parameters.secondaryCellColoring);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Radius")
+                        .textWidth(RightColumnWidth)
+                        .min(1.0f)
+                        .max(8.0f)
+                        .defaultValue(&origParameters.secondaryCellColoringRadius)
+                        .tooltip(""),
+                    &parameters.secondaryCellColoringRadius);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Strength")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(1.0f)
+                        .defaultValue(&origParameters.secondaryCellColoringStrength)
+                        .tooltip(""),
+                    &parameters.secondaryCellColoringStrength);
+                AlienImGui::EndTreeNode();
             }
         }
     }
@@ -2178,6 +2206,9 @@ void _SimulationParametersWindow::processAddonList(
                     .textWidth(0).defaultValue(origParameters.features.cellAgeLimiter)
                     .tooltip(""),
                 parameters.features.cellAgeLimiter);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters().name("Secondary cell rendering").textWidth(0).defaultValue(origParameters.features.secondaryCellRendering).tooltip(""),
+                parameters.features.secondaryCellRendering);
         }
         ImGui::EndChild();
         AlienImGui::EndTreeNode();
@@ -2251,6 +2282,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
     parameters.cellMaxAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.cellMaxAgeBalancerInterval));
+    parameters.secondaryCellColoringRadius = std::max(1.0f, std::min(8.0f, parameters.secondaryCellColoringRadius));
+    parameters.secondaryCellColoringStrength = std::max(0.0f, std::min(1.0f, parameters.secondaryCellColoringStrength));
 }
 
 void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const

@@ -564,6 +564,7 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
         }
         ++cell->age;
 
+
         if (cudaSimulationParameters.features.cellColorTransitionRules) {
             int transitionDuration;
             int targetColor;

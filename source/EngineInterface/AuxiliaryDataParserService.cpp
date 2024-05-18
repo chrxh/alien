@@ -175,13 +175,19 @@ namespace
         encodeDecodeProperty(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
         encodeDecodeProperty(tree, parameters.primaryCellColoring, defaultParameters.primaryCellColoring, "simulation parameters.cell colorization", parserTask);
         encodeDecodeProperty(
+            tree, parameters.secondaryCellColoring, defaultParameters.secondaryCellColoring, "simulation parameters.secondary cell colorization.type", parserTask);
+        encodeDecodeProperty(
             tree,
-            parameters.secondaryCellColoringActivated,
-            defaultParameters.secondaryCellColoringActivated,
-            "simulation parameters.secondary cell colorization activated",
+            parameters.secondaryCellColoringRadius,
+            defaultParameters.secondaryCellColoringRadius,
+            "simulation parameters.secondary cell colorization.radius",
             parserTask);
         encodeDecodeProperty(
-            tree, parameters.secondaryCellColoring, defaultParameters.secondaryCellColoring, "simulation parameters.secondary cell colorization", parserTask);
+            tree,
+            parameters.secondaryCellColoringStrength,
+            defaultParameters.secondaryCellColoringStrength,
+            "simulation parameters.secondary cell colorization.strength",
+            parserTask);
         encodeDecodeProperty(
             tree,
             parameters.highlightedCellFunction,
@@ -1045,6 +1051,12 @@ namespace
             parameters.features.cellAgeLimiter,
             defaultParameters.features.cellAgeLimiter,
             "simulation parameters.features.cell age limiter",
+            parserTask);
+        missingFeatures.secondaryCellRendering = encodeDecodeProperty(
+            tree,
+            parameters.features.secondaryCellRendering,
+            defaultParameters.features.secondaryCellRendering,
+            "simulation parameters.features.secondary cell rendering",
             parserTask);
         if (parserTask == ParserTask::Decode) {
             SimulationParametersService::activateFeaturesForLegacyFiles(missingFeatures, parameters);
