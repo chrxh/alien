@@ -744,7 +744,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         auto cellMaxAge = cudaSimulationParameters.cellMaxAge[cell->color];
-        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellFunctionUnusedAgeActivated
+        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellInactiveMaxAgeActivated
             && cell->cellFunctionUsed == CellFunctionUsed_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < cell->numConnections; ++i) {
@@ -754,7 +754,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 }
             }
             if (!adjacentCellsUsed) {
-                cellMaxAge = cudaSimulationParameters.cellFunctionUnusedAge[cell->color];
+                cellMaxAge = cudaSimulationParameters.cellInactiveMaxAge[cell->color];
             }
         }
         if (cellMaxAge > 0 && cell->age > cellMaxAge) {

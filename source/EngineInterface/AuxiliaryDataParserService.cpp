@@ -292,12 +292,12 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.cellFunctionUnusedAgeActivated,
-            defaultParameters.cellFunctionUnusedAgeActivated,
-            "simulation parameters.cell.function.unused age activated",
+            parameters.cellInactiveMaxAgeActivated,
+            defaultParameters.cellInactiveMaxAgeActivated,
+            "simulation parameters.cell.inactive max age activated",
             parserTask);
         encodeDecodeProperty(
-            tree, parameters.cellFunctionUnusedAge, defaultParameters.cellFunctionUnusedAge, "simulation parameters.cell.function.unused age", parserTask);
+            tree, parameters.cellInactiveMaxAge, defaultParameters.cellInactiveMaxAge, "simulation parameters.cell.inactive max age", parserTask);
         encodeDecodeProperty(
             tree,
             parameters.baseValues.cellColorTransitionDuration,
