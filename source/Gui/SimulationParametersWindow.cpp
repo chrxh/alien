@@ -1458,12 +1458,12 @@ void _SimulationParametersWindow::processBase(
                         .max(10000000)
                         .logarithmic(true)
                         .infinity(true)
-                        .disabledValue(parameters.cellFunctionUnusedAge)
-                        .defaultEnabledValue(&origParameters.cellFunctionUnusedAgeActivated)
-                        .defaultValue(origParameters.cellFunctionUnusedAge)
+                        .disabledValue(parameters.cellInactiveMaxAge)
+                        .defaultEnabledValue(&origParameters.cellInactiveMaxAgeActivated)
+                        .defaultValue(origParameters.cellInactiveMaxAge)
                         .tooltip(""),
-                    parameters.cellFunctionUnusedAge,
-                    &parameters.cellFunctionUnusedAgeActivated);
+                    parameters.cellInactiveMaxAge,
+                    &parameters.cellInactiveMaxAgeActivated);
                 AlienImGui::EndTreeNode();
             }
         }

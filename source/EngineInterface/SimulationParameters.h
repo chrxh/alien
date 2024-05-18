@@ -92,8 +92,8 @@ struct SimulationParameters
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value};
-    bool cellFunctionUnusedAgeActivated = false;
-    ColorVector<int> cellFunctionUnusedAge = {
+    bool cellInactiveMaxAgeActivated = false;
+    ColorVector<int> cellInactiveMaxAge = {
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value,
