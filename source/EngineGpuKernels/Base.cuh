@@ -122,13 +122,11 @@ __device__ __inline__ T alienAtomicRead(T* const& address)
 //
 // Due to this, we need an ugly type casting workaround here
 //
-template <typename S, typename T, typename U = S>
-__device__ __inline__ U alienAtomicAdd64(S* address, T const& value)
+template <typename T>
+__device__ __inline__ T alienAtomicAdd64(T* address, T const& value)
 {
     static_assert(sizeof(unsigned long long) == sizeof(T));
-    static_assert(sizeof(unsigned long long) == sizeof(S));
-    static_assert(sizeof(unsigned long long) == sizeof(U));
-    return reinterpret_cast<U>(atomicAdd(reinterpret_cast<unsigned long long*>(address), static_cast<unsigned long long>(value)));
+    return atomicAdd(reinterpret_cast<unsigned long long*>(address), static_cast<unsigned long long>(value));
 }
 
 template <typename T>

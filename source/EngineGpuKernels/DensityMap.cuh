@@ -64,13 +64,13 @@ public:
         auto index = toInt(cell->pos.x) / _slotSize + toInt(cell->pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             auto color = calcMod(cell->color, MAX_COLORS);
-            alienAtomicAdd64(&_colorDensityMap[index], (1ull << (color * 8)) | (1ull << 56));
+            alienAtomicAdd64(&_colorDensityMap[index], static_cast<uint64_t>((1ull << (color * 8)) | (1ull << 56)));
 
             if (cell->mutationId != 0) {
                 uint64_t bucket = calcBucket(cell->mutationId, timestep);
-                alienAtomicAdd64(&_otherMutantDensityMap[index], 0x0101010101010101ull ^ (1ull << (bucket * 8)));
+                alienAtomicAdd64(&_otherMutantDensityMap[index], static_cast<uint64_t>(0x0101010101010101ull ^ (1ull << (bucket * 8))));
             } else {
-                alienAtomicAdd64(&_otherMutantDensityMap[index], 1ull);
+                alienAtomicAdd64(&_otherMutantDensityMap[index], static_cast<uint64_t>(1ull));
             }
         }
     }
