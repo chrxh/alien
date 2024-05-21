@@ -425,23 +425,24 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
             drawCircle(imageData, imageSize, cellImagePos, primaryColor * 0.45f, zoom / 2.5f, false, false);
 
             //draw secondary color for cell
-            auto radius = zoom / 4;
-            auto secondaryColor = calcColor(cell, cell->selected, coloring, false) * 0.5f;
-            drawCircle(imageData, imageSize, cellImagePos, secondaryColor, radius, shadedCells, true);
+            auto cellRadius = zoom / 4;
+            auto secondaryColor =
+                coloring == CellColoring_MutationId_AllCellFunctions ? calcColor(cell, cell->selected, coloring, false) * 0.5f : primaryColor * 0.6f;
+            drawCircle(imageData, imageSize, cellImagePos, secondaryColor, cellRadius, shadedCells, true);
 
             //draw activity
             if (cell->isActive() && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
-                drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, radius, shadedCells);
+                drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, cellRadius, shadedCells);
             }
 
             //draw events
             if (cell->eventCounter > 0) {
                 if (cudaSimulationParameters.attackVisualization && cell->event == CellEvent_Attacking) {
-                    drawDisc(imageData, imageSize, cellImagePos, {0.0f, 0.5f, 0.0f}, radius * 1.4f, radius * 2.0f);
+                    drawDisc(imageData, imageSize, cellImagePos, {0.0f, 0.5f, 0.0f}, cellRadius * 1.4f, cellRadius * 2.0f);
                 }
                 if (cudaSimulationParameters.attackVisualization && cell->event == CellEvent_Attacked) {
                     float3 color{0.5f, 0.0f, 0.0f};
-                    drawDisc(imageData, imageSize, cellImagePos, color, radius * 1.4f, radius * 2.0f);
+                    drawDisc(imageData, imageSize, cellImagePos, color, cellRadius * 1.4f, cellRadius * 2.0f);
 
                     auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, cell->eventPos, universeImageSize, imageSize, zoom);
                     if (isLineVisible(cellImagePos, endImagePos, universeImageSize)) {
