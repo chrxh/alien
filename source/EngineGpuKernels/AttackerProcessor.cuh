@@ -59,13 +59,31 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (cell->creatureId == 0 && CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {
                 return;
             }
-            if (otherCell->barrier /*&& otherCell->livingState != LivingState_UnderConstruction*/) {
+            if (otherCell->barrier) {
                 return;
             }
+            //if (otherCell->livingState == LivingState_UnderConstruction) {
+            //    return;
+            //}
 
             auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - baseValue) * cudaSimulationParameters.cellFunctionAttackerStrength[cell->color];
             if (energyToTransfer < 0) {
                 return;
+            }
+
+            if (otherCell->livingState == LivingState_UnderConstruction) {
+                for (int i = 0; i < otherCell->numConnections; ++i) {
+                    auto connectedCell = otherCell->connections[i].cell;
+                    if (connectedCell->creatureId != 0 && connectedCell->creatureId == cell->creatureId) {
+                        return;
+                    }
+                    for (int j = 0; j < connectedCell->numConnections; ++j) {
+                        auto otherConnectedCell = connectedCell->connections[j].cell;
+                        if (otherConnectedCell->creatureId != 0 && otherConnectedCell->creatureId == cell->creatureId) {
+                            return;
+                        }
+                    }
+                }
             }
 
             auto color = calcMod(cell->color, MAX_COLORS);

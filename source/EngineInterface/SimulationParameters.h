@@ -19,10 +19,11 @@ enum CellColoring_
     CellColoring_None,
     CellColoring_CellColor,
     CellColoring_MutationId,
+    CellColoring_MutationId_AllCellFunctions,
     CellColoring_LivingState,
     CellColoring_GenomeSize,
     CellColoring_CellFunction,
-    CellColoring_AllCellFunction
+    CellColoring_AllCellFunctions
 };
 
 struct SimulationParameters

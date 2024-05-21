@@ -479,7 +479,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     bool adaptReferenceAngle = false;
     if (!constructionData.isLastNodeOfLastRepetition || !constructionData.genomeHeader.separateConstruction) {
 
-        //move connection
+        //move connection between lastConstructionCell and hostCell to a connection between newCell and hostCell
         auto distance = constructionData.isLastNodeOfLastRepetition && !constructionData.genomeHeader.separateConstruction
             ? 1.0f
             : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
@@ -515,6 +515,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         adaptReferenceAngle = false;
         CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         hostCell->livingState = LivingState_Dying;
+        constructionData.lastConstructionCell->livingState = LivingState_Dying;
     }
 
     Math::normalize(posDelta);
