@@ -84,7 +84,7 @@ namespace
         return {toInt((r_ + m) * 255), toInt((g_ + m) * 255), toInt((b_ + m) * 255)};
     }
 
-    __device__ __inline__ float3 calcColor(Cell* cell, int selected, CellColoring cellColoring)
+    __device__ __inline__ float3 calcColor(Cell* cell, int selected, CellColoring cellColoring, bool primary)
     {
         float factor = max(20.0f, min(300.0f, cell->energy)) / 320.0f;
         if (1 == selected) {
@@ -130,7 +130,7 @@ namespace
             }
             }
         }
-        if (cellColoring == CellColoring_MutationId) {
+        if (cellColoring == CellColoring_MutationId || (cellColoring == CellColoring_MutationId_AllCellFunctions && primary)) {
             auto h = abs(toInt((cell->mutationId * 12107) % 360));
             auto s = 0.6f + toFloat(abs(toInt(cell->mutationId * 12107)) % 400) / 1000;
             auto rgb = convertHSVtoRGB(toFloat(h), s, 1.0f);
@@ -139,16 +139,16 @@ namespace
         if (cellColoring == CellColoring_LivingState) {
             switch (cell->livingState) {
             case LivingState_Ready:
-                cellColor = 0x0000ff;
+                cellColor = 0x1010ff;
                 break;
             case LivingState_UnderConstruction:
-                cellColor = 0x00ff00;
+                cellColor = 0x10ff10;
                 break;
             case LivingState_Activating:
                 cellColor = 0xffffff;
                 break;
             case LivingState_Dying:
-                cellColor = 0xff0000;
+                cellColor = 0xff1010;
                 break;
             default:
                 cellColor = 0x000000;
@@ -172,7 +172,7 @@ namespace
             }
         }
 
-        if (cellColoring == CellColoring_AllCellFunction) {
+        if (cellColoring == CellColoring_AllCellFunctions || (cellColoring == CellColoring_MutationId_AllCellFunctions && !primary)) {
             auto h = (toFloat(cell->cellFunction) / toFloat(CellFunction_Count - 1)) * 360.0f;
             auto rgb = convertHSVtoRGB(toFloat(h), 0.7f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
@@ -421,12 +421,13 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
         if (isContainedInRect({0, 0}, toFloat2(imageSize), cellImagePos)) {
 
             //draw primary color for cell
-            auto primaryColor = calcColor(cell, cell->selected, coloring) * 0.85f;
+            auto primaryColor = calcColor(cell, cell->selected, coloring, true) * 0.85f;
             drawCircle(imageData, imageSize, cellImagePos, primaryColor * 0.45f, zoom / 2.5f, false, false);
 
             //draw secondary color for cell
             auto radius = zoom / 4;
-            drawCircle(imageData, imageSize, cellImagePos, primaryColor * 0.6f, radius, shadedCells, true);
+            auto secondaryColor = calcColor(cell, cell->selected, coloring, false) * 0.5f;
+            drawCircle(imageData, imageSize, cellImagePos, secondaryColor, radius, shadedCells, true);
 
             //draw activity
             if (cell->isActive() && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
@@ -558,7 +559,7 @@ __global__ void cudaDrawCellGlow(int2 worldSize, float2 rectUpperLeft, Array<Cel
 
             //draw background for cell
             if (threadIdx.x == 0) {
-                color = calcColor(cell, cell->selected, coloring);
+                color = calcColor(cell, cell->selected, coloring, true);
             }
             __syncthreads();
 

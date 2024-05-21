@@ -35,7 +35,7 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     bool considerRigidityUpdate = (data.timestep % 3 == 0);
 
     KERNEL_CALL(cudaNextTimestep_physics_init, data);
-    KERNEL_CALL(cudaNextTimestep_physics_fillMaps, data);
+    cudaNextTimestep_physics_fillMaps<<<gpuSettings.numBlocks, 32>>>(data);
     if (settings.simulationParameters.motionType == MotionType_Fluid) {
         auto threads = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
         cudaNextTimestep_physics_calcFluidForces<<<gpuSettings.numBlocks, threads>>>(data);
@@ -69,9 +69,9 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_cellFunction_detonator, data, statistics);
 
     if (considerInnerFriction) {
-        KERNEL_CALL(cudaNextTimestep_physics_substep7_innerFriction, data);
+        KERNEL_CALL(cudaNextTimestep_physics_applyInnerFriction, data);
     }
-    KERNEL_CALL(cudaNextTimestep_physics_substep8, data);
+    KERNEL_CALL(cudaNextTimestep_physics_applyFriction, data);
 
     if (considerRigidityUpdate && isRigidityUpdateEnabled(settings)) {
         KERNEL_CALL(cudaInitClusterData, data);

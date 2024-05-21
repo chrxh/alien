@@ -251,6 +251,7 @@ void _SimulationParametersWindow::processBase(
                         {"None",
                          "Standard cell colors",
                          "Mutants",
+                         "Mutants and cell functions",
                          "Cell states",
                          "Genome complexities",
                          "Single cell function",
@@ -258,6 +259,7 @@ void _SimulationParametersWindow::processBase(
                     .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
                         ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n"
                         ICON_FA_CHEVRON_RIGHT " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into account).\n\n"
+                        ICON_FA_CHEVRON_RIGHT " Mutants and cell functions: Combination of mutants and cell function coloring.\n\n"
                         ICON_FA_CHEVRON_RIGHT " Cell states: green = under construction, blue = ready, red = dying\n\n"
                         ICON_FA_CHEVRON_RIGHT " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex genome protection' is "
                         "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large bonus\n\n"
@@ -1479,7 +1481,15 @@ void _SimulationParametersWindow::processBase(
                         .name("Coloring")
                         .textWidth(RightColumnWidth)
                         .defaultValue(origParameters.cellGlowColoring)
-                        .values({"None", "Standard cell colors", "Mutants", "Cell states", "Genome complexities", "Single cell function", "All cell functions"})
+                        .values(
+                            {"None",
+                             "Standard cell colors",
+                             "Mutants",
+                             "Mutants and cell functions",
+                             "Cell states",
+                             "Genome complexities",
+                             "Single cell function",
+                             "All cell functions"})
                         .tooltip(""),
                     parameters.cellGlowColoring);
                 AlienImGui::SliderFloat(
@@ -2188,6 +2198,9 @@ void _SimulationParametersWindow::processAddonList(
                     .tooltip("This can be used to define color transitions for cells depending on their age."),
                 parameters.features.cellColorTransitionRules);
             AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters().name("Cell glow").textWidth(0).defaultValue(origParameters.features.cellGlow).tooltip(""),
+                parameters.features.cellGlow);
+            AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("External energy control")
                     .textWidth(0)
@@ -2205,9 +2218,6 @@ void _SimulationParametersWindow::processAddonList(
                              "and 'Advanced attacker control' to favor more complex genomes in natural selection. If it is deactivated, default values are "
                              "used that simply take the genome size into account."),
                 parameters.features.genomeComplexityMeasurement);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Secondary cell rendering").textWidth(0).defaultValue(origParameters.features.cellGlow).tooltip(""),
-                parameters.features.cellGlow);
         }
         ImGui::EndChild();
         AlienImGui::EndTreeNode();

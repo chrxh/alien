@@ -514,6 +514,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
         }
         if (scheduleForDestruction) {
             CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
+            atomicCAS(&cell->livingState, LivingState_UnderConstruction, LivingState_Dying);
         }
     }
 }
@@ -733,6 +734,10 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         if (cell->livingState == LivingState_Dying) {
             if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb[cell->color]) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
+
+                //for (int i = 0; i < cell->numConnections; ++i) {
+                //    atomicCAS(&cell->connections[i].cell->livingState, LivingState_UnderConstruction, LivingState_Dying);
+                //}
             }
         }
 
@@ -741,10 +746,11 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             cellDestruction = true;
         } else if (cell->energy > cellMaxBindingEnergy) {
             CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
+            atomicCAS(&cell->livingState, LivingState_UnderConstruction, LivingState_Dying);
         }
 
         auto cellMaxAge = cudaSimulationParameters.cellMaxAge[cell->color];
-        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellInactiveMaxAgeActivated
+        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellInactiveMaxAgeActivated && cell->mutationId != 0
             && cell->cellFunctionUsed == CellFunctionUsed_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < cell->numConnections; ++i) {
