@@ -90,3 +90,12 @@ void checkAndThrowError(T result, char const *const func, const char *const file
     } else { \
         func<<<1, 1>>>(__VA_ARGS__); \
     }
+
+#define KERNEL_CALL_MOD(func, threadsPerBlock, ...) \
+    if (GlobalSettings::getInstance().isDebugMode()) { \
+        func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
+        cudaDeviceSynchronize(); \
+        CHECK_FOR_CUDA_ERROR(cudaGetLastError()); \
+    } else { \
+        func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
+    }
