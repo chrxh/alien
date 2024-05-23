@@ -357,6 +357,7 @@ struct CellDescription
     LivingState livingState = LivingState_Ready;
     int creatureId = 0;
     int mutationId = 0;
+    uint8_t ancestorMutationId = 0;
 
     //cell function
     int executionOrderNumber = 0;

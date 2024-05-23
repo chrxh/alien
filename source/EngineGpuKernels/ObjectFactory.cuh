@@ -95,6 +95,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->livingState = cellTO.livingState;
     cell->creatureId = cellTO.creatureId;
     cell->mutationId = cellTO.mutationId;
+    cell->ancestorMutationId = cellTO.ancestorMutationId;
     cell->inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber;
     cell->outputBlocked = cellTO.outputBlocked;
     cell->maxConnections = cellTO.maxConnections;
@@ -279,6 +280,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->density = 1.0f;
     cell->creatureId = 0;
     cell->mutationId = 0;
+    cell->ancestorMutationId = 0;
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
     cell->cellFunctionUsed = CellFunctionUsed_No;

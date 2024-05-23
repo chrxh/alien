@@ -46,7 +46,7 @@ namespace
     }
     void writeEnergy(std::vector<uint8_t>& data, float value)
     {
-        writeFloat(data, (value - 548.0f) / 512);
+        writeFloat(data, (value - 150.0f) / 100);
     }
     void writeNeuronProperty(std::vector<uint8_t>& data, float value)
     {
@@ -113,7 +113,7 @@ namespace
     //between 36 and 1060
     float readEnergy(std::vector<uint8_t> const& data, int& pos)
     {
-        return readFloat(data, pos) * 512 + 548.0f; 
+        return readFloat(data, pos) * 100 + 150.0f; 
     }
     //between 0 and 1
     float readDensity(std::vector<uint8_t> const& data, int& pos)

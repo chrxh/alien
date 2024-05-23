@@ -106,14 +106,15 @@ namespace
     auto constexpr Id_Cell_Barrier = 3;
     auto constexpr Id_Cell_Age = 4;
     auto constexpr Id_Cell_LivingState = 5;
-    auto constexpr Id_Cell_CreatureId = 11;
-    auto constexpr Id_Cell_MutationId = 12;
-    auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
     auto constexpr Id_Cell_OutputBlocked = 7;
     auto constexpr Id_Cell_ActivationTime = 8;
+    auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
+    auto constexpr Id_Cell_CreatureId = 11;
+    auto constexpr Id_Cell_MutationId = 12;
     auto constexpr Id_Cell_GenomeComplexity = 13;
     auto constexpr Id_Cell_DetectedByCreatureId = 14;
     auto constexpr Id_Cell_CellFunctionUsed = 15;
+    auto constexpr Id_Cell_AncestorMutationId = 16;
 
     auto constexpr Id_Neuron_ActivationFunctions = 0;
 
@@ -736,6 +737,7 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Cell_LivingState, data.livingState, defaultObject.livingState);
         loadSave<int>(task, auxiliaries, Id_Cell_CreatureId, data.creatureId, defaultObject.creatureId);
         loadSave<int>(task, auxiliaries, Id_Cell_MutationId, data.mutationId, defaultObject.mutationId);
+        loadSave<uint8_t>(task, auxiliaries, Id_Cell_AncestorMutationId, data.ancestorMutationId, defaultObject.ancestorMutationId);
         loadSave<std::optional<int>>(
             task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);

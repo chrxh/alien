@@ -238,20 +238,21 @@ namespace
                             if (angle < -180.0f) {
                                 angle += 360.0f;
                             }
-                            factor *= 65.0f / (abs(angle) + 1.0f);
+                            factor *= 40.0f / (abs(angle) + 1.0f);
+
                             factor = min(factor, 1.0f);
-                            if (inverted && sqrt(rSquared) > radius - 2.0f) {
-                                factor = 2.0f;
-                            }
+                        }
+                        if (inverted && sqrt(rSquared) > radius - 2.0f) {
+                            factor = 1.5f;
                         }
                         drawDot(imageData, imageSize, pos + float2{x, y}, color * factor);
                     }
                 }
             }
         } else {
-            color = color * radius * 2;
+            color *= radius * 2;
             drawDot(imageData, imageSize, pos, color);
-            color = color * 0.3f;
+            color *= 0.45f;
             drawDot(imageData, imageSize, pos + float2{1, 0}, color);
             drawDot(imageData, imageSize, pos + float2{-1, 0}, color);
             drawDot(imageData, imageSize, pos + float2{0, 1}, color);

@@ -62,28 +62,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (otherCell->barrier) {
                 return;
             }
-            //if (otherCell->livingState == LivingState_UnderConstruction) {
-            //    return;
-            //}
 
             auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - baseValue) * cudaSimulationParameters.cellFunctionAttackerStrength[cell->color];
             if (energyToTransfer < 0) {
                 return;
-            }
-
-            if (otherCell->livingState == LivingState_UnderConstruction) {
-                for (int i = 0; i < otherCell->numConnections; ++i) {
-                    auto connectedCell = otherCell->connections[i].cell;
-                    if (connectedCell->creatureId != 0 && connectedCell->creatureId == cell->creatureId) {
-                        return;
-                    }
-                    for (int j = 0; j < connectedCell->numConnections; ++j) {
-                        auto otherConnectedCell = connectedCell->connections[j].cell;
-                        if (otherConnectedCell->creatureId != 0 && otherConnectedCell->creatureId == cell->creatureId) {
-                            return;
-                        }
-                    }
-                }
             }
 
             auto color = calcMod(cell->color, MAX_COLORS);
@@ -104,7 +86,9 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 energyToTransfer /=
                     (1.0f + cellFunctionAttackerGenomeComplexityBonus * static_cast<float>(otherCell->genomeComplexity - cell->genomeComplexity));
             }
-            if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->mutationId == cell->mutationId && cell->mutationId != 0) {
+            if (cudaSimulationParameters.features.advancedAttackerControl
+                && ((otherCell->mutationId == cell->mutationId) || (otherCell->ancestorMutationId == static_cast<uint8_t>(cell->mutationId & 0xff)))
+                && cell->mutationId != 0) {
                 auto sameMutantPenalty = cudaSimulationParameters.cellFunctionAttackerSameMutantPenalty[color][otherColor];
                 energyToTransfer *= (1.0f - sameMutantPenalty);
             }
