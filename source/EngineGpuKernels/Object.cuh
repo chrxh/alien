@@ -208,6 +208,7 @@ struct Cell
     LivingState livingState;
     uint32_t creatureId;
     uint32_t mutationId;
+    uint8_t ancestorMutationId; //only the first 8 bits from ancestor mutation id
 
     //cell function
     uint8_t executionOrderNumber;

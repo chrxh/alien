@@ -388,6 +388,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.livingState = cellTO.livingState;
     result.creatureId = cellTO.creatureId;
     result.mutationId = cellTO.mutationId;
+    result.ancestorMutationId = cellTO.ancestorMutationId;
     result.inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber >= 0 ? std::make_optional(cellTO.inputExecutionOrderNumber) : std::nullopt;
     result.outputBlocked = cellTO.outputBlocked;
     result.executionOrderNumber = cellTO.executionOrderNumber;
@@ -548,6 +549,7 @@ void DescriptionConverter::addCell(
     cellTO.livingState = cellDesc.livingState;
     cellTO.creatureId = cellDesc.creatureId;
     cellTO.mutationId = cellDesc.mutationId;
+    cellTO.ancestorMutationId = cellDesc.ancestorMutationId;
     cellTO.inputExecutionOrderNumber = cellDesc.inputExecutionOrderNumber.value_or(-1);
     cellTO.outputBlocked = cellDesc.outputBlocked;
     cellTO.cellFunction = cellDesc.getCellFunctionType();

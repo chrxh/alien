@@ -289,7 +289,7 @@ __inline__ __device__ float GenomeDecoder::readFloat(ConstructorFunction& constr
 
 __inline__ __device__ float GenomeDecoder::readEnergy(ConstructorFunction& constructor, int& genomeBytePosition)
 {
-    return static_cast<float>(static_cast<int8_t>(readByte(constructor, genomeBytePosition))) / 128 * 512 + 548;
+    return static_cast<float>(static_cast<int8_t>(readByte(constructor, genomeBytePosition))) / 128 * 100 + 150;
 }
 
 __inline__ __device__ float GenomeDecoder::readAngle(ConstructorFunction& constructor, int& genomeBytePosition)

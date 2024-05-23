@@ -634,6 +634,7 @@ ConstructorProcessor::constructCellIntern(
     result->livingState = LivingState_UnderConstruction;
     result->creatureId = constructor.offspringCreatureId;
     result->mutationId = constructor.offspringMutationId;
+    result->ancestorMutationId = static_cast<uint8_t>(hostCell->mutationId & 0xff);
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
     result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;

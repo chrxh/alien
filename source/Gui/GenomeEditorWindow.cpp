@@ -960,7 +960,7 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
     if (cell.numRequiredAdditionalConnections) {
         cell.numRequiredAdditionalConnections = (*cell.numRequiredAdditionalConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
     }
-    cell.energy = std::min(std::max(cell.energy, 50.0f), 1050.0f);
+    cell.energy = std::min(std::max(cell.energy, 50.0f), 250.0f);
 
     switch (cell.getCellFunctionType()) {
     case CellFunction_Constructor: {
