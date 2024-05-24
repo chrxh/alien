@@ -649,7 +649,7 @@ void _BrowserWindow::processSimulationList()
                 ImGui::TableNextColumn();
                 processHeightField(treeTO);
                 ImGui::TableNextColumn();
-                processNumParticlesField(treeTO);
+                processNumParticlesField(treeTO, NumParticlesFormat::Kilo);
                 ImGui::TableNextColumn();
                 processSizeField(treeTO, true);
                 ImGui::TableNextColumn();
@@ -750,7 +750,7 @@ void _BrowserWindow::processGenomeList()
                 ImGui::TableNextColumn();
                 processNumDownloadsField(treeTO);
                 ImGui::TableNextColumn();
-                processNumParticlesField(treeTO);
+                processNumParticlesField(treeTO, NumParticlesFormat::Standard);
                 ImGui::TableNextColumn();
                 processSizeField(treeTO, false);
                 ImGui::TableNextColumn();
@@ -951,11 +951,20 @@ void _BrowserWindow::processHeightField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processNumParticlesField(NetworkResourceTreeTO const& treeTO)
+void _BrowserWindow::processNumParticlesField(NetworkResourceTreeTO const& treeTO, NumParticlesFormat const& format)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienImGui::Text(StringHelper::format(leaf.rawTO->particles / 1000) + " K");
+        switch (format) {
+        case NumParticlesFormat::Standard:
+            AlienImGui::Text(StringHelper::format(leaf.rawTO->particles));
+            break;
+        case NumParticlesFormat::Kilo:
+            AlienImGui::Text(StringHelper::format(leaf.rawTO->particles / 1000) + " K");
+            break;
+        default:
+            break;
+        }
     }
 }
 
