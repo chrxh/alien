@@ -77,7 +77,12 @@ private:
     void processNumDownloadsField(NetworkResourceTreeTO const& treeTO);
     void processWidthField(NetworkResourceTreeTO const& treeTO);
     void processHeightField(NetworkResourceTreeTO const& treeTO);
-    void processNumParticlesField(NetworkResourceTreeTO const& treeTO);
+    enum class NumParticlesFormat
+    {
+        Standard,
+        Kilo,
+    };
+    void processNumParticlesField(NetworkResourceTreeTO const& treeTO, NumParticlesFormat const& format);
     void processSizeField(NetworkResourceTreeTO const& treeTO, bool kbyte);
     void processVersionField(NetworkResourceTreeTO const& treeTO);
 
