@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/RawStatisticsData.h"
 
@@ -56,5 +58,6 @@ private:
     std::unordered_set<int> _collapsedPlotIndices;
 
     TimelineLiveStatistics _liveStatistics;
+    std::optional<std::chrono::steady_clock::time_point> _liveStatisticsDataTimepoint;
 };
 

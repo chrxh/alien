@@ -91,11 +91,11 @@ void TimelineLiveStatistics::truncate()
     }
 }
 
-void TimelineLiveStatistics::add(TimelineStatistics const& data, uint64_t timestep)
+void TimelineLiveStatistics::add(TimelineStatistics const& data, uint64_t timestep, double deltaTime)
 {
     truncate();
 
-    timepoint += toDouble(ImGui::GetIO().DeltaTime);
+    timepoint += deltaTime;
 
     auto newDataPoint = StatisticsConverterService::convert(data, timestep, timepoint, lastData, lastTimestep);
     dataPointCollectionHistory.emplace_back(newDataPoint);
