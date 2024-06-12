@@ -89,8 +89,12 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (cudaSimulationParameters.features.advancedAttackerControl
                 && ((otherCell->mutationId == cell->mutationId) || (otherCell->ancestorMutationId == static_cast<uint8_t>(cell->mutationId & 0xff)))
                 && cell->mutationId != 0) {
-                auto sameMutantPenalty = cudaSimulationParameters.cellFunctionAttackerSameMutantPenalty[color][otherColor];
-                energyToTransfer *= (1.0f - sameMutantPenalty);
+                energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerSameMutantPenalty[color][otherColor]);
+            }
+
+            if (cudaSimulationParameters.features.advancedAttackerControl && cell->mutationId < otherCell->mutationId
+                && cell->genomeComplexity <= otherCell->genomeComplexity) {
+                energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerArisingComplexMutantPenalty[color][otherColor]);
             }
 
             auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);

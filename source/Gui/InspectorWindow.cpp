@@ -186,6 +186,9 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
                     AlienImGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellMutationIdTooltip), cell.mutationId);
+                int temp = cell.ancestorMutationId;
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters().name("Anc. mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellMutationIdTooltip), temp);
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellCreatureIdTooltip), cell.creatureId);
                 ImGui::TreePop();

@@ -148,6 +148,9 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
     }
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
+            if (cellFunctionAttackerArisingComplexMutantPenalty[i][j] != other.cellFunctionAttackerArisingComplexMutantPenalty[i][j]) {
+                return false;
+            }
             if (cellFunctionConstructorMutationColorTransitions[i][j] != other.cellFunctionConstructorMutationColorTransitions[i][j]) {
                 return false;
             }
