@@ -20,5 +20,5 @@ struct TimelineLiveStatistics
     std::optional<uint64_t> lastTimestep;
 
     void truncate();
-    void add(TimelineStatistics const& statistics, uint64_t timestep);
+    void add(TimelineStatistics const& statistics, uint64_t timestep, double deltaTime);
 };

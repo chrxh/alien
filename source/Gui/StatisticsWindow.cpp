@@ -24,8 +24,9 @@
 
 namespace
 {
-    auto const RightColumnWidth = 175.0f;
-    auto const RightColumnWidthTable = 150.0f;
+    auto constexpr RightColumnWidth = 175.0f;
+    auto constexpr RightColumnWidthTable = 150.0f;
+    auto constexpr LiveStatisticsDeltaTime = 50;    //in millisec
 }
 
 _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
@@ -424,9 +425,17 @@ void _StatisticsWindow::processBackground()
 {
     auto timestep = _simController->getCurrentTimestep();
 
-    _lastStatisticsData = _simController->getRawStatistics();
-    _liveStatistics.add(_lastStatisticsData->timeline, timestep);
-} 
+    auto timepoint = std::chrono::steady_clock::now();
+    if (!_liveStatisticsDataTimepoint) {
+        _liveStatisticsDataTimepoint = timepoint;
+    }
+    auto duration = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_liveStatisticsDataTimepoint).count());
+    if (duration > LiveStatisticsDeltaTime) {
+        _lastStatisticsData = _simController->getRawStatistics();
+        _liveStatistics.add(_lastStatisticsData->timeline, timestep, toDouble(duration) / 1000);
+        _liveStatisticsDataTimepoint = timepoint;
+    }
+}
 
 namespace
 {
