@@ -111,36 +111,64 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         cell->pos,
         cell->color);
 
-    if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
-        neuronDataMutation(data, cell);
+    //if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
+    //    neuronDataMutation(data, cell);
+    //}
+    //if (isRandomEvent(data, cellFunctionConstructorMutationDataProbability)) {
+    //    propertiesMutation(data, cell);
+    //}
+    if (data.numberGen1.random() < 0.05f) {
+        auto& constructor = cell->cellFunctionData.constructor;
+        auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
+        if (isRandomEvent(data, cellFunctionConstructorMutationDataProbability * numNodes)) {
+            propertiesMutation(data, cell);
+        }
+        if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability * numNodes)) {
+            neuronDataMutation(data, cell);
+        }
+        if (isRandomEvent(data, cellFunctionConstructorMutationGeometryProbability * numNodes)) {
+            geometryMutation(data, cell);
+        }
+        if (isRandomEvent(data, cellFunctionConstructorMutationCustomGeometryProbability * numNodes)) {
+            customGeometryMutation(data, cell);
+        }
+        if (isRandomEvent(data, cellFunctionConstructorMutationCellFunctionProbability * numNodes)) {
+            cellFunctionMutation(data, cell);
+        }
+        if (isRandomEvent(data, cellFunctionConstructorMutationInsertionProbability * numNodes)) {
+            insertMutation(data, cell);
+        }
+        if (isRandomEvent(data, cellFunctionConstructorMutationDeletionProbability * numNodes)) {
+            deleteMutation(data, cell);
+        }
+        if (isRandomEvent(data, cellFunctionConstructorMutationCellColorProbability * numNodes)) {
+            cellColorMutation(data, cell);
+        }
     }
-    if (isRandomEvent(data, cellFunctionConstructorMutationDataProbability)) {
-        propertiesMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationGeometryProbability)) {
-        geometryMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationCustomGeometryProbability)) {
-        customGeometryMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationCellFunctionProbability)) {
-        cellFunctionMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationInsertionProbability)) {
-        insertMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationDeletionProbability)) {
-        deleteMutation(data, cell);
-    }
+    //if (isRandomEvent(data, cellFunctionConstructorMutationGeometryProbability)) {
+    //    geometryMutation(data, cell);
+    //}
+    //if (isRandomEvent(data, cellFunctionConstructorMutationCustomGeometryProbability)) {
+    //    customGeometryMutation(data, cell);
+    //}
+    //if (isRandomEvent(data, cellFunctionConstructorMutationCellFunctionProbability)) {
+    //    cellFunctionMutation(data, cell);
+    //}
+    //if (isRandomEvent(data, cellFunctionConstructorMutationInsertionProbability)) {
+    //    insertMutation(data, cell);
+    //}
+    //if (isRandomEvent(data, cellFunctionConstructorMutationDeletionProbability)) {
+    //    deleteMutation(data, cell);
+    //}
     if (isRandomEvent(data, cellFunctionConstructorMutationTranslationProbability)) {
         translateMutation(data, cell);
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationDuplicationProbability)) {
         duplicateMutation(data, cell);
     }
-    if (isRandomEvent(data, cellFunctionConstructorMutationCellColorProbability)) {
-        cellColorMutation(data, cell);
-    }
+    //if (isRandomEvent(data, cellFunctionConstructorMutationCellColorProbability)) {
+    //    cellColorMutation(data, cell);
+    //}
     if (isRandomEvent(data, cellFunctionConstructorMutationSubgenomeColorProbability)) {
         subgenomeColorMutation(data, cell);
     }

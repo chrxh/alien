@@ -609,6 +609,12 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.cellFunctionAttackerArisingComplexMutantPenalty,
+            defaultParameters.cellFunctionAttackerArisingComplexMutantPenalty,
+            "simulation parameters.cell.function.attacker.arising complex mutant penalty",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.cellFunctionAttackerSensorDetectionFactor,
             defaultParameters.cellFunctionAttackerSensorDetectionFactor,
             "simulation parameters.cell.function.attacker.sensor detection factor",

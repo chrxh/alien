@@ -1265,6 +1265,15 @@ void _SimulationParametersWindow::processBase(
                         .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerSameMutantPenalty))
                         .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
                     parameters.cellFunctionAttackerSameMutantPenalty);
+                AlienImGui::InputFloatColorMatrix(
+                    AlienImGui::InputFloatColorMatrixParameters()
+                        .name("New complex mutant protection")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(1.0f)
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerSameMutantPenalty))
+                        .tooltip(""),
+                    parameters.cellFunctionAttackerArisingComplexMutantPenalty);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Sensor detection factor")
@@ -1482,7 +1491,7 @@ void _SimulationParametersWindow::processBase(
                         .textWidth(RightColumnWidth)
                         .defaultValue(origParameters.cellGlowColoring)
                         .values(
-                            {"None",
+                            {"Energy",
                              "Standard cell colors",
                              "Mutants",
                              "Mutants and cell functions",
@@ -2268,6 +2277,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
             parameters.cellFunctionAttackerSameMutantPenalty[i][j] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSameMutantPenalty[i][j]));
+            parameters.cellFunctionAttackerArisingComplexMutantPenalty[i][j] =
+                std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerArisingComplexMutantPenalty[i][j]));
             parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j] =
                 std::max(0.0f, parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j]);
         }
