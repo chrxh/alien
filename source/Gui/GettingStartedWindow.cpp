@@ -364,6 +364,12 @@ void _GettingStartedWindow::processIntern()
             "In small worlds with smaller organisms and high mutation rates, evolutionary changes can sometimes be observed every minute depending on the hardware. With more complex "
             "simulations, you should rather expect a few hours.");
 
+        drawHeading2("How can I add energy to a simulation?");
+        drawParagraph("Adding energy to a simulation can increase the available resources and thus the population. There is a convenient way to directly feed "
+                      "all constructor cells with additional energy. This can be achieved by enabling the 'External Energy Control' addon in the simulation "
+                      "parameter window. Next, set the amount of energy to be added (for instance, 1M could sustain 10K cells if each cell has 100 energy "
+                      "units). The external energy is not added instantly but at a rate that can be specified under 'inflow'.");
+
         drawHeading2("How can I create a cell activity in the first place?");
         drawParagraph("To activate a cell function, an input from a connected cell in the form of non-zero activity states is required. The simplest methods "
                       "to generate an non-zero activity state are as follows:");
