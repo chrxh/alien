@@ -111,12 +111,6 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         cell->pos,
         cell->color);
 
-    //if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
-    //    neuronDataMutation(data, cell);
-    //}
-    //if (isRandomEvent(data, cellFunctionConstructorMutationDataProbability)) {
-    //    propertiesMutation(data, cell);
-    //}
     if (data.numberGen1.random() < 0.05f) {
         auto& constructor = cell->cellFunctionData.constructor;
         auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
@@ -145,6 +139,12 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
             cellColorMutation(data, cell);
         }
     }
+    //if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
+    //    neuronDataMutation(data, cell);
+    //}
+    //if (isRandomEvent(data, cellFunctionConstructorMutationDataProbability)) {
+    //    propertiesMutation(data, cell);
+    //}
     //if (isRandomEvent(data, cellFunctionConstructorMutationGeometryProbability)) {
     //    geometryMutation(data, cell);
     //}
