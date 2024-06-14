@@ -69,7 +69,7 @@ An Nvidia graphics card with compute capability 6.0 or higher is needed. Please 
 # 💽 Installer
 Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (Updated: 2024-04-26)
 
-In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
+In the case that the program crashes for an unknown reason, please refer to the troubleshooting section below.
 
 # 🔨 How to build the sources
 The build process is mostly automated using the cross-platform CMake build system and the vcpkg package manager, which is included as a Git submodule.
@@ -103,6 +103,19 @@ For example,
 .\cli.exe -i example.sim -o output.sim -t 1000
 ```
 runs the simulation file `example.sim` for 1000 time steps.
+
+# 🔎 Troubleshooting
+
+Please make sure that:
+1) You have an NVIDIA graphics card with compute capability 6.0 or higher (for example GeForce 10 series).
+2) You have the latest NVIDIA graphics driver installed.
+3) The name of the installation directory (including the parent directories) should not contain non-English characters. If this is not fulfilled, please re-install ALIEN to a suitable directory. Do not move the files manually. If you use Windows, make also sure that you install ALIEN with a Windows user that contains no non-English characters. If this is not the case, a new Windows user could be created to solve this problem.
+4) ALIEN needs write access to its own directory. This should normally be the case.
+5) If you have multiple graphics cards, please check that your primary monitor is connected to the CUDA-powered card. ALIEN uses the same graphics card for computation as well as rendering and chooses the one with the highest compute capability.
+6) If you possess both integrated and dedicated graphics cards, please ensure that the alien-executable is configured to use your high-performance graphics card. On Windows you need to access the 'Graphics settings,' add 'alien.exe' to the list, click 'Options,' and choose 'High performance'.
+
+If these conditions are not met, ALIEN may crash unexpectedly.
+If the conditions are met and the error still occurs, please start ALIEN with the command line parameter `-d`, try to reproduce the error and then create a GitHub issue on https://github.com/chrxh/alien/issues where the log.txt is attached.
 
 # 🌌 Screenshots
 #### Different plant-like populations around a radiation source
