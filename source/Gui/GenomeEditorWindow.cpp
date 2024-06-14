@@ -432,7 +432,9 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 
     auto shapeGenerator = ShapeGeneratorFactory::create(tab.genome.header.shape);
     for (auto& cell : tab.genome.cells) {
-        auto isFirstOrLast = index == 0 || index == tab.genome.cells.size() - 1;
+        auto isFirst = index == 0;
+        auto isLast = index == tab.genome.cells.size() - 1;
+        auto isFirstOrLast = isFirst || isLast;
         std::optional<ShapeGeneratorResult> shapeGeneratorResult =
             shapeGenerator ? std::make_optional(shapeGenerator->generateNextConstructionData()) : std::nullopt;
 
@@ -478,7 +480,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 
         if (treeNodeOpen) {
             auto origCell = cell;
-            processNode(tab, cell, shapeGeneratorResult, isFirstOrLast);
+            processNode(tab, cell, shapeGeneratorResult, isFirst, isLast);
             if (origCell != cell) {
                 tab.selectedNode = index;
             }
@@ -494,9 +496,11 @@ void _GenomeEditorWindow::processNode(
     TabData& tab,
     CellGenomeDescription& cell,
     std::optional<ShapeGeneratorResult> const& shapeGeneratorResult,
-    bool isFirstOrLast)
+    bool isFirst,
+    bool isLast)
 {
     auto type = cell.getCellFunctionType();
+    auto isFirstOrLast = isFirst || isLast;
 
     AlienImGui::DynamicTableLayout table(DynamicTableColumnWidth);
     if (table.begin()) {
@@ -533,11 +537,17 @@ void _GenomeEditorWindow::processNode(
         table.next();
         auto numRequiredAdditionalConnections =
             shapeGeneratorResult ? shapeGeneratorResult->numRequiredAdditionalConnections : cell.numRequiredAdditionalConnections;
+        if (!isFirst && numRequiredAdditionalConnections) {
+            numRequiredAdditionalConnections = std::min(*numRequiredAdditionalConnections + 1, MAX_CELL_BONDS);
+        }
         if (AlienImGui::InputOptionalInt(
                 AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::GenomeRequiredConnectionsTooltip),
                 numRequiredAdditionalConnections)) {
             updateGeometry(tab.genome, tab.genome.header.shape);
             tab.genome.header.shape = ConstructionShape_Custom;
+        }
+        if (!isFirst && numRequiredAdditionalConnections) {
+            numRequiredAdditionalConnections = *numRequiredAdditionalConnections - 1;
         }
         cell.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
 
