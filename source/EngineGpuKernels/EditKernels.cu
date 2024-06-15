@@ -365,7 +365,7 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
                 auto const& connectedCell = cell->connections[i].cell;
 
                 if (1 != connectedCell->selected
-                    && data.cellMap.getDistance(cell->pos, connectedCell->pos) > cudaSimulationParameters.cellMaxBindingDistance) {
+                    && data.cellMap.getDistance(cell->pos, connectedCell->pos) > cudaSimulationParameters.cellMaxBindingDistance[cell->color]) {
                     CellConnectionProcessor::scheduleDeleteConnectionPair(data, cell, connectedCell);
                     atomicExch(result, 1);
                 }

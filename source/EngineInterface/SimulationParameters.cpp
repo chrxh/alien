@@ -17,6 +17,9 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
     }
 
     for (int i = 0; i < MAX_COLORS; ++i) {
+        if (cellMaxBindingDistance[i] != other.cellMaxBindingDistance[i]) {
+            return false;
+        }
         if (cellInactiveMaxAge[i] != other.cellInactiveMaxAge[i]) {
             return false;
         }
@@ -174,7 +177,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
     return backgroundColor == other.backgroundColor && cellColoring == other.cellColoring && cellGlowColoring == other.cellGlowColoring
         && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity
         && baseValues == other.baseValues && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity
-        && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
+        && cellMinDistance == other.cellMinDistance
         && cellMaxForceDecayProb == other.cellMaxForceDecayProb && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers
         && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
         && radiationVelocityPerturbation == other.radiationVelocityPerturbation

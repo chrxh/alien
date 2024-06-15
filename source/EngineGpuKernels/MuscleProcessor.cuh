@@ -83,7 +83,7 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData&
         return;
     }
     auto const minDistance = cudaSimulationParameters.cellMinDistance * 1.2f;
-    auto const maxDistance = max(cudaSimulationParameters.cellMaxBindingDistance * 0.5f, minDistance);
+    auto const maxDistance = max(cudaSimulationParameters.cellMaxBindingDistance[cell->color] * 0.5f, minDistance);
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connection = cell->connections[i];
         if (connection.cell->executionOrderNumber == cell->inputExecutionOrderNumber) {

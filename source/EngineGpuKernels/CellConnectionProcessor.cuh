@@ -31,7 +31,7 @@ public:
     __inline__ __device__ static void deleteConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void deleteConnectionOneWay(Cell* cell1, Cell* cell2);
 
-    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached);
+    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached, int color);
     __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos);
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
 
@@ -413,10 +413,10 @@ __inline__ __device__ void CellConnectionProcessor::deleteConnectionOneWay(Cell*
     }
 }
 
-__inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached)
+__inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached, int color)
 {
     auto distance = Math::length(pos1 - pos2);
-    if (distance > cudaSimulationParameters.cellMaxBindingDistance) {
+    if (distance > cudaSimulationParameters.cellMaxBindingDistance[color]) {
         return false;
     }
 

@@ -99,5 +99,6 @@ public:
 
 private:
     RawStatisticsData* _data;
+    uint32_t* _mutantToColorCountMap;
 };
 

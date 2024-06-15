@@ -65,7 +65,7 @@ struct SimulationParameters
 
     float innerFriction = 0.3f;
     float cellMaxVelocity = 2.0f;              
-    float cellMaxBindingDistance = 3.6f;
+    ColorVector<float> cellMaxBindingDistance = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
 
     ColorVector<float> cellNormalEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
     float cellMinDistance = 0.3f;         

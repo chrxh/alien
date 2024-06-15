@@ -15,7 +15,7 @@ struct SimulationParametersSpotValues
     ColorVector<float> radiationAbsorptionLowVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> radiationAbsorptionLowGenomeComplexityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> radiationCellAgeStrength = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f};
-    float cellMaxForce = 0.8f;
+    ColorVector<float> cellMaxForce = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f};
     ColorVector<float> cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
     float cellFusionVelocity = 0.6f;
     float cellMaxBindingEnergy = Infinity<float>::value;
@@ -75,6 +75,9 @@ struct SimulationParametersSpotValues
             }
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (cellMaxForce[i] != other.cellMaxForce[i]) {
+                return false;
+            }
             if (cellColorTransitionDuration[i] != other.cellColorTransitionDuration[i]) {
                 return false;
             }
@@ -142,7 +145,7 @@ struct SimulationParametersSpotValues
                 return false;
             }
         }
-        return friction == other.friction && rigidity == other.rigidity && cellMaxForce == other.cellMaxForce
+        return friction == other.friction && rigidity == other.rigidity
             && cellFusionVelocity == other.cellFusionVelocity
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy
         ;

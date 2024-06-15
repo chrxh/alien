@@ -343,7 +343,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
     float2 newCellPos = hostCell->pos + newCellDirection;
 
-    if (CellConnectionProcessor::existCrossingConnections(data, hostCell->pos, newCellPos, hostCell->detached)) {
+    if (CellConnectionProcessor::existCrossingConnections(data, hostCell->pos, newCellPos, hostCell->detached, hostCell->color)) {
         return false;
     }
 
