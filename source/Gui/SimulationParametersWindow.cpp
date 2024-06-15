@@ -248,7 +248,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .defaultValue(origParameters.cellColoring)
                     .values(
-                        {"None",
+                        {"Energy",
                          "Standard cell colors",
                          "Mutants",
                          "Mutants and cell functions",
@@ -450,9 +450,10 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(3.0f)
-                    .defaultValue(&origParameters.baseValues.cellMaxForce)
+                    .colorDependence(true)
+                    .defaultValue(origParameters.baseValues.cellMaxForce)
                     .tooltip(std::string("Maximum force that can be applied to a cell without causing it to disintegrate.")),
-                &parameters.baseValues.cellMaxForce);
+                parameters.baseValues.cellMaxForce);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Minimum distance")
@@ -475,9 +476,10 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(5.0f)
-                    .defaultValue(&origParameters.cellMaxBindingDistance)
+                    .colorDependence(true)
+                    .defaultValue(origParameters.cellMaxBindingDistance)
                     .tooltip(std::string("Maximum distance up to which a connection of two cells is possible.")),
-                &parameters.cellMaxBindingDistance);
+                parameters.cellMaxBindingDistance);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Fusion velocity")
@@ -1782,9 +1784,10 @@ void _SimulationParametersWindow::processSpot(
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(3.0f)
-                    .defaultValue(&origSpot.values.cellMaxForce)
-                    .disabledValue(&parameters.baseValues.cellMaxForce),
-                &spot.values.cellMaxForce,
+                    .colorDependence(true)
+                    .defaultValue(origSpot.values.cellMaxForce)
+                    .disabledValue(parameters.baseValues.cellMaxForce),
+                spot.values.cellMaxForce,
                 &spot.activatedValues.cellMaxForce);
             AlienImGui::EndTreeNode();
         }

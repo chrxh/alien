@@ -376,7 +376,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
         }
 
         if (Math::length(cell->shared1) > SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::cellMaxForce, &SimulationParametersSpotActivatedValues::cellMaxForce, data, cell->pos)) {
+                &SimulationParametersSpotValues::cellMaxForce, &SimulationParametersSpotActivatedValues::cellMaxForce, data, cell->pos, cell->color)) {
             if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             }
@@ -504,7 +504,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
             auto displacement = connectedCell->pos - cell->pos;
             data.cellMap.correctDirection(displacement);
             auto actualDistance = Math::length(displacement);
-            if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance) {
+            if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance[cell->color]) {
                 scheduleForDestruction = true;
                 if (cudaSimulationParameters.clusterDecay) {
                     connectedCell->livingState = LivingState_Dying;
