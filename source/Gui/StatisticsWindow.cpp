@@ -479,7 +479,7 @@ void _StatisticsWindow::plotSumColorsIntern(
 
     if (ImPlot::BeginPlot(
             "##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        auto color = ImPlot::GetColormapColor(row <= 10 ? row : 20 - row);
+        auto color = ImPlot::GetColormapColor((row % 21) <= 10 ? (row % 21): 20 - (row % 21));
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::AnnotateClamped(
                 endTime, endValue, ImVec2(-10.0f, 10.0f), ImPlot::GetLastItemColor(), "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
