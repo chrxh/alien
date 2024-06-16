@@ -1178,6 +1178,7 @@ namespace
         loadSave(task, serializedData, 1 + 18 * 8, dataPoints.numReconnectorCreated);
         loadSave(task, serializedData, 1 + 19 * 8, dataPoints.numReconnectorRemoved);
         loadSave(task, serializedData, 1 + 20 * 8, dataPoints.numDetonations);
+        loadSave(task, serializedData, 1 + 21 * 8, dataPoints.numColonies);
     }
 }
 
@@ -1212,6 +1213,7 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
     writeLabelAllColors("Reconnector creations");
     writeLabelAllColors("Reconnector deletions");
     writeLabelAllColors("Detonations");
+    writeLabelAllColors("Colonies");
     stream << std::endl;
 
     //content

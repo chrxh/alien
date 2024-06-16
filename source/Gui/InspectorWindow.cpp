@@ -174,7 +174,7 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
                     cell.stiffness);
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(BaseTabTextWidth).tooltip(Const::CellMaxConnectionTooltip), cell.maxConnections);
                 AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters().name("Indestructible").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip), cell.barrier);
+                    AlienImGui::CheckboxParameters().name("Indestructible wall").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip), cell.barrier);
                 ImGui::TreePop();
             }
             if (ImGui::TreeNodeEx("Ids##Base", TreeNodeFlags)) {
