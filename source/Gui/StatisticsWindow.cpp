@@ -186,6 +186,12 @@ void _StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::numColonies);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Colonies");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::averageGenomeCells, 2);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Average genome size");
@@ -426,11 +432,9 @@ void _StatisticsWindow::processBackground()
     auto timestep = _simController->getCurrentTimestep();
 
     auto timepoint = std::chrono::steady_clock::now();
-    if (!_liveStatisticsDataTimepoint) {
-        _liveStatisticsDataTimepoint = timepoint;
-    }
-    auto duration = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_liveStatisticsDataTimepoint).count());
-    if (duration > LiveStatisticsDeltaTime) {
+    auto duration = _liveStatisticsDataTimepoint.has_value()
+        ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_liveStatisticsDataTimepoint).count()) : 0;
+    if (!_liveStatisticsDataTimepoint || duration > LiveStatisticsDeltaTime) {
         _lastStatisticsData = _simController->getRawStatistics();
         _liveStatistics.add(_lastStatisticsData->timeline, timestep, toDouble(duration) / 1000);
         _liveStatisticsDataTimepoint = timepoint;

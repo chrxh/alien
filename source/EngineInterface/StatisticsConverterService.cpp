@@ -69,6 +69,7 @@ DataPointCollection StatisticsConverterService::convert(
     result.time = time;
     result.numCells = getDataPointForTimestepProperty(data.timestep.numCells);
     result.numSelfReplicators = getDataPointForTimestepProperty(data.timestep.numSelfReplicators);
+    result.numColonies = getDataPointForTimestepProperty(data.timestep.numColonies);
     result.numViruses = getDataPointForTimestepProperty(data.timestep.numViruses);
     result.numConnections = getDataPointForTimestepProperty(data.timestep.numConnections);
     result.numParticles = getDataPointForTimestepProperty(data.timestep.numParticles);
