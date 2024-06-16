@@ -26,6 +26,7 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
     result.time = time + other.time;
     result.numCells = numCells + other.numCells;
     result.numSelfReplicators = numSelfReplicators + other.numSelfReplicators;
+    result.numColonies = numColonies + other.numColonies;
     result.numViruses = numViruses + other.numViruses;
     result.numConnections = numConnections + other.numConnections;
     result.numParticles = numParticles + other.numParticles;
@@ -54,6 +55,7 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
     result.time = time / divisor;
     result.numCells = numCells / divisor;
     result.numSelfReplicators = numSelfReplicators / divisor;
+    result.numColonies = numColonies / divisor;
     result.numViruses = numViruses / divisor;
     result.numConnections = numConnections / divisor;
     result.numParticles = numParticles / divisor;
