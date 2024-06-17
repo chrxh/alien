@@ -257,6 +257,7 @@ void _SimulationParametersWindow::processBase(
                          "Single cell function",
                          "All cell functions"})
                     .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
+                        ICON_FA_CHEVRON_RIGHT " Energy: The more energy a cell has, the brighter it is displayed. A grayscale is used.\n\n"
                         ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n"
                         ICON_FA_CHEVRON_RIGHT " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into account).\n\n"
                         ICON_FA_CHEVRON_RIGHT " Mutants and cell functions: Combination of mutants and cell function coloring.\n\n"
@@ -1183,7 +1184,9 @@ void _SimulationParametersWindow::processBase(
                         .max(20.0f)
                         .format("%.1f")
                         .defaultValue(origParameters.genomeComplexityRamificationFactor)
-                        .tooltip(""),
+                        .tooltip("With this parameter, the number of ramifications of the cell structure to the genome is taken into account for the "
+                                 "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
+                                 "then have a high complexity value."),
                     parameters.genomeComplexityRamificationFactor);
                 AlienImGui::EndTreeNode();
             }
