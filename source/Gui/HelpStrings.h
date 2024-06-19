@@ -274,9 +274,10 @@ namespace Const
         "be multiples of certain values. This allows for greater stability of the created networks, as the angles would otherwise be more susceptible to "
         "external influences. Choosing 60 degrees is recommended here, as it allows for the accurate representation of most geometries.";
 
-    std::string const GenomeNumBranchesTooltip = "Specifies how many constructions (including repetitions) should be created and connected to the constructor.";
+    std::string const GenomeNumBranchesTooltip = "Specifies how many branches the constructor can use to build the cell networks. Each branch is connected to "
+                                                 "the constructor cell and consists of repetitions of the encoded cell network.";
 
-    std::string const GenomeRepetitionsPerConstructionTooltip =
+    std::string const GenomeRepetitionsPerBranchTooltip =
         "This value specifies how many times the cell network described in the genome should be concatenated for each construction. For a value greater "
         "than 1, the cell network geometry has to fulfill certain requirements (e.g. rectangle, hexagon, loop and lolli geometries are not suitable for "
         "concatenation). A value of infinity is also possible, but should not be used for an activated completeness check (see simulation parameters).";
@@ -329,6 +330,19 @@ namespace Const
         "is completed by the constructor, the cells briefly enter the 'Activating' state before transitioning to the 'Ready' state shortly after. If a cell "
         "network is in the process of dying, its cells are in the 'Dying' state.";
 
+    std::string const ColoringParameterTooltip =
+        "Here, one can set how the cells are to be colored during rendering. \n\n" ICON_FA_CHEVRON_RIGHT
+        " Energy: The more energy a cell has, the brighter it is displayed. A grayscale is used.\n\n" ICON_FA_CHEVRON_RIGHT
+        " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
+        " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into "
+        "account).\n\n" ICON_FA_CHEVRON_RIGHT " Mutants and cell functions: Combination of mutants and cell function coloring.\n\n" ICON_FA_CHEVRON_RIGHT
+        " Cell states: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
+        " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex genome protection' is "
+        "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large "
+        "bonus\n\n" ICON_FA_CHEVRON_RIGHT
+        " Single cell function: A specific type of cell function can be highlighted, which is selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT
+        " All cell functions: The cells are colored according to their cell function.";
+
     inline std::string getCellFunctionTooltip(CellFunction cellFunction)
     {
         switch (cellFunction) {
@@ -368,10 +382,14 @@ namespace Const
 
     std::string const GenomeNumCellsTooltip = "The number of the encoded cells per repetition in the genome. Cells of sub-genomes are not counted here.";
 
-    std::string const GenomeCurrentCellTooltip = "The sequence number of the cell in the genome that will be constructed next.";
+    std::string const GenomeCurrentBranchTooltip = "This number specifies the current branch on which the construction process takes place. Each branch is "
+                                                   "connected to the constructor cell and consists of repetitions of the encoded cell network.";
 
-    std::string const GenomeCurrentRepetitionTooltip = "The cell network encoded in the genome can be repeated in a single construction by specifying a number of "
-                                                 "repetitions. This value indicates the index of the current repetition.";
+    std::string const GenomeCurrentRepetitionTooltip =
+        "The cell network encoded in the genome can be repeatedly built by specifying a number of "
+        "repetitions. This value indicates the index of the current repetition.";
+
+    std::string const GenomeCurrentCellTooltip = "The sequence number of the cell in the genome that will be constructed next.";
 
     std::string const CellInjectorCounterTooltip =
         "When a genome injection is initiated, the counter increments after each consecutive successful activation of the injector. Once the counter reaches a "

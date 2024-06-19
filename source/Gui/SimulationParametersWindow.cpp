@@ -256,17 +256,7 @@ void _SimulationParametersWindow::processBase(
                          "Genome complexities",
                          "Single cell function",
                          "All cell functions"})
-                    .tooltip("Here, one can set how the cells are to be colored during rendering. \n\n"
-                        ICON_FA_CHEVRON_RIGHT " Energy: The more energy a cell has, the brighter it is displayed. A grayscale is used.\n\n"
-                        ICON_FA_CHEVRON_RIGHT " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n"
-                        ICON_FA_CHEVRON_RIGHT " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into account).\n\n"
-                        ICON_FA_CHEVRON_RIGHT " Mutants and cell functions: Combination of mutants and cell function coloring.\n\n"
-                        ICON_FA_CHEVRON_RIGHT " Cell states: green = under construction, blue = ready, red = dying\n\n"
-                        ICON_FA_CHEVRON_RIGHT " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex genome protection' is "
-                        "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large bonus\n\n"
-                        ICON_FA_CHEVRON_RIGHT " Single cell function: A specific type of cell function can be highlighted, which is selected in the next parameter.\n\n"
-                        ICON_FA_CHEVRON_RIGHT " All cell functions: The cells are colored according to their cell function.\n\n"
-                    ),
+                    .tooltip(Const::ColoringParameterTooltip),
                 parameters.cellColoring);
             if (parameters.cellColoring == CellColoring_CellFunction) {
                 AlienImGui::Switcher(
@@ -522,7 +512,6 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Absorption factor")
-                    .tooltip("")
                     .textWidth(RightColumnWidth)
                     .logarithmic(true)
                     .colorDependence(true)
@@ -547,7 +536,6 @@ void _SimulationParametersWindow::processBase(
             AlienImGui::SliderInt(
                 AlienImGui::SliderIntParameters()
                     .name("Radiation type I: Minimum age")
-                    .tooltip("")
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .infinity(true)
@@ -1004,7 +992,6 @@ void _SimulationParametersWindow::processBase(
                     .logarithmic(true)
                     .max(100000)
                     .textWidth(RightColumnWidth)
-                    .tooltip("")
                     .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionInjectorDurationColorMatrix))
                     .tooltip("The number of activations an injector cell requires to infect another cell. One activation usually takes 6 time steps. The row "
                              "number determines the color of the injector cell, while the column number corresponds to the color of the infected cell."),
@@ -1173,7 +1160,7 @@ void _SimulationParametersWindow::processBase(
                         .max(1.0f)
                         .format("%.2f")
                         .defaultValue(origParameters.genomeComplexitySizeFactor)
-                        .tooltip(""),
+                        .tooltip("This parameter controls how the genome size influences the calculation of its complexity."),
                     parameters.genomeComplexitySizeFactor);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -1277,7 +1264,7 @@ void _SimulationParametersWindow::processBase(
                         .min(0)
                         .max(1.0f)
                         .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerSameMutantPenalty))
-                        .tooltip(""),
+                        .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
                     parameters.cellFunctionAttackerArisingComplexMutantPenalty);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -1463,7 +1450,7 @@ void _SimulationParametersWindow::processBase(
                         .disabledValue(parameters.cellInactiveMaxAge)
                         .defaultEnabledValue(&origParameters.cellInactiveMaxAgeActivated)
                         .defaultValue(origParameters.cellInactiveMaxAge)
-                        .tooltip(""),
+                        .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered."),
                     parameters.cellInactiveMaxAge,
                     &parameters.cellInactiveMaxAgeActivated);
                 AlienImGui::SliderInt(
@@ -1504,7 +1491,7 @@ void _SimulationParametersWindow::processBase(
                              "Genome complexities",
                              "Single cell function",
                              "All cell functions"})
-                        .tooltip(""),
+                        .tooltip(Const::ColoringParameterTooltip),
                     parameters.cellGlowColoring);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -1513,7 +1500,7 @@ void _SimulationParametersWindow::processBase(
                         .min(1.0f)
                         .max(8.0f)
                         .defaultValue(&origParameters.cellGlowRadius)
-                        .tooltip(""),
+                        .tooltip("The radius of the glow. Please note that a large radius affects the performance."),
                     &parameters.cellGlowRadius);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -1522,7 +1509,7 @@ void _SimulationParametersWindow::processBase(
                         .min(0)
                         .max(1.0f)
                         .defaultValue(&origParameters.cellGlowStrength)
-                        .tooltip(""),
+                        .tooltip("The strength of the glow."),
                     &parameters.cellGlowStrength);
                 AlienImGui::EndTreeNode();
             }
@@ -2203,7 +2190,11 @@ void _SimulationParametersWindow::processAddonList(
                     .tooltip("It contains further settings that influence how much energy can be obtained from an attack by attacker cells."),
                 parameters.features.advancedAttackerControl);
             AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Cell age limiter").textWidth(0).defaultValue(origParameters.features.cellAgeLimiter).tooltip(""),
+                AlienImGui::CheckboxParameters()
+                    .name("Cell age limiter")
+                    .textWidth(0)
+                    .defaultValue(origParameters.features.cellAgeLimiter)
+                    .tooltip("It enables additional possibilities to control the maximal cell age."),
                 parameters.features.cellAgeLimiter);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
@@ -2213,7 +2204,11 @@ void _SimulationParametersWindow::processAddonList(
                     .tooltip("This can be used to define color transitions for cells depending on their age."),
                 parameters.features.cellColorTransitionRules);
             AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Cell glow").textWidth(0).defaultValue(origParameters.features.cellGlow).tooltip(""),
+                AlienImGui::CheckboxParameters()
+                    .name("Cell glow")
+                    .textWidth(0)
+                    .defaultValue(origParameters.features.cellGlow)
+                    .tooltip("It enables an additional rendering step that makes the cells glow."),
                 parameters.features.cellGlow);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
