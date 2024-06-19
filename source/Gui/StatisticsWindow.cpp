@@ -189,7 +189,8 @@ void _StatisticsWindow::processTimelineStatistics()
         processPlot(row++, &DataPointCollection::numColonies);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Diversity");
-        AlienImGui::Tooltip("The number of colonies is displayed. A colony is a set of at least 10 self-replicators of the same mutation.");
+        ImGui::SameLine();
+        AlienImGui::HelpMarker("The number of colonies is displayed. A colony is a set of at least 10 self-replicators of the same mutation.");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
