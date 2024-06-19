@@ -355,7 +355,7 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
                 .name("Repetitions per branch")
                 .infinity(true)
                 .textWidth(ContentHeaderTextWidth)
-                .tooltip(Const::GenomeRepetitionsPerConstructionTooltip),
+                .tooltip(Const::GenomeRepetitionsPerBranchTooltip),
             tab.genome.header.numRepetitions);
         if (tab.genome.header.numRepetitions > 1) {
             table.next();

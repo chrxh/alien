@@ -434,7 +434,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                         .name("Number of branches")
                         .textWidth(GenomeTabTextWidth)
                         .readOnly(true)
-                        .tooltip(""),
+                        .tooltip(Const::GenomeNumBranchesTooltip),
                     numBranches);
 
                 auto numRepetitions = genomeDesc.header.numRepetitions;
@@ -444,7 +444,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                         .textWidth(GenomeTabTextWidth)
                         .infinity(true)
                         .readOnly(true)
-                        .tooltip(Const::GenomeRepetitionsPerConstructionTooltip),
+                        .tooltip(Const::GenomeRepetitionsPerBranchTooltip),
                     numRepetitions);
 
                 auto numNodes = toInt(genomeDesc.cells.size());
@@ -460,8 +460,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                     AlienImGui::InputInt(
                         AlienImGui::InputIntParameters()
                             .name("Current branch index")
-                            .textWidth(GenomeTabTextWidth)
-                            .tooltip(""),
+                            .textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentBranchTooltip),
                         desc.currentBranch);
                     AlienImGui::InputInt(
                         AlienImGui::InputIntParameters()
