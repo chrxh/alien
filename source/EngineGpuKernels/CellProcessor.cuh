@@ -507,7 +507,6 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
             if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance[cell->color]) {
                 scheduleForDestruction = true;
                 if (cudaSimulationParameters.clusterDecay) {
-                    connectedCell->livingState = LivingState_Dying;
                     cell->livingState = LivingState_Dying;
                 }
             }

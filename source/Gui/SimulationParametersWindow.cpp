@@ -1147,39 +1147,6 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
-         * Addon: Genome complexity measurement
-         */
-        if (parameters.features.genomeComplexityMeasurement) {
-            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Genome complexity measurement").highlighted(false))) {
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Size factor")
-                        .textWidth(RightColumnWidth)
-                        .colorDependence(true)
-                        .min(0.0f)
-                        .max(1.0f)
-                        .format("%.2f")
-                        .defaultValue(origParameters.genomeComplexitySizeFactor)
-                        .tooltip("This parameter controls how the genome size influences the calculation of its complexity."),
-                    parameters.genomeComplexitySizeFactor);
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Ramification factor")
-                        .textWidth(RightColumnWidth)
-                        .colorDependence(true)
-                        .min(0.0f)
-                        .max(20.0f)
-                        .format("%.1f")
-                        .defaultValue(origParameters.genomeComplexityRamificationFactor)
-                        .tooltip("With this parameter, the number of ramifications of the cell structure to the genome is taken into account for the "
-                                 "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
-                                 "then have a high complexity value."),
-                    parameters.genomeComplexityRamificationFactor);
-                AlienImGui::EndTreeNode();
-            }
-        }
-
-        /**
          * Addon: Advanced absorption control
          */
         if (parameters.features.advancedAbsorptionControl) {
@@ -1511,6 +1478,39 @@ void _SimulationParametersWindow::processBase(
                         .defaultValue(&origParameters.cellGlowStrength)
                         .tooltip("The strength of the glow."),
                     &parameters.cellGlowStrength);
+                AlienImGui::EndTreeNode();
+            }
+        }
+
+        /**
+         * Addon: Genome complexity measurement
+         */
+        if (parameters.features.genomeComplexityMeasurement) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Genome complexity measurement").highlighted(false))) {
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Size factor")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0.0f)
+                        .max(1.0f)
+                        .format("%.2f")
+                        .defaultValue(origParameters.genomeComplexitySizeFactor)
+                        .tooltip("This parameter controls how the genome size influences the calculation of its complexity."),
+                    parameters.genomeComplexitySizeFactor);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Ramification factor")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0.0f)
+                        .max(20.0f)
+                        .format("%.1f")
+                        .defaultValue(origParameters.genomeComplexityRamificationFactor)
+                        .tooltip("With this parameter, the number of ramifications of the cell structure to the genome is taken into account for the "
+                                 "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
+                                 "then have a high complexity value."),
+                    parameters.genomeComplexityRamificationFactor);
                 AlienImGui::EndTreeNode();
             }
         }
