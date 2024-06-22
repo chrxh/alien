@@ -67,7 +67,7 @@ Further information and artwork:
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 # 💽 Installer
-Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (Updated: 2024-04-26)
+Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (updated: 2024-04-26)
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section below.
 
@@ -82,8 +82,7 @@ git clone --recursive https://github.com/chrxh/alien.git
 Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
 
 ### Build instructions
-Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and a toolchain for CMake (e.g. GCC 9.x+ or [MSVC v142+](https://visualstudio.microsoft.com/de/free-developer-offers/)).
-There are reported compile issues with GCC 13 at the moment. Please use GCC 12 instead if you intend to use GCC.
+Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and a toolchain for CMake (e.g. GCC 9.x+ or [MSVC v142+](https://visualstudio.microsoft.com/vs/)).
 
 Build steps:
 ```
@@ -93,6 +92,11 @@ cmake --build . --config Release -j8
 ```
 If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
 It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
+
+There are reported build issues with (updated: 2024-06-22)
+* GCC 13 (version 12 should work)
+* Visual Studio 17.10 (version 17.9 should work)
+* CUDA 12.5 (version 12.4 should work)
 
 # ⌨️ Command-line interface
 
