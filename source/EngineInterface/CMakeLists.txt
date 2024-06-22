@@ -55,7 +55,6 @@ add_library(EngineInterface
     ZoomLevels.h)
 
 target_link_libraries(EngineInterface Boost::boost)
-target_link_libraries(EngineInterface cereal)
 target_link_libraries(alien ZLIB::ZLIB)
 
 find_path(ZSTR_INCLUDE_DIRS "zstr.hpp")
