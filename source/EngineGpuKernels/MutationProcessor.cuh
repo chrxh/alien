@@ -853,7 +853,7 @@ __inline__ __device__ void MutationProcessor::genomeColorMutation(SimulationData
 __inline__ __device__ void MutationProcessor::adaptMutationId(SimulationData& data, ConstructorFunction& constructor)
 {
     if (GenomeDecoder::containsSelfReplication(constructor)) {
-        constructor.offspringMutationId = abs(toInt(data.numberGen1.createNewSmalllId()));
+        constructor.offspringMutationId = data.numberGen1.createNewSmallId();
     }
 }
 

@@ -387,6 +387,9 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataTO d
             auto const& cell = dataTO.cells[index];
             numberGen.adaptMaxId(cell.id);
             numberGen.adaptMaxSmallId(cell.mutationId);
+            if (cell.cellFunction == CellFunction_Constructor) {
+                numberGen.adaptMaxSmallId(cell.cellFunctionData.constructor.offspringMutationId);
+            }
         }
     }
     {
