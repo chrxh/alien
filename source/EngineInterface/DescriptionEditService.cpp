@@ -489,7 +489,7 @@ void DescriptionEditService::randomizeCountdowns(ClusteredDataDescription& data,
 void DescriptionEditService::randomizeMutationIds(ClusteredDataDescription& data)
 {
     for (auto& cluster : data.clusters) {
-        auto mutationId = NumberGenerator::getInstance().getRandomInt();
+        auto mutationId = NumberGenerator::getInstance().getRandomInt() % 65536;
         for (auto& cell : cluster.cells) {
             cell.mutationId = toInt(mutationId);
             if (cell.getCellFunctionType() == CellFunction_Constructor) {

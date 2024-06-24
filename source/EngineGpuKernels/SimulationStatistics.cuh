@@ -66,7 +66,7 @@ public:
     {
         auto partition = calcAllThreadsPartition(MutantToColorCountMapSize);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            if (_mutantToColorCountMap[index].count > 10) {
+            if (_mutantToColorCountMap[index].count >= 20) {
                 atomicAdd(&_data->timeline.timestep.numColonies[_mutantToColorCountMap[index].color], 1);
             }
         }
