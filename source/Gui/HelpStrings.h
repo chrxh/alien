@@ -391,6 +391,9 @@ namespace Const
 
     std::string const GenomeCurrentCellTooltip = "The sequence number of the cell in the genome that will be constructed next.";
 
+    std::string const GenomePreviewTooltip = "The spatial structure of the cells encoded in the genome sequence is displayed here. This is only a rough "
+                                             "prediction without using the physics engine.";
+
     std::string const CellInjectorCounterTooltip =
         "When a genome injection is initiated, the counter increments after each consecutive successful activation of the injector. Once the counter reaches a "
         "specific threshold (refer to the 'Injection time' simulation parameter), the injection process is completed.";

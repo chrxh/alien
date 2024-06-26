@@ -253,7 +253,7 @@ public:
     static void Separator();
     static void MovableSeparator(float& height);
 
-    static void Group(std::string const& text);
+    static void Group(std::string const& text, std::optional<std::string> const& tooltip = std::nullopt);
 
     static bool ToolbarButton(std::string const& text);
     static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);

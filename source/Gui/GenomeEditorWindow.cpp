@@ -294,7 +294,8 @@ void _GenomeEditorWindow::processTab(TabData& tab)
 
     AlienImGui::MovableSeparator(_previewHeight);
 
-    AlienImGui::Group("Preview (reference configuration)");
+    AlienImGui::Group("Preview (reference configuration)", Const::GenomePreviewTooltip);
+    ImGui::SameLine();
     if (ImGui::BeginChild("##child4", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         showPreview(tab);
     }
