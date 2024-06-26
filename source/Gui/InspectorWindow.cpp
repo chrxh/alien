@@ -376,7 +376,9 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
     if (ImGui::BeginTabItem("Genome", nullptr, flags)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
-            if (ImGui::TreeNodeEx("Data", TreeNodeFlags)) {
+            auto previewNodeResult = ImGui::TreeNodeEx("Preview (reference configuration)", TreeNodeFlags);
+            AlienImGui::HelpMarker(Const::GenomePreviewTooltip);
+            if (previewNodeResult) {
                 if (ImGui::BeginChild("##child", ImVec2(0, scale(200)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
                     auto genomDesc = GenomeDescriptionService::convertBytesToDescription(desc.genome);
                     auto previewDesc = PreviewDescriptionService::convert(genomDesc, std::nullopt, parameters);

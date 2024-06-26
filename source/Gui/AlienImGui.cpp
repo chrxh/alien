@@ -848,11 +848,14 @@ void AlienImGui::MovableSeparator(float& height)
     }
 }
 
-void AlienImGui::Group(std::string const& text)
+void AlienImGui::Group(std::string const& text, std::optional<std::string> const& tooltip)
 {
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::TextUnformatted(text.c_str());
+    if (tooltip.has_value()) {
+        AlienImGui::HelpMarker(*tooltip);
+    }
     ImGui::Separator();
     ImGui::Spacing();
 }
