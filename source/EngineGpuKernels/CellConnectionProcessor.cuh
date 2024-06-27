@@ -38,7 +38,7 @@ public:
 private:
     static int constexpr MaxOperationsPerCell = 30;
 
-    __inline__ __device__ static bool scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex);
+    __inline__ __device__ static void scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex);
 
     __inline__ __device__ static void lockAndtryAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
     __inline__ __device__ static bool tryAddConnectionOneWay(
@@ -492,7 +492,7 @@ __inline__ __device__ bool CellConnectionProcessor::isConnectedConnected(Cell* c
     return result;
 }
 
-__inline__ __device__ bool CellConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex)
+__inline__ __device__ void CellConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex)
 {
     auto origOperationIndex = atomicCAS(&cell->scheduledOperationIndex, -1, operationIndex);
     for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
