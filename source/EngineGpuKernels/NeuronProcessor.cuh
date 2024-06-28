@@ -84,4 +84,5 @@ __inline__ __device__ float NeuronProcessor::applyActivationFunction(NeuronActiv
     case NeuronActivationFunction_Gaussian:
         return __expf(-2 * x * x);
     }
+    return 0;
 }
