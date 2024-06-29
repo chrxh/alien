@@ -195,13 +195,13 @@ struct DefenderGenomeDescription
 
 struct ReconnectorGenomeDescription
 {
-    int color = 0;
+    std::optional<int> restrictToColor;
 
     auto operator<=>(ReconnectorGenomeDescription const&) const = default;
 
-    ReconnectorGenomeDescription& setColor(int value)
+    ReconnectorGenomeDescription& setRestrictToColor(int value)
     {
-        color = value;
+        restrictToColor = value;
         return *this;
     }
 };

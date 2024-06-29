@@ -120,7 +120,7 @@ struct DefenderTO
 
 struct ReconnectorTO
 {
-    uint8_t color;
+    uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
 };
 
 struct DetonatorTO

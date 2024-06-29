@@ -711,7 +711,7 @@ ConstructorProcessor::constructCellIntern(
         result->cellFunctionData.defender.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % DefenderMode_Count;
     } break;
     case CellFunction_Reconnector: {
-        result->cellFunctionData.reconnector.color = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % MAX_COLORS;
+        result->cellFunctionData.reconnector.restrictToColor = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition, MAX_COLORS);
     } break;
     case CellFunction_Detonator: {
         result->cellFunctionData.detonator.state = DetonatorState_Ready;

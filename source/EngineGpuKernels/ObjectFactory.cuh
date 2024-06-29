@@ -196,7 +196,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.defender.mode = cellTO.cellFunctionData.defender.mode;
     } break;
     case CellFunction_Reconnector: {
-        cell->cellFunctionData.reconnector.color = cellTO.cellFunctionData.reconnector.color;
+        cell->cellFunctionData.reconnector.restrictToColor = cellTO.cellFunctionData.reconnector.restrictToColor;
     } break;
     case CellFunction_Detonator: {
         cell->cellFunctionData.detonator.state = cellTO.cellFunctionData.detonator.state;
@@ -360,7 +360,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.defender.mode = _data->numberGen1.random(DefenderMode_Count - 1);
         } break;
         case CellFunction_Reconnector: {
-            cell->cellFunctionData.reconnector.color = _data->numberGen1.random(MAX_COLORS - 1);
+            cell->cellFunctionData.reconnector.restrictToColor = _data->numberGen1.randomBool() ? _data->numberGen1.random(MAX_COLORS - 1) : 255;
         } break;
         case CellFunction_Detonator: {
             cell->cellFunctionData.detonator.state = DetonatorState_Ready;

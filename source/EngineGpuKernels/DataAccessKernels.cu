@@ -146,7 +146,7 @@ namespace
             cellTO.cellFunctionData.defender.mode = cell->cellFunctionData.defender.mode;
         } break;
         case CellFunction_Reconnector: {
-            cellTO.cellFunctionData.reconnector.color = cell->cellFunctionData.reconnector.color;
+            cellTO.cellFunctionData.reconnector.restrictToColor = cell->cellFunctionData.reconnector.restrictToColor;
         } break;
         case CellFunction_Detonator: {
             cellTO.cellFunctionData.detonator.state = cell->cellFunctionData.detonator.state;

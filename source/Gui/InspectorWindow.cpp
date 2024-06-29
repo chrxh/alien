@@ -700,9 +700,10 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
 void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconnector)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
-        AlienImGui::ComboColor(
-            AlienImGui::ComboColorParameters().name("Target color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeReconnectorTargetColorTooltip),
-            reconnector.color);
+        AlienImGui::ComboOptionalColor(
+            AlienImGui::ComboColorParameters().name("Restrict to color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
+            reconnector.restrictToColor);
+
         ImGui::TreePop();
     }
 }

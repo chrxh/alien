@@ -239,7 +239,7 @@ namespace Const
         ICON_FA_CHEVRON_RIGHT " Anti-attacker: reduces the attack strength of an enemy attacker cell\n\n" ICON_FA_CHEVRON_RIGHT
                               "Anti-injector: increases the injection duration of an enemy injector cell";
 
-    std::string const GenomeReconnectorTargetColorTooltip = "Specifies the color of the cells where connections are to be established or destroyed.";
+    std::string const GenomeReconnectorRestrictToColorTooltip = "Specifies the color of the cells where connections are to be established or destroyed.";
 
     std::string const DetonatorStateTooltip =
         ICON_FA_CHEVRON_RIGHT " Ready: The detonator cell waits for input on channel #0. If abs(value) > threshold, the detonator will be activated.\n\n"

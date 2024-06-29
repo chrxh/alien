@@ -59,7 +59,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         if (otherCell->barrier) {
             return;
         }
-        if (otherCell->color != cell->cellFunctionData.reconnector.color) {
+        if (cell->cellFunctionData.reconnector.restrictToColor != 255 && otherCell->color != cell->cellFunctionData.reconnector.restrictToColor) {
             return;
         }
         if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {
