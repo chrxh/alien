@@ -50,6 +50,7 @@ __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& dat
 
 __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
 {
+    auto const& reconnector = cell->cellFunctionData.reconnector;
     Cell* closestCell = nullptr;
     float closestDistance = 0;
     data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellFunctionReconnectorRadius[cell->color], cell->detached, [&](auto const& otherCell) {
@@ -59,7 +60,17 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         if (otherCell->barrier) {
             return;
         }
-        if (cell->cellFunctionData.reconnector.restrictToColor != 255 && otherCell->color != cell->cellFunctionData.reconnector.restrictToColor) {
+        if (reconnector.restrictToColor != 255 && otherCell->color != reconnector.restrictToColor) {
+            return;
+        }
+        if (reconnector.restrictToMutation == ReconnectorRestrictToMutation_RestrictToSameMutants && otherCell->mutationId != cell->mutationId) {
+            return;
+        }
+        if (reconnector.restrictToMutation == ReconnectorRestrictToMutation_RestrictToOtherNonZeroMutants
+            && (otherCell->mutationId == cell->mutationId || otherCell->mutationId == 0)) {
+            return;
+        }
+        if (reconnector.restrictToMutation == ReconnectorRestrictToMutation_RestrictToZeroMutants && otherCell->mutationId != 0) {
             return;
         }
         if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {

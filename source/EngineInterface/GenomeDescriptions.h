@@ -196,12 +196,18 @@ struct DefenderGenomeDescription
 struct ReconnectorGenomeDescription
 {
     std::optional<int> restrictToColor;
+    ReconnectorRestrictToMutation restrictToMutation;
 
     auto operator<=>(ReconnectorGenomeDescription const&) const = default;
 
     ReconnectorGenomeDescription& setRestrictToColor(int value)
     {
         restrictToColor = value;
+        return *this;
+    }
+    ReconnectorGenomeDescription& setRestrictToMutation(ReconnectorRestrictToMutation value)
+    {
+        restrictToMutation = value;
         return *this;
     }
 };
