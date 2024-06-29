@@ -494,7 +494,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         ReconnectorDescription reconnector;
         reconnector.restrictToColor =
             cellTO.cellFunctionData.reconnector.restrictToColor != 255 ? std::make_optional(cellTO.cellFunctionData.reconnector.restrictToColor) : std::nullopt;
-        reconnector.restrictToMutation = cellTO.cellFunctionData.reconnector.restrictToMutation;
+        reconnector.restrictToMutants = cellTO.cellFunctionData.reconnector.restrictToMutants;
         result.cellFunction = reconnector;
     } break;
     case CellFunction_Detonator: {
@@ -650,7 +650,7 @@ void DescriptionConverter::addCell(
         auto const& reconnectorDesc = std::get<ReconnectorDescription>(*cellDesc.cellFunction);
         ReconnectorTO reconnectorTO;
         reconnectorTO.restrictToColor = toUInt8(reconnectorDesc.restrictToColor.value_or(255));
-        reconnectorTO.restrictToMutation = reconnectorDesc.restrictToMutation;
+        reconnectorTO.restrictToMutants = reconnectorDesc.restrictToMutants;
         cellTO.cellFunctionData.reconnector = reconnectorTO;
     } break;
     case CellFunction_Detonator: {

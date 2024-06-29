@@ -63,14 +63,14 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         if (reconnector.restrictToColor != 255 && otherCell->color != reconnector.restrictToColor) {
             return;
         }
-        if (reconnector.restrictToMutation == ReconnectorRestrictToMutation_RestrictToSameMutants && otherCell->mutationId != cell->mutationId) {
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToSameMutants && otherCell->mutationId != cell->mutationId) {
             return;
         }
-        if (reconnector.restrictToMutation == ReconnectorRestrictToMutation_RestrictToOtherNonZeroMutants
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToOtherNonZeroMutants
             && (otherCell->mutationId == cell->mutationId || otherCell->mutationId == 0)) {
             return;
         }
-        if (reconnector.restrictToMutation == ReconnectorRestrictToMutation_RestrictToZeroMutants && otherCell->mutationId != 0) {
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToZeroMutants && otherCell->mutationId != 0) {
             return;
         }
         if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {

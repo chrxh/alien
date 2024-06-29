@@ -95,7 +95,7 @@ namespace
 
     auto constexpr Id_ReconnectorGenome_Color_Deprecated = 0;
     auto constexpr Id_ReconnectorGenome_RestrictToColor = 1;
-    auto constexpr Id_ReconnectorGenome_RestrictToMutation = 2;
+    auto constexpr Id_ReconnectorGenome_RestrictToMutants = 2;
 
     auto constexpr Id_DetonatorGenome_Countdown = 0;
 
@@ -170,7 +170,7 @@ namespace
 
     auto constexpr Id_Reconnector_Color_Deprecated = 0;
     auto constexpr Id_Reconnector_RestrictToColor = 1;
-    auto constexpr Id_Reconnector_RestrictToMutation = 2;
+    auto constexpr Id_Reconnector_RestrictToMutants = 2;
 
     auto constexpr Id_Detonator_State = 0;
     auto constexpr Id_Detonator_Countdown = 1;
@@ -429,7 +429,7 @@ namespace cereal
         ReconnectorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_ReconnectorGenome_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
-        loadSave(task, auxiliaries, Id_ReconnectorGenome_RestrictToMutation, data.restrictToMutation, defaultObject.restrictToMutation);
+        loadSave(task, auxiliaries, Id_ReconnectorGenome_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
         processLoadSaveMap(task, ar, auxiliaries);
 
         //compatibility with older versions
@@ -723,7 +723,7 @@ namespace cereal
         ReconnectorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Reconnector_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
-        loadSave(task, auxiliaries, Id_Reconnector_RestrictToMutation, data.restrictToMutation, defaultObject.restrictToMutation);
+        loadSave(task, auxiliaries, Id_Reconnector_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
         processLoadSaveMap(task, ar, auxiliaries);
 
         //compatibility with older versions

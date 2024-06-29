@@ -167,7 +167,7 @@ struct DefenderFunction
 struct ReconnectorFunction
 {
     uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
-    ReconnectorRestrictToMutation restrictToMutation;
+    ReconnectorRestrictToMutants restrictToMutants;
 };
 
 struct DetonatorFunction
