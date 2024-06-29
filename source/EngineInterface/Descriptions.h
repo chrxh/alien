@@ -297,7 +297,7 @@ struct DefenderDescription
 struct ReconnectorDescription
 {
     std::optional<int> restrictToColor;
-    ReconnectorRestrictToMutation restrictToMutation;
+    ReconnectorRestrictToMutants restrictToMutants;
 
     auto operator<=>(ReconnectorDescription const&) const = default;
 
@@ -306,9 +306,9 @@ struct ReconnectorDescription
         restrictToColor = value;
         return *this;
     }
-    ReconnectorDescription& setRestrictToMutation(ReconnectorRestrictToMutation value)
+    ReconnectorDescription& setRestrictToMutants(ReconnectorRestrictToMutants value)
     {
-        restrictToMutation = value;
+        restrictToMutants = value;
         return *this;
     }
 };

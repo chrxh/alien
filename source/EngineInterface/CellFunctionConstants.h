@@ -128,14 +128,14 @@ enum DetonatorState_
     DetonatorState_Exploded
 };
 
-using ReconnectorRestrictToMutation = uint8_t;
-enum ReconnectorRestrictToMutation_
+using ReconnectorRestrictToMutants = uint8_t;
+enum ReconnectorRestrictToMutants_
 {
-    ReconnectorRestrictToMutation_NoRestriction,
-    ReconnectorRestrictToMutation_RestrictToSameMutants,
-    ReconnectorRestrictToMutation_RestrictToOtherNonZeroMutants,
-    ReconnectorRestrictToMutation_RestrictToZeroMutants,
-    ReconnectorRestrictToMutation_Count
+    ReconnectorRestrictToMutants_NoRestriction,
+    ReconnectorRestrictToMutants_RestrictToSameMutants,
+    ReconnectorRestrictToMutants_RestrictToOtherNonZeroMutants,
+    ReconnectorRestrictToMutants_RestrictToZeroMutants,
+    ReconnectorRestrictToMutants_Count
 };
 
 using CellEvent = uint8_t;
