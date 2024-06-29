@@ -32,6 +32,6 @@ namespace Const
     auto constexpr InjectorFixedBytes = 1;
     auto constexpr MuscleBytes = 1;
     auto constexpr DefenderBytes = 1;
-    auto constexpr ReconnectorBytes = 1;
+    auto constexpr ReconnectorBytes = 2;
     auto constexpr DetonatorBytes = 2;
 }

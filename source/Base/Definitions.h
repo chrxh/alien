@@ -44,6 +44,12 @@ inline int toInt(T const& value)
     return static_cast<int>(value);
 }
 
+template <typename T>
+inline uint8_t toUInt8(T const& value)
+{
+    return static_cast<uint8_t>(value);
+}
+
 #define THROW_NOT_IMPLEMENTED() throw std::runtime_error("not implemented")
 
 #define CHECK(expression) \

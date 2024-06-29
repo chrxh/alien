@@ -147,6 +147,7 @@ namespace
         } break;
         case CellFunction_Reconnector: {
             cellTO.cellFunctionData.reconnector.restrictToColor = cell->cellFunctionData.reconnector.restrictToColor;
+            cellTO.cellFunctionData.reconnector.restrictToMutation = cell->cellFunctionData.reconnector.restrictToMutation;
         } break;
         case CellFunction_Detonator: {
             cellTO.cellFunctionData.detonator.state = cell->cellFunctionData.detonator.state;
