@@ -1072,7 +1072,7 @@ TEST_F(ConstructorTests, constructInjectorCell)
 
 TEST_F(ConstructorTests, constructReconnectorCell)
 {
-    auto reconnectorDesc = ReconnectorGenomeDescription().setColor(2);
+    auto reconnectorDesc = ReconnectorGenomeDescription().setRestrictToColor(2);
     auto genome =
         GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(reconnectorDesc)}));
 
@@ -1094,7 +1094,7 @@ TEST_F(ConstructorTests, constructReconnectorCell)
     EXPECT_EQ(CellFunction_Reconnector, actualConstructedCell.getCellFunctionType());
 
     auto actualReconnector = std::get<ReconnectorDescription>(*actualConstructedCell.cellFunction);
-    EXPECT_EQ(reconnectorDesc.color, actualReconnector.color);
+    EXPECT_EQ(reconnectorDesc.restrictToColor, actualReconnector.restrictToColor);
 }
 
 TEST_F(ConstructorTests, constructDetonatorCell)
