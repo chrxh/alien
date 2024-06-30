@@ -641,12 +641,14 @@ void _GenomeEditorWindow::processNode(
             AlienImGui::ComboOptionalColor(
                 AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
             table.next();
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Restrict to other mutants")
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters()
+                    .name("Scan mutants")
+                    .values({"None", "Same mutants", "Other mutants", "Artificial"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeSensorRestrictToOtherMutantsTooltip),
-                sensor.restrictToOtherMutants);
+                sensor.restrictToMutants);
+
 
             table.next();
             AlienImGui::InputFloat(
@@ -738,6 +740,11 @@ void _GenomeEditorWindow::processNode(
             AlienImGui::ComboOptionalColor(
                 AlienImGui::ComboColorParameters().name("Restrict to color").textWidth(ContentTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
                 reconnector.restrictToColor);
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters()
+                    .name("Restrict to mutants")
+                    .values({"None", "Same mutants", "Other mutants", "Artificial"}).textWidth(ContentTextWidth),
+                reconnector.restrictToMutants);
         } break;
         case CellFunction_Detonator: {
             table.next();
