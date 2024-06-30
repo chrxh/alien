@@ -51,6 +51,16 @@ enum SensorMode_
     SensorMode_Count
 };
 
+using SensorRestrictToMutants = uint8_t;
+enum SensorRestrictToMutants_
+{
+    SensorRestrictToMutants_NoRestriction,
+    SensorRestrictToMutants_RestrictToSameMutants,
+    SensorRestrictToMutants_RestrictToOtherNonZeroMutants,
+    SensorRestrictToMutants_RestrictToZeroMutants,
+    SensorRestrictToMutants_Count
+};
+
 using EnergyDistributionMode = int;
 enum EnergyDistributionMode_
 {

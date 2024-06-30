@@ -83,7 +83,7 @@ struct SensorGenomeDescription
     std::optional<float> fixedAngle;   //nullopt = entire neighborhood
     float minDensity = 0.05f;
     std::optional<int> restrictToColor;
-    bool restrictToOtherMutants = false;
+    SensorRestrictToMutants restrictToMutants = SensorRestrictToMutants_NoRestriction;
 
     auto operator<=>(SensorGenomeDescription const&) const = default;
 
@@ -104,6 +104,11 @@ struct SensorGenomeDescription
     SensorGenomeDescription& setColor(int value)
     {
         restrictToColor = value;
+        return *this;
+    }
+    SensorGenomeDescription& setRestrictToMutants(SensorRestrictToMutants value)
+    {
+        restrictToMutants = value;
         return *this;
     }
 };
@@ -196,7 +201,7 @@ struct DefenderGenomeDescription
 struct ReconnectorGenomeDescription
 {
     std::optional<int> restrictToColor;
-    ReconnectorRestrictToMutants restrictToMutants;
+    ReconnectorRestrictToMutants restrictToMutants = ReconnectorRestrictToMutants_NoRestriction;
 
     auto operator<=>(ReconnectorGenomeDescription const&) const = default;
 
