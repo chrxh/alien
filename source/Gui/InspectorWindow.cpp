@@ -679,12 +679,14 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
         }
         AlienImGui::ComboOptionalColor(
             AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
-                .name("Restrict to other mutants")
+
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters()
+                .name("Scan mutants")
+                .values({"None", "Same mutants", "Other mutants", "Artificial"})
                 .textWidth(CellFunctionTextWidth)
                 .tooltip(Const::GenomeSensorRestrictToOtherMutantsTooltip),
-            sensor.restrictToOtherMutants);
+            sensor.restrictToMutants);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
                 .name("Min density")
@@ -703,6 +705,12 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
         AlienImGui::ComboOptionalColor(
             AlienImGui::ComboColorParameters().name("Restrict to color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
             reconnector.restrictToColor);
+        AlienImGui::Combo(
+            AlienImGui::ComboParameters()
+                .name("Restrict to mutants")
+                .values({"None", "Same mutants", "Other mutants", "Artificial"})
+                .textWidth(CellFunctionTextWidth),
+            reconnector.restrictToMutants);
 
         ImGui::TreePop();
     }

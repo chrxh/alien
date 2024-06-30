@@ -51,7 +51,7 @@ enum SensorMode_
     SensorMode_Count
 };
 
-using SensorRestrictToMutants = uint8_t;
+using SensorRestrictToMutants = int;
 enum SensorRestrictToMutants_
 {
     SensorRestrictToMutants_NoRestriction,
@@ -138,7 +138,7 @@ enum DetonatorState_
     DetonatorState_Exploded
 };
 
-using ReconnectorRestrictToMutants = uint8_t;
+using ReconnectorRestrictToMutants = int;
 enum ReconnectorRestrictToMutants_
 {
     ReconnectorRestrictToMutants_NoRestriction,
