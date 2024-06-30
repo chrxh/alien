@@ -214,7 +214,7 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
             writeAngle(result, sensor.fixedAngle.has_value() ? *sensor.fixedAngle : 0.0f);
             writeDensity(result, sensor.minDensity);
             writeOptionalByte(result, sensor.restrictToColor);
-            writeBool(result, sensor.restrictToOtherMutants);
+            writeByte(result, sensor.restrictToMutants);
         } break;
         case CellFunction_Nerve: {
             auto const& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
@@ -339,7 +339,7 @@ namespace
                 }
                 sensor.minDensity = readDensity(data, bytePosition);
                 sensor.restrictToColor = readOptionalByte(data, bytePosition, MAX_COLORS);
-                sensor.restrictToOtherMutants = readBool(data, bytePosition);
+                sensor.restrictToMutants = readByte(data, bytePosition) % SensorRestrictToMutants_Count;
                 cell.cellFunction = sensor;
             } break;
             case CellFunction_Nerve: {

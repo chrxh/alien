@@ -15,6 +15,13 @@ private:
     static int constexpr ScanStep = 8.0f;
 
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static uint32_t getCellDensity(
+        uint64_t const& timestep,
+        uint32_t const& mutationId,
+        uint8_t const& restrictToColor,
+        SensorRestrictToMutants const& restrictToMutants,
+        DensityMap const& densityMap,
+        float2 const& scanPos);
     __inline__ __device__ static void searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity);
     __inline__ __device__ static void searchByAngle(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity);
 
@@ -64,12 +71,39 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     }
 }
 
+__inline__ __device__ uint32_t SensorProcessor::getCellDensity(
+    uint64_t const& timestep,
+    uint32_t const& mutationId,
+    uint8_t const& restrictToColor,
+    SensorRestrictToMutants const& restrictToMutants,
+    DensityMap const& densityMap,
+    float2 const& scanPos)
+{
+    uint32_t result;
+    if (restrictToMutants == SensorRestrictToMutants_NoRestriction) {
+        if (restrictToColor == 255) {
+            result = densityMap.getCellDensity(scanPos);
+        }
+        if (restrictToColor != 255) {
+            result = densityMap.getColorDensity(scanPos, restrictToColor);
+        }
+    } else {
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherNonZeroMutants) {
+            result = densityMap.getOtherMutantsDensity(timestep, scanPos, mutationId);
+        }
+        if (restrictToColor != 255) {
+            result = min(result, densityMap.getColorDensity(scanPos, restrictToColor));
+        }
+    }
+    return result;
+}
+
 __inline__ __device__ void
 SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
 {
     __shared__ uint32_t minDensity;
     __shared__ uint8_t restrictToColor;
-    __shared__ bool restrictToOtherMutants;
+    __shared__ SensorRestrictToMutants restrictToMutants;
     __shared__ float refScanAngle;
     __shared__ uint64_t lookupResult;
 
@@ -77,13 +111,13 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
         refScanAngle = Math::angleOfVector(CellFunctionProcessor::calcSignalDirection(data, cell));
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 100);
         restrictToColor = cell->cellFunctionData.sensor.restrictToColor;
-        restrictToOtherMutants = cell->cellFunctionData.sensor.restrictToOtherMutants;
+        restrictToMutants = cell->cellFunctionData.sensor.restrictToMutants;
         lookupResult = 0xffffffffffffffff;
     }
     __syncthreads();
 
     auto const partition = calcPartition(NumScanAngles, threadIdx.x, blockDim.x);
-    auto startRadius = ((restrictToColor == 255 && !restrictToOtherMutants) || restrictToColor == cell->color) ? 14.0f : 0.0f;
+    auto startRadius = ((restrictToColor == 255 && restrictToMutants == SensorRestrictToMutants_NoRestriction) || restrictToColor == cell->color) ? 14.0f : 0.0f;
     auto const& densityMap = data.preprocessedCellFunctionData.densityMap;
     for (float radius = startRadius; radius <= cudaSimulationParameters.cellFunctionSensorRange[cell->color]; radius += ScanStep) {
         for (int angleIndex = partition.startIndex; angleIndex <= partition.endIndex; ++angleIndex) {
@@ -93,21 +127,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             auto scanPos = cell->pos + delta;
             data.cellMap.correctPosition(scanPos);
 
-            uint32_t density;
-            if (restrictToColor != 255 && !restrictToOtherMutants) {
-                density = densityMap.getColorDensity(scanPos, restrictToColor);
-            }
-            if (restrictToColor == 255 && restrictToOtherMutants) {
-                density = densityMap.getOtherMutantsDensity(data.timestep, scanPos, cell->mutationId);
-            }
-            if (restrictToColor != 255 && restrictToOtherMutants) {
-                density =
-                    min(densityMap.getOtherMutantsDensity(data.timestep, scanPos, cell->mutationId),
-                        densityMap.getColorDensity(scanPos, restrictToColor));
-            }
-            if (restrictToColor == 255 && !restrictToOtherMutants) {
-                density = densityMap.getCellDensity(scanPos);
-            }
+            uint32_t density = getCellDensity(data.timestep, cell->mutationId, restrictToColor, restrictToMutants, densityMap, scanPos);
             if (density < minDensity) {
                 continue;
             }
@@ -154,14 +174,14 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
 {
     __shared__ uint32_t minDensity;
     __shared__ uint8_t restrictToColor;
-    __shared__ bool restrictToOtherMutants;
+    __shared__ SensorRestrictToMutants restrictToMutants;
     __shared__ float2 searchDelta;
     __shared__ uint64_t lookupResult;
 
     if (threadIdx.x == 0) {
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 255);
         restrictToColor = cell->cellFunctionData.sensor.restrictToColor;
-        restrictToOtherMutants = cell->cellFunctionData.sensor.restrictToOtherMutants;
+        restrictToMutants = cell->cellFunctionData.sensor.restrictToMutants;
         searchDelta = CellFunctionProcessor::calcSignalDirection(data, cell);
         searchDelta = Math::rotateClockwise(searchDelta, cell->cellFunctionData.sensor.angle);
 
@@ -177,19 +197,8 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
         auto scanPos = cell->pos + searchDelta * distance;
         data.cellMap.correctPosition(scanPos);
 
-        uint32_t density;
-        if (restrictToColor != 255 && !restrictToOtherMutants) {
-            density = densityMap.getColorDensity(scanPos, restrictToColor);
-        }
-        if (restrictToColor == 255 && restrictToOtherMutants) {
-            density = densityMap.getOtherMutantsDensity(data.timestep, scanPos, cell->mutationId);
-        }
-        if (restrictToColor != 255 && restrictToOtherMutants) {
-            density = min(densityMap.getOtherMutantsDensity(data.timestep, scanPos, cell->mutationId), densityMap.getColorDensity(scanPos, restrictToColor));
-        }
-        if (restrictToColor == 255 && !restrictToOtherMutants) {
-            density = densityMap.getCellDensity(scanPos);
-        }
+        uint32_t density = getCellDensity(data.timestep, cell->mutationId, restrictToColor, restrictToMutants, densityMap, scanPos);
+
         if (density < minDensity) {
             continue;
         }
@@ -220,7 +229,7 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
 __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& data, Cell* cell, float2 const& scanPos)
 {
     auto const& restrictToColor = cell->cellFunctionData.sensor.restrictToColor;
-    auto const& restrictToOtherMutants = cell->cellFunctionData.sensor.restrictToOtherMutants;
+    auto const& restrictToMutants = cell->cellFunctionData.sensor.restrictToMutants;
 
     for (float dx = -3.0f; dx < 3.0f + NEAR_ZERO; dx += 1.0f) {
         for (float dy = -3.0f; dy < 3.0f + NEAR_ZERO; dy += 1.0f) {
@@ -234,7 +243,7 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             if (restrictToColor != 255 && otherCell->color != restrictToColor) {
                 continue;
             }
-            if (restrictToOtherMutants && otherCell->mutationId != 0
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherNonZeroMutants && otherCell->mutationId != 0
                 && (cell->mutationId == otherCell->mutationId || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
                 continue;
             }

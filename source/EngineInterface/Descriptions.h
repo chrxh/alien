@@ -175,7 +175,7 @@ struct SensorDescription
     std::optional<float> fixedAngle;  //nullopt = entire neighborhood
     float minDensity = 0.05f;
     std::optional<int> restrictToColor;
-    bool restrictToOtherMutants = false;
+    SensorRestrictToMutants restrictToMutants = SensorRestrictToMutants_NoRestriction;
 
     //process data
     float memoryChannel1 = 0;
@@ -200,9 +200,9 @@ struct SensorDescription
         minDensity = value;
         return *this;
     }
-    SensorDescription& setRestrictToOtherMutants(bool value)
+    SensorDescription& setRestrictToMutants(SensorRestrictToMutants value)
     {
-        restrictToOtherMutants = value;
+        restrictToMutants = value;
         return *this;
     }
 };
@@ -297,7 +297,7 @@ struct DefenderDescription
 struct ReconnectorDescription
 {
     std::optional<int> restrictToColor;
-    ReconnectorRestrictToMutants restrictToMutants;
+    ReconnectorRestrictToMutants restrictToMutants = ReconnectorRestrictToMutants_NoRestriction;
 
     auto operator<=>(ReconnectorDescription const&) const = default;
 

@@ -123,7 +123,7 @@ struct SensorFunction
     float angle;
     float minDensity;
     uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
-    bool restrictToOtherMutants;
+    SensorRestrictToMutants restrictToMutants;
 
     //process data
     float memoryChannel1;

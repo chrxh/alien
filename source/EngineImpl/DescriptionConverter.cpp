@@ -452,7 +452,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         }
         sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         sensor.restrictToColor = cellTO.cellFunctionData.sensor.restrictToColor != 255 ? std::make_optional(cellTO.cellFunctionData.sensor.restrictToColor) : std::nullopt;
-        sensor.restrictToOtherMutants = cellTO.cellFunctionData.sensor.restrictToOtherMutants;
+        sensor.restrictToMutants = cellTO.cellFunctionData.sensor.restrictToMutants;
         sensor.memoryChannel1 = cellTO.cellFunctionData.sensor.memoryChannel1;
         sensor.memoryChannel2 = cellTO.cellFunctionData.sensor.memoryChannel2;
         sensor.memoryChannel3 = cellTO.cellFunctionData.sensor.memoryChannel3;
@@ -600,7 +600,7 @@ void DescriptionConverter::addCell(
         SensorTO sensorTO;
         sensorTO.mode = sensorDesc.getSensorMode();
         sensorTO.restrictToColor = sensorDesc.restrictToColor.value_or(255);
-        sensorTO.restrictToOtherMutants = sensorDesc.restrictToOtherMutants;
+        sensorTO.restrictToMutants = sensorDesc.restrictToMutants;
         sensorTO.minDensity = sensorDesc.minDensity;
         sensorTO.angle = sensorDesc.fixedAngle.value_or(0);
         sensorTO.memoryChannel1 = sensorDesc.memoryChannel1;

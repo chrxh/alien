@@ -112,7 +112,7 @@ namespace
             cellTO.cellFunctionData.sensor.angle = cell->cellFunctionData.sensor.angle;
             cellTO.cellFunctionData.sensor.minDensity = cell->cellFunctionData.sensor.minDensity;
             cellTO.cellFunctionData.sensor.restrictToColor = cell->cellFunctionData.sensor.restrictToColor;
-            cellTO.cellFunctionData.sensor.restrictToOtherMutants = cell->cellFunctionData.sensor.restrictToOtherMutants;
+            cellTO.cellFunctionData.sensor.restrictToMutants = cell->cellFunctionData.sensor.restrictToMutants;
             cellTO.cellFunctionData.sensor.memoryChannel1 = cell->cellFunctionData.sensor.memoryChannel1;
             cellTO.cellFunctionData.sensor.memoryChannel2 = cell->cellFunctionData.sensor.memoryChannel2;
             cellTO.cellFunctionData.sensor.memoryChannel3 = cell->cellFunctionData.sensor.memoryChannel3;

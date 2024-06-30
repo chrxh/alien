@@ -90,7 +90,8 @@ namespace
     auto constexpr Id_SensorGenome_MinDensity = 1;
     auto constexpr Id_SensorGenome_Color_Deprecated = 2;
     auto constexpr Id_SensorGenome_RestrictToColor = 3;
-    auto constexpr Id_SensorGenome_RestrictToOtherMutants = 4;
+    auto constexpr Id_SensorGenome_RestrictToOtherMutants_Deprecated = 4;
+    auto constexpr Id_SensorGenome_RestrictToMutants = 5;
 
 
     auto constexpr Id_ReconnectorGenome_Color_Deprecated = 0;
@@ -164,7 +165,8 @@ namespace
     auto constexpr Id_Sensor_MemoryChannel2 = 5;
     auto constexpr Id_Sensor_MemoryChannel3 = 6;
     auto constexpr Id_Sensor_RestrictToColor = 7;
-    auto constexpr Id_Sensor_RestrictToOtherMutants = 8;
+    auto constexpr Id_Sensor_RestrictToOtherMutants_Deprecated = 8;
+    auto constexpr Id_Sensor_RestrictToMutants = 9;
 
     auto constexpr Id_Transmitter_Mode = 0;
 
@@ -324,7 +326,7 @@ namespace cereal
         loadSave<std::optional<float>>(task, auxiliaries, Id_SensorGenome_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
         loadSave<float>(task, auxiliaries, Id_SensorGenome_MinDensity, data.minDensity, defaultObject.minDensity);
         loadSave<std::optional<int>>(task, auxiliaries, Id_SensorGenome_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
-        loadSave<bool>(task, auxiliaries, Id_SensorGenome_RestrictToOtherMutants, data.restrictToOtherMutants, defaultObject.restrictToOtherMutants);
+        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
         processLoadSaveMap(task, ar, auxiliaries);
 
         //compatibility with older versions
@@ -332,6 +334,10 @@ namespace cereal
         if (task == SerializationTask::Load) {
             if (auxiliaries.contains(Id_SensorGenome_Color_Deprecated)) {
                 data.restrictToColor = std::get<int>(auxiliaries.at(Id_SensorGenome_Color_Deprecated));
+            }
+            if (auxiliaries.contains(Id_SensorGenome_RestrictToOtherMutants_Deprecated)) {
+                auto restrictToOtherMutants = std::get<bool>(auxiliaries.at(Id_SensorGenome_RestrictToOtherMutants_Deprecated));
+                data.restrictToMutants = restrictToOtherMutants ? SensorRestrictToMutants_RestrictToOtherNonZeroMutants : SensorRestrictToMutants_NoRestriction;
             }
         }
         //<<<
@@ -626,7 +632,7 @@ namespace cereal
         loadSave<std::optional<float>>(task, auxiliaries, Id_Sensor_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
         loadSave<float>(task, auxiliaries, Id_Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
         loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
-        loadSave<bool>(task, auxiliaries, Id_Sensor_RestrictToOtherMutants, data.restrictToOtherMutants, defaultObject.restrictToOtherMutants);
+        loadSave(task, auxiliaries, Id_Sensor_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel1, data.memoryChannel1, defaultObject.memoryChannel1);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel2, data.memoryChannel2, defaultObject.memoryChannel2);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel3, data.memoryChannel3, defaultObject.memoryChannel3);
@@ -637,6 +643,10 @@ namespace cereal
         if (task == SerializationTask::Load) {
             if (auxiliaries.contains(Id_Sensor_Color_Deprecated)) {
                 data.restrictToColor = std::get<int>(auxiliaries.at(Id_Sensor_Color_Deprecated));
+            }
+            if (auxiliaries.contains(Id_Sensor_RestrictToOtherMutants_Deprecated)) {
+                auto restrictToOtherMutants = std::get<bool>(auxiliaries.at(Id_Sensor_RestrictToOtherMutants_Deprecated));
+                data.restrictToMutants = restrictToOtherMutants ? SensorRestrictToMutants_RestrictToOtherNonZeroMutants : SensorRestrictToMutants_NoRestriction;
             }
         }
         //<<<
