@@ -88,8 +88,14 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
             result = densityMap.getColorDensity(scanPos, restrictToColor);
         }
     } else {
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants) {
+            result = densityMap.getSameMutantDensity(timestep, scanPos, mutationId);
+        }
         if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherNonZeroMutants) {
-            result = densityMap.getOtherMutantsDensity(timestep, scanPos, mutationId);
+            result = densityMap.getOtherMutantDensity(timestep, scanPos, mutationId);
+        }
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToZeroMutants) {
+            result = densityMap.getZeroMutantDensity(timestep, scanPos, mutationId);
         }
         if (restrictToColor != 255) {
             result = min(result, densityMap.getColorDensity(scanPos, restrictToColor));
