@@ -262,7 +262,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherNonZeroMutants_succe
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherNonZeroMutants)),
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -301,7 +301,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherNonZeroMutants_faile
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherNonZeroMutants)),
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -338,7 +338,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherNonZeroMutants_faile
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherNonZeroMutants)),
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})

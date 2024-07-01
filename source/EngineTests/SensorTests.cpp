@@ -406,7 +406,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherNonZeroMutants)),
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
@@ -446,7 +446,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherNonZeroMutants)),
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
