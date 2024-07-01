@@ -145,6 +145,7 @@ enum ReconnectorRestrictToMutants_
     ReconnectorRestrictToMutants_NoRestriction,
     ReconnectorRestrictToMutants_RestrictToSameMutants,
     ReconnectorRestrictToMutants_RestrictToOtherMutants,
+    ReconnectorRestrictToMutants_RestrictToRespawnedMutants,
     ReconnectorRestrictToMutants_RestrictToZeroMutants,
     ReconnectorRestrictToMutants_Count
 };
