@@ -252,8 +252,18 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             if (restrictToColor != 255 && otherCell->color != restrictToColor) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants && otherCell->mutationId != 0
-                && (cell->mutationId == otherCell->mutationId || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants && cell->mutationId != otherCell->mutationId) {
+                continue;
+            }
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
+                && (cell->mutationId == otherCell->mutationId || otherCell->mutationId == 0 || otherCell->mutationId == 1
+                    || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
+                continue;
+            }
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToRespawnedMutants && otherCell->mutationId != 1) {
+                continue;
+            }
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToZeroMutants && otherCell->mutationId != 0) {
                 continue;
             }
             //if (restrictToOtherMutants && otherCell->mutationId != 0
