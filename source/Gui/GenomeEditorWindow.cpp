@@ -644,7 +644,7 @@ void _GenomeEditorWindow::processNode(
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Scan mutants")
-                    .values({"None", "Same mutants", "Other mutants", "Artificial"})
+                    .values({"None", "Same mutants", "Other mutants", "Respawned", "Artificial"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeSensorRestrictToOtherMutantsTooltip),
                 sensor.restrictToMutants);
