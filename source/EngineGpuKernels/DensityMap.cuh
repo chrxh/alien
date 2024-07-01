@@ -13,9 +13,9 @@ public:
         _densityMapSize = {worldSize.x / slotSize, worldSize.y / slotSize};
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _colorDensityMap);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _otherMutantDensityMap);
-        CudaMemoryManager::getInstance().acquireMemory<uint32_t>(_densityMapSize.x * _densityMapSize.y, _zeroMutantDensityMap);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _sameMutantDensityMap1);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _sameMutantDensityMap2);
+        CudaMemoryManager::getInstance().acquireMemory<uint32_t>(_densityMapSize.x * _densityMapSize.y, _specificMutantDensityMap);
         _slotSize = slotSize;
     }
 
@@ -25,7 +25,7 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_otherMutantDensityMap);
         CudaMemoryManager::getInstance().freeMemory(_sameMutantDensityMap1);
         CudaMemoryManager::getInstance().freeMemory(_sameMutantDensityMap2);
-        CudaMemoryManager::getInstance().freeMemory(_zeroMutantDensityMap);
+        CudaMemoryManager::getInstance().freeMemory(_specificMutantDensityMap);
     }
 
     __device__ __inline__ void clear()
@@ -36,7 +36,7 @@ public:
             _otherMutantDensityMap[index] = 0;
             _sameMutantDensityMap1[index] = 0;
             _sameMutantDensityMap2[index] = 0;
-            _zeroMutantDensityMap[index] = 0;
+            _specificMutantDensityMap[index] = 0;
         }
     }
 
@@ -68,7 +68,7 @@ public:
         return 0ul;
     }
 
-    __device__ __inline__ uint32_t getSameMutantDensity(uint64_t const& timestep, float2 const& pos, uint32_t mutationId) const
+    __device__ __inline__ uint32_t getSameMutantDensity(float2 const& pos, uint32_t mutationId) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
@@ -84,11 +84,20 @@ public:
         return 0ul;
     }
 
-    __device__ __inline__ uint32_t getZeroMutantDensity(uint64_t const& timestep, float2 const& pos, uint32_t mutationId) const
+    __device__ __inline__ uint32_t getRespawnedMutantDensity(float2 const& pos) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            return _zeroMutantDensityMap[index];
+            return (_specificMutantDensityMap[index] >> 8) & 0xff;
+        }
+        return 0ul;
+    }
+
+    __device__ __inline__ uint32_t getZeroMutantDensity(float2 const& pos) const
+    {
+        auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
+        if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
+            return _specificMutantDensityMap[index] & 0xff;
         }
         return 0ul;
     }
@@ -100,7 +109,11 @@ public:
             auto color = calcMod(cell->color, MAX_COLORS);
             alienAtomicAdd64(&_colorDensityMap[index], static_cast<uint64_t>((1ull << (color * 8)) | (1ull << 56)));
 
-            if (cell->mutationId != 0) {
+            if (cell->mutationId == 0) {
+                alienAtomicAdd32(&_specificMutantDensityMap[index], static_cast<uint32_t>(1));
+            } else if (cell->mutationId == 1) {
+                alienAtomicAdd32(&_specificMutantDensityMap[index], static_cast<uint32_t>(0x100));
+            } else {
                 {
                     uint64_t bucket = calcOtherMutantsBucket(cell->mutationId, timestep);
                     alienAtomicAdd64(&_otherMutantDensityMap[index], static_cast<uint64_t>(0x0101010101010101ull ^ (1ull << (bucket * 8))));
@@ -112,8 +125,6 @@ public:
                     alienAtomicAdd64(&_sameMutantDensityMap1[index], static_cast<uint64_t>((1ull << (bucket1 * 8)) | (1ull << ((bucket2 + 3) * 8))));
                     alienAtomicAdd64(&_sameMutantDensityMap2[index], static_cast<uint64_t>(1ull << (bucket3 * 8)));
                 }
-            } else {
-                alienAtomicAdd32(&_zeroMutantDensityMap[index], static_cast<uint32_t>(1));
             }
         }
     }
@@ -131,6 +142,7 @@ private:
     uint64_t* _otherMutantDensityMap;
     uint64_t* _sameMutantDensityMap1;
     uint64_t* _sameMutantDensityMap2;
-    uint32_t* _zeroMutantDensityMap;
+    uint32_t* _respawnedMutantDensityMap;
+    uint32_t* _specificMutantDensityMap;
 };
 

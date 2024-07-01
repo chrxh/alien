@@ -66,7 +66,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToSameMutants && otherCell->mutationId != cell->mutationId) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToOtherNonZeroMutants
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToOtherMutants
             && (otherCell->mutationId == cell->mutationId || otherCell->mutationId == 0)) {
             return;
         }

@@ -743,7 +743,7 @@ void _GenomeEditorWindow::processNode(
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Restrict to mutants")
-                    .values({"None", "Same mutants", "Other mutants", "Artificial"}).textWidth(ContentTextWidth),
+                    .values({"None", "Same mutants", "Other mutants", "Respawned", "Artificial"}).textWidth(ContentTextWidth),
                 reconnector.restrictToMutants);
         } break;
         case CellFunction_Detonator: {

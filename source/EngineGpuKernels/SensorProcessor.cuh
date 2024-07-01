@@ -89,13 +89,16 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
         }
     } else {
         if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants) {
-            result = densityMap.getSameMutantDensity(timestep, scanPos, mutationId);
+            result = densityMap.getSameMutantDensity(scanPos, mutationId);
         }
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherNonZeroMutants) {
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants) {
             result = densityMap.getOtherMutantDensity(timestep, scanPos, mutationId);
         }
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToRespawnedMutants) {
+            result = densityMap.getRespawnedMutantDensity(scanPos);
+        }
         if (restrictToMutants == SensorRestrictToMutants_RestrictToZeroMutants) {
-            result = densityMap.getZeroMutantDensity(timestep, scanPos, mutationId);
+            result = densityMap.getZeroMutantDensity(scanPos);
         }
         if (restrictToColor != 255) {
             result = min(result, densityMap.getColorDensity(scanPos, restrictToColor));
@@ -249,7 +252,7 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             if (restrictToColor != 255 && otherCell->color != restrictToColor) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherNonZeroMutants && otherCell->mutationId != 0
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants && otherCell->mutationId != 0
                 && (cell->mutationId == otherCell->mutationId || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
                 continue;
             }
