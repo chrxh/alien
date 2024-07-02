@@ -393,7 +393,7 @@ TEST_F(SensorTests, scanByAngle_wrongAngle)
 }
 
 
-TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant)
+TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
     _simController->setSimulationParameters(_parameters);
@@ -433,7 +433,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant)
     EXPECT_TRUE(actualSensorCell.activity.channels[3] < 15.0f / 365);
 }
 
-TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant)
+TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
     _simController->setSimulationParameters(_parameters);
@@ -458,6 +458,225 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant)
 
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    auto actualSensorCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
+}
+
+TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
+{
+    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _simController->setSimulationParameters(_parameters);
+    DataDescription data;
+    data.addCells(
+        {CellDescription()
+             .setId(1)
+             .setMutationId(6)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
+         CellDescription()
+             .setId(2)
+             .setPos({101.0f, 100.0f})
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    data.add(DescriptionEditService::createRect(
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(6)));
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    auto actualSensorCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
+}
+
+TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
+{
+    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _simController->setSimulationParameters(_parameters);
+
+    auto const MutantId = 6;
+    for (int otherMutantId = 0; otherMutantId < 100; ++otherMutantId) {
+        if (otherMutantId == MutantId) {
+            continue;
+        }
+        DataDescription data;
+        data.addCells(
+            {CellDescription()
+                 .setId(1)
+                 .setMutationId(MutantId)
+                 .setPos({100.0f, 100.0f})
+                 .setMaxConnections(2)
+                 .setExecutionOrderNumber(0)
+                 .setInputExecutionOrderNumber(5)
+                 .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
+             CellDescription()
+                 .setId(2)
+                 .setPos({101.0f, 100.0f})
+                 .setMaxConnections(1)
+                 .setExecutionOrderNumber(5)
+                 .setCellFunction(NerveDescription())
+                 .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+        data.addConnection(1, 2);
+
+        data.add(DescriptionEditService::createRect(
+            DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(otherMutantId)));
+
+        _simController->clear();
+        _simController->setCurrentTimestep(0ull);
+        _simController->setSimulationData(data);
+        _simController->calcTimesteps(1);
+
+        auto actualData = _simController->getSimulationData();
+        auto actualSensorCell = getCell(actualData, 1);
+
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
+    }
+}
+
+TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
+{
+    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _simController->setSimulationParameters(_parameters);
+    DataDescription data;
+    data.addCells(
+        {CellDescription()
+             .setId(1)
+             .setMutationId(6)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToZeroMutants)),
+         CellDescription()
+             .setId(2)
+             .setPos({101.0f, 100.0f})
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    data.add(DescriptionEditService::createRect(
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0)));
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    auto actualSensorCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
+}
+
+TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
+{
+    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _simController->setSimulationParameters(_parameters);
+    DataDescription data;
+    data.addCells(
+        {CellDescription()
+             .setId(1)
+             .setMutationId(6)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToZeroMutants)),
+         CellDescription()
+             .setId(2)
+             .setPos({101.0f, 100.0f})
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    data.add(DescriptionEditService::createRect(
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1)));
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    auto actualSensorCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
+}
+
+TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
+{
+    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _simController->setSimulationParameters(_parameters);
+    DataDescription data;
+    data.addCells(
+        {CellDescription()
+             .setId(1)
+             .setMutationId(6)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToRespawnedMutants)),
+         CellDescription()
+             .setId(2)
+             .setPos({101.0f, 100.0f})
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    data.add(DescriptionEditService::createRect(
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1)));
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    auto actualSensorCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
+}
+
+TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
+{
+    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _simController->setSimulationParameters(_parameters);
+    DataDescription data;
+    data.addCells(
+        {CellDescription()
+             .setId(1)
+             .setMutationId(6)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToRespawnedMutants)),
+         CellDescription()
+             .setId(2)
+             .setPos({101.0f, 100.0f})
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    data.add(DescriptionEditService::createRect(
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
