@@ -153,7 +153,7 @@ public:
                             bitset |= (bitset << 8);
                         }
                         alienAtomicAdd64(&_lessGenomeComplexityDensityMap1[index], bitset);
-                        alienAtomicAdd64(&_lessGenomeComplexityDensityMap2[index], 0x0101010101010101ull);
+                        alienAtomicAdd64(&_lessGenomeComplexityDensityMap2[index], static_cast<uint64_t>(0x0101010101010101ull));
                     } else if (bucket < 16) {
                         auto bitset = static_cast<uint64_t>(1ull << ((bucket - 8) * 8));
                         for (int i = 0; i < 7; ++i) {
