@@ -20,6 +20,7 @@ public:
         MEMBER_DECLARATION(CreateRectParameters, bool, barrier, false);
         MEMBER_DECLARATION(CreateRectParameters, bool, randomCreatureId, true);
         MEMBER_DECLARATION(CreateRectParameters, int, mutationId, 0);
+        MEMBER_DECLARATION(CreateRectParameters, int, genomeComplexity, 0);
     };
     static DataDescription createRect(CreateRectParameters const& parameters);
 
