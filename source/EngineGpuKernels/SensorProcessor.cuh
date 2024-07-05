@@ -27,6 +27,9 @@ private:
 
     __inline__ __device__ static void flagDetectedCells(SimulationData& data, Cell* cell, float2 const& scanPos);
 
+    __inline__ __device__ static float
+    calcStartDistanceForScanning(uint8_t const& restrictToColor, SensorRestrictToMutants const& restrictToMutants, int const& color);
+
     __inline__ __device__ static uint8_t convertAngleToData(float angle);
     __inline__ __device__ static float convertDataToAngle(uint8_t b);
 };
@@ -129,7 +132,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     __syncthreads();
 
     auto const partition = calcPartition(NumScanAngles, threadIdx.x, blockDim.x);
-    auto startRadius = ((restrictToColor == 255 && restrictToMutants == SensorRestrictToMutants_NoRestriction) || restrictToColor == cell->color) ? 14.0f : 0.0f;
+    auto const startRadius = calcStartDistanceForScanning(restrictToColor, restrictToMutants, cell->color);
     auto const& densityMap = data.preprocessedCellFunctionData.densityMap;
     for (float radius = startRadius; radius <= cudaSimulationParameters.cellFunctionSensorRange[cell->color]; radius += ScanStep) {
         for (int angleIndex = partition.startIndex; angleIndex <= partition.endIndex; ++angleIndex) {
@@ -202,7 +205,7 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
     __syncthreads();
 
     auto const partition = calcPartition(NumScanPoints, threadIdx.x, blockDim.x);
-    auto startRadius = (restrictToColor == 255 || restrictToColor == cell->color) ? 14.0f : 0.0f;
+    auto const startRadius = calcStartDistanceForScanning(restrictToColor, restrictToMutants, cell->color);
     auto const& densityMap = data.preprocessedCellFunctionData.densityMap;
     for (int distanceIndex = partition.startIndex; distanceIndex <= partition.endIndex; ++distanceIndex) {
         auto distance = startRadius + cudaSimulationParameters.cellFunctionSensorRange[cell->color] / NumScanPoints * distanceIndex;
@@ -282,6 +285,15 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             otherCell->detectedByCreatureId = static_cast<uint8_t>(cell->creatureId & 0xff);
         }
     }
+}
+
+__inline__ __device__ float
+SensorProcessor::calcStartDistanceForScanning(uint8_t const& restrictToColor, SensorRestrictToMutants const& restrictToMutants, int const& color)
+{
+    return (restrictToColor == 255 || restrictToColor == color)
+            && (restrictToMutants == SensorRestrictToMutants_NoRestriction || restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants)
+        ? 14.0f
+        : 0.0f;
 }
 
 __inline__ __device__ uint8_t SensorProcessor::convertAngleToData(float angle)
