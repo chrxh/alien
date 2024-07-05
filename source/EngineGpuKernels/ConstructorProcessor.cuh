@@ -67,7 +67,7 @@ private:
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static bool isSelfReplicator(Cell* cell);
-    __inline__ __device__ static int calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize);
+    __inline__ __device__ static uint32_t calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize);
 };
 
 /************************************************************************/
@@ -778,7 +778,7 @@ __inline__ __device__ bool ConstructorProcessor::isSelfReplicator(Cell* cell)
     return GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor);
 }
 
-__inline__ __device__ int ConstructorProcessor::calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize)
+__inline__ __device__ uint32_t ConstructorProcessor::calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize)
 {
     int lastDepth = 0;
     auto result = 0.0f;
@@ -794,5 +794,5 @@ __inline__ __device__ int ConstructorProcessor::calcGenomeComplexity(int color, 
         lastDepth = depth;
         ++acceleration;
     });
-    return toInt(result);
+    return static_cast<uint32_t>(result);
 }

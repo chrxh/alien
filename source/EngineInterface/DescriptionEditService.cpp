@@ -25,7 +25,8 @@ DataDescription DescriptionEditService::createRect(CreateRectParameters const& p
                                .setColor(parameters._color)
                                .setBarrier(parameters._barrier)
                                .setCreatureId(creatureId)
-                               .setMutationId(parameters._mutationId));
+                               .setMutationId(parameters._mutationId)
+                               .setGenomeComplexity(parameters._genomeComplexity));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);

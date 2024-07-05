@@ -498,6 +498,11 @@ struct CellDescription
         mutationId = value;
         return *this;
     }
+    CellDescription& setGenomeComplexity(int value)
+    {
+        genomeComplexity = value;
+        return *this;
+    }
 
     bool hasGenome() const;
     std::vector<uint8_t>& getGenomeRef();
