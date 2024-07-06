@@ -685,7 +685,7 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
                 .name("Scan mutants")
                 .values({"None", "Same mutants", "Other mutants", "Inorganic", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
                 .textWidth(CellFunctionTextWidth)
-                .tooltip(Const::GenomeSensorRestrictToOtherMutantsTooltip),
+                .tooltip(Const::SensorRestrictToMutantsTooltip),
             sensor.restrictToMutants);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
@@ -709,7 +709,8 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
             AlienImGui::ComboParameters()
                 .name("Restrict to mutants")
                 .values({"None", "Same mutants", "Other mutants", "Inorganic", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
-                .textWidth(CellFunctionTextWidth),
+                .textWidth(CellFunctionTextWidth)
+                .tooltip(Const::ReconnectorRestrictToMutantsTooltip),
             reconnector.restrictToMutants);
 
         ImGui::TreePop();
