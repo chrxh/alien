@@ -646,7 +646,7 @@ void _GenomeEditorWindow::processNode(
                     .name("Scan mutants")
                     .values({"None", "Same mutants", "Other mutants", "Inorganic", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
                     .textWidth(ContentTextWidth)
-                    .tooltip(Const::GenomeSensorRestrictToOtherMutantsTooltip),
+                    .tooltip(Const::SensorRestrictToMutantsTooltip),
                 sensor.restrictToMutants);
 
 
@@ -744,7 +744,8 @@ void _GenomeEditorWindow::processNode(
                 AlienImGui::ComboParameters()
                     .name("Restrict to mutants")
                     .values({"None", "Same mutants", "Other mutants", "Inorganic", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
-                    .textWidth(ContentTextWidth),
+                    .textWidth(ContentTextWidth)
+                    .tooltip(Const::ReconnectorRestrictToMutantsTooltip),
                 reconnector.restrictToMutants);
         } break;
         case CellFunction_Detonator: {
