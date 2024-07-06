@@ -26,13 +26,12 @@ namespace
 {
     auto const CellWindowWidth = 350.0f;
     auto const ParticleWindowWidth = 280.0f;
-    auto const BaseTabTextWidth = 155.0f;
+    auto const BaseTabTextWidth = 162.0f;
     auto const CellFunctionTextWidth = 195.0f;
     auto const CellFunctionDefenderWidth = 100.0f;
     auto const CellFunctionBaseTabTextWidth = 150.0f;
     auto const ActivityTextWidth = 130.0f;
     auto const GenomeTabTextWidth = 195.0f;
-    auto const CellMetadataContentTextWidth = 80.0f;
     auto const ParticleContentTextWidth = 80.0f;
 
     auto const TreeNodeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
@@ -160,7 +159,12 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
     if (ImGui::BeginTabItem("Base", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             if (ImGui::TreeNodeEx("Properties##Base", TreeNodeFlags)) {
-                AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(BaseTabTextWidth).tooltip(Const::GenomeColorTooltip), cell.color);
+                std::stringstream ss;
+                ss << "0x" << std::hex << std::uppercase << cell.id;
+                auto cellId = ss.str();
+
+                AlienImGui::ComboColor(
+                    AlienImGui::ComboColorParameters().name("Color").textWidth(BaseTabTextWidth).tooltip(Const::GenomeColorTooltip), cell.color);
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(BaseTabTextWidth).tooltip(Const::CellEnergyTooltip),
                     cell.energy);
@@ -175,22 +179,19 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
                 AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(BaseTabTextWidth).tooltip(Const::CellMaxConnectionTooltip), cell.maxConnections);
                 AlienImGui::Checkbox(
                     AlienImGui::CheckboxParameters().name("Indestructible wall").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip), cell.barrier);
-                ImGui::TreePop();
-            }
-            if (ImGui::TreeNodeEx("Ids##Base", TreeNodeFlags)) {
-                std::stringstream ss;
-                ss << "0x" << std::hex << std::uppercase << cell.id;
-                auto cellId = ss.str();
-
                 AlienImGui::InputText(
                     AlienImGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellMutationIdTooltip), cell.mutationId);
-                int temp = cell.ancestorMutationId;
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Anc. mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellMutationIdTooltip), temp);
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNodeEx("Associated creature##Base", TreeNodeFlags)) {
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellCreatureIdTooltip), cell.creatureId);
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters().name("Mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellMutationIdTooltip), cell.mutationId);
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters().name("Genome complexity").textWidth(BaseTabTextWidth).tooltip(Const::GenomeComplexityTooltip),
+                    cell.genomeComplexity);
+
                 ImGui::TreePop();
             }
             if (ImGui::TreeNodeEx("Connections to other cells", TreeNodeFlags)) {

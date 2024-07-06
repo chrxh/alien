@@ -364,6 +364,7 @@ struct CellDescription
     int creatureId = 0;
     int mutationId = 0;
     uint8_t ancestorMutationId = 0;
+    int genomeComplexity = 0;
 
     //cell function
     int executionOrderNumber = 0;
@@ -372,7 +373,6 @@ struct CellDescription
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
     int activationTime = 0;
-    int genomeComplexity = 0;
     uint8_t detectedByCreatureId = 0;   //only the first 8 bits from the creature id
     CellFunctionUsed cellFunctionUsed = CellFunctionUsed_No;
 

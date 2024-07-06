@@ -1496,7 +1496,7 @@ void _SimulationParametersWindow::processBase(
                         .max(1.0f)
                         .format("%.2f")
                         .defaultValue(origParameters.genomeComplexitySizeFactor)
-                        .tooltip("This parameter controls how the genome size influences the calculation of its complexity."),
+                        .tooltip("This parameter controls how the number of encoded cells in the genome influences the calculation of its complexity."),
                     parameters.genomeComplexitySizeFactor);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()

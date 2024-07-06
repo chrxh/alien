@@ -164,6 +164,7 @@ struct CellTO
     uint32_t creatureId;
     uint32_t mutationId;
     uint8_t ancestorMutationId;  //only the first 8 bits from ancestor mutation id
+    uint32_t genomeComplexity;
 
     //cell function
     uint8_t executionOrderNumber;
@@ -173,7 +174,6 @@ struct CellTO
     CellFunctionTO cellFunctionData;
     ActivityTO activity;
     uint32_t activationTime;
-    uint32_t genomeComplexity;
     uint8_t detectedByCreatureId;  //only the first 8 bits from the creature id
     CellFunctionUsed cellFunctionUsed;
 
