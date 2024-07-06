@@ -104,7 +104,10 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
             result = densityMap.getZeroMutantDensity(scanPos);
         }
         if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants) {
-            result = densityMap.getLowerComplexMutantDensity(scanPos, cell->genomeComplexity);
+            result = densityMap.getLessComplexMutantDensity(scanPos, cell->genomeComplexity);
+        }
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants) {
+            result = densityMap.getMoreComplexMutantDensity(scanPos, cell->genomeComplexity);
         }
         if (restrictToColor != 255) {
             result = min(result, densityMap.getColorDensity(scanPos, restrictToColor));
@@ -273,7 +276,11 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants
-                && (otherCell->genomeComplexity >= cell->genomeComplexity || otherCell->mutationId == 0 && otherCell->mutationId == 1)) {
+                && (otherCell->genomeComplexity >= cell->genomeComplexity || otherCell->mutationId == 0 || otherCell->mutationId == 1)) {
+                continue;
+            }
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants
+                && (otherCell->genomeComplexity <= cell->genomeComplexity || otherCell->mutationId == 0 || otherCell->mutationId == 1)) {
                 continue;
             }
             //if (restrictToOtherMutants && otherCell->mutationId != 0

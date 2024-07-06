@@ -18,6 +18,8 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<uint32_t>(_densityMapSize.x * _densityMapSize.y, _specificMutantDensityMap);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _lessGenomeComplexityDensityMap1);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _lessGenomeComplexityDensityMap2);
+        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _moreGenomeComplexityDensityMap1);
+        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _moreGenomeComplexityDensityMap2);
         _slotSize = slotSize;
     }
 
@@ -30,6 +32,8 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_specificMutantDensityMap);
         CudaMemoryManager::getInstance().freeMemory(_lessGenomeComplexityDensityMap1);
         CudaMemoryManager::getInstance().freeMemory(_lessGenomeComplexityDensityMap2);
+        CudaMemoryManager::getInstance().freeMemory(_moreGenomeComplexityDensityMap1);
+        CudaMemoryManager::getInstance().freeMemory(_moreGenomeComplexityDensityMap2);
     }
 
     __device__ __inline__ void clear()
@@ -43,6 +47,8 @@ public:
             _specificMutantDensityMap[index] = 0;
             _lessGenomeComplexityDensityMap1[index] = 0;
             _lessGenomeComplexityDensityMap2[index] = 0;
+            _moreGenomeComplexityDensityMap1[index] = 0;
+            _moreGenomeComplexityDensityMap2[index] = 0;
         }
     }
 
@@ -108,7 +114,7 @@ public:
         return 0ul;
     }
 
-    __device__ __inline__ uint32_t getLowerComplexMutantDensity(float2 const& pos, uint32_t genomeComplexity) const
+    __device__ __inline__ uint32_t getLessComplexMutantDensity(float2 const& pos, uint32_t genomeComplexity) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
@@ -117,6 +123,20 @@ public:
                 return (_lessGenomeComplexityDensityMap1[index] >> (bucket * 8)) & 0xff;
             } else {
                 return (_lessGenomeComplexityDensityMap2[index] >> ((bucket - 8) * 8)) & 0xff;
+            }
+        }
+        return 0ul;
+    }
+
+    __device__ __inline__ uint32_t getMoreComplexMutantDensity(float2 const& pos, uint32_t genomeComplexity) const
+    {
+        auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
+        if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
+            auto bucket = min(16, max(0, 33 - __clz(genomeComplexity)));
+            if (bucket < 8) {
+                return (_moreGenomeComplexityDensityMap1[index] >> (bucket * 8)) & 0xff;
+            } else {
+                return (_moreGenomeComplexityDensityMap2[index] >> ((bucket - 8) * 8)) & 0xff;
             }
         }
         return 0ul;
@@ -148,18 +168,37 @@ public:
                 {
                     auto bucket = 32 - __clz(cell->genomeComplexity);
                     if (bucket < 8) {
-                        auto bitset = static_cast<uint64_t>(1ull << bucket * 8);
-                        for (int i = 0; i < 7; ++i) {
-                            bitset |= (bitset << 8);
+                        {
+                            auto bitset = static_cast<uint64_t>(1ull << bucket * 8);
+                            for (int i = 0; i < 7; ++i) {
+                                bitset |= (bitset << 8);
+                            }
+                            alienAtomicAdd64(&_lessGenomeComplexityDensityMap1[index], bitset);
+                            alienAtomicAdd64(&_lessGenomeComplexityDensityMap2[index], static_cast<uint64_t>(0x0101010101010101ull));
                         }
-                        alienAtomicAdd64(&_lessGenomeComplexityDensityMap1[index], bitset);
-                        alienAtomicAdd64(&_lessGenomeComplexityDensityMap2[index], static_cast<uint64_t>(0x0101010101010101ull));
+                        {
+                            auto bitset = static_cast<uint64_t>(1ull << bucket * 8);
+                            for (int i = 0; i < 7; ++i) {
+                                bitset |= (bitset >> 8);
+                            }
+                            alienAtomicAdd64(&_moreGenomeComplexityDensityMap1[index], bitset);
+                        }
                     } else if (bucket < 16) {
-                        auto bitset = static_cast<uint64_t>(1ull << ((bucket - 8) * 8));
-                        for (int i = 0; i < 7; ++i) {
-                            bitset |= (bitset << 8);
+                        {
+                            auto bitset = static_cast<uint64_t>(1ull << ((bucket - 8) * 8));
+                            for (int i = 0; i < 7; ++i) {
+                                bitset |= (bitset << 8);
+                            }
+                            alienAtomicAdd64(&_lessGenomeComplexityDensityMap2[index], bitset);
                         }
-                        alienAtomicAdd64(&_lessGenomeComplexityDensityMap2[index], bitset);
+                        {
+                            auto bitset = static_cast<uint64_t>(1ull << ((bucket - 8) * 8));
+                            for (int i = 0; i < 7; ++i) {
+                                bitset |= (bitset >> 8);
+                            }
+                            alienAtomicAdd64(&_moreGenomeComplexityDensityMap2[index], bitset);
+                            alienAtomicAdd64(&_moreGenomeComplexityDensityMap1[index], static_cast<uint64_t>(0x0101010101010101ull));
+                        }
                     }
                 }
             }
@@ -183,5 +222,7 @@ private:
     uint32_t* _specificMutantDensityMap;
     uint64_t* _lessGenomeComplexityDensityMap1;
     uint64_t* _lessGenomeComplexityDensityMap2;
+    uint64_t* _moreGenomeComplexityDensityMap1;
+    uint64_t* _moreGenomeComplexityDensityMap2;
 };
 

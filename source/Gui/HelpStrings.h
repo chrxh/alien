@@ -197,7 +197,8 @@ namespace Const
 
     std::string const GenomeSensorScanColorTooltip = "Restricts the sensor so that it only scans cells with a certain color.";
 
-    std::string const GenomeSensorRestrictToOtherMutantsTooltip = "Restricts the sensor so that it only scans cells with belong to an other mutant";
+    std::string const GenomeSensorRestrictToOtherMutantsTooltip =
+        "Restricts the sensor so that it only scans cells with belong to other types of mutants:\n\n" ICON_FA_CHEVRON_RIGHT " ";
 
     std::string const GenomeSensorMinDensityTooltip =
         "The minimum density to search for a cell concentration of a specific color. This value ranges between 0 and 1. It controls the "
