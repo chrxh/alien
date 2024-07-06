@@ -53,7 +53,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
     auto const& reconnector = cell->cellFunctionData.reconnector;
     Cell* closestCell = nullptr;
     float closestDistance = 0;
-    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellFunctionReconnectorRadius[cell->color], cell->detached, [&](auto const& otherCell) {
+    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellFunctionReconnectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
         if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
             return;
         }
@@ -74,6 +74,14 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
             return;
         }
         if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToRespawnedMutants && otherCell->mutationId != 1) {
+            return;
+        }
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToLessComplexMutants
+            && otherCell->genomeComplexity >= cell->genomeComplexity) {
+            return;
+        }
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToMoreComplexMutants
+            && otherCell->genomeComplexity <= cell->genomeComplexity) {
             return;
         }
         if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {

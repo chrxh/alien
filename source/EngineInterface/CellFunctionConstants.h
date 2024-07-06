@@ -60,6 +60,7 @@ enum SensorRestrictToMutants_
     SensorRestrictToMutants_RestrictToRespawnedMutants,
     SensorRestrictToMutants_RestrictToZeroMutants,
     SensorRestrictToMutants_RestrictToLessComplexMutants,
+    SensorRestrictToMutants_RestrictToMoreComplexMutants,
     SensorRestrictToMutants_Count
 };
 
@@ -148,6 +149,8 @@ enum ReconnectorRestrictToMutants_
     ReconnectorRestrictToMutants_RestrictToOtherMutants,
     ReconnectorRestrictToMutants_RestrictToRespawnedMutants,
     ReconnectorRestrictToMutants_RestrictToZeroMutants,
+    ReconnectorRestrictToMutants_RestrictToLessComplexMutants,
+    ReconnectorRestrictToMutants_RestrictToMoreComplexMutants,
     ReconnectorRestrictToMutants_Count
 };
 
