@@ -48,9 +48,7 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
             } else if (cell->livingState == LivingState_Ready && cell->activationTime == 0) {
                 data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
             }
-            if (cell->cellFunction == CellFunction_Defender && cell->cellFunctionUsed == CellFunctionUsed_No) {
-                cell->cellFunctionUsed = CellFunctionUsed_Yes;
-            }
+
         }
     }
 }
