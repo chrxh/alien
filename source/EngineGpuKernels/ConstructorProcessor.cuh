@@ -155,7 +155,6 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         auto constructionData = readConstructionData(cell);
         auto cellBuilt = false;
         if (isConstructionTriggered(data, cell, activity)) {
-            cell->cellFunctionUsed = CellFunctionUsed_Yes;
             if (tryConstructCell(data, statistics, cell, constructionData)) {
                 cellBuilt = true;
             } 

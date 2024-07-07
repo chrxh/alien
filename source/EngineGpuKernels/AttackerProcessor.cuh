@@ -353,7 +353,6 @@ __inline__ __device__ int AttackerProcessor::countAndTrackDefenderCells(Simulati
         auto connectedCell = cell->connections[i].cell;
         if (connectedCell->cellFunction == CellFunction_Defender && connectedCell->cellFunctionData.defender.mode == DefenderMode_DefendAgainstAttacker) {
             statistics.incNumDefenderActivities(connectedCell->color);
-            connectedCell->cellFunctionUsed = CellFunctionUsed_Yes;
             ++result;
         }
     }
