@@ -409,6 +409,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .setId(2)
+             .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
@@ -433,6 +434,45 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
     EXPECT_TRUE(actualSensorCell.activity.channels[3] < 15.0f / 365);
 }
 
+TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehind)
+{
+    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _simController->setSimulationParameters(_parameters);
+    DataDescription data;
+    data.addCells(
+        {CellDescription()
+             .setId(1)
+             .setMutationId(6)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+         CellDescription()
+             .setId(2)
+             .setMutationId(6)
+             .setPos({101.0f, 100.0f})
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    //data.add(DescriptionEditService::createRect(
+    //    DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(1).height(16).cellDistance(0.5f).mutationId(0)));
+
+    data.add(DescriptionEditService::createRect(
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    auto actualSensorCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
+}
+
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
@@ -449,12 +489,52 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .setId(2)
+             .setMutationId(7)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
+
+    data.add(DescriptionEditService::createRect(
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    auto actualSensorCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
+}
+
+TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallInBetween)
+{
+    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _simController->setSimulationParameters(_parameters);
+    DataDescription data;
+    data.addCells(
+        {CellDescription()
+             .setId(1)
+             .setMutationId(7)
+             .setPos({100.0f, 100.0f})
+             .setMaxConnections(2)
+             .setExecutionOrderNumber(0)
+             .setInputExecutionOrderNumber(5)
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+         CellDescription()
+             .setId(2)
+             .setMutationId(7)
+             .setPos({101.0f, 100.0f})
+             .setMaxConnections(1)
+             .setExecutionOrderNumber(5)
+             .setCellFunction(NerveDescription())
+             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+    data.addConnection(1, 2);
+
+    data.add(DescriptionEditService::createRect(
+        DescriptionEditService::CreateRectParameters().center({50.0f, 100.0f}).width(1).height(16).cellDistance(0.5f).mutationId(0)));
 
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
@@ -484,6 +564,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
          CellDescription()
              .setId(2)
+             .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
@@ -525,6 +606,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
              CellDescription()
                  .setId(2)
+                 .setMutationId(MutantId)
                  .setPos({101.0f, 100.0f})
                  .setMaxConnections(1)
                  .setExecutionOrderNumber(5)
@@ -563,6 +645,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToZeroMutants)),
          CellDescription()
              .setId(2)
+             .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
@@ -598,6 +681,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToZeroMutants)),
          CellDescription()
              .setId(2)
+             .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
@@ -633,6 +717,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToRespawnedMutants)),
          CellDescription()
              .setId(2)
+             .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
@@ -668,6 +753,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToRespawnedMutants)),
          CellDescription()
              .setId(2)
+             .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
@@ -706,6 +792,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
              CellDescription()
                  .setId(2)
+                 .setMutationId(5)
                  .setPos({101.0f, 100.0f})
                  .setMaxConnections(1)
                  .setExecutionOrderNumber(5)
@@ -752,6 +839,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
              CellDescription()
                  .setId(2)
+                 .setMutationId(5)
                  .setPos({101.0f, 100.0f})
                  .setMaxConnections(1)
                  .setExecutionOrderNumber(5)
@@ -796,6 +884,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
          CellDescription()
              .setId(2)
+             .setMutationId(100)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
@@ -832,6 +921,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
          CellDescription()
              .setId(2)
+             .setMutationId(100)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
@@ -870,6 +960,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
              CellDescription()
                  .setId(2)
+                 .setMutationId(5)
                  .setPos({101.0f, 100.0f})
                  .setMaxConnections(1)
                  .setExecutionOrderNumber(5)
@@ -916,6 +1007,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
              CellDescription()
                  .setId(2)
+                 .setMutationId(5)
                  .setPos({101.0f, 100.0f})
                  .setMaxConnections(1)
                  .setExecutionOrderNumber(5)
@@ -960,6 +1052,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
          CellDescription()
              .setId(2)
+             .setMutationId(100)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
@@ -996,6 +1089,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
          CellDescription()
              .setId(2)
+             .setMutationId(100)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
