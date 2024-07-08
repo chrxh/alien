@@ -64,7 +64,6 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
 
     if (0 == threadIdx.x) {
         CellFunctionProcessor::setActivity(cell, outputActivity);
-        CellFunctionProcessor::updateInvocationState(cell, outputActivity);
         statistics.incNumNeuronActivities(cell->color);
     }
     __syncthreads();

@@ -12,7 +12,7 @@ public:
 private:
     static int constexpr NumScanAngles = 32;
     static int constexpr NumScanPoints = 64;
-    static int constexpr ScanStep = 8.0f;
+    static float constexpr ScanStep = 8.0f;
 
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static uint32_t getCellDensity(
@@ -124,6 +124,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     __shared__ SensorRestrictToMutants restrictToMutants;
     __shared__ float refScanAngle;
     __shared__ uint64_t lookupResult;
+    __shared__ bool blockedByWall[NumScanAngles];
 
     if (threadIdx.x == 0) {
         refScanAngle = Math::angleOfVector(CellFunctionProcessor::calcSignalDirection(data, cell));
@@ -133,8 +134,12 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
         lookupResult = 0xffffffffffffffff;
     }
     __syncthreads();
-
     auto const partition = calcPartition(NumScanAngles, threadIdx.x, blockDim.x);
+    for (int angleIndex = partition.startIndex; angleIndex <= partition.endIndex; ++angleIndex) {
+        blockedByWall[angleIndex] = false;
+    }
+    __syncthreads();
+
     auto const startRadius = calcStartDistanceForScanning(restrictToColor, restrictToMutants, cell->color);
     auto const& densityMap = data.preprocessedCellFunctionData.densityMap;
     for (float radius = startRadius; radius <= cudaSimulationParameters.cellFunctionSensorRange[cell->color]; radius += ScanStep) {
@@ -145,7 +150,15 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             auto scanPos = cell->pos + delta;
             data.cellMap.correctPosition(scanPos);
 
-            uint32_t density = getCellDensity(data.timestep, cell, restrictToColor, restrictToMutants, densityMap, scanPos);
+            uint32_t density = 0;
+            if (!blockedByWall[angleIndex]) {
+                if (restrictToMutants == SensorRestrictToMutants_NoRestriction || restrictToMutants == SensorRestrictToMutants_RestrictToZeroMutants
+                    || densityMap.getZeroMutantDensity(scanPos) == 0) {
+                    density = getCellDensity(data.timestep, cell, restrictToColor, restrictToMutants, densityMap, scanPos);
+                } else {
+                    blockedByWall[angleIndex] = true;
+                }
+            }
             if (density < minDensity) {
                 continue;
             }
