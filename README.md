@@ -94,7 +94,7 @@ If everything goes well, the ALIEN executable can be found under the build direc
 It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
 
 There are reported build issues with (updated: 2024-06-22)
-* GCC 13 (version 12 should work)
+* GCC 13 (version 11 should work)
 * Visual Studio 17.10 (version 17.9 should work)
 * CUDA 12.5 (version 12.4 should work)
 
