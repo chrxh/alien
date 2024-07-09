@@ -29,12 +29,7 @@ namespace
         return float3{toFloat(value & 0xff) / 255, toFloat((value >> 8) & 0xff) / 255, toFloat((value >> 16) & 0xff) / 255};
     }
 
-    __device__ __inline__ float2 mapWorldPosToImagePos(
-        float2 const& rectUpperLeft,
-        float2 const& pos,
-        float2 const& universeImageSize,
-        int2 const& imageSize,
-        float zoom)
+    __device__ __inline__ float2 mapWorldPosToImagePos(float2 const& rectUpperLeft, float2 const& pos, float2 const& universeImageSize, float zoom)
     {
         auto result = float2{(pos.x - rectUpperLeft.x) * zoom, (pos.y - rectUpperLeft.y) * zoom};
         if (cudaSimulationParameters.borderlessRendering) {
@@ -418,7 +413,7 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
         auto const& cell = cells.at(index);
 
         auto cellPos = cell->pos;
-        auto cellImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos, universeImageSize, imageSize, zoom);
+        auto cellImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos, universeImageSize, zoom);
         if (isContainedInRect({0, 0}, toFloat2(imageSize), cellImagePos)) {
 
             //draw primary color for cell
@@ -445,7 +440,7 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
                     float3 color{0.5f, 0.0f, 0.0f};
                     drawDisc(imageData, imageSize, cellImagePos, color, cellRadius * 1.4f, cellRadius * 2.0f);
 
-                    auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, cell->eventPos, universeImageSize, imageSize, zoom);
+                    auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, cell->eventPos, universeImageSize, zoom);
                     if (isLineVisible(cellImagePos, endImagePos, universeImageSize)) {
                         drawLine(cellImagePos, endImagePos, color, imageData, imageSize);
                     }
@@ -479,9 +474,9 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
                     otherCellPos += topologyCorrection;
 
                     auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) / 4;
-                    auto const startImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos + distFromCellCenter, universeImageSize, imageSize, zoom);
+                    auto const startImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos + distFromCellCenter, universeImageSize, zoom);
                     auto const endImagePos =
-                        mapWorldPosToImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, imageSize, zoom);
+                        mapWorldPosToImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, zoom);
                     if (isLineVisible(startImagePos, endImagePos, universeImageSize)) {
                         drawLine(startImagePos, endImagePos, lineColor, imageData, imageSize);
                     }
@@ -499,12 +494,12 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
                             auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                             otherCellPos += topologyCorrection;
 
-                            auto const otherCellImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos, universeImageSize, imageSize, zoom);
+                            auto const otherCellImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos, universeImageSize, zoom);
                             if (!isContainedInRect({0, 0}, toFloat2(imageSize), otherCellImagePos)) {
                                 continue;
                             }
                             auto const arrowEnd = mapWorldPosToImagePos(
-                                rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 4, universeImageSize, imageSize, zoom);
+                                rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 4, universeImageSize, zoom);
                             if (!isContainedInRect({0, 0}, toFloat2(imageSize), arrowEnd)) {
                                 continue;
                             }
@@ -552,7 +547,7 @@ __global__ void cudaDrawCellGlow(int2 worldSize, float2 rectUpperLeft, Array<Cel
         auto const& cell = cells.at(index);
 
         if (threadIdx.x == 0) {
-            cellImagePos = mapWorldPosToImagePos(rectUpperLeft, cell->pos, universeImageSize, imageSize, zoom);
+            cellImagePos = mapWorldPosToImagePos(rectUpperLeft, cell->pos, universeImageSize, zoom);
             isContained = isContainedInRect({0, 0}, toFloat2(imageSize), cellImagePos);
         }
         __syncthreads();
@@ -588,7 +583,7 @@ __global__ void cudaDrawParticles(int2 worldSize, float2 rectUpperLeft, float2 r
         auto particlePos = particle->absPos;
         map.correctPosition(particlePos);
 
-        auto const particleImagePos = mapWorldPosToImagePos(rectUpperLeft, particlePos, universeImageSize, imageSize, zoom);
+        auto const particleImagePos = mapWorldPosToImagePos(rectUpperLeft, particlePos, universeImageSize, zoom);
         if (isContainedInRect({0, 0}, imageSize, particleImagePos)) {
             auto const color = calcColor(particle, 0 != particle->selected);
             auto radius = zoom / 3;
@@ -602,7 +597,7 @@ __global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpper
     auto universeImageSize = toFloat2(worldSize) * zoom;
     for (int i = 0; i < cudaSimulationParameters.numParticleSources; ++i) {
         float2 sourcePos{cudaSimulationParameters.particleSources[i].posX, cudaSimulationParameters.particleSources[i].posY};
-        auto imagePos = mapWorldPosToImagePos(rectUpperLeft, sourcePos, universeImageSize, imageSize, zoom);
+        auto imagePos = mapWorldPosToImagePos(rectUpperLeft, sourcePos, universeImageSize, zoom);
         if (isContainedInRect({0, 0}, toFloat2(imageSize), imagePos)) {
             for (int dx = -5; dx <= 5; ++dx) {
                 auto drawX = toInt(imagePos.x) + dx;
@@ -637,7 +632,7 @@ __global__ void cudaDrawRepetition(int2 worldSize, int2 imageSize, float2 rectUp
         if (x >= toInt(universeImageSize.x) || y >= toInt(universeImageSize.y)) {
             float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
 
-            auto refPos = mapWorldPosToImagePos(rectUpperLeft, worldPos, universeImageSize, imageSize, zoom);
+            auto refPos = mapWorldPosToImagePos(rectUpperLeft, worldPos, universeImageSize, zoom);
             int2 refIntPos{toInt(refPos.x), toInt(refPos.y)};
             if (refIntPos.x >= 0 && refIntPos.x < imageSize.x && refIntPos.y >= 0 && refIntPos.y < imageSize.y) {
                 alienAtomicExch64(&imageData[index], imageData[refIntPos.x + refIntPos.y * imageSize.x]);
