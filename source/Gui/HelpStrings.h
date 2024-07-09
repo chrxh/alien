@@ -413,7 +413,7 @@ namespace Const
 
     std::string const GenomeCurrentCellTooltip = "The sequence number of the cell in the genome that will be constructed next.";
 
-    std::string const GenomePreviewTooltip = "The spatial structure of the cells encoded in the genome sequence is displayed here. This is only a rough "
+    std::string const GenomePreviewTooltip = "The spatial structure of the cells encoded in the genome is displayed here. This is only a rough "
                                              "prediction without using the physics engine.";
 
     std::string const CellInjectorCounterTooltip =
