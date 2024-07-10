@@ -200,7 +200,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
         //finished => reset indices
         constructor.genomeCurrentNodeIndex = 0;
         constructor.genomeCurrentRepetition = 0;
-    } else if (result.lastConstructionCell->numConnections == 1) {
+    } else if (result.lastConstructionCell->numConnections == 1 && constructor.numInheritedGenomeNodes > 1) {
         int numConstructedCells = constructor.genomeCurrentRepetition * result.genomeHeader.numRepetitions + constructor.genomeCurrentNodeIndex;
         if (numConstructedCells > 1) {
 
