@@ -50,8 +50,11 @@ public:
     __inline__ __device__ static CellFunction getNextCellFunctionType(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static bool isNextCellSelfReplication(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static int getNextCellColor(uint8_t* genome, int nodeAddress);
+    __inline__ __device__ static int getNextExecutionNumber(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static void setNextCellFunctionType(uint8_t* genome, int nodeAddress, CellFunction cellFunction);
     __inline__ __device__ static void setNextCellColor(uint8_t* genome, int nodeAddress, int color);
+    __inline__ __device__ static void setNextInputExecutionNumber(uint8_t* genome, int nodeAddress, int value);
+    __inline__ __device__ static void setNextOutputBlocked(uint8_t* genome, int nodeAddress, bool value);
     __inline__ __device__ static void setNextAngle(uint8_t* genome, int nodeAddress, uint8_t angle);
     __inline__ __device__ static void setNextRequiredConnections(uint8_t* genome, int nodeAddress, uint8_t angle);
     __inline__ __device__ static void setNextConstructionAngle1(uint8_t* genome, int nodeAddress, uint8_t angle);
@@ -603,6 +606,11 @@ __inline__ __device__ int GenomeDecoder::getNextCellColor(uint8_t* genome, int n
     return genome[nodeAddress + Const::CellColorPos] % MAX_COLORS;
 }
 
+__inline__ __device__ int GenomeDecoder::getNextExecutionNumber(uint8_t* genome, int nodeAddress)
+{
+    return genome[nodeAddress + Const::CellExecutionNumberPos];
+}
+
 __inline__ __device__ void GenomeDecoder::setNextCellFunctionType(uint8_t* genome, int nodeAddress, CellFunction cellFunction)
 {
     genome[nodeAddress] = static_cast<uint8_t>(cellFunction);
@@ -611,6 +619,16 @@ __inline__ __device__ void GenomeDecoder::setNextCellFunctionType(uint8_t* genom
 __inline__ __device__ void GenomeDecoder::setNextCellColor(uint8_t* genome, int nodeAddress, int color)
 {
     genome[nodeAddress + Const::CellColorPos] = color;
+}
+
+__inline__ __device__ void GenomeDecoder::setNextInputExecutionNumber(uint8_t* genome, int nodeAddress, int value)
+{
+    genome[nodeAddress + Const::CellInputExecutionNumberPos] = value;
+}
+
+__inline__ __device__ void GenomeDecoder::setNextOutputBlocked(uint8_t* genome, int nodeAddress, bool value)
+{
+    genome[nodeAddress + Const::CellOutputBlockedPos] = value ? 1 : 0;
 }
 
 __inline__ __device__ void GenomeDecoder::setNextAngle(uint8_t* genome, int nodeAddress, uint8_t angle)

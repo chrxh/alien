@@ -17,7 +17,10 @@ namespace Const
 
     auto constexpr CellAnglePos = 1;
     auto constexpr CellRequiredConnectionsPos = 3;
+    auto constexpr CellExecutionNumberPos = 4;
     auto constexpr CellColorPos = 5;
+    auto constexpr CellInputExecutionNumberPos = 6;
+    auto constexpr CellOutputBlockedPos = 7;
 
     auto constexpr ConstructorConstructionAngle1Pos = 3;
     auto constexpr ConstructorConstructionAngle2Pos = 4;

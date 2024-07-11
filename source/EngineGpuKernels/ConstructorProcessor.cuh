@@ -779,19 +779,21 @@ __inline__ __device__ bool ConstructorProcessor::isSelfReplicator(Cell* cell)
 
 __inline__ __device__ uint32_t ConstructorProcessor::calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize)
 {
-    int lastDepth = 0;
+    auto lastDepth = 0;
     auto result = 0.0f;
-    int acceleration = 1;
+    auto repetition = 1;
 
     auto genomeComplexityRamificationFactor =
         cudaSimulationParameters.features.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityRamificationFactor[color] : 0.0f;
     auto sizeFactor =
         cudaSimulationParameters.features.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexitySizeFactor[color] : 1.0f;
     GenomeDecoder::executeForEachNodeRecursively(genome, toInt(genomeSize), false, [&](int depth, int nodeAddress, int repetitions) {
-        float ramificationFactor = depth > lastDepth ? genomeComplexityRamificationFactor * toFloat(acceleration) : 0.0f;
+        float ramificationFactor = depth > lastDepth ? genomeComplexityRamificationFactor * toFloat(repetition) : 0.0f;
         result += powf(2.0f, toFloat(depth)) * toFloat(repetitions) * (ramificationFactor + sizeFactor);
         lastDepth = depth;
-        ++acceleration;
+        if (ramificationFactor > 0) {
+            ++repetition;
+        }
     });
     return static_cast<uint32_t>(result);
 }
