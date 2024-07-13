@@ -786,7 +786,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
                  .setMutationId(5)
                  .setPos({100.0f, 100.0f})
                  .setMaxConnections(2)
-                 .setGenomeComplexity(1000)
+                 .setGenomeComplexity(1000.0f)
                  .setExecutionOrderNumber(0)
                  .setInputExecutionOrderNumber(5)
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
@@ -806,7 +806,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
                                                         .height(16)
                                                         .cellDistance(0.5f)
                                                         .mutationId(6)
-                                                        .genomeComplexity(otherGenomeComplexity)));
+                                                        .genomeComplexity(toFloat(otherGenomeComplexity))));
 
         _simController->clear();
         _simController->setCurrentTimestep(0ull);
@@ -833,7 +833,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
                  .setMutationId(5)
                  .setPos({100.0f, 100.0f})
                  .setMaxConnections(2)
-                 .setGenomeComplexity(1000)
+                 .setGenomeComplexity(1000.0f)
                  .setExecutionOrderNumber(0)
                  .setInputExecutionOrderNumber(5)
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
@@ -853,7 +853,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
                                                         .height(16)
                                                         .cellDistance(0.5f)
                                                         .mutationId(6)
-                                                        .genomeComplexity(otherGenomeComplexity)));
+                                                        .genomeComplexity(toFloat(otherGenomeComplexity))));
 
         _simController->clear();
         _simController->setCurrentTimestep(0ull);
@@ -880,7 +880,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setGenomeComplexity(1000)
+             .setGenomeComplexity(1000.0f)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
          CellDescription()
              .setId(2)
@@ -893,7 +893,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::createRect(
-        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0).genomeComplexity(100)));
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0).genomeComplexity(100.0f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -913,7 +913,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
         {CellDescription()
              .setId(1)
              .setMutationId(100)
-             .setGenomeComplexity(1000)
+             .setGenomeComplexity(1000.0f)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
@@ -930,7 +930,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::createRect(
-        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1).genomeComplexity(100)));
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1).genomeComplexity(100.0f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -954,7 +954,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
                  .setMutationId(5)
                  .setPos({100.0f, 100.0f})
                  .setMaxConnections(2)
-                 .setGenomeComplexity(500)
+                 .setGenomeComplexity(500.0f)
                  .setExecutionOrderNumber(0)
                  .setInputExecutionOrderNumber(5)
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
@@ -974,7 +974,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
                                                         .height(16)
                                                         .cellDistance(0.5f)
                                                         .mutationId(6)
-                                                        .genomeComplexity(otherGenomeComplexity)));
+                                                        .genomeComplexity(toFloat(otherGenomeComplexity))));
 
         _simController->clear();
         _simController->setCurrentTimestep(0ull);
@@ -1001,7 +1001,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
                  .setMutationId(5)
                  .setPos({100.0f, 100.0f})
                  .setMaxConnections(2)
-                 .setGenomeComplexity(500)
+                 .setGenomeComplexity(500.0f)
                  .setExecutionOrderNumber(0)
                  .setInputExecutionOrderNumber(5)
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
@@ -1021,7 +1021,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
                                                         .height(16)
                                                         .cellDistance(0.5f)
                                                         .mutationId(6)
-                                                        .genomeComplexity(otherGenomeComplexity)));
+                                                        .genomeComplexity(toFloat(otherGenomeComplexity))));
 
         _simController->clear();
         _simController->setCurrentTimestep(0ull);
@@ -1044,7 +1044,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
         {CellDescription()
              .setId(1)
              .setMutationId(100)
-             .setGenomeComplexity(100)
+             .setGenomeComplexity(100.0f)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
@@ -1061,7 +1061,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::createRect(
-        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0).genomeComplexity(1000)));
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0).genomeComplexity(1000.0f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);
@@ -1081,7 +1081,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
         {CellDescription()
              .setId(1)
              .setMutationId(100)
-             .setGenomeComplexity(100)
+             .setGenomeComplexity(100.0f)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
@@ -1098,7 +1098,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::createRect(
-        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1).genomeComplexity(1000)));
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1).genomeComplexity(1000.0f)));
 
     _simController->setSimulationData(data);
     _simController->calcTimesteps(1);

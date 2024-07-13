@@ -114,11 +114,11 @@ public:
         return 0ul;
     }
 
-    __device__ __inline__ uint32_t getLessComplexMutantDensity(float2 const& pos, uint32_t genomeComplexity) const
+    __device__ __inline__ uint32_t getLessComplexMutantDensity(float2 const& pos, float genomeComplexity) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            auto bucket = min(16, max(0, 31 - __clz(genomeComplexity)));
+            auto bucket = min(16, max(0, 31 - __clz(convertGenomeComplexityToIntValue(genomeComplexity))));
             if (bucket < 8) {
                 return (_lessGenomeComplexityDensityMap1[index] >> (bucket * 8)) & 0xff;
             } else {
@@ -128,11 +128,11 @@ public:
         return 0ul;
     }
 
-    __device__ __inline__ uint32_t getMoreComplexMutantDensity(float2 const& pos, uint32_t genomeComplexity) const
+    __device__ __inline__ uint32_t getMoreComplexMutantDensity(float2 const& pos, float genomeComplexity) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            auto bucket = min(16, max(0, 33 - __clz(genomeComplexity)));
+            auto bucket = min(16, max(0, 33 - __clz(convertGenomeComplexityToIntValue(genomeComplexity))));
             if (bucket < 8) {
                 return (_moreGenomeComplexityDensityMap1[index] >> (bucket * 8)) & 0xff;
             } else {
@@ -166,7 +166,7 @@ public:
                     alienAtomicAdd64(&_sameMutantDensityMap2[index], static_cast<uint64_t>(1ull << (bucket3 * 8)));
                 }
                 {
-                    auto bucket = 32 - __clz(cell->genomeComplexity);
+                    auto bucket = 32 - __clz(convertGenomeComplexityToIntValue(cell->genomeComplexity));
                     if (bucket < 8) {
                         {
                             auto bitset = static_cast<uint64_t>(1ull << bucket * 8);
@@ -211,6 +211,8 @@ private:
     {
         return mutationId != 0 ? (static_cast<uint64_t>(mutationId) + timestep / 23) % 8 : 0;
     }
+
+    __device__ __inline__ uint32_t convertGenomeComplexityToIntValue(float genomeComplexity) const { return toInt(genomeComplexity * 10); }
 
     int _slotSize;
     int2 _densityMapSize;

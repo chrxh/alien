@@ -114,10 +114,11 @@ namespace
     auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
     auto constexpr Id_Cell_CreatureId = 11;
     auto constexpr Id_Cell_MutationId = 12;
-    auto constexpr Id_Cell_GenomeComplexity = 13;
+    auto constexpr Id_Cell_GenomeComplexity_Deprecated = 13;
     auto constexpr Id_Cell_DetectedByCreatureId = 14;
     auto constexpr Id_Cell_CellFunctionUsed = 15;
     auto constexpr Id_Cell_AncestorMutationId = 16;
+    auto constexpr Id_Cell_GenomeComplexity = 17;
 
     auto constexpr Id_Neuron_ActivationFunctions = 0;
 
@@ -776,12 +777,21 @@ namespace cereal
             task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
-        loadSave<int>(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
+        loadSave<float>(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
         loadSave<uint8_t>(task, auxiliaries, Id_Cell_DetectedByCreatureId, data.detectedByCreatureId, defaultObject.detectedByCreatureId);
         loadSave<uint8_t>(task, auxiliaries, Id_Cell_CellFunctionUsed, data.cellFunctionUsed, defaultObject.cellFunctionUsed);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
+
+        //compatibility with older versions
+        //>>>
+        if (task == SerializationTask::Load) {
+            if (auxiliaries.contains(Id_Cell_GenomeComplexity_Deprecated)) {
+                data.genomeComplexity = toFloat(std::get<int>(auxiliaries.at(Id_Cell_GenomeComplexity_Deprecated)));
+            }
+        }
+        //<<<
     }
     SPLIT_SERIALIZATION(CellDescription)
 

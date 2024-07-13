@@ -122,7 +122,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                                 data,
                                 cell->pos,
                                 cell->color);
-                            energyToTransfer *= 1.0f - radiationAbsorptionLowGenomeComplexityPenalty / powf(1.0f + toFloat(cell->genomeComplexity), 0.1f);
+                            energyToTransfer *= 1.0f - radiationAbsorptionLowGenomeComplexityPenalty / powf(1.0f + cell->genomeComplexity, 0.1f);
                         }
 
                         if (particle->energy < 0.01f/* && energyToTransfer > 0.1f*/) {

@@ -364,7 +364,7 @@ struct CellDescription
     int creatureId = 0;
     int mutationId = 0;
     uint8_t ancestorMutationId = 0;
-    int genomeComplexity = 0;
+    float genomeComplexity = 0;
 
     //cell function
     int executionOrderNumber = 0;
@@ -498,7 +498,7 @@ struct CellDescription
         mutationId = value;
         return *this;
     }
-    CellDescription& setGenomeComplexity(int value)
+    CellDescription& setGenomeComplexity(float value)
     {
         genomeComplexity = value;
         return *this;

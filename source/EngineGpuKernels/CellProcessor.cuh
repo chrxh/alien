@@ -595,14 +595,18 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        auto livingState = atomicCAS(&cell->livingState, LivingState_Activating, LivingState_Ready);
-        if (livingState == LivingState_Activating) {
+        auto origLivingState = atomicCAS(&cell->livingState, LivingState_Activating, LivingState_Ready);
+        if (origLivingState == LivingState_Activating) {
+            atomicExch(&cell->age, 0);
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const& connectedCell = cell->connections[i].cell;
-                atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_Activating);
+                auto origLivingStateConnectedCell = atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_Activating);
+                if (origLivingStateConnectedCell == LivingState_UnderConstruction) {
+                    atomicExch(&connectedCell->age, 0);
+                }
             }
         }
-        if (livingState == LivingState_Dying) {
+        if (origLivingState == LivingState_Dying) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const& connectedCell = cell->connections[i].cell;
                 if (connectedCell->creatureId == cell->creatureId) {
@@ -746,7 +750,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         auto cellMaxAge = cudaSimulationParameters.cellMaxAge[cell->color];
-        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellInactiveMaxAgeActivated && cell->mutationId != 1
+        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellInactiveMaxAgeActivated /*&& cell->mutationId != 1*/
             && cell->cellFunctionUsed == CellFunctionUsed_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < cell->numConnections; ++i) {
