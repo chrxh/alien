@@ -72,7 +72,7 @@ namespace Const
     ImColor const InspectorLineColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);
     ImColor const InspectorRectColor = ImColor::HSV(0.54f, 0.0f, 0.5f, 1.0f);
 
-    ImColor const CursorShadowColor = ImColor::HSV(0, 0, 0, 0.6f);
+    ImColor const CursorShadowColor = ImColor::HSV(0, 0, 0, 1.0f);
     ImColor const CursorColor = ImColor::HSV(0, 0.0f, 1.0f, 1.0f);
 
     ImColor const GenomePreviewConnectionColor = ImColor::HSV(0, 0, 0.5f);

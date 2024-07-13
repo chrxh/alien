@@ -25,7 +25,7 @@ namespace
     auto constexpr MotionBlurStatic = 0.8f;
     auto constexpr MotionBlurMoving = 0.5f;
     auto constexpr ZoomFactorForOverlay = 12.0f;
-    auto constexpr CursorRadius = 10.0f;
+    auto constexpr CursorRadius = 13.0f;
 }
 
 _SimulationView::_SimulationView(
