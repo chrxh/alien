@@ -300,6 +300,12 @@ namespace
             tree, parameters.cellInactiveMaxAge, defaultParameters.cellInactiveMaxAge, "simulation parameters.cell.inactive max age", parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.cellResetAgeAfterActivation,
+            defaultParameters.cellResetAgeAfterActivation,
+            "simulation parameters.cell.reset age after activation",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.baseValues.cellColorTransitionDuration,
             defaultParameters.baseValues.cellColorTransitionDuration,
             "simulation parameters.cell.color transition rules.duration",

@@ -1417,9 +1417,20 @@ void _SimulationParametersWindow::processBase(
                         .disabledValue(parameters.cellInactiveMaxAge)
                         .defaultEnabledValue(&origParameters.cellInactiveMaxAgeActivated)
                         .defaultValue(origParameters.cellInactiveMaxAge)
-                        .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered."),
+                        .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
+                                 "are in state 'Under construction' are not affected by this option."),
                     parameters.cellInactiveMaxAge,
                     &parameters.cellInactiveMaxAgeActivated);
+                AlienImGui::Checkbox(
+                    AlienImGui::CheckboxParameters()
+                        .name("Reset age after construction")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origParameters.cellResetAgeAfterActivation)
+                        .tooltip("If this option is activated, the age of the cells is reset to 0 after the construction of their cell network is completed, "
+                                 "i.e. when the state of the cells changes from 'Under construction' to 'Ready'. This option is particularly useful if a low 'Maximum "
+                                 "inactive cell age' is set, as cell networks that are under construction are inactive and could die immediately after "
+                                 "completion if their construction takes a long time."),
+                    parameters.cellResetAgeAfterActivation);
                 AlienImGui::SliderInt(
                     AlienImGui::SliderIntParameters()
                         .name("Maximum age balancing")

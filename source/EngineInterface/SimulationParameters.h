@@ -105,6 +105,8 @@ struct SimulationParameters
 
     bool cellMaxAgeBalancer = false;
     int cellMaxAgeBalancerInterval = 10000;
+    bool cellResetAgeAfterActivation = false;
+
     bool particleTransformationAllowed = false;
     bool particleTransformationRandomCellFunction = false;
     int particleTransformationMaxGenomeSize = 300;
