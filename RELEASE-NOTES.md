@@ -1,5 +1,27 @@
 # Release notes
 
+## [4.10.0] - ???
+### Added
+- engine: sensor and reconnector cells can be restricted to only sensing/connecting to certain type of mutants (same, other, inorganic, handcrafted, less and more complex)
+- engine: sensor cells can tag detected cells for attacking if parameter 'Sensor detection factor' is above 0
+- engine: sensors can not penetrate handcrafted structures when restricting to scanning for certain mutants
+- engine: allow to limit max age of permanently inactive cells (+ simulation parameter under addon 'Cell age limiter')
+- engine: allow to reset age after cell switches from 'Under construction' to 'Ready' (+ simulation parameter under addon 'Cell age limiter')
+- gui/statistics: diversity plot added
+- gui/simulation view: attack visualization (+ simulation parameter)
+- gui/simulation view: cell glow (+ simulation parameter under new addon 'Cell glow')
+- gui/mass operation, engine: mass operation for randomizing mutation ids
+
+### Changed
+- engine: make certain mutation rates (all except for translation, duplication and color mutations) dependent on the genome size
+- engine: avoid that creature is able to eat its offspring when it is currently under construction
+- engine: parameters 'Cell max force' and 'Maximum distance' are now color-dependent
+
+### Fixed
+- gui/simulation view: visibility of cells with low energy improved
+- serialization: load/save real-time counter in autosave
+- gui/browser: apply text filter to all workspaces and resource types
+
 ## [4.9.1] - 2024-04-26
 ### Added
 - gui/browser: label new simulations
