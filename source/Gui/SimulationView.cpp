@@ -511,7 +511,7 @@ void _SimulationView::drawCursor()
         //shadow
         drawList->AddCircle(mousePos, cursorSize / 2, Const::CursorShadowColor, 0, scale(4.0f));
         drawList->AddLine(
-            {mousePos.x + sqrt(2.0f) / 2.0f * cursorSize / 2, mousePos.y + sqrt(2.0f) / 2.0f * cursorSize / 2},
+            {mousePos.x + sqrtf(2.0f) / 2.0f * cursorSize / 2, mousePos.y + sqrtf(2.0f) / 2.0f * cursorSize / 2},
             {mousePos.x + cursorSize, mousePos.y + cursorSize},
             Const::CursorShadowColor,
             scale(4.0f));
@@ -519,7 +519,7 @@ void _SimulationView::drawCursor()
         //foreground
         drawList->AddCircle(mousePos, cursorSize / 2, Const::CursorColor, 0, scale(2.0f));
         drawList->AddLine(
-            {mousePos.x + sqrt(2.0f) / 2.0f * cursorSize / 2, mousePos.y + sqrt(2.0f) / 2.0f * cursorSize / 2},
+            {mousePos.x + sqrtf(2.0f) / 2.0f * cursorSize / 2, mousePos.y + sqrtf(2.0f) / 2.0f * cursorSize / 2},
             {mousePos.x + cursorSize, mousePos.y + cursorSize},
             Const::CursorColor,
             scale(2.0f));
