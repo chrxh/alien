@@ -199,5 +199,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && highlightedCellFunction == other.highlightedCellFunction && borderlessRendering == other.borderlessRendering
         && markReferenceDomain == other.markReferenceDomain && gridLines == other.gridLines && externalEnergy == other.externalEnergy
         && attackVisualization == other.attackVisualization && cellInactiveMaxAgeActivated == other.cellInactiveMaxAgeActivated
-        && cellGlowStrength == other.cellGlowStrength && cellGlowRadius == other.cellGlowRadius;
+        && cellGlowStrength == other.cellGlowStrength && cellGlowRadius == other.cellGlowRadius
+        && cellResetAgeAfterActivation == other.cellResetAgeAfterActivation;
 }
