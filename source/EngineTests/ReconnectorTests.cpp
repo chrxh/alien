@@ -561,7 +561,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setGenomeComplexity(1000)
+            .setGenomeComplexity(1000.0f)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
@@ -573,7 +573,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(999),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(999.0f),
     });
     data.addConnection(1, 2);
 
@@ -592,7 +592,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setGenomeComplexity(1000)
+            .setGenomeComplexity(1000.0f)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
@@ -604,7 +604,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001.0f),
     });
     data.addConnection(1, 2);
 
@@ -623,7 +623,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setGenomeComplexity(1000)
+            .setGenomeComplexity(1000.0f)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
@@ -635,7 +635,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001.0f),
     });
     data.addConnection(1, 2);
 
@@ -654,7 +654,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setGenomeComplexity(1000)
+            .setGenomeComplexity(1000.0f)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
@@ -666,7 +666,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1000),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1000.0f),
     });
     data.addConnection(1, 2);
 

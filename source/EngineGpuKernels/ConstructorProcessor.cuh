@@ -67,7 +67,7 @@ private:
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static bool isSelfReplicator(Cell* cell);
-    __inline__ __device__ static uint32_t calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize);
+    __inline__ __device__ static float calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize);
 };
 
 /************************************************************************/
@@ -777,12 +777,12 @@ __inline__ __device__ bool ConstructorProcessor::isSelfReplicator(Cell* cell)
     return GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor);
 }
 
-__inline__ __device__ uint32_t ConstructorProcessor::calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize)
+__inline__ __device__ float ConstructorProcessor::calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize)
 {
-    auto lastDepth = 0;
     auto result = 0.0f;
-    auto repetition = 1;
 
+    auto lastDepth = 0;
+    auto repetition = 1;
     auto genomeComplexityRamificationFactor =
         cudaSimulationParameters.features.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityRamificationFactor[color] : 0.0f;
     auto sizeFactor =
@@ -795,5 +795,6 @@ __inline__ __device__ uint32_t ConstructorProcessor::calcGenomeComplexity(int co
             ++repetition;
         }
     });
-    return static_cast<uint32_t>(result);
+
+    return result;
 }
