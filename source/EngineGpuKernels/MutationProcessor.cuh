@@ -139,36 +139,12 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
             cellColorMutation(data, cell);
         }
     }
-    //if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
-    //    neuronDataMutation(data, cell);
-    //}
-    //if (isRandomEvent(data, cellFunctionConstructorMutationDataProbability)) {
-    //    propertiesMutation(data, cell);
-    //}
-    //if (isRandomEvent(data, cellFunctionConstructorMutationGeometryProbability)) {
-    //    geometryMutation(data, cell);
-    //}
-    //if (isRandomEvent(data, cellFunctionConstructorMutationCustomGeometryProbability)) {
-    //    customGeometryMutation(data, cell);
-    //}
-    //if (isRandomEvent(data, cellFunctionConstructorMutationCellFunctionProbability)) {
-    //    cellFunctionMutation(data, cell);
-    //}
-    //if (isRandomEvent(data, cellFunctionConstructorMutationInsertionProbability)) {
-    //    insertMutation(data, cell);
-    //}
-    //if (isRandomEvent(data, cellFunctionConstructorMutationDeletionProbability)) {
-    //    deleteMutation(data, cell);
-    //}
     if (isRandomEvent(data, cellFunctionConstructorMutationTranslationProbability)) {
         translateMutation(data, cell);
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationDuplicationProbability)) {
         duplicateMutation(data, cell);
     }
-    //if (isRandomEvent(data, cellFunctionConstructorMutationCellColorProbability)) {
-    //    cellColorMutation(data, cell);
-    //}
     if (isRandomEvent(data, cellFunctionConstructorMutationSubgenomeColorProbability)) {
         subgenomeColorMutation(data, cell);
     }
