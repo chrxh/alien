@@ -597,14 +597,14 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
         auto& cell = cells.at(index);
         auto origLivingState = atomicCAS(&cell->livingState, LivingState_Activating, LivingState_Ready);
         if (origLivingState == LivingState_Activating) {
-            if (cudaSimulationParameters.cellResetAgeAfterActivation) {
+            if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellResetAgeAfterActivation) {
                 atomicExch(&cell->age, 0);
             }
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const& connectedCell = cell->connections[i].cell;
                 auto origLivingStateConnectedCell = atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_Activating);
                 if (origLivingStateConnectedCell == LivingState_UnderConstruction) {
-                    if (cudaSimulationParameters.cellResetAgeAfterActivation) {
+                    if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellResetAgeAfterActivation) {
                         atomicExch(&connectedCell->age, 0);
                     }
                 }
