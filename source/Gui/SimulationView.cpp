@@ -25,7 +25,7 @@ namespace
     auto constexpr MotionBlurStatic = 0.8f;
     auto constexpr MotionBlurMoving = 0.5f;
     auto constexpr ZoomFactorForOverlay = 12.0f;
-    auto constexpr EditCursorRadius = 10.0f;
+    auto constexpr CursorRadius = 10.0f;
 }
 
 _SimulationView::_SimulationView(
@@ -271,7 +271,7 @@ void _SimulationView::processEvents()
             middleMouseButtonReleased();
         }
 
-        drawEditCursor();
+        drawCursor();
     }
     processMouseWheel(mousePosInt);
 
@@ -393,7 +393,6 @@ void _SimulationView::updateImageFromSimulation()
     auto worldRect = Viewport::getVisibleWorldRect();
     auto viewSize = Viewport::getViewSize();
     auto zoomFactor = Viewport::getZoomFactor();
-    auto worldSize = _simController->getWorldSize();
 
     if (zoomFactor >= ZoomFactorForOverlay) {
         auto overlay = _simController->tryDrawVectorGraphicsAndReturnOverlay(
@@ -474,30 +473,56 @@ void _SimulationView::updateMotionBlur()
     _shader->setFloat("motionBlurFactor", motionBlur);
 }
 
-void _SimulationView::drawEditCursor()
+void _SimulationView::drawCursor()
 {
+    auto mousePos = ImGui::GetMousePos();
+    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+    }
+
     if (_modeWindow->getMode() == _ModeController::Mode::Editor) {
-        auto mousePos = ImGui::GetMousePos();
-        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto zoom = Viewport::getZoomFactor();
         if (!_editorModel->isDrawMode() || _simController->isSimulationRunning()) {
-            auto cursorSize = scale(EditCursorRadius);
+            auto cursorSize = scale(CursorRadius);
+
+            //shadow
             drawList->AddRectFilled(
-                {mousePos.x - cursorSize / 5, mousePos.y - cursorSize}, {mousePos.x + cursorSize / 5, mousePos.y + cursorSize},
-                Const::NavigationCursorColor);
+                {mousePos.x - scale(2.0f), mousePos.y - cursorSize}, {mousePos.x + scale(2.0f), mousePos.y + cursorSize}, Const::CursorShadowColor);
             drawList->AddRectFilled(
-                {mousePos.x - cursorSize, mousePos.y - cursorSize / 5}, {mousePos.x + cursorSize, mousePos.y + cursorSize / 5},
-                Const::NavigationCursorColor);
+                {mousePos.x - cursorSize, mousePos.y - scale(2.0f)}, {mousePos.x + cursorSize, mousePos.y + scale(2.0f)}, Const::CursorShadowColor);
+
+            //foreground
+            drawList->AddRectFilled(
+                {mousePos.x - scale(1.0f), mousePos.y - cursorSize}, {mousePos.x + scale(1.0f), mousePos.y + cursorSize}, Const::CursorColor);
+            drawList->AddRectFilled(
+                {mousePos.x - cursorSize, mousePos.y - scale(1.0f)}, {mousePos.x + cursorSize, mousePos.y + scale(1.0f)}, Const::CursorColor);
         } else {
+            auto zoom = Viewport::getZoomFactor();
             auto radius = _editorModel->getPencilWidth() * zoom;
             auto color = Const::IndividualCellColors[_editorModel->getDefaultColorCode()];
             float h, s, v;
             AlienImGui::ConvertRGBtoHSV(color, h, s, v);
             drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));
         }
-        if (!ImGui::GetIO().WantCaptureMouse) {
-            ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-        }
+    } else {
+        auto cursorSize = scale(CursorRadius);
+
+        //shadow
+        drawList->AddCircle(mousePos, cursorSize / 2, Const::CursorShadowColor, 0, scale(4.0f));
+        drawList->AddLine(
+            {mousePos.x + sqrt(2.0f) / 2.0f * cursorSize / 2, mousePos.y + sqrt(2.0f) / 2.0f * cursorSize / 2},
+            {mousePos.x + cursorSize, mousePos.y + cursorSize},
+            Const::CursorShadowColor,
+            scale(4.0f));
+
+        //foreground
+        drawList->AddCircle(mousePos, cursorSize / 2, Const::CursorColor, 0, scale(2.0f));
+        drawList->AddLine(
+            {mousePos.x + sqrt(2.0f) / 2.0f * cursorSize / 2, mousePos.y + sqrt(2.0f) / 2.0f * cursorSize / 2},
+            {mousePos.x + cursorSize, mousePos.y + cursorSize},
+            Const::CursorColor,
+            scale(2.0f));
     }
 }
 
