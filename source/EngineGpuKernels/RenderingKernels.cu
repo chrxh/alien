@@ -81,7 +81,7 @@ namespace
 
     __device__ __inline__ float3 calcColor(Cell* cell, int selected, CellColoring cellColoring, bool primary)
     {
-        float factor = max(20.0f, min(300.0f, cell->energy)) / 340.0f;
+        float factor = max(30.0f, min(300.0f, cell->energy)) / 340.0f;
         if (1 == selected) {
             factor *= 2.5f;
         }

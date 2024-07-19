@@ -122,6 +122,7 @@ public:
 private:
     RawStatisticsData* _data;
 
+    //for diversity calculation
     static auto constexpr MutantToColorCountMapSize = 1 << 20;
     struct ColorCount
     {
