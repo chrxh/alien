@@ -184,7 +184,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
     auto node = data.numberGen1.random(numNodes - 1);
     auto sequenceNumber = 0;
     uint8_t lastExecutionNumber = 0;
-    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, [&](int depth, int nodeAddress, int repetition) {
+    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddress, int repetition) {
         if (sequenceNumber++ != node) {
             return;
         }
@@ -312,7 +312,7 @@ __inline__ __device__ void MutationProcessor::customGeometryMutation(SimulationD
     auto numNodes = GenomeDecoder::getNumNodesRecursively(genome, genomeSize, false, true);
     auto node = data.numberGen1.random(numNodes - 1);
     auto sequenceNumber = 0;
-    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, [&](int depth, int nodeAddress, int repetition) {
+    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddress, int repetition) {
         if (sequenceNumber++ != node) {
             return;
         }
@@ -420,7 +420,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
 
         //choose a random node position to a constructor with a subgenome
         int numConstructorsWithSubgenome = 0;
-        GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, [&](int depth, int nodeAddressIntern, int repetition) {
+        GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddressIntern, int repetition) {
             auto cellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddressIntern);
             if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfReplication(genome, nodeAddressIntern)) {
                 ++numConstructorsWithSubgenome;
@@ -429,7 +429,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
         if (numConstructorsWithSubgenome > 0) {
             auto randomIndex = data.numberGen1.random(numConstructorsWithSubgenome - 1);
             int counter = 0;
-            GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, [&](int depth, int nodeAddressIntern, int repetition) {
+            GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddressIntern, int repetition) {
                 auto cellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddressIntern);
                 if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfReplication(genome, nodeAddressIntern)) {
                     if (randomIndex == counter) {
@@ -768,7 +768,7 @@ __inline__ __device__ void MutationProcessor::cellColorMutation(SimulationData& 
     auto numNodes = GenomeDecoder::getNumNodesRecursively(genome, genomeSize, false, true);
     auto randomNode = data.numberGen1.random(numNodes - 1);
     auto sequenceNumber = 0;
-    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, [&](int depth, int nodeAddress, int repetition) {
+    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddress, int repetition) {
         if (sequenceNumber++ != randomNode) {
             return;
         }
@@ -838,7 +838,7 @@ __inline__ __device__ void MutationProcessor::genomeColorMutation(SimulationData
     }
 
     GenomeDecoder::executeForEachNodeRecursively(
-        genome, genomeSize, true, [&](int depth, int nodeAddress, int repetition) { GenomeDecoder::setNextCellColor(genome, nodeAddress, newColor); });
+        genome, genomeSize, true, false, [&](int depth, int nodeAddress, int repetition) { GenomeDecoder::setNextCellColor(genome, nodeAddress, newColor); });
 }
 
 __inline__ __device__ void MutationProcessor::adaptMutationId(SimulationData& data, ConstructorFunction& constructor)
