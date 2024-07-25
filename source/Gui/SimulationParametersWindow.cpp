@@ -1232,7 +1232,7 @@ void _SimulationParametersWindow::processBase(
                         .max(1.0f)
                         .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerSameMutantPenalty))
                         .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
-                    parameters.cellFunctionAttackerArisingComplexMutantPenalty);
+                    parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Sensor detection factor")
@@ -2102,6 +2102,16 @@ void _SimulationParametersWindow::processSpot(
                         .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus)),
                     spot.values.cellFunctionAttackerGenomeComplexityBonus,
                     &spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
+                AlienImGui::InputFloatColorMatrix(
+                    AlienImGui::InputFloatColorMatrixParameters()
+                        .name("New complex mutant protection")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(1.0f)
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerNewComplexMutantPenalty))
+                        .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty)),
+                    spot.values.cellFunctionAttackerNewComplexMutantPenalty,
+                    &spot.activatedValues.cellFunctionAttackerNewComplexMutantPenalty);
 
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -2289,8 +2299,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
             parameters.cellFunctionAttackerSameMutantPenalty[i][j] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSameMutantPenalty[i][j]));
-            parameters.cellFunctionAttackerArisingComplexMutantPenalty[i][j] =
-                std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerArisingComplexMutantPenalty[i][j]));
+            parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty[i][j] =
+                std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty[i][j]));
             parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j] =
                 std::max(0.0f, parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j]);
         }
@@ -2325,6 +2335,8 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSp
             spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j]));
             spot.values.cellFunctionAttackerGenomeComplexityBonus[i][j] = std::max(0.0f, spot.values.cellFunctionAttackerGenomeComplexityBonus[i][j]);
+            spot.values.cellFunctionAttackerNewComplexMutantPenalty[i][j] =
+                std::max(0.0f, std::min(1.0f, spot.values.cellFunctionAttackerNewComplexMutantPenalty[i][j]));
         }
         spot.values.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorption[i]));
         spot.values.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);

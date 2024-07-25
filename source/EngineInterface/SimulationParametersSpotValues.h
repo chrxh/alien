@@ -48,6 +48,14 @@ struct SimulationParametersSpotValues
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    ColorMatrix<float> cellFunctionAttackerNewComplexMutantPenalty = {
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
 
     ColorVector<float> cellFunctionConstructorMutationNeuronDataProbability = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellFunctionConstructorMutationPropertiesProbability = {0, 0, 0, 0, 0, 0, 0};
@@ -70,6 +78,9 @@ struct SimulationParametersSpotValues
                     return false;
                 }
                 if (cellFunctionAttackerGenomeComplexityBonus[i][j] != other.cellFunctionAttackerGenomeComplexityBonus[i][j]) {
+                    return false;
+                }
+                if (cellFunctionAttackerNewComplexMutantPenalty[i][j] != other.cellFunctionAttackerNewComplexMutantPenalty[i][j]) {
                     return false;
                 }
             }

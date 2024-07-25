@@ -18,6 +18,7 @@ struct SimulationParametersSpotActivatedValues
     bool cellFunctionAttackerEnergyCost = false;
     bool cellFunctionAttackerFoodChainColorMatrix = false;
     bool cellFunctionAttackerGenomeComplexityBonus = false;
+    bool cellFunctionAttackerNewComplexMutantPenalty = false;
     bool cellFunctionAttackerGeometryDeviationExponent = false;
     bool cellFunctionAttackerConnectionsMismatchPenalty = false;
 
@@ -59,6 +60,7 @@ struct SimulationParametersSpotActivatedValues
             && radiationAbsorptionLowGenomeComplexityPenalty == other.radiationAbsorptionLowGenomeComplexityPenalty
             && cellFunctionAttackerGenomeComplexityBonus == other.cellFunctionAttackerGenomeComplexityBonus
             && radiationAbsorptionLowVelocityPenalty == other.radiationAbsorptionLowVelocityPenalty
+            && cellFunctionAttackerNewComplexMutantPenalty == other.cellFunctionAttackerNewComplexMutantPenalty
         ;
     }
 };
