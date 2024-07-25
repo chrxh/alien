@@ -94,7 +94,14 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             if (cudaSimulationParameters.features.advancedAttackerControl && cell->mutationId < otherCell->mutationId
                 && cell->genomeComplexity <= otherCell->genomeComplexity) {
-                energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerArisingComplexMutantPenalty[color][otherColor]);
+                auto cellFunctionAttackerArisingComplexMutantPenalty = SpotCalculator::calcParameter(
+                    &SimulationParametersSpotValues::cellFunctionAttackerNewComplexMutantPenalty,
+                    &SimulationParametersSpotActivatedValues::cellFunctionAttackerNewComplexMutantPenalty,
+                    data,
+                    cell->pos,
+                    color,
+                    otherColor);
+                energyToTransfer *= (1.0f - cellFunctionAttackerArisingComplexMutantPenalty);
             }
 
             auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);

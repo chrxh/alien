@@ -615,9 +615,9 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.cellFunctionAttackerArisingComplexMutantPenalty,
-            defaultParameters.cellFunctionAttackerArisingComplexMutantPenalty,
-            "simulation parameters.cell.function.attacker.arising complex mutant penalty",
+            parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty,
+            defaultParameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty,
+            "simulation parameters.cell.function.attacker.new complex mutant penalty",
             parserTask);
         encodeDecodeProperty(
             tree,
@@ -935,6 +935,13 @@ namespace
                 spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus,
                 defaultSpot.values.cellFunctionAttackerGenomeComplexityBonus,
                 base + "cell.function.attacker.genome size bonus",
+                parserTask);
+            encodeDecodeSpotProperty(
+                tree,
+                spot.values.cellFunctionAttackerNewComplexMutantPenalty,
+                spot.activatedValues.cellFunctionAttackerNewComplexMutantPenalty,
+                defaultSpot.values.cellFunctionAttackerNewComplexMutantPenalty,
+                base + "cell.function.attacker.new complex mutant penalty",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
