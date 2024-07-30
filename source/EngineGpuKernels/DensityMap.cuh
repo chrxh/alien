@@ -96,7 +96,7 @@ public:
         return 0ul;
     }
 
-    __device__ __inline__ uint32_t getRespawnedMutantDensity(float2 const& pos) const
+    __device__ __inline__ uint32_t getNutrientDensity(float2 const& pos) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {

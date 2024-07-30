@@ -57,7 +57,7 @@ enum SensorRestrictToMutants_
     SensorRestrictToMutants_NoRestriction,
     SensorRestrictToMutants_RestrictToSameMutants,
     SensorRestrictToMutants_RestrictToOtherMutants,
-    SensorRestrictToMutants_RestrictToRespawnedMutants,
+    SensorRestrictToMutants_RestrictToNutrient,
     SensorRestrictToMutants_RestrictToZeroMutants,
     SensorRestrictToMutants_RestrictToLessComplexMutants,
     SensorRestrictToMutants_RestrictToMoreComplexMutants,
