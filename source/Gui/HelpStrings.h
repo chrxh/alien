@@ -202,7 +202,7 @@ namespace Const
         ICON_FA_CHEVRON_RIGHT" None: No further restriction.\n\n"
         ICON_FA_CHEVRON_RIGHT" Same mutants: Cells that have a related genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" Other mutants: Cells that have a significantly different genome.\n\n"
-        ICON_FA_CHEVRON_RIGHT" Inorganic: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
+        ICON_FA_CHEVRON_RIGHT" Nutrient: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
         ICON_FA_CHEVRON_RIGHT" Handcrafted constructs: Cells that were created in the editor (e.g. walls).\n\n"
         ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' addon. By default, it is the number of encoded cells in the genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" More complex mutants: Cells that have a more complex genome.\n\n";
@@ -254,7 +254,7 @@ namespace Const
         ICON_FA_CHEVRON_RIGHT" None: No further restriction.\n\n"
         ICON_FA_CHEVRON_RIGHT" Same mutants: Cells that have a related genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" Other mutants: Cells that have a significantly different genome.\n\n"
-        ICON_FA_CHEVRON_RIGHT" Inorganic: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
+        ICON_FA_CHEVRON_RIGHT" Nutrient: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
         ICON_FA_CHEVRON_RIGHT" Handcrafted constructs: Cells that were created in the editor (e.g. walls).\n\n"
         ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' addon. By default, it is the number of encoded cells in the genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" More complex mutants: Cells that have a more complex genome.\n\n";

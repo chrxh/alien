@@ -714,7 +714,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToRespawnedMutants)),
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToNutrient)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
@@ -750,7 +750,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToRespawnedMutants)),
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToNutrient)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
