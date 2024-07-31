@@ -2060,7 +2060,7 @@ TEST_F(ConstructorTests, severalRepetitionsAndBranchesOfSingleCell)
 {
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
         GenomeDescription()
-            .setHeader(GenomeHeaderDescription().setNumBranches(1).setNumBranches(3).setNumRepetitions(2).setSeparateConstruction(false))
+            .setHeader(GenomeHeaderDescription().setNumBranches(3).setNumRepetitions(2).setSeparateConstruction(false))
             .setCells({CellGenomeDescription()}));
 
     DataDescription data;
@@ -2082,6 +2082,38 @@ TEST_F(ConstructorTests, severalRepetitionsAndBranchesOfSingleCell)
     auto actualConstructor = getCell(actualData, 1);
 
     EXPECT_EQ(3, actualConstructor.connections.size());
+    for (auto const& connection : actualConstructor.connections) {
+        auto lastContructedCell = getCell(actualData, connection.cellId);
+        EXPECT_EQ(2, lastContructedCell.connections.size());
+    }
+}
+
+TEST_F(ConstructorTests, severalRepetitionsAndBranchesOfSingleCell_ignoreNumRequiredConnections)
+{
+    auto genome = GenomeDescriptionService::convertDescriptionToBytes(
+        GenomeDescription()
+            .setHeader(GenomeHeaderDescription().setNumBranches(1).setNumRepetitions(3).setSeparateConstruction(false))
+            .setCells({CellGenomeDescription().setNumRequiredAdditionalConnections(1)}));
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2 * 3 * 4 * 3)
+            .setMaxConnections(6)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(3)),
+    });
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(400 * 6);
+    auto actualData = _simController->getSimulationData();
+
+    ASSERT_EQ(4, actualData.cells.size());
+    auto actualConstructor = getCell(actualData, 1);
+
+    EXPECT_EQ(1, actualConstructor.connections.size());
     for (auto const& connection : actualConstructor.connections) {
         auto lastContructedCell = getCell(actualData, connection.cellId);
         EXPECT_EQ(2, lastContructedCell.connections.size());

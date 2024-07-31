@@ -417,6 +417,11 @@ struct CellGenomeDescription
         cellFunction = value;
         return *this;
     }
+    CellGenomeDescription& setNumRequiredAdditionalConnections(int const& value)
+    {
+        numRequiredAdditionalConnections = value;
+        return *this;
+    }
 };
 
 struct GenomeHeaderDescription
