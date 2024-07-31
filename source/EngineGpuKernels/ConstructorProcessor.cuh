@@ -190,6 +190,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     ConstructionData result;
     result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
     result.hasInfiniteRepetitions = GenomeDecoder::hasInfiniteRepetitions(constructor);
+    auto genomeNodesPerRepetition = GenomeDecoder::getNumNodes(constructor.genome, constructor.genomeSize);
     if (!GenomeDecoder::hasInfiniteRepetitions(constructor) && constructor.genomeCurrentNodeIndex == 0 && constructor.genomeCurrentRepetition == 0) {
         result.lastConstructionCell = nullptr;
     } else {
@@ -201,7 +202,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
         constructor.genomeCurrentNodeIndex = 0;
         constructor.genomeCurrentRepetition = 0;
     } else if (result.lastConstructionCell->numConnections == 1 && constructor.numInheritedGenomeNodes > 1) {
-        int numConstructedCells = constructor.genomeCurrentRepetition * result.genomeHeader.numRepetitions + constructor.genomeCurrentNodeIndex;
+        int numConstructedCells = constructor.genomeCurrentRepetition * genomeNodesPerRepetition + constructor.genomeCurrentNodeIndex;
         if (numConstructedCells > 1) {
 
             //construction is broken => reset indices
@@ -241,6 +242,10 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     if (result.genomeHeader.shape == ConstructionShape_Custom) {
         result.angle = angle;
         result.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
+    }
+
+    if (genomeNodesPerRepetition == 1) {
+        result.numRequiredAdditionalConnections = -1;
     }
 
     auto isAtFirstNode = GenomeDecoder::isFirstNode(constructor);
