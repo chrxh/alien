@@ -224,34 +224,25 @@ void _StatisticsWindow::processHistogramsTab()
     ImPlot::PopStyleColor(2);
 }
 
-namespace
-{
-    uint64_t sum(ColorVector<uint64_t> const& valueByColor)
-    {
-        uint64_t result = 0;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            result += valueByColor[i];
-        }
-        return result;
-    }
-}
-
 void _StatisticsWindow::processTablesTab()
 {
+    if (!_tableLiveStatistics.isDataAvailable()) {
+        return;
+    }
+
     ImGui::PushID(3);
     if (ImGui::BeginTable(
             "##tables",
             2,
             ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_BordersOuterV,
             ImVec2(-1, 0))) {
+
         ImGui::TableSetupColumn("##");
         ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTable));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        //if (_lastHistogramData) {
-        //    AlienImGui::Text(StringHelper::format(sum(_lastHistogramData->timeline.accumulated.numCreatedCells)));
-        //}
+        AlienImGui::Text(StringHelper::format(_tableLiveStatistics.getCreatedCells()));
 
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Created cells");
@@ -482,6 +473,7 @@ void _StatisticsWindow::processBackground()
         auto rawStatistics = _simController->getRawStatistics();
         _histogramLiveStatistics.update(rawStatistics.histogram);
         _timelineLiveStatistics.update(rawStatistics.timeline, _simController->getCurrentTimestep());
+        _tableLiveStatistics.update(rawStatistics.timeline);
     }
 }
 

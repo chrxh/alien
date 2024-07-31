@@ -8,6 +8,7 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 #include "HistogramLiveStatistics.h"
+#include "TableLiveStatistics.h"
 #include "TimelineLiveStatistics.h"
 
 struct ImPlotPoint;
@@ -62,6 +63,6 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;
     TimelineLiveStatistics _timelineLiveStatistics;
     HistogramLiveStatistics _histogramLiveStatistics;
-    //TableLiveStatistics _tableLiveStatistics;
+    TableLiveStatistics _tableLiveStatistics;
 };
 
