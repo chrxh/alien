@@ -130,7 +130,10 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
             cellFunctionMutation(data, cell);
         }
         if (isRandomEvent(data, cellFunctionConstructorMutationInsertionProbability * numNodes)) {
-            insertMutation(data, cell);
+            auto numNonSeparatedNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false));
+            if (numNodes < 2 * numNonSeparatedNodes) {
+                insertMutation(data, cell);
+            }
         }
         if (isRandomEvent(data, cellFunctionConstructorMutationDeletionProbability * numNodes)) {
             deleteMutation(data, cell);
@@ -143,7 +146,12 @@ __inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData
         translateMutation(data, cell);
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationDuplicationProbability)) {
-        duplicateMutation(data, cell);
+        auto& constructor = cell->cellFunctionData.constructor;
+        auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
+        auto numNonSeparatedNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false));
+        if (numNodes < 2 * numNonSeparatedNodes) {
+            duplicateMutation(data, cell);
+        }
     }
     if (isRandomEvent(data, cellFunctionConstructorMutationSubgenomeColorProbability)) {
         subgenomeColorMutation(data, cell);
