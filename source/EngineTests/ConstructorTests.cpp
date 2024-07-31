@@ -2088,7 +2088,7 @@ TEST_F(ConstructorTests, severalRepetitionsAndBranchesOfSingleCell)
     }
 }
 
-TEST_F(ConstructorTests, severalRepetitionsAndBranchesOfSingleCell_ignoreNumRequiredConnections)
+TEST_F(ConstructorTests, severalRepetitionsOfSingleCell_ignoreNumRequiredConnections)
 {
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
         GenomeDescription()
