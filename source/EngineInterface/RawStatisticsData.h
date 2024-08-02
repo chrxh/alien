@@ -13,6 +13,7 @@ struct TimestepStatistics
     ColorVector<int> numConnections = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numParticles = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numGenomeCells = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> genomeComplexity = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> totalEnergy = {0, 0, 0, 0, 0, 0, 0};
 };
 

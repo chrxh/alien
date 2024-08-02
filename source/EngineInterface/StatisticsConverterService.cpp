@@ -16,20 +16,21 @@ namespace
         return result;
     }
 
-    DataPoint getDataPointForAverageGenomeNodes(ColorVector<uint64_t> const& numGenomeNodes, ColorVector<int> const& numSelfReplicators)
+    template<typename T>
+    DataPoint getDataPointForAverageSelfReplicator(ColorVector<T> const& summedValue, ColorVector<int> const& numSelfReplicators)
     {
         DataPoint result;
-        auto sumNumGenomeNodes = 0.0;
+        auto sumSummedValue = 0.0;
         auto sumNumSelfReplicators = 0.0;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            result.values[i] = toDouble(numGenomeNodes[i]);
-            sumNumGenomeNodes += result.values[i];
+            result.values[i] = toDouble(summedValue[i]);
+            sumSummedValue += result.values[i];
             sumNumSelfReplicators += numSelfReplicators[i];
             if (numSelfReplicators[i] > 0) {
                 result.values[i] /= numSelfReplicators[i];
             }
         }
-        result.summedValues = sumNumSelfReplicators > 0 ? sumNumGenomeNodes / sumNumSelfReplicators : sumNumGenomeNodes;
+        result.summedValues = sumNumSelfReplicators > 0 ? sumSummedValue / sumNumSelfReplicators : sumSummedValue;
         return result;
     }
 
@@ -73,7 +74,8 @@ DataPointCollection StatisticsConverterService::convert(
     result.numViruses = getDataPointForTimestepProperty(data.timestep.numViruses);
     result.numConnections = getDataPointForTimestepProperty(data.timestep.numConnections);
     result.numParticles = getDataPointForTimestepProperty(data.timestep.numParticles);
-    result.averageGenomeCells = getDataPointForAverageGenomeNodes(data.timestep.numGenomeCells, data.timestep.numSelfReplicators);
+    result.averageGenomeCells = getDataPointForAverageSelfReplicator(data.timestep.numGenomeCells, data.timestep.numSelfReplicators);
+    result.averageGenomeComplexity = getDataPointForAverageSelfReplicator(data.timestep.genomeComplexity, data.timestep.numSelfReplicators);
     result.totalEnergy = getDataPointForTimestepProperty(data.timestep.totalEnergy);
 
     auto deltaTimesteps = lastTimestep ? toDouble(timestep) - toDouble(*lastTimestep) : 1.0;
