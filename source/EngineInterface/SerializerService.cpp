@@ -1223,6 +1223,7 @@ namespace
         loadSave(task, serializedData, 1 + 19 * 8, dataPoints.numReconnectorRemoved);
         loadSave(task, serializedData, 1 + 20 * 8, dataPoints.numDetonations);
         loadSave(task, serializedData, 1 + 21 * 8, dataPoints.numColonies);
+        loadSave(task, serializedData, 1 + 22 * 8, dataPoints.averageGenomeComplexity);
     }
 }
 
@@ -1258,6 +1259,7 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
     writeLabelAllColors("Reconnector deletions");
     writeLabelAllColors("Detonations");
     writeLabelAllColors("Colonies");
+    writeLabelAllColors("Average genome complexity");
     stream << std::endl;
 
     //content
