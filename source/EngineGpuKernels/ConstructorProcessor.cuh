@@ -58,6 +58,7 @@ private:
 
     __inline__ __device__ static Cell* constructCellIntern(
         SimulationData& data,
+        SimulationStatistics& statistics,
         uint64_t& cellPointerIndex,
         Cell* hostCell,
         float2 const& newCellPos,
@@ -368,7 +369,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     }
 
     uint64_t cellPointerIndex;
-    Cell* newCell = constructCellIntern(data, cellPointerIndex, hostCell, newCellPos, 0, constructionData);
+    Cell* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, 0, constructionData);
 
     if (!newCell->tryLock()) {
         return false;
@@ -389,8 +390,6 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
 
     newCell->releaseLock();
-
-    statistics.incNumCreatedCells(hostCell->color);
     return true;
 }
 
@@ -458,7 +457,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
         return false;
     }
     uint64_t cellPointerIndex;
-    Cell* newCell = constructCellIntern(data, cellPointerIndex, hostCell, newCellPos, 0, constructionData);
+    Cell* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, 0, constructionData);
 
     if (!newCell->tryLock()) {
         return false;
@@ -593,8 +592,6 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
 
     newCell->releaseLock();
-
-    statistics.incNumCreatedCells(hostCell->color);
     return true;
 }
 
@@ -615,6 +612,7 @@ __inline__ __device__ bool ConstructorProcessor::isConnectable(int numConnection
 __inline__ __device__ Cell*
 ConstructorProcessor::constructCellIntern(
     SimulationData& data,
+    SimulationStatistics& statistics,
     uint64_t& cellPointerIndex,
     Cell* hostCell,
     float2 const& posOfNewCell,
@@ -681,6 +679,9 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.numInheritedGenomeNodes = static_cast<uint16_t>(min(NPP_MAX_16U, numInheritedGenomeNodes));
         newConstructor.genomeGeneration = constructor.genomeGeneration + 1;
         newConstructor.offspringMutationId = constructor.offspringMutationId;
+        if (GenomeDecoder::containsSelfReplication(newConstructor)) {
+            statistics.incNumCreatedReplicators(hostCell->color);
+        }
     } break;
     case CellFunction_Sensor: {
         result->cellFunctionData.sensor.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % SensorMode_Count;
@@ -726,6 +727,7 @@ ConstructorProcessor::constructCellIntern(
     } break;
     }
 
+    statistics.incNumCreatedCells(hostCell->color);
     return result;
 }
 

@@ -19,6 +19,7 @@ struct TimestepStatistics
 struct AccumulatedStatistics
 {
     ColorVector<uint64_t> numCreatedCells = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numCreatedReplicators = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numAttacks = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numMuscleActivities = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numDefenderActivities = {0, 0, 0, 0, 0, 0, 0};
