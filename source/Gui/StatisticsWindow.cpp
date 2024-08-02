@@ -25,7 +25,8 @@
 namespace
 {
     auto constexpr RightColumnWidth = 175.0f;
-    auto constexpr RightColumnWidthTable = 150.0f;
+    auto constexpr RightColumnWidthTimeline = 150.0f;
+    auto constexpr RightColumnWidthTable = 200.0f;
     auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
 }
 
@@ -247,6 +248,12 @@ void _StatisticsWindow::processTablesTab()
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Created cells / sec");
 
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        AlienImGui::Text(StringHelper::format(_tableLiveStatistics.getCreatedReplicatorsPerSecond()));
+
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Created self-replicators / sec");
 
         ImGui::EndTable();
     }
@@ -261,7 +268,7 @@ void _StatisticsWindow::processTimelineStatistics()
     int row = 0;
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");
-        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTable));
+        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTimeline));
 
         ImPlot::PushColormap(ImPlotColormap_Cool);
 
@@ -326,7 +333,7 @@ void _StatisticsWindow::processTimelineStatistics()
     ImGui::PushID(2);
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");
-        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTable));
+        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTimeline));
         ImPlot::PushColormap(ImPlotColormap_Cool);
 
         ImGui::TableNextRow();
