@@ -51,6 +51,7 @@ public:
     {
         alienAtomicAdd64(&_data->timeline.timestep.numGenomeCells[color], valueToAdd);
     }
+    __inline__ __device__ void addGenomeComplexity(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.genomeComplexity[color], valueToAdd); }
     __inline__ __device__ void incMutant(int color, uint32_t mutationId)
     {
         atomicAdd(&_mutantToColorCountMap[mutationId % MutantToColorCountMapSize].count, 1);

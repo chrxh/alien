@@ -314,7 +314,15 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::averageGenomeCells, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Average genome size");
+        AlienImGui::Text("Average genome\ncells");
+        ImGui::SameLine();
+        AlienImGui::HelpMarker("The average number of encoded cells in the genomes is displayed.");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::averageGenomeComplexity, 2);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Average genome\ncomplexity");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
