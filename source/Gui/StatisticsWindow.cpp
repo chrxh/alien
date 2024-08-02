@@ -242,10 +242,10 @@ void _StatisticsWindow::processTablesTab()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienImGui::Text(StringHelper::format(_tableLiveStatistics.getCreatedCells()));
+        AlienImGui::Text(StringHelper::format(_tableLiveStatistics.getCreatedCellsPerSecond()));
 
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Created cells");
+        AlienImGui::Text("Created cells / sec");
 
 
         ImGui::EndTable();

@@ -2,7 +2,7 @@
 
 bool TableLiveStatistics::isDataAvailable() const
 {
-    return _lastData.has_value();
+    return _currentData.has_value();
 }
 
 namespace
@@ -17,15 +17,39 @@ namespace
     }
 }
 
-uint64_t TableLiveStatistics::getCreatedCells() const
+float TableLiveStatistics::getCreatedCellsPerSecond() const
 {
-    return sum(_lastData->accumulated.numCreatedCells);
+    if (!_lastDataTimepoint.has_value()) {
+        return 0;
+    }
+
+    auto currentCreatedCells = sum(_currentData->accumulated.numCreatedCells);
+    auto lastCreatedCells = sum(_lastData->accumulated.numCreatedCells);
+    return (toFloat(currentCreatedCells) - toFloat(lastCreatedCells))
+        / toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(*_currentDataTimepoint - *_lastDataTimepoint).count()) * 5000;
+}
+
+float TableLiveStatistics::getReplicatorsPerSecond() const
+{
+    return 0;
 }
 
 void TableLiveStatistics::update(TimelineStatistics const& data)
 {
-    _lastData = data;
-    //auto timepoint = std::chrono::steady_clock::now();
-    //auto duration =
-    //    _lastTimepoint.has_value() ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_lastTimepoint).count()) : 0;
+    auto timepoint = std::chrono::steady_clock::now();
+
+    if (!_currentDataTimepoint.has_value()) {
+        _currentData = data;
+        _currentDataTimepoint = timepoint;
+        return;
+    }
+
+    auto duration = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_currentDataTimepoint).count());
+    if (duration > 5000) {
+        _lastData = _currentData;
+        _lastDataTimepoint = _currentDataTimepoint;
+
+        _currentData = data;
+        _currentDataTimepoint = timepoint;
+    }
 }
