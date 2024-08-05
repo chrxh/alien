@@ -55,19 +55,19 @@ public:
     __device__ __inline__ float random(float maxVal)
     {
         int number = getRandomNumber();
-        return maxVal * static_cast<float>(number) / RAND_MAX;
+        return maxVal * static_cast<float>(number) / toFloat(RAND_MAX);
     }
 
     __device__ __inline__ float random(float minVal, float maxVal)
     {
         int number = getRandomNumber();
-        return minVal + (maxVal - minVal) * static_cast<float>(number) / RAND_MAX;
+        return minVal + (maxVal - minVal) * static_cast<float>(number) / toFloat(RAND_MAX);
     }
 
     __device__ __inline__ float random()
     {
         int number = getRandomNumber();
-        return static_cast<float>(number) / RAND_MAX;
+        return static_cast<float>(number) / toFloat(RAND_MAX);
     }
 
     __device__ __inline__ bool randomBool() { return random(1) == 0; }
