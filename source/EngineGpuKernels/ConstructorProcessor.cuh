@@ -789,17 +789,17 @@ __inline__ __device__ float ConstructorProcessor::calcGenomeComplexity(int color
     auto result = 0.0f;
 
     auto lastDepth = 0;
-    auto repetition = 1;
+    auto numRamifications = 1;
     auto genomeComplexityRamificationFactor =
         cudaSimulationParameters.features.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityRamificationFactor[color] : 0.0f;
     auto sizeFactor =
         cudaSimulationParameters.features.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexitySizeFactor[color] : 1.0f;
     GenomeDecoder::executeForEachNodeRecursively(genome, toInt(genomeSize), false, false, [&](int depth, int nodeAddress, int repetitions) {
-        float ramificationFactor = depth > lastDepth ? genomeComplexityRamificationFactor * toFloat(repetition) : 0.0f;
+        float ramificationFactor = depth > lastDepth ? genomeComplexityRamificationFactor * toFloat(numRamifications) : 0.0f;
         result += powf(2.0f, toFloat(depth)) * toFloat(repetitions) * (ramificationFactor + sizeFactor);
         lastDepth = depth;
         if (ramificationFactor > 0) {
-            ++repetition;
+            ++numRamifications;
         }
     });
 

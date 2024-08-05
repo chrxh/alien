@@ -314,7 +314,7 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::averageGenomeCells, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Average genome\ncells");
+        AlienImGui::Text("Average genotype\ncells");
         ImGui::SameLine();
         AlienImGui::HelpMarker("The average number of encoded cells in the genomes is displayed.");
 
