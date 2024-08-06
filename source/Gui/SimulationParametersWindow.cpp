@@ -270,6 +270,15 @@ void _SimulationParametersWindow::processBase(
             }
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
+                    .name("Cell radius")
+                    .textWidth(RightColumnWidth)
+                    .min(0)
+                    .max(0.5f)
+                    .defaultValue(&origParameters.cellRadius)
+                    .tooltip("Specifies the radius of the drawn cells in unit length."),
+                &parameters.cellRadius);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
                     .name("Zoom level for cell activity")
                     .textWidth(RightColumnWidth)
                     .min(0)

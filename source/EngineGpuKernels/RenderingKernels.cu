@@ -417,12 +417,13 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
         auto cellImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos, universeImageSize, zoom);
         if (isContainedInRect({0, 0}, toFloat2(imageSize), cellImagePos)) {
 
+            auto cellRadius = zoom * cudaSimulationParameters.cellRadius;
+
             //draw primary color for cell
             auto primaryColor = calcColor(cell, cell->selected, coloring, true) * 0.85f;
-            drawCircle(imageData, imageSize, cellImagePos, primaryColor * 0.45f, zoom / 2.5f, false, false);
+            drawCircle(imageData, imageSize, cellImagePos, primaryColor * 0.45f, cellRadius * 8 / 5, false, false);
 
             //draw secondary color for cell
-            auto cellRadius = zoom / 4;
             auto secondaryColor =
                 coloring == CellColoring_MutationId_AllCellFunctions ? calcColor(cell, cell->selected, coloring, false) * 0.5f : primaryColor * 0.6f;
             drawCircle(imageData, imageSize, cellImagePos, secondaryColor, cellRadius, shadedCells, true);
