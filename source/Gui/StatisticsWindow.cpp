@@ -89,8 +89,8 @@ void _StatisticsWindow::processIntern()
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Tables")) {
-            if (ImGui::BeginChild("##tables", ImVec2(0, 0), false)) {
+        if (ImGui::BeginTabItem("Throughput")) {
+            if (ImGui::BeginChild("##throughput", ImVec2(0, 0), false)) {
                 processTablesTab();
             }
             ImGui::EndChild();
@@ -233,7 +233,7 @@ void _StatisticsWindow::processTablesTab()
 
     ImGui::PushID(3);
     if (ImGui::BeginTable(
-            "##tables",
+            "##throughput",
             2,
             ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_BordersOuterV,
             ImVec2(-1, 0))) {
