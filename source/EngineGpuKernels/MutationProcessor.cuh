@@ -11,7 +11,8 @@ class MutationProcessor
 {
 public:
 
-    __inline__ __device__ static void applyRandomMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void applyRandomMutations(SimulationData& data);
+    __inline__ __device__ static void applyRandomMutationsForCell(SimulationData& data, Cell* cell);
 
     __inline__ __device__ static void neuronDataMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void propertiesMutation(SimulationData& data, Cell* cell);
@@ -37,7 +38,20 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::applyRandomMutations(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->livingState== LivingState_Activating && cell->cellFunction == CellFunction_Constructor) {
+            MutationProcessor::applyRandomMutationsForCell(data, cell);
+        }
+    }
+}
+
+__inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
@@ -836,9 +850,10 @@ __inline__ __device__ void MutationProcessor::genomeColorMutation(SimulationData
 template <typename Func>
 __inline__ __device__ void MutationProcessor::executeEvent(SimulationData& data, float probability, Func eventFunc)
 {
-    for (int i = 0, j = toInt(probability); i < j; ++i) {
-        eventFunc();
-    }
+    //TODO avoid performance deterioration
+    //for (int i = 0, j = toInt(probability); i < j; ++i) {
+    //    eventFunc();
+    //}
     if (isRandomEvent(data, probability)) {
         eventFunc();
     }

@@ -48,11 +48,11 @@ private:
     __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
     __inline__ __device__ static bool isConstructionTriggered(SimulationData const& data, Cell* cell, Activity const& activity);
 
-    __inline__ __device__ static bool tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static Cell* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static Cell* getLastConstructedCell(Cell* hostCell);
-    __inline__ __device__ static bool startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
-    __inline__ __device__ static bool continueConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static Cell* startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static Cell* continueConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static bool isConnectable(int numConnections, int maxConnections, bool adaptMaxConnections);
 
@@ -279,27 +279,27 @@ ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* 
     return true;
 }
 
-__inline__ __device__ bool
+__inline__ __device__ Cell*
 ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData)
 {
     if (!hostCell->tryLock()) {
-        return false;
+        return nullptr;
     }
     if (constructionData.lastConstructionCell) {
         if (!constructionData.lastConstructionCell->tryLock()) {
             hostCell->releaseLock();
-            return false;
+            return nullptr;
         }
-        auto success = continueConstruction(data, statistics, hostCell, constructionData);
+        auto newCell = continueConstruction(data, statistics, hostCell, constructionData);
 
         constructionData.lastConstructionCell->releaseLock();
         hostCell->releaseLock();
-        return success;
+        return newCell;
     } else {
-        auto success = startNewConstruction(data, statistics, hostCell, constructionData);
+        auto newCell = startNewConstruction(data, statistics, hostCell, constructionData);
 
         hostCell->releaseLock();
-        return success;
+        return newCell;
     }
 }
 
@@ -333,13 +333,13 @@ __inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCell(Cell* h
     return nullptr;
 }
 
-__inline__ __device__ bool
+__inline__ __device__ Cell*
 ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData)
 {
     auto& constructor = hostCell->cellFunctionData.constructor;
 
     if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, true)) {
-        return false;
+        return nullptr;
     }
     auto anglesForNewConnection = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
 
@@ -347,15 +347,15 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     float2 newCellPos = hostCell->pos + newCellDirection;
 
     if (CellConnectionProcessor::existCrossingConnections(data, hostCell->pos, newCellPos, hostCell->detached, hostCell->color)) {
-        return false;
+        return nullptr;
     }
 
     if (cudaSimulationParameters.cellFunctionConstructorCheckCompletenessForSelfReplication && !constructor.isComplete) {
-        return false;
+        return nullptr;
     }
 
     if (!checkAndReduceHostEnergy(data, hostCell, constructionData)) {
-        return false;
+        return nullptr;
     }
 
     if (GenomeDecoder::containsSelfReplication(constructor)) {
@@ -370,7 +370,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     Cell* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, 0, constructionData);
 
     if (!newCell->tryLock()) {
-        return false;
+        return nullptr;
     }
 
     if (!constructionData.isLastNodeOfLastRepetition || !constructionData.genomeHeader.separateConstruction) {
@@ -388,10 +388,10 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
 
     newCell->releaseLock();
-    return true;
+    return newCell;
 }
 
-__inline__ __device__ bool ConstructorProcessor::continueConstruction(
+__inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     SimulationData& data,
     SimulationStatistics& statistics,
     Cell* hostCell,
@@ -406,7 +406,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
 
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
         || constructionSiteDistance - desiredDistance < cudaSimulationParameters.cellMinDistance) {
-        return false;
+        return nullptr;
     }
 
     auto newCellPos = hostCell->pos + posDelta;
@@ -447,18 +447,18 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     }
     if (constructionData.numRequiredAdditionalConnections != -1) {
         if (numOtherCells < constructionData.numRequiredAdditionalConnections) {
-            return false;
+            return nullptr;
         }
     }
 
     if (!checkAndReduceHostEnergy(data, hostCell, constructionData)) {
-        return false;
+        return nullptr;
     }
     uint64_t cellPointerIndex;
     Cell* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, 0, constructionData);
 
     if (!newCell->tryLock()) {
-        return false;
+        return nullptr;
     }
     if (constructionData.lastConstructionCell->livingState == LivingState_Dying) {
         newCell->livingState = LivingState_Dying;
@@ -590,7 +590,7 @@ __inline__ __device__ bool ConstructorProcessor::continueConstruction(
     newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
 
     newCell->releaseLock();
-    return true;
+    return newCell;
 }
 
 __inline__ __device__ bool ConstructorProcessor::isConnectable(int numConnections, int maxConnections, bool adaptMaxConnections)
@@ -679,7 +679,6 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.offspringMutationId = constructor.offspringMutationId;
         if (GenomeDecoder::containsSelfReplication(newConstructor)) {
             statistics.incNumCreatedReplicators(hostCell->color);
-            MutationProcessor::applyRandomMutation(data, result);
         }
     } break;
     case CellFunction_Sensor: {
