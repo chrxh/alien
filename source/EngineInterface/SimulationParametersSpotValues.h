@@ -19,6 +19,14 @@ struct SimulationParametersSpotValues
     ColorVector<float> cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
     float cellFusionVelocity = 0.6f;
     float cellMaxBindingEnergy = Infinity<float>::value;
+    ColorVector<float> cellInactiveMaxAge = {
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value};
     ColorVector<int> cellColorTransitionDuration = {
         Infinity<int>::value,
         Infinity<int>::value,
@@ -153,6 +161,9 @@ struct SimulationParametersSpotValues
                 return false;
             }
             if (radiationAbsorptionLowVelocityPenalty[i] != other.radiationAbsorptionLowVelocityPenalty[i]) {
+                return false;
+            }
+            if (cellInactiveMaxAge[i] != other.cellInactiveMaxAge[i]) {
                 return false;
             }
         }

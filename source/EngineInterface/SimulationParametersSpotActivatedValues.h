@@ -14,6 +14,7 @@ struct SimulationParametersSpotActivatedValues
     bool cellMinEnergy = false;
     bool cellFusionVelocity = false;
     bool cellMaxBindingEnergy = false;
+    bool cellInactiveMaxAge = false;
     bool cellColorTransition = false;
     bool cellFunctionAttackerEnergyCost = false;
     bool cellFunctionAttackerFoodChainColorMatrix = false;
@@ -61,6 +62,7 @@ struct SimulationParametersSpotActivatedValues
             && cellFunctionAttackerGenomeComplexityBonus == other.cellFunctionAttackerGenomeComplexityBonus
             && radiationAbsorptionLowVelocityPenalty == other.radiationAbsorptionLowVelocityPenalty
             && cellFunctionAttackerNewComplexMutantPenalty == other.cellFunctionAttackerNewComplexMutantPenalty
+            && cellInactiveMaxAge == other.cellInactiveMaxAge
         ;
     }
 };
