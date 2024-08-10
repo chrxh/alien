@@ -207,7 +207,7 @@ namespace
         encodeDecodeProperty(tree, parameters.gridLines, defaultParameters.gridLines, "simulation parameters.grid lines", parserTask);
         encodeDecodeProperty(
             tree, parameters.attackVisualization, defaultParameters.attackVisualization, "simulation parameters.attack visualization", parserTask);
-        encodeDecodeProperty(tree, parameters.cellRadius, defaultParameters.cellRadius, "simulation parameters.cell radius", parserTask);
+        encodeDecodeProperty(tree, parameters.cellRadius, defaultParameters.cellRadius, "simulation parameters.cek", parserTask);
 
         encodeDecodeProperty(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);
 
@@ -298,7 +298,11 @@ namespace
             "simulation parameters.cell.inactive max age activated",
             parserTask);
         encodeDecodeProperty(
-            tree, parameters.cellInactiveMaxAge, defaultParameters.cellInactiveMaxAge, "simulation parameters.cell.inactive max age", parserTask);
+            tree,
+            parameters.baseValues.cellInactiveMaxAge,
+            defaultParameters.baseValues.cellInactiveMaxAge,
+            "simulation parameters.cell.inactive max age",
+            parserTask);
         encodeDecodeProperty(
             tree,
             parameters.cellResetAgeAfterActivation,
@@ -899,6 +903,13 @@ namespace
                 spot.activatedValues.cellMaxBindingEnergy,
                 defaultSpot.values.cellMaxBindingEnergy,
                 base + "cell.max binding energy",
+                parserTask);
+            encodeDecodeSpotProperty(
+                tree,
+                spot.values.cellInactiveMaxAge,
+                spot.activatedValues.cellInactiveMaxAge,
+                defaultSpot.values.cellInactiveMaxAge,
+                base + "cell.inactive max age",
                 parserTask);
 
             encodeDecodeProperty(tree, spot.activatedValues.cellColorTransition, false, base + "cell.color transition rules.activated", parserTask);

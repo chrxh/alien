@@ -1414,21 +1414,22 @@ void _SimulationParametersWindow::processBase(
          */
         if (parameters.features.cellAgeLimiter) {
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell age limiter").highlighted(false))) {
-                AlienImGui::SliderInt(
-                    AlienImGui::SliderIntParameters()
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
                         .name("Maximum inactive cell age")
                         .textWidth(RightColumnWidth)
                         .colorDependence(true)
-                        .min(1)
-                        .max(10000000)
+                        .min(1.0f)
+                        .max(10000000.0f)
+                        .format("%.0f")
                         .logarithmic(true)
                         .infinity(true)
-                        .disabledValue(parameters.cellInactiveMaxAge)
+                        .disabledValue(parameters.baseValues.cellInactiveMaxAge)
                         .defaultEnabledValue(&origParameters.cellInactiveMaxAgeActivated)
-                        .defaultValue(origParameters.cellInactiveMaxAge)
+                        .defaultValue(origParameters.baseValues.cellInactiveMaxAge)
                         .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
                                  "are in state 'Under construction' are not affected by this option."),
-                    parameters.cellInactiveMaxAge,
+                    parameters.baseValues.cellInactiveMaxAge,
                     &parameters.cellInactiveMaxAgeActivated);
                 AlienImGui::Checkbox(
                     AlienImGui::CheckboxParameters()
@@ -2144,6 +2145,29 @@ void _SimulationParametersWindow::processSpot(
                         .disabledValue(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty),
                     spot.values.cellFunctionAttackerConnectionsMismatchPenalty,
                     &spot.activatedValues.cellFunctionAttackerConnectionsMismatchPenalty);
+                AlienImGui::EndTreeNode();
+            }
+        }
+
+        /**
+         * Addon: Cell age limiter
+         */
+        if (parameters.features.cellAgeLimiter) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell age limiter").highlighted(false))) {
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Maximum inactive cell age")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(1.0f)
+                        .max(10000000.0f)
+                        .logarithmic(true)
+                        .infinity(true)
+                        .format("%.0f")
+                        .disabledValue(parameters.baseValues.cellInactiveMaxAge)
+                        .defaultValue(origSpot.values.cellInactiveMaxAge),
+                    spot.values.cellInactiveMaxAge,
+                    &spot.activatedValues.cellInactiveMaxAge);
                 AlienImGui::EndTreeNode();
             }
         }

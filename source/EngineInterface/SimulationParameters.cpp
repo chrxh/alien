@@ -20,9 +20,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (cellMaxBindingDistance[i] != other.cellMaxBindingDistance[i]) {
             return false;
         }
-        if (cellInactiveMaxAge[i] != other.cellInactiveMaxAge[i]) {
-            return false;
-        }
         if (externalEnergyBackflowFactor[i] != other.externalEnergyBackflowFactor[i]) {
             return false;
         }
