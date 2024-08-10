@@ -147,8 +147,6 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
 
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    MutationProcessor::applyRandomMutation(data, cell);
-
     auto& constructor = cell->cellFunctionData.constructor;
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
     CellFunctionProcessor::updateInvocationState(cell, activity);
@@ -681,6 +679,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.offspringMutationId = constructor.offspringMutationId;
         if (GenomeDecoder::containsSelfReplication(newConstructor)) {
             statistics.incNumCreatedReplicators(hostCell->color);
+            MutationProcessor::applyRandomMutation(data, result);
         }
     } break;
     case CellFunction_Sensor: {
