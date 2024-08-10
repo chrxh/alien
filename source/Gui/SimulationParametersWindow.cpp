@@ -1431,6 +1431,21 @@ void _SimulationParametersWindow::processBase(
                                  "are in state 'Under construction' are not affected by this option."),
                     parameters.baseValues.cellInactiveMaxAge,
                     &parameters.cellInactiveMaxAgeActivated);
+                AlienImGui::SliderInt(
+                    AlienImGui::SliderIntParameters()
+                        .name("Maximum nutrient cell age")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(1)
+                        .max(10000000)
+                        .logarithmic(true)
+                        .infinity(true)
+                        .disabledValue(parameters.cellNutrientMaxAge)
+                        .defaultEnabledValue(&origParameters.cellNutrientMaxAgeActivated)
+                        .defaultValue(origParameters.cellNutrientMaxAge)
+                        .tooltip("The maximal age of cells that arise from energy particles can be set here."),
+                    parameters.cellNutrientMaxAge,
+                    &parameters.cellNutrientMaxAgeActivated);
                 AlienImGui::Checkbox(
                     AlienImGui::CheckboxParameters()
                         .name("Reset age after construction")
