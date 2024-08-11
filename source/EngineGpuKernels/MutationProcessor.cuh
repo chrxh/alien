@@ -60,49 +60,49 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationNeuronDataProbability,
         data,
         cell->pos,
-        cell->color) * 125 * numNodes;
+        cell->color) * 250 * numNodes;
     auto cellFunctionConstructorMutationDataProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationPropertiesProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationPropertiesProbability,
         data,
         cell->pos,
-        cell->color) * 125 * numNodes;
+        cell->color) * 250 * numNodes;
     auto cellFunctionConstructorMutationGeometryProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationGeometryProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationGeometryProbability,
         data,
         cell->pos,
-        cell->color) * 125  * numNodes;
+        cell->color) * 250  * numNodes;
     auto cellFunctionConstructorMutationCustomGeometryProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationCustomGeometryProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCustomGeometryProbability,
         data,
         cell->pos,
-        cell->color) * 125  * numNodes;
+        cell->color) * 250  * numNodes;
     auto cellFunctionConstructorMutationCellFunctionProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationCellFunctionProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCellFunctionProbability,
         data,
         cell->pos,
-        cell->color) * 125  * numNodes;
+        cell->color) * 250  * numNodes;
     auto cellFunctionConstructorMutationInsertionProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationInsertionProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationInsertionProbability,
         data,
         cell->pos,
-        cell->color) * 125  * numNodes;
+        cell->color) * 250  * numNodes;
     auto cellFunctionConstructorMutationDeletionProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationDeletionProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDeletionProbability,
         data,
         cell->pos,
-        cell->color) * 125  * numNodes;
+        cell->color) * 250  * numNodes;
     auto cellFunctionConstructorMutationCellColorProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationCellColorProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCellColorProbability,
         data,
         cell->pos,
-        cell->color) * 125  * numNodes;
+        cell->color) * 250  * numNodes;
     auto cellFunctionConstructorMutationTranslationProbability =
         SpotCalculator::calcParameter(
             &SimulationParametersSpotValues::cellFunctionConstructorMutationTranslationProbability,
@@ -110,7 +110,7 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
             data,
             cell->pos,
             cell->color)
-        * 2500;
+        * 5000;
     auto cellFunctionConstructorMutationDuplicationProbability =
         SpotCalculator::calcParameter(
             &SimulationParametersSpotValues::cellFunctionConstructorMutationDuplicationProbability,
@@ -118,20 +118,20 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
             data,
             cell->pos,
             cell->color)
-        * 2500;
+        * 5000;
     auto cellFunctionConstructorMutationSubgenomeColorProbability =
         SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationSubgenomeColorProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationSubgenomeColorProbability,
         data,
         cell->pos,
-        cell->color) * 2500;
+        cell->color) * 5000;
     auto cellFunctionConstructorMutationGenomeColorProbability = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellFunctionConstructorMutationGenomeColorProbability,
         &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationGenomeColorProbability,
         data,
         cell->pos,
-        cell->color) * 2500;
+        cell->color) * 5000;
 
     executeEvent(data, cellFunctionConstructorMutationDataProbability, [&]() { propertiesMutation(data, cell); });
     executeEvent(data, cellFunctionConstructorMutationNeuronProbability, [&]() { neuronDataMutation(data, cell); });
