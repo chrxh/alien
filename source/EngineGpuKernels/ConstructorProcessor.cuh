@@ -156,6 +156,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         if (isConstructionTriggered(data, cell, activity)) {
             if (tryConstructCell(data, statistics, cell, constructionData)) {
                 cellBuilt = true;
+                cell->cellFunctionUsed = CellFunctionUsed_Yes;
             } 
         }
 
@@ -794,7 +795,7 @@ __inline__ __device__ float ConstructorProcessor::calcGenomeComplexity(int color
         cudaSimulationParameters.features.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexitySizeFactor[color] : 1.0f;
     GenomeDecoder::executeForEachNodeRecursively(genome, toInt(genomeSize), false, false, [&](int depth, int nodeAddress, int repetitions) {
         float ramificationFactor = depth > lastDepth ? genomeComplexityRamificationFactor * toFloat(numRamifications) : 0.0f;
-        result += powf(2.0f, toFloat(depth)) * toFloat(repetitions) * (ramificationFactor + sizeFactor);
+        result +=/* (1.0f + toFloat(depth)) * */ toFloat(repetitions) * (ramificationFactor + sizeFactor);
         lastDepth = depth;
         if (ramificationFactor > 0) {
             ++numRamifications;
