@@ -2,7 +2,7 @@
 
 #include "GeneralSettings.h"
 #include "Settings.h"
-#include "SimulationParametersService.h"
+#include "LegacySimulationParametersService.h"
 
 namespace
 {
@@ -54,7 +54,8 @@ namespace
         auto result = false;
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {
-                result |= encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
+                result |=
+                    encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
             }
         }
         return result;
@@ -71,7 +72,8 @@ namespace
         auto result = false;
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {
-                result |= encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
+                result |=
+                    encodeDecodeProperty(tree, parameter[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
             }
         }
         return result;
@@ -166,6 +168,59 @@ namespace
         encodeDecodeProperty(tree, isActivated, false, node + ".activated", task);
         encodeDecodeProperty(tree, parameter, defaultValue, node, task);
     }
+
+    void readLegacyParameter(ColorVector<float>& result, boost::property_tree::ptree& tree, std::string const& node)
+    {
+        ColorVector<float> defaultDummy;
+        encodeDecodeProperty(tree, result, defaultDummy, node, ParserTask::Decode);
+    }
+
+    LegacyParametersForSpot readLegacyParametersForSpot(boost::property_tree::ptree& tree, std::string const& nodeBase)
+    {
+        LegacyParametersForSpot result;
+        readLegacyParameter(
+            result.cellFunctionConstructorMutationNeuronDataProbability, tree, nodeBase + "cell.function.constructor.mutation probability.neuron data");
+        readLegacyParameter(
+            result.cellFunctionConstructorMutationPropertiesProbability, tree, nodeBase + "cell.function.constructor.mutation probability.data");
+        readLegacyParameter(
+            result.cellFunctionConstructorMutationCellFunctionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell function");
+        readLegacyParameter(
+            result.cellFunctionConstructorMutationGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.geometry");
+        readLegacyParameter(
+            result.cellFunctionConstructorMutationCustomGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.custom geometry");
+        readLegacyParameter(
+            result.cellFunctionConstructorMutationInsertionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.insertion");
+        readLegacyParameter(
+            result.cellFunctionConstructorMutationDeletionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.deletion");
+        readLegacyParameter(
+            result.cellFunctionConstructorMutationTranslationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.translation");
+        readLegacyParameter(
+            result.cellFunctionConstructorMutationDuplicationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.duplication");
+        readLegacyParameter(
+            result.cellFunctionConstructorMutationCellColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell color");
+        readLegacyParameter(
+            result.cellFunctionConstructorMutationSubgenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.color");
+        readLegacyParameter(
+            result.cellFunctionConstructorMutationGenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.uniform color");
+        return result;
+    }
+
+    void searchAndApplyLegacyParameters(
+        boost::property_tree::ptree& tree,
+        Features const& missingFeatures,
+        MissingParameters const& missingParameters,
+        SimulationParameters& parameters)
+    {
+        LegacySimulationParametersService::activateFeaturesForLegacyFiles(missingFeatures, parameters);
+
+        LegacyParameters legacyParameters;
+        legacyParameters.base = readLegacyParametersForSpot(tree, "simulation parameters.");
+        for (int i = 0; i < MAX_SPOTS; ++i) {
+            legacyParameters.spots[i] = readLegacyParametersForSpot(tree, "simulation parameters.spots." + std::to_string(i) + ".");
+        }
+        LegacySimulationParametersService::activateParametersForLegacyFiles(missingParameters, legacyParameters, parameters);
+    }
+
 
     void encodeDecode(boost::property_tree::ptree& tree, SimulationParameters& parameters, ParserTask parserTask)
     {
@@ -446,99 +501,100 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationNeuronDataProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.neuron data",
+            parameters.cellFunctionConstructorCheckCompletenessForSelfReplication,
+            defaultParameters.cellFunctionConstructorCheckCompletenessForSelfReplication,
+            "simulation parameters.cell.function.constructor.completeness check for self-replication",
+            parserTask);
+
+        missingParameters.copyMutations = encodeDecodeProperty(
+            tree,
+            parameters.baseValues.cellCopyMutationNeuronData,
+            defaultParameters.baseValues.cellCopyMutationNeuronData,
+            "simulation parameters.cell.copy mutation.neuron data",
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationPropertiesProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationPropertiesProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.data",
+            parameters.baseValues.cellCopyMutationCellProperties,
+            defaultParameters.baseValues.cellCopyMutationCellProperties,
+            "simulation parameters.cell.copy mutation.cell properties",
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationGeometryProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationGeometryProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.geometry",
+            parameters.baseValues.cellCopyMutationGeometry,
+            defaultParameters.baseValues.cellCopyMutationGeometry,
+            "simulation parameters.cell.copy mutation.geometry",
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationCustomGeometryProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationCustomGeometryProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.custom geometry",
+            parameters.baseValues.cellCopyMutationCustomGeometry,
+            defaultParameters.baseValues.cellCopyMutationCustomGeometry,
+            "simulation parameters.cell.copy mutation.custom geometry",
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationCellFunctionProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.cell function",
+            parameters.baseValues.cellCopyMutationCellFunction,
+            defaultParameters.baseValues.cellCopyMutationCellFunction,
+            "simulation parameters.cell.copy mutation.cell function",
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationInsertionProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationInsertionProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.insertion",
+            parameters.baseValues.cellCopyMutationInsertion,
+            defaultParameters.baseValues.cellCopyMutationInsertion,
+            "simulation parameters.cell.copy mutation.insertion",
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationDeletionProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationDeletionProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.deletion",
+            parameters.baseValues.cellCopyMutationDeletion,
+            defaultParameters.baseValues.cellCopyMutationDeletion,
+            "simulation parameters.cell.copy mutation.deletion",
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationTranslationProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationTranslationProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.translation",
+            parameters.baseValues.cellCopyMutationTranslation,
+            defaultParameters.baseValues.cellCopyMutationTranslation,
+            "simulation parameters.cell.copy mutation.translation",
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationDuplicationProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationDuplicationProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.duplication",
+            parameters.baseValues.cellCopyMutationDuplication,
+            defaultParameters.baseValues.cellCopyMutationDuplication,
+            "simulation parameters.cell.copy mutation.duplication",
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationCellColorProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationCellColorProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.cell color",
+            parameters.baseValues.cellCopyMutationCellColor,
+            defaultParameters.baseValues.cellCopyMutationCellColor,
+            "simulation parameters.cell.copy mutation.cell color",
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationSubgenomeColorProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationSubgenomeColorProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.color",
+            parameters.baseValues.cellCopyMutationSubgenomeColor,
+            defaultParameters.baseValues.cellCopyMutationSubgenomeColor,
+            "simulation parameters.cell.copy mutation.subgenome color",
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.baseValues.cellFunctionConstructorMutationGenomeColorProbability,
-            defaultParameters.baseValues.cellFunctionConstructorMutationGenomeColorProbability,
-            "simulation parameters.cell.function.constructor.mutation probability.uniform color",
+            parameters.baseValues.cellCopyMutationGenomeColor,
+            defaultParameters.baseValues.cellCopyMutationGenomeColor,
+            "simulation parameters.cell.copy mutation.genome color",
             parserTask);
         encodeDecodeProperty(
             tree,
             parameters.cellFunctionConstructorMutationColorTransitions,
             defaultParameters.cellFunctionConstructorMutationColorTransitions,
-            "simulation parameters.cell.function.constructor.mutation color transition",
+            "simulation parameters.cell.copy mutation.color transition",
             parserTask);
         encodeDecodeProperty(
             tree,
             parameters.cellFunctionConstructorMutationSelfReplication,
             defaultParameters.cellFunctionConstructorMutationSelfReplication,
-            "simulation parameters.cell.function.constructor.mutation self replication",
+            "simulation parameters.cell.copy mutation.self replication flag",
             parserTask);
         encodeDecodeProperty(
             tree,
             parameters.cellFunctionConstructorMutationPreventDepthIncrease,
             defaultParameters.cellFunctionConstructorMutationPreventDepthIncrease,
-            "simulation parameters.cell.function.constructor.mutation prevent depth increase",
-            parserTask);
-        encodeDecodeProperty(
-            tree,
-            parameters.cellFunctionConstructorCheckCompletenessForSelfReplication,
-            defaultParameters.cellFunctionConstructorCheckCompletenessForSelfReplication,
-            "simulation parameters.cell.function.constructor.completeness check for self-replication",
+            "simulation parameters.cell.copy mutation.prevent depth increase",
             parserTask);
 
         encodeDecodeProperty(
@@ -980,80 +1036,87 @@ namespace
 
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationNeuronDataProbability,
-                spot.activatedValues.cellFunctionConstructorMutationNeuronDataProbability,
-                defaultSpot.values.cellFunctionConstructorMutationNeuronDataProbability,
-                base + "cell.function.constructor.mutation probability.neuron data",
+                spot.values.cellCopyMutationNeuronData,
+                spot.activatedValues.cellCopyMutationNeuronData,
+                defaultSpot.values.cellCopyMutationNeuronData,
+                base + "cell.copy mutation.neuron data",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationPropertiesProbability,
-                spot.activatedValues.cellFunctionConstructorMutationPropertiesProbability,
-                defaultSpot.values.cellFunctionConstructorMutationPropertiesProbability,
-                base + "cell.function.constructor.mutation probability.data ",
+                spot.values.cellCopyMutationCellProperties,
+                spot.activatedValues.cellCopyMutationCellProperties,
+                defaultSpot.values.cellCopyMutationCellProperties,
+                base + "cell.copy mutation.cell properties",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationGeometryProbability,
-                spot.activatedValues.cellFunctionConstructorMutationGeometryProbability,
-                defaultSpot.values.cellFunctionConstructorMutationGeometryProbability,
-                base + "cell.function.constructor.mutation probability.geometry",
+                spot.values.cellCopyMutationGeometry,
+                spot.activatedValues.cellCopyMutationGeometry,
+                defaultSpot.values.cellCopyMutationGeometry,
+                base + "cell.copy mutation.geometry",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationCustomGeometryProbability,
-                spot.activatedValues.cellFunctionConstructorMutationCustomGeometryProbability,
-                defaultSpot.values.cellFunctionConstructorMutationCustomGeometryProbability,
-                base + "cell.function.constructor.mutation probability.custom geometry",
+                spot.values.cellCopyMutationCustomGeometry,
+                spot.activatedValues.cellCopyMutationCustomGeometry,
+                defaultSpot.values.cellCopyMutationCustomGeometry,
+                base + "cell.copy mutation.custom geometry",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationCellFunctionProbability,
-                spot.activatedValues.cellFunctionConstructorMutationCellFunctionProbability,
-                defaultSpot.values.cellFunctionConstructorMutationCellFunctionProbability,
-                base + "cell.function.constructor.mutation probability.cell function",
+                spot.values.cellCopyMutationCellFunction,
+                spot.activatedValues.cellCopyMutationCellFunction,
+                defaultSpot.values.cellCopyMutationCellFunction,
+                base + "cell.copy mutation.cell function",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationInsertionProbability,
-                spot.activatedValues.cellFunctionConstructorMutationInsertionProbability,
-                defaultSpot.values.cellFunctionConstructorMutationInsertionProbability,
-                base + "cell.function.constructor.mutation probability.insertion",
+                spot.values.cellCopyMutationInsertion,
+                spot.activatedValues.cellCopyMutationInsertion,
+                defaultSpot.values.cellCopyMutationInsertion,
+                base + "cell.copy mutation.insertion",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationDeletionProbability,
-                spot.activatedValues.cellFunctionConstructorMutationDeletionProbability,
-                defaultSpot.values.cellFunctionConstructorMutationDeletionProbability,
-                base + "cell.function.constructor.mutation probability.deletion",
+                spot.values.cellCopyMutationDeletion,
+                spot.activatedValues.cellCopyMutationDeletion,
+                defaultSpot.values.cellCopyMutationDeletion,
+                base + "cell.copy mutation.deletion",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationTranslationProbability,
-                spot.activatedValues.cellFunctionConstructorMutationTranslationProbability,
-                defaultSpot.values.cellFunctionConstructorMutationTranslationProbability,
-                base + "cell.function.constructor.mutation probability.translation",
+                spot.values.cellCopyMutationTranslation,
+                spot.activatedValues.cellCopyMutationTranslation,
+                defaultSpot.values.cellCopyMutationTranslation,
+                base + "cell.copy mutation.translation",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationDuplicationProbability,
-                spot.activatedValues.cellFunctionConstructorMutationDuplicationProbability,
-                defaultSpot.values.cellFunctionConstructorMutationDuplicationProbability,
-                base + "cell.function.constructor.mutation probability.duplication",
+                spot.values.cellCopyMutationDuplication,
+                spot.activatedValues.cellCopyMutationDuplication,
+                defaultSpot.values.cellCopyMutationDuplication,
+                base + "cell.copy mutation.duplication",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationSubgenomeColorProbability,
-                spot.activatedValues.cellFunctionConstructorMutationSubgenomeColorProbability,
-                defaultSpot.values.cellFunctionConstructorMutationSubgenomeColorProbability,
-                base + "cell.function.constructor.mutation probability.color",
+                spot.values.cellCopyMutationCellColor,
+                spot.activatedValues.cellCopyMutationCellColor,
+                defaultSpot.values.cellCopyMutationCellColor,
+                base + "cell.copy mutation.cell color",
                 parserTask);
             encodeDecodeSpotProperty(
                 tree,
-                spot.values.cellFunctionConstructorMutationGenomeColorProbability,
-                spot.activatedValues.cellFunctionConstructorMutationGenomeColorProbability,
-                defaultSpot.values.cellFunctionConstructorMutationGenomeColorProbability,
-                base + "cell.function.constructor.mutation probability.uniform color",
+                spot.values.cellCopyMutationSubgenomeColor,
+                spot.activatedValues.cellCopyMutationSubgenomeColor,
+                defaultSpot.values.cellCopyMutationSubgenomeColor,
+                base + "cell.copy mutation.subgenome color",
+                parserTask);
+            encodeDecodeSpotProperty(
+                tree,
+                spot.values.cellCopyMutationGenomeColor,
+                spot.activatedValues.cellCopyMutationGenomeColor,
+                defaultSpot.values.cellCopyMutationGenomeColor,
+                base + "cell.copy mutation.genome color",
                 parserTask);
         }
 
@@ -1097,9 +1160,10 @@ namespace
             defaultParameters.features.cellGlow,
             "simulation parameters.features.cell glow",
             parserTask);
+
+        // Compatibility with legacy parameters
         if (parserTask == ParserTask::Decode) {
-            SimulationParametersService::activateFeaturesForLegacyFiles(missingFeatures, parameters);
-            SimulationParametersService::activateParametersForLegacyFiles(missingParameters, parameters);
+            searchAndApplyLegacyParameters(tree, missingFeatures, missingParameters, parameters);
         }
     }
 

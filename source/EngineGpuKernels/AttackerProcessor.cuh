@@ -91,9 +91,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 && cell->mutationId != 0) {
                 energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerSameMutantPenalty[color][otherColor]);
             }
-            if (otherCell->cellFunction == CellFunction_Neuron) {
-                energyToTransfer *= 0.1f;
-            }
 
             if (cudaSimulationParameters.features.advancedAttackerControl && cell->mutationId < otherCell->mutationId
                 && cell->genomeComplexity <= otherCell->genomeComplexity) {

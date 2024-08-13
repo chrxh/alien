@@ -65,18 +65,18 @@ struct SimulationParametersSpotValues
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
 
-    ColorVector<float> cellFunctionConstructorMutationNeuronDataProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationPropertiesProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationCellFunctionProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationGeometryProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationCustomGeometryProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationInsertionProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationDeletionProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationTranslationProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationDuplicationProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationCellColorProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationSubgenomeColorProbability = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionConstructorMutationGenomeColorProbability = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationNeuronData = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationCellProperties = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationCellFunction = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationGeometry = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationCustomGeometry = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationInsertion = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationDeletion = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationTranslation = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationDuplication = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationCellColor = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationSubgenomeColor = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationGenomeColor = {0, 0, 0, 0, 0, 0, 0};
 
     bool operator==(SimulationParametersSpotValues const& other) const
     {
@@ -106,16 +106,16 @@ struct SimulationParametersSpotValues
             if (radiationAbsorptionLowGenomeComplexityPenalty[i] != other.radiationAbsorptionLowGenomeComplexityPenalty[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationCellColorProbability[i] != other.cellFunctionConstructorMutationCellColorProbability[i]) {
+            if (cellCopyMutationCellColor[i] != other.cellCopyMutationCellColor[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationGenomeColorProbability[i] != other.cellFunctionConstructorMutationGenomeColorProbability[i]) {
+            if (cellCopyMutationGenomeColor[i] != other.cellCopyMutationGenomeColor[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationGeometryProbability[i] != other.cellFunctionConstructorMutationGeometryProbability[i]) {
+            if (cellCopyMutationGeometry[i] != other.cellCopyMutationGeometry[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationCustomGeometryProbability[i] != other.cellFunctionConstructorMutationCustomGeometryProbability[i]) {
+            if (cellCopyMutationCustomGeometry[i] != other.cellCopyMutationCustomGeometry[i]) {
                 return false;
             }
             if (radiationAbsorption[i] != other.radiationAbsorption[i]) {
@@ -136,28 +136,28 @@ struct SimulationParametersSpotValues
             if (radiationCellAgeStrength[i] != other.radiationCellAgeStrength[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationNeuronDataProbability[i] != other.cellFunctionConstructorMutationNeuronDataProbability[i]) {
+            if (cellCopyMutationNeuronData[i] != other.cellCopyMutationNeuronData[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationPropertiesProbability[i] != other.cellFunctionConstructorMutationPropertiesProbability[i]) {
+            if (cellCopyMutationCellProperties[i] != other.cellCopyMutationCellProperties[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationCellFunctionProbability[i] != other.cellFunctionConstructorMutationCellFunctionProbability[i]) {
+            if (cellCopyMutationCellFunction[i] != other.cellCopyMutationCellFunction[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationInsertionProbability[i] != other.cellFunctionConstructorMutationInsertionProbability[i]) {
+            if (cellCopyMutationInsertion[i] != other.cellCopyMutationInsertion[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationDeletionProbability[i] != other.cellFunctionConstructorMutationDeletionProbability[i]) {
+            if (cellCopyMutationDeletion[i] != other.cellCopyMutationDeletion[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationTranslationProbability[i] != other.cellFunctionConstructorMutationTranslationProbability[i]) {
+            if (cellCopyMutationTranslation[i] != other.cellCopyMutationTranslation[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationDuplicationProbability[i] != other.cellFunctionConstructorMutationDuplicationProbability[i]) {
+            if (cellCopyMutationDuplication[i] != other.cellCopyMutationDuplication[i]) {
                 return false;
             }
-            if (cellFunctionConstructorMutationSubgenomeColorProbability[i] != other.cellFunctionConstructorMutationSubgenomeColorProbability[i]) {
+            if (cellCopyMutationSubgenomeColor[i] != other.cellCopyMutationSubgenomeColor[i]) {
                 return false;
             }
             if (radiationAbsorptionLowVelocityPenalty[i] != other.radiationAbsorptionLowVelocityPenalty[i]) {
