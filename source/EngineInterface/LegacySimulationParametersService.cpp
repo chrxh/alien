@@ -1,4 +1,4 @@
-#include "SimulationParametersService.h"
+#include "LegacySimulationParametersService.h"
 
 #include <set>
 
@@ -60,7 +60,7 @@ namespace
     }
 }
 
-void SimulationParametersService::activateFeaturesForLegacyFiles(Features const& missingFeatures, SimulationParameters& parameters)
+void LegacySimulationParametersService::activateFeaturesForLegacyFiles(Features const& missingFeatures, SimulationParameters& parameters)
 {
     if (missingFeatures.advancedAbsorptionControl) {
         if (!equals(parameters.radiationAbsorptionHighVelocityPenalty, 0.0f) || !equals(parameters.radiationAbsorptionLowConnectionPenalty, 0.0f)) {
@@ -119,13 +119,39 @@ void SimulationParametersService::activateFeaturesForLegacyFiles(Features const&
     }
 }
 
-void SimulationParametersService::activateParametersForLegacyFiles(MissingParameters const& missingParameters, SimulationParameters& parameters)
+void LegacySimulationParametersService::activateParametersForLegacyFiles(
+    MissingParameters const& missingParameters,
+    LegacyParameters const& legacyParameters,
+    SimulationParameters& parameters)
 {
     if (missingParameters.externalEnergyBackflowFactor) {
         if (!equals(parameters.externalEnergyConditionalInflowFactor, 0.0f)) {
             for (int i = 0; i < MAX_COLORS; ++i) {
                 parameters.externalEnergyBackflowFactor[i] = parameters.externalEnergyConditionalInflowFactor[i] / 5;
             }
+        }
+    }
+
+    if (missingParameters.copyMutations) {
+        auto setParametersForSpot = [](SimulationParametersSpotValues& target, LegacyParametersForSpot const& source) {
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                target.cellCopyMutationNeuronData[i] = source.cellFunctionConstructorMutationNeuronDataProbability[i] * 250;
+                target.cellCopyMutationCellProperties[i] = source.cellFunctionConstructorMutationPropertiesProbability[i] * 250;
+                target.cellCopyMutationCellFunction[i] = source.cellFunctionConstructorMutationCellFunctionProbability[i] * 250;
+                target.cellCopyMutationGeometry[i] = source.cellFunctionConstructorMutationGeometryProbability[i] * 250;
+                target.cellCopyMutationCustomGeometry[i] = source.cellFunctionConstructorMutationCustomGeometryProbability[i] * 250;
+                target.cellCopyMutationInsertion[i] = source.cellFunctionConstructorMutationInsertionProbability[i] * 250;
+                target.cellCopyMutationDeletion[i] = source.cellFunctionConstructorMutationDeletionProbability[i] * 250;
+                target.cellCopyMutationCellColor[i] = source.cellFunctionConstructorMutationCellColorProbability[i] * 250;
+                target.cellCopyMutationTranslation[i] = source.cellFunctionConstructorMutationTranslationProbability[i] * 5000;
+                target.cellCopyMutationDuplication[i] = source.cellFunctionConstructorMutationDuplicationProbability[i] * 5000;
+                target.cellCopyMutationSubgenomeColor[i] = source.cellFunctionConstructorMutationSubgenomeColorProbability[i] * 5000;
+                target.cellCopyMutationGenomeColor[i] = source.cellFunctionConstructorMutationGenomeColorProbability[i] * 5000;
+            }
+        };
+        setParametersForSpot(parameters.baseValues, legacyParameters.base);
+        for (int i = 0; i < MAX_SPOTS; ++i) {
+            setParametersForSpot(parameters.spots->values, legacyParameters.spots[i]);
         }
     }
 }
