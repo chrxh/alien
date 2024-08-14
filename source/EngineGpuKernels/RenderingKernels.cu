@@ -597,8 +597,8 @@ __global__ void cudaDrawParticles(int2 worldSize, float2 rectUpperLeft, float2 r
 __global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpperLeft, int2 worldSize, int2 imageSize, float zoom)
 {
     auto universeImageSize = toFloat2(worldSize) * zoom;
-    for (int i = 0; i < cudaSimulationParameters.numParticleSources; ++i) {
-        float2 sourcePos{cudaSimulationParameters.particleSources[i].posX, cudaSimulationParameters.particleSources[i].posY};
+    for (int i = 0; i < cudaSimulationParameters.numRadiationSources; ++i) {
+        float2 sourcePos{cudaSimulationParameters.radiationSources[i].posX, cudaSimulationParameters.radiationSources[i].posY};
         auto imagePos = mapWorldPosToImagePos(rectUpperLeft, sourcePos, universeImageSize, zoom);
         if (isContainedInRect({0, 0}, toFloat2(imageSize), imagePos)) {
             for (int dx = -5; dx <= 5; ++dx) {

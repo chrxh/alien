@@ -28,24 +28,24 @@ void _RadiationSourcesWindow::processIntern()
 
     if (ImGui::BeginTabBar("##ParticleSources", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
-        if (parameters.numParticleSources < MAX_PARTICLE_SOURCES) {
+        if (parameters.numRadiationSources < MAX_RADIATION_SOURCES) {
 
             //add source
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-                auto index = parameters.numParticleSources;
-                parameters.particleSources[index] = createParticleSource();
-                origParameters.particleSources[index] = createParticleSource();
-                ++parameters.numParticleSources;
-                ++origParameters.numParticleSources;
+                auto index = parameters.numRadiationSources;
+                parameters.radiationSources[index] = createParticleSource();
+                origParameters.radiationSources[index] = createParticleSource();
+                ++parameters.numRadiationSources;
+                ++origParameters.numRadiationSources;
                 _simController->setSimulationParameters(parameters);
                 _simController->setOriginalSimulationParameters(origParameters);
             }
             AlienImGui::Tooltip("Add source");
         }
 
-        for (int tab = 0; tab < parameters.numParticleSources; ++tab) {
-            RadiationSource& source = parameters.particleSources[tab];
-            RadiationSource& origSource = origParameters.particleSources[tab];
+        for (int tab = 0; tab < parameters.numRadiationSources; ++tab) {
+            RadiationSource& source = parameters.radiationSources[tab];
+            RadiationSource& origSource = origParameters.radiationSources[tab];
             bool open = true;
             char name[18] = {};
             bool* openPtr = &open;
@@ -153,12 +153,12 @@ void _RadiationSourcesWindow::processIntern()
 
             //del source
             if (!open) {
-                for (int i = tab; i < parameters.numParticleSources - 1; ++i) {
-                    parameters.particleSources[i] = parameters.particleSources[i + 1];
-                    origParameters.particleSources[i] = origParameters.particleSources[i + 1];
+                for (int i = tab; i < parameters.numRadiationSources - 1; ++i) {
+                    parameters.radiationSources[i] = parameters.radiationSources[i + 1];
+                    origParameters.radiationSources[i] = origParameters.radiationSources[i + 1];
                 }
-                --parameters.numParticleSources;
-                --origParameters.numParticleSources;
+                --parameters.numRadiationSources;
+                --origParameters.numRadiationSources;
                 _simController->setSimulationParameters(parameters);
                 _simController->setOriginalSimulationParameters(origParameters);
             }

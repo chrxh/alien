@@ -23,6 +23,7 @@ __global__ void cudaNextTimestep_prepare(SimulationData data, SimulationStatisti
 __global__ void cudaNextTimestep_physics_init(SimulationData data)
 {
     CellProcessor::init(data);
+    ParticleProcessor::calcActiveSources(data);
 }
 
 __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)

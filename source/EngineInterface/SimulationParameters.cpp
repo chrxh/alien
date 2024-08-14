@@ -141,11 +141,11 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
             return false;
         }
     }
-    if (numParticleSources != other.numParticleSources) {
+    if (numRadiationSources != other.numRadiationSources) {
         return false;
     }
-    for (int i = 0; i < numParticleSources; ++i) {
-        if (particleSources[i] != other.particleSources[i]) {
+    for (int i = 0; i < numRadiationSources; ++i) {
+        if (radiationSources[i] != other.radiationSources[i]) {
             return false;
         }
     }

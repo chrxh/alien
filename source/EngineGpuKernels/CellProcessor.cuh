@@ -75,14 +75,14 @@ __inline__ __device__ void CellProcessor::updateMap(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::clearDensityMap(SimulationData& data)
 {
-    data.preprocessedCellFunctionData.densityMap.clear();
+    data.preprocessedSimulationData.densityMap.clear();
 }
 
 __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
 {
     auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        data.preprocessedCellFunctionData.densityMap.addCell(data.timestep, data.objects.cellPointers.at(index));
+        data.preprocessedSimulationData.densityMap.addCell(data.timestep, data.objects.cellPointers.at(index));
     }
 }
 

@@ -8,7 +8,7 @@
 
 #include "Base.cuh"
 #include "CudaNumberGenerator.cuh"
-#include "PreprocessedCellFunctionData.cuh"
+#include "PreprocessedSimulationData.cuh"
 #include "Definitions.cuh"
 #include "Objects.cuh"
 #include "Map.cuh"
@@ -29,7 +29,7 @@ struct SimulationData
     //additional data for cell functions
     double* externalEnergy;
     RawMemory processMemory;
-    PreprocessedCellFunctionData preprocessedCellFunctionData;
+    PreprocessedSimulationData preprocessedSimulationData;
 
     //scheduled operations
     UnmanagedArray<StructuralOperation> structuralOperations;

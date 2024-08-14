@@ -1078,7 +1078,7 @@ void _SimulationParametersWindow::processBase(
                     .textWidth(RightColumnWidth)
                     .colorDependence(true)
                     .min(10.0f)
-                    .max(512.0f)
+                    .max(800.0f)
                     .defaultValue(origParameters.cellFunctionSensorRange)
                     .tooltip("The maximum radius in which a sensor cell can detect mass concentrations."),
                 parameters.cellFunctionSensorRange);
@@ -1860,6 +1860,15 @@ void _SimulationParametersWindow::processSpot(
          * Physics: Radiation
          */
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Physics: Radiation"))) {
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Disable radiation sources")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSpot.values.radiationDisableSources)
+                    .tooltip("If activated, all radiation sources within this spot are deactivated."),
+                spot.values.radiationDisableSources);
+            spot.activatedValues.radiationDisableSources = spot.values.radiationDisableSources;
+
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Absorption factor")
