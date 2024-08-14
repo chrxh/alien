@@ -10,6 +10,7 @@ struct SimulationParametersSpotActivatedValues
     bool radiationAbsorptionLowVelocityPenalty = false;
     bool radiationAbsorptionLowGenomeComplexityPenalty = false;
     bool radiationCellAgeStrength = false;
+    bool radiationDisableSources = false;
     bool cellMaxForce = false;
     bool cellMinEnergy = false;
     bool cellFusionVelocity = false;
@@ -63,6 +64,7 @@ struct SimulationParametersSpotActivatedValues
             && radiationAbsorptionLowVelocityPenalty == other.radiationAbsorptionLowVelocityPenalty
             && cellFunctionAttackerNewComplexMutantPenalty == other.cellFunctionAttackerNewComplexMutantPenalty
             && cellInactiveMaxAge == other.cellInactiveMaxAge
+            && radiationDisableSources == other.radiationDisableSources
         ;
     }
 };

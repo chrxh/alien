@@ -417,6 +417,12 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.baseValues.radiationDisableSources,
+            defaultParameters.baseValues.radiationDisableSources,
+            "simulation parameters.radiation.disable sources",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.baseValues.radiationAbsorption,
             defaultParameters.baseValues.radiationAbsorption,
             "simulation parameters.radiation.absorption",
@@ -832,11 +838,11 @@ namespace
 
         //particle sources
         encodeDecodeProperty(
-            tree, parameters.numParticleSources, defaultParameters.numParticleSources, "simulation parameters.particle sources.num sources", parserTask);
-        for (int index = 0; index < parameters.numParticleSources; ++index) {
+            tree, parameters.numRadiationSources, defaultParameters.numRadiationSources, "simulation parameters.particle sources.num sources", parserTask);
+        for (int index = 0; index < parameters.numRadiationSources; ++index) {
             std::string base = "simulation parameters.particle sources." + std::to_string(index) + ".";
-            auto& source = parameters.particleSources[index];
-            auto& defaultSource = defaultParameters.particleSources[index];
+            auto& source = parameters.radiationSources[index];
+            auto& defaultSource = defaultParameters.radiationSources[index];
             encodeDecodeProperty(tree, source.posX, defaultSource.posX, base + "pos.x", parserTask);
             encodeDecodeProperty(tree, source.posY, defaultSource.posY, base + "pos.y", parserTask);
             encodeDecodeProperty(tree, source.velX, defaultSource.velX, base + "vel.x", parserTask);
@@ -921,6 +927,13 @@ namespace
 
             encodeDecodeSpotProperty(tree, spot.values.friction, spot.activatedValues.friction, defaultSpot.values.friction, base + "friction", parserTask);
             encodeDecodeSpotProperty(tree, spot.values.rigidity, spot.activatedValues.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
+            encodeDecodeSpotProperty(
+                tree,
+                spot.values.radiationDisableSources,
+                spot.activatedValues.radiationDisableSources,
+                defaultSpot.values.radiationDisableSources,
+                base + "radiation.disable sources",
+                parserTask);
             encodeDecodeSpotProperty(
                 tree,
                 spot.values.radiationAbsorption,

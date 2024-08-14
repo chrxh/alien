@@ -102,8 +102,8 @@ bool _SimulationKernelsLauncher::updateSimulationParametersAfterTimestep(
     auto const& worldSizeX = settings.generalSettings.worldSizeX;
     auto const& worldSizeY = settings.generalSettings.worldSizeY;
     SpaceCalculator space({worldSizeX, worldSizeY});
-    for (int i = 0; i < settings.simulationParameters.numParticleSources; ++i) {
-        auto& source = settings.simulationParameters.particleSources[i];
+    for (int i = 0; i < settings.simulationParameters.numRadiationSources; ++i) {
+        auto& source = settings.simulationParameters.radiationSources[i];
         if (source.velX != 0) {
             source.posX += source.velX * settings.simulationParameters.timestepSize;
             result = true;

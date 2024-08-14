@@ -15,6 +15,7 @@ struct SimulationParametersSpotValues
     ColorVector<float> radiationAbsorptionLowVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> radiationAbsorptionLowGenomeComplexityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> radiationCellAgeStrength = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f};
+    bool radiationDisableSources = false;
     ColorVector<float> cellMaxForce = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f};
     ColorVector<float> cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
     float cellFusionVelocity = 0.6f;
@@ -170,6 +171,7 @@ struct SimulationParametersSpotValues
         return friction == other.friction && rigidity == other.rigidity
             && cellFusionVelocity == other.cellFusionVelocity
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy
+            && radiationDisableSources == other.radiationDisableSources
         ;
     }
 };

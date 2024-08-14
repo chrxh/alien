@@ -32,8 +32,8 @@ struct SimulationParameters
     Features features;
 
     //particle sources
-    int numParticleSources = 0;
-    RadiationSource particleSources[MAX_PARTICLE_SOURCES];
+    int numRadiationSources = 0;
+    RadiationSource radiationSources[MAX_RADIATION_SOURCES];
     float externalEnergy = 0.0f;
     ColorVector<float> externalEnergyInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> externalEnergyConditionalInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
