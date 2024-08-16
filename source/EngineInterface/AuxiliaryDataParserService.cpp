@@ -215,17 +215,21 @@ namespace
 
         LegacyParameters legacyParameters;
         legacyParameters.base = readLegacyParametersForSpot(tree, "simulation parameters.");
-        for (int i = 0; i < MAX_SPOTS; ++i) {
+        for (int i = 0; i < parameters.numSpots; ++i) {
             legacyParameters.spots[i] = readLegacyParametersForSpot(tree, "simulation parameters.spots." + std::to_string(i) + ".");
         }
         LegacySimulationParametersService::activateParametersForLegacyFiles(missingParameters, legacyParameters, parameters);
     }
 
 
-    void encodeDecode(boost::property_tree::ptree& tree, SimulationParameters& parameters, ParserTask parserTask)
+    void encodeDecode(
+        boost::property_tree::ptree& tree,
+        SimulationParameters& parameters,
+        MissingParameters& missingParameters,
+        Features& missingFeatures,
+        ParserTask parserTask)
     {
         SimulationParameters defaultParameters;
-        MissingParameters missingParameters;
 
         encodeDecodeProperty(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
         encodeDecodeProperty(tree, parameters.cellColoring, defaultParameters.cellColoring, "simulation parameters.cell colorization", parserTask);
@@ -753,6 +757,12 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
+            parameters.cellFunctionMuscleMovementAngleFromSensor,
+            defaultParameters.cellFunctionMuscleMovementAngleFromSensor,
+            "simulation parameters.cell.function.muscle.movement angle from sensor",
+            parserTask);
+        encodeDecodeProperty(
+            tree,
             parameters.cellFunctionMuscleBendingAngle,
             defaultParameters.cellFunctionMuscleBendingAngle,
             "simulation parameters.cell.function.muscle.bending angle",
@@ -1134,7 +1144,6 @@ namespace
         }
 
         //features
-        Features missingFeatures;
         missingFeatures.genomeComplexityMeasurement = encodeDecodeProperty(
             tree,
             parameters.features.genomeComplexityMeasurement,
@@ -1152,6 +1161,12 @@ namespace
             parameters.features.advancedAttackerControl,
             defaultParameters.features.advancedAttackerControl,
             "simulation parameters.features.additional attacker control",
+            parserTask);
+        missingFeatures.advancedMuscleControl = encodeDecodeProperty(
+            tree,
+            parameters.features.advancedMuscleControl,
+            defaultParameters.features.advancedMuscleControl,
+            "simulation parameters.features.additional muscle control",
             parserTask);
         missingFeatures.externalEnergyControl = encodeDecodeProperty(
             tree, parameters.features.externalEnergyControl, defaultParameters.features.externalEnergyControl, "simulation parameters.features.external energy", parserTask);
@@ -1173,6 +1188,13 @@ namespace
             defaultParameters.features.cellGlow,
             "simulation parameters.features.cell glow",
             parserTask);
+    }
+
+    void encodeDecodeSimulationParameters(boost::property_tree::ptree& tree, SimulationParameters& parameters, ParserTask parserTask)
+    {
+        MissingParameters missingParameters;
+        Features missingFeatures;
+        encodeDecode(tree, parameters, missingParameters, missingFeatures, parserTask);
 
         // Compatibility with legacy parameters
         if (parserTask == ParserTask::Decode) {
@@ -1193,7 +1215,7 @@ namespace
         encodeDecodeProperty(tree, data.generalSettings.worldSizeX, defaultSettings.generalSettings.worldSizeX, "general.world size.x", parserTask);
         encodeDecodeProperty(tree, data.generalSettings.worldSizeY, defaultSettings.generalSettings.worldSizeY, "general.world size.y", parserTask);
 
-        encodeDecode(tree, data.simulationParameters, parserTask);
+        encodeDecodeSimulationParameters(tree, data.simulationParameters, parserTask);
     }
 }
 
@@ -1214,13 +1236,13 @@ AuxiliaryData AuxiliaryDataParserService::decodeAuxiliaryData(boost::property_tr
 boost::property_tree::ptree AuxiliaryDataParserService::encodeSimulationParameters(SimulationParameters const& data)
 {
     boost::property_tree::ptree tree;
-    encodeDecode(tree, const_cast<SimulationParameters&>(data), ParserTask::Encode);
+    encodeDecodeSimulationParameters(tree, const_cast<SimulationParameters&>(data), ParserTask::Encode);
     return tree;
 }
 
 SimulationParameters AuxiliaryDataParserService::decodeSimulationParameters(boost::property_tree::ptree tree)
 {
     SimulationParameters result;
-    encodeDecode(tree, result, ParserTask::Decode);
+    encodeDecodeSimulationParameters(tree, result, ParserTask::Decode);
     return result;
 }

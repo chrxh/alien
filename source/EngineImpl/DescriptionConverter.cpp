@@ -451,11 +451,16 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
             sensor.fixedAngle = cellTO.cellFunctionData.sensor.angle;
         }
         sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
-        sensor.restrictToColor = cellTO.cellFunctionData.sensor.restrictToColor != 255 ? std::make_optional(cellTO.cellFunctionData.sensor.restrictToColor) : std::nullopt;
+        sensor.minRange = cellTO.cellFunctionData.sensor.minRange >= 0 ? std::make_optional(cellTO.cellFunctionData.sensor.minRange) : std::nullopt;
+        sensor.maxRange = cellTO.cellFunctionData.sensor.maxRange >= 0 ? std::make_optional(cellTO.cellFunctionData.sensor.maxRange) : std::nullopt;
+        sensor.restrictToColor =
+            cellTO.cellFunctionData.sensor.restrictToColor != 255 ? std::make_optional(cellTO.cellFunctionData.sensor.restrictToColor) : std::nullopt;
         sensor.restrictToMutants = cellTO.cellFunctionData.sensor.restrictToMutants;
         sensor.memoryChannel1 = cellTO.cellFunctionData.sensor.memoryChannel1;
         sensor.memoryChannel2 = cellTO.cellFunctionData.sensor.memoryChannel2;
         sensor.memoryChannel3 = cellTO.cellFunctionData.sensor.memoryChannel3;
+        sensor.targetX = cellTO.cellFunctionData.sensor.targetX;
+        sensor.targetY = cellTO.cellFunctionData.sensor.targetY;
         result.cellFunction = sensor;
     } break;
     case CellFunction_Nerve: {
@@ -602,10 +607,14 @@ void DescriptionConverter::addCell(
         sensorTO.restrictToColor = sensorDesc.restrictToColor.value_or(255);
         sensorTO.restrictToMutants = sensorDesc.restrictToMutants;
         sensorTO.minDensity = sensorDesc.minDensity;
+        sensorTO.minRange = static_cast<int8_t>(sensorDesc.minRange.value_or(-1));
+        sensorTO.maxRange = static_cast<int8_t>(sensorDesc.maxRange.value_or(-1));
         sensorTO.angle = sensorDesc.fixedAngle.value_or(0);
         sensorTO.memoryChannel1 = sensorDesc.memoryChannel1;
         sensorTO.memoryChannel2 = sensorDesc.memoryChannel2;
         sensorTO.memoryChannel3 = sensorDesc.memoryChannel3;
+        sensorTO.targetX = sensorDesc.targetX;
+        sensorTO.targetY = sensorDesc.targetY;
         cellTO.cellFunctionData.sensor = sensorTO;
     } break;
     case CellFunction_Nerve: {

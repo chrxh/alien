@@ -172,12 +172,10 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
     }
 
     return backgroundColor == other.backgroundColor && cellColoring == other.cellColoring && cellGlowColoring == other.cellGlowColoring
-        && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity
-        && baseValues == other.baseValues && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity
-        && cellMinDistance == other.cellMinDistance
-        && cellMaxForceDecayProb == other.cellMaxForceDecayProb && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers
-        && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
-        && radiationVelocityPerturbation == other.radiationVelocityPerturbation
+        && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity && baseValues == other.baseValues && timestepSize == other.timestepSize
+        && cellMaxVelocity == other.cellMaxVelocity && cellMinDistance == other.cellMinDistance && cellMaxForceDecayProb == other.cellMaxForceDecayProb
+        && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers && radiationProb == other.radiationProb
+        && radiationVelocityMultiplier == other.radiationVelocityMultiplier && radiationVelocityPerturbation == other.radiationVelocityPerturbation
         && cellFunctionAttackerActivityThreshold == other.cellFunctionAttackerActivityThreshold
         && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
         && cellFunctionTransmitterEnergyDistributionSameCreature == other.cellFunctionTransmitterEnergyDistributionSameCreature
@@ -198,5 +196,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && attackVisualization == other.attackVisualization && cellInactiveMaxAgeActivated == other.cellInactiveMaxAgeActivated
         && cellGlowStrength == other.cellGlowStrength && cellGlowRadius == other.cellGlowRadius
         && cellResetAgeAfterActivation == other.cellResetAgeAfterActivation && cellRadius == other.cellRadius
-        && cellNutrientMaxAgeActivated == other.cellNutrientMaxAgeActivated;
+        && cellNutrientMaxAgeActivated == other.cellNutrientMaxAgeActivated
+        && cellFunctionMuscleMovementAngleFromSensor == other.cellFunctionMuscleMovementAngleFromSensor;
 }

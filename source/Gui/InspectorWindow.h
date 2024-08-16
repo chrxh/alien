@@ -54,7 +54,6 @@ private:
 
     void validationAndCorrection(CellDescription& cell) const;
 
-private:
     SimulationController _simController;
     EditorModel _editorModel;
     GenomeEditorWindow _genomeEditorWindow;

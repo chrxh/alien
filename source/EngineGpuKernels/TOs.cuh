@@ -76,13 +76,17 @@ struct SensorTO
     SensorMode mode;
     float angle;
     float minDensity;
-    uint8_t restrictToColor;    //0 ... 6 = color restriction, 255 = no restriction
+    int8_t minRange;          //< 0 = no restriction
+    int8_t maxRange;          //< 0 = no restriction
+    uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
     SensorRestrictToMutants restrictToMutants;
 
     //process data
     float memoryChannel1;
     float memoryChannel2;
     float memoryChannel3;
+    float targetX;
+    float targetY;
 };
 
 struct NerveTO

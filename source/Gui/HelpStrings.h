@@ -211,6 +211,9 @@ namespace Const
         "The minimum density to search for a cell concentration of a specific color. This value ranges between 0 and 1. It controls the "
         "sensitivity of the sensor. Typically, very few cells of the corresponding color are already detected with a value of 0.1.";
 
+    std::string const GenomeSensorMinRangeTooltip = "If activated, the sensor detects only objects with a distance equal or greater than the specified value.";
+    std::string const GenomeSensorMaxRangeTooltip = "If activated, the sensor detects only objects with a distance equal or less than the specified value.";
+
     std::string const GenomeNerveGeneratePulsesTooltip = "If enabled, an activity pulse in channel #0 will be generated at regular time intervals.";
 
     std::string const GenomeNervePulseIntervalTooltip =
