@@ -443,7 +443,7 @@ __global__ void cudaDrawCells(uint64_t timestep, int2 worldSize, float2 rectUppe
                     drawDisc(imageData, imageSize, cellImagePos, color, cellRadius * 1.4f, cellRadius * 2.0f);
 
                     auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, cell->eventPos, universeImageSize, zoom);
-                    if (isLineVisible(cellImagePos, endImagePos, universeImageSize)) {
+                    if (isLineVisible(cellImagePos, endImagePos, universeImageSize) && Math::length(cell->eventPos - cell->pos) < 10.0f) {
                         drawLine(cellImagePos, endImagePos, color, imageData, imageSize);
                     }
                 }
