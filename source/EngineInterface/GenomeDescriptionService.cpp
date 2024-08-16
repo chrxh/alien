@@ -77,6 +77,11 @@ namespace
         uint8_t result = data[pos++];
         return result;
     }
+    std::optional<int> readOptionalByte(std::vector<uint8_t> const& data, int& pos)
+    {
+        auto value = static_cast<int>(readByte(data, pos));
+        return value > 127 ? std::nullopt : std::make_optional(value);
+    }
     std::optional<int> readOptionalByte(std::vector<uint8_t> const& data, int& pos, int moduloValue)
     {
         auto value = static_cast<int>(readByte(data, pos));
@@ -215,6 +220,8 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
             writeDensity(result, sensor.minDensity);
             writeOptionalByte(result, sensor.restrictToColor);
             writeByte(result, sensor.restrictToMutants);
+            writeOptionalByte(result, sensor.minRange);
+            writeOptionalByte(result, sensor.maxRange);
         } break;
         case CellFunction_Nerve: {
             auto const& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
@@ -340,6 +347,8 @@ namespace
                 sensor.minDensity = readDensity(data, bytePosition);
                 sensor.restrictToColor = readOptionalByte(data, bytePosition, MAX_COLORS);
                 sensor.restrictToMutants = readByte(data, bytePosition) % SensorRestrictToMutants_Count;
+                sensor.minRange = readOptionalByte(data, bytePosition);
+                sensor.maxRange = readOptionalByte(data, bytePosition);
                 cell.cellFunction = sensor;
             } break;
             case CellFunction_Nerve: {

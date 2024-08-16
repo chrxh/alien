@@ -659,6 +659,12 @@ void _GenomeEditorWindow::processNode(
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeSensorMinDensityTooltip),
                 sensor.minDensity);
+            table.next();
+            AlienImGui::InputOptionalInt(
+                AlienImGui::InputIntParameters().name("Min range").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorMinRangeTooltip), sensor.minRange);
+            table.next();
+            AlienImGui::InputOptionalInt(
+                AlienImGui::InputIntParameters().name("Max range").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorMaxRangeTooltip), sensor.maxRange);
         } break;
         case CellFunction_Nerve: {
             auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
@@ -993,6 +999,12 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
     case CellFunction_Sensor: {
         auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
         sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
+        if (sensor.minRange) {
+            sensor.minRange = std::max(0, std::min(127, *sensor.minRange));
+        }
+        if (sensor.maxRange) {
+            sensor.maxRange = std::max(0, std::min(127, *sensor.maxRange));
+        }
     } break;
     case CellFunction_Nerve: {
         auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);

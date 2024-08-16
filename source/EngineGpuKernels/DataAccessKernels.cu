@@ -111,11 +111,15 @@ namespace
             cellTO.cellFunctionData.sensor.mode = cell->cellFunctionData.sensor.mode;
             cellTO.cellFunctionData.sensor.angle = cell->cellFunctionData.sensor.angle;
             cellTO.cellFunctionData.sensor.minDensity = cell->cellFunctionData.sensor.minDensity;
+            cellTO.cellFunctionData.sensor.minRange = cell->cellFunctionData.sensor.minRange;
+            cellTO.cellFunctionData.sensor.maxRange = cell->cellFunctionData.sensor.maxRange;
             cellTO.cellFunctionData.sensor.restrictToColor = cell->cellFunctionData.sensor.restrictToColor;
             cellTO.cellFunctionData.sensor.restrictToMutants = cell->cellFunctionData.sensor.restrictToMutants;
             cellTO.cellFunctionData.sensor.memoryChannel1 = cell->cellFunctionData.sensor.memoryChannel1;
             cellTO.cellFunctionData.sensor.memoryChannel2 = cell->cellFunctionData.sensor.memoryChannel2;
             cellTO.cellFunctionData.sensor.memoryChannel3 = cell->cellFunctionData.sensor.memoryChannel3;
+            cellTO.cellFunctionData.sensor.targetX = cell->cellFunctionData.sensor.targetX;
+            cellTO.cellFunctionData.sensor.targetY = cell->cellFunctionData.sensor.targetY;
         } break;
         case CellFunction_Nerve: {
             cellTO.cellFunctionData.nerve.pulseMode = cell->cellFunctionData.nerve.pulseMode;

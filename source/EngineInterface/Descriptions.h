@@ -174,6 +174,8 @@ struct SensorDescription
 {
     std::optional<float> fixedAngle;  //nullopt = entire neighborhood
     float minDensity = 0.05f;
+    std::optional<int> minRange;
+    std::optional<int> maxRange;
     std::optional<int> restrictToColor;
     SensorRestrictToMutants restrictToMutants = SensorRestrictToMutants_NoRestriction;
 
@@ -181,6 +183,8 @@ struct SensorDescription
     float memoryChannel1 = 0;
     float memoryChannel2 = 0;
     float memoryChannel3 = 0;
+    float targetX = 0;
+    float targetY = 0;
 
     auto operator<=>(SensorDescription const&) const = default;
 
@@ -198,6 +202,16 @@ struct SensorDescription
     SensorDescription& setMinDensity(float value)
     {
         minDensity = value;
+        return *this;
+    }
+    SensorDescription& setMinRange(int value)
+    {
+        minRange = value;
+        return *this;
+    }
+    SensorDescription& setMaxRange(int value)
+    {
+        maxRange = value;
         return *this;
     }
     SensorDescription& setRestrictToMutants(SensorRestrictToMutants value)

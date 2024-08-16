@@ -73,6 +73,7 @@ public:
     //low level read-write methods
     __inline__ __device__ static bool readBool(ConstructorFunction& constructor, int& genomeBytePosition);
     __inline__ __device__ static uint8_t readByte(ConstructorFunction& constructor, int& genomeBytePosition);
+    __inline__ __device__ static int readOptionalByte(ConstructorFunction& constructor, int& genomeBytePosition);
     __inline__ __device__ static int readOptionalByte(ConstructorFunction& constructor, int& genomeBytePosition, int moduloValue);
     __inline__ __device__ static int readWord(ConstructorFunction& constructor, int& genomeBytePosition);
     __inline__ __device__ static float readFloat(ConstructorFunction& constructor, int& genomeBytePosition);  //return values from -1 to 1
@@ -253,6 +254,13 @@ __inline__ __device__ uint8_t GenomeDecoder::readByte(ConstructorFunction& const
         return 0;
     }
     uint8_t result = constructor.genome[genomeBytePosition++];
+    return result;
+}
+
+__inline__ __device__ int GenomeDecoder::readOptionalByte(ConstructorFunction& constructor, int& genomeBytePosition)
+{
+    auto result = static_cast<int>(readByte(constructor, genomeBytePosition));
+    result = result > 127 ? -1 : result;
     return result;
 }
 

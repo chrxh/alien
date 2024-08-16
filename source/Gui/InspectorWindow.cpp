@@ -696,6 +696,10 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
                 .textWidth(CellFunctionTextWidth)
                 .tooltip(Const::GenomeSensorMinDensityTooltip),
             sensor.minDensity);
+        AlienImGui::InputOptionalInt(
+            AlienImGui::InputIntParameters().name("Min range").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeSensorMinRangeTooltip), sensor.minRange);
+        AlienImGui::InputOptionalInt(
+            AlienImGui::InputIntParameters().name("Max range").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeSensorMaxRangeTooltip), sensor.maxRange);
         ImGui::TreePop();
     }
 }
@@ -801,6 +805,12 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
     case CellFunction_Sensor: {
         auto& sensor = std::get<SensorDescription>(*cell.cellFunction);
         sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
+        if (sensor.minRange) {
+            sensor.minRange = std::max(0, std::min(127, *sensor.minRange));
+        }
+        if (sensor.maxRange) {
+            sensor.maxRange = std::max(0, std::min(127, *sensor.maxRange));
+        }
     } break;
     case CellFunction_Nerve: {
         auto& nerve = std::get<NerveDescription>(*cell.cellFunction);

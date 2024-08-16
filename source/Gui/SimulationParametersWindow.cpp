@@ -1322,6 +1322,22 @@ void _SimulationParametersWindow::processBase(
         }
 
         /**
+         * Addon: Advanced muscle control
+         */
+        if (parameters.features.advancedMuscleControl) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced muscle control"))) {
+                AlienImGui::Checkbox(
+                    AlienImGui::CheckboxParameters()
+                        .name("Get movement angle from sensor")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origParameters.cellFunctionMuscleMovementAngleFromSensor)
+                        .tooltip("If activated, muscle cells will receive the relative angle for movements from connected (or connected-connected) sensor cells."),
+                    parameters.cellFunctionMuscleMovementAngleFromSensor);
+                AlienImGui::EndTreeNode();
+            }
+        }
+
+        /**
          * Addon: External energy control
          */
         if (parameters.features.externalEnergyControl) {
@@ -2275,6 +2291,13 @@ void _SimulationParametersWindow::processAddonList(
                     .defaultValue(origParameters.features.advancedAttackerControl)
                     .tooltip("It contains further settings that influence how much energy can be obtained from an attack by attacker cells."),
                 parameters.features.advancedAttackerControl);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Advanced muscle control")
+                    .textWidth(0)
+                    .defaultValue(origParameters.features.advancedAttackerControl)
+                    .tooltip("It contains further settings that influence how the muscle cells work."),
+                parameters.features.advancedMuscleControl);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Cell age limiter")

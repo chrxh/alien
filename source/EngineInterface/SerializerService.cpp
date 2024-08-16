@@ -92,6 +92,8 @@ namespace
     auto constexpr Id_SensorGenome_RestrictToColor = 3;
     auto constexpr Id_SensorGenome_RestrictToOtherMutants_Deprecated = 4;
     auto constexpr Id_SensorGenome_RestrictToMutants = 5;
+    auto constexpr Id_SensorGenome_MinRange = 6;
+    auto constexpr Id_SensorGenome_MaxRange = 7;
 
 
     auto constexpr Id_ReconnectorGenome_Color_Deprecated = 0;
@@ -168,6 +170,10 @@ namespace
     auto constexpr Id_Sensor_RestrictToColor = 7;
     auto constexpr Id_Sensor_RestrictToOtherMutants_Deprecated = 8;
     auto constexpr Id_Sensor_RestrictToMutants = 9;
+    auto constexpr Id_Sensor_TargetX = 10;
+    auto constexpr Id_Sensor_TargetY = 11;
+    auto constexpr Id_Sensor_MinRange = 12;
+    auto constexpr Id_Sensor_MaxRange = 13;
 
     auto constexpr Id_Transmitter_Mode = 0;
 
@@ -328,6 +334,8 @@ namespace cereal
         loadSave<float>(task, auxiliaries, Id_SensorGenome_MinDensity, data.minDensity, defaultObject.minDensity);
         loadSave<std::optional<int>>(task, auxiliaries, Id_SensorGenome_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
         loadSave(task, auxiliaries, Id_SensorGenome_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_SensorGenome_MinRange, data.minRange, defaultObject.minRange);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_SensorGenome_MaxRange, data.maxRange, defaultObject.maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
 
         //compatibility with older versions
@@ -637,6 +645,10 @@ namespace cereal
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel1, data.memoryChannel1, defaultObject.memoryChannel1);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel2, data.memoryChannel2, defaultObject.memoryChannel2);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel3, data.memoryChannel3, defaultObject.memoryChannel3);
+        loadSave<float>(task, auxiliaries, Id_Sensor_TargetX, data.targetX, defaultObject.targetX);
+        loadSave<float>(task, auxiliaries, Id_Sensor_TargetY, data.targetY, defaultObject.targetY);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_MinRange, data.minRange, defaultObject.minRange);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_MaxRange, data.maxRange, defaultObject.maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
 
         //compatibility with older versions
