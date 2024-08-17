@@ -3,6 +3,7 @@
 </h1>
 
 ![Preview](https://github.com/user-attachments/assets/ee578848-7dd7-458d-873f-89662a7c15f0)
+
 <p>
 <b><i>A</i></b>rtificial <b><i>LI</i></b>fe <b><i>EN</i></b>vironment <b>(ALIEN)</b> is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluids. Each simulated body consists of a network of particles that can be upgraded with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, muscles, weapons, constructors, etc.) whose executions are orchestrated by neural networks. The bodies can be thought of as agents or digital organisms operating in a common environment. Their blueprints can be stored in genomes and passed on to offspring.
 </p>
@@ -14,6 +15,10 @@ An important goal is to make the simulator user-friendly through a modern user i
 
 <p>
   Please join our <a href="https://discord.gg/7bjyZdXXQ2" target="_blank">Discord server</a> as a place for discussions, new developments and feedback around ALIEN and artificial life in general.
+</p>
+
+<p>
+  Demo video: <a href="https://youtu.be/qwbMGPkoJmg" target="_blank">Emerging Ecosystems | Winner of the ALIFE 2024 Virtual Creatures Competition</a>
 </p>
 
 # ⚡ Main features
