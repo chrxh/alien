@@ -116,12 +116,11 @@ void _GettingStartedWindow::processIntern()
         drawParagraph("By attaching higher-level functions to particle networks, complex multi-cellular organisms can be modeled. They can evolve over time as "
                       "they are subject to mutations. The following examples consist of homogeneous as well as changing worlds populated by self-reproducing agents. Different "
                       "selection pressures control evolution.");
-        drawItemText("Primordial World/Selected Results");
+        drawItemText("Deep Down Below/Selected Results");
+        drawItemText("Primordial Ocean/Selected Results");
         drawItemText("v4.8-Evolution/Gradient/Selected Results");
         drawItemText("Evolution Sandbox/Example");
         drawItemText("Complex Evolution Testbed/Example");
-        drawItemText("Diversity/Example");
-        drawItemText("Color Niches/Example");
 
         drawHeading2("Plant-herbivore ecosystems");
         drawParagraph("By customizing the cells according to their color, it is possible to specify different types of organisms. There are many examples that "
