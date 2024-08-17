@@ -23,6 +23,8 @@ add_library(EngineInterface
     GeneralSettings.h
     GpuSettings.h
     InspectedEntityIds.h
+    LegacySimulationParametersService.cpp
+    LegacySimulationParametersService.h
     Motion.h
     MutationType.h
     OverlayDescriptions.h
@@ -41,8 +43,6 @@ add_library(EngineInterface
     SimulationController.h
     SimulationParameters.cpp
     SimulationParameters.h
-    SimulationParametersService.cpp
-    SimulationParametersService.h
     SimulationParametersSpot.h
     SimulationParametersSpotActivatedValues.h
     SimulationParametersSpotValues.h

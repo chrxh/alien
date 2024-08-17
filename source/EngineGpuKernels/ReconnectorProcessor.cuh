@@ -38,6 +38,8 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    CellFunctionProcessor::updateInvocationState(cell, activity);
+
     if (activity.channels[0] >= cudaSimulationParameters.cellFunctionReconnectorActivityThreshold) {
         tryCreateConnection(data, statistics, cell, activity);
     } else if (activity.channels[0] <= -cudaSimulationParameters.cellFunctionReconnectorActivityThreshold) {
@@ -48,16 +50,38 @@ __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& dat
 
 __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
 {
+    auto const& reconnector = cell->cellFunctionData.reconnector;
     Cell* closestCell = nullptr;
     float closestDistance = 0;
-    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellFunctionReconnectorRadius[cell->color], cell->detached, [&](auto const& otherCell) {
+    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellFunctionReconnectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
         if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
             return;
         }
         if (otherCell->barrier) {
             return;
         }
-        if (otherCell->color != cell->cellFunctionData.reconnector.color) {
+        if (reconnector.restrictToColor != 255 && otherCell->color != reconnector.restrictToColor) {
+            return;
+        }
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToSameMutants && otherCell->mutationId != cell->mutationId) {
+            return;
+        }
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToOtherMutants
+            && (otherCell->mutationId == cell->mutationId || otherCell->mutationId == 0 || otherCell->mutationId == 1)) {
+            return;
+        }
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToZeroMutants && otherCell->mutationId != 0) {
+            return;
+        }
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToRespawnedMutants && otherCell->mutationId != 1) {
+            return;
+        }
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToLessComplexMutants
+            && otherCell->genomeComplexity >= cell->genomeComplexity) {
+            return;
+        }
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToMoreComplexMutants
+            && otherCell->genomeComplexity <= cell->genomeComplexity) {
             return;
         }
         if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {

@@ -23,6 +23,7 @@ __global__ void cudaNextTimestep_prepare(SimulationData data, SimulationStatisti
 __global__ void cudaNextTimestep_physics_init(SimulationData data)
 {
     CellProcessor::init(data);
+    ParticleProcessor::calcActiveSources(data);
 }
 
 __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
@@ -78,12 +79,14 @@ __global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData dat
 __global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData data)
 {
     CellProcessor::aging(data);
+    MutationProcessor::applyRandomMutations(data);
 }
 
 __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data)
 {
     CellProcessor::livingStateTransition(data);
     CellFunctionProcessor::collectCellFunctionOperations(data);
+    CellFunctionProcessor::updateRenderingData(data);
 }
 
 __global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationStatistics statistics)
@@ -141,12 +144,12 @@ __global__ void cudaNextTimestep_cellFunction_detonator(SimulationData data, Sim
     DetonatorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_physics_substep7_innerFriction(SimulationData data)
+__global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)
 {
     CellProcessor::applyInnerFriction(data);
 }
 
-__global__ void cudaNextTimestep_physics_substep8(SimulationData data)
+__global__ void cudaNextTimestep_physics_applyFriction(SimulationData data)
 {
     CellFunctionProcessor::resetFetchedActivities(data);
     CellProcessor::applyFriction(data);

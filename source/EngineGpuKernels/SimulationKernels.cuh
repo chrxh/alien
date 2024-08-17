@@ -25,8 +25,8 @@ __global__ void cudaNextTimestep_cellFunction_muscle(SimulationData data, Simula
 __global__ void cudaNextTimestep_cellFunction_sensor(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellFunction_reconnector(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellFunction_detonator(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_physics_substep7_innerFriction(SimulationData data);
-__global__ void cudaNextTimestep_physics_substep8(SimulationData data);
+__global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data);
+__global__ void cudaNextTimestep_physics_applyFriction(SimulationData data);
 __global__ void cudaNextTimestep_structuralOperations_substep1(SimulationData data);
 __global__ void cudaNextTimestep_structuralOperations_substep2(SimulationData data);
 __global__ void cudaNextTimestep_structuralOperations_substep3(SimulationData data);

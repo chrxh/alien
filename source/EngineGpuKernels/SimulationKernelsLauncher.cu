@@ -35,21 +35,21 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     bool considerRigidityUpdate = (data.timestep % 3 == 0);
 
     KERNEL_CALL(cudaNextTimestep_physics_init, data);
-    KERNEL_CALL(cudaNextTimestep_physics_fillMaps, data);
+    KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, 64, data);
     if (settings.simulationParameters.motionType == MotionType_Fluid) {
-        auto threads = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
-        cudaNextTimestep_physics_calcFluidForces<<<gpuSettings.numBlocks, threads>>>(data);
+        auto threadBlockSize = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
+        KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, threadBlockSize, data);
     } else {
         KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, data);
     }
     if (settings.simulationParameters.numSpots > 0) {
         KERNEL_CALL(cudaApplyFlowFieldSettings, data);
     }
-    KERNEL_CALL(cudaNextTimestep_physics_applyForces, data);
-    KERNEL_CALL(cudaNextTimestep_physics_calcConnectionForces, data, considerForcesFromAngleDifferences);
-    KERNEL_CALL(cudaNextTimestep_physics_verletPositionUpdate, data);
-    KERNEL_CALL(cudaNextTimestep_physics_calcConnectionForces, data, considerForcesFromAngleDifferences);
-    KERNEL_CALL(cudaNextTimestep_physics_verletVelocityUpdate, data);
+    KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, 16, data);
+    KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, 16, data, considerForcesFromAngleDifferences);
+    KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, 16, data);
+    KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, 16, data, considerForcesFromAngleDifferences);
+    KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, 16, data);
 
     //cell functions
     KERNEL_CALL(cudaNextTimestep_cellFunction_prepare_substep1, data);
@@ -59,19 +59,19 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     if (settings.simulationParameters.cellFunctionConstructorCheckCompletenessForSelfReplication) {
         KERNEL_CALL(cudaNextTimestep_cellFunction_constructor_completenessCheck, data, statistics);
     }
-    KERNEL_CALL(cudaNextTimestep_cellFunction_constructor_process, data, statistics);
+    KERNEL_CALL_MOD(cudaNextTimestep_cellFunction_constructor_process, 4, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_injector, data, statistics);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_attacker, data, statistics);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_transmitter, data, statistics);
+    KERNEL_CALL_MOD(cudaNextTimestep_cellFunction_attacker, 4, data, statistics);
+    KERNEL_CALL_MOD(cudaNextTimestep_cellFunction_transmitter, 4, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_muscle, data, statistics);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_sensor, data, statistics);
+    KERNEL_CALL_MOD(cudaNextTimestep_cellFunction_sensor, 64, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_reconnector, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_detonator, data, statistics);
 
     if (considerInnerFriction) {
-        KERNEL_CALL(cudaNextTimestep_physics_substep7_innerFriction, data);
+        KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, 16, data);
     }
-    KERNEL_CALL(cudaNextTimestep_physics_substep8, data);
+    KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, 16, data);
 
     if (considerRigidityUpdate && isRigidityUpdateEnabled(settings)) {
         KERNEL_CALL(cudaInitClusterData, data);
@@ -102,8 +102,8 @@ bool _SimulationKernelsLauncher::updateSimulationParametersAfterTimestep(
     auto const& worldSizeX = settings.generalSettings.worldSizeX;
     auto const& worldSizeY = settings.generalSettings.worldSizeY;
     SpaceCalculator space({worldSizeX, worldSizeY});
-    for (int i = 0; i < settings.simulationParameters.numParticleSources; ++i) {
-        auto& source = settings.simulationParameters.particleSources[i];
+    for (int i = 0; i < settings.simulationParameters.numRadiationSources; ++i) {
+        auto& source = settings.simulationParameters.radiationSources[i];
         if (source.velX != 0) {
             source.posX += source.velX * settings.simulationParameters.timestepSize;
             result = true;

@@ -294,7 +294,8 @@ void _GenomeEditorWindow::processTab(TabData& tab)
 
     AlienImGui::MovableSeparator(_previewHeight);
 
-    AlienImGui::Group("Preview (reference configuration)");
+    AlienImGui::Group("Preview (reference configuration)", Const::GenomePreviewTooltip);
+    ImGui::SameLine();
     if (ImGui::BeginChild("##child4", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         showPreview(tab);
     }
@@ -346,16 +347,16 @@ void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
         table.next();
         if (!tab.genome.header.separateConstruction) {
             AlienImGui::InputInt(
-                AlienImGui::InputIntParameters().name("Number of constructions").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeNumBranchesTooltip),
+                AlienImGui::InputIntParameters().name("Number of branches").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeNumBranchesTooltip),
                 tab.genome.header.numBranches);
             table.next();
         }
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
-                .name("Repetitions per construction")
+                .name("Repetitions per branch")
                 .infinity(true)
                 .textWidth(ContentHeaderTextWidth)
-                .tooltip(Const::GenomeRepetitionsPerConstructionTooltip),
+                .tooltip(Const::GenomeRepetitionsPerBranchTooltip),
             tab.genome.header.numRepetitions);
         if (tab.genome.header.numRepetitions > 1) {
             table.next();
@@ -432,7 +433,9 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 
     auto shapeGenerator = ShapeGeneratorFactory::create(tab.genome.header.shape);
     for (auto& cell : tab.genome.cells) {
-        auto isFirstOrLast = index == 0 || index == tab.genome.cells.size() - 1;
+        auto isFirst = index == 0;
+        auto isLast = index == tab.genome.cells.size() - 1;
+        auto isFirstOrLast = isFirst || isLast;
         std::optional<ShapeGeneratorResult> shapeGeneratorResult =
             shapeGenerator ? std::make_optional(shapeGenerator->generateNextConstructionData()) : std::nullopt;
 
@@ -478,7 +481,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
 
         if (treeNodeOpen) {
             auto origCell = cell;
-            processNode(tab, cell, shapeGeneratorResult, isFirstOrLast);
+            processNode(tab, cell, shapeGeneratorResult, isFirst, isLast);
             if (origCell != cell) {
                 tab.selectedNode = index;
             }
@@ -494,9 +497,11 @@ void _GenomeEditorWindow::processNode(
     TabData& tab,
     CellGenomeDescription& cell,
     std::optional<ShapeGeneratorResult> const& shapeGeneratorResult,
-    bool isFirstOrLast)
+    bool isFirst,
+    bool isLast)
 {
     auto type = cell.getCellFunctionType();
+    auto isFirstOrLast = isFirst || isLast;
 
     AlienImGui::DynamicTableLayout table(DynamicTableColumnWidth);
     if (table.begin()) {
@@ -533,11 +538,17 @@ void _GenomeEditorWindow::processNode(
         table.next();
         auto numRequiredAdditionalConnections =
             shapeGeneratorResult ? shapeGeneratorResult->numRequiredAdditionalConnections : cell.numRequiredAdditionalConnections;
+        if (!isFirst && numRequiredAdditionalConnections) {
+            numRequiredAdditionalConnections = std::min(*numRequiredAdditionalConnections + 1, MAX_CELL_BONDS);
+        }
         if (AlienImGui::InputOptionalInt(
                 AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::GenomeRequiredConnectionsTooltip),
                 numRequiredAdditionalConnections)) {
             updateGeometry(tab.genome, tab.genome.header.shape);
             tab.genome.header.shape = ConstructionShape_Custom;
+        }
+        if (!isFirst && numRequiredAdditionalConnections) {
+            numRequiredAdditionalConnections = *numRequiredAdditionalConnections - 1;
         }
         cell.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
 
@@ -627,8 +638,17 @@ void _GenomeEditorWindow::processNode(
                     *sensor.fixedAngle);
             }
             table.next();
-            AlienImGui::ComboColor(
-                AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.color);
+            AlienImGui::ComboOptionalColor(
+                AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
+            table.next();
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters()
+                    .name("Scan mutants")
+                    .values({"None", "Same mutants", "Other mutants", "Emergent cells", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
+                    .textWidth(ContentTextWidth)
+                    .tooltip(Const::SensorRestrictToMutantsTooltip),
+                sensor.restrictToMutants);
+
 
             table.next();
             AlienImGui::InputFloat(
@@ -639,6 +659,12 @@ void _GenomeEditorWindow::processNode(
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeSensorMinDensityTooltip),
                 sensor.minDensity);
+            table.next();
+            AlienImGui::InputOptionalInt(
+                AlienImGui::InputIntParameters().name("Min range").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorMinRangeTooltip), sensor.minRange);
+            table.next();
+            AlienImGui::InputOptionalInt(
+                AlienImGui::InputIntParameters().name("Max range").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorMaxRangeTooltip), sensor.maxRange);
         } break;
         case CellFunction_Nerve: {
             auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
@@ -717,9 +743,16 @@ void _GenomeEditorWindow::processNode(
         case CellFunction_Reconnector: {
             auto& reconnector = std::get<ReconnectorGenomeDescription>(*cell.cellFunction);
             table.next();
-            AlienImGui::ComboColor(
-                AlienImGui::ComboColorParameters().name("Target color").textWidth(ContentTextWidth).tooltip(Const::GenomeReconnectorTargetColorTooltip),
-                reconnector.color);
+            AlienImGui::ComboOptionalColor(
+                AlienImGui::ComboColorParameters().name("Restrict to color").textWidth(ContentTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
+                reconnector.restrictToColor);
+            AlienImGui::Combo(
+                AlienImGui::ComboParameters()
+                    .name("Restrict to mutants")
+                    .values({"None", "Same mutants", "Other mutants", "Emergent cells", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
+                    .textWidth(ContentTextWidth)
+                    .tooltip(Const::ReconnectorRestrictToMutantsTooltip),
+                reconnector.restrictToMutants);
         } break;
         case CellFunction_Detonator: {
             table.next();
@@ -953,7 +986,7 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
     if (cell.numRequiredAdditionalConnections) {
         cell.numRequiredAdditionalConnections = (*cell.numRequiredAdditionalConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
     }
-    cell.energy = std::min(std::max(cell.energy, 50.0f), 1050.0f);
+    cell.energy = std::min(std::max(cell.energy, 50.0f), 250.0f);
 
     switch (cell.getCellFunctionType()) {
     case CellFunction_Constructor: {
@@ -961,10 +994,17 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
         if (constructor.mode < 0) {
             constructor.mode = 0;
         }
+        constructor.constructionActivationTime = ((constructor.constructionActivationTime % MaxActivationTime) + MaxActivationTime) % MaxActivationTime;
     } break;
     case CellFunction_Sensor: {
         auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
         sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
+        if (sensor.minRange) {
+            sensor.minRange = std::max(0, std::min(127, *sensor.minRange));
+        }
+        if (sensor.maxRange) {
+            sensor.maxRange = std::max(0, std::min(127, *sensor.maxRange));
+        }
     } break;
     case CellFunction_Nerve: {
         auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);

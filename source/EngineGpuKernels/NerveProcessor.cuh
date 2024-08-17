@@ -28,6 +28,7 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
         auto const& cell = operation.cell;
 
         auto activity = CellFunctionProcessor::calcInputActivity(cell);
+        CellFunctionProcessor::updateInvocationState(cell, activity);
 
         auto const& nerve = cell->cellFunctionData.nerve;
         auto counter = (cell->age / cudaSimulationParameters.cellNumExecutionOrderNumbers) * cudaSimulationParameters.cellNumExecutionOrderNumbers

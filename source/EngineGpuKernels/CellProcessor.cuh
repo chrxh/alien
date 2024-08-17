@@ -75,14 +75,14 @@ __inline__ __device__ void CellProcessor::updateMap(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::clearDensityMap(SimulationData& data)
 {
-    data.preprocessedCellFunctionData.densityMap.clear();
+    data.preprocessedSimulationData.densityMap.clear();
 }
 
 __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
 {
     auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        data.preprocessedCellFunctionData.densityMap.addCell(data.objects.cellPointers.at(index));
+        data.preprocessedSimulationData.densityMap.addCell(data.timestep, data.objects.cellPointers.at(index));
     }
 }
 
@@ -376,7 +376,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
         }
 
         if (Math::length(cell->shared1) > SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::cellMaxForce, &SimulationParametersSpotActivatedValues::cellMaxForce, data, cell->pos)) {
+                &SimulationParametersSpotValues::cellMaxForce, &SimulationParametersSpotActivatedValues::cellMaxForce, data, cell->pos, cell->color)) {
             if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             }
@@ -504,10 +504,9 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
             auto displacement = connectedCell->pos - cell->pos;
             data.cellMap.correctDirection(displacement);
             auto actualDistance = Math::length(displacement);
-            if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance) {
+            if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance[cell->color]) {
                 scheduleForDestruction = true;
                 if (cudaSimulationParameters.clusterDecay) {
-                    connectedCell->livingState = LivingState_Dying;
                     cell->livingState = LivingState_Dying;
                 }
             }
@@ -564,6 +563,7 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
         }
         ++cell->age;
 
+
         if (cudaSimulationParameters.features.cellColorTransitionRules) {
             int transitionDuration;
             int targetColor;
@@ -595,14 +595,22 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        auto livingState = atomicCAS(&cell->livingState, LivingState_Activating, LivingState_Ready);
-        if (livingState == LivingState_Activating) {
+        auto origLivingState = atomicCAS(&cell->livingState, LivingState_Activating, LivingState_Ready);
+        if (origLivingState == LivingState_Activating) {
+            if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellResetAgeAfterActivation) {
+                atomicExch(&cell->age, 0);
+            }
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const& connectedCell = cell->connections[i].cell;
-                atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_Activating);
+                auto origLivingStateConnectedCell = atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_Activating);
+                if (origLivingStateConnectedCell == LivingState_UnderConstruction) {
+                    if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellResetAgeAfterActivation) {
+                        atomicExch(&connectedCell->age, 0);
+                    }
+                }
             }
         }
-        if (livingState == LivingState_Dying) {
+        if (origLivingState == LivingState_Dying) {
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const& connectedCell = cell->connections[i].cell;
                 if (connectedCell->creatureId == cell->creatureId) {
@@ -732,6 +740,9 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         if (cell->livingState == LivingState_Dying) {
             if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb[cell->color]) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
+                //for (int i = 0; i < cell->numConnections; ++i) {
+                //    atomicCAS(&cell->connections[i].cell->livingState, LivingState_UnderConstruction, LivingState_Dying);
+                //}
             }
         }
 
@@ -743,6 +754,29 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         auto cellMaxAge = cudaSimulationParameters.cellMaxAge[cell->color];
+        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellInactiveMaxAgeActivated && cell->mutationId != 1
+            && cell->cellFunctionUsed == CellFunctionUsed_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
+            bool adjacentCellsUsed = false;
+            for (int i = 0; i < cell->numConnections; ++i) {
+                if (cell->connections[i].cell->cellFunctionUsed == CellFunctionUsed_Yes) {
+                    adjacentCellsUsed = true;
+                    break;
+                }
+            }
+            if (!adjacentCellsUsed) {
+                auto cellInactiveMaxAge = SpotCalculator::calcParameter(
+                    &SimulationParametersSpotValues::cellInactiveMaxAge,
+                    &SimulationParametersSpotActivatedValues::cellInactiveMaxAge,
+                    data,
+                    cell->pos,
+                    cell->color);
+
+                cellMaxAge = cellInactiveMaxAge;
+            }
+        }
+        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellEmergentMaxAgeActivated && cell->mutationId == 1) {
+            cellMaxAge = cudaSimulationParameters.cellEmergentMaxAge[cell->color];
+        }
         if (cellMaxAge > 0 && cell->age > cellMaxAge) {
             cellDestruction = true;
         }

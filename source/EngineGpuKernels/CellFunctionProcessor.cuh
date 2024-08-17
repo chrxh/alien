@@ -10,10 +10,12 @@ class CellFunctionProcessor
 {
 public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
+    __inline__ __device__ static void updateRenderingData(SimulationData& data);
     __inline__ __device__ static void resetFetchedActivities(SimulationData& data);
 
     __inline__ __device__ static Activity calcInputActivity(Cell* cell);
     __inline__ __device__ static void setActivity(Cell* cell, Activity const& newActivity);
+    __inline__ __device__ static void updateInvocationState(Cell* cell, Activity const& activity);
 
     struct ReferenceAndActualAngle
     {
@@ -23,6 +25,8 @@ public:
     __inline__ __device__ static ReferenceAndActualAngle calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation);
 
     __inline__ __device__ static float2 calcSignalDirection(SimulationData& data, Cell* cell);
+
+    __inline__ __device__ static int getCurrentExecutionNumber(SimulationData& data, Cell* cell);
 };
 
 /************************************************************************/
@@ -34,15 +38,30 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    auto executionOrderNumber = toInt(data.timestep % cudaSimulationParameters.cellNumExecutionOrderNumbers);
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
+        auto executionOrderNumber = getCurrentExecutionNumber(data, cell);
+
         if (cell->cellFunction != CellFunction_None && cell->executionOrderNumber == executionOrderNumber) {
             if (cell->cellFunction == CellFunction_Detonator && cell->cellFunctionData.detonator.state == DetonatorState_Activated) {
                 data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
             } else if (cell->livingState == LivingState_Ready && cell->activationTime == 0) {
                 data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
             }
+
+        }
+    }
+}
+
+__inline__ __device__ void CellFunctionProcessor::updateRenderingData(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->eventCounter > 0) {
+            --cell->eventCounter;
         }
     }
 }
@@ -51,13 +70,16 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto executionOrderNumber = data.timestep % cudaSimulationParameters.cellNumExecutionOrderNumbers;
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->cellFunction == CellFunction_None) {
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                cell->activity.channels[i] = 0;
+            }
             continue;
         }
+        auto executionOrderNumber = getCurrentExecutionNumber(data, cell);
         int maxOtherExecutionOrderNumber = -1;
         if (!cell->outputBlocked) {
             for (int i = 0, j = cell->numConnections; i < j; ++i) {
@@ -118,6 +140,18 @@ __inline__ __device__ void CellFunctionProcessor::setActivity(Cell* cell, Activi
 {
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->activity.channels[i] = newActivity.channels[i];
+    }
+}
+
+__inline__ __device__ void CellFunctionProcessor::updateInvocationState(Cell* cell, Activity const& activity)
+{
+    if (cell->cellFunctionUsed == CellFunctionUsed_No) {
+        for (int i = 0; i < MAX_CHANNELS - 1; ++i) {
+            if (activity.channels[i] != 0) {
+                cell->cellFunctionUsed = CellFunctionUsed_Yes;
+                break;
+            }
+        }
     }
 }
 
@@ -183,4 +217,9 @@ __inline__ __device__ float2 CellFunctionProcessor::calcSignalDirection(Simulati
         }
     }
     return Math::normalized(result);
+}
+
+__inline__ __device__ int CellFunctionProcessor::getCurrentExecutionNumber(SimulationData& data, Cell* cell)
+{
+    return toInt((data.timestep /*+ cell->creatureId*/) % cudaSimulationParameters.cellNumExecutionOrderNumbers);
 }

@@ -24,7 +24,9 @@ DataDescription DescriptionEditService::createRect(CreateRectParameters const& p
                                .setMaxConnections(parameters._maxConnections)
                                .setColor(parameters._color)
                                .setBarrier(parameters._barrier)
-                               .setCreatureId(creatureId));
+                               .setCreatureId(creatureId)
+                               .setMutationId(parameters._mutationId)
+                               .setGenomeComplexity(parameters._genomeComplexity));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
@@ -480,6 +482,19 @@ void DescriptionEditService::randomizeCountdowns(ClusteredDataDescription& data,
         for (auto& cell : cluster.cells) {
             if (cell.getCellFunctionType() == CellFunction_Detonator) {
                 std::get<DetonatorDescription>(*cell.cellFunction).countdown = countdown;
+            }
+        }
+    }
+}
+
+void DescriptionEditService::randomizeMutationIds(ClusteredDataDescription& data)
+{
+    for (auto& cluster : data.clusters) {
+        auto mutationId = NumberGenerator::getInstance().getRandomInt() % 65536;
+        for (auto& cell : cluster.cells) {
+            cell.mutationId = toInt(mutationId);
+            if (cell.getCellFunctionType() == CellFunction_Constructor) {
+                std::get<ConstructorDescription>(*cell.cellFunction).offspringMutationId = toInt(mutationId);
             }
         }
     }

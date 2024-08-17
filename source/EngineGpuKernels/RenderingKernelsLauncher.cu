@@ -19,6 +19,11 @@ void _RenderingKernelsLauncher::drawImage(
     KERNEL_CALL(cudaDrawCells, data.timestep, data.worldSize, rectUpperLeft, rectLowerRight, data.objects.cellPointers, targetImage, imageSize, zoom);
     KERNEL_CALL(cudaDrawParticles, data.worldSize, rectUpperLeft, rectLowerRight, data.objects.particlePointers, targetImage, imageSize, zoom);
     KERNEL_CALL_1_1(cudaDrawRadiationSources, targetImage, rectUpperLeft, data.worldSize, imageSize, zoom);
+
+    if (settings.simulationParameters.features.cellGlow) {
+        cudaDrawCellGlow<<<512, 128>>>(data.worldSize, rectUpperLeft, data.objects.cellPointers, targetImage, imageSize, zoom);
+    }
+
     if (settings.simulationParameters.borderlessRendering) {
         KERNEL_CALL(cudaDrawRepetition, data.worldSize, imageSize, rectUpperLeft, rectLowerRight, targetImage, zoom);
     }

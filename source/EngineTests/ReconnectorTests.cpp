@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionHelper.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/GenomeDescriptionConverter.h"
+#include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/GenomeDescriptions.h"
 #include "EngineInterface/SimulationController.h"
 #include "IntegrationTestFramework.h"
@@ -27,7 +26,7 @@ public:
     ~ReconnectorTests() = default;
 };
 
-TEST_F(ReconnectorTests, establishConnection_nothingFound)
+TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
 {
     DataDescription data;
     data.addCells(
@@ -60,45 +59,7 @@ TEST_F(ReconnectorTests, establishConnection_nothingFound)
     EXPECT_EQ(1, actualReconnectorCell.connections.size());
 }
 
-TEST_F(ReconnectorTests, establishConnection_wrongColor)
-{
-    DataDescription data;
-    data.addCells({
-        CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
-            .setCellFunction(ReconnectorDescription().setColor(1)),
-        CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
-            .setCellFunction(NerveDescription())
-            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}),
-    });
-    data.addConnection(1, 2);
-
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-
-    auto actualData = _simController->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
-
-    auto actualReconnectorCell = getCell(actualData, 1);
-
-    auto actualTargetCell = getCell(actualData, 3);
-
-    EXPECT_TRUE(std::abs(actualReconnectorCell.activity.channels[0]) < NEAR_ZERO);
-    EXPECT_EQ(1, actualReconnectorCell.connections.size());
-    EXPECT_EQ(0, actualTargetCell.connections.size());
-    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-}
-
-TEST_F(ReconnectorTests, establishConnection_success)
+TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
 {
     DataDescription data;
     data.addCells({
@@ -135,6 +96,585 @@ TEST_F(ReconnectorTests, establishConnection_success)
     EXPECT_EQ(1, actualTargetCell.connections.size());
     EXPECT_TRUE(hasConnection(actualData, 1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToColor(1)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(std::abs(actualReconnectorCell.activity.channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell.connections.size());
+    EXPECT_EQ(0, actualTargetCell.connections.size());
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription()),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(actualReconnectorCell.activity.channels[0] > NEAR_ZERO);
+    EXPECT_EQ(2, actualReconnectorCell.connections.size());
+    EXPECT_EQ(1, actualTargetCell.connections.size());
+    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(5),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(actualReconnectorCell.activity.channels[0] > NEAR_ZERO);
+    EXPECT_EQ(2, actualReconnectorCell.connections.size());
+    EXPECT_EQ(1, actualTargetCell.connections.size());
+    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(std::abs(actualReconnectorCell.activity.channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell.connections.size());
+    EXPECT_EQ(0, actualTargetCell.connections.size());
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(actualReconnectorCell.activity.channels[0] > NEAR_ZERO);
+    EXPECT_EQ(2, actualReconnectorCell.connections.size());
+    EXPECT_EQ(1, actualTargetCell.connections.size());
+    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_zeroMutant)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(std::abs(actualReconnectorCell.activity.channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell.connections.size());
+    EXPECT_EQ(0, actualTargetCell.connections.size());
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_respawnedCell)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(std::abs(actualReconnectorCell.activity.channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell.connections.size());
+    EXPECT_EQ(0, actualTargetCell.connections.size());
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_sameMutant)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(5),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(std::abs(actualReconnectorCell.activity.channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell.connections.size());
+    EXPECT_EQ(0, actualTargetCell.connections.size());
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToZeroMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(actualReconnectorCell.activity.channels[0] > NEAR_ZERO);
+    EXPECT_EQ(2, actualReconnectorCell.connections.size());
+    EXPECT_EQ(1, actualTargetCell.connections.size());
+    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToZeroMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(std::abs(actualReconnectorCell.activity.channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell.connections.size());
+    EXPECT_EQ(0, actualTargetCell.connections.size());
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToRespawnedMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(actualReconnectorCell.activity.channels[0] > NEAR_ZERO);
+    EXPECT_EQ(2, actualReconnectorCell.connections.size());
+    EXPECT_EQ(1, actualTargetCell.connections.size());
+    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_failed)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToRespawnedMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    ASSERT_EQ(3, actualData.cells.size());
+
+    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualTargetCell = getCell(actualData, 3);
+
+    EXPECT_TRUE(std::abs(actualReconnectorCell.activity.channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell.connections.size());
+    EXPECT_EQ(0, actualTargetCell.connections.size());
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_success)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setGenomeComplexity(1000.0f)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(999.0f),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setGenomeComplexity(1000.0f)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001.0f),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    EXPECT_FALSE(hasConnection(actualData, 1, 3));
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_success)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setGenomeComplexity(1000.0f)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001.0f),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+}
+
+TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({10.0f, 10.0f})
+            .setMutationId(5)
+            .setGenomeComplexity(1000.0f)
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setInputExecutionOrderNumber(5)
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
+        CellDescription()
+            .setId(2)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(5)
+            .setCellFunction(NerveDescription())
+            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1000.0f),
+    });
+    data.addConnection(1, 2);
+
+    _simController->setSimulationData(data);
+    _simController->calcTimesteps(1);
+
+    auto actualData = _simController->getSimulationData();
+    EXPECT_FALSE(hasConnection(actualData, 1, 3));
 }
 
 TEST_F(ReconnectorTests, deleteConnections_success)

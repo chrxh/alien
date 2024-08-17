@@ -19,6 +19,8 @@ public:
         MEMBER_DECLARATION(CreateRectParameters, int, color, 0);
         MEMBER_DECLARATION(CreateRectParameters, bool, barrier, false);
         MEMBER_DECLARATION(CreateRectParameters, bool, randomCreatureId, true);
+        MEMBER_DECLARATION(CreateRectParameters, int, mutationId, 0);
+        MEMBER_DECLARATION(CreateRectParameters, float, genomeComplexity, 0);
     };
     static DataDescription createRect(CreateRectParameters const& parameters);
 
@@ -103,6 +105,7 @@ public:
     static void randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy);
     static void randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge);
     static void randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue);
+    static void randomizeMutationIds(ClusteredDataDescription& data);
 
     static void generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers);
 

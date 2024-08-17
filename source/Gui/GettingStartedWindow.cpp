@@ -116,12 +116,11 @@ void _GettingStartedWindow::processIntern()
         drawParagraph("By attaching higher-level functions to particle networks, complex multi-cellular organisms can be modeled. They can evolve over time as "
                       "they are subject to mutations. The following examples consist of homogeneous as well as changing worlds populated by self-reproducing agents. Different "
                       "selection pressures control evolution.");
-        drawItemText("Primordial World/Selected Results");
+        drawItemText("Deep Down Below/Selected Results");
+        drawItemText("Primordial Ocean/Selected Results");
         drawItemText("v4.8-Evolution/Gradient/Selected Results");
         drawItemText("Evolution Sandbox/Example");
         drawItemText("Complex Evolution Testbed/Example");
-        drawItemText("Diversity/Example");
-        drawItemText("Color Niches/Example");
 
         drawHeading2("Plant-herbivore ecosystems");
         drawParagraph("By customizing the cells according to their color, it is possible to specify different types of organisms. There are many examples that "
@@ -363,6 +362,12 @@ void _GettingStartedWindow::processIntern()
             "by the simulation parameters and on the self-replication duration. Usually one should wait for several dozen generations, which may correspond to hundreds of thousands or million time steps."
             "In small worlds with smaller organisms and high mutation rates, evolutionary changes can sometimes be observed every minute depending on the hardware. With more complex "
             "simulations, you should rather expect a few hours.");
+
+        drawHeading2("How can I add energy to a simulation?");
+        drawParagraph("Adding energy to a simulation can increase the available resources and thus the population. There is a convenient way to directly feed "
+                      "all constructor cells with additional energy. This can be achieved by enabling the 'External Energy Control' addon in the simulation "
+                      "parameter window. Next, set the amount of energy to be added (for instance, 1M could sustain 10K cells if each cell has 100 energy "
+                      "units). The external energy is not added instantly but at a rate that can be specified under 'inflow'.");
 
         drawHeading2("How can I create a cell activity in the first place?");
         drawParagraph("To activate a cell function, an input from a connected cell in the form of non-zero activity states is required. The simplest methods "

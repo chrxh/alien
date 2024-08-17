@@ -35,6 +35,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __shared__ Activity inputActivity;
     if (0 == threadIdx.x) {
         inputActivity = CellFunctionProcessor::calcInputActivity(cell);
+        CellFunctionProcessor::updateInvocationState(cell, inputActivity);
     }
     __syncthreads();
 
@@ -82,4 +83,5 @@ __inline__ __device__ float NeuronProcessor::applyActivationFunction(NeuronActiv
     case NeuronActivationFunction_Gaussian:
         return __expf(-2 * x * x);
     }
+    return 0;
 }

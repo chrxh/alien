@@ -31,14 +31,14 @@ public:
     __inline__ __device__ static void deleteConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void deleteConnectionOneWay(Cell* cell1, Cell* cell2);
 
-    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached);
+    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached, int color);
     __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos);
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
 
 private:
     static int constexpr MaxOperationsPerCell = 30;
 
-    __inline__ __device__ static bool scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex);
+    __inline__ __device__ static void scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex);
 
     __inline__ __device__ static void lockAndtryAddConnections(SimulationData& data, Cell* cell1, Cell* cell2);
     __inline__ __device__ static bool tryAddConnectionOneWay(
@@ -413,10 +413,10 @@ __inline__ __device__ void CellConnectionProcessor::deleteConnectionOneWay(Cell*
     }
 }
 
-__inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached)
+__inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached, int color)
 {
     auto distance = Math::length(pos1 - pos2);
-    if (distance > cudaSimulationParameters.cellMaxBindingDistance) {
+    if (distance > cudaSimulationParameters.cellMaxBindingDistance[color]) {
         return false;
     }
 
@@ -492,7 +492,7 @@ __inline__ __device__ bool CellConnectionProcessor::isConnectedConnected(Cell* c
     return result;
 }
 
-__inline__ __device__ bool CellConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex)
+__inline__ __device__ void CellConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex)
 {
     auto origOperationIndex = atomicCAS(&cell->scheduledOperationIndex, -1, operationIndex);
     for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {

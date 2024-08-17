@@ -1,5 +1,34 @@
 # Release notes
 
+## [4.10.0] - 2024-08-17
+### Added
+- engine: sensor and reconnector cells can be restricted to only sensing/connecting to certain type of mutants (same, other, nutrient, handcrafted, less and more complex)
+- engine: sensor cells can tag detected cells for attacking if parameter 'Sensor detection factor' is above 0
+- engine: sensors can not penetrate handcrafted structures when restricting to scanning for certain mutants
+- engine: possibility to force muscle cells to obtain movement angles from nearby sensors (+ simulation parameter under addon 'Advanced muscle control')
+- engine: possibility to redefine max age of permanently inactive or of emergent cells (+ simulation parameters under addon 'Cell age limiter')
+- engine: possibility to reset age after cell switches from 'Under construction' to 'Ready' (+ simulation parameter under addon 'Cell age limiter')
+- engine: allow to disable radiation sources in spots
+- gui/statistics: diversity and average genome complexity plots added
+- gui/statistics: thoughtput statistics
+- gui/simulation view: attack visualization (+ simulation parameter)
+- gui/simulation view: cell glow (+ simulation parameter under new addon 'Cell glow')
+- gui/simulation view: configurable cell radius via simulation parameter
+- gui/mass operation, engine: mass operation for randomizing mutation ids
+
+### Changed
+- engine: replace continuous mutation rates (which are applied in each time step) by genome copy mutations (which are only applied when genomes are copied)
+- engine: make certain mutation rates (all except for translation, duplication and color mutations) dependent on the genome size
+- engine: avoid that creature is able to eat its offspring when it is currently under construction
+- engine: parameters 'Cell max force' and 'Maximum distance' are now color-dependent
+
+### Fixed
+- gui/simulation view: visibility of cells with low energy increased
+- gui/browser: apply text filter to all workspaces and resource types
+- serialization: load/save real-time counter in autosave
+- engine: avoid genome bloating (with separated parts) due to mutations 
+- engine: incorrect construction processes based on single cell genomes with multiple branches and/or repetitions fixed
+
 ## [4.9.1] - 2024-04-26
 ### Added
 - gui/browser: label new simulations

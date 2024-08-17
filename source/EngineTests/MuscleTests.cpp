@@ -214,7 +214,7 @@ TEST_F(MuscleTests, expansion)
 
 TEST_F(MuscleTests, expansionNotPossible)
 {
-    auto const largeDistance = _parameters.cellMaxBindingDistance * 0.9f;
+    auto const largeDistance = _parameters.cellMaxBindingDistance[0] * 0.9f;
 
     DataDescription data;
     data.addCells(
@@ -247,7 +247,7 @@ TEST_F(MuscleTests, expansionNotPossible)
 
 TEST_F(MuscleTests, contraction)
 {
-    auto const largeDistance = _parameters.cellMaxBindingDistance * 0.9f;
+    auto const largeDistance = _parameters.cellMaxBindingDistance[0] * 0.9f;
 
     DataDescription data;
     data.addCells(
@@ -281,7 +281,7 @@ TEST_F(MuscleTests, contraction)
 
 TEST_F(MuscleTests, multipleContraction)
 {
-    auto const largeDistance = _parameters.cellMaxBindingDistance * 0.9f;
+    auto const largeDistance = _parameters.cellMaxBindingDistance[0] * 0.9f;
 
     DataDescription data;
     data.addCells({

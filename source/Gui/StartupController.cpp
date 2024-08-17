@@ -57,6 +57,7 @@ void _StartupController::process()
             deserializedSim.auxiliaryData.timestep = 0;
             deserializedSim.auxiliaryData.zoom = 12.0f;
             deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
+            deserializedSim.auxiliaryData.realTime = std::chrono::milliseconds(0);
             deserializedSim.mainData = ClusteredDataDescription();
         }
 
@@ -64,6 +65,7 @@ void _StartupController::process()
             deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
         _simController->setClusteredSimulationData(deserializedSim.mainData);
         _simController->setStatisticsHistory(deserializedSim.statistics);
+        _simController->setRealTime(deserializedSim.auxiliaryData.realTime);
         Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
         Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
         _temporalControlWindow->onSnapshot();

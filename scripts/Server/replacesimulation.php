@@ -33,14 +33,19 @@
     $settings = $_POST['settings'];
     $simId = $_POST['simId'];
     $size = strlen($content);
+    $userId = $obj->id;
     $statistics = array_key_exists('statistics', $_POST) ? $_POST['statistics'] : "";
 
-    $obj = $db->query("SELECT sim.NAME as name, sim.TYPE as type, sim.FROM_RELEASE as workspace FROM simulation sim WHERE sim.ID='".addslashes($simId)."'")->fetch_object();
+    $obj = $db->query("SELECT sim.NAME as name, sim.TYPE as type, sim.FROM_RELEASE as workspace, sim.USER_ID as userId FROM simulation sim WHERE sim.ID='".addslashes($simId)."'")->fetch_object();
     if (!$obj) {
         closeAndExit($db);
     }
 
     if ($userName != 'alien-project' && $obj->workspace == ALIEN_PROJECT_WORKSPACE_TYPE) {
+        closeAndExit($db);
+    }
+
+    if ($obj->userId != $userId) {
         closeAndExit($db);
     }
 

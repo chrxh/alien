@@ -11,7 +11,8 @@ class MutationProcessor
 {
 public:
 
-    __inline__ __device__ static void applyRandomMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void applyRandomMutations(SimulationData& data);
+    __inline__ __device__ static void applyRandomMutationsForCell(SimulationData& data, Cell* cell);
 
     __inline__ __device__ static void neuronDataMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void propertiesMutation(SimulationData& data, Cell* cell);
@@ -27,6 +28,8 @@ public:
     __inline__ __device__ static void genomeColorMutation(SimulationData& data, Cell* cell);
 
 private:
+    template <typename Func>
+    __inline__ __device__ static void executeEvent(SimulationData& data, float probability, Func eventFunc);
     __inline__ __device__ static void adaptMutationId(SimulationData& data, ConstructorFunction& constructor);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
     __inline__ __device__ static int getNewColorFromTransition(SimulationData& data, int origColor);
@@ -35,118 +38,120 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-
-__inline__ __device__ void MutationProcessor::applyRandomMutation(SimulationData& data, Cell* cell)
+__inline__ __device__ void MutationProcessor::applyRandomMutations(SimulationData& data)
 {
-    auto cellFunctionConstructorMutationNeuronProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationNeuronDataProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationNeuronDataProbability,
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->livingState== LivingState_Activating && cell->cellFunction == CellFunction_Constructor) {
+            MutationProcessor::applyRandomMutationsForCell(data, cell);
+        }
+    }
+}
+
+__inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
+    auto cellCopyMutationNeuronData = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellCopyMutationNeuronData,
+        &SimulationParametersSpotActivatedValues::cellCopyMutationNeuronData,
+        data,
+        cell->pos,
+        cell->color) * numNodes;
+    auto cellCopyMutationCellProperties = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellCopyMutationCellProperties,
+        &SimulationParametersSpotActivatedValues::cellCopyMutationCellProperties,
+        data,
+        cell->pos,
+        cell->color) * numNodes;
+    auto cellCopyMutationGeometry = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellCopyMutationGeometry,
+        &SimulationParametersSpotActivatedValues::cellCopyMutationGeometry,
+        data,
+        cell->pos,
+        cell->color) * numNodes;
+    auto cellCopyMutationCustomGeometry = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellCopyMutationCustomGeometry,
+        &SimulationParametersSpotActivatedValues::cellCopyMutationCustomGeometry,
+        data,
+        cell->pos,
+        cell->color) * numNodes;
+    auto cellCopyMutationCellFunction = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellCopyMutationCellFunction,
+        &SimulationParametersSpotActivatedValues::cellCopyMutationCellFunction,
+        data,
+        cell->pos,
+        cell->color) * numNodes;
+    auto cellCopyMutationInsertion = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellCopyMutationInsertion,
+        &SimulationParametersSpotActivatedValues::cellCopyMutationInsertion,
+        data,
+        cell->pos,
+        cell->color) * numNodes;
+    auto cellCopyMutationDeletion = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellCopyMutationDeletion,
+        &SimulationParametersSpotActivatedValues::cellCopyMutationDeletion,
+        data,
+        cell->pos,
+        cell->color) * numNodes;
+    auto cellCopyMutationCellColor = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellCopyMutationCellColor,
+        &SimulationParametersSpotActivatedValues::cellCopyMutationCellColor,
+        data,
+        cell->pos,
+        cell->color) * numNodes;
+    auto cellCopyMutationTranslation = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellCopyMutationTranslation,
+        &SimulationParametersSpotActivatedValues::cellCopyMutationTranslation,
         data,
         cell->pos,
         cell->color);
-    auto cellFunctionConstructorMutationDataProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationPropertiesProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationPropertiesProbability,
+    auto cellCopyMutationDuplication = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellCopyMutationDuplication,
+        &SimulationParametersSpotActivatedValues::cellCopyMutationDuplication,
         data,
         cell->pos,
         cell->color);
-    auto cellFunctionConstructorMutationGeometryProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationGeometryProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationGeometryProbability,
+    auto cellCopyMutationSubgenomeColor = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellCopyMutationSubgenomeColor,
+        &SimulationParametersSpotActivatedValues::cellCopyMutationSubgenomeColor,
         data,
         cell->pos,
         cell->color);
-    auto cellFunctionConstructorMutationCustomGeometryProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationCustomGeometryProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCustomGeometryProbability,
-        data,
-        cell->pos,
-        cell->color);
-    auto cellFunctionConstructorMutationCellFunctionProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationCellFunctionProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCellFunctionProbability,
-        data,
-        cell->pos,
-        cell->color);
-    auto cellFunctionConstructorMutationInsertionProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationInsertionProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationInsertionProbability,
-        data,
-        cell->pos,
-        cell->color);
-    auto cellFunctionConstructorMutationDeletionProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationDeletionProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDeletionProbability,
-        data,
-        cell->pos,
-        cell->color);
-    auto cellFunctionConstructorMutationTranslationProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationTranslationProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationTranslationProbability,
-        data,
-        cell->pos,
-        cell->color);
-    auto cellFunctionConstructorMutationDuplicationProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationDuplicationProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationDuplicationProbability,
-        data,
-        cell->pos,
-        cell->color);
-    auto cellFunctionConstructorMutationCellColorProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationCellColorProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationCellColorProbability,
-        data,
-        cell->pos,
-        cell->color);
-    auto cellFunctionConstructorMutationSubgenomeColorProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationSubgenomeColorProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationSubgenomeColorProbability,
-        data,
-        cell->pos,
-        cell->color);
-    auto cellFunctionConstructorMutationGenomeColorProbability = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionConstructorMutationGenomeColorProbability,
-        &SimulationParametersSpotActivatedValues::cellFunctionConstructorMutationGenomeColorProbability,
+    auto cellCopyMutationGenomeColor = SpotCalculator::calcParameter(
+        &SimulationParametersSpotValues::cellCopyMutationGenomeColor,
+        &SimulationParametersSpotActivatedValues::cellCopyMutationGenomeColor,
         data,
         cell->pos,
         cell->color);
 
-    if (isRandomEvent(data, cellFunctionConstructorMutationNeuronProbability)) {
-        neuronDataMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationDataProbability)) {
-        propertiesMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationGeometryProbability)) {
-        geometryMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationCustomGeometryProbability)) {
-        customGeometryMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationCellFunctionProbability)) {
-        cellFunctionMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationInsertionProbability)) {
-        insertMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationDeletionProbability)) {
-        deleteMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationTranslationProbability)) {
-        translateMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationDuplicationProbability)) {
-        duplicateMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationCellColorProbability)) {
-        cellColorMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationSubgenomeColorProbability)) {
-        subgenomeColorMutation(data, cell);
-    }
-    if (isRandomEvent(data, cellFunctionConstructorMutationGenomeColorProbability)) {
-        genomeColorMutation(data, cell);
-    }
+    executeEvent(data, cellCopyMutationCellProperties, [&]() { propertiesMutation(data, cell); });
+    executeEvent(data, cellCopyMutationNeuronData, [&]() { neuronDataMutation(data, cell); });
+    executeEvent(data, cellCopyMutationGeometry, [&]() { geometryMutation(data, cell); });
+    executeEvent(data, cellCopyMutationCustomGeometry, [&]() { customGeometryMutation(data, cell); });
+    executeEvent(data, cellCopyMutationCellFunction, [&]() { cellFunctionMutation(data, cell); });
+    executeEvent(data, cellCopyMutationInsertion, [&]() {
+        auto numNonSeparatedNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false));
+        if (numNodes < 2 * numNonSeparatedNodes) {
+            insertMutation(data, cell);
+        }
+    });
+    executeEvent(data, cellCopyMutationDeletion, [&]() { deleteMutation(data, cell); });
+    executeEvent(data, cellCopyMutationCellColor, [&]() { cellColorMutation(data, cell); });
+    executeEvent(data, cellCopyMutationTranslation, [&]() { translateMutation(data, cell); });
+    executeEvent(data, cellCopyMutationDuplication, [&]() {
+        auto& constructor = cell->cellFunctionData.constructor;
+        auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
+        auto numNonSeparatedNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false));
+        if (numNodes < 2 * numNonSeparatedNodes) {
+            duplicateMutation(data, cell);
+        }
+    });
+    executeEvent(data, cellCopyMutationSubgenomeColor, [&]() { subgenomeColorMutation(data, cell); });
+    executeEvent(data, cellCopyMutationGenomeColor, [&]() { genomeColorMutation(data, cell); });
 }
 
 __inline__ __device__ void MutationProcessor::neuronDataMutation(SimulationData& data, Cell* cell)
@@ -179,25 +184,31 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
     auto numNodes = GenomeDecoder::getNumNodesRecursively(genome, genomeSize, false, true);
     auto node = data.numberGen1.random(numNodes - 1);
     auto sequenceNumber = 0;
-    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, [&](int depth, int nodeAddress, int repetition) {
+    uint8_t lastExecutionNumber = 0;
+    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddress, int repetition) {
         if (sequenceNumber++ != node) {
             return;
         }
 
         //basic property mutation
         if (data.numberGen1.randomBool()) {
-            auto randomDelta = data.numberGen1.random(Const::CellBasicBytes - 1);
-            if (randomDelta == 0) {  //no cell function type change
-                return;
+            if (data.numberGen1.randomBool()) {
+                GenomeDecoder::setNextInputExecutionNumber(
+                    genome, nodeAddress, data.numberGen1.randomBool() ? data.numberGen1.randomByte() : lastExecutionNumber);
+                //adaptMutationId(data, constructor);
+            } else {
+                auto randomDelta = data.numberGen1.random(Const::CellBasicBytes - 1);
+                if (randomDelta == 0) {  //no cell function type change
+                    return;
+                }
+                if (randomDelta == Const::CellColorPos) {  //no color change
+                    return;
+                }
+                if (randomDelta == Const::CellAnglePos || randomDelta == Const::CellRequiredConnectionsPos) {  //no structure change
+                    return;
+                }
+                genome[nodeAddress + randomDelta] = data.numberGen1.randomByte();
             }
-            if (randomDelta == Const::CellColorPos) {  //no color change
-                return;
-            }
-            if (randomDelta == Const::CellAnglePos || randomDelta == Const::CellRequiredConnectionsPos) {  //no structure change
-                return;
-            }
-            genome[nodeAddress + randomDelta] = data.numberGen1.randomByte();
-            //adaptMutationId(data, constructor);
         }
 
         //cell function specific mutation
@@ -215,6 +226,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
                 //adaptMutationId(data, constructor);
             }
         }
+        lastExecutionNumber = genome[nodeAddress + Const::CellInputExecutionNumberPos];
     });
 }
 
@@ -301,7 +313,7 @@ __inline__ __device__ void MutationProcessor::customGeometryMutation(SimulationD
     auto numNodes = GenomeDecoder::getNumNodesRecursively(genome, genomeSize, false, true);
     auto node = data.numberGen1.random(numNodes - 1);
     auto sequenceNumber = 0;
-    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, [&](int depth, int nodeAddress, int repetition) {
+    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddress, int repetition) {
         if (sequenceNumber++ != node) {
             return;
         }
@@ -409,7 +421,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
 
         //choose a random node position to a constructor with a subgenome
         int numConstructorsWithSubgenome = 0;
-        GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, [&](int depth, int nodeAddressIntern, int repetition) {
+        GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddressIntern, int repetition) {
             auto cellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddressIntern);
             if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfReplication(genome, nodeAddressIntern)) {
                 ++numConstructorsWithSubgenome;
@@ -418,7 +430,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
         if (numConstructorsWithSubgenome > 0) {
             auto randomIndex = data.numberGen1.random(numConstructorsWithSubgenome - 1);
             int counter = 0;
-            GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, [&](int depth, int nodeAddressIntern, int repetition) {
+            GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddressIntern, int repetition) {
                 auto cellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddressIntern);
                 if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfReplication(genome, nodeAddressIntern)) {
                     if (randomIndex == counter) {
@@ -435,8 +447,10 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     }
 
     auto newColor = cell->color;
+    auto executionNumber = 0;
     if (nodeAddress < genomeSize) {
         newColor = GenomeDecoder::getNextCellColor(genome, nodeAddress);
+        executionNumber = GenomeDecoder::getNextExecutionNumber(genome, nodeAddress);
     }
     auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
     auto makeSelfCopy = cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication ? data.numberGen1.randomBool() : false;
@@ -464,6 +478,12 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     data.numberGen1.randomBytes(targetGenome + nodeAddress, Const::CellBasicBytes);
     GenomeDecoder::setNextCellFunctionType(targetGenome, nodeAddress, newCellFunction);
     GenomeDecoder::setNextCellColor(targetGenome, nodeAddress, newColor);
+    if (data.numberGen1.random() < 0.9f) {
+        GenomeDecoder::setNextInputExecutionNumber(targetGenome, nodeAddress, executionNumber);
+    }
+    if (data.numberGen1.random() < 0.9f) {
+        GenomeDecoder::setNextOutputBlocked(targetGenome, nodeAddress, false);  //'output blocked' should be rare
+    }
     GenomeDecoder::setRandomCellFunctionData(data, targetGenome, nodeAddress + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeHeaderSize);
     if (newCellFunction == CellFunction_Constructor && !makeSelfCopy) {
         GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);      //currently no sub-genome with separation property wished
@@ -481,7 +501,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     }
     constructor.genomeSize = targetGenomeSize;
     constructor.genome = targetGenome;
-    //adaptMutationId(data, constructor);
+    adaptMutationId(data, constructor);
 }
 
 __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& data, Cell* cell)
@@ -506,10 +526,10 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
             return;
         }
     }
-    auto deletedCellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
-    if (deletedCellFunctionType == CellFunction_Constructor || deletedCellFunctionType == CellFunction_Injector) {
-        adaptMutationId(data, constructor);
-    }
+    //auto deletedCellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
+    //if (deletedCellFunctionType == CellFunction_Constructor || deletedCellFunctionType == CellFunction_Injector) {
+    //    adaptMutationId(data, constructor);
+    //}
 
     auto targetGenomeSize = genomeSize - deleteSize;
     for (int i = nodeAddress; i < targetGenomeSize; ++i) {
@@ -522,7 +542,7 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
     }
     constructor.genomeCurrentNodeIndex = 0;
     constructor.genomeSize = targetGenomeSize;
-    //adaptMutationId(data, constructor);
+    adaptMutationId(data, constructor);
 }
 
 __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& data, Cell* cell)
@@ -749,7 +769,7 @@ __inline__ __device__ void MutationProcessor::cellColorMutation(SimulationData& 
     auto numNodes = GenomeDecoder::getNumNodesRecursively(genome, genomeSize, false, true);
     auto randomNode = data.numberGen1.random(numNodes - 1);
     auto sequenceNumber = 0;
-    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, [&](int depth, int nodeAddress, int repetition) {
+    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddress, int repetition) {
         if (sequenceNumber++ != randomNode) {
             return;
         }
@@ -819,13 +839,25 @@ __inline__ __device__ void MutationProcessor::genomeColorMutation(SimulationData
     }
 
     GenomeDecoder::executeForEachNodeRecursively(
-        genome, genomeSize, true, [&](int depth, int nodeAddress, int repetition) { GenomeDecoder::setNextCellColor(genome, nodeAddress, newColor); });
+        genome, genomeSize, true, false, [&](int depth, int nodeAddress, int repetition) { GenomeDecoder::setNextCellColor(genome, nodeAddress, newColor); });
+}
+
+template <typename Func>
+__inline__ __device__ void MutationProcessor::executeEvent(SimulationData& data, float probability, Func eventFunc)
+{
+    //TODO avoid performance deterioration
+    //for (int i = 0, j = toInt(probability); i < j; ++i) {
+    //    eventFunc();
+    //}
+    if (isRandomEvent(data, probability)) {
+        eventFunc();
+    }
 }
 
 __inline__ __device__ void MutationProcessor::adaptMutationId(SimulationData& data, ConstructorFunction& constructor)
 {
     if (GenomeDecoder::containsSelfReplication(constructor)) {
-        constructor.offspringMutationId = abs(toInt(data.numberGen1.createNewSmalllId()));
+        constructor.offspringMutationId = data.numberGen1.createNewSmallId();
     }
 }
 

@@ -122,13 +122,17 @@ struct SensorFunction
     SensorMode mode;
     float angle;
     float minDensity;
-    uint8_t color;
-    uint32_t targetedCreatureId;
+    int8_t minRange;          //< 0 = no restriction
+    int8_t maxRange;          //< 0 = no restriction
+    uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
+    SensorRestrictToMutants restrictToMutants;
 
     //process data
     float memoryChannel1;
     float memoryChannel2;
     float memoryChannel3;
+    float targetX;
+    float targetY;
 };
 
 struct NerveFunction
@@ -166,7 +170,8 @@ struct DefenderFunction
 
 struct ReconnectorFunction
 {
-    uint8_t color;
+    uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
+    ReconnectorRestrictToMutants restrictToMutants;
 };
 
 struct DetonatorFunction
@@ -208,6 +213,8 @@ struct Cell
     LivingState livingState;
     uint32_t creatureId;
     uint32_t mutationId;
+    uint8_t ancestorMutationId; //only the first 8 bits from ancestor mutation id
+    float genomeComplexity;
 
     //cell function
     uint8_t executionOrderNumber;
@@ -217,10 +224,18 @@ struct Cell
     CellFunctionData cellFunctionData;
     Activity activity;
     uint32_t activationTime;
-    uint32_t genomeComplexity;
+    CellFunctionUsed cellFunctionUsed;
+
+    //process data
+    uint8_t detectedByCreatureId;  //only the first 8 bits from the creature id
 
     //annotations
     CellMetadataDescription metadata;
+
+    //additional rendering data
+    CellEvent event;
+    uint8_t eventCounter;
+    float2 eventPos;
 
     //editing data
     uint8_t selected;  //0 = no, 1 = selected, 2 = cluster selected

@@ -13,6 +13,7 @@ class ParticleProcessor
 {
 public:
     __inline__ __device__ static void updateMap(SimulationData& data);
+    __inline__ __device__ static void calcActiveSources(SimulationData& data);
     __inline__ __device__ static void movement(SimulationData& data);
     __inline__ __device__ static void collision(SimulationData& data);
     __inline__ __device__ static void splitting(SimulationData& data);
@@ -34,6 +35,25 @@ __inline__ __device__ void ParticleProcessor::updateMap(SimulationData& data)
 
     Particle** particlePointers = &data.objects.particlePointers.at(partition.startIndex);
     data.particleMap.set_block(partition.numElements(), particlePointers);
+}
+
+__inline__ __device__ void ParticleProcessor::calcActiveSources(SimulationData& data)
+{
+    if (threadIdx.x == 0 && blockIdx.x == 0) {
+        int activeSourceIndex = 0;
+        for (int i = 0; i < cudaSimulationParameters.numRadiationSources; ++i) {
+            auto sourceActive = !SpotCalculator::calcParameter(
+                &SimulationParametersSpotValues::radiationDisableSources,
+                &SimulationParametersSpotActivatedValues::radiationDisableSources,
+                data,
+                {cudaSimulationParameters.radiationSources[i].posX, cudaSimulationParameters.radiationSources[i].posY});
+            if (sourceActive) {
+                data.preprocessedSimulationData.activeRadiationSources.setActiveSource(activeSourceIndex, i);
+                ++activeSourceIndex;
+            }
+        }
+        data.preprocessedSimulationData.activeRadiationSources.setNumActiveSources(activeSourceIndex);
+    }
 }
 
 __inline__ __device__ void ParticleProcessor::movement(SimulationData& data)
@@ -122,7 +142,7 @@ __inline__ __device__ void ParticleProcessor::collision(SimulationData& data)
                                 data,
                                 cell->pos,
                                 cell->color);
-                            energyToTransfer *= 1.0f - radiationAbsorptionLowGenomeComplexityPenalty / powf(1.0f + toFloat(cell->genomeComplexity), 0.1f);
+                            energyToTransfer *= 1.0f - radiationAbsorptionLowGenomeComplexityPenalty / powf(1.0f + cell->genomeComplexity, 0.1f);
                         }
 
                         if (particle->energy < 0.01f/* && energyToTransfer > 0.1f*/) {
@@ -204,12 +224,16 @@ __inline__ __device__ void ParticleProcessor::transformation(SimulationData& dat
 
 __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, float2 pos, float2 vel, int color, float energy)
 {
-    if (cudaSimulationParameters.numParticleSources > 0) {
-        auto sourceIndex = data.numberGen1.random(cudaSimulationParameters.numParticleSources - 1);
-        pos.x = cudaSimulationParameters.particleSources[sourceIndex].posX;
-        pos.y = cudaSimulationParameters.particleSources[sourceIndex].posY;
+    auto numActiveSources = data.preprocessedSimulationData.activeRadiationSources.getNumActiveSources();
+    if (numActiveSources > 0) {
 
-        auto const& source = cudaSimulationParameters.particleSources[sourceIndex];
+        auto sourceIndex = data.numberGen1.random(numActiveSources - 1);
+        sourceIndex = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(sourceIndex);
+
+        pos.x = cudaSimulationParameters.radiationSources[sourceIndex].posX;
+        pos.y = cudaSimulationParameters.radiationSources[sourceIndex].posY;
+
+        auto const& source = cudaSimulationParameters.radiationSources[sourceIndex];
         if (source.shapeType == RadiationSourceShapeType_Circular) {
             auto radius = max(1.0f, source.shapeData.circularRadiationSource.radius);
             float2 delta{0, 0};

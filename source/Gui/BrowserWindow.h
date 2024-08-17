@@ -77,7 +77,7 @@ private:
     void processNumDownloadsField(NetworkResourceTreeTO const& treeTO);
     void processWidthField(NetworkResourceTreeTO const& treeTO);
     void processHeightField(NetworkResourceTreeTO const& treeTO);
-    void processNumParticlesField(NetworkResourceTreeTO const& treeTO);
+    void processNumObjectsField(NetworkResourceTreeTO const& treeTO, bool kobjects);
     void processSizeField(NetworkResourceTreeTO const& treeTO, bool kbyte);
     void processVersionField(NetworkResourceTreeTO const& treeTO);
 
