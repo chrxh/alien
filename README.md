@@ -2,8 +2,7 @@
 <a href="https://alien-project.org" target="_blank">ALIEN - Explore worlds of artificial life</a>
 </h1>
 
-[![Preview](https://github.com/user-attachments/assets/6d05041e-65c7-4330-b1e5-2f5dbd0f0c92)](https://youtu.be/qwbMGPkoJmg)
-
+![Preview](https://github.com/user-attachments/assets/ee578848-7dd7-458d-873f-89662a7c15f0)
 <p>
 <b><i>A</i></b>rtificial <b><i>LI</i></b>fe <b><i>EN</i></b>vironment <b>(ALIEN)</b> is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluids. Each simulated body consists of a network of particles that can be upgraded with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, muscles, weapons, constructors, etc.) whose executions are orchestrated by neural networks. The bodies can be thought of as agents or digital organisms operating in a common environment. Their blueprints can be stored in genomes and passed on to offspring.
 </p>
