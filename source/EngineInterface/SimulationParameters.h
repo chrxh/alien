@@ -95,8 +95,8 @@ struct SimulationParameters
         Infinity<int>::value,
         Infinity<int>::value};
     bool cellInactiveMaxAgeActivated = false;
-    bool cellNutrientMaxAgeActivated = false;
-    ColorVector<int> cellNutrientMaxAge = {
+    bool cellEmergentMaxAgeActivated = false;
+    ColorVector<int> cellEmergentMaxAge = {
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value,

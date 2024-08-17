@@ -97,8 +97,8 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
         if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants) {
             result = densityMap.getOtherMutantDensity(timestep, scanPos, cell->mutationId);
         }
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToNutrient) {
-            result = densityMap.getNutrientDensity(scanPos);
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToEmergentCells) {
+            result = densityMap.getEmergentCellDensity(scanPos);
         }
         if (restrictToMutants == SensorRestrictToMutants_RestrictToZeroMutants) {
             result = densityMap.getZeroMutantDensity(scanPos);
@@ -294,7 +294,7 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
                     || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToNutrient && otherCell->mutationId != 1) {
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToEmergentCells && otherCell->mutationId != 1) {
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToZeroMutants && otherCell->mutationId != 0) {

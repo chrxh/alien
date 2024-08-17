@@ -137,7 +137,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (genomeComplexitySizeFactor[i] != other.genomeComplexitySizeFactor[i]) {
             return false;
         }
-        if (cellNutrientMaxAge[i] != other.cellNutrientMaxAge[i]) {
+        if (cellEmergentMaxAge[i] != other.cellEmergentMaxAge[i]) {
             return false;
         }
     }
@@ -196,6 +196,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && attackVisualization == other.attackVisualization && cellInactiveMaxAgeActivated == other.cellInactiveMaxAgeActivated
         && cellGlowStrength == other.cellGlowStrength && cellGlowRadius == other.cellGlowRadius
         && cellResetAgeAfterActivation == other.cellResetAgeAfterActivation && cellRadius == other.cellRadius
-        && cellNutrientMaxAgeActivated == other.cellNutrientMaxAgeActivated
+        && cellEmergentMaxAgeActivated == other.cellEmergentMaxAgeActivated
         && cellFunctionMuscleMovementAngleFromSensor == other.cellFunctionMuscleMovementAngleFromSensor;
 }

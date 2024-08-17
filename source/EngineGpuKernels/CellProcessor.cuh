@@ -774,8 +774,8 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 cellMaxAge = cellInactiveMaxAge;
             }
         }
-        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellNutrientMaxAgeActivated && cell->mutationId == 1) {
-            cellMaxAge = cudaSimulationParameters.cellNutrientMaxAge[cell->color];
+        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellEmergentMaxAgeActivated && cell->mutationId == 1) {
+            cellMaxAge = cudaSimulationParameters.cellEmergentMaxAge[cell->color];
         }
         if (cellMaxAge > 0 && cell->age > cellMaxAge) {
             cellDestruction = true;
