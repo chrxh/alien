@@ -364,12 +364,12 @@ namespace
             parserTask);
         encodeDecodeProperty(
             tree,
-            parameters.cellNutrientMaxAgeActivated,
-            defaultParameters.cellNutrientMaxAgeActivated,
+            parameters.cellEmergentMaxAgeActivated,
+            defaultParameters.cellEmergentMaxAgeActivated,
             "simulation parameters.cell.nutrient max age activated",
             parserTask);
         encodeDecodeProperty(
-            tree, parameters.cellNutrientMaxAge, defaultParameters.cellNutrientMaxAge, "simulation parameters.cell.nutrient max age", parserTask);
+            tree, parameters.cellEmergentMaxAge, defaultParameters.cellEmergentMaxAge, "simulation parameters.cell.nutrient max age", parserTask);
         encodeDecodeProperty(
             tree,
             parameters.cellResetAgeAfterActivation,

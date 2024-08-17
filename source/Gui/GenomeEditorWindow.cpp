@@ -644,7 +644,7 @@ void _GenomeEditorWindow::processNode(
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Scan mutants")
-                    .values({"None", "Same mutants", "Other mutants", "Nutrient", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
+                    .values({"None", "Same mutants", "Other mutants", "Emergent cells", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::SensorRestrictToMutantsTooltip),
                 sensor.restrictToMutants);
@@ -749,7 +749,7 @@ void _GenomeEditorWindow::processNode(
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Restrict to mutants")
-                    .values({"None", "Same mutants", "Other mutants", "Nutrient", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
+                    .values({"None", "Same mutants", "Other mutants", "Emergent cells", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::ReconnectorRestrictToMutantsTooltip),
                 reconnector.restrictToMutants);

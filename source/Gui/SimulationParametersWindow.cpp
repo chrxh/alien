@@ -1457,19 +1457,19 @@ void _SimulationParametersWindow::processBase(
                     &parameters.cellInactiveMaxAgeActivated);
                 AlienImGui::SliderInt(
                     AlienImGui::SliderIntParameters()
-                        .name("Maximum nutrient cell age")
+                        .name("Maximum emergent cell age")
                         .textWidth(RightColumnWidth)
                         .colorDependence(true)
                         .min(1)
                         .max(10000000)
                         .logarithmic(true)
                         .infinity(true)
-                        .disabledValue(parameters.cellNutrientMaxAge)
-                        .defaultEnabledValue(&origParameters.cellNutrientMaxAgeActivated)
-                        .defaultValue(origParameters.cellNutrientMaxAge)
+                        .disabledValue(parameters.cellEmergentMaxAge)
+                        .defaultEnabledValue(&origParameters.cellEmergentMaxAgeActivated)
+                        .defaultValue(origParameters.cellEmergentMaxAge)
                         .tooltip("The maximal age of cells that arise from energy particles can be set here."),
-                    parameters.cellNutrientMaxAge,
-                    &parameters.cellNutrientMaxAgeActivated);
+                    parameters.cellEmergentMaxAge,
+                    &parameters.cellEmergentMaxAgeActivated);
                 AlienImGui::Checkbox(
                     AlienImGui::CheckboxParameters()
                         .name("Reset age after construction")
