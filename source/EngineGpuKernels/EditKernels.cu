@@ -36,7 +36,7 @@ __global__ void cudaChangeCell(SimulationData data, DataTO changeDataTO)
         if (cell->id == cellTO.id) {
             ObjectFactory entityFactory;
             entityFactory.init(&data);
-            entityFactory.changeCellFromTO(changeDataTO, cellTO, cell);
+            entityFactory.changeCellFromTO(changeDataTO, cellTO, cell, false);
         }
     }
 }
@@ -365,7 +365,7 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
                 auto const& connectedCell = cell->connections[i].cell;
 
                 if (1 != connectedCell->selected
-                    && data.cellMap.getDistance(cell->pos, connectedCell->pos) > cudaSimulationParameters.cellMaxBindingDistance) {
+                    && data.cellMap.getDistance(cell->pos, connectedCell->pos) > cudaSimulationParameters.cellMaxBindingDistance[cell->color]) {
                     CellConnectionProcessor::scheduleDeleteConnectionPair(data, cell, connectedCell);
                     atomicExch(result, 1);
                 }

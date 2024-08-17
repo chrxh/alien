@@ -1,5 +1,6 @@
 
 add_library(EngineGpuKernels
+    ActiveRadiationSources.cuh
     Array.cuh
     AttackerProcessor.cuh
     Base.cuh
@@ -56,7 +57,7 @@ add_library(EngineGpuKernels
     Operations.cuh
     ParticleProcessor.cuh
     Physics.cuh
-    PreprocessedCellFunctionData.cuh
+    PreprocessedSimulationData.cuh
     ReconnectorProcessor.cuh
     RenderingData.cu
     RenderingData.cuh

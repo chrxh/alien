@@ -39,6 +39,7 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
 __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    CellFunctionProcessor::updateInvocationState(cell, activity);
 
     switch (cell->cellFunctionData.muscle.mode) {
     case MuscleMode_Movement: {
@@ -55,6 +56,29 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     CellFunctionProcessor::setActivity(cell, activity);
 }
 
+namespace
+{
+    __device__ Cell* findNearbySensor(Cell* cell)
+    {
+        for (int i = 0, j = cell->numConnections; i < j; ++i) {
+            auto const& connectedCell = cell->connections[i].cell;
+            if (connectedCell->cellFunction == CellFunction_Sensor) {
+                return connectedCell;
+            }
+        }
+        for (int i = 0, j = cell->numConnections; i < j; ++i) {
+            auto const& connectedCell = cell->connections[i].cell;
+            for (int k = 0, l = connectedCell->numConnections; k < l; ++k) {
+                auto const& connectedConnectedCell = connectedCell->connections[k].cell;
+                if (connectedConnectedCell->cellFunction == CellFunction_Sensor) {
+                    return connectedConnectedCell;
+                }
+            }
+        }
+        return nullptr;
+    }
+}
+
 __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity)
 {
     if (abs(activity.channels[0]) < NEAR_ZERO) {
@@ -63,11 +87,25 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
     if (!cell->tryLock()) {
         return;
     }
-    float2 direction = CellFunctionProcessor::calcSignalDirection(data, cell);
+
+    auto direction = float2{0, 0};
+    auto acceleration = 0.0f;
+    if (cudaSimulationParameters.features.advancedMuscleControl && cudaSimulationParameters.cellFunctionMuscleMovementAngleFromSensor) {
+        if (auto sensorCell = findNearbySensor(cell)) {
+            auto const& sensorData = sensorCell->cellFunctionData.sensor;
+            if (sensorData.targetX != 0 || sensorData.targetY != 0) {
+                direction = {sensorData.targetX, sensorData.targetY};
+                acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
+            }
+        }
+    } else {
+        direction = CellFunctionProcessor::calcSignalDirection(data, cell);
+        acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
+    }
     float angle = max(-0.5f, min(0.5f, activity.channels[3])) * 360.0f;
     direction = Math::rotateClockwise(direction, angle);
     if (direction.x != 0 || direction.y != 0) {
-        cell->vel += Math::normalized(direction) * cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color] * getTruncatedUnitValue(activity);
+        cell->vel += Math::normalized(direction) * acceleration * getTruncatedUnitValue(activity);
     }
     cell->releaseLock();
     statistics.incNumMuscleActivities(cell->color);
@@ -82,7 +120,7 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData&
         return;
     }
     auto const minDistance = cudaSimulationParameters.cellMinDistance * 1.2f;
-    auto const maxDistance = max(cudaSimulationParameters.cellMaxBindingDistance * 0.5f, minDistance);
+    auto const maxDistance = max(cudaSimulationParameters.cellMaxBindingDistance[cell->color] * 0.5f, minDistance);
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connection = cell->connections[i];
         if (connection.cell->executionOrderNumber == cell->inputExecutionOrderNumber) {

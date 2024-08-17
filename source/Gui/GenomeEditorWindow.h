@@ -32,7 +32,7 @@ private:
     void processTab(TabData& tab);
     void processGenomeHeader(TabData& tab);
     void processConstructionSequence(TabData& tab);
-    void processNode(TabData& tab, CellGenomeDescription& cell, std::optional<ShapeGeneratorResult> const& shapeGeneratorResult, bool isFirstOrLast);
+    void processNode(TabData& tab, CellGenomeDescription& cell, std::optional<ShapeGeneratorResult> const& shapeGeneratorResult, bool isFirst, bool isLast);
     template<typename Description>
     void processSubGenomeWidgets(TabData const& tab, Description& desc);
 

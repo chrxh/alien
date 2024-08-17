@@ -24,8 +24,10 @@
 
 namespace
 {
-    auto const RightColumnWidth = 175.0f;
-    auto const RightColumnWidthTable = 150.0f;
+    auto constexpr RightColumnWidth = 175.0f;
+    auto constexpr RightColumnWidthTimeline = 150.0f;
+    auto constexpr RightColumnWidthTable = 200.0f;
+    auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
 }
 
 _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
@@ -39,7 +41,7 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
     _startingPath = GlobalSettings::getInstance().getString("windows.statistics.starting path", path.string());
     _plotHeight = GlobalSettings::getInstance().getFloat("windows.statistics.plot height", _plotHeight);
     _mode = GlobalSettings::getInstance().getInt("windows.statistics.mode", _mode);
-    _liveStatistics.history = GlobalSettings::getInstance().getFloat("windows.statistics.live statistics horizon", _liveStatistics.history);
+    _timeHorizonForLiveStatistics = GlobalSettings::getInstance().getFloat("windows.statistics.live statistics horizon", _timeHorizonForLiveStatistics);
     _plotType = GlobalSettings::getInstance().getInt("windows.statistics.plot type", _plotType);
     auto collapsedPlotIndexJoinedString = GlobalSettings::getInstance().getString("windows.statistics.collapsed plot indices", "");
     
@@ -57,7 +59,7 @@ _StatisticsWindow::~_StatisticsWindow()
     GlobalSettings::getInstance().setString("windows.statistics.starting path", _startingPath);
     GlobalSettings::getInstance().setFloat("windows.statistics.plot height", _plotHeight);
     GlobalSettings::getInstance().setInt("windows.statistics.mode", _mode);
-    GlobalSettings::getInstance().setFloat("windows.statistics.live statistics horizon", _liveStatistics.history);
+    GlobalSettings::getInstance().setFloat("windows.statistics.live statistics horizon", _timeHorizonForLiveStatistics);
     GlobalSettings::getInstance().setInt("windows.statistics.plot type", _plotType);
 
     std::vector<std::string> collapsedPlotIndexStrings;
@@ -73,7 +75,7 @@ void _StatisticsWindow::processIntern()
 
         if (ImGui::BeginTabItem("Timelines")) {
             if (ImGui::BeginChild("##timelines", ImVec2(0, 0), false)) {
-                processTimelines();
+                processTimelinesTab();
             }
             ImGui::EndChild();
             ImGui::EndTabItem();
@@ -81,7 +83,15 @@ void _StatisticsWindow::processIntern()
 
         if (ImGui::BeginTabItem("Histograms")) {
             if (ImGui::BeginChild("##histograms", ImVec2(0, 0), false)) {
-                processHistograms();
+                processHistogramsTab();
+            }
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Throughput")) {
+            if (ImGui::BeginChild("##throughput", ImVec2(0, 0), false)) {
+                processTablesTab();
             }
             ImGui::EndChild();
             ImGui::EndTabItem();
@@ -91,7 +101,7 @@ void _StatisticsWindow::processIntern()
     }
 }
 
-void _StatisticsWindow::processTimelines()
+void _StatisticsWindow::processTimelinesTab()
 {
     ImGui::Spacing();
 
@@ -112,7 +122,7 @@ void _StatisticsWindow::processTimelines()
             .max(TimelineLiveStatistics::MaxLiveHistory)
             .format("%.1f s")
             .textWidth(RightColumnWidth),
-        &_liveStatistics.history);
+        &_timeHorizonForLiveStatistics);
     ImGui::EndDisabled();
 
     AlienImGui::Switcher(
@@ -141,6 +151,115 @@ void _StatisticsWindow::processTimelines()
     ImGui::EndChild();
 }
 
+void _StatisticsWindow::processHistogramsTab()
+{
+    if (!_histogramLiveStatistics.isDataAvailable()) {
+        return;
+    }
+    ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha * 0.5 * Const::WindowAlpha));
+    ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha * 0.5 * Const::WindowAlpha));
+    auto const& histogramData = _histogramLiveStatistics.getData();
+    auto maxNumObjects = 0;
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        for (int j = 0; j < MAX_HISTOGRAM_SLOTS; ++j) {
+            auto value = histogramData->numCellsByColorBySlot[i][j];
+            maxNumObjects = std::max(maxNumObjects, value);
+        }
+    }
+
+    //round maxNumObjects
+    if (!_histogramUpperBound || toFloat(maxNumObjects) > *_histogramUpperBound * 0.9f || toFloat(maxNumObjects) < *_histogramUpperBound * 0.5f) {
+        _histogramUpperBound = toFloat(maxNumObjects) * 1.3f;
+    }
+
+    ImPlot::SetNextPlotLimitsX(0, toFloat(MAX_HISTOGRAM_SLOTS), ImGuiCond_Always);
+    ImPlot::SetNextPlotLimitsY(0, *_histogramUpperBound, ImGuiCond_Always);
+
+    auto getLabelString = [](int value) {
+        if (value >= 1000) {
+            return std::to_string(value / 1000) + "K";
+        } else {
+            return std::to_string(value);
+        }
+    };
+
+    //y-ticks
+    char const* labelsY[6];
+    double positionsY[6];
+    for (int i = 0; i < 5; ++i) {
+        labelsY[i] = "";
+        positionsY[i] = *_histogramUpperBound / 5 * i;
+    }
+    auto temp = getLabelString(maxNumObjects);
+    labelsY[5] = temp.c_str();
+    positionsY[5] = toFloat(maxNumObjects);
+    ImPlot::SetNextPlotTicksY(positionsY, 6, labelsY);
+
+    //x-ticks
+    char const* labelsX[5];
+    std::string labelsX_temp[5];
+    double positionsX[5];
+
+    auto slotAge = histogramData->maxValue / MAX_HISTOGRAM_SLOTS;
+    for (int i = 0; i < 5; ++i) {
+        labelsX_temp[i] = getLabelString(slotAge * ((MAX_HISTOGRAM_SLOTS - 1) / 4) * i);
+        labelsX[i] = labelsX_temp[i].c_str();
+        positionsX[i] = toFloat(((MAX_HISTOGRAM_SLOTS - 1) / 4) * i);
+    }
+    ImPlot::SetNextPlotTicksX(positionsX, 5, labelsX);
+    ImPlot::SetNextPlotFormatX("");
+
+    //plot histogram
+    if (ImPlot::BeginPlot("##Histograms", "Age", "Cell count", ImVec2(-1, -1))) {
+
+        auto const width = 1.0f / MAX_COLORS;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            float h, s, v;
+            AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[i], h, s, v);
+            ImPlot::PushStyleColor(ImPlotCol_Fill, (ImVec4)ImColor::HSV(h, s /** 3 / 4*/, v /** 3 / 4*/, ImGui::GetStyle().Alpha));
+            ImPlot::PlotBars((" ##" + std::to_string(i)).c_str(), histogramData->numCellsByColorBySlot[i], MAX_HISTOGRAM_SLOTS, width, width * i);
+            ImPlot::PopStyleColor(1);
+        }
+        ImPlot::EndPlot();
+    }
+    ImPlot::PopStyleColor(2);
+}
+
+void _StatisticsWindow::processTablesTab()
+{
+    if (!_tableLiveStatistics.isDataAvailable()) {
+        return;
+    }
+
+    ImGui::PushID(3);
+    if (ImGui::BeginTable(
+            "##throughput",
+            2,
+            ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_BordersOuterV,
+            ImVec2(-1, 0))) {
+
+        ImGui::TableSetupColumn("##");
+        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTable));
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        AlienImGui::Text(StringHelper::format(_tableLiveStatistics.getCreatedCellsPerSecond()));
+
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Created cells / sec");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        AlienImGui::Text(StringHelper::format(_tableLiveStatistics.getCreatedReplicatorsPerSecond()));
+
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Created self-replicators / sec");
+
+        ImGui::EndTable();
+    }
+    ImGui::PopID();
+}
+
 void _StatisticsWindow::processTimelineStatistics()
 {
     ImGui::Spacing();
@@ -149,7 +268,7 @@ void _StatisticsWindow::processTimelineStatistics()
     int row = 0;
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");
-        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTable));
+        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTimeline));
 
         ImPlot::PushColormap(ImPlotColormap_Cool);
 
@@ -175,7 +294,7 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::totalEnergy);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Total energy");
+        AlienImGui::Text("Contained energy");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -185,9 +304,25 @@ void _StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::numColonies);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Diversity");
+        ImGui::SameLine();
+        AlienImGui::HelpMarker("The number of colonies is displayed. A colony is a set of at least 20 same mutants.");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::averageGenomeCells, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Average genome size");
+        AlienImGui::Text("Average genotype\ncells");
+        ImGui::SameLine();
+        AlienImGui::HelpMarker("The average number of encoded cells in the genomes is displayed.");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::averageGenomeComplexity, 2);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Average genome\ncomplexity");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -206,7 +341,7 @@ void _StatisticsWindow::processTimelineStatistics()
     ImGui::PushID(2);
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");
-        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTable));
+        ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, scale(RightColumnWidthTimeline));
         ImPlot::PushColormap(ImPlotColormap_Cool);
 
         ImGui::TableNextRow();
@@ -299,82 +434,6 @@ void _StatisticsWindow::processTimelineStatistics()
     ImGui::PopID();
 }
 
-void _StatisticsWindow::processHistograms()
-{
-    if (!_lastStatisticsData) {
-        return;
-    }
-    ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha * 0.5 * Const::WindowAlpha));
-    ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha * 0.5 * Const::WindowAlpha));
-
-    auto maxNumObjects = 0;
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        for (int j = 0; j < MAX_HISTOGRAM_SLOTS; ++j) {
-            auto value = _lastStatisticsData->histogram.numCellsByColorBySlot[i][j];
-            maxNumObjects = std::max(maxNumObjects, value);
-        }
-    }
-
-    //round maxNumObjects
-    if (!_histogramUpperBound || toFloat(maxNumObjects) > *_histogramUpperBound * 0.9f || toFloat(maxNumObjects) < *_histogramUpperBound * 0.5f) {
-        _histogramUpperBound = toFloat(maxNumObjects) * 1.3f;
-    }
-
-    ImPlot::SetNextPlotLimitsX(0, toFloat(MAX_HISTOGRAM_SLOTS), ImGuiCond_Always);
-    ImPlot::SetNextPlotLimitsY(0, *_histogramUpperBound, ImGuiCond_Always);
-
-    auto getLabelString = [](int value) {
-        if (value >= 1000) {
-            return std::to_string(value / 1000) + "K";
-        } else {
-            return std::to_string(value);
-        }
-    };
-
-    //y-ticks
-    char const* labelsY[6];
-    double positionsY[6];
-    for (int i = 0; i < 5; ++i) {
-        labelsY[i] = "";
-        positionsY[i] = *_histogramUpperBound / 5 * i;
-    }
-    auto temp = getLabelString(maxNumObjects);
-    labelsY[5] = temp.c_str();
-    positionsY[5] = toFloat(maxNumObjects);
-    ImPlot::SetNextPlotTicksY(positionsY, 6, labelsY);
-
-    //x-ticks
-    char const* labelsX[5];
-    std::string labelsX_temp[5];
-    double positionsX[5];
-
-    auto slotAge = _lastStatisticsData->histogram.maxValue / MAX_HISTOGRAM_SLOTS;
-    for (int i = 0; i < 5; ++i) {
-        labelsX_temp[i] = getLabelString(slotAge * ((MAX_HISTOGRAM_SLOTS - 1) / 4) * i);
-        labelsX[i] = labelsX_temp[i].c_str();
-        positionsX[i] = toFloat(((MAX_HISTOGRAM_SLOTS - 1) / 4) * i);
-    }
-    ImPlot::SetNextPlotTicksX(positionsX, 5, labelsX);
-    ImPlot::SetNextPlotFormatX("");
-
-    //plot histogram
-    if (ImPlot::BeginPlot("##Histograms", "Age", "Cell count", ImVec2(-1, -1))) {
-
-        auto const width = 1.0f / MAX_COLORS;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            float h, s, v;
-            AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[i], h, s, v);
-            ImPlot::PushStyleColor(ImPlotCol_Fill, (ImVec4)ImColor::HSV(h, s /** 3 / 4*/, v /** 3 / 4*/, ImGui::GetStyle().Alpha));
-            ImPlot::PlotBars(
-                (" ##" + std::to_string(i)).c_str(), _lastStatisticsData->histogram.numCellsByColorBySlot[i], MAX_HISTOGRAM_SLOTS, width, width * i);
-            ImPlot::PopStyleColor(1);
-        }
-        ImPlot::EndPlot();
-    }
-    ImPlot::PopStyleColor(2);
-
-}
-
 void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valuesPtr, int fracPartDecimals)
 {
     auto isCollapsed = _collapsedPlotIndices.contains(row);
@@ -400,11 +459,12 @@ void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*val
         longtermStatistics = &dummy;
     }
 
-    auto count = _mode == 0 ? toInt(_liveStatistics.dataPointCollectionHistory.size()) : toInt(longtermStatistics->size());
-    auto startTime = _mode == 0 ? _liveStatistics.dataPointCollectionHistory.back().time - toDouble(_liveStatistics.history) : longtermStatistics->front().time;
-    auto endTime = _mode == 0 ? _liveStatistics.dataPointCollectionHistory.back().time : longtermStatistics->back().time;
-    auto values = _mode == 0 ? &(_liveStatistics.dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
-    auto timePoints = _mode == 0 ? &_liveStatistics.dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
+    auto const& dataPointCollectionHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
+    auto count = _mode == 0 ? toInt(dataPointCollectionHistory.size()) : toInt(longtermStatistics->size());
+    auto startTime = _mode == 0 ? dataPointCollectionHistory.back().time - toDouble(_timeHorizonForLiveStatistics) : longtermStatistics->front().time;
+    auto endTime = _mode == 0 ? dataPointCollectionHistory.back().time : longtermStatistics->back().time;
+    auto values = _mode == 0 ? &(dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
+    auto timePoints = _mode == 0 ? &dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
 
     switch (_plotType) {
     case 0:
@@ -422,11 +482,15 @@ void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*val
 
 void _StatisticsWindow::processBackground()
 {
-    auto timestep = _simController->getCurrentTimestep();
-
-    _lastStatisticsData = _simController->getRawStatistics();
-    _liveStatistics.add(_lastStatisticsData->timeline, timestep);
-} 
+    auto timepoint = std::chrono::steady_clock::now();
+    auto duration = _lastTimepoint.has_value() ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_lastTimepoint).count()) : 0;
+    if(!_lastTimepoint || duration > LiveStatisticsDeltaTime) {
+        auto rawStatistics = _simController->getRawStatistics();
+        _histogramLiveStatistics.update(rawStatistics.histogram);
+        _timelineLiveStatistics.update(rawStatistics.timeline, _simController->getCurrentTimestep());
+        _tableLiveStatistics.update(rawStatistics.timeline);
+    }
+}
 
 namespace
 {
@@ -466,7 +530,7 @@ void _StatisticsWindow::plotSumColorsIntern(
 
     if (ImPlot::BeginPlot(
             "##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        auto color = ImPlot::GetColormapColor(row <= 10 ? row : 20 - row);
+        auto color = ImPlot::GetColormapColor((row % 21) <= 10 ? (row % 21): 20 - (row % 21));
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::AnnotateClamped(
                 endTime, endValue, ImVec2(-10.0f, 10.0f), ImPlot::GetLastItemColor(), "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());

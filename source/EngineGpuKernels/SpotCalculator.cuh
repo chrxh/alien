@@ -6,6 +6,8 @@
 #include "ConstantMemory.cuh"
 #include "Util.cuh"
 #include "Math.cuh"
+#include "Map.cuh"
+#include "SimulationData.cuh"
 
 class SpotCalculator
 {
@@ -123,6 +125,22 @@ public:
         }
 
         return toInt(calcResultingValue(data.cellMap, worldPos, toFloat(cudaSimulationParameters.baseValues.*value), spotValues, valueActivated));
+    }
+
+    __device__ __inline__ static bool calcParameter(
+        bool SimulationParametersSpotValues::*value,
+        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        SimulationData const& data,
+        float2 const& worldPos)
+    {
+        float spotValues[MAX_SPOTS];
+        int numValues = 0;
+        for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            if (cudaSimulationParameters.spots[i].activatedValues.*valueActivated) {
+                spotValues[numValues++] = cudaSimulationParameters.spots[i].values.*value ? 1.0f : 0.0f;
+            }
+        }
+        return calcResultingValue(data.cellMap, worldPos, cudaSimulationParameters.baseValues.*value ? 1.0f : 0.0f, spotValues, valueActivated) > 0.5f;
     }
 
     __device__ __inline__ static float calcParameter(

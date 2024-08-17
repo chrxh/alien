@@ -42,5 +42,7 @@ private:
     int _minCountdown = 5;
     int _maxCountdown = 5;
 
+    bool _randomizeMutationId = false;
+
     bool _restrictToSelectedClusters = false;
 };

@@ -220,9 +220,9 @@ void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
     auto parameters = _simController->getSimulationParameters();
     auto const& origParameters = snapshot.parameters;
 
-    if (origParameters.numParticleSources == parameters.numParticleSources) {
-        for (int i = 0; i < parameters.numParticleSources; ++i) {
-            restorePosition(parameters.particleSources[i], origParameters.particleSources[i], snapshot.timestep);
+    if (origParameters.numRadiationSources == parameters.numRadiationSources) {
+        for (int i = 0; i < parameters.numRadiationSources; ++i) {
+            restorePosition(parameters.radiationSources[i], origParameters.radiationSources[i], snapshot.timestep);
         }
     }
 

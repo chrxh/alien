@@ -82,7 +82,10 @@ struct SensorGenomeDescription
 {
     std::optional<float> fixedAngle;   //nullopt = entire neighborhood
     float minDensity = 0.05f;
-    int color = 0;
+    std::optional<int> minRange;
+    std::optional<int> maxRange;
+    std::optional<int> restrictToColor;
+    SensorRestrictToMutants restrictToMutants = SensorRestrictToMutants_NoRestriction;
 
     auto operator<=>(SensorGenomeDescription const&) const = default;
 
@@ -102,7 +105,12 @@ struct SensorGenomeDescription
 
     SensorGenomeDescription& setColor(int value)
     {
-        color = value;
+        restrictToColor = value;
+        return *this;
+    }
+    SensorGenomeDescription& setRestrictToMutants(SensorRestrictToMutants value)
+    {
+        restrictToMutants = value;
         return *this;
     }
 };
@@ -194,13 +202,19 @@ struct DefenderGenomeDescription
 
 struct ReconnectorGenomeDescription
 {
-    int color = 0;
+    std::optional<int> restrictToColor;
+    ReconnectorRestrictToMutants restrictToMutants = ReconnectorRestrictToMutants_NoRestriction;
 
     auto operator<=>(ReconnectorGenomeDescription const&) const = default;
 
-    ReconnectorGenomeDescription& setColor(int value)
+    ReconnectorGenomeDescription& setRestrictToColor(int value)
     {
-        color = value;
+        restrictToColor = value;
+        return *this;
+    }
+    ReconnectorGenomeDescription& setRestrictToMutants(ReconnectorRestrictToMutants value)
+    {
+        restrictToMutants = value;
         return *this;
     }
 };
@@ -403,6 +417,11 @@ struct CellGenomeDescription
     CellGenomeDescription& setCellFunction(CellFunctionDesc const& value)
     {
         cellFunction = value;
+        return *this;
+    }
+    CellGenomeDescription& setNumRequiredAdditionalConnections(int const& value)
+    {
+        numRequiredAdditionalConnections = value;
         return *this;
     }
 };

@@ -174,13 +174,17 @@ struct SensorDescription
 {
     std::optional<float> fixedAngle;  //nullopt = entire neighborhood
     float minDensity = 0.05f;
-    int color = 0;
-    int targetedCreatureId = 0;
+    std::optional<int> minRange;
+    std::optional<int> maxRange;
+    std::optional<int> restrictToColor;
+    SensorRestrictToMutants restrictToMutants = SensorRestrictToMutants_NoRestriction;
 
     //process data
     float memoryChannel1 = 0;
     float memoryChannel2 = 0;
     float memoryChannel3 = 0;
+    float targetX = 0;
+    float targetY = 0;
 
     auto operator<=>(SensorDescription const&) const = default;
 
@@ -192,12 +196,27 @@ struct SensorDescription
     }
     SensorDescription& setColor(int value)
     {
-        color = value;
+        restrictToColor = value;
         return *this;
     }
     SensorDescription& setMinDensity(float value)
     {
         minDensity = value;
+        return *this;
+    }
+    SensorDescription& setMinRange(int value)
+    {
+        minRange = value;
+        return *this;
+    }
+    SensorDescription& setMaxRange(int value)
+    {
+        maxRange = value;
+        return *this;
+    }
+    SensorDescription& setRestrictToMutants(SensorRestrictToMutants value)
+    {
+        restrictToMutants = value;
         return *this;
     }
 };
@@ -291,13 +310,19 @@ struct DefenderDescription
 
 struct ReconnectorDescription
 {
-    int color = 0;
+    std::optional<int> restrictToColor;
+    ReconnectorRestrictToMutants restrictToMutants = ReconnectorRestrictToMutants_NoRestriction;
 
     auto operator<=>(ReconnectorDescription const&) const = default;
 
-    ReconnectorDescription& setColor(int value)
+    ReconnectorDescription& setRestrictToColor(int value)
     {
-        color = value;
+        restrictToColor = value;
+        return *this;
+    }
+    ReconnectorDescription& setRestrictToMutants(ReconnectorRestrictToMutants value)
+    {
+        restrictToMutants = value;
         return *this;
     }
 };
@@ -352,6 +377,8 @@ struct CellDescription
     LivingState livingState = LivingState_Ready;
     int creatureId = 0;
     int mutationId = 0;
+    uint8_t ancestorMutationId = 0;
+    float genomeComplexity = 0;
 
     //cell function
     int executionOrderNumber = 0;
@@ -360,7 +387,8 @@ struct CellDescription
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
     int activationTime = 0;
-    int genomeComplexity = 0;
+    uint8_t detectedByCreatureId = 0;   //only the first 8 bits from the creature id
+    CellFunctionUsed cellFunctionUsed = CellFunctionUsed_No;
 
     CellMetadataDescription metadata;
 
@@ -479,7 +507,16 @@ struct CellDescription
         creatureId = value;
         return *this;
     }
-
+    CellDescription& setMutationId(int value)
+    {
+        mutationId = value;
+        return *this;
+    }
+    CellDescription& setGenomeComplexity(float value)
+    {
+        genomeComplexity = value;
+        return *this;
+    }
 
     bool hasGenome() const;
     std::vector<uint8_t>& getGenomeRef();

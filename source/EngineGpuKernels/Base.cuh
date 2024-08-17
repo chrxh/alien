@@ -150,6 +150,13 @@ __device__ __inline__ T* alienAtomicExch(T** address, T* value)
     return reinterpret_cast<T*>(atomicExch(reinterpret_cast<unsigned long long int*>(address), reinterpret_cast<unsigned long long int>(value)));
 }
 
+template <typename T>
+__device__ __inline__ T alienAtomicAdd32(T* address, T value)
+{
+    static_assert(sizeof(unsigned int) == sizeof(T));
+    return reinterpret_cast<T>(atomicAdd(reinterpret_cast<unsigned int*>(address), reinterpret_cast<unsigned int>(value)));
+}
+
 class SystemLock
 {
 public:

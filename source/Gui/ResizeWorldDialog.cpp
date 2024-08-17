@@ -76,6 +76,7 @@ void _ResizeWorldDialog::onResizing()
     auto generalSettings = _simController->getGeneralSettings();
     auto parameters = _simController->getSimulationParameters();
     auto content = _simController->getClusteredSimulationData();
+    auto realtime = _simController->getRealTime();
     auto const& statistics = _simController->getStatisticsHistory().getCopiedData();
     _simController->closeSimulation();
 
@@ -91,5 +92,6 @@ void _ResizeWorldDialog::onResizing()
     }
     _simController->setClusteredSimulationData(content);
     _simController->setStatisticsHistory(statistics);
+    _simController->setRealTime(realtime);
     _temporalControlWindow->onSnapshot();
 }

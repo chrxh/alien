@@ -20,8 +20,10 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
             statistics.addEnergy(cell->color, cell->energy);
             if (cell->cellFunction == CellFunction_Constructor && GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor)) {
                 statistics.incNumReplicator(cell->color);
+                statistics.incMutant(cell->color, cell->mutationId);
                 auto numNodes = GenomeDecoder::getNumNodesRecursively(cell->cellFunctionData.constructor.genome, cell->cellFunctionData.constructor.genomeSize, true, true);
                 statistics.addNumGenomeNodes(cell->color, numNodes);
+                statistics.addGenomeComplexity(cell->color, cell->genomeComplexity);
             }
             if (cell->cellFunction == CellFunction_Injector && GenomeDecoder::containsSelfReplication(cell->cellFunctionData.injector)) {
                 statistics.incNumViruses(cell->color);
@@ -42,7 +44,10 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
 
 __global__ void cudaUpdateTimestepStatistics_substep3(SimulationData data, SimulationStatistics statistics)
 {
-    statistics.halveNumConnections();
+    if (threadIdx.x == 0 && blockIdx.x == 0) {
+        statistics.halveNumConnections();
+    }
+    statistics.calcColonies();
 }
 
 __global__ void cudaUpdateHistogramData_substep1(SimulationData data, SimulationStatistics statistics)

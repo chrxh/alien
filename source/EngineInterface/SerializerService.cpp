@@ -88,9 +88,17 @@ namespace
 
     auto constexpr Id_SensorGenome_FixedAngle = 0;
     auto constexpr Id_SensorGenome_MinDensity = 1;
-    auto constexpr Id_SensorGenome_Color = 2;
+    auto constexpr Id_SensorGenome_Color_Deprecated = 2;
+    auto constexpr Id_SensorGenome_RestrictToColor = 3;
+    auto constexpr Id_SensorGenome_RestrictToOtherMutants_Deprecated = 4;
+    auto constexpr Id_SensorGenome_RestrictToMutants = 5;
+    auto constexpr Id_SensorGenome_MinRange = 6;
+    auto constexpr Id_SensorGenome_MaxRange = 7;
 
-    auto constexpr Id_ReconnectorGenome_Color = 0;
+
+    auto constexpr Id_ReconnectorGenome_Color_Deprecated = 0;
+    auto constexpr Id_ReconnectorGenome_RestrictToColor = 1;
+    auto constexpr Id_ReconnectorGenome_RestrictToMutants = 2;
 
     auto constexpr Id_DetonatorGenome_Countdown = 0;
 
@@ -103,12 +111,16 @@ namespace
     auto constexpr Id_Cell_Barrier = 3;
     auto constexpr Id_Cell_Age = 4;
     auto constexpr Id_Cell_LivingState = 5;
-    auto constexpr Id_Cell_CreatureId = 11;
-    auto constexpr Id_Cell_MutationId = 12;
-    auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
     auto constexpr Id_Cell_OutputBlocked = 7;
     auto constexpr Id_Cell_ActivationTime = 8;
-    auto constexpr Id_Cell_GenomeComplexity = 13;
+    auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
+    auto constexpr Id_Cell_CreatureId = 11;
+    auto constexpr Id_Cell_MutationId = 12;
+    auto constexpr Id_Cell_GenomeComplexity_Deprecated = 13;
+    auto constexpr Id_Cell_DetectedByCreatureId = 14;
+    auto constexpr Id_Cell_CellFunctionUsed = 15;
+    auto constexpr Id_Cell_AncestorMutationId = 16;
+    auto constexpr Id_Cell_GenomeComplexity = 17;
 
     auto constexpr Id_Neuron_ActivationFunctions = 0;
 
@@ -150,15 +162,24 @@ namespace
 
     auto constexpr Id_Sensor_FixedAngle = 0;
     auto constexpr Id_Sensor_MinDensity = 1;
-    auto constexpr Id_Sensor_Color = 2;
-    auto constexpr Id_Sensor_TargetedCreatureId = 3;
+    auto constexpr Id_Sensor_Color_Deprecated = 2;
+    //auto constexpr Id_Sensor_TargetedCreatureId = 3;
     auto constexpr Id_Sensor_MemoryChannel1 = 4;
     auto constexpr Id_Sensor_MemoryChannel2 = 5;
     auto constexpr Id_Sensor_MemoryChannel3 = 6;
+    auto constexpr Id_Sensor_RestrictToColor = 7;
+    auto constexpr Id_Sensor_RestrictToOtherMutants_Deprecated = 8;
+    auto constexpr Id_Sensor_RestrictToMutants = 9;
+    auto constexpr Id_Sensor_TargetX = 10;
+    auto constexpr Id_Sensor_TargetY = 11;
+    auto constexpr Id_Sensor_MinRange = 12;
+    auto constexpr Id_Sensor_MaxRange = 13;
 
     auto constexpr Id_Transmitter_Mode = 0;
 
-    auto constexpr Id_Reconnector_Color = 0;
+    auto constexpr Id_Reconnector_Color_Deprecated = 0;
+    auto constexpr Id_Reconnector_RestrictToColor = 1;
+    auto constexpr Id_Reconnector_RestrictToMutants = 2;
 
     auto constexpr Id_Detonator_State = 0;
     auto constexpr Id_Detonator_Countdown = 1;
@@ -172,7 +193,7 @@ namespace
 
 namespace cereal
 {
-    using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>, std::optional<int>, std::vector<int>, uint32_t>;
+    using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>, std::optional<int>, std::vector<int>, uint32_t, uint8_t>;
 
     template <class Archive>
     std::unordered_map<int, VariantData> getLoadSaveMap(SerializationTask task, Archive& ar)
@@ -311,8 +332,24 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<std::optional<float>>(task, auxiliaries, Id_SensorGenome_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
         loadSave<float>(task, auxiliaries, Id_SensorGenome_MinDensity, data.minDensity, defaultObject.minDensity);
-        loadSave<int>(task, auxiliaries, Id_SensorGenome_Color, data.color, defaultObject.color);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_SensorGenome_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
+        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_SensorGenome_MinRange, data.minRange, defaultObject.minRange);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_SensorGenome_MaxRange, data.maxRange, defaultObject.maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        //compatibility with older versions
+        //>>>
+        if (task == SerializationTask::Load) {
+            if (auxiliaries.contains(Id_SensorGenome_Color_Deprecated)) {
+                data.restrictToColor = std::get<int>(auxiliaries.at(Id_SensorGenome_Color_Deprecated));
+            }
+            if (auxiliaries.contains(Id_SensorGenome_RestrictToOtherMutants_Deprecated)) {
+                auto restrictToOtherMutants = std::get<bool>(auxiliaries.at(Id_SensorGenome_RestrictToOtherMutants_Deprecated));
+                data.restrictToMutants = restrictToOtherMutants ? SensorRestrictToMutants_RestrictToEmergentCells : SensorRestrictToMutants_NoRestriction;
+            }
+        }
+        //<<<
     }
     SPLIT_SERIALIZATION(SensorGenomeDescription)
 
@@ -406,8 +443,18 @@ namespace cereal
     {
         ReconnectorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_ReconnectorGenome_Color, data.color, defaultObject.color);
+        loadSave(task, auxiliaries, Id_ReconnectorGenome_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
+        loadSave(task, auxiliaries, Id_ReconnectorGenome_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        //compatibility with older versions
+        //>>>
+        if (task == SerializationTask::Load) {
+            if (auxiliaries.contains(Id_ReconnectorGenome_Color_Deprecated)) {
+                data.restrictToColor = std::get<int>(auxiliaries.at(Id_ReconnectorGenome_Color_Deprecated));
+            }
+        }
+        //<<<
     }
     SPLIT_SERIALIZATION(ReconnectorGenomeDescription)
 
@@ -593,12 +640,29 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<std::optional<float>>(task, auxiliaries, Id_Sensor_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
         loadSave<float>(task, auxiliaries, Id_Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
-        loadSave<int>(task, auxiliaries, Id_Sensor_Color, data.color, defaultObject.color);
-        loadSave<int>(task, auxiliaries, Id_Sensor_TargetedCreatureId, data.targetedCreatureId, defaultObject.targetedCreatureId);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
+        loadSave(task, auxiliaries, Id_Sensor_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel1, data.memoryChannel1, defaultObject.memoryChannel1);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel2, data.memoryChannel2, defaultObject.memoryChannel2);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel3, data.memoryChannel3, defaultObject.memoryChannel3);
+        loadSave<float>(task, auxiliaries, Id_Sensor_TargetX, data.targetX, defaultObject.targetX);
+        loadSave<float>(task, auxiliaries, Id_Sensor_TargetY, data.targetY, defaultObject.targetY);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_MinRange, data.minRange, defaultObject.minRange);
+        loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_MaxRange, data.maxRange, defaultObject.maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        //compatibility with older versions
+        //>>>
+        if (task == SerializationTask::Load) {
+            if (auxiliaries.contains(Id_Sensor_Color_Deprecated)) {
+                data.restrictToColor = std::get<int>(auxiliaries.at(Id_Sensor_Color_Deprecated));
+            }
+            if (auxiliaries.contains(Id_Sensor_RestrictToOtherMutants_Deprecated)) {
+                auto restrictToOtherMutants = std::get<bool>(auxiliaries.at(Id_Sensor_RestrictToOtherMutants_Deprecated));
+                data.restrictToMutants = restrictToOtherMutants ? SensorRestrictToMutants_RestrictToEmergentCells : SensorRestrictToMutants_NoRestriction;
+            }
+        }
+        //<<<
     }
     SPLIT_SERIALIZATION(SensorDescription)
 
@@ -681,8 +745,18 @@ namespace cereal
     {
         ReconnectorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_Reconnector_Color, data.color, defaultObject.color);
+        loadSave(task, auxiliaries, Id_Reconnector_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
+        loadSave(task, auxiliaries, Id_Reconnector_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        //compatibility with older versions
+        //>>>
+        if (task == SerializationTask::Load) {
+            if (auxiliaries.contains(Id_Reconnector_Color_Deprecated)) {
+                data.restrictToColor = std::get<int>(auxiliaries.at(Id_Reconnector_Color_Deprecated));
+            }
+        }
+        //<<<
     }
     SPLIT_SERIALIZATION(ReconnectorDescription)
 
@@ -710,14 +784,26 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Cell_LivingState, data.livingState, defaultObject.livingState);
         loadSave<int>(task, auxiliaries, Id_Cell_CreatureId, data.creatureId, defaultObject.creatureId);
         loadSave<int>(task, auxiliaries, Id_Cell_MutationId, data.mutationId, defaultObject.mutationId);
+        loadSave<uint8_t>(task, auxiliaries, Id_Cell_AncestorMutationId, data.ancestorMutationId, defaultObject.ancestorMutationId);
         loadSave<std::optional<int>>(
             task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
-        loadSave<int>(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
+        loadSave<float>(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
+        loadSave<uint8_t>(task, auxiliaries, Id_Cell_DetectedByCreatureId, data.detectedByCreatureId, defaultObject.detectedByCreatureId);
+        loadSave<uint8_t>(task, auxiliaries, Id_Cell_CellFunctionUsed, data.cellFunctionUsed, defaultObject.cellFunctionUsed);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
+
+        //compatibility with older versions
+        //>>>
+        if (task == SerializationTask::Load) {
+            if (auxiliaries.contains(Id_Cell_GenomeComplexity_Deprecated)) {
+                data.genomeComplexity = toFloat(std::get<int>(auxiliaries.at(Id_Cell_GenomeComplexity_Deprecated)));
+            }
+        }
+        //<<<
     }
     SPLIT_SERIALIZATION(CellDescription)
 
@@ -1148,6 +1234,8 @@ namespace
         loadSave(task, serializedData, 1 + 18 * 8, dataPoints.numReconnectorCreated);
         loadSave(task, serializedData, 1 + 19 * 8, dataPoints.numReconnectorRemoved);
         loadSave(task, serializedData, 1 + 20 * 8, dataPoints.numDetonations);
+        loadSave(task, serializedData, 1 + 21 * 8, dataPoints.numColonies);
+        loadSave(task, serializedData, 1 + 22 * 8, dataPoints.averageGenomeComplexity);
     }
 }
 
@@ -1182,6 +1270,8 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
     writeLabelAllColors("Reconnector creations");
     writeLabelAllColors("Reconnector deletions");
     writeLabelAllColors("Detonations");
+    writeLabelAllColors("Colonies");
+    writeLabelAllColors("Average genome complexity");
     stream << std::endl;
 
     //content

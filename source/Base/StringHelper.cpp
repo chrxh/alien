@@ -42,9 +42,6 @@ std::string StringHelper::format(float v, int fracPartDecimals)
 
 std::string StringHelper::format(std::chrono::milliseconds duration)
 {
-    if (duration.count() == 0) {
-        return "0";
-    }
     auto months = std::chrono::duration_cast<std::chrono::months>(duration);
     duration -= months;
     auto days = std::chrono::duration_cast<std::chrono::days>(duration);
@@ -66,12 +63,8 @@ std::string StringHelper::format(std::chrono::milliseconds duration)
     if (hours.count() > 0 || days.count() > 0 || months.count() > 0) {
         oss << std::setw(2) << std::setfill('0') << hours.count() << ":";
     }
-    if (minutes.count() > 0 || hours.count() > 0 || days.count() > 0 || months.count() > 0) {
-        oss << std::setw(2) << std::setfill('0') << minutes.count() << ":";
-    }
-    if (seconds.count() > 0 || minutes.count() > 0 || hours.count() > 0 || days.count() > 0 || months.count() > 0) {
-        oss << std::setw(2) << std::setfill('0') << seconds.count() << ":";
-    }
+    oss << std::setw(2) << std::setfill('0') << minutes.count() << ":";
+    oss << std::setw(2) << std::setfill('0') << seconds.count() << ".";
     oss << std::setw(3) << std::setfill('0') << duration.count();
 
     return oss.str();

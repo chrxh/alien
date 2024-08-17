@@ -1,10 +1,14 @@
 #pragma once
 
+#include <chrono>
+
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/RawStatisticsData.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
+#include "HistogramLiveStatistics.h"
+#include "TableLiveStatistics.h"
 #include "TimelineLiveStatistics.h"
 
 struct ImPlotPoint;
@@ -17,11 +21,12 @@ public:
 
 private:
     void processIntern() override;
-    void processTimelines();
+
+    void processTimelinesTab();
+    void processHistogramsTab();
+    void processTablesTab();
 
     void processTimelineStatistics();
-
-    void processHistograms();
 
     void processPlot(int row, DataPoint DataPointCollection::*valuesPtr, int fracPartDecimals = 0);
 
@@ -50,11 +55,14 @@ private:
     static auto constexpr MinPlotHeight = 80.0f;
     float _plotHeight = MinPlotHeight;
 
-    std::optional<RawStatisticsData> _lastStatisticsData;
     std::optional<float> _histogramUpperBound;
     std::map<int, std::vector<double>> _cachedTimelines;
     std::unordered_set<int> _collapsedPlotIndices;
 
-    TimelineLiveStatistics _liveStatistics;
+    float _timeHorizonForLiveStatistics = 10.0f;  //in seconds
+    std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;
+    TimelineLiveStatistics _timelineLiveStatistics;
+    HistogramLiveStatistics _histogramLiveStatistics;
+    TableLiveStatistics _tableLiveStatistics;
 };
 

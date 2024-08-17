@@ -17,6 +17,9 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
     }
 
     for (int i = 0; i < MAX_COLORS; ++i) {
+        if (cellMaxBindingDistance[i] != other.cellMaxBindingDistance[i]) {
+            return false;
+        }
         if (externalEnergyBackflowFactor[i] != other.externalEnergyBackflowFactor[i]) {
             return false;
         }
@@ -134,12 +137,15 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (genomeComplexitySizeFactor[i] != other.genomeComplexitySizeFactor[i]) {
             return false;
         }
+        if (cellEmergentMaxAge[i] != other.cellEmergentMaxAge[i]) {
+            return false;
+        }
     }
-    if (numParticleSources != other.numParticleSources) {
+    if (numRadiationSources != other.numRadiationSources) {
         return false;
     }
-    for (int i = 0; i < numParticleSources; ++i) {
-        if (particleSources[i] != other.particleSources[i]) {
+    for (int i = 0; i < numRadiationSources; ++i) {
+        if (radiationSources[i] != other.radiationSources[i]) {
             return false;
         }
     }
@@ -165,12 +171,11 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         }
     }
 
-    return backgroundColor == other.backgroundColor && cellColoring == other.cellColoring && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity
-        && baseValues == other.baseValues && timestepSize == other.timestepSize && cellMaxVelocity == other.cellMaxVelocity
-        && cellMaxBindingDistance == other.cellMaxBindingDistance && cellMinDistance == other.cellMinDistance
-        && cellMaxForceDecayProb == other.cellMaxForceDecayProb && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers
-        && radiationProb == other.radiationProb && radiationVelocityMultiplier == other.radiationVelocityMultiplier
-        && radiationVelocityPerturbation == other.radiationVelocityPerturbation
+    return backgroundColor == other.backgroundColor && cellColoring == other.cellColoring && cellGlowColoring == other.cellGlowColoring
+        && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity && baseValues == other.baseValues && timestepSize == other.timestepSize
+        && cellMaxVelocity == other.cellMaxVelocity && cellMinDistance == other.cellMinDistance && cellMaxForceDecayProb == other.cellMaxForceDecayProb
+        && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers && radiationProb == other.radiationProb
+        && radiationVelocityMultiplier == other.radiationVelocityMultiplier && radiationVelocityPerturbation == other.radiationVelocityPerturbation
         && cellFunctionAttackerActivityThreshold == other.cellFunctionAttackerActivityThreshold
         && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
         && cellFunctionTransmitterEnergyDistributionSameCreature == other.cellFunctionTransmitterEnergyDistributionSameCreature
@@ -187,5 +192,10 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellFunctionReconnectorActivityThreshold == other.cellFunctionReconnectorActivityThreshold
         && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold && features == other.features
         && highlightedCellFunction == other.highlightedCellFunction && borderlessRendering == other.borderlessRendering
-        && markReferenceDomain == other.markReferenceDomain && gridLines == other.gridLines && externalEnergy == other.externalEnergy;
+        && markReferenceDomain == other.markReferenceDomain && gridLines == other.gridLines && externalEnergy == other.externalEnergy
+        && attackVisualization == other.attackVisualization && cellInactiveMaxAgeActivated == other.cellInactiveMaxAgeActivated
+        && cellGlowStrength == other.cellGlowStrength && cellGlowRadius == other.cellGlowRadius
+        && cellResetAgeAfterActivation == other.cellResetAgeAfterActivation && cellRadius == other.cellRadius
+        && cellEmergentMaxAgeActivated == other.cellEmergentMaxAgeActivated
+        && cellFunctionMuscleMovementAngleFromSensor == other.cellFunctionMuscleMovementAngleFromSensor;
 }

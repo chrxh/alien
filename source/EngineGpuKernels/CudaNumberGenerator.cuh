@@ -82,7 +82,7 @@ public:
     }
 
     __device__ __inline__ unsigned long long int createNewId() { return atomicAdd(_currentId, 1); }
-    __device__ __inline__ unsigned int createNewSmalllId() { return atomicAdd(_currentSmallId, 1); }
+    __device__ __inline__ unsigned int createNewSmallId() { return atomicAdd(_currentSmallId, 1); }
 
     __device__ __inline__ void adaptMaxId(unsigned long long int id) { atomicMax(_currentId, id + 1); }
     __device__ __inline__ void adaptMaxSmallId(unsigned int id) { atomicMax(_currentSmallId, id + 1); }

@@ -26,10 +26,12 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
     result.time = time + other.time;
     result.numCells = numCells + other.numCells;
     result.numSelfReplicators = numSelfReplicators + other.numSelfReplicators;
+    result.numColonies = numColonies + other.numColonies;
     result.numViruses = numViruses + other.numViruses;
     result.numConnections = numConnections + other.numConnections;
     result.numParticles = numParticles + other.numParticles;
     result.averageGenomeCells = averageGenomeCells + other.averageGenomeCells;
+    result.averageGenomeComplexity = averageGenomeComplexity + other.averageGenomeComplexity;
     result.totalEnergy = totalEnergy + other.totalEnergy;
     result.numCreatedCells = numCreatedCells + other.numCreatedCells;
     result.numAttacks = numAttacks + other.numAttacks;
@@ -54,10 +56,12 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
     result.time = time / divisor;
     result.numCells = numCells / divisor;
     result.numSelfReplicators = numSelfReplicators / divisor;
+    result.numColonies = numColonies / divisor;
     result.numViruses = numViruses / divisor;
     result.numConnections = numConnections / divisor;
     result.numParticles = numParticles / divisor;
     result.averageGenomeCells = averageGenomeCells / divisor;
+    result.averageGenomeComplexity = averageGenomeComplexity / divisor;
     result.totalEnergy = totalEnergy / divisor;
     result.numCreatedCells = numCreatedCells / divisor;
     result.numAttacks = numAttacks / divisor;

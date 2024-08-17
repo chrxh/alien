@@ -8,16 +8,19 @@ struct TimestepStatistics
 {
     ColorVector<int> numCells = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numSelfReplicators = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<int> numColonies = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numViruses = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numConnections = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numParticles = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numGenomeCells = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> genomeComplexity = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> totalEnergy = {0, 0, 0, 0, 0, 0, 0};
 };
 
 struct AccumulatedStatistics
 {
     ColorVector<uint64_t> numCreatedCells = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numCreatedReplicators = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numAttacks = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numMuscleActivities = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numDefenderActivities = {0, 0, 0, 0, 0, 0, 0};

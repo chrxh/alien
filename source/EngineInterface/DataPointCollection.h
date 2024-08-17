@@ -17,10 +17,12 @@ struct DataPointCollection
 
     DataPoint numCells;
     DataPoint numSelfReplicators;
+    DataPoint numColonies;
     DataPoint numViruses;
     DataPoint numConnections;
     DataPoint numParticles;
     DataPoint averageGenomeCells;
+    DataPoint averageGenomeComplexity;
     DataPoint totalEnergy;
 
     DataPoint numCreatedCells;

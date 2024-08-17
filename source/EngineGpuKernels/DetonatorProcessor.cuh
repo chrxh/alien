@@ -35,6 +35,8 @@ __device__ __inline__ void DetonatorProcessor::process(SimulationData& data, Sim
 __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
+    CellFunctionProcessor::updateInvocationState(cell, activity);
+
     auto& detonator = cell->cellFunctionData.detonator;
     if (activity.channels[0] >= abs(cudaSimulationParameters.cellFunctionDetonatorActivityThreshold) && detonator.state == DetonatorState_Ready) {
         detonator.state = DetonatorState_Activated;

@@ -2,7 +2,7 @@
 <a href="https://alien-project.org" target="_blank">ALIEN - Explore worlds of artificial life</a>
 </h1>
 
-![image](https://github.com/chrxh/alien/assets/73127001/169b4be7-d70e-4e0e-8bf7-7a4d72d29868)
+![Preview](https://github.com/user-attachments/assets/ee578848-7dd7-458d-873f-89662a7c15f0)
 
 <p>
 <b><i>A</i></b>rtificial <b><i>LI</i></b>fe <b><i>EN</i></b>vironment <b>(ALIEN)</b> is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluids. Each simulated body consists of a network of particles that can be upgraded with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, muscles, weapons, constructors, etc.) whose executions are orchestrated by neural networks. The bodies can be thought of as agents or digital organisms operating in a common environment. Their blueprints can be stored in genomes and passed on to offspring.
@@ -15,6 +15,10 @@ An important goal is to make the simulator user-friendly through a modern user i
 
 <p>
   Please join our <a href="https://discord.gg/7bjyZdXXQ2" target="_blank">Discord server</a> as a place for discussions, new developments and feedback around ALIEN and artificial life in general.
+</p>
+
+<p>
+  Demo video: <a href="https://youtu.be/qwbMGPkoJmg" target="_blank">Emerging Ecosystems | Winner of the ALIFE 2024 Virtual Creatures Competition</a>
 </p>
 
 # ⚡ Main features
@@ -67,9 +71,9 @@ Further information and artwork:
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 # 💽 Installer
-Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (Updated: 2024-04-22)
+Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (updated: 2024-04-26)
 
-In the case that the program crashes for an unknown reason, please refer to the troubleshooting section in [alien-project.org/downloads.html](https://alien-project.org/downloads.html).
+In the case that the program crashes for an unknown reason, please refer to the troubleshooting section below.
 
 # 🔨 How to build the sources
 The build process is mostly automated using the cross-platform CMake build system and the vcpkg package manager, which is included as a Git submodule.
@@ -82,8 +86,7 @@ git clone --recursive https://github.com/chrxh/alien.git
 Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
 
 ### Build instructions
-Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and a toolchain for CMake (e.g. GCC 9.x+ or [MSVC v142+](https://visualstudio.microsoft.com/de/free-developer-offers/)).
-There are reported compile issues with GCC 13 at the moment. Please use GCC 12 instead if you intend to use GCC.
+Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and a toolchain for CMake (e.g. GCC 9.x+ or [MSVC v142+](https://visualstudio.microsoft.com/vs/)).
 
 Build steps:
 ```
@@ -94,6 +97,11 @@ cmake --build . --config Release -j8
 If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
 It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
 
+There are reported build issues with (updated: 2024-06-22)
+* GCC 13 (version 11 should work)
+* Visual Studio 17.10 (version 17.9 should work)
+* CUDA 12.5 (version 12.4 should work)
+
 # ⌨️ Command-line interface
 
 This repository also contains a CLI for ALIEN. It can be used to run simulations without using a GUI. This is useful for performance measurements as well as for automatic execution and evaluation of simulations for different parameters.
@@ -103,6 +111,19 @@ For example,
 .\cli.exe -i example.sim -o output.sim -t 1000
 ```
 runs the simulation file `example.sim` for 1000 time steps.
+
+# 🔎 Troubleshooting
+
+Please make sure that:
+1) You have an NVIDIA graphics card with compute capability 6.0 or higher (for example GeForce 10 series).
+2) You have the latest NVIDIA graphics driver installed.
+3) The name of the installation directory (including the parent directories) should not contain non-English characters. If this is not fulfilled, please re-install ALIEN to a suitable directory. Do not move the files manually. If you use Windows, make also sure that you install ALIEN with a Windows user that contains no non-English characters. If this is not the case, a new Windows user could be created to solve this problem.
+4) ALIEN needs write access to its own directory. This should normally be the case.
+5) If you have multiple graphics cards, please check that your primary monitor is connected to the CUDA-powered card. ALIEN uses the same graphics card for computation as well as rendering and chooses the one with the highest compute capability.
+6) If you possess both integrated and dedicated graphics cards, please ensure that the alien-executable is configured to use your high-performance graphics card. On Windows you need to access the 'Graphics settings,' add 'alien.exe' to the list, click 'Options,' and choose 'High performance'.
+
+If these conditions are not met, ALIEN may crash unexpectedly.
+If the conditions are met and the error still occurs, please start ALIEN with the command line parameter `-d`, try to reproduce the error and then create a GitHub issue on https://github.com/chrxh/alien/issues where the log.txt is attached.
 
 # 🌌 Screenshots
 #### Different plant-like populations around a radiation source

@@ -61,6 +61,9 @@ void _StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep
 {
     std::lock_guard lock(history.getMutex());
     auto& data = history.getDataRef();
+    if (data.empty()) {
+        return;
+    }
 
     auto prevTimestep = data.back().time;
     if (!data.empty() && prevTimestep > 0) {

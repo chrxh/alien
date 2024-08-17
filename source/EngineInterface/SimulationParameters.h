@@ -19,11 +19,11 @@ enum CellColoring_
     CellColoring_None,
     CellColoring_CellColor,
     CellColoring_MutationId,
-    CellColoring_MutationId_AllCellFunction,
+    CellColoring_MutationId_AllCellFunctions,
     CellColoring_LivingState,
     CellColoring_GenomeSize,
     CellColoring_CellFunction,
-    CellColoring_AllCellFunction
+    CellColoring_AllCellFunctions
 };
 
 struct SimulationParameters
@@ -32,8 +32,8 @@ struct SimulationParameters
     Features features;
 
     //particle sources
-    int numParticleSources = 0;
-    RadiationSource particleSources[MAX_PARTICLE_SOURCES];
+    int numRadiationSources = 0;
+    RadiationSource radiationSources[MAX_RADIATION_SOURCES];
     float externalEnergy = 0.0f;
     ColorVector<float> externalEnergyInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> externalEnergyConditionalInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
@@ -49,8 +49,13 @@ struct SimulationParameters
     bool markReferenceDomain = true;
     bool gridLines = false;
     CellColoring cellColoring = CellColoring_CellColor;
+    CellColoring cellGlowColoring = CellColoring_CellColor;
+    float cellGlowRadius = 4.0f;
+    float cellGlowStrength = 0.1f;
     CellFunction highlightedCellFunction = CellFunction_Constructor;
     float zoomLevelNeuronalActivity = 2.0f;
+    bool attackVisualization = false;
+    float cellRadius = 0.25f;
 
     //all other parameters
     SimulationParametersSpotValues baseValues;
@@ -61,7 +66,7 @@ struct SimulationParameters
 
     float innerFriction = 0.3f;
     float cellMaxVelocity = 2.0f;              
-    float cellMaxBindingDistance = 3.6f;
+    ColorVector<float> cellMaxBindingDistance = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
 
     ColorVector<float> cellNormalEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
     float cellMinDistance = 0.3f;         
@@ -89,8 +94,21 @@ struct SimulationParameters
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value};
+    bool cellInactiveMaxAgeActivated = false;
+    bool cellEmergentMaxAgeActivated = false;
+    ColorVector<int> cellEmergentMaxAge = {
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value};
+
     bool cellMaxAgeBalancer = false;
     int cellMaxAgeBalancerInterval = 10000;
+    bool cellResetAgeAfterActivation = false;
+
     bool particleTransformationAllowed = false;
     bool particleTransformationRandomCellFunction = false;
     int particleTransformationMaxGenomeSize = 300;
@@ -161,6 +179,7 @@ struct SimulationParameters
     ColorVector<float> cellFunctionMuscleBendingAngle = {5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f};
     ColorVector<float> cellFunctionMuscleBendingAcceleration = {0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
     float cellFunctionMuscleBendingAccelerationThreshold = 0.1f;
+    bool cellFunctionMuscleMovementAngleFromSensor = false;
 
     ColorVector<float> cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
     float cellFunctionSensorActivityThreshold = 0.1f;

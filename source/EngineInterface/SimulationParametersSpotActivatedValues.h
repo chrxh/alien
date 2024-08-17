@@ -10,29 +10,32 @@ struct SimulationParametersSpotActivatedValues
     bool radiationAbsorptionLowVelocityPenalty = false;
     bool radiationAbsorptionLowGenomeComplexityPenalty = false;
     bool radiationCellAgeStrength = false;
+    bool radiationDisableSources = false;
     bool cellMaxForce = false;
     bool cellMinEnergy = false;
     bool cellFusionVelocity = false;
     bool cellMaxBindingEnergy = false;
+    bool cellInactiveMaxAge = false;
     bool cellColorTransition = false;
     bool cellFunctionAttackerEnergyCost = false;
     bool cellFunctionAttackerFoodChainColorMatrix = false;
     bool cellFunctionAttackerGenomeComplexityBonus = false;
+    bool cellFunctionAttackerNewComplexMutantPenalty = false;
     bool cellFunctionAttackerGeometryDeviationExponent = false;
     bool cellFunctionAttackerConnectionsMismatchPenalty = false;
 
-    bool cellFunctionConstructorMutationNeuronDataProbability = false;
-    bool cellFunctionConstructorMutationPropertiesProbability = false;
-    bool cellFunctionConstructorMutationCellFunctionProbability = false;
-    bool cellFunctionConstructorMutationGeometryProbability = false;
-    bool cellFunctionConstructorMutationCustomGeometryProbability = false; 
-    bool cellFunctionConstructorMutationInsertionProbability = false;
-    bool cellFunctionConstructorMutationDeletionProbability = false;
-    bool cellFunctionConstructorMutationTranslationProbability = false;
-    bool cellFunctionConstructorMutationDuplicationProbability = false;
-    bool cellFunctionConstructorMutationCellColorProbability = false;
-    bool cellFunctionConstructorMutationSubgenomeColorProbability = false;
-    bool cellFunctionConstructorMutationGenomeColorProbability = false;
+    bool cellCopyMutationNeuronData = false;
+    bool cellCopyMutationCellProperties = false;
+    bool cellCopyMutationCellFunction = false;
+    bool cellCopyMutationGeometry = false;
+    bool cellCopyMutationCustomGeometry = false; 
+    bool cellCopyMutationInsertion = false;
+    bool cellCopyMutationDeletion = false;
+    bool cellCopyMutationTranslation = false;
+    bool cellCopyMutationDuplication = false;
+    bool cellCopyMutationCellColor = false;
+    bool cellCopyMutationSubgenomeColor = false;
+    bool cellCopyMutationGenomeColor = false;
 
     bool operator==(SimulationParametersSpotActivatedValues const& other) const
     {
@@ -43,22 +46,25 @@ struct SimulationParametersSpotActivatedValues
             && cellFunctionAttackerGeometryDeviationExponent == other.cellFunctionAttackerGeometryDeviationExponent
             && cellMaxBindingEnergy == other.cellMaxBindingEnergy
             && cellFunctionAttackerConnectionsMismatchPenalty == other.cellFunctionAttackerConnectionsMismatchPenalty
-            && cellFunctionConstructorMutationNeuronDataProbability == other.cellFunctionConstructorMutationNeuronDataProbability
-            && cellFunctionConstructorMutationPropertiesProbability == other.cellFunctionConstructorMutationPropertiesProbability
-            && cellFunctionConstructorMutationCellFunctionProbability == other.cellFunctionConstructorMutationCellFunctionProbability
-            && cellFunctionConstructorMutationInsertionProbability == other.cellFunctionConstructorMutationInsertionProbability
-            && cellFunctionConstructorMutationDeletionProbability == other.cellFunctionConstructorMutationDeletionProbability
-            && cellFunctionConstructorMutationTranslationProbability == other.cellFunctionConstructorMutationTranslationProbability
-            && cellFunctionConstructorMutationDuplicationProbability == other.cellFunctionConstructorMutationDuplicationProbability
-            && cellFunctionConstructorMutationSubgenomeColorProbability == other.cellFunctionConstructorMutationSubgenomeColorProbability
+            && cellCopyMutationNeuronData == other.cellCopyMutationNeuronData
+            && cellCopyMutationCellProperties == other.cellCopyMutationCellProperties
+            && cellCopyMutationCellFunction == other.cellCopyMutationCellFunction
+            && cellCopyMutationInsertion == other.cellCopyMutationInsertion
+            && cellCopyMutationDeletion == other.cellCopyMutationDeletion
+            && cellCopyMutationTranslation == other.cellCopyMutationTranslation
+            && cellCopyMutationDuplication == other.cellCopyMutationDuplication
+            && cellCopyMutationSubgenomeColor == other.cellCopyMutationSubgenomeColor
             && radiationAbsorption == other.radiationAbsorption
-            && cellFunctionConstructorMutationCustomGeometryProbability == other.cellFunctionConstructorMutationCustomGeometryProbability
-            && cellFunctionConstructorMutationGeometryProbability == other.cellFunctionConstructorMutationGeometryProbability
-            && cellFunctionConstructorMutationGenomeColorProbability == other.cellFunctionConstructorMutationGenomeColorProbability
-            && cellFunctionConstructorMutationCellColorProbability == other.cellFunctionConstructorMutationCellColorProbability
+            && cellCopyMutationCustomGeometry == other.cellCopyMutationCustomGeometry
+            && cellCopyMutationGeometry == other.cellCopyMutationGeometry
+            && cellCopyMutationGenomeColor == other.cellCopyMutationGenomeColor
+            && cellCopyMutationCellColor == other.cellCopyMutationCellColor
             && radiationAbsorptionLowGenomeComplexityPenalty == other.radiationAbsorptionLowGenomeComplexityPenalty
             && cellFunctionAttackerGenomeComplexityBonus == other.cellFunctionAttackerGenomeComplexityBonus
             && radiationAbsorptionLowVelocityPenalty == other.radiationAbsorptionLowVelocityPenalty
+            && cellFunctionAttackerNewComplexMutantPenalty == other.cellFunctionAttackerNewComplexMutantPenalty
+            && cellInactiveMaxAge == other.cellInactiveMaxAge
+            && radiationDisableSources == other.radiationDisableSources
         ;
     }
 };

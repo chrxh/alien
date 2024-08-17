@@ -111,7 +111,7 @@ _BrowserWindow::~_BrowserWindow()
                 + workspaceTypeToString.at(workspaceId.workspaceType),
             NetworkResourceService::convertFolderNamesToSettings(workspace.collapsedFolderNames));
     }
-    _lastSessionData.save(getAllRawTOs());
+    _lastSessionData.save();
 }
 
 void _BrowserWindow::registerCyclicReferences(
@@ -304,7 +304,7 @@ void _BrowserWindow::processToolbar()
         onReplaceResource(_selectedTreeTO->getLeaf());
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Replace the selected " + resourceTypeString + " with the one that is currently open. The name, description and reactions will be maintained.");
+    AlienImGui::Tooltip("Replace the selected " + resourceTypeString + " with the one that is currently open. The name, description and reactions will be preserved.");
 
     //move to other workspace button
     ImGui::SameLine();
@@ -416,7 +416,11 @@ void _BrowserWindow::processWorkspaceSelectionAndFilter()
 
         ImGui::TableSetColumnIndex(1);
         if (AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Filter").textWidth(0), _filter)) {
-            createTreeTOs(_workspaces.at(_currentWorkspace));
+            for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
+                for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+                    createTreeTOs(_workspaces.at(WorkspaceId{resourceType, workspaceType}));
+                }
+            }
         }
 
         ImGui::EndTable();
@@ -607,6 +611,9 @@ void _BrowserWindow::processSimulationList()
         while (clipper.Step())
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
                 auto treeTO = workspace.treeTOs.at(row);
+                if (treeTO->isLeaf()) {
+                    _lastSessionData.registrate(treeTO->getLeaf().rawTO);
+                }
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
@@ -642,7 +649,7 @@ void _BrowserWindow::processSimulationList()
                 ImGui::TableNextColumn();
                 processHeightField(treeTO);
                 ImGui::TableNextColumn();
-                processNumParticlesField(treeTO);
+                processNumObjectsField(treeTO, true);
                 ImGui::TableNextColumn();
                 processSizeField(treeTO, true);
                 ImGui::TableNextColumn();
@@ -709,6 +716,9 @@ void _BrowserWindow::processGenomeList()
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
 
                 auto& treeTO = workspace.treeTOs.at(row);
+                if (treeTO->isLeaf()) {
+                    _lastSessionData.registrate(treeTO->getLeaf().rawTO);
+                }
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(RowHeight));
@@ -740,7 +750,7 @@ void _BrowserWindow::processGenomeList()
                 ImGui::TableNextColumn();
                 processNumDownloadsField(treeTO);
                 ImGui::TableNextColumn();
-                processNumParticlesField(treeTO);
+                processNumObjectsField(treeTO, false);
                 ImGui::TableNextColumn();
                 processSizeField(treeTO, false);
                 ImGui::TableNextColumn();
@@ -941,11 +951,15 @@ void _BrowserWindow::processHeightField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processNumParticlesField(NetworkResourceTreeTO const& treeTO)
+void _BrowserWindow::processNumObjectsField(NetworkResourceTreeTO const& treeTO, bool kobjects)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienImGui::Text(StringHelper::format(leaf.rawTO->particles / 1000) + " K");
+        if (kobjects) {
+            AlienImGui::Text(StringHelper::format(leaf.rawTO->particles / 1000) + " K");
+        } else {
+            AlienImGui::Text(StringHelper::format(leaf.rawTO->particles));
+        }
     }
 }
 

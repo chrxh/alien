@@ -46,7 +46,7 @@ namespace
     }
     void writeEnergy(std::vector<uint8_t>& data, float value)
     {
-        writeFloat(data, (value - 548.0f) / 512);
+        writeFloat(data, (value - 150.0f) / 100);
     }
     void writeNeuronProperty(std::vector<uint8_t>& data, float value)
     {
@@ -76,6 +76,11 @@ namespace
         }
         uint8_t result = data[pos++];
         return result;
+    }
+    std::optional<int> readOptionalByte(std::vector<uint8_t> const& data, int& pos)
+    {
+        auto value = static_cast<int>(readByte(data, pos));
+        return value > 127 ? std::nullopt : std::make_optional(value);
     }
     std::optional<int> readOptionalByte(std::vector<uint8_t> const& data, int& pos, int moduloValue)
     {
@@ -113,7 +118,7 @@ namespace
     //between 36 and 1060
     float readEnergy(std::vector<uint8_t> const& data, int& pos)
     {
-        return readFloat(data, pos) * 512 + 548.0f; 
+        return readFloat(data, pos) * 100 + 150.0f; 
     }
     //between 0 and 1
     float readDensity(std::vector<uint8_t> const& data, int& pos)
@@ -213,7 +218,10 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
             writeByte(result, sensor.fixedAngle.has_value() ? SensorMode_FixedAngle : SensorMode_Neighborhood);
             writeAngle(result, sensor.fixedAngle.has_value() ? *sensor.fixedAngle : 0.0f);
             writeDensity(result, sensor.minDensity);
-            writeByte(result, sensor.color);
+            writeOptionalByte(result, sensor.restrictToColor);
+            writeByte(result, sensor.restrictToMutants);
+            writeOptionalByte(result, sensor.minRange);
+            writeOptionalByte(result, sensor.maxRange);
         } break;
         case CellFunction_Nerve: {
             auto const& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
@@ -239,7 +247,8 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
         } break;
         case CellFunction_Reconnector: {
             auto const& reconnector = std::get<ReconnectorGenomeDescription>(*cell.cellFunction);
-            writeByte(result, reconnector.color);
+            writeOptionalByte(result, reconnector.restrictToColor);
+            writeByte(result, reconnector.restrictToMutants);
         } break;
         case CellFunction_Detonator: {
             auto const& detonator = std::get<DetonatorGenomeDescription>(*cell.cellFunction);
@@ -336,7 +345,10 @@ namespace
                     sensor.fixedAngle = angle;
                 }
                 sensor.minDensity = readDensity(data, bytePosition);
-                sensor.color = readByte(data, bytePosition) % MAX_COLORS;
+                sensor.restrictToColor = readOptionalByte(data, bytePosition, MAX_COLORS);
+                sensor.restrictToMutants = readByte(data, bytePosition) % SensorRestrictToMutants_Count;
+                sensor.minRange = readOptionalByte(data, bytePosition);
+                sensor.maxRange = readOptionalByte(data, bytePosition);
                 cell.cellFunction = sensor;
             } break;
             case CellFunction_Nerve: {
@@ -368,7 +380,8 @@ namespace
             } break;
             case CellFunction_Reconnector: {
                 ReconnectorGenomeDescription reconnector;
-                reconnector.color = readByte(data, bytePosition) % MAX_COLORS;
+                reconnector.restrictToColor = readOptionalByte(data, bytePosition, MAX_COLORS);
+                reconnector.restrictToMutants = readByte(data, bytePosition) % ReconnectorRestrictToMutants_Count;
                 cell.cellFunction = reconnector;
             } break;
             case CellFunction_Detonator: {

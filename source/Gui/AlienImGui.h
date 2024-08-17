@@ -64,6 +64,7 @@ public:
     {
         MEMBER_DECLARATION(InputIntParameters, std::string, name, "");
         MEMBER_DECLARATION(InputIntParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(InputIntParameters, bool, keepTextEnabled, false);
         MEMBER_DECLARATION(InputIntParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(InputIntParameters, bool, infinity, false);
         MEMBER_DECLARATION(InputIntParameters, std::optional<std::string>, tooltip, std::nullopt);
@@ -166,7 +167,7 @@ public:
         MEMBER_DECLARATION(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER_DECLARATION(ComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool Combo(ComboParameters& parameters, int& value);
+    static bool Combo(ComboParameters& parameters, int& value, bool* enabled = nullptr);
 
     struct SwitcherParameters
     {
@@ -185,10 +186,12 @@ public:
         MEMBER_DECLARATION(ComboColorParameters, std::string, name, "");
         MEMBER_DECLARATION(ComboColorParameters, float, width, 0);
         MEMBER_DECLARATION(ComboColorParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(ComboColorParameters, bool, keepTextEnabled, false);
         MEMBER_DECLARATION(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(ComboColorParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool ComboColor(ComboColorParameters const& parameters, int& value);
+    static bool ComboColor(ComboColorParameters const& parameters, int& value, bool* enabled = nullptr);
+    static bool ComboOptionalColor(ComboColorParameters const& parameters, std::optional<int>& value);
 
     struct InputColorTransitionParameters
     {
@@ -250,7 +253,7 @@ public:
     static void Separator();
     static void MovableSeparator(float& height);
 
-    static void Group(std::string const& text);
+    static void Group(std::string const& text, std::optional<std::string> const& tooltip = std::nullopt);
 
     static bool ToolbarButton(std::string const& text);
     static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);

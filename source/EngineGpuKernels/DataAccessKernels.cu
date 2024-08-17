@@ -32,6 +32,7 @@ namespace
         cellTO.livingState = cell->livingState;
         cellTO.creatureId = cell->creatureId;
         cellTO.mutationId = cell->mutationId;
+        cellTO.ancestorMutationId = cell->ancestorMutationId;
         cellTO.genomeComplexity = cell->genomeComplexity;
         cellTO.inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
         cellTO.outputBlocked = cell->outputBlocked;
@@ -42,6 +43,8 @@ namespace
             cellTO.activity.channels[i] = cell->activity.channels[i];
         }
         cellTO.activationTime = cell->activationTime;
+        cellTO.detectedByCreatureId = cell->detectedByCreatureId;
+        cellTO.cellFunctionUsed = cell->cellFunctionUsed;
 
         copyAuxiliaryData(
             cell->metadata.nameSize,
@@ -108,11 +111,15 @@ namespace
             cellTO.cellFunctionData.sensor.mode = cell->cellFunctionData.sensor.mode;
             cellTO.cellFunctionData.sensor.angle = cell->cellFunctionData.sensor.angle;
             cellTO.cellFunctionData.sensor.minDensity = cell->cellFunctionData.sensor.minDensity;
-            cellTO.cellFunctionData.sensor.color = cell->cellFunctionData.sensor.color;
-            cellTO.cellFunctionData.sensor.targetedCreatureId = cell->cellFunctionData.sensor.targetedCreatureId;
+            cellTO.cellFunctionData.sensor.minRange = cell->cellFunctionData.sensor.minRange;
+            cellTO.cellFunctionData.sensor.maxRange = cell->cellFunctionData.sensor.maxRange;
+            cellTO.cellFunctionData.sensor.restrictToColor = cell->cellFunctionData.sensor.restrictToColor;
+            cellTO.cellFunctionData.sensor.restrictToMutants = cell->cellFunctionData.sensor.restrictToMutants;
             cellTO.cellFunctionData.sensor.memoryChannel1 = cell->cellFunctionData.sensor.memoryChannel1;
             cellTO.cellFunctionData.sensor.memoryChannel2 = cell->cellFunctionData.sensor.memoryChannel2;
             cellTO.cellFunctionData.sensor.memoryChannel3 = cell->cellFunctionData.sensor.memoryChannel3;
+            cellTO.cellFunctionData.sensor.targetX = cell->cellFunctionData.sensor.targetX;
+            cellTO.cellFunctionData.sensor.targetY = cell->cellFunctionData.sensor.targetY;
         } break;
         case CellFunction_Nerve: {
             cellTO.cellFunctionData.nerve.pulseMode = cell->cellFunctionData.nerve.pulseMode;
@@ -143,7 +150,8 @@ namespace
             cellTO.cellFunctionData.defender.mode = cell->cellFunctionData.defender.mode;
         } break;
         case CellFunction_Reconnector: {
-            cellTO.cellFunctionData.reconnector.color = cell->cellFunctionData.reconnector.color;
+            cellTO.cellFunctionData.reconnector.restrictToColor = cell->cellFunctionData.reconnector.restrictToColor;
+            cellTO.cellFunctionData.reconnector.restrictToMutants = cell->cellFunctionData.reconnector.restrictToMutants;
         } break;
         case CellFunction_Detonator: {
             cellTO.cellFunctionData.detonator.state = cell->cellFunctionData.detonator.state;
@@ -384,6 +392,9 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataTO d
             auto const& cell = dataTO.cells[index];
             numberGen.adaptMaxId(cell.id);
             numberGen.adaptMaxSmallId(cell.mutationId);
+            if (cell.cellFunction == CellFunction_Constructor) {
+                numberGen.adaptMaxSmallId(cell.cellFunctionData.constructor.offspringMutationId);
+            }
         }
     }
     {

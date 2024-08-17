@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 using CellFunction = int;
 enum CellFunction_
 {
@@ -47,6 +49,19 @@ enum SensorMode_
     SensorMode_Neighborhood,
     SensorMode_FixedAngle,
     SensorMode_Count
+};
+
+using SensorRestrictToMutants = int;
+enum SensorRestrictToMutants_
+{
+    SensorRestrictToMutants_NoRestriction,
+    SensorRestrictToMutants_RestrictToSameMutants,
+    SensorRestrictToMutants_RestrictToOtherMutants,
+    SensorRestrictToMutants_RestrictToEmergentCells,
+    SensorRestrictToMutants_RestrictToZeroMutants,
+    SensorRestrictToMutants_RestrictToLessComplexMutants,
+    SensorRestrictToMutants_RestrictToMoreComplexMutants,
+    SensorRestrictToMutants_Count
 };
 
 using EnergyDistributionMode = int;
@@ -125,3 +140,33 @@ enum DetonatorState_
     DetonatorState_Activated,
     DetonatorState_Exploded
 };
+
+using ReconnectorRestrictToMutants = int;
+enum ReconnectorRestrictToMutants_
+{
+    ReconnectorRestrictToMutants_NoRestriction,
+    ReconnectorRestrictToMutants_RestrictToSameMutants,
+    ReconnectorRestrictToMutants_RestrictToOtherMutants,
+    ReconnectorRestrictToMutants_RestrictToRespawnedMutants,
+    ReconnectorRestrictToMutants_RestrictToZeroMutants,
+    ReconnectorRestrictToMutants_RestrictToLessComplexMutants,
+    ReconnectorRestrictToMutants_RestrictToMoreComplexMutants,
+    ReconnectorRestrictToMutants_Count
+};
+
+using CellEvent = uint8_t;
+enum CellEvent_
+{
+    CellEvent_No,
+    CellEvent_Attacking,
+    CellEvent_Attacked
+};
+
+using CellFunctionUsed = uint8_t;
+enum CellFunctionUsed_
+{
+    CellFunctionUsed_No,
+    CellFunctionUsed_Yes,
+};
+
+auto constexpr MaxActivationTime = 256 * 4;

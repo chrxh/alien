@@ -4,7 +4,8 @@
 StatisticsHistoryData StatisticsHistory::getCopiedData() const
 {
     std::lock_guard lock(_mutex);
-    return _data;
+    auto copy = _data;
+    return copy;
 }
 
 std::mutex& StatisticsHistory::getMutex() const

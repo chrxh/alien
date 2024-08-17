@@ -10,7 +10,7 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
 
     objects.init();
     tempObjects.init();
-    preprocessedCellFunctionData.init(worldSize);
+    preprocessedSimulationData.init(worldSize);
     cellMap.init(worldSize);
     particleMap.init(worldSize);
 
@@ -103,7 +103,7 @@ void SimulationData::free()
 {
     objects.free();
     tempObjects.free();
-    preprocessedCellFunctionData.free();
+    preprocessedSimulationData.free();
     cellMap.free();
     particleMap.free();
     numberGen1.free();
