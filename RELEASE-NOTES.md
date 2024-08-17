@@ -6,7 +6,7 @@
 - engine: sensor cells can tag detected cells for attacking if parameter 'Sensor detection factor' is above 0
 - engine: sensors can not penetrate handcrafted structures when restricting to scanning for certain mutants
 - engine: possibility to force muscle cells to obtain movement angles from nearby sensors (+ simulation parameter under addon 'Advanced muscle control')
-- engine: possibility to redefine max age of permanently inactive cells or of nutrient (+ simulation parameters under addon 'Cell age limiter')
+- engine: possibility to redefine max age of permanently inactive or of emergent cells (+ simulation parameters under addon 'Cell age limiter')
 - engine: possibility to reset age after cell switches from 'Under construction' to 'Ready' (+ simulation parameter under addon 'Cell age limiter')
 - engine: allow to disable radiation sources in spots
 - gui/statistics: diversity and average genome complexity plots added
