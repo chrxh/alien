@@ -1,7 +1,7 @@
 <h1 align="center">
 <a href="https://alien-project.org" target="_blank">ALIEN - Explore worlds of artificial life</a>
 </h1>
-[![](https://github.com/user-attachments/assets/f7afdb26-36e7-4c85-8a96-12755da4fbb0)](https://youtu.be/qwbMGPkoJmg)
+[![screen cap](https://github.com/user-attachments/assets/f7afdb26-36e7-4c85-8a96-12755da4fbb0)](https://youtu.be/qwbMGPkoJmg)
 
 ![image](https://github.com/chrxh/alien/assets/73127001/169b4be7-d70e-4e0e-8bf7-7a4d72d29868)
 
