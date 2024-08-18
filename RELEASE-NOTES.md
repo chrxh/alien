@@ -10,7 +10,7 @@
 - engine: possibility to reset age after cell switches from 'Under construction' to 'Ready' (+ simulation parameter under addon 'Cell age limiter')
 - engine: allow to disable radiation sources in spots
 - gui/statistics: diversity and average genome complexity plots added
-- gui/statistics: thoughtput statistics
+- gui/statistics: throughput statistics
 - gui/simulation view: attack visualization (+ simulation parameter)
 - gui/simulation view: cell glow (+ simulation parameter under new addon 'Cell glow')
 - gui/simulation view: configurable cell radius via simulation parameter
