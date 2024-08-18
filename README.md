@@ -71,7 +71,7 @@ Further information and artwork:
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 # 💽 Installer
-Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (updated: 2024-04-26)
+Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (updated: 2024-08-17)
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section below.
 
