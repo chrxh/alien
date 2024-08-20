@@ -10,13 +10,13 @@ struct MissingParameters
 };
 
 template<typename T>
-struct LegacyParameter
+struct LegacySpotParameter
 {
     bool active = false;
     T parameter;
 };
 
-struct LegacyParametersForSpot
+struct LegacyParametersForBase
 {
     ColorVector<float> cellFunctionConstructorMutationNeuronDataProbability;
     ColorVector<float> cellFunctionConstructorMutationPropertiesProbability;
@@ -31,9 +31,26 @@ struct LegacyParametersForSpot
     ColorVector<float> cellFunctionConstructorMutationSubgenomeColorProbability;
     ColorVector<float> cellFunctionConstructorMutationGenomeColorProbability;
 };
+
+struct LegacyParametersForSpot
+{
+    LegacySpotParameter<ColorVector<float>> cellFunctionConstructorMutationNeuronDataProbability;
+    LegacySpotParameter<ColorVector<float>> cellFunctionConstructorMutationPropertiesProbability;
+    LegacySpotParameter<ColorVector<float>> cellFunctionConstructorMutationCellFunctionProbability;
+    LegacySpotParameter<ColorVector<float>> cellFunctionConstructorMutationGeometryProbability;
+    LegacySpotParameter<ColorVector<float>> cellFunctionConstructorMutationCustomGeometryProbability;
+    LegacySpotParameter<ColorVector<float>> cellFunctionConstructorMutationInsertionProbability;
+    LegacySpotParameter<ColorVector<float>> cellFunctionConstructorMutationDeletionProbability;
+    LegacySpotParameter<ColorVector<float>> cellFunctionConstructorMutationTranslationProbability;
+    LegacySpotParameter<ColorVector<float>> cellFunctionConstructorMutationDuplicationProbability;
+    LegacySpotParameter<ColorVector<float>> cellFunctionConstructorMutationCellColorProbability;
+    LegacySpotParameter<ColorVector<float>> cellFunctionConstructorMutationSubgenomeColorProbability;
+    LegacySpotParameter<ColorVector<float>> cellFunctionConstructorMutationGenomeColorProbability;
+};
+
 struct LegacyParameters
 {
-    LegacyParametersForSpot base;
+    LegacyParametersForBase base;
     LegacyParametersForSpot spots[MAX_SPOTS];
 };
 

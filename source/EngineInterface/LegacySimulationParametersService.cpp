@@ -133,7 +133,7 @@ void LegacySimulationParametersService::activateParametersForLegacyFiles(
     }
 
     if (missingParameters.copyMutations) {
-        auto setParametersForSpot = [](SimulationParametersSpotValues& target, LegacyParametersForSpot const& source) {
+        auto setParametersForBase = [](SimulationParametersSpotValues& target, LegacyParametersForBase const& source) {
             for (int i = 0; i < MAX_COLORS; ++i) {
                 target.cellCopyMutationNeuronData[i] = source.cellFunctionConstructorMutationNeuronDataProbability[i] * 250;
                 target.cellCopyMutationCellProperties[i] = source.cellFunctionConstructorMutationPropertiesProbability[i] * 250;
@@ -149,7 +149,24 @@ void LegacySimulationParametersService::activateParametersForLegacyFiles(
                 target.cellCopyMutationGenomeColor[i] = source.cellFunctionConstructorMutationGenomeColorProbability[i] * 5000;
             }
         };
-        setParametersForSpot(parameters.baseValues, legacyParameters.base);
+        auto setParametersForSpot = [](SimulationParametersSpotValues& target, LegacyParametersForSpot const& source) {
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                target.cellCopyMutationNeuronData[i] = source.cellFunctionConstructorMutationNeuronDataProbability.parameter[i] * 250;
+                target.cellCopyMutationCellProperties[i] = source.cellFunctionConstructorMutationPropertiesProbability.parameter[i] * 250;
+                target.cellCopyMutationCellFunction[i] = source.cellFunctionConstructorMutationCellFunctionProbability.parameter[i] * 250;
+                target.cellCopyMutationGeometry[i] = source.cellFunctionConstructorMutationGeometryProbability.parameter[i] * 250;
+                target.cellCopyMutationCustomGeometry[i] = source.cellFunctionConstructorMutationCustomGeometryProbability.parameter[i] * 250;
+                target.cellCopyMutationInsertion[i] = source.cellFunctionConstructorMutationInsertionProbability.parameter[i] * 250;
+                target.cellCopyMutationDeletion[i] = source.cellFunctionConstructorMutationDeletionProbability.parameter[i] * 250;
+                target.cellCopyMutationCellColor[i] = source.cellFunctionConstructorMutationCellColorProbability.parameter[i] * 250;
+                target.cellCopyMutationTranslation[i] = source.cellFunctionConstructorMutationTranslationProbability.parameter[i] * 5000;
+                target.cellCopyMutationDuplication[i] = source.cellFunctionConstructorMutationDuplicationProbability.parameter[i] * 5000;
+                target.cellCopyMutationSubgenomeColor[i] = source.cellFunctionConstructorMutationSubgenomeColorProbability.parameter[i] * 5000;
+                target.cellCopyMutationGenomeColor[i] = source.cellFunctionConstructorMutationGenomeColorProbability.parameter[i] * 5000;
+            }
+        };
+
+        setParametersForBase(parameters.baseValues, legacyParameters.base);
         for (int i = 0; i < MAX_SPOTS; ++i) {
             setParametersForSpot(parameters.spots->values, legacyParameters.spots[i]);
         }
