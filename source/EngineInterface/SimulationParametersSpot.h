@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-
+#include <cstring>
 #include "SimulationParametersSpotActivatedValues.h"
 #include "SimulationParametersSpotValues.h"
 
@@ -86,8 +86,11 @@ union SpotShapeData
     RectangularSpot rectangularSpot;
 };
 
+static constexpr size_t SIM_PARAM_SPOT_NAME_LENGTH = 32;
+
 struct SimulationParametersSpot
 {
+    char name[SIM_PARAM_SPOT_NAME_LENGTH]{};
     uint32_t color = 0;
     float posX = 0;
     float posY = 0;
@@ -139,7 +142,7 @@ struct SimulationParametersSpot
             }
         }
 
-        return color == other.color && posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY
+        return (strcmp(name, other.name) == 0) && color == other.color && posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY
             && fadeoutRadius == other.fadeoutRadius && values == other.values && activatedValues == other.activatedValues && shapeType == other.shapeType;
     }
     bool operator!=(SimulationParametersSpot const& other) const { return !operator==(other); }

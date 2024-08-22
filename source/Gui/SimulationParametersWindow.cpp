@@ -1,5 +1,7 @@
 #include "SimulationParametersWindow.h"
 
+#include <cstring>
+
 #include <ImFileDialog.h>
 #include <imgui.h>
 #include <Fonts/IconsFontAwesome5.h>
@@ -72,6 +74,12 @@ _SimulationParametersWindow::_SimulationParametersWindow(
     for (int i = 0; i < CellFunction_Count; ++i) {
         _cellFunctionStrings.emplace_back(Const::CellFunctionToStringMap.at(i));
     }
+
+    _serialTabID = 0;
+    for (int i = 0; i < MAX_SPOTS; ++i) {
+        _spotNameStrings.emplace_back("");
+        _spotTabIDs.emplace_back(std::to_string(0));
+    }
 }
 
 _SimulationParametersWindow::~_SimulationParametersWindow()
@@ -101,8 +109,12 @@ void _SimulationParametersWindow::processIntern()
 
 SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
 {
-    auto worldSize = _simController->getWorldSize();
     SimulationParametersSpot spot;
+
+    strncpy(spot.name, std::string("Zone " + std::to_string(index)).c_str(), SIM_PARAM_SPOT_NAME_LENGTH);
+    
+    auto worldSize = _simController->getWorldSize();
+    
     spot.posX = toFloat(worldSize.x / 2);
     spot.posY = toFloat(worldSize.y / 2);
 
@@ -148,6 +160,8 @@ void _SimulationParametersWindow::processToolbar()
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
         _copiedParameters = _simController->getSimulationParameters();
+        _copiedSpotNameStrings = _spotNameStrings;
+        _copiedSpotTabIDs = _spotTabIDs;
         printOverlayMessage("Simulation parameters copied");
     }
     AlienImGui::Tooltip("Copy simulation parameters");
@@ -157,6 +171,8 @@ void _SimulationParametersWindow::processToolbar()
     if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
         _simController->setSimulationParameters(*_copiedParameters);
         _simController->setOriginalSimulationParameters(*_copiedParameters);
+        _spotNameStrings = _copiedSpotNameStrings;
+        _spotTabIDs = _copiedSpotTabIDs;
         printOverlayMessage("Simulation parameters pasted");
     }
     ImGui::EndDisabled();
@@ -171,10 +187,29 @@ void _SimulationParametersWindow::processTabWidget(
     SimulationParameters& origParameters)
 {
     auto currentSessionId = _simController->getSessionId();
+    
+    bool sessionChanged = (!_sessionId.has_value() || (currentSessionId != *_sessionId));
+    _focusBaseTab = sessionChanged;
+
+    if (sessionChanged){
+        for (int i = 0; i < parameters.numSpots; ++i) {
+            // Legacy support: version <= 4.9 do not have names for zones
+            if (strcmp(parameters.spots[i].name, "") == 0){
+                _spotNameStrings[i] = std::string("Zone ") + std::to_string(i);
+            }else{
+                _spotNameStrings[i] = parameters.spots[i].name;
+            }
+            _spotTabIDs[i] = std::to_string(_serialTabID);
+            ++_serialTabID;
+        }
+    }
+    
+    _sessionId= currentSessionId;
+    
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
 
-        if (ImGui::BeginTabBar("##Parameters", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+        if (ImGui::BeginTabBar("##Parameters", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
 
             //add spot
             if (parameters.numSpots < MAX_SPOTS) {
@@ -184,30 +219,35 @@ void _SimulationParametersWindow::processTabWidget(
                     origParameters.spots[index] = createSpot(parameters, index);
                     ++parameters.numSpots;
                     ++origParameters.numSpots;
+                    
+                    _spotNameStrings[index] = parameters.spots[index].name;
+                    _spotTabIDs[index] = std::to_string(_serialTabID);
+                    ++_serialTabID;
+                    
                     _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
                 }
                 AlienImGui::Tooltip("Add parameter zone");
             }
 
-                bool open = true;
-            if (ImGui::BeginTabItem("Base", &open, _focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+            if (ImGui::BeginTabItem("Base", nullptr, _focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_NoReorder)) {
                 processBase(parameters, origParameters);
                 ImGui::EndTabItem();
             }
-
-            for (int tab = 0; tab < parameters.numSpots; ++tab) {
+            for (int tab = 0; tab < parameters.numSpots;) {
                 SimulationParametersSpot& spot = parameters.spots[tab];
                 SimulationParametersSpot const& origSpot = origParameters.spots[tab];
-                std::string name = "Zone " + std::to_string(tab + 1);
-                if (ImGui::BeginTabItem(name.c_str(), &open, ImGuiTabItemFlags_None)) {
-                    processSpot(spot, origSpot, parameters);
+                
+                bool open = true;
+                std::string label = std::string(_spotNameStrings[tab] + std::string("###") + _spotTabIDs[tab]);
+                if (ImGui::BeginTabItem(label.c_str(), &open, ImGuiTabItemFlags_None)) {
+                    processSpot(tab,spot, origSpot, parameters);
                     ImGui::EndTabItem();
                 }
-
-                //delete spot
                 if (!open) {
                     for (int i = tab; i < parameters.numSpots - 1; ++i) {
+                        _spotNameStrings[i] = _spotNameStrings[i + 1];
+                        _spotTabIDs[i] = _spotTabIDs[i+1];
                         parameters.spots[i] = parameters.spots[i + 1];
                         origParameters.spots[i] = origParameters.spots[i + 1];
                     }
@@ -215,6 +255,8 @@ void _SimulationParametersWindow::processTabWidget(
                     --origParameters.numSpots;
                     _simController->setSimulationParameters(parameters);
                     _simController->setOriginalSimulationParameters(origParameters);
+                }else{
+                    ++tab;
                 }
             }
 
@@ -222,9 +264,6 @@ void _SimulationParametersWindow::processTabWidget(
         }
     }
     ImGui::EndChild();
-
-    _focusBaseTab = !_sessionId.has_value() || currentSessionId != *_sessionId;
-    _sessionId= currentSessionId;
 }
 
 void _SimulationParametersWindow::processBase(
@@ -1581,6 +1620,7 @@ void _SimulationParametersWindow::processBase(
 }
 
 void _SimulationParametersWindow::processSpot(
+        int tab, 
     SimulationParametersSpot& spot,
     SimulationParametersSpot const& origSpot,
     SimulationParameters const& parameters)
@@ -1588,6 +1628,14 @@ void _SimulationParametersWindow::processSpot(
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto worldSize = _simController->getWorldSize();
 
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("General"))) {
+            if(AlienImGui::InputText(AlienImGui::InputTextParameters().name("Name").textWidth(RightColumnWidth), _spotNameStrings[tab])){
+                _spotNameStrings[tab] = _spotNameStrings[tab].substr(0, SIM_PARAM_SPOT_NAME_LENGTH - 1); // Leave space for null byte
+                strncpy(spot.name, _spotNameStrings[tab].c_str(), SIM_PARAM_SPOT_NAME_LENGTH);
+            }
+            AlienImGui::EndTreeNode();
+        }
+        
         /**
          * Colors and location
          */
@@ -2355,6 +2403,11 @@ void _SimulationParametersWindow::onOpenParameters()
         if (!SerializerService::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
             MessageDialog::getInstance().information("Open simulation parameters", "The selected file could not be opened.");
         } else {
+            for(int spot = 0; spot < parameters.numSpots; ++spot){
+                _spotNameStrings[spot] = std::string(parameters.spots[spot].name);
+                _spotTabIDs[spot] = std::to_string(_serialTabID);
+                ++_serialTabID;
+            }
             _simController->setSimulationParameters(parameters);
         }
     });

@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "AuxiliaryDataParserService.h"
 
 #include "GeneralSettings.h"
@@ -925,6 +927,16 @@ namespace
             std::string base = "simulation parameters.spots." + std::to_string(index) + ".";
             auto& spot = parameters.spots[index];
             auto& defaultSpot = defaultParameters.spots[index];
+            
+            std::string currentName(spot.name);
+            std::string defaultName(defaultSpot.name); 
+            encodeDecodeProperty(tree, currentName, defaultName, base + "name", parserTask);
+            
+            if (parserTask == ParserTask::Decode){
+                currentName = currentName.substr(0, SIM_PARAM_SPOT_NAME_LENGTH - 1); // Leave space for null byte
+                strncpy(spot.name, currentName.c_str(), SIM_PARAM_SPOT_NAME_LENGTH);
+            } 
+                    
             encodeDecodeProperty(tree, spot.color, defaultSpot.color, base + "color", parserTask);
             encodeDecodeProperty(tree, spot.posX, defaultSpot.posX, base + "pos.x", parserTask);
             encodeDecodeProperty(tree, spot.posY, defaultSpot.posY, base + "pos.y", parserTask);
