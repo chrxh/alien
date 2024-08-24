@@ -1,5 +1,11 @@
 # Release notes
 
+## [4.10.1] - 2024-08-24
+### Fixed
+- performance of rendering with high zoom level improved
+- incorrect conversion of mutation rates into new genome copy mutations when loading simulations with versions below 4.10 fixed
+- deletion of parameter zones led to the unwanted deletion of other zones
+
 ## [4.10.0] - 2024-08-17
 ### Added
 - engine: sensor and reconnector cells can be restricted to only sensing/connecting to certain type of mutants (same, other, nutrient, handcrafted, less and more complex)
