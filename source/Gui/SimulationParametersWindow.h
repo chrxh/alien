@@ -19,10 +19,13 @@ private:
     void createDefaultSpotData(SimulationParametersSpot& spot);
 
     void processToolbar();
-    void processTabWidget(SimulationParameters& parameters, SimulationParameters const& lastParameters, SimulationParameters& origParameters);
-    void processBase(SimulationParameters& parameters, SimulationParameters const& origParameters);
-    void processSpot(SimulationParametersSpot& spot, SimulationParametersSpot const& origSpot, SimulationParameters const& parameters);
-    void processAddonList(SimulationParameters& parameters, SimulationParameters const& lastParameters, SimulationParameters const& origParameters);
+    void processTabWidget();
+    void processBase();
+    bool processSpot(int index);    //returns false if tab should be closed
+    void processAddonList();
+
+    void onAppendTab();
+    void onDeleteTab(int index);
 
     void onOpenParameters();
     void onSaveParameters();

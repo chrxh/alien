@@ -1,5 +1,14 @@
 # Release notes
 
+## [4.10.1] - 2024-08-24
+### Deleted
+- engine, gui/CUDA settings: input of threads per block removed (internal routines automatically determine a good value)
+
+### Fixed
+- gui/simulation view: performance of rendering with high zoom level improved
+- serialization: incorrect conversion of mutation rates into new genome copy mutations when loading simulations with versions below 4.10 fixed
+- gui/simulation parameters: deletion of parameter zones led to the unwanted deletion of other zones
+
 ## [4.10.0] - 2024-08-17
 ### Added
 - engine: sensor and reconnector cells can be restricted to only sensing/connecting to certain type of mutants (same, other, nutrient, handcrafted, less and more complex)
@@ -10,7 +19,7 @@
 - engine: possibility to reset age after cell switches from 'Under construction' to 'Ready' (+ simulation parameter under addon 'Cell age limiter')
 - engine: allow to disable radiation sources in spots
 - gui/statistics: diversity and average genome complexity plots added
-- gui/statistics: thoughtput statistics
+- gui/statistics: throughput statistics
 - gui/simulation view: attack visualization (+ simulation parameter)
 - gui/simulation view: cell glow (+ simulation parameter under new addon 'Cell glow')
 - gui/simulation view: configurable cell radius via simulation parameter

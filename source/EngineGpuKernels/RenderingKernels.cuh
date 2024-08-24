@@ -15,6 +15,21 @@
 #include <cuda_runtime.h>
 
 __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float2 rectUpperLeft, float2 rectLowerRight);
+__global__ void cudaPrepareFilteringForRendering(Array<Cell*> filteredCells, Array<Particle*> filteredParticles);
+__global__ void cudaFilterCellsForRendering(
+    int2 worldSize,
+    float2 rectUpperLeft,
+    Array<Cell*> cells,
+    Array<Cell*> filteredCells,
+    int2 imageSize,
+    float zoom);
+__global__ void cudaFilterParticlesForRendering(
+    int2 worldSize,
+    float2 rectUpperLeft,
+    Array<Particle*> particles,
+    Array<Particle*> filteredParticles,
+    int2 imageSize,
+    float zoom);
 __global__ void cudaDrawCells(
     uint64_t timestep,
     int2 worldSize,
