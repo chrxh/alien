@@ -1,10 +1,13 @@
 # Release notes
 
 ## [4.10.1] - 2024-08-24
+### Deleted
+- engine, gui/CUDA settings: input of threads per block removed (internal routines automatically determine a good value)
+
 ### Fixed
-- performance of rendering with high zoom level improved
-- incorrect conversion of mutation rates into new genome copy mutations when loading simulations with versions below 4.10 fixed
-- deletion of parameter zones led to the unwanted deletion of other zones
+- gui/simulation view: performance of rendering with high zoom level improved
+- serialization: incorrect conversion of mutation rates into new genome copy mutations when loading simulations with versions below 4.10 fixed
+- gui/simulation parameters: deletion of parameter zones led to the unwanted deletion of other zones
 
 ## [4.10.0] - 2024-08-17
 ### Added
