@@ -12,6 +12,10 @@ public:
 private:
     void processIntern() override;
 
+    bool processTab(int index); //return false if tab is closed
+    void processAppendTab();
+    void processDelTab(int index);
+
     RadiationSource createParticleSource() const;
 
     void validationAndCorrection(RadiationSource& source) const;
