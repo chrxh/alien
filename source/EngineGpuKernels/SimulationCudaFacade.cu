@@ -91,6 +91,13 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     _cudaSimulationStatistics->free();
     _cudaSelectionResult->free();
 
+    _simulationKernels.reset();
+    _dataAccessKernels.reset();
+    _garbageCollectorKernels.reset();
+    _renderingKernels.reset();
+    _editKernels.reset();
+    _statisticsKernels.reset();
+
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->auxiliaryData);
@@ -98,8 +105,8 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numParticles);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->numAuxiliaryData);
 
-    cudaDeviceReset();
-    log(Priority::Important, "close simulation");
+    CHECK_FOR_CUDA_ERROR(cudaDeviceReset());
+    log(Priority::Important, "simulation closed");
 }
 
 void* _SimulationCudaFacade::registerImageResource(GLuint image)

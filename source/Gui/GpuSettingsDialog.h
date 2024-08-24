@@ -16,6 +16,8 @@ private:
     void processIntern();
     void openIntern();
 
+    void validationAndCorrection(GpuSettings& settings) const;
+
     SimulationController _simController;
 
     GpuSettings _gpuSettings;

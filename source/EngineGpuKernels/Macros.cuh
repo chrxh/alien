@@ -74,12 +74,12 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 
 #define KERNEL_CALL(func, ...) \
     if (GlobalSettings::getInstance().isDebugMode()) { \
-        func<<<gpuSettings.numBlocks, gpuSettings.numThreadsPerBlock>>>(__VA_ARGS__); \
+        func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
         cudaDeviceSynchronize(); \
         CHECK_FOR_CUDA_ERROR(cudaGetLastError()); \
     } \
     else { \
-        func<<<gpuSettings.numBlocks, gpuSettings.numThreadsPerBlock>>>(__VA_ARGS__); \
+        func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
     }
 
 #define KERNEL_CALL_1_1(func, ...) \

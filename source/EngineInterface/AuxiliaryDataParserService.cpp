@@ -169,38 +169,74 @@ namespace
         encodeDecodeProperty(tree, parameter, defaultValue, node, task);
     }
 
-    void readLegacyParameter(ColorVector<float>& result, boost::property_tree::ptree& tree, std::string const& node)
+    void readLegacyParameterForBase(ColorVector<float>& result, boost::property_tree::ptree& tree, std::string const& node)
     {
         ColorVector<float> defaultDummy;
         encodeDecodeProperty(tree, result, defaultDummy, node, ParserTask::Decode);
     }
 
+    void readLegacyParameterForSpot(LegacySpotParameter<ColorVector<float>>& result, boost::property_tree::ptree& tree, std::string const& node)
+    {
+        ColorVector<float> defaultDummy;
+        encodeDecodeSpotProperty(tree, result.parameter, result.active, defaultDummy, node, ParserTask::Decode);
+    }
+
+    LegacyParametersForBase readLegacyParametersForBase(boost::property_tree::ptree& tree, std::string const& nodeBase)
+    {
+        LegacyParametersForBase result;
+        readLegacyParameterForBase(
+            result.cellFunctionConstructorMutationNeuronDataProbability, tree, nodeBase + "cell.function.constructor.mutation probability.neuron data");
+        readLegacyParameterForBase(
+            result.cellFunctionConstructorMutationPropertiesProbability, tree, nodeBase + "cell.function.constructor.mutation probability.data");
+        readLegacyParameterForBase(
+            result.cellFunctionConstructorMutationCellFunctionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell function");
+        readLegacyParameterForBase(
+            result.cellFunctionConstructorMutationGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.geometry");
+        readLegacyParameterForBase(
+            result.cellFunctionConstructorMutationCustomGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.custom geometry");
+        readLegacyParameterForBase(
+            result.cellFunctionConstructorMutationInsertionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.insertion");
+        readLegacyParameterForBase(
+            result.cellFunctionConstructorMutationDeletionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.deletion");
+        readLegacyParameterForBase(
+            result.cellFunctionConstructorMutationTranslationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.translation");
+        readLegacyParameterForBase(
+            result.cellFunctionConstructorMutationDuplicationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.duplication");
+        readLegacyParameterForBase(
+            result.cellFunctionConstructorMutationCellColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell color");
+        readLegacyParameterForBase(
+            result.cellFunctionConstructorMutationSubgenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.color");
+        readLegacyParameterForBase(
+            result.cellFunctionConstructorMutationGenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.uniform color");
+        return result;
+    }
+
     LegacyParametersForSpot readLegacyParametersForSpot(boost::property_tree::ptree& tree, std::string const& nodeBase)
     {
         LegacyParametersForSpot result;
-        readLegacyParameter(
+        readLegacyParameterForSpot(
             result.cellFunctionConstructorMutationNeuronDataProbability, tree, nodeBase + "cell.function.constructor.mutation probability.neuron data");
-        readLegacyParameter(
-            result.cellFunctionConstructorMutationPropertiesProbability, tree, nodeBase + "cell.function.constructor.mutation probability.data");
-        readLegacyParameter(
+        readLegacyParameterForSpot(
+            result.cellFunctionConstructorMutationPropertiesProbability, tree, nodeBase + "cell.function.constructor.mutation probability.data ");
+        readLegacyParameterForSpot(
             result.cellFunctionConstructorMutationCellFunctionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell function");
-        readLegacyParameter(
+        readLegacyParameterForSpot(
             result.cellFunctionConstructorMutationGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.geometry");
-        readLegacyParameter(
+        readLegacyParameterForSpot(
             result.cellFunctionConstructorMutationCustomGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.custom geometry");
-        readLegacyParameter(
+        readLegacyParameterForSpot(
             result.cellFunctionConstructorMutationInsertionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.insertion");
-        readLegacyParameter(
+        readLegacyParameterForSpot(
             result.cellFunctionConstructorMutationDeletionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.deletion");
-        readLegacyParameter(
+        readLegacyParameterForSpot(
             result.cellFunctionConstructorMutationTranslationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.translation");
-        readLegacyParameter(
+        readLegacyParameterForSpot(
             result.cellFunctionConstructorMutationDuplicationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.duplication");
-        readLegacyParameter(
+        readLegacyParameterForSpot(
             result.cellFunctionConstructorMutationCellColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell color");
-        readLegacyParameter(
+        readLegacyParameterForSpot(
             result.cellFunctionConstructorMutationSubgenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.color");
-        readLegacyParameter(
+        readLegacyParameterForSpot(
             result.cellFunctionConstructorMutationGenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.uniform color");
         return result;
     }
@@ -214,13 +250,12 @@ namespace
         LegacySimulationParametersService::activateFeaturesForLegacyFiles(missingFeatures, parameters);
 
         LegacyParameters legacyParameters;
-        legacyParameters.base = readLegacyParametersForSpot(tree, "simulation parameters.");
+        legacyParameters.base = readLegacyParametersForBase(tree, "simulation parameters.");
         for (int i = 0; i < parameters.numSpots; ++i) {
             legacyParameters.spots[i] = readLegacyParametersForSpot(tree, "simulation parameters.spots." + std::to_string(i) + ".");
         }
         LegacySimulationParametersService::activateParametersForLegacyFiles(missingParameters, legacyParameters, parameters);
     }
-
 
     void encodeDecode(
         boost::property_tree::ptree& tree,
