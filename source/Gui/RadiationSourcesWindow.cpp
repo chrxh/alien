@@ -21,8 +21,8 @@ void _RadiationSourcesWindow::processIntern()
 {
     auto parameters = _simController->getSimulationParameters();
 
-    std::optional<bool> scheduleAddTab;
-    std::optional<int> scheduleDelTabAtIndex;
+    std::optional<bool> scheduleAppendTab;
+    std::optional<int> scheduleDeleteTabAtIndex;
 
     if (ImGui::BeginTabBar("##ParticleSources", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
@@ -30,25 +30,25 @@ void _RadiationSourcesWindow::processIntern()
 
             //add source
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-                scheduleAddTab = true;
+                scheduleAppendTab = true;
             }
             AlienImGui::Tooltip("Add source");
         }
 
         for (int tab = 0; tab < parameters.numRadiationSources; ++tab) {
             if (!processTab(tab)) {
-                scheduleDelTabAtIndex = tab;
+                scheduleDeleteTabAtIndex = tab;
             }
         }
 
         ImGui::EndTabBar();
     }
 
-    if (scheduleAddTab.has_value()) {
-        processAppendTab();
+    if (scheduleAppendTab.has_value()) {
+        onAppendTab();
     }
-    if (scheduleDelTabAtIndex.has_value()) {
-        processDelTab(scheduleDelTabAtIndex.value());
+    if (scheduleDeleteTabAtIndex.has_value()) {
+        onDeleteTab(scheduleDeleteTabAtIndex.value());
     }
 }
 
@@ -171,7 +171,7 @@ bool _RadiationSourcesWindow::processTab(int index)
     return isOpen;
 }
 
-void _RadiationSourcesWindow::processAppendTab()
+void _RadiationSourcesWindow::onAppendTab()
 {
     auto parameters = _simController->getSimulationParameters();
     auto origParameters = _simController->getOriginalSimulationParameters();
@@ -186,7 +186,7 @@ void _RadiationSourcesWindow::processAppendTab()
     _simController->setOriginalSimulationParameters(origParameters);
 }
 
-void _RadiationSourcesWindow::processDelTab(int index)
+void _RadiationSourcesWindow::onDeleteTab(int index)
 {
     auto parameters = _simController->getSimulationParameters();
     auto origParameters = _simController->getOriginalSimulationParameters();
