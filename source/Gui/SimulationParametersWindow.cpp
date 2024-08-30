@@ -7,7 +7,7 @@
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
-#include "EngineInterface/LegacySimulationParametersService.h"
+#include "EngineInterface/LegacyAuxiliaryDataParserService.h"
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
@@ -1299,86 +1299,6 @@ void _SimulationParametersWindow::processBase()
             }
 
             /**
-             * Addon: Advanced muscle control
-             */
-            if (parameters.features.advancedMuscleControl) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced muscle control"))) {
-                    AlienImGui::Checkbox(
-                        AlienImGui::CheckboxParameters()
-                            .name("Get movement angle from sensor")
-                            .textWidth(RightColumnWidth)
-                            .defaultValue(origParameters.cellFunctionMuscleMovementAngleFromSensor)
-                            .tooltip("If activated, muscle cells will receive the relative angle for movements from connected (or connected-connected) sensor cells."),
-                        parameters.cellFunctionMuscleMovementAngleFromSensor);
-                    AlienImGui::EndTreeNode();
-                }
-            }
-
-            /**
-             * Addon: External energy control
-             */
-            if (parameters.features.externalEnergyControl) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: External energy control").highlighted(false))) {
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name("External energy amount")
-                            .textWidth(RightColumnWidth)
-                            .min(0.0f)
-                            .max(100000000.0f)
-                            .format("%.0f")
-                            .logarithmic(true)
-                            .infinity(true)
-                            .defaultValue(&origParameters.externalEnergy)
-                            .tooltip(
-                                "This parameter can be used to set the amount of energy of an external energy source. This type of energy can be "
-                                "transferred to all constructor cells at a certain rate (see inflow settings).\n\nTip: You can explicitly enter a numerical value by selecting the "
-                                "slider and then pressing TAB.\n\nWarning: Too much external energy can result in a massive production of cells and slow down or "
-                                "even crash the simulation."),
-                        &parameters.externalEnergy);
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name("Inflow")
-                            .textWidth(RightColumnWidth)
-                            .colorDependence(true)
-                            .min(0.0f)
-                            .max(1.0f)
-                            .format("%.5f")
-                            .logarithmic(true)
-                            .defaultValue(origParameters.externalEnergyInflowFactor)
-                            .tooltip(
-                                "Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that each time "
-                                "a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy source."),
-                        parameters.externalEnergyInflowFactor);
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name("Conditional inflow")
-                            .textWidth(RightColumnWidth)
-                            .colorDependence(true)
-                            .min(0.00f)
-                            .max(1.0f)
-                            .format("%.5f")
-                            .defaultValue(origParameters.externalEnergyConditionalInflowFactor)
-                            .tooltip("Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
-                                     "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
-                                     "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
-                                     "Otherwise, no energy will be transferred."),
-                        parameters.externalEnergyConditionalInflowFactor);
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name("Backflow")
-                            .textWidth(RightColumnWidth)
-                            .colorDependence(true)
-                            .min(0.0f)
-                            .max(1.0f)
-                            .defaultValue(origParameters.externalEnergyBackflowFactor)
-                            .tooltip("The proportion of energy that flows back to the external energy source when a cell loses energy or dies. The remaining "
-                                     "fraction of the energy is used to create a new energy particle."),
-                        parameters.externalEnergyBackflowFactor);
-                    AlienImGui::EndTreeNode();
-                }
-            }
-
-            /**
              * Addon: Cell color transition rules
              */
             if (parameters.features.cellColorTransitionRules) {
@@ -1520,6 +1440,73 @@ void _SimulationParametersWindow::processBase()
             }
 
             /**
+             * Addon: External energy control
+             */
+            if (parameters.features.externalEnergyControl) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: External energy control").highlighted(false))) {
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("External energy amount")
+                            .textWidth(RightColumnWidth)
+                            .min(0.0f)
+                            .max(100000000.0f)
+                            .format("%.0f")
+                            .logarithmic(true)
+                            .infinity(true)
+                            .defaultValue(&origParameters.externalEnergy)
+                            .tooltip("This parameter can be used to set the amount of energy of an external energy source. This type of energy can be "
+                                     "transferred to all constructor cells at a certain rate (see inflow settings).\n\nTip: You can explicitly enter a "
+                                     "numerical value by selecting the "
+                                     "slider and then pressing TAB.\n\nWarning: Too much external energy can result in a massive production of cells and slow "
+                                     "down or "
+                                     "even crash the simulation."),
+                        &parameters.externalEnergy);
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Inflow")
+                            .textWidth(RightColumnWidth)
+                            .colorDependence(true)
+                            .min(0.0f)
+                            .max(1.0f)
+                            .format("%.5f")
+                            .logarithmic(true)
+                            .defaultValue(origParameters.externalEnergyInflowFactor)
+                            .tooltip("Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that "
+                                     "each time "
+                                     "a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy "
+                                     "source."),
+                        parameters.externalEnergyInflowFactor);
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Conditional inflow")
+                            .textWidth(RightColumnWidth)
+                            .colorDependence(true)
+                            .min(0.00f)
+                            .max(1.0f)
+                            .format("%.5f")
+                            .defaultValue(origParameters.externalEnergyConditionalInflowFactor)
+                            .tooltip(
+                                "Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
+                                "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
+                                "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
+                                "Otherwise, no energy will be transferred."),
+                        parameters.externalEnergyConditionalInflowFactor);
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Backflow")
+                            .textWidth(RightColumnWidth)
+                            .colorDependence(true)
+                            .min(0.0f)
+                            .max(1.0f)
+                            .defaultValue(origParameters.externalEnergyBackflowFactor)
+                            .tooltip("The proportion of energy that flows back to the external energy source when a cell loses energy or dies. The remaining "
+                                     "fraction of the energy is used to create a new energy particle."),
+                        parameters.externalEnergyBackflowFactor);
+                    AlienImGui::EndTreeNode();
+                }
+            }
+
+            /**
              * Addon: Genome complexity measurement
              */
             if (parameters.features.genomeComplexityMeasurement) {
@@ -1548,6 +1535,22 @@ void _SimulationParametersWindow::processBase()
                                      "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
                                      "then have a high complexity value."),
                         parameters.genomeComplexityRamificationFactor);
+                    AlienImGui::EndTreeNode();
+                }
+            }
+
+            /**
+             * Addon: Legacy modes
+             */
+            if (parameters.features.legacyModes) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Legacy modes"))) {
+                    AlienImGui::Checkbox(
+                        AlienImGui::CheckboxParameters()
+                            .name("Non-restricted movements")
+                            .textWidth(RightColumnWidth)
+                            .defaultValue(origParameters.legacyCellFunctionMuscleMovementAngleFromChannel)
+                            .tooltip(""),
+                        parameters.legacyCellFunctionMuscleMovementAngleFromChannel);
                     AlienImGui::EndTreeNode();
                 }
             }
@@ -2309,13 +2312,6 @@ void _SimulationParametersWindow::processAddonList()
                 parameters.features.advancedAttackerControl);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Advanced muscle control")
-                    .textWidth(0)
-                    .defaultValue(origFeatures.advancedMuscleControl)
-                    .tooltip("It contains further settings that influence how the muscle cells work."),
-                parameters.features.advancedMuscleControl);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
                     .name("Cell age limiter")
                     .textWidth(0)
                     .defaultValue(origFeatures.cellAgeLimiter)
@@ -2353,6 +2349,13 @@ void _SimulationParametersWindow::processAddonList()
                              "and 'Advanced attacker control' to favor more complex genomes in natural selection. If it is deactivated, default values are "
                              "used that simply take the genome size into account."),
                 parameters.features.genomeComplexityMeasurement);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Legacy modes")
+                    .textWidth(0)
+                    .defaultValue(origFeatures.legacyModes)
+                    .tooltip("It contains features for compatibility with older versions."),
+                parameters.features.legacyModes);
 
             if (parameters.features != lastFeatures) {
                 _simController->setSimulationParameters(parameters);
