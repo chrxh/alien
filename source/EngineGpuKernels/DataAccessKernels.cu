@@ -42,6 +42,9 @@ namespace
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cellTO.activity.channels[i] = cell->activity.channels[i];
         }
+        cellTO.activity.origin = cell->activity.origin;
+        cellTO.activity.targetX = cell->activity.targetX;
+        cellTO.activity.targetY = cell->activity.targetY;
         cellTO.activationTime = cell->activationTime;
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
         cellTO.cellFunctionUsed = cell->cellFunctionUsed;
