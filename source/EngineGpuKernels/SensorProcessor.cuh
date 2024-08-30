@@ -196,8 +196,9 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             activity.channels[1] = toFloat((lookupResult >> 40) & 0xff) / 256;  //density
             activity.channels[2] = 1.0f - min(1.0f, distance / 256);                       //distance: 1 = close, 0 = far away
 
-            auto legacyMode = cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellFunctionMuscleMovementAngleFromChannel;
-            activity.channels[3] = legacyMode ? angle / 360.0f : 0;  //angle: between -0.5 and 0.5
+            auto legacyMode_unrestrictedMovements = cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellFunctionMuscleMovementModeActivated
+                && cudaSimulationParameters.legacyCellFunctionMuscleMovementMode == 0;
+            activity.channels[3] = legacyMode_unrestrictedMovements ? angle / 360.0f : 0;  //angle: between -0.5 and 0.5
             cell->cellFunctionData.sensor.memoryChannel1 = activity.channels[1];
             cell->cellFunctionData.sensor.memoryChannel2 = activity.channels[2];
             cell->cellFunctionData.sensor.memoryChannel3 = activity.channels[3];
@@ -205,11 +206,16 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
             activity.targetX = delta.x;
             activity.targetY = delta.y;
+
+            cell->cellFunctionData.sensor.targetX = delta.x;
+            cell->cellFunctionData.sensor.targetY = delta.y;
         } else {
             activity.channels[0] = 0;  //nothing found
             activity.channels[1] = cell->cellFunctionData.sensor.memoryChannel1;
             activity.channels[2] = cell->cellFunctionData.sensor.memoryChannel2;
             activity.channels[3] = cell->cellFunctionData.sensor.memoryChannel3;
+            activity.targetX = cell->cellFunctionData.sensor.targetX;
+            activity.targetY = cell->cellFunctionData.sensor.targetY;
         }
     }
     __syncthreads();
@@ -270,8 +276,12 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
             auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
             activity.targetX = delta.x;
             activity.targetY = delta.y;
+            cell->cellFunctionData.sensor.targetX = delta.x;
+            cell->cellFunctionData.sensor.targetY = delta.y;
         } else {
             activity.channels[0] = 0;  //nothing found
+            activity.targetX = cell->cellFunctionData.sensor.targetX;
+            activity.targetY = cell->cellFunctionData.sensor.targetY;
         }
     }
 }

@@ -122,6 +122,10 @@ namespace
     auto constexpr Id_Cell_AncestorMutationId = 16;
     auto constexpr Id_Cell_GenomeComplexity = 17;
 
+    auto constexpr Id_Activity_Origin = 0;
+    auto constexpr Id_Activity_TargetX = 1;
+    auto constexpr Id_Activity_TargetY = 2;
+
     auto constexpr Id_Neuron_ActivationFunctions = 0;
 
     auto constexpr Id_Constructor_ActivationMode = 0;
@@ -795,6 +799,14 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
+
+        //#TODO
+        //ActivityDescription defaultActivity;
+        //auxiliaries = getLoadSaveMap(task, ar);
+        //loadSave<ActivityOrigin>(task, auxiliaries, Id_Activity_Origin, data.activity.origin, defaultObject.activity.origin);
+        //loadSave<float>(task, auxiliaries, Id_Activity_TargetX, data.activity.targetX, defaultObject.activity.targetX);
+        //loadSave<float>(task, auxiliaries, Id_Activity_TargetY, data.activity.targetY, defaultObject.activity.targetY);
+        //processLoadSaveMap(task, ar, auxiliaries);
 
         //compatibility with older versions
         //>>>

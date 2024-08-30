@@ -54,6 +54,9 @@ struct ConnectionDescription
 struct ActivityDescription
 {
     std::vector<float> channels;
+    ActivityOrigin origin = ActivityOrigin_Unknown;
+    float targetX = 0;
+    float targetY = 0;
 
     ActivityDescription() { channels.resize(MAX_CHANNELS, 0); }
     auto operator<=>(ActivityDescription const&) const = default;
