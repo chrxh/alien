@@ -57,8 +57,8 @@ void WindowController::init()
 {
     auto& settings = GlobalSettings::getInstance();
     _mode = settings.getString("settings.display.mode", DesktopMode);
-    _sizeInWindowedMode.x = settings.getInt("settings.display.window width", _sizeInWindowedMode.x);
-    _sizeInWindowedMode.y = settings.getInt("settings.display.window height", _sizeInWindowedMode.y);
+    _sizeInWindowedMode.x = std::max(100, settings.getInt("settings.display.window width", _sizeInWindowedMode.x));
+    _sizeInWindowedMode.y = std::max(100, settings.getInt("settings.display.window height", _sizeInWindowedMode.y));
     _fps = settings.getInt("settings.display.fps", _fps);
     _lastContentScaleFactor = settings.getFloat("settings.display.content scale factor", _lastContentScaleFactor);
 
