@@ -121,7 +121,7 @@ public:
     }
 
     template <typename T>
-    static bool encodeDecodeSpot(
+    static bool encodeDecodeWithEnabled(
         boost::property_tree::ptree& tree,
         T& parameter,
         bool& isActivated,
@@ -135,7 +135,7 @@ public:
     }
 
     template <>
-    static bool encodeDecodeSpot(
+    static bool encodeDecodeWithEnabled(
         boost::property_tree::ptree& tree,
         ColorVector<float>& parameter,
         bool& isActivated,
@@ -149,7 +149,7 @@ public:
     }
 
     template <>
-    static bool encodeDecodeSpot(
+    static bool encodeDecodeWithEnabled(
         boost::property_tree::ptree& tree,
         ColorVector<int>& parameter,
         bool& isActivated,
@@ -163,7 +163,7 @@ public:
     }
 
     template <typename T>
-    static bool encodeDecodeSpot(
+    static bool encodeDecodeWithEnabled(
         boost::property_tree::ptree& tree,
         ColorMatrix<T>& parameter,
         bool& isActivated,

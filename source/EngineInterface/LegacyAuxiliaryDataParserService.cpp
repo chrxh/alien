@@ -72,7 +72,7 @@ namespace
     void readLegacyParameterForSpot(LegacySpotProperty<T>& result, boost::property_tree::ptree& tree, std::string const& node)
     {
         T defaultDummy;
-        result.existent = !PropertyParser::encodeDecodeSpot(tree, result.parameter, result.active, defaultDummy, node, ParserTask::Decode);
+        result.existent = !PropertyParser::encodeDecodeWithEnabled(tree, result.parameter, result.active, defaultDummy, node, ParserTask::Decode);
     }
 
     LegacyParametersForBase readLegacyParametersForBase(boost::property_tree::ptree& tree, std::string const& nodeBase)
