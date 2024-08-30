@@ -1544,13 +1544,15 @@ void _SimulationParametersWindow::processBase()
              */
             if (parameters.features.legacyModes) {
                 if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Legacy modes"))) {
-                    AlienImGui::Checkbox(
-                        AlienImGui::CheckboxParameters()
-                            .name("Non-restricted movements")
+                    AlienImGui::Switcher(
+                        AlienImGui::SwitcherParameters()
+                            .name("Legacy movement modes")
                             .textWidth(RightColumnWidth)
-                            .defaultValue(origParameters.legacyCellFunctionMuscleMovementAngleFromChannel)
+                            .defaultValue(origParameters.legacyCellFunctionMuscleMovementMode)
+                            .values({"Unrestricted", "Fetch angle from sensor"})
                             .tooltip(""),
-                        parameters.legacyCellFunctionMuscleMovementAngleFromChannel);
+                        parameters.legacyCellFunctionMuscleMovementMode,
+                        &parameters.legacyCellFunctionMuscleMovementModeActivated);
                     AlienImGui::EndTreeNode();
                 }
             }

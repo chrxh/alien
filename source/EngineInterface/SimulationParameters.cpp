@@ -197,5 +197,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellGlowStrength == other.cellGlowStrength && cellGlowRadius == other.cellGlowRadius
         && cellResetAgeAfterActivation == other.cellResetAgeAfterActivation && cellRadius == other.cellRadius
         && cellEmergentMaxAgeActivated == other.cellEmergentMaxAgeActivated
-        && legacyCellFunctionMuscleMovementAngleFromChannel == other.legacyCellFunctionMuscleMovementAngleFromChannel;
+        && legacyCellFunctionMuscleMovementModeActivated == other.legacyCellFunctionMuscleMovementModeActivated
+        && legacyCellFunctionMuscleMovementMode == other.legacyCellFunctionMuscleMovementMode
+        ;
 }

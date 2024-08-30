@@ -414,10 +414,17 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
     return result;
 }
 
-bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
+bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value, bool* enabled /*= nullptr*/)
 {
     ImGui::PushID(parameters._name.c_str());
-    ImGui::BeginDisabled(parameters._disabled);
+
+    //enable button
+    if (enabled) {
+        ImGui::Checkbox("##checkbox", enabled);
+        ImGui::BeginDisabled(!(*enabled));
+        ImGui::SameLine();
+    }
+
     static auto constexpr buttonWidth = 20;
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
     auto textAndButtonWidth = scale(parameters._textWidth + buttonWidth * 2) + ImGui::GetStyle().FramePadding.x * 4;
@@ -459,7 +466,9 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value)
     ImGui::SameLine();
     ImGui::TextUnformatted(parameters._name.c_str());
 
-    ImGui::EndDisabled();
+    if (enabled) {
+        ImGui::EndDisabled();
+    }
 
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);

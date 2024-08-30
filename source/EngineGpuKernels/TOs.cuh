@@ -36,6 +36,9 @@ struct ConnectionTO
 struct ActivityTO
 {
     float channels[MAX_CHANNELS];
+    ActivityOrigin origin;
+    float targetX;
+    float targetY;
 };
 
 struct NeuronTO

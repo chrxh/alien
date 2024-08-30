@@ -50,6 +50,7 @@ public:
     __inline__ __device__ static bool isNextCellSelfReplication(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static int getNextCellColor(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static int getNextExecutionNumber(uint8_t* genome, int nodeAddress);
+    __inline__ __device__ static int getNextInputExecutionNumber(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static void setNextCellFunctionType(uint8_t* genome, int nodeAddress, CellFunction cellFunction);
     __inline__ __device__ static void setNextCellColor(uint8_t* genome, int nodeAddress, int color);
     __inline__ __device__ static void setNextInputExecutionNumber(uint8_t* genome, int nodeAddress, int value);
@@ -602,6 +603,11 @@ __inline__ __device__ int GenomeDecoder::getNextCellColor(uint8_t* genome, int n
 __inline__ __device__ int GenomeDecoder::getNextExecutionNumber(uint8_t* genome, int nodeAddress)
 {
     return genome[nodeAddress + Const::CellExecutionNumberPos];
+}
+
+__inline__ __device__ int GenomeDecoder::getNextInputExecutionNumber(uint8_t* genome, int nodeAddress)
+{
+    return genome[nodeAddress + Const::CellInputExecutionNumberPos];
 }
 
 __inline__ __device__ void GenomeDecoder::setNextCellFunctionType(uint8_t* genome, int nodeAddress, CellFunction cellFunction)
