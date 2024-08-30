@@ -63,6 +63,9 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     
 
     if (0 == threadIdx.x) {
+        outputActivity.origin = inputActivity.origin;
+        outputActivity.targetX = inputActivity.targetX;
+        outputActivity.targetY = inputActivity.targetY;
         CellFunctionProcessor::setActivity(cell, outputActivity);
         statistics.incNumNeuronActivities(cell->color);
     }
