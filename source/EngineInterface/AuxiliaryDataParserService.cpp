@@ -559,6 +559,13 @@ namespace
             defaultParameters.cellFunctionMuscleBendingAccelerationThreshold,
             "simulation parameters.cell.function.muscle.bending acceleration threshold",
             parserTask);
+        PropertyParser::encodeDecodeWithEnabled(
+            tree,
+            parameters.legacyCellFunctionMuscleMovementMode,
+            parameters.legacyCellFunctionMuscleMovementModeActivated,
+            defaultParameters.legacyCellFunctionMuscleMovementMode,
+            "simulation parameters.legacy.cell.function.muscle.movement mode",
+            parserTask);
 
         PropertyParser::encodeDecode(
             tree,
@@ -715,63 +722,63 @@ namespace
             }
             PropertyParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", parserTask);
 
-            PropertyParser::PropertyParser::encodeDecodeSpot(tree, spot.values.friction, spot.activatedValues.friction, defaultSpot.values.friction, base + "friction", parserTask);
-            PropertyParser::encodeDecodeSpot(tree, spot.values.rigidity, spot.activatedValues.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::PropertyParser::encodeDecodeWithEnabled(tree, spot.values.friction, spot.activatedValues.friction, defaultSpot.values.friction, base + "friction", parserTask);
+            PropertyParser::encodeDecodeWithEnabled(tree, spot.values.rigidity, spot.activatedValues.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.radiationDisableSources,
                 spot.activatedValues.radiationDisableSources,
                 defaultSpot.values.radiationDisableSources,
                 base + "radiation.disable sources",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.radiationAbsorption,
                 spot.activatedValues.radiationAbsorption,
                 defaultSpot.values.radiationAbsorption,
                 base + "radiation.absorption",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.radiationAbsorptionLowVelocityPenalty,
                 spot.activatedValues.radiationAbsorptionLowVelocityPenalty,
                 defaultSpot.values.radiationAbsorptionLowVelocityPenalty,
                 base + "radiation.absorption low velocity penalty",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.radiationAbsorptionLowGenomeComplexityPenalty,
                 spot.activatedValues.radiationAbsorptionLowGenomeComplexityPenalty,
                 defaultSpot.values.radiationAbsorptionLowGenomeComplexityPenalty,
                 base +"radiation.absorption low genome complexity penalty",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.radiationCellAgeStrength,
                 spot.activatedValues.radiationCellAgeStrength,
                 defaultSpot.values.radiationCellAgeStrength,
                 base + "radiation.factor",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree, spot.values.cellMaxForce, spot.activatedValues.cellMaxForce, defaultSpot.values.cellMaxForce, base + "cell.max force", parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree, spot.values.cellMinEnergy, spot.activatedValues.cellMinEnergy, defaultSpot.values.cellMinEnergy, base + "cell.min energy", parserTask);
 
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellFusionVelocity,
                 spot.activatedValues.cellFusionVelocity,
                 defaultSpot.values.cellFusionVelocity,
                 base + "cell.fusion velocity",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellMaxBindingEnergy,
                 spot.activatedValues.cellMaxBindingEnergy,
                 defaultSpot.values.cellMaxBindingEnergy,
                 base + "cell.max binding energy",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellInactiveMaxAge,
                 spot.activatedValues.cellInactiveMaxAge,
@@ -793,7 +800,7 @@ namespace
                 base + "cell.color transition rules.target color",
                 parserTask);
 
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellFunctionAttackerEnergyCost,
                 spot.activatedValues.cellFunctionAttackerEnergyCost,
@@ -801,35 +808,35 @@ namespace
                 base + "cell.function.attacker.energy cost",
                 parserTask);
 
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellFunctionAttackerFoodChainColorMatrix,
                 spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix,
                 defaultSpot.values.cellFunctionAttackerFoodChainColorMatrix,
                 base + "cell.function.attacker.food chain color matrix",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellFunctionAttackerGenomeComplexityBonus,
                 spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus,
                 defaultSpot.values.cellFunctionAttackerGenomeComplexityBonus,
                 base + "cell.function.attacker.genome size bonus",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellFunctionAttackerNewComplexMutantPenalty,
                 spot.activatedValues.cellFunctionAttackerNewComplexMutantPenalty,
                 defaultSpot.values.cellFunctionAttackerNewComplexMutantPenalty,
                 base + "cell.function.attacker.new complex mutant penalty",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellFunctionAttackerGeometryDeviationExponent,
                 spot.activatedValues.cellFunctionAttackerGeometryDeviationExponent,
                 defaultSpot.values.cellFunctionAttackerGeometryDeviationExponent,
                 base + "cell.function.attacker.geometry deviation exponent",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellFunctionAttackerConnectionsMismatchPenalty,
                 spot.activatedValues.cellFunctionAttackerConnectionsMismatchPenalty,
@@ -837,84 +844,84 @@ namespace
                 base + "cell.function.attacker.connections mismatch penalty",
                 parserTask);
 
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellCopyMutationNeuronData,
                 spot.activatedValues.cellCopyMutationNeuronData,
                 defaultSpot.values.cellCopyMutationNeuronData,
                 base + "cell.copy mutation.neuron data",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellCopyMutationCellProperties,
                 spot.activatedValues.cellCopyMutationCellProperties,
                 defaultSpot.values.cellCopyMutationCellProperties,
                 base + "cell.copy mutation.cell properties",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellCopyMutationGeometry,
                 spot.activatedValues.cellCopyMutationGeometry,
                 defaultSpot.values.cellCopyMutationGeometry,
                 base + "cell.copy mutation.geometry",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellCopyMutationCustomGeometry,
                 spot.activatedValues.cellCopyMutationCustomGeometry,
                 defaultSpot.values.cellCopyMutationCustomGeometry,
                 base + "cell.copy mutation.custom geometry",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellCopyMutationCellFunction,
                 spot.activatedValues.cellCopyMutationCellFunction,
                 defaultSpot.values.cellCopyMutationCellFunction,
                 base + "cell.copy mutation.cell function",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellCopyMutationInsertion,
                 spot.activatedValues.cellCopyMutationInsertion,
                 defaultSpot.values.cellCopyMutationInsertion,
                 base + "cell.copy mutation.insertion",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellCopyMutationDeletion,
                 spot.activatedValues.cellCopyMutationDeletion,
                 defaultSpot.values.cellCopyMutationDeletion,
                 base + "cell.copy mutation.deletion",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellCopyMutationTranslation,
                 spot.activatedValues.cellCopyMutationTranslation,
                 defaultSpot.values.cellCopyMutationTranslation,
                 base + "cell.copy mutation.translation",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellCopyMutationDuplication,
                 spot.activatedValues.cellCopyMutationDuplication,
                 defaultSpot.values.cellCopyMutationDuplication,
                 base + "cell.copy mutation.duplication",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellCopyMutationCellColor,
                 spot.activatedValues.cellCopyMutationCellColor,
                 defaultSpot.values.cellCopyMutationCellColor,
                 base + "cell.copy mutation.cell color",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellCopyMutationSubgenomeColor,
                 spot.activatedValues.cellCopyMutationSubgenomeColor,
                 defaultSpot.values.cellCopyMutationSubgenomeColor,
                 base + "cell.copy mutation.subgenome color",
                 parserTask);
-            PropertyParser::encodeDecodeSpot(
+            PropertyParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellCopyMutationGenomeColor,
                 spot.activatedValues.cellCopyMutationGenomeColor,
