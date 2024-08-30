@@ -70,6 +70,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 
     if (threadIdx.x == 0) {
+        activity.origin = ActivityOrigin_Sensor;
         CellFunctionProcessor::setActivity(cell, activity);
     }
 }
@@ -194,14 +195,16 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             activity.channels[0] = 1;                                                     //something found
             activity.channels[1] = toFloat((lookupResult >> 40) & 0xff) / 256;  //density
             activity.channels[2] = 1.0f - min(1.0f, distance / 256);                       //distance: 1 = close, 0 = far away
-            activity.channels[3] = cudaSimulationParameters.cellFunctionMuscleMovementAngleFromSensor ? 0 : angle / 360.0f;  //angle: between -0.5 and 0.5
+
+            auto legacyMode = cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellFunctionMuscleMovementAngleFromChannel;
+            activity.channels[3] = legacyMode ? angle / 360.0f : 0;  //angle: between -0.5 and 0.5
             cell->cellFunctionData.sensor.memoryChannel1 = activity.channels[1];
             cell->cellFunctionData.sensor.memoryChannel2 = activity.channels[2];
             cell->cellFunctionData.sensor.memoryChannel3 = activity.channels[3];
-            auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
-            cell->cellFunctionData.sensor.targetX = delta.x;
-            cell->cellFunctionData.sensor.targetY = delta.y;
             statistics.incNumSensorMatches(cell->color);
+            auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
+            activity.targetX = delta.x;
+            activity.targetY = delta.y;
         } else {
             activity.channels[0] = 0;  //nothing found
             activity.channels[1] = cell->cellFunctionData.sensor.memoryChannel1;
@@ -263,6 +266,10 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
             activity.channels[1] = static_cast<float>((lookupResult >> 40) & 0xff) / 256;  //density
             activity.channels[2] = distance / 256;                                         //distance
             statistics.incNumSensorMatches(cell->color);
+
+            auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
+            activity.targetX = delta.x;
+            activity.targetY = delta.y;
         } else {
             activity.channels[0] = 0;  //nothing found
         }

@@ -23,14 +23,15 @@ add_library(EngineInterface
     GeneralSettings.h
     GpuSettings.h
     InspectedEntityIds.h
-    LegacySimulationParametersService.cpp
-    LegacySimulationParametersService.h
+    LegacyAuxiliaryDataParserService.cpp
+    LegacyAuxiliaryDataParserService.h
     Motion.h
     MutationType.h
     OverlayDescriptions.h
     PreviewDescriptionService.cpp
     PreviewDescriptionService.h
     PreviewDescriptions.h
+    PropertyParser.h
     RadiationSource.h
     RawStatisticsData.h
     SelectionShallowData.h
