@@ -1535,6 +1535,17 @@ void _SimulationParametersWindow::processBase()
                                      "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
                                      "then have a high complexity value."),
                         parameters.genomeComplexityRamificationFactor);
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Neuron factor")
+                            .textWidth(RightColumnWidth)
+                            .colorDependence(true)
+                            .min(0.0f)
+                            .max(20.0f)
+                            .format("%.1f")
+                            .defaultValue(origParameters.genomeComplexityNeuronFactor)
+                            .tooltip(""),
+                        parameters.genomeComplexityNeuronFactor);
                     AlienImGui::EndTreeNode();
                 }
             }
@@ -1546,7 +1557,7 @@ void _SimulationParametersWindow::processBase()
                 if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Legacy modes"))) {
                     AlienImGui::Switcher(
                         AlienImGui::SwitcherParameters()
-                            .name("Legacy movement modes")
+                            .name("Muscle movement modes")
                             .textWidth(RightColumnWidth)
                             .defaultValue(origParameters.legacyCellFunctionMuscleMovementMode)
                             .values({"Unrestricted", "Fetch angle from sensor"})

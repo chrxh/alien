@@ -188,6 +188,12 @@ namespace
             parserTask);
         PropertyParser::encodeDecode(
             tree,
+            parameters.genomeComplexityNeuronFactor,
+            defaultParameters.genomeComplexityNeuronFactor,
+            "simulation parameters.genome complexity.genome complexity neuron factor",
+            parserTask);
+        PropertyParser::encodeDecode(
+            tree,
             parameters.baseValues.radiationCellAgeStrength,
             defaultParameters.baseValues.radiationCellAgeStrength,
             "simulation parameters.radiation.factor",
