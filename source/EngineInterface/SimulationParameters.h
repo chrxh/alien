@@ -179,7 +179,8 @@ struct SimulationParameters
     ColorVector<float> cellFunctionMuscleBendingAngle = {5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f};
     ColorVector<float> cellFunctionMuscleBendingAcceleration = {0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
     float cellFunctionMuscleBendingAccelerationThreshold = 0.1f;
-    bool legacyCellFunctionMuscleMovementAngleFromChannel = false;
+    bool legacyCellFunctionMuscleMovementModeActivated = false;
+    int legacyCellFunctionMuscleMovementMode = 0;   //0 = unrestricted, 1 = get angle from sensor
 
     ColorVector<float> cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
     float cellFunctionSensorActivityThreshold = 0.1f;

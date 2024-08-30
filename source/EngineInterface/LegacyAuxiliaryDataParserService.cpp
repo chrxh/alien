@@ -168,15 +168,16 @@ void LegacyAuxiliaryDataParserService::activateParametersAndFeaturesForLegacyFil
     //check activation of legacyCellFunctionMuscleMovementAngleFromChannel before v4.10.0
     if (missingFeatures.legacyMode && !legacyFeatures.advancedMuscleControl.existent) {
         parameters.features.legacyModes = true;
-        parameters.legacyCellFunctionMuscleMovementAngleFromChannel = true;
+        parameters.legacyCellFunctionMuscleMovementModeActivated = true;
+        parameters.legacyCellFunctionMuscleMovementMode = 0;
     }
 
     //check activation of legacyCellFunctionMuscleMovementAngleFromChannel between v4.10.0 and v4.10.1
     if (legacyFeatures.advancedMuscleControl.existent && legacyParameters.base.cellFunctionMuscleMovementAngleFromSensor.existent) {
-        if (!(legacyFeatures.advancedMuscleControl.parameter && legacyParameters.base.cellFunctionMuscleMovementAngleFromSensor.parameter)) {
-            parameters.features.legacyModes = true;
-            parameters.legacyCellFunctionMuscleMovementAngleFromChannel = true;
-        }
+        parameters.features.legacyModes = true;
+        parameters.legacyCellFunctionMuscleMovementModeActivated = true;
+        parameters.legacyCellFunctionMuscleMovementMode =
+            legacyFeatures.advancedMuscleControl.parameter && legacyParameters.base.cellFunctionMuscleMovementAngleFromSensor.parameter ? 1 : 0;
     }
 
     //check activation of other features
