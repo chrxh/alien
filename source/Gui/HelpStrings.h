@@ -115,7 +115,7 @@ namespace Const
         "The functions of cells can be executed in a specific sequence determined by this number. The values are limited between 0 and 5 and "
         "follow a modulo 6 logic. For example, a cell with an execution number of 0 will be executed at time points 0, 6, 12, 18, etc. A cell "
         "with an execution number of 1 will be shifted by one, i.e. executed at 1, 7, 13, 19, etc. This time offset enables the orchestration "
-        "of cell functions. A muscle cell, for instance, requiring input from a neuron cell, should then be executed one time step later.";
+        "of cell functions. A muscle cell, for instance, requiring input from a neuron cell, should then be executed some time steps later.";
 
     std::string const GenomeInputExecutionNumberTooltip =
         "A functioning organism requires cells to collaborate. This can involve sensor cells that perceive the environment, neuron cells that "
