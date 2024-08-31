@@ -3,14 +3,14 @@
 ## [4.10.2] - 2024-08-31
 ### Added
 - engine, gui/simulation parameters: number of neurons can be taken into account for the genome complexity calculation
-- engine, gui/simulation parameters: add-on 'Legacy features' containing parameter for older muscle movement modes
+- engine, gui/simulation parameters: add-on 'Legacy features' containing parameter for older muscle movement mode
 
 ### Changed
 - engine: cell property mutations prefer to set fitting input execution numbers (leads in better communicating cell networks)
 - engine: muscle cells in movement mode will only move if they receive signals which originate from sensors that have targeted an object
 
 ### Deleted
-- gui/simulation parameters: add-on 'Advanced muscle control' (incorporated in add-on 'Legacy features')
+- gui/simulation parameters: add-on 'Advanced muscle control'
 
 ### Fixed
 - gui: prevent exception in case of too small window size

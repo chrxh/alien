@@ -998,6 +998,26 @@ void _SimulationParametersWindow::processBase()
              * Muscle
              */
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Cell function: Muscle"))) {
+                AlienImGui::Checkbox(
+                    AlienImGui::CheckboxParameters()
+                        .name("Movement toward target")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origParameters.cellFunctionMuscleMovementTowardTargetedObject)
+                        .tooltip("If activated, a muscle cell in movement mode will only move if the triggering signal originates from a sensor cell that has "
+                                 "targeted an object. The specified angle in the input is interpreted relative to the target."),
+                    parameters.cellFunctionMuscleMovementTowardTargetedObject);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Movement acceleration")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(0.4f)
+                        .logarithmic(true)
+                        .defaultValue(origParameters.cellFunctionMuscleMovementAcceleration)
+                        .tooltip("The maximum value by which a muscle cell can modify its velocity during activation. This parameter applies only to muscle cells "
+                                 "which are in movement mode."),
+                    parameters.cellFunctionMuscleMovementAcceleration);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Contraction and expansion delta")
@@ -1009,18 +1029,6 @@ void _SimulationParametersWindow::processBase()
                         .tooltip("The maximum length that a muscle cell can shorten or lengthen a cell connection. This parameter applies only to muscle cells "
                                  "which are in contraction/expansion mode."),
                     parameters.cellFunctionMuscleContractionExpansionDelta);
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Forward/backward acceleration")
-                        .textWidth(RightColumnWidth)
-                        .colorDependence(true)
-                        .min(0)
-                        .max(0.4f)
-                        .logarithmic(true)
-                        .defaultValue(origParameters.cellFunctionMuscleMovementAcceleration)
-                        .tooltip("The maximum value by which a muscle cell can modify its velocity during activation. This parameter applies only to muscle cells "
-                                 "which are in movement mode."),
-                    parameters.cellFunctionMuscleMovementAcceleration);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Bending angle")
@@ -1556,18 +1564,15 @@ void _SimulationParametersWindow::processBase()
              */
             if (parameters.features.legacyModes) {
                 if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Legacy features"))) {
-                    AlienImGui::Switcher(
-                        AlienImGui::SwitcherParameters()
-                            .name("Muscle movement modes")
+                    AlienImGui::Checkbox(
+                        AlienImGui::CheckboxParameters()
+                            .name("Fetch angle from adjacent sensor")
                             .textWidth(RightColumnWidth)
-                            .defaultValue(origParameters.legacyCellFunctionMuscleMovementMode)
-                            .values({"Unrestricted", "Fetch angle from sensor"})
-                            .tooltip(ICON_FA_CHEVRON_RIGHT " Unrestricted: Muscle cells can move in all directions when set in 'Movement' mode. The relative "
-                                                           "angle is provided in channel #3.\n\n" ICON_FA_CHEVRON_RIGHT
-                                                           " Fetch angle from sensor: Muscle cells can move only if an adjacent sensor cell has previously "
-                                                           "detected a target. The relative angle in relation to the target is provided in channel #3."),
-                        parameters.legacyCellFunctionMuscleMovementMode,
-                        &parameters.legacyCellFunctionMuscleMovementModeActivated);
+                            .defaultValue(origParameters.legacyCellFunctionMuscleMovementAngleFromSensor)
+                            .tooltip("This parameter changes the behavior of the parameter 'Movement angle from sensor'. If activated, the fetches the angle "
+                                     "directly from an connected (or connected-connected) sensor cell has previously detected a target (legacy behavior). If "
+                                     "deactivated, the signal must only originate from a sensor cell and must not be adjacent (new behavior)."),
+                        parameters.legacyCellFunctionMuscleMovementAngleFromSensor);
                     AlienImGui::EndTreeNode();
                 }
             }
