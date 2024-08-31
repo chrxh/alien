@@ -65,7 +65,7 @@ float Viewport::getZoomSensitivity()
 
 void Viewport::setZoomSensitivity(float value)
 {
-    _zoomSensitivity = value;
+    _zoomSensitivity = std::min(10.0f, std::max(1.0f, value));
 }
 
 void Viewport::centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos)

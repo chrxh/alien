@@ -75,6 +75,8 @@ struct SimulationParameters
 
     ColorVector<float> genomeComplexitySizeFactor  = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorVector<float> genomeComplexityRamificationFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    ColorVector<float> genomeComplexityNeuronFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+
 
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
@@ -179,7 +181,8 @@ struct SimulationParameters
     ColorVector<float> cellFunctionMuscleBendingAngle = {5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f};
     ColorVector<float> cellFunctionMuscleBendingAcceleration = {0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
     float cellFunctionMuscleBendingAccelerationThreshold = 0.1f;
-    bool cellFunctionMuscleMovementAngleFromSensor = false;
+    bool legacyCellFunctionMuscleMovementModeActivated = false;
+    int legacyCellFunctionMuscleMovementMode = 0;   //0 = unrestricted, 1 = get angle from sensor
 
     ColorVector<float> cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
     float cellFunctionSensorActivityThreshold = 0.1f;

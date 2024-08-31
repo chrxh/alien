@@ -7,7 +7,7 @@
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
-#include "EngineInterface/LegacySimulationParametersService.h"
+#include "EngineInterface/LegacyAuxiliaryDataParserService.h"
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
@@ -476,7 +476,8 @@ void _SimulationParametersWindow::processBase()
                         .infinity(true)
                         .format("%.0f")
                         .defaultValue(&origParameters.baseValues.cellMaxBindingEnergy)
-                        .tooltip(std::string("Maximum energy of a cell at which it does not disintegrate.")),
+                        .tooltip(std::string("Maximum energy of a cell at which it can contain bonds to adjacent cells. If the energy of a cell exceeds this "
+                                             "value, all bonds will be destroyed.")),
                     &parameters.baseValues.cellMaxBindingEnergy);
                 AlienImGui::EndTreeNode();
             }
@@ -659,7 +660,7 @@ void _SimulationParametersWindow::processBase()
                         .name("Neural net")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -672,7 +673,7 @@ void _SimulationParametersWindow::processBase()
                         .name("Cell properties")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -687,7 +688,7 @@ void _SimulationParametersWindow::processBase()
                         .name("Geometry")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -700,7 +701,7 @@ void _SimulationParametersWindow::processBase()
                         .name("Custom geometry")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -713,7 +714,7 @@ void _SimulationParametersWindow::processBase()
                         .name("Cell function type")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -728,7 +729,7 @@ void _SimulationParametersWindow::processBase()
                         .name("Insertion")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -741,7 +742,7 @@ void _SimulationParametersWindow::processBase()
                         .name("Deletion")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -754,7 +755,7 @@ void _SimulationParametersWindow::processBase()
                         .name("Translation")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -766,7 +767,7 @@ void _SimulationParametersWindow::processBase()
                         .name("Duplication")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -778,7 +779,7 @@ void _SimulationParametersWindow::processBase()
                         .name("Individual cell color")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -791,7 +792,7 @@ void _SimulationParametersWindow::processBase()
                         .name("Sub-genome color")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -803,7 +804,7 @@ void _SimulationParametersWindow::processBase()
                         .name("Genome color")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -1299,86 +1300,6 @@ void _SimulationParametersWindow::processBase()
             }
 
             /**
-             * Addon: Advanced muscle control
-             */
-            if (parameters.features.advancedMuscleControl) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced muscle control"))) {
-                    AlienImGui::Checkbox(
-                        AlienImGui::CheckboxParameters()
-                            .name("Get movement angle from sensor")
-                            .textWidth(RightColumnWidth)
-                            .defaultValue(origParameters.cellFunctionMuscleMovementAngleFromSensor)
-                            .tooltip("If activated, muscle cells will receive the relative angle for movements from connected (or connected-connected) sensor cells."),
-                        parameters.cellFunctionMuscleMovementAngleFromSensor);
-                    AlienImGui::EndTreeNode();
-                }
-            }
-
-            /**
-             * Addon: External energy control
-             */
-            if (parameters.features.externalEnergyControl) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: External energy control").highlighted(false))) {
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name("External energy amount")
-                            .textWidth(RightColumnWidth)
-                            .min(0.0f)
-                            .max(100000000.0f)
-                            .format("%.0f")
-                            .logarithmic(true)
-                            .infinity(true)
-                            .defaultValue(&origParameters.externalEnergy)
-                            .tooltip(
-                                "This parameter can be used to set the amount of energy of an external energy source. This type of energy can be "
-                                "transferred to all constructor cells at a certain rate (see inflow settings).\n\nTip: You can explicitly enter a numerical value by selecting the "
-                                "slider and then pressing TAB.\n\nWarning: Too much external energy can result in a massive production of cells and slow down or "
-                                "even crash the simulation."),
-                        &parameters.externalEnergy);
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name("Inflow")
-                            .textWidth(RightColumnWidth)
-                            .colorDependence(true)
-                            .min(0.0f)
-                            .max(1.0f)
-                            .format("%.5f")
-                            .logarithmic(true)
-                            .defaultValue(origParameters.externalEnergyInflowFactor)
-                            .tooltip(
-                                "Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that each time "
-                                "a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy source."),
-                        parameters.externalEnergyInflowFactor);
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name("Conditional inflow")
-                            .textWidth(RightColumnWidth)
-                            .colorDependence(true)
-                            .min(0.00f)
-                            .max(1.0f)
-                            .format("%.5f")
-                            .defaultValue(origParameters.externalEnergyConditionalInflowFactor)
-                            .tooltip("Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
-                                     "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
-                                     "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
-                                     "Otherwise, no energy will be transferred."),
-                        parameters.externalEnergyConditionalInflowFactor);
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name("Backflow")
-                            .textWidth(RightColumnWidth)
-                            .colorDependence(true)
-                            .min(0.0f)
-                            .max(1.0f)
-                            .defaultValue(origParameters.externalEnergyBackflowFactor)
-                            .tooltip("The proportion of energy that flows back to the external energy source when a cell loses energy or dies. The remaining "
-                                     "fraction of the energy is used to create a new energy particle."),
-                        parameters.externalEnergyBackflowFactor);
-                    AlienImGui::EndTreeNode();
-                }
-            }
-
-            /**
              * Addon: Cell color transition rules
              */
             if (parameters.features.cellColorTransitionRules) {
@@ -1520,6 +1441,73 @@ void _SimulationParametersWindow::processBase()
             }
 
             /**
+             * Addon: External energy control
+             */
+            if (parameters.features.externalEnergyControl) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: External energy control").highlighted(false))) {
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("External energy amount")
+                            .textWidth(RightColumnWidth)
+                            .min(0.0f)
+                            .max(100000000.0f)
+                            .format("%.0f")
+                            .logarithmic(true)
+                            .infinity(true)
+                            .defaultValue(&origParameters.externalEnergy)
+                            .tooltip("This parameter can be used to set the amount of energy of an external energy source. This type of energy can be "
+                                     "transferred to all constructor cells at a certain rate (see inflow settings).\n\nTip: You can explicitly enter a "
+                                     "numerical value by clicking on the "
+                                     "slider while holding CTRL.\n\nWarning: Too much external energy can result in a massive production of cells and slow "
+                                     "down or "
+                                     "even crash the simulation."),
+                        &parameters.externalEnergy);
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Inflow")
+                            .textWidth(RightColumnWidth)
+                            .colorDependence(true)
+                            .min(0.0f)
+                            .max(1.0f)
+                            .format("%.5f")
+                            .logarithmic(true)
+                            .defaultValue(origParameters.externalEnergyInflowFactor)
+                            .tooltip("Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that "
+                                     "each time "
+                                     "a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy "
+                                     "source."),
+                        parameters.externalEnergyInflowFactor);
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Conditional inflow")
+                            .textWidth(RightColumnWidth)
+                            .colorDependence(true)
+                            .min(0.00f)
+                            .max(1.0f)
+                            .format("%.5f")
+                            .defaultValue(origParameters.externalEnergyConditionalInflowFactor)
+                            .tooltip(
+                                "Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
+                                "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
+                                "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
+                                "Otherwise, no energy will be transferred."),
+                        parameters.externalEnergyConditionalInflowFactor);
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Backflow")
+                            .textWidth(RightColumnWidth)
+                            .colorDependence(true)
+                            .min(0.0f)
+                            .max(1.0f)
+                            .defaultValue(origParameters.externalEnergyBackflowFactor)
+                            .tooltip("The proportion of energy that flows back to the external energy source when a cell loses energy or dies. The remaining "
+                                     "fraction of the energy is used to create a new energy particle."),
+                        parameters.externalEnergyBackflowFactor);
+                    AlienImGui::EndTreeNode();
+                }
+            }
+
+            /**
              * Addon: Genome complexity measurement
              */
             if (parameters.features.genomeComplexityMeasurement) {
@@ -1548,6 +1536,38 @@ void _SimulationParametersWindow::processBase()
                                      "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
                                      "then have a high complexity value."),
                         parameters.genomeComplexityRamificationFactor);
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Neuron factor")
+                            .textWidth(RightColumnWidth)
+                            .colorDependence(true)
+                            .min(0.0f)
+                            .max(20.0f)
+                            .format("%.1f")
+                            .defaultValue(origParameters.genomeComplexityNeuronFactor)
+                            .tooltip("This parameter takes into account the number of encoded neurons in the genome for the complexity value."),
+                        parameters.genomeComplexityNeuronFactor);
+                    AlienImGui::EndTreeNode();
+                }
+            }
+
+            /**
+             * Addon: Legacy modes
+             */
+            if (parameters.features.legacyModes) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Legacy features"))) {
+                    AlienImGui::Switcher(
+                        AlienImGui::SwitcherParameters()
+                            .name("Muscle movement modes")
+                            .textWidth(RightColumnWidth)
+                            .defaultValue(origParameters.legacyCellFunctionMuscleMovementMode)
+                            .values({"Unrestricted", "Fetch angle from sensor"})
+                            .tooltip(ICON_FA_CHEVRON_RIGHT " Unrestricted: Muscle cells can move in all directions when set in 'Movement' mode. The relative "
+                                                           "angle is provided in channel #3.\n\n" ICON_FA_CHEVRON_RIGHT
+                                                           " Fetch angle from sensor: Muscle cells can move only if an adjacent sensor cell has previously "
+                                                           "detected a target. The relative angle in relation to the target is provided in channel #3."),
+                        parameters.legacyCellFunctionMuscleMovementMode,
+                        &parameters.legacyCellFunctionMuscleMovementModeActivated);
                     AlienImGui::EndTreeNode();
                 }
             }
@@ -1935,7 +1955,7 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .name("Neuron weights and biases")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .colorDependence(true)
                         .logarithmic(true)
@@ -1948,7 +1968,7 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .name("Cell properties")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -1961,7 +1981,7 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .name("Geometry")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -1974,7 +1994,7 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .name("Custom geometry")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -1987,7 +2007,7 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .name("Cell function type")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -2000,7 +2020,7 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .name("Cell insertion")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -2013,7 +2033,7 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .name("Cell deletion")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -2026,7 +2046,7 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .name("Translation")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -2039,7 +2059,7 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .name("Duplication")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -2049,10 +2069,23 @@ bool _SimulationParametersWindow::processSpot(int index)
                     &spot.activatedValues.cellCopyMutationDuplication);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
-                        .name("Color")
+                        .name("Individual cell color")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
+                        .format("%.7f")
+                        .logarithmic(true)
+                        .colorDependence(true)
+                        .defaultValue(origSpot.values.cellCopyMutationCellColor)
+                        .disabledValue(parameters.baseValues.cellCopyMutationCellColor),
+                    spot.values.cellCopyMutationCellColor,
+                    &spot.activatedValues.cellCopyMutationCellColor);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Sub-genome color")
+                        .textWidth(RightColumnWidth)
+                        .min(0.0f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -2062,10 +2095,10 @@ bool _SimulationParametersWindow::processSpot(int index)
                     &spot.activatedValues.cellCopyMutationSubgenomeColor);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
-                        .name("Uniform color")
+                        .name("Genome color")
                         .textWidth(RightColumnWidth)
                         .min(0.0f)
-                        .max(0.1f)
+                        .max(1.0f)
                         .format("%.7f")
                         .logarithmic(true)
                         .colorDependence(true)
@@ -2296,13 +2329,6 @@ void _SimulationParametersWindow::processAddonList()
                 parameters.features.advancedAttackerControl);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Advanced muscle control")
-                    .textWidth(0)
-                    .defaultValue(origFeatures.advancedMuscleControl)
-                    .tooltip("It contains further settings that influence how the muscle cells work."),
-                parameters.features.advancedMuscleControl);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
                     .name("Cell age limiter")
                     .textWidth(0)
                     .defaultValue(origFeatures.cellAgeLimiter)
@@ -2340,6 +2366,13 @@ void _SimulationParametersWindow::processAddonList()
                              "and 'Advanced attacker control' to favor more complex genomes in natural selection. If it is deactivated, default values are "
                              "used that simply take the genome size into account."),
                 parameters.features.genomeComplexityMeasurement);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name("Legacy features")
+                    .textWidth(0)
+                    .defaultValue(origFeatures.legacyModes)
+                    .tooltip("It contains features for compatibility with older versions."),
+                parameters.features.legacyModes);
 
             if (parameters.features != lastFeatures) {
                 _simController->setSimulationParameters(parameters);
@@ -2443,6 +2476,9 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i]));
         parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i] =
             std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i]));
+        parameters.genomeComplexitySizeFactor[i] = std::max(0.0f, parameters.genomeComplexitySizeFactor[i]);
+        parameters.genomeComplexityRamificationFactor[i] = std::max(0.0f, parameters.genomeComplexityRamificationFactor[i]);
+        parameters.genomeComplexityNeuronFactor[i] = std::max(0.0f, parameters.genomeComplexityNeuronFactor[i]);
     }
     parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);

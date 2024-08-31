@@ -112,6 +112,9 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
 __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* cell)
 {
     Activity result;
+    result.origin = ActivityOrigin_Unknown;
+    result.targetX = 0;
+    result.targetY = 0;
 
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         result.channels[i] = 0;
@@ -131,6 +134,11 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
                 result.channels[i] += connectedCell->activity.channels[i];
                 result.channels[i] = max(-1000000.0f, min(1000000.0f, result.channels[i])); //truncate value to avoid overflow
             }
+            if (connectedCell->activity.origin == ActivityOrigin_Sensor) {
+                result.origin = ActivityOrigin_Sensor;
+                result.targetX = connectedCell->activity.targetX;
+                result.targetY = connectedCell->activity.targetY;
+            }
         }
     }
     return result;
@@ -141,6 +149,9 @@ __inline__ __device__ void CellFunctionProcessor::setActivity(Cell* cell, Activi
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->activity.channels[i] = newActivity.channels[i];
     }
+    cell->activity.origin = newActivity.origin;
+    cell->activity.targetX = newActivity.targetX;
+    cell->activity.targetY = newActivity.targetY;
 }
 
 __inline__ __device__ void CellFunctionProcessor::updateInvocationState(Cell* cell, Activity const& activity)

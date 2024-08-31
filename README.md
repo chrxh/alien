@@ -71,7 +71,7 @@ Further information and artwork:
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 # 💽 Installer
-Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (updated: 2024-08-24)
+Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (updated: 2024-08-31)
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section below.
 
@@ -98,7 +98,7 @@ If everything goes well, the ALIEN executable can be found under the build direc
 It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
 
 There are reported build issues with (updated: 2024-06-22)
-* GCC 13 (version 11 should work)
+* GCC 12+ (version 11 should work)
 * Visual Studio 17.10 (version 17.9 should work)
 * CUDA 12.5 (version 12.4 should work)
 

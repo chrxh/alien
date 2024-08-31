@@ -122,6 +122,9 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->activity.channels[i] = cellTO.activity.channels[i];
     }
+    cell->activity.origin = cellTO.activity.origin;
+    cell->activity.targetX = cellTO.activity.targetX;
+    cell->activity.targetY = cellTO.activity.targetY;
 
     cell->cellFunction = cellTO.cellFunction;
     switch (cellTO.cellFunction) {
@@ -282,6 +285,9 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->activity.channels[i] = 0;
     }
+    cell->activity.origin = ActivityOrigin_Unknown;
+    cell->activity.targetX = 0;
+    cell->activity.targetY = 0;
     cell->density = 1.0f;
     cell->creatureId = 0;
     cell->mutationId = 1;
@@ -406,6 +412,9 @@ __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->activity.channels[i] = 0;
     }
+    cell->activity.origin = ActivityOrigin_Unknown;
+    cell->activity.targetX = 0;
+    cell->activity.targetY = 0;
     cell->density = 1.0f;
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;

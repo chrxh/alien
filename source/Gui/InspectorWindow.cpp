@@ -644,7 +644,7 @@ void _InspectorWindow::processMuscleContent(MuscleDescription& muscle)
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
                 .name("Mode")
-                .values({"Movement", "Expansion and contraction", "Bending"})
+                .values({"Movement to sensor target", "Expansion and contraction", "Bending"})
                 .textWidth(CellFunctionTextWidth)
                 .tooltip(Const::GenomeMuscleModeTooltip),
             muscle.mode);
