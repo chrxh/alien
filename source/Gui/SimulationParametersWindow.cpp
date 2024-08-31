@@ -476,7 +476,8 @@ void _SimulationParametersWindow::processBase()
                         .infinity(true)
                         .format("%.0f")
                         .defaultValue(&origParameters.baseValues.cellMaxBindingEnergy)
-                        .tooltip(std::string("Maximum energy of a cell at which it does not disintegrate.")),
+                        .tooltip(std::string("Maximum energy of a cell at which it can contain bonds to adjacent cells. If the energy of a cell exceeds this "
+                                             "value, all bonds will be destroyed.")),
                     &parameters.baseValues.cellMaxBindingEnergy);
                 AlienImGui::EndTreeNode();
             }
