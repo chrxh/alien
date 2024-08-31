@@ -556,14 +556,14 @@ __global__ void cudaDrawCells(
                         auto direction = Math::normalized(arrowEnd - otherCellImagePos);
                         {
                             float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
-                            arrowPartStart = arrowPartStart * zoom / 8 + arrowEnd;
+                            arrowPartStart = arrowPartStart * zoom / 14 + arrowEnd;
                             if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
                                 drawLine(arrowPartStart, arrowEnd, lineColor, imageData, imageSize, 0.5f);
                             }
                         }
                         {
                             float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
-                            arrowPartStart = arrowPartStart * zoom / 8 + arrowEnd;
+                            arrowPartStart = arrowPartStart * zoom / 14 + arrowEnd;
                             if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
                                 drawLine(arrowPartStart, arrowEnd, lineColor, imageData, imageSize, 0.5f);
                             }
