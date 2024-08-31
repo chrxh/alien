@@ -184,6 +184,10 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 {
+    _parameters.features.legacyModes = true;
+    _parameters.legacyCellFunctionMuscleMovementModeActivated = true;
+    _simController->setSimulationParameters(_parameters);
+
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -220,6 +224,10 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 {
+    _parameters.features.legacyModes = true;
+    _parameters.legacyCellFunctionMuscleMovementModeActivated = true;
+    _simController->setSimulationParameters(_parameters);
+
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -256,6 +264,10 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 {
+    _parameters.features.legacyModes = true;
+    _parameters.legacyCellFunctionMuscleMovementModeActivated = true;
+    _simController->setSimulationParameters(_parameters);
+
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -292,6 +304,10 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 
 TEST_F(SensorTests, scanNeighborhood_twoMasses)
 {
+    _parameters.features.legacyModes = true;
+    _parameters.legacyCellFunctionMuscleMovementModeActivated = true;
+    _simController->setSimulationParameters(_parameters);
+
     DataDescription data;
     data.addCells(
         {CellDescription()
