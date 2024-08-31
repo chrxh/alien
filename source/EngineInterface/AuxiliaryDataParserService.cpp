@@ -565,12 +565,17 @@ namespace
             defaultParameters.cellFunctionMuscleBendingAccelerationThreshold,
             "simulation parameters.cell.function.muscle.bending acceleration threshold",
             parserTask);
-        PropertyParser::encodeDecodeWithEnabled(
+        PropertyParser::encodeDecode(
             tree,
-            parameters.legacyCellFunctionMuscleMovementMode,
-            parameters.legacyCellFunctionMuscleMovementModeActivated,
-            defaultParameters.legacyCellFunctionMuscleMovementMode,
-            "simulation parameters.legacy.cell.function.muscle.movement mode",
+            parameters.cellFunctionMuscleMovementTowardTargetedObject,
+            defaultParameters.cellFunctionMuscleMovementTowardTargetedObject,
+            "simulation parameters.cell.function.muscle.movement toward targeted object",
+            parserTask);
+        PropertyParser::encodeDecode(
+            tree,
+            parameters.legacyCellFunctionMuscleMovementAngleFromSensor,
+            defaultParameters.legacyCellFunctionMuscleMovementAngleFromSensor,
+            "simulation parameters.legacy.cell.function.muscle.movement angle from sensor",
             parserTask);
 
         PropertyParser::encodeDecode(
