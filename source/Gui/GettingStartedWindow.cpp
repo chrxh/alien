@@ -240,7 +240,7 @@ void _GettingStartedWindow::processIntern()
             "different color.");
         drawParagraph("Regardless of this, many parameters can also be set depending on the cell color. For this purpose click the '+' button beside the "
                       "parameter. This customization is useful when you want to define different classes of species.");
-        drawParagraph("Sometimes it is difficult to set precise values in the slider. In this case, you can select the slider and then press the TAB key. This "
+        drawParagraph("Sometimes it is difficult to set precise values in a slider. In this case, you can click on the slider while holding the CTRL key. This "
                       "allows you to enter the exact value in an input field and confirm it by pressing ENTER.");
         drawParagraph("In general, the following types of parameters can be set.");
         drawHeading2("Rendering");
