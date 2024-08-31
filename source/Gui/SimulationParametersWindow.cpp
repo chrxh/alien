@@ -1544,7 +1544,7 @@ void _SimulationParametersWindow::processBase()
                             .max(20.0f)
                             .format("%.1f")
                             .defaultValue(origParameters.genomeComplexityNeuronFactor)
-                            .tooltip(""),
+                            .tooltip("This parameter takes into account the number of encoded neurons in the genome for the complexity value."),
                         parameters.genomeComplexityNeuronFactor);
                     AlienImGui::EndTreeNode();
                 }
@@ -1554,14 +1554,17 @@ void _SimulationParametersWindow::processBase()
              * Addon: Legacy modes
              */
             if (parameters.features.legacyModes) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Legacy modes"))) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Legacy features"))) {
                     AlienImGui::Switcher(
                         AlienImGui::SwitcherParameters()
                             .name("Muscle movement modes")
                             .textWidth(RightColumnWidth)
                             .defaultValue(origParameters.legacyCellFunctionMuscleMovementMode)
                             .values({"Unrestricted", "Fetch angle from sensor"})
-                            .tooltip(""),
+                            .tooltip(ICON_FA_CHEVRON_RIGHT " Unrestricted: Muscle cells can move in all directions when set in 'Movement' mode. The relative "
+                                                           "angle is provided in channel #3.\n\n" ICON_FA_CHEVRON_RIGHT
+                                                           " Fetch angle from sensor: Muscle cells can move only if an adjacent sensor cell has previously "
+                                                           "detected a target. The relative angle in relation to the target is provided in channel #3."),
                         parameters.legacyCellFunctionMuscleMovementMode,
                         &parameters.legacyCellFunctionMuscleMovementModeActivated);
                     AlienImGui::EndTreeNode();
@@ -2364,7 +2367,7 @@ void _SimulationParametersWindow::processAddonList()
                 parameters.features.genomeComplexityMeasurement);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Legacy modes")
+                    .name("Legacy features")
                     .textWidth(0)
                     .defaultValue(origFeatures.legacyModes)
                     .tooltip("It contains features for compatibility with older versions."),
@@ -2472,6 +2475,9 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
             std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i]));
         parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i] =
             std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i]));
+        parameters.genomeComplexitySizeFactor[i] = std::max(0.0f, parameters.genomeComplexitySizeFactor[i]);
+        parameters.genomeComplexityRamificationFactor[i] = std::max(0.0f, parameters.genomeComplexityRamificationFactor[i]);
+        parameters.genomeComplexityNeuronFactor[i] = std::max(0.0f, parameters.genomeComplexityNeuronFactor[i]);
     }
     parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);

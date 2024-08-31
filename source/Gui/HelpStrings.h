@@ -73,7 +73,8 @@ namespace Const
         "#0: The strength of the movement, bending or expansion/contraction. A negative sign corresponds to the opposite "
         "action.\n\n" ICON_FA_CHEVRON_RIGHT " Input channel #1: This channel is solely utilized for acceleration due to bending. If the sign of channel #1 "
         "differs from the sign of channel #0, no acceleration will be obtained during the bending process.\n\n " ICON_FA_CHEVRON_RIGHT
-        " Input channel #3: This channel is used for muscles in movement mode. It allows to determine the relative angle of the movement. A value of -0.5 "
+        " Input channel #3: This channel is used for muscles in movement mode. It contains the relative angle of the movement with respect to a "
+        "detected object. The object must have been targeted from a sensor cell from which the input signal originates (it does not have to be an adjacent cell). A value of -0.5 "
         "correspond to -180 deg and +0.5 to +180 deg.";
 
     std::string const DefenderTooltip =
@@ -241,8 +242,9 @@ namespace Const
         "The duration of the injection process depends on the simulation parameter 'Injection time'.";
 
     std::string const GenomeMuscleModeTooltip = ICON_FA_CHEVRON_RIGHT
-        " Movement: Results in movement in the direction (or counter-direction) determined by the path from the "
-        "input cell to the muscle cell.\n\n" ICON_FA_CHEVRON_RIGHT " Expansion and contraction: Causes an elongation (or contraction) of the "
+        " Movement to sensor target: A movement can be performed if the input signal has its origin in a sensor cell which has previously detected a "
+        "target. The direction of movement is specified relative to the target.\n\n" ICON_FA_CHEVRON_RIGHT
+        " Expansion and contraction: Causes an elongation (or contraction) of the "
         "reference distance to the input cell.\n\n" ICON_FA_CHEVRON_RIGHT " Bending: Increases (or decreases) the angle between the muscle "
         "cell, input cell, and the nearest connected cell clockwise from the muscle cell.";
 
@@ -452,8 +454,8 @@ namespace Const
         "during the bending process.",
         "The following cell functions obtain their input from channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions obtain their input from channel #3:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT
-        " Muscle: This channel is used for muscles in movement mode. It allows to determine the relative angle of the movement. A value of -0.5 correspond to "
-        "-180 deg and +0.5 to +180 deg.",
+        " Muscle: This channel is used for muscles in movement mode. It allows to determine the relative angle of the movement with respect to a previously "
+        "detected target from a sensor cell. A value of -0.5 correspond to -180 deg and +0.5 to +180 deg.",
         "The following cell functions obtain their input from channel #4:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions obtain their input from channel #5:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions obtain their input from channel #6:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
