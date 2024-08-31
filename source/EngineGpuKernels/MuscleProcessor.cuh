@@ -91,12 +91,8 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
 
     auto direction = float2{0, 0};
     auto acceleration = 0.0f;
-    if (cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellFunctionMuscleMovementModeActivated) {
-        if (cudaSimulationParameters.legacyCellFunctionMuscleMovementMode == 0) {
-            direction = CellFunctionProcessor::calcSignalDirection(data, cell);
-            acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
-        }
-        if (cudaSimulationParameters.legacyCellFunctionMuscleMovementMode == 1) {
+    if (cudaSimulationParameters.cellFunctionMuscleMovementTowardTargetedObject) {
+        if (cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellFunctionMuscleMovementAngleFromSensor) {
             if (auto sensorCell = findNearbySensor(cell)) {
                 auto const& sensorData = sensorCell->cellFunctionData.sensor;
                 if (sensorData.targetX != 0 || sensorData.targetY != 0) {
@@ -104,12 +100,15 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
                     acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
                 }
             }
+        } else {
+            if (activity.origin == ActivityOrigin_Sensor && (activity.targetX != 0 || activity.targetY != 0)) {
+                direction = {activity.targetX, activity.targetY};
+                acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
+            }
         }
     } else {
-        if (activity.origin == ActivityOrigin_Sensor && (activity.targetX != 0 || activity.targetY != 0)) {
-            direction = {activity.targetX, activity.targetY};
-            acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
-        }
+        direction = CellFunctionProcessor::calcSignalDirection(data, cell);
+        acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
     }
     float angle = max(-0.5f, min(0.5f, activity.channels[3])) * 360.0f;
     direction = Math::rotateClockwise(direction, angle);
