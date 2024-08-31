@@ -728,7 +728,7 @@ namespace
             }
             PropertyParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", parserTask);
 
-            PropertyParser::PropertyParser::encodeDecodeWithEnabled(tree, spot.values.friction, spot.activatedValues.friction, defaultSpot.values.friction, base + "friction", parserTask);
+            PropertyParser::encodeDecodeWithEnabled(tree, spot.values.friction, spot.activatedValues.friction, defaultSpot.values.friction, base + "friction", parserTask);
             PropertyParser::encodeDecodeWithEnabled(tree, spot.values.rigidity, spot.activatedValues.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
             PropertyParser::encodeDecodeWithEnabled(
                 tree,
