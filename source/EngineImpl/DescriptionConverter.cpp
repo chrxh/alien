@@ -513,6 +513,9 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         result.activity.channels[i] = cellTO.activity.channels[i];
     }
+    result.activity.origin = cellTO.activity.origin;
+    result.activity.targetX = cellTO.activity.targetX;
+    result.activity.targetY = cellTO.activity.targetY;
     result.activationTime = cellTO.activationTime;
     return result;
 }
@@ -673,6 +676,9 @@ void DescriptionConverter::addCell(
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cellTO.activity.channels[i] = cellDesc.activity.channels[i];
     }
+    cellTO.activity.origin = cellDesc.activity.origin;
+    cellTO.activity.targetX = cellDesc.activity.targetX;
+    cellTO.activity.targetY = cellDesc.activity.targetY;
     cellTO.activationTime = cellDesc.activationTime;
     cellTO.numConnections = 0;
     cellTO.barrier = cellDesc.barrier;

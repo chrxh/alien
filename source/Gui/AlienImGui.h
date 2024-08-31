@@ -174,12 +174,11 @@ public:
         MEMBER_DECLARATION(SwitcherParameters, std::string, name, "");
         MEMBER_DECLARATION(SwitcherParameters, float, width, 0);
         MEMBER_DECLARATION(SwitcherParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(SwitcherParameters, bool, disabled, false);
         MEMBER_DECLARATION(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER_DECLARATION(SwitcherParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool Switcher(SwitcherParameters& parameters, int& value);
+    static bool Switcher(SwitcherParameters& parameters, int& value, bool* enabled = nullptr);
 
     struct ComboColorParameters
     {

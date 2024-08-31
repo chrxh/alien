@@ -140,12 +140,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (cellEmergentMaxAge[i] != other.cellEmergentMaxAge[i]) {
             return false;
         }
-    }
-    if (numRadiationSources != other.numRadiationSources) {
-        return false;
-    }
-    for (int i = 0; i < numRadiationSources; ++i) {
-        if (radiationSources[i] != other.radiationSources[i]) {
+        if (genomeComplexityNeuronFactor[i] != other.genomeComplexityNeuronFactor[i]) {
             return false;
         }
     }
@@ -160,6 +155,14 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
             if (cellFunctionAttackerSameMutantPenalty[i][j] != other.cellFunctionAttackerSameMutantPenalty[i][j]) {
                 return false;
             }
+        }
+    }
+    if (numRadiationSources != other.numRadiationSources) {
+        return false;
+    }
+    for (int i = 0; i < numRadiationSources; ++i) {
+        if (radiationSources[i] != other.radiationSources[i]) {
+            return false;
         }
     }
     if (numSpots != other.numSpots) {
@@ -197,5 +200,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellGlowStrength == other.cellGlowStrength && cellGlowRadius == other.cellGlowRadius
         && cellResetAgeAfterActivation == other.cellResetAgeAfterActivation && cellRadius == other.cellRadius
         && cellEmergentMaxAgeActivated == other.cellEmergentMaxAgeActivated
-        && cellFunctionMuscleMovementAngleFromSensor == other.cellFunctionMuscleMovementAngleFromSensor;
+        && legacyCellFunctionMuscleMovementModeActivated == other.legacyCellFunctionMuscleMovementModeActivated
+        && legacyCellFunctionMuscleMovementMode == other.legacyCellFunctionMuscleMovementMode
+        ;
 }
