@@ -66,6 +66,10 @@ TEST_F(MuscleTests, doNothing)
 
 TEST_F(MuscleTests, moveForward)
 {
+    _parameters.features.legacyModes = true;
+    _parameters.legacyCellFunctionMuscleMovementModeActivated = true;
+    _simController->setSimulationParameters(_parameters);
+
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -102,6 +106,10 @@ TEST_F(MuscleTests, moveForward)
 
 TEST_F(MuscleTests, moveBackward)
 {
+    _parameters.features.legacyModes = true;
+    _parameters.legacyCellFunctionMuscleMovementModeActivated = true;
+    _simController->setSimulationParameters(_parameters);
+
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -137,6 +145,10 @@ TEST_F(MuscleTests, moveBackward)
 
 TEST_F(MuscleTests, multipleMovementDirections)
 {
+    _parameters.features.legacyModes = true;
+    _parameters.legacyCellFunctionMuscleMovementModeActivated = true;
+    _simController->setSimulationParameters(_parameters);
+
     DataDescription data;
     data.addCells({
         CellDescription()
