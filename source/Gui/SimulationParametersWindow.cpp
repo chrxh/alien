@@ -1569,9 +1569,9 @@ void _SimulationParametersWindow::processBase()
                             .name("Fetch angle from adjacent sensor")
                             .textWidth(RightColumnWidth)
                             .defaultValue(origParameters.legacyCellFunctionMuscleMovementAngleFromSensor)
-                            .tooltip("This parameter changes the behavior of the parameter 'Movement angle from sensor'. If activated, the fetches the angle "
-                                     "directly from an connected (or connected-connected) sensor cell has previously detected a target (legacy behavior). If "
-                                     "deactivated, the signal must only originate from a sensor cell and must not be adjacent (new behavior)."),
+                            .tooltip("This parameter changes the behavior of the parameter 'Movement toward target'. If activated, the muscle cell fetches the "
+                                     "movement angle directly from a connected (or connected-connected) sensor cell that has previously detected a target "
+                                     "(legacy behavior). If deactivated, the input signal must only originate from a sensor cell and must not be adjacent (new behavior)."),
                         parameters.legacyCellFunctionMuscleMovementAngleFromSensor);
                     AlienImGui::EndTreeNode();
                 }
