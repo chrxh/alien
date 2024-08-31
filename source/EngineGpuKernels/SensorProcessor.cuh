@@ -196,8 +196,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             activity.channels[1] = toFloat((lookupResult >> 40) & 0xff) / 256;  //density
             activity.channels[2] = 1.0f - min(1.0f, distance / 256);                       //distance: 1 = close, 0 = far away
 
-            auto legacyMode_unrestrictedMovements = cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellFunctionMuscleMovementModeActivated
-                && cudaSimulationParameters.legacyCellFunctionMuscleMovementMode == 0;
+            auto legacyMode_unrestrictedMovements = !cudaSimulationParameters.cellFunctionMuscleMovementTowardTargetedObject;
             activity.channels[3] = legacyMode_unrestrictedMovements ? angle / 360.0f : 0;  //angle: between -0.5 and 0.5
             cell->cellFunctionData.sensor.memoryChannel1 = activity.channels[1];
             cell->cellFunctionData.sensor.memoryChannel2 = activity.channels[2];
