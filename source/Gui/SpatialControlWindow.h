@@ -10,6 +10,7 @@ class _SpatialControlWindow : public _AlienWindow
 {
 public:
     _SpatialControlWindow(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow);
+    ~_SpatialControlWindow();
 
 private:
     void processIntern() override;
