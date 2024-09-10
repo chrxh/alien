@@ -109,18 +109,20 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     log(Priority::Important, "simulation closed");
 }
 
-void* _SimulationCudaFacade::registerImageResource(GLuint image)
+void _SimulationCudaFacade::registerImageResource(GLuint textureId)
 {
-    //unregister old resource
-    if (_cudaResource) {
-        // CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaResource));
-    }
+    _textureId = textureId;
 
-    //register new resource
-    // CHECK_FOR_CUDA_ERROR(
-    //     cudaGraphicsGLRegisterImage(&_cudaResource, image, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
+    ////unregister old resource
+    //if (_cudaResource) {
+    //    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaResource));
+    //}
 
-    return reinterpret_cast<void*>(_cudaResource);
+    ////register new resource
+    //CHECK_FOR_CUDA_ERROR(
+    //    cudaGraphicsGLRegisterImage(&_cudaResource, textureId, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
+
+    //return reinterpret_cast<void*>(_cudaResource);
 }
 
 void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)
@@ -169,35 +171,40 @@ void _SimulationCudaFacade::applyCataclysm(int power)
 void _SimulationCudaFacade::drawVectorGraphics(
     float2 const& rectUpperLeft,
     float2 const& rectLowerRight,
-    void* cudaResource,
     int2 const& imageSize,
     double zoom)
 {
-    // checkAndProcessSimulationParameterChanges();
+    checkAndProcessSimulationParameterChanges();
 
-    // auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaResource);
-    // CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
+    //auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaResource);
+    //CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
 
-    // cudaArray* mappedArray;
-    // CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, cudaResourceImpl, 0, 0));
+    //cudaArray* mappedArray;
+    //CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, cudaResourceImpl, 0, 0));
 
-    // _cudaRenderingData->resizeImageIfNecessary(imageSize);
+    _cudaRenderingData->resizeImageIfNecessary(imageSize);
 
-    // _renderingKernels->drawImage(_settings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), getSimulationDataIntern(), *_cudaRenderingData);
-    // syncAndCheck();
+    _renderingKernels->drawImage(_settings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), getSimulationDataIntern(), *_cudaRenderingData);
+    syncAndCheck();
 
-    // const size_t widthBytes = sizeof(uint64_t) * imageSize.x;
-    // CHECK_FOR_CUDA_ERROR(cudaMemcpy2DToArray(
-    //     mappedArray,
-    //     0,
-    //     0,
-    //     _cudaRenderingData->imageData,
-    //     widthBytes,
-    //     widthBytes,
-    //     imageSize.y,
-    //     cudaMemcpyDeviceToDevice));
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+        _cudaRenderingData->imageDataHost, _cudaRenderingData->imageDataDevice, sizeof(uint64_t) * imageSize.x * imageSize.y, cudaMemcpyDeviceToHost));
+    glBindTexture(GL_TEXTURE_2D, _textureId);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, imageSize.x, imageSize.y, 0, GL_RGBA, GL_UNSIGNED_SHORT, _cudaRenderingData->imageDataHost);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-    // CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
+    //const size_t widthBytes = sizeof(uint64_t) * imageSize.x;
+    //CHECK_FOR_CUDA_ERROR(cudaMemcpy2DToArray(
+    //    mappedArray,
+    //    0,
+    //    0,
+    //    _cudaRenderingData->imageDataDevice,
+    //    widthBytes,
+    //    widthBytes,
+    //    imageSize.y,
+    //    cudaMemcpyDeviceToDevice));
+
+    //CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
 }
 
 void _SimulationCudaFacade::getSimulationData(

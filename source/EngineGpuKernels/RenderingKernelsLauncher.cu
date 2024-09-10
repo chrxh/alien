@@ -12,7 +12,7 @@ void _RenderingKernelsLauncher::drawImage(
     SimulationData data,
     RenderingData renderingData)
 {
-    uint64_t* targetImage = renderingData.imageData;
+    uint64_t* targetImage = renderingData.imageDataDevice;
     auto const& gpuSettings = settings.gpuSettings;
 
     KERNEL_CALL(cudaDrawBackground, targetImage, imageSize, data.worldSize, zoom, rectUpperLeft, rectLowerRight);

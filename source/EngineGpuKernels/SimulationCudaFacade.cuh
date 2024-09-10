@@ -36,12 +36,12 @@ public:
     _SimulationCudaFacade(uint64_t timestep, Settings const& settings);
     ~_SimulationCudaFacade();
 
-    void* registerImageResource(GLuint image);
+    void registerImageResource(GLuint textureId);
 
     void calcTimestep(uint64_t timesteps, bool forceUpdateStatistics);
     void applyCataclysm(int power);
 
-    void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
+    void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, int2 const& imageSize, double zoom);
     void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
     void getSelectedSimulationData(bool includeClusters, DataTO const& dataTO);
     void getInspectedSimulationData(std::vector<uint64_t> entityIds, DataTO const& dataTO);
@@ -103,6 +103,7 @@ private:
     SimulationData getSimulationDataIntern() const;
 
     GpuInfo _gpuInfo;
+    GLuint _textureId = 0;
     cudaGraphicsResource* _cudaResource = nullptr;
 
     mutable std::mutex _mutexForSimulationParameters;
