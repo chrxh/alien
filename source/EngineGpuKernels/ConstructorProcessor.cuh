@@ -517,7 +517,12 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
         adaptReferenceAngle = false;
         CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         hostCell->livingState = LivingState_Dying;
-        constructionData.lastConstructionCell->livingState = LivingState_Dying;
+        for (int i = 0; i < hostCell->numConnections; ++i) {
+            auto const& connectedCell = hostCell->connections[i].cell;
+            if (connectedCell->creatureId == hostCell->creatureId) {
+                connectedCell->livingState = LivingState_Detaching;
+            }
+        }
     }
 
     Math::normalize(posDelta);
