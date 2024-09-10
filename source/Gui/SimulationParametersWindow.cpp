@@ -1560,10 +1560,10 @@ void _SimulationParametersWindow::processBase()
             }
 
             /**
-             * Addon: Legacy modes
+             * Addon: Legacy behavior
              */
             if (parameters.features.legacyModes) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Legacy features"))) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Legacy behavior"))) {
                     AlienImGui::Checkbox(
                         AlienImGui::CheckboxParameters()
                             .name("Fetch angle from adjacent sensor")
@@ -2373,7 +2373,7 @@ void _SimulationParametersWindow::processAddonList()
                 parameters.features.genomeComplexityMeasurement);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Legacy features")
+                    .name("Legacy behavior")
                     .textWidth(0)
                     .defaultValue(origFeatures.legacyModes)
                     .tooltip("It contains features for compatibility with older versions."),

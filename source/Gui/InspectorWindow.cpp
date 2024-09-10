@@ -292,7 +292,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                     AlienImGui::ComboParameters()
                         .name("Living state")
                         .textWidth(CellFunctionBaseTabTextWidth)
-                        .values({"Ready", "Under construction", "Activating", "Dying"})
+                        .values({"Ready", "Under construction", "Activating", "Detaching", "Reviving", "Dying"})
                         .tooltip(Const::CellLivingStateTooltip),
                     cell.livingState);
                 ImGui::TreePop();
@@ -684,7 +684,7 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
                 .name("Scan mutants")
-                .values({"None", "Same mutants", "Other mutants", "Emergent cells", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
+                .values({"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
                 .textWidth(CellFunctionTextWidth)
                 .tooltip(Const::SensorRestrictToMutantsTooltip),
             sensor.restrictToMutants);
@@ -713,7 +713,7 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
                 .name("Restrict to mutants")
-                .values({"None", "Same mutants", "Other mutants", "Emergent cells", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
+                .values({"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
                 .textWidth(CellFunctionTextWidth)
                 .tooltip(Const::ReconnectorRestrictToMutantsTooltip),
             reconnector.restrictToMutants);

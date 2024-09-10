@@ -28,6 +28,8 @@ enum LivingState_
     LivingState_Ready,
     LivingState_UnderConstruction,
     LivingState_Activating,
+    LivingState_Detaching,
+    LivingState_Reviving,
     LivingState_Dying,
     LivingState_Count
 };

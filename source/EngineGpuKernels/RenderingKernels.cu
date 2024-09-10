@@ -143,6 +143,12 @@ namespace
             case LivingState_Activating:
                 cellColor = 0xffffff;
                 break;
+            case LivingState_Detaching:
+                cellColor = 0xbf4040;
+                break;
+            case LivingState_Reviving:
+                cellColor = 0x4040bf;
+                break;
             case LivingState_Dying:
                 cellColor = 0xff1010;
                 break;
