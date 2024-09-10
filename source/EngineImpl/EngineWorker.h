@@ -159,7 +159,6 @@ private:
     std::optional<std::chrono::microseconds> _slowDownOvershot;
   
     //internals
-    void* _cudaResource;
     AccessDataTOCache _dataTOCache;
 };
 

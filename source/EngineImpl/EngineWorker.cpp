@@ -21,7 +21,7 @@ void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& gener
     _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, _settings);
 
     if (_imageResource) {
-        _cudaResource = _simulationCudaFacade->registerImageResource(*_imageResource);
+        _simulationCudaFacade->registerImageResource(*_imageResource);
     }
 }
 
@@ -38,7 +38,7 @@ void EngineWorker::setImageResource(void* image)
 
     if (_simulationCudaFacade) {
         EngineWorkerGuard access(this);
-        _cudaResource = _simulationCudaFacade->registerImageResource(imageId);
+        _simulationCudaFacade->registerImageResource(imageId);
     }
 }
 
@@ -59,7 +59,6 @@ void EngineWorker::tryDrawVectorGraphics(
         _simulationCudaFacade->drawVectorGraphics(
             {rectUpperLeft.x, rectUpperLeft.y},
             {rectLowerRight.x, rectLowerRight.y},
-            _cudaResource,
             {imageSize.x, imageSize.y},
             zoom);
         syncSimulationWithRenderingIfDesired();
@@ -78,7 +77,6 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
         _simulationCudaFacade->drawVectorGraphics(
             {rectUpperLeft.x, rectUpperLeft.y},
             {rectLowerRight.x, rectLowerRight.y},
-            _cudaResource,
             {imageSize.x, imageSize.y},
             zoom);
 
