@@ -148,6 +148,8 @@ namespace
             cellTO.cellFunctionData.muscle.lastBendingDirection = cell->cellFunctionData.muscle.lastBendingDirection;
             cellTO.cellFunctionData.muscle.lastBendingSourceIndex = cell->cellFunctionData.muscle.lastBendingSourceIndex;
             cellTO.cellFunctionData.muscle.consecutiveBendingAngle = cell->cellFunctionData.muscle.consecutiveBendingAngle;
+            cellTO.cellFunctionData.muscle.lastMovementX = cell->cellFunctionData.muscle.lastMovementX;
+            cellTO.cellFunctionData.muscle.lastMovementY = cell->cellFunctionData.muscle.lastMovementY;
         } break;
         case CellFunction_Defender: {
             cellTO.cellFunctionData.defender.mode = cell->cellFunctionData.defender.mode;

@@ -289,6 +289,10 @@ struct MuscleDescription
     int lastBendingSourceIndex = 0;
     float consecutiveBendingAngle = 0;
 
+    //additional rendering data
+    float lastMovementX = 0;
+    float lastMovementY = 0;
+
     auto operator<=>(MuscleDescription const&) const = default;
 
     MuscleDescription& setMode(MuscleMode value)

@@ -80,9 +80,9 @@ __inline__ __device__ float NeuronProcessor::applyActivationFunction(NeuronActiv
     case NeuronActivationFunction_BinaryStep:
         return x >= NEAR_ZERO ? 1.0f : 0.0f;
     case NeuronActivationFunction_Identity:
-        return x;
+        return max(-1.0f, min(1.0f, x));
     case NeuronActivationFunction_Abs:
-        return abs(x);
+        return min(1.0f, abs(x));
     case NeuronActivationFunction_Gaussian:
         return __expf(-2 * x * x);
     }
