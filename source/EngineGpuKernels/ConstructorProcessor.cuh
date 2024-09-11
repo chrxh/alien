@@ -719,6 +719,8 @@ ConstructorProcessor::constructCellIntern(
         result->cellFunctionData.muscle.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % MuscleMode_Count;
         result->cellFunctionData.muscle.lastBendingDirection = MuscleBendingDirection_None;
         result->cellFunctionData.muscle.consecutiveBendingAngle = 0;
+        result->cellFunctionData.muscle.lastMovementX = 0;
+        result->cellFunctionData.muscle.lastMovementY = 0;
     } break;
     case CellFunction_Defender: {
         result->cellFunctionData.defender.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % DefenderMode_Count;

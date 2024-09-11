@@ -510,6 +510,34 @@ __global__ void cudaDrawCells(
             }
         }
 
+        //draw muscle movements
+        if (cell->cellFunction == CellFunction_Muscle
+            && (cell->cellFunctionData.muscle.lastMovementX != 0 || cell->cellFunctionData.muscle.lastMovementY != 0)) {
+
+            auto color = float3{0.7f, 0.7f, 0.7f} * min(1.0f, zoom * 0.1f);
+            auto endPos = cell->pos + float2{cell->cellFunctionData.muscle.lastMovementX, cell->cellFunctionData.muscle.lastMovementY} * 100;
+            auto endImagePos = mapWorldPosToImagePos(rectUpperLeft, endPos, universeImageSize, zoom);
+            if (isLineVisible(cellImagePos, endImagePos, universeImageSize)) {
+                drawLine(cellImagePos, endImagePos, color, imageData, imageSize);
+            }
+
+            auto arrowPos1 = endPos + float2{
+                -cell->cellFunctionData.muscle.lastMovementX + cell->cellFunctionData.muscle.lastMovementY,
+                -cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY} * 40;
+            auto arrowImagePos1 = mapWorldPosToImagePos(rectUpperLeft, arrowPos1, universeImageSize, zoom);
+            if (isLineVisible(arrowImagePos1, endImagePos, universeImageSize)) {
+                drawLine(arrowImagePos1, endImagePos, color, imageData, imageSize);
+            }
+
+            auto arrowPos2 = endPos + float2{
+                -cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY,
+                +cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY} * 40;
+            auto arrowImagePos2 = mapWorldPosToImagePos(rectUpperLeft, arrowPos2, universeImageSize, zoom);
+            if (isLineVisible(arrowImagePos2, endImagePos, universeImageSize)) {
+                drawLine(arrowImagePos2, endImagePos, color, imageData, imageSize);
+            }
+        }
+
         //draw detonation
         if (cell->cellFunction == CellFunction_Detonator) {
             auto const& detonator = cell->cellFunctionData.detonator;

@@ -164,6 +164,10 @@ struct MuscleFunction
     MuscleBendingDirection lastBendingDirection;
     uint8_t lastBendingSourceIndex;
     float consecutiveBendingAngle;
+
+    //additional rendering data
+    float lastMovementX;
+    float lastMovementY;
 };
 
 struct DefenderFunction

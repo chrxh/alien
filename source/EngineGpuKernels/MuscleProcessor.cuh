@@ -41,6 +41,9 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     auto activity = CellFunctionProcessor::calcInputActivity(cell);
     CellFunctionProcessor::updateInvocationState(cell, activity);
 
+    cell->cellFunctionData.muscle.lastMovementX = 0;
+    cell->cellFunctionData.muscle.lastMovementY = 0;
+
     switch (cell->cellFunctionData.muscle.mode) {
     case MuscleMode_Movement: {
         movement(data, statistics, cell, activity);
@@ -53,6 +56,7 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     } break;
     }
 
+    activity.channels[0] *= 0.95f;
     CellFunctionProcessor::setActivity(cell, activity);
 }
 
@@ -111,10 +115,10 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
         acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
     }
     float angle = max(-0.5f, min(0.5f, activity.channels[3])) * 360.0f;
-    direction = Math::rotateClockwise(direction, angle);
-    if (direction.x != 0 || direction.y != 0) {
-        cell->vel += Math::normalized(direction) * acceleration * getTruncatedUnitValue(activity);
-    }
+    direction = Math::normalized(Math::rotateClockwise(direction, angle)) * acceleration * max(0.0f, getTruncatedUnitValue(activity));
+    cell->vel += direction;
+    cell->cellFunctionData.muscle.lastMovementX = direction.x;
+    cell->cellFunctionData.muscle.lastMovementY = direction.y;
     cell->releaseLock();
     statistics.incNumMuscleActivities(cell->color);
 }
