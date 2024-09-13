@@ -12,14 +12,14 @@ public:
     __host__ void init()
     {
         CudaMemoryManager::getInstance().acquireMemory<RawStatisticsData>(1, _data);
-        CudaMemoryManager::getInstance().acquireMemory<ColorCount>(MutantToColorCountMapSize, _mutantToColorCountMap);
+        CudaMemoryManager::getInstance().acquireMemory<MutantStatistics>(MutantToColorCountMapSize, _mutantToMutantStatisticsMap);
         CHECK_FOR_CUDA_ERROR(cudaMemset(_data, 0, sizeof(RawStatisticsData)));
     }
 
     __host__ void free()
     {
         CudaMemoryManager::getInstance().freeMemory(_data);
-        CudaMemoryManager::getInstance().freeMemory(_mutantToColorCountMap);
+        CudaMemoryManager::getInstance().freeMemory(_mutantToMutantStatisticsMap);
     }
 
     __host__ RawStatisticsData getStatistics()
@@ -37,7 +37,7 @@ public:
         }
         auto partition = calcAllThreadsPartition(MutantToColorCountMapSize);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            _mutantToColorCountMap[index].count = 0;
+            _mutantToMutantStatisticsMap[index].count = 0;
         }
     }
 
@@ -52,10 +52,11 @@ public:
         alienAtomicAdd64(&_data->timeline.timestep.numGenomeCells[color], valueToAdd);
     }
     __inline__ __device__ void addGenomeComplexity(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.genomeComplexity[color], valueToAdd); }
-    __inline__ __device__ void incMutant(int color, uint32_t mutationId)
+    __inline__ __device__ void incMutant(int color, uint32_t mutationId, float genomeComplexity)
     {
-        atomicAdd(&_mutantToColorCountMap[mutationId % MutantToColorCountMapSize].count, 1);
-        atomicExch(&_mutantToColorCountMap[mutationId % MutantToColorCountMapSize].color, color);
+        atomicAdd(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].count, 1);
+        atomicExch(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].color, color);
+        atomicExch(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].genomeComplexity, genomeComplexity);
     }
     __inline__ __device__ void halveNumConnections()
     {
@@ -63,12 +64,14 @@ public:
             _data->timeline.timestep.numConnections[i] /= 2;
         }
     }
-    __inline__ __device__ void calcColonies()
+    __inline__ __device__ void calcStatisticsForColonies()
     {
         auto partition = calcAllThreadsPartition(MutantToColorCountMapSize);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            if (_mutantToColorCountMap[index].count >= 20) {
-                atomicAdd(&_data->timeline.timestep.numColonies[_mutantToColorCountMap[index].color], 1);
+            if (_mutantToMutantStatisticsMap[index].count >= 20) {
+                auto& mutantStatistics = _mutantToMutantStatisticsMap[index];
+                atomicAdd(&_data->timeline.timestep.numColonies[mutantStatistics.color], 1);
+                alienAtomicMax(&_data->timeline.timestep.maxGenomeComplexityOfColonies[mutantStatistics.color], mutantStatistics.genomeComplexity);
             }
         }
     }
@@ -126,11 +129,12 @@ private:
 
     //for diversity calculation
     static auto constexpr MutantToColorCountMapSize = 1 << 20;
-    struct ColorCount
+    struct MutantStatistics
     {
         uint32_t color;
         uint32_t count;
+        float genomeComplexity;
     };
-    ColorCount* _mutantToColorCountMap;
+    MutantStatistics* _mutantToMutantStatisticsMap;
 };
 

@@ -157,6 +157,15 @@ __device__ __inline__ T alienAtomicAdd32(T* address, T value)
     return reinterpret_cast<T>(atomicAdd(reinterpret_cast<unsigned int*>(address), reinterpret_cast<unsigned int>(value)));
 }
 
+__device__ __forceinline__ float alienAtomicMax(float* addr, float value)
+{
+    float old;
+    old = !signbit(value) ? __int_as_float(atomicMax((int*)addr, __float_as_int(value)))
+                          : __uint_as_float(atomicMin((unsigned int*)addr, __float_as_uint(value)));
+
+    return old;
+}
+
 class SystemLock
 {
 public:

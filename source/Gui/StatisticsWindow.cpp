@@ -326,6 +326,12 @@ void _StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::maxGenomeComplexityOfColonies, 2);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Max colony\ngenome complexity");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numViruses);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Viruses");
@@ -574,7 +580,7 @@ void _StatisticsWindow::plotByColorIntern(
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
 
     auto isCollapsed = _collapsedPlotIndices.contains(row);
-    auto flags = _plotHeight > 160.0f && !isCollapsed ? ImPlotFlags_None : ImPlotFlags_NoLegend;
+    auto flags = _plotHeight > 159.0f && !isCollapsed ? ImPlotFlags_None : ImPlotFlags_NoLegend;
     if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), flags, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         for (int i = 0; i < MAX_COLORS; ++i) {
             ImGui::PushID(i);

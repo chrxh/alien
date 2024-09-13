@@ -32,6 +32,7 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
     result.numParticles = numParticles + other.numParticles;
     result.averageGenomeCells = averageGenomeCells + other.averageGenomeCells;
     result.averageGenomeComplexity = averageGenomeComplexity + other.averageGenomeComplexity;
+    result.maxGenomeComplexityOfColonies = maxGenomeComplexityOfColonies + other.maxGenomeComplexityOfColonies;
     result.totalEnergy = totalEnergy + other.totalEnergy;
     result.numCreatedCells = numCreatedCells + other.numCreatedCells;
     result.numAttacks = numAttacks + other.numAttacks;
@@ -62,6 +63,7 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
     result.numParticles = numParticles / divisor;
     result.averageGenomeCells = averageGenomeCells / divisor;
     result.averageGenomeComplexity = averageGenomeComplexity / divisor;
+    result.maxGenomeComplexityOfColonies = maxGenomeComplexityOfColonies / divisor;
     result.totalEnergy = totalEnergy / divisor;
     result.numCreatedCells = numCreatedCells / divisor;
     result.numAttacks = numAttacks / divisor;
