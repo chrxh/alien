@@ -10,7 +10,7 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    static int constexpr NumScanAngles = 32;
+    static int constexpr NumScanAngles = 64;
     static int constexpr NumScanPoints = 64;
     static float constexpr ScanStep = 8.0f;
 
@@ -61,16 +61,16 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
         switch (cell->cellFunctionData.sensor.mode) {
         case SensorMode_Neighborhood: {
             searchNeighborhood(data, statistics, cell, activity);
+            activity.origin = ActivityOrigin_Sensor;
         } break;
-        case SensorMode_FixedAngle: {
-            searchByAngle(data, statistics, cell, activity);
-        } break;
+        //case SensorMode_FixedAngle: {
+        //    searchByAngle(data, statistics, cell, activity);
+        //} break;
         }
     }
     __syncthreads();
 
     if (threadIdx.x == 0) {
-        activity.origin = ActivityOrigin_Sensor;
         CellFunctionProcessor::setActivity(cell, activity);
     }
 }
@@ -209,11 +209,13 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             cell->cellFunctionData.sensor.memoryTargetY = delta.y;
         } else {
             activity.channels[0] = 0;  //nothing found
-            activity.channels[1] = cell->cellFunctionData.sensor.memoryChannel1;
-            activity.channels[2] = cell->cellFunctionData.sensor.memoryChannel2;
-            activity.channels[3] = cell->cellFunctionData.sensor.memoryChannel3;
-            activity.targetX = cell->cellFunctionData.sensor.memoryTargetX;
-            activity.targetY = cell->cellFunctionData.sensor.memoryTargetY;
+            //activity.channels[1] = cell->cellFunctionData.sensor.memoryChannel1;
+            //activity.channels[2] = cell->cellFunctionData.sensor.memoryChannel2;
+            //activity.channels[3] = cell->cellFunctionData.sensor.memoryChannel3;
+            //activity.targetX = cell->cellFunctionData.sensor.memoryTargetX;
+            //activity.targetY = cell->cellFunctionData.sensor.memoryTargetY;
+            activity.targetX = 0;
+            activity.targetY = 0;
         }
     }
     __syncthreads();

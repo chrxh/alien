@@ -23,6 +23,7 @@ struct DataPointCollection
     DataPoint numParticles;
     DataPoint averageGenomeCells;
     DataPoint averageGenomeComplexity;
+    DataPoint maxGenomeComplexityOfColonies;
     DataPoint totalEnergy;
 
     DataPoint numCreatedCells;

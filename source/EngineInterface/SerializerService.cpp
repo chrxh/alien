@@ -1252,6 +1252,7 @@ namespace
         loadSave(task, serializedData, 1 + 20 * 8, dataPoints.numDetonations);
         loadSave(task, serializedData, 1 + 21 * 8, dataPoints.numColonies);
         loadSave(task, serializedData, 1 + 22 * 8, dataPoints.averageGenomeComplexity);
+        loadSave(task, serializedData, 1 + 23 * 8, dataPoints.maxGenomeComplexityOfColonies);
     }
 }
 
@@ -1288,6 +1289,7 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
     writeLabelAllColors("Detonations");
     writeLabelAllColors("Colonies");
     writeLabelAllColors("Average genome complexity");
+    writeLabelAllColors("Max colony genome complexity");
     stream << std::endl;
 
     //content
