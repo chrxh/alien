@@ -205,16 +205,15 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
             activity.targetX = delta.x;
             activity.targetY = delta.y;
-
-            cell->cellFunctionData.sensor.targetX = delta.x;
-            cell->cellFunctionData.sensor.targetY = delta.y;
+            cell->cellFunctionData.sensor.memoryTargetX = delta.x;
+            cell->cellFunctionData.sensor.memoryTargetY = delta.y;
         } else {
             activity.channels[0] = 0;  //nothing found
             activity.channels[1] = cell->cellFunctionData.sensor.memoryChannel1;
             activity.channels[2] = cell->cellFunctionData.sensor.memoryChannel2;
             activity.channels[3] = cell->cellFunctionData.sensor.memoryChannel3;
-            activity.targetX = cell->cellFunctionData.sensor.targetX;
-            activity.targetY = cell->cellFunctionData.sensor.targetY;
+            activity.targetX = cell->cellFunctionData.sensor.memoryTargetX;
+            activity.targetY = cell->cellFunctionData.sensor.memoryTargetY;
         }
     }
     __syncthreads();
@@ -270,17 +269,29 @@ SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& stati
             activity.channels[0] = 1;                                                     //something found
             activity.channels[1] = static_cast<float>((lookupResult >> 40) & 0xff) / 256;  //density
             activity.channels[2] = distance / 256;                                         //distance
+
+            auto legacyMode_unrestrictedMovements = !cudaSimulationParameters.cellFunctionMuscleMovementTowardTargetedObject;
+            if (!legacyMode_unrestrictedMovements) {
+                activity.channels[3] = 0;
+            }
+            cell->cellFunctionData.sensor.memoryChannel1 = activity.channels[1];
+            cell->cellFunctionData.sensor.memoryChannel2 = activity.channels[2];
+            cell->cellFunctionData.sensor.memoryChannel3 = activity.channels[3];
+
             statistics.incNumSensorMatches(cell->color);
 
             auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
             activity.targetX = delta.x;
             activity.targetY = delta.y;
-            cell->cellFunctionData.sensor.targetX = delta.x;
-            cell->cellFunctionData.sensor.targetY = delta.y;
+            cell->cellFunctionData.sensor.memoryTargetX = delta.x;
+            cell->cellFunctionData.sensor.memoryTargetY = delta.y;
         } else {
             activity.channels[0] = 0;  //nothing found
-            activity.targetX = cell->cellFunctionData.sensor.targetX;
-            activity.targetY = cell->cellFunctionData.sensor.targetY;
+            activity.channels[1] = cell->cellFunctionData.sensor.memoryChannel1;
+            activity.channels[2] = cell->cellFunctionData.sensor.memoryChannel2;
+            activity.channels[3] = cell->cellFunctionData.sensor.memoryChannel3;
+            activity.targetX = cell->cellFunctionData.sensor.memoryTargetX;
+            activity.targetY = cell->cellFunctionData.sensor.memoryTargetY;
         }
     }
 }

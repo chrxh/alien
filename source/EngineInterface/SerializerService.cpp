@@ -651,8 +651,8 @@ namespace cereal
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel1, data.memoryChannel1, defaultObject.memoryChannel1);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel2, data.memoryChannel2, defaultObject.memoryChannel2);
         loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel3, data.memoryChannel3, defaultObject.memoryChannel3);
-        loadSave<float>(task, auxiliaries, Id_Sensor_TargetX, data.targetX, defaultObject.targetX);
-        loadSave<float>(task, auxiliaries, Id_Sensor_TargetY, data.targetY, defaultObject.targetY);
+        loadSave<float>(task, auxiliaries, Id_Sensor_TargetX, data.memoryTargetX, defaultObject.memoryTargetX);
+        loadSave<float>(task, auxiliaries, Id_Sensor_TargetY, data.memoryTargetY, defaultObject.memoryTargetY);
         loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_MinRange, data.minRange, defaultObject.minRange);
         loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_MaxRange, data.maxRange, defaultObject.maxRange);
         processLoadSaveMap(task, ar, auxiliaries);

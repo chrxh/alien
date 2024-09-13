@@ -55,6 +55,7 @@ struct SimulationParameters
     CellFunction highlightedCellFunction = CellFunction_Constructor;
     float zoomLevelNeuronalActivity = 2.0f;
     bool attackVisualization = false;
+    bool muscleMovementVisualization = false;
     float cellRadius = 0.25f;
 
     //all other parameters

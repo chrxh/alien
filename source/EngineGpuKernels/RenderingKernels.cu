@@ -511,7 +511,7 @@ __global__ void cudaDrawCells(
         }
 
         //draw muscle movements
-        if (cell->cellFunction == CellFunction_Muscle
+        if (cudaSimulationParameters.muscleMovementVisualization && cell->cellFunction == CellFunction_Muscle
             && (cell->cellFunctionData.muscle.lastMovementX != 0 || cell->cellFunctionData.muscle.lastMovementY != 0)) {
 
             auto color = float3{0.7f, 0.7f, 0.7f} * min(1.0f, zoom * 0.1f);
@@ -523,7 +523,7 @@ __global__ void cudaDrawCells(
 
             auto arrowPos1 = endPos + float2{
                 -cell->cellFunctionData.muscle.lastMovementX + cell->cellFunctionData.muscle.lastMovementY,
-                -cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY} * 40;
+                -cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY} * 20;
             auto arrowImagePos1 = mapWorldPosToImagePos(rectUpperLeft, arrowPos1, universeImageSize, zoom);
             if (isLineVisible(arrowImagePos1, endImagePos, universeImageSize)) {
                 drawLine(arrowImagePos1, endImagePos, color, imageData, imageSize);
@@ -531,7 +531,7 @@ __global__ void cudaDrawCells(
 
             auto arrowPos2 = endPos + float2{
                 -cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY,
-                +cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY} * 40;
+                +cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY} * 20;
             auto arrowImagePos2 = mapWorldPosToImagePos(rectUpperLeft, arrowPos2, universeImageSize, zoom);
             if (isLineVisible(arrowImagePos2, endImagePos, universeImageSize)) {
                 drawLine(arrowImagePos2, endImagePos, color, imageData, imageSize);
@@ -573,7 +573,8 @@ __global__ void cudaDrawCells(
             if (inputExecutionOrderNumber != -1 && inputExecutionOrderNumber != cell->executionOrderNumber) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const& otherCell = cell->connections[i].cell;
-                    if (otherCell->executionOrderNumber == inputExecutionOrderNumber && !otherCell->outputBlocked) {
+                    if (otherCell->executionOrderNumber == inputExecutionOrderNumber && !otherCell->outputBlocked
+                        && (otherCell->inputExecutionOrderNumber != cell->executionOrderNumber || cell->executionOrderNumber > otherCell->executionOrderNumber)) {
                         auto otherCellPos = otherCell->pos;
                         auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                         otherCellPos += topologyCorrection;

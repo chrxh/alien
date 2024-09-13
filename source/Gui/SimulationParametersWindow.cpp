@@ -273,6 +273,13 @@ void _SimulationParametersWindow::processBase()
                     parameters.attackVisualization);
                 AlienImGui::Checkbox(
                     AlienImGui::CheckboxParameters()
+                        .name("Muscle movement visualization")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origParameters.muscleMovementVisualization)
+                        .tooltip("If activated, the direction in which muscle cells are moving are visualized."),
+                    parameters.muscleMovementVisualization);
+                AlienImGui::Checkbox(
+                    AlienImGui::CheckboxParameters()
                         .name("Borderless rendering")
                         .textWidth(RightColumnWidth)
                         .defaultValue(origParameters.borderlessRendering)

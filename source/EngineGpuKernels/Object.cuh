@@ -134,8 +134,8 @@ struct SensorFunction
     float memoryChannel1;
     float memoryChannel2;
     float memoryChannel3;
-    float targetX;
-    float targetY;
+    float memoryTargetX;
+    float memoryTargetY;
 };
 
 struct NerveFunction

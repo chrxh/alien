@@ -81,11 +81,16 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
         }
         auto executionOrderNumber = getCurrentExecutionNumber(data, cell);
         int maxOtherExecutionOrderNumber = -1;
+
         if (!cell->outputBlocked) {
             for (int i = 0, j = cell->numConnections; i < j; ++i) {
                 auto otherExecutionOrderNumber = cell->connections[i].cell->executionOrderNumber;
                 auto otherInputExecutionOrderNumber = cell->connections[i].cell->inputExecutionOrderNumber;
-                if (otherInputExecutionOrderNumber == cell->executionOrderNumber) {
+                auto otherOutputBlocked = cell->connections[i].cell->outputBlocked;
+                bool isDataFlownIn =
+                    cell->inputExecutionOrderNumber == otherExecutionOrderNumber && !otherOutputBlocked
+                      && cell->executionOrderNumber > otherInputExecutionOrderNumber;
+                if (otherInputExecutionOrderNumber == cell->executionOrderNumber && !isDataFlownIn) {
                     if (maxOtherExecutionOrderNumber == -1) {
                         maxOtherExecutionOrderNumber = otherExecutionOrderNumber;
                     } else {
@@ -127,6 +132,10 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
     for (int i = 0, j = cell->numConnections; i < j; ++i) {
         auto connectedCell = cell->connections[i].cell;
         if (connectedCell->outputBlocked || connectedCell->livingState != LivingState_Ready ) {
+            continue;
+        }
+        if (connectedCell->inputExecutionOrderNumber == cell->executionOrderNumber && connectedCell->executionOrderNumber > cell->executionOrderNumber
+            && !cell->outputBlocked) {
             continue;
         }
         if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber) {

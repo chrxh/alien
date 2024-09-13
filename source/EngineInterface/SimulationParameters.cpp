@@ -202,5 +202,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellEmergentMaxAgeActivated == other.cellEmergentMaxAgeActivated
         && cellFunctionMuscleMovementTowardTargetedObject == other.cellFunctionMuscleMovementTowardTargetedObject
         && legacyCellFunctionMuscleMovementAngleFromSensor == other.legacyCellFunctionMuscleMovementAngleFromSensor
+        && muscleMovementVisualization == other.muscleMovementVisualization
         ;
 }
