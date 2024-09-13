@@ -699,8 +699,8 @@ ConstructorProcessor::constructCellIntern(
         result->cellFunctionData.sensor.memoryChannel1 = 0;
         result->cellFunctionData.sensor.memoryChannel2 = 0;
         result->cellFunctionData.sensor.memoryChannel3 = 0;
-        result->cellFunctionData.sensor.targetX = 0;
-        result->cellFunctionData.sensor.targetY = 0;
+        result->cellFunctionData.sensor.memoryTargetX = 0;
+        result->cellFunctionData.sensor.memoryTargetY = 0;
     } break;
     case CellFunction_Nerve: {
         result->cellFunctionData.nerve.pulseMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);

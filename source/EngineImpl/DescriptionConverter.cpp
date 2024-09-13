@@ -459,8 +459,8 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         sensor.memoryChannel1 = cellTO.cellFunctionData.sensor.memoryChannel1;
         sensor.memoryChannel2 = cellTO.cellFunctionData.sensor.memoryChannel2;
         sensor.memoryChannel3 = cellTO.cellFunctionData.sensor.memoryChannel3;
-        sensor.targetX = cellTO.cellFunctionData.sensor.targetX;
-        sensor.targetY = cellTO.cellFunctionData.sensor.targetY;
+        sensor.memoryTargetX = cellTO.cellFunctionData.sensor.memoryTargetX;
+        sensor.memoryTargetY = cellTO.cellFunctionData.sensor.memoryTargetY;
         result.cellFunction = sensor;
     } break;
     case CellFunction_Nerve: {
@@ -618,8 +618,8 @@ void DescriptionConverter::addCell(
         sensorTO.memoryChannel1 = sensorDesc.memoryChannel1;
         sensorTO.memoryChannel2 = sensorDesc.memoryChannel2;
         sensorTO.memoryChannel3 = sensorDesc.memoryChannel3;
-        sensorTO.targetX = sensorDesc.targetX;
-        sensorTO.targetY = sensorDesc.targetY;
+        sensorTO.memoryTargetX = sensorDesc.memoryTargetX;
+        sensorTO.memoryTargetY = sensorDesc.memoryTargetY;
         cellTO.cellFunctionData.sensor = sensorTO;
     } break;
     case CellFunction_Nerve: {

@@ -15,7 +15,7 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static void movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity);
+    __inline__ __device__ static void movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity);
     __inline__ __device__ static void contractionExpansion(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity);
     __inline__ __device__ static void bending(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity);
 
@@ -56,7 +56,6 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     } break;
     }
 
-    activity.channels[0] *= 0.95f;
     CellFunctionProcessor::setActivity(cell, activity);
 }
 
@@ -84,7 +83,7 @@ namespace
     }
 }
 
-__device__ __inline__ void MuscleProcessor::movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity const& activity)
+__device__ __inline__ void MuscleProcessor::movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
 {
     if (abs(activity.channels[0]) < NEAR_ZERO) {
         return;
@@ -99,8 +98,8 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
         if (cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellFunctionMuscleMovementAngleFromSensor) {
             if (auto sensorCell = findNearbySensor(cell)) {
                 auto const& sensorData = sensorCell->cellFunctionData.sensor;
-                if (sensorData.targetX != 0 || sensorData.targetY != 0) {
-                    direction = {sensorData.targetX, sensorData.targetY};
+                if (sensorData.memoryTargetX != 0 || sensorData.memoryTargetY != 0) {
+                    direction = {sensorData.memoryTargetX, sensorData.memoryTargetY};
                     acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
                 }
             }
@@ -119,6 +118,8 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
     cell->vel += direction;
     cell->cellFunctionData.muscle.lastMovementX = direction.x;
     cell->cellFunctionData.muscle.lastMovementY = direction.y;
+    activity.channels[0] = 0;
+    activity.origin = ActivityOrigin_Unknown;
     cell->releaseLock();
     statistics.incNumMuscleActivities(cell->color);
 }

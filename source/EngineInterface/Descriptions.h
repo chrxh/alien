@@ -186,8 +186,8 @@ struct SensorDescription
     float memoryChannel1 = 0;
     float memoryChannel2 = 0;
     float memoryChannel3 = 0;
-    float targetX = 0;
-    float targetY = 0;
+    float memoryTargetX = 0;
+    float memoryTargetY = 0;
 
     auto operator<=>(SensorDescription const&) const = default;
 

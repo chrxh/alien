@@ -452,6 +452,9 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
                     auto angle = Math::angleOfVector(displacement);
                     auto prevAngle = Math::angleOfVector(prevDisplacement);
                     auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
+                    if (actualAngleFromPrevious < 0) {
+                        continue;
+                    }
                     auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
 
                     auto strength = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * cellStiffnessSquared;

@@ -121,8 +121,8 @@ namespace
             cellTO.cellFunctionData.sensor.memoryChannel1 = cell->cellFunctionData.sensor.memoryChannel1;
             cellTO.cellFunctionData.sensor.memoryChannel2 = cell->cellFunctionData.sensor.memoryChannel2;
             cellTO.cellFunctionData.sensor.memoryChannel3 = cell->cellFunctionData.sensor.memoryChannel3;
-            cellTO.cellFunctionData.sensor.targetX = cell->cellFunctionData.sensor.targetX;
-            cellTO.cellFunctionData.sensor.targetY = cell->cellFunctionData.sensor.targetY;
+            cellTO.cellFunctionData.sensor.memoryTargetX = cell->cellFunctionData.sensor.memoryTargetX;
+            cellTO.cellFunctionData.sensor.memoryTargetY = cell->cellFunctionData.sensor.memoryTargetY;
         } break;
         case CellFunction_Nerve: {
             cellTO.cellFunctionData.nerve.pulseMode = cell->cellFunctionData.nerve.pulseMode;

@@ -52,6 +52,12 @@ namespace
         PropertyParser::encodeDecode(tree, parameters.gridLines, defaultParameters.gridLines, "simulation parameters.grid lines", parserTask);
         PropertyParser::encodeDecode(
             tree, parameters.attackVisualization, defaultParameters.attackVisualization, "simulation parameters.attack visualization", parserTask);
+        PropertyParser::encodeDecode(
+            tree,
+            parameters.muscleMovementVisualization,
+            defaultParameters.muscleMovementVisualization,
+            "simulation parameters.muscle movement visualization",
+            parserTask);
         PropertyParser::encodeDecode(tree, parameters.cellRadius, defaultParameters.cellRadius, "simulation parameters.cek", parserTask);
 
         PropertyParser::encodeDecode(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);

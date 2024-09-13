@@ -172,8 +172,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.sensor.memoryChannel1 = cellTO.cellFunctionData.sensor.memoryChannel1;
         cell->cellFunctionData.sensor.memoryChannel2 = cellTO.cellFunctionData.sensor.memoryChannel2;
         cell->cellFunctionData.sensor.memoryChannel3 = cellTO.cellFunctionData.sensor.memoryChannel3;
-        cell->cellFunctionData.sensor.targetX = cellTO.cellFunctionData.sensor.targetX;
-        cell->cellFunctionData.sensor.targetY = cellTO.cellFunctionData.sensor.targetY;
+        cell->cellFunctionData.sensor.memoryTargetX = cellTO.cellFunctionData.sensor.memoryTargetX;
+        cell->cellFunctionData.sensor.memoryTargetY = cellTO.cellFunctionData.sensor.memoryTargetY;
     } break;
     case CellFunction_Nerve: {
         cell->cellFunctionData.nerve.pulseMode = cellTO.cellFunctionData.nerve.pulseMode;
@@ -348,8 +348,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.sensor.memoryChannel1 = 0;
             cell->cellFunctionData.sensor.memoryChannel2 = 0;
             cell->cellFunctionData.sensor.memoryChannel3 = 0;
-            cell->cellFunctionData.sensor.targetX = 0;
-            cell->cellFunctionData.sensor.targetY = 0;
+            cell->cellFunctionData.sensor.memoryTargetX = 0;
+            cell->cellFunctionData.sensor.memoryTargetY = 0;
         } break;
         case CellFunction_Nerve: {
         } break;

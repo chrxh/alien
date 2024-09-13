@@ -417,7 +417,7 @@ void _SimulationView::updateImageFromSimulation()
             if (_isCellDetailOverlayActive && overlayElement.cell) {
                 {
                     auto fontSize = std::min(40.0f, Viewport::getZoomFactor()) / 2;
-                    auto viewPos = Viewport::mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.4f}, borderlessRendering);
+                    auto viewPos = Viewport::mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, borderlessRendering);
                     if (overlayElement.cellType != CellFunction_None) {
                         auto text = Const::CellFunctionToStringMap.at(overlayElement.cellType);
                         drawList->AddText(
