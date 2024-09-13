@@ -328,7 +328,7 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::maxGenomeComplexityOfColonies, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Max colony\ngenome complexity");
+        AlienImGui::Text("Max genome\ncomplexity");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);

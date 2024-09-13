@@ -119,8 +119,9 @@ namespace
     auto constexpr Id_Cell_GenomeComplexity_Deprecated = 13;
     auto constexpr Id_Cell_DetectedByCreatureId = 14;
     auto constexpr Id_Cell_CellFunctionUsed = 15;
-    auto constexpr Id_Cell_AncestorMutationId = 16;
+//    auto constexpr Id_Cell_AncestorMutationId = 16;
     auto constexpr Id_Cell_GenomeComplexity = 17;
+    auto constexpr Id_Cell_AncestorMutationId = 18;
 
     auto constexpr Id_Activity_Origin = 0;
     auto constexpr Id_Activity_TargetX = 1;
@@ -792,7 +793,7 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Cell_LivingState, data.livingState, defaultObject.livingState);
         loadSave<int>(task, auxiliaries, Id_Cell_CreatureId, data.creatureId, defaultObject.creatureId);
         loadSave<int>(task, auxiliaries, Id_Cell_MutationId, data.mutationId, defaultObject.mutationId);
-        loadSave<uint8_t>(task, auxiliaries, Id_Cell_AncestorMutationId, data.ancestorMutationId, defaultObject.ancestorMutationId);
+        loadSave<int>(task, auxiliaries, Id_Cell_AncestorMutationId, data.ancestorMutationId, defaultObject.ancestorMutationId);
         loadSave<std::optional<int>>(
             task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
