@@ -320,7 +320,7 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
                 && (cell->mutationId == otherCell->mutationId || otherCell->mutationId == 0 || otherCell->mutationId == 1
-                    || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
+                    || static_cast<uint16_t>(cell->mutationId & 0xffff) == otherCell->ancestorMutationId)) {
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToEmergentCells && otherCell->mutationId != 1) {
