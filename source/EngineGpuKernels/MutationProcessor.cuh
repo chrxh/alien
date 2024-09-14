@@ -306,9 +306,9 @@ __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& d
     }
 
     auto mutatedByte = data.numberGen1.randomByte();
-    if (delta == Const::GenomeHeaderSeparationPos && GenomeDecoder::convertByteToBool(mutatedByte)) {
-        return;
-    }
+    //if (delta == Const::GenomeHeaderSeparationPos && GenomeDecoder::convertByteToBool(mutatedByte)) {
+    //    return;
+    //}
     if (delta == Const::GenomeHeaderShapePos) {
         auto shape = mutatedByte % ConstructionShape_Count;
         auto origShape = subgenome[delta] % ConstructionShape_Count;
@@ -421,9 +421,9 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
     }
     GenomeDecoder::setNextCellFunctionType(targetGenome, nodeAddress, newCellFunction);
     GenomeDecoder::setRandomCellFunctionData(data, targetGenome, nodeAddress + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeHeaderSize);
-    if (newCellFunction == CellFunction_Constructor && !makeSelfCopy) {
-        GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);  //currently no sub-genome with separation property wished
-    }
+    //if (newCellFunction == CellFunction_Constructor && !makeSelfCopy) {
+    //    GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);  //currently no sub-genome with separation property wished
+    //}
 
     for (int i = nodeAddress + Const::CellBasicBytes + origCellFunctionSize; i < genomeSize; ++i) {
         targetGenome[i + sizeDelta] = genome[i];
@@ -522,7 +522,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     }
     GenomeDecoder::setRandomCellFunctionData(data, targetGenome, nodeAddress + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeHeaderSize);
     if (newCellFunction == CellFunction_Constructor && !makeSelfCopy) {
-        GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);      //currently no sub-genome with separation property wished
+        //GenomeDecoder::setNextConstructorSeparation(targetGenome, nodeAddress, false);      //currently no sub-genome with separation property wished
         auto numBranches = data.numberGen1.randomBool() ? 1 : data.numberGen1.randomByte();
         GenomeDecoder::setNextConstructorNumBranches(targetGenome, nodeAddress, numBranches);
     }
