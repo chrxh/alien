@@ -354,9 +354,12 @@ namespace Const
         "complexity measurement' addon. By default, it is the number of encoded cells in the genome.";
 
     std::string const CellLivingStateTooltip =
-        "Cells can exist in various states. When a cell network is being constructed, its cells are in the 'Under construction' state. Once the cell network "
-        "is completed by the constructor, the cells briefly enter the 'Activating' state before transitioning to the 'Ready' state shortly after. If a cell "
-        "network is in the process of dying, its cells are in the 'Dying' state.";
+        "Cells can exist in various states. When a cell network of the organism is being constructed, its cells are in the 'Under construction' state. Once the cell network "
+        "is completed, the cells briefly enter the 'Activating' state before transitioning to the 'Ready' state shortly after. If a cell "
+        "network is in the process of dying, its cells are in the 'Dying' state.\n\n"
+        "In case that the parameter 'Cell death consequences' is set to 'Detached creature parts die': A cell is in 'Detached' state when it is separated from "
+        "its organism where the constructor cell for self-replication is located. However, if a non-dying cell for self-replication is still present, a detached cell will "
+        "transition into the 'Reviving' state and then into 'Ready' state shortly after.";
 
     std::string const ColoringParameterTooltip =
         "Here, one can set how the cells are to be colored during rendering. \n\n" ICON_FA_CHEVRON_RIGHT
