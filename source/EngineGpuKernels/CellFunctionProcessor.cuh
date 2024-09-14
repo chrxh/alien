@@ -87,10 +87,10 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
                 auto otherExecutionOrderNumber = cell->connections[i].cell->executionOrderNumber;
                 auto otherInputExecutionOrderNumber = cell->connections[i].cell->inputExecutionOrderNumber;
                 auto otherOutputBlocked = cell->connections[i].cell->outputBlocked;
-                bool isDataFlownIn =
+                bool flowToCell =
                     cell->inputExecutionOrderNumber == otherExecutionOrderNumber && !otherOutputBlocked
                       && cell->executionOrderNumber > otherInputExecutionOrderNumber;
-                if (otherInputExecutionOrderNumber == cell->executionOrderNumber && !isDataFlownIn) {
+                if (otherInputExecutionOrderNumber == cell->executionOrderNumber && !flowToCell) {
                     if (maxOtherExecutionOrderNumber == -1) {
                         maxOtherExecutionOrderNumber = otherExecutionOrderNumber;
                     } else {

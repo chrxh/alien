@@ -127,7 +127,7 @@ namespace Const
         "whose 'execution number' matches the specified 'input execution number', summing them up, and then setting the result to the "
         "activity states for the considered cell.\n\n2) The cell function is executed and can use the cell's activity states as input. "
         "The output is used to update the activity states again.\n\nSetting an 'input execution number' is optional. If none is set, the cell can "
-        "receive no input.";
+        "receive no input. Bidirectional connections are not allowed.";
 
     std::string const GenomeBlockOutputTooltip =
         "Activating this toggle, the cell's output can be locked, preventing any other cell from utilizing it as input.";
