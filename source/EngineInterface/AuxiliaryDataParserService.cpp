@@ -285,9 +285,10 @@ namespace
             "simulation parameters.cell.function.constructor.external energy backflow",
             parserTask);
 
-        PropertyParser::encodeDecode(tree, parameters.clusterDecay, defaultParameters.clusterDecay, "simulation parameters.cluster.decay", parserTask);
+        missingParameters.cellDeathConsequences = PropertyParser::encodeDecode(
+            tree, parameters.cellDeathConsequences, defaultParameters.cellDeathConsequences, "simulation parameters.cell.death consequences", parserTask);
         PropertyParser::encodeDecode(
-            tree, parameters.clusterDecayProb, defaultParameters.clusterDecayProb, "simulation parameters.cluster.decay probability", parserTask);
+            tree, parameters.cellDeathProbability, defaultParameters.cellDeathProbability, "simulation parameters.cell.death probability", parserTask);
 
         PropertyParser::encodeDecode(
             tree,

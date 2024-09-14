@@ -510,13 +510,14 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
             auto actualDistance = Math::length(displacement);
             if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance[cell->color]) {
                 scheduleForDestruction = true;
-                if (cudaSimulationParameters.clusterDecay) {
-                    cell->livingState = LivingState_Dying;
-                }
             }
         }
         if (scheduleForDestruction) {
             CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto connectedCell = cell->connections[i].cell;
+                connectedCell->livingState = LivingState_Detaching;
+            }
         }
     }
 }
@@ -624,11 +625,13 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
             }
         }
         if (origLivingState == LivingState_Detaching) {
-            if (cudaSimulationParameters.clusterDecay) {
+            if (cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_DetachedPartsDie
+                || cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_CreatureDies) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const& connectedCell = cell->connections[i].cell;
                     if (connectedCell->creatureId == cell->creatureId) {
-                        if (connectedCell->cellFunction == CellFunction_Constructor
+                        if (cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_DetachedPartsDie
+                            && connectedCell->cellFunction == CellFunction_Constructor
                             && GenomeDecoder::containsSelfReplication(connectedCell->cellFunctionData.constructor)) {
                             atomicExch(&connectedCell->livingState, LivingState_Reviving);
                         } else {
@@ -761,7 +764,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
 
         if (cell->livingState == LivingState_Dying || cell->livingState == LivingState_Detaching) {
-            if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb[cell->color]) {
+            if (data.numberGen1.random() < cudaSimulationParameters.cellDeathProbability[cell->color]) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
             }
         }

@@ -624,12 +624,12 @@ void _SimulationParametersWindow::processBase()
                         .min(10.0f)
                         .max(200.0f)
                         .defaultValue(origParameters.cellNormalEnergy)
-                        .tooltip("The normal energy value of a cell is defined here. This is used as a reference value in various contexts: \n"
-                                 ICON_FA_CARET_RIGHT" Attacker and Transmitter cells: When the energy of these cells is above the normal value, some of their energy is distributed to "
-                                 "surrounding cells.\n"
-                                 ICON_FA_CARET_RIGHT" Constructor cells: Creating new cells costs energy. The creation of new cells is executed only when the "
-                                 "residual energy of the constructor cell does not fall below the normal value.\n"
-                                 ICON_FA_CARET_RIGHT" If the transformation of energy particles to "
+                        .tooltip("The normal energy value of a cell is defined here. This is used as a reference value in various contexts: \n\n" ICON_FA_CHEVRON_RIGHT
+                            " Attacker and Transmitter cells: When the energy of these cells is above the normal value, some of their energy is distributed to "
+                                 "surrounding cells.\n\n" ICON_FA_CHEVRON_RIGHT
+                            " Constructor cells: Creating new cells costs energy. The creation of new cells is executed only when the "
+                                 "residual energy of the constructor cell does not fall below the normal value.\n\n" ICON_FA_CHEVRON_RIGHT
+                            " If the transformation of energy particles to "
                                  "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
                     parameters.cellNormalEnergy);
                 AlienImGui::SliderFloat(
@@ -638,22 +638,26 @@ void _SimulationParametersWindow::processBase()
                         .colorDependence(true)
                         .textWidth(RightColumnWidth)
                         .min(1e-6f)
-                        .max(0.05f)
+                        .max(0.1f)
                         .format("%.6f")
                         .logarithmic(true)
-                        .defaultValue(origParameters.clusterDecayProb)
-                        .tooltip(
-                            "The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) provided that one of the following conditions is satisfied:\n" ICON_FA_CARET_RIGHT
-                            " the cell has too low energy,\n" ICON_FA_CARET_RIGHT " the cell is in 'Dying' state\n" ICON_FA_CARET_RIGHT " the cell has exceeded the maximum age.")
-                    , parameters.clusterDecayProb);
-                AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters()
-                        .name("Cell network decay")
+                        .defaultValue(origParameters.cellDeathProbability)
+                        .tooltip("The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
+                                    "state 'dying'. This can occur when one of the following conditions is satisfied:\n\n"
+                                    ICON_FA_CHEVRON_RIGHT " The cell has too low energy.\n\n"
+                                    ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),
+                    parameters.cellDeathProbability);
+                AlienImGui::Switcher(
+                    AlienImGui::SwitcherParameters()
+                        .name("Cell death consequences")
                         .textWidth(RightColumnWidth)
-                        .defaultValue(origParameters.clusterDecay)
-                        .tooltip("If enabled, entire cell networks will disintegrate when one of their cells is dying because of insufficient energy or exceeding "
-                                 "the max. age. This option is useful to minimize the presence of damaged cell networks."),
-                    parameters.clusterDecay);
+                        .defaultValue(origParameters.cellDeathConsequences)
+                        .values({"None", "Entire creature dies", "Detached creature parts die"})
+                        .tooltip("Here one can define what happens to the organism when one of its cells is in the 'dying' state.\n\n" ICON_FA_CHEVRON_RIGHT
+                                 " None: Only the cell dies.\n\n" ICON_FA_CHEVRON_RIGHT " Entire creature dies: All the cells of the organism will also die.\n\n" ICON_FA_CHEVRON_RIGHT
+                                 " Detached creature parts die: Only the parts of the organism that are no longer connected to a "
+                                 "constructor cell for self-replication die."),
+                    parameters.cellDeathConsequences);
                 AlienImGui::EndTreeNode();
             }
             ImGui::PopID();

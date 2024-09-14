@@ -20,6 +20,7 @@ struct MissingParameters
 {
     bool externalEnergyBackflowFactor = false;
     bool copyMutations = false;
+    bool cellDeathConsequences = false;
 };
 
 template <typename T>
@@ -57,6 +58,8 @@ struct LegacyParametersForBase
     LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationSubgenomeColorProbability;
     LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationGenomeColorProbability;
     LegacyProperty<bool> cellFunctionMuscleMovementAngleFromSensor;
+    LegacyProperty<bool> clusterDecay;
+    LegacyProperty<ColorVector<float>> clusterDecayProb;
 };
 
 struct LegacyParametersForSpot

@@ -104,7 +104,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (cellFunctionConstructorOffspringDistance[i] != other.cellFunctionConstructorOffspringDistance[i]) {
             return false;
         }
-        if (clusterDecayProb[i] != other.clusterDecayProb[i]) {
+        if (cellDeathProbability[i] != other.cellDeathProbability[i]) {
             return false;
         }
         if (cellNormalEnergy[i] != other.cellNormalEnergy[i]) {
@@ -184,7 +184,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellFunctionTransmitterEnergyDistributionSameCreature == other.cellFunctionTransmitterEnergyDistributionSameCreature
         && particleTransformationAllowed == other.particleTransformationAllowed
         && particleTransformationRandomCellFunction == other.particleTransformationRandomCellFunction
-        && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize && clusterDecay == other.clusterDecay
+        && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize && cellDeathConsequences == other.cellDeathConsequences
         && cellFunctionSensorActivityThreshold == other.cellFunctionSensorActivityThreshold
         && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
         && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication

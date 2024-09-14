@@ -26,6 +26,14 @@ enum CellColoring_
     CellColoring_AllCellFunctions
 };
 
+using CellDeathConsquences = int;
+enum CellDeathConsquences_
+{
+    CellDeathConsquences_None,
+    CellDeathConsquences_CreatureDies,
+    CellDeathConsquences_DetachedPartsDie
+};
+
 struct SimulationParameters
 {
     //feature list
@@ -87,8 +95,8 @@ struct SimulationParameters
     ColorVector<float> radiationAbsorptionLowConnectionPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> highRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
-    bool clusterDecay = false;
-    ColorVector<float> clusterDecayProb = {0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f};
+    CellDeathConsquences cellDeathConsequences = CellDeathConsquences_DetachedPartsDie;
+    ColorVector<float> cellDeathProbability = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f};
     ColorVector<int> cellMaxAge = {
         Infinity<int>::value,
         Infinity<int>::value,

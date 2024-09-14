@@ -106,6 +106,9 @@ namespace
         readLegacyParameterForBase(
             result.cellFunctionMuscleMovementAngleFromSensor, tree, nodeBase + "cell.function.muscle.movement angle from sensor");
 
+        readLegacyParameterForBase(result.clusterDecay, tree, nodeBase + "cluster.decay");
+        readLegacyParameterForBase(result.clusterDecayProb, tree, nodeBase + "cluster.decay probability");
+
         return result;
     }
 
@@ -165,12 +168,12 @@ void LegacyAuxiliaryDataParserService::activateParametersAndFeaturesForLegacyFil
     LegacyParameters const& legacyParameters,
     SimulationParameters& parameters)
 {
-    //check activation of legacyCellFunctionMuscleMovementAngleFromChannel before v4.10.0
+    //activation of legacyCellFunctionMuscleMovementAngleFromChannel before v4.10.0
     if (missingFeatures.legacyMode && !legacyFeatures.advancedMuscleControl.existent) {
         parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
     }
 
-    //check activation of legacyCellFunctionMuscleMovementAngleFromChannel between v4.10.0 and v4.10.1
+    //activation of legacyCellFunctionMuscleMovementAngleFromChannel between v4.10.0 and v4.10.1
     if (legacyFeatures.advancedMuscleControl.existent && legacyParameters.base.cellFunctionMuscleMovementAngleFromSensor.existent) {
         parameters.features.legacyModes = true;
         parameters.cellFunctionMuscleMovementTowardTargetedObject =
@@ -178,7 +181,7 @@ void LegacyAuxiliaryDataParserService::activateParametersAndFeaturesForLegacyFil
         parameters.legacyCellFunctionMuscleMovementAngleFromSensor = true;
     }
 
-    //check activation of other features
+    //activation of other features
     if (missingFeatures.advancedAbsorptionControl) {
         if (!equals(parameters.radiationAbsorptionHighVelocityPenalty, 0.0f) || !equals(parameters.radiationAbsorptionLowConnectionPenalty, 0.0f)) {
             parameters.features.advancedAbsorptionControl = true;
@@ -233,7 +236,7 @@ void LegacyAuxiliaryDataParserService::activateParametersAndFeaturesForLegacyFil
         parameters.features.cellAgeLimiter = true;
     }
 
-    //check activation of externalEnergyBackflowFactor
+    //activation of externalEnergyBackflowFactor
     if (missingParameters.externalEnergyBackflowFactor) {
         if (!equals(parameters.externalEnergyConditionalInflowFactor, 0.0f)) {
             for (int i = 0; i < MAX_COLORS; ++i) {
@@ -242,7 +245,7 @@ void LegacyAuxiliaryDataParserService::activateParametersAndFeaturesForLegacyFil
         }
     }
 
-    //check conversion of mutation rates to genome copy mutations
+    //conversion of mutation rates to genome copy mutations
     if (missingParameters.copyMutations) {
         auto setParametersForBase = [](SimulationParametersSpotValues& target, LegacyParametersForBase const& source) {
             for (int i = 0; i < MAX_COLORS; ++i) {
@@ -280,6 +283,20 @@ void LegacyAuxiliaryDataParserService::activateParametersAndFeaturesForLegacyFil
         setParametersForBase(parameters.baseValues, legacyParameters.base);
         for (int i = 0; i < MAX_SPOTS; ++i) {
             setParametersForSpot(parameters.spots->values, legacyParameters.spots[i]);
+        }
+    }
+
+    //conversion of cluster decay and probabilities
+    if (missingParameters.cellDeathConsequences) {
+        parameters.cellDeathConsequences = legacyParameters.base.clusterDecay.parameter ? CellDeathConsquences_CreatureDies : CellDeathConsquences_None;
+        if (parameters.cellDeathConsequences == CellDeathConsquences_None) {
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                parameters.cellDeathProbability[i] = 0.01f;
+            }
+        } else {
+            for (int i = 0; i < MAX_COLORS; ++i) {
+                parameters.cellDeathProbability[i] = legacyParameters.base.clusterDecayProb.parameter[i];
+            }
         }
     }
 }
