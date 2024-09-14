@@ -118,7 +118,7 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
     cell->vel += direction;
     cell->cellFunctionData.muscle.lastMovementX = direction.x;
     cell->cellFunctionData.muscle.lastMovementY = direction.y;
-    if (!cudaSimulationParameters.features.legacyModes || !cudaSimulationParameters.legacyCellFunctionMuscleNoActivityReset) {
+    if (!(cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellFunctionMuscleNoActivityReset)) {
         activity.channels[0] = 0;
         activity.origin = ActivityOrigin_Unknown;
     }

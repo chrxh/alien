@@ -173,6 +173,7 @@ void LegacyAuxiliaryDataParserService::activateParametersAndFeaturesForLegacyFil
     if (programVersion.empty()) {
         parameters.features.legacyModes = true;
         parameters.legacyCellFunctionMuscleNoActivityReset = true;
+        parameters.legacyCellDirectionalConnection = true;
     }
 
     //*******************

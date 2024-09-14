@@ -204,5 +204,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && legacyCellFunctionMuscleMovementAngleFromSensor == other.legacyCellFunctionMuscleMovementAngleFromSensor
         && muscleMovementVisualization == other.muscleMovementVisualization
         && legacyCellFunctionMuscleNoActivityReset == other.legacyCellFunctionMuscleNoActivityReset
+        && legacyCellDirectionalConnection == other.legacyCellDirectionalConnection
         ;
 }
