@@ -5,10 +5,11 @@
 #include "Settings.h"
 
 #include "PropertyParser.h"
+#include "Base/Resources.h"
 
 namespace
 {
-    void encodeDecode(
+    void encodeDecodeLatestSimulationParameters(
         boost::property_tree::ptree& tree,
         SimulationParameters& parameters,
         MissingParameters& missingParameters,
@@ -578,12 +579,6 @@ namespace
             defaultParameters.cellFunctionMuscleMovementTowardTargetedObject,
             "simulation parameters.cell.function.muscle.movement toward targeted object",
             parserTask);
-        PropertyParser::encodeDecode(
-            tree,
-            parameters.legacyCellFunctionMuscleMovementAngleFromSensor,
-            defaultParameters.legacyCellFunctionMuscleMovementAngleFromSensor,
-            "simulation parameters.legacy.cell.function.muscle.movement angle from sensor",
-            parserTask);
 
         PropertyParser::encodeDecode(
             tree,
@@ -649,6 +644,19 @@ namespace
             parameters.cellFunctionDetonatorActivityThreshold,
             defaultParameters.cellFunctionDetonatorActivityThreshold,
             "simulation parameters.cell.function.detonator.activity threshold",
+            parserTask);
+
+        PropertyParser::encodeDecode(
+            tree,
+            parameters.legacyCellFunctionMuscleMovementAngleFromSensor,
+            defaultParameters.legacyCellFunctionMuscleMovementAngleFromSensor,
+            "simulation parameters.legacy.cell.function.muscle.movement angle from sensor",
+            parserTask);
+        PropertyParser::encodeDecode(
+            tree,
+            parameters.legacyCellFunctionMuscleNoActivityReset,
+            defaultParameters.legacyCellFunctionMuscleNoActivityReset,
+            "simulation parameters.legacy.cell.function.muscle.no activity reset",
             parserTask);
 
         //particle sources
@@ -991,15 +999,21 @@ namespace
             tree, parameters.features.legacyModes, defaultParameters.features.legacyModes, "simulation parameters.features.legacy modes", parserTask);
     }
 
-    void encodeDecodeSimulationParameters(boost::property_tree::ptree& tree, SimulationParameters& parameters, ParserTask parserTask)
+    void encodeDecodeSimulationParameters(
+        boost::property_tree::ptree& tree,
+        SimulationParameters& parameters,
+        ParserTask parserTask)
     {
+        auto programVersion = Const::ProgramVersion;
+        PropertyParser::encodeDecode(tree, programVersion, std::string(), "simulation parameters.version", parserTask);
+
         MissingParameters missingParameters;
         MissingFeatures missingFeatures;
-        encodeDecode(tree, parameters, missingParameters, missingFeatures, parserTask);
+        encodeDecodeLatestSimulationParameters(tree, parameters, missingParameters, missingFeatures, parserTask);
 
         // Compatibility with legacy parameters
         if (parserTask == ParserTask::Decode) {
-            LegacyAuxiliaryDataParserService::searchAndApplyLegacyParameters(tree, missingFeatures, missingParameters, parameters);
+            LegacyAuxiliaryDataParserService::searchAndApplyLegacyParameters(programVersion, tree, missingFeatures, missingParameters, parameters);
         }
     }
 

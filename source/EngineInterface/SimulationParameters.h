@@ -191,7 +191,6 @@ struct SimulationParameters
     ColorVector<float> cellFunctionMuscleBendingAcceleration = {0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
     float cellFunctionMuscleBendingAccelerationThreshold = 0.1f;
     bool cellFunctionMuscleMovementTowardTargetedObject = true;
-    bool legacyCellFunctionMuscleMovementAngleFromSensor = false;
 
     ColorVector<float> cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
     float cellFunctionSensorActivityThreshold = 0.1f;
@@ -202,6 +201,9 @@ struct SimulationParameters
     ColorVector<float> cellFunctionDetonatorRadius = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
     ColorVector<float> cellFunctionDetonatorChainExplosionProbability = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     float cellFunctionDetonatorActivityThreshold = 0.1f;
+
+    bool legacyCellFunctionMuscleMovementAngleFromSensor = false;
+    bool legacyCellFunctionMuscleNoActivityReset = false;
 
     bool operator==(SimulationParameters const& other) const;
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }

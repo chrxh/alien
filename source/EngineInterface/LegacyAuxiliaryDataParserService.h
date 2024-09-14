@@ -87,7 +87,9 @@ struct LegacyParameters
 class LegacyAuxiliaryDataParserService
 {
 public:
+    //Note: missingFeatures and missingParameters are deprecated, use programVersion instead
     static void searchAndApplyLegacyParameters(
+        std::string const& programVersion,
         boost::property_tree::ptree& tree,
         MissingFeatures const& missingFeatures,
         MissingParameters const& missingParameters,
@@ -95,6 +97,7 @@ public:
 
 private:
     static void activateParametersAndFeaturesForLegacyFiles(
+        std::string const& programVersion,
         MissingFeatures const& missingFeatures,
         LegacyFeatures const& legacyFeatures,
         MissingParameters const& missingParameters,
