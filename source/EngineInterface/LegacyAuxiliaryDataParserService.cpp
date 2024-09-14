@@ -144,6 +144,7 @@ namespace
 }
 
 void LegacyAuxiliaryDataParserService::searchAndApplyLegacyParameters(
+    std::string const& programVersion,
     boost::property_tree::ptree& tree,
     MissingFeatures const& missingFeatures,
     MissingParameters const& missingParameters,
@@ -157,17 +158,26 @@ void LegacyAuxiliaryDataParserService::searchAndApplyLegacyParameters(
     for (int i = 0; i < parameters.numSpots; ++i) {
         legacyParameters.spots[i] = readLegacyParametersForSpot(tree, "simulation parameters.spots." + std::to_string(i) + ".");
     }
-    activateParametersAndFeaturesForLegacyFiles(
-        missingFeatures, legacyFeatures, missingParameters, legacyParameters, parameters);
+    activateParametersAndFeaturesForLegacyFiles(programVersion, missingFeatures, legacyFeatures, missingParameters, legacyParameters, parameters);
 }
 
 void LegacyAuxiliaryDataParserService::activateParametersAndFeaturesForLegacyFiles(
+    std::string const& programVersion,
     MissingFeatures const& missingFeatures,
     LegacyFeatures const& legacyFeatures,
     MissingParameters const& missingParameters,
     LegacyParameters const& legacyParameters,
     SimulationParameters& parameters)
 {
+    //parameter conversion for v4.10.2 and below
+    if (programVersion.empty()) {
+        parameters.features.legacyModes = true;
+        parameters.legacyCellFunctionMuscleNoActivityReset = true;
+    }
+
+    //*******************
+    //* older conversions
+    //*******************
     //activation of legacyCellFunctionMuscleMovementAngleFromChannel before v4.10.0
     if (missingFeatures.legacyMode && !legacyFeatures.advancedMuscleControl.existent) {
         parameters.cellFunctionMuscleMovementTowardTargetedObject = false;

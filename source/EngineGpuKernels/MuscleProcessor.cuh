@@ -118,8 +118,10 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
     cell->vel += direction;
     cell->cellFunctionData.muscle.lastMovementX = direction.x;
     cell->cellFunctionData.muscle.lastMovementY = direction.y;
-    activity.channels[0] = 0;
-    activity.origin = ActivityOrigin_Unknown;
+    if (!cudaSimulationParameters.features.legacyModes || !cudaSimulationParameters.legacyCellFunctionMuscleNoActivityReset) {
+        activity.channels[0] = 0;
+        activity.origin = ActivityOrigin_Unknown;
+    }
     cell->releaseLock();
     statistics.incNumMuscleActivities(cell->color);
 }

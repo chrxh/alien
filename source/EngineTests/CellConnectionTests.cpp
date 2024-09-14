@@ -19,8 +19,8 @@ public:
 TEST_F(CellConnectionTests, decay)
 {
     _parameters.baseValues.radiationAbsorption[0] = 0;
-    _parameters.clusterDecay = false;
-    _parameters.clusterDecayProb[0] = 0.5f;
+    _parameters.cellDeathConsequences = CellDeathConsquences_CreatureDies;
+    _parameters.cellDeathProbability[0] = 0.5f;
 
     _simController->setSimulationParameters(_parameters);
     auto origData =

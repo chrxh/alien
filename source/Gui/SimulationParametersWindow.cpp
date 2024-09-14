@@ -1584,6 +1584,14 @@ void _SimulationParametersWindow::processBase()
                                      "movement angle directly from a connected (or connected-connected) sensor cell that has previously detected a target "
                                      "(legacy behavior). If deactivated, the input signal must only originate from a sensor cell and must not be adjacent (new behavior)."),
                         parameters.legacyCellFunctionMuscleMovementAngleFromSensor);
+                    AlienImGui::Checkbox(
+                        AlienImGui::CheckboxParameters()
+                            .name("No activity reset in muscles")
+                            .textWidth(RightColumnWidth)
+                            .defaultValue(origParameters.legacyCellFunctionMuscleNoActivityReset)
+                            .tooltip("If activated, the activity in channel #0 is not set to 0 in muscle cells which are in movement mode. Thus the output of this type "
+                                     "of muscles can be reused for other muscle cells."),
+                        parameters.legacyCellFunctionMuscleNoActivityReset);
                     AlienImGui::EndTreeNode();
                 }
             }
