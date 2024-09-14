@@ -643,7 +643,7 @@ void _SimulationParametersWindow::processBase()
                         .logarithmic(true)
                         .defaultValue(origParameters.cellDeathProbability)
                         .tooltip("The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
-                                    "state 'dying'. This can occur when one of the following conditions is satisfied:\n\n"
+                                    "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n"
                                     ICON_FA_CHEVRON_RIGHT " The cell has too low energy.\n\n"
                                     ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),
                     parameters.cellDeathProbability);
@@ -653,7 +653,7 @@ void _SimulationParametersWindow::processBase()
                         .textWidth(RightColumnWidth)
                         .defaultValue(origParameters.cellDeathConsequences)
                         .values({"None", "Entire creature dies", "Detached creature parts die"})
-                        .tooltip("Here one can define what happens to the organism when one of its cells is in the 'dying' state.\n\n" ICON_FA_CHEVRON_RIGHT
+                        .tooltip("Here one can define what happens to the organism when one of its cells is in the 'Dying' state.\n\n" ICON_FA_CHEVRON_RIGHT
                                  " None: Only the cell dies.\n\n" ICON_FA_CHEVRON_RIGHT " Entire creature dies: All the cells of the organism will also die.\n\n" ICON_FA_CHEVRON_RIGHT
                                  " Detached creature parts die: Only the parts of the organism that are no longer connected to a "
                                  "constructor cell for self-replication die."),
