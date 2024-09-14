@@ -87,9 +87,10 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
                 auto otherExecutionOrderNumber = cell->connections[i].cell->executionOrderNumber;
                 auto otherInputExecutionOrderNumber = cell->connections[i].cell->inputExecutionOrderNumber;
                 auto otherOutputBlocked = cell->connections[i].cell->outputBlocked;
-                bool flowToCell =
-                    cell->inputExecutionOrderNumber == otherExecutionOrderNumber && !otherOutputBlocked
-                      && cell->executionOrderNumber > otherInputExecutionOrderNumber;
+                bool flowToCell = !(cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellDirectionalConnection)
+                    ? cell->inputExecutionOrderNumber == otherExecutionOrderNumber && !otherOutputBlocked
+                        && cell->executionOrderNumber > otherInputExecutionOrderNumber
+                    : false;
                 if (otherInputExecutionOrderNumber == cell->executionOrderNumber && !flowToCell) {
                     if (maxOtherExecutionOrderNumber == -1) {
                         maxOtherExecutionOrderNumber = otherExecutionOrderNumber;
@@ -134,8 +135,8 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         if (connectedCell->outputBlocked || connectedCell->livingState != LivingState_Ready ) {
             continue;
         }
-        if (connectedCell->inputExecutionOrderNumber == cell->executionOrderNumber && connectedCell->executionOrderNumber > cell->executionOrderNumber
-            && !cell->outputBlocked) {
+        if (!(cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellDirectionalConnection) && connectedCell->inputExecutionOrderNumber == cell->executionOrderNumber
+            && connectedCell->executionOrderNumber > cell->executionOrderNumber && !cell->outputBlocked) {
             continue;
         }
         if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber) {
