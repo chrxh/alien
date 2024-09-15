@@ -18,8 +18,7 @@ void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatis
         historyData.clear();
     }
 
-    if (!_lastRawStatistics || historyData.empty() || toDouble(timestep) - historyData.back().time > _longtermTimestepDelta) {
-
+    if (!_lastRawStatistics || historyData.empty() || toDouble(timestep) - historyData.back().time > _longtermTimestepDelta / 100 * (_numDataPoints + 1)) {
         auto newDataPoint = [&] {
             if (!_lastRawStatistics && !historyData.empty()) {
 
@@ -32,15 +31,24 @@ void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatis
             }
         }();
 
+        _lastRawStatistics = newRawStatistics;
+        _lastTimestep = timestep;
+        _accumulatedDataPoint = _accumulatedDataPoint.has_value() ? *_accumulatedDataPoint + newDataPoint : newDataPoint;
+        ++_numDataPoints;
+    }
+
+    if (_accumulatedDataPoint.has_value() && (historyData.empty() || toDouble(timestep) - historyData.back().time > _longtermTimestepDelta)) {
+        auto newDataPoint = *_accumulatedDataPoint / _numDataPoints;
+        _numDataPoints = 0;
+        _accumulatedDataPoint.reset();
+
         //remove last entry if timestep has not changed
         if (!historyData.empty() && abs(historyData.back().time - toDouble(timestep)) < NEAR_ZERO) {
             historyData.pop_back();
         }
         historyData.emplace_back(newDataPoint);
 
-        _lastRawStatistics = newRawStatistics;
-        _lastTimestep = timestep;
-
+        //compress history after MaxSamples
         if (historyData.size() > MaxSamples) {
             std::vector<DataPointCollection> newData;
             newData.reserve(historyData.size() / 2);
