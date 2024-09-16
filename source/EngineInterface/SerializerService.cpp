@@ -117,11 +117,12 @@ namespace
     auto constexpr Id_Cell_CreatureId = 11;
     auto constexpr Id_Cell_MutationId = 12;
     auto constexpr Id_Cell_GenomeComplexity_Deprecated = 13;
-    auto constexpr Id_Cell_DetectedByCreatureId = 14;
+    //auto constexpr Id_Cell_DetectedByCreatureId = 14;
     auto constexpr Id_Cell_CellFunctionUsed = 15;
-//    auto constexpr Id_Cell_AncestorMutationId = 16;
+    auto constexpr Id_Cell_AncestorMutationId = 16;
     auto constexpr Id_Cell_GenomeComplexity = 17;
-    auto constexpr Id_Cell_AncestorMutationId = 18;
+    //auto constexpr Id_Cell_AncestorMutationId = 18;
+    auto constexpr Id_Cell_DetectedByCreatureId = 19;
 
     auto constexpr Id_Activity_Origin = 0;
     auto constexpr Id_Activity_TargetX = 1;
@@ -793,13 +794,13 @@ namespace cereal
         loadSave<int>(task, auxiliaries, Id_Cell_LivingState, data.livingState, defaultObject.livingState);
         loadSave<int>(task, auxiliaries, Id_Cell_CreatureId, data.creatureId, defaultObject.creatureId);
         loadSave<int>(task, auxiliaries, Id_Cell_MutationId, data.mutationId, defaultObject.mutationId);
-        loadSave<int>(task, auxiliaries, Id_Cell_AncestorMutationId, data.ancestorMutationId, defaultObject.ancestorMutationId);
+        loadSave<uint8_t>(task, auxiliaries, Id_Cell_AncestorMutationId, data.ancestorMutationId, defaultObject.ancestorMutationId);
         loadSave<std::optional<int>>(
             task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
         loadSave<float>(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
-        loadSave<uint8_t>(task, auxiliaries, Id_Cell_DetectedByCreatureId, data.detectedByCreatureId, defaultObject.detectedByCreatureId);
+        loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data.detectedByCreatureId, defaultObject.detectedByCreatureId);
         loadSave<uint8_t>(task, auxiliaries, Id_Cell_CellFunctionUsed, data.cellFunctionUsed, defaultObject.cellFunctionUsed);
         processLoadSaveMap(task, ar, auxiliaries);
 

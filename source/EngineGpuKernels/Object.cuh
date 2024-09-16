@@ -220,7 +220,7 @@ struct Cell
     LivingState livingState;
     uint32_t creatureId;
     uint32_t mutationId;
-    uint16_t ancestorMutationId; //only the first 16 bits from host mutation id
+    uint8_t ancestorMutationId; //only the first 8 bits from ancestor mutation id
     float genomeComplexity;
 
     //cell function
@@ -234,7 +234,7 @@ struct Cell
     CellFunctionUsed cellFunctionUsed;
 
     //process data
-    uint8_t detectedByCreatureId;  //only the first 8 bits from the creature id
+    uint16_t detectedByCreatureId;  //only the first 16 bits from the creature id
 
     //annotations
     CellMetadataDescription metadata;

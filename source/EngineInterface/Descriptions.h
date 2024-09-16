@@ -384,7 +384,7 @@ struct CellDescription
     LivingState livingState = LivingState_Ready;
     int creatureId = 0;
     int mutationId = 0;
-    int ancestorMutationId = 0;
+    uint8_t ancestorMutationId = 0;
     float genomeComplexity = 0;
 
     //cell function
@@ -394,7 +394,7 @@ struct CellDescription
     CellFunctionDescription cellFunction;
     ActivityDescription activity;
     int activationTime = 0;
-    uint8_t detectedByCreatureId = 0;   //only the first 8 bits from the creature id
+    int detectedByCreatureId = 0;   //only the first 16 bits from the creature id
     CellFunctionUsed cellFunctionUsed = CellFunctionUsed_No;
 
     CellMetadataDescription metadata;

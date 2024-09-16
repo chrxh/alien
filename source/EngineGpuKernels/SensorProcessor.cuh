@@ -320,7 +320,7 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
                 && (cell->mutationId == otherCell->mutationId || otherCell->mutationId == 0 || otherCell->mutationId == 1
-                    || static_cast<uint16_t>(cell->mutationId & 0xffff) == otherCell->ancestorMutationId)) {
+                    || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells && otherCell->mutationId != 1) {
@@ -343,7 +343,7 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             //    continue;
             //}
 
-            otherCell->detectedByCreatureId = static_cast<uint8_t>(cell->creatureId & 0xff);
+            otherCell->detectedByCreatureId = static_cast<uint16_t>(cell->creatureId & 0xffff);
         }
     }
 }
