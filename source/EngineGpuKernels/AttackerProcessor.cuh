@@ -71,7 +71,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             auto color = calcMod(cell->color, MAX_COLORS);
             auto otherColor = calcMod(otherCell->color, MAX_COLORS);
 
-            if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->detectedByCreatureId != (cell->creatureId & 0xff)) {
+            if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->detectedByCreatureId != (cell->creatureId & 0xffff)) {
                 energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[color]);
             }
 
@@ -87,7 +87,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     (1.0f + cellFunctionAttackerGenomeComplexityBonus * (otherCell->genomeComplexity - cell->genomeComplexity));
             }
             if (cudaSimulationParameters.features.advancedAttackerControl
-                && ((otherCell->mutationId == cell->mutationId) || (otherCell->ancestorMutationId == static_cast<uint16_t>(cell->mutationId & 0xffff)))
+                && ((otherCell->mutationId == cell->mutationId) || (otherCell->ancestorMutationId == static_cast<uint8_t>(cell->mutationId & 0xff)))
                 && cell->mutationId != 0) {
                 energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerSameMutantPenalty[color][otherColor]);
             }
