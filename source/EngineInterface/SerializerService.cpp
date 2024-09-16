@@ -353,7 +353,7 @@ namespace cereal
             }
             if (auxiliaries.contains(Id_SensorGenome_RestrictToOtherMutants_Deprecated)) {
                 auto restrictToOtherMutants = std::get<bool>(auxiliaries.at(Id_SensorGenome_RestrictToOtherMutants_Deprecated));
-                data.restrictToMutants = restrictToOtherMutants ? SensorRestrictToMutants_RestrictToEmergentCells : SensorRestrictToMutants_NoRestriction;
+                data.restrictToMutants = restrictToOtherMutants ? SensorRestrictToMutants_RestrictToFreeCells : SensorRestrictToMutants_NoRestriction;
             }
         }
         //<<<
@@ -666,7 +666,7 @@ namespace cereal
             }
             if (auxiliaries.contains(Id_Sensor_RestrictToOtherMutants_Deprecated)) {
                 auto restrictToOtherMutants = std::get<bool>(auxiliaries.at(Id_Sensor_RestrictToOtherMutants_Deprecated));
-                data.restrictToMutants = restrictToOtherMutants ? SensorRestrictToMutants_RestrictToEmergentCells : SensorRestrictToMutants_NoRestriction;
+                data.restrictToMutants = restrictToOtherMutants ? SensorRestrictToMutants_RestrictToFreeCells : SensorRestrictToMutants_NoRestriction;
             }
         }
         //<<<

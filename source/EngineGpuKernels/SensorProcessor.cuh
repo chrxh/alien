@@ -98,10 +98,10 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
         if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants) {
             result = densityMap.getOtherMutantDensity(timestep, scanPos, cell->mutationId);
         }
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToEmergentCells) {
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells) {
             result = densityMap.getEmergentCellDensity(scanPos);
         }
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToZeroMutants) {
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToHandcraftedCells) {
             result = densityMap.getZeroMutantDensity(scanPos);
         }
         if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants) {
@@ -161,7 +161,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
                 uint32_t density = 0;
                 if (!blockedByWall[angleIndex]) {
-                    if (restrictToMutants == SensorRestrictToMutants_NoRestriction || restrictToMutants == SensorRestrictToMutants_RestrictToZeroMutants
+                    if (restrictToMutants == SensorRestrictToMutants_NoRestriction || restrictToMutants == SensorRestrictToMutants_RestrictToHandcraftedCells
                         || densityMap.getZeroMutantDensity(scanPos) == 0) {
                         density = getCellDensity(data.timestep, cell, restrictToColor, restrictToMutants, densityMap, scanPos);
                     } else {
@@ -323,10 +323,10 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
                     || static_cast<uint16_t>(cell->mutationId & 0xffff) == otherCell->ancestorMutationId)) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToEmergentCells && otherCell->mutationId != 1) {
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells && otherCell->mutationId != 1) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToZeroMutants && otherCell->mutationId != 0) {
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToHandcraftedCells && otherCell->mutationId != 0) {
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants
