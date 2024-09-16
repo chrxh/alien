@@ -412,7 +412,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToZeroMutants)),
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToHandcraftedCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -451,7 +451,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToZeroMutants)),
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToHandcraftedCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -488,7 +488,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToRespawnedMutants)),
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
@@ -527,7 +527,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_failed)
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
             .setInputExecutionOrderNumber(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToRespawnedMutants)),
+            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})

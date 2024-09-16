@@ -654,7 +654,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToZeroMutants)),
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToHandcraftedCells)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
@@ -690,7 +690,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToZeroMutants)),
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToHandcraftedCells)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
@@ -726,7 +726,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToEmergentCells)),
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
@@ -762,7 +762,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToEmergentCells)),
+             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
          CellDescription()
              .setId(2)
              .setMutationId(6)

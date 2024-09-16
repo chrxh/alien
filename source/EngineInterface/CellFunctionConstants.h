@@ -59,8 +59,8 @@ enum SensorRestrictToMutants_
     SensorRestrictToMutants_NoRestriction,
     SensorRestrictToMutants_RestrictToSameMutants,
     SensorRestrictToMutants_RestrictToOtherMutants,
-    SensorRestrictToMutants_RestrictToEmergentCells,
-    SensorRestrictToMutants_RestrictToZeroMutants,
+    SensorRestrictToMutants_RestrictToFreeCells,
+    SensorRestrictToMutants_RestrictToHandcraftedCells,
     SensorRestrictToMutants_RestrictToLessComplexMutants,
     SensorRestrictToMutants_RestrictToMoreComplexMutants,
     SensorRestrictToMutants_Count
@@ -149,8 +149,8 @@ enum ReconnectorRestrictToMutants_
     ReconnectorRestrictToMutants_NoRestriction,
     ReconnectorRestrictToMutants_RestrictToSameMutants,
     ReconnectorRestrictToMutants_RestrictToOtherMutants,
-    ReconnectorRestrictToMutants_RestrictToRespawnedMutants,
-    ReconnectorRestrictToMutants_RestrictToZeroMutants,
+    ReconnectorRestrictToMutants_RestrictToFreeCells,
+    ReconnectorRestrictToMutants_RestrictToHandcraftedCells,
     ReconnectorRestrictToMutants_RestrictToLessComplexMutants,
     ReconnectorRestrictToMutants_RestrictToMoreComplexMutants,
     ReconnectorRestrictToMutants_Count

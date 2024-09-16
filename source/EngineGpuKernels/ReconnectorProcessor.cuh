@@ -70,10 +70,10 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
             && (otherCell->mutationId == cell->mutationId || otherCell->mutationId == 0 || otherCell->mutationId == 1)) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToZeroMutants && otherCell->mutationId != 0) {
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToHandcraftedCells && otherCell->mutationId != 0) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToRespawnedMutants && otherCell->mutationId != 1) {
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToFreeCells && otherCell->mutationId != 1) {
             return;
         }
         if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToLessComplexMutants
