@@ -114,7 +114,7 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
         acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
     }
     float angle = max(-0.5f, min(0.5f, activity.channels[3])) * 360.0f;
-    direction = Math::normalized(Math::rotateClockwise(direction, angle)) * acceleration * max(0.0f, getTruncatedUnitValue(activity));
+    direction = Math::normalized(Math::rotateClockwise(direction, angle)) * acceleration * getTruncatedUnitValue(activity);
     cell->vel += direction;
     cell->cellFunctionData.muscle.lastMovementX = direction.x;
     cell->cellFunctionData.muscle.lastMovementY = direction.y;
