@@ -641,6 +641,8 @@ __inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& 
                         atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_Detaching);
                     }
                 }
+            } else {
+                atomicExch(&cell->livingState, LivingState_Ready);
             }
         }
     }

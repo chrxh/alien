@@ -44,6 +44,8 @@ private:
         double endTime,
         int fracPartDecimals);
 
+    void validationAndCorrection();
+
     float calcPlotHeight(int row) const;
 
     SimulationController _simController;
@@ -60,6 +62,7 @@ private:
     std::unordered_set<int> _collapsedPlotIndices;
 
     float _timeHorizonForLiveStatistics = 10.0f;  //in seconds
+    float _timeHorizonForLongtermStatistics = 100.0f;  //in percent
     std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;
     TimelineLiveStatistics _timelineLiveStatistics;
     HistogramLiveStatistics _histogramLiveStatistics;

@@ -41,7 +41,8 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
     _startingPath = GlobalSettings::getInstance().getString("windows.statistics.starting path", path.string());
     _plotHeight = GlobalSettings::getInstance().getFloat("windows.statistics.plot height", _plotHeight);
     _mode = GlobalSettings::getInstance().getInt("windows.statistics.mode", _mode);
-    _timeHorizonForLiveStatistics = GlobalSettings::getInstance().getFloat("windows.statistics.live statistics horizon", _timeHorizonForLiveStatistics);
+    _timeHorizonForLiveStatistics = GlobalSettings::getInstance().getFloat("windows.statistics.live horizon", _timeHorizonForLiveStatistics);
+    _timeHorizonForLongtermStatistics = GlobalSettings::getInstance().getFloat("windows.statistics.long term horizon", _timeHorizonForLongtermStatistics);
     _plotType = GlobalSettings::getInstance().getInt("windows.statistics.plot type", _plotType);
     auto collapsedPlotIndexJoinedString = GlobalSettings::getInstance().getString("windows.statistics.collapsed plot indices", "");
     
@@ -59,7 +60,8 @@ _StatisticsWindow::~_StatisticsWindow()
     GlobalSettings::getInstance().setString("windows.statistics.starting path", _startingPath);
     GlobalSettings::getInstance().setFloat("windows.statistics.plot height", _plotHeight);
     GlobalSettings::getInstance().setInt("windows.statistics.mode", _mode);
-    GlobalSettings::getInstance().setFloat("windows.statistics.live statistics horizon", _timeHorizonForLiveStatistics);
+    GlobalSettings::getInstance().setFloat("windows.statistics.live horizon", _timeHorizonForLiveStatistics);
+    GlobalSettings::getInstance().setFloat("windows.statistics.long term horizon", _timeHorizonForLongtermStatistics);
     GlobalSettings::getInstance().setInt("windows.statistics.plot type", _plotType);
 
     std::vector<std::string> collapsedPlotIndexStrings;
@@ -113,17 +115,27 @@ void _StatisticsWindow::processTimelinesTab()
                 {"Real-time plots", "Entire history plots"}),
         _mode);
 
-    ImGui::BeginDisabled(_mode == 1);
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(RightColumnWidth));
-    AlienImGui::SliderFloat(
-        AlienImGui::SliderFloatParameters()
-            .name("Time horizon")
-            .min(1.0f)
-            .max(TimelineLiveStatistics::MaxLiveHistory)
-            .format("%.1f s")
-            .textWidth(RightColumnWidth),
-        &_timeHorizonForLiveStatistics);
-    ImGui::EndDisabled();
+    if (_mode == 0) {
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Time horizon")
+                .min(1.0f)
+                .max(TimelineLiveStatistics::MaxLiveHistory)
+                .format("%.1f s")
+                .textWidth(RightColumnWidth),
+            &_timeHorizonForLiveStatistics);
+    }
+    if (_mode == 1) {
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Time horizon")
+                .min(1.0f)
+                .max(100.0f)
+                .format("%.0f percent")
+                .textWidth(RightColumnWidth),
+            &_timeHorizonForLongtermStatistics);
+    }
 
     AlienImGui::Switcher(
         AlienImGui::SwitcherParameters()
@@ -467,7 +479,8 @@ void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*val
 
     auto const& dataPointCollectionHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
     auto count = _mode == 0 ? toInt(dataPointCollectionHistory.size()) : toInt(longtermStatistics->size());
-    auto startTime = _mode == 0 ? dataPointCollectionHistory.back().time - toDouble(_timeHorizonForLiveStatistics) : longtermStatistics->front().time;
+    auto startTime = _mode == 0 ? dataPointCollectionHistory.back().time - toDouble(_timeHorizonForLiveStatistics)
+        : longtermStatistics->back().time - (longtermStatistics->back().time - longtermStatistics->front().time) * toDouble(_timeHorizonForLongtermStatistics) / 100;
     auto endTime = _mode == 0 ? dataPointCollectionHistory.back().time : longtermStatistics->back().time;
     auto values = _mode == 0 ? &(dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
     auto timePoints = _mode == 0 ? &dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
@@ -644,6 +657,12 @@ void _StatisticsWindow::plotForColorIntern(
     ImPlot::PopStyleVar();
     ImPlot::PopStyleColor(3);
     ImGui::PopID();
+}
+
+void _StatisticsWindow::validationAndCorrection()
+{
+    _timeHorizonForLiveStatistics = std::max(1.0f, std::min(TimelineLiveStatistics::MaxLiveHistory, _timeHorizonForLiveStatistics));
+    _timeHorizonForLongtermStatistics = std::max(1.0f, std::min(100.0f, _timeHorizonForLongtermStatistics));
 }
 
 float _StatisticsWindow::calcPlotHeight(int row) const
