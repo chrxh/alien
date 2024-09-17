@@ -1596,9 +1596,9 @@ void _SimulationParametersWindow::processBase()
                         AlienImGui::CheckboxParameters()
                             .name("Allow bidirectional connections")
                             .textWidth(RightColumnWidth)
-                            .defaultValue(origParameters.legacyCellDirectionalConnection)
+                            .defaultValue(origParameters.legacyCellDirectionalConnections)
                             .tooltip("If activated, two connected cells can receive each other's input if the 'input execution number' matches."),
-                        parameters.legacyCellDirectionalConnection);
+                        parameters.legacyCellDirectionalConnections);
                     AlienImGui::EndTreeNode();
                 }
             }
