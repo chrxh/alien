@@ -91,10 +91,14 @@ void _StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep
         }
     }
     data.swap(newData);
+    _accumulatedDataPoint.reset();
+    _numDataPoints = 0;
 }
 
 void _StatisticsService::rewriteHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep)
 {
+    _accumulatedDataPoint.reset();
+    _numDataPoints = 0;
     _lastRawStatistics.reset();
     _lastTimestep.reset();
     if (!newHistoryData.empty()) {
