@@ -211,15 +211,6 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
         return;
     }
 
-    //already fitting input-output connection? => use other input
-    auto executionNumber = GenomeDecoder::getNextInputExecutionNumber(genome, nodeAddress) % cudaSimulationParameters.cellNumExecutionOrderNumbers;
-    if (executionNumber == (prevInputExecutionNumber % cudaSimulationParameters.cellNumExecutionOrderNumbers)) {
-        prevExecutionNumber = nextExecutionNumber;
-    }
-    if (executionNumber == (nextInputExecutionNumber % cudaSimulationParameters.cellNumExecutionOrderNumbers)) {
-        nextExecutionNumber = prevExecutionNumber;
-    }
-
     //basic property mutation
     if (data.numberGen1.randomBool()) {
         if (data.numberGen1.randomBool()) {
@@ -514,11 +505,11 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     data.numberGen1.randomBytes(targetGenome + nodeAddress, Const::CellBasicBytes);
     GenomeDecoder::setNextCellFunctionType(targetGenome, nodeAddress, newCellFunction);
     GenomeDecoder::setNextCellColor(targetGenome, nodeAddress, newColor);
-    if (data.numberGen1.random() < 0.9f) {  //fitting input execution number should be often
+    if (data.numberGen1.random() < 0.9f) {  //fitting input execution number should be more often
         GenomeDecoder::setNextInputExecutionNumber(targetGenome, nodeAddress, data.numberGen1.randomBool() ? prevExecutionNumber : nextExecutionNumber);
     }
-    if (data.numberGen1.random() < 0.9f) {
-        GenomeDecoder::setNextOutputBlocked(targetGenome, nodeAddress, false);  //non-blocking output should be often
+    if (data.numberGen1.random() < 0.9f) {  //non-blocking output should be more often
+        GenomeDecoder::setNextOutputBlocked(targetGenome, nodeAddress, false);
     }
     GenomeDecoder::setRandomCellFunctionData(data, targetGenome, nodeAddress + Const::CellBasicBytes, newCellFunction, makeSelfCopy, Const::GenomeHeaderSize);
     if (newCellFunction == CellFunction_Constructor && !makeSelfCopy) {
