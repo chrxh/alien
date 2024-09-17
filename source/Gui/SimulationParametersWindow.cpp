@@ -1561,7 +1561,7 @@ void _SimulationParametersWindow::processBase()
                             .textWidth(RightColumnWidth)
                             .colorDependence(true)
                             .min(0.0f)
-                            .max(20.0f)
+                            .max(4.0f)
                             .format("%.1f")
                             .defaultValue(origParameters.genomeComplexityNeuronFactor)
                             .tooltip("This parameter takes into account the number of encoded neurons in the genome for the complexity value."),
