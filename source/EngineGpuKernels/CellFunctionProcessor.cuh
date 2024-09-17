@@ -87,7 +87,7 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
                 auto otherExecutionOrderNumber = cell->connections[i].cell->executionOrderNumber;
                 auto otherInputExecutionOrderNumber = cell->connections[i].cell->inputExecutionOrderNumber;
                 auto otherOutputBlocked = cell->connections[i].cell->outputBlocked;
-                bool flowToCell = !(cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellDirectionalConnection)
+                bool flowToCell = !(cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellDirectionalConnections)
                     ? cell->inputExecutionOrderNumber == otherExecutionOrderNumber && !otherOutputBlocked
                         && cell->executionOrderNumber > otherInputExecutionOrderNumber
                     : false;
@@ -135,7 +135,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         if (connectedCell->outputBlocked || connectedCell->livingState != LivingState_Ready ) {
             continue;
         }
-        if (!(cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellDirectionalConnection) && connectedCell->inputExecutionOrderNumber == cell->executionOrderNumber
+        if (!(cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellDirectionalConnections) && connectedCell->inputExecutionOrderNumber == cell->executionOrderNumber
             && connectedCell->executionOrderNumber > cell->executionOrderNumber && !cell->outputBlocked) {
             continue;
         }

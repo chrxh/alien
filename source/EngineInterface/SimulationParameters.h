@@ -204,7 +204,7 @@ struct SimulationParameters
 
     bool legacyCellFunctionMuscleMovementAngleFromSensor = false;
     bool legacyCellFunctionMuscleNoActivityReset = false;
-    bool legacyCellDirectionalConnection = false;
+    bool legacyCellDirectionalConnections = false;
 
     bool operator==(SimulationParameters const& other) const;
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }
