@@ -326,7 +326,7 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::averageGenomeCells, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Average genotype\ncells");
+        AlienImGui::Text("Num genotype\ncells average");
         ImGui::SameLine();
         AlienImGui::HelpMarker("The average number of encoded cells in the genomes is displayed.");
 
@@ -334,13 +334,19 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::averageGenomeComplexity, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Average genome\ncomplexity");
+        AlienImGui::Text("Genome complexity\naverage");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::varianceGenomeComplexity, 5);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Genome complexity\nvariance");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::maxGenomeComplexityOfColonies, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Max genome\ncomplexity");
+        AlienImGui::Text("Genome complexity\nmaximum");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
