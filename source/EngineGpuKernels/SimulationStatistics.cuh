@@ -43,6 +43,14 @@ public:
 
     __inline__ __device__ void incNumCells(int color) { atomicAdd(&(_data->timeline.timestep.numCells[color]), 1); }
     __inline__ __device__ void incNumReplicator(int color) { atomicAdd(&_data->timeline.timestep.numSelfReplicators[color], 1); }
+    __inline__ __device__ int getNumReplicators()
+    {
+        auto result = 0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            result += _data->timeline.timestep.numSelfReplicators[i];
+        }
+        return result;
+    }
     __inline__ __device__ void incNumViruses(int color) { atomicAdd(&_data->timeline.timestep.numViruses[color], 1); }
     __inline__ __device__ void incNumConnections(int color, int numConnections) { atomicAdd(&_data->timeline.timestep.numConnections[color], numConnections); }
     __inline__ __device__ void incNumParticles(int color) { atomicAdd(&_data->timeline.timestep.numParticles[color], 1); }
@@ -52,6 +60,15 @@ public:
         alienAtomicAdd64(&_data->timeline.timestep.numGenomeCells[color], valueToAdd);
     }
     __inline__ __device__ void addGenomeComplexity(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.genomeComplexity[color], valueToAdd); }
+    __inline__ __device__ void addToGenomeComplexityVariance(int color, float valueToAdd, int numReplicators)
+    {
+        auto numReplicatorsAsDouble = toDouble(numReplicators);
+        auto averageGenomeComplexity = toDouble(_data->timeline.timestep.genomeComplexity[color]) / numReplicatorsAsDouble;
+        auto variance = toDouble(valueToAdd - averageGenomeComplexity);
+        variance = variance * variance / numReplicatorsAsDouble;
+
+        atomicAdd(&_data->timeline.timestep.genomeComplexityVariance[color], variance);
+    }
     __inline__ __device__ void incMutant(int color, uint32_t mutationId, float genomeComplexity)
     {
         atomicAdd(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].count, 1);

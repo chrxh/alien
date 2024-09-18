@@ -48,6 +48,19 @@ __global__ void cudaUpdateTimestepStatistics_substep3(SimulationData data, Simul
         statistics.halveNumConnections();
     }
     statistics.calcStatisticsForColonies();
+
+    {
+        auto& cells = data.objects.cellPointers;
+        auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+        auto numReplicator = statistics.getNumReplicators();
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& cell = cells.at(index);
+            if (cell->cellFunction == CellFunction_Constructor && GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor)) {
+                statistics.addToGenomeComplexityVariance(cell->color, cell->genomeComplexity, numReplicator);
+            }
+        }
+    }
 }
 
 __global__ void cudaUpdateHistogramData_substep1(SimulationData data, SimulationStatistics statistics)
