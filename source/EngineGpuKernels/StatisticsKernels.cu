@@ -53,11 +53,15 @@ __global__ void cudaUpdateTimestepStatistics_substep3(SimulationData data, Simul
         auto& cells = data.objects.cellPointers;
         auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
-        auto numReplicator = statistics.getNumReplicators();
+        auto numReplicators = toDouble(statistics.getNumReplicators());
+        auto averageGenomeComplexity = statistics.getSummedGenomeComplexity() / numReplicators;
+
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cell = cells.at(index);
             if (cell->cellFunction == CellFunction_Constructor && GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor)) {
-                statistics.addToGenomeComplexityVariance(cell->color, cell->genomeComplexity, numReplicator);
+                auto variance = toDouble(cell->genomeComplexity) - averageGenomeComplexity;
+                variance = variance * variance / numReplicators;
+                statistics.addToGenomeComplexityVariance(cell->color, variance);
             }
         }
     }

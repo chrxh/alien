@@ -60,14 +60,17 @@ public:
         alienAtomicAdd64(&_data->timeline.timestep.numGenomeCells[color], valueToAdd);
     }
     __inline__ __device__ void addGenomeComplexity(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.genomeComplexity[color], valueToAdd); }
-    __inline__ __device__ void addToGenomeComplexityVariance(int color, float valueToAdd, int numReplicators)
+    __inline__ __device__ double getSummedGenomeComplexity()
     {
-        auto numReplicatorsAsDouble = toDouble(numReplicators);
-        auto averageGenomeComplexity = toDouble(_data->timeline.timestep.genomeComplexity[color]) / numReplicatorsAsDouble;
-        auto variance = toDouble(valueToAdd - averageGenomeComplexity);
-        variance = variance * variance / numReplicatorsAsDouble;
-
-        atomicAdd(&_data->timeline.timestep.genomeComplexityVariance[color], variance);
+        auto result = 0.0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            result += toDouble(_data->timeline.timestep.genomeComplexity[i]);
+        }
+        return result;
+    }
+    __inline__ __device__ void addToGenomeComplexityVariance(int color, double valueToAdd)
+    {
+        atomicAdd(&_data->timeline.timestep.genomeComplexityVariance[color], valueToAdd);
     }
     __inline__ __device__ void incMutant(int color, uint32_t mutationId, float genomeComplexity)
     {
