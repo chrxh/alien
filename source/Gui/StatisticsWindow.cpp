@@ -491,16 +491,17 @@ void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*val
     auto endTime = _mode == 0 ? dataPointCollectionHistory.back().time : longtermStatistics->back().time;
     auto values = _mode == 0 ? &(dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
     auto timePoints = _mode == 0 ? &dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
+    auto systemClock = _mode == 0 ? nullptr : &(*longtermStatistics)[0].systemClock;
 
     switch (_plotType) {
     case 0:
-        plotSumColorsIntern(row, values, timePoints, count, startTime, endTime, fracPartDecimals);
+        plotSumColorsIntern(row, values, timePoints, systemClock, count, startTime, endTime, fracPartDecimals);
         break;
     case 1:
         plotByColorIntern(row, values, timePoints, count, startTime, endTime, fracPartDecimals);
         break;
     default:
-        plotForColorIntern(row, values, _plotType - 2, timePoints, count, startTime, endTime, fracPartDecimals);
+        plotForColorIntern(row, values, _plotType - 2, timePoints, systemClock, count, startTime, endTime, fracPartDecimals);
         break;
     }
     ImGui::Spacing();
@@ -538,6 +539,7 @@ void _StatisticsWindow::plotSumColorsIntern(
     int row,
     DataPoint const* dataPoints,
     double const* timePoints,
+    double const* systemClock,
     int count,
     double startTime,
     double endTime,
@@ -573,7 +575,7 @@ void _StatisticsWindow::plotSumColorsIntern(
             ImPlot::PopStyleColor();
         }
         if (ImGui::GetStyle().Alpha == 1.0f && ImPlot::IsPlotHovered() && count > 0) {
-            drawValuesAtMouseCursor(plotDataY, timePoints, count, startTime, endTime, upperBound, fracPartDecimals);
+            drawValuesAtMouseCursor(plotDataY, timePoints, systemClock, count, startTime, endTime, upperBound, fracPartDecimals);
         }
         ImPlot::EndPlot();
     }
@@ -633,6 +635,7 @@ void _StatisticsWindow::plotForColorIntern(
     DataPoint const* values,
     int colorIndex,
     double const* timePoints,
+    double const* systemClock,
     int count,
     double startTime,
     double endTime,
@@ -668,7 +671,7 @@ void _StatisticsWindow::plotForColorIntern(
             ImPlot::PopStyleVar();
             ImPlot::PopStyleColor();
             if (ImGui::GetStyle().Alpha == 1.0f && ImPlot::IsPlotHovered()) {
-                drawValuesAtMouseCursor(valuesForColor, timePoints, count, startTime, endTime, upperBound, fracPartDecimals);
+                drawValuesAtMouseCursor(valuesForColor, timePoints, systemClock, count, startTime, endTime, upperBound, fracPartDecimals);
             }
         }
         ImPlot::EndPlot();
@@ -681,23 +684,42 @@ void _StatisticsWindow::plotForColorIntern(
 void _StatisticsWindow::drawValuesAtMouseCursor(
     double const* dataPoints,
     double const* timePoints,
+    double const* systemClock,
     int count,
     double startTime,
     double endTime,
     double upperBound,
     int fracPartDecimals)
 {
+    auto constexpr stride = sizeof(DataPointCollection) / sizeof(double);
+
     auto mousePos = ImPlot::GetPlotMousePos();
     mousePos.x = std::max(startTime, std::min(endTime, mousePos.x));
     mousePos.y = dataPoints[0];
-    auto constexpr stride = sizeof(DataPointCollection) / sizeof(double);
-    for (int i = 1; i < count; ++i) {
-        if (timePoints[i * stride] > mousePos.x) {
-            mousePos.y = dataPoints[i * stride];
-            break;
+
+    auto dateTimeString =
+        [&] {
+        if (systemClock == nullptr) {
+            for (int i = 1; i < count; ++i) {
+                if (timePoints[i * stride] > mousePos.x) {
+                    mousePos.y = dataPoints[i * stride];
+                    break;
+                }
+            }
+            return std::string();
         }
-    }
-    mousePos.y = std::max(0.0, std::min(upperBound, mousePos.y));
+        auto systemClockPoint = systemClock[0];
+        for (int i = 1; i < count; ++i) {
+            if (timePoints[i * stride] > mousePos.x) {
+                mousePos.y = dataPoints[i * stride];
+                systemClockPoint = systemClock[i * stride];
+                break;
+            }
+        }
+        mousePos.y = std::max(0.0, std::min(upperBound, mousePos.y));
+        auto timePoint = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::from_time_t(static_cast<std::time_t>(systemClockPoint)));
+        return systemClockPoint != 0 ? std::format("{:%Y-%m-%d %H:%M:%S}", timePoint) : std::string("-");
+    }();
 
     ImPlot::PushStyleColor(ImPlotCol_InlayText, ImColor::HSV(0.0f, 0.0f, 1.0f).Value);
     ImPlot::PlotText(ICON_FA_GENDERLESS, mousePos.x, mousePos.y, false, {scale(1.0f), scale(2.0f)});
@@ -709,9 +731,23 @@ void _StatisticsWindow::drawValuesAtMouseCursor(
 
     char label[256];
     auto leftSideFactor = mousePos.x > (startTime + endTime) / 2 ? -1.0f : 1.0f;
-    snprintf(
-        label, sizeof(label), "Time: %s\nValue: %s", StringHelper::format(mousePos.x, 0).c_str(), StringHelper::format(mousePos.y, fracPartDecimals).c_str());
-    ImPlot::PlotText(label, mousePos.x, upperBound, false, {leftSideFactor * (scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(20.0f)});
+    if (!dateTimeString.empty()) {
+        snprintf(
+            label,
+            sizeof(label),
+            "Time step: %s\nReal time: %s\nValue: %s",
+            StringHelper::format(mousePos.x, 0).c_str(),
+            dateTimeString.c_str(),
+            StringHelper::format(mousePos.y, fracPartDecimals).c_str());
+    } else {
+        snprintf(
+            label,
+            sizeof(label),
+            "Relative time: %s\nValue: %s",
+            StringHelper::format(mousePos.x, 0).c_str(),
+            StringHelper::format(mousePos.y, fracPartDecimals).c_str());
+    }
+    ImPlot::PlotText(label, mousePos.x, upperBound, false, {leftSideFactor * (scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(28.0f)});
 }
 
 void _StatisticsWindow::validationAndCorrection()

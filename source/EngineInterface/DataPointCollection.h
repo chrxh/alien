@@ -14,6 +14,7 @@ struct DataPoint
 struct DataPointCollection
 {
     double time; //could be a time step or real-time
+    double systemClock = 0;
 
     DataPoint numCells;
     DataPoint numSelfReplicators;

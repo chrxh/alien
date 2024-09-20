@@ -24,6 +24,7 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
 {
     DataPointCollection result;
     result.time = time + other.time;
+    result.systemClock = systemClock + other.systemClock;
     result.numCells = numCells + other.numCells;
     result.numSelfReplicators = numSelfReplicators + other.numSelfReplicators;
     result.numColonies = numColonies + other.numColonies;
@@ -56,6 +57,7 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
 {
     DataPointCollection result;
     result.time = time / divisor;
+    result.systemClock = systemClock / divisor;
     result.numCells = numCells / divisor;
     result.numSelfReplicators = numSelfReplicators / divisor;
     result.numColonies = numColonies / divisor;

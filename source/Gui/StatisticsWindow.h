@@ -32,13 +32,31 @@ private:
 
     void processBackground() override;
 
-    void plotSumColorsIntern(int row, DataPoint const* dataPoints, double const* timePoints, int count, double startTime, double endTime, int fracPartDecimals);
+    void plotSumColorsIntern(
+        int row,
+        DataPoint const* dataPoints,
+        double const* timePoints,
+        double const* systemClock,
+        int count,
+        double startTime,
+        double endTime,
+        int fracPartDecimals);
     void plotByColorIntern(int row, DataPoint const* values, double const* timePoints, int count, double startTime, double endTime, int fracPartDecimals);
-    void plotForColorIntern(int row, DataPoint const* values, int colorIndex, double const* timePoints, int count, double startTime, double endTime, int fracPartDecimals);
+    void plotForColorIntern(
+        int row,
+        DataPoint const* values,
+        int colorIndex,
+        double const* timePoints,
+        double const* systemClock,
+        int count,
+        double startTime,
+        double endTime,
+        int fracPartDecimals);
 
     void drawValuesAtMouseCursor(
         double const* dataPoints,
         double const* timePoints,
+        double const* systemClock,
         int count,
         double startTime,
         double endTime,

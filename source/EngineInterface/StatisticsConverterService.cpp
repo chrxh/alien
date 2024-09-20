@@ -1,5 +1,7 @@
 #include "StatisticsConverterService.h"
 
+#include <chrono>
+
 #include "Base/Definitions.h"
 
 namespace
@@ -80,6 +82,11 @@ DataPointCollection StatisticsConverterService::convert(
 {
     DataPointCollection result;
     result.time = time;
+
+    auto now = std::chrono::system_clock::now();
+    auto unixEpoch = std::chrono::time_point<std::chrono::system_clock>();
+    result.systemClock = toDouble(std::chrono::duration_cast<std::chrono::seconds>(now - unixEpoch).count());
+
     result.numCells = getDataPointBySummation(data.timestep.numCells);
     result.numSelfReplicators = getDataPointBySummation(data.timestep.numSelfReplicators);
     result.numColonies = getDataPointBySummation(data.timestep.numColonies);
