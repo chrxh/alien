@@ -522,11 +522,12 @@ namespace
 {
     double getMaxWithDataPointStride(double const* data, double const* timePoints, double startTime, int count)
     {
+        auto constexpr strideDouble = sizeof(DataPointCollection) / sizeof(double);
+
         auto result = 0.0;
-        auto stride = toInt(sizeof(DataPointCollection) / sizeof(double));
         for (int i = count / 20; i < count; ++i) {
-            if (timePoints[i * stride] >= startTime - NEAR_ZERO) {
-                result = std::max(result, *reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(data) + i));
+            if (timePoints[i * strideDouble] >= startTime - NEAR_ZERO) {
+                result = std::max(result, data[i * strideDouble]);
             }
         }
         return result;
