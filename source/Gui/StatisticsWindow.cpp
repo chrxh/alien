@@ -1,6 +1,7 @@
 #include "StatisticsWindow.h"
 
 #include <fstream>
+#include <cmath>
 
 #include <boost/algorithm/string.hpp>
 
@@ -554,7 +555,7 @@ void _StatisticsWindow::plotSumColorsIntern(
     ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
 
     if (ImPlot::BeginPlot(
-            "##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+            "##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), ImPlotFlags_NoMousePos, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         auto color = ImPlot::GetColormapColor((row % 21) <= 10 ? (row % 21): 20 - (row % 21));
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::AnnotateClamped(
@@ -567,6 +568,31 @@ void _StatisticsWindow::plotSumColorsIntern(
             ImPlot::PlotShaded("##", timePoints, plotDataY, count, 0, 0, stride);
             ImPlot::PopStyleVar();
             ImPlot::PopStyleColor();
+        }
+        if (ImGui::GetStyle().Alpha == 1.0f && ImPlot::IsPlotHovered() && count > 0) {
+            auto mousePos = ImPlot::GetPlotMousePos();
+            mousePos.x = std::max(startTime, std::min(endTime, mousePos.x));
+            mousePos.y = dataPoint->summedValues;
+            auto stride = toInt(sizeof(DataPointCollection) / sizeof(double));
+            for (int i = 1; i < count; ++i) {
+                if (timePoints[i * stride] > mousePos.x) {
+                    mousePos.y = *(reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(dataPoint) + i) + MAX_COLORS);
+                    break;
+                }
+            }
+            mousePos.y = std::max(0.0, std::min(upperBound, mousePos.y));
+
+            ImPlot::PushStyleColor(ImPlotCol_InlayText, ImColor::HSV(0.5f, 1.0f, 1.0f).Value);
+            ImPlot::PlotText(ICON_FA_GENDERLESS, mousePos.x, mousePos.y, false, {scale(1.0f), scale(2.0f)});
+            ImPlot::PopStyleColor();
+
+            ImPlot::PlotVLines("", &mousePos.x, 1);
+
+            char label[256];
+            auto leftSideFactory = mousePos.x > (startTime + endTime) / 2 ? -1.0f : 1.0f;
+            snprintf(
+                label, sizeof(label), "Time: %s\nValue: %s", StringHelper::format(mousePos.x, 0).c_str(), StringHelper::format(mousePos.y, fracPartDecimals).c_str());
+            ImPlot::PlotText(label, mousePos.x, upperBound, false, {leftSideFactory*(scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(20.0f)});
         }
         ImPlot::EndPlot();
     }

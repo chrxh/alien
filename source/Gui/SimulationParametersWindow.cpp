@@ -1549,7 +1549,7 @@ void _SimulationParametersWindow::processBase()
                             .colorDependence(true)
                             .min(0.0f)
                             .max(20.0f)
-                            .format("%.1f")
+                            .format("%.2f")
                             .defaultValue(origParameters.genomeComplexityRamificationFactor)
                             .tooltip("With this parameter, the number of ramifications of the cell structure to the genome is taken into account for the "
                                      "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
@@ -1562,7 +1562,7 @@ void _SimulationParametersWindow::processBase()
                             .colorDependence(true)
                             .min(0.0f)
                             .max(4.0f)
-                            .format("%.1f")
+                            .format("%.2f")
                             .defaultValue(origParameters.genomeComplexityNeuronFactor)
                             .tooltip("This parameter takes into account the number of encoded neurons in the genome for the complexity value."),
                         parameters.genomeComplexityNeuronFactor);
