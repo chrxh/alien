@@ -646,7 +646,7 @@ ConstructorProcessor::constructCellIntern(
     result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;
     result->outputBlocked = constructionData.outputBlocked;
 
-    result->activationTime = constructor.constructionActivationTime;
+    result->activationTime = GenomeDecoder::containsSelfReplication(constructor) ? constructor.constructionActivationTime : 0;
     result->genomeComplexity = hostCell->genomeComplexity;
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
