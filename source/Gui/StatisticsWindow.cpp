@@ -535,17 +535,19 @@ namespace
 
 void _StatisticsWindow::plotSumColorsIntern(
     int row,
-    DataPoint const* dataPoint,
+    DataPoint const* dataPoints,
     double const* timePoints,
     int count,
     double startTime,
     double endTime,
     int fracPartDecimals)
 {
-    double const* plotDataY = reinterpret_cast<double const*>(dataPoint) + MAX_COLORS;
+    auto constexpr strideBytes = sizeof(DataPointCollection);
+    auto constexpr strideDouble = sizeof(DataPointCollection) / sizeof(double);
+
+    double const* plotDataY = reinterpret_cast<double const*>(dataPoints) + MAX_COLORS;
     double upperBound = getMaxWithDataPointStride(plotDataY, timePoints, startTime, count);
-    double endValue = count > 0 ? *(reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(dataPoint) + count - 1) + MAX_COLORS): 0.0;
-    auto stride = toInt(sizeof(DataPointCollection));
+    double endValue = count > 0 ? plotDataY[(count - 1) * strideDouble] : 0.0;
     upperBound *= 1.5;
     ImGui::PushID(row);
     ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
@@ -563,36 +565,14 @@ void _StatisticsWindow::plotSumColorsIntern(
         }
         if (count > 0) {
             ImPlot::PushStyleColor(ImPlotCol_Line, color);
-            ImPlot::PlotLine("##", timePoints, plotDataY, count, 0, stride);
+            ImPlot::PlotLine("##", timePoints, plotDataY, count, 0, strideBytes);
             ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.5f * ImGui::GetStyle().Alpha);
-            ImPlot::PlotShaded("##", timePoints, plotDataY, count, 0, 0, stride);
+            ImPlot::PlotShaded("##", timePoints, plotDataY, count, 0, 0, strideBytes);
             ImPlot::PopStyleVar();
             ImPlot::PopStyleColor();
         }
         if (ImGui::GetStyle().Alpha == 1.0f && ImPlot::IsPlotHovered() && count > 0) {
-            auto mousePos = ImPlot::GetPlotMousePos();
-            mousePos.x = std::max(startTime, std::min(endTime, mousePos.x));
-            mousePos.y = dataPoint->summedValues;
-            auto stride = toInt(sizeof(DataPointCollection) / sizeof(double));
-            for (int i = 1; i < count; ++i) {
-                if (timePoints[i * stride] > mousePos.x) {
-                    mousePos.y = *(reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(dataPoint) + i) + MAX_COLORS);
-                    break;
-                }
-            }
-            mousePos.y = std::max(0.0, std::min(upperBound, mousePos.y));
-
-            ImPlot::PushStyleColor(ImPlotCol_InlayText, ImColor::HSV(0.5f, 1.0f, 1.0f).Value);
-            ImPlot::PlotText(ICON_FA_GENDERLESS, mousePos.x, mousePos.y, false, {scale(1.0f), scale(2.0f)});
-            ImPlot::PopStyleColor();
-
-            ImPlot::PlotVLines("", &mousePos.x, 1);
-
-            char label[256];
-            auto leftSideFactory = mousePos.x > (startTime + endTime) / 2 ? -1.0f : 1.0f;
-            snprintf(
-                label, sizeof(label), "Time: %s\nValue: %s", StringHelper::format(mousePos.x, 0).c_str(), StringHelper::format(mousePos.y, fracPartDecimals).c_str());
-            ImPlot::PlotText(label, mousePos.x, upperBound, false, {leftSideFactory*(scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(20.0f)});
+            drawValuesAtMouseCursor(plotDataY, timePoints, count, startTime, endTime, upperBound, fracPartDecimals);
         }
         ImPlot::EndPlot();
     }
@@ -657,9 +637,12 @@ void _StatisticsWindow::plotForColorIntern(
     double endTime,
     int fracPartDecimals)
 {
+    auto constexpr strideBytes = sizeof(DataPointCollection);
+    auto constexpr strideDouble = sizeof(DataPointCollection) / sizeof(double);
+
     auto valuesForColor = reinterpret_cast<double const*>(values) + colorIndex;
     auto upperBound = getMaxWithDataPointStride(valuesForColor, timePoints, startTime, count) * 1.5;
-    auto endValue = count > 0 ? *reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(valuesForColor) + count - 1) : 0.0;
+    auto endValue = count > 0 ? valuesForColor[(count - 1) * strideDouble] : 0.0;
 
     ImGui::PushID(row);
     ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
@@ -678,17 +661,56 @@ void _StatisticsWindow::plotForColorIntern(
         }
         if (count > 0) {
             ImPlot::PushStyleColor(ImPlotCol_Line, color);
-            ImPlot::PlotLine("##", timePoints, valuesForColor, count, 0, sizeof(DataPointCollection));
+            ImPlot::PlotLine("##", timePoints, valuesForColor, count, 0, strideBytes);
             ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.5f * ImGui::GetStyle().Alpha);
-            ImPlot::PlotShaded("##", timePoints, valuesForColor, count, 0, 0, sizeof(DataPointCollection));
+            ImPlot::PlotShaded("##", timePoints, valuesForColor, count, 0, 0, strideBytes);
             ImPlot::PopStyleVar();
             ImPlot::PopStyleColor();
+            if (ImGui::GetStyle().Alpha == 1.0f && ImPlot::IsPlotHovered()) {
+                drawValuesAtMouseCursor(valuesForColor, timePoints, count, startTime, endTime, upperBound, fracPartDecimals);
+            }
         }
         ImPlot::EndPlot();
     }
     ImPlot::PopStyleVar();
     ImPlot::PopStyleColor(3);
     ImGui::PopID();
+}
+
+void _StatisticsWindow::drawValuesAtMouseCursor(
+    double const* dataPoints,
+    double const* timePoints,
+    int count,
+    double startTime,
+    double endTime,
+    double upperBound,
+    int fracPartDecimals)
+{
+    auto mousePos = ImPlot::GetPlotMousePos();
+    mousePos.x = std::max(startTime, std::min(endTime, mousePos.x));
+    mousePos.y = dataPoints[0];
+    auto constexpr stride = sizeof(DataPointCollection) / sizeof(double);
+    for (int i = 1; i < count; ++i) {
+        if (timePoints[i * stride] > mousePos.x) {
+            mousePos.y = dataPoints[i * stride];
+            break;
+        }
+    }
+    mousePos.y = std::max(0.0, std::min(upperBound, mousePos.y));
+
+    ImPlot::PushStyleColor(ImPlotCol_InlayText, ImColor::HSV(0.0f, 0.0f, 1.0f).Value);
+    ImPlot::PlotText(ICON_FA_GENDERLESS, mousePos.x, mousePos.y, false, {scale(1.0f), scale(2.0f)});
+    ImPlot::PopStyleColor();
+
+    ImPlot::PushStyleColor(ImPlotCol_Line, ImColor::HSV(0.0f, 0.0f, 1.0f).Value);
+    ImPlot::PlotVLines("", &mousePos.x, 1);
+    ImPlot::PopStyleColor();
+
+    char label[256];
+    auto leftSideFactor = mousePos.x > (startTime + endTime) / 2 ? -1.0f : 1.0f;
+    snprintf(
+        label, sizeof(label), "Time: %s\nValue: %s", StringHelper::format(mousePos.x, 0).c_str(), StringHelper::format(mousePos.y, fracPartDecimals).c_str());
+    ImPlot::PlotText(label, mousePos.x, upperBound, false, {leftSideFactor * (scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(20.0f)});
 }
 
 void _StatisticsWindow::validationAndCorrection()
