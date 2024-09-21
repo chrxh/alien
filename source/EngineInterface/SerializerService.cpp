@@ -1255,7 +1255,7 @@ namespace
         loadSave(task, serializedData, 1 + 21 * 8, dataPoints.numColonies);
         loadSave(task, serializedData, 1 + 22 * 8, dataPoints.averageGenomeComplexity);
         loadSave(task, serializedData, 1 + 23 * 8, dataPoints.maxGenomeComplexityOfColonies);
-        loadSave(task, serializedData, 1 + 24 * 8, dataPoints.varianceGenomeComplexity);
+        loadSave(task, serializedData, 1 + 24 * 8, dataPoints.deviationGenomeComplexity);
         loadSave(task, serializedData, 1 + 25 * 8, dataPoints.systemClock);
     }
 }
@@ -1294,7 +1294,7 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
     writeLabelAllColors("Colonies");
     writeLabelAllColors("Genome complexity average");
     writeLabelAllColors("Genome complexity Maximum");
-    writeLabelAllColors("Genome complexity variance");
+    writeLabelAllColors("Genome complexity deviation");
     writeLabelAllColors("System clock");
     stream << std::endl;
 

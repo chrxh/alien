@@ -40,6 +40,7 @@ private:
 
         //construction data
         Cell* lastConstructionCell;
+        bool containsSelfReplication;
     };
 
     __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
@@ -156,7 +157,9 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         if (isConstructionTriggered(data, cell, activity)) {
             if (tryConstructCell(data, statistics, cell, constructionData)) {
                 cellBuilt = true;
-                cell->cellFunctionUsed = CellFunctionUsed_Yes;
+                if (!constructionData.containsSelfReplication) {
+                    cell->cellFunctionUsed = CellFunctionUsed_Yes;
+                }
             } 
         }
 
@@ -190,6 +193,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     ConstructionData result;
     result.genomeHeader = GenomeDecoder::readGenomeHeader(constructor);
     result.hasInfiniteRepetitions = GenomeDecoder::hasInfiniteRepetitions(constructor);
+    result.containsSelfReplication = isSelfReplicator(cell);
     auto genomeNodesPerRepetition = GenomeDecoder::getNumNodes(constructor.genome, constructor.genomeSize);
     if (!GenomeDecoder::hasInfiniteRepetitions(constructor) && constructor.genomeCurrentNodeIndex == 0 && constructor.genomeCurrentRepetition == 0) {
         result.lastConstructionCell = nullptr;
@@ -359,7 +363,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         return nullptr;
     }
 
-    if (GenomeDecoder::containsSelfReplication(constructor)) {
+    if (constructionData.containsSelfReplication) {
         constructor.offspringCreatureId = 1 + data.numberGen1.random(65535);
 
         hostCell->genomeComplexity = calcGenomeComplexity(hostCell->color, constructor.genome, constructor.genomeSize);
@@ -646,7 +650,7 @@ ConstructorProcessor::constructCellIntern(
     result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;
     result->outputBlocked = constructionData.outputBlocked;
 
-    result->activationTime = GenomeDecoder::containsSelfReplication(constructor) ? constructor.constructionActivationTime : 0;
+    result->activationTime = constructionData.containsSelfReplication ? constructor.constructionActivationTime : 0;
     result->genomeComplexity = hostCell->genomeComplexity;
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;

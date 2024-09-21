@@ -142,7 +142,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 result.channels[i] += connectedCell->activity.channels[i];
-                result.channels[i] = max(-1000000.0f, min(1000000.0f, result.channels[i])); //truncate value to avoid overflow
+                result.channels[i] = max(-10.0f, min(10.0f, result.channels[i])); //truncate value to avoid overflow
             }
             if (connectedCell->activity.origin == ActivityOrigin_Sensor) {
                 result.origin = ActivityOrigin_Sensor;
