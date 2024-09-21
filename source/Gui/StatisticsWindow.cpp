@@ -1,7 +1,7 @@
 #include "StatisticsWindow.h"
 
 #include <fstream>
-#include <cmath>
+#include <format>
 
 #include <boost/algorithm/string.hpp>
 
@@ -339,7 +339,7 @@ void _StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::varianceGenomeComplexity, 5);
+        processPlot(row++, &DataPointCollection::varianceGenomeComplexity, 2);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Genome complexity\nvariance");
 
@@ -735,7 +735,7 @@ void _StatisticsWindow::drawValuesAtMouseCursor(
         snprintf(
             label,
             sizeof(label),
-            "Time step: %s\nReal time: %s\nValue: %s",
+            "Time step: %s\nTimestamp: %s\nValue: %s",
             StringHelper::format(mousePos.x, 0).c_str(),
             dateTimeString.c_str(),
             StringHelper::format(mousePos.y, fracPartDecimals).c_str());
