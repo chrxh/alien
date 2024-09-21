@@ -68,9 +68,9 @@ public:
         }
         return result;
     }
-    __inline__ __device__ void addToGenomeComplexityVariance(int color, double valueToAdd)
+    __inline__ __device__ void addToGenomeComplexityDeviation(int color, double valueToAdd)
     {
-        atomicAdd(&_data->timeline.timestep.genomeComplexityVariance[color], valueToAdd);
+        atomicAdd(&_data->timeline.timestep.genomeComplexityDeviation[color], valueToAdd);
     }
     __inline__ __device__ void incMutant(int color, uint32_t mutationId, float genomeComplexity)
     {

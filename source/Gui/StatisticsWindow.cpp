@@ -1,7 +1,6 @@
 #include "StatisticsWindow.h"
 
 #include <fstream>
-#include <format>
 
 #include <boost/algorithm/string.hpp>
 
@@ -339,9 +338,9 @@ void _StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::varianceGenomeComplexity, 2);
+        processPlot(row++, &DataPointCollection::deviationGenomeComplexity, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Genome complexity\nvariance");
+        AlienImGui::Text("Genome complexity\ndeviation");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -681,6 +680,20 @@ void _StatisticsWindow::plotForColorIntern(
     ImGui::PopID();
 }
 
+namespace
+{
+    std::string convertSystemClockToString(double systemClock)
+    {
+        auto time_t = static_cast<std::time_t>(systemClock);
+        std::tm* tm = std::localtime(&time_t);
+
+        char buffer[100];
+        std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm);
+        return std::string(buffer);
+
+    }
+}
+
 void _StatisticsWindow::drawValuesAtMouseCursor(
     double const* dataPoints,
     double const* timePoints,
@@ -708,17 +721,17 @@ void _StatisticsWindow::drawValuesAtMouseCursor(
             }
             return std::string();
         }
-        auto systemClockPoint = systemClock[0];
+        auto systemClockEntry = systemClock[0];
         for (int i = 1; i < count; ++i) {
             if (timePoints[i * stride] > mousePos.x) {
                 mousePos.y = dataPoints[i * stride];
-                systemClockPoint = systemClock[i * stride];
+                systemClockEntry = systemClock[i * stride];
                 break;
             }
         }
         mousePos.y = std::max(0.0, std::min(upperBound, mousePos.y));
-        auto timePoint = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::from_time_t(static_cast<std::time_t>(systemClockPoint)));
-        return systemClockPoint != 0 ? std::format("{:%Y-%m-%d %H:%M:%S}", timePoint) : std::string("-");
+
+        return systemClockEntry != 0 ? convertSystemClockToString(systemClockEntry) : std::string("-");
     }();
 
     ImPlot::PushStyleColor(ImPlotCol_InlayText, ImColor::HSV(0.0f, 0.0f, 1.0f).Value);
