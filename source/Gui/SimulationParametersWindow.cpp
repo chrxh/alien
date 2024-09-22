@@ -16,6 +16,7 @@
 #include "MessageDialog.h"
 #include "RadiationSourcesWindow.h"
 #include "OverlayMessageController.h"
+#include "SimulationView.h"
 #include "StyleRepository.h"
 
 namespace
@@ -72,6 +73,9 @@ _SimulationParametersWindow::_SimulationParametersWindow(
     for (int i = 0; i < CellFunction_Count; ++i) {
         _cellFunctionStrings.emplace_back(Const::CellFunctionToStringMap.at(i));
     }
+
+    _getMousePickerEnabledFunc = [&]() { return _simView->getMousePickerEnabled(); };
+    _setMousePickerEnabledFunc = [&](bool value) { _simView->setMousePickerEnabled(value); };
 }
 
 _SimulationParametersWindow::~_SimulationParametersWindow()
@@ -1654,24 +1658,20 @@ bool _SimulationParametersWindow::processSpot(int index)
                         spot.shapeType)) {
                     createDefaultSpotData(spot);
                 }
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Position X")
+                AlienImGui::SliderFloat2(
+                    AlienImGui::SliderFloat2Parameters()
+                        .name("Position")
                         .textWidth(RightColumnWidth)
-                        .min(0)
-                        .max(toFloat(worldSize.x))
-                        .defaultValue(&origSpot.posX)
+                        .minX(0)
+                        .maxX(toFloat(worldSize.x))
+                        .minY(0)
+                        .maxY(toFloat(worldSize.y))
+                        .defaultValueX(origSpot.posX)
+                        .defaultValueY(origSpot.posY)
                         .format("%.2f"),
-                    &spot.posX);
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Position Y")
-                        .textWidth(RightColumnWidth)
-                        .min(0)
-                        .max(toFloat(worldSize.y))
-                        .defaultValue(&origSpot.posY)
-                        .format("%.2f"),
-                    &spot.posY);
+                    spot.posX,
+                    spot.posY);
+
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Velocity X")

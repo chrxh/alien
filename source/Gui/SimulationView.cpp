@@ -388,6 +388,16 @@ void _SimulationView::setMotionBlur(float value)
     updateMotionBlur();
 }
 
+bool _SimulationView::getMousePickerEnabled() const
+{
+    return _mousePickerEnabled;
+}
+
+void _SimulationView::setMousePickerEnabled(bool value)
+{
+    _mousePickerEnabled = value;
+}
+
 void _SimulationView::updateImageFromSimulation()
 {
     auto worldRect = Viewport::getVisibleWorldRect();

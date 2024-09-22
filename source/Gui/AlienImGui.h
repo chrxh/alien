@@ -49,6 +49,23 @@ public:
     };
     static bool SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled = nullptr);
 
+    struct SliderFloat2Parameters
+    {
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::string, name, "");
+        MEMBER_DECLARATION(SliderFloat2Parameters, float, minX, 0);
+        MEMBER_DECLARATION(SliderFloat2Parameters, float, minY, 0);
+        MEMBER_DECLARATION(SliderFloat2Parameters, float, maxX, 0);
+        MEMBER_DECLARATION(SliderFloat2Parameters, float, maxY, 0);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::string, format, "%.3f");
+        MEMBER_DECLARATION(SliderFloat2Parameters, float, textWidth, 100);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<float>, defaultValueX, std::nullopt);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<float>, defaultValueY, std::nullopt);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::function<bool(void)>>, getMousePickerEnabledFunc, std::nullopt);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::function<void(bool)>>, setMousePickerEnabledFunc, std::nullopt);
+    };
+    static bool SliderFloat2(SliderFloat2Parameters const& parameters, float& valueX, float& valueY);
+
     struct SliderInputFloatParameters
     {
         MEMBER_DECLARATION(SliderInputFloatParameters, std::string, name, "");
