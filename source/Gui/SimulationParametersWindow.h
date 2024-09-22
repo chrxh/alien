@@ -35,6 +35,7 @@ private:
     void validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const;
 
     SimulationController _simController;
+    SimulationView _simView;
     RadiationSourcesWindow _radiationSourcesWindow;
 
     uint32_t _savedPalette[32] = {};
@@ -47,4 +48,7 @@ private:
 
     bool _featureListOpen = false;
     float _featureListHeight = 200.0f;
+
+    std::function<bool(void)> _getMousePickerEnabledFunc;
+    std::function<void(bool)> _setMousePickerEnabledFunc;
 };

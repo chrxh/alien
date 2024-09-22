@@ -60,6 +60,58 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bo
     return BasicSlider(parameters, value, enabled);
 }
 
+bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& valueX, float& valueY)
+{
+    ImGui::PushID(parameters._name.c_str());
+
+    auto mousePickerButtonSize = parameters._getMousePickerEnabledFunc ? scale(50.0f) + ImGui::GetStyle().FramePadding.x * 2 : 0.0f;
+    auto sliderWidth = (ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - mousePickerButtonSize) / 2 - ImGui::GetStyle().FramePadding.x;
+    ImGui::SetNextItemWidth(sliderWidth);
+    bool result = ImGui::SliderFloat("##sliderX", &valueX, parameters._minX, parameters._maxX, parameters._format.c_str(), 0);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(sliderWidth);
+    result |= ImGui::SliderFloat("##sliderY", &valueY, parameters._minY, parameters._maxY, parameters._format.c_str(), 0);
+
+    //revert button
+    if (parameters._defaultValueX) {
+        ImGui::SameLine();
+
+        ImGui::BeginDisabled(valueX == *parameters._defaultValueX && valueY == *parameters._defaultValueY);
+        if (revertButton(parameters._name)) {
+            valueX = *parameters._defaultValueX;
+            valueY = *parameters._defaultValueY;
+        }
+        ImGui::EndDisabled();
+    }
+
+    //text
+    if (!parameters._name.empty()) {
+        ImGui::SameLine();
+        ImGui::TextUnformatted(parameters._name.c_str());
+    }
+
+    //tooltip
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
+
+    ImGui::PopID();
+    return result;
+
+    //        //mouse picker
+    //        if (parameters._getMousePickerEnabledFunc) {
+    //            ImGui::SameLine();
+    //            if (ImGui::Button(ICON_FA_CROSSHAIRS)) {
+    //                auto mousePickerEnabled = parameters._getMousePickerEnabledFunc.value()();
+    //                parameters._setMousePickerEnabledFunc.value()(!mousePickerEnabled);
+    //            }
+    //            if (parameters._getMousePickerEnabledFunc.value()()) {
+    //                auto mousePos = ImGui::GetMousePos();
+    //                value[0] = mousePos.x;
+    //            }
+    //        }
+}
+
 void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)
 {
     auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
@@ -1334,14 +1386,16 @@ bool AlienImGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, 
 
 namespace
 {
-    int& getIdBasedValue(std::unordered_map<unsigned int, int>& idToValueMap, int defaultValue = 0)
+    template<typename T>
+    int& getIdBasedValue(std::unordered_map<unsigned int, T>& idToValueMap, T const& defaultValue)
     {
         auto id = ImGui::GetID("");
         if (!idToValueMap.contains(id)) {
-            idToValueMap[id] = 0;
+            idToValueMap[id] = defaultValue;
         }
         return idToValueMap.at(id);
     }
+
 }
 
 void AlienImGui::NeuronSelection(
@@ -1350,8 +1404,8 @@ void AlienImGui::NeuronSelection(
     std::vector<float>& biases,
     std::vector<NeuronActivationFunction>& activationFunctions)
 {
-    auto& selectedInput = getIdBasedValue(_neuronSelectedInput);
-    auto& selectedOutput = getIdBasedValue(_neuronSelectedOutput);
+    auto& selectedInput = getIdBasedValue(_neuronSelectedInput, 0);
+    auto& selectedOutput = getIdBasedValue(_neuronSelectedOutput, 0);
     auto setDefaultColors = [] {
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonHoveredColor);
@@ -1702,6 +1756,7 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
         ImGui::PopID();
 
         if (color == 0) {
+
             //revert button
             if (parameters._defaultValue) {
                 ImGui::SameLine();

@@ -28,6 +28,9 @@ public:
     void setContrast(float value);
     void setMotionBlur(float value);
 
+    bool getMousePickerEnabled() const;
+    void setMousePickerEnabled(bool value);
+
 private:
     void processEvents();
 
@@ -90,6 +93,7 @@ private:
         std::chrono::steady_clock::time_point lastTime;
     };
     std::optional<MouseWheelAction> _mouseWheelAction;
+    bool _mousePickerEnabled = false;
 
     ModeController _modeWindow;
     SimulationController _simController;
