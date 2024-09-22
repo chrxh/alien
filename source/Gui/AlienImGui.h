@@ -52,17 +52,15 @@ public:
     struct SliderFloat2Parameters
     {
         MEMBER_DECLARATION(SliderFloat2Parameters, std::string, name, "");
-        MEMBER_DECLARATION(SliderFloat2Parameters, float, minX, 0);
-        MEMBER_DECLARATION(SliderFloat2Parameters, float, minY, 0);
-        MEMBER_DECLARATION(SliderFloat2Parameters, float, maxX, 0);
-        MEMBER_DECLARATION(SliderFloat2Parameters, float, maxY, 0);
+        MEMBER_DECLARATION(SliderFloat2Parameters, RealVector2D, min, RealVector2D());
+        MEMBER_DECLARATION(SliderFloat2Parameters, RealVector2D, max, RealVector2D());
         MEMBER_DECLARATION(SliderFloat2Parameters, std::string, format, "%.3f");
         MEMBER_DECLARATION(SliderFloat2Parameters, float, textWidth, 100);
-        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<float>, defaultValueX, std::nullopt);
-        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<float>, defaultValueY, std::nullopt);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<RealVector2D>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::function<bool(void)>>, getMousePickerEnabledFunc, std::nullopt);
         MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::function<void(bool)>>, setMousePickerEnabledFunc, std::nullopt);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::function<std::optional<RealVector2D>(void)>>, getMousePickerPositionFunc, std::nullopt);
     };
     static bool SliderFloat2(SliderFloat2Parameters const& parameters, float& valueX, float& valueY);
 
@@ -240,13 +238,13 @@ public:
     };
     static bool ToggleButton(ToggleButtonParameters const& parameters, bool& value);
 
-    struct CheckButtonParameters 
+    struct SelectableButtonParameters 
     {
-        MEMBER_DECLARATION(CheckButtonParameters, std::string, name, "");
-        MEMBER_DECLARATION(CheckButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER_DECLARATION(CheckButtonParameters, float, width, 0);
+        MEMBER_DECLARATION(SelectableButtonParameters, std::string, name, "");
+        MEMBER_DECLARATION(SelectableButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(SelectableButtonParameters, float, width, 0);
     };
-    static bool SelectableButton(CheckButtonParameters const& parameters, bool& value);
+    static bool SelectableButton(SelectableButtonParameters const& parameters, bool& value);
 
     static void Text(std::string const& text);
     static void BoldText(std::string const& text);

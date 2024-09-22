@@ -9,7 +9,10 @@
 class _SimulationParametersWindow : public _AlienWindow
 {
 public:
-    _SimulationParametersWindow(SimulationController const& simController, RadiationSourcesWindow const& radiationSourcesWindow);
+    _SimulationParametersWindow(
+        SimulationController const& simController,
+        RadiationSourcesWindow const& radiationSourcesWindow,
+        SimulationView const& simulationView);
     ~_SimulationParametersWindow();
 
 private:
@@ -35,7 +38,7 @@ private:
     void validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const;
 
     SimulationController _simController;
-    SimulationView _simView;
+    SimulationView _simulationView;
     RadiationSourcesWindow _radiationSourcesWindow;
 
     uint32_t _savedPalette[32] = {};
@@ -51,4 +54,5 @@ private:
 
     std::function<bool(void)> _getMousePickerEnabledFunc;
     std::function<void(bool)> _setMousePickerEnabledFunc;
+    std::function<std::optional<RealVector2D>(void)> _getMousePickerPositionFunc;
 };

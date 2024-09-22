@@ -50,10 +50,12 @@ namespace
 
 _SimulationParametersWindow::_SimulationParametersWindow(
     SimulationController const& simController,
-    RadiationSourcesWindow const& radiationSourcesWindow)
+    RadiationSourcesWindow const& radiationSourcesWindow,
+    SimulationView const& simulationView)
     : _AlienWindow("Simulation parameters", "windows.simulation parameters", false)
     , _simController(simController)
     , _radiationSourcesWindow(radiationSourcesWindow)
+    , _simulationView(simulationView)
 {
     for (int n = 0; n < IM_ARRAYSIZE(_savedPalette); n++) {
         ImVec4 color;
@@ -74,8 +76,9 @@ _SimulationParametersWindow::_SimulationParametersWindow(
         _cellFunctionStrings.emplace_back(Const::CellFunctionToStringMap.at(i));
     }
 
-    _getMousePickerEnabledFunc = [&]() { return _simView->getMousePickerEnabled(); };
-    _setMousePickerEnabledFunc = [&](bool value) { _simView->setMousePickerEnabled(value); };
+    _getMousePickerEnabledFunc = [&]() { return _simulationView->getMousePickerEnabled(); };
+    _setMousePickerEnabledFunc = [&](bool value) { _simulationView->setMousePickerEnabled(value); };
+    _getMousePickerPositionFunc = [&]() { return _simulationView->getMousePickerPosition(); };
 }
 
 _SimulationParametersWindow::~_SimulationParametersWindow()
@@ -1662,13 +1665,13 @@ bool _SimulationParametersWindow::processSpot(int index)
                     AlienImGui::SliderFloat2Parameters()
                         .name("Position")
                         .textWidth(RightColumnWidth)
-                        .minX(0)
-                        .maxX(toFloat(worldSize.x))
-                        .minY(0)
-                        .maxY(toFloat(worldSize.y))
-                        .defaultValueX(origSpot.posX)
-                        .defaultValueY(origSpot.posY)
-                        .format("%.2f"),
+                        .min({0, 0})
+                        .max(toRealVector2D(worldSize))
+                        .defaultValue(RealVector2D{origSpot.posX, origSpot.posY})
+                        .format("%.2f")
+                        .getMousePickerEnabledFunc(_getMousePickerEnabledFunc)
+                        .setMousePickerEnabledFunc(_setMousePickerEnabledFunc)
+                        .getMousePickerPositionFunc(_getMousePickerPositionFunc),
                     spot.posX,
                     spot.posY);
 

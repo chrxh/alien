@@ -64,22 +64,37 @@ bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& v
 {
     ImGui::PushID(parameters._name.c_str());
 
-    auto mousePickerButtonSize = parameters._getMousePickerEnabledFunc ? scale(50.0f) + ImGui::GetStyle().FramePadding.x * 2 : 0.0f;
+    auto mousePickerButtonSize = parameters._getMousePickerEnabledFunc ? scale(20.0f) + ImGui::GetStyle().FramePadding.x * 2 : 0.0f;
     auto sliderWidth = (ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - mousePickerButtonSize) / 2 - ImGui::GetStyle().FramePadding.x;
     ImGui::SetNextItemWidth(sliderWidth);
-    bool result = ImGui::SliderFloat("##sliderX", &valueX, parameters._minX, parameters._maxX, parameters._format.c_str(), 0);
+    bool result = ImGui::SliderFloat("##sliderX", &valueX, parameters._min.x, parameters._max.x, parameters._format.c_str(), 0);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(sliderWidth);
-    result |= ImGui::SliderFloat("##sliderY", &valueY, parameters._minY, parameters._maxY, parameters._format.c_str(), 0);
+    result |= ImGui::SliderFloat("##sliderY", &valueY, parameters._min.y, parameters._max.y, parameters._format.c_str(), 0);
+
+    //mouse picker
+    if (parameters._getMousePickerEnabledFunc) {
+        ImGui::SameLine();
+        auto mousePickerEnabled = parameters._getMousePickerEnabledFunc.value()();
+        if (AlienImGui::SelectableButton(AlienImGui::SelectableButtonParameters().name(ICON_FA_CROSSHAIRS), mousePickerEnabled)) {
+            parameters._setMousePickerEnabledFunc.value()(mousePickerEnabled);
+        }
+        if (parameters._getMousePickerEnabledFunc.value()()) {
+            if (auto pos = parameters._getMousePickerPositionFunc.value()()) {
+                valueX = pos->x;
+                valueY = pos->y;
+            }
+        }
+    }
 
     //revert button
-    if (parameters._defaultValueX) {
+    if (parameters._defaultValue) {
         ImGui::SameLine();
 
-        ImGui::BeginDisabled(valueX == *parameters._defaultValueX && valueY == *parameters._defaultValueY);
+        ImGui::BeginDisabled(valueX == parameters._defaultValue->x && valueY == parameters._defaultValue->y);
         if (revertButton(parameters._name)) {
-            valueX = *parameters._defaultValueX;
-            valueY = *parameters._defaultValueY;
+            valueX = parameters._defaultValue->x;
+            valueY = parameters._defaultValue->y;
         }
         ImGui::EndDisabled();
     }
@@ -97,19 +112,6 @@ bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& v
 
     ImGui::PopID();
     return result;
-
-    //        //mouse picker
-    //        if (parameters._getMousePickerEnabledFunc) {
-    //            ImGui::SameLine();
-    //            if (ImGui::Button(ICON_FA_CROSSHAIRS)) {
-    //                auto mousePickerEnabled = parameters._getMousePickerEnabledFunc.value()();
-    //                parameters._setMousePickerEnabledFunc.value()(!mousePickerEnabled);
-    //            }
-    //            if (parameters._getMousePickerEnabledFunc.value()()) {
-    //                auto mousePos = ImGui::GetMousePos();
-    //                value[0] = mousePos.x;
-    //            }
-    //        }
 }
 
 void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)
@@ -171,7 +173,7 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
     if (showInfinity) {
         ImGui::SameLine();
         ImGui::BeginDisabled(parameters._readOnly);
-        if (SelectableButton(CheckButtonParameters().name(ICON_FA_INFINITY).tooltip(parameters._tooltip).width(infinityButtonWidth), isInfinity)) {
+        if (SelectableButton(SelectableButtonParameters().name(ICON_FA_INFINITY).tooltip(parameters._tooltip).width(infinityButtonWidth), isInfinity)) {
             if (isInfinity) {
                 value = std::numeric_limits<int>::max();
             } else {
@@ -681,7 +683,7 @@ bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
     return result;
 }
 
-bool AlienImGui::SelectableButton(CheckButtonParameters const& parameters, bool& value)
+bool AlienImGui::SelectableButton(SelectableButtonParameters const& parameters, bool& value)
 {
     auto buttonColor = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Button]);
     auto buttonColorHovered = ImColor(ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered]);

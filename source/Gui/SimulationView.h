@@ -30,6 +30,7 @@ public:
 
     bool getMousePickerEnabled() const;
     void setMousePickerEnabled(bool value);
+    std::optional<RealVector2D> getMousePickerPosition() const;
 
 private:
     void processEvents();

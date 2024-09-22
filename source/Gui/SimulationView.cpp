@@ -157,7 +157,7 @@ void _SimulationView::leftMouseButtonPressed(IntVector2D const& viewPos)
 
 void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
 {
-    if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
+    if (_navigationState == NavigationState::Moving && _modeWindow->getMode() == _ModeController::Mode::Navigation) {
         Viewport::zoom(viewPos, calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
     }
 }
@@ -235,42 +235,47 @@ void _SimulationView::processEvents()
     IntVector2D prevMousePosInt = _prevMousePosInt ? *_prevMousePosInt : mousePosInt;
 
     if (!ImGui::GetIO().WantCaptureMouse) {
-        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            leftMouseButtonPressed(mousePosInt);
-        }
-        if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            leftMouseButtonHold(mousePosInt, prevMousePosInt);
-        }
-        if (ImGui::GetIO().MouseWheel > 0) {
-            mouseWheelUp(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
-        }
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-            leftMouseButtonReleased();
-        }
+        if (_mousePickerEnabled) {
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                _mousePickerEnabled = false;
+            }
+        } else {
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                leftMouseButtonPressed(mousePosInt);
+            }
+            if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+                leftMouseButtonHold(mousePosInt, prevMousePosInt);
+            }
+            if (ImGui::GetIO().MouseWheel > 0) {
+                mouseWheelUp(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
+            }
+            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+                leftMouseButtonReleased();
+            }
 
-        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-            rightMouseButtonPressed();
-        }
-        if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
-            rightMouseButtonHold(mousePosInt);
-        }
-        if (ImGui::GetIO().MouseWheel < 0) {
-            mouseWheelDown(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
-        }
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
-            rightMouseButtonReleased();
-        }
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+                rightMouseButtonPressed();
+            }
+            if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+                rightMouseButtonHold(mousePosInt);
+            }
+            if (ImGui::GetIO().MouseWheel < 0) {
+                mouseWheelDown(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
+            }
+            if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+                rightMouseButtonReleased();
+            }
 
-        if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
-            middleMouseButtonPressed(mousePosInt);
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
+                middleMouseButtonPressed(mousePosInt);
+            }
+            if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
+                middleMouseButtonHold(mousePosInt);
+            }
+            if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
+                middleMouseButtonReleased();
+            }
         }
-        if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
-            middleMouseButtonHold(mousePosInt);
-        }
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
-            middleMouseButtonReleased();
-        }
-
         drawCursor();
     }
     processMouseWheel(mousePosInt);
@@ -398,6 +403,16 @@ void _SimulationView::setMousePickerEnabled(bool value)
     _mousePickerEnabled = value;
 }
 
+std::optional<RealVector2D> _SimulationView::getMousePickerPosition() const
+{
+    if (ImGui::GetIO().WantCaptureMouse) {
+        return std::nullopt;
+    }
+
+    auto mousePos = ImGui::GetMousePos();
+    return Viewport::mapViewToWorldPosition({mousePos.x, mousePos.y});
+}
+
 void _SimulationView::updateImageFromSimulation()
 {
     auto worldRect = Viewport::getVisibleWorldRect();
@@ -498,7 +513,7 @@ void _SimulationView::drawCursor()
         ImGui::SetMouseCursor(ImGuiMouseCursor_None);
     }
 
-    if (_modeWindow->getMode() == _ModeController::Mode::Editor) {
+    if (_mousePickerEnabled || _modeWindow->getMode() == _ModeController::Mode::Editor) {
         if (!_editorModel->isDrawMode() || _simController->isSimulationRunning()) {
             auto cursorSize = scale(CursorRadius);
 
