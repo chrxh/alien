@@ -338,9 +338,9 @@ void _StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::deviationGenomeComplexity, 2);
+        processPlot(row++, &DataPointCollection::varianceGenomeComplexity, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Genome complexity\ndeviation");
+        AlienImGui::Text("Genome complexity\nvariance");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
