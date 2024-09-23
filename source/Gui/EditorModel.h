@@ -48,5 +48,5 @@ private:
     float _pencilWidth = 3.0f;
     int _defaultColorCode = 0;
     bool _rolloutToClusters = true;
-    bool _forceNoRollout = false;;
+    bool _forceNoRollout = false;
 };
