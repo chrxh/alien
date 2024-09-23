@@ -33,8 +33,8 @@ using SimulationParametersWindow = std::shared_ptr<_SimulationParametersWindow>;
 class _StatisticsWindow;
 using StatisticsWindow = std::shared_ptr<_StatisticsWindow>;
 
-class _ModeController;
-using ModeController = std::shared_ptr<_ModeController>;
+class _SimulationInteractionController;
+using SimulationInteractionController = std::shared_ptr<_SimulationInteractionController>;
 
 class _GpuSettingsDialog;
 using GpuSettingsDialog = std::shared_ptr<_GpuSettingsDialog>;

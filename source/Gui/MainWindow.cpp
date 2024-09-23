@@ -25,7 +25,7 @@
 #include "EngineInterface/SimulationController.h"
 #include "Network/NetworkService.h"
 
-#include "ModeController.h"
+#include "SimulationInteractionController.h"
 #include "SimulationView.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
@@ -124,13 +124,13 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     _editorController =
         std::make_shared<_EditorController>(_simController);
     _simulationView = std::make_shared<_SimulationView>(_simController, _editorController->getEditorModel());
-    _modeController = std::make_shared<_ModeController>(_simController, _editorController, _simulationView);
+    _simInteractionController = std::make_shared<_SimulationInteractionController>(_simController, _editorController, _simulationView);
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simController);
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _temporalControlWindow);
     _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController);
-    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow, _modeController);
+    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow, _simInteractionController);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
     _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow);
     _exitDialog = std::make_shared<_ExitDialog>(_onExit);
@@ -454,11 +454,11 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuToggled, "Editor")) {
-            if (ImGui::MenuItem("Activate", "ALT+E", _modeController->isEditMode())) {
-                _modeController->setEditMode(!_modeController->isEditMode());
+            if (ImGui::MenuItem("Activate", "ALT+E", _simInteractionController->isEditMode())) {
+                _simInteractionController->setEditMode(!_simInteractionController->isEditMode());
             }
             ImGui::Separator();
-            ImGui::BeginDisabled(!_modeController->isEditMode());
+            ImGui::BeginDisabled(!_simInteractionController->isEditMode());
             if (ImGui::MenuItem("Selection", "ALT+S", selectionWindow->isOn())) {
                 selectionWindow->setOn(!selectionWindow->isOn());
             }
@@ -476,28 +476,28 @@ void _MainWindow::processMenubar()
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(!_modeController->isEditMode() || !_editorController->isObjectInspectionPossible());
+            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !_editorController->isObjectInspectionPossible());
             if (ImGui::MenuItem("Inspect objects", "ALT+N")) {
                 _editorController->onInspectSelectedObjects();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_modeController->isEditMode() || !_editorController->isGenomeInspectionPossible());
+            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !_editorController->isGenomeInspectionPossible());
             if (ImGui::MenuItem("Inspect principal genome", "ALT+F")) {
                 _editorController->onInspectSelectedGenomes();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_modeController->isEditMode() || !_editorController->areInspectionWindowsActive());
+            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !_editorController->areInspectionWindowsActive());
             if (ImGui::MenuItem("Close inspections", "ESC")) {
                 _editorController->onCloseAllInspectorWindows();
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(!_modeController->isEditMode() || !_editorController->isCopyingPossible());
+            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !_editorController->isCopyingPossible());
             if (ImGui::MenuItem("Copy", "CTRL+C")) {
                 _editorController->onCopy();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_modeController->isEditMode() || !_editorController->isPastingPossible());
+            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !_editorController->isPastingPossible());
             if (ImGui::MenuItem("Paste", "CTRL+V")) {
                 _editorController->onPaste();
             }
@@ -627,7 +627,7 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
-            _modeController->setEditMode(!_modeController->isEditMode());
+            _simInteractionController->setEditMode(!_simInteractionController->isEditMode());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_S)) {
             selectionWindow->setOn(!selectionWindow->isOn());
@@ -729,7 +729,7 @@ void _MainWindow::processWindows()
 {
     _temporalControlWindow->process();
     _spatialControlWindow->process();
-    _modeController->process();
+    _simInteractionController->process();
     _statisticsWindow->process();
     _simulationParametersWindow->process();
     _logWindow->process();

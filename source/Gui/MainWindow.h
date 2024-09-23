@@ -69,7 +69,7 @@ private:
     NewPasswordDialog _newPasswordDialog;
     ImageToPatternDialog _imageToPatternDialog;
 
-    ModeController _modeController;
+    SimulationInteractionController _simInteractionController;
     SimulationController _simController;
     StartupController _startupController;
     AutosaveController _autosaveController; 
