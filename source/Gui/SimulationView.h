@@ -10,9 +10,7 @@
 class _SimulationView
 {
 public:
-    _SimulationView(
-        SimulationController const& simController,
-        EditorModel const& editorModel);
+    _SimulationView(SimulationController const& simController);
     ~_SimulationView();
 
     void resize(IntVector2D const& viewportSize);
@@ -33,26 +31,9 @@ public:
     void updateMotionBlur();
 
 private:
-    void leftMouseButtonPressed(IntVector2D const& viewPos);
-    void leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos);
-    void mouseWheelUp(IntVector2D const& viewPos, float strongness);
-    void leftMouseButtonReleased();
-
-    void rightMouseButtonPressed();
-    void rightMouseButtonHold(IntVector2D const& viewPos);
-    void mouseWheelDown(IntVector2D const& viewPos, float strongness);
-    void rightMouseButtonReleased();
-
-    void processMouseWheel(IntVector2D const& viewPos);
-
-    void middleMouseButtonPressed(IntVector2D const& viewPos);
-    void middleMouseButtonHold(IntVector2D const& viewPos);
-    void middleMouseButtonReleased();
-
     void updateImageFromSimulation();
 
     void markReferenceDomain();
-    float calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint);
 
     //widgets
     SimulationScrollbar _scrollbarX;
@@ -60,10 +41,6 @@ private:
 
     //overlay
     bool _isCellDetailOverlayActive = false;
-    enum class NavigationState {
-        Static, Moving
-    };
-    NavigationState _navigationState = NavigationState::Static;
     std::optional<OverlayDescription> _overlay;
     
     //shader data
@@ -81,5 +58,4 @@ private:
     float _motionBlur = 0.5f;
 
     SimulationController _simController;
-    EditorModel _editorModel;
 };

@@ -25,10 +25,8 @@ namespace
     auto constexpr ZoomFactorForOverlay = 12.0f;
 }
 
-_SimulationView::_SimulationView(
-    SimulationController const& simController,
-    EditorModel const& editorModel)
-    : _editorModel(editorModel)
+_SimulationView::_SimulationView(SimulationController const& simController)
+    : _simController(simController)
 {
     _isCellDetailOverlayActive = GlobalSettings::getInstance().getBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
     _brightness = GlobalSettings::getInstance().getFloat("windows.simulation view.brightness", _brightness);
