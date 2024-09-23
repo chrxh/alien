@@ -145,9 +145,15 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
                 result.channels[i] = max(-10.0f, min(10.0f, result.channels[i])); //truncate value to avoid overflow
             }
             if (connectedCell->activity.origin == ActivityOrigin_Sensor) {
-                result.origin = ActivityOrigin_Sensor;
-                result.targetX = connectedCell->activity.targetX;
-                result.targetY = connectedCell->activity.targetY;
+                if (result.origin != ActivityOrigin_Sensor) {
+                    result.origin = ActivityOrigin_Sensor;
+                    result.targetX = connectedCell->activity.targetX;
+                    result.targetY = connectedCell->activity.targetY;
+                } else {
+                    result.origin = ActivityOrigin_Unknown;
+                    result.targetX = 0;
+                    result.targetY = 0;
+                }
             }
         }
     }
