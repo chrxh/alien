@@ -22,20 +22,18 @@
 
 namespace
 {
-    auto constexpr MotionBlurStatic = 0.8f;
-    auto constexpr MotionBlurMoving = 0.5f;
     auto constexpr ZoomFactorForOverlay = 12.0f;
-    auto constexpr CursorRadius = 13.0f;
 }
 
 _SimulationView::_SimulationView(
     SimulationController const& simController,
-    ModeController const& modeWindow,
     EditorModel const& editorModel)
     : _editorModel(editorModel)
 {
     _isCellDetailOverlayActive = GlobalSettings::getInstance().getBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
-    _modeWindow = modeWindow;
+    _brightness = GlobalSettings::getInstance().getFloat("windows.simulation view.brightness", _brightness);
+    _contrast = GlobalSettings::getInstance().getFloat("windows.simulation view.contrast", _contrast);
+    _motionBlur = GlobalSettings::getInstance().getFloat("windows.simulation view.motion blur factor", _motionBlur);
 
     _simController = simController;
     _shader = std::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
@@ -98,6 +96,9 @@ _SimulationView::_SimulationView(
 _SimulationView::~_SimulationView()
 {
     GlobalSettings::getInstance().setBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
+    GlobalSettings::getInstance().setFloat("windows.simulation view.brightness", _brightness);
+    GlobalSettings::getInstance().setFloat("windows.simulation view.contrast", _contrast);
+    GlobalSettings::getInstance().setFloat("windows.simulation view.motion blur factor", _motionBlur);
 }
 
 void _SimulationView::resize(IntVector2D const& size)
@@ -148,146 +149,9 @@ void _SimulationView::resize(IntVector2D const& size)
     Viewport::setViewSize(size);
 }
 
-void _SimulationView::leftMouseButtonPressed(IntVector2D const& viewPos)
-{
-    _navigationState = NavigationState::Moving;
-    _lastZoomTimepoint.reset();
-    updateMotionBlur();
-}
-
-void _SimulationView::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
-{
-    if (_navigationState == NavigationState::Moving && _modeWindow->getMode() == _ModeController::Mode::Navigation) {
-        Viewport::zoom(viewPos, calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
-    }
-}
-
-void _SimulationView::mouseWheelUp(IntVector2D const& viewPos, float strongness)
-{
-    _mouseWheelAction =
-        MouseWheelAction{.up = true, .strongness = strongness, .start = std::chrono::steady_clock::now(), .lastTime = std::chrono::steady_clock::now()};
-}
-
-void _SimulationView::leftMouseButtonReleased()
-{
-    _navigationState = NavigationState::Static;
-    updateMotionBlur();
-}
-
-void _SimulationView::rightMouseButtonPressed()
-{
-    _navigationState = NavigationState::Moving;
-    _lastZoomTimepoint.reset();
-    updateMotionBlur();
-}
-
-void _SimulationView::rightMouseButtonHold(IntVector2D const& viewPos)
-{
-    if (_modeWindow->getMode() == _ModeController::Mode::Navigation) {
-        Viewport::zoom(viewPos, 1.0f / calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
-    }
-}
-
-void _SimulationView::mouseWheelDown(IntVector2D const& viewPos, float strongness)
-{
-    _mouseWheelAction =
-        MouseWheelAction{.up = false, .strongness = strongness, .start = std::chrono::steady_clock::now(), .lastTime = std::chrono::steady_clock::now()};
-}
-
-void _SimulationView::rightMouseButtonReleased()
-{
-    _navigationState = NavigationState::Static;
-    updateMotionBlur();
-}
-
-void _SimulationView::processMouseWheel(IntVector2D const& viewPos)
-{
-    if (_mouseWheelAction) {
-        auto zoomFactor = powf(calcZoomFactor(_mouseWheelAction->lastTime), 2.2f * _mouseWheelAction->strongness);
-        auto now = std::chrono::steady_clock::now();
-        _mouseWheelAction->lastTime = now;
-        Viewport::zoom(viewPos, _mouseWheelAction->up ? zoomFactor : 1.0f / zoomFactor);
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - _mouseWheelAction->start).count() > 100) {
-            _mouseWheelAction.reset();
-        }
-    }
-}
-
-void _SimulationView::middleMouseButtonPressed(IntVector2D const& viewPos)
-{
-    _worldPosForMovement = Viewport::mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
-}
-
-void _SimulationView::middleMouseButtonHold(IntVector2D const& viewPos)
-{
-    Viewport::centerTo(*_worldPosForMovement, viewPos);
-}
-
-void _SimulationView::middleMouseButtonReleased()
-{
-    _worldPosForMovement = std::nullopt;
-}
-
-void _SimulationView::processEvents()
-{
-    auto mousePos = ImGui::GetMousePos();
-    IntVector2D mousePosInt{toInt(mousePos.x), toInt(mousePos.y)};
-    IntVector2D prevMousePosInt = _prevMousePosInt ? *_prevMousePosInt : mousePosInt;
-
-    if (!ImGui::GetIO().WantCaptureMouse) {
-        if (_mousePickerEnabled) {
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                _mousePickerEnabled = false;
-            }
-        } else {
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                leftMouseButtonPressed(mousePosInt);
-            }
-            if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-                leftMouseButtonHold(mousePosInt, prevMousePosInt);
-            }
-            if (ImGui::GetIO().MouseWheel > 0) {
-                mouseWheelUp(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
-            }
-            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-                leftMouseButtonReleased();
-            }
-
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-                rightMouseButtonPressed();
-            }
-            if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
-                rightMouseButtonHold(mousePosInt);
-            }
-            if (ImGui::GetIO().MouseWheel < 0) {
-                mouseWheelDown(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
-            }
-            if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
-                rightMouseButtonReleased();
-            }
-
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
-                middleMouseButtonPressed(mousePosInt);
-            }
-            if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
-                middleMouseButtonHold(mousePosInt);
-            }
-            if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
-                middleMouseButtonReleased();
-            }
-        }
-        drawCursor();
-    }
-    processMouseWheel(mousePosInt);
-
-    _prevMousePosInt = mousePosInt;
-}
-
 void _SimulationView::draw(bool renderSimulation)
 {
     if (renderSimulation) {
-        processEvents();
-
         updateImageFromSimulation();
 
         _shader->use();
@@ -377,9 +241,19 @@ void _SimulationView::setOverlayActive(bool active)
     _isCellDetailOverlayActive = active;
 }
 
+float _SimulationView::getBrightness() const
+{
+    return _brightness;
+}
+
 void _SimulationView::setBrightness(float value)
 {
     _shader->setFloat("brightness", value);
+}
+
+float _SimulationView::getContrast() const
+{
+    return _contrast;
 }
 
 void _SimulationView::setContrast(float value)
@@ -387,30 +261,15 @@ void _SimulationView::setContrast(float value)
     _shader->setFloat("contrast", value);
 }
 
+float _SimulationView::getMotionBlur() const
+{
+    return _motionBlur;
+}
+
 void _SimulationView::setMotionBlur(float value)
 {
-    _motionBlurFactor = value;
+    _motionBlur = value;
     updateMotionBlur();
-}
-
-bool _SimulationView::getMousePickerEnabled() const
-{
-    return _mousePickerEnabled;
-}
-
-void _SimulationView::setMousePickerEnabled(bool value)
-{
-    _mousePickerEnabled = value;
-}
-
-std::optional<RealVector2D> _SimulationView::getMousePickerPosition() const
-{
-    if (ImGui::GetIO().WantCaptureMouse) {
-        return std::nullopt;
-    }
-
-    auto mousePos = ImGui::GetMousePos();
-    return Viewport::mapViewToWorldPosition({mousePos.x, mousePos.y});
 }
 
 void _SimulationView::updateImageFromSimulation()
@@ -495,66 +354,9 @@ void _SimulationView::updateImageFromSimulation()
 
 void _SimulationView::updateMotionBlur()
 {
-    auto motionBlur = _navigationState == NavigationState::Static ? MotionBlurStatic : MotionBlurMoving;
-    if (_motionBlurFactor == 0) {
-        motionBlur = 1.0f;
-    } else {
-        motionBlur = std::min(1.0f, motionBlur / _motionBlurFactor);
-    }
-    _shader->setFloat("motionBlurFactor", motionBlur);
-}
-
-void _SimulationView::drawCursor()
-{
-    auto mousePos = ImGui::GetMousePos();
-    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-
-    if (!ImGui::GetIO().WantCaptureMouse) {
-        ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-    }
-
-    if (_mousePickerEnabled || _modeWindow->getMode() == _ModeController::Mode::Editor) {
-        if (!_editorModel->isDrawMode() || _simController->isSimulationRunning()) {
-            auto cursorSize = scale(CursorRadius);
-
-            //shadow
-            drawList->AddRectFilled(
-                {mousePos.x - scale(2.0f), mousePos.y - cursorSize}, {mousePos.x + scale(2.0f), mousePos.y + cursorSize}, Const::CursorShadowColor);
-            drawList->AddRectFilled(
-                {mousePos.x - cursorSize, mousePos.y - scale(2.0f)}, {mousePos.x + cursorSize, mousePos.y + scale(2.0f)}, Const::CursorShadowColor);
-
-            //foreground
-            drawList->AddRectFilled(
-                {mousePos.x - scale(1.0f), mousePos.y - cursorSize}, {mousePos.x + scale(1.0f), mousePos.y + cursorSize}, Const::CursorColor);
-            drawList->AddRectFilled(
-                {mousePos.x - cursorSize, mousePos.y - scale(1.0f)}, {mousePos.x + cursorSize, mousePos.y + scale(1.0f)}, Const::CursorColor);
-        } else {
-            auto zoom = Viewport::getZoomFactor();
-            auto radius = _editorModel->getPencilWidth() * zoom;
-            auto color = Const::IndividualCellColors[_editorModel->getDefaultColorCode()];
-            float h, s, v;
-            AlienImGui::ConvertRGBtoHSV(color, h, s, v);
-            drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));
-        }
-    } else {
-        auto cursorSize = scale(CursorRadius);
-
-        //shadow
-        drawList->AddCircle(mousePos, cursorSize / 2, Const::CursorShadowColor, 0, scale(4.0f));
-        drawList->AddLine(
-            {mousePos.x + sqrtf(2.0f) / 2.0f * cursorSize / 2, mousePos.y + sqrtf(2.0f) / 2.0f * cursorSize / 2},
-            {mousePos.x + cursorSize, mousePos.y + cursorSize},
-            Const::CursorShadowColor,
-            scale(4.0f));
-
-        //foreground
-        drawList->AddCircle(mousePos, cursorSize / 2, Const::CursorColor, 0, scale(2.0f));
-        drawList->AddLine(
-            {mousePos.x + sqrtf(2.0f) / 2.0f * cursorSize / 2, mousePos.y + sqrtf(2.0f) / 2.0f * cursorSize / 2},
-            {mousePos.x + cursorSize, mousePos.y + cursorSize},
-            Const::CursorColor,
-            scale(2.0f));
-    }
+    //motionBlurFactor = 0: max motion blur
+    //motionBlurFactor = 1: no motion blur
+    _shader->setFloat("motionBlurFactor", 1.0f / (1.0f + _motionBlur));
 }
 
 void _SimulationView::markReferenceDomain()
@@ -568,13 +370,5 @@ void _SimulationView::markReferenceDomain()
     drawList->AddLine({p2.x, p1.y}, {p2.x, p2.y}, color);
     drawList->AddLine({p2.x, p2.y}, {p1.x, p2.y}, color);
     drawList->AddLine({p1.x, p2.y}, {p1.x, p1.y}, color);
-}
-
-float _SimulationView::calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint)
-{
-    auto now = std::chrono::steady_clock::now();
-    auto duration = toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTimepoint).count());
-    _lastZoomTimepoint = now;
-    return pow(Viewport::getZoomSensitivity(), duration / 15);
 }
 

@@ -12,7 +12,6 @@ class _SimulationView
 public:
     _SimulationView(
         SimulationController const& simController,
-        ModeController const& modeWindow,
         EditorModel const& editorModel);
     ~_SimulationView();
 
@@ -24,17 +23,16 @@ public:
     bool isOverlayActive() const;
     void setOverlayActive(bool active);
 
+    float getBrightness() const;
     void setBrightness(float value);
+    float getContrast() const;
     void setContrast(float value);
+    float getMotionBlur() const;
     void setMotionBlur(float value);
 
-    bool getMousePickerEnabled() const;
-    void setMousePickerEnabled(bool value);
-    std::optional<RealVector2D> getMousePickerPosition() const;
+    void updateMotionBlur();
 
 private:
-    void processEvents();
-
     void leftMouseButtonPressed(IntVector2D const& viewPos);
     void leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos);
     void mouseWheelUp(IntVector2D const& viewPos, float strongness);
@@ -52,9 +50,7 @@ private:
     void middleMouseButtonReleased();
 
     void updateImageFromSimulation();
-    void updateMotionBlur();
 
-    void drawCursor();
     void markReferenceDomain();
     float calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint);
 
@@ -64,7 +60,6 @@ private:
 
     //overlay
     bool _isCellDetailOverlayActive = false;
-    float _motionBlurFactor = 1.0f;
     enum class NavigationState {
         Static, Moving
     };
@@ -81,22 +76,10 @@ private:
     unsigned int _textureFramebufferId1 = 0;
     unsigned int _textureFramebufferId2 = 0;
 
-    //navigation
-    std::optional<RealVector2D> _worldPosForMovement;
-    std::optional<IntVector2D> _prevMousePosInt;
-    std::optional<std::chrono::steady_clock::time_point> _lastZoomTimepoint;
+    float _brightness = 1.0f;
+    float _contrast = 1.0f;
+    float _motionBlur = 0.5f;
 
-    struct MouseWheelAction
-    {
-        bool up;    //false=down
-        float strongness;
-        std::chrono::steady_clock::time_point start;
-        std::chrono::steady_clock::time_point lastTime;
-    };
-    std::optional<MouseWheelAction> _mouseWheelAction;
-    bool _mousePickerEnabled = false;
-
-    ModeController _modeWindow;
     SimulationController _simController;
     EditorModel _editorModel;
 };

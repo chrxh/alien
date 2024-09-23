@@ -12,7 +12,7 @@ public:
     _SimulationParametersWindow(
         SimulationController const& simController,
         RadiationSourcesWindow const& radiationSourcesWindow,
-        SimulationView const& simulationView);
+        ModeController const& modeController);
     ~_SimulationParametersWindow();
 
 private:
@@ -38,7 +38,7 @@ private:
     void validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const;
 
     SimulationController _simController;
-    SimulationView _simulationView;
+    ModeController _modeController;
     RadiationSourcesWindow _radiationSourcesWindow;
 
     uint32_t _savedPalette[32] = {};
