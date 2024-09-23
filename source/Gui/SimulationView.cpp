@@ -15,7 +15,7 @@
 #include "Shader.h"
 #include "SimulationScrollbar.h"
 #include "Viewport.h"
-#include "ModeController.h"
+#include "SimulationInteractionController.h"
 #include "StyleRepository.h"
 #include "CellFunctionStrings.h"
 #include "EditorModel.h"

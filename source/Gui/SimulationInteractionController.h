@@ -5,11 +5,10 @@
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
 
-//#TODO rename to SimulationInteractionController
-class _ModeController
+class _SimulationInteractionController
 {
 public:
-    _ModeController(SimulationController const& simController, EditorController const& editorController, SimulationView const& simulationView);
+    _SimulationInteractionController(SimulationController const& simController, EditorController const& editorController, SimulationView const& simulationView);
 
     void process();
 

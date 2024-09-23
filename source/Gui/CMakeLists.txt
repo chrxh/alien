@@ -69,8 +69,6 @@ PUBLIC
     MassOperationsDialog.h
     MessageDialog.cpp
     MessageDialog.h
-    ModeController.cpp
-    ModeController.h
     MultiplierWindow.cpp
     MultiplierWindow.h
     NetworkSettingsDialog.cpp
@@ -101,6 +99,8 @@ PUBLIC
     Shader.h
     ShaderWindow.cpp
     ShaderWindow.h
+    SimulationInteractionController.cpp
+    SimulationInteractionController.h
     SimulationParametersWindow.cpp
     SimulationParametersWindow.h
     SimulationScrollbar.cpp

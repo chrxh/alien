@@ -14,7 +14,7 @@
 #include "GenericFileDialogs.h"
 #include "HelpStrings.h"
 #include "MessageDialog.h"
-#include "ModeController.h"
+#include "SimulationInteractionController.h"
 #include "RadiationSourcesWindow.h"
 #include "OverlayMessageController.h"
 #include "SimulationView.h"
@@ -52,11 +52,11 @@ namespace
 _SimulationParametersWindow::_SimulationParametersWindow(
     SimulationController const& simController,
     RadiationSourcesWindow const& radiationSourcesWindow,
-    ModeController const& modeController)
+    SimulationInteractionController const& simInteractionController)
     : _AlienWindow("Simulation parameters", "windows.simulation parameters", false)
     , _simController(simController)
     , _radiationSourcesWindow(radiationSourcesWindow)
-    , _modeController(modeController)
+    , _simInteractionController(simInteractionController)
 {
     for (int n = 0; n < IM_ARRAYSIZE(_savedPalette); n++) {
         ImVec4 color;
@@ -77,9 +77,9 @@ _SimulationParametersWindow::_SimulationParametersWindow(
         _cellFunctionStrings.emplace_back(Const::CellFunctionToStringMap.at(i));
     }
 
-    _getMousePickerEnabledFunc = [&]() { return _modeController->isPositionSelectionMode(); };
-    _setMousePickerEnabledFunc = [&](bool value) { _modeController->setPositionSelectionMode(value); };
-    _getMousePickerPositionFunc = [&]() { return _modeController->getPositionSelectionData(); };
+    _getMousePickerEnabledFunc = [&]() { return _simInteractionController->isPositionSelectionMode(); };
+    _setMousePickerEnabledFunc = [&](bool value) { _simInteractionController->setPositionSelectionMode(value); };
+    _getMousePickerPositionFunc = [&]() { return _simInteractionController->getPositionSelectionData(); };
 }
 
 _SimulationParametersWindow::~_SimulationParametersWindow()
