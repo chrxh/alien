@@ -157,9 +157,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         if (isConstructionTriggered(data, cell, activity)) {
             if (tryConstructCell(data, statistics, cell, constructionData)) {
                 cellBuilt = true;
-                if (!constructionData.containsSelfReplication) {
-                    cell->cellFunctionUsed = CellFunctionUsed_Yes;
-                }
+                cell->cellFunctionUsed = CellFunctionUsed_Yes;
             } 
         }
 
@@ -764,7 +762,8 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }
 
-    auto externalEnergyConditionalInflowFactor = cudaSimulationParameters.externalEnergyConditionalInflowFactor[hostCell->color];
+    auto externalEnergyConditionalInflowFactor =
+        cudaSimulationParameters.features.externalEnergyControl ? cudaSimulationParameters.externalEnergyConditionalInflowFactor[hostCell->color] : 0.0f;
     //if (isSelfReplicator(hostCell)) {
     //    externalEnergyConditionalInflowFactor = 0;
     //}

@@ -130,6 +130,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         return result;
     }
 
+    int numSensorActivities = 0;
     for (int i = 0, j = cell->numConnections; i < j; ++i) {
         auto connectedCell = cell->connections[i].cell;
         if (connectedCell->outputBlocked || connectedCell->livingState != LivingState_Ready ) {
@@ -145,17 +146,16 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
                 result.channels[i] = max(-10.0f, min(10.0f, result.channels[i])); //truncate value to avoid overflow
             }
             if (connectedCell->activity.origin == ActivityOrigin_Sensor) {
-                if (result.origin != ActivityOrigin_Sensor) {
-                    result.origin = ActivityOrigin_Sensor;
-                    result.targetX = connectedCell->activity.targetX;
-                    result.targetY = connectedCell->activity.targetY;
-                } else {
-                    result.origin = ActivityOrigin_Unknown;
-                    result.targetX = 0;
-                    result.targetY = 0;
-                }
+                result.origin = ActivityOrigin_Sensor;
+                result.targetX += connectedCell->activity.targetX;
+                result.targetY += connectedCell->activity.targetY;
+                ++numSensorActivities;
             }
         }
+    }
+    if (numSensorActivities > 0) {
+        result.targetX /= numSensorActivities;
+        result.targetY /= numSensorActivities;
     }
     return result;
 }
