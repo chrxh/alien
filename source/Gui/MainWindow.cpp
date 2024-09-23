@@ -123,7 +123,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     _autosaveController = std::make_shared<_AutosaveController>(_simController);
     _editorController =
         std::make_shared<_EditorController>(_simController);
-    _simulationView = std::make_shared<_SimulationView>(_simController, _editorController->getEditorModel());
+    _simulationView = std::make_shared<_SimulationView>(_simController);
     _simInteractionController = std::make_shared<_SimulationInteractionController>(_simController, _editorController, _simulationView);
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simController);
