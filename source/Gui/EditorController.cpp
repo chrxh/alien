@@ -65,13 +65,15 @@ void _EditorController::process()
         _editorModel->setDrawMode(false);
     }
 
-    processSelectionRect();
     processInspectorWindows();
 
     _editorModel->setForceNoRollout(ImGui::GetIO().KeyShift);
 
-    processEvents();
+    if (_simController->updateSelectionIfNecessary()) {
+        _editorModel->update();
+    }
 }
+
 
 SelectionWindow _EditorController::getSelectionWindow() const
 {
@@ -240,65 +242,6 @@ void _EditorController::onDelete()
     printOverlayMessage("Selection deleted");
 }
 
-void _EditorController::processEvents()
-{
-    auto running = _simController->isSimulationRunning();
-
-    RealVector2D mousePos{ImGui::GetMousePos().x, ImGui::GetMousePos().y};
-    RealVector2D worldPos = Viewport::mapViewToWorldPosition(mousePos);
-    RealVector2D prevWorldPos = _prevWorldPos ? *_prevWorldPos : worldPos;
-    
-    auto& io = ImGui::GetIO();
-    if (!io.WantCaptureMouse && !io.KeyAlt) {
-
-        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-            if (!running && !_editorModel->isDrawMode()) {
-                createSelectionRect(mousePos);
-            }
-        }
-        if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
-            if (!running && !_editorModel->isDrawMode()) {
-                resizeSelectionRect(mousePos);
-            }
-            if (running) {
-                applyForces(mousePos, prevWorldPos);
-            }
-        }
-    }
-
-    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-        if (!running) {
-            if (_editorModel->isDrawMode()) {
-                _creatorWindow->finishDrawing();
-            }
-        } else {
-            _simController->setDetached(false);
-            accelerateSelectedObjects(mousePos, prevWorldPos);
-        }
-    }
-    if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
-        if (!running) {
-            removeSelectionRect();
-        }
-    }
-
-    if (_simController->updateSelectionIfNecessary()) {
-        _editorModel->update();
-    }
-    _prevWorldPos = worldPos;
-}
-
-void _EditorController::processSelectionRect()
-{
-    if (_selectionRect) {
-        ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
-        auto startPos = _selectionRect->startPos;
-        auto endPos = _selectionRect->endPos;
-        draw_list->AddRectFilled({startPos.x, startPos.y}, {endPos.x, endPos.y}, Const::SelectionAreaFillColor);
-        draw_list->AddRect({startPos.x, startPos.y}, {endPos.x, endPos.y}, Const::SelectionAreaBorderColor, 0, 0, 1.0f);
-    }
-}
-
 void _EditorController::processInspectorWindows()
 {
     //process inspector windows
@@ -398,7 +341,6 @@ void _EditorController::accelerateSelectedObjects(RealVector2D const& viewPos, R
     auto end = Viewport::mapViewToWorldPosition({viewPos.x, viewPos.y});
     auto delta = end - start;
 
-    auto zoom = Viewport::getZoomFactor();
     ShallowUpdateSelectionData updateData;
     updateData.considerClusters = true;
     updateData.velDeltaX = delta.x / 10;
@@ -414,25 +356,13 @@ void _EditorController::applyForces(RealVector2D const& viewPos, RealVector2D co
     _simController->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
 }
 
-void _EditorController::createSelectionRect(RealVector2D const& viewPos)
+void _EditorController::updateSelectionRect(RealRect const& rect)
 {
-    SelectionRect rect{viewPos, viewPos};
-    _selectionRect = rect;
-}
-
-void _EditorController::resizeSelectionRect(RealVector2D const& viewPos)
-{
-    _selectionRect->endPos = viewPos;
-    auto startPos = Viewport::mapViewToWorldPosition(_selectionRect->startPos);
-    auto endPos = Viewport::mapViewToWorldPosition(_selectionRect->endPos);
+    auto startPos = Viewport::mapViewToWorldPosition(rect.topLeft);
+    auto endPos = Viewport::mapViewToWorldPosition(rect.bottomRight);
     auto topLeft = RealVector2D{std::min(startPos.x, endPos.x), std::min(startPos.y, endPos.y)};
     auto bottomRight = RealVector2D{std::max(startPos.x, endPos.x), std::max(startPos.y, endPos.y)};
 
     _simController->setSelection(topLeft, bottomRight);
     _editorModel->update();
-}
-
-void _EditorController::removeSelectionRect()
-{
-    _selectionRect = std::nullopt;
 }

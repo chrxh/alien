@@ -54,6 +54,9 @@ void _SimulationInteractionController::process()
     ImGui::PopStyleColor(3);
     ImGui::End();
 
+    if (_editMode) {
+        processSelectionRect();
+    }
     processEvents();
 }
 
@@ -120,14 +123,14 @@ void _SimulationInteractionController::processEvents()
                 mouseWheelUp(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
             }
             if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-                leftMouseButtonReleased();
+                leftMouseButtonReleased(mousePosInt, prevMousePosInt);
             }
 
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-                rightMouseButtonPressed();
+                rightMouseButtonPressed(mousePosInt);
             }
             if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
-                rightMouseButtonHold(mousePosInt);
+                rightMouseButtonHold(mousePosInt, prevMousePosInt);
             }
             if (ImGui::GetIO().MouseWheel < 0) {
                 mouseWheelDown(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
@@ -155,8 +158,6 @@ void _SimulationInteractionController::processEvents()
 
 void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& mousePos)
 {
-    auto creatorWindow = _editorController->getCreatorWindow();
-
     if (!_editMode) {
         _lastZoomTimepoint.reset();
         _simulationView->setMotionBlur(_simulationView->getMotionBlur() * 2);
@@ -172,7 +173,7 @@ void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const&
                     _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
                 }
             } else {
-                creatorWindow->onDrawing();
+                _editorController->getCreatorWindow()->onDrawing();
             }
         }
     }
@@ -203,25 +204,55 @@ void _SimulationInteractionController::mouseWheelUp(IntVector2D const& mousePos,
         MouseWheelAction{.up = true, .strongness = strongness, .start = std::chrono::steady_clock::now(), .lastTime = std::chrono::steady_clock::now()};
 }
 
-void _SimulationInteractionController::leftMouseButtonReleased()
+void _SimulationInteractionController::leftMouseButtonReleased(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
 {
     if (!_editMode) {
         _simulationView->setMotionBlur(_simulationView->getMotionBlur() / 2);
+    } else {
+        if (!_simController->isSimulationRunning()) {
+            if (_drawMode) {
+                _editorController->getCreatorWindow()->finishDrawing();
+            }
+        } else {
+            _simController->setDetached(false);
+            RealVector2D prevWorldPos = Viewport::mapViewToWorldPosition(toRealVector2D(prevMousePos));
+            _editorController->accelerateSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
+        }
     }
 }
 
-void _SimulationInteractionController::rightMouseButtonPressed()
+void _SimulationInteractionController::rightMouseButtonPressed(IntVector2D const& mousePos)
 {
     if (!_editMode) {
         _lastZoomTimepoint.reset();
         _simulationView->setMotionBlur(_simulationView->getMotionBlur() * 2);
+    } else {
+        if (!ImGui::GetIO().KeyAlt) {
+            if (!_simController->isSimulationRunning() && !_drawMode) {
+                auto viewPos = toRealVector2D(mousePos);
+                RealRect rect{viewPos, viewPos};
+                _selectionRect = rect;
+            }
+        }
     }
 }
 
-void _SimulationInteractionController::rightMouseButtonHold(IntVector2D const& mousePos)
+void _SimulationInteractionController::rightMouseButtonHold(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
 {
     if (!_editMode) {
         Viewport::zoom(mousePos, 1.0f / calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
+    } else {
+        if (!ImGui::GetIO().KeyAlt) {
+            auto isSimulationRunning = _simController->isSimulationRunning();
+            if (!isSimulationRunning && !_drawMode && _selectionRect.has_value()) {
+                _selectionRect->bottomRight = toRealVector2D(mousePos);
+                _editorController->updateSelectionRect(*_selectionRect);
+            }
+            if (isSimulationRunning) {
+                RealVector2D prevWorldPos = Viewport::mapViewToWorldPosition(toRealVector2D(prevMousePos));
+                _editorController->applyForces(toRealVector2D(mousePos), prevWorldPos);
+            }
+        }
     }
 }
 
@@ -235,6 +266,10 @@ void _SimulationInteractionController::rightMouseButtonReleased()
 {
     if (!_editMode) {
         _simulationView->setMotionBlur(_simulationView->getMotionBlur() / 2);
+    } else {
+        if (!_simController->isSimulationRunning()) {
+            _selectionRect.reset();
+        }
     }
 }
 
@@ -317,6 +352,17 @@ void _SimulationInteractionController::drawCursor()
             {mousePos.x + cursorSize, mousePos.y + cursorSize},
             Const::CursorColor,
             scale(2.0f));
+    }
+}
+
+void _SimulationInteractionController::processSelectionRect()
+{
+    if (_selectionRect) {
+        ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
+        auto startPos = _selectionRect->topLeft;
+        auto endPos = _selectionRect->bottomRight;
+        draw_list->AddRectFilled({startPos.x, startPos.y}, {endPos.x, endPos.y}, Const::SelectionAreaFillColor);
+        draw_list->AddRect({startPos.x, startPos.y}, {endPos.x, endPos.y}, Const::SelectionAreaBorderColor, 0, 0, 1.0f);
     }
 }
 
