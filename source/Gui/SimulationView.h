@@ -30,6 +30,10 @@ public:
 
     void updateMotionBlur();
 
+    static auto constexpr DefaultBrightness = 1.0f;
+    static auto constexpr DefaultContrast = 1.0f;
+    static auto constexpr DefaultMotionBlur = 0.25f;
+
 private:
     void updateImageFromSimulation();
 
@@ -53,9 +57,9 @@ private:
     unsigned int _textureFramebufferId1 = 0;
     unsigned int _textureFramebufferId2 = 0;
 
-    float _brightness = 1.0f;
-    float _contrast = 1.0f;
-    float _motionBlur = 0.5f;
+    float _brightness = DefaultBrightness;
+    float _contrast = DefaultContrast;
+    float _motionBlur = DefaultMotionBlur;
 
     SimulationController _simController;
 };
