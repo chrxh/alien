@@ -59,7 +59,7 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     if (settings.simulationParameters.cellFunctionConstructorCheckCompletenessForSelfReplication) {
         KERNEL_CALL(cudaNextTimestep_cellFunction_constructor_completenessCheck, data, statistics);
     }
-    KERNEL_CALL_MOD(cudaNextTimestep_cellFunction_constructor_process, 4, data, statistics);
+    KERNEL_CALL_MOD(cudaNextTimestep_cellFunction_constructor, 4, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellFunction_injector, data, statistics);
     KERNEL_CALL_MOD(cudaNextTimestep_cellFunction_attacker, 4, data, statistics);
     KERNEL_CALL_MOD(cudaNextTimestep_cellFunction_transmitter, 4, data, statistics);
