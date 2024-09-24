@@ -43,18 +43,12 @@ public:
     void selectObjects(RealVector2D const& viewPos, bool modifierKeyPressed);
     void moveSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
     void fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& initialViewPos, RealVector2D const& selectionPositionOnClick);
+    void updateSelectionRect(RealRect const& rect);
+    void applyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
+    void accelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
 
 private:
-    void processEvents();
-    void processSelectionRect();
     void processInspectorWindows();
-
-    void accelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
-    void applyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
-
-    void createSelectionRect(RealVector2D const& viewPos);
-    void resizeSelectionRect(RealVector2D const& viewPos);
-    void removeSelectionRect();
 
 private:
     EditorModel _editorModel;
@@ -68,13 +62,6 @@ private:
 
     bool _on = false;
 
-    struct SelectionRect
-    {
-        RealVector2D startPos;
-        RealVector2D endPos;
-    };
-    std::optional<SelectionRect> _selectionRect;
     std::vector<InspectorWindow> _inspectorWindows;
     DataDescription _drawing;
-    std::optional<RealVector2D> _prevWorldPos;
 };

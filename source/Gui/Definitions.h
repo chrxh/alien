@@ -171,3 +171,4 @@ struct TextureData
     int width;
     int height;
 };
+
