@@ -22,9 +22,9 @@ _ShaderWindow::~_ShaderWindow()
 
 void _ShaderWindow::processIntern()
 {
-    auto const defaultBrightness = 1.0f;
-    auto const defaultContrast = 1.0f;
-    auto const defaultMotionBlur = 0.5f;
+    auto const defaultBrightness = _SimulationView::DefaultBrightness;
+    auto const defaultContrast = _SimulationView::DefaultContrast;
+    auto const defaultMotionBlur = _SimulationView::DefaultMotionBlur;
 
     auto brightness = _simulationView->getBrightness();
     auto contrast = _simulationView->getContrast();
