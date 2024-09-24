@@ -40,15 +40,15 @@ public:
     bool isDeletingPossible() const;
     void onDelete();
 
+    void selectObjects(RealVector2D const& viewPos, bool modifierKeyPressed);
+    void moveSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
+    void fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& initialViewPos, RealVector2D const& selectionPositionOnClick);
 
 private:
     void processEvents();
     void processSelectionRect();
     void processInspectorWindows();
 
-    void selectObjects(RealVector2D const& viewPos, bool modifierKeyPressed);
-    void moveSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
-    void fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& initialViewPos);
     void accelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
     void applyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
 
@@ -76,7 +76,5 @@ private:
     std::optional<SelectionRect> _selectionRect;
     std::vector<InspectorWindow> _inspectorWindows;
     DataDescription _drawing;
-    std::optional<RealVector2D> _selectionPositionOnClick;
-    std::optional<RealVector2D> _worldPosOnClick;
     std::optional<RealVector2D> _prevWorldPos;
 };

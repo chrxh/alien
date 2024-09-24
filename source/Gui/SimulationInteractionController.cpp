@@ -12,13 +12,17 @@
 #include "AlienImGui.h"
 #include "EditorModel.h"
 #include "SimulationView.h"
+#include "CreatorWindow.h"
 
 namespace
 {
     auto constexpr CursorRadius = 13.0f;
 }
 
-_SimulationInteractionController::_SimulationInteractionController(SimulationController const& simController, EditorController const& editorController, SimulationView const& simulationView)
+_SimulationInteractionController::_SimulationInteractionController(
+    SimulationController const& simController,
+    EditorController const& editorController,
+    SimulationView const& simulationView)
     : _simController(simController)
     , _editorController(editorController)
     , _simulationView(simulationView)
@@ -149,22 +153,51 @@ void _SimulationInteractionController::processEvents()
     _prevMousePosInt = mousePosInt;
 }
 
-void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& viewPos)
+void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& mousePos)
 {
+    auto creatorWindow = _editorController->getCreatorWindow();
+
     if (!_editMode) {
         _lastZoomTimepoint.reset();
         _simulationView->setMotionBlur(_simulationView->getMotionBlur() * 2);
+    } else {
+        if (!ImGui::GetIO().KeyAlt) {
+            if (!_drawMode) {
+                _editorController->selectObjects(toRealVector2D(mousePos), ImGui::GetIO().KeyCtrl);
+                if (_simController->isSimulationRunning()) {
+                    _worldPosOnClick = Viewport::mapViewToWorldPosition(toRealVector2D(mousePos));
+                    _simController->setDetached(true);
+
+                    auto shallowData = _simController->getSelectionShallowData(*_worldPosOnClick);
+                    _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
+                }
+            } else {
+                creatorWindow->onDrawing();
+            }
+        }
     }
 }
 
-void _SimulationInteractionController::leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos)
+void _SimulationInteractionController::leftMouseButtonHold(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
 {
     if (!_editMode) {
-        Viewport::zoom(viewPos, calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
+        Viewport::zoom(mousePos, calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
+    } else {
+        RealVector2D prevWorldPos = Viewport::mapViewToWorldPosition(toRealVector2D(prevMousePos));
+
+        if (!_simController->isSimulationRunning()) {
+            if (!_drawMode) {
+                _editorController->moveSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
+            } else {
+                _editorController->getCreatorWindow()->onDrawing();
+            }
+        } else {
+            _editorController->fixateSelectedObjects(toRealVector2D(mousePos), *_worldPosOnClick, *_selectionPositionOnClick);
+        }
     }
 }
 
-void _SimulationInteractionController::mouseWheelUp(IntVector2D const& viewPos, float strongness)
+void _SimulationInteractionController::mouseWheelUp(IntVector2D const& mousePos, float strongness)
 {
     _mouseWheelAction =
         MouseWheelAction{.up = true, .strongness = strongness, .start = std::chrono::steady_clock::now(), .lastTime = std::chrono::steady_clock::now()};
@@ -185,14 +218,14 @@ void _SimulationInteractionController::rightMouseButtonPressed()
     }
 }
 
-void _SimulationInteractionController::rightMouseButtonHold(IntVector2D const& viewPos)
+void _SimulationInteractionController::rightMouseButtonHold(IntVector2D const& mousePos)
 {
     if (!_editMode) {
-        Viewport::zoom(viewPos, 1.0f / calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
+        Viewport::zoom(mousePos, 1.0f / calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
     }
 }
 
-void _SimulationInteractionController::mouseWheelDown(IntVector2D const& viewPos, float strongness)
+void _SimulationInteractionController::mouseWheelDown(IntVector2D const& mousePos, float strongness)
 {
     _mouseWheelAction =
         MouseWheelAction{.up = false, .strongness = strongness, .start = std::chrono::steady_clock::now(), .lastTime = std::chrono::steady_clock::now()};
@@ -205,27 +238,27 @@ void _SimulationInteractionController::rightMouseButtonReleased()
     }
 }
 
-void _SimulationInteractionController::processMouseWheel(IntVector2D const& viewPos)
+void _SimulationInteractionController::processMouseWheel(IntVector2D const& mousePos)
 {
     if (_mouseWheelAction) {
         auto zoomFactor = powf(calcZoomFactor(_mouseWheelAction->lastTime), 2.2f * _mouseWheelAction->strongness);
         auto now = std::chrono::steady_clock::now();
         _mouseWheelAction->lastTime = now;
-        Viewport::zoom(viewPos, _mouseWheelAction->up ? zoomFactor : 1.0f / zoomFactor);
+        Viewport::zoom(mousePos, _mouseWheelAction->up ? zoomFactor : 1.0f / zoomFactor);
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - _mouseWheelAction->start).count() > 100) {
             _mouseWheelAction.reset();
         }
     }
 }
 
-void _SimulationInteractionController::middleMouseButtonPressed(IntVector2D const& viewPos)
+void _SimulationInteractionController::middleMouseButtonPressed(IntVector2D const& mousePos)
 {
-    _worldPosForMovement = Viewport::mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
+    _worldPosForMovement = Viewport::mapViewToWorldPosition({toFloat(mousePos.x), toFloat(mousePos.y)});
 }
 
-void _SimulationInteractionController::middleMouseButtonHold(IntVector2D const& viewPos)
+void _SimulationInteractionController::middleMouseButtonHold(IntVector2D const& mousePos)
 {
-    Viewport::centerTo(*_worldPosForMovement, viewPos);
+    Viewport::centerTo(*_worldPosForMovement, mousePos);
 }
 
 void _SimulationInteractionController::middleMouseButtonReleased()

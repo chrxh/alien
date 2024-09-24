@@ -25,20 +25,20 @@ public:
 private:
     void processEvents();
 
-    void leftMouseButtonPressed(IntVector2D const& viewPos);
-    void leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos);
-    void mouseWheelUp(IntVector2D const& viewPos, float strongness);
+    void leftMouseButtonPressed(IntVector2D const& mousePos);
+    void leftMouseButtonHold(IntVector2D const& mousePos, IntVector2D const& prevMousePos);
+    void mouseWheelUp(IntVector2D const& mousePos, float strongness);
     void leftMouseButtonReleased();
 
     void rightMouseButtonPressed();
-    void rightMouseButtonHold(IntVector2D const& viewPos);
-    void mouseWheelDown(IntVector2D const& viewPos, float strongness);
+    void rightMouseButtonHold(IntVector2D const& mousePos);
+    void mouseWheelDown(IntVector2D const& mousePos, float strongness);
     void rightMouseButtonReleased();
 
-    void processMouseWheel(IntVector2D const& viewPos);
+    void processMouseWheel(IntVector2D const& mousePos);
 
-    void middleMouseButtonPressed(IntVector2D const& viewPos);
-    void middleMouseButtonHold(IntVector2D const& viewPos);
+    void middleMouseButtonPressed(IntVector2D const& mousePos);
+    void middleMouseButtonHold(IntVector2D const& mousePos);
     void middleMouseButtonReleased();
 
     void drawCursor();
@@ -58,7 +58,9 @@ private:
 
     //navigation
     std::optional<RealVector2D> _worldPosForMovement;
+    std::optional<RealVector2D> _worldPosOnClick;
     std::optional<IntVector2D> _prevMousePosInt;
+    std::optional<RealVector2D> _selectionPositionOnClick;
     std::optional<std::chrono::steady_clock::time_point> _lastZoomTimepoint;
 
     struct MouseWheelAction

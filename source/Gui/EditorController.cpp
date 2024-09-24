@@ -251,32 +251,6 @@ void _EditorController::processEvents()
     auto& io = ImGui::GetIO();
     if (!io.WantCaptureMouse && !io.KeyAlt) {
 
-        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            if (!running) {
-                if (!_editorModel->isDrawMode()) {
-                    selectObjects(mousePos, ImGui::GetIO().KeyCtrl);
-                } else {
-                    _creatorWindow->onDrawing();
-                }
-            } else {
-                selectObjects(mousePos, ImGui::GetIO().KeyCtrl);
-                _simController->setDetached(true);
-                auto shallowData = _simController->getSelectionShallowData(worldPos);
-                _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
-                _worldPosOnClick = worldPos;
-            }
-        }
-        if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            if (!running) {
-                if (!_editorModel->isDrawMode()) {
-                    moveSelectedObjects(mousePos, prevWorldPos);
-                } else {
-                    _creatorWindow->onDrawing();
-                }
-            } else {
-                fixateSelectedObjects(mousePos, *_worldPosOnClick);
-            }
-        }
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
             if (!running && !_editorModel->isDrawMode()) {
                 createSelectionRect(mousePos);
@@ -397,11 +371,11 @@ void _EditorController::moveSelectedObjects(
     _editorModel->update();
 }
 
-void _EditorController::fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
+void _EditorController::fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos, RealVector2D const& selectionPositionOnClick)
 {
-    auto shallowData = _simController->getSelectionShallowData(*_selectionPositionOnClick);
+    auto shallowData = _simController->getSelectionShallowData(selectionPositionOnClick);
     auto selectionPosition = RealVector2D{shallowData.centerPosX, shallowData.centerPosY};
-    auto selectionDelta = selectionPosition - *_selectionPositionOnClick;
+    auto selectionDelta = selectionPosition - selectionPositionOnClick;
 
     auto mouseStart = Viewport::mapViewToWorldPosition(viewPos);
     auto mouseEnd = prevWorldPos;

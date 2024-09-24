@@ -16,7 +16,7 @@ __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData da
 __global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellFunction_neuron(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellFunction_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellFunction_constructor_process(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellFunction_injector(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellFunction_attacker(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellFunction_defender(SimulationData data, SimulationStatistics statistics);
