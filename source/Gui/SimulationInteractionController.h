@@ -24,6 +24,7 @@ public:
     std::optional<RealVector2D> getPositionSelectionData() const;
 
 private:
+    void processEditWidget();
     void processEvents();
 
     void leftMouseButtonPressed(IntVector2D const& mousePos);

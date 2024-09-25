@@ -63,16 +63,6 @@ bool _EditorModel::areEntitiesInspected() const
     return !_inspectedEntityById.empty();
 }
 
-void _EditorModel::setDrawMode(bool value)
-{
-    _drawMode = value;
-}
-
-bool _EditorModel::isDrawMode() const
-{
-    return _drawMode;
-}
-
 void _EditorModel::setPencilWidth(float value)
 {
     _pencilWidth = value;
