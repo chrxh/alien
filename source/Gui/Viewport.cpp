@@ -9,7 +9,7 @@
 
 SimulationController Viewport::_simController;
 float Viewport::_zoomFactor = 1.0f;
-float Viewport::_zoomSensitivity = 1.03f;
+float Viewport::_zoomSensitivity = 1.07f;
 RealVector2D Viewport::_worldCenter;
 IntVector2D Viewport::_viewSize;
 
