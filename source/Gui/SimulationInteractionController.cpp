@@ -35,44 +35,44 @@ void _SimulationInteractionController::process()
 {
     processEditWidget();
 
-    if (_editMode) {
+    if (_modes.editMode) {
         processSelectionRect();
     }
     if (!_editorController->getCreatorWindow()->isOn()) {
-        _drawMode = false;
+        _modes.drawMode = false;
     }
     processEvents();
 }
 
 bool _SimulationInteractionController::isEditMode() const
 {
-    return _editMode;
+    return _modes.editMode;
 }
 
 void _SimulationInteractionController::setEditMode(bool value)
 {
-    _editMode = value;
-    _editorController->setOn(_editMode);
+    _modes.editMode = value;
+    _editorController->setOn(_modes.editMode);
 }
 
 bool _SimulationInteractionController::isDrawMode() const
 {
-    return _drawMode;
+    return _modes.drawMode;
 }
 
 void _SimulationInteractionController::setDrawMode(bool value)
 {
-    _drawMode = value;
+    _modes.drawMode = value;
 }
 
 bool _SimulationInteractionController::isPositionSelectionMode() const
 {
-    return _positionSelectionMode;
+    return _modes.positionSelectionMode;
 }
 
 void _SimulationInteractionController::setPositionSelectionMode(bool value)
 {
-    _positionSelectionMode = value;
+    _modes.positionSelectionMode = value;
 }
 
 std::optional<RealVector2D> _SimulationInteractionController::getPositionSelectionData() const
@@ -99,9 +99,9 @@ void _SimulationInteractionController::processEditWidget()
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor());
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor());
 
-    auto actionTexture = _editMode ? _editorOn.textureId : _editorOff.textureId;
+    auto actionTexture = _modes.editMode ? _editorOn.textureId : _editorOff.textureId;
     if (ImGui::ImageButton((void*)(intptr_t)actionTexture, {scale(80.0f), scale(80.0f)}, {0, 0}, {1.0f, 1.0f})) {
-        _editMode = !_editMode;
+        _modes.editMode = !_modes.editMode;
         _editorController->setOn(!_editorController->isOn());
     }
 
@@ -116,46 +116,40 @@ void _SimulationInteractionController::processEvents()
     IntVector2D prevMousePosInt = _prevMousePosInt ? *_prevMousePosInt : mousePosInt;
 
     if (!ImGui::GetIO().WantCaptureMouse) {
-        if (_positionSelectionMode) {
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                _positionSelectionMode = false;
-            }
-        } else {
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                leftMouseButtonPressed(mousePosInt);
-            }
-            if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-                leftMouseButtonHold(mousePosInt, prevMousePosInt);
-            }
-            if (ImGui::GetIO().MouseWheel > 0) {
-                mouseWheelUp(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
-            }
-            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-                leftMouseButtonReleased(mousePosInt, prevMousePosInt);
-            }
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+            leftMouseButtonPressed(mousePosInt);
+        }
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+            leftMouseButtonHold(mousePosInt, prevMousePosInt);
+        }
+        if (ImGui::GetIO().MouseWheel > 0) {
+            mouseWheelUp(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
+        }
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+            leftMouseButtonReleased(mousePosInt, prevMousePosInt);
+        }
 
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-                rightMouseButtonPressed(mousePosInt);
-            }
-            if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
-                rightMouseButtonHold(mousePosInt, prevMousePosInt);
-            }
-            if (ImGui::GetIO().MouseWheel < 0) {
-                mouseWheelDown(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
-            }
-            if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
-                rightMouseButtonReleased();
-            }
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+            rightMouseButtonPressed(mousePosInt);
+        }
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+            rightMouseButtonHold(mousePosInt, prevMousePosInt);
+        }
+        if (ImGui::GetIO().MouseWheel < 0) {
+            mouseWheelDown(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
+        }
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+            rightMouseButtonReleased();
+        }
 
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
-                middleMouseButtonPressed(mousePosInt);
-            }
-            if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
-                middleMouseButtonHold(mousePosInt);
-            }
-            if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
-                middleMouseButtonReleased();
-            }
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
+            middleMouseButtonPressed(mousePosInt);
+        }
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
+            middleMouseButtonHold(mousePosInt);
+        }
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
+            middleMouseButtonReleased();
         }
         drawCursor();
     }
@@ -166,12 +160,19 @@ void _SimulationInteractionController::processEvents()
 
 void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& mousePos)
 {
-    if (!_editMode) {
+    _modesAtClick = _modes;
+
+    if (_modes.positionSelectionMode) {
+        _modes.positionSelectionMode = false;
+        return;
+    }
+
+    if (!_modes.editMode) {
         _lastZoomTimepoint.reset();
         _simulationView->setMotionBlur(_simulationView->getMotionBlur() * 2);
     } else {
         if (!ImGui::GetIO().KeyAlt) {
-            if (!_drawMode) {
+            if (!_modes.drawMode) {
                 _editorController->onSelectObjects(toRealVector2D(mousePos), ImGui::GetIO().KeyCtrl);
                 if (_simController->isSimulationRunning()) {
                     _worldPosOnClick = Viewport::mapViewToWorldPosition(toRealVector2D(mousePos));
@@ -189,13 +190,17 @@ void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const&
 
 void _SimulationInteractionController::leftMouseButtonHold(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
 {
-    if (!_editMode) {
+    if (_modesAtClick.positionSelectionMode) {
+        return;
+    }
+
+    if (!_modesAtClick.editMode) {
         Viewport::zoom(mousePos, calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
     } else {
         RealVector2D prevWorldPos = Viewport::mapViewToWorldPosition(toRealVector2D(prevMousePos));
 
         if (!_simController->isSimulationRunning()) {
-            if (!_drawMode) {
+            if (!_modesAtClick.drawMode) {
                 _editorController->onMoveSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
             } else {
                 _editorController->getCreatorWindow()->onDrawing();
@@ -214,11 +219,15 @@ void _SimulationInteractionController::mouseWheelUp(IntVector2D const& mousePos,
 
 void _SimulationInteractionController::leftMouseButtonReleased(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
 {
-    if (!_editMode) {
+    if (_modesAtClick.positionSelectionMode) {
+        return;
+    }
+
+    if (!_modesAtClick.editMode) {
         _simulationView->setMotionBlur(_simulationView->getMotionBlur() / 2);
     } else {
         if (!_simController->isSimulationRunning()) {
-            if (_drawMode) {
+            if (_modesAtClick.drawMode) {
                 _editorController->getCreatorWindow()->finishDrawing();
             }
         } else {
@@ -231,12 +240,19 @@ void _SimulationInteractionController::leftMouseButtonReleased(IntVector2D const
 
 void _SimulationInteractionController::rightMouseButtonPressed(IntVector2D const& mousePos)
 {
-    if (!_editMode) {
+    _modesAtClick = _modes;
+
+    if (_modes.positionSelectionMode) {
+        _modes.positionSelectionMode = false;
+        return;
+    }
+
+    if (!_modes.editMode) {
         _lastZoomTimepoint.reset();
         _simulationView->setMotionBlur(_simulationView->getMotionBlur() * 2);
     } else {
         if (!ImGui::GetIO().KeyAlt) {
-            if (!_simController->isSimulationRunning() && !_drawMode) {
+            if (!_simController->isSimulationRunning() && !_modes.drawMode) {
                 auto viewPos = toRealVector2D(mousePos);
                 RealRect rect{viewPos, viewPos};
                 _selectionRect = rect;
@@ -247,12 +263,16 @@ void _SimulationInteractionController::rightMouseButtonPressed(IntVector2D const
 
 void _SimulationInteractionController::rightMouseButtonHold(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
 {
-    if (!_editMode) {
+    if (_modesAtClick.positionSelectionMode) {
+        return;
+    }
+
+    if (!_modesAtClick.editMode) {
         Viewport::zoom(mousePos, 1.0f / calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
     } else {
         if (!ImGui::GetIO().KeyAlt) {
             auto isSimulationRunning = _simController->isSimulationRunning();
-            if (!isSimulationRunning && !_drawMode && _selectionRect.has_value()) {
+            if (!isSimulationRunning && !_modesAtClick.drawMode && _selectionRect.has_value()) {
                 _selectionRect->bottomRight = toRealVector2D(mousePos);
                 _editorController->onUpdateSelectionRect(*_selectionRect);
             }
@@ -272,7 +292,11 @@ void _SimulationInteractionController::mouseWheelDown(IntVector2D const& mousePo
 
 void _SimulationInteractionController::rightMouseButtonReleased()
 {
-    if (!_editMode) {
+    if (_modesAtClick.positionSelectionMode) {
+        return;
+    }
+
+    if (!_modesAtClick.editMode) {
         _simulationView->setMotionBlur(_simulationView->getMotionBlur() / 2);
     } else {
         if (!_simController->isSimulationRunning()) {
@@ -319,8 +343,8 @@ void _SimulationInteractionController::drawCursor()
         ImGui::SetMouseCursor(ImGuiMouseCursor_None);
     }
 
-    if (_positionSelectionMode || _editMode) {
-        if (!_drawMode || _simController->isSimulationRunning()) {
+    if (_modes.positionSelectionMode || _modes.editMode) {
+        if (!_modes.drawMode || _simController->isSimulationRunning()) {
             auto cursorSize = scale(CursorRadius);
 
             //shadow

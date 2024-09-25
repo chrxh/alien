@@ -1675,25 +1675,16 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .getMousePickerPositionFunc(_getMousePickerPositionFunc),
                     spot.posX,
                     spot.posY);
-
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Velocity X")
+                AlienImGui::SliderFloat2(
+                    AlienImGui::SliderFloat2Parameters()
+                        .name("Velocity")
                         .textWidth(RightColumnWidth)
-                        .min(-4.0f)
-                        .max(4.0f)
-                        .defaultValue(&origSpot.velX)
-                        .format("%.3f"),
-                    &spot.velX);
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Velocity Y")
-                        .textWidth(RightColumnWidth)
-                        .min(-4.0f)
-                        .max(4.0f)
-                        .defaultValue(&origSpot.velY)
-                        .format("%.3f"),
-                    &spot.velY);
+                        .min({0, 0})
+                        .max({4.0f, 4.0f})
+                        .defaultValue(RealVector2D{origSpot.velX, origSpot.velY})
+                        .format("%.2f"),
+                    spot.velX,
+                    spot.velY);
                 auto maxRadius = toFloat(std::max(worldSize.x, worldSize.y));
                 if (spot.shapeType == SpotShapeType_Circular) {
                     AlienImGui::SliderFloat(
