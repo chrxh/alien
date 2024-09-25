@@ -78,7 +78,7 @@ public:
     {
         atomicAdd(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].count, 1);
         atomicMax(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].color, color);
-        alienAtomicMax(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].genomeComplexity, genomeComplexity);
+        atomicAdd(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].genomeComplexity, genomeComplexity);
     }
     __inline__ __device__ void halveNumConnections()
     {
@@ -93,7 +93,8 @@ public:
             if (_mutantToMutantStatisticsMap[index].count >= 40) {
                 auto& mutantStatistics = _mutantToMutantStatisticsMap[index];
                 atomicAdd(&_data->timeline.timestep.numColonies[mutantStatistics.color], 1);
-                alienAtomicMax(&_data->timeline.timestep.maxGenomeComplexityOfColonies[mutantStatistics.color], mutantStatistics.genomeComplexity);
+                alienAtomicMax(
+                    &_data->timeline.timestep.maxGenomeComplexityOfColonies[mutantStatistics.color], mutantStatistics.genomeComplexity / mutantStatistics.count);
             }
         }
     }

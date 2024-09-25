@@ -20,7 +20,7 @@ _SpatialControlWindow::_SpatialControlWindow(SimulationController const& simCont
     _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simController, temporalControlWindow);
 
     auto& settings = GlobalSettings::getInstance();
-    Viewport::setZoomSensitivity(settings.getFloat("windows.spatial control.zoom sensitivity", Viewport::getZoomSensitivity()));
+    Viewport::setZoomSensitivity(settings.getFloat("windows.spatial control.zoom sensitivity factor", Viewport::getZoomSensitivity()));
 }
 
 _SpatialControlWindow::~_SpatialControlWindow()
@@ -79,7 +79,7 @@ void _SpatialControlWindow::processIntern()
         ImGui::Spacing();
         ImGui::Spacing();
         float sensitivity = Viewport::getZoomSensitivity();
-        if (AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Zoom sensitivity").min(1.0f).max(1.07f).textWidth(130).format(""), &sensitivity)) {
+        if (AlienImGui::SliderFloat(AlienImGui::SliderFloatParameters().name("Zoom sensitivity").min(1.0f).max(1.1f).textWidth(130).format(""), &sensitivity)) {
             Viewport::setZoomSensitivity(sensitivity);
         }
     }
