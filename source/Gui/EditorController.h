@@ -40,12 +40,12 @@ public:
     bool isDeletingPossible() const;
     void onDelete();
 
-    void selectObjects(RealVector2D const& viewPos, bool modifierKeyPressed);
-    void moveSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
-    void fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& initialViewPos, RealVector2D const& selectionPositionOnClick);
-    void updateSelectionRect(RealRect const& rect);
-    void applyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
-    void accelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
+    void onSelectObjects(RealVector2D const& viewPos, bool modifierKeyPressed);
+    void onMoveSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
+    void onFixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& initialViewPos, RealVector2D const& selectionPositionOnClick);
+    void onUpdateSelectionRect(RealRect const& rect);
+    void onApplyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
+    void onAccelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
 
 private:
     void processInspectorWindows();
@@ -60,7 +60,7 @@ private:
 
     SimulationController _simController;
 
-    bool _on = false;
+    bool _on = false;   //#TODO weg!
 
     std::vector<InspectorWindow> _inspectorWindows;
     DataDescription _drawing;

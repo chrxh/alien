@@ -69,11 +69,3 @@ inline uint8_t toUInt8(T const& value)
         _##name = std::move(name); \
         return *this; \
     }
-
-using RealMatrix2D = std::array<std::array<float, 2>, 2>;
-
-struct RealRect
-{
-    RealVector2D topLeft;
-    RealVector2D bottomRight;
-};
