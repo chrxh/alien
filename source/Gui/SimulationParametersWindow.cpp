@@ -1679,7 +1679,7 @@ bool _SimulationParametersWindow::processSpot(int index)
                     AlienImGui::SliderFloat2Parameters()
                         .name("Velocity")
                         .textWidth(RightColumnWidth)
-                        .min({0, 0})
+                        .min({-4.0f, -4.0f})
                         .max({4.0f, 4.0f})
                         .defaultValue(RealVector2D{origSpot.velX, origSpot.velY})
                         .format("%.2f"),
