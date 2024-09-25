@@ -164,7 +164,7 @@ void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const&
     } else {
         if (!ImGui::GetIO().KeyAlt) {
             if (!_drawMode) {
-                _editorController->selectObjects(toRealVector2D(mousePos), ImGui::GetIO().KeyCtrl);
+                _editorController->onSelectObjects(toRealVector2D(mousePos), ImGui::GetIO().KeyCtrl);
                 if (_simController->isSimulationRunning()) {
                     _worldPosOnClick = Viewport::mapViewToWorldPosition(toRealVector2D(mousePos));
                     _simController->setDetached(true);
@@ -188,12 +188,12 @@ void _SimulationInteractionController::leftMouseButtonHold(IntVector2D const& mo
 
         if (!_simController->isSimulationRunning()) {
             if (!_drawMode) {
-                _editorController->moveSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
+                _editorController->onMoveSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
             } else {
                 _editorController->getCreatorWindow()->onDrawing();
             }
         } else {
-            _editorController->fixateSelectedObjects(toRealVector2D(mousePos), *_worldPosOnClick, *_selectionPositionOnClick);
+            _editorController->onFixateSelectedObjects(toRealVector2D(mousePos), *_worldPosOnClick, *_selectionPositionOnClick);
         }
     }
 }
@@ -216,7 +216,7 @@ void _SimulationInteractionController::leftMouseButtonReleased(IntVector2D const
         } else {
             _simController->setDetached(false);
             RealVector2D prevWorldPos = Viewport::mapViewToWorldPosition(toRealVector2D(prevMousePos));
-            _editorController->accelerateSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
+            _editorController->onAccelerateSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
         }
     }
 }
@@ -246,11 +246,11 @@ void _SimulationInteractionController::rightMouseButtonHold(IntVector2D const& m
             auto isSimulationRunning = _simController->isSimulationRunning();
             if (!isSimulationRunning && !_drawMode && _selectionRect.has_value()) {
                 _selectionRect->bottomRight = toRealVector2D(mousePos);
-                _editorController->updateSelectionRect(*_selectionRect);
+                _editorController->onUpdateSelectionRect(*_selectionRect);
             }
             if (isSimulationRunning) {
                 RealVector2D prevWorldPos = Viewport::mapViewToWorldPosition(toRealVector2D(prevMousePos));
-                _editorController->applyForces(toRealVector2D(mousePos), prevWorldPos);
+                _editorController->onApplyForces(toRealVector2D(mousePos), prevWorldPos);
             }
         }
     }

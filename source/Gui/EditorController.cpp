@@ -284,7 +284,7 @@ void _EditorController::processInspectorWindows()
     _inspectorWindows = inspectorWindows;
 }
 
-void _EditorController::selectObjects(RealVector2D const& viewPos, bool modifierKeyPressed)
+void _EditorController::onSelectObjects(RealVector2D const& viewPos, bool modifierKeyPressed)
 {
     auto pos = Viewport::mapViewToWorldPosition({viewPos.x, viewPos.y});
     auto zoom = Viewport::getZoomFactor();
@@ -297,7 +297,7 @@ void _EditorController::selectObjects(RealVector2D const& viewPos, bool modifier
     _editorModel->update();
 }
 
-void _EditorController::moveSelectedObjects(
+void _EditorController::onMoveSelectedObjects(
     RealVector2D const& viewPos,
     RealVector2D const& prevWorldPos)
 {
@@ -314,7 +314,7 @@ void _EditorController::moveSelectedObjects(
     _editorModel->update();
 }
 
-void _EditorController::fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos, RealVector2D const& selectionPositionOnClick)
+void _EditorController::onFixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos, RealVector2D const& selectionPositionOnClick)
 {
     auto shallowData = _simController->getSelectionShallowData(selectionPositionOnClick);
     auto selectionPosition = RealVector2D{shallowData.centerPosX, shallowData.centerPosY};
@@ -335,7 +335,7 @@ void _EditorController::fixateSelectedObjects(RealVector2D const& viewPos, RealV
     }
 }
 
-void _EditorController::accelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
+void _EditorController::onAccelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
     auto start = prevWorldPos;
     auto end = Viewport::mapViewToWorldPosition({viewPos.x, viewPos.y});
@@ -348,7 +348,7 @@ void _EditorController::accelerateSelectedObjects(RealVector2D const& viewPos, R
     _simController->shallowUpdateSelectedObjects(updateData);
 }
 
-void _EditorController::applyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
+void _EditorController::onApplyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
     auto start = prevWorldPos;
     auto end = Viewport::mapViewToWorldPosition({viewPos.x, viewPos.y});
@@ -356,7 +356,7 @@ void _EditorController::applyForces(RealVector2D const& viewPos, RealVector2D co
     _simController->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
 }
 
-void _EditorController::updateSelectionRect(RealRect const& rect)
+void _EditorController::onUpdateSelectionRect(RealRect const& rect)
 {
     auto startPos = Viewport::mapViewToWorldPosition(rect.topLeft);
     auto endPos = Viewport::mapViewToWorldPosition(rect.bottomRight);

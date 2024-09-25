@@ -38,6 +38,8 @@ public:
         auto partition = calcAllThreadsPartition(MutantToColorCountMapSize);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             _mutantToMutantStatisticsMap[index].count = 0;
+            _mutantToMutantStatisticsMap[index].genomeComplexity = 0;
+            _mutantToMutantStatisticsMap[index].color = 0;
         }
     }
 
@@ -75,8 +77,8 @@ public:
     __inline__ __device__ void incMutant(int color, uint32_t mutationId, float genomeComplexity)
     {
         atomicAdd(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].count, 1);
-        atomicExch(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].color, color);
-        atomicExch(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].genomeComplexity, genomeComplexity);
+        atomicMax(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].color, color);
+        alienAtomicMax(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].genomeComplexity, genomeComplexity);
     }
     __inline__ __device__ void halveNumConnections()
     {
@@ -88,7 +90,7 @@ public:
     {
         auto partition = calcAllThreadsPartition(MutantToColorCountMapSize);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            if (_mutantToMutantStatisticsMap[index].count >= 20) {
+            if (_mutantToMutantStatisticsMap[index].count >= 40) {
                 auto& mutantStatistics = _mutantToMutantStatisticsMap[index];
                 atomicAdd(&_data->timeline.timestep.numColonies[mutantStatistics.color], 1);
                 alienAtomicMax(&_data->timeline.timestep.maxGenomeComplexityOfColonies[mutantStatistics.color], mutantStatistics.genomeComplexity);
