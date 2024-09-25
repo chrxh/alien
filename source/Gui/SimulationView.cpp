@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <glad/glad.h>
 #include <imgui.h>
-#include <cmath>
 
 #include "Base/GlobalSettings.h"
 #include "Base/Resources.h"

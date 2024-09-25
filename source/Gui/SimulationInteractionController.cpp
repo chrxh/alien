@@ -1,6 +1,7 @@
 #include "SimulationInteractionController.h"
 
 #include <imgui.h>
+#include <cmath>
 
 #include "Base/Resources.h"
 #include "EngineInterface/SimulationController.h"
@@ -403,5 +404,5 @@ float _SimulationInteractionController::calcZoomFactor(std::chrono::steady_clock
     auto now = std::chrono::steady_clock::now();
     auto duration = toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTimepoint).count());
     _lastZoomTimepoint = now;
-    return pow(Viewport::getZoomSensitivity(), duration / 15);
+    return powf(Viewport::getZoomSensitivity(), duration / 15);
 }
