@@ -55,10 +55,15 @@ private:
 
     TextureData _editorOn;
     TextureData _editorOff;
-    
-    bool _editMode = false;
-    bool _drawMode = false;
-    bool _positionSelectionMode = false;
+
+    struct Modes
+    {
+        bool editMode = false;
+        bool drawMode = false;
+        bool positionSelectionMode = false;
+    };
+    Modes _modes;
+    Modes _modesAtClick;
 
     //navigation
     std::optional<RealVector2D> _worldPosForMovement;
