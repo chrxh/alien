@@ -19,6 +19,7 @@
 #include "Viewport.h"
 #include "EditorModel.h"
 #include "HelpStrings.h"
+#include "SimulationInteractionController.h"
 
 namespace
 {
@@ -38,6 +39,11 @@ _CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationControl
     : _AlienWindow("Creator", "editors.creator", false), _editorModel(editorModel)
     , _simController(simController)
 {
+}
+
+void _CreatorWindow::registerCyclicReferences(SimulationInteractionControllerWeakPtr const& simulationInteractionController)
+{
+    _simulationInteractionController = simulationInteractionController;
 }
 
 void _CreatorWindow::processIntern()
@@ -148,13 +154,14 @@ void _CreatorWindow::processIntern()
     ImGui::EndChild();
 
     AlienImGui::Separator();
+    auto simInteractionController = _simulationInteractionController.lock();
     if (_mode == CreationMode_Drawing) {
-        auto text = _editorModel->isDrawMode() ? "End drawing" : "Start drawing";
+        auto text = simInteractionController->isDrawMode() ? "End drawing" : "Start drawing";
         if (AlienImGui::Button(text)) {
-            _editorModel->setDrawMode(!_editorModel->isDrawMode());
+            simInteractionController->setDrawMode(!simInteractionController->isDrawMode());
         }
     } else {
-        _editorModel->setDrawMode(false);
+        simInteractionController->setDrawMode(false);
         if (AlienImGui::Button("Build")) {
             if (_mode == CreationMode_CreateCell) {
                 createCell();

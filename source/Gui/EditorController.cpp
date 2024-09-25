@@ -35,9 +35,12 @@ _EditorController::_EditorController(SimulationController const& simController)
     _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simController);
 }
 
-void _EditorController::registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog)
+void _EditorController::registerCyclicReferences(
+    UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
+    SimulationInteractionControllerWeakPtr const& simulationInteractionController)
 {
     _genomeEditorWindow->registerCyclicReferences(uploadSimulationDialog);
+    _creatorWindow->registerCyclicReferences(simulationInteractionController);
 }
 
 bool _EditorController::isOn() const
@@ -61,9 +64,6 @@ void _EditorController::process()
     _creatorWindow->process();
     _multiplierWindow->process();
     _genomeEditorWindow->process();
-    if (!_creatorWindow->isOn()) {
-        _editorModel->setDrawMode(false);
-    }
 
     processInspectorWindows();
 

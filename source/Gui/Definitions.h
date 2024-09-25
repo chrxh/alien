@@ -35,6 +35,7 @@ using StatisticsWindow = std::shared_ptr<_StatisticsWindow>;
 
 class _SimulationInteractionController;
 using SimulationInteractionController = std::shared_ptr<_SimulationInteractionController>;
+using SimulationInteractionControllerWeakPtr = std::weak_ptr<_SimulationInteractionController>;
 
 class _GpuSettingsDialog;
 using GpuSettingsDialog = std::shared_ptr<_GpuSettingsDialog>;

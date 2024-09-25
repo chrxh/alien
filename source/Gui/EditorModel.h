@@ -24,9 +24,6 @@ public:
     void setInspectedEntities(std::vector<CellOrParticleDescription> const& inspectedEntities);
     bool areEntitiesInspected() const;
 
-    void setDrawMode(bool value);
-    bool isDrawMode() const;
-
     void setPencilWidth(float value);
     float getPencilWidth() const;
 
@@ -44,7 +41,6 @@ private:
 
     std::unordered_map<uint64_t, CellOrParticleDescription> _inspectedEntityById;
 
-    bool _drawMode = false;
     float _pencilWidth = 3.0f;
     int _defaultColorCode = 0;
     bool _rolloutToClusters = true;

@@ -33,29 +33,13 @@ _SimulationInteractionController::_SimulationInteractionController(
 
 void _SimulationInteractionController::process()
 {
-    ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + viewport->Size.y - scale(120.0f)));
-    ImGui::SetNextWindowSize(ImVec2(scale(160.0f), scale(100.0f)));
-
-    ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
-    ImGui::Begin("TOOLBAR", NULL, windowFlags);
-
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor());
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor());
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor());
-
-    auto actionTexture = _editMode ? _editorOn.textureId : _editorOff.textureId;
-    if (ImGui::ImageButton((void*)(intptr_t)actionTexture, {scale(80.0f), scale(80.0f)}, {0, 0}, {1.0f, 1.0f})) {
-        _editMode = !_editMode;
-        _editorController->setOn(!_editorController->isOn());
-    }
-
-    ImGui::PopStyleColor(3);
-    ImGui::End();
+    processEditWidget();
 
     if (_editMode) {
         processSelectionRect();
+    }
+    if (!_editorController->getCreatorWindow()->isOn()) {
+        _drawMode = false;
     }
     processEvents();
 }
@@ -99,6 +83,30 @@ std::optional<RealVector2D> _SimulationInteractionController::getPositionSelecti
 
     auto mousePos = ImGui::GetMousePos();
     return Viewport::mapViewToWorldPosition({mousePos.x, mousePos.y});
+}
+
+void _SimulationInteractionController::processEditWidget()
+{
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + viewport->Size.y - scale(120.0f)));
+    ImGui::SetNextWindowSize(ImVec2(scale(160.0f), scale(100.0f)));
+
+    ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
+        | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
+    ImGui::Begin("TOOLBAR", NULL, windowFlags);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor());
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor());
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor());
+
+    auto actionTexture = _editMode ? _editorOn.textureId : _editorOff.textureId;
+    if (ImGui::ImageButton((void*)(intptr_t)actionTexture, {scale(80.0f), scale(80.0f)}, {0, 0}, {1.0f, 1.0f})) {
+        _editMode = !_editMode;
+        _editorController->setOn(!_editorController->isOn());
+    }
+
+    ImGui::PopStyleColor(3);
+    ImGui::End();
 }
 
 void _SimulationInteractionController::processEvents()
