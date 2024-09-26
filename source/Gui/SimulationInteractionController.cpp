@@ -344,21 +344,56 @@ void _SimulationInteractionController::drawCursor()
         ImGui::SetMouseCursor(ImGuiMouseCursor_None);
     }
 
-    if (_modes.positionSelectionMode || _modes.editMode) {
+    // position selection cursor
+    if (_modes.positionSelectionMode) {
+        auto cursorSize = scale(CursorRadius);
+
+        // shadow
+        drawList->AddRectFilled(
+            {mousePos.x - scale(2.0f), mousePos.y - cursorSize}, {mousePos.x + scale(2.0f), mousePos.y - cursorSize / 2}, Const::CursorShadowColor);
+        drawList->AddRectFilled(
+            {mousePos.x - scale(2.0f), mousePos.y + cursorSize / 2}, {mousePos.x + scale(2.0f), mousePos.y + cursorSize}, Const::CursorShadowColor);
+        drawList->AddRectFilled(
+            {mousePos.x - cursorSize, mousePos.y - scale(2.0f)}, {mousePos.x - cursorSize / 2, mousePos.y + scale(2.0f)}, Const::CursorShadowColor);
+        drawList->AddRectFilled(
+            {mousePos.x + cursorSize / 2, mousePos.y - scale(2.0f)}, {mousePos.x + cursorSize, mousePos.y + scale(2.0f)}, Const::CursorShadowColor);
+
+        // foreground
+        drawList->AddRectFilled(
+            {mousePos.x - scale(1.0f), mousePos.y - cursorSize}, {mousePos.x + scale(1.0f), mousePos.y - cursorSize / 2}, Const::CursorColor);
+        drawList->AddRectFilled(
+            {mousePos.x - scale(1.0f), mousePos.y + cursorSize / 2}, {mousePos.x + scale(1.0f), mousePos.y + cursorSize}, Const::CursorColor);
+        drawList->AddRectFilled(
+            {mousePos.x - cursorSize, mousePos.y - scale(1.0f)}, {mousePos.x - cursorSize / 2, mousePos.y + scale(1.0f)}, Const::CursorColor);
+        drawList->AddRectFilled(
+            {mousePos.x + cursorSize / 2, mousePos.y - scale(1.0f)}, {mousePos.x + cursorSize, mousePos.y + scale(1.0f)}, Const::CursorColor);
+        return;
+    }
+
+    // editing cursors
+    if (_modes.editMode) {
         if (!_modes.drawMode || _simController->isSimulationRunning()) {
             auto cursorSize = scale(CursorRadius);
 
-            //shadow
+            // shadow
             drawList->AddRectFilled(
-                {mousePos.x - scale(2.0f), mousePos.y - cursorSize}, {mousePos.x + scale(2.0f), mousePos.y + cursorSize}, Const::CursorShadowColor);
+                {mousePos.x - scale(2.0f), mousePos.y - cursorSize}, {mousePos.x + scale(2.0f), mousePos.y - cursorSize / 2}, Const::CursorShadowColor);
             drawList->AddRectFilled(
-                {mousePos.x - cursorSize, mousePos.y - scale(2.0f)}, {mousePos.x + cursorSize, mousePos.y + scale(2.0f)}, Const::CursorShadowColor);
+                {mousePos.x - scale(2.0f), mousePos.y + cursorSize / 2}, {mousePos.x + scale(2.0f), mousePos.y + cursorSize}, Const::CursorShadowColor);
+            drawList->AddRectFilled(
+                {mousePos.x - cursorSize, mousePos.y - scale(2.0f)}, {mousePos.x - cursorSize / 2, mousePos.y + scale(2.0f)}, Const::CursorShadowColor);
+            drawList->AddRectFilled(
+                {mousePos.x + cursorSize / 2, mousePos.y - scale(2.0f)}, {mousePos.x + cursorSize, mousePos.y + scale(2.0f)}, Const::CursorShadowColor);
 
-            //foreground
+            // foreground
             drawList->AddRectFilled(
-                {mousePos.x - scale(1.0f), mousePos.y - cursorSize}, {mousePos.x + scale(1.0f), mousePos.y + cursorSize}, Const::CursorColor);
+                {mousePos.x - scale(1.0f), mousePos.y - cursorSize}, {mousePos.x + scale(1.0f), mousePos.y - cursorSize / 2}, Const::CursorColor);
             drawList->AddRectFilled(
-                {mousePos.x - cursorSize, mousePos.y - scale(1.0f)}, {mousePos.x + cursorSize, mousePos.y + scale(1.0f)}, Const::CursorColor);
+                {mousePos.x - scale(1.0f), mousePos.y + cursorSize / 2}, {mousePos.x + scale(1.0f), mousePos.y + cursorSize}, Const::CursorColor);
+            drawList->AddRectFilled(
+                {mousePos.x - cursorSize, mousePos.y - scale(1.0f)}, {mousePos.x - cursorSize / 2, mousePos.y + scale(1.0f)}, Const::CursorColor);
+            drawList->AddRectFilled(
+                {mousePos.x + cursorSize / 2, mousePos.y - scale(1.0f)}, {mousePos.x + cursorSize, mousePos.y + scale(1.0f)}, Const::CursorColor);
         } else {
             auto zoom = Viewport::getZoomFactor();
             auto radius = editorModel->getPencilWidth() * zoom;
@@ -367,10 +402,14 @@ void _SimulationInteractionController::drawCursor()
             AlienImGui::ConvertRGBtoHSV(color, h, s, v);
             drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));
         }
-    } else {
+        return;
+    }
+
+    // navigation cursor
+    if (!_modes.editMode) {
         auto cursorSize = scale(CursorRadius);
 
-        //shadow
+        // shadow
         drawList->AddCircle(mousePos, cursorSize / 2, Const::CursorShadowColor, 0, scale(4.0f));
         drawList->AddLine(
             {mousePos.x + sqrtf(2.0f) / 2.0f * cursorSize / 2, mousePos.y + sqrtf(2.0f) / 2.0f * cursorSize / 2},
@@ -378,7 +417,7 @@ void _SimulationInteractionController::drawCursor()
             Const::CursorShadowColor,
             scale(4.0f));
 
-        //foreground
+        // foreground
         drawList->AddCircle(mousePos, cursorSize / 2, Const::CursorColor, 0, scale(2.0f));
         drawList->AddLine(
             {mousePos.x + sqrtf(2.0f) / 2.0f * cursorSize / 2, mousePos.y + sqrtf(2.0f) / 2.0f * cursorSize / 2},

@@ -320,7 +320,7 @@ void _StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Diversity");
         ImGui::SameLine();
-        AlienImGui::HelpMarker("The number of colonies is displayed. A colony is a set of at least 40 same mutants.");
+        AlienImGui::HelpMarker("The number of colonies is displayed. A colony is a set of at least 20 same mutants.");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);

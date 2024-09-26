@@ -378,6 +378,8 @@ private:
 
     static ImVec2 RotationCenter(ImDrawList* drawList);
 
+    static bool revertButton(std::string const& id);
+
     static std::unordered_set<unsigned int> _basicSilderExpanded;
     static int _rotationStartIndex;
     static std::unordered_map<unsigned int, int> _neuronSelectedInput;

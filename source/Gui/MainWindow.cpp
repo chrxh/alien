@@ -125,11 +125,10 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
         std::make_shared<_EditorController>(_simController);
     _simulationView = std::make_shared<_SimulationView>(_simController);
     _simInteractionController = std::make_shared<_SimulationInteractionController>(_simController, _editorController, _simulationView);
-    simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simController);
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _temporalControlWindow);
-    _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController);
+    _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController, _simInteractionController);
     _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow, _simInteractionController);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
     _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow);
