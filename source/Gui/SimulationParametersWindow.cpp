@@ -1650,8 +1650,8 @@ bool _SimulationParametersWindow::processSpot(int index)
             }
 
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Location"))) {
-                if (AlienImGui::Combo(
-                        AlienImGui::ComboParameters()
+                if (AlienImGui::Switcher(
+                        AlienImGui::SwitcherParameters()
                             .name("Shape")
                             .values({"Circular", "Rectangular"})
                             .textWidth(RightColumnWidth)

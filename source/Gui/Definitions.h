@@ -159,6 +159,9 @@ using RadiationSourcesWindow = std::shared_ptr<_RadiationSourcesWindow>;
 class _ChangeColorDialog;
 using ChangeColorDialog = std::shared_ptr<_ChangeColorDialog>;
 
+class _AutosaveWindow;
+using AutosaveWindow = std::shared_ptr<_AutosaveWindow>;
+
 struct UserInfo;
 
 struct GLFWvidmode;

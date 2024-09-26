@@ -50,6 +50,7 @@ private:
     BrowserWindow _browserWindow;
     ShaderWindow _shaderWindow;
     RadiationSourcesWindow _radiationSourcesWindow;
+    AutosaveWindow _autosaveWindow;
 
     ExitDialog _exitDialog;
     GpuSettingsDialog _gpuSettingsDialog;

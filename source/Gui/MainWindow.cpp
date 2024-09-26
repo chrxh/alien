@@ -72,6 +72,7 @@
 #include "RadiationSourcesWindow.h"
 #include "OverlayMessageController.h"
 #include "ExitDialog.h"
+#include "AutosaveWindow.h"
 
 namespace
 {
@@ -155,6 +156,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_simController);
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
+    _autosaveWindow = std::make_shared<_AutosaveWindow>(_simController);
 
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
@@ -449,6 +451,9 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Log", "ALT+7", _logWindow->isOn())) {
                 _logWindow->setOn(!_logWindow->isOn());
             }
+            if (ImGui::MenuItem("Auto save", "ALT+8", _autosaveWindow->isOn())) {
+                _autosaveWindow->setOn(!_autosaveWindow->isOn());
+            }
             AlienImGui::EndMenuButton();
         }
 
@@ -624,6 +629,9 @@ void _MainWindow::processMenubar()
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_7)) {
             _logWindow->setOn(!_logWindow->isOn());
         }
+        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_8)) {
+            _autosaveWindow->setOn(!_autosaveWindow->isOn());
+        }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
             _simInteractionController->setEditMode(!_simInteractionController->isEditMode());
@@ -736,6 +744,7 @@ void _MainWindow::processWindows()
     _gettingStartedWindow->process();
     _shaderWindow->process();
     _radiationSourcesWindow->process();
+    _autosaveWindow->process();
 }
 
 void _MainWindow::processControllers()
