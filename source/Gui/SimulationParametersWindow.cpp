@@ -77,9 +77,6 @@ _SimulationParametersWindow::_SimulationParametersWindow(
         _cellFunctionStrings.emplace_back(Const::CellFunctionToStringMap.at(i));
     }
 
-    _getMousePickerEnabledFunc = [&]() { return _simInteractionController->isPositionSelectionMode(); };
-    _setMousePickerEnabledFunc = [&](bool value) { _simInteractionController->setPositionSelectionMode(value); };
-    _getMousePickerPositionFunc = [&]() { return _simInteractionController->getPositionSelectionData(); };
 }
 
 _SimulationParametersWindow::~_SimulationParametersWindow()
@@ -1662,6 +1659,11 @@ bool _SimulationParametersWindow::processSpot(int index)
                         spot.shapeType)) {
                     createDefaultSpotData(spot);
                 }
+
+                auto getMousePickerEnabledFunc = [&]() { return _simInteractionController->isPositionSelectionMode(); };
+                auto setMousePickerEnabledFunc = [&](bool value) { _simInteractionController->setPositionSelectionMode(value); };
+                auto getMousePickerPositionFunc = [&]() { return _simInteractionController->getPositionSelectionData(); };
+
                 AlienImGui::SliderFloat2(
                     AlienImGui::SliderFloat2Parameters()
                         .name("Position")
@@ -1670,9 +1672,9 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .max(toRealVector2D(worldSize))
                         .defaultValue(RealVector2D{origSpot.posX, origSpot.posY})
                         .format("%.2f")
-                        .getMousePickerEnabledFunc(_getMousePickerEnabledFunc)
-                        .setMousePickerEnabledFunc(_setMousePickerEnabledFunc)
-                        .getMousePickerPositionFunc(_getMousePickerPositionFunc),
+                        .getMousePickerEnabledFunc(getMousePickerEnabledFunc)
+                        .setMousePickerEnabledFunc(setMousePickerEnabledFunc)
+                        .getMousePickerPositionFunc(getMousePickerPositionFunc),
                     spot.posX,
                     spot.posY);
                 AlienImGui::SliderFloat2(

@@ -6,15 +6,17 @@
 
 #include "RadiationSourcesWindow.h"
 #include "StyleRepository.h"
+#include "SimulationInteractionController.h"
 
 namespace
 {
     auto const RightColumnWidth = 120.0f;
 }
 
-_RadiationSourcesWindow::_RadiationSourcesWindow(SimulationController const& simController)
+_RadiationSourcesWindow::_RadiationSourcesWindow(SimulationController const& simController, SimulationInteractionController const& simInteractionController)
     : _AlienWindow("Radiation sources", "windows.radiation sources", false)
     , _simController(simController)
+    , _simInteractionController(simInteractionController)
 {}
 
 void _RadiationSourcesWindow::processIntern()
@@ -80,42 +82,32 @@ bool _RadiationSourcesWindow::processTab(int index)
             }
         }
 
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Position X")
+        auto getMousePickerEnabledFunc = [&]() { return _simInteractionController->isPositionSelectionMode(); };
+        auto setMousePickerEnabledFunc = [&](bool value) { _simInteractionController->setPositionSelectionMode(value); };
+        auto getMousePickerPositionFunc = [&]() { return _simInteractionController->getPositionSelectionData(); };
+        AlienImGui::SliderFloat2(
+            AlienImGui::SliderFloat2Parameters()
+                .name("Position")
                 .textWidth(RightColumnWidth)
-                .min(0)
-                .max(toFloat(worldSize.x))
-                .format("%.0f")
-                .defaultValue(&origSource.posX),
-            &source.posX);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Position Y")
+                .min({0, 0})
+                .max(toRealVector2D(worldSize))
+                .defaultValue(RealVector2D{origSource.posX, origSource.posY})
+                .format("%.2f")
+                .getMousePickerEnabledFunc(getMousePickerEnabledFunc)
+                .setMousePickerEnabledFunc(setMousePickerEnabledFunc)
+                .getMousePickerPositionFunc(getMousePickerPositionFunc),
+            source.posX,
+            source.posY);
+        AlienImGui::SliderFloat2(
+            AlienImGui::SliderFloat2Parameters()
+                .name("Velocity")
                 .textWidth(RightColumnWidth)
-                .min(0)
-                .max(toFloat(worldSize.y))
-                .format("%.0f")
-                .defaultValue(&origSource.posY),
-            &source.posY);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Velocity X")
-                .textWidth(RightColumnWidth)
-                .min(-4.0f)
-                .max(4.0f)
-                .format("%.3f")
-                .defaultValue(&origSource.velX),
-            &source.velX);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Velocity Y")
-                .textWidth(RightColumnWidth)
-                .min(-4.0f)
-                .max(4.0f)
-                .format("%.3f")
-                .defaultValue(&origSource.velY),
-            &source.velY);
+                .min({-4.0f, -4.0f})
+                .max({4.0f, 4.0f})
+                .defaultValue(RealVector2D{origSource.velX, origSource.velY})
+                .format("%.2f"),
+            source.velX,
+            source.velY);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Angle")

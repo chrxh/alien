@@ -7,7 +7,7 @@
 class _RadiationSourcesWindow : public _AlienWindow
 {
 public:
-    _RadiationSourcesWindow(SimulationController const& simController);
+    _RadiationSourcesWindow(SimulationController const& simController, SimulationInteractionController const& simInteractionController);
 
 private:
     void processIntern() override;
@@ -21,4 +21,5 @@ private:
     void validationAndCorrection(RadiationSource& source) const;
 
     SimulationController _simController;
+    SimulationInteractionController _simInteractionController;
 };

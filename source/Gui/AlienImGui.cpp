@@ -21,11 +21,6 @@
 
 namespace
 {
-    bool revertButton(std::string const& id)
-    {
-        return ImGui::Button((ICON_FA_UNDO "##" + id).c_str());
-    }
-
     auto constexpr HoveredTimer = 0.5f;
 }
 
@@ -79,6 +74,7 @@ bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& v
         if (AlienImGui::SelectableButton(AlienImGui::SelectableButtonParameters().name(ICON_FA_CROSSHAIRS), mousePickerEnabled)) {
             parameters._setMousePickerEnabledFunc.value()(mousePickerEnabled);
         }
+        AlienImGui::Tooltip("Select a position with the mouse");
         if (parameters._getMousePickerEnabledFunc.value()()) {
             if (auto pos = parameters._getMousePickerPositionFunc.value()()) {
                 valueX = pos->x;
@@ -92,7 +88,7 @@ bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& v
         ImGui::SameLine();
 
         ImGui::BeginDisabled(valueX == parameters._defaultValue->x && valueY == parameters._defaultValue->y);
-        if (revertButton(parameters._name)) {
+        if (AlienImGui::revertButton(parameters._name)) {
             valueX = parameters._defaultValue->x;
             valueY = parameters._defaultValue->y;
         }
@@ -1998,6 +1994,13 @@ ImVec2 AlienImGui::RotationCenter(ImDrawList* drawList)
         l = ImMin(l, buf[i].pos), u = ImMax(u, buf[i].pos);
 
     return ImVec2((l.x + u.x) / 2, (l.y + u.y) / 2);  // or use _ClipRectStack?
+}
+
+bool AlienImGui::revertButton(std::string const& id)
+{
+    auto result = ImGui::Button((ICON_FA_UNDO "##" + id).c_str());
+    AlienImGui::Tooltip("Revert changes");
+    return result;
 }
 
 namespace

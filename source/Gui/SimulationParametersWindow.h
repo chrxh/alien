@@ -51,8 +51,4 @@ private:
 
     bool _featureListOpen = false;
     float _featureListHeight = 200.0f;
-
-    std::function<bool(void)> _getMousePickerEnabledFunc;
-    std::function<void(bool)> _setMousePickerEnabledFunc;
-    std::function<std::optional<RealVector2D>(void)> _getMousePickerPositionFunc;
 };
