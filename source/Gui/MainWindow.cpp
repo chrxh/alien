@@ -745,7 +745,7 @@ void _MainWindow::processWindows()
     _gettingStartedWindow->process();
     _shaderWindow->process();
     _radiationSourcesWindow->process();
-    _autosaveWindow->process();
+    //_autosaveWindow->process();
 }
 
 void _MainWindow::processControllers()
