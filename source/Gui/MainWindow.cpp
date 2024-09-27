@@ -452,9 +452,9 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Log", "ALT+7", _logWindow->isOn())) {
                 _logWindow->setOn(!_logWindow->isOn());
             }
-            //if (ImGui::MenuItem("Auto save", "ALT+8", _autosaveWindow->isOn())) {
-            //    _autosaveWindow->setOn(!_autosaveWindow->isOn());
-            //}
+            if (ImGui::MenuItem("Autosave", "ALT+8", _autosaveWindow->isOn())) {
+                _autosaveWindow->setOn(!_autosaveWindow->isOn());
+            }
             AlienImGui::EndMenuButton();
         }
 
@@ -745,7 +745,7 @@ void _MainWindow::processWindows()
     _gettingStartedWindow->process();
     _shaderWindow->process();
     _radiationSourcesWindow->process();
-    //_autosaveWindow->process();
+    _autosaveWindow->process();
 }
 
 void _MainWindow::processControllers()
