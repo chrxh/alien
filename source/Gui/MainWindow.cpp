@@ -126,6 +126,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
         std::make_shared<_EditorController>(_simController);
     _simulationView = std::make_shared<_SimulationView>(_simController);
     _simInteractionController = std::make_shared<_SimulationInteractionController>(_simController, _editorController, _simulationView);
+    simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simController);
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simController, _statisticsWindow);
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simController, _temporalControlWindow);
