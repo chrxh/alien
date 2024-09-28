@@ -176,7 +176,9 @@ void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const&
             if (!_modes.drawMode) {
                 _editorController->onSelectObjects(toRealVector2D(mousePos), ImGui::GetIO().KeyCtrl);
                 _worldPosOnClick = Viewport::mapViewToWorldPosition(toRealVector2D(mousePos));
-                _simController->setDetached(true);
+                if (_simController->isSimulationRunning()) {
+                    _simController->setDetached(true);
+                }
 
                 auto shallowData = _simController->getSelectionShallowData(*_worldPosOnClick);
                 _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
