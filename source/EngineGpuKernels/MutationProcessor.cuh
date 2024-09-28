@@ -802,7 +802,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
         targetGenome[i] = genome[i];
     }
 
-    //copy duplicated part
+    //copy segment for duplication
     if (!duplicatedSegmentContainsSelfReplicator) {
         for (int i = 0; i < sizeDelta; ++i) {
             targetGenome[startTargetIndex + i] = genome[startSourceIndex + i];
