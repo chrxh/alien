@@ -64,7 +64,7 @@ public:
     __inline__ __device__ static void setNextConstructorSeparation(uint8_t* genome, int nodeAddress, bool separation);
     __inline__ __device__ static void setNextConstructorNumBranches(uint8_t* genome, int nodeAddress, int numBranches);
     __inline__ __device__ static bool containsSectionSelfReplication(uint8_t* genome, int genomeSize);
-    __inline__ __device__ static int getNodeAddressForSelfReplication(uint8_t* genome, int genomeSize);  //-1 = no node for self-replication found
+    __inline__ __device__ static int getNodeAddressForSelfReplication(uint8_t* genome, int genomeSize, bool& containsSelfReplicator);
     __inline__ __device__ static void setRandomCellFunctionData(SimulationData& data, uint8_t* genome, int nodeAddress, CellFunction const& cellFunction, bool makeSelfCopy, int subGenomeSize);
     __inline__ __device__ static int getCellFunctionDataSize(
         CellFunction cellFunction,
@@ -740,15 +740,16 @@ __inline__ __device__ bool GenomeDecoder::containsSectionSelfReplication(uint8_t
     return false;
 }
 
-__inline__ __device__ int GenomeDecoder::getNodeAddressForSelfReplication(uint8_t* genome, int genomeSize)
+__inline__ __device__ int GenomeDecoder::getNodeAddressForSelfReplication(uint8_t* genome, int genomeSize, bool& containsSelfReplicator)
 {
     int nodeAddress = 0;
     for (; nodeAddress < genomeSize;) {
         if (isNextCellSelfReplication(genome, nodeAddress)) {
+            containsSelfReplicator = true;
             return nodeAddress;
         }
         nodeAddress += Const::CellBasicBytes + getNextCellFunctionDataSize(genome, genomeSize, nodeAddress);
     }
-
-    return -1;
+    containsSelfReplicator = false;
+    return 0;
 }

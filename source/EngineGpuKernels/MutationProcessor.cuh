@@ -739,10 +739,11 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     }
     auto sizeDelta = endSourceIndex - startSourceIndex;
     auto nodeAddressForSelfReplication = -1;
+    auto duplicatedSegmentContainsSelfReplicator = false;
     if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
-        nodeAddressForSelfReplication = GenomeDecoder::getNodeAddressForSelfReplication(genome + startSourceIndex, sizeDelta);
-        if (nodeAddressForSelfReplication != -1 ) {
-            nodeAddressForSelfReplication += startSourceIndex;
+        nodeAddressForSelfReplication =
+            GenomeDecoder::getNodeAddressForSelfReplication(genome + startSourceIndex, sizeDelta, duplicatedSegmentContainsSelfReplicator) + startSourceIndex;
+        if (duplicatedSegmentContainsSelfReplicator) {
             sizeDelta += 2 + Const::GenomeHeaderSize;  //additional size for empty subgenome
         }
     }
@@ -802,7 +803,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     }
 
     //copy duplicated part
-    if (nodeAddressForSelfReplication == -1) {
+    if (!duplicatedSegmentContainsSelfReplicator) {
         for (int i = 0; i < sizeDelta; ++i) {
             targetGenome[startTargetIndex + i] = genome[startSourceIndex + i];
         }
