@@ -738,15 +738,45 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
         }
     }
     auto sizeDelta = endSourceIndex - startSourceIndex;
+    auto nodeAddressForSelfReplication = -1;
     if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
-        if (GenomeDecoder::containsSectionSelfReplication(genome + startSourceIndex, sizeDelta)) {
-            return;
+        nodeAddressForSelfReplication = GenomeDecoder::getNodeAddressForSelfReplication(genome + startSourceIndex, sizeDelta);
+        if (nodeAddressForSelfReplication != -1 ) {
+            nodeAddressForSelfReplication += startSourceIndex;
+            sizeDelta += 2 + Const::GenomeHeaderSize;  //additional size for empty subgenome
         }
     }
 
+    //calculate target addess where the new node should be inserted
+    int startTargetIndex = 0;
     int subGenomesSizeIndices[GenomeDecoder::MAX_SUBGENOME_RECURSION_DEPTH + 1];
     int numSubGenomesSizeIndices;
-    auto startTargetIndex = GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, true, subGenomesSizeIndices, &numSubGenomesSizeIndices);
+    if (data.numberGen1.randomBool() && genomeSize > Const::GenomeHeaderSize) {
+
+        //choose a random node position to a constructor with a subgenome
+        int numConstructorsWithSubgenome = 0;
+        GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddressIntern, int repetition) {
+            auto cellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddressIntern);
+            if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfReplication(genome, nodeAddressIntern)) {
+                ++numConstructorsWithSubgenome;
+            }
+        });
+        if (numConstructorsWithSubgenome > 0) {
+            auto randomIndex = data.numberGen1.random(numConstructorsWithSubgenome - 1);
+            auto counter = 0;
+            GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddressIntern, int repetition) {
+                auto cellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddressIntern);
+                if (cellFunctionType == CellFunction_Constructor && !GenomeDecoder::isNextCellSelfReplication(genome, nodeAddressIntern)) {
+                    if (randomIndex == counter) {
+                        startTargetIndex = nodeAddressIntern + Const::CellBasicBytes + Const::ConstructorFixedBytes + 3 + 1;
+                    }
+                    ++counter;
+                }
+            });
+        }
+    }
+    startTargetIndex =
+        GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, true, subGenomesSizeIndices, &numSubGenomesSizeIndices, startTargetIndex);
 
     auto targetGenomeSize = genomeSize + sizeDelta;
     if (targetGenomeSize > MAX_GENOME_BYTES) {
@@ -765,12 +795,34 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     }
 
     auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(targetGenomeSize);
+
+    //copy segment before duplication
     for (int i = 0; i < startTargetIndex; ++i) {
         targetGenome[i] = genome[i];
     }
-    for (int i = 0; i < sizeDelta; ++i) {
-        targetGenome[startTargetIndex + i] = genome[startSourceIndex + i];
+
+    //copy duplicated part
+    if (nodeAddressForSelfReplication == -1) {
+        for (int i = 0; i < sizeDelta; ++i) {
+            targetGenome[startTargetIndex + i] = genome[startSourceIndex + i];
+        }
+    } else {
+        auto nodeSize = Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(genome, genomeSize, nodeAddressForSelfReplication);
+        for (int i = 0; i < nodeAddressForSelfReplication - startSourceIndex + nodeSize; ++i) {
+            targetGenome[startTargetIndex + i] = genome[startSourceIndex + i];
+        }
+
+        //make construction non-self-replicating + insert empty subgenome
+        GenomeDecoder::setNextCellSelfReplication(targetGenome, startTargetIndex + nodeAddressForSelfReplication - startSourceIndex, false);
+        GenomeDecoder::setNextCellSubgenomeSize(targetGenome, startTargetIndex + nodeAddressForSelfReplication - startSourceIndex, Const::GenomeHeaderSize);
+
+        auto const emptySubgenomeSize = 2 + Const::GenomeHeaderSize;
+        for (int i = nodeAddressForSelfReplication - startSourceIndex + nodeSize; i < sizeDelta; ++i) {
+            targetGenome[startTargetIndex + i + emptySubgenomeSize] = genome[startSourceIndex + i];
+        }
     }
+
+    //copy segment after duplication
     for (int i = 0; i < genomeSize - startTargetIndex; ++i) {
         targetGenome[startTargetIndex + sizeDelta + i] = genome[startTargetIndex + i];
     }
