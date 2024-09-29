@@ -2334,7 +2334,7 @@ void _SimulationParametersWindow::processAddonList()
         AlienImGui::Separator();
     }
 
-    _featureListOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true));
+    _featureListOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true).defaultOpen(_featureListOpen));
     if (_featureListOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
             auto parameters = _simController->getSimulationParameters();

@@ -1026,13 +1026,13 @@ bool AlienImGui::CollapseButton(bool collapsed)
 bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
 {
     if (parameters._highlighted) {
-        ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(Const::TreeNodeHighlightedColor));
-        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, static_cast<ImVec4>(Const::TreeNodeHighlightedHoveredColor));
-        ImGui::PushStyleColor(ImGuiCol_HeaderActive, static_cast<ImVec4>(Const::TreeNodeHighlightedActiveColor));
+        ImGui::PushStyleColor(ImGuiCol_Header, Const::TreeNodeHighlightedColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Const::TreeNodeHighlightedHoveredColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_HeaderActive, Const::TreeNodeHighlightedActiveColor.Value);
     } else {
-        ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(Const::TreeNodeColor));
-        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, static_cast<ImVec4>(Const::TreeNodeHoveredColor));
-        ImGui::PushStyleColor(ImGuiCol_HeaderActive, static_cast<ImVec4>(Const::TreeNodeActiveColor));
+        ImGui::PushStyleColor(ImGuiCol_Header, Const::TreeNodeColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Const::TreeNodeHoveredColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_HeaderActive, Const::TreeNodeActiveColor.Value);
     }
     ImGuiTreeNodeFlags treeNodeClosedFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_Framed;
     ImGuiTreeNodeFlags treeNodeOpenFlags = treeNodeClosedFlags | ImGuiTreeNodeFlags_DefaultOpen;
