@@ -5,6 +5,7 @@
 #include "Base/GlobalSettings.h"
 
 #include "AlienImGui.h"
+#include "SerializationHelperService.h"
 #include "StyleRepository.h"
 
 namespace
@@ -15,6 +16,7 @@ namespace
 _AutosaveWindow::_AutosaveWindow(SimulationController const& simController)
     : _AlienWindow("Autosave", "windows.autosave", false)
     , _simController(simController)
+    , _worker(simController)
 {
     _settingsOpen = GlobalSettings::getInstance().getBool("windows.autosave.settings.open", _settingsOpen);
     _settingsHeight = GlobalSettings::getInstance().getFloat("windows.autosave.settings.height", _settingsHeight);
@@ -62,21 +64,21 @@ void _AutosaveWindow::processIntern()
 void _AutosaveWindow::processToolbar()
 {
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
         onCreateSave();
     }
     AlienImGui::Tooltip("Create save point");
 
     ImGui::SameLine();
     ImGui::BeginDisabled(true);
-    if (AlienImGui::ToolbarButton(ICON_FA_MINUS)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
     }
     AlienImGui::Tooltip("Delete save point");
     ImGui::EndDisabled();
 
     ImGui::SameLine();
     ImGui::BeginDisabled(true);
-    if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_BROOM)) {
     }
     AlienImGui::Tooltip("Delete all save points");
     ImGui::EndDisabled();
@@ -166,6 +168,8 @@ void _AutosaveWindow::processSettings()
 
 void _AutosaveWindow::onCreateSave()
 {
+    DeserializedSimulation dummy;
+    _worker.saveToDisc("d:\\test.sim");
 }
 
 void _AutosaveWindow::validationAndCorrection()

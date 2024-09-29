@@ -19,7 +19,6 @@ public:
 private:
     bool fits(ArraySizes const& left, ArraySizes const& right) const;
     ArraySizes getArraySizes(DataTO const& dataTO) const;
-    void deleteDataTO(DataTO const& dataTO);
 
     std::optional<DataTO> _dataTO;
 };

@@ -6,20 +6,8 @@
 #include "AuxiliaryData.h"
 #include "Descriptions.h"
 #include "StatisticsHistory.h"
-
-struct DeserializedSimulation
-{
-    ClusteredDataDescription mainData;
-    AuxiliaryData auxiliaryData;
-    StatisticsHistoryData statistics;
-};
-
-struct SerializedSimulation
-{
-    std::string mainData;  //binary
-    std::string auxiliaryData;  //JSON
-    std::string statistics;  //CSV
-};
+#include "DeserializedSimulation.h"
+#include "SerializedSimulation.h"
 
 class SerializerService
 {

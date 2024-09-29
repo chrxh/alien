@@ -87,6 +87,10 @@ PUBLIC
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
+    PersisterJob.cpp
+    PersisterJob.h
+    PersisterWorker.cpp
+    PersisterWorker.h
     RadiationSourcesWindow.cpp
     RadiationSourcesWindow.h
     ResetPasswordDialog.cpp

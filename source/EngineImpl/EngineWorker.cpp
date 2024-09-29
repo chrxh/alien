@@ -120,16 +120,18 @@ void EngineWorker::setSyncSimulationWithRenderingRatio(int value)
 
 ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
-    EngineWorkerGuard access(this);
+    DataTO dataTO;
+    {
+        EngineWorkerGuard access(this);
 
-    DataTO dataTO = provideTO();
-    
-    _simulationCudaFacade->getSimulationData(
-        {rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
+        dataTO.init(_simulationCudaFacade->getArraySizes());
 
+        _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
+    }
     DescriptionConverter converter(_settings.simulationParameters);
 
     auto result = converter.convertTOtoClusteredDataDescription(dataTO);
+    dataTO.destroy();
     return result;
 }
 
@@ -137,12 +139,10 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
 {
     EngineWorkerGuard access(this);
 
-    DataTO dataTO = provideTO();
-    
+    auto dataTO = provideTO();
     _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
     DescriptionConverter converter(_settings.simulationParameters);
-
     auto result = converter.convertTOtoDataDescription(dataTO);
     return result;
 }
@@ -604,6 +604,7 @@ void EngineWorker::slowdownTPS()
 EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::chrono::milliseconds> const& maxDuration)
     : _worker(worker)
 {
+    _worker->_mutexForEngineWorkerGuard.lock();
     checkForException(worker->_exceptionData);
 
     worker->_accessState = 1;
@@ -629,6 +630,7 @@ EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::ch
 EngineWorkerGuard::~EngineWorkerGuard()
 {
     _worker->_accessState = 0;
+    _worker->_mutexForEngineWorkerGuard.unlock();
 }
 
 bool EngineWorkerGuard::isTimeout() const

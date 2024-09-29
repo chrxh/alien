@@ -115,7 +115,6 @@ public:
 private:
     DataTO provideTO(); 
     void resetTimeIntervalStatistics();
-    void updateStatistics(bool afterMinDuration = false);
     void processJobs();
 
     void syncSimulationWithRenderingIfDesired();
@@ -137,6 +136,7 @@ private:
     ExceptionData _exceptionData;
 
     //async jobs
+    std::mutex _mutexForEngineWorkerGuard;
     mutable std::mutex _mutexForAsyncJobs;
     std::optional<GpuSettings> _updateGpuSettingsJob;
     std::optional<GLuint> _imageResource;
