@@ -1,8 +1,7 @@
 #pragma once
 
-#include <optional>
-
-#include "EngineInterface/SerializerService.h"
+#include "EngineInterface/DeserializedSimulation.h"
+#include "EngineInterface/SimulationController.h"
 
 class SerializationHelperService
 {

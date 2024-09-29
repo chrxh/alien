@@ -13,6 +13,7 @@ add_library(EngineInterface
     DescriptionEditService.h
     Descriptions.cpp
     Descriptions.h
+    DeserializedSimulation.h
     EngineConstants.h
     Features.cpp
     Features.h
@@ -28,8 +29,6 @@ add_library(EngineInterface
     Motion.h
     MutationType.h
     OverlayDescriptions.h
-    PersisterWorker.cpp
-    PersisterWorker.h
     PreviewDescriptionService.cpp
     PreviewDescriptionService.h
     PreviewDescriptions.h
@@ -43,6 +42,7 @@ add_library(EngineInterface
     ShallowUpdateSelectionData.h
     ShapeGenerator.cpp
     ShapeGenerator.h
+    SerializedSimulation.h
     SimulationController.h
     SimulationParameters.cpp
     SimulationParameters.h

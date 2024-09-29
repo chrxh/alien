@@ -1,9 +1,8 @@
 #pragma once
 
-#include "EngineInterface/PersisterWorker.h"
-
-#include "AlienWindow.h"
 #include "Definitions.h"
+#include "AlienWindow.h"
+#include "PersisterWorker.h"
 
 class _AutosaveWindow : public _AlienWindow
 {

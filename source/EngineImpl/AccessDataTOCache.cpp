@@ -6,7 +6,7 @@ _AccessDataTOCache::_AccessDataTOCache()
 _AccessDataTOCache::~_AccessDataTOCache()
 {
     if(_dataTO) {
-        deleteDataTO(*_dataTO);
+        _dataTO->destroy();
     }
 }
 
@@ -20,20 +20,12 @@ DataTO _AccessDataTOCache::getDataTO(ArraySizes const& arraySizes)
             *_dataTO->numAuxiliaryData = 0;
             return *_dataTO;
         } else {
-            deleteDataTO(*_dataTO);
+            _dataTO->destroy();
         }
     }
     try {
         DataTO result;
-        result.numCells = new uint64_t;
-        result.numParticles = new uint64_t;
-        result.numAuxiliaryData = new uint64_t;
-        *result.numCells = 0;
-        *result.numParticles = 0;
-        *result.numAuxiliaryData = 0;
-        result.cells = new CellTO[arraySizes.cellArraySize];
-        result.particles = new ParticleTO[arraySizes.particleArraySize];
-        result.auxiliaryData = new uint8_t[arraySizes.auxiliaryDataSize];
+        result.init(arraySizes);
         _dataTO = result;
         return result;
     } catch (std::bad_alloc const&) {
@@ -50,14 +42,4 @@ bool _AccessDataTOCache::fits(ArraySizes const& left, ArraySizes const& right) c
 auto _AccessDataTOCache::getArraySizes(DataTO const& dataTO) const -> ArraySizes
 {
     return {*dataTO.numCells, *dataTO.numParticles, *dataTO.numAuxiliaryData};
-}
-
-void _AccessDataTOCache::deleteDataTO(DataTO const& dataTO)
-{
-    delete dataTO.numCells;
-    delete dataTO.numParticles;
-    delete dataTO.numAuxiliaryData;
-    delete[] dataTO.cells;
-    delete[] dataTO.particles;
-    delete[] dataTO.auxiliaryData;
 }
