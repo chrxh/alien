@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineInterface/PersisterWorker.h"
+
 #include "AlienWindow.h"
 #include "Definitions.h"
 
@@ -25,6 +27,8 @@ private:
 
     bool _settingsOpen = false;
     float _settingsHeight = 100.0f;
+    std::string _origLocation;
+    std::string _location;
 
     bool _autosaveEnabled = false;
     int _origAutosaveInterval = 40;
@@ -43,6 +47,7 @@ private:
 
     struct SavePointEntry
     {
+        bool transient = true;
         int sequenceNumber = 0;
         std::string id;
         std::string timestamp;
@@ -50,4 +55,7 @@ private:
         uint64_t timestep;
     };
     std::vector<SavePointEntry> _savePoints;
+
+    PersisterWorker _worker;
+    std::thread* _thread = nullptr;
 };

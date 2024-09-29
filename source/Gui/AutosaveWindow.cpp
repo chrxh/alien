@@ -24,10 +24,16 @@ _AutosaveWindow::_AutosaveWindow(SimulationController const& simController)
     _origSaveMode = GlobalSettings::getInstance().getInt("windows.autosave.mode", _origSaveMode);
     _saveMode = _origSaveMode;
     _numberOfFiles = GlobalSettings::getInstance().getInt("windows.autosave.number of files", _origNumberOfFiles);
+
+    _thread = new std::thread(&PersisterWorker::runThreadLoop, &_worker);
 }
 
 _AutosaveWindow::~_AutosaveWindow()
 {
+    _worker.shutdown();
+    _thread->join();
+    delete _thread;
+
     GlobalSettings::getInstance().setBool("windows.autosave.settings.open", _settingsOpen);
     GlobalSettings::getInstance().setFloat("windows.autosave.settings.height", _settingsHeight);
     GlobalSettings::getInstance().setBool("windows.autosave.enabled", _autosaveEnabled);
@@ -65,15 +71,15 @@ void _AutosaveWindow::processToolbar()
     ImGui::BeginDisabled(true);
     if (AlienImGui::ToolbarButton(ICON_FA_MINUS)) {
     }
-    ImGui::EndDisabled();
     AlienImGui::Tooltip("Delete save point");
+    ImGui::EndDisabled();
 
     ImGui::SameLine();
     ImGui::BeginDisabled(true);
     if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
     }
-    ImGui::EndDisabled();
     AlienImGui::Tooltip("Delete all save points");
+    ImGui::EndDisabled();
 
     AlienImGui::Separator();
 }
@@ -140,6 +146,7 @@ void _AutosaveWindow::processSettings()
     _settingsOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Settings").highlighted(true).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
+            AlienImGui::InputText(AlienImGui::InputTextParameters().name("Location on disc").textWidth(RightColumnWidth).defaultValue(_origLocation), _location);
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Mode")

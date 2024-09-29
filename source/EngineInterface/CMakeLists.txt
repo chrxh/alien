@@ -28,6 +28,8 @@ add_library(EngineInterface
     Motion.h
     MutationType.h
     OverlayDescriptions.h
+    PersisterWorker.cpp
+    PersisterWorker.h
     PreviewDescriptionService.cpp
     PreviewDescriptionService.h
     PreviewDescriptions.h
