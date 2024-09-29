@@ -43,9 +43,9 @@ namespace Const
     ImColor const TreeNodeColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
     ImColor const TreeNodeHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
     ImColor const TreeNodeActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
-    ImColor const TreeNodeHighlightedColor = ImColor::HSV(0.3f, 0.4f, 0.45f);
-    ImColor const TreeNodeHighlightedHoveredColor = ImColor::HSV(0.3f, 0.4f, 0.55f);
-    ImColor const TreeNodeHighlightedActiveColor = ImColor::HSV(0.3f, 0.4f, 0.65f);
+    ImColor const TreeNodeHighlightedColor = ImColor::HSV(0.54f, 0.33f, 0.45f);
+    ImColor const TreeNodeHighlightedHoveredColor = ImColor::HSV(0.5f, 0.33f, 0.55f);
+    ImColor const TreeNodeHighlightedActiveColor = ImColor::HSV(0.5f, 0.33f, 0.65f);
 
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 

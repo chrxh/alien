@@ -15,10 +15,16 @@ private:
     void processToolbar();
     void processHeader();
     void processTable();
+    void processSettings();
+
+    void onCreateSave();
 
     void validationAndCorrection();
 
     SimulationController _simController;
+
+    bool _settingsOpen = false;
+    float _settingsHeight = 100.0f;
 
     bool _autosaveEnabled = false;
     int _origAutosaveInterval = 40;
@@ -35,11 +41,13 @@ private:
     int _origNumberOfFiles = 20;
     int _numberOfFiles = 20;
 
-    struct SaveFileEntry
+    struct SavePointEntry
     {
+        int sequenceNumber = 0;
+        std::string id;
         std::string timestamp;
         std::string name;
         uint64_t timestep;
     };
-    std::vector<SaveFileEntry> _saveFileEntry;
+    std::vector<SavePointEntry> _savePoints;
 };
