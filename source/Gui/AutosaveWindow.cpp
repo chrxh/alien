@@ -169,7 +169,7 @@ void _AutosaveWindow::processSettings()
 void _AutosaveWindow::onCreateSave()
 {
     DeserializedSimulation dummy;
-    _worker.saveToDisc("d:\\test.sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
+    _worker.saveSimulationToDisc("d:\\test.sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
 }
 
 void _AutosaveWindow::validationAndCorrection()
