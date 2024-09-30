@@ -1,4 +1,5 @@
 #include <imgui.h>
+#include <cmath>
 
 #include "AlienImGui.h"
 #include "OverlayMessageController.h"
@@ -82,7 +83,7 @@ void OverlayMessageController::processSpinner()
             0.0f,
             false);
 
-        auto angle = std::sinf(duration * Const::DegToRad / 10 - Const::Pi / 2) * 4 + 6.0f;
+        auto angle = sinf(duration * Const::DegToRad / 10 - Const::Pi / 2) * 4 + 6.0f;
         _spinnerAngle += angle;
         AlienImGui::RotateEnd(_spinnerAngle, drawList);
     } else {

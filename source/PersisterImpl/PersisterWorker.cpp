@@ -65,7 +65,7 @@ void _PersisterWorker::addJob(PersisterJob const& job)
     _conditionVariable.notify_all();
 }
 
-std::variant<PersisterJobResult, PersisterJobError> _PersisterWorker::fetchJobResult(PersisterJobId const& id)
+PersisterJobResult _PersisterWorker::fetchJobResult(PersisterJobId const& id)
 {
     std::unique_lock uniqueLock(_jobMutex);
 
@@ -75,6 +75,12 @@ std::variant<PersisterJobResult, PersisterJobError> _PersisterWorker::fetchJobRe
         _finishedJobs.erase(finishedJobsIter);
         return resultCopy;
     }
+    THROW_NOT_IMPLEMENTED();
+}
+
+PersisterJobError _PersisterWorker::fetchJobError(PersisterJobId const& id)
+{
+    std::unique_lock uniqueLock(_jobMutex);
 
     auto jobsErrorsIter = std::ranges::find_if(_jobErrors, [&](PersisterJobError const& job) { return job->getId() == id; });
     if (jobsErrorsIter != _jobErrors.end()) {
@@ -113,7 +119,7 @@ void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
         auto job = _openJobs.front();
         _openJobs.pop_front();
 
-        if (auto const& saveToDiscJob = std::dynamic_pointer_cast<_SaveToDiscJob>(job)) {
+        if (auto const& saveToDiscJob = std::dynamic_pointer_cast<_SaveToFileJob>(job)) {
             _inProgressJobs.push_back(job);
             auto processingResult = processSaveToDiscJob(lock, saveToDiscJob);
             auto inProgressJobsIter = std::ranges::find_if(_inProgressJobs, [&](PersisterJob const& otherJob) { return otherJob->getId() == job->getId(); });
@@ -143,12 +149,16 @@ namespace
     };
 }
 
-std::variant<PersisterJobResult, PersisterJobError> _PersisterWorker::processSaveToDiscJob(std::unique_lock<std::mutex>& lock, SaveToDiscJob const& job)
+std::variant<PersisterJobResult, PersisterJobError> _PersisterWorker::processSaveToDiscJob(std::unique_lock<std::mutex>& lock, SaveToFileJob const& job)
 {
     UnlockGuard unlockGuard(lock);
 
     DeserializedSimulation deserializedData;
+    std::string simulationName;
+    std::chrono::system_clock::time_point timePoint;
     try {
+        simulationName = _simController->getSimulationName();
+        timePoint = std::chrono::system_clock::now();
         deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
         deserializedData.auxiliaryData.realTime = _simController->getRealTime();
         deserializedData.auxiliaryData.zoom = job->getZoom();
@@ -171,5 +181,5 @@ std::variant<PersisterJobResult, PersisterJobError> _PersisterWorker::processSav
             PersisterErrorInfo{"The simulation could not be saved because an error occurred when serializing the data to the file."});
     }
 
-    return std::make_shared<_SaveToDiscJobResult>(job->getId(), deserializedData.auxiliaryData.timestep, deserializedData.auxiliaryData.realTime);
+    return std::make_shared<_SaveToFileJobResult>(job->getId(), simulationName, deserializedData.auxiliaryData.timestep, timePoint);
 }

@@ -77,7 +77,7 @@ void _NewSimulationDialog::onNewSimulation()
     GeneralSettings generalSettings;
     generalSettings.worldSizeX = _width;
     generalSettings.worldSizeY = _height;
-    _simController->newSimulation(0, generalSettings, parameters);
+    _simController->newSimulation(std::nullopt, 0, generalSettings, parameters);
     Viewport::setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     Viewport::setZoomFactor(4.0f);
     _temporalControlWindow->onSnapshot();

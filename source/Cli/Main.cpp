@@ -48,7 +48,7 @@ int main(int argc, char** argv)
         auto startTimepoint = std::chrono::steady_clock::now();
 
         auto simController = std::make_shared<_SimulationControllerImpl>();
-        simController->newSimulation(simData.auxiliaryData.timestep, simData.auxiliaryData.generalSettings, simData.auxiliaryData.simulationParameters);
+        simController->newSimulation("", simData.auxiliaryData.timestep, simData.auxiliaryData.generalSettings, simData.auxiliaryData.simulationParameters);
         simController->setClusteredSimulationData(simData.mainData);
         simController->setStatisticsHistory(simData.statistics);
         simController->setRealTime(simData.auxiliaryData.realTime);

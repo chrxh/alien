@@ -788,6 +788,7 @@ void _MainWindow::onOpenSimulation()
                     std::optional<std::string> errorMessage;
                     try {
                         _simController->newSimulation(
+                            firstFilename.stem().string(),
                             deserializedData.auxiliaryData.timestep,
                             deserializedData.auxiliaryData.generalSettings,
                             deserializedData.auxiliaryData.simulationParameters);
@@ -804,6 +805,7 @@ void _MainWindow::onOpenSimulation()
                         showMessage("Error", *errorMessage);
                         _simController->closeSimulation();
                         _simController->newSimulation(
+                            std::nullopt,
                             deserializedData.auxiliaryData.timestep,
                             deserializedData.auxiliaryData.generalSettings,
                             deserializedData.auxiliaryData.simulationParameters);

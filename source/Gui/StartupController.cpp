@@ -49,6 +49,7 @@ void _StartupController::process()
     }
 
     if (_state == State::LoadSimulation) {
+        std::optional<std::string> name;
         DeserializedSimulation deserializedSim;
         if (!SerializerService::deserializeSimulationFromFiles(deserializedSim, Const::AutosaveFile)) {
             MessageDialog::getInstance().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
@@ -59,10 +60,12 @@ void _StartupController::process()
             deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
             deserializedSim.auxiliaryData.realTime = std::chrono::milliseconds(0);
             deserializedSim.mainData = ClusteredDataDescription();
+        } else {
+            name = "autosave";
         }
 
         _simController->newSimulation(
-            deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+            name, deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
         _simController->setClusteredSimulationData(deserializedSim.mainData);
         _simController->setStatisticsHistory(deserializedSim.statistics);
         _simController->setRealTime(deserializedSim.auxiliaryData.realTime);

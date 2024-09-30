@@ -26,7 +26,8 @@ public:
     {
         std::string name;
         uint64_t timestep = 0;
-        std::chrono::milliseconds realtime;
+        std::chrono::system_clock::time_point timestamp;
     };
-    virtual std::variant<SavedSimulationData, PersisterErrorInfo> fetchSavedSimulationData(PersisterJobId const& id) = 0;
+    virtual SavedSimulationData fetchSavedSimulationData(PersisterJobId const& id) = 0;
+    virtual PersisterErrorInfo fetchError(PersisterJobId const& id) = 0;
 };

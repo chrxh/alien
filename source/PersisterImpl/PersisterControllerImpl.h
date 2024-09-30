@@ -20,7 +20,8 @@ public:
     std::vector<PersisterErrorInfo> fetchCriticalErrorInfos() override;
 
     PersisterJobId scheduleSaveSimulationToDisc(std::string const& filename, bool critical, float const& zoom, RealVector2D const& center) override;
-    std::variant<SavedSimulationData, PersisterErrorInfo> fetchSavedSimulationData(PersisterJobId const& id) override;
+    SavedSimulationData fetchSavedSimulationData(PersisterJobId const& id) override;
+    PersisterErrorInfo fetchError(PersisterJobId const& id) override;
 
 private:
     static auto constexpr MaxWorkerThreads = 4;
