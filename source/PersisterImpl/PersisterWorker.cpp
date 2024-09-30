@@ -147,7 +147,6 @@ std::variant<PersisterJobResult, PersisterJobError> _PersisterWorker::processSav
 
     try {
         SerializerService::serializeSimulationToFiles(job->getFilename(), deserializedData);
-        throw std::runtime_error("bla");
     } catch (std::runtime_error const&) {
         return std::make_shared<_PersisterJobError>(
             job->getId(), PersisterErrorInfo{"The simulation could not be saved because an error occurred when serializing the data to the file."});
