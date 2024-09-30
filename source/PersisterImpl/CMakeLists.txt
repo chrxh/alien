@@ -1,6 +1,8 @@
 
 add_library(PersisterImpl
     Definitions.h
+    PersisterControllerImpl.cpp
+    PersisterControllerImpl.h
     PersisterJob.cpp
     PersisterJob.h
     PersisterWorker.cpp

@@ -3,6 +3,7 @@
 #include <atomic>
 #include <deque>
 #include <mutex>
+#include <condition_variable>
 
 #include "EngineInterface/SerializerService.h"
 

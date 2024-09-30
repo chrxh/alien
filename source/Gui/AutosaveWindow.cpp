@@ -16,7 +16,6 @@ namespace
 _AutosaveWindow::_AutosaveWindow(SimulationController const& simController)
     : _AlienWindow("Autosave", "windows.autosave", false)
     , _simController(simController)
-    , _worker(simController)
 {
     _settingsOpen = GlobalSettings::getInstance().getBool("windows.autosave.settings.open", _settingsOpen);
     _settingsHeight = GlobalSettings::getInstance().getFloat("windows.autosave.settings.height", _settingsHeight);
@@ -26,16 +25,10 @@ _AutosaveWindow::_AutosaveWindow(SimulationController const& simController)
     _origSaveMode = GlobalSettings::getInstance().getInt("windows.autosave.mode", _origSaveMode);
     _saveMode = _origSaveMode;
     _numberOfFiles = GlobalSettings::getInstance().getInt("windows.autosave.number of files", _origNumberOfFiles);
-
-    _thread = new std::thread(&PersisterWorker::runThreadLoop, &_worker);
 }
 
 _AutosaveWindow::~_AutosaveWindow()
 {
-    _worker.shutdown();
-    _thread->join();
-    delete _thread;
-
     GlobalSettings::getInstance().setBool("windows.autosave.settings.open", _settingsOpen);
     GlobalSettings::getInstance().setFloat("windows.autosave.settings.height", _settingsHeight);
     GlobalSettings::getInstance().setBool("windows.autosave.enabled", _autosaveEnabled);
@@ -168,8 +161,6 @@ void _AutosaveWindow::processSettings()
 
 void _AutosaveWindow::onCreateSave()
 {
-    DeserializedSimulation dummy;
-    _worker.saveSimulationToDisc("d:\\test.sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
 }
 
 void _AutosaveWindow::validationAndCorrection()
