@@ -26,8 +26,23 @@ void _PersisterControllerImpl::shutdown()
     _thread = nullptr;
 }
 
-void _PersisterControllerImpl::saveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center)
+PersisterJobState _PersisterControllerImpl::getJobState(PersisterJobId const& id) const
 {
-    DeserializedSimulation dummy;
-    _worker->saveSimulationToDisc("d:\\test.sim", zoom, center);
+    return _worker->getJobState(id);
+}
+
+PersisterJobId _PersisterControllerImpl::saveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center)
+{
+    auto jobId = generateNewJobId();
+    auto saveToDiscJob = std::make_shared<_SaveToDiscJob>(jobId, filename, zoom, center);
+
+    _worker->addJob(saveToDiscJob);
+
+    return jobId;
+}
+
+PersisterJobId _PersisterControllerImpl::generateNewJobId()
+{
+    ++_latestJobId;
+    return _latestJobId;
 }

@@ -2,11 +2,12 @@
 
 #include "Definitions.h"
 #include "AlienWindow.h"
+#include "PersisterInterface/PersisterController.h"
 
 class _AutosaveWindow : public _AlienWindow
 {
 public:
-    _AutosaveWindow(SimulationController const& simController);
+    _AutosaveWindow(PersisterController const& persisterController);
     ~_AutosaveWindow();
 
 private:
@@ -21,7 +22,7 @@ private:
 
     void validationAndCorrection();
 
-    SimulationController _simController;
+    PersisterController _persisterController;
 
     bool _settingsOpen = false;
     float _settingsHeight = 100.0f;

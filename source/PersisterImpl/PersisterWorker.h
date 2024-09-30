@@ -5,10 +5,13 @@
 #include <mutex>
 #include <condition_variable>
 
+#include "PersisterInterface/PersisterJobState.h"
+
 #include "Definitions.h"
 #include "PersisterJob.h"
+#include "PersisterJobResult.h"
 
-class _PersisterWorker
+    class _PersisterWorker
 {
 public:
     _PersisterWorker(SimulationController const& simController);
@@ -16,7 +19,9 @@ public:
     void runThreadLoop();
     void shutdown();
 
-    void saveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center);
+    PersisterJobState getJobState(PersisterJobId const& id) const;
+
+    void addJob(PersisterJob const& job);
 
 private:
     void processJobs(std::unique_lock<std::mutex>& lock);
@@ -27,7 +32,7 @@ private:
 
     std::atomic<bool> _isShutdown{false};
 
-    std::mutex _jobMutex;
+    mutable std::mutex _jobMutex;
     std::deque<PersisterJob> _openJobs;
     std::vector<PersisterJob> _inProgressJobs;
     std::vector<PersisterJobResult> _finishedJobs;

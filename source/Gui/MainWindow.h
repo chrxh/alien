@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
+#include "PersisterInterface/Definitions.h"
 #include "Network/Definitions.h"
 
 #include "Definitions.h"
@@ -8,7 +9,7 @@
 class _MainWindow
 {
 public:
-    _MainWindow(SimulationController const& simController, GuiLogger const& logger);
+    _MainWindow(SimulationController const& simController, PersisterController const& persisterController, GuiLogger const& logger);
     void mainLoop();
     void shutdown();
 
@@ -70,8 +71,9 @@ private:
     NewPasswordDialog _newPasswordDialog;
     ImageToPatternDialog _imageToPatternDialog;
 
-    SimulationInteractionController _simInteractionController;
+    PersisterController _persisterController;
     SimulationController _simController;
+    SimulationInteractionController _simInteractionController;
     StartupController _startupController;
     AutosaveController _autosaveController; 
     UiController _uiController; 

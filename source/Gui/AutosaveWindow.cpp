@@ -5,6 +5,7 @@
 #include "Base/GlobalSettings.h"
 
 #include "AlienImGui.h"
+#include "OverlayMessageController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
 
@@ -13,9 +14,9 @@ namespace
     auto constexpr RightColumnWidth = 200.0f;
 }
 
-_AutosaveWindow::_AutosaveWindow(SimulationController const& simController)
+_AutosaveWindow::_AutosaveWindow(PersisterController const& persisterController)
     : _AlienWindow("Autosave", "windows.autosave", false)
-    , _simController(simController)
+    , _persisterController(persisterController)
 {
     _settingsOpen = GlobalSettings::getInstance().getBool("windows.autosave.settings.open", _settingsOpen);
     _settingsHeight = GlobalSettings::getInstance().getFloat("windows.autosave.settings.height", _settingsHeight);
@@ -161,6 +162,8 @@ void _AutosaveWindow::processSettings()
 
 void _AutosaveWindow::onCreateSave()
 {
+    printOverlayMessage("Saving ...");
+    _persisterController->saveSimulationToDisc("d:\\test2.sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
 }
 
 void _AutosaveWindow::validationAndCorrection()
