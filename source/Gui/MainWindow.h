@@ -29,8 +29,6 @@ private:
     void processWindows();
     void processControllers();
 
-    void onOpenSimulation();
-    void onSaveSimulation();
     void onRunSimulation();
     void onPauseSimulation();
     void onExit();
@@ -90,6 +88,4 @@ private:
     bool _toolsMenuToggled = false;
     bool _helpMenuToggled = false;
     bool _renderSimulation = true;
-
-    std::string _startingPath;
 };

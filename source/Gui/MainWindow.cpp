@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-#include <boost/algorithm/string.hpp>
-
 #include <glad/glad.h>
 
 #include <imgui.h>
@@ -76,11 +74,10 @@
 #include "OverlayMessageController.h"
 #include "ExitDialog.h"
 #include "AutosaveWindow.h"
+#include "FileTransferController.h"
 
 namespace
 {
-    auto constexpr MainWindowSenderId = "MainWindow";
-
     void glfwErrorCallback(int error, const char* description)
     {
         throw std::runtime_error("Glfw error " + std::to_string(error) + ": " + description);
@@ -166,6 +163,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _autosaveWindow = std::make_shared<_AutosaveWindow>(_simController, _persisterController);
     _persisterController->init(_simController);
     OverlayMessageController::getInstance().init(_persisterController);
+    FileTransferController::get().init(_persisterController, _simController, _temporalControlWindow);
 
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
@@ -382,11 +380,11 @@ void _MainWindow::processMenubar()
                 _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Open", "CTRL+O")) {
-                onOpenSimulation();
+                FileTransferController::get().onOpenSimulation();
                 _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Save", "CTRL+S")) {
-                onSaveSimulation();
+                FileTransferController::get().onSaveSimulation();
                 _simulationMenuToggled = false;
             }
             ImGui::Separator();
@@ -584,10 +582,10 @@ void _MainWindow::processMenubar()
             _newSimulationDialog->open();
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_O)) {
-            onOpenSimulation();
+            FileTransferController::get().onOpenSimulation();
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_S)) {
-            onSaveSimulation();
+            FileTransferController::get().onSaveSimulation();
         }
         if (ImGui::IsKeyPressed(GLFW_KEY_SPACE)) {
             if (_simController->isSimulationRunning()) {
@@ -763,78 +761,7 @@ void _MainWindow::processControllers()
     _editorController->process();
     OverlayMessageController::getInstance().process();
     DelayedExecutionController::getInstance().process();
-    auto criticalErrors = _persisterController->fetchAllErrorInfos(SenderId{MainWindowSenderId});
-    if (!criticalErrors.empty()) {
-        std::vector<std::string> errorMessages;
-        for (auto const& error : criticalErrors) {
-            errorMessages.emplace_back(error.message);
-        }
-        MessageDialog::getInstance().information("Error", boost::join(errorMessages, "\n\n"));
-    }
-}
-
-void _MainWindow::onOpenSimulation()
-{
-    GenericFileDialogs::getInstance().showOpenFileDialog(
-        "Open simulation", "Simulation file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
-            auto firstFilename = ifd::FileDialog::Instance().GetResult();
-            auto firstFilenameCopy = firstFilename;
-            _startingPath = firstFilenameCopy.remove_filename().string();
-
-            printOverlayMessage("Loading ...");
-            delayedExecution([firstFilename = firstFilename, this] {
-                DeserializedSimulation deserializedData;
-                if (SerializerService::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
-                    _simController->closeSimulation();
-
-                    std::optional<std::string> errorMessage;
-                    try {
-                        _simController->newSimulation(
-                            firstFilename.stem().string(),
-                            deserializedData.auxiliaryData.timestep,
-                            deserializedData.auxiliaryData.generalSettings,
-                            deserializedData.auxiliaryData.simulationParameters);
-                        _simController->setClusteredSimulationData(deserializedData.mainData);
-                        _simController->setStatisticsHistory(deserializedData.statistics);
-                        _simController->setRealTime(deserializedData.auxiliaryData.realTime);
-                    } catch (CudaMemoryAllocationException const& exception) {
-                        errorMessage = exception.what();
-                    } catch (...) {
-                        errorMessage = "Failed to load simulation.";
-                    }
-
-                    if (errorMessage) {
-                        showMessage("Error", *errorMessage);
-                        _simController->closeSimulation();
-                        _simController->newSimulation(
-                            std::nullopt,
-                            deserializedData.auxiliaryData.timestep,
-                            deserializedData.auxiliaryData.generalSettings,
-                            deserializedData.auxiliaryData.simulationParameters);
-                    }
-
-                    Viewport::setCenterInWorldPos(deserializedData.auxiliaryData.center);
-                    Viewport::setZoomFactor(deserializedData.auxiliaryData.zoom);
-                    _temporalControlWindow->onSnapshot();
-                    printOverlayMessage(firstFilename.filename().string());
-                } else {
-                    showMessage("Open simulation", "The selected file could not be opened.");
-                }
-            });
-        });
-}
-
-void _MainWindow::onSaveSimulation()
-{
-    GenericFileDialogs::getInstance().showSaveFileDialog(
-        "Save simulation", "Simulation file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
-            auto firstFilename = ifd::FileDialog::Instance().GetResult();
-            auto firstFilenameCopy = firstFilename;
-            _startingPath = firstFilenameCopy.remove_filename().string();
-            printOverlayMessage("Saving ...");
-            SenderInfo senderInfo{.senderId = SenderId{MainWindowSenderId}, .wishResultData = false, .wishErrorInfo = true};
-            _persisterController->scheduleSaveSimulationToFile(senderInfo, firstFilename.string(), Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
-        });
+    FileTransferController::get().process();
 }
 
 void _MainWindow::onRunSimulation()

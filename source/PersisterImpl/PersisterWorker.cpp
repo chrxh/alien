@@ -1,6 +1,7 @@
 #include "PersisterWorker.h"
 
 #include <algorithm>
+#include <filesystem>
 
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
@@ -12,14 +13,10 @@ _PersisterWorker::_PersisterWorker(SimulationController const& simController)
 
 void _PersisterWorker::runThreadLoop()
 {
-    try {
-        std::unique_lock lock(_jobMutex);
-        while (!_isShutdown.load()) {
-            _conditionVariable.wait(lock);
-            processJobs(lock);
-        }
-    } catch (std::exception const&) {
-        //#TODO
+    std::unique_lock lock(_jobMutex);
+    while (!_isShutdown.load()) {
+        _conditionVariable.wait(lock);
+        processJobs(lock);
     }
 }
 
@@ -40,22 +37,22 @@ PersisterRequestState _PersisterWorker::getJobState(PersisterRequestId const& id
 {
     std::unique_lock uniqueLock(_jobMutex);
 
-    if (std::ranges::find_if(_openJobs, [&](PersisterRequest const& job) { return job->getId() == id; }) != _openJobs.end()) {
+    if (std::ranges::find_if(_openJobs, [&](PersisterRequest const& request) { return request->getRequestId() == id; }) != _openJobs.end()) {
         return PersisterRequestState::InQueue;
     }
-    if (std::ranges::find_if(_inProgressJobs, [&](PersisterRequest const& job) { return job->getId() == id; }) != _inProgressJobs.end()) {
+    if (std::ranges::find_if(_inProgressJobs, [&](PersisterRequest const& request) { return request->getRequestId() == id; }) != _inProgressJobs.end()) {
         return PersisterRequestState::InProgress;
     }
-    if (std::ranges::find_if(_finishedJobs, [&](PersisterRequestResult const& job) { return job->getRequestId() == id; }) != _finishedJobs.end()) {
+    if (std::ranges::find_if(_finishedJobs, [&](PersisterRequestResult const& request) { return request->getRequestId() == id; }) != _finishedJobs.end()) {
         return PersisterRequestState::Finished;
     }
-    if (std::ranges::find_if(_jobErrors, [&](PersisterRequestError const& job) { return job->getId() == id; }) != _jobErrors.end()) {
+    if (std::ranges::find_if(_jobErrors, [&](PersisterRequestError const& request) { return request->getRequestId() == id; }) != _jobErrors.end()) {
         return PersisterRequestState::Error;
     }
     THROW_NOT_IMPLEMENTED();
 }
 
-void _PersisterWorker::addJob(PersisterRequest const& job)
+void _PersisterWorker::addRequest(PersisterRequest const& job)
 {
     {
         std::unique_lock uniqueLock(_jobMutex);
@@ -82,7 +79,7 @@ PersisterRequestError _PersisterWorker::fetchJobError(PersisterRequestId const& 
 {
     std::unique_lock uniqueLock(_jobMutex);
 
-    auto jobsErrorsIter = std::ranges::find_if(_jobErrors, [&](PersisterRequestError const& job) { return job->getId() == id; });
+    auto jobsErrorsIter = std::ranges::find_if(_jobErrors, [&](PersisterRequestError const& job) { return job->getRequestId() == id; });
     if (jobsErrorsIter != _jobErrors.end()) {
         auto resultCopy = *jobsErrorsIter;
         _jobErrors.erase(jobsErrorsIter);
@@ -116,28 +113,29 @@ void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
 
     while (!_openJobs.empty()) {
 
-        auto job = _openJobs.front();
+        auto request = _openJobs.front();
         _openJobs.pop_front();
 
-        _inProgressJobs.push_back(job);
+        _inProgressJobs.push_back(request);
 
         std::variant<PersisterRequestResult, PersisterRequestError> processingResult;
-        if (auto const& saveToFileJob = std::dynamic_pointer_cast<_SaveToFileJob>(job)) {
-            processingResult = processJob(lock, saveToFileJob);
+        if (auto const& saveToFileJob = std::dynamic_pointer_cast<_SaveToFileRequest>(request)) {
+            processingResult = processRequest(lock, saveToFileJob);
         }
-        if (auto const& loadFromFileJob = std::dynamic_pointer_cast<_LoadFromFileJob>(job)) {
-            processingResult = processJob(lock, loadFromFileJob);
+        if (auto const& loadFromFileJob = std::dynamic_pointer_cast<_LoadFromFileRequest>(request)) {
+            processingResult = processRequest(lock, loadFromFileJob);
         }
-        auto inProgressJobsIter = std::ranges::find_if(_inProgressJobs, [&](PersisterRequest const& otherJob) { return otherJob->getId() == job->getId(); });
+        auto inProgressJobsIter = std::ranges::find_if(
+            _inProgressJobs, [&](PersisterRequest const& otherRequest) { return otherRequest->getRequestId() == request->getRequestId(); });
         _inProgressJobs.erase(inProgressJobsIter);
 
         if (std::holds_alternative<PersisterRequestResult>(processingResult)) {
-            if (job->getSenderInfo().wishResultData) {
+            if (request->getSenderInfo().wishResultData) {
                 _finishedJobs.emplace_back(std::get<PersisterRequestResult>(processingResult));
             }
         }
         if (std::holds_alternative<PersisterRequestError>(processingResult)) {
-            if (job->getSenderInfo().wishErrorInfo) {
+            if (request->getSenderInfo().wishErrorInfo) {
                 _jobErrors.emplace_back(std::get<PersisterRequestError>(processingResult));
             }
         }
@@ -156,9 +154,11 @@ namespace
         std::unique_lock<std::mutex>& _lock;
     };
 }
-auto _PersisterWorker::processJob(std::unique_lock<std::mutex>& lock, SaveToFileJob const& job) -> PersisterRequestResultOrError
+auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveToFileRequest const& request) -> PersisterRequestResultOrError
 {
     UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
 
     DeserializedSimulation deserializedData;
     std::string simulationName;
@@ -168,69 +168,43 @@ auto _PersisterWorker::processJob(std::unique_lock<std::mutex>& lock, SaveToFile
         timePoint = std::chrono::system_clock::now();
         deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
         deserializedData.auxiliaryData.realTime = _simController->getRealTime();
-        deserializedData.auxiliaryData.zoom = job->getZoom();
-        deserializedData.auxiliaryData.center = job->getCenter();
+        deserializedData.auxiliaryData.zoom = requestData.zoom;
+        deserializedData.auxiliaryData.center = requestData.center;
         deserializedData.auxiliaryData.generalSettings = _simController->getGeneralSettings();
         deserializedData.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
         deserializedData.statistics = _simController->getStatisticsHistory().getCopiedData();
         deserializedData.mainData = _simController->getClusteredSimulationData();
     } catch (std::runtime_error const&) {
         return std::make_shared<_PersisterRequestError>(
-            job->getId(),
-            job->getSenderInfo().senderId,
+            request->getRequestId(),
+            request->getSenderInfo().senderId,
             PersisterErrorInfo{"The simulation could not be saved because no valid data could be obtained from the GPU."});
     }
 
     try {
-        SerializerService::serializeSimulationToFiles(job->getFilename(), deserializedData);
+        SerializerService::serializeSimulationToFiles(requestData.filename, deserializedData);
     } catch (std::runtime_error const&) {
         return std::make_shared<_PersisterRequestError>(
-            job->getId(),
-            job->getSenderInfo().senderId,
+            request->getRequestId(),
+            request->getSenderInfo().senderId,
             PersisterErrorInfo{"The simulation could not be saved because an error occurred when serializing the data to the file."});
     }
 
-    return std::make_shared<_SaveToFileJobResult>(job->getId(), simulationName, deserializedData.auxiliaryData.timestep, timePoint);
+    return std::make_shared<_SaveToFileRequestResult>(
+        request->getRequestId(), SavedSimulationResultData{simulationName, deserializedData.auxiliaryData.timestep, timePoint});
 }
 
-auto _PersisterWorker::processJob(std::unique_lock<std::mutex>& lock, LoadFromFileJob const& job) -> PersisterRequestResultOrError
+auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, LoadFromFileRequest const& request) -> PersisterRequestResultOrError
 {
-    return PersisterRequestError{};
-    //DeserializedSimulation deserializedData;
-    //if (SerializerService::deserializeSimulationFromFiles(deserializedData, firstFilename.string())) {
-    //    _simController->closeSimulation();
+    UnlockGuard unlockGuard(lock);
 
-    //    std::optional<std::string> errorMessage;
-    //    try {
-    //        _simController->newSimulation(
-    //            firstFilename.stem().string(),
-    //            deserializedData.auxiliaryData.timestep,
-    //            deserializedData.auxiliaryData.generalSettings,
-    //            deserializedData.auxiliaryData.simulationParameters);
-    //        _simController->setClusteredSimulationData(deserializedData.mainData);
-    //        _simController->setStatisticsHistory(deserializedData.statistics);
-    //        _simController->setRealTime(deserializedData.auxiliaryData.realTime);
-    //    } catch (CudaMemoryAllocationException const& exception) {
-    //        errorMessage = exception.what();
-    //    } catch (...) {
-    //        errorMessage = "Failed to load simulation.";
-    //    }
+    auto const& requestData = request->getData();
 
-    //    if (errorMessage) {
-    //        showMessage("Error", *errorMessage);
-    //        _simController->closeSimulation();
-    //        _simController->newSimulation(
-    //            std::nullopt,
-    //            deserializedData.auxiliaryData.timestep,
-    //            deserializedData.auxiliaryData.generalSettings,
-    //            deserializedData.auxiliaryData.simulationParameters);
-    //    }
-
-    //    Viewport::setCenterInWorldPos(deserializedData.auxiliaryData.center);
-    //    Viewport::setZoomFactor(deserializedData.auxiliaryData.zoom);
-    //    _temporalControlWindow->onSnapshot();
-    //    printOverlayMessage(firstFilename.filename().string());
-    //} else {
-    //    showMessage("Open simulation", "The selected file could not be opened.");
-    //}
+    DeserializedSimulation deserializedData;
+    if (!SerializerService::deserializeSimulationFromFiles(deserializedData, requestData.filename)) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The selected file could not be opened."});
+    }
+    auto simulationName = std::filesystem::path(requestData.filename).stem().string();
+    return std::make_shared<_LoadFromFileRequestResult>(request->getRequestId(), LoadedSimulationResultData{simulationName, deserializedData});
 }

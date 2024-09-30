@@ -16,14 +16,15 @@ public:
     void shutdown() override;
 
     bool isBusy() const override;
-    PersisterRequestState getJobState(PersisterRequestId const& id) const override;
+    PersisterRequestState getRequestState(PersisterRequestId const& id) const override;
     std::vector<PersisterErrorInfo> fetchAllErrorInfos(SenderId const& senderId) override;
     PersisterErrorInfo fetchError(PersisterRequestId const& id) override;
 
-    PersisterRequestId scheduleSaveSimulationToFile(SenderInfo const& senderInfo, std::string const& filename, float const& zoom, RealVector2D const& center) override;
-    SavedSimulationData fetchSavedSimulationData(PersisterRequestId const& id) override;
+    PersisterRequestId scheduleSaveSimulationToFile(SenderInfo const& senderInfo, SaveSimulationRequestData const& data) override;
+    SavedSimulationResultData fetchSavedSimulationData(PersisterRequestId const& id) override;
 
-    PersisterRequestId scheduleLoadSimulationFromFile(SenderInfo const& senderInfo, std::string const& filename) override;
+    PersisterRequestId scheduleLoadSimulationFromFile(SenderInfo const& senderInfo, LoadSimulationRequestData const& data) override;
+    LoadedSimulationResultData fetchLoadSimulationData(PersisterRequestId const& id) override;
 
 private:
     static auto constexpr MaxWorkerThreads = 4;

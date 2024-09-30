@@ -1,49 +1,52 @@
 #pragma once
 
+#include "PersisterInterface/LoadSimulationRequestData.h"
 #include "PersisterInterface/PersisterRequestId.h"
 #include "PersisterInterface/SenderInfo.h"
-
-#include "Definitions.h"
+#include "PersisterInterface/SaveSimulationRequestData.h"
 
 class _PersisterRequest
 {
 public:
-    PersisterRequestId const& getId() const;
-    SenderInfo const& getSenderInfo() const;
+    PersisterRequestId const& getRequestId() const { return _requestId; }
+    SenderInfo const& getSenderInfo() const { return _senderInfo; }
 
 protected:
-    _PersisterRequest(PersisterRequestId const& requestId, SenderInfo const& senderInfo);
+    _PersisterRequest(PersisterRequestId const& requestId, SenderInfo const& senderInfo)
+        : _requestId(requestId)
+        , _senderInfo(senderInfo) {}
+
     virtual ~_PersisterRequest() = default;
 
+private:
     PersisterRequestId _requestId;
     SenderInfo _senderInfo;
 };
+
+template <typename Data_t>
+class _ConcreteRequest : public _PersisterRequest
+{
+public:
+    Data_t const& getData() const { return _data; }
+
+    _ConcreteRequest(PersisterRequestId const& requestId, SenderInfo const& senderInfo, Data_t const& data)
+        : _PersisterRequest(requestId, senderInfo)
+        , _data(data)
+    {}
+
+    virtual ~_ConcreteRequest() = default;
+
+private:
+    Data_t _data;
+};
+
 using PersisterRequest = std::shared_ptr<_PersisterRequest>;
 
-class _SaveToFileJob : public _PersisterRequest
-{
-public:
-    _SaveToFileJob(PersisterRequestId const& requestId, SenderInfo const& senderInfo, std::string const& filename, float const& zoom, RealVector2D const& center);
+template<typename Data_t>
+using ConcreteRequest = std::shared_ptr<_ConcreteRequest<Data_t>>;
 
-    std::string const& getFilename() const;
-    float const& getZoom() const;
-    RealVector2D const& getCenter() const;
+using _SaveToFileRequest = _ConcreteRequest<SaveSimulationRequestData>;
+using SaveToFileRequest = std::shared_ptr<_SaveToFileRequest>;
 
-private:
-    std::string _filename;
-    float _zoom = 0;
-    RealVector2D _center;
-};
-using SaveToFileJob = std::shared_ptr<_SaveToFileJob>;
-
-class _LoadFromFileJob : public _PersisterRequest
-{
-public:
-    _LoadFromFileJob(PersisterRequestId const& requestId, SenderInfo const& senderInfo, std::string const& filename);
-
-    std::string const& getFilename() const;
-
-private:
-    std::string _filename;
-};
-using LoadFromFileJob = std::shared_ptr<_LoadFromFileJob>;
+using _LoadFromFileRequest = _ConcreteRequest<LoadSimulationRequestData>;
+using LoadFromFileRequest = std::shared_ptr<_LoadFromFileRequest>;

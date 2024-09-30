@@ -6,7 +6,7 @@ _PersisterRequestError::_PersisterRequestError(PersisterRequestId const& id, Sen
     , _errorInfo(errorInfo)
 {}
 
-PersisterRequestId const& _PersisterRequestError::getId() const
+PersisterRequestId const& _PersisterRequestError::getRequestId() const
 {
     return _requestId;
 }

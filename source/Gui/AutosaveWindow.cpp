@@ -183,9 +183,9 @@ void _AutosaveWindow::createSavepoint()
 {
     printOverlayMessage("Creating save point ...");
     static int i = 0;
-    SenderInfo senderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
-    auto jobId = _persisterController->scheduleSaveSimulationToFile(
-        senderInfo, "d:\\test" + std::to_string(++i) + ".sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
+    auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
+    auto saveData = SaveSimulationRequestData{"d:\\test" + std::to_string(++i) + ".sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos()};
+    auto jobId = _persisterController->scheduleSaveSimulationToFile(senderInfo, saveData);
 
     _savePoints.emplace_front(SavepointState::InQueue, jobId.value, "", "", 0);
 }
@@ -193,7 +193,7 @@ void _AutosaveWindow::createSavepoint()
 void _AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)
 {
     if (savepoint.state != SavepointState::Persisted) {
-        auto jobState = _persisterController->getJobState(PersisterRequestId(savepoint.id));
+        auto jobState = _persisterController->getRequestState(PersisterRequestId(savepoint.id));
         if (jobState == PersisterRequestState::InProgress) {
             savepoint.state = SavepointState::InProgress;
         }

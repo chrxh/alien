@@ -162,6 +162,8 @@ using ChangeColorDialog = std::shared_ptr<_ChangeColorDialog>;
 class _AutosaveWindow;
 using AutosaveWindow = std::shared_ptr<_AutosaveWindow>;
 
+class FileTransferController;
+
 struct UserInfo;
 
 struct GLFWvidmode;

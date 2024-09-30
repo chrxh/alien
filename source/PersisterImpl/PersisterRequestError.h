@@ -10,7 +10,7 @@ public:
     _PersisterRequestError(PersisterRequestId const& requestId, SenderId const& senderId, PersisterErrorInfo const& errorInfo);
     virtual ~_PersisterRequestError() = default;
 
-    PersisterRequestId const& getId() const;
+    PersisterRequestId const& getRequestId() const;
     SenderId const& getSenderId() const;
     PersisterErrorInfo const& getErrorInfo() const;
 
