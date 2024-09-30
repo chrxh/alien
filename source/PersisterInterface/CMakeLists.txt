@@ -3,6 +3,7 @@ add_library(PersisterInterface
     Definitions.h
     PersisterController.cpp
     PersisterController.h
+    PersisterErrorInfo.h
     PersisterJobId.h
     PersisterJobState.h)
 

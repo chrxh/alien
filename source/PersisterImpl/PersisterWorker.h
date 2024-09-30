@@ -19,7 +19,9 @@ public:
     void runThreadLoop();
     void shutdown();
 
+    bool isBusy() const;
     PersisterJobState getJobState(PersisterJobId const& id) const;
+    PersisterJobResult fetchJobResult(PersisterJobId const& id);
 
     void addJob(PersisterJob const& job);
 

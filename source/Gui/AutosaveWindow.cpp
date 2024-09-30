@@ -113,7 +113,7 @@ void _AutosaveWindow::processTable()
                 ImGui::TableNextRow(0, scale(15.0f));
 
                 ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(entry.sequenceNumber));
+                AlienImGui::Text(std::to_string(row + 1));
 
                 ImGui::TableNextColumn();
                 if (entry.state == SavepointState::InQueue) {
@@ -176,13 +176,11 @@ void _AutosaveWindow::processSettings()
 
 void _AutosaveWindow::createSavepoint()
 {
-    printOverlayMessage("Creating save point ...", true);
-    auto jobId = _persisterController->saveSimulationToDisc("d:\\test2.sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
+    printOverlayMessage("Creating save point ...");
+    static int i = 0;
+    auto jobId = _persisterController->scheduleSaveSimulationToDisc("d:\\test" + std::to_string(++i) + ".sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
 
-    for (auto& savePoint : _savePoints) {
-        ++savePoint.sequenceNumber;
-    }
-    _savePoints.emplace_front(SavepointState::InQueue, 1, jobId, "", "", 0);
+    _savePoints.emplace_front(SavepointState::InQueue, jobId, "", "", 0);
 }
 
 void _AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)

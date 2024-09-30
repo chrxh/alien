@@ -1854,10 +1854,9 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
         auto drawList = ImGui::GetWindowDrawList();
         RotateStart(drawList);
         ImGui::Text("[cell color]");
-        RotateEnd(90.0f, drawList);
+        RotateEnd(-90.0f, drawList);
 
         ImGui::SetCursorPos(startPos);
-
 
         //color matrix
         if (ImGui::BeginTable(("##" + parameters._name).c_str(), MAX_COLORS + 1, 0, ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
@@ -2014,7 +2013,7 @@ namespace
 void AlienImGui::RotateEnd(float angle, ImDrawList* drawList)
 {
     auto center = RotationCenter(drawList);
-    float s = sin((angle + 90.0f) * Const::DegToRad), c = cos((angle + 90.0f) * Const::DegToRad);
+    float s = sin((-angle + 90.0f) * Const::DegToRad), c = cos((-angle + 90.0f) * Const::DegToRad);
     center = ImRotate(center, s, c) - center;
 
     auto& buf = drawList->VtxBuffer;

@@ -16,7 +16,6 @@ enum class SavepointState
 struct SavepointEntry
 {
     SavepointState state = SavepointState::InQueue;
-    int sequenceNumber = 0;
     std::string id;
     std::string timestamp;
     std::string name;
@@ -46,7 +45,7 @@ private:
     PersisterController _persisterController;
 
     bool _settingsOpen = false;
-    float _settingsHeight = 100.0f;
+    float _settingsHeight = 130.0f;
     std::string _origLocation;
     std::string _location;
 

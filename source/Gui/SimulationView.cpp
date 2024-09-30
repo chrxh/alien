@@ -195,7 +195,7 @@ void _SimulationView::draw(bool renderSimulation)
         auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
         auto maxLength = std::max(right, bottom);
 
-        AlienImGui::RotateStart(ImGui::GetBackgroundDrawList());
+        AlienImGui::RotateStart(drawList);
         auto font = styleRep.getReefLargeFont();
         auto text = "Rendering disabled";
         ImVec4 clipRect(-100000.0f, -100000.0f, 100000.0f, 100000.0f);
@@ -213,7 +213,7 @@ void _SimulationView::draw(bool renderSimulation)
                     false);
             }
         }
-        AlienImGui::RotateEnd(45.0f, ImGui::GetBackgroundDrawList());
+        AlienImGui::RotateEnd(45.0f, drawList);
     }
 }
 
