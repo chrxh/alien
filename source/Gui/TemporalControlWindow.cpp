@@ -181,7 +181,7 @@ void _TemporalControlWindow::processStepForwardButton()
 void _TemporalControlWindow::processCreateFlashbackButton()
 {
     auto result = AlienImGui::ToolbarButton(ICON_FA_CAMERA);
-    AlienImGui::Tooltip("Creating flashback: It saves the content of the current world to the memory.");
+    AlienImGui::Tooltip("Creating in-memory flashback: It saves the content of the current world to the memory.");
     if (result) {
         delayedExecution([this] { onSnapshot(); });
         
@@ -193,7 +193,7 @@ void _TemporalControlWindow::processLoadFlashbackButton()
 {
     ImGui::BeginDisabled(!_snapshot);
     auto result = AlienImGui::ToolbarButton(ICON_FA_UNDO);
-    AlienImGui::Tooltip("Loading flashback: It loads the saved world from the memory. Static simulation parameters will not be changed. Non-static parameters "
+    AlienImGui::Tooltip("Loading in-memory flashback: It loads the saved world from the memory. Static simulation parameters will not be changed. Non-static parameters "
                         "(such as the position of moving zones) will be restored as well.");
     if (result) {
         delayedExecution([this] { applySnapshot(*_snapshot); });

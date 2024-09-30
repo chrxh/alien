@@ -37,7 +37,7 @@ PersisterJobState _PersisterWorker::getJobState(PersisterJobId const& id) const
         return PersisterJobState::InProgress;
     }
     if (std::ranges::find_if(_finishedJobs, [&](PersisterJobResult const& job) { return job->getId() == id; }) != _finishedJobs.end()) {
-        return PersisterJobState::InProgress;
+        return PersisterJobState::Finished;
     }
     THROW_NOT_IMPLEMENTED();
 }

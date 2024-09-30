@@ -6,6 +6,23 @@
 #include "AlienWindow.h"
 #include "PersisterInterface/PersisterController.h"
 
+enum class SavepointState
+{
+    InQueue,
+    InProgress,
+    Persisted,
+};
+
+struct SavepointEntry
+{
+    SavepointState state = SavepointState::InQueue;
+    int sequenceNumber = 0;
+    std::string id;
+    std::string timestamp;
+    std::string name;
+    uint64_t timestep;
+};
+
 class _AutosaveWindow : public _AlienWindow
 {
 public:
@@ -20,7 +37,8 @@ private:
     void processTable();
     void processSettings();
 
-    void onCreateSave();
+    void createSavepoint();
+    void updateSavepoint(SavepointEntry& savepoint);
 
     void validationAndCorrection();
 
@@ -47,14 +65,5 @@ private:
     int _origNumberOfFiles = 20;
     int _numberOfFiles = 20;
 
-    struct SavePointEntry
-    {
-        bool transient = true;
-        int sequenceNumber = 0;
-        std::string id;
-        std::string timestamp;
-        std::string name;
-        uint64_t timestep;
-    };
-    std::deque<SavePointEntry> _savePoints;
+    std::deque<SavepointEntry> _savePoints;
 };
