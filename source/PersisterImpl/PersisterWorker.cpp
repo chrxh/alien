@@ -49,7 +49,7 @@ PersisterJobState _PersisterWorker::getJobState(PersisterJobId const& id) const
     if (std::ranges::find_if(_finishedJobs, [&](PersisterJobResult const& job) { return job->getId() == id; }) != _finishedJobs.end()) {
         return PersisterJobState::Finished;
     }
-    if (std::ranges::find_if(_errorJobs, [&](PersisterJobError const& job) { return job->getId() == id; }) != _errorJobs.end()) {
+    if (std::ranges::find_if(_jobErrors, [&](PersisterJobError const& job) { return job->getId() == id; }) != _jobErrors.end()) {
         return PersisterJobState::Error;
     }
     THROW_NOT_IMPLEMENTED();
@@ -76,10 +76,10 @@ std::variant<PersisterJobResult, PersisterJobError> _PersisterWorker::fetchJobRe
         return resultCopy;
     }
 
-    auto errorJobsIter = std::ranges::find_if(_errorJobs, [&](PersisterJobError const& job) { return job->getId() == id; });
-    if (errorJobsIter != _errorJobs.end()) {
-        auto resultCopy = *errorJobsIter;
-        _errorJobs.erase(errorJobsIter);
+    auto jobsErrorsIter = std::ranges::find_if(_jobErrors, [&](PersisterJobError const& job) { return job->getId() == id; });
+    if (jobsErrorsIter != _jobErrors.end()) {
+        auto resultCopy = *jobsErrorsIter;
+        _jobErrors.erase(jobsErrorsIter);
         return resultCopy;
     }
     THROW_NOT_IMPLEMENTED();
@@ -91,14 +91,14 @@ std::vector<PersisterErrorInfo> _PersisterWorker::fetchCriticalErrorInfos()
 
     std::vector<PersisterErrorInfo> result;
     std::deque<PersisterJobError> filteredErrorJobs;
-    for (auto const& errorJob : _errorJobs) {
+    for (auto const& errorJob : _jobErrors) {
         if (errorJob->isCritical()) {
             result.emplace_back(errorJob->getErrorInfo());
         } else {
             filteredErrorJobs.emplace_back(errorJob);
         }
     }
-    _errorJobs = filteredErrorJobs;
+    _jobErrors = filteredErrorJobs;
     return result;
 }
 
@@ -123,7 +123,7 @@ void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
                 _finishedJobs.emplace_back(std::get<PersisterJobResult>(processingResult));
             }
             if (std::holds_alternative<PersisterJobError>(processingResult)) {
-                _errorJobs.emplace_back(std::get<PersisterJobError>(processingResult));
+                _jobErrors.emplace_back(std::get<PersisterJobError>(processingResult));
             }
         }
 

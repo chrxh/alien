@@ -40,7 +40,7 @@ private:
     std::deque<PersisterJob> _openJobs;
     std::deque<PersisterJob> _inProgressJobs;
     std::deque<PersisterJobResult> _finishedJobs;
-    std::deque<PersisterJobError> _errorJobs;
+    std::deque<PersisterJobError> _jobErrors;
 
     std::condition_variable _conditionVariable;
 };
