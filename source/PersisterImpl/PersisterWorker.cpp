@@ -1,5 +1,7 @@
 #include "PersisterWorker.h"
 
+#include <algorithm>
+
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 
