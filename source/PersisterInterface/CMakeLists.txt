@@ -2,7 +2,9 @@
 add_library(PersisterInterface
     Definitions.h
     PersisterController.cpp
-    PersisterController.h)
+    PersisterController.h
+    PersisterJobId.h
+    PersisterJobState.h)
 
 target_link_libraries(PersisterInterface Base)
 

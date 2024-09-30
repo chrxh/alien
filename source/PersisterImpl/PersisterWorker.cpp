@@ -27,12 +27,26 @@ void _PersisterWorker::shutdown()
     _conditionVariable.notify_all();
 }
 
-void _PersisterWorker::saveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center)
+PersisterJobState _PersisterWorker::getJobState(PersisterJobId const& id) const
+{
+    std::unique_lock uniqueLock(_jobMutex);
+    if (std::ranges::find_if(_openJobs, [&](PersisterJob const& job) { return job->getId() == id; }) != _openJobs.end()) {
+        return PersisterJobState::InQueue;
+    }
+    if (std::ranges::find_if(_inProgressJobs, [&](PersisterJob const& job) { return job->getId() == id; }) != _inProgressJobs.end()) {
+        return PersisterJobState::InProgress;
+    }
+    if (std::ranges::find_if(_finishedJobs, [&](PersisterJobResult const& job) { return job->getId() == id; }) != _finishedJobs.end()) {
+        return PersisterJobState::InProgress;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+void _PersisterWorker::addJob(PersisterJob const& job)
 {
     {
         std::unique_lock uniqueLock(_jobMutex);
-        auto saveToDiscJob = std::make_shared<_SaveToDiscJob>(_idCount++, filename, zoom, center);
-        _openJobs.emplace_back(saveToDiscJob);
+        _openJobs.emplace_back(job);
     }
     _conditionVariable.notify_all();
 }

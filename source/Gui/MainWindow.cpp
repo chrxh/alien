@@ -21,6 +21,7 @@
 #include "implot.h"
 #include "Fonts/IconsFontAwesome5.h"
 
+#include "PersisterInterface/PersisterController.h"
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 #include "Network/NetworkService.h"
@@ -91,12 +92,13 @@ namespace
     }
 }
 
-_MainWindow::_MainWindow(SimulationController const& simController, GuiLogger const& logger)
+_MainWindow::_MainWindow(SimulationController const& simController, PersisterController const& persisterController, GuiLogger const& logger)
+    : _logger(logger)
+    , _simController(simController)
+    , _persisterController(persisterController)
 {
     IMGUI_CHECKVERSION();
 
-    _logger = logger;
-    _simController = simController;
 
     log(Priority::Important, "initialize GLFW and OpenGL");
     auto glfwVersion = initGlfw();
@@ -157,7 +159,8 @@ _MainWindow::_MainWindow(SimulationController const& simController, GuiLogger co
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_simController);
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
-    _autosaveWindow = std::make_shared<_AutosaveWindow>(_simController);
+    _autosaveWindow = std::make_shared<_AutosaveWindow>(_persisterController);
+    _persisterController->init(_simController);
 
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
@@ -239,6 +242,7 @@ void _MainWindow::shutdown()
 
     _simulationView.reset();
 
+    _persisterController->shutdown();
     _simController->closeSimulation();
     NetworkService::shutdown();
 }

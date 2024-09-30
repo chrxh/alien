@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     try {
         simController = std::make_shared<_SimulationControllerImpl>();
         persisterController = std::make_shared<_PersisterControllerImpl>();
-        mainWindow = std::make_shared<_MainWindow>(simController, logger);
+        mainWindow = std::make_shared<_MainWindow>(simController, persisterController, logger);
         mainWindow->mainLoop();
         mainWindow->shutdown();
 
