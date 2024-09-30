@@ -159,7 +159,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_simController);
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
-    _autosaveWindow = std::make_shared<_AutosaveWindow>(_persisterController);
+    _autosaveWindow = std::make_shared<_AutosaveWindow>(_simController, _persisterController);
     _persisterController->init(_simController);
 
     //cyclic references

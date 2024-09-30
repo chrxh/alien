@@ -1,5 +1,7 @@
 #pragma once
 
+#include <deque>
+
 #include "Definitions.h"
 #include "AlienWindow.h"
 #include "PersisterInterface/PersisterController.h"
@@ -7,7 +9,7 @@
 class _AutosaveWindow : public _AlienWindow
 {
 public:
-    _AutosaveWindow(PersisterController const& persisterController);
+    _AutosaveWindow(SimulationController const& simController, PersisterController const& persisterController);
     ~_AutosaveWindow();
 
 private:
@@ -22,6 +24,7 @@ private:
 
     void validationAndCorrection();
 
+    SimulationController _simController; 
     PersisterController _persisterController;
 
     bool _settingsOpen = false;
@@ -53,5 +56,5 @@ private:
         std::string name;
         uint64_t timestep;
     };
-    std::vector<SavePointEntry> _savePoints;
+    std::deque<SavePointEntry> _savePoints;
 };
