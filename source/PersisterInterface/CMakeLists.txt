@@ -1,11 +1,15 @@
 
 add_library(PersisterInterface
     Definitions.h
+    LoadedSimulationResultData.h
+    LoadSimulationRequestData.h
     PersisterController.cpp
     PersisterController.h
     PersisterErrorInfo.h
     PersisterRequestId.h
     PersisterRequestState.h
+    SavedSimulationResultData.h
+    SaveSimulationRequestData.h
     SenderId.h
     SenderInfo.h)
 

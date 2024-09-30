@@ -1,37 +1,45 @@
 #pragma once
 
-#include "EngineInterface/DeserializedSimulation.h"
+#include "PersisterInterface/LoadedSimulationResultData.h"
 #include "PersisterInterface/PersisterRequestId.h"
+#include "PersisterInterface/SavedSimulationResultData.h"
 
 class _PersisterRequestResult
 {
 public:
-    PersisterRequestId const& getRequestId() const;
+    PersisterRequestId const& getRequestId() const { return _requestId; }
 
 protected:
-    _PersisterRequestResult(PersisterRequestId const& requestId);
+    _PersisterRequestResult(PersisterRequestId const& requestId) : _requestId(requestId) {}
     virtual ~_PersisterRequestResult() = default;
 
     PersisterRequestId _requestId;
 };
 using PersisterRequestResult = std::shared_ptr<_PersisterRequestResult>;
 
-class _SaveToFileJobResult : public _PersisterRequestResult
+template <typename Data_t>
+class _ConcreteRequestResult : public _PersisterRequestResult
 {
 public:
-    _SaveToFileJobResult(
-        PersisterRequestId const& requestId,
-        std::string const& simulationName,
-        uint64_t const& timestep,
-        std::chrono::system_clock::time_point const& timestamp);
+    Data_t const& getData() const { return _data; }
 
-    std::string const& getSimulationName() const;
-    uint64_t const& getTimestep() const;
-    std::chrono::system_clock::time_point const& getTimestamp();
+    _ConcreteRequestResult(PersisterRequestId const& requestId, Data_t const& data)
+        : _PersisterRequestResult(requestId)
+        , _data(data)
+    {}
+
+    virtual ~_ConcreteRequestResult() = default;
 
 private:
-    std::string _simulationName;
-    uint64_t _timestep = 0;
-    std::chrono::system_clock::time_point _timestamp;
+    Data_t _data;
 };
-using SaveToFileJobResult = std::shared_ptr<_SaveToFileJobResult>;
+using PersisterRequestResult = std::shared_ptr<_PersisterRequestResult>;
+
+template <typename Data_t>
+using ConcreteRequestResult = std::shared_ptr<_ConcreteRequestResult<Data_t>>;
+
+using _SaveToFileRequestResult = _ConcreteRequestResult<SavedSimulationResultData>;
+using SaveToFileRequestResult = std::shared_ptr<_SaveToFileRequestResult>;
+
+using _LoadFromFileRequestResult = _ConcreteRequestResult<LoadedSimulationResultData>;
+using LoadFromFileRequestResult = std::shared_ptr<_LoadFromFileRequestResult>;

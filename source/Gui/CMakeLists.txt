@@ -39,6 +39,8 @@ PUBLIC
     EditSimulationDialog.h
     ExitDialog.cpp
     ExitDialog.h
+    FileTransferController.cpp
+    FileTransferController.h
     FpsController.cpp
     FpsController.h
     GenericFileDialogs.cpp

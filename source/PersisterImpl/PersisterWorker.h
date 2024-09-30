@@ -23,7 +23,7 @@ public:
     bool isBusy() const;
     PersisterRequestState getJobState(PersisterRequestId const& id) const;
 
-    void addJob(PersisterRequest const& job);
+    void addRequest(PersisterRequest const& job);
     PersisterRequestResult fetchJobResult(PersisterRequestId const& id);   
     PersisterRequestError fetchJobError(PersisterRequestId const& id);   
 
@@ -33,8 +33,8 @@ private:
     void processJobs(std::unique_lock<std::mutex>& lock);
 
     using PersisterRequestResultOrError = std::variant<PersisterRequestResult, PersisterRequestError>;
-    PersisterRequestResultOrError processJob(std::unique_lock<std::mutex>& lock, SaveToFileJob const& job);
-    PersisterRequestResultOrError processJob(std::unique_lock<std::mutex>& lock, LoadFromFileJob const& job);
+    PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, SaveToFileRequest const& job);
+    PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, LoadFromFileRequest const& request);
 
     SimulationController _simController;
 

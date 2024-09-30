@@ -6,9 +6,13 @@
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
+#include "LoadedSimulationResultData.h"
+#include "LoadSimulationRequestData.h"
 #include "PersisterErrorInfo.h"
 #include "PersisterRequestId.h"
 #include "PersisterRequestState.h"
+#include "SavedSimulationResultData.h"
+#include "SaveSimulationRequestData.h"
 #include "SenderId.h"
 #include "SenderInfo.h"
 
@@ -22,19 +26,14 @@ public:
 
     //generic logic
     virtual bool isBusy() const = 0;
-    virtual PersisterRequestState getJobState(PersisterRequestId const& id) const = 0;
+    virtual PersisterRequestState getRequestState(PersisterRequestId const& id) const = 0;
     virtual std::vector<PersisterErrorInfo> fetchAllErrorInfos(SenderId const& senderId) = 0;
     virtual PersisterErrorInfo fetchError(PersisterRequestId const& id) = 0;
 
-    //specific logic
-    virtual PersisterRequestId scheduleSaveSimulationToFile(SenderInfo const& senderInfo, std::string const& filename, float const& zoom, RealVector2D const& center) = 0;
-    struct SavedSimulationData
-    {
-        std::string name;
-        uint64_t timestep = 0;
-        std::chrono::system_clock::time_point timestamp;
-    };
-    virtual SavedSimulationData fetchSavedSimulationData(PersisterRequestId const& id) = 0;
+    //specific request
+    virtual PersisterRequestId scheduleSaveSimulationToFile(SenderInfo const& senderInfo, SaveSimulationRequestData const& data) = 0;
+    virtual SavedSimulationResultData fetchSavedSimulationData(PersisterRequestId const& id) = 0;
 
-    virtual PersisterRequestId scheduleLoadSimulationFromFile(SenderInfo const& senderInfo, std::string const& filename) = 0;
+    virtual PersisterRequestId scheduleLoadSimulationFromFile(SenderInfo const& senderInfo, LoadSimulationRequestData const& data) = 0;
+    virtual LoadedSimulationResultData fetchLoadSimulationData(PersisterRequestId const& id) = 0;
 };

@@ -3,11 +3,9 @@ add_library(PersisterImpl
     Definitions.h
     PersisterControllerImpl.cpp
     PersisterControllerImpl.h
-    PersisterRequest.cpp
     PersisterRequest.h
     PersisterRequestError.cpp
     PersisterRequestError.h
-    PersisterRequestResult.cpp
     PersisterRequestResult.h
     PersisterWorker.cpp
     PersisterWorker.h)
