@@ -1,6 +1,6 @@
 #pragma once
 
-enum class PersisterJobState
+enum class PersisterRequestState
 {
     InQueue,
     InProgress,

@@ -5,12 +5,12 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "PersisterInterface/PersisterJobState.h"
+#include "PersisterInterface/PersisterRequestState.h"
 
 #include "Definitions.h"
-#include "PersisterJob.h"
-#include "PersisterJobError.h"
-#include "PersisterJobResult.h"
+#include "PersisterRequest.h"
+#include "PersisterRequestError.h"
+#include "PersisterRequestResult.h"
 
 class _PersisterWorker
 {
@@ -21,28 +21,30 @@ public:
     void shutdown();
 
     bool isBusy() const;
-    PersisterJobState getJobState(PersisterJobId const& id) const;
+    PersisterRequestState getJobState(PersisterRequestId const& id) const;
 
-    void addJob(PersisterJob const& job);
-    PersisterJobResult fetchJobResult(PersisterJobId const& id);   
-    PersisterJobError fetchJobError(PersisterJobId const& id);   
+    void addJob(PersisterRequest const& job);
+    PersisterRequestResult fetchJobResult(PersisterRequestId const& id);   
+    PersisterRequestError fetchJobError(PersisterRequestId const& id);   
 
-    std::vector<PersisterErrorInfo> fetchCriticalErrorInfos();
+    std::vector<PersisterErrorInfo> fetchAllErrorInfos(SenderId const& senderId);
 
 private:
     void processJobs(std::unique_lock<std::mutex>& lock);
 
-    std::variant<PersisterJobResult, PersisterJobError> processSaveToDiscJob(std::unique_lock<std::mutex>& lock, SaveToFileJob const& job);
+    using PersisterRequestResultOrError = std::variant<PersisterRequestResult, PersisterRequestError>;
+    PersisterRequestResultOrError processJob(std::unique_lock<std::mutex>& lock, SaveToFileJob const& job);
+    PersisterRequestResultOrError processJob(std::unique_lock<std::mutex>& lock, LoadFromFileJob const& job);
 
     SimulationController _simController;
 
     std::atomic<bool> _isShutdown{false};
 
     mutable std::mutex _jobMutex;
-    std::deque<PersisterJob> _openJobs;
-    std::deque<PersisterJob> _inProgressJobs;
-    std::deque<PersisterJobResult> _finishedJobs;
-    std::deque<PersisterJobError> _jobErrors;
+    std::deque<PersisterRequest> _openJobs;
+    std::deque<PersisterRequest> _inProgressJobs;
+    std::deque<PersisterRequestResult> _finishedJobs;
+    std::deque<PersisterRequestError> _jobErrors;
 
     std::condition_variable _conditionVariable;
 };
