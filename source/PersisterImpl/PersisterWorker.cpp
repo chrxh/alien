@@ -32,12 +32,14 @@ void _PersisterWorker::shutdown()
 bool _PersisterWorker::isBusy() const
 {
     std::unique_lock uniqueLock(_jobMutex);
+
     return !_openJobs.empty() || !_inProgressJobs.empty();
 }
 
 PersisterJobState _PersisterWorker::getJobState(PersisterJobId const& id) const
 {
     std::unique_lock uniqueLock(_jobMutex);
+
     if (std::ranges::find_if(_openJobs, [&](PersisterJob const& job) { return job->getId() == id; }) != _openJobs.end()) {
         return PersisterJobState::InQueue;
     }
@@ -47,18 +49,27 @@ PersisterJobState _PersisterWorker::getJobState(PersisterJobId const& id) const
     if (std::ranges::find_if(_finishedJobs, [&](PersisterJobResult const& job) { return job->getId() == id; }) != _finishedJobs.end()) {
         return PersisterJobState::Finished;
     }
+    if (std::ranges::find_if(_errorJobs, [&](PersisterJobError const& job) { return job->getId() == id; }) != _errorJobs.end()) {
+        return PersisterJobState::Error;
+    }
     THROW_NOT_IMPLEMENTED();
 }
 
-PersisterJobResult _PersisterWorker::fetchJobResult(PersisterJobId const& id)
+std::variant<PersisterJobResult, PersisterJobError> _PersisterWorker::fetchJobResult(PersisterJobId const& id)
 {
     std::unique_lock uniqueLock(_jobMutex);
 
-    auto findResult = std::ranges::find_if(_finishedJobs, [&](PersisterJobResult const& job) { return job->getId() == id; });
+    auto finishedJobsIter = std::ranges::find_if(_finishedJobs, [&](PersisterJobResult const& job) { return job->getId() == id; });
+    if (finishedJobsIter != _finishedJobs.end()) {
+        auto resultCopy = *finishedJobsIter;
+        _finishedJobs.erase(finishedJobsIter);
+        return resultCopy;
+    }
 
-    if (findResult != _finishedJobs.end()) {
-        auto resultCopy = *findResult;
-        _finishedJobs.erase(findResult);
+    auto errorJobsIter = std::ranges::find_if(_errorJobs, [&](PersisterJobError const& job) { return job->getId() == id; });
+    if (errorJobsIter != _errorJobs.end()) {
+        auto resultCopy = *errorJobsIter;
+        _errorJobs.erase(errorJobsIter);
         return resultCopy;
     }
     THROW_NOT_IMPLEMENTED();
@@ -68,6 +79,7 @@ void _PersisterWorker::addJob(PersisterJob const& job)
 {
     {
         std::unique_lock uniqueLock(_jobMutex);
+
         _openJobs.emplace_back(job);
     }
     _conditionVariable.notify_all();
@@ -86,33 +98,60 @@ void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
 
         if (auto const& saveToDiscJob = std::dynamic_pointer_cast<_SaveToDiscJob>(job)) {
             _inProgressJobs.push_back(job);
-            auto jobResult = processSaveToDiscJob(lock, saveToDiscJob);
-            auto findResult = std::ranges::find_if(_inProgressJobs, [&](PersisterJob const& otherJob) { return otherJob->getId() == job->getId(); });
-            _inProgressJobs.erase(findResult);
+            auto processingResult = processSaveToDiscJob(lock, saveToDiscJob);
+            auto inProgressJobsIter = std::ranges::find_if(_inProgressJobs, [&](PersisterJob const& otherJob) { return otherJob->getId() == job->getId(); });
+            _inProgressJobs.erase(inProgressJobsIter);
 
-            _finishedJobs.emplace_back(jobResult);
+            if (std::holds_alternative<PersisterJobResult>(processingResult)) {
+                _finishedJobs.emplace_back(std::get<PersisterJobResult>(processingResult));
+            }
+            if (std::holds_alternative<PersisterJobError>(processingResult)) {
+                _errorJobs.emplace_back(std::get<PersisterJobError>(processingResult));
+            }
         }
 
     }
 }
 
-PersisterJobResult _PersisterWorker::processSaveToDiscJob(std::unique_lock<std::mutex>& lock, SaveToDiscJob const& job)
+namespace
 {
-    lock.unlock();
+    class UnlockGuard
+    {
+    public:
+        UnlockGuard(std::unique_lock<std::mutex>& lock) : _lock(lock) { _lock.unlock(); }
+        ~UnlockGuard() { _lock.lock(); }
+
+    private:
+        std::unique_lock<std::mutex>& _lock;
+    };
+}
+
+std::variant<PersisterJobResult, PersisterJobError> _PersisterWorker::processSaveToDiscJob(std::unique_lock<std::mutex>& lock, SaveToDiscJob const& job)
+{
+    UnlockGuard unlockGuard(lock);
 
     DeserializedSimulation deserializedData;
-    deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-    deserializedData.auxiliaryData.realTime = _simController->getRealTime();
-    deserializedData.auxiliaryData.zoom = job->getZoom();
-    deserializedData.auxiliaryData.center = job->getCenter();
-    deserializedData.auxiliaryData.generalSettings = _simController->getGeneralSettings();
-    deserializedData.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
-    deserializedData.statistics = _simController->getStatisticsHistory().getCopiedData();
-    deserializedData.mainData = _simController->getClusteredSimulationData();
+    try {
+        deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+        deserializedData.auxiliaryData.realTime = _simController->getRealTime();
+        deserializedData.auxiliaryData.zoom = job->getZoom();
+        deserializedData.auxiliaryData.center = job->getCenter();
+        deserializedData.auxiliaryData.generalSettings = _simController->getGeneralSettings();
+        deserializedData.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
+        deserializedData.statistics = _simController->getStatisticsHistory().getCopiedData();
+        deserializedData.mainData = _simController->getClusteredSimulationData();
+    } catch (std::runtime_error const&) {
+        return std::make_shared<_PersisterJobError>(
+            job->getId(), PersisterErrorInfo{"The simulation could not be saved because no valid data could be obtained from the GPU."});
+    }
 
-    SerializerService::serializeSimulationToFiles(job->getFilename(), deserializedData);
-
-    lock.lock();
+    try {
+        SerializerService::serializeSimulationToFiles(job->getFilename(), deserializedData);
+        throw std::runtime_error("bla");
+    } catch (std::runtime_error const&) {
+        return std::make_shared<_PersisterJobError>(
+            job->getId(), PersisterErrorInfo{"The simulation could not be saved because an error occurred when serializing the data to the file."});
+    }
 
     return std::make_shared<_SaveToDiscJobResult>(job->getId(), deserializedData.auxiliaryData.timestep, deserializedData.auxiliaryData.realTime);
 }

@@ -4,6 +4,5 @@
 
 struct PersisterErrorInfo
 {
-    bool error = false;
     std::string message;
 };

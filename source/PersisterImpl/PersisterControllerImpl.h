@@ -17,10 +17,10 @@ public:
 
     bool isBusy() const override;
     PersisterJobState getJobState(PersisterJobId const& id) const override;
-    PersisterErrorInfo fetchErrorInfo() const override;
+    std::vector<PersisterErrorInfo> fetchErrorInfos() override;
 
     PersisterJobId scheduleSaveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center) override;
-    SavedSimulationData fetchSavedSimulationData(PersisterJobId const& id) override;
+    std::variant<SavedSimulationData, PersisterErrorInfo> fetchSavedSimulationData(PersisterJobId const& id) override;
 
 private:
     static auto constexpr MaxWorkerThreads = 4;

@@ -5,12 +5,11 @@
 class _PersisterJobError
 {
 public:
-    PersisterJobId getId() const;
-
     _PersisterJobError(PersisterJobId const& id, PersisterErrorInfo const& errorInfo);
     virtual ~_PersisterJobError() = default;
 
-    PersisterErrorInfo const& getPersisterErrorInfo() const;
+    PersisterJobId const& getId() const;
+    PersisterErrorInfo const& getErrorInfo() const;
 
 protected:
     PersisterJobId _id;
