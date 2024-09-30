@@ -30,6 +30,7 @@
 #include "StyleRepository.h"
 #include "StatisticsWindow.h"
 #include "Viewport.h"
+#include "SerializationHelperService.h"
 #include "TemporalControlWindow.h"
 #include "MessageDialog.h"
 #include "LoginDialog.h"
@@ -41,7 +42,6 @@
 #include "OverlayMessageController.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
-#include "SerializationHelperService.h"
 
 namespace
 {

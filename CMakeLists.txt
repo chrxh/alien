@@ -71,6 +71,7 @@ add_subdirectory(source/EngineTests)
 add_subdirectory(source/Gui)
 add_subdirectory(source/Network)
 add_subdirectory(source/NetworkTests)
+add_subdirectory(source/Persister)
 
 # Copy resources to the build location
 add_custom_command(

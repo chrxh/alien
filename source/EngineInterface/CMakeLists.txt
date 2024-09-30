@@ -59,7 +59,7 @@ add_library(EngineInterface
 
 target_link_libraries(EngineInterface Boost::boost)
 target_link_libraries(EngineInterface cereal)
-target_link_libraries(alien ZLIB::ZLIB)
+target_link_libraries(EngineInterface ZLIB::ZLIB)
 
 find_path(ZSTR_INCLUDE_DIRS "zstr.hpp")
 target_include_directories(EngineInterface PRIVATE ${ZSTR_INCLUDE_DIRS})
