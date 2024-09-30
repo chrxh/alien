@@ -13,6 +13,7 @@
 namespace
 {
     auto constexpr RightColumnWidth = 200.0f;
+    auto constexpr AutosaveSenderId = "Autosave";
 }
 
 _AutosaveWindow::_AutosaveWindow(SimulationController const& simController, PersisterController const& persisterController)
@@ -182,26 +183,28 @@ void _AutosaveWindow::createSavepoint()
 {
     printOverlayMessage("Creating save point ...");
     static int i = 0;
-    auto jobId = _persisterController->scheduleSaveSimulationToDisc("d:\\test" + std::to_string(++i) + ".sim", false, Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
+    SenderInfo senderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
+    auto jobId = _persisterController->scheduleSaveSimulationToFile(
+        senderInfo, "d:\\test" + std::to_string(++i) + ".sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
 
-    _savePoints.emplace_front(SavepointState::InQueue, jobId, "", "", 0);
+    _savePoints.emplace_front(SavepointState::InQueue, jobId.value, "", "", 0);
 }
 
 void _AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)
 {
     if (savepoint.state != SavepointState::Persisted) {
-        auto jobState = _persisterController->getJobState(PersisterJobId(savepoint.id));
-        if (jobState == PersisterJobState::InProgress) {
+        auto jobState = _persisterController->getJobState(PersisterRequestId(savepoint.id));
+        if (jobState == PersisterRequestState::InProgress) {
             savepoint.state = SavepointState::InProgress;
         }
-        if (jobState == PersisterJobState::Finished) {
+        if (jobState == PersisterRequestState::Finished) {
             savepoint.state = SavepointState::Persisted;
-            auto jobResult = _persisterController->fetchSavedSimulationData(savepoint.id);
+            auto jobResult = _persisterController->fetchSavedSimulationData(PersisterRequestId{savepoint.id});
             savepoint.timestep = jobResult.timestep;
             savepoint.timestamp = StringHelper::format(jobResult.timestamp);
             savepoint.name = jobResult.name;
         }
-        if (jobState == PersisterJobState::Error) {
+        if (jobState == PersisterRequestState::Error) {
             savepoint.state = SavepointState::Error;
         }
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Base/Definitions.h"
+#include "PersisterInterface/Definitions.h"
 
 class _PersisterWorker;
 using PersisterWorker = std::shared_ptr<_PersisterWorker>;

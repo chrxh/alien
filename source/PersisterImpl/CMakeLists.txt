@@ -3,12 +3,12 @@ add_library(PersisterImpl
     Definitions.h
     PersisterControllerImpl.cpp
     PersisterControllerImpl.h
-    PersisterJob.cpp
-    PersisterJob.h
-    PersisterJobError.cpp
-    PersisterJobError.h
-    PersisterJobResult.cpp
-    PersisterJobResult.h
+    PersisterRequest.cpp
+    PersisterRequest.h
+    PersisterRequestError.cpp
+    PersisterRequestError.h
+    PersisterRequestResult.cpp
+    PersisterRequestResult.h
     PersisterWorker.cpp
     PersisterWorker.h)
 

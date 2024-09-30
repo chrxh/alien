@@ -1,21 +1,21 @@
-#include "PersisterJobResult.h"
+#include "PersisterRequestResult.h"
 
 
-PersisterJobId const& _PersisterJobResult::getId() const
+PersisterRequestId const& _PersisterRequestResult::getRequestId() const
 {
-    return _id;
+    return _requestId;
 }
 
-_PersisterJobResult::_PersisterJobResult(PersisterJobId const& id)
-    : _id(id)
+_PersisterRequestResult::_PersisterRequestResult(PersisterRequestId const& requestId)
+    : _requestId(requestId)
 {}
 
 _SaveToFileJobResult::_SaveToFileJobResult(
-    PersisterJobId const& id,
+    PersisterRequestId const& requestId,
     std::string const& simulationName,
     uint64_t const& timestep,
     std::chrono::system_clock::time_point const& timestamp)
-    : _PersisterJobResult(id)
+    : _PersisterRequestResult(requestId)
     , _simulationName(simulationName)
     , _timestep(timestep)
     , _timestamp(timestamp)

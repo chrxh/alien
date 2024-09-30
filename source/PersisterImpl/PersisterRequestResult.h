@@ -1,27 +1,26 @@
 #pragma once
 
-#include "Definitions.h"
 #include "EngineInterface/DeserializedSimulation.h"
-#include "PersisterInterface/Definitions.h"
+#include "PersisterInterface/PersisterRequestId.h"
 
-class _PersisterJobResult
+class _PersisterRequestResult
 {
 public:
-    PersisterJobId const& getId() const;
+    PersisterRequestId const& getRequestId() const;
 
 protected:
-    _PersisterJobResult(PersisterJobId const& id);
-    virtual ~_PersisterJobResult() = default;
+    _PersisterRequestResult(PersisterRequestId const& requestId);
+    virtual ~_PersisterRequestResult() = default;
 
-    PersisterJobId _id;
+    PersisterRequestId _requestId;
 };
-using PersisterJobResult = std::shared_ptr<_PersisterJobResult>;
+using PersisterRequestResult = std::shared_ptr<_PersisterRequestResult>;
 
-class _SaveToFileJobResult : public _PersisterJobResult
+class _SaveToFileJobResult : public _PersisterRequestResult
 {
 public:
     _SaveToFileJobResult(
-        PersisterJobId const& id,
+        PersisterRequestId const& requestId,
         std::string const& simulationName,
         uint64_t const& timestep,
         std::chrono::system_clock::time_point const& timestamp);

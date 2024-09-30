@@ -79,6 +79,8 @@
 
 namespace
 {
+    auto constexpr MainWindowSenderId = "MainWindow";
+
     void glfwErrorCallback(int error, const char* description)
     {
         throw std::runtime_error("Glfw error " + std::to_string(error) + ": " + description);
@@ -761,7 +763,7 @@ void _MainWindow::processControllers()
     _editorController->process();
     OverlayMessageController::getInstance().process();
     DelayedExecutionController::getInstance().process();
-    auto criticalErrors = _persisterController->fetchCriticalErrorInfos();
+    auto criticalErrors = _persisterController->fetchAllErrorInfos(SenderId{MainWindowSenderId});
     if (!criticalErrors.empty()) {
         std::vector<std::string> errorMessages;
         for (auto const& error : criticalErrors) {
@@ -830,7 +832,8 @@ void _MainWindow::onSaveSimulation()
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
             printOverlayMessage("Saving ...");
-            _persisterController->scheduleSaveSimulationToDisc(firstFilename.string(), true, Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
+            SenderInfo senderInfo{.senderId = SenderId{MainWindowSenderId}, .wishResultData = false, .wishErrorInfo = true};
+            _persisterController->scheduleSaveSimulationToFile(senderInfo, firstFilename.string(), Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
         });
 }
 

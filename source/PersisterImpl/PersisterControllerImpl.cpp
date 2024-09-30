@@ -35,39 +35,53 @@ bool _PersisterControllerImpl::isBusy() const
     return _worker->isBusy();
 }
 
-PersisterJobState _PersisterControllerImpl::getJobState(PersisterJobId const& id) const
+PersisterRequestState _PersisterControllerImpl::getJobState(PersisterRequestId const& id) const
 {
     return _worker->getJobState(id);
 }
 
-std::vector<PersisterErrorInfo> _PersisterControllerImpl::fetchCriticalErrorInfos()
+std::vector<PersisterErrorInfo> _PersisterControllerImpl::fetchAllErrorInfos(SenderId const& senderId)
 {
-    return _worker->fetchCriticalErrorInfos();
+    return _worker->fetchAllErrorInfos(senderId);
 }
 
-PersisterJobId _PersisterControllerImpl::scheduleSaveSimulationToDisc(std::string const& filename, bool critical, float const& zoom, RealVector2D const& center)
+PersisterErrorInfo _PersisterControllerImpl::fetchError(PersisterRequestId const& id)
 {
-    auto jobId = generateNewJobId();
-    auto saveToDiscJob = std::make_shared<_SaveToFileJob>(jobId, critical, filename, zoom, center);
-
-    _worker->addJob(saveToDiscJob);
-
-    return jobId;
+    return _worker->fetchJobError(id)->getErrorInfo();
 }
 
-auto _PersisterControllerImpl::fetchSavedSimulationData(PersisterJobId const& id) -> SavedSimulationData
+PersisterRequestId _PersisterControllerImpl::scheduleSaveSimulationToFile(
+    SenderInfo const& senderInfo,
+    std::string const& filename,
+    float const& zoom,
+    RealVector2D const& center)
+{
+    auto requestId = generateNewJobId();
+    auto saveToFileJob = std::make_shared<_SaveToFileJob>(requestId, senderInfo, filename, zoom, center);
+
+    _worker->addJob(saveToFileJob);
+
+    return requestId;
+}
+
+auto _PersisterControllerImpl::fetchSavedSimulationData(PersisterRequestId const& id) -> SavedSimulationData
 {
     auto saveToDiscResult = std::dynamic_pointer_cast<_SaveToFileJobResult>(_worker->fetchJobResult(id));
     return SavedSimulationData{.name = saveToDiscResult->getSimulationName(), .timestep = saveToDiscResult->getTimestep(), .timestamp = saveToDiscResult->getTimestamp()};
 }
 
-PersisterErrorInfo _PersisterControllerImpl::fetchError(PersisterJobId const& id)
+PersisterRequestId _PersisterControllerImpl::scheduleLoadSimulationFromFile(SenderInfo const& senderInfo, std::string const& filename)
 {
-    return _worker->fetchJobError(id)->getErrorInfo();
+    auto requestId = generateNewJobId();
+    auto loadFromFileJob = std::make_shared<_LoadFromFileJob>(requestId, senderInfo, filename);
+
+    _worker->addJob(loadFromFileJob);
+
+    return requestId;
 }
 
-PersisterJobId _PersisterControllerImpl::generateNewJobId()
+PersisterRequestId _PersisterControllerImpl::generateNewJobId()
 {
     ++_latestJobId;
-    return std::to_string(_latestJobId);
+    return PersisterRequestId{std::to_string(_latestJobId)};
 }

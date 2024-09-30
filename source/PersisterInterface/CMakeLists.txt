@@ -4,8 +4,10 @@ add_library(PersisterInterface
     PersisterController.cpp
     PersisterController.h
     PersisterErrorInfo.h
-    PersisterJobId.h
-    PersisterJobState.h)
+    PersisterRequestId.h
+    PersisterRequestState.h
+    SenderId.h
+    SenderInfo.h)
 
 target_link_libraries(PersisterInterface Base)
 

@@ -7,7 +7,10 @@
 
 #include "Definitions.h"
 #include "PersisterErrorInfo.h"
-#include "PersisterJobState.h"
+#include "PersisterRequestId.h"
+#include "PersisterRequestState.h"
+#include "SenderId.h"
+#include "SenderInfo.h"
 
 class _PersisterController
 {
@@ -17,17 +20,21 @@ public:
     virtual void init(SimulationController const& simController) = 0;
     virtual void shutdown() = 0;
 
+    //generic logic
     virtual bool isBusy() const = 0;
-    virtual PersisterJobState getJobState(PersisterJobId const& id) const = 0;
-    virtual std::vector<PersisterErrorInfo> fetchCriticalErrorInfos() = 0;
+    virtual PersisterRequestState getJobState(PersisterRequestId const& id) const = 0;
+    virtual std::vector<PersisterErrorInfo> fetchAllErrorInfos(SenderId const& senderId) = 0;
+    virtual PersisterErrorInfo fetchError(PersisterRequestId const& id) = 0;
 
-    virtual PersisterJobId scheduleSaveSimulationToDisc(std::string const& filename, bool critical, float const& zoom, RealVector2D const& center) = 0;
+    //specific logic
+    virtual PersisterRequestId scheduleSaveSimulationToFile(SenderInfo const& senderInfo, std::string const& filename, float const& zoom, RealVector2D const& center) = 0;
     struct SavedSimulationData
     {
         std::string name;
         uint64_t timestep = 0;
         std::chrono::system_clock::time_point timestamp;
     };
-    virtual SavedSimulationData fetchSavedSimulationData(PersisterJobId const& id) = 0;
-    virtual PersisterErrorInfo fetchError(PersisterJobId const& id) = 0;
+    virtual SavedSimulationData fetchSavedSimulationData(PersisterRequestId const& id) = 0;
+
+    virtual PersisterRequestId scheduleLoadSimulationFromFile(SenderInfo const& senderInfo, std::string const& filename) = 0;
 };
