@@ -26,7 +26,7 @@ void PersisterWorker::shutdown()
     _conditionVariable.notify_all();
 }
 
-void PersisterWorker::saveToDisc(std::string const& filename, float const& zoom, RealVector2D const& center)
+void PersisterWorker::saveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center)
 {
     {
         std::unique_lock uniqueLock(_jobMutex);

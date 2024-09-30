@@ -17,7 +17,7 @@ public:
     void runThreadLoop();
     void shutdown();
 
-    void saveToDisc(std::string const& filename, float const& zoom, RealVector2D const& center);
+    void saveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center);
 
 private:
     void processJobs(std::unique_lock<std::mutex>& lock);
