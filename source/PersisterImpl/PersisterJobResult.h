@@ -17,16 +17,22 @@ protected:
 };
 using PersisterJobResult = std::shared_ptr<_PersisterJobResult>;
 
-class _SaveToDiscJobResult : public _PersisterJobResult
+class _SaveToFileJobResult : public _PersisterJobResult
 {
 public:
-    _SaveToDiscJobResult(PersisterJobId const& id, uint64_t const& timestep, std::chrono::milliseconds const& realtime);
+    _SaveToFileJobResult(
+        PersisterJobId const& id,
+        std::string const& simulationName,
+        uint64_t const& timestep,
+        std::chrono::system_clock::time_point const& timestamp);
 
+    std::string const& getSimulationName() const;
     uint64_t const& getTimestep() const;
-    std::chrono::milliseconds const& getRealtime();
+    std::chrono::system_clock::time_point const& getTimestamp();
 
 private:
+    std::string _simulationName;
     uint64_t _timestep = 0;
-    std::chrono::milliseconds _realtime;
+    std::chrono::system_clock::time_point _timestamp;
 };
-using SaveToDiscJobResult = std::shared_ptr<_SaveToDiscJobResult>;
+using SaveToFileJobResult = std::shared_ptr<_SaveToFileJobResult>;

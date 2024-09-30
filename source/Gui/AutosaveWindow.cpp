@@ -3,6 +3,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
+#include "Base/StringHelper.h"
 
 #include "AlienImGui.h"
 #include "OverlayMessageController.h"
@@ -96,7 +97,7 @@ void _AutosaveWindow::processTable()
 
     if (ImGui::BeginTable("Save files", 4, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn("No", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(30.0f));
-        ImGui::TableSetupColumn("Timestamp", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+        ImGui::TableSetupColumn("Timestamp", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(200.0f));
         ImGui::TableSetupColumn("Time step", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
@@ -136,7 +137,7 @@ void _AutosaveWindow::processTable()
 
                 ImGui::TableNextColumn();
                 if (entry.state == SavepointState::Persisted) {
-                    AlienImGui::Text(std::to_string(entry.timestep));
+                    AlienImGui::Text(StringHelper::format(entry.timestep));
                 }
 
                 ImGui::PopID();
@@ -195,6 +196,10 @@ void _AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)
         }
         if (jobState == PersisterJobState::Finished) {
             savepoint.state = SavepointState::Persisted;
+            auto jobResult = _persisterController->fetchSavedSimulationData(savepoint.id);
+            savepoint.timestep = jobResult.timestep;
+            savepoint.timestamp = StringHelper::format(jobResult.timestamp);
+            savepoint.name = jobResult.name;
         }
         if (jobState == PersisterJobState::Error) {
             savepoint.state = SavepointState::Error;

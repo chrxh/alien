@@ -197,8 +197,9 @@ void _MassOperationsDialog::onExecute()
         _simController->removeSelectedObjects(true);
         _simController->addAndSelectSimulationData(DataDescription(content));
     } else {
+        auto name = _simController->getSimulationName();
         _simController->closeSimulation();
-        _simController->newSimulation(timestep, generalSettings, parameters);
+        _simController->newSimulation(name, timestep, generalSettings, parameters);
         _simController->setClusteredSimulationData(content);       
     }
 }

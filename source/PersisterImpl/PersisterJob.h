@@ -20,10 +20,10 @@ protected:
 };
 using PersisterJob = std::shared_ptr<_PersisterJob>;
 
-class _SaveToDiscJob : public _PersisterJob
+class _SaveToFileJob : public _PersisterJob
 {
 public:
-    _SaveToDiscJob(PersisterJobId const& id, bool critical, std::string const& filename, float const& zoom, RealVector2D const& center);
+    _SaveToFileJob(PersisterJobId const& id, bool critical, std::string const& filename, float const& zoom, RealVector2D const& center);
 
     std::string const& getFilename() const;
     float const& getZoom() const;
@@ -34,4 +34,4 @@ private:
     float _zoom = 0;
     RealVector2D _center;
 };
-using SaveToDiscJob = std::shared_ptr<_SaveToDiscJob>;
+using SaveToFileJob = std::shared_ptr<_SaveToFileJob>;

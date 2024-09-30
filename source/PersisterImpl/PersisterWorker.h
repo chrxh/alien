@@ -24,13 +24,15 @@ public:
     PersisterJobState getJobState(PersisterJobId const& id) const;
 
     void addJob(PersisterJob const& job);
-    std::variant<PersisterJobResult, PersisterJobError> fetchJobResult(PersisterJobId const& id);
+    PersisterJobResult fetchJobResult(PersisterJobId const& id);   
+    PersisterJobError fetchJobError(PersisterJobId const& id);   
+
     std::vector<PersisterErrorInfo> fetchCriticalErrorInfos();
 
 private:
     void processJobs(std::unique_lock<std::mutex>& lock);
 
-    std::variant<PersisterJobResult, PersisterJobError> processSaveToDiscJob(std::unique_lock<std::mutex>& lock, SaveToDiscJob const& job);
+    std::variant<PersisterJobResult, PersisterJobError> processSaveToDiscJob(std::unique_lock<std::mutex>& lock, SaveToFileJob const& job);
 
     SimulationController _simController;
 

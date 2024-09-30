@@ -70,6 +70,17 @@ std::string StringHelper::format(std::chrono::milliseconds duration)
     return oss.str();
 }
 
+std::string StringHelper::format(std::chrono::system_clock::time_point const& timePoint)
+{
+    std::time_t timeT = std::chrono::system_clock::to_time_t(timePoint);
+
+    std::tm tm = *std::localtime(&timeT);
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+
+    return ss.str();
+}
+
 void StringHelper::copy(char* target, int targetSize, std::string const& source)
 {
     auto sourceSize = source.size();

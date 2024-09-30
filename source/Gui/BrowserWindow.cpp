@@ -1266,7 +1266,10 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
             std::optional<std::string> errorMessage;
             try {
                 _simController->newSimulation(
-                    deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+                    leaf.leafName,
+                    deserializedSim.auxiliaryData.timestep,
+                    deserializedSim.auxiliaryData.generalSettings,
+                    deserializedSim.auxiliaryData.simulationParameters);
                 _simController->setRealTime(deserializedSim.auxiliaryData.realTime);
                 _simController->setClusteredSimulationData(deserializedSim.mainData);
                 _simController->setStatisticsHistory(deserializedSim.statistics);
@@ -1280,7 +1283,10 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
                 showMessage("Error", *errorMessage);
                 _simController->closeSimulation();
                 _simController->newSimulation(
-                    deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+                    leaf.leafName,
+                    deserializedSim.auxiliaryData.timestep,
+                    deserializedSim.auxiliaryData.generalSettings,
+                    deserializedSim.auxiliaryData.simulationParameters);
             }
 
             Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);

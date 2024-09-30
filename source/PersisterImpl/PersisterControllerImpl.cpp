@@ -48,24 +48,22 @@ std::vector<PersisterErrorInfo> _PersisterControllerImpl::fetchCriticalErrorInfo
 PersisterJobId _PersisterControllerImpl::scheduleSaveSimulationToDisc(std::string const& filename, bool critical, float const& zoom, RealVector2D const& center)
 {
     auto jobId = generateNewJobId();
-    auto saveToDiscJob = std::make_shared<_SaveToDiscJob>(jobId, critical, filename, zoom, center);
+    auto saveToDiscJob = std::make_shared<_SaveToFileJob>(jobId, critical, filename, zoom, center);
 
     _worker->addJob(saveToDiscJob);
 
     return jobId;
 }
 
-auto _PersisterControllerImpl::fetchSavedSimulationData(PersisterJobId const& id) -> std::variant<SavedSimulationData, PersisterErrorInfo>
+auto _PersisterControllerImpl::fetchSavedSimulationData(PersisterJobId const& id) -> SavedSimulationData
 {
-    auto jobResult = _worker->fetchJobResult(id);
-    if (std::holds_alternative<PersisterJobResult>(jobResult)) {
-        auto saveToDiscResult = std::dynamic_pointer_cast<_SaveToDiscJobResult>(std::get<PersisterJobResult>(jobResult));
-        return SavedSimulationData{.name = "", .timestep = saveToDiscResult->getTimestep(), .realtime = saveToDiscResult->getRealtime()};
-    }
-    if (std::holds_alternative<PersisterJobError>(jobResult)) {
-        return std::get<PersisterJobError>(jobResult)->getErrorInfo();
-    }
-    THROW_NOT_IMPLEMENTED();
+    auto saveToDiscResult = std::dynamic_pointer_cast<_SaveToFileJobResult>(_worker->fetchJobResult(id));
+    return SavedSimulationData{.name = saveToDiscResult->getSimulationName(), .timestep = saveToDiscResult->getTimestep(), .timestamp = saveToDiscResult->getTimestamp()};
+}
+
+PersisterErrorInfo _PersisterControllerImpl::fetchError(PersisterJobId const& id)
+{
+    return _worker->fetchJobError(id)->getErrorInfo();
 }
 
 PersisterJobId _PersisterControllerImpl::generateNewJobId()
