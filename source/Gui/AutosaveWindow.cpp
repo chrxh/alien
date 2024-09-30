@@ -14,8 +14,9 @@ namespace
     auto constexpr RightColumnWidth = 200.0f;
 }
 
-_AutosaveWindow::_AutosaveWindow(PersisterController const& persisterController)
+_AutosaveWindow::_AutosaveWindow(SimulationController const& simController, PersisterController const& persisterController)
     : _AlienWindow("Autosave", "windows.autosave", false)
+    , _simController(simController)
     , _persisterController(persisterController)
 {
     _settingsOpen = GlobalSettings::getInstance().getBool("windows.autosave.settings.open", _settingsOpen);
@@ -163,7 +164,9 @@ void _AutosaveWindow::processSettings()
 void _AutosaveWindow::onCreateSave()
 {
     printOverlayMessage("Saving ...");
-    _persisterController->saveSimulationToDisc("d:\\test2.sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
+    auto jobId = _persisterController->saveSimulationToDisc("d:\\test2.sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
+
+    _savePoints.emplace_front(true, 1, std::to_string(jobId), "", "", 0);
 }
 
 void _AutosaveWindow::validationAndCorrection()

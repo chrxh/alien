@@ -11,7 +11,7 @@
 #include "PersisterJob.h"
 #include "PersisterJobResult.h"
 
-    class _PersisterWorker
+class _PersisterWorker
 {
 public:
     _PersisterWorker(SimulationController const& simController);
@@ -34,9 +34,8 @@ private:
 
     mutable std::mutex _jobMutex;
     std::deque<PersisterJob> _openJobs;
-    std::vector<PersisterJob> _inProgressJobs;
-    std::vector<PersisterJobResult> _finishedJobs;
+    std::deque<PersisterJob> _inProgressJobs;
+    std::deque<PersisterJobResult> _finishedJobs;
 
-    int _idCount = 0;
     std::condition_variable _conditionVariable;
 };
