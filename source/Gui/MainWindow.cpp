@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <boost/algorithm/string.hpp>
+
 #include <glad/glad.h>
 
 #include <imgui.h>
@@ -759,6 +761,14 @@ void _MainWindow::processControllers()
     _editorController->process();
     OverlayMessageController::getInstance().process();
     DelayedExecutionController::getInstance().process();
+    auto criticalErrors = _persisterController->fetchCriticalErrorInfos();
+    if (!criticalErrors.empty()) {
+        std::vector<std::string> errorMessages;
+        for (auto const& error : criticalErrors) {
+            errorMessages.emplace_back(error.message);
+        }
+        MessageDialog::getInstance().information("Error", boost::join(errorMessages, "\n\n"));
+    }
 }
 
 void _MainWindow::onOpenSimulation()
@@ -818,7 +828,7 @@ void _MainWindow::onSaveSimulation()
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
             printOverlayMessage("Saving ...");
-            _persisterController->scheduleSaveSimulationToDisc(firstFilename.string(), Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
+            _persisterController->scheduleSaveSimulationToDisc(firstFilename.string(), true, Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
         });
 }
 

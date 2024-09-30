@@ -40,16 +40,15 @@ PersisterJobState _PersisterControllerImpl::getJobState(PersisterJobId const& id
     return _worker->getJobState(id);
 }
 
-std::vector<PersisterErrorInfo> _PersisterControllerImpl::fetchErrorInfos()
+std::vector<PersisterErrorInfo> _PersisterControllerImpl::fetchCriticalErrorInfos()
 {
-    return {};
-    //_worker->fetchErrorInfos();
+    return _worker->fetchCriticalErrorInfos();
 }
 
-PersisterJobId _PersisterControllerImpl::scheduleSaveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center)
+PersisterJobId _PersisterControllerImpl::scheduleSaveSimulationToDisc(std::string const& filename, bool critical, float const& zoom, RealVector2D const& center)
 {
     auto jobId = generateNewJobId();
-    auto saveToDiscJob = std::make_shared<_SaveToDiscJob>(jobId, filename, zoom, center);
+    auto saveToDiscJob = std::make_shared<_SaveToDiscJob>(jobId, critical, filename, zoom, center);
 
     _worker->addJob(saveToDiscJob);
 

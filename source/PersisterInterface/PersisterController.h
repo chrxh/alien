@@ -19,9 +19,9 @@ public:
 
     virtual bool isBusy() const = 0;
     virtual PersisterJobState getJobState(PersisterJobId const& id) const = 0;
-    virtual std::vector<PersisterErrorInfo> fetchErrorInfos() = 0;
+    virtual std::vector<PersisterErrorInfo> fetchCriticalErrorInfos() = 0;
 
-    virtual PersisterJobId scheduleSaveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center) = 0;
+    virtual PersisterJobId scheduleSaveSimulationToDisc(std::string const& filename, bool critical, float const& zoom, RealVector2D const& center) = 0;
     struct SavedSimulationData
     {
         std::string name;

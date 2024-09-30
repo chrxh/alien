@@ -17,9 +17,9 @@ public:
 
     bool isBusy() const override;
     PersisterJobState getJobState(PersisterJobId const& id) const override;
-    std::vector<PersisterErrorInfo> fetchErrorInfos() override;
+    std::vector<PersisterErrorInfo> fetchCriticalErrorInfos() override;
 
-    PersisterJobId scheduleSaveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center) override;
+    PersisterJobId scheduleSaveSimulationToDisc(std::string const& filename, bool critical, float const& zoom, RealVector2D const& center) override;
     std::variant<SavedSimulationData, PersisterErrorInfo> fetchSavedSimulationData(PersisterJobId const& id) override;
 
 private:
