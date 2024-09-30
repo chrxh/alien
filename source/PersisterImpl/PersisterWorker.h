@@ -9,6 +9,7 @@
 
 #include "Definitions.h"
 #include "PersisterJob.h"
+#include "PersisterJobError.h"
 #include "PersisterJobResult.h"
 
 class _PersisterWorker
@@ -21,14 +22,14 @@ public:
 
     bool isBusy() const;
     PersisterJobState getJobState(PersisterJobId const& id) const;
-    PersisterJobResult fetchJobResult(PersisterJobId const& id);
+    std::variant<PersisterJobResult, PersisterJobError> fetchJobResult(PersisterJobId const& id);
 
     void addJob(PersisterJob const& job);
 
 private:
     void processJobs(std::unique_lock<std::mutex>& lock);
 
-    PersisterJobResult processSaveToDiscJob(std::unique_lock<std::mutex>& lock, SaveToDiscJob const& job);
+    std::variant<PersisterJobResult, PersisterJobError> processSaveToDiscJob(std::unique_lock<std::mutex>& lock, SaveToDiscJob const& job);
 
     SimulationController _simController;
 
@@ -38,6 +39,7 @@ private:
     std::deque<PersisterJob> _openJobs;
     std::deque<PersisterJob> _inProgressJobs;
     std::deque<PersisterJobResult> _finishedJobs;
+    std::deque<PersisterJobError> _errorJobs;
 
     std::condition_variable _conditionVariable;
 };

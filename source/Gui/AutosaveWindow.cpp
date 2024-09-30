@@ -125,6 +125,9 @@ void _AutosaveWindow::processTable()
                 if (entry.state == SavepointState::Persisted) {
                     AlienImGui::Text(entry.timestamp);
                 }
+                if (entry.state == SavepointState::Error) {
+                    AlienImGui::Text("Error");
+                }
 
                 ImGui::TableNextColumn();
                 if (entry.state == SavepointState::Persisted) {
@@ -192,6 +195,9 @@ void _AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)
         }
         if (jobState == PersisterJobState::Finished) {
             savepoint.state = SavepointState::Persisted;
+        }
+        if (jobState == PersisterJobState::Error) {
+            savepoint.state = SavepointState::Error;
         }
     }
 }

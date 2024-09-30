@@ -11,6 +11,7 @@ enum class SavepointState
     InQueue,
     InProgress,
     Persisted,
+    Error
 };
 
 struct SavepointEntry

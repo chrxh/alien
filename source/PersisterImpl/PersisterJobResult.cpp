@@ -1,7 +1,7 @@
 #include "PersisterJobResult.h"
 
 
-PersisterJobId _PersisterJobResult::getId() const
+PersisterJobId const& _PersisterJobResult::getId() const
 {
     return _id;
 }
@@ -16,12 +16,12 @@ _SaveToDiscJobResult::_SaveToDiscJobResult(PersisterJobId const& id, uint64_t co
     , _realtime(realtime)
 {}
 
-uint64_t _SaveToDiscJobResult::getTimestep() const
+uint64_t const& _SaveToDiscJobResult::getTimestep() const
 {
     return _timestep;
 }
 
-std::chrono::milliseconds _SaveToDiscJobResult::getRealtime()
+std::chrono::milliseconds const& _SaveToDiscJobResult::getRealtime()
 {
     return _realtime;
 }

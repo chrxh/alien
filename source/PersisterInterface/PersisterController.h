@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <variant>
 
 #include "EngineInterface/Definitions.h"
 
@@ -18,7 +19,7 @@ public:
 
     virtual bool isBusy() const = 0;
     virtual PersisterJobState getJobState(PersisterJobId const& id) const = 0;
-    virtual PersisterErrorInfo fetchErrorInfo() const = 0;
+    virtual std::vector<PersisterErrorInfo> fetchErrorInfos() = 0;
 
     virtual PersisterJobId scheduleSaveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center) = 0;
     struct SavedSimulationData
@@ -27,5 +28,5 @@ public:
         uint64_t timestep = 0;
         std::chrono::milliseconds realtime;
     };
-    virtual SavedSimulationData fetchSavedSimulationData(PersisterJobId const& id) = 0;
+    virtual std::variant<SavedSimulationData, PersisterErrorInfo> fetchSavedSimulationData(PersisterJobId const& id) = 0;
 };
