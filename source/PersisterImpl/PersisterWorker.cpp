@@ -1,13 +1,14 @@
 #include "PersisterWorker.h"
 
+#include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 
-PersisterWorker::PersisterWorker(SimulationController const& simController)
+_PersisterWorker::_PersisterWorker(SimulationController const& simController)
     : _simController(simController)
 {
 }
 
-void PersisterWorker::runThreadLoop()
+void _PersisterWorker::runThreadLoop()
 {
     try {
         std::unique_lock lock(_jobMutex);
@@ -20,13 +21,13 @@ void PersisterWorker::runThreadLoop()
     }
 }
 
-void PersisterWorker::shutdown()
+void _PersisterWorker::shutdown()
 {
     _isShutdown = true;
     _conditionVariable.notify_all();
 }
 
-void PersisterWorker::saveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center)
+void _PersisterWorker::saveSimulationToDisc(std::string const& filename, float const& zoom, RealVector2D const& center)
 {
     {
         std::unique_lock uniqueLock(_jobMutex);
@@ -36,7 +37,7 @@ void PersisterWorker::saveSimulationToDisc(std::string const& filename, float co
     _conditionVariable.notify_all();
 }
 
-void PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
+void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
 {
     if (_openJobs.empty()) {
         return;
@@ -58,7 +59,7 @@ void PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
     }
 }
 
-PersisterJobResult PersisterWorker::processSaveToDiscJob(std::unique_lock<std::mutex>& lock, SaveToDiscJob const& job)
+PersisterJobResult _PersisterWorker::processSaveToDiscJob(std::unique_lock<std::mutex>& lock, SaveToDiscJob const& job)
 {
     lock.unlock();
 

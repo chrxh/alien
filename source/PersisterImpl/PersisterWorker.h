@@ -5,15 +5,13 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "EngineInterface/SerializerService.h"
-
 #include "Definitions.h"
 #include "PersisterJob.h"
 
-class PersisterWorker
+class _PersisterWorker
 {
 public:
-    PersisterWorker(SimulationController const& simController);
+    _PersisterWorker(SimulationController const& simController);
 
     void runThreadLoop();
     void shutdown();

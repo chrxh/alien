@@ -5,6 +5,7 @@
 
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/ArraySizes.h"
 
 struct ParticleTO
 {
@@ -201,6 +202,29 @@ struct DataTO
 	ParticleTO* particles = nullptr;
     uint64_t* numAuxiliaryData = nullptr;
     uint8_t* auxiliaryData = nullptr;
+
+    void init(ArraySizes arraySizes)
+    {
+        numCells = new uint64_t;
+        numParticles = new uint64_t;
+        numAuxiliaryData = new uint64_t;
+        *numCells = 0;
+        *numParticles = 0;
+        *numAuxiliaryData = 0;
+        cells = new CellTO[arraySizes.cellArraySize];
+        particles = new ParticleTO[arraySizes.particleArraySize];
+        auxiliaryData = new uint8_t[arraySizes.auxiliaryDataSize];
+    }
+
+    void destroy()
+    {
+        delete numCells;
+        delete numParticles;
+        delete numAuxiliaryData;
+        delete[] cells;
+        delete[] particles;
+        delete[] auxiliaryData;
+    }
 
 	bool operator==(DataTO const& other) const
 	{
