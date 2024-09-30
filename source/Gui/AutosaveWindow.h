@@ -1,7 +1,5 @@
 #pragma once
 
-#include "PersisterImpl/PersisterWorker.h"
-
 #include "Definitions.h"
 #include "AlienWindow.h"
 
@@ -55,7 +53,4 @@ private:
         uint64_t timestep;
     };
     std::vector<SavePointEntry> _savePoints;
-
-    PersisterWorker _worker;
-    std::thread* _thread = nullptr;
 };
