@@ -1,6 +1,6 @@
 #include "PersisterWorker.h"
 
-#include "SerializationHelperService.h"
+#include "EngineInterface/SimulationController.h"
 
 PersisterWorker::PersisterWorker(SimulationController const& simController)
     : _simController(simController)
@@ -26,11 +26,11 @@ void PersisterWorker::shutdown()
     _conditionVariable.notify_all();
 }
 
-void PersisterWorker::saveToDisc(std::string const& filename)
+void PersisterWorker::saveToDisc(std::string const& filename, float const& zoom, RealVector2D const& center)
 {
     {
         std::unique_lock uniqueLock(_jobMutex);
-        auto saveToDiscJob = std::make_shared<_SaveToDiscJob>(_idCount++, filename);
+        auto saveToDiscJob = std::make_shared<_SaveToDiscJob>(_idCount++, filename, zoom, center);
         _openJobs.emplace_back(saveToDiscJob);
     }
     _conditionVariable.notify_all();
@@ -61,7 +61,17 @@ void PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
 PersisterJobResult PersisterWorker::processSaveToDiscJob(std::unique_lock<std::mutex>& lock, SaveToDiscJob const& job)
 {
     lock.unlock();
-    auto deserializedData = SerializationHelperService::getDeserializedSerialization(_simController);
+
+    DeserializedSimulation deserializedData;
+    deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+    deserializedData.auxiliaryData.realTime = _simController->getRealTime();
+    deserializedData.auxiliaryData.zoom = job->getZoom();
+    deserializedData.auxiliaryData.center = job->getCenter();
+    deserializedData.auxiliaryData.generalSettings = _simController->getGeneralSettings();
+    deserializedData.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
+    deserializedData.statistics = _simController->getStatisticsHistory().getCopiedData();
+    deserializedData.mainData = _simController->getClusteredSimulationData();
+
     SerializerService::serializeSimulationToFiles(job->getFilename(), deserializedData);
     lock.lock();
 

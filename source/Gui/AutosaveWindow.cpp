@@ -5,8 +5,8 @@
 #include "Base/GlobalSettings.h"
 
 #include "AlienImGui.h"
-#include "SerializationHelperService.h"
 #include "StyleRepository.h"
+#include "Viewport.h"
 
 namespace
 {
@@ -169,7 +169,7 @@ void _AutosaveWindow::processSettings()
 void _AutosaveWindow::onCreateSave()
 {
     DeserializedSimulation dummy;
-    _worker.saveToDisc("d:\\test.sim");
+    _worker.saveToDisc("d:\\test.sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
 }
 
 void _AutosaveWindow::validationAndCorrection()

@@ -87,10 +87,6 @@ PUBLIC
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
-    PersisterJob.cpp
-    PersisterJob.h
-    PersisterWorker.cpp
-    PersisterWorker.h
     RadiationSourcesWindow.cpp
     RadiationSourcesWindow.h
     ResetPasswordDialog.cpp
@@ -99,12 +95,12 @@ PUBLIC
     ResizeWorldDialog.h
     SelectionWindow.cpp
     SelectionWindow.h
-    SerializationHelperService.cpp
-    SerializationHelperService.h
     Shader.cpp
     Shader.h
     ShaderWindow.cpp
     ShaderWindow.h
+    SerializationHelperService.cpp
+    SerializationHelperService.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersWindow.cpp
@@ -141,6 +137,7 @@ target_link_libraries(alien EngineGpuKernels)
 target_link_libraries(alien EngineImpl)
 target_link_libraries(alien EngineInterface)
 target_link_libraries(alien Network)
+target_link_libraries(alien Persister)
 
 target_link_libraries(alien im_file_dialog)
 target_link_libraries(alien CUDA::cudart_static)
