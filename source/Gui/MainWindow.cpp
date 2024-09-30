@@ -161,6 +161,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
     _autosaveWindow = std::make_shared<_AutosaveWindow>(_simController, _persisterController);
     _persisterController->init(_simController);
+    OverlayMessageController::getInstance().init(_persisterController);
 
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
@@ -453,11 +454,11 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Shader parameters", "ALT+6", _shaderWindow->isOn())) {
                 _shaderWindow->setOn(!_shaderWindow->isOn());
             }
-            if (ImGui::MenuItem("Log", "ALT+7", _logWindow->isOn())) {
-                _logWindow->setOn(!_logWindow->isOn());
-            }
-            if (ImGui::MenuItem("Autosave", "ALT+8", _autosaveWindow->isOn())) {
+            if (ImGui::MenuItem("Autosave", "ALT+7", _autosaveWindow->isOn())) {
                 _autosaveWindow->setOn(!_autosaveWindow->isOn());
+            }
+            if (ImGui::MenuItem("Log", "ALT+8", _logWindow->isOn())) {
+                _logWindow->setOn(!_logWindow->isOn());
             }
             AlienImGui::EndMenuButton();
         }
@@ -632,10 +633,10 @@ void _MainWindow::processMenubar()
             _shaderWindow->setOn(!_shaderWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_7)) {
-            _logWindow->setOn(!_logWindow->isOn());
+            _autosaveWindow->setOn(!_autosaveWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_8)) {
-            _autosaveWindow->setOn(!_autosaveWindow->isOn());
+            _logWindow->setOn(!_logWindow->isOn());
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
@@ -817,21 +818,7 @@ void _MainWindow::onSaveSimulation()
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
             printOverlayMessage("Saving ...");
-            delayedExecution([=, this] {
-                DeserializedSimulation sim;
-                sim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-                sim.auxiliaryData.realTime = _simController->getRealTime();
-                sim.auxiliaryData.zoom = Viewport::getZoomFactor();
-                sim.auxiliaryData.center = Viewport::getCenterInWorldPos();
-                sim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
-                sim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
-                sim.mainData = _simController->getClusteredSimulationData();
-                sim.statistics = _simController->getStatisticsHistory().getCopiedData();
-
-                if (!SerializerService::serializeSimulationToFiles(firstFilename.string(), sim)) {
-                    MessageDialog::getInstance().information("Save simulation", "The simulation could not be saved to the specified file.");
-                }
-            });
+            _persisterController->scheduleSaveSimulationToDisc(firstFilename.string(), Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
         });
 }
 

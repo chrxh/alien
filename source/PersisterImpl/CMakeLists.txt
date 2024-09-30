@@ -5,6 +5,8 @@ add_library(PersisterImpl
     PersisterControllerImpl.h
     PersisterJob.cpp
     PersisterJob.h
+    PersisterJobError.cpp
+    PersisterJobError.h
     PersisterJobResult.cpp
     PersisterJobResult.h
     PersisterWorker.cpp

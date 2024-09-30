@@ -29,6 +29,12 @@ void _PersisterWorker::shutdown()
     _conditionVariable.notify_all();
 }
 
+bool _PersisterWorker::isBusy() const
+{
+    std::unique_lock uniqueLock(_jobMutex);
+    return !_openJobs.empty() || !_inProgressJobs.empty();
+}
+
 PersisterJobState _PersisterWorker::getJobState(PersisterJobId const& id) const
 {
     std::unique_lock uniqueLock(_jobMutex);
@@ -40,6 +46,20 @@ PersisterJobState _PersisterWorker::getJobState(PersisterJobId const& id) const
     }
     if (std::ranges::find_if(_finishedJobs, [&](PersisterJobResult const& job) { return job->getId() == id; }) != _finishedJobs.end()) {
         return PersisterJobState::Finished;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+PersisterJobResult _PersisterWorker::fetchJobResult(PersisterJobId const& id)
+{
+    std::unique_lock uniqueLock(_jobMutex);
+
+    auto findResult = std::ranges::find_if(_finishedJobs, [&](PersisterJobResult const& job) { return job->getId() == id; });
+
+    if (findResult != _finishedJobs.end()) {
+        auto resultCopy = *findResult;
+        _finishedJobs.erase(findResult);
+        return resultCopy;
     }
     THROW_NOT_IMPLEMENTED();
 }
@@ -67,7 +87,8 @@ void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
         if (auto const& saveToDiscJob = std::dynamic_pointer_cast<_SaveToDiscJob>(job)) {
             _inProgressJobs.push_back(job);
             auto jobResult = processSaveToDiscJob(lock, saveToDiscJob);
-            _inProgressJobs.pop_back();
+            auto findResult = std::ranges::find_if(_inProgressJobs, [&](PersisterJob const& otherJob) { return otherJob->getId() == job->getId(); });
+            _inProgressJobs.erase(findResult);
 
             _finishedJobs.emplace_back(jobResult);
         }
@@ -90,7 +111,8 @@ PersisterJobResult _PersisterWorker::processSaveToDiscJob(std::unique_lock<std::
     deserializedData.mainData = _simController->getClusteredSimulationData();
 
     SerializerService::serializeSimulationToFiles(job->getFilename(), deserializedData);
+
     lock.lock();
 
-    return std::make_shared<_SaveToDiscJobResult>(job->getId());
+    return std::make_shared<_SaveToDiscJobResult>(job->getId(), deserializedData.auxiliaryData.timestep, deserializedData.auxiliaryData.realTime);
 }

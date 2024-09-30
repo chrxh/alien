@@ -10,6 +10,18 @@ _PersisterJobResult::_PersisterJobResult(PersisterJobId const& id)
     : _id(id)
 {}
 
-_SaveToDiscJobResult::_SaveToDiscJobResult(PersisterJobId const& id)
+_SaveToDiscJobResult::_SaveToDiscJobResult(PersisterJobId const& id, uint64_t const& timestep, std::chrono::milliseconds const& realtime)
     : _PersisterJobResult(id)
+    , _timestep(timestep)
+    , _realtime(realtime)
 {}
+
+uint64_t _SaveToDiscJobResult::getTimestep() const
+{
+    return _timestep;
+}
+
+std::chrono::milliseconds _SaveToDiscJobResult::getRealtime()
+{
+    return _realtime;
+}
