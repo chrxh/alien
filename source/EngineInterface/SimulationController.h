@@ -12,6 +12,8 @@
 class _SimulationController
 {
 public:
+    virtual ~_SimulationController() = default;
+
     virtual void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& simulationParameters) = 0;
     virtual int getSessionId() const = 0;
     virtual void clear() = 0;
