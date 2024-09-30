@@ -55,6 +55,16 @@ PersisterJobState _PersisterWorker::getJobState(PersisterJobId const& id) const
     THROW_NOT_IMPLEMENTED();
 }
 
+void _PersisterWorker::addJob(PersisterJob const& job)
+{
+    {
+        std::unique_lock uniqueLock(_jobMutex);
+
+        _openJobs.emplace_back(job);
+    }
+    _conditionVariable.notify_all();
+}
+
 std::variant<PersisterJobResult, PersisterJobError> _PersisterWorker::fetchJobResult(PersisterJobId const& id)
 {
     std::unique_lock uniqueLock(_jobMutex);
@@ -75,14 +85,21 @@ std::variant<PersisterJobResult, PersisterJobError> _PersisterWorker::fetchJobRe
     THROW_NOT_IMPLEMENTED();
 }
 
-void _PersisterWorker::addJob(PersisterJob const& job)
+std::vector<PersisterErrorInfo> _PersisterWorker::fetchCriticalErrorInfos()
 {
-    {
-        std::unique_lock uniqueLock(_jobMutex);
+    std::unique_lock lock(_jobMutex);
 
-        _openJobs.emplace_back(job);
+    std::vector<PersisterErrorInfo> result;
+    std::deque<PersisterJobError> filteredErrorJobs;
+    for (auto const& errorJob : _errorJobs) {
+        if (errorJob->isCritical()) {
+            result.emplace_back(errorJob->getErrorInfo());
+        } else {
+            filteredErrorJobs.emplace_back(errorJob);
+        }
     }
-    _conditionVariable.notify_all();
+    _errorJobs = filteredErrorJobs;
+    return result;
 }
 
 void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
@@ -142,14 +159,16 @@ std::variant<PersisterJobResult, PersisterJobError> _PersisterWorker::processSav
         deserializedData.mainData = _simController->getClusteredSimulationData();
     } catch (std::runtime_error const&) {
         return std::make_shared<_PersisterJobError>(
-            job->getId(), PersisterErrorInfo{"The simulation could not be saved because no valid data could be obtained from the GPU."});
+            job->getId(), job->isCritical(), PersisterErrorInfo{"The simulation could not be saved because no valid data could be obtained from the GPU."});
     }
 
     try {
         SerializerService::serializeSimulationToFiles(job->getFilename(), deserializedData);
     } catch (std::runtime_error const&) {
         return std::make_shared<_PersisterJobError>(
-            job->getId(), PersisterErrorInfo{"The simulation could not be saved because an error occurred when serializing the data to the file."});
+            job->getId(),
+            job->isCritical(),
+            PersisterErrorInfo{"The simulation could not be saved because an error occurred when serializing the data to the file."});
     }
 
     return std::make_shared<_SaveToDiscJobResult>(job->getId(), deserializedData.auxiliaryData.timestep, deserializedData.auxiliaryData.realTime);

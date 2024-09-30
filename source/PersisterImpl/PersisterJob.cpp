@@ -1,16 +1,22 @@
 #include "PersisterJob.h"
 
-PersisterJobId _PersisterJob::getId() const
+PersisterJobId const& _PersisterJob::getId() const
 {
     return _id;
 }
 
-_PersisterJob::_PersisterJob(PersisterJobId const& id)
+bool _PersisterJob::isCritical() const
+{
+    return _critical;
+}
+
+_PersisterJob::_PersisterJob(PersisterJobId const& id, bool critical)
     : _id(id)
+    , _critical(critical)
 {}
 
-_SaveToDiscJob::_SaveToDiscJob(PersisterJobId const& id, std::string const& filename, float const& zoom, RealVector2D const& center)
-    : _PersisterJob(id)
+_SaveToDiscJob::_SaveToDiscJob(PersisterJobId const& id, bool critical, std::string const& filename, float const& zoom, RealVector2D const& center)
+    : _PersisterJob(id, critical)
     , _filename(filename)
     , _zoom(zoom)
     , _center(center)

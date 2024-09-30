@@ -181,7 +181,7 @@ void _AutosaveWindow::createSavepoint()
 {
     printOverlayMessage("Creating save point ...");
     static int i = 0;
-    auto jobId = _persisterController->scheduleSaveSimulationToDisc("d:\\test" + std::to_string(++i) + ".sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
+    auto jobId = _persisterController->scheduleSaveSimulationToDisc("d:\\test" + std::to_string(++i) + ".sim", false, Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
 
     _savePoints.emplace_front(SavepointState::InQueue, jobId, "", "", 0);
 }

@@ -22,9 +22,10 @@ public:
 
     bool isBusy() const;
     PersisterJobState getJobState(PersisterJobId const& id) const;
-    std::variant<PersisterJobResult, PersisterJobError> fetchJobResult(PersisterJobId const& id);
 
     void addJob(PersisterJob const& job);
+    std::variant<PersisterJobResult, PersisterJobError> fetchJobResult(PersisterJobId const& id);
+    std::vector<PersisterErrorInfo> fetchCriticalErrorInfos();
 
 private:
     void processJobs(std::unique_lock<std::mutex>& lock);
