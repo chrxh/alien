@@ -60,7 +60,7 @@ void _AutosaveWindow::processToolbar()
 {
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
-        onCreateSave();
+        createSavepoint();
     }
     AlienImGui::Tooltip("Create save point");
 
@@ -106,22 +106,35 @@ void _AutosaveWindow::processTable()
         clipper.Begin(_savePoints.size());
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto item = &_savePoints[row];
+                auto& entry = _savePoints[row];
+                updateSavepoint(entry);
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(15.0f));
 
                 ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(item->sequenceNumber));
+                AlienImGui::Text(std::to_string(entry.sequenceNumber));
 
                 ImGui::TableNextColumn();
-                AlienImGui::Text(item->timestamp);
+                if (entry.state == SavepointState::InQueue) {
+                    AlienImGui::Text("In queue");
+                }
+                if (entry.state == SavepointState::InProgress) {
+                    AlienImGui::Text("In progress");
+                }
+                if (entry.state == SavepointState::Persisted) {
+                    AlienImGui::Text(entry.timestamp);
+                }
 
                 ImGui::TableNextColumn();
-                AlienImGui::Text(item->name);
+                if (entry.state == SavepointState::Persisted) {
+                    AlienImGui::Text(entry.name);
+                }
 
                 ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(item->timestep));
+                if (entry.state == SavepointState::Persisted) {
+                    AlienImGui::Text(std::to_string(entry.timestep));
+                }
 
                 ImGui::PopID();
             }
@@ -161,12 +174,28 @@ void _AutosaveWindow::processSettings()
     }
 }
 
-void _AutosaveWindow::onCreateSave()
+void _AutosaveWindow::createSavepoint()
 {
-    printOverlayMessage("Saving ...");
+    printOverlayMessage("Creating save point ...", true);
     auto jobId = _persisterController->saveSimulationToDisc("d:\\test2.sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos());
 
-    _savePoints.emplace_front(true, 1, std::to_string(jobId), "", "", 0);
+    for (auto& savePoint : _savePoints) {
+        ++savePoint.sequenceNumber;
+    }
+    _savePoints.emplace_front(SavepointState::InQueue, 1, jobId, "", "", 0);
+}
+
+void _AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)
+{
+    if (savepoint.state != SavepointState::Persisted) {
+        auto jobState = _persisterController->getJobState(PersisterJobId(savepoint.id));
+        if (jobState == PersisterJobState::InProgress) {
+            savepoint.state = SavepointState::InProgress;
+        }
+        if (jobState == PersisterJobState::Finished) {
+            savepoint.state = SavepointState::Persisted;
+        }
+    }
 }
 
 void _AutosaveWindow::validationAndCorrection()

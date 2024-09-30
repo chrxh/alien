@@ -44,5 +44,5 @@ PersisterJobId _PersisterControllerImpl::saveSimulationToDisc(std::string const&
 PersisterJobId _PersisterControllerImpl::generateNewJobId()
 {
     ++_latestJobId;
-    return _latestJobId;
+    return std::to_string(_latestJobId);
 }

@@ -24,5 +24,5 @@ private:
 
     std::shared_ptr<_PersisterWorker> _worker;
     std::thread* _thread = nullptr;
-    PersisterJobId _latestJobId = PersisterJobId(0);
+    int _latestJobId = 0;
 };

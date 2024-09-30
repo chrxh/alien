@@ -1,6 +1,6 @@
 #include "PersisterJob.h"
 
-int _PersisterJob::getId() const
+PersisterJobId _PersisterJob::getId() const
 {
     return _id;
 }
