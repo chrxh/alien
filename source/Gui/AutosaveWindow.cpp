@@ -161,7 +161,7 @@ void _AutosaveWindow::processSettings()
     _settingsOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Settings").highlighted(true).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
-            AlienImGui::InputText(AlienImGui::InputTextParameters().name("Location on disc").textWidth(RightColumnWidth).defaultValue(_origLocation), _location);
+            AlienImGui::InputText(AlienImGui::InputTextParameters().name("Directory").textWidth(RightColumnWidth).defaultValue(_origLocation), _location);
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Mode")

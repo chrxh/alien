@@ -14,6 +14,7 @@ public:
 
     void init(SimulationController const& simController) override;
     void shutdown() override;
+    void restart() override;
 
     bool isBusy() const override;
     PersisterRequestState getRequestState(PersisterRequestId const& id) const override;
@@ -23,8 +24,8 @@ public:
     PersisterRequestId scheduleSaveSimulationToFile(SenderInfo const& senderInfo, SaveSimulationRequestData const& data) override;
     SavedSimulationResultData fetchSavedSimulationData(PersisterRequestId const& id) override;
 
-    PersisterRequestId scheduleLoadSimulationFromFile(SenderInfo const& senderInfo, LoadSimulationRequestData const& data) override;
-    LoadedSimulationResultData fetchLoadSimulationData(PersisterRequestId const& id) override;
+    PersisterRequestId scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data) override;
+    ReadSimulationResultData fetchReadSimulationData(PersisterRequestId const& id) override;
 
 private:
     static auto constexpr MaxWorkerThreads = 4;

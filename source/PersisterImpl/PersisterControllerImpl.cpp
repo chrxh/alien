@@ -14,9 +14,7 @@ _PersisterControllerImpl::~_PersisterControllerImpl()
 void _PersisterControllerImpl::init(SimulationController const& simController)
 {
     _worker = std::make_shared<_PersisterWorker>(simController);
-    for (int i = 0; i < MaxWorkerThreads; ++i) {
-        _thread[i] = new std::thread(&_PersisterWorker::runThreadLoop, _worker.get());
-    }
+    restart();
 }
 
 void _PersisterControllerImpl::shutdown()
@@ -28,6 +26,14 @@ void _PersisterControllerImpl::shutdown()
             delete _thread[i];
             _thread[i] = nullptr;
         }
+    }
+}
+
+void _PersisterControllerImpl::restart()
+{
+    _worker->restart();
+    for (int i = 0; i < MaxWorkerThreads; ++i) {
+        _thread[i] = new std::thread(&_PersisterWorker::runThreadLoop, _worker.get());
     }
 }
 
@@ -67,19 +73,19 @@ SavedSimulationResultData _PersisterControllerImpl::fetchSavedSimulationData(Per
     return requestResult->getData();
 }
 
-PersisterRequestId _PersisterControllerImpl::scheduleLoadSimulationFromFile(SenderInfo const& senderInfo, LoadSimulationRequestData const& data)
+PersisterRequestId _PersisterControllerImpl::scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data)
 {
     auto requestId = generateNewJobId();
-    auto loadFromFileRequest = std::make_shared<_LoadFromFileRequest>(requestId, senderInfo, data);
+    auto loadFromFileRequest = std::make_shared<_ReadFromFileRequest>(requestId, senderInfo, data);
 
     _worker->addRequest(loadFromFileRequest);
 
     return requestId;
 }
 
-LoadedSimulationResultData _PersisterControllerImpl::fetchLoadSimulationData(PersisterRequestId const& id)
+ReadSimulationResultData _PersisterControllerImpl::fetchReadSimulationData(PersisterRequestId const& id)
 {
-    auto requestResult = std::dynamic_pointer_cast<_LoadFromFileRequestResult>(_worker->fetchJobResult(id));
+    auto requestResult = std::dynamic_pointer_cast<_ReadFromFileRequestResult>(_worker->fetchJobResult(id));
     return requestResult->getData();
 }
 

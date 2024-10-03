@@ -19,10 +19,7 @@ void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& gener
     _settings.simulationParameters = parameters;
     _dataTOCache = std::make_shared<_AccessDataTOCache>();
     _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, _settings);
-
-    if (_imageResource) {
-        _cudaResource = _simulationCudaFacade->registerImageResource(*_imageResource);
-    }
+    _cudaResource = nullptr;
 }
 
 void EngineWorker::clear()
@@ -56,12 +53,9 @@ void EngineWorker::tryDrawVectorGraphics(
     EngineWorkerGuard access(this, FrameTimeout);
 
     if (!access.isTimeout()) {
+        registerImageResource();
         _simulationCudaFacade->drawVectorGraphics(
-            {rectUpperLeft.x, rectUpperLeft.y},
-            {rectLowerRight.x, rectLowerRight.y},
-            _cudaResource,
-            {imageSize.x, imageSize.y},
-            zoom);
+            {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
         syncSimulationWithRenderingIfDesired();
     }
 }
@@ -75,12 +69,9 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
     EngineWorkerGuard access(this, FrameTimeout);
 
     if (!access.isTimeout()) {
+        registerImageResource();
         _simulationCudaFacade->drawVectorGraphics(
-            {rectUpperLeft.x, rectUpperLeft.y},
-            {rectLowerRight.x, rectLowerRight.y},
-            _cudaResource,
-            {imageSize.x, imageSize.y},
-            zoom);
+            {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
 
         DataTO dataTO = provideTO();
 
@@ -599,6 +590,13 @@ void EngineWorker::slowdownTPS()
         }
     }
     _slowDownTimepoint = std::chrono::steady_clock::now();
+}
+
+void EngineWorker::registerImageResource()
+{
+    if (_imageResource && !_cudaResource) {
+        _cudaResource = _simulationCudaFacade->registerImageResource(*_imageResource);
+    }
 }
 
 EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::chrono::milliseconds> const& maxDuration)

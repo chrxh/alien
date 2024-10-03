@@ -43,8 +43,8 @@ void FileTransferController::onOpenSimulation()
             printOverlayMessage("Loading ...");
 
             auto senderInfo = SenderInfo{.senderId = SenderId{FileTransferSenderId}, .wishResultData = true, .wishErrorInfo = true};
-            auto readData = LoadSimulationRequestData{firstFilename.string()};
-            _readSimulationRequestIds.emplace_back(_persisterController->scheduleLoadSimulationFromFile(senderInfo, readData));
+            auto readData = ReadSimulationRequestData{firstFilename.string()};
+            _readSimulationRequestIds.emplace_back(_persisterController->scheduleReadSimulationFromFile(senderInfo, readData));
         });
 }
 
@@ -67,7 +67,9 @@ void FileTransferController::process()
     std::vector<PersisterRequestId> newReadSimulationRequestIds;
     for (auto const& requestId : _readSimulationRequestIds) {
         if (_persisterController->getRequestState(requestId) == PersisterRequestState::Finished) {
-            auto const& data = _persisterController->fetchLoadSimulationData(requestId);
+            auto const& data = _persisterController->fetchReadSimulationData(requestId);
+            _persisterController->shutdown();
+
             _simController->closeSimulation();
 
             std::optional<std::string> errorMessage;
@@ -95,6 +97,7 @@ void FileTransferController::process()
                     data.deserializedSimulation.auxiliaryData.generalSettings,
                     data.deserializedSimulation.auxiliaryData.simulationParameters);
             }
+            _persisterController->restart();
 
             Viewport::setCenterInWorldPos(data.deserializedSimulation.auxiliaryData.center);
             Viewport::setZoomFactor(data.deserializedSimulation.auxiliaryData.zoom);
