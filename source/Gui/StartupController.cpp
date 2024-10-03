@@ -8,6 +8,7 @@
 #include "Base/LoggingService.h"
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
+#include "PersisterInterface/PersisterController.h"
 
 #include "OpenGLHelper.h"
 #include "Viewport.h"
@@ -23,11 +24,16 @@ namespace
     std::chrono::milliseconds::rep const FadeInDuration = 500;
 
     auto constexpr InitialLineDistance = 15.0f;
+    auto const StartupSenderId = "Startup";
 }
 
-_StartupController::_StartupController(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow)
+_StartupController::_StartupController(
+    SimulationController const& simController,
+    PersisterController const& persisterController,
+    TemporalControlWindow const& temporalControlWindow)
     : _simController(simController)
     , _temporalControlWindow(temporalControlWindow)
+    , _persisterController(persisterController)
 {
     log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
@@ -37,47 +43,65 @@ _StartupController::_StartupController(SimulationController const& simController
 
 void _StartupController::process()
 {
-    if (_state == State::Unintialized) {
-        processLoadingScreen();
-        auto now = std::chrono::steady_clock::now();
-        auto millisecSinceStartup =
-            std::chrono::duration_cast<std::chrono::milliseconds>(now - *_startupTimepoint).count();
-        if (millisecSinceStartup > LogoDuration) {
-            activate();
-        }
+    if (_state == State::StartLoadSimulation) {
+        auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
+        auto readData = ReadSimulationRequestData{Const::AutosaveFile};
+        _startupSimRequestId = _persisterController->scheduleReadSimulationFromFile(senderInfo, readData);
+        _state = State::LoadingSimulation;
         return;
     }
 
-    if (_state == State::LoadSimulation) {
-        std::optional<std::string> name;
-        DeserializedSimulation deserializedSim;
-        if (!SerializerService::deserializeSimulationFromFiles(deserializedSim, Const::AutosaveFile)) {
-            MessageDialog::getInstance().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
-            deserializedSim.auxiliaryData.generalSettings.worldSizeX = 1000;
-            deserializedSim.auxiliaryData.generalSettings.worldSizeY = 500;
-            deserializedSim.auxiliaryData.timestep = 0;
-            deserializedSim.auxiliaryData.zoom = 12.0f;
-            deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
-            deserializedSim.auxiliaryData.realTime = std::chrono::milliseconds(0);
-            deserializedSim.mainData = ClusteredDataDescription();
-        } else {
-            name = "autosave";
+    if (_state == State::LoadingSimulation) {
+        processLoadingScreen();
+        if (_persisterController->getRequestState(_startupSimRequestId) == PersisterRequestState::Finished) {
+            auto const& data = _persisterController->fetchReadSimulationData(_startupSimRequestId);
+            auto const& deserializedSim = data.deserializedSimulation;
+            _simController->newSimulation(
+                data.simulationName,
+                deserializedSim.auxiliaryData.timestep,
+                deserializedSim.auxiliaryData.generalSettings,
+                deserializedSim.auxiliaryData.simulationParameters);
+            _simController->setClusteredSimulationData(deserializedSim.mainData);
+            _simController->setStatisticsHistory(deserializedSim.statistics);
+            _simController->setRealTime(deserializedSim.auxiliaryData.realTime);
+            Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+            Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
+            _temporalControlWindow->onSnapshot();
+
+            _lastActivationTimepoint = std::chrono::steady_clock::now();
+            _state = State::FadeOutLoadingScreen;
         }
 
-        _simController->newSimulation(
-            name, deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
-        _simController->setClusteredSimulationData(deserializedSim.mainData);
-        _simController->setStatisticsHistory(deserializedSim.statistics);
-        _simController->setRealTime(deserializedSim.auxiliaryData.realTime);
-        Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
-        Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
-        _temporalControlWindow->onSnapshot();
-
-        _lastActivationTimepoint = std::chrono::steady_clock::now();
-        _state = State::FadeOutLoadingScreen;
-        processLoadingScreen();
         return;
     }
+//    if (_state == State::LoadingSimulation) {
+        //std::optional<std::string> name;
+        //DeserializedSimulation deserializedSim;
+        //if (!SerializerService::deserializeSimulationFromFiles(deserializedSim, Const::AutosaveFile)) {
+        //    MessageDialog::getInstance().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
+        //    deserializedSim.auxiliaryData.generalSettings.worldSizeX = 1000;
+        //    deserializedSim.auxiliaryData.generalSettings.worldSizeY = 500;
+        //    deserializedSim.auxiliaryData.timestep = 0;
+        //    deserializedSim.auxiliaryData.zoom = 12.0f;
+        //    deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
+        //    deserializedSim.auxiliaryData.realTime = std::chrono::milliseconds(0);
+        //    deserializedSim.mainData = ClusteredDataDescription();
+        //} else {
+        //    name = "autosave";
+        //}
+
+        //_simController->newSimulation(
+        //    name, deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
+        //_simController->setClusteredSimulationData(deserializedSim.mainData);
+        //_simController->setStatisticsHistory(deserializedSim.statistics);
+        //_simController->setRealTime(deserializedSim.auxiliaryData.realTime);
+        //Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+        //Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
+        //_temporalControlWindow->onSnapshot();
+
+        //_lastActivationTimepoint = std::chrono::steady_clock::now();
+        //_state = State::FadeOutLoadingScreen;
+    //}
 
     if (_state == State::FadeOutLoadingScreen) {
         auto now = std::chrono::steady_clock::now();
@@ -121,7 +145,7 @@ auto _StartupController::getState() -> State
 
 void _StartupController::activate()
 {
-    _state = State::LoadSimulation;
+    _state = State::StartLoadSimulation;
 }
 
 void _StartupController::processLoadingScreen()
@@ -152,9 +176,9 @@ void _StartupController::processLoadingScreen()
     //draw 'Initializing' text if it fits
     if (bottom - scale(230) > bottom / 2 + _logo.height * imageScale / 2) {
         drawGrid(bottom - scale(250), std::max(0.0f, 1.0f - toFloat(millisecSinceStartup) / LogoDuration));
-        if (_state == State::Unintialized) {
+        //if (_state == State::Unintialized) {
             drawList->AddText(styleRep.getReefLargeFont(), scale(32.0), {center.x - scale(38), bottom - scale(270)}, loadingTextColor, "Initializing");
-        }
+        //}
     }
     drawList->AddText(styleRep.getReefLargeFont(), scale(48.0f), {center.x - scale(165), bottom - scale(200)}, textColor, "Artificial Life Environment");
 

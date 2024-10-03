@@ -136,7 +136,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController, _simInteractionController);
     _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow, _simInteractionController);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
-    _startupController = std::make_shared<_StartupController>(_simController, _temporalControlWindow);
+    _startupController = std::make_shared<_StartupController>(_simController, _persisterController, _temporalControlWindow);
     _exitDialog = std::make_shared<_ExitDialog>(_onExit);
     _aboutDialog = std::make_shared<_AboutDialog>();
     _massOperationsDialog = std::make_shared<_MassOperationsDialog>(_simController);
@@ -208,11 +208,11 @@ void _MainWindow::mainLoop()
      //   ImGui::ShowDemoWindow(NULL);
 
         switch (_startupController->getState()) {
-        case _StartupController::State::Unintialized:
+        case _StartupController::State::StartLoadSimulation:
             processUninitialized();
             break;
-        case _StartupController::State::LoadSimulation:
-            processRequestLoading();
+        case _StartupController::State::LoadingSimulation:
+            processUninitialized();
             break;
         case _StartupController::State::FadeOutLoadingScreen:
             processLoadingSimulation();

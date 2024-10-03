@@ -20,6 +20,11 @@ void _PersisterWorker::runThreadLoop()
     }
 }
 
+void _PersisterWorker::restart()
+{
+    _isShutdown = false;
+}
+
 void _PersisterWorker::shutdown()
 {
     _isShutdown = true;
@@ -122,7 +127,7 @@ void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
         if (auto const& saveToFileJob = std::dynamic_pointer_cast<_SaveToFileRequest>(request)) {
             processingResult = processRequest(lock, saveToFileJob);
         }
-        if (auto const& loadFromFileJob = std::dynamic_pointer_cast<_LoadFromFileRequest>(request)) {
+        if (auto const& loadFromFileJob = std::dynamic_pointer_cast<_ReadFromFileRequest>(request)) {
             processingResult = processRequest(lock, loadFromFileJob);
         }
         auto inProgressJobsIter = std::ranges::find_if(
@@ -194,7 +199,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveTo
         request->getRequestId(), SavedSimulationResultData{simulationName, deserializedData.auxiliaryData.timestep, timePoint});
 }
 
-auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, LoadFromFileRequest const& request) -> PersisterRequestResultOrError
+auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadFromFileRequest const& request) -> PersisterRequestResultOrError
 {
     UnlockGuard unlockGuard(lock);
 
@@ -206,5 +211,5 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, LoadFr
             request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The selected file could not be opened."});
     }
     auto simulationName = std::filesystem::path(requestData.filename).stem().string();
-    return std::make_shared<_LoadFromFileRequestResult>(request->getRequestId(), LoadedSimulationResultData{simulationName, deserializedData});
+    return std::make_shared<_ReadFromFileRequestResult>(request->getRequestId(), ReadSimulationResultData{simulationName, deserializedData});
 }

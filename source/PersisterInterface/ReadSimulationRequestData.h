@@ -1,6 +1,6 @@
 #pragma once
 
-struct LoadSimulationRequestData
+struct ReadSimulationRequestData
 {
     std::string filename;
 };

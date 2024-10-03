@@ -122,6 +122,8 @@ private:
     void measureTPS();
     void slowdownTPS();
 
+    void registerImageResource();
+
     CudaSimulationFacade _simulationCudaFacade;
 
     //settings
@@ -139,7 +141,6 @@ private:
     std::mutex _mutexForEngineWorkerGuard;
     mutable std::mutex _mutexForAsyncJobs;
     std::optional<GpuSettings> _updateGpuSettingsJob;
-    std::optional<GLuint> _imageResource;
 
     struct ApplyForceJob
     {
@@ -159,7 +160,8 @@ private:
     std::optional<std::chrono::microseconds> _slowDownOvershot;
   
     //internals
-    void* _cudaResource;
+    std::optional<GLuint> _imageResource;
+    void* _cudaResource = nullptr;
     AccessDataTOCache _dataTOCache;
 };
 

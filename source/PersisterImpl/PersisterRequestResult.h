@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PersisterInterface/LoadedSimulationResultData.h"
+#include "PersisterInterface/ReadSimulationResultData.h"
 #include "PersisterInterface/PersisterRequestId.h"
 #include "PersisterInterface/SavedSimulationResultData.h"
 
@@ -41,5 +41,5 @@ using ConcreteRequestResult = std::shared_ptr<_ConcreteRequestResult<Data_t>>;
 using _SaveToFileRequestResult = _ConcreteRequestResult<SavedSimulationResultData>;
 using SaveToFileRequestResult = std::shared_ptr<_SaveToFileRequestResult>;
 
-using _LoadFromFileRequestResult = _ConcreteRequestResult<LoadedSimulationResultData>;
-using LoadFromFileRequestResult = std::shared_ptr<_LoadFromFileRequestResult>;
+using _ReadFromFileRequestResult = _ConcreteRequestResult<ReadSimulationResultData>;
+using ReadFromFileRequestResult = std::shared_ptr<_ReadFromFileRequestResult>;

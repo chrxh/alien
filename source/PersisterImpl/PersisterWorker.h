@@ -19,6 +19,7 @@ public:
 
     void runThreadLoop();
     void shutdown();
+    void restart();
 
     bool isBusy() const;
     PersisterRequestState getJobState(PersisterRequestId const& id) const;
@@ -34,7 +35,7 @@ private:
 
     using PersisterRequestResultOrError = std::variant<PersisterRequestResult, PersisterRequestError>;
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, SaveToFileRequest const& job);
-    PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, LoadFromFileRequest const& request);
+    PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, ReadFromFileRequest const& request);
 
     SimulationController _simController;
 

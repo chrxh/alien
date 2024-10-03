@@ -3,18 +3,23 @@
 #include <chrono>
 
 #include "EngineInterface/Definitions.h"
+#include "PersisterInterface/Definitions.h"
+#include "PersisterInterface/PersisterRequestId.h"
 #include "Definitions.h"
 
 class _StartupController
 {
 public:
-    _StartupController(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow);
+    _StartupController(
+        SimulationController const& simController,
+        PersisterController const& persisterController,
+        TemporalControlWindow const& temporalControlWindow);
 
     void process();
     enum class State
     {
-        Unintialized,
-        LoadSimulation,
+        StartLoadSimulation,
+        LoadingSimulation,
         FadeOutLoadingScreen,
         LoadingControls,
         Ready
@@ -30,8 +35,10 @@ private:
 
     SimulationController _simController;
     TemporalControlWindow _temporalControlWindow;
+    PersisterController _persisterController;
 
-    State _state = State::Unintialized;
+    PersisterRequestId _startupSimRequestId;
+    State _state = State::StartLoadSimulation;
     TextureData _logo;
     std::optional<std::chrono::steady_clock::time_point> _startupTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _lastActivationTimepoint;

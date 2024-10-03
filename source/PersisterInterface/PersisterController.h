@@ -6,8 +6,8 @@
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
-#include "LoadedSimulationResultData.h"
-#include "LoadSimulationRequestData.h"
+#include "ReadSimulationResultData.h"
+#include "ReadSimulationRequestData.h"
 #include "PersisterErrorInfo.h"
 #include "PersisterRequestId.h"
 #include "PersisterRequestState.h"
@@ -23,6 +23,7 @@ public:
 
     virtual void init(SimulationController const& simController) = 0;
     virtual void shutdown() = 0;
+    virtual void restart() = 0;
 
     //generic logic
     virtual bool isBusy() const = 0;
@@ -34,6 +35,6 @@ public:
     virtual PersisterRequestId scheduleSaveSimulationToFile(SenderInfo const& senderInfo, SaveSimulationRequestData const& data) = 0;
     virtual SavedSimulationResultData fetchSavedSimulationData(PersisterRequestId const& id) = 0;
 
-    virtual PersisterRequestId scheduleLoadSimulationFromFile(SenderInfo const& senderInfo, LoadSimulationRequestData const& data) = 0;
-    virtual LoadedSimulationResultData fetchLoadSimulationData(PersisterRequestId const& id) = 0;
+    virtual PersisterRequestId scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data) = 0;
+    virtual ReadSimulationResultData fetchReadSimulationData(PersisterRequestId const& id) = 0;
 };

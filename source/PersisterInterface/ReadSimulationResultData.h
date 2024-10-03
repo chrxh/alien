@@ -4,7 +4,7 @@
 
 #include "EngineInterface/DeserializedSimulation.h"
 
-struct LoadedSimulationResultData
+struct ReadSimulationResultData
 {
     std::string simulationName;
     DeserializedSimulation deserializedSimulation;
