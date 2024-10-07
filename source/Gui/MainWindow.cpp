@@ -578,16 +578,16 @@ void _MainWindow::processMenubar()
     //hotkeys
     auto& io = ImGui::GetIO();
     if (!io.WantCaptureKeyboard) {
-        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_N)) {
+        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_N)) {
             _newSimulationDialog->open();
         }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_O)) {
+        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_O)) {
             FileTransferController::get().onOpenSimulation();
         }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_S)) {
+        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S)) {
             FileTransferController::get().onSaveSimulation();
         }
-        if (ImGui::IsKeyPressed(GLFW_KEY_SPACE)) {
+        if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
             if (_simController->isSimulationRunning()) {
                 onPauseSimulation();
             } else {
@@ -596,122 +596,122 @@ void _MainWindow::processMenubar()
             
         }
 
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_W)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_W)) {
             _browserWindow->setOn(!_browserWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_L) && !NetworkService::getLoggedInUserName()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_L) && !NetworkService::getLoggedInUserName()) {
             _loginDialog->open();
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_T)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_T)) {
             NetworkService::logout();
             _browserWindow->onRefresh();
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_D) && NetworkService::getLoggedInUserName()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_D) && NetworkService::getLoggedInUserName()) {
             _uploadSimulationDialog->open(NetworkResourceType_Simulation);
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_Q) && NetworkService::getLoggedInUserName()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_Q) && NetworkService::getLoggedInUserName()) {
             _uploadSimulationDialog->open(NetworkResourceType_Genome);
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_J) && NetworkService::getLoggedInUserName()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_J) && NetworkService::getLoggedInUserName()) {
             _deleteUserDialog->open();
         }
 
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_1)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_1)) {
             _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_2)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_2)) {
             _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_3)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_3)) {
             _statisticsWindow->setOn(!_statisticsWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_4)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_4)) {
             _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_5)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_5)) {
             _radiationSourcesWindow->setOn(!_radiationSourcesWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_6)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_6)) {
             _shaderWindow->setOn(!_shaderWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_7)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_7)) {
             _autosaveWindow->setOn(!_autosaveWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_8)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_8)) {
             _logWindow->setOn(!_logWindow->isOn());
         }
 
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_E)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_E)) {
             _simInteractionController->setEditMode(!_simInteractionController->isEditMode());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_S)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_S)) {
             selectionWindow->setOn(!selectionWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_M)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_M)) {
             patternEditorWindow->setOn(!patternEditorWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_B)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_B)) {
             genomeEditorWindow->setOn(!genomeEditorWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_R)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_R)) {
             creatorWindow->setOn(!creatorWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_A)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_A)) {
             multiplierWindow->setOn(!multiplierWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_N) && _editorController->isObjectInspectionPossible()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_N) && _editorController->isObjectInspectionPossible()) {
             _editorController->onInspectSelectedObjects();
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_F) && _editorController->isGenomeInspectionPossible()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_F) && _editorController->isGenomeInspectionPossible()) {
             _editorController->onInspectSelectedGenomes();
         }
-        if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE)) {
+        if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
             _editorController->onCloseAllInspectorWindows();
         }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_C) && _editorController->isCopyingPossible()) {
+        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_C) && _editorController->isCopyingPossible()) {
             _editorController->onCopy();
         }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(GLFW_KEY_V) && _editorController->isPastingPossible()) {
+        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_V) && _editorController->isPastingPossible()) {
             _editorController->onPaste();
         }
-        if (ImGui::IsKeyPressed(GLFW_KEY_DELETE) ) {
+        if (ImGui::IsKeyPressed(ImGuiKey_Delete) ) {
             _editorController->onDelete();
         }
 
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_C)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_C)) {
             _gpuSettingsDialog->open();
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_V)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_V)) {
             _displaySettingsDialog->open();
         }
-        if (ImGui::IsKeyPressed(GLFW_KEY_F7)) {
+        if (ImGui::IsKeyPressed(ImGuiKey_F7)) {
             if (WindowController::isDesktopMode()) {
                 WindowController::setWindowedMode();
             } else {
                 WindowController::setDesktopMode();
             }
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_K)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_K)) {
             _networkSettingsDialog->open();
         }
 
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_O)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_O)) {
             _simulationView->setOverlayActive(!_simulationView->isOverlayActive());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_U)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_U)) {
             _uiController->setOn(!_uiController->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_I)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_I)) {
             _renderSimulation = !_renderSimulation;
         }
 
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_H)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_H)) {
             _massOperationsDialog->show();
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_P)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_P)) {
             _patternAnalysisDialog->show();
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(GLFW_KEY_G)) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_G)) {
             _imageToPatternDialog->show();
         }
     }
