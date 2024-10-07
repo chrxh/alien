@@ -81,7 +81,7 @@ The build process is mostly automated using the cross-platform CMake build syste
 ### Getting the sources
 To obtain the sources, please open a command prompt in a suitable directory (which should not contain whitespace characters) and enter the following command:
 ```
-git clone -b master --recursive https://github.com/chrxh/alien.git
+git clone --recursive https://github.com/chrxh/alien.git
 ```
 Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
 
