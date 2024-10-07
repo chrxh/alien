@@ -458,7 +458,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
         }
 
         if (_expandNodes) {
-            ImGui::SetNextTreeNodeOpen(*_expandNodes);
+            ImGui::SetNextItemOpen(*_expandNodes);
         }
         ImGui::PushFont(StyleRepository::getInstance().getSmallBoldFont());
         auto treeNodeOpen =

@@ -184,8 +184,7 @@ void _StatisticsWindow::processHistogramsTab()
         _histogramUpperBound = toFloat(maxNumObjects) * 1.3f;
     }
 
-    ImPlot::SetNextPlotLimitsX(0, toFloat(MAX_HISTOGRAM_SLOTS), ImGuiCond_Always);
-    ImPlot::SetNextPlotLimitsY(0, *_histogramUpperBound, ImGuiCond_Always);
+    ImPlot::SetNextAxesLimits(0, toFloat(MAX_HISTOGRAM_SLOTS), 0, *_histogramUpperBound, ImGuiCond_Always);
 
     auto getLabelString = [](int value) {
         if (value >= 1000) {
@@ -205,7 +204,7 @@ void _StatisticsWindow::processHistogramsTab()
     auto temp = getLabelString(maxNumObjects);
     labelsY[5] = temp.c_str();
     positionsY[5] = toFloat(maxNumObjects);
-    ImPlot::SetNextPlotTicksY(positionsY, 6, labelsY);
+    ImPlot::SetupAxisTicks(ImAxis_Y1, positionsY, 5, labelsY);
 
     //x-ticks
     char const* labelsX[5];
@@ -218,8 +217,9 @@ void _StatisticsWindow::processHistogramsTab()
         labelsX[i] = labelsX_temp[i].c_str();
         positionsX[i] = toFloat(((MAX_HISTOGRAM_SLOTS - 1) / 4) * i);
     }
-    ImPlot::SetNextPlotTicksX(positionsX, 5, labelsX);
-    ImPlot::SetNextPlotFormatX("");
+    ImPlot::SetupAxisTicks(ImAxis_X1, positionsX, 5, labelsX);
+    ImPlot::SetupAxisFormat(ImAxis_X1,"");
+
 
     //plot histogram
     if (ImPlot::BeginPlot("##Histograms", "Age", "Cell count", ImVec2(-1, -1))) {
@@ -557,20 +557,20 @@ void _StatisticsWindow::plotSumColorsIntern(
     ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
-    ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
+    ImPlot::SetNextAxesLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
 
     if (ImPlot::BeginPlot(
-            "##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), ImPlotFlags_NoMousePos, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+            "##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), ImPlotFlags_NoMouseText, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
         auto color = ImPlot::GetColormapColor((row % 21) <= 10 ? (row % 21): 20 - (row % 21));
         if (ImGui::GetStyle().Alpha == 1.0f) {
-            ImPlot::AnnotateClamped(
-                endTime, endValue, ImVec2(-10.0f, 10.0f), ImPlot::GetLastItemColor(), "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
+            ImPlot::Annotation(
+                endTime, endValue, ImPlot::GetLastItemColor(), ImVec2(-10.0f, 10.0f), true, "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
         }
         if (count > 0) {
             ImPlot::PushStyleColor(ImPlotCol_Line, color);
-            ImPlot::PlotLine("##", timePoints, plotDataY, count, 0, strideBytes);
+            ImPlot::PlotLine("##", timePoints, plotDataY, count, 0, 0, strideBytes);
             ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.5f * ImGui::GetStyle().Alpha);
-            ImPlot::PlotShaded("##", timePoints, plotDataY, count, 0, 0, strideBytes);
+            ImPlot::PlotShaded("##", timePoints, plotDataY, count, 0, 0, 0, strideBytes);
             ImPlot::PopStyleVar();
             ImPlot::PopStyleColor();
         }
@@ -605,7 +605,7 @@ void _StatisticsWindow::plotByColorIntern(
     ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 1.5f);
-    ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
+    ImPlot::SetNextAxesLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
 
     auto isCollapsed = _collapsedPlotIndices.contains(row);
     auto flags = _plotHeight > 159.0f && !isCollapsed ? ImPlotFlags_None : ImPlotFlags_NoLegend;
@@ -653,15 +653,21 @@ void _StatisticsWindow::plotForColorIntern(
     ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
-    ImPlot::SetNextPlotLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
+    ImPlot::SetNextAxesLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
     if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
 
         float h, s, v;
         AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[colorIndex], h, s, v);
         auto color = static_cast<ImVec4>(ImColor::HSV(h, s, v));
         if (ImGui::GetStyle().Alpha == 1.0f) {
-            ImPlot::AnnotateClamped(
-                endTime, endValue, ImVec2(-10.0f, 10.0f), ImPlot::GetLastItemColor(), "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
+            ImPlot::Annotation(
+                endTime,
+                endValue,
+                ImPlot::GetLastItemColor(),
+                ImVec2(-10.0f, 10.0f),
+                true,
+                "%s",
+                StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
         }
         if (count > 0) {
             ImPlot::PushStyleColor(ImPlotCol_Line, color);
@@ -736,11 +742,11 @@ void _StatisticsWindow::drawValuesAtMouseCursor(
     }();
 
     ImPlot::PushStyleColor(ImPlotCol_InlayText, ImColor::HSV(0.0f, 0.0f, 1.0f).Value);
-    ImPlot::PlotText(ICON_FA_GENDERLESS, mousePos.x, mousePos.y, false, {scale(1.0f), scale(2.0f)});
+    ImPlot::PlotText(ICON_FA_GENDERLESS, mousePos.x, mousePos.y, {scale(1.0f), scale(2.0f)});
     ImPlot::PopStyleColor();
 
     ImPlot::PushStyleColor(ImPlotCol_Line, ImColor::HSV(0.0f, 0.0f, 1.0f).Value);
-    ImPlot::PlotVLines("", &mousePos.x, 1);
+    ImPlot::PlotInfLines("", &mousePos.x, 1);
     ImPlot::PopStyleColor();
 
     char label[256];
@@ -761,7 +767,7 @@ void _StatisticsWindow::drawValuesAtMouseCursor(
             StringHelper::format(mousePos.x, 0).c_str(),
             StringHelper::format(mousePos.y, fracPartDecimals).c_str());
     }
-    ImPlot::PlotText(label, mousePos.x, upperBound, false, {leftSideFactor * (scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(28.0f)});
+    ImPlot::PlotText(label, mousePos.x, upperBound,  {leftSideFactor * (scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(28.0f)});
 }
 
 void _StatisticsWindow::validationAndCorrection()
