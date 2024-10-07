@@ -204,7 +204,6 @@ void _StatisticsWindow::processHistogramsTab()
     auto temp = getLabelString(maxNumObjects);
     labelsY[5] = temp.c_str();
     positionsY[5] = toFloat(maxNumObjects);
-    ImPlot::SetupAxisTicks(ImAxis_Y1, positionsY, 5, labelsY);
 
     //x-ticks
     char const* labelsX[5];
@@ -217,13 +216,14 @@ void _StatisticsWindow::processHistogramsTab()
         labelsX[i] = labelsX_temp[i].c_str();
         positionsX[i] = toFloat(((MAX_HISTOGRAM_SLOTS - 1) / 4) * i);
     }
-    ImPlot::SetupAxisTicks(ImAxis_X1, positionsX, 5, labelsX);
-    ImPlot::SetupAxisFormat(ImAxis_X1,"");
 
 
     //plot histogram
-    if (ImPlot::BeginPlot("##Histograms", "Age", "Cell count", ImVec2(-1, -1))) {
-
+    if (ImPlot::BeginPlot("##Histograms", ImVec2(-1, -1))) {
+        ImPlot::SetupAxisTicks(ImAxis_Y1, positionsY, 5, labelsY);
+        ImPlot::SetupAxisTicks(ImAxis_X1, positionsX, 5, labelsX);
+        ImPlot::SetupAxes("Age", "Cell count");
+        ImPlot::SetupAxisFormat(ImAxis_X1, "");
         auto const width = 1.0f / MAX_COLORS;
         for (int i = 0; i < MAX_COLORS; ++i) {
             float h, s, v;
@@ -559,9 +559,12 @@ void _StatisticsWindow::plotSumColorsIntern(
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextAxesLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
 
-    if (ImPlot::BeginPlot(
-            "##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), ImPlotFlags_NoMouseText, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
-        auto color = ImPlot::GetColormapColor((row % 21) <= 10 ? (row % 21): 20 - (row % 21));
+    if (ImPlot::BeginPlot("##", ImVec2(-1, scale(calcPlotHeight(row))), ImPlotFlags_NoMouseText)) {
+        ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoTickLabels);
+        ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels);
+        ImPlot::SetupAxisFormat(ImAxis_X1, "");
+        ImPlot::SetupAxisFormat(ImAxis_Y1, "");
+        auto color = ImPlot::GetColormapColor((row % 21) <= 10 ? (row % 21) : 20 - (row % 21));
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::Annotation(
                 endTime, endValue, ImPlot::GetLastItemColor(), ImVec2(-10.0f, 10.0f), true, "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
@@ -609,7 +612,11 @@ void _StatisticsWindow::plotByColorIntern(
 
     auto isCollapsed = _collapsedPlotIndices.contains(row);
     auto flags = _plotHeight > 159.0f && !isCollapsed ? ImPlotFlags_None : ImPlotFlags_NoLegend;
-    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), flags, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+    if (ImPlot::BeginPlot("##", ImVec2(-1, scale(calcPlotHeight(row))), flags)) {
+        ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoTickLabels);
+        ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels);
+        ImPlot::SetupAxisFormat(ImAxis_X1, "");
+        ImPlot::SetupAxisFormat(ImAxis_Y1, "");
         for (int i = 0; i < MAX_COLORS; ++i) {
             ImGui::PushID(i);
             auto colorRaw = Const::IndividualCellColors[i];
@@ -618,7 +625,7 @@ void _StatisticsWindow::plotByColorIntern(
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
             auto endValue = count > 0 ? *(reinterpret_cast<double const*>(reinterpret_cast<DataPointCollection const*>(values) + (count - 1)) + i) : 0.0f;
             auto labelId = StringHelper::format(toFloat(endValue), fracPartDecimals);
-            ImPlot::PlotLine(labelId.c_str(), timePoints, reinterpret_cast<double const*>(values) + i, count, 0, sizeof(DataPointCollection));
+            ImPlot::PlotLine(labelId.c_str(), timePoints, reinterpret_cast<double const*>(values) + i, count, 0, 0, sizeof(DataPointCollection));
             ImPlot::PopStyleColor();
             ImGui::PopID();
         }
@@ -654,7 +661,11 @@ void _StatisticsWindow::plotForColorIntern(
     ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
     ImPlot::SetNextAxesLimits(startTime, endTime, 0, upperBound, ImGuiCond_Always);
-    if (ImPlot::BeginPlot("##", 0, 0, ImVec2(-1, scale(calcPlotHeight(row))), 0, ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_NoTickLabels)) {
+    if (ImPlot::BeginPlot("##", ImVec2(-1, scale(calcPlotHeight(row))))) {
+        ImPlot::SetupAxis(ImAxis_X1, "", ImPlotAxisFlags_NoTickLabels);
+        ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels);
+        ImPlot::SetupAxisFormat(ImAxis_X1, "");
+        ImPlot::SetupAxisFormat(ImAxis_Y1, "");
 
         float h, s, v;
         AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[colorIndex], h, s, v);
@@ -671,9 +682,9 @@ void _StatisticsWindow::plotForColorIntern(
         }
         if (count > 0) {
             ImPlot::PushStyleColor(ImPlotCol_Line, color);
-            ImPlot::PlotLine("##", timePoints, valuesForColor, count, 0, strideBytes);
+            ImPlot::PlotLine("##", timePoints, valuesForColor, count, 0, 0, strideBytes);
             ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.5f * ImGui::GetStyle().Alpha);
-            ImPlot::PlotShaded("##", timePoints, valuesForColor, count, 0, 0, strideBytes);
+            ImPlot::PlotShaded("##", timePoints, valuesForColor, count, 0, 0, 0, strideBytes);
             ImPlot::PopStyleVar();
             ImPlot::PopStyleColor();
             if (ImGui::GetStyle().Alpha == 1.0f && ImPlot::IsPlotHovered()) {
