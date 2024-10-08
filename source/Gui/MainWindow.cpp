@@ -100,7 +100,6 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
 {
     IMGUI_CHECKVERSION();
 
-
     log(Priority::Important, "initialize GLFW and OpenGL");
     auto glfwVersion = initGlfw();
     WindowController::init();
