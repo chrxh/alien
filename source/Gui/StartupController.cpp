@@ -38,7 +38,6 @@ _StartupController::_StartupController(
     log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
     _lineDistance = scale(InitialLineDistance);
-    _startupTimepoint = std::chrono::steady_clock::now();
 }
 
 void _StartupController::process()
@@ -47,13 +46,15 @@ void _StartupController::process()
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto readData = ReadSimulationRequestData{Const::AutosaveFile};
         _startupSimRequestId = _persisterController->scheduleReadSimulationFromFile(senderInfo, readData);
+        _startupTimepoint = std::chrono::steady_clock::now();
         _state = State::LoadingSimulation;
         return;
     }
 
     if (_state == State::LoadingSimulation) {
         processLoadingScreen();
-        if (_persisterController->getRequestState(_startupSimRequestId) == PersisterRequestState::Finished) {
+        auto requestedSimState = _persisterController->getRequestState(_startupSimRequestId);
+        if (requestedSimState == PersisterRequestState::Finished) {
             auto const& data = _persisterController->fetchReadSimulationData(_startupSimRequestId);
             auto const& deserializedSim = data.deserializedSimulation;
             _simController->newSimulation(
@@ -71,38 +72,34 @@ void _StartupController::process()
             _lastActivationTimepoint = std::chrono::steady_clock::now();
             _state = State::FadeOutLoadingScreen;
         }
+        if (requestedSimState == PersisterRequestState::Error) {
+            MessageDialog::getInstance().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
 
+            DeserializedSimulation deserializedSim;
+            deserializedSim.auxiliaryData.generalSettings.worldSizeX = 1000;
+            deserializedSim.auxiliaryData.generalSettings.worldSizeY = 500;
+            deserializedSim.auxiliaryData.timestep = 0;
+            deserializedSim.auxiliaryData.zoom = 12.0f;
+            deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
+            deserializedSim.auxiliaryData.realTime = std::chrono::milliseconds(0);
+
+            _simController->newSimulation(
+                "autosave",
+                deserializedSim.auxiliaryData.timestep,
+                deserializedSim.auxiliaryData.generalSettings,
+                deserializedSim.auxiliaryData.simulationParameters);
+            _simController->setClusteredSimulationData(deserializedSim.mainData);
+            _simController->setStatisticsHistory(deserializedSim.statistics);
+            _simController->setRealTime(deserializedSim.auxiliaryData.realTime);
+            Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+            Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
+            _temporalControlWindow->onSnapshot();
+
+            _lastActivationTimepoint = std::chrono::steady_clock::now();
+            _state = State::FadeOutLoadingScreen;
+        }
         return;
     }
-//    if (_state == State::LoadingSimulation) {
-        //std::optional<std::string> name;
-        //DeserializedSimulation deserializedSim;
-        //if (!SerializerService::deserializeSimulationFromFiles(deserializedSim, Const::AutosaveFile)) {
-        //    MessageDialog::getInstance().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
-        //    deserializedSim.auxiliaryData.generalSettings.worldSizeX = 1000;
-        //    deserializedSim.auxiliaryData.generalSettings.worldSizeY = 500;
-        //    deserializedSim.auxiliaryData.timestep = 0;
-        //    deserializedSim.auxiliaryData.zoom = 12.0f;
-        //    deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
-        //    deserializedSim.auxiliaryData.realTime = std::chrono::milliseconds(0);
-        //    deserializedSim.mainData = ClusteredDataDescription();
-        //} else {
-        //    name = "autosave";
-        //}
-
-        //_simController->newSimulation(
-        //    name, deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
-        //_simController->setClusteredSimulationData(deserializedSim.mainData);
-        //_simController->setStatisticsHistory(deserializedSim.statistics);
-        //_simController->setRealTime(deserializedSim.auxiliaryData.realTime);
-        //Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
-        //Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
-        //_temporalControlWindow->onSnapshot();
-
-        //_lastActivationTimepoint = std::chrono::steady_clock::now();
-        //_state = State::FadeOutLoadingScreen;
-    //}
-
     if (_state == State::FadeOutLoadingScreen) {
         auto now = std::chrono::steady_clock::now();
         auto millisecSinceActivation =

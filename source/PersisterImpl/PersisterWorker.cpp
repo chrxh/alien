@@ -159,6 +159,7 @@ namespace
         std::unique_lock<std::mutex>& _lock;
     };
 }
+
 auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveToFileRequest const& request) -> PersisterRequestResultOrError
 {
     UnlockGuard unlockGuard(lock);
@@ -179,7 +180,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveTo
         deserializedData.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
         deserializedData.statistics = _simController->getStatisticsHistory().getCopiedData();
         deserializedData.mainData = _simController->getClusteredSimulationData();
-    } catch (std::runtime_error const&) {
+    } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),
             request->getSenderInfo().senderId,
@@ -188,28 +189,35 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveTo
 
     try {
         SerializerService::serializeSimulationToFiles(requestData.filename, deserializedData);
-    } catch (std::runtime_error const&) {
+
+        return std::make_shared<_SaveToFileRequestResult>(
+            request->getRequestId(), SavedSimulationResultData{simulationName, deserializedData.auxiliaryData.timestep, timePoint});
+    } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),
             request->getSenderInfo().senderId,
             PersisterErrorInfo{"The simulation could not be saved because an error occurred when serializing the data to the file."});
     }
-
-    return std::make_shared<_SaveToFileRequestResult>(
-        request->getRequestId(), SavedSimulationResultData{simulationName, deserializedData.auxiliaryData.timestep, timePoint});
 }
 
 auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadFromFileRequest const& request) -> PersisterRequestResultOrError
 {
     UnlockGuard unlockGuard(lock);
 
-    auto const& requestData = request->getData();
+    try {
+        auto const& requestData = request->getData();
 
-    DeserializedSimulation deserializedData;
-    if (!SerializerService::deserializeSimulationFromFiles(deserializedData, requestData.filename)) {
+        DeserializedSimulation deserializedData;
+        if (!SerializerService::deserializeSimulationFromFiles(deserializedData, requestData.filename)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The selected file could not be opened."});
+        }
+        auto simulationName = std::filesystem::path(requestData.filename).stem().string();
+        return std::make_shared<_ReadFromFileRequestResult>(request->getRequestId(), ReadSimulationResultData{simulationName, deserializedData});
+    } catch (...) {
         return std::make_shared<_PersisterRequestError>(
-            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The selected file could not be opened."});
+            request->getRequestId(),
+            request->getSenderInfo().senderId,
+            PersisterErrorInfo{"The simulation could not be loaded because an error occurred when deserializing the data from the file."});
     }
-    auto simulationName = std::filesystem::path(requestData.filename).stem().string();
-    return std::make_shared<_ReadFromFileRequestResult>(request->getRequestId(), ReadSimulationResultData{simulationName, deserializedData});
 }
