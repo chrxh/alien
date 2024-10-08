@@ -96,7 +96,7 @@ void _EditSimulationDialog::processForLeaf()
 
 void _EditSimulationDialog::processForFolder()
 {
-    if (ImGui::BeginChild("", {0, -scale(50.0f)})) {
+    if (ImGui::BeginChild("##Folder", {0, -scale(50.0f)})) {
         AlienImGui::InputText(AlienImGui::InputTextParameters().textWidth(0).hint("Folder name"), _newName);
     }
     ImGui::EndChild();

@@ -89,7 +89,7 @@ _SimulationParametersWindow::~_SimulationParametersWindow()
 void _SimulationParametersWindow::processIntern()
 {
     processToolbar();
-    if (ImGui::BeginChild("", {0, _featureListOpen ? -scale(_featureListHeight) : -scale(50.0f)})) {
+    if (ImGui::BeginChild("##Parameter", {0, _featureListOpen ? -scale(_featureListHeight) : -scale(50.0f)})) {
         processTabWidget();
     }
     ImGui::EndChild();

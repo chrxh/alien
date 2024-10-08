@@ -430,7 +430,7 @@ void _BrowserWindow::processWorkspaceSelectionAndFilter()
 void _BrowserWindow::processMovableSeparator()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
-    ImGui::Button("", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomSpace)));
+    ImGui::Button("##MovableSeparator", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomSpace)));
     if (ImGui::IsItemActive()) {
         _userTableWidth -= ImGui::GetIO().MouseDelta.x;
     }

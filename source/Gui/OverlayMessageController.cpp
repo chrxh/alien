@@ -46,7 +46,7 @@ void OverlayMessageController::show(std::string const& message, bool withLightni
 {
     _show = true;
     _message = message;
-    _startTimepoint = std::chrono::steady_clock::now();
+    _messageStartTimepoint = std::chrono::steady_clock::now();
     _withLightning = withLightning;
     _counter = 0;
 }
@@ -59,11 +59,11 @@ void OverlayMessageController::setOn(bool value)
 void OverlayMessageController::processLoadingBar()
 {
     if (_persisterController->isBusy()) {
-        if (!_spinnerRefTimepoint.has_value()) {
-            _spinnerRefTimepoint = std::chrono::steady_clock::now();
+        if (!_progressBarRefTimepoint.has_value()) {
+            _progressBarRefTimepoint = std::chrono::steady_clock::now();
         }
         auto now = std::chrono::steady_clock::now();
-        auto duration = toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - *_spinnerRefTimepoint).count());
+        auto duration = toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - *_progressBarRefTimepoint).count());
 
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 
@@ -82,10 +82,10 @@ void OverlayMessageController::processLoadingBar()
             drawList->AddRectFilledMultiColor(
                 ImVec2{center.x - width / 2 + toFloat(progressStart), center.y - height / 2},
                 ImVec2{center.x - width / 2 + toFloat(progressEnd), center.y + height / 2},
-                ImColor::HSV(0.66f, 0.9f, 1.0f, 0.8f),
-                ImColor::HSV(0.66f, 0.9f, 0.6f, 0.8f),
-                ImColor::HSV(0.66f, 0.9f, 0.2f, 0.8f),
-                ImColor::HSV(0.66f, 0.9f, 0.6f, 0.8f));
+                ImColor::HSV(0.66f, 0.9f, 1.0f, 1.0f),
+                ImColor::HSV(0.66f, 0.9f, 0.6f, 1.0f),
+                ImColor::HSV(0.66f, 0.9f, 0.2f, 1.0f),
+                ImColor::HSV(0.66f, 0.9f, 0.6f, 1.0f));
         } else {
             {
                 auto factor = toFloat(progressEnd) / progressWidth;
@@ -94,10 +94,10 @@ void OverlayMessageController::processLoadingBar()
                 drawList->AddRectFilledMultiColor(
                     ImVec2{center.x - width / 2, center.y - height / 2},
                     ImVec2{center.x - width / 2 + toFloat(progressEnd), center.y + height / 2},
-                    ImColor::HSV(0.66f, 0.9f, brightness1, 0.8f),
-                    ImColor::HSV(0.66f, 0.9f, 0.6f, 0.8f),
-                    ImColor::HSV(0.66f, 0.9f, 0.2f, 0.8f),
-                    ImColor::HSV(0.66f, 0.9f, brightness2, 0.8f));
+                    ImColor::HSV(0.66f, 0.9f, brightness1, 1.0f),
+                    ImColor::HSV(0.66f, 0.9f, 0.6f, 1.0f),
+                    ImColor::HSV(0.66f, 0.9f, 0.2f, 1.0f),
+                    ImColor::HSV(0.66f, 0.9f, brightness2, 1.0f));
             }
             {
                 auto factor = (width - toFloat(progressStart)) / progressWidth;
@@ -106,25 +106,24 @@ void OverlayMessageController::processLoadingBar()
                 drawList->AddRectFilledMultiColor(
                     ImVec2{center.x - width / 2 + toFloat(progressStart), center.y - height / 2},
                     ImVec2{center.x + width / 2, center.y + height / 2},
-                    ImColor::HSV(0.66f, 0.9f, 1.0f, 0.8f),
-                    ImColor::HSV(0.66f, 0.9f, brightness3, 0.8f),
-                    ImColor::HSV(0.66f, 0.9f, brightness4, 0.8f),
-                    ImColor::HSV(0.66f, 0.9f, 0.6f, 0.8f));
+                    ImColor::HSV(0.66f, 0.9f, 1.0f, 1.0f),
+                    ImColor::HSV(0.66f, 0.9f, brightness3, 1.0f),
+                    ImColor::HSV(0.66f, 0.9f, brightness4, 1.0f),
+                    ImColor::HSV(0.66f, 0.9f, 0.6f, 1.0f));
             }
         }
         drawList->AddRect(
             ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2}, ImColor::HSV(0.66f, 1.0f, 0.5f, 1.0f));
 
     } else {
-        _spinnerAngle = 0;
-        _spinnerRefTimepoint.reset();
+        _progressBarRefTimepoint.reset();
     }
 }
 
 void OverlayMessageController::processMessage()
 {
     auto now = std::chrono::steady_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_startTimepoint);
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_messageStartTimepoint);
     if (duration.count() > ShowDuration + FadeoutTextDuration) {
         _show = false;
     }
