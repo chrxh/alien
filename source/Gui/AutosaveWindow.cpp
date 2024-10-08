@@ -48,7 +48,7 @@ void _AutosaveWindow::processIntern()
     processHeader();
 
     AlienImGui::Separator();
-    if (ImGui::BeginChild("", {0, _settingsOpen ? -scale(_settingsHeight) : -scale(50.0f)})) {
+    if (ImGui::BeginChild("##autosave", {0, _settingsOpen ? -scale(_settingsHeight) : -scale(50.0f)})) {
         processTable();
     }
     ImGui::EndChild();

@@ -23,7 +23,6 @@ namespace
     std::chrono::milliseconds::rep const FadeOutDuration = 1500;
     std::chrono::milliseconds::rep const FadeInDuration = 500;
 
-    auto constexpr InitialLineDistance = 15.0f;
     auto const StartupSenderId = "Startup";
 }
 
@@ -37,7 +36,6 @@ _StartupController::_StartupController(
 {
     log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
-    _lineDistance = scale(InitialLineDistance);
 }
 
 void _StartupController::process()
@@ -160,9 +158,6 @@ void _StartupController::processLoadingScreen()
     ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(_logo.width * imageScale, _logo.height * imageScale));
     ImGui::End();
 
-    auto now = std::chrono::steady_clock::now();
-    auto millisecSinceStartup = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_startupTimepoint).count();
-
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     ImColor textColor = Const::ProgramVersionTextColor;
     textColor.Value.w *= ImGui::GetStyle().Alpha;
@@ -172,18 +167,15 @@ void _StartupController::processLoadingScreen()
 
     //draw 'Initializing' text if it fits
     if (bottom - scale(230) > bottom / 2 + _logo.height * imageScale / 2) {
-        drawGrid(bottom - scale(250), std::max(0.0f, 1.0f - toFloat(millisecSinceStartup) / LogoDuration));
-        //if (_state == State::Unintialized) {
-            drawList->AddText(styleRep.getReefLargeFont(), scale(32.0), {center.x - scale(38), bottom - scale(270)}, loadingTextColor, "Initializing");
-        //}
+        drawList->AddText(styleRep.getReefLargeFont(), scale(32.0), {center.x - scale(48), bottom - scale(270)}, loadingTextColor, "Initializing");
     }
-    drawList->AddText(styleRep.getReefLargeFont(), scale(48.0f), {center.x - scale(165), bottom - scale(200)}, textColor, "Artificial Life Environment");
+    drawList->AddText(styleRep.getReefLargeFont(), scale(48.0f), {center.x - scale(175), bottom - scale(200)}, textColor, "Artificial Life Environment");
 
     auto versionString = "Version " + Const::ProgramVersion;
     drawList->AddText(
         styleRep.getReefMediumFont(),
         scale(24.0f),
-        {center.x - scale(toFloat(versionString.size()) * 2.8f), bottom - scale(140)},
+        {center.x - scale(toFloat(versionString.size()) * 3.4f), bottom - scale(140)},
         textColor,
         versionString.c_str());
 
@@ -195,47 +187,4 @@ void _StartupController::processLoadingScreen()
             textColor,
             "DEBUG");
     }
-}
-
-namespace
-{
-    enum class Direction
-    {
-        Up,
-        Down,
-    };
-    void drawGridIntern(float yPos, float lineDistance, float maxDistance, Direction const& direction, bool includeMainLine, float alpha)
-    {
-        if (lineDistance > scale(InitialLineDistance)) {
-            drawGridIntern(yPos, lineDistance / 2, maxDistance, direction, includeMainLine, alpha);
-        }
-        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        alpha *= std::min(1.0f, lineDistance / scale(InitialLineDistance * 2)) * ImGui::GetStyle().Alpha;
-        float accumulatedDistance = 0.0f;
-
-        if (!includeMainLine) {
-            accumulatedDistance += lineDistance;
-        }
-        auto right = ImGui::GetMainViewport()->Pos.x + ImGui::GetMainViewport()->Size.x;
-        auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
-        while (accumulatedDistance < maxDistance) {
-            ImU32 color = ImColor::HSV(0.6f, 0.8f, 0.4f, alpha * (maxDistance - accumulatedDistance) / maxDistance);
-            switch (direction) {
-            case Direction::Up:
-                drawList->AddLine(ImVec2(0.0f, yPos - accumulatedDistance), ImVec2(right, yPos - accumulatedDistance), color);
-                break;
-            case Direction::Down:
-                drawList->AddLine(ImVec2(0.0f, yPos + accumulatedDistance), ImVec2(right, yPos + accumulatedDistance), color);
-                break;
-            }
-            accumulatedDistance += lineDistance;
-        }
-    }
-}
-
-void _StartupController::drawGrid(float yPos, float alpha)
-{
-    drawGridIntern(yPos, _lineDistance, scale(300.0f), Direction::Up, true, alpha);
-    drawGridIntern(yPos, _lineDistance, scale(300.0f), Direction::Down, false, alpha);
-    _lineDistance *= 1.05f;
 }

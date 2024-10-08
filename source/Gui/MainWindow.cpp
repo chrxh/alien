@@ -208,13 +208,13 @@ void _MainWindow::mainLoop()
 
         switch (_startupController->getState()) {
         case _StartupController::State::StartLoadSimulation:
-            processUninitialized();
+            processLoadingScreen();
             break;
         case _StartupController::State::LoadingSimulation:
-            processUninitialized();
+            processLoadingScreen();
             break;
         case _StartupController::State::FadeOutLoadingScreen:
-            processLoadingSimulation();
+            processFadeoutLoadingScreen();
             break;
         case _StartupController::State::LoadingControls:
             processLoadingControls();
@@ -283,9 +283,10 @@ char const* _MainWindow::initGlfw()
     return glsl_version;
 }
 
-void _MainWindow::processUninitialized()
+void _MainWindow::processLoadingScreen()
 {
     _startupController->process();
+    OverlayMessageController::getInstance().process();
 
     // render mainData
     ImGui::Render();
@@ -300,13 +301,7 @@ void _MainWindow::processUninitialized()
     glfwSwapBuffers(_window);
 }
 
-void _MainWindow::processRequestLoading()
-{
-    _startupController->process();
-    renderSimulation();
-}
-
-void _MainWindow::processLoadingSimulation()
+void _MainWindow::processFadeoutLoadingScreen()
 {
     _startupController->process();
     renderSimulation();
