@@ -34,7 +34,7 @@ void OverlayMessageController::process()
     if (!_on) {
         return;
     }
-    processSpinner();
+    processLoadingBar();
 
     if (!_show) {
         return;
@@ -56,7 +56,7 @@ void OverlayMessageController::setOn(bool value)
     _on = value;
 }
 
-void OverlayMessageController::processSpinner()
+void OverlayMessageController::processLoadingBar()
 {
     if (_persisterController->isBusy()) {
         if (!_spinnerRefTimepoint.has_value()) {
@@ -65,27 +65,56 @@ void OverlayMessageController::processSpinner()
         auto now = std::chrono::steady_clock::now();
         auto duration = toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - *_spinnerRefTimepoint).count());
 
-        ImDrawList* drawList = ImGui::GetForegroundDrawList();
+        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 
-        AlienImGui::RotateStart(drawList);
-        auto font = StyleRepository::getInstance().getIconFont();
-        auto text = ICON_FA_SPINNER;
-        ImVec4 clipRect(-100000.0f, -100000.0f, 100000.0f, 100000.0f);
         auto viewSize = toRealVector2D(Viewport::getViewSize());
-        font->RenderText(
-            drawList,
-            scale(30.0f),
-            {viewSize.x / 2 - scale(15.0f), viewSize.y - scale(80.0f)},
-            ImColor::HSV(0.5f, 0.1f, 1.0f, std::min(1.0f, duration / 500)),
-            clipRect,
-            text,
-            text + strlen(text),
-            0.0f,
-            false);
+        auto width = viewSize.x / 6 + 1.0f;
+        auto height = scale(20.0f);
+        auto center = ImVec2{viewSize.x / 2, viewSize.y - scale(60.0f)};
+        drawList->AddRectFilled(
+            ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2},
+            ImColor::HSV(0.66f, 1.0f, 0.5f, 0.4f));
 
-        auto angle = sinf(duration * Const::DegToRad / 10 - Const::Pi / 2) * 4 + 6.0f;
-        _spinnerAngle += angle;
-        AlienImGui::RotateEnd(_spinnerAngle, drawList);
+        auto progressWidth = width * 2 / 5;
+        auto progressStart = (toInt(duration) / 10 + toInt(width - progressWidth)) % toInt(width);
+        auto progressEnd = (toInt(duration) / 10) % toInt(width);
+        if (progressStart < progressEnd) {
+            drawList->AddRectFilledMultiColor(
+                ImVec2{center.x - width / 2 + toFloat(progressStart), center.y - height / 2},
+                ImVec2{center.x - width / 2 + toFloat(progressEnd), center.y + height / 2},
+                ImColor::HSV(0.66f, 0.9f, 1.0f, 0.8f),
+                ImColor::HSV(0.66f, 0.9f, 0.6f, 0.8f),
+                ImColor::HSV(0.66f, 0.9f, 0.2f, 0.8f),
+                ImColor::HSV(0.66f, 0.9f, 0.6f, 0.8f));
+        } else {
+            {
+                auto factor = toFloat(progressEnd) / progressWidth;
+                auto brightness1 = 1.0f * factor + 0.6f * (1.0f - factor);
+                auto brightness2 = 0.6f * factor + 0.2f * (1.0f - factor);
+                drawList->AddRectFilledMultiColor(
+                    ImVec2{center.x - width / 2, center.y - height / 2},
+                    ImVec2{center.x - width / 2 + toFloat(progressEnd), center.y + height / 2},
+                    ImColor::HSV(0.66f, 0.9f, brightness1, 0.8f),
+                    ImColor::HSV(0.66f, 0.9f, 0.6f, 0.8f),
+                    ImColor::HSV(0.66f, 0.9f, 0.2f, 0.8f),
+                    ImColor::HSV(0.66f, 0.9f, brightness2, 0.8f));
+            }
+            {
+                auto factor = (width - toFloat(progressStart)) / progressWidth;
+                auto brightness3 = 1.0f * (1.0f - factor) + 0.6f * factor;
+                auto brightness4 = 0.6f * (1.0f - factor) + 0.2f * factor;
+                drawList->AddRectFilledMultiColor(
+                    ImVec2{center.x - width / 2 + toFloat(progressStart), center.y - height / 2},
+                    ImVec2{center.x + width / 2, center.y + height / 2},
+                    ImColor::HSV(0.66f, 0.9f, 1.0f, 0.8f),
+                    ImColor::HSV(0.66f, 0.9f, brightness3, 0.8f),
+                    ImColor::HSV(0.66f, 0.9f, brightness4, 0.8f),
+                    ImColor::HSV(0.66f, 0.9f, 0.6f, 0.8f));
+            }
+        }
+        drawList->AddRect(
+            ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2}, ImColor::HSV(0.66f, 1.0f, 0.5f, 1.0f));
+
     } else {
         _spinnerAngle = 0;
         _spinnerRefTimepoint.reset();

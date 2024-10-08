@@ -19,7 +19,7 @@ public:
     void setOn(bool value);
 
 private:
-    void processSpinner();
+    void processLoadingBar();
     void processMessage();
 
     PersisterController _persisterController;

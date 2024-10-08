@@ -16,9 +16,8 @@ public:
 private:
     char const* initGlfw();  //return glsl version
 
-    void processUninitialized();
-    void processRequestLoading();
-    void processLoadingSimulation();
+    void processLoadingScreen();
+    void processFadeoutLoadingScreen();
     void processLoadingControls();
     void processReady();
 
