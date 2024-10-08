@@ -30,9 +30,8 @@ private:
     std::string _message;
     int _counter = 0;
 
-    std::optional<std::chrono::steady_clock::time_point> _spinnerRefTimepoint;
-    float _spinnerAngle = 0;
-    std::optional<std::chrono::steady_clock::time_point> _startTimepoint;
+    std::optional<std::chrono::steady_clock::time_point> _progressBarRefTimepoint;
+    std::optional<std::chrono::steady_clock::time_point> _messageStartTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _ticksLaterTimepoint;
 };
 

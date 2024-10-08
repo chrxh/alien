@@ -901,7 +901,7 @@ void AlienImGui::Separator()
 
 void AlienImGui::MovableSeparator(float& height)
 {
-    ImGui::Button("", ImVec2(-1, scale(5.0f)));
+    ImGui::Button("##MovableSeparator", ImVec2(-1, scale(5.0f)));
     if (ImGui::IsItemActive()) {
         height -= ImGui::GetIO().MouseDelta.y;
     }
