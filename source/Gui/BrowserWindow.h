@@ -93,6 +93,8 @@ private:
     bool processActionButton(std::string const& text);
     bool processDetailButton();
 
+    void processRefreshingScreen(RealVector2D const& startPos);
+
     void processActivated() override;
 
     void processPendingRequestIds();
