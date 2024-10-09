@@ -18,7 +18,7 @@ private:
 
     void processLoadingScreen();
     void processFadeoutLoadingScreen();
-    void processLoadingControls();
+    void processFadeInControls();
     void processReady();
 
     void renderSimulation();
@@ -31,6 +31,8 @@ private:
     void onRunSimulation();
     void onPauseSimulation();
     void onExit();
+
+    void finishFrame();
 
     void pushGlobalStyle();
     void popGlobalStyle();

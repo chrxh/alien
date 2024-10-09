@@ -36,6 +36,7 @@ private:
     using PersisterRequestResultOrError = std::variant<PersisterRequestResult, PersisterRequestError>;
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, SaveToFileRequest const& job);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, ReadFromFileRequest const& request);
+    PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, GetNetworkResourcesRequest const& request);
 
     SimulationController _simController;
 

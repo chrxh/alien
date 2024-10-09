@@ -146,7 +146,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
     _browserWindow =
-        std::make_shared<_BrowserWindow>(_simController, _statisticsWindow, _temporalControlWindow, _editorController);
+        std::make_shared<_BrowserWindow>(_simController, _persisterController, _statisticsWindow, _temporalControlWindow, _editorController);
     _activateUserDialog = std::make_shared<_ActivateUserDialog>(_simController, _browserWindow);
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simController, _browserWindow);
@@ -216,8 +216,8 @@ void _MainWindow::mainLoop()
         case _StartupController::State::FadeOutLoadingScreen:
             processFadeoutLoadingScreen();
             break;
-        case _StartupController::State::LoadingControls:
-            processLoadingControls();
+        case _StartupController::State::FadeInControls:
+            processFadeInControls();
             break;
         case _StartupController::State::Ready:
             processReady();
@@ -305,10 +305,14 @@ void _MainWindow::processFadeoutLoadingScreen()
 {
     _startupController->process();
     renderSimulation();
+
+    finishFrame();
 }
 
-void _MainWindow::processLoadingControls()
+void _MainWindow::processFadeInControls()
 {
+    renderSimulation();
+
     pushGlobalStyle();
 
     processMenubar();
@@ -322,11 +326,15 @@ void _MainWindow::processLoadingControls()
 
     popGlobalStyle();
 
-    renderSimulation();
+    _fpsController->processForceFps(WindowController::getFps());
+
+    finishFrame();
 }
 
 void _MainWindow::processReady()
 {
+    renderSimulation();
+
     pushGlobalStyle();
 
     processMenubar();
@@ -338,7 +346,9 @@ void _MainWindow::processReady()
 
     popGlobalStyle();
 
-    renderSimulation();
+    _fpsController->processForceFps(WindowController::getFps());
+
+    finishFrame();
 }
 
 void _MainWindow::renderSimulation()
@@ -347,12 +357,6 @@ void _MainWindow::renderSimulation()
     glfwGetFramebufferSize(_window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
     _simulationView->draw(_renderSimulation);
-    ImGui::Render();
-
-    _fpsController->processForceFps(WindowController::getFps());
-
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    glfwSwapBuffers(_window);
 }
 
 void _MainWindow::processMenubar()
@@ -773,6 +777,13 @@ void _MainWindow::onPauseSimulation()
 void _MainWindow::onExit()
 {
     _exitDialog->open();
+}
+
+void _MainWindow::finishFrame()
+{
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    glfwSwapBuffers(_window);
 }
 
 void _MainWindow::pushGlobalStyle()

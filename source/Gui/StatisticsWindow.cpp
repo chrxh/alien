@@ -39,11 +39,14 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
         path = path.parent_path();
     }
     _startingPath = GlobalSettings::getInstance().getString("windows.statistics.starting path", path.string());
+    _settingsOpen = GlobalSettings::getInstance().getBool("windows.statistics.settings.open", _settingsOpen);
+    _settingsHeight = GlobalSettings::getInstance().getFloat("windows.statistics.settings.height", _settingsHeight);
     _plotHeight = GlobalSettings::getInstance().getFloat("windows.statistics.plot height", _plotHeight);
-    _mode = GlobalSettings::getInstance().getInt("windows.statistics.mode", _mode);
+    _plotMode = GlobalSettings::getInstance().getInt("windows.statistics.mode", _plotMode);
     _timeHorizonForLiveStatistics = GlobalSettings::getInstance().getFloat("windows.statistics.live horizon", _timeHorizonForLiveStatistics);
     _timeHorizonForLongtermStatistics = GlobalSettings::getInstance().getFloat("windows.statistics.long term horizon", _timeHorizonForLongtermStatistics);
     _plotType = GlobalSettings::getInstance().getInt("windows.statistics.plot type", _plotType);
+    _plotScale = GlobalSettings::getInstance().getInt("windows.statistics.plot scale", _plotScale);
     auto collapsedPlotIndexJoinedString = GlobalSettings::getInstance().getString("windows.statistics.collapsed plot indices", "");
     
     if (!collapsedPlotIndexJoinedString.empty()) {
@@ -58,11 +61,14 @@ _StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
 _StatisticsWindow::~_StatisticsWindow()
 {
     GlobalSettings::getInstance().setString("windows.statistics.starting path", _startingPath);
+    GlobalSettings::getInstance().setBool("windows.statistics.settings.open", _settingsOpen);
+    GlobalSettings::getInstance().setFloat("windows.statistics.settings.height", _settingsHeight);
     GlobalSettings::getInstance().setFloat("windows.statistics.plot height", _plotHeight);
-    GlobalSettings::getInstance().setInt("windows.statistics.mode", _mode);
+    GlobalSettings::getInstance().setInt("windows.statistics.mode", _plotMode);
     GlobalSettings::getInstance().setFloat("windows.statistics.live horizon", _timeHorizonForLiveStatistics);
     GlobalSettings::getInstance().setFloat("windows.statistics.long term horizon", _timeHorizonForLongtermStatistics);
     GlobalSettings::getInstance().setInt("windows.statistics.plot type", _plotType);
+    GlobalSettings::getInstance().setInt("windows.statistics.plot scale", _plotScale);
 
     std::vector<std::string> collapsedPlotIndexStrings;
     for (auto const& index : _collapsedPlotIndices) {
@@ -73,34 +79,38 @@ _StatisticsWindow::~_StatisticsWindow()
 
 void _StatisticsWindow::processIntern()
 {
-    if (ImGui::BeginTabBar("##Statistics", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+    if (ImGui::BeginChild("##statistics", {0, _settingsOpen ? -scale(_settingsHeight) : -scale(50.0f)})) {
+        if (ImGui::BeginTabBar("##Statistics", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
-        if (ImGui::BeginTabItem("Timelines")) {
-            if (ImGui::BeginChild("##timelines", ImVec2(0, 0), false)) {
-                processTimelinesTab();
+            if (ImGui::BeginTabItem("Timelines")) {
+                if (ImGui::BeginChild("##timelines", ImVec2(0, 0), false)) {
+                    processTimelinesTab();
+                }
+                ImGui::EndChild();
+                ImGui::EndTabItem();
             }
-            ImGui::EndChild();
-            ImGui::EndTabItem();
-        }
 
-        if (ImGui::BeginTabItem("Histograms")) {
-            if (ImGui::BeginChild("##histograms", ImVec2(0, 0), false)) {
-                processHistogramsTab();
+            if (ImGui::BeginTabItem("Histograms")) {
+                if (ImGui::BeginChild("##histograms", ImVec2(0, 0), false)) {
+                    processHistogramsTab();
+                }
+                ImGui::EndChild();
+                ImGui::EndTabItem();
             }
-            ImGui::EndChild();
-            ImGui::EndTabItem();
-        }
 
-        if (ImGui::BeginTabItem("Throughput")) {
-            if (ImGui::BeginChild("##throughput", ImVec2(0, 0), false)) {
-                processTablesTab();
+            if (ImGui::BeginTabItem("Throughput")) {
+                if (ImGui::BeginChild("##throughput", ImVec2(0, 0), false)) {
+                    processTablesTab();
+                }
+                ImGui::EndChild();
+                ImGui::EndTabItem();
             }
-            ImGui::EndChild();
-            ImGui::EndTabItem();
-        }
 
-        ImGui::EndTabBar();
+            ImGui::EndTabBar();
+        }
     }
+    ImGui::EndChild();
+    processSettings();
 }
 
 void _StatisticsWindow::processTimelinesTab()
@@ -113,29 +123,7 @@ void _StatisticsWindow::processTimelinesTab()
             .textWidth(RightColumnWidth)
             .values(
                 {"Real-time plots", "Entire history plots"}),
-        _mode);
-
-    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(RightColumnWidth));
-    if (_mode == 0) {
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Time horizon")
-                .min(1.0f)
-                .max(TimelineLiveStatistics::MaxLiveHistory)
-                .format("%.1f s")
-                .textWidth(RightColumnWidth),
-            &_timeHorizonForLiveStatistics);
-    }
-    if (_mode == 1) {
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Time horizon")
-                .min(1.0f)
-                .max(100.0f)
-                .format("%.0f percent")
-                .textWidth(RightColumnWidth),
-            &_timeHorizonForLongtermStatistics);
-    }
+        _plotMode);
 
     AlienImGui::Switcher(
         AlienImGui::SwitcherParameters()
@@ -144,15 +132,6 @@ void _StatisticsWindow::processTimelinesTab()
             .values(
             {"Accumulate values for all colors", "Break down by color", "Color #0", "Color #1", "Color #2", "Color #3", "Color #4", "Color #5", "Color #6"}),
         _plotType);
-
-    AlienImGui::SliderFloat(
-        AlienImGui::SliderFloatParameters()
-            .name("Plot height")
-            .min(MinPlotHeight)
-            .max(1000.0f)
-            .format("%.0f")
-            .textWidth(RightColumnWidth),
-        &_plotHeight);
     ImGui::Spacing();
     ImGui::Spacing();
     ImGui::Separator();
@@ -270,6 +249,46 @@ void _StatisticsWindow::processTablesTab()
         ImGui::EndTable();
     }
     ImGui::PopID();
+}
+
+void _StatisticsWindow::processSettings()
+{
+    if (_settingsOpen) {
+        ImGui::Spacing();
+        ImGui::Spacing();
+        AlienImGui::MovableSeparator(_settingsHeight);
+    } else {
+        AlienImGui::Separator();
+    }
+
+    _settingsOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Settings").highlighted(true).defaultOpen(_settingsOpen));
+    if (_settingsOpen) {
+        if (ImGui::BeginChild("##addons", {scale(0), 0})) {
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(RightColumnWidth));
+            if (_plotMode == 0) {
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Time horizon")
+                        .min(1.0f)
+                        .max(TimelineLiveStatistics::MaxLiveHistory)
+                        .format("%.1f s")
+                        .textWidth(RightColumnWidth),
+                    &_timeHorizonForLiveStatistics);
+            }
+            if (_plotMode == 1) {
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters().name("Time horizon").min(1.0f).max(100.0f).format("%.0f percent").textWidth(RightColumnWidth),
+                    &_timeHorizonForLongtermStatistics);
+            }
+
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters().name("Plot height").min(MinPlotHeight).max(1000.0f).format("%.0f").textWidth(RightColumnWidth),
+                &_plotHeight);
+            AlienImGui::Switcher(AlienImGui::SwitcherParameters().name("Scale").textWidth(RightColumnWidth).values({"Linear", "Logarithmic"}), _plotScale);
+        }
+        ImGui::EndChild();
+        AlienImGui::EndTreeNode();
+    }
 }
 
 void _StatisticsWindow::processTimelineStatistics()
@@ -484,13 +503,13 @@ void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*val
     }
 
     auto const& dataPointCollectionHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
-    auto count = _mode == 0 ? toInt(dataPointCollectionHistory.size()) : toInt(longtermStatistics->size());
-    auto startTime = _mode == 0 ? dataPointCollectionHistory.back().time - toDouble(_timeHorizonForLiveStatistics)
+    auto count = _plotMode == 0 ? toInt(dataPointCollectionHistory.size()) : toInt(longtermStatistics->size());
+    auto startTime = _plotMode == 0 ? dataPointCollectionHistory.back().time - toDouble(_timeHorizonForLiveStatistics)
         : longtermStatistics->back().time - (longtermStatistics->back().time - longtermStatistics->front().time) * toDouble(_timeHorizonForLongtermStatistics) / 100;
-    auto endTime = _mode == 0 ? dataPointCollectionHistory.back().time : longtermStatistics->back().time;
-    auto values = _mode == 0 ? &(dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
-    auto timePoints = _mode == 0 ? &dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
-    auto systemClock = _mode == 0 ? nullptr : &(*longtermStatistics)[0].systemClock;
+    auto endTime = _plotMode == 0 ? dataPointCollectionHistory.back().time : longtermStatistics->back().time;
+    auto values = _plotMode == 0 ? &(dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
+    auto timePoints = _plotMode == 0 ? &dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
+    auto systemClock = _plotMode == 0 ? nullptr : &(*longtermStatistics)[0].systemClock;
 
     switch (_plotType) {
     case 0:
@@ -551,7 +570,8 @@ void _StatisticsWindow::plotSumColorsIntern(
     double const* plotDataY = reinterpret_cast<double const*>(dataPoints) + MAX_COLORS;
     double upperBound = getMaxWithDataPointStride(plotDataY, timePoints, startTime, count);
     double endValue = count > 0 ? plotDataY[(count - 1) * strideDouble] : 0.0;
-    upperBound *= 1.5;
+    upperBound = getUpperBound(upperBound);
+
     ImGui::PushID(row);
     ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
@@ -564,10 +584,11 @@ void _StatisticsWindow::plotSumColorsIntern(
         ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels);
         ImPlot::SetupAxisFormat(ImAxis_X1, "");
         ImPlot::SetupAxisFormat(ImAxis_Y1, "");
+        setPlotScale();
         auto color = ImPlot::GetColormapColor((row % 21) <= 10 ? (row % 21) : 20 - (row % 21));
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::Annotation(
-                endTime, endValue, ImPlot::GetLastItemColor(), ImVec2(-10.0f, 10.0f), true, "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
+                endTime, endValue, ImPlot::GetLastItemColor(), ImVec2(-10.0f, 15.0f), true, "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
         }
         if (count > 0) {
             ImPlot::PushStyleColor(ImPlotCol_Line, color);
@@ -600,7 +621,7 @@ void _StatisticsWindow::plotByColorIntern(
     for (int i = 0; i < MAX_COLORS; ++i) {
         upperBound = std::max(upperBound, getMaxWithDataPointStride(reinterpret_cast<double const*>(values) + i, timePoints, startTime, count));
     }
-    upperBound *= 1.5;
+    upperBound = getUpperBound(upperBound);
 
     ImGui::PushID(row);
     ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
@@ -617,6 +638,7 @@ void _StatisticsWindow::plotByColorIntern(
         ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels);
         ImPlot::SetupAxisFormat(ImAxis_X1, "");
         ImPlot::SetupAxisFormat(ImAxis_Y1, "");
+        setPlotScale();
         for (int i = 0; i < MAX_COLORS; ++i) {
             ImGui::PushID(i);
             auto colorRaw = Const::IndividualCellColors[i];
@@ -652,7 +674,8 @@ void _StatisticsWindow::plotForColorIntern(
     auto constexpr strideDouble = sizeof(DataPointCollection) / sizeof(double);
 
     auto valuesForColor = reinterpret_cast<double const*>(values) + colorIndex;
-    auto upperBound = getMaxWithDataPointStride(valuesForColor, timePoints, startTime, count) * 1.5;
+    auto upperBound = getMaxWithDataPointStride(valuesForColor, timePoints, startTime, count);
+    upperBound = getUpperBound(upperBound);
     auto endValue = count > 0 ? valuesForColor[(count - 1) * strideDouble] : 0.0;
 
     ImGui::PushID(row);
@@ -666,6 +689,7 @@ void _StatisticsWindow::plotForColorIntern(
         ImPlot::SetupAxis(ImAxis_Y1, "", ImPlotAxisFlags_NoTickLabels);
         ImPlot::SetupAxisFormat(ImAxis_X1, "");
         ImPlot::SetupAxisFormat(ImAxis_Y1, "");
+        setPlotScale();
 
         float h, s, v;
         AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[colorIndex], h, s, v);
@@ -696,6 +720,41 @@ void _StatisticsWindow::plotForColorIntern(
     ImPlot::PopStyleVar();
     ImPlot::PopStyleColor(3);
     ImGui::PopID();
+}
+
+void _StatisticsWindow::setPlotScale()
+{
+    if (_plotScale == PlotScale_Linear) {
+        ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_Linear);
+        return;
+    }
+    if (_plotScale == PlotScale_Logarithmic) {
+        //ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_SymLog);
+        ImPlot::SetupAxisScale(
+            ImAxis_Y1,
+            [](double value, void* user_data) {
+                return log2(value * 1000 + 1.0);
+            },
+            [](double value, void* user_data) {
+                return (exp2(value) - 1.0) / 1000;
+            });
+        return;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+double _StatisticsWindow::getUpperBound(double maxValue)
+{
+    if (_plotScale == PlotScale_Linear) {
+        return maxValue * 1.5;
+    }
+    if (_plotScale == PlotScale_Logarithmic) {
+        if (maxValue > 10) {
+            return maxValue * pow(maxValue, 0.5);
+        }
+        return maxValue * 1.5;
+    }
+    THROW_NOT_IMPLEMENTED();
 }
 
 namespace

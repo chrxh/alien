@@ -113,7 +113,7 @@ void OverlayMessageController::processLoadingBar()
             }
         }
         drawList->AddRect(
-            ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2}, ImColor::HSV(0.66f, 1.0f, 0.5f, 1.0f));
+            ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2}, ImColor::HSV(0.66f, 0.7f, 0.8f, 1.0f));
 
     } else {
         _progressBarRefTimepoint.reset();

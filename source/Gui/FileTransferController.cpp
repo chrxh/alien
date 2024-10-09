@@ -66,7 +66,8 @@ void FileTransferController::process()
 {
     std::vector<PersisterRequestId> newReadSimulationRequestIds;
     for (auto const& requestId : _readSimulationRequestIds) {
-        if (_persisterController->getRequestState(requestId) == PersisterRequestState::Finished) {
+        auto state = _persisterController->getRequestState(requestId);
+        if (state == PersisterRequestState::Finished) {
             auto const& data = _persisterController->fetchReadSimulationData(requestId);
             _persisterController->shutdown();
 
@@ -103,7 +104,8 @@ void FileTransferController::process()
             Viewport::setZoomFactor(data.deserializedSimulation.auxiliaryData.zoom);
             _temporalControlWindow->onSnapshot();
             printOverlayMessage(data.simulationName + ".sim");
-        } else {
+        }
+        if (state == PersisterRequestState::InQueue || state == PersisterRequestState::InProgress) {
             newReadSimulationRequestIds.emplace_back(requestId);
         }
     }

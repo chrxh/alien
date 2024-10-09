@@ -193,18 +193,18 @@ void _AutosaveWindow::createSavepoint()
 void _AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)
 {
     if (savepoint.state != SavepointState::Persisted) {
-        auto jobState = _persisterController->getRequestState(PersisterRequestId(savepoint.id));
-        if (jobState == PersisterRequestState::InProgress) {
+        auto requestState = _persisterController->getRequestState(PersisterRequestId(savepoint.id));
+        if (requestState == PersisterRequestState::InProgress) {
             savepoint.state = SavepointState::InProgress;
         }
-        if (jobState == PersisterRequestState::Finished) {
+        if (requestState == PersisterRequestState::Finished) {
             savepoint.state = SavepointState::Persisted;
             auto jobResult = _persisterController->fetchSavedSimulationData(PersisterRequestId{savepoint.id});
             savepoint.timestep = jobResult.timestep;
             savepoint.timestamp = StringHelper::format(jobResult.timestamp);
             savepoint.name = jobResult.name;
         }
-        if (jobState == PersisterRequestState::Error) {
+        if (requestState == PersisterRequestState::Error) {
             savepoint.state = SavepointState::Error;
         }
     }

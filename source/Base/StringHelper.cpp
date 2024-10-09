@@ -35,7 +35,7 @@ std::string StringHelper::format(float v, int fracPartDecimals)
     }
     while (fracPartDecimals-- > 0) {
         v *= 10;
-        result += std::to_string(static_cast<int>(v) % 10);
+        result += std::to_string(static_cast<uint64_t>(v) % 10);
     }
     return result;
 }
