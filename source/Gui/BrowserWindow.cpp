@@ -170,15 +170,22 @@ void _BrowserWindow::processIntern()
 {
     processToolbar();
 
-    processWorkspace();
+    auto startPos = ImGui::GetCursorScreenPos();
 
-    ImGui::SameLine();
-    processMovableSeparator();
+    if (ImGui::BeginChild("##workspaceAndUserList", {0, -scale(5.0f)}, 0, ImGuiWindowFlags_NoScrollbar)) {
+        processWorkspace();
 
-    ImGui::SameLine();
-    processUserList();
+        ImGui::SameLine();
+        processMovableSeparator();
 
-    processStatus();
+        ImGui::SameLine();
+        processUserList();
+
+        processStatus();
+    }
+    ImGui::EndChild();
+
+    processRefreshingScreen({startPos.x, startPos.y});
 
     processEmojiWindow();
 
@@ -570,6 +577,7 @@ void _BrowserWindow::processSimulationList()
         //process treeTOs
         auto& workspace = _workspaces.at(_currentWorkspace);
         auto scheduleRecreateTreeTOs = false;
+
         ImGuiListClipper clipper;
         clipper.Begin(workspace.treeTOs.size());
         while (clipper.Step())
@@ -1158,6 +1166,24 @@ bool _BrowserWindow::processDetailButton()
     auto detailClicked = AlienImGui::Button("...");
     ImGui::PopStyleColor(2);
     return detailClicked;
+}
+
+void _BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
+{
+    if (!_pendingRefreshRequestIds.empty()) {
+        auto color = ImColor(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
+        color.Value.w = 0.8f;
+        auto size = ImGui::GetItemRectSize();
+        auto afterTablePos = ImGui::GetCursorScreenPos();
+
+        ImGui::SetCursorScreenPos({startPos.x, startPos.y});
+        if (ImGui::BeginChild("##overlay", {size.x, size.y}, 0, ImGuiWindowFlags_NoScrollbar)) {
+            ImDrawList* drawList = ImGui::GetWindowDrawList();
+            drawList->AddRectFilled({startPos.x, startPos.y}, {startPos.x + size.x, startPos.y + size.y}, color);
+        }
+        ImGui::EndChild();
+        ImGui::SetCursorScreenPos(afterTablePos);
+    }
 }
 
 void _BrowserWindow::processActivated()

@@ -14,7 +14,7 @@ public:
     void shutdown();
 
 private:
-    char const* initGlfw();  //return glsl version
+    char const* initGlfwAndReturnGlslVersion();
 
     void processLoadingScreen();
     void processFadeoutLoadingScreen();
