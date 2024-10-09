@@ -729,14 +729,13 @@ void _StatisticsWindow::setPlotScale()
         return;
     }
     if (_plotScale == PlotScale_Logarithmic) {
-        //ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_SymLog);
         ImPlot::SetupAxisScale(
             ImAxis_Y1,
             [](double value, void* user_data) {
-                return log2(value * 1000 + 1.0);
+                return log(value * 1000 + 1.0) / log(2.0);
             },
             [](double value, void* user_data) {
-                return (exp2(value) - 1.0) / 1000;
+                return (pow(2.0f, value) - 1.0) / 1000;
             });
         return;
     }
