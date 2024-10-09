@@ -1,6 +1,7 @@
 #include "StatisticsWindow.h"
 
 #include <fstream>
+#include <cmath>
 
 #include <boost/algorithm/string.hpp>
 
