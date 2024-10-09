@@ -27,6 +27,9 @@ public:
     PersisterRequestId scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data) override;
     ReadSimulationResultData fetchReadSimulationData(PersisterRequestId const& id) override;
 
+    PersisterRequestId scheduleGetNetworkResources(SenderInfo const& senderInfo, GetNetworkResourcesRequestData const& data) override;
+    GetNetworkResourcesResultData fetchGetNetworkResourcesData(PersisterRequestId const& id) override;
+
 private:
     static auto constexpr MaxWorkerThreads = 4;
 

@@ -9,6 +9,7 @@
 #include "Network/NetworkResourceRawTO.h"
 #include "Network/UserTO.h"
 #include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/PersisterController.h"
 
 #include "AlienWindow.h"
 #include "Definitions.h"
@@ -23,6 +24,7 @@ class _BrowserWindow : public _AlienWindow
 public:
     _BrowserWindow(
         SimulationController const& simController,
+        PersisterController const& persisterController,
         StatisticsWindow const& statisticsWindow,
         TemporalControlWindow const& temporalControlWindow,
         EditorController const& editorController);
@@ -93,6 +95,8 @@ private:
 
     void processActivated() override;
 
+    void processPendingRequestIds();
+
     void createTreeTOs(Workspace& workspace);
     void sortUserList();
 
@@ -113,6 +117,8 @@ private:
 
     void pushTextColor(NetworkResourceTreeTO const& to);
     void popTextColor();
+
+    std::vector<PersisterRequestId> _pendingRefreshRequestIds;
 
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
@@ -136,6 +142,7 @@ private:
     BrowserCache _simulationCache;
 
     SimulationController _simController;
+    PersisterController _persisterController;
     StatisticsWindow _statisticsWindow;
     TemporalControlWindow _temporalControlWindow;
     LoginDialogWeakPtr _loginDialog;

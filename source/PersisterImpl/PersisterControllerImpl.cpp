@@ -89,6 +89,22 @@ ReadSimulationResultData _PersisterControllerImpl::fetchReadSimulationData(Persi
     return requestResult->getData();
 }
 
+PersisterRequestId _PersisterControllerImpl::scheduleGetNetworkResources(SenderInfo const& senderInfo, GetNetworkResourcesRequestData const& data)
+{
+    auto requestId = generateNewJobId();
+    auto getNetworkResourcesRequest = std::make_shared<_GetNetworkResourcesRequest>(requestId, senderInfo, data);
+
+    _worker->addRequest(getNetworkResourcesRequest);
+
+    return requestId;
+}
+
+GetNetworkResourcesResultData _PersisterControllerImpl::fetchGetNetworkResourcesData(PersisterRequestId const& id)
+{
+    auto requestResult = std::dynamic_pointer_cast<_GetNetworkResourcesRequestResult>(_worker->fetchJobResult(id));
+    return requestResult->getData();
+}
+
 PersisterRequestId _PersisterControllerImpl::generateNewJobId()
 {
     ++_latestJobId;

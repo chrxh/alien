@@ -5,6 +5,7 @@
 
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
+#include "Network/NetworkService.h"
 
 _PersisterWorker::_PersisterWorker(SimulationController const& simController)
     : _simController(simController)
@@ -124,11 +125,14 @@ void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
         _inProgressJobs.push_back(request);
 
         std::variant<PersisterRequestResult, PersisterRequestError> processingResult;
-        if (auto const& saveToFileJob = std::dynamic_pointer_cast<_SaveToFileRequest>(request)) {
-            processingResult = processRequest(lock, saveToFileJob);
+        if (auto const& saveToFileRequest = std::dynamic_pointer_cast<_SaveToFileRequest>(request)) {
+            processingResult = processRequest(lock, saveToFileRequest);
         }
-        if (auto const& loadFromFileJob = std::dynamic_pointer_cast<_ReadFromFileRequest>(request)) {
-            processingResult = processRequest(lock, loadFromFileJob);
+        if (auto const& loadFromFileRequest = std::dynamic_pointer_cast<_ReadFromFileRequest>(request)) {
+            processingResult = processRequest(lock, loadFromFileRequest);
+        }
+        if (auto const& getNetworkResourcesRequest = std::dynamic_pointer_cast<_GetNetworkResourcesRequest>(request)) {
+            processingResult = processRequest(lock, getNetworkResourcesRequest);
         }
         auto inProgressJobsIter = std::ranges::find_if(
             _inProgressJobs, [&](PersisterRequest const& otherRequest) { return otherRequest->getRequestId() == request->getRequestId(); });
@@ -220,4 +224,31 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadFr
             request->getSenderInfo().senderId,
             PersisterErrorInfo{"The simulation could not be loaded because an error occurred when deserializing the data from the file."});
     }
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, GetNetworkResourcesRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    NetworkService::refreshLogin();
+
+    GetNetworkResourcesResultData data;
+
+    auto withRetry = true;
+    bool success = NetworkService::getNetworkResources(data.resourceTOs, withRetry);
+    if (success) {
+        success &= NetworkService::getUserList(data.userTOs, withRetry);
+    }
+    if (success && NetworkService::getLoggedInUserName()) {
+        success &= NetworkService::getEmojiTypeByResourceId(data.emojiTypeByResourceId);
+    }
+
+    if (!success) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(),
+            request->getSenderInfo().senderId,
+            PersisterErrorInfo{"Failed to retrieve browser data. Please try again."});
+    }
+
+    return std::make_shared<_GetNetworkResourcesRequestResult>(request->getRequestId(), data);
 }

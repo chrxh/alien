@@ -43,3 +43,6 @@ using SaveToFileRequestResult = std::shared_ptr<_SaveToFileRequestResult>;
 
 using _ReadFromFileRequestResult = _ConcreteRequestResult<ReadSimulationResultData>;
 using ReadFromFileRequestResult = std::shared_ptr<_ReadFromFileRequestResult>;
+
+using _GetNetworkResourcesRequestResult = _ConcreteRequestResult<GetNetworkResourcesResultData>;
+using GetNetworkResourcesRequestResult = std::shared_ptr<_GetNetworkResourcesRequestResult>;

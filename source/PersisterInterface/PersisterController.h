@@ -6,6 +6,8 @@
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
+#include "GetNetworkResourcesRequestData.h"
+#include "GetNetworkResourcesResultData.h"
 #include "ReadSimulationResultData.h"
 #include "ReadSimulationRequestData.h"
 #include "PersisterErrorInfo.h"
@@ -37,4 +39,7 @@ public:
 
     virtual PersisterRequestId scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data) = 0;
     virtual ReadSimulationResultData fetchReadSimulationData(PersisterRequestId const& id) = 0;
+
+    virtual PersisterRequestId scheduleGetNetworkResources(SenderInfo const& senderInfo, GetNetworkResourcesRequestData const& data) = 0;
+    virtual GetNetworkResourcesResultData fetchGetNetworkResourcesData(PersisterRequestId const& id) = 0;
 };

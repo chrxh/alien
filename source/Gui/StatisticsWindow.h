@@ -25,6 +25,7 @@ private:
     void processTimelinesTab();
     void processHistogramsTab();
     void processTablesTab();
+    void processSettings();
 
     void processTimelineStatistics();
 
@@ -53,6 +54,9 @@ private:
         double endTime,
         int fracPartDecimals);
 
+    void setPlotScale();
+    double getUpperBound(double maxValue);
+
     void drawValuesAtMouseCursor(
         double const* dataPoints,
         double const* timePoints,
@@ -71,8 +75,40 @@ private:
 
     std::string _startingPath;
 
-    int _plotType = 0;  //0 = accumulated, 1 = by color, 2...8 = specific color
-    int _mode = 0;  //0 = real-time, 1 = entire history
+    bool _settingsOpen = false;
+    float _settingsHeight = 130.0f;
+
+    using PlotScale = int;
+    enum PlotScale_
+    {
+        PlotScale_Linear,
+        PlotScale_Logarithmic,
+    };
+    PlotScale _plotScale = PlotScale_Linear;
+
+    using PlotType = int;
+    enum PlotType_
+    {
+        PlotType_Accumulated,
+        PlotType_ByColor,
+        PlotType_Color0,
+        PlotType_Color1,
+        PlotType_Color2,
+        PlotType_Color3,
+        PlotType_Color4,
+        PlotType_Color5,
+        PlotType_Color6
+    };
+    PlotType _plotType = PlotType_Accumulated;
+
+    using PlotMode = int;
+    enum PlotMode_
+    {
+        PlotMode_RealTime,
+        PlotMode_EntireHistory
+    };
+    PlotMode _plotMode = PlotMode_RealTime;
+
     static auto constexpr MinPlotHeight = 80.0f;
     float _plotHeight = MinPlotHeight;
 

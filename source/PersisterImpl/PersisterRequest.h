@@ -1,5 +1,6 @@
 #pragma once
 
+#include "PersisterInterface/GetNetworkResourcesRequestData.h"
 #include "PersisterInterface/ReadSimulationRequestData.h"
 #include "PersisterInterface/PersisterRequestId.h"
 #include "PersisterInterface/SenderInfo.h"
@@ -23,6 +24,9 @@ private:
     SenderInfo _senderInfo;
 };
 
+using PersisterRequest = std::shared_ptr<_PersisterRequest>;
+
+
 template <typename Data_t>
 class _ConcreteRequest : public _PersisterRequest
 {
@@ -40,8 +44,6 @@ private:
     Data_t _data;
 };
 
-using PersisterRequest = std::shared_ptr<_PersisterRequest>;
-
 template<typename Data_t>
 using ConcreteRequest = std::shared_ptr<_ConcreteRequest<Data_t>>;
 
@@ -50,3 +52,6 @@ using SaveToFileRequest = std::shared_ptr<_SaveToFileRequest>;
 
 using _ReadFromFileRequest = _ConcreteRequest<ReadSimulationRequestData>;
 using ReadFromFileRequest = std::shared_ptr<_ReadFromFileRequest>;
+
+using _GetNetworkResourcesRequest = _ConcreteRequest<GetNetworkResourcesRequestData>;
+using GetNetworkResourcesRequest = std::shared_ptr<_GetNetworkResourcesRequest>;
