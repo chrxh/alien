@@ -71,7 +71,7 @@ void _StartupController::process()
             _state = State::FadeOutLoadingScreen;
         }
         if (requestedSimState == PersisterRequestState::Error) {
-            MessageDialog::getInstance().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
+            MessageDialog::get().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
 
             DeserializedSimulation deserializedSim;
             deserializedSim.auxiliaryData.generalSettings.worldSizeX = 1000;
@@ -145,7 +145,7 @@ void _StartupController::activate()
 
 void _StartupController::processLoadingScreen()
 {
-    auto& styleRep = StyleRepository::getInstance();
+    auto& styleRep = StyleRepository::get();
     auto center = ImGui::GetMainViewport()->GetCenter();
     auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));

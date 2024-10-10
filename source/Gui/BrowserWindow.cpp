@@ -426,7 +426,7 @@ void _BrowserWindow::processUserList()
 
 
         ImGui::PushID("User list");
-        auto& styleRepository = StyleRepository::getInstance();
+        auto& styleRepository = StyleRepository::get();
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
@@ -759,7 +759,7 @@ bool _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
         ImGui::SameLine();
 
         if (!isOwner(treeTO) && _lastSessionData.isNew(leaf.rawTO)) {
-            auto font = StyleRepository::getInstance().getSmallBoldFont();
+            auto font = StyleRepository::get().getSmallBoldFont();
             auto origSize = font->Scale;
             font->Scale *= 0.65f;
             ImGui::PushFont(font);
@@ -1127,7 +1127,7 @@ void _BrowserWindow::processShortenedText(std::string const& text, bool bold) {
     if (substrings.empty()) {
         return;
     }
-    auto& styleRepository = StyleRepository::getInstance();
+    auto& styleRepository = StyleRepository::get();
     auto textSize = ImGui::CalcTextSize(substrings.at(0).c_str());
     auto needDetailButton = textSize.x > ImGui::GetContentRegionAvail().x || substrings.size() > 1;
     auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - styleRepository.scale(15.0f);
@@ -1231,7 +1231,7 @@ void _BrowserWindow::processPendingRequestIds()
 
     auto criticalErrors = _persisterController->fetchAllErrorInfos(SenderId{BrowserSenderId});
     if (!criticalErrors.empty()) {
-        MessageDialog::getInstance().information("Error", criticalErrors);
+        MessageDialog::get().information("Error", criticalErrors);
     }
 }
 
@@ -1276,7 +1276,7 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
         SerializedSimulation serializedSim;
         if (!cachedSimulation.has_value()) {
             if (!NetworkService::downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.rawTO->id)) {
-                MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
+                MessageDialog::get().information("Error", "Failed to download " + dataTypeString + ".");
                 return;
             }
         }
@@ -1285,7 +1285,7 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
             DeserializedSimulation deserializedSim;
             if (!cachedSimulation.has_value()) {
                 if (!SerializerService::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
-                    MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
+                    MessageDialog::get().information("Error", "Failed to load simulation. Your program version may not match.");
                     return;
                 }
                 _simulationCache.insertOrAssign(leaf.rawTO->id, deserializedSim);
@@ -1330,14 +1330,14 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
         } else {
             std::vector<uint8_t> genome;
             if (!SerializerService::deserializeGenomeFromString(genome, serializedSim.mainData)) {
-                MessageDialog::getInstance().information("Error", "Failed to load genome. Your program version may not match.");
+                MessageDialog::get().information("Error", "Failed to load genome. Your program version may not match.");
                 return;
             }
             _editorController->setOn(true);
             _editorController->getGenomeEditorWindow()->openTab(GenomeDescriptionService::convertBytesToDescription(genome));
         }
         if (VersionChecker::isVersionNewer(leaf.rawTO->version)) {
-            MessageDialog::getInstance().information(
+            MessageDialog::get().information(
                 "Warning",
                 "The download was successful but the " + dataTypeString +" was generated using a more recent\n"
                 "version of ALIEN. Consequently, the " + dataTypeString + "might not function as expected.\n"
@@ -1364,7 +1364,7 @@ void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
 
                 SerializedSimulation serializedSim;
                 if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
-                    MessageDialog::getInstance().information("Replace simulation", "The simulation could not be serialized for replacing.");
+                    MessageDialog::get().information("Replace simulation", "The simulation could not be serialized for replacing.");
                     return;
                 }
                 mainData = serializedSim.mainData;
@@ -1403,7 +1403,7 @@ void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
             onRefresh();
         });
     };
-    MessageDialog::getInstance().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
+    MessageDialog::get().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
 }
 
 void _BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
@@ -1448,7 +1448,7 @@ void _BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
     delayedExecution([rawTOs = rawTOs, this] {
         for (auto const& rawTO : rawTOs) {
             if (!NetworkService::moveResource(rawTO->id, rawTO->workspaceType)) {
-                MessageDialog::getInstance().information("Error", "Failed to move item.");
+                MessageDialog::get().information("Error", "Failed to move item.");
                 refreshIntern(true);
                 return;
             }
@@ -1463,7 +1463,7 @@ void _BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
     auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, currentWorkspace.rawTOs);
 
     auto message = treeTO->isLeaf() ? "Do you really want to delete the selected item?" : "Do you really want to delete the selected folder?";
-    MessageDialog::getInstance().yesNo("Delete", message, [rawTOs = rawTOs, this]() {
+    MessageDialog::get().yesNo("Delete", message, [rawTOs = rawTOs, this]() {
 
         //remove resources form workspace
         for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
@@ -1482,7 +1482,7 @@ void _BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
         delayedExecution([rawTOs = rawTOs, this] {
             for (auto const& rawTO : rawTOs) {
                 if (!NetworkService::deleteResource(rawTO->id)) {
-                    MessageDialog::getInstance().information("Error", "Failed to delete item. Please try again later.");
+                    MessageDialog::get().information("Error", "Failed to delete item. Please try again later.");
                     refreshIntern(true);
                     return;
                 }

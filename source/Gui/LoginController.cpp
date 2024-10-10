@@ -7,36 +7,33 @@
 #include "PersisterInterface/SenderInfo.h"
 
 #include "MessageDialog.h"
+#include "ActivateUserDialog.h"
+#include "BrowserWindow.h"
 
 namespace
 {
     auto constexpr LoginSenderId = "Login";
 }
 
-LoginController& LoginController::get()
-{
-    static LoginController instance;
-    return instance;
-}
-
-void LoginController::init(SimulationController const& simController, PersisterController const& persisterController)
+void LoginController::init(
+    SimulationController const& simController,
+    PersisterController const& persisterController,
+    ActivateUserDialog const& activateUserDialog,
+    BrowserWindow const& browserWindow)
 {
     _simController = simController;
     _persisterController = persisterController;
+    _activateUserDialog = activateUserDialog;
+    _browserWindow = browserWindow;
 
     auto& settings = GlobalSettings::getInstance();
-    _remember = settings.getBool("dialogs.login.remember", _remember);
-    _shareGpuInfo = settings.getBool("dialogs.login.share gpu info", _shareGpuInfo);
+    _remember = settings.getBool("controller.login.remember", _remember);
+    _shareGpuInfo = settings.getBool("controller.login.share gpu info", _shareGpuInfo);
 
     if (_remember) {
-        auto userName = settings.getString("dialogs.login.user name", "");
-        auto password = settings.getString("dialogs.login.password", "");
-
-        if (!userName.empty()) {
-            persisterController->scheduleLogin(
-                SenderInfo{.senderId = SenderId{LoginSenderId}, .wishResultData = false, .wishErrorInfo = true},
-                LoginRequestData{.userName = userName, .password = password, .userInfo = getUserInfo()});
-        }
+        _userName = settings.getString("dialogs.login.user name", "");
+        _password = settings.getString("dialogs.login.password", "");
+        onLogin();
     }
 }
 
@@ -45,26 +42,55 @@ void LoginController::shutdown()
     saveSettings();
 }
 
+void LoginController::onLogin()
+{
+    if (!_userName.empty()) {
+        _pendingLoginRequestIds.emplace_back(_persisterController->scheduleLogin(
+            SenderInfo{.senderId = SenderId{LoginSenderId}, .wishResultData = true, .wishErrorInfo = true},
+            LoginRequestData{.userName = _userName, .password = _password, .userInfo = getUserInfo()}));
+        if (!_remember) {
+            _userName.clear();
+            _password.clear();
+        }
+    }
+}
+
 void LoginController::process()
 {
+    std::vector<PersisterRequestId> newLoginRequestIds;
+    for (auto const& requestId : _pendingLoginRequestIds) {
+        auto state = _persisterController->getRequestState(requestId);
+        if (state == PersisterRequestState::Finished) {
+            auto const& data = _persisterController->fetchLoginData(requestId);
+            if (data.unknownUser) {
+                auto& settings = GlobalSettings::getInstance();
+                auto userName = settings.getString("dialogs.login.user name", "");
+                auto password = settings.getString("dialogs.login.password", "");
+                _activateUserDialog->open(userName, password, getUserInfo());
+            }
+            saveSettings();
+            _browserWindow->onRefresh();
+        }
+        if (state == PersisterRequestState::InQueue || state == PersisterRequestState::InProgress) {
+            newLoginRequestIds.emplace_back(requestId);
+        }
+    }
+    _pendingLoginRequestIds = newLoginRequestIds;
+
     auto criticalErrors = _persisterController->fetchAllErrorInfos(SenderId{LoginSenderId});
     if (!criticalErrors.empty()) {
-        MessageDialog::getInstance().information("Login failed", criticalErrors);
+        MessageDialog::get().information("Error", criticalErrors);
     }
 }
 
 void LoginController::saveSettings()
 {
     auto& settings = GlobalSettings::getInstance();
-    settings.setBool("dialogs.login.remember", _remember);
-    settings.setBool("dialogs.login.share gpu info", _shareGpuInfo);
+    settings.setBool("controller.login.remember", _remember);
+    settings.setBool("controller.login.share gpu info", _shareGpuInfo);
     if (_remember) {
-        auto userName = NetworkService::getLoggedInUserName();
-        auto password = NetworkService::getPassword();
-        if (userName.has_value() && password.has_value()) {
-            settings.setString("dialogs.login.user name", *userName);
-            settings.setString("dialogs.login.password", *password);
-        }
+        settings.setString("dialogs.login.user name", _userName);
+        settings.setString("dialogs.login.password", _password);
     }
 }
 
@@ -86,6 +112,26 @@ bool LoginController::isRemember() const
 void LoginController::setRemember(bool value)
 {
     _remember = value;
+}
+
+std::string const& LoginController::getUserName() const
+{
+    return _userName;
+}
+
+void LoginController::setUserName(std::string const& value)
+{
+    _userName = value;
+}
+
+std::string const& LoginController::getPassword() const
+{
+    return _password;
+}
+
+void LoginController::setPassword(std::string const& value)
+{
+    _password = value;
 }
 
 UserInfo LoginController::getUserInfo()

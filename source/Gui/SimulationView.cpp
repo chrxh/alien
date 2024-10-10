@@ -190,7 +190,7 @@ void _SimulationView::draw(bool renderSimulation)
         auto textWidth = scale(300.0f);
         auto textHeight = scale(80.0f);
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto& styleRep = StyleRepository::getInstance();
+        auto& styleRep = StyleRepository::get();
         auto right = ImGui::GetMainViewport()->Pos.x + ImGui::GetMainViewport()->Size.x;
         auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
         auto maxLength = std::max(right, bottom);
@@ -307,13 +307,13 @@ void _SimulationView::updateImageFromSimulation()
                                 {viewPos.x - 2.0f * fontSizeUnit, viewPos.y + 0.5f * fontSizeUnit}, fontSizeUnit / 5, ImColor::HSV(0.0f, 1.0f, 0.7f, 1.0f));
                         }
                         drawList->AddText(
-                            StyleRepository::getInstance().getMediumFont(),
+                            StyleRepository::get().getMediumFont(),
                             fontSizeUnit,
                             {viewPos.x - 1.7f * fontSizeUnit, viewPos.y},
                             Const::CellFunctionOverlayShadowColor,
                             text.c_str());
                         drawList->AddText(
-                            StyleRepository::getInstance().getMediumFont(),
+                            StyleRepository::get().getMediumFont(),
                             fontSizeUnit,
                             {viewPos.x - 1.7f * fontSizeUnit + 1, viewPos.y + 1},
                             Const::CellFunctionOverlayColor,
@@ -325,13 +325,13 @@ void _SimulationView::updateImageFromSimulation()
                         Viewport::mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f}, parameters.borderlessRendering);
                     auto fontSize = Viewport::getZoomFactor() / 2;
                     drawList->AddText(
-                        StyleRepository::getInstance().getLargeFont(),
+                        StyleRepository::get().getLargeFont(),
                         fontSize,
                         {viewPos.x, viewPos.y},
                         Const::ExecutionNumberOverlayShadowColor,
                         std::to_string(overlayElement.executionOrderNumber).c_str());
                     drawList->AddText(
-                        StyleRepository::getInstance().getLargeFont(),
+                        StyleRepository::get().getLargeFont(),
                         fontSize,
                         {viewPos.x + 1, viewPos.y + 1},
                         Const::ExecutionNumberOverlayColor,

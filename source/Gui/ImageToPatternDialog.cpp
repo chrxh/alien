@@ -78,7 +78,7 @@ namespace
 
 void _ImageToPatternDialog::show()
 {
-    GenericFileDialogs::getInstance().showOpenFileDialog(
+    GenericFileDialogs::get().showOpenFileDialog(
         "Open image", "Image (*.png){.png},.*", _startingPath, [&](std::filesystem::path const& path) {
 
         auto firstFilename = ifd::FileDialog::Instance().GetResult();

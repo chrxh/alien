@@ -137,7 +137,7 @@ void OverlayMessageController::processMessage()
     }
     ImDrawList* drawList = ImGui::GetForegroundDrawList();
 
-    auto& styleRep = StyleRepository::getInstance();
+    auto& styleRep = StyleRepository::get();
     auto center = ImGui::GetMainViewport()->Size;
     center.x /= 2;
     auto textColorFront = ImColor::HSV(0.5f, 0.0f, 1.0f, textAlpha);

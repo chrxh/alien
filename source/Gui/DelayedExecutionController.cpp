@@ -3,13 +3,6 @@
 #include "AlienImGui.h"
 #include "DelayedExecutionController.h"
 
-
-DelayedExecutionController& DelayedExecutionController::getInstance()
-{
-    static DelayedExecutionController instance;
-    return instance;
-}
-
 void DelayedExecutionController::process()
 {
     std::vector<ExecutionData> delayedExecDatas;

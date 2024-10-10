@@ -460,7 +460,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
         if (_expandNodes) {
             ImGui::SetNextItemOpen(*_expandNodes);
         }
-        ImGui::PushFont(StyleRepository::getInstance().getSmallBoldFont());
+        ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
         auto treeNodeOpen =
             ImGui::TreeNodeEx((generateShortDescription(index, cell, shapeGeneratorResult, isFirstOrLast) + "###").c_str(), flags);
         ImGui::PopFont();
@@ -838,14 +838,14 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
 
 void _GenomeEditorWindow::onOpenGenome()
 {
-    GenericFileDialogs::getInstance().showOpenFileDialog("Open genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
+    GenericFileDialogs::get().showOpenFileDialog("Open genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         std::vector<uint8_t> genomeData;
         if (!SerializerService::deserializeGenomeFromFile(genomeData, firstFilename.string())) {
-            MessageDialog::getInstance().information("Open genome", "The selected file could not be opened.");
+            MessageDialog::get().information("Open genome", "The selected file could not be opened.");
         } else {
             openTab(GenomeDescriptionService::convertBytesToDescription(genomeData), false);
         }
@@ -854,7 +854,7 @@ void _GenomeEditorWindow::onOpenGenome()
 
 void _GenomeEditorWindow::onSaveGenome()
 {
-    GenericFileDialogs::getInstance().showSaveFileDialog(
+    GenericFileDialogs::get().showSaveFileDialog(
         "Save genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
@@ -863,7 +863,7 @@ void _GenomeEditorWindow::onSaveGenome()
             auto const& selectedTab = _tabDatas.at(_selectedTabIndex);
             auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(selectedTab.genome);
             if (!SerializerService::serializeGenomeToFile(firstFilename.string(), genomeData)) {
-                MessageDialog::getInstance().information("Save genome", "The selected file could not be saved.");
+                MessageDialog::get().information("Save genome", "The selected file could not be saved.");
             }
         });
 }

@@ -50,7 +50,7 @@ void _SpatialControlWindow::processIntern()
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImGui::Text("World size");
-        ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
+        ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         auto worldSize = _simController->getWorldSize();
         ImGui::TextUnformatted(
@@ -59,14 +59,14 @@ void _SpatialControlWindow::processIntern()
         ImGui::PopFont();
 
         ImGui::Text("Zoom factor");
-        ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
+        ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         ImGui::TextUnformatted(StringHelper::format(Viewport::getZoomFactor(), 2).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
         ImGui::Text("Center position");
-        ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
+        ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
         auto centerPos = Viewport::getCenterInWorldPos();
         ImGui::TextUnformatted(

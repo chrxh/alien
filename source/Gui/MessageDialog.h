@@ -7,9 +7,9 @@
 
 class MessageDialog
 {
-public:
-    static MessageDialog& getInstance();
+    MAKE_SINGLETON(MessageDialog);
 
+public:
     void process();
 
     void information(std::string const& title, std::string const& message);
@@ -35,5 +35,5 @@ private:
 
 inline void showMessage(std::string const& title, std::string const& message)
 {
-    MessageDialog::getInstance().information(title, message);
+    MessageDialog::get().information(title, message);
 }

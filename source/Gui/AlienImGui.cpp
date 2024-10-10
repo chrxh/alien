@@ -112,8 +112,8 @@ bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& v
 
 void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, float& value)
 {
-    auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
-    auto inputWidth = StyleRepository::getInstance().scale(parameters._inputWidth);
+    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
+    auto inputWidth = StyleRepository::get().scale(parameters._inputWidth);
 
     ImGui::SetNextItemWidth(
         ImGui::GetContentRegionAvail().x - textWidth - inputWidth
@@ -217,7 +217,7 @@ bool AlienImGui::InputOptionalInt(InputIntParameters const& parameters, std::opt
 
 bool AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value)
 {
-    auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
+    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
 
     ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
@@ -242,7 +242,7 @@ bool AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
 
 void AlienImGui::InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2)
 {
-    auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
+    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
 
     ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
@@ -333,7 +333,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
     ImGui::SetNextItemWidth(width - scale(parameters._textWidth));
     if (parameters._monospaceFont) {
-        ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
+        ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
     }
     ImGuiInputTextFlags flags = 0;
     if (parameters._readOnly) {
@@ -385,10 +385,10 @@ void AlienImGui::InputTextMultiline(InputTextMultilineParameters const& paramete
     static char buffer[1024*16];
     StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
 
-    auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
+    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
     auto height = parameters._height == 0
         ? ImGui::GetContentRegionAvail().y
-        : StyleRepository::getInstance().scale(parameters._height);
+        : StyleRepository::get().scale(parameters._height);
     auto id = parameters._hint.empty() ? ("##" + parameters._name).c_str() : ("##" + parameters._hint).c_str();
     ImGui::InputTextEx(
         ("##" + parameters._name).c_str(),
@@ -418,7 +418,7 @@ namespace
 
 bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
 {
-    auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
+    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
 
     const char** items = new const char*[parameters._values.size()];
     for (int i = 0; i < parameters._values.size(); ++i) {
@@ -710,14 +710,14 @@ void AlienImGui::Text(std::string const& text)
 
 void AlienImGui::BoldText(std::string const& text)
 {
-    ImGui::PushFont(StyleRepository::getInstance().getSmallBoldFont());
+    ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
     AlienImGui::Text(text);
     ImGui::PopFont();
 }
 
 void AlienImGui::MonospaceText(std::string const& text)
 {
-    ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
+    ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
     ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
     Text(text);
     ImGui::PopStyleColor();
@@ -818,7 +818,7 @@ void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& pa
         ("##" + parameters._name).c_str(),
         imGuiColor,
         ImGuiColorEditFlags_NoBorder,
-        {ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().scale(parameters._textWidth), 0});
+        {ImGui::GetContentRegionAvail().x - StyleRepository::get().scale(parameters._textWidth), 0});
     if (openColorPicker) {
         ImGui::OpenPopup("colorpicker");
         imGuiBackupColor = imGuiColor;
@@ -923,7 +923,7 @@ bool AlienImGui::ToolbarButton(std::string const& text)
 {
     auto id = std::to_string(ImGui::GetID(text.c_str()));
 
-    ImGui::PushFont(StyleRepository::getInstance().getIconFont());
+    ImGui::PushFont(StyleRepository::get().getIconFont());
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
     auto color = Const::ToolbarButtonTextColor;
     float h, s, v;
@@ -947,7 +947,7 @@ bool AlienImGui::SelectableToolbarButton(std::string const& text, int& value, in
 {
     auto id = std::to_string(ImGui::GetID(text.c_str()));
 
-    ImGui::PushFont(StyleRepository::getInstance().getIconFont());
+    ImGui::PushFont(StyleRepository::get().getIconFont());
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
     auto color = Const::ToolbarButtonTextColor;
     float h, s, v;
@@ -1036,7 +1036,7 @@ bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
     }
     ImGuiTreeNodeFlags treeNodeClosedFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_Framed;
     ImGuiTreeNodeFlags treeNodeOpenFlags = treeNodeClosedFlags | ImGuiTreeNodeFlags_DefaultOpen;
-    ImGui::PushFont(StyleRepository::getInstance().getSmallBoldFont());
+    ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
     bool result = ImGui::TreeNodeEx(parameters._text.c_str(), parameters._defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
     ImGui::PopFont();
     ImGui::PopStyleColor(3);
@@ -1050,7 +1050,7 @@ void AlienImGui::EndTreeNode()
 
 bool AlienImGui::Button(ButtonParameters const& parameters)
 {
-    auto width = ImGui::GetContentRegionAvail().x - StyleRepository::getInstance().scale(parameters._textWidth);
+    auto width = ImGui::GetContentRegionAvail().x - StyleRepository::get().scale(parameters._textWidth);
     auto result = ImGui::Button(parameters._buttonText.c_str(), {width, 0});
     ImGui::SameLine();
 
@@ -1150,8 +1150,8 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
 
     auto drawTextWithShadow = [&drawList, &cellSize](std::string const& text, float posX, float posY) {
         drawList->AddText(
-            StyleRepository::getInstance().getLargeFont(), cellSize / 2, {posX + 1.0f, posY + 1.0f}, Const::ExecutionNumberOverlayShadowColor, text.c_str());
-        drawList->AddText(StyleRepository::getInstance().getLargeFont(), cellSize / 2, {posX, posY}, Const::ExecutionNumberOverlayColor, text.c_str());
+            StyleRepository::get().getLargeFont(), cellSize / 2, {posX + 1.0f, posY + 1.0f}, Const::ExecutionNumberOverlayShadowColor, text.c_str());
+        drawList->AddText(StyleRepository::get().getLargeFont(), cellSize / 2, {posX, posY}, Const::ExecutionNumberOverlayColor, text.c_str());
     };
 
     auto result = false;
@@ -1229,7 +1229,7 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
             case SymbolPreviewDescription::Type::Infinity: {
                 if (zoom > ZoomLevelForConnections) {
                     drawList->AddText(
-                        StyleRepository::getInstance().getIconFont(),
+                        StyleRepository::get().getIconFont(),
                         cellSize / 2,
                         {pos.x - cellSize * 0.4f, pos.y - cellSize * 0.2f},
                         Const::GenomePreviewInfinitySymbolColor,
@@ -1323,7 +1323,7 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
                 }
                 if (cell.selfReplicator) {
                     drawList->AddText(
-                        StyleRepository::getInstance().getIconFont(),
+                        StyleRepository::get().getIconFont(),
                         cellSize / 4,
                         {cellPos.x - length * 2, cellPos.y + length},
                         Const::GenomePreviewSelfReplicatorColor,
@@ -1839,7 +1839,7 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
             _basicSilderExpanded.insert(toggleButtonId);
         }
     }
-    auto textWidth = StyleRepository::getInstance().scale(parameters._textWidth);
+    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
 
     ImGui::SameLine();
 

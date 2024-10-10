@@ -8,9 +8,8 @@
 
 class GenericFileDialogs
 {
+    MAKE_SINGLETON(GenericFileDialogs);
 public:
-    static GenericFileDialogs& getInstance();
-
     void showOpenFileDialog(
         std::string const& title,
         std::string const& filter,

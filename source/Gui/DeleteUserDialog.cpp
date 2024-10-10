@@ -31,7 +31,7 @@ void _DeleteUserDialog::processIntern()
         if (_reenteredPassword == *NetworkService::getPassword()) {
             onDelete();
         } else {
-            MessageDialog::getInstance().information("Error", "The password does not match.");
+            MessageDialog::get().information("Error", "The password does not match.");
         }
         _reenteredPassword.clear();
     }
@@ -50,8 +50,8 @@ void _DeleteUserDialog::onDelete()
     auto userName = *NetworkService::getLoggedInUserName();
     if (NetworkService::deleteUser()) {
         _browserWindow->onRefresh();
-        MessageDialog::getInstance().information("Information", "The user '" + userName + "' has been deleted.\nYou are logged out.");
+        MessageDialog::get().information("Information", "The user '" + userName + "' has been deleted.\nYou are logged out.");
     } else {
-        MessageDialog::getInstance().information("Error", "An error occurred on the server.");
+        MessageDialog::get().information("Error", "An error occurred on the server.");
     }
 }

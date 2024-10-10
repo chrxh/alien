@@ -9,12 +9,6 @@
 #include "AlienImGui.h"
 #include "WindowController.h"
 
-MessageDialog& MessageDialog::getInstance()
-{
-    static MessageDialog instance;
-    return instance;
-}
-
 void MessageDialog::process()
 {
     if (!_show) {
@@ -45,7 +39,7 @@ void MessageDialog::information(std::string const& title, std::vector<PersisterE
     for (auto const& error : errors) {
         errorMessages.emplace_back(error.message);
     }
-    MessageDialog::getInstance().information(title, boost::join(errorMessages, "\n\n"));
+    MessageDialog::get().information(title, boost::join(errorMessages, "\n\n"));
 }
 
 void MessageDialog::yesNo(std::string const& title, std::string const& message, std::function<void()> const& yesFunction)

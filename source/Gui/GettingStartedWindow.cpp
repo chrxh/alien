@@ -382,7 +382,7 @@ void _GettingStartedWindow::processIntern()
 
         //ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
-        //ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
+        //ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
         //auto windowWidth = ImGui::GetWindowSize().x;
         //auto weblink = "https://alien-project.gitbook.io/docs";
         //auto textWidth = ImGui::CalcTextSize(weblink).x;
@@ -406,46 +406,46 @@ void _GettingStartedWindow::drawTitle()
 {
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
 
-    ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
+    ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("What is ");
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienImGui::NegativeSpacing();
-    ImGui::PushFont(StyleRepository::getInstance().getMediumBoldFont());
+    ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("A");
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienImGui::NegativeSpacing();
     AlienImGui::NegativeSpacing();
-    ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
+    ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("rtificial ");
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienImGui::NegativeSpacing();
-    ImGui::PushFont(StyleRepository::getInstance().getMediumBoldFont());
+    ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("LI");
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienImGui::NegativeSpacing();
     AlienImGui::NegativeSpacing();
-    ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
+    ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("fe ");
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienImGui::NegativeSpacing();
-    ImGui::PushFont(StyleRepository::getInstance().getMediumBoldFont());
+    ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("EN");
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienImGui::NegativeSpacing();
     AlienImGui::NegativeSpacing();
-    ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
+    ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("vironment ?");
     ImGui::PopFont();
 

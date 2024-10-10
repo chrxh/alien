@@ -19,12 +19,6 @@
 
 #include "WindowController.h"
 
-StyleRepository& StyleRepository::getInstance()
-{
-    static StyleRepository instance;
-    return instance;
-}
-
 void StyleRepository::init()
 {
     auto scaleFactor = WindowController::getContentScaleFactor();

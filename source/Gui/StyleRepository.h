@@ -104,10 +104,9 @@ namespace Const
 
 class StyleRepository
 {
-public:
-    static StyleRepository& getInstance();
-    StyleRepository(StyleRepository const&) = delete;
+    MAKE_SINGLETON(StyleRepository);
 
+public :
     void init();
 
     ImFont* getIconFont() const;
@@ -128,8 +127,6 @@ public:
     float scaleInverse(float value) const;
 
 private:
-    StyleRepository() = default;
-
     ImFont* _iconFont = nullptr;
     ImFont* _smallBoldFont = nullptr;
     ImFont* _mediumBoldFont = nullptr;
@@ -143,5 +140,5 @@ private:
 
 inline float scale(float value)
 {
-    return StyleRepository::getInstance().scale(value);
+    return StyleRepository::get().scale(value);
 }

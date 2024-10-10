@@ -176,7 +176,7 @@ void _PatternEditorWindow::processIntern()
             AlienImGui::SliderInputFloatParameters()
                 .name("Angle")
                 .textWidth(RightColumnWidth)
-                .inputWidth(StyleRepository::getInstance().scale(50.0f))
+                .inputWidth(StyleRepository::get().scale(50.0f))
                 .min(-180.0f)
                 .max(180.0f)
                 .format("%.1f"),
@@ -327,7 +327,7 @@ void _PatternEditorWindow::processIntern()
 
 void _PatternEditorWindow::onOpenPattern()
 {
-    GenericFileDialogs::getInstance().showOpenFileDialog(
+    GenericFileDialogs::get().showOpenFileDialog(
         "Open pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
@@ -339,14 +339,14 @@ void _PatternEditorWindow::onOpenPattern()
                 _simController->addAndSelectSimulationData(DataDescription(content));
                 _editorModel->update();
             } else {
-                MessageDialog::getInstance().information("Open pattern", "The selected file could not be opened.");
+                MessageDialog::get().information("Open pattern", "The selected file could not be opened.");
             }
         });
 }
 
 void _PatternEditorWindow::onSavePattern()
 {
-    GenericFileDialogs::getInstance().showSaveFileDialog(
+    GenericFileDialogs::get().showSaveFileDialog(
         "Save pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
@@ -354,7 +354,7 @@ void _PatternEditorWindow::onSavePattern()
 
             auto content = _simController->getSelectedClusteredSimulationData(_editorModel->isRolloutToClusters());
             if (!SerializerService::serializeContentToFile(firstFilename.string(), content)) {
-                MessageDialog::getInstance().information("Save pattern", "The selected pattern could not be saved to the specified file.");
+                MessageDialog::get().information("Save pattern", "The selected pattern could not be saved to the specified file.");
             }
         });
 }

@@ -6,12 +6,6 @@
 #include "AlienImGui.h"
 #include "WindowController.h"
 
-GenericFileDialogs& GenericFileDialogs::getInstance()
-{
-    static GenericFileDialogs instance;
-    return instance;
-}
-
 void GenericFileDialogs::showOpenFileDialog(
     std::string const& title,
     std::string const& filter,
