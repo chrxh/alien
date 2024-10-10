@@ -73,7 +73,7 @@ void OverlayMessageController::processLoadingBar()
         auto center = ImVec2{viewSize.x / 2, viewSize.y - scale(60.0f)};
         drawList->AddRectFilled(
             ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2},
-            ImColor::HSV(0.66f, 1.0f, 0.5f, 0.4f));
+            ImColor::HSV(0.66f, 1.0f, 0.25f, 0.8f));
 
         auto progressWidth = width * 2 / 5;
         auto progressStart = (toInt(duration) / 10 + toInt(width - progressWidth)) % toInt(width);
@@ -113,7 +113,7 @@ void OverlayMessageController::processLoadingBar()
             }
         }
         drawList->AddRect(
-            ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2}, ImColor::HSV(0.66f, 0.7f, 0.8f, 1.0f));
+            ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2}, ImColor::HSV(0.66f, 0.9f, 0.6f, 1.0f));
 
     } else {
         _progressBarRefTimepoint.reset();

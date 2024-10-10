@@ -9,11 +9,7 @@
 #include "MessageDialog.h"
 #include "ActivateUserDialog.h"
 #include "BrowserWindow.h"
-
-namespace
-{
-    auto constexpr LoginSenderId = "Login";
-}
+#include "PersisterInterface/TaskProcessor.h"
 
 void LoginController::init(
     SimulationController const& simController,
@@ -25,6 +21,7 @@ void LoginController::init(
     _persisterController = persisterController;
     _activateUserDialog = activateUserDialog;
     _browserWindow = browserWindow;
+    _taskProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
 
     auto& settings = GlobalSettings::get();
     _remember = settings.getBool("controller.login.remember", _remember);
@@ -45,42 +42,35 @@ void LoginController::shutdown()
 void LoginController::onLogin()
 {
     if (!_userName.empty()) {
-        _pendingLoginRequestIds.emplace_back(_persisterController->scheduleLogin(
-            SenderInfo{.senderId = SenderId{LoginSenderId}, .wishResultData = true, .wishErrorInfo = true},
-            LoginRequestData{.userName = _userName, .password = _password, .userInfo = getUserInfo()}));
-        if (!_remember) {
-            _userName.clear();
-            _password.clear();
-        }
+        _taskProcessor->executeTask(
+            [&](auto const& senderId) {
+                auto result = _persisterController->scheduleLogin(
+                    SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true},
+                    LoginRequestData{.userName = _userName, .password = _password, .userInfo = getUserInfo()});
+                if (!_remember) {
+                    _userName.clear();
+                    _password.clear();
+                }
+                return result;
+            },
+            [&](auto const& requestId) {
+                auto const& data = _persisterController->fetchLoginData(requestId);
+                if (data.unknownUser) {
+                    auto& settings = GlobalSettings::get();
+                    auto userName = settings.getString("dialogs.login.user name", "");
+                    auto password = settings.getString("dialogs.login.password", "");
+                    _activateUserDialog->open(userName, password, getUserInfo());
+                }
+                saveSettings();
+                _browserWindow->onRefresh();
+            },
+            [&](auto const& criticalErrors) { MessageDialog::get().information("Error", criticalErrors); });
     }
 }
 
 void LoginController::process()
 {
-    std::vector<PersisterRequestId> newLoginRequestIds;
-    for (auto const& requestId : _pendingLoginRequestIds) {
-        auto state = _persisterController->getRequestState(requestId);
-        if (state == PersisterRequestState::Finished) {
-            auto const& data = _persisterController->fetchLoginData(requestId);
-            if (data.unknownUser) {
-                auto& settings = GlobalSettings::get();
-                auto userName = settings.getString("dialogs.login.user name", "");
-                auto password = settings.getString("dialogs.login.password", "");
-                _activateUserDialog->open(userName, password, getUserInfo());
-            }
-            saveSettings();
-            _browserWindow->onRefresh();
-        }
-        if (state == PersisterRequestState::InQueue || state == PersisterRequestState::InProgress) {
-            newLoginRequestIds.emplace_back(requestId);
-        }
-    }
-    _pendingLoginRequestIds = newLoginRequestIds;
-
-    auto criticalErrors = _persisterController->fetchAllErrorInfos(SenderId{LoginSenderId});
-    if (!criticalErrors.empty()) {
-        MessageDialog::get().information("Error", criticalErrors);
-    }
+    _taskProcessor->process();
 }
 
 void LoginController::saveSettings()

@@ -38,7 +38,7 @@ private:
     ActivateUserDialog _activateUserDialog;
     BrowserWindow _browserWindow;
 
-    std::vector<PersisterRequestId> _pendingLoginRequestIds;
+    TaskProcessor _taskProcessor;
 
     bool _shareGpuInfo = true;
     bool _remember = true;

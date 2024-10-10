@@ -120,7 +120,8 @@ private:
     void pushTextColor(NetworkResourceTreeTO const& to);
     void popTextColor();
 
-    std::vector<PersisterRequestId> _pendingRefreshRequestIds;
+    TaskProcessor _refreshProcessor;
+    TaskProcessor _downloadProcessor;
 
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;

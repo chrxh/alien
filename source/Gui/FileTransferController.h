@@ -23,6 +23,7 @@ private:
     SimulationController _simController;
     TemporalControlWindow _temporalControlWindow;
 
-    std::string _startingPath;
-    std::vector<PersisterRequestId> _readSimulationRequestIds;
+    TaskProcessor _openSimulationProcessor;
+
+    std::string _referencePath;
 };

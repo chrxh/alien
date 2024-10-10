@@ -25,6 +25,7 @@
 #include "Network/NetworkService.h"
 #include "Network/NetworkResourceParserService.h"
 #include "Network/NetworkResourceTreeTO.h"
+#include "PersisterInterface/TaskProcessor.h"
 
 #include "AlienImGui.h"
 #include "StyleRepository.h"
@@ -56,7 +57,6 @@ namespace
     auto constexpr NumEmojiBlocks = 4;
     int const NumEmojisPerBlock[] = {19, 14, 10, 6};
     auto constexpr NumEmojisPerRow = 5;
-    auto constexpr BrowserSenderId = "Browser";
 }
 
 _BrowserWindow::_BrowserWindow(
@@ -72,6 +72,9 @@ _BrowserWindow::_BrowserWindow(
     , _temporalControlWindow(temporalControlWindow)
     , _editorController(editorController)
 {
+    _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
+    _downloadProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
+
     auto& settings = GlobalSettings::get();
     _currentWorkspace.resourceType = settings.getInt("windows.browser.resource type", _currentWorkspace.resourceType);
     _currentWorkspace.workspaceType = settings.getInt("windows.browser.workspace type", _currentWorkspace.workspaceType);
@@ -163,8 +166,35 @@ BrowserCache& _BrowserWindow::getSimulationCache()
 
 void _BrowserWindow::refreshIntern(bool withRetry)
 {
-    _pendingRefreshRequestIds.emplace_back(_persisterController->scheduleGetNetworkResources(
-        SenderInfo{.senderId = BrowserSenderId, .wishResultData = true, .wishErrorInfo = withRetry}, GetNetworkResourcesRequestData()));
+    _refreshProcessor->executeTask(
+        [&](auto const& senderId) {
+            return _persisterController->scheduleGetNetworkResources(
+                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = withRetry}, GetNetworkResourcesRequestData());
+        },
+        [&](auto const& requestId) {
+            auto data = _persisterController->fetchGetNetworkResourcesData(requestId);
+            _userTOs = data.userTOs;
+            _ownEmojiTypeBySimId = data.emojiTypeByResourceId;
+
+            for (auto& [workspaceId, workspace] : _workspaces) {
+                workspace.rawTOs.clear();
+                auto userName = NetworkService::getLoggedInUserName().value_or("");
+                for (auto const& rawTO : data.resourceTOs) {
+                    if (rawTO->resourceType == workspaceId.resourceType) {
+                        //public user items should also be visible in private workspace
+                        if ((workspaceId.workspaceType == WorkspaceType_Private && rawTO->userName == userName
+                             && (rawTO->workspaceType == WorkspaceType_Private || rawTO->workspaceType == WorkspaceType_Public))
+                            || ((workspaceId.workspaceType == WorkspaceType_Public || workspaceId.workspaceType == WorkspaceType_AlienProject)
+                                && rawTO->workspaceType == workspaceId.workspaceType)) {
+                            workspace.rawTOs.emplace_back(rawTO);
+                        }
+                    }
+                }
+                createTreeTOs(workspace);
+            }
+            sortUserList();
+        },
+        [](auto const& errors) { MessageDialog::get().information("Error", errors); });
 }
 
 void _BrowserWindow::processIntern()
@@ -1170,7 +1200,7 @@ bool _BrowserWindow::processDetailButton()
 
 void _BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
 {
-    if (!_pendingRefreshRequestIds.empty()) {
+    if (_refreshProcessor->pendingTasks()) {
         auto color = ImColor(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
         color.Value.w = 0.5f;
         auto size = ImGui::GetItemRectSize();
@@ -1194,45 +1224,7 @@ void _BrowserWindow::processActivated()
 
 void _BrowserWindow::processPendingRequestIds()
 {
-    if (_pendingRefreshRequestIds.empty()) {
-        return;
-    }
-    std::vector<PersisterRequestId> newPendingRefreshRequestIds;
-    for (auto const& requestId : _pendingRefreshRequestIds) {
-        auto requestState = _persisterController->getRequestState(PersisterRequestId(requestId));
-        if (requestState == PersisterRequestState::Finished) {
-            auto data = _persisterController->fetchGetNetworkResourcesData(requestId);
-            _userTOs = data.userTOs;
-            _ownEmojiTypeBySimId = data.emojiTypeByResourceId;
-
-            for (auto& [workspaceId, workspace] : _workspaces) {
-                workspace.rawTOs.clear();
-                auto userName = NetworkService::getLoggedInUserName().value_or("");
-                for (auto const& rawTO : data.resourceTOs) {
-                    if (rawTO->resourceType == workspaceId.resourceType) {
-                        //public user items should also be visible in private workspace
-                        if ((workspaceId.workspaceType == WorkspaceType_Private && rawTO->userName == userName
-                             && (rawTO->workspaceType == WorkspaceType_Private || rawTO->workspaceType == WorkspaceType_Public))
-                            || ((workspaceId.workspaceType == WorkspaceType_Public || workspaceId.workspaceType == WorkspaceType_AlienProject)
-                                && rawTO->workspaceType == workspaceId.workspaceType)) {
-                            workspace.rawTOs.emplace_back(rawTO);
-                        }
-                    }
-                }
-                createTreeTOs(workspace);
-            }
-            sortUserList();
-        }
-        if (requestState == PersisterRequestState::InQueue || requestState == PersisterRequestState::InProgress) {
-            newPendingRefreshRequestIds.emplace_back(requestId);
-        }
-    }
-    _pendingRefreshRequestIds = newPendingRefreshRequestIds;
-
-    auto criticalErrors = _persisterController->fetchAllErrorInfos(SenderId{BrowserSenderId});
-    if (!criticalErrors.empty()) {
-        MessageDialog::get().information("Error", criticalErrors);
-    }
+    _refreshProcessor->process();
 }
 
 void _BrowserWindow::createTreeTOs(Workspace& workspace)
