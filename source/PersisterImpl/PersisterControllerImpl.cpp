@@ -3,7 +3,6 @@
 #include "EngineInterface/DeserializedSimulation.h"
 #include "EngineInterface/SimulationController.h"
 
-#include "PersisterWorker.h"
 #include "PersisterRequestResult.h"
 
 _PersisterControllerImpl::~_PersisterControllerImpl()
@@ -59,50 +58,42 @@ PersisterErrorInfo _PersisterControllerImpl::fetchError(PersisterRequestId const
 
 PersisterRequestId _PersisterControllerImpl::scheduleSaveSimulationToFile(SenderInfo const& senderInfo, SaveSimulationRequestData const& data)
 {
-    auto requestId = generateNewJobId();
-    auto saveToFileRequest = std::make_shared<_SaveToFileRequest>(requestId, senderInfo, data);
-
-    _worker->addRequest(saveToFileRequest);
-
-    return requestId;
+    return scheduleRequest<_SaveToFileRequest>(senderInfo, data);
 }
 
 SavedSimulationResultData _PersisterControllerImpl::fetchSavedSimulationData(PersisterRequestId const& id)
 {
-    auto requestResult = std::dynamic_pointer_cast<_SaveToFileRequestResult>(_worker->fetchJobResult(id));
-    return requestResult->getData();
+    return fetchData<_SaveToFileRequestResult, SavedSimulationResultData>(id);
 }
 
 PersisterRequestId _PersisterControllerImpl::scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data)
 {
-    auto requestId = generateNewJobId();
-    auto loadFromFileRequest = std::make_shared<_ReadFromFileRequest>(requestId, senderInfo, data);
-
-    _worker->addRequest(loadFromFileRequest);
-
-    return requestId;
+    return scheduleRequest<_ReadFromFileRequest>(senderInfo, data);
 }
 
 ReadSimulationResultData _PersisterControllerImpl::fetchReadSimulationData(PersisterRequestId const& id)
 {
-    auto requestResult = std::dynamic_pointer_cast<_ReadFromFileRequestResult>(_worker->fetchJobResult(id));
-    return requestResult->getData();
+    return fetchData<_ReadFromFileRequestResult, ReadSimulationResultData>(id);
+}
+
+PersisterRequestId _PersisterControllerImpl::scheduleLogin(SenderInfo const& senderInfo, LoginRequestData const& data)
+{
+    return scheduleRequest<_LoginRequest>(senderInfo, data);
+}
+
+LoginResultData _PersisterControllerImpl::fetchLoginData(PersisterRequestId const& id)
+{
+    return fetchData<_LoginRequestResult, LoginResultData>(id);
 }
 
 PersisterRequestId _PersisterControllerImpl::scheduleGetNetworkResources(SenderInfo const& senderInfo, GetNetworkResourcesRequestData const& data)
 {
-    auto requestId = generateNewJobId();
-    auto getNetworkResourcesRequest = std::make_shared<_GetNetworkResourcesRequest>(requestId, senderInfo, data);
-
-    _worker->addRequest(getNetworkResourcesRequest);
-
-    return requestId;
+    return scheduleRequest<_GetNetworkResourcesRequest>(senderInfo, data);
 }
 
 GetNetworkResourcesResultData _PersisterControllerImpl::fetchGetNetworkResourcesData(PersisterRequestId const& id)
 {
-    auto requestResult = std::dynamic_pointer_cast<_GetNetworkResourcesRequestResult>(_worker->fetchJobResult(id));
-    return requestResult->getData();
+    return fetchData<_GetNetworkResourcesRequestResult, GetNetworkResourcesResultData>(id);
 }
 
 PersisterRequestId _PersisterControllerImpl::generateNewJobId()

@@ -10,7 +10,7 @@
 using LoginErrorCode = int;
 enum LoginErrorCode_
 {
-    LoginErrorCode_UnconfirmedUser,
+    LoginErrorCode_UnknownUser,
     LoginErrorCode_Other
 };
 

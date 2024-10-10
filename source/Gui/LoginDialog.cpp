@@ -14,47 +14,28 @@
 #include "ActivateUserDialog.h"
 #include "StyleRepository.h"
 #include "HelpStrings.h"
+#include "LoginController.h"
 
 _LoginDialog::_LoginDialog(
     SimulationController const& simController,
+    PersisterController const& persisterController,
     BrowserWindow const& browserWindow,
     CreateUserDialog const& createUserDialog,
     ActivateUserDialog const& activateUserDialog,
     ResetPasswordDialog const& resetPasswordDialog)
     : _AlienDialog("Login")
     , _simController(simController)
+    , _persisterController(persisterController)
     , _browserWindow(browserWindow)
     , _createUserDialog(createUserDialog)
     , _activateUserDialog(activateUserDialog)
     , _resetPasswordDialog(resetPasswordDialog)
 
 {
-    auto& settings = GlobalSettings::getInstance();
-    _remember = settings.getBool("dialogs.login.remember", _remember);
-    _shareGpuInfo = settings.getBool("dialogs.login.share gpu info", _shareGpuInfo);
-
-    if (_remember) {
-        _userName = settings.getString("dialogs.login.user name", "");
-        _password = settings.getString("dialogs.login.password", "");
-        if (!_userName.empty()) {
-            LoginErrorCode errorCode;
-            if (!NetworkService::login(errorCode, _userName, _password, getUserInfo())) {
-                if (errorCode != LoginErrorCode_UnconfirmedUser) {
-                    MessageDialog::getInstance().information("Error", "Login failed.");
-                }
-            }
-        }
-    }
 }
 
 _LoginDialog::~_LoginDialog()
 {
-    saveSettings();
-}
-
-bool _LoginDialog::isShareGpuInfo() const
-{
-    return _shareGpuInfo;
 }
 
 void _LoginDialog::processIntern()
@@ -74,12 +55,18 @@ void _LoginDialog::processIntern()
     AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Password").password(true).textWidth(0), _password);
     AlienImGui::Separator();
     ImGui::Spacing();
-    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Remember").tooltip(Const::LoginRememberTooltip), _remember);
+
+    auto remember = LoginController::get().isRemember();
+    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Remember").tooltip(Const::LoginRememberTooltip), remember);
+    LoginController::get().setRemember(remember);
+
+    auto shareGpuInfo = LoginController::get().shareGpuInfo();
     AlienImGui::ToggleButton(
         AlienImGui::ToggleButtonParameters()
             .name("Share GPU model info")
             .tooltip(Const::LoginShareGpuInfoTooltip1 + _simController->getGpuName() + "\n" + Const::LoginShareGpuInfoTooltip2),
-        _shareGpuInfo);
+        shareGpuInfo);
+    LoginController::get().setShareGpuInfo(shareGpuInfo);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienImGui::Separator();
@@ -88,7 +75,7 @@ void _LoginDialog::processIntern()
     if (AlienImGui::Button("Login")) {
         close();
         onLogin();
-        if (!_remember) {
+        if (!remember) {
             _userName.clear();
             _password.clear();
         }
@@ -103,7 +90,7 @@ void _LoginDialog::processIntern()
     ImGui::BeginDisabled(_userName.empty() || _password.empty());
     if (AlienImGui::Button("Create user")) {
         close();
-        _createUserDialog->open(_userName, _password, getUserInfo());
+        _createUserDialog->open(_userName, _password, LoginController::get().getUserInfo());
     }
     ImGui::EndDisabled();
 
@@ -111,7 +98,7 @@ void _LoginDialog::processIntern()
     ImGui::BeginDisabled(_userName.empty());
     if (AlienImGui::Button("Reset password")) {
         close();
-        _resetPasswordDialog->open(_userName, getUserInfo());
+        _resetPasswordDialog->open(_userName, LoginController::get().getUserInfo());
     }
     ImGui::EndDisabled();
 
@@ -128,11 +115,11 @@ void _LoginDialog::onLogin()
 {
     LoginErrorCode errorCode;
 
-    auto userInfo = getUserInfo();
+    auto userInfo = LoginController::get().getUserInfo();
 
     if (!NetworkService::login(errorCode, _userName, _password, userInfo)) {
         switch (errorCode) {
-        case LoginErrorCode_UnconfirmedUser: {
+        case LoginErrorCode_UnknownUser: {
             _activateUserDialog->open(_userName, _password, userInfo);
         } break;
         default: {
@@ -142,25 +129,5 @@ void _LoginDialog::onLogin()
         return;
     }
     _browserWindow->onRefresh();
-    saveSettings();
-}
-
-void _LoginDialog::saveSettings()
-{
-    auto& settings = GlobalSettings::getInstance();
-    settings.setBool("dialogs.login.remember", _remember);
-    settings.setBool("dialogs.login.share gpu info", _shareGpuInfo);
-    if (_remember) {
-        settings.setString("dialogs.login.user name", _userName);
-        settings.setString("dialogs.login.password", _password);
-    }
-}
-
-UserInfo _LoginDialog::getUserInfo()
-{
-    UserInfo result;
-    if (_shareGpuInfo) {
-        result.gpu = _simController->getGpuName();
-    }
-    return result;
+    LoginController::get().saveSettings();
 }

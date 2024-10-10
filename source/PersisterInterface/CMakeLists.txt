@@ -3,6 +3,8 @@ add_library(PersisterInterface
     Definitions.h
     GetNetworkResourcesRequestData.h
     GetNetworkResourcesResultData.h
+    LoginRequestData.h
+    LoginResultData.h
     PersisterController.cpp
     PersisterController.h
     PersisterErrorInfo.h

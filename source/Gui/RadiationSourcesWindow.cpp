@@ -10,7 +10,7 @@
 
 namespace
 {
-    auto const RightColumnWidth = 120.0f;
+    auto const RightColumnWidth = 140.0f;
 }
 
 _RadiationSourcesWindow::_RadiationSourcesWindow(SimulationController const& simController, SimulationInteractionController const& simInteractionController)
@@ -71,8 +71,12 @@ bool _RadiationSourcesWindow::processTab(int index)
     snprintf(name, IM_ARRAYSIZE(name), "Source %01d", index + 1);
     if (ImGui::BeginTabItem(name, &isOpen, ImGuiTabItemFlags_None)) {
 
-        if (AlienImGui::Combo(
-                AlienImGui::ComboParameters().name("Shape").values({"Circular", "Rectangular"}).textWidth(RightColumnWidth).defaultValue(origSource.shapeType),
+        if (AlienImGui::Switcher(
+                AlienImGui::SwitcherParameters()
+                    .name("Shape")
+                    .values({"Circular", "Rectangular"})
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(origSource.shapeType),
                 source.shapeType)) {
             if (source.shapeType == RadiationSourceShapeType_Circular) {
                 source.shapeData.circularRadiationSource.radius = 1;
@@ -87,7 +91,7 @@ bool _RadiationSourcesWindow::processTab(int index)
         auto getMousePickerPositionFunc = [&]() { return _simInteractionController->getPositionSelectionData(); };
         AlienImGui::SliderFloat2(
             AlienImGui::SliderFloat2Parameters()
-                .name("Position")
+                .name("Position (x,y)")
                 .textWidth(RightColumnWidth)
                 .min({0, 0})
                 .max(toRealVector2D(worldSize))
@@ -100,7 +104,7 @@ bool _RadiationSourcesWindow::processTab(int index)
             source.posY);
         AlienImGui::SliderFloat2(
             AlienImGui::SliderFloat2Parameters()
-                .name("Velocity")
+                .name("Velocity (x,y)")
                 .textWidth(RightColumnWidth)
                 .min({-4.0f, -4.0f})
                 .max({4.0f, 4.0f})
@@ -108,18 +112,6 @@ bool _RadiationSourcesWindow::processTab(int index)
                 .format("%.2f"),
             source.velX,
             source.velY);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Angle")
-                .textWidth(RightColumnWidth)
-                .min(-180.0f)
-                .max(180.0f)
-                .defaultEnabledValue(&origSource.useAngle)
-                .defaultValue(&origSource.angle)
-                .disabledValue(&source.angle)
-                .format("%.1f"),
-            &source.angle,
-            &source.useAngle);
         if (source.shapeType == RadiationSourceShapeType_Circular) {
             auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y));
             AlienImGui::SliderFloat(
@@ -133,25 +125,29 @@ bool _RadiationSourcesWindow::processTab(int index)
                 &source.shapeData.circularRadiationSource.radius);
         }
         if (source.shapeType == RadiationSourceShapeType_Rectangular) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Width")
+            AlienImGui::SliderFloat2(
+                AlienImGui::SliderFloat2Parameters()
+                    .name("Size (x,y)")
                     .textWidth(RightColumnWidth)
-                    .min(1)
-                    .max(toFloat(worldSize.x))
-                    .format("%.0f")
-                    .defaultValue(&origSource.shapeData.rectangularRadiationSource.width),
-                &source.shapeData.rectangularRadiationSource.width);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Height")
-                    .textWidth(RightColumnWidth)
-                    .min(1)
-                    .max(toFloat(worldSize.y))
-                    .format("%.0f")
-                    .defaultValue(&origSource.shapeData.rectangularRadiationSource.height),
-                &source.shapeData.rectangularRadiationSource.height);
+                    .min({0, 0})
+                    .max({toFloat(worldSize.x), toFloat(worldSize.y)})
+                    .defaultValue(RealVector2D{origSource.shapeData.rectangularRadiationSource.height, origSource.shapeData.rectangularRadiationSource.height})
+                    .format("%.1f"),
+                source.shapeData.rectangularRadiationSource.width,
+                source.shapeData.rectangularRadiationSource.height);
         }
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Radiation angle")
+                .textWidth(RightColumnWidth)
+                .min(-180.0f)
+                .max(180.0f)
+                .defaultEnabledValue(&origSource.useAngle)
+                .defaultValue(&origSource.angle)
+                .disabledValue(&source.angle)
+                .format("%.1f"),
+            &source.angle,
+            &source.useAngle);
         ImGui::EndTabItem();
         validationAndCorrection(source);
     }
