@@ -15,7 +15,9 @@ add_library(PersisterInterface
     SaveSimulationRequestData.h
     SavedSimulationResultData.h
     SenderId.h
-    SenderInfo.h)
+    SenderInfo.h
+    TaskProcessor.cpp
+    TaskProcessor.h)
 
 target_link_libraries(PersisterInterface Base)
 
