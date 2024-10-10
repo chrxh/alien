@@ -6,6 +6,8 @@
 #include "PersisterInterface/LoginRequestData.h"
 #include "PersisterInterface/SenderInfo.h"
 
+#include "MessageDialog.h"
+
 namespace
 {
     auto constexpr LoginSenderId = "Login";
@@ -32,14 +34,8 @@ void LoginController::init(SimulationController const& simController, PersisterC
 
         if (!userName.empty()) {
             persisterController->scheduleLogin(
-                SenderInfo{.senderId = LoginSenderId, .wishResultData = false, .wishErrorInfo = true},
+                SenderInfo{.senderId = SenderId{LoginSenderId}, .wishResultData = false, .wishErrorInfo = true},
                 LoginRequestData{.userName = userName, .password = password, .userInfo = getUserInfo()});
-            //LoginErrorCode errorCode;
-            //if (!NetworkService::login(errorCode, _userName, _password, getUserInfo())) {
-            //    if (errorCode != LoginErrorCode_UnknownUser) {
-            //        MessageDialog::getInstance().information("Error", "Login failed.");
-            //    }
-            //}
         }
     }
 }
@@ -47,6 +43,14 @@ void LoginController::init(SimulationController const& simController, PersisterC
 void LoginController::shutdown()
 {
     saveSettings();
+}
+
+void LoginController::process()
+{
+    auto criticalErrors = _persisterController->fetchAllErrorInfos(SenderId{LoginSenderId});
+    if (!criticalErrors.empty()) {
+        MessageDialog::getInstance().information("Login failed", criticalErrors);
+    }
 }
 
 void LoginController::saveSettings()

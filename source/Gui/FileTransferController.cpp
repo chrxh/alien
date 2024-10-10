@@ -1,7 +1,5 @@
 #include "FileTransferController.h"
 
-#include <boost/algorithm/string.hpp>
-
 #include <ImFileDialog.h>
 
 #include "EngineInterface/SimulationController.h"
@@ -113,10 +111,6 @@ void FileTransferController::process()
 
     auto criticalErrors = _persisterController->fetchAllErrorInfos(SenderId{FileTransferSenderId});
     if (!criticalErrors.empty()) {
-        std::vector<std::string> errorMessages;
-        for (auto const& error : criticalErrors) {
-            errorMessages.emplace_back(error.message);
-        }
-        MessageDialog::getInstance().information("Error", boost::join(errorMessages, "\n\n"));
+        MessageDialog::getInstance().information("Error", criticalErrors);
     }
 }

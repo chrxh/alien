@@ -1,6 +1,8 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
+#include "PersisterInterface/PersisterErrorInfo.h"
+
 #include "Definitions.h"
 
 class MessageDialog
@@ -11,6 +13,7 @@ public:
     void process();
 
     void information(std::string const& title, std::string const& message);
+    void information(std::string const& title, std::vector<PersisterErrorInfo> const& errors);
     void yesNo(std::string const& title, std::string const& message, std::function<void()> const& yesFunction);
 
 private:

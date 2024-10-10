@@ -11,6 +11,8 @@ public:
     void init(SimulationController const& simController, PersisterController const& persisterController);
     void shutdown();
 
+    void process();
+
     void saveSettings();
 
     bool shareGpuInfo() const;

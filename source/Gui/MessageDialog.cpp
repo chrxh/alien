@@ -1,5 +1,7 @@
 #include "MessageDialog.h"
 
+#include <boost/algorithm/string.hpp>
+
 #include <imgui.h>
 
 #include "Base/LoggingService.h"
@@ -35,6 +37,15 @@ void MessageDialog::information(std::string const& title, std::string const& mes
     _message = message;
     _dialogType = DialogType::Information;
     log(Priority::Important, "message dialog showing: '" + message + "'");
+}
+
+void MessageDialog::information(std::string const& title, std::vector<PersisterErrorInfo> const& errors)
+{
+    std::vector<std::string> errorMessages;
+    for (auto const& error : errors) {
+        errorMessages.emplace_back(error.message);
+    }
+    MessageDialog::getInstance().information(title, boost::join(errorMessages, "\n\n"));
 }
 
 void MessageDialog::yesNo(std::string const& title, std::string const& message, std::function<void()> const& yesFunction)

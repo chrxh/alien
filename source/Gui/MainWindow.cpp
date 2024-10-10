@@ -763,6 +763,7 @@ void _MainWindow::processControllers()
     OverlayMessageController::get().process();
     DelayedExecutionController::getInstance().process();
     FileTransferController::get().process();
+    LoginController::get().process();
 }
 
 void _MainWindow::onRunSimulation()
