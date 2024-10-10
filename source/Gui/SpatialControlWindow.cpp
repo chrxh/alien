@@ -19,13 +19,13 @@ _SpatialControlWindow::_SpatialControlWindow(SimulationController const& simCont
 {
     _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simController, temporalControlWindow);
 
-    auto& settings = GlobalSettings::getInstance();
+    auto& settings = GlobalSettings::get();
     Viewport::setZoomSensitivity(settings.getFloat("windows.spatial control.zoom sensitivity factor", Viewport::getZoomSensitivity()));
 }
 
 _SpatialControlWindow::~_SpatialControlWindow()
 {
-    auto& settings = GlobalSettings::getInstance();
+    auto& settings = GlobalSettings::get();
     settings.setFloat("windows.spatial control.zoom sensitivity", Viewport::getZoomSensitivity());
 }
 

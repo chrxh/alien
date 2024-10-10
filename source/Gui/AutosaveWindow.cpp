@@ -21,24 +21,24 @@ _AutosaveWindow::_AutosaveWindow(SimulationController const& simController, Pers
     , _simController(simController)
     , _persisterController(persisterController)
 {
-    _settingsOpen = GlobalSettings::getInstance().getBool("windows.autosave.settings.open", _settingsOpen);
-    _settingsHeight = GlobalSettings::getInstance().getFloat("windows.autosave.settings.height", _settingsHeight);
-    _autosaveEnabled = GlobalSettings::getInstance().getBool("windows.autosave.enabled", _autosaveEnabled);
-    _origAutosaveInterval = GlobalSettings::getInstance().getInt("windows.autosave.interval", _origAutosaveInterval);
+    _settingsOpen = GlobalSettings::get().getBool("windows.autosave.settings.open", _settingsOpen);
+    _settingsHeight = GlobalSettings::get().getFloat("windows.autosave.settings.height", _settingsHeight);
+    _autosaveEnabled = GlobalSettings::get().getBool("windows.autosave.enabled", _autosaveEnabled);
+    _origAutosaveInterval = GlobalSettings::get().getInt("windows.autosave.interval", _origAutosaveInterval);
     _autosaveInterval = _origAutosaveInterval;
-    _origSaveMode = GlobalSettings::getInstance().getInt("windows.autosave.mode", _origSaveMode);
+    _origSaveMode = GlobalSettings::get().getInt("windows.autosave.mode", _origSaveMode);
     _saveMode = _origSaveMode;
-    _numberOfFiles = GlobalSettings::getInstance().getInt("windows.autosave.number of files", _origNumberOfFiles);
+    _numberOfFiles = GlobalSettings::get().getInt("windows.autosave.number of files", _origNumberOfFiles);
 }
 
 _AutosaveWindow::~_AutosaveWindow()
 {
-    GlobalSettings::getInstance().setBool("windows.autosave.settings.open", _settingsOpen);
-    GlobalSettings::getInstance().setFloat("windows.autosave.settings.height", _settingsHeight);
-    GlobalSettings::getInstance().setBool("windows.autosave.enabled", _autosaveEnabled);
-    GlobalSettings::getInstance().setInt("windows.autosave.interval", _autosaveInterval);
-    GlobalSettings::getInstance().setInt("windows.autosave.mode", _saveMode);
-    GlobalSettings::getInstance().setInt("windows.autosave.number of files", _numberOfFiles);
+    GlobalSettings::get().setBool("windows.autosave.settings.open", _settingsOpen);
+    GlobalSettings::get().setFloat("windows.autosave.settings.height", _settingsHeight);
+    GlobalSettings::get().setBool("windows.autosave.enabled", _autosaveEnabled);
+    GlobalSettings::get().setInt("windows.autosave.interval", _autosaveInterval);
+    GlobalSettings::get().setInt("windows.autosave.mode", _saveMode);
+    GlobalSettings::get().setInt("windows.autosave.number of files", _numberOfFiles);
 }
 
 void _AutosaveWindow::processIntern()

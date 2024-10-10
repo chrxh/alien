@@ -21,12 +21,12 @@ _AutosaveController::_AutosaveController(SimulationController const& simControll
     : _simController(simController)
 {
     _startTimePoint = std::chrono::steady_clock::now();
-    _on = GlobalSettings::getInstance().getBool("controllers.auto save.active", true);
+    _on = GlobalSettings::get().getBool("controllers.auto save.active", true);
 }
 
 _AutosaveController::~_AutosaveController()
 {
-    GlobalSettings::getInstance().setBool("controllers.auto save.active", _on);
+    GlobalSettings::get().setBool("controllers.auto save.active", _on);
 }
 
 void _AutosaveController::shutdown()

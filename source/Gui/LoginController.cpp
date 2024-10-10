@@ -26,7 +26,7 @@ void LoginController::init(
     _activateUserDialog = activateUserDialog;
     _browserWindow = browserWindow;
 
-    auto& settings = GlobalSettings::getInstance();
+    auto& settings = GlobalSettings::get();
     _remember = settings.getBool("controller.login.remember", _remember);
     _shareGpuInfo = settings.getBool("controller.login.share gpu info", _shareGpuInfo);
 
@@ -63,7 +63,7 @@ void LoginController::process()
         if (state == PersisterRequestState::Finished) {
             auto const& data = _persisterController->fetchLoginData(requestId);
             if (data.unknownUser) {
-                auto& settings = GlobalSettings::getInstance();
+                auto& settings = GlobalSettings::get();
                 auto userName = settings.getString("dialogs.login.user name", "");
                 auto password = settings.getString("dialogs.login.password", "");
                 _activateUserDialog->open(userName, password, getUserInfo());
@@ -85,7 +85,7 @@ void LoginController::process()
 
 void LoginController::saveSettings()
 {
-    auto& settings = GlobalSettings::getInstance();
+    auto& settings = GlobalSettings::get();
     settings.setBool("controller.login.remember", _remember);
     settings.setBool("controller.login.share gpu info", _shareGpuInfo);
     if (_remember) {

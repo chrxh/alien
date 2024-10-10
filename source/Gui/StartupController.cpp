@@ -179,7 +179,7 @@ void _StartupController::processLoadingScreen()
         textColor,
         versionString.c_str());
 
-    if (GlobalSettings::getInstance().isDebugMode()) {
+    if (GlobalSettings::get().isDebugMode()) {
         drawList->AddText(
             styleRep.getReefMediumFont(),
             scale(24.0f),

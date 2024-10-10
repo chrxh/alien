@@ -72,7 +72,7 @@ _BrowserWindow::_BrowserWindow(
     , _temporalControlWindow(temporalControlWindow)
     , _editorController(editorController)
 {
-    auto& settings = GlobalSettings::getInstance();
+    auto& settings = GlobalSettings::get();
     _currentWorkspace.resourceType = settings.getInt("windows.browser.resource type", _currentWorkspace.resourceType);
     _currentWorkspace.workspaceType = settings.getInt("windows.browser.workspace type", _currentWorkspace.workspaceType);
     _userTableWidth = settings.getFloat("windows.browser.user table width", scale(UserTableWidth));
@@ -104,7 +104,7 @@ namespace
 
 _BrowserWindow::~_BrowserWindow()
 {
-    auto& settings = GlobalSettings::getInstance();
+    auto& settings = GlobalSettings::get();
     settings.setInt("windows.browser.resource type", _currentWorkspace.resourceType);
     settings.setInt("windows.browser.workspace type", _currentWorkspace.workspaceType);
     settings.setBool("windows.browser.first start", false);
@@ -129,13 +129,13 @@ void _BrowserWindow::registerCyclicReferences(
     _editSimulationDialog = editSimulationDialog;
     _genomeEditorWindow = genomeEditorWindow;
 
-    auto firstStart = GlobalSettings::getInstance().getBool("windows.browser.first start", true);
+    auto firstStart = GlobalSettings::get().getBool("windows.browser.first start", true);
     refreshIntern(firstStart);
 
     for (auto& [workspaceId, workspace] : _workspaces) {
         auto initialCollapsedSimulationFolders =
             NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::getFolderNames(workspace.rawTOs));
-        auto collapsedSimulationFolders = GlobalSettings::getInstance().getStringVector(
+        auto collapsedSimulationFolders = GlobalSettings::get().getStringVector(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
             initialCollapsedSimulationFolders);

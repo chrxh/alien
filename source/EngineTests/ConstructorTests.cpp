@@ -35,7 +35,7 @@ protected:
         std::vector<uint8_t> result;
         result.reserve(size);
         for (int i = 0; i < size; ++i) {
-            result.emplace_back(static_cast<uint8_t>(NumberGenerator::getInstance().getRandomInt(256)));
+            result.emplace_back(static_cast<uint8_t>(NumberGenerator::get().getRandomInt(256)));
         }
         return result;
     }

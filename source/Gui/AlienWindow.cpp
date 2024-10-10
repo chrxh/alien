@@ -11,12 +11,12 @@ _AlienWindow::_AlienWindow(std::string const& title, std::string const& settings
     : _title(title)
     , _settingsNode(settingsNode)
 {
-    _on = GlobalSettings::getInstance().getBool(settingsNode + ".active", defaultOn);
+    _on = GlobalSettings::get().getBool(settingsNode + ".active", defaultOn);
 }
 
 _AlienWindow::~_AlienWindow()
 {
-    GlobalSettings::getInstance().setBool(_settingsNode + ".active", _on);
+    GlobalSettings::get().setBool(_settingsNode + ".active", _on);
 }
 
 void _AlienWindow::process()

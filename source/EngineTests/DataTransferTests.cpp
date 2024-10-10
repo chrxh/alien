@@ -104,7 +104,7 @@ TEST_F(DataTransferTests, cellCluster)
 
 TEST_F(DataTransferTests, largeData)
 {
-    auto& numberGen = NumberGenerator::getInstance();
+    auto& numberGen = NumberGenerator::get();
     auto addCellAndParticles = [&](DataDescription& data) {
         data.addCell(CellDescription()
                          .setId(numberGen.getId())

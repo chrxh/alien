@@ -3,6 +3,7 @@
 #include <functional>
 #include <filesystem>
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
 

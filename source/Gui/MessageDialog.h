@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "PersisterInterface/PersisterErrorInfo.h"
 

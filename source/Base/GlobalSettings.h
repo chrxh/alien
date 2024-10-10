@@ -9,13 +9,12 @@ struct GlobalSettingsImpl;
 class GlobalSettings
 {
 public:
-    static GlobalSettings& getInstance();
+    static GlobalSettings& get();
+    GlobalSettings(GlobalSettings const&) = delete;
+    void operator=(GlobalSettings const&) = delete;
 
     bool isDebugMode() const;
     void setDebugMode(bool value) const;
-
-    GlobalSettings(GlobalSettings const&) = delete;
-    void operator=(GlobalSettings const&) = delete;
 
     bool getBool(std::string const& key, bool defaultValue);
     void setBool(std::string const& key, bool value);
