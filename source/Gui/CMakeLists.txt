@@ -62,6 +62,8 @@ PUBLIC
     InspectorWindow.h
     LastSessionBrowserData.cpp
     LastSessionBrowserData.h
+    LoginController.cpp
+    LoginController.h
     LoginDialog.cpp
     LoginDialog.h
     LogWindow.cpp

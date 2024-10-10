@@ -8,6 +8,8 @@
 #include "Definitions.h"
 #include "GetNetworkResourcesRequestData.h"
 #include "GetNetworkResourcesResultData.h"
+#include "LoginRequestData.h"
+#include "LoginResultData.h"
 #include "ReadSimulationResultData.h"
 #include "ReadSimulationRequestData.h"
 #include "PersisterErrorInfo.h"
@@ -39,6 +41,9 @@ public:
 
     virtual PersisterRequestId scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data) = 0;
     virtual ReadSimulationResultData fetchReadSimulationData(PersisterRequestId const& id) = 0;
+
+    virtual PersisterRequestId scheduleLogin(SenderInfo const& senderInfo, LoginRequestData const& data) = 0;
+    virtual LoginResultData fetchLoginData(PersisterRequestId const& id) = 0;
 
     virtual PersisterRequestId scheduleGetNetworkResources(SenderInfo const& senderInfo, GetNetworkResourcesRequestData const& data) = 0;
     virtual GetNetworkResourcesResultData fetchGetNetworkResourcesData(PersisterRequestId const& id) = 0;

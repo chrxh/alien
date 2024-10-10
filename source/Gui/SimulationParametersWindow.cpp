@@ -1666,7 +1666,7 @@ bool _SimulationParametersWindow::processSpot(int index)
 
                 AlienImGui::SliderFloat2(
                     AlienImGui::SliderFloat2Parameters()
-                        .name("Position")
+                        .name("Position (x,y)")
                         .textWidth(RightColumnWidth)
                         .min({0, 0})
                         .max(toRealVector2D(worldSize))
@@ -1679,7 +1679,7 @@ bool _SimulationParametersWindow::processSpot(int index)
                     spot.posY);
                 AlienImGui::SliderFloat2(
                     AlienImGui::SliderFloat2Parameters()
-                        .name("Velocity")
+                        .name("Velocity (x,y)")
                         .textWidth(RightColumnWidth)
                         .min({-4.0f, -4.0f})
                         .max({4.0f, 4.0f})
@@ -1700,24 +1700,16 @@ bool _SimulationParametersWindow::processSpot(int index)
                         &spot.shapeData.circularSpot.coreRadius);
                 }
                 if (spot.shapeType == SpotShapeType_Rectangular) {
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name("Core width")
+                    AlienImGui::SliderFloat2(
+                        AlienImGui::SliderFloat2Parameters()
+                            .name("Size (x,y)")
                             .textWidth(RightColumnWidth)
-                            .min(0)
-                            .max(worldSize.x)
-                            .defaultValue(&origSpot.shapeData.rectangularSpot.width)
+                            .min({0, 0})
+                            .max({toFloat(worldSize.x), toFloat(worldSize.y)})
+                            .defaultValue(RealVector2D{origSpot.shapeData.rectangularSpot.width, origSpot.shapeData.rectangularSpot.height})
                             .format("%.1f"),
-                        &spot.shapeData.rectangularSpot.width);
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name("Core height")
-                            .textWidth(RightColumnWidth)
-                            .min(0)
-                            .max(worldSize.y)
-                            .defaultValue(&origSpot.shapeData.rectangularSpot.height)
-                            .format("%.1f"),
-                        &spot.shapeData.rectangularSpot.height);
+                        spot.shapeData.rectangularSpot.width,
+                        spot.shapeData.rectangularSpot.height);
                 }
 
                 AlienImGui::SliderFloat(

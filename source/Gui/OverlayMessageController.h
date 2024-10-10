@@ -9,7 +9,7 @@
 class OverlayMessageController
 {
 public:
-    static OverlayMessageController& getInstance();
+    static OverlayMessageController& get();
 
     void init(PersisterController const& persisterController);
     void process();
@@ -37,5 +37,5 @@ private:
 
 inline void printOverlayMessage(std::string const& message, bool withLightning = false)
 {
-    OverlayMessageController::getInstance().show(message, withLightning);
+    OverlayMessageController::get().show(message, withLightning);
 }

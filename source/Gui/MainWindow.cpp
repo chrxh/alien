@@ -75,6 +75,7 @@
 #include "ExitDialog.h"
 #include "AutosaveWindow.h"
 #include "FileTransferController.h"
+#include "LoginController.h"
 
 namespace
 {
@@ -122,6 +123,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
 
     //init controllers, windows and dialogs
     Viewport::init(_simController);
+    _persisterController->init(_simController);
     _uiController = std::make_shared<_UiController>();
     _autosaveController = std::make_shared<_AutosaveController>(_simController);
     _editorController =
@@ -151,7 +153,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simController, _browserWindow);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
-    _loginDialog = std::make_shared<_LoginDialog>(_simController, _browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
+    _loginDialog = std::make_shared<_LoginDialog>(_simController, _persisterController, _browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(
         _browserWindow, _loginDialog, _simController, _editorController->getGenomeEditorWindow());
     _editSimulationDialog = std::make_shared<_EditSimulationDialog>(_browserWindow);
@@ -160,9 +162,9 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_simController);
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
     _autosaveWindow = std::make_shared<_AutosaveWindow>(_simController, _persisterController);
-    _persisterController->init(_simController);
-    OverlayMessageController::getInstance().init(_persisterController);
+    OverlayMessageController::get().init(_persisterController);
     FileTransferController::get().init(_persisterController, _simController, _temporalControlWindow);
+    LoginController::get().init(_simController, _persisterController);
 
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
@@ -230,6 +232,7 @@ void _MainWindow::mainLoop()
 
 void _MainWindow::shutdown()
 {
+    LoginController::get().shutdown();
     WindowController::shutdown();
     _autosaveController->shutdown();
 
@@ -286,7 +289,7 @@ char const* _MainWindow::initGlfwAndReturnGlslVersion()
 void _MainWindow::processLoadingScreen()
 {
     _startupController->process();
-    OverlayMessageController::getInstance().process();
+    OverlayMessageController::get().process();
 
     // render mainData
     ImGui::Render();
@@ -757,7 +760,7 @@ void _MainWindow::processControllers()
 {
     _autosaveController->process();
     _editorController->process();
-    OverlayMessageController::getInstance().process();
+    OverlayMessageController::get().process();
     DelayedExecutionController::getInstance().process();
     FileTransferController::get().process();
 }

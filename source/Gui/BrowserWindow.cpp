@@ -42,6 +42,7 @@
 #include "OverlayMessageController.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
+#include "LoginController.h"
 
 namespace
 {
@@ -468,7 +469,7 @@ void _BrowserWindow::processUserList()
                     processShortenedText(item->userName, isBoldFont);
 
                     ImGui::TableNextColumn();
-                    if (isLoggedIn && _loginDialog.lock()->isShareGpuInfo()) {
+                    if (isLoggedIn && LoginController::get().shareGpuInfo()) {
                         processShortenedText(getGpuString(item->gpu), isBoldFont);
                     }
 

@@ -18,7 +18,7 @@ namespace
     auto constexpr FadeoutLightningDuration = 1200;
 }
 
-OverlayMessageController& OverlayMessageController::getInstance()
+OverlayMessageController& OverlayMessageController::get()
 {
     static OverlayMessageController instance;
     return instance;

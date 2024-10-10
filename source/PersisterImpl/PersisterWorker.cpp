@@ -68,7 +68,7 @@ void _PersisterWorker::addRequest(PersisterRequest const& job)
     _conditionVariable.notify_all();
 }
 
-PersisterRequestResult _PersisterWorker::fetchJobResult(PersisterRequestId const& id)
+PersisterRequestResult _PersisterWorker::fetchRequestResult(PersisterRequestId const& id)
 {
     std::unique_lock uniqueLock(_jobMutex);
 
@@ -130,6 +130,9 @@ void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
         }
         if (auto const& loadFromFileRequest = std::dynamic_pointer_cast<_ReadFromFileRequest>(request)) {
             processingResult = processRequest(lock, loadFromFileRequest);
+        }
+        if (auto const& loginRequest = std::dynamic_pointer_cast<_LoginRequest>(request)) {
+            processingResult = processRequest(lock, loginRequest);
         }
         if (auto const& getNetworkResourcesRequest = std::dynamic_pointer_cast<_GetNetworkResourcesRequest>(request)) {
             processingResult = processRequest(lock, getNetworkResourcesRequest);
@@ -224,6 +227,24 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadFr
             request->getSenderInfo().senderId,
             PersisterErrorInfo{"The simulation could not be loaded because an error occurred when deserializing the data from the file."});
     }
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, LoginRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    LoginErrorCode errorCode;
+    if (!NetworkService::login(errorCode, requestData.userName, requestData.password, requestData.userInfo)) {
+        if (errorCode != LoginErrorCode_UnknownUser) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(),
+                request->getSenderInfo().senderId,
+                PersisterErrorInfo{"Login failed."});
+        }
+    }
+    return std::make_shared<_LoginRequestResult>(request->getRequestId(), LoginResultData{.unknownUser = (errorCode == LoginErrorCode_UnknownUser)});
 }
 
 _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, GetNetworkResourcesRequest const& request)

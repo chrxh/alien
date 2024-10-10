@@ -36,17 +36,17 @@ namespace Const
     ImColor const ImportantButtonActiveColor = ImColor::HSV(0.0f, 0.6f, 1.0f);
 
     ImColor const ToggleButtonColor = ImColor::HSV(0.0f, 0.0f, 0.2f);
-    ImColor const ToggleButtonHoveredColor = ImColor::HSV(0.14, 0.8, 0.5);
-    ImColor const ToggleButtonActiveColor = ImColor::HSV(0.14, 0.8, 0.7);
-    ImColor const ToggleButtonActiveHoveredColor = ImColor::HSV(0.14, 0.8, 0.8);
+    ImColor const ToggleButtonHoveredColor = ImColor::HSV(0.14f, 0.8f, 0.5f);
+    ImColor const ToggleButtonActiveColor = ImColor::HSV(0.14f, 0.8f, 0.7f);
+    ImColor const ToggleButtonActiveHoveredColor = ImColor::HSV(0.14f, 0.8f, 0.8f);
 
     ImColor const TreeNodeColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
     ImColor const TreeNodeHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
     ImColor const TreeNodeActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
-    ImColor const TreeNodeHighlightedColor = ImColor::HSV(0.54f, 0.33f, 0.45f);
-    ImColor const TreeNodeHighlightedHoveredColor = ImColor::HSV(0.5f, 0.33f, 0.55f);
-    ImColor const TreeNodeHighlightedActiveColor = ImColor::HSV(0.5f, 0.33f, 0.65f);
-
+    ImColor const TreeNodeHighlightedColor = ImColor::HSV(0.0, 0.0f, 0.15f);
+    ImColor const TreeNodeHighlightedHoveredColor = ImColor::HSV(0.0f, 0.0f, 0.25f);
+    ImColor const TreeNodeHighlightedActiveColor = ImColor::HSV(0.0f, 0.0f, 0.35f);
+    
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 
     ImColor const HeadlineColor = ImColor::HSV(0.4f, 0.4f, 0.8f);
