@@ -68,7 +68,7 @@ void _TemporalControlWindow::processTpsInfo()
 {
     ImGui::Text("Time steps per second");
 
-    ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
+    ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor /*0xffa07050*/);
     ImGui::TextUnformatted(StringHelper::format(_simController->getTps(), 1).c_str());
     ImGui::PopStyleColor();
@@ -79,7 +79,7 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
 {
     ImGui::Text("Total time steps");
 
-    ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
+    ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
     ImGui::TextUnformatted(StringHelper::format(_simController->getCurrentTimestep()).c_str());
     ImGui::PopStyleColor();
@@ -90,7 +90,7 @@ void _TemporalControlWindow::processRealTimeInfo()
 {
     ImGui::Text("Real-time");
 
-    ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
+    ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
     ImGui::TextUnformatted(StringHelper::format(_simController->getRealTime()).c_str());
     ImGui::PopStyleColor();

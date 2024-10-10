@@ -118,7 +118,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     }
 
     //init services
-    StyleRepository::getInstance().init();
+    StyleRepository::get().init();
     NetworkService::init();
 
     //init controllers, windows and dialogs
@@ -153,7 +153,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simController, _browserWindow);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
-    _loginDialog = std::make_shared<_LoginDialog>(_simController, _persisterController, _browserWindow, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
+    _loginDialog = std::make_shared<_LoginDialog>(_simController, _persisterController, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(
         _browserWindow, _loginDialog, _simController, _editorController->getGenomeEditorWindow());
     _editSimulationDialog = std::make_shared<_EditSimulationDialog>(_browserWindow);
@@ -164,7 +164,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _autosaveWindow = std::make_shared<_AutosaveWindow>(_simController, _persisterController);
     OverlayMessageController::get().init(_persisterController);
     FileTransferController::get().init(_persisterController, _simController, _temporalControlWindow);
-    LoginController::get().init(_simController, _persisterController);
+    LoginController::get().init(_simController, _persisterController, _activateUserDialog, _browserWindow);
 
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
@@ -737,8 +737,8 @@ void _MainWindow::processDialogs()
     _newPasswordDialog->process();
     _exitDialog->process();
 
-    MessageDialog::getInstance().process();
-    GenericFileDialogs::getInstance().process();
+    MessageDialog::get().process();
+    GenericFileDialogs::get().process();
 }
 
 void _MainWindow::processWindows()
@@ -761,7 +761,7 @@ void _MainWindow::processControllers()
     _autosaveController->process();
     _editorController->process();
     OverlayMessageController::get().process();
-    DelayedExecutionController::getInstance().process();
+    DelayedExecutionController::get().process();
     FileTransferController::get().process();
     LoginController::get().process();
 }

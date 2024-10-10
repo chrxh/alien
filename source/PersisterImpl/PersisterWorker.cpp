@@ -243,8 +243,11 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 request->getSenderInfo().senderId,
                 PersisterErrorInfo{"Login failed."});
         }
+        if (errorCode == LoginErrorCode_UnknownUser) {
+            return std::make_shared<_LoginRequestResult>(request->getRequestId(), LoginResultData{.unknownUser = true});
+        }
     }
-    return std::make_shared<_LoginRequestResult>(request->getRequestId(), LoginResultData{.unknownUser = (errorCode == LoginErrorCode_UnknownUser)});
+    return std::make_shared<_LoginRequestResult>(request->getRequestId(), LoginResultData{.unknownUser = false});
 }
 
 _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, GetNetworkResourcesRequest const& request)

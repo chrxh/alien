@@ -4,9 +4,9 @@
 
 class DelayedExecutionController
 {
-public:
-    static DelayedExecutionController& getInstance();
+    MAKE_SINGLETON(DelayedExecutionController);
 
+public:
     void process();
 
     void executeLater(std::function<void(void)> const& execFunc);
@@ -22,5 +22,5 @@ private:
 
 inline void delayedExecution(std::function<void(void)> const& execFunc)
 {
-    DelayedExecutionController::getInstance().executeLater(execFunc);
+    DelayedExecutionController::get().executeLater(execFunc);
 }

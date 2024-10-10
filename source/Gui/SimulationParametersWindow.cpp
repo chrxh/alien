@@ -2434,7 +2434,7 @@ void _SimulationParametersWindow::onDeleteTab(int index)
 
 void _SimulationParametersWindow::onOpenParameters()
 {
-    GenericFileDialogs::getInstance().showOpenFileDialog(
+    GenericFileDialogs::get().showOpenFileDialog(
         "Open simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
@@ -2442,7 +2442,7 @@ void _SimulationParametersWindow::onOpenParameters()
 
         SimulationParameters parameters;
         if (!SerializerService::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
-            MessageDialog::getInstance().information("Open simulation parameters", "The selected file could not be opened.");
+            MessageDialog::get().information("Open simulation parameters", "The selected file could not be opened.");
         } else {
             _simController->setSimulationParameters(parameters);
         }
@@ -2451,7 +2451,7 @@ void _SimulationParametersWindow::onOpenParameters()
 
 void _SimulationParametersWindow::onSaveParameters()
 {
-    GenericFileDialogs::getInstance().showSaveFileDialog(
+    GenericFileDialogs::get().showSaveFileDialog(
         "Save simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
@@ -2459,7 +2459,7 @@ void _SimulationParametersWindow::onSaveParameters()
 
         auto parameters = _simController->getSimulationParameters();
         if (!SerializerService::serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
-            MessageDialog::getInstance().information("Save simulation parameters", "The selected file could not be saved.");
+            MessageDialog::get().information("Save simulation parameters", "The selected file could not be saved.");
         }
     });
 }

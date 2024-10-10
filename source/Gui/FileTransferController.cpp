@@ -32,7 +32,7 @@ void FileTransferController::init(
 
 void FileTransferController::onOpenSimulation()
 {
-    GenericFileDialogs::getInstance().showOpenFileDialog(
+    GenericFileDialogs::get().showOpenFileDialog(
         "Open simulation", "Simulation file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
@@ -48,7 +48,7 @@ void FileTransferController::onOpenSimulation()
 
 void FileTransferController::onSaveSimulation()
 {
-    GenericFileDialogs::getInstance().showSaveFileDialog(
+    GenericFileDialogs::get().showSaveFileDialog(
         "Save simulation", "Simulation file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
@@ -111,6 +111,6 @@ void FileTransferController::process()
 
     auto criticalErrors = _persisterController->fetchAllErrorInfos(SenderId{FileTransferSenderId});
     if (!criticalErrors.empty()) {
-        MessageDialog::getInstance().information("Error", criticalErrors);
+        MessageDialog::get().information("Error", criticalErrors);
     }
 }

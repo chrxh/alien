@@ -105,7 +105,7 @@ void _UploadSimulationDialog::processIntern()
         AlienImGui::InputTextMultilineParameters()
             .hint("Description (optional)")
             .textWidth(0)
-            .height(ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(70.0f)),
+            .height(ImGui::GetContentRegionAvail().y - StyleRepository::get().scale(70.0f)),
         _resourceDescription);
     ImGui::PopID();
 
@@ -156,7 +156,7 @@ void _UploadSimulationDialog::onUpload()
 
             SerializedSimulation serializedSim;
             if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
-                MessageDialog::getInstance().information(
+                MessageDialog::get().information(
                     "Upload simulation", "The simulation could not be serialized for uploading.");
                 return;
             }

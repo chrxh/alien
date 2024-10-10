@@ -173,7 +173,7 @@ bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userNam
             _password = password;
         }
 
-        errorCode = false;
+        errorCode = 0;
         std::stringstream stream(result->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
