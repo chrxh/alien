@@ -1067,6 +1067,38 @@ bool AlienImGui::Button(ButtonParameters const& parameters)
     return result;
 }
 
+void AlienImGui::Spinner(SpinnerParameters const& parameters)
+{
+    static std::optional<std::chrono::steady_clock::time_point> spinnerRefTimepoint;
+    static float spinnerAngle = 0;
+    if (!spinnerRefTimepoint.has_value()) {
+        spinnerRefTimepoint = std::chrono::steady_clock::now();
+    }
+    auto now = std::chrono::steady_clock::now();
+    auto duration = toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - *spinnerRefTimepoint).count());
+
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+    AlienImGui::RotateStart(drawList);
+    auto font = StyleRepository::get().getIconFont();
+    auto text = ICON_FA_SPINNER;
+    ImVec4 clipRect(-100000.0f, -100000.0f, 100000.0f, 100000.0f);
+    font->RenderText(
+        drawList,
+        scale(30.0f),
+        {parameters._pos.x - scale(15.0f), parameters._pos.y - scale(80.0f)},
+        ImColor::HSV(0.5f, 0.1f, 1.0f, std::min(1.0f, duration / 500)),
+        clipRect,
+        text,
+        text + strlen(text),
+        0.0f,
+        false);
+
+    auto angle = sinf(duration * Const::DegToRad / 10 - Const::Pi / 2) * 4 + 6.0f;
+    spinnerAngle += angle;
+    AlienImGui::RotateEnd(spinnerAngle, drawList);
+}
+
 void AlienImGui::Tooltip(std::string const& text, bool delay)
 {
     if (ImGui::IsItemHovered() && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
