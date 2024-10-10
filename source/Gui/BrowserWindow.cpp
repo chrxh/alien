@@ -212,8 +212,7 @@ void _BrowserWindow::processToolbar()
 
     //refresh button
     if (AlienImGui::ToolbarButton(ICON_FA_SYNC)) {
-        delayedExecution([this] { onRefresh(); });
-        printOverlayMessage("Refreshing ...");
+        onRefresh();
     }
     AlienImGui::Tooltip("Refresh");
 
@@ -1173,7 +1172,7 @@ void _BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
 {
     if (!_pendingRefreshRequestIds.empty()) {
         auto color = ImColor(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
-        color.Value.w = 0.8f;
+        color.Value.w = 0.5f;
         auto size = ImGui::GetItemRectSize();
         auto afterTablePos = ImGui::GetCursorScreenPos();
 
@@ -1181,6 +1180,7 @@ void _BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
         if (ImGui::BeginChild("##overlay", {size.x, size.y}, 0, ImGuiWindowFlags_NoScrollbar)) {
             ImDrawList* drawList = ImGui::GetWindowDrawList();
             drawList->AddRectFilled({startPos.x, startPos.y}, {startPos.x + size.x, startPos.y + size.y}, color);
+            AlienImGui::Spinner(AlienImGui::SpinnerParameters().pos({startPos.x + size.x / 2, startPos.y + size.y / 2}));
         }
         ImGui::EndChild();
         ImGui::SetCursorScreenPos(afterTablePos);

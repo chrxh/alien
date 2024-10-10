@@ -296,6 +296,12 @@ public:
     };
     static bool Button(ButtonParameters const& parameters);
 
+    struct SpinnerParameters
+    {
+        MEMBER_DECLARATION(SpinnerParameters, RealVector2D, pos, RealVector2D());
+    };
+    static void Spinner(SpinnerParameters const& parameters);
+
     static void Tooltip(std::string const& text, bool delay = true);
     static void Tooltip(std::function<std::string()> const& textFunc, bool delay = true);
 
