@@ -1594,10 +1594,10 @@ void AlienImGui::NeuronSelection(
         if (AlienImGui::Button("Randomize")) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 for (int j = 0; j < MAX_CHANNELS; ++j) {
-                    weights[i][j] = NumberGenerator::getInstance().getRandomFloat(-4.0f, 4.0f);
+                    weights[i][j] = NumberGenerator::get().getRandomFloat(-4.0f, 4.0f);
                 }
-                biases[i] = NumberGenerator::getInstance().getRandomFloat(-4.0f, 4.0f);
-                activationFunctions[i] = NumberGenerator::getInstance().getRandomInt(NeuronActivationFunction_Count);
+                biases[i] = NumberGenerator::get().getRandomFloat(-4.0f, 4.0f);
+                activationFunctions[i] = NumberGenerator::get().getRandomInt(NeuronActivationFunction_Count);
             }
         }
     }

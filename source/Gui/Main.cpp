@@ -23,7 +23,7 @@ namespace
 int main(int argc, char** argv)
 {
     auto inDebugMode = isInDebugMode(argc, argv);
-    GlobalSettings::getInstance().setDebugMode(inDebugMode);
+    GlobalSettings::get().setDebugMode(inDebugMode);
 
     GuiLogger logger = std::make_shared<_GuiLogger>();
     FileLogger fileLogger = std::make_shared<_FileLogger>();

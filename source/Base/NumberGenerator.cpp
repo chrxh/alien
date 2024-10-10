@@ -21,7 +21,7 @@ NumberGenerator::~NumberGenerator()
 {
 }
 
-NumberGenerator& NumberGenerator::getInstance()
+NumberGenerator& NumberGenerator::get()
 {
     static NumberGenerator instance;
     return instance;

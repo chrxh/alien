@@ -38,12 +38,12 @@ _PatternEditorWindow::_PatternEditorWindow(
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::getInstance().getString("editors.pattern editor.starting path", path.string());
+    _startingPath = GlobalSettings::get().getString("editors.pattern editor.starting path", path.string());
 }
 
 _PatternEditorWindow::~_PatternEditorWindow()
 {
-    GlobalSettings::getInstance().setString("editors.pattern editor.starting path", _startingPath);
+    GlobalSettings::get().setString("editors.pattern editor.starting path", _startingPath);
 }
 
 void _PatternEditorWindow::processIntern()

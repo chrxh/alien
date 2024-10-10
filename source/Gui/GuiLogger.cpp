@@ -4,12 +4,12 @@
 
 _GuiLogger::_GuiLogger()
 {
-    LoggingService::getInstance().registerCallBack(this);
+    LoggingService::get().registerCallBack(this);
 }
 
 _GuiLogger::~_GuiLogger()
 {
-    LoggingService::getInstance().unregisterCallBack(this);
+    LoggingService::get().unregisterCallBack(this);
 }
 
 std::vector<std::string> const& _GuiLogger::getMessages(Priority minPriority) const

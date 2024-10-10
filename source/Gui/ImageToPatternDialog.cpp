@@ -25,12 +25,12 @@ _ImageToPatternDialog::_ImageToPatternDialog(SimulationController const& simCont
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::getInstance().getString("dialogs.open image.starting path", path.string());
+    _startingPath = GlobalSettings::get().getString("dialogs.open image.starting path", path.string());
 }
 
 _ImageToPatternDialog::~_ImageToPatternDialog()
 {
-    GlobalSettings::getInstance().setString("dialogs.open image.starting path", _startingPath);
+    GlobalSettings::get().setString("dialogs.open image.starting path", _startingPath);
 }
 
 namespace
@@ -101,7 +101,7 @@ void _ImageToPatternDialog::show()
                     float matchedCellIntensity;
                     getMatchedCellColor(ImColor(r, g, b, 255), matchedCellColor, matchedCellIntensity);
                     dataDesc.addCell(CellDescription()
-                                         .setId(NumberGenerator::getInstance().getId())
+                                         .setId(NumberGenerator::get().getId())
                                          .setEnergy(matchedCellIntensity * 200)
                                          .setPos({toFloat(x) + xOffset, toFloat(y)})
                                          .setMaxConnections(MAX_CELL_BONDS)

@@ -45,13 +45,13 @@ _UploadSimulationDialog::_UploadSimulationDialog(
     , _loginDialog(loginDialog)
     , _genomeEditorWindow(genomeEditorWindow)
 {
-    auto& settings = GlobalSettings::getInstance();
+    auto& settings = GlobalSettings::get();
     _share = settings.getBool("dialogs.upload.share", _share);
 }
 
 _UploadSimulationDialog::~_UploadSimulationDialog()
 {
-    auto& settings = GlobalSettings::getInstance();
+    auto& settings = GlobalSettings::get();
     settings.setBool("dialogs.upload.share", _share);
 }
 

@@ -245,7 +245,7 @@ void _CreatorWindow::finishDrawing()
 
 void _CreatorWindow::createCell()
 {
-    auto creatureId = toInt(NumberGenerator::getInstance().getRandomInt(std::numeric_limits<int>::max()));
+    auto creatureId = toInt(NumberGenerator::get().getRandomInt(std::numeric_limits<int>::max()));
 
     auto cell = CellDescription()
                     .setPos(getRandomPos())
@@ -332,7 +332,7 @@ void _CreatorWindow::createDisc()
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
             data.addCell(CellDescription()
-                             .setId(NumberGenerator::getInstance().getId())
+                             .setId(NumberGenerator::get().getId())
                              .setEnergy(_energy)
                              .setStiffness(_stiffness)
                              .setPos(relPos)

@@ -13,11 +13,11 @@
 DataDescription DescriptionEditService::createRect(CreateRectParameters const& parameters)
 {
     DataDescription result;
-    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::getInstance().getRandomInt(std::numeric_limits<int>::max())) : 0;
+    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::get().getRandomInt(std::numeric_limits<int>::max())) : 0;
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
             result.addCell(CellDescription()
-                               .setId(NumberGenerator::getInstance().getId())
+                               .setId(NumberGenerator::get().getId())
                                .setPos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
                                .setEnergy(parameters._energy)
                                .setStiffness(parameters._stiffness)
@@ -40,14 +40,14 @@ DataDescription DescriptionEditService::createRect(CreateRectParameters const& p
 DataDescription DescriptionEditService::createHex(CreateHexParameters const& parameters)
 {
     DataDescription result;
-    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::getInstance().getRandomInt(std::numeric_limits<int>::max())) : 0;
+    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::get().getRandomInt(std::numeric_limits<int>::max())) : 0;
     auto incY = sqrt(3.0) * parameters._cellDistance / 2.0;
     for (int j = 0; j < parameters._layers; ++j) {
         for (int i = -(parameters._layers - 1); i < parameters._layers - j; ++i) {
 
             //create cell: upper layer
             result.addCell(CellDescription()
-                               .setId(NumberGenerator::getInstance().getId())
+                               .setId(NumberGenerator::get().getId())
                                .setEnergy(parameters._energy)
                                .setStiffness(parameters._stiffness)
                                .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
@@ -59,7 +59,7 @@ DataDescription DescriptionEditService::createHex(CreateHexParameters const& par
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
                 result.addCell(CellDescription()
-                                 .setId(NumberGenerator::getInstance().getId())
+                                 .setId(NumberGenerator::get().getId())
                                    .setEnergy(parameters._energy)
                                    .setStiffness(parameters._stiffness)
                                    .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
@@ -83,11 +83,11 @@ DataDescription DescriptionEditService::createHex(CreateHexParameters const& par
 DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters)
 {
     DataDescription result;
-    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::getInstance().getRandomInt(std::numeric_limits<int>::max())) : 0;
+    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::get().getRandomInt(std::numeric_limits<int>::max())) : 0;
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result.addCell(CellDescription()
-                           .setId(NumberGenerator::getInstance().getId())
+                           .setId(NumberGenerator::get().getId())
                            .setPos(parameters._center)
                            .setEnergy(parameters._energy)
                            .setStiffness(parameters._stiffness)
@@ -112,7 +112,7 @@ DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnecte
                 continue;
             }
             result.addCell(CellDescription()
-                               .setId(NumberGenerator::getInstance().getId())
+                               .setId(NumberGenerator::get().getId())
                                .setEnergy(parameters._energy)
                                .setStiffness(parameters._stiffness)
                                .setPos({parameters._center.x + dxMod, parameters._center.y + dy})
@@ -130,7 +130,7 @@ namespace
 {
     void generateNewIds(DataDescription& data)
     {
-        auto& numberGen = NumberGenerator::getInstance();
+        auto& numberGen = NumberGenerator::get();
         std::unordered_map<uint64_t, uint64_t> newByOldIds;
         for (auto& cell : data.cells) {
             uint64_t newId = numberGen.getId();
@@ -147,7 +147,7 @@ namespace
 
     void generateNewIds(ClusterDescription& cluster)
     {
-        auto& numberGen = NumberGenerator::getInstance();
+        auto& numberGen = NumberGenerator::get();
         //cluster.id = numberGen.getId();
         std::unordered_map<uint64_t, uint64_t> newByOldIds;
         for (auto& cell : cluster.cells) {
@@ -191,7 +191,7 @@ void DescriptionEditService::duplicate(ClusteredDataDescription& data, IntVector
                 auto origPos = particle.pos;
                 particle.pos = RealVector2D{origPos.x + incX, origPos.y + incY};
                 if (particle.pos.x < size.x && particle.pos.y < size.y) {
-                    particle.setId(NumberGenerator::getInstance().getId());
+                    particle.setId(NumberGenerator::get().getId());
                     result.addParticle(particle);
                 }
             }
@@ -287,7 +287,7 @@ DataDescription DescriptionEditService::randomMultiply(
     //do multiplication
     DataDescription result = input;
     generateNewIds(result);
-    auto& numberGen = NumberGenerator::getInstance();
+    auto& numberGen = NumberGenerator::get();
     for (int i = 0; i < parameters._number; ++i) {
         bool overlapping = false;
         DataDescription copy;
@@ -421,7 +421,7 @@ void DescriptionEditService::correctConnections(ClusteredDataDescription& data, 
 void DescriptionEditService::randomizeCellColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
 {
     for (auto& cluster : data.clusters) {
-        auto newColor = colorCodes[NumberGenerator::getInstance().getRandomInt(toInt(colorCodes.size()))];
+        auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
         for (auto& cell : cluster.cells) {
             cell.color = newColor;
         }
@@ -446,7 +446,7 @@ namespace
 void DescriptionEditService::randomizeGenomeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
 {
     for (auto& cluster : data.clusters) {
-        auto newColor = colorCodes[NumberGenerator::getInstance().getRandomInt(toInt(colorCodes.size()))];
+        auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
         for (auto& cell : cluster.cells) {
             if (cell.hasGenome()) {
                 colorizeGenomeNodes(cell.getGenomeRef(), newColor);
@@ -458,7 +458,7 @@ void DescriptionEditService::randomizeGenomeColors(ClusteredDataDescription& dat
 void DescriptionEditService::randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy)
 {
     for (auto& cluster : data.clusters) {
-        auto energy = NumberGenerator::getInstance().getRandomReal(toDouble(minEnergy), toDouble(maxEnergy));
+        auto energy = NumberGenerator::get().getRandomReal(toDouble(minEnergy), toDouble(maxEnergy));
         for (auto& cell : cluster.cells) {
             cell.energy = energy;
         }
@@ -468,7 +468,7 @@ void DescriptionEditService::randomizeEnergies(ClusteredDataDescription& data, f
 void DescriptionEditService::randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge)
 {
     for (auto& cluster : data.clusters) {
-        auto age = NumberGenerator::getInstance().getRandomReal(toDouble(minAge), toDouble(maxAge));
+        auto age = NumberGenerator::get().getRandomReal(toDouble(minAge), toDouble(maxAge));
         for (auto& cell : cluster.cells) {
             cell.age = age;
         }
@@ -478,7 +478,7 @@ void DescriptionEditService::randomizeAges(ClusteredDataDescription& data, int m
 void DescriptionEditService::randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue)
 {
     for (auto& cluster : data.clusters) {
-        auto countdown = NumberGenerator::getInstance().getRandomReal(toDouble(minValue), toDouble(maxValue));
+        auto countdown = NumberGenerator::get().getRandomReal(toDouble(minValue), toDouble(maxValue));
         for (auto& cell : cluster.cells) {
             if (cell.getCellFunctionType() == CellFunction_Detonator) {
                 std::get<DetonatorDescription>(*cell.cellFunction).countdown = countdown;
@@ -490,7 +490,7 @@ void DescriptionEditService::randomizeCountdowns(ClusteredDataDescription& data,
 void DescriptionEditService::randomizeMutationIds(ClusteredDataDescription& data)
 {
     for (auto& cluster : data.clusters) {
-        auto mutationId = NumberGenerator::getInstance().getRandomInt() % 65536;
+        auto mutationId = NumberGenerator::get().getRandomInt() % 65536;
         for (auto& cell : cluster.cells) {
             cell.mutationId = toInt(mutationId);
             if (cell.getCellFunctionType() == CellFunction_Constructor) {
@@ -568,7 +568,7 @@ namespace
         } else {
             int newCreatureId = 0;
             while (newCreatureId == 0) {
-                newCreatureId = NumberGenerator::getInstance().getRandomInt();
+                newCreatureId = NumberGenerator::get().getRandomInt();
             }
             origToNewCreatureIdMap.emplace(origCreatureId, newCreatureId);
             return newCreatureId;

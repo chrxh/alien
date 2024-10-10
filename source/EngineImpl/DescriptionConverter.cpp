@@ -537,7 +537,7 @@ void DescriptionConverter::addParticle(DataTO const& dataTO, ParticleDescription
     auto particleIndex = (*dataTO.numParticles)++;
 
 	ParticleTO& particleTO = dataTO.particles[particleIndex];
-	particleTO.id = particleDesc.id == 0 ? NumberGenerator::getInstance().getId() : particleDesc.id;
+	particleTO.id = particleDesc.id == 0 ? NumberGenerator::get().getId() : particleDesc.id;
     particleTO.pos = {particleDesc.pos.x, particleDesc.pos.y};
     particleTO.vel = {particleDesc.vel.x, particleDesc.vel.y};
     particleTO.energy = particleDesc.energy;
@@ -550,7 +550,7 @@ void DescriptionConverter::addCell(
 {
     int cellIndex = (*dataTO.numCells)++;
     CellTO& cellTO = dataTO.cells[cellIndex];
-    cellTO.id = cellDesc.id == 0 ? NumberGenerator::getInstance().getId() : cellDesc.id;
+    cellTO.id = cellDesc.id == 0 ? NumberGenerator::get().getId() : cellDesc.id;
 	cellTO.pos= { cellDesc.pos.x, cellDesc.pos.y };
     cellTO.vel = {cellDesc.vel.x, cellDesc.vel.y};
     cellTO.energy = cellDesc.energy;

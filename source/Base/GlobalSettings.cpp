@@ -137,7 +137,7 @@ struct GlobalSettingsImpl
 };
 
 
-GlobalSettings& GlobalSettings::getInstance()
+GlobalSettings& GlobalSettings::get()
 {
     static GlobalSettings instance;
     return instance;

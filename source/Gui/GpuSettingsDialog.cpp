@@ -19,7 +19,7 @@ _GpuSettingsDialog::_GpuSettingsDialog(SimulationController const& simController
     , _simController(simController)
 {
     GpuSettings gpuSettings;
-    gpuSettings.numBlocks = GlobalSettings::getInstance().getInt("settings.gpu.num blocks", gpuSettings.numBlocks);
+    gpuSettings.numBlocks = GlobalSettings::get().getInt("settings.gpu.num blocks", gpuSettings.numBlocks);
 
     _simController->setGpuSettings_async(gpuSettings);
 }
@@ -27,7 +27,7 @@ _GpuSettingsDialog::_GpuSettingsDialog(SimulationController const& simController
 _GpuSettingsDialog::~_GpuSettingsDialog()
 {
     auto gpuSettings = _simController->getGpuSettings();
-    GlobalSettings::getInstance().setInt("settings.gpu.num blocks", gpuSettings.numBlocks);
+    GlobalSettings::get().setInt("settings.gpu.num blocks", gpuSettings.numBlocks);
 }
 
 void _GpuSettingsDialog::processIntern()

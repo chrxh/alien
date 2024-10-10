@@ -25,12 +25,12 @@ _NewSimulationDialog::_NewSimulationDialog(
     , _temporalControlWindow(temporalControlWindow)
     , _statisticsWindow(statisticsWindow)
 {
-    _adoptSimulationParameters = GlobalSettings::getInstance().getBool("dialogs.new simulation.adopt simulation parameters", true);
+    _adoptSimulationParameters = GlobalSettings::get().getBool("dialogs.new simulation.adopt simulation parameters", true);
 }
 
 _NewSimulationDialog::~_NewSimulationDialog()
 {
-    GlobalSettings::getInstance().setBool("dialogs.new simulation.adopt simulation parameters", _adoptSimulationParameters);
+    GlobalSettings::get().setBool("dialogs.new simulation.adopt simulation parameters", _adoptSimulationParameters);
 }
 
 void _NewSimulationDialog::processIntern()

@@ -55,7 +55,7 @@ std::string WindowController::_mode;
 
 void WindowController::init()
 {
-    auto& settings = GlobalSettings::getInstance();
+    auto& settings = GlobalSettings::get();
     _mode = settings.getString("settings.display.mode", DesktopMode);
     _sizeInWindowedMode.x = std::max(100, settings.getInt("settings.display.window width", _sizeInWindowedMode.x));
     _sizeInWindowedMode.y = std::max(100, settings.getInt("settings.display.window height", _sizeInWindowedMode.y));
@@ -101,7 +101,7 @@ void WindowController::shutdown()
     if (isWindowedMode()) {
         updateWindowSize();
     }
-    auto& settings = GlobalSettings::getInstance();
+    auto& settings = GlobalSettings::get();
     settings.setString("settings.display.mode", _mode);
     settings.setInt("settings.display.window width", _sizeInWindowedMode.x);
     settings.setInt("settings.display.window height", _sizeInWindowedMode.y);

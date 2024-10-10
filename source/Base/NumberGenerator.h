@@ -5,7 +5,9 @@
 class NumberGenerator
 {
 public:
-    static NumberGenerator& getInstance();
+    static NumberGenerator& get();
+    NumberGenerator(NumberGenerator const&) = delete;
+    void operator=(NumberGenerator const&) = delete;
 
 	uint32_t getRandomInt();
     uint32_t getRandomInt(uint32_t range);
@@ -15,10 +17,6 @@ public:
     float getRandomFloat(float min, float max);
 
 	uint64_t getId();
-
-public:
-    NumberGenerator(NumberGenerator const&) = delete;
-    void operator=(NumberGenerator const&) = delete;
 
 	uint32_t getLargeRandomInt(uint32_t range);
     uint32_t getNumberFromArray();

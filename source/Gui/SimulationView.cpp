@@ -27,10 +27,10 @@ namespace
 _SimulationView::_SimulationView(SimulationController const& simController)
     : _simController(simController)
 {
-    _isCellDetailOverlayActive = GlobalSettings::getInstance().getBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
-    _brightness = GlobalSettings::getInstance().getFloat("windows.simulation view.brightness", _brightness);
-    _contrast = GlobalSettings::getInstance().getFloat("windows.simulation view.contrast", _contrast);
-    _motionBlur = GlobalSettings::getInstance().getFloat("windows.simulation view.motion blur factor", _motionBlur);
+    _isCellDetailOverlayActive = GlobalSettings::get().getBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
+    _brightness = GlobalSettings::get().getFloat("windows.simulation view.brightness", _brightness);
+    _contrast = GlobalSettings::get().getFloat("windows.simulation view.contrast", _contrast);
+    _motionBlur = GlobalSettings::get().getFloat("windows.simulation view.motion blur factor", _motionBlur);
 
     _simController = simController;
     _shader = std::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
@@ -92,10 +92,10 @@ _SimulationView::_SimulationView(SimulationController const& simController)
 
 _SimulationView::~_SimulationView()
 {
-    GlobalSettings::getInstance().setBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
-    GlobalSettings::getInstance().setFloat("windows.simulation view.brightness", _brightness);
-    GlobalSettings::getInstance().setFloat("windows.simulation view.contrast", _contrast);
-    GlobalSettings::getInstance().setFloat("windows.simulation view.motion blur factor", _motionBlur);
+    GlobalSettings::get().setBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
+    GlobalSettings::get().setFloat("windows.simulation view.brightness", _brightness);
+    GlobalSettings::get().setFloat("windows.simulation view.contrast", _contrast);
+    GlobalSettings::get().setFloat("windows.simulation view.motion blur factor", _motionBlur);
 }
 
 void _SimulationView::resize(IntVector2D const& size)

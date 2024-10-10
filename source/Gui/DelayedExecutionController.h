@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "Definitions.h"
 
 class DelayedExecutionController
