@@ -49,3 +49,6 @@ using LoginRequestResult = std::shared_ptr<_LoginRequestResult>;
 
 using _GetNetworkResourcesRequestResult = _ConcreteRequestResult<GetNetworkResourcesResultData>;
 using GetNetworkResourcesRequestResult = std::shared_ptr<_GetNetworkResourcesRequestResult>;
+
+using _DownloadNetworkResourceRequestResult = _ConcreteRequestResult<DownloadNetworkResourceResultData>;
+using DownloadNetworkResourceRequestResult = std::shared_ptr<_DownloadNetworkResourceRequestResult>;

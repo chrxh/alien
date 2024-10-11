@@ -96,6 +96,16 @@ GetNetworkResourcesResultData _PersisterControllerImpl::fetchGetNetworkResources
     return fetchData<_GetNetworkResourcesRequestResult, GetNetworkResourcesResultData>(id);
 }
 
+PersisterRequestId _PersisterControllerImpl::scheduleDownloadNetworkResource(SenderInfo const& senderInfo, DownloadNetworkResourceRequestData const& data)
+{
+    return scheduleRequest<_DownloadNetworkResourceRequest>(senderInfo, data);
+}
+
+DownloadNetworkResourceResultData _PersisterControllerImpl::fetchDownloadNetworkResourcesData(PersisterRequestId const& id)
+{
+    return fetchData<_DownloadNetworkResourceRequestResult, DownloadNetworkResourceResultData>(id);
+}
+
 PersisterRequestId _PersisterControllerImpl::generateNewJobId()
 {
     ++_latestJobId;

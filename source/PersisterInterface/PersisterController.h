@@ -6,6 +6,8 @@
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
+#include "DownloadNetworkResourceRequestData.h"
+#include "DownloadNetworkResourceResultData.h"
 #include "GetNetworkResourcesRequestData.h"
 #include "GetNetworkResourcesResultData.h"
 #include "LoginRequestData.h"
@@ -47,4 +49,7 @@ public:
 
     virtual PersisterRequestId scheduleGetNetworkResources(SenderInfo const& senderInfo, GetNetworkResourcesRequestData const& data) = 0;
     virtual GetNetworkResourcesResultData fetchGetNetworkResourcesData(PersisterRequestId const& id) = 0;
+
+    virtual PersisterRequestId scheduleDownloadNetworkResource(SenderInfo const& senderInfo, DownloadNetworkResourceRequestData const& data) = 0;
+    virtual DownloadNetworkResourceResultData fetchDownloadNetworkResourcesData(PersisterRequestId const& id) = 0;
 };

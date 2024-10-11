@@ -38,16 +38,17 @@ private:
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, ReadFromFileRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, LoginRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, GetNetworkResourcesRequest const& request);
+    PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, DownloadNetworkResourceRequest const& request);
 
     SimulationController _simController;
 
     std::atomic<bool> _isShutdown{false};
 
     mutable std::mutex _jobMutex;
-    std::deque<PersisterRequest> _openJobs;
-    std::deque<PersisterRequest> _inProgressJobs;
-    std::deque<PersisterRequestResult> _finishedJobs;
-    std::deque<PersisterRequestError> _jobErrors;
+    std::deque<PersisterRequest> _openRequests;
+    std::deque<PersisterRequest> _inProgressRequests;
+    std::deque<PersisterRequestResult> _finishedRequests;
+    std::deque<PersisterRequestError> _requestErrors;
 
     std::condition_variable _conditionVariable;
 };

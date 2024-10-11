@@ -17,8 +17,6 @@
 
 struct ImGuiTableColumnSortSpecs;
 
-using BrowserCache = Cache<std::string, DeserializedSimulation, 5>;
-
 class _BrowserWindow : public _AlienWindow
 {
 public:
@@ -39,7 +37,7 @@ public:
     void onRefresh();
     WorkspaceType getCurrentWorkspaceType() const;
 
-    BrowserCache& getSimulationCache();
+    DownloadCache& getSimulationCache();
 
 private:
     struct WorkspaceId
@@ -142,7 +140,7 @@ private:
 
     std::vector<TextureData> _emojis;
 
-    BrowserCache _simulationCache;
+    DownloadCache _downloadCache;
 
     SimulationController _simController;
     PersisterController _persisterController;
