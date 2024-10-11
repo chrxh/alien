@@ -1,5 +1,6 @@
 #pragma once
 
+#include "PersisterInterface/DownloadNetworkResourceRequestData.h"
 #include "PersisterInterface/GetNetworkResourcesRequestData.h"
 #include "PersisterInterface/LoginRequestData.h"
 #include "PersisterInterface/ReadSimulationRequestData.h"
@@ -59,3 +60,6 @@ using LoginRequest = std::shared_ptr<_LoginRequest>;
 
 using _GetNetworkResourcesRequest = _ConcreteRequest<GetNetworkResourcesRequestData>;
 using GetNetworkResourcesRequest = std::shared_ptr<_GetNetworkResourcesRequest>;
+
+using _DownloadNetworkResourceRequest = _ConcreteRequest<DownloadNetworkResourceRequestData>;
+using DownloadNetworkResourceRequest = std::shared_ptr<_DownloadNetworkResourceRequest>;

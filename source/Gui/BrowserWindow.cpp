@@ -25,7 +25,6 @@
 #include "Network/NetworkService.h"
 #include "Network/NetworkResourceParserService.h"
 #include "Network/NetworkResourceTreeTO.h"
-#include "PersisterInterface/TaskProcessor.h"
 
 #include "AlienImGui.h"
 #include "StyleRepository.h"
@@ -44,6 +43,7 @@
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginController.h"
+#include "PersisterInterface/TaskProcessor.h"
 
 namespace
 {
@@ -72,6 +72,7 @@ _BrowserWindow::_BrowserWindow(
     , _temporalControlWindow(temporalControlWindow)
     , _editorController(editorController)
 {
+    _downloadCache = std::make_shared<_DownloadCache>();
     _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
     _downloadProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
 
@@ -159,9 +160,9 @@ WorkspaceType _BrowserWindow::getCurrentWorkspaceType() const
     return _currentWorkspace.workspaceType;
 }
 
-BrowserCache& _BrowserWindow::getSimulationCache()
+DownloadCache& _BrowserWindow::getSimulationCache()
 {
-    return _simulationCache;
+    return _downloadCache;
 }
 
 void _BrowserWindow::refreshIntern(bool withRetry)
@@ -219,9 +220,7 @@ void _BrowserWindow::processIntern()
     processRefreshingScreen({startPos.x, startPos.y});
 
     processEmojiWindow();
-
-    processPendingRequestIds();
-}
+}    
 
 void _BrowserWindow::processBackground()
 {
@@ -233,6 +232,8 @@ void _BrowserWindow::processBackground()
         _lastRefreshTime = now;
         refreshIntern(false);
     }
+
+    processPendingRequestIds();
 }
 
 void _BrowserWindow::processToolbar()
@@ -1225,6 +1226,7 @@ void _BrowserWindow::processActivated()
 void _BrowserWindow::processPendingRequestIds()
 {
     _refreshProcessor->process();
+    _downloadProcessor->process();
 }
 
 void _BrowserWindow::createTreeTOs(Workspace& workspace)
@@ -1259,83 +1261,70 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
     printOverlayMessage("Downloading ...");
     ++leaf.rawTO->numDownloads;
 
-    delayedExecution([=, this] {
-        std::string dataTypeString = _currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
-        std::optional<DeserializedSimulation> cachedSimulation;
-        if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
-            cachedSimulation = _simulationCache.find(leaf.rawTO->id);
-        }
-        SerializedSimulation serializedSim;
-        if (!cachedSimulation.has_value()) {
-            if (!NetworkService::downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.rawTO->id)) {
-                MessageDialog::get().information("Error", "Failed to download " + dataTypeString + ".");
-                return;
-            }
-        }
+    _downloadProcessor->executeTask(
+        [&](auto const& senderId) {
+            return _persisterController->scheduleDownloadNetworkResource(
+                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true},
+                DownloadNetworkResourceRequestData{
+                    .resourceId = leaf.rawTO->id,
+                    .resourceName = leaf.leafName,
+                    .resourceVersion = leaf.rawTO->version,
+                    .resourceType = _currentWorkspace.resourceType,
+                    .downloadCache = _downloadCache});
+        },
+        [&](auto const& requestId) {
+            auto data = _persisterController->fetchDownloadNetworkResourcesData(requestId);
 
-        if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
-            DeserializedSimulation deserializedSim;
-            if (!cachedSimulation.has_value()) {
-                if (!SerializerService::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
-                    MessageDialog::get().information("Error", "Failed to load simulation. Your program version may not match.");
-                    return;
-                }
-                _simulationCache.insertOrAssign(leaf.rawTO->id, deserializedSim);
-            } else {
-                log(Priority::Important, "browser: get resource with id=" + leaf.rawTO->id + " from simulation cache");
-                std::swap(deserializedSim, *cachedSimulation);
-                NetworkService::incDownloadCounter(leaf.rawTO->id);
-            }
-
-            _simController->closeSimulation();
-
-            std::optional<std::string> errorMessage;
-            try {
-                _simController->newSimulation(
-                    leaf.leafName,
-                    deserializedSim.auxiliaryData.timestep,
-                    deserializedSim.auxiliaryData.generalSettings,
-                    deserializedSim.auxiliaryData.simulationParameters);
-                _simController->setRealTime(deserializedSim.auxiliaryData.realTime);
-                _simController->setClusteredSimulationData(deserializedSim.mainData);
-                _simController->setStatisticsHistory(deserializedSim.statistics);
-            } catch (CudaMemoryAllocationException const& exception) {
-                errorMessage = exception.what();
-            } catch (...) {
-                errorMessage = "Failed to load simulation.";
-            }
-
-            if (errorMessage) {
-                showMessage("Error", *errorMessage);
+        if (data.resourceType == NetworkResourceType_Simulation) {
+                _persisterController->shutdown();
                 _simController->closeSimulation();
-                _simController->newSimulation(
-                    leaf.leafName,
-                    deserializedSim.auxiliaryData.timestep,
-                    deserializedSim.auxiliaryData.generalSettings,
-                    deserializedSim.auxiliaryData.simulationParameters);
-            }
+                std::optional<std::string> errorMessage;
+                auto const& deserializedSimulation = std::get<DeserializedSimulation>(data.resourceData);
+                try {
+                    _simController->newSimulation(
+                        leaf.leafName,
+                        deserializedSimulation.auxiliaryData.timestep,
+                        deserializedSimulation.auxiliaryData.generalSettings,
+                        deserializedSimulation.auxiliaryData.simulationParameters);
+                    _simController->setRealTime(deserializedSimulation.auxiliaryData.realTime);
+                    _simController->setClusteredSimulationData(deserializedSimulation.mainData);
+                    _simController->setStatisticsHistory(deserializedSimulation.statistics);
+                } catch (CudaMemoryAllocationException const& exception) {
+                    errorMessage = exception.what();
+                } catch (...) {
+                    errorMessage = "Failed to load simulation.";
+                }
+                if (errorMessage) {
+                    showMessage("Error", *errorMessage);
+                    _simController->closeSimulation();
+                    _simController->newSimulation(
+                        leaf.leafName,
+                        deserializedSimulation.auxiliaryData.timestep,
+                        deserializedSimulation.auxiliaryData.generalSettings,
+                        deserializedSimulation.auxiliaryData.simulationParameters);
+                }
+                _persisterController->restart();
 
-            Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
-            Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
-            _temporalControlWindow->onSnapshot();
-
-        } else {
-            std::vector<uint8_t> genome;
-            if (!SerializerService::deserializeGenomeFromString(genome, serializedSim.mainData)) {
-                MessageDialog::get().information("Error", "Failed to load genome. Your program version may not match.");
-                return;
+                Viewport::setCenterInWorldPos(deserializedSimulation.auxiliaryData.center);
+                Viewport::setZoomFactor(deserializedSimulation.auxiliaryData.zoom);
+                _temporalControlWindow->onSnapshot();
+            } else {
+                _editorController->setOn(true);
+                _editorController->getGenomeEditorWindow()->openTab(std::get<GenomeDescription>(data.resourceData));
             }
-            _editorController->setOn(true);
-            _editorController->getGenomeEditorWindow()->openTab(GenomeDescriptionService::convertBytesToDescription(genome));
-        }
-        if (VersionChecker::isVersionNewer(leaf.rawTO->version)) {
-            MessageDialog::get().information(
-                "Warning",
-                "The download was successful but the " + dataTypeString +" was generated using a more recent\n"
-                "version of ALIEN. Consequently, the " + dataTypeString + "might not function as expected.\n"
-                "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
-        }
-    });
+            if (VersionChecker::isVersionNewer(data.resourceVersion)) {
+                std::string dataTypeString = data.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
+                MessageDialog::get().information(
+                    "Warning",
+                    "The download was successful but the " + dataTypeString
+                        + " was generated using a more recent\n"
+                          "version of ALIEN. Consequently, the "
+                        + dataTypeString
+                        + "might not function as expected.\n"
+                          "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
+            }
+        },
+        [](auto const& errors) { MessageDialog::get().information("Error", errors); });
 }
 
 void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
@@ -1390,7 +1379,7 @@ void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
                 return;
             }
             if (leaf.rawTO->resourceType == NetworkResourceType_Simulation) {
-                getSimulationCache().insertOrAssign(leaf.rawTO->id, deserializedSim);
+                getSimulationCache()->insertOrAssign(leaf.rawTO->id, deserializedSim);
             }
             onRefresh();
         });

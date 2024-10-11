@@ -191,7 +191,7 @@ void _UploadSimulationDialog::onUpload()
             return;
         }
         if (_resourceType == NetworkResourceType_Simulation) {
-            _browserWindow->getSimulationCache().insertOrAssign(resourceId, deserializedSim);
+            _browserWindow->getSimulationCache()->insertOrAssign(resourceId, deserializedSim);
         }
         _browserWindow->onRefresh();
     });

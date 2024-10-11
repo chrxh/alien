@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <filesystem>
 
+#include "Base/LoggingService.h"
+#include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 #include "Network/NetworkService.h"
@@ -36,23 +38,23 @@ bool _PersisterWorker::isBusy() const
 {
     std::unique_lock uniqueLock(_jobMutex);
 
-    return !_openJobs.empty() || !_inProgressJobs.empty();
+    return !_openRequests.empty() || !_inProgressRequests.empty();
 }
 
 PersisterRequestState _PersisterWorker::getJobState(PersisterRequestId const& id) const
 {
     std::unique_lock uniqueLock(_jobMutex);
 
-    if (std::ranges::find_if(_openJobs, [&](PersisterRequest const& request) { return request->getRequestId() == id; }) != _openJobs.end()) {
+    if (std::ranges::find_if(_openRequests, [&](PersisterRequest const& request) { return request->getRequestId() == id; }) != _openRequests.end()) {
         return PersisterRequestState::InQueue;
     }
-    if (std::ranges::find_if(_inProgressJobs, [&](PersisterRequest const& request) { return request->getRequestId() == id; }) != _inProgressJobs.end()) {
+    if (std::ranges::find_if(_inProgressRequests, [&](PersisterRequest const& request) { return request->getRequestId() == id; }) != _inProgressRequests.end()) {
         return PersisterRequestState::InProgress;
     }
-    if (std::ranges::find_if(_finishedJobs, [&](PersisterRequestResult const& request) { return request->getRequestId() == id; }) != _finishedJobs.end()) {
+    if (std::ranges::find_if(_finishedRequests, [&](PersisterRequestResult const& request) { return request->getRequestId() == id; }) != _finishedRequests.end()) {
         return PersisterRequestState::Finished;
     }
-    if (std::ranges::find_if(_jobErrors, [&](PersisterRequestError const& request) { return request->getRequestId() == id; }) != _jobErrors.end()) {
+    if (std::ranges::find_if(_requestErrors, [&](PersisterRequestError const& request) { return request->getRequestId() == id; }) != _requestErrors.end()) {
         return PersisterRequestState::Error;
     }
     THROW_NOT_IMPLEMENTED();
@@ -63,7 +65,7 @@ void _PersisterWorker::addRequest(PersisterRequest const& job)
     {
         std::unique_lock uniqueLock(_jobMutex);
 
-        _openJobs.emplace_back(job);
+        _openRequests.emplace_back(job);
     }
     _conditionVariable.notify_all();
 }
@@ -72,10 +74,10 @@ PersisterRequestResult _PersisterWorker::fetchRequestResult(PersisterRequestId c
 {
     std::unique_lock uniqueLock(_jobMutex);
 
-    auto finishedJobsIter = std::ranges::find_if(_finishedJobs, [&](PersisterRequestResult const& job) { return job->getRequestId() == id; });
-    if (finishedJobsIter != _finishedJobs.end()) {
+    auto finishedJobsIter = std::ranges::find_if(_finishedRequests, [&](PersisterRequestResult const& job) { return job->getRequestId() == id; });
+    if (finishedJobsIter != _finishedRequests.end()) {
         auto resultCopy = *finishedJobsIter;
-        _finishedJobs.erase(finishedJobsIter);
+        _finishedRequests.erase(finishedJobsIter);
         return resultCopy;
     }
     THROW_NOT_IMPLEMENTED();
@@ -85,10 +87,10 @@ PersisterRequestError _PersisterWorker::fetchJobError(PersisterRequestId const& 
 {
     std::unique_lock uniqueLock(_jobMutex);
 
-    auto jobsErrorsIter = std::ranges::find_if(_jobErrors, [&](PersisterRequestError const& job) { return job->getRequestId() == id; });
-    if (jobsErrorsIter != _jobErrors.end()) {
+    auto jobsErrorsIter = std::ranges::find_if(_requestErrors, [&](PersisterRequestError const& job) { return job->getRequestId() == id; });
+    if (jobsErrorsIter != _requestErrors.end()) {
         auto resultCopy = *jobsErrorsIter;
-        _jobErrors.erase(jobsErrorsIter);
+        _requestErrors.erase(jobsErrorsIter);
         return resultCopy;
     }
     THROW_NOT_IMPLEMENTED();
@@ -100,55 +102,58 @@ std::vector<PersisterErrorInfo> _PersisterWorker::fetchAllErrorInfos(SenderId co
 
     std::vector<PersisterErrorInfo> result;
     std::deque<PersisterRequestError> filteredErrorJobs;
-    for (auto const& errorJob : _jobErrors) {
+    for (auto const& errorJob : _requestErrors) {
         if (errorJob->getSenderId() == senderId) {
             result.emplace_back(errorJob->getErrorInfo());
         } else {
             filteredErrorJobs.emplace_back(errorJob);
         }
     }
-    _jobErrors = filteredErrorJobs;
+    _requestErrors = filteredErrorJobs;
     return result;
 }
 
 void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
 {
-    if (_openJobs.empty()) {
+    if (_openRequests.empty()) {
         return;
     }
 
-    while (!_openJobs.empty()) {
+    while (!_openRequests.empty()) {
 
-        auto request = _openJobs.front();
-        _openJobs.pop_front();
+        auto request = _openRequests.front();
+        _openRequests.pop_front();
 
-        _inProgressJobs.push_back(request);
+        _inProgressRequests.push_back(request);
 
         std::variant<PersisterRequestResult, PersisterRequestError> processingResult;
-        if (auto const& saveToFileRequest = std::dynamic_pointer_cast<_SaveToFileRequest>(request)) {
-            processingResult = processRequest(lock, saveToFileRequest);
+        if (auto const& concreteRequest = std::dynamic_pointer_cast<_SaveToFileRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
         }
-        if (auto const& loadFromFileRequest = std::dynamic_pointer_cast<_ReadFromFileRequest>(request)) {
-            processingResult = processRequest(lock, loadFromFileRequest);
+        if (auto const& concreteRequest = std::dynamic_pointer_cast<_ReadFromFileRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
         }
-        if (auto const& loginRequest = std::dynamic_pointer_cast<_LoginRequest>(request)) {
-            processingResult = processRequest(lock, loginRequest);
+        if (auto const& concreteRequest = std::dynamic_pointer_cast<_LoginRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
         }
-        if (auto const& getNetworkResourcesRequest = std::dynamic_pointer_cast<_GetNetworkResourcesRequest>(request)) {
-            processingResult = processRequest(lock, getNetworkResourcesRequest);
+        if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetNetworkResourcesRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        }
+        if (auto const& concreteRequest = std::dynamic_pointer_cast<_DownloadNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
         }
         auto inProgressJobsIter = std::ranges::find_if(
-            _inProgressJobs, [&](PersisterRequest const& otherRequest) { return otherRequest->getRequestId() == request->getRequestId(); });
-        _inProgressJobs.erase(inProgressJobsIter);
+            _inProgressRequests, [&](PersisterRequest const& otherRequest) { return otherRequest->getRequestId() == request->getRequestId(); });
+        _inProgressRequests.erase(inProgressJobsIter);
 
         if (std::holds_alternative<PersisterRequestResult>(processingResult)) {
             if (request->getSenderInfo().wishResultData) {
-                _finishedJobs.emplace_back(std::get<PersisterRequestResult>(processingResult));
+                _finishedRequests.emplace_back(std::get<PersisterRequestResult>(processingResult));
             }
         }
         if (std::holds_alternative<PersisterRequestError>(processingResult)) {
             if (request->getSenderInfo().wishErrorInfo) {
-                _jobErrors.emplace_back(std::get<PersisterRequestError>(processingResult));
+                _requestErrors.emplace_back(std::get<PersisterRequestError>(processingResult));
             }
         }
     }
@@ -275,4 +280,59 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     }
 
     return std::make_shared<_GetNetworkResourcesRequestResult>(request->getRequestId(), data);
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    DownloadNetworkResourceRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+    DownloadNetworkResourceResultData resultData;
+    resultData.resourceName = requestData.resourceName;
+    resultData.resourceVersion = requestData.resourceVersion;
+    resultData.resourceType = requestData.resourceType;
+
+    std::string dataTypeString = requestData.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
+    std::optional<DeserializedSimulation> cachedSimulation;
+    if (requestData.resourceType == NetworkResourceType_Simulation) {
+        cachedSimulation = requestData.downloadCache->find(requestData.resourceId);
+    }
+    SerializedSimulation serializedSim;
+    if (!cachedSimulation.has_value()) {
+        if (!NetworkService::downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, requestData.resourceId)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to download " + dataTypeString + "."});
+        }
+    }
+
+    if (requestData.resourceType == NetworkResourceType_Simulation) {
+        DeserializedSimulation deserializedSimulation;
+        if (!cachedSimulation.has_value()) {
+            if (!SerializerService::deserializeSimulationFromStrings(deserializedSimulation, serializedSim)) {
+                return std::make_shared<_PersisterRequestError>(
+                    request->getRequestId(),
+                    request->getSenderInfo().senderId,
+                    PersisterErrorInfo{"Failed to load simulation. Your program version may not match."});
+            }
+            requestData.downloadCache->insertOrAssign(requestData.resourceId, deserializedSimulation);
+        } else {
+            log(Priority::Important, "browser: get resource with id=" + requestData.resourceId + " from simulation cache");
+            std::swap(deserializedSimulation, *cachedSimulation);
+            NetworkService::incDownloadCounter(requestData.resourceId);
+        }
+        resultData.resourceData.emplace<DeserializedSimulation>(std::move(deserializedSimulation));
+    } else {
+        std::vector<uint8_t> genome;
+        if (!SerializerService::deserializeGenomeFromString(genome, serializedSim.mainData)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(),
+                request->getSenderInfo().senderId,
+                PersisterErrorInfo{"Failed to load genome. Your program version may not match."});
+        }
+        resultData.resourceData = GenomeDescriptionService::convertBytesToDescription(genome);
+    }
+
+    return std::make_shared<_DownloadNetworkResourceRequestResult>(request->getRequestId(), resultData);
 }

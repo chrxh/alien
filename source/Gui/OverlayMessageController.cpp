@@ -74,6 +74,21 @@ void OverlayMessageController::processLoadingBar()
         drawList->AddRectFilled(
             ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2},
             ImColor::HSV(0.66f, 1.0f, 0.25f, 0.8f));
+        //drawList->AddRectFilledMultiColor(
+        //    ImVec2{center.x - width / 2, center.y - height / 2},
+        //    ImVec2{center.x + width / 2, center.y},
+        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 1.0f),
+        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 1.0f),
+        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 0.0f),
+        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 0.0f));
+
+        //drawList->AddRectFilledMultiColor(
+        //    ImVec2{center.x - width / 2, center.y},
+        //    ImVec2{center.x + width / 2, center.y + height / 2},
+        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 0.0f),
+        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 0.0f),
+        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 1.0f),
+        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 1.0f));
 
         auto progressWidth = width * 2 / 5;
         auto progressStart = (toInt(duration) / 10 + toInt(width - progressWidth)) % toInt(width);
@@ -82,10 +97,10 @@ void OverlayMessageController::processLoadingBar()
             drawList->AddRectFilledMultiColor(
                 ImVec2{center.x - width / 2 + toFloat(progressStart), center.y - height / 2},
                 ImVec2{center.x - width / 2 + toFloat(progressEnd), center.y + height / 2},
-                ImColor::HSV(0.66f, 0.9f, 1.0f, 1.0f),
-                ImColor::HSV(0.66f, 0.9f, 0.6f, 1.0f),
-                ImColor::HSV(0.66f, 0.9f, 0.2f, 1.0f),
-                ImColor::HSV(0.66f, 0.9f, 0.6f, 1.0f));
+                ImColor::HSV(0.66f, 0.8f, 1.0f, 1.0f),
+                ImColor::HSV(0.66f, 0.8f, 0.6f, 1.0f),
+                ImColor::HSV(0.66f, 0.8f, 0.2f, 1.0f),
+                ImColor::HSV(0.66f, 0.8f, 0.6f, 1.0f));
         } else {
             {
                 auto factor = toFloat(progressEnd) / progressWidth;
@@ -94,10 +109,10 @@ void OverlayMessageController::processLoadingBar()
                 drawList->AddRectFilledMultiColor(
                     ImVec2{center.x - width / 2, center.y - height / 2},
                     ImVec2{center.x - width / 2 + toFloat(progressEnd), center.y + height / 2},
-                    ImColor::HSV(0.66f, 0.9f, brightness1, 1.0f),
-                    ImColor::HSV(0.66f, 0.9f, 0.6f, 1.0f),
-                    ImColor::HSV(0.66f, 0.9f, 0.2f, 1.0f),
-                    ImColor::HSV(0.66f, 0.9f, brightness2, 1.0f));
+                    ImColor::HSV(0.66f, 0.8f, brightness1, 1.0f),
+                    ImColor::HSV(0.66f, 0.8f, 0.6f, 1.0f),
+                    ImColor::HSV(0.66f, 0.8f, 0.2f, 1.0f),
+                    ImColor::HSV(0.66f, 0.8f, brightness2, 1.0f));
             }
             {
                 auto factor = (width - toFloat(progressStart)) / progressWidth;
@@ -106,14 +121,14 @@ void OverlayMessageController::processLoadingBar()
                 drawList->AddRectFilledMultiColor(
                     ImVec2{center.x - width / 2 + toFloat(progressStart), center.y - height / 2},
                     ImVec2{center.x + width / 2, center.y + height / 2},
-                    ImColor::HSV(0.66f, 0.9f, 1.0f, 1.0f),
-                    ImColor::HSV(0.66f, 0.9f, brightness3, 1.0f),
-                    ImColor::HSV(0.66f, 0.9f, brightness4, 1.0f),
-                    ImColor::HSV(0.66f, 0.9f, 0.6f, 1.0f));
+                    ImColor::HSV(0.66f, 0.8f, 1.0f, 1.0f),
+                    ImColor::HSV(0.66f, 0.8f, brightness3, 1.0f),
+                    ImColor::HSV(0.66f, 0.8f, brightness4, 1.0f),
+                    ImColor::HSV(0.66f, 0.8f, 0.6f, 1.0f));
             }
         }
         drawList->AddRect(
-            ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2}, ImColor::HSV(0.66f, 0.9f, 0.6f, 1.0f));
+            ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2}, ImColor::HSV(0.66f, 0.8f, 0.6f, 1.0f));
 
     } else {
         _progressBarRefTimepoint.reset();

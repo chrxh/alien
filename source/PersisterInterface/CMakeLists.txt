@@ -1,6 +1,9 @@
 
 add_library(PersisterInterface
     Definitions.h
+    DownloadCache.h
+    DownloadNetworkResourceRequestData.h
+    DownloadNetworkResourceResultData.h
     GetNetworkResourcesRequestData.h
     GetNetworkResourcesResultData.h
     LoginRequestData.h
