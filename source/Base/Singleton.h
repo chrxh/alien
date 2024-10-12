@@ -14,4 +14,4 @@ private: \
     ClassName(ClassName const&) = delete; \
     ClassName& operator=(ClassName const&) = delete; \
     ClassName(ClassName&&) = delete; \
-    ClassName& operator=(ClassName&&) = delete\
+    ClassName& operator=(ClassName&&) = delete
