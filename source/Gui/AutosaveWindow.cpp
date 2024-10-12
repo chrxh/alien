@@ -17,7 +17,7 @@ namespace
 }
 
 _AutosaveWindow::_AutosaveWindow(SimulationController const& simController, PersisterController const& persisterController)
-    : _AlienWindow("Autosave", "windows.autosave", false)
+    : _AlienWindow("Autosave (work in progress)", "windows.autosave", false)
     , _simController(simController)
     , _persisterController(persisterController)
 {
