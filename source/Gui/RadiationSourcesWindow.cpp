@@ -66,7 +66,7 @@ bool _RadiationSourcesWindow::processTab(int index)
     RadiationSource& origSource = origParameters.radiationSources[index];
 
     bool isOpen = true;
-    char name[18] = {};
+    char name[20] = {};
 
     snprintf(name, IM_ARRAYSIZE(name), "Source %01d", index + 1);
     if (ImGui::BeginTabItem(name, &isOpen, ImGuiTabItemFlags_None)) {
