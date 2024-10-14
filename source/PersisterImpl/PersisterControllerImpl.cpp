@@ -43,7 +43,7 @@ bool _PersisterControllerImpl::isBusy() const
 
 PersisterRequestState _PersisterControllerImpl::getRequestState(PersisterRequestId const& id) const
 {
-    return _worker->getJobState(id);
+    return _worker->getRequestState(id);
 }
 
 std::vector<PersisterErrorInfo> _PersisterControllerImpl::fetchAllErrorInfos(SenderId const& senderId)
@@ -104,6 +104,16 @@ PersisterRequestId _PersisterControllerImpl::scheduleDownloadNetworkResource(Sen
 DownloadNetworkResourceResultData _PersisterControllerImpl::fetchDownloadNetworkResourcesData(PersisterRequestId const& id)
 {
     return fetchData<_DownloadNetworkResourceRequestResult, DownloadNetworkResourceResultData>(id);
+}
+
+PersisterRequestId _PersisterControllerImpl::scheduleUploadNetworkResource(SenderInfo const& senderInfo, UploadNetworkResourceRequestData const& data)
+{
+    return scheduleRequest<_UploadNetworkResourceRequest>(senderInfo, data);
+}
+
+UploadNetworkResourceResultData _PersisterControllerImpl::fetchUploadNetworkResourcesData(PersisterRequestId const& id)
+{
+    return fetchData<_UploadNetworkResourceRequestResult, UploadNetworkResourceResultData>(id);
 }
 
 PersisterRequestId _PersisterControllerImpl::generateNewJobId()

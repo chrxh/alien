@@ -76,6 +76,7 @@
 #include "AutosaveWindow.h"
 #include "FileTransferController.h"
 #include "LoginController.h"
+#include "NetworkTransferController.h"
 
 namespace
 {
@@ -164,6 +165,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _autosaveWindow = std::make_shared<_AutosaveWindow>(_simController, _persisterController);
     OverlayMessageController::get().init(_persisterController);
     FileTransferController::get().init(_persisterController, _simController, _temporalControlWindow);
+    NetworkTransferController::get().init(_simController, _persisterController, _temporalControlWindow, _editorController, _browserWindow);
     LoginController::get().init(_simController, _persisterController, _activateUserDialog, _browserWindow);
 
     //cyclic references
@@ -763,6 +765,7 @@ void _MainWindow::processControllers()
     OverlayMessageController::get().process();
     DelayedExecutionController::get().process();
     FileTransferController::get().process();
+    NetworkTransferController::get().process();
     LoginController::get().process();
 }
 

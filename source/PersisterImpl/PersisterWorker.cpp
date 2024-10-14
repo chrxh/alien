@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <filesystem>
 
+#include <Fonts/IconsFontAwesome5.h>
+
 #include "Base/LoggingService.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/SerializerService.h"
@@ -16,10 +18,10 @@ _PersisterWorker::_PersisterWorker(SimulationController const& simController)
 
 void _PersisterWorker::runThreadLoop()
 {
-    std::unique_lock lock(_jobMutex);
+    std::unique_lock lock(_requestMutex);
     while (!_isShutdown.load()) {
         _conditionVariable.wait(lock);
-        processJobs(lock);
+        processRequests(lock);
     }
 }
 
@@ -36,14 +38,14 @@ void _PersisterWorker::shutdown()
 
 bool _PersisterWorker::isBusy() const
 {
-    std::unique_lock uniqueLock(_jobMutex);
+    std::unique_lock uniqueLock(_requestMutex);
 
     return !_openRequests.empty() || !_inProgressRequests.empty();
 }
 
-PersisterRequestState _PersisterWorker::getJobState(PersisterRequestId const& id) const
+PersisterRequestState _PersisterWorker::getRequestState(PersisterRequestId const& id) const
 {
-    std::unique_lock uniqueLock(_jobMutex);
+    std::unique_lock uniqueLock(_requestMutex);
 
     if (std::ranges::find_if(_openRequests, [&](PersisterRequest const& request) { return request->getRequestId() == id; }) != _openRequests.end()) {
         return PersisterRequestState::InQueue;
@@ -63,7 +65,7 @@ PersisterRequestState _PersisterWorker::getJobState(PersisterRequestId const& id
 void _PersisterWorker::addRequest(PersisterRequest const& job)
 {
     {
-        std::unique_lock uniqueLock(_jobMutex);
+        std::unique_lock uniqueLock(_requestMutex);
 
         _openRequests.emplace_back(job);
     }
@@ -72,7 +74,7 @@ void _PersisterWorker::addRequest(PersisterRequest const& job)
 
 PersisterRequestResult _PersisterWorker::fetchRequestResult(PersisterRequestId const& id)
 {
-    std::unique_lock uniqueLock(_jobMutex);
+    std::unique_lock uniqueLock(_requestMutex);
 
     auto finishedJobsIter = std::ranges::find_if(_finishedRequests, [&](PersisterRequestResult const& job) { return job->getRequestId() == id; });
     if (finishedJobsIter != _finishedRequests.end()) {
@@ -85,7 +87,7 @@ PersisterRequestResult _PersisterWorker::fetchRequestResult(PersisterRequestId c
 
 PersisterRequestError _PersisterWorker::fetchJobError(PersisterRequestId const& id)
 {
-    std::unique_lock uniqueLock(_jobMutex);
+    std::unique_lock uniqueLock(_requestMutex);
 
     auto jobsErrorsIter = std::ranges::find_if(_requestErrors, [&](PersisterRequestError const& job) { return job->getRequestId() == id; });
     if (jobsErrorsIter != _requestErrors.end()) {
@@ -98,7 +100,7 @@ PersisterRequestError _PersisterWorker::fetchJobError(PersisterRequestId const& 
 
 std::vector<PersisterErrorInfo> _PersisterWorker::fetchAllErrorInfos(SenderId const& senderId)
 {
-    std::unique_lock lock(_jobMutex);
+    std::unique_lock lock(_requestMutex);
 
     std::vector<PersisterErrorInfo> result;
     std::deque<PersisterRequestError> filteredErrorJobs;
@@ -113,7 +115,7 @@ std::vector<PersisterErrorInfo> _PersisterWorker::fetchAllErrorInfos(SenderId co
     return result;
 }
 
-void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
+void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
 {
     if (_openRequests.empty()) {
         return;
@@ -140,6 +142,9 @@ void _PersisterWorker::processJobs(std::unique_lock<std::mutex>& lock)
             processingResult = processRequest(lock, concreteRequest);
         }
         if (auto const& concreteRequest = std::dynamic_pointer_cast<_DownloadNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        }
+        if (auto const& concreteRequest = std::dynamic_pointer_cast<_UploadNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
         }
         auto inProgressJobsIter = std::ranges::find_if(
@@ -335,4 +340,95 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     }
 
     return std::make_shared<_DownloadNetworkResourceRequestResult>(request->getRequestId(), resultData);
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    UploadNetworkResourceRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+    DownloadNetworkResourceResultData resultData;
+
+    std::string mainData;
+    std::string settings;
+    std::string statistics;
+    IntVector2D size;
+    int numObjects = 0;
+
+    auto resourceType = std::holds_alternative<UploadNetworkResourceRequestData::SimulationData>(requestData.data) ? NetworkResourceType_Simulation
+                                                                                                                   : NetworkResourceType_Genome;
+    DeserializedSimulation deserializedSim;
+    if (resourceType == NetworkResourceType_Simulation) {
+        try {
+            auto simulationData = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data);
+            deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
+            deserializedSim.auxiliaryData.realTime = _simController->getRealTime();
+            deserializedSim.auxiliaryData.zoom = simulationData.zoom;
+            deserializedSim.auxiliaryData.center = simulationData.center;
+            deserializedSim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
+            deserializedSim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
+            deserializedSim.statistics = _simController->getStatisticsHistory().getCopiedData();
+            deserializedSim.mainData = _simController->getClusteredSimulationData();
+        } catch (...) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(),
+                request->getSenderInfo().senderId,
+                PersisterErrorInfo{"The simulation could not be uploaded because no valid data could be obtained from the GPU."});
+        }
+
+        SerializedSimulation serializedSim;
+        if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(),
+                request->getSenderInfo().senderId,
+                PersisterErrorInfo{"The simulation could not be serialized for uploading."});
+        }
+        mainData = serializedSim.mainData;
+        settings = serializedSim.auxiliaryData;
+        statistics = serializedSim.statistics;
+        size = {deserializedSim.auxiliaryData.generalSettings.worldSizeX, deserializedSim.auxiliaryData.generalSettings.worldSizeY};
+        numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
+    } else {
+        auto genome = std::get<UploadNetworkResourceRequestData::GenomeData>(requestData.data).description;
+        if (genome.cells.empty()) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The is no valid genome for upload selected."});
+        }
+        auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(genome);
+        numObjects = GenomeDescriptionService::getNumNodesRecursively(genomeData, true);
+
+        if (!SerializerService::serializeGenomeToString(mainData, genomeData)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for uploading."});
+        }
+    }
+
+    std::string resourceId;
+    if (!NetworkService::uploadResource(
+            resourceId,
+            requestData.folderName + requestData.resourceWithoutFolderName,
+            requestData.resourceDescription,
+            size,
+            numObjects,
+            mainData,
+            settings,
+            statistics,
+            resourceType,
+            requestData.workspaceType)) {
+        std::string dataTypeString = resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(),
+            request->getSenderInfo().senderId,
+            PersisterErrorInfo{
+                "Failed to upload " + dataTypeString
+                + ".\n\nPossible reasons:\n\n" ICON_FA_CHEVRON_RIGHT " The server is not reachable.\n\n" ICON_FA_CHEVRON_RIGHT
+                  " The total size of your uploads exceeds the allowed storage limit."});
+    }
+    if (resourceType == NetworkResourceType_Simulation) {
+        requestData.downloadCache->insertOrAssign(resourceId, deserializedSim);
+    }
+
+    return std::make_shared<_UploadNetworkResourceRequestResult>(request->getRequestId(), UploadNetworkResourceResultData{});
 }

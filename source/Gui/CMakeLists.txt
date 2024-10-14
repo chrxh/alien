@@ -79,6 +79,8 @@ PUBLIC
     MultiplierWindow.h
     NetworkSettingsDialog.cpp
     NetworkSettingsDialog.h
+    NetworkTransferController.cpp
+    NetworkTransferController.h
     NewSimulationDialog.cpp
     NewSimulationDialog.h
     NewPasswordDialog.cpp
