@@ -37,6 +37,9 @@ public:
     PersisterRequestId scheduleDownloadNetworkResource(SenderInfo const& senderInfo, DownloadNetworkResourceRequestData const& data) override;
     DownloadNetworkResourceResultData fetchDownloadNetworkResourcesData(PersisterRequestId const& id) override;
 
+    PersisterRequestId scheduleUploadNetworkResource(SenderInfo const& senderInfo, UploadNetworkResourceRequestData const& data) override;
+    UploadNetworkResourceResultData fetchUploadNetworkResourcesData(PersisterRequestId const& id) override;
+
 private:
     static auto constexpr MaxWorkerThreads = 4;
 

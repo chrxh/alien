@@ -5,12 +5,13 @@
 #include "PersisterInterface/PersisterRequestId.h"
 
 #include "Definitions.h"
+#include "Base/Singleton.h"
 
 class FileTransferController
 {
-public:
-    static FileTransferController& get();
+    MAKE_SINGLETON(FileTransferController);
 
+public:
     void init(PersisterController const& persisterController, SimulationController const& simController, TemporalControlWindow const& temporalControlWindow);
     
     void onOpenSimulation();

@@ -20,7 +20,9 @@ add_library(PersisterInterface
     SenderId.h
     SenderInfo.h
     TaskProcessor.cpp
-    TaskProcessor.h)
+    TaskProcessor.h
+    UploadNetworkResourceRequestData.h
+    UploadNetworkResourceResultData.h)
 
 target_link_libraries(PersisterInterface Base)
 

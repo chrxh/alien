@@ -43,6 +43,7 @@
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginController.h"
+#include "NetworkTransferController.h"
 #include "PersisterInterface/TaskProcessor.h"
 
 namespace
@@ -74,7 +75,6 @@ _BrowserWindow::_BrowserWindow(
 {
     _downloadCache = std::make_shared<_DownloadCache>();
     _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
-    _downloadProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
 
     auto& settings = GlobalSettings::get();
     _currentWorkspace.resourceType = settings.getInt("windows.browser.resource type", _currentWorkspace.resourceType);
@@ -1226,7 +1226,6 @@ void _BrowserWindow::processActivated()
 void _BrowserWindow::processPendingRequestIds()
 {
     _refreshProcessor->process();
-    _downloadProcessor->process();
 }
 
 void _BrowserWindow::createTreeTOs(Workspace& workspace)
@@ -1261,70 +1260,13 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
     printOverlayMessage("Downloading ...");
     ++leaf.rawTO->numDownloads;
 
-    _downloadProcessor->executeTask(
-        [&](auto const& senderId) {
-            return _persisterController->scheduleDownloadNetworkResource(
-                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true},
-                DownloadNetworkResourceRequestData{
-                    .resourceId = leaf.rawTO->id,
-                    .resourceName = leaf.leafName,
-                    .resourceVersion = leaf.rawTO->version,
-                    .resourceType = _currentWorkspace.resourceType,
-                    .downloadCache = _downloadCache});
-        },
-        [&](auto const& requestId) {
-            auto data = _persisterController->fetchDownloadNetworkResourcesData(requestId);
 
-        if (data.resourceType == NetworkResourceType_Simulation) {
-                _persisterController->shutdown();
-                _simController->closeSimulation();
-                std::optional<std::string> errorMessage;
-                auto const& deserializedSimulation = std::get<DeserializedSimulation>(data.resourceData);
-                try {
-                    _simController->newSimulation(
-                        leaf.leafName,
-                        deserializedSimulation.auxiliaryData.timestep,
-                        deserializedSimulation.auxiliaryData.generalSettings,
-                        deserializedSimulation.auxiliaryData.simulationParameters);
-                    _simController->setRealTime(deserializedSimulation.auxiliaryData.realTime);
-                    _simController->setClusteredSimulationData(deserializedSimulation.mainData);
-                    _simController->setStatisticsHistory(deserializedSimulation.statistics);
-                } catch (CudaMemoryAllocationException const& exception) {
-                    errorMessage = exception.what();
-                } catch (...) {
-                    errorMessage = "Failed to load simulation.";
-                }
-                if (errorMessage) {
-                    showMessage("Error", *errorMessage);
-                    _simController->closeSimulation();
-                    _simController->newSimulation(
-                        leaf.leafName,
-                        deserializedSimulation.auxiliaryData.timestep,
-                        deserializedSimulation.auxiliaryData.generalSettings,
-                        deserializedSimulation.auxiliaryData.simulationParameters);
-                }
-                _persisterController->restart();
-
-                Viewport::setCenterInWorldPos(deserializedSimulation.auxiliaryData.center);
-                Viewport::setZoomFactor(deserializedSimulation.auxiliaryData.zoom);
-                _temporalControlWindow->onSnapshot();
-            } else {
-                _editorController->setOn(true);
-                _editorController->getGenomeEditorWindow()->openTab(std::get<GenomeDescription>(data.resourceData));
-            }
-            if (VersionChecker::isVersionNewer(data.resourceVersion)) {
-                std::string dataTypeString = data.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
-                MessageDialog::get().information(
-                    "Warning",
-                    "The download was successful but the " + dataTypeString
-                        + " was generated using a more recent\n"
-                          "version of ALIEN. Consequently, the "
-                        + dataTypeString
-                        + "might not function as expected.\n"
-                          "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
-            }
-        },
-        [](auto const& errors) { MessageDialog::get().information("Error", errors); });
+    NetworkTransferController::get().onDownload(DownloadNetworkResourceRequestData{
+        .resourceId = leaf.rawTO->id,
+        .resourceName = leaf.leafName,
+        .resourceVersion = leaf.rawTO->version,
+        .resourceType = _currentWorkspace.resourceType,
+        .downloadCache = _downloadCache});
 }
 
 void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)

@@ -7,6 +7,7 @@
 #include "PersisterInterface/PersisterRequestId.h"
 #include "PersisterInterface/SenderInfo.h"
 #include "PersisterInterface/SaveSimulationRequestData.h"
+#include "PersisterInterface/UploadNetworkResourceRequestData.h"
 
 class _PersisterRequest
 {
@@ -63,3 +64,6 @@ using GetNetworkResourcesRequest = std::shared_ptr<_GetNetworkResourcesRequest>;
 
 using _DownloadNetworkResourceRequest = _ConcreteRequest<DownloadNetworkResourceRequestData>;
 using DownloadNetworkResourceRequest = std::shared_ptr<_DownloadNetworkResourceRequest>;
+
+using _UploadNetworkResourceRequest = _ConcreteRequest<UploadNetworkResourceRequestData>;
+using UploadNetworkResourceRequest = std::shared_ptr<_UploadNetworkResourceRequest>;

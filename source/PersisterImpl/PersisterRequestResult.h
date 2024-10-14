@@ -52,3 +52,6 @@ using GetNetworkResourcesRequestResult = std::shared_ptr<_GetNetworkResourcesReq
 
 using _DownloadNetworkResourceRequestResult = _ConcreteRequestResult<DownloadNetworkResourceResultData>;
 using DownloadNetworkResourceRequestResult = std::shared_ptr<_DownloadNetworkResourceRequestResult>;
+
+using _UploadNetworkResourceRequestResult = _ConcreteRequestResult<UploadNetworkResourceResultData>;
+using UploadNetworkResourceRequestResult = std::shared_ptr<_UploadNetworkResourceRequestResult>;

@@ -21,6 +21,8 @@
 #include "SaveSimulationRequestData.h"
 #include "SenderId.h"
 #include "SenderInfo.h"
+#include "UploadNetworkResourceRequestData.h"
+#include "UploadNetworkResourceResultData.h"
 
 class _PersisterController
 {
@@ -52,4 +54,7 @@ public:
 
     virtual PersisterRequestId scheduleDownloadNetworkResource(SenderInfo const& senderInfo, DownloadNetworkResourceRequestData const& data) = 0;
     virtual DownloadNetworkResourceResultData fetchDownloadNetworkResourcesData(PersisterRequestId const& id) = 0;
+
+    virtual PersisterRequestId scheduleUploadNetworkResource(SenderInfo const& senderInfo, UploadNetworkResourceRequestData const& data) = 0;
+    virtual UploadNetworkResourceResultData fetchUploadNetworkResourcesData(PersisterRequestId const& id) = 0;
 };

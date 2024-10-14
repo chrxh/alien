@@ -20,6 +20,7 @@
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginDialog.h"
+#include "NetworkTransferController.h"
 #include "SerializationHelperService.h"
 
 namespace
@@ -143,56 +144,11 @@ void _UploadSimulationDialog::onUpload()
 {
     printOverlayMessage("Uploading ...");
 
-    delayedExecution([=, this] {
-        std::string mainData;
-        std::string settings;
-        std::string statistics;
-        IntVector2D size;
-        int numObjects = 0;
-
-        DeserializedSimulation deserializedSim;
-        if (_resourceType == NetworkResourceType_Simulation) {
-            deserializedSim = SerializationHelperService::getDeserializedSerialization(_simController);
-
-            SerializedSimulation serializedSim;
-            if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
-                MessageDialog::get().information(
-                    "Upload simulation", "The simulation could not be serialized for uploading.");
-                return;
-            }
-            mainData = serializedSim.mainData;
-            settings = serializedSim.auxiliaryData;
-            statistics = serializedSim.statistics;
-            size = {deserializedSim.auxiliaryData.generalSettings.worldSizeX, deserializedSim.auxiliaryData.generalSettings.worldSizeY};
-            numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
-        } else {
-            auto genome = _genomeEditorWindow->getCurrentGenome();
-            if (genome.cells.empty()) {
-                showMessage("Upload genome", "The is no valid genome in the genome editor selected.");
-                return;
-            }
-            auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(genome);
-            numObjects = GenomeDescriptionService::getNumNodesRecursively(genomeData, true);
-
-            if (!SerializerService::serializeGenomeToString(mainData, genomeData)) {
-                showMessage("Upload genome", "The genome could not be serialized for uploading.");
-                return;
-            }
-        }
-
-        std::string resourceId;
-        auto workspaceType = _share ? WorkspaceType_Public : WorkspaceType_Private;
-        if (!NetworkService::uploadResource(
-                resourceId, _folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, workspaceType)) {
-            showMessage(
-                "Error",
-                "Failed to upload " + BrowserDataTypeToLowerString.at(_resourceType)
-                    + ".\n\nPossible reasons:\n\n" ICON_FA_CHEVRON_RIGHT " The server is not reachable.\n\n" ICON_FA_CHEVRON_RIGHT " The total size of your uploads exceeds the allowed storage limit.");
-            return;
-        }
-        if (_resourceType == NetworkResourceType_Simulation) {
-            _browserWindow->getSimulationCache()->insertOrAssign(resourceId, deserializedSim);
-        }
-        _browserWindow->onRefresh();
-    });
+    auto workspaceType = _share ? WorkspaceType_Public : WorkspaceType_Private;
+    NetworkTransferController::get().onUpload(UploadNetworkResourceRequestData{
+        .folderName = _folder,
+        .resourceWithoutFolderName = _resourceName,
+        .resourceDescription = _resourceDescription,
+        .workspaceType = workspaceType,
+        .downloadCache = _browserWindow->getSimulationCache()});
 }

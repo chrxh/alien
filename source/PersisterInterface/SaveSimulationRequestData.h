@@ -7,6 +7,6 @@
 struct SaveSimulationRequestData
 {
     std::string filename;
-    float zoom;
+    float zoom = 1.0f;
     RealVector2D center;
 };

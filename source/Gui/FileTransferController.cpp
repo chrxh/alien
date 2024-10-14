@@ -15,12 +15,6 @@ namespace
     auto constexpr FileTransferSenderId = "FileTransfer";
 }
 
-FileTransferController& FileTransferController::get()
-{
-    static FileTransferController instance;
-    return instance;
-}
-
 void FileTransferController::init(
     PersisterController const& persisterController,
     SimulationController const& simController,
