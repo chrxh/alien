@@ -44,7 +44,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 auto const& deserializedSimulation = std::get<DeserializedSimulation>(data.resourceData);
                 try {
                     _simController->newSimulation(
-                        requestData.resourceName,
+                        data.resourceName,
                         deserializedSimulation.auxiliaryData.timestep,
                         deserializedSimulation.auxiliaryData.generalSettings,
                         deserializedSimulation.auxiliaryData.simulationParameters);
@@ -60,7 +60,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                     showMessage("Error", *errorMessage);
                     _simController->closeSimulation();
                     _simController->newSimulation(
-                        requestData.resourceName,
+                        data.resourceName,
                         deserializedSimulation.auxiliaryData.timestep,
                         deserializedSimulation.auxiliaryData.generalSettings,
                         deserializedSimulation.auxiliaryData.simulationParameters);
