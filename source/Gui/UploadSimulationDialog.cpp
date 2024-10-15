@@ -144,11 +144,19 @@ void _UploadSimulationDialog::onUpload()
 {
     printOverlayMessage("Uploading ...");
 
+    auto data = [&]() -> std::variant<UploadNetworkResourceRequestData::SimulationData, UploadNetworkResourceRequestData::GenomeData> {
+        if (_resourceType == NetworkResourceType_Simulation) {
+            return UploadNetworkResourceRequestData::SimulationData{.zoom = Viewport::getZoomFactor(), .center = Viewport::getCenterInWorldPos()};
+        } else {
+            return UploadNetworkResourceRequestData::GenomeData{.description = _genomeEditorWindow->getCurrentGenome()};
+        }
+    }();
     auto workspaceType = _share ? WorkspaceType_Public : WorkspaceType_Private;
     NetworkTransferController::get().onUpload(UploadNetworkResourceRequestData{
         .folderName = _folder,
         .resourceWithoutFolderName = _resourceName,
         .resourceDescription = _resourceDescription,
         .workspaceType = workspaceType,
-        .downloadCache = _browserWindow->getSimulationCache()});
+        .downloadCache = _browserWindow->getSimulationCache(),
+        .data = data});
 }
