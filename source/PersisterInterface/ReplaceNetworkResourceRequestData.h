@@ -6,11 +6,9 @@
 #include "Network/Definitions.h"
 #include "DownloadCache.h"
 
-struct UploadNetworkResourceRequestData
+struct ReplaceNetworkResourceRequestData
 {
-    std::string folderName;
-    std::string resourceWithoutFolderName;
-    std::string resourceDescription;
+    std::string resourceId;
     WorkspaceType workspaceType = WorkspaceType_Public;
     DownloadCache downloadCache;
 

@@ -25,6 +25,7 @@ void NetworkTransferController::init(
     _browserWindow = browserWindow;
     _downloadProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
     _uploadProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
+    _replaceProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
 }
 
 void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData const& requestData)
@@ -103,8 +104,23 @@ void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const&
         [](auto const& errors) { MessageDialog::get().information("Error", errors); });
 }
 
+void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData const& requestData)
+{
+    _replaceProcessor->executeTask(
+        [&](auto const& senderId) {
+            return _persisterController->scheduleReplaceNetworkResource(
+                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
+        },
+        [&](auto const& requestId) {
+            _persisterController->fetchReplaceNetworkResourcesData(requestId);
+            _browserWindow->onRefresh();
+        },
+        [](auto const& errors) { MessageDialog::get().information("Error", errors); });
+}
+
 void NetworkTransferController::process()
 {
     _downloadProcessor->process();
     _uploadProcessor->process();
+    _replaceProcessor->process();
 }

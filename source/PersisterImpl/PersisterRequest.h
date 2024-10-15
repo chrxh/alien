@@ -5,6 +5,7 @@
 #include "PersisterInterface/LoginRequestData.h"
 #include "PersisterInterface/ReadSimulationRequestData.h"
 #include "PersisterInterface/PersisterRequestId.h"
+#include "PersisterInterface/ReplaceNetworkResourceRequestData.h"
 #include "PersisterInterface/SenderInfo.h"
 #include "PersisterInterface/SaveSimulationRequestData.h"
 #include "PersisterInterface/UploadNetworkResourceRequestData.h"
@@ -50,11 +51,11 @@ private:
 template<typename Data_t>
 using ConcreteRequest = std::shared_ptr<_ConcreteRequest<Data_t>>;
 
-using _SaveToFileRequest = _ConcreteRequest<SaveSimulationRequestData>;
-using SaveToFileRequest = std::shared_ptr<_SaveToFileRequest>;
+using _SaveSimulationRequest = _ConcreteRequest<SaveSimulationRequestData>;
+using SaveSimulationRequest = std::shared_ptr<_SaveSimulationRequest>;
 
-using _ReadFromFileRequest = _ConcreteRequest<ReadSimulationRequestData>;
-using ReadFromFileRequest = std::shared_ptr<_ReadFromFileRequest>;
+using _ReadSimulationRequest = _ConcreteRequest<ReadSimulationRequestData>;
+using ReadSimulationRequest = std::shared_ptr<_ReadSimulationRequest>;
 
 using _LoginRequest = _ConcreteRequest<LoginRequestData>;
 using LoginRequest = std::shared_ptr<_LoginRequest>;
@@ -67,3 +68,6 @@ using DownloadNetworkResourceRequest = std::shared_ptr<_DownloadNetworkResourceR
 
 using _UploadNetworkResourceRequest = _ConcreteRequest<UploadNetworkResourceRequestData>;
 using UploadNetworkResourceRequest = std::shared_ptr<_UploadNetworkResourceRequest>;
+
+using _ReplaceNetworkResourceRequest = _ConcreteRequest<ReplaceNetworkResourceRequestData>;
+using ReplaceNetworkResourceRequest = std::shared_ptr<_ReplaceNetworkResourceRequest>;

@@ -58,22 +58,22 @@ PersisterErrorInfo _PersisterControllerImpl::fetchError(PersisterRequestId const
 
 PersisterRequestId _PersisterControllerImpl::scheduleSaveSimulationToFile(SenderInfo const& senderInfo, SaveSimulationRequestData const& data)
 {
-    return scheduleRequest<_SaveToFileRequest>(senderInfo, data);
+    return scheduleRequest<_SaveSimulationRequest>(senderInfo, data);
 }
 
-SavedSimulationResultData _PersisterControllerImpl::fetchSavedSimulationData(PersisterRequestId const& id)
+SaveSimulationResultData _PersisterControllerImpl::fetchSavedSimulationData(PersisterRequestId const& id)
 {
-    return fetchData<_SaveToFileRequestResult, SavedSimulationResultData>(id);
+    return fetchData<_SaveSimulationRequestResult, SaveSimulationResultData>(id);
 }
 
 PersisterRequestId _PersisterControllerImpl::scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data)
 {
-    return scheduleRequest<_ReadFromFileRequest>(senderInfo, data);
+    return scheduleRequest<_ReadSimulationRequest>(senderInfo, data);
 }
 
 ReadSimulationResultData _PersisterControllerImpl::fetchReadSimulationData(PersisterRequestId const& id)
 {
-    return fetchData<_ReadFromFileRequestResult, ReadSimulationResultData>(id);
+    return fetchData<_ReadSimulationRequestResult, ReadSimulationResultData>(id);
 }
 
 PersisterRequestId _PersisterControllerImpl::scheduleLogin(SenderInfo const& senderInfo, LoginRequestData const& data)
@@ -114,6 +114,16 @@ PersisterRequestId _PersisterControllerImpl::scheduleUploadNetworkResource(Sende
 UploadNetworkResourceResultData _PersisterControllerImpl::fetchUploadNetworkResourcesData(PersisterRequestId const& id)
 {
     return fetchData<_UploadNetworkResourceRequestResult, UploadNetworkResourceResultData>(id);
+}
+
+PersisterRequestId _PersisterControllerImpl::scheduleReplaceNetworkResource(SenderInfo const& senderInfo, ReplaceNetworkResourceRequestData const& data)
+{
+    return scheduleRequest<_ReplaceNetworkResourceRequest>(senderInfo, data);
+}
+
+ReplaceNetworkResourceResultData _PersisterControllerImpl::fetchReplaceNetworkResourcesData(PersisterRequestId const& id)
+{
+    return fetchData<_ReplaceNetworkResourceRequestResult, ReplaceNetworkResourceResultData>(id);
 }
 
 PersisterRequestId _PersisterControllerImpl::generateNewJobId()

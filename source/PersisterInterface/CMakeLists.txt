@@ -15,8 +15,10 @@ add_library(PersisterInterface
     PersisterRequestState.h
     ReadSimulationRequestData.h
     ReadSimulationResultData.h
+    ReplaceNetworkResourceRequestData.h
+    ReplaceNetworkResourceResultData.h
     SaveSimulationRequestData.h
-    SavedSimulationResultData.h
+    SaveSimulationResultData.h
     SenderId.h
     SenderInfo.h
     TaskProcessor.cpp

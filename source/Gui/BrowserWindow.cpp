@@ -1260,7 +1260,6 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
     printOverlayMessage("Downloading ...");
     ++leaf.rawTO->numDownloads;
 
-
     NetworkTransferController::get().onDownload(DownloadNetworkResourceRequestData{
         .resourceId = leaf.rawTO->id,
         .resourceName = leaf.leafName,
@@ -1274,57 +1273,18 @@ void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
     auto func = [&] {
         printOverlayMessage("Replacing ...");
 
-        delayedExecution([=, this] {
-            std::string mainData;
-            std::string settings;
-            std::string statistics;
-            IntVector2D worldSize;
-            int numObjects = 0;
-
-            DeserializedSimulation deserializedSim;
-            if (leaf.rawTO->resourceType == NetworkResourceType_Simulation) {
-                deserializedSim = SerializationHelperService::getDeserializedSerialization(_simController);
-
-                SerializedSimulation serializedSim;
-                if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
-                    MessageDialog::get().information("Replace simulation", "The simulation could not be serialized for replacing.");
-                    return;
-                }
-                mainData = serializedSim.mainData;
-                settings = serializedSim.auxiliaryData;
-                statistics = serializedSim.statistics;
-                worldSize = {deserializedSim.auxiliaryData.generalSettings.worldSizeX, deserializedSim.auxiliaryData.generalSettings.worldSizeY};
-                numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
+        auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::GenomeData> {
+            if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
+                return ReplaceNetworkResourceRequestData::SimulationData{.zoom = Viewport::getZoomFactor(), .center = Viewport::getCenterInWorldPos()};
             } else {
-                auto genome = _genomeEditorWindow.lock()->getCurrentGenome();
-                if (genome.cells.empty()) {
-                    showMessage("Replace genome", "The is no valid genome in the genome editor selected.");
-                    return;
-                }
-                auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(genome);
-                numObjects = GenomeDescriptionService::getNumNodesRecursively(genomeData, true);
-
-                if (!SerializerService::serializeGenomeToString(mainData, genomeData)) {
-                    showMessage("Replace genome", "The genome could not be serialized for replacing.");
-                    return;
-                }
+                return ReplaceNetworkResourceRequestData::GenomeData{.description = _genomeEditorWindow.lock()->getCurrentGenome()};
             }
-
-            if (!NetworkService::replaceResource(leaf.rawTO->id, worldSize, numObjects, mainData, settings, statistics)) {
-                std::string type = leaf.rawTO->resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
-                showMessage(
-                    "Error",
-                    "Failed to replace " + type
-                        + ".\n\n"
-                          "Possible reasons:\n\n" ICON_FA_CHEVRON_RIGHT " The server is not reachable.\n\n" ICON_FA_CHEVRON_RIGHT
-                          " The total size of your uploads exceeds the allowed storage limit.");
-                return;
-            }
-            if (leaf.rawTO->resourceType == NetworkResourceType_Simulation) {
-                getSimulationCache()->insertOrAssign(leaf.rawTO->id, deserializedSim);
-            }
-            onRefresh();
-        });
+        }();
+        NetworkTransferController::get().onReplace(ReplaceNetworkResourceRequestData{
+            .resourceId = leaf.rawTO->id,
+            .workspaceType = leaf.rawTO->workspaceType,
+            .downloadCache = getSimulationCache(),
+            .data = data});
     };
     MessageDialog::get().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
 }

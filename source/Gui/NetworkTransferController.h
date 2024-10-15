@@ -7,6 +7,7 @@
 #include "PersisterInterface/PersisterRequestId.h"
 #include "PersisterInterface/DownloadNetworkResourceRequestData.h"
 #include "PersisterInterface/UploadNetworkResourceRequestData.h"
+#include "PersisterInterface/ReplaceNetworkResourceRequestData.h"
 
 #include "Definitions.h"
 
@@ -24,6 +25,7 @@ public:
 
     void onDownload(DownloadNetworkResourceRequestData const& requestData);
     void onUpload(UploadNetworkResourceRequestData const& requestData);
+    void onReplace(ReplaceNetworkResourceRequestData const& requestData);
 
     void process();
 
@@ -36,4 +38,5 @@ private:
 
     TaskProcessor _downloadProcessor;
     TaskProcessor _uploadProcessor;
+    TaskProcessor _replaceProcessor;
 };
