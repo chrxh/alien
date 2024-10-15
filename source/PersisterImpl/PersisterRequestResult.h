@@ -2,7 +2,7 @@
 
 #include "PersisterInterface/ReadSimulationResultData.h"
 #include "PersisterInterface/PersisterRequestId.h"
-#include "PersisterInterface/SavedSimulationResultData.h"
+#include "PersisterInterface/SaveSimulationResultData.h"
 
 class _PersisterRequestResult
 {
@@ -38,20 +38,10 @@ using PersisterRequestResult = std::shared_ptr<_PersisterRequestResult>;
 template <typename Data_t>
 using ConcreteRequestResult = std::shared_ptr<_ConcreteRequestResult<Data_t>>;
 
-using _SaveToFileRequestResult = _ConcreteRequestResult<SavedSimulationResultData>;
-using SaveToFileRequestResult = std::shared_ptr<_SaveToFileRequestResult>;
-
-using _ReadFromFileRequestResult = _ConcreteRequestResult<ReadSimulationResultData>;
-using ReadFromFileRequestResult = std::shared_ptr<_ReadFromFileRequestResult>;
-
+using _SaveSimulationRequestResult = _ConcreteRequestResult<SaveSimulationResultData>;
+using _ReadSimulationRequestResult = _ConcreteRequestResult<ReadSimulationResultData>;
 using _LoginRequestResult = _ConcreteRequestResult<LoginResultData>;
-using LoginRequestResult = std::shared_ptr<_LoginRequestResult>;
-
 using _GetNetworkResourcesRequestResult = _ConcreteRequestResult<GetNetworkResourcesResultData>;
-using GetNetworkResourcesRequestResult = std::shared_ptr<_GetNetworkResourcesRequestResult>;
-
 using _DownloadNetworkResourceRequestResult = _ConcreteRequestResult<DownloadNetworkResourceResultData>;
-using DownloadNetworkResourceRequestResult = std::shared_ptr<_DownloadNetworkResourceRequestResult>;
-
 using _UploadNetworkResourceRequestResult = _ConcreteRequestResult<UploadNetworkResourceResultData>;
-using UploadNetworkResourceRequestResult = std::shared_ptr<_UploadNetworkResourceRequestResult>;
+using _ReplaceNetworkResourceRequestResult = _ConcreteRequestResult<ReplaceNetworkResourceResultData>;

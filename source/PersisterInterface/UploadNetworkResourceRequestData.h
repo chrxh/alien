@@ -4,6 +4,7 @@
 
 #include "EngineInterface/GenomeDescriptions.h"
 #include "Network/Definitions.h"
+#include "DownloadCache.h"
 
 struct UploadNetworkResourceRequestData
 {

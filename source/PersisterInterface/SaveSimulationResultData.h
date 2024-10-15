@@ -3,7 +3,7 @@
 #include <chrono>
 #include <string>
 
-struct SavedSimulationResultData
+struct SaveSimulationResultData
 {
     std::string name;
     uint64_t timestep = 0;

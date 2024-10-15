@@ -17,7 +17,9 @@
 #include "PersisterErrorInfo.h"
 #include "PersisterRequestId.h"
 #include "PersisterRequestState.h"
-#include "SavedSimulationResultData.h"
+#include "ReplaceNetworkResourceRequestData.h"
+#include "ReplaceNetworkResourceResultData.h"
+#include "SaveSimulationResultData.h"
 #include "SaveSimulationRequestData.h"
 #include "SenderId.h"
 #include "SenderInfo.h"
@@ -41,7 +43,7 @@ public:
 
     //specific request
     virtual PersisterRequestId scheduleSaveSimulationToFile(SenderInfo const& senderInfo, SaveSimulationRequestData const& data) = 0;
-    virtual SavedSimulationResultData fetchSavedSimulationData(PersisterRequestId const& id) = 0;
+    virtual SaveSimulationResultData fetchSavedSimulationData(PersisterRequestId const& id) = 0;
 
     virtual PersisterRequestId scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data) = 0;
     virtual ReadSimulationResultData fetchReadSimulationData(PersisterRequestId const& id) = 0;
@@ -57,4 +59,7 @@ public:
 
     virtual PersisterRequestId scheduleUploadNetworkResource(SenderInfo const& senderInfo, UploadNetworkResourceRequestData const& data) = 0;
     virtual UploadNetworkResourceResultData fetchUploadNetworkResourcesData(PersisterRequestId const& id) = 0;
+
+    virtual PersisterRequestId scheduleReplaceNetworkResource(SenderInfo const& senderInfo, ReplaceNetworkResourceRequestData const& data) = 0;
+    virtual ReplaceNetworkResourceResultData fetchReplaceNetworkResourcesData(PersisterRequestId const& id) = 0;
 };
