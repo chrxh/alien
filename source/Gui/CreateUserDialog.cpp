@@ -61,7 +61,7 @@ void _CreateUserDialog::processIntern()
 
 void _CreateUserDialog::onCreateUser()
 {
-    if (NetworkService::createUser(_userName, _password, _email)) {
+    if (NetworkService::get().createUser(_userName, _password, _email)) {
         _activateUserDialog->open(_userName, _password, _userInfo);
     } else {
         MessageDialog::get().information(

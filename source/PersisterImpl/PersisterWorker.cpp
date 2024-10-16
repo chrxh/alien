@@ -256,7 +256,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     auto const& requestData = request->getData();
 
     LoginErrorCode errorCode;
-    if (!NetworkService::login(errorCode, requestData.userName, requestData.password, requestData.userInfo)) {
+    if (!NetworkService::get().login(errorCode, requestData.userName, requestData.password, requestData.userInfo)) {
         if (errorCode != LoginErrorCode_UnknownUser) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(),
@@ -274,17 +274,17 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 {
     UnlockGuard unlockGuard(lock);
 
-    NetworkService::refreshLogin();
+    NetworkService::get().refreshLogin();
 
     GetNetworkResourcesResultData data;
 
     auto withRetry = true;
-    bool success = NetworkService::getNetworkResources(data.resourceTOs, withRetry);
+    bool success = NetworkService::get().getNetworkResources(data.resourceTOs, withRetry);
     if (success) {
-        success &= NetworkService::getUserList(data.userTOs, withRetry);
+        success &= NetworkService::get().getUserList(data.userTOs, withRetry);
     }
-    if (success && NetworkService::getLoggedInUserName()) {
-        success &= NetworkService::getEmojiTypeByResourceId(data.emojiTypeByResourceId);
+    if (success && NetworkService::get().getLoggedInUserName()) {
+        success &= NetworkService::get().getEmojiTypeByResourceId(data.emojiTypeByResourceId);
     }
 
     if (!success) {
@@ -316,7 +316,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     }
     SerializedSimulation serializedSim;
     if (!cachedSimulation.has_value()) {
-        if (!NetworkService::downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, requestData.resourceId)) {
+        if (!NetworkService::get().downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, requestData.resourceId)) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to download " + dataTypeString + "."});
         }
@@ -335,7 +335,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         } else {
             log(Priority::Important, "browser: get resource with id=" + requestData.resourceId + " from simulation cache");
             std::swap(deserializedSimulation, *cachedSimulation);
-            NetworkService::incDownloadCounter(requestData.resourceId);
+            NetworkService::get().incDownloadCounter(requestData.resourceId);
         }
         resultData.resourceData.emplace<DeserializedSimulation>(std::move(deserializedSimulation));
     } else {
@@ -416,7 +416,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     }
 
     std::string resourceId;
-    if (!NetworkService::uploadResource(
+    if (!NetworkService::get().uploadResource(
             resourceId,
             requestData.folderName + requestData.resourceWithoutFolderName,
             requestData.resourceDescription,
@@ -503,7 +503,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         }
     }
 
-    if (!NetworkService::replaceResource(requestData.resourceId, worldSize, numObjects, mainData, settings, statistics)) {
+    if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData, settings, statistics)) {
 
         std::string dataTypeString = resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
         return std::make_shared<_PersisterRequestError>(
@@ -529,7 +529,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     GetUserNamesForEmojiResultData resultData;
     resultData.resourceId = requestData.resourceId;
     resultData.emojiType = requestData.emojiType;
-    if (!NetworkService::getUserNamesForResourceAndEmojiType(resultData.userNames, requestData.resourceId, requestData.emojiType)) {
+    if (!NetworkService::get().getUserNamesForResourceAndEmojiType(resultData.userNames, requestData.resourceId, requestData.emojiType)) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Could not load user names."});
     }
@@ -545,7 +545,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
     auto const& requestData = request->getData();
 
-    if (!NetworkService::deleteResource(requestData.resourceId)) {
+    if (!NetworkService::get().deleteResource(requestData.resourceId)) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to delete item. Please try again later."});
     }

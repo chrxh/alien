@@ -74,7 +74,7 @@ void _EditSimulationDialog::processForLeaf()
     if (AlienImGui::Button("OK")) {
         if (ValidationService::isStringValidForDatabase(_newName) && ValidationService::isStringValidForDatabase(_newDescription)) {
             delayedExecution([rawTO = rawTO, resourceTypeString = resourceTypeString, this] {
-                if (!NetworkService::editResource(rawTO->id, _newName, _newDescription)) {
+                if (!NetworkService::get().editResource(rawTO->id, _newName, _newDescription)) {
                     showMessage("Error", "Failed to edit " + resourceTypeString + ".");
                 }
                 _browserWindow->onRefresh();
@@ -110,7 +110,7 @@ void _EditSimulationDialog::processForFolder()
                 for (auto const& rawTO : _rawTOs) {
                     auto nameWithoutOldFolder = rawTO->resourceName.substr(_origFolderName.size() + 1);
                     auto newName = NetworkResourceService::concatenateFolderName({_newName, nameWithoutOldFolder}, false);
-                    if (!NetworkService::editResource(rawTO->id, newName, rawTO->description)) {
+                    if (!NetworkService::get().editResource(rawTO->id, newName, rawTO->description)) {
                         showMessage("Error", "Failed to change folder name.");
                         break;
                     }
