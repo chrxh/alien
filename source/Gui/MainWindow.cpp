@@ -747,7 +747,6 @@ void _MainWindow::processWindows()
 {
     _temporalControlWindow->process();
     _spatialControlWindow->process();
-    _simInteractionController->process();
     _statisticsWindow->process();
     _simulationParametersWindow->process();
     _logWindow->process();
@@ -763,6 +762,7 @@ void _MainWindow::processControllers()
     _autosaveController->process();
     _editorController->process();
     OverlayMessageController::get().process();
+    _simInteractionController->process();
     DelayedExecutionController::get().process();
     FileTransferController::get().process();
     NetworkTransferController::get().process();
