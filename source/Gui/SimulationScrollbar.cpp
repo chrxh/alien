@@ -49,7 +49,7 @@ void _SimulationScrollbar::processEvents(RealRect const& rect)
 {
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         if (doesMouseCursorIntersectSliderBar(rect)) {
-            _worldCenterForDragging = Viewport::getCenterInWorldPos();
+            _worldCenterForDragging = Viewport::get().getCenterInWorldPos();
         }
     }
     if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && _worldCenterForDragging) {
@@ -58,13 +58,13 @@ void _SimulationScrollbar::processEvents(RealRect const& rect)
         auto worldSize = _simulationFacade->getWorldSize();
         auto dragWorldDelta = RealVector2D{
             dragViewDelta.x / scrollbarSize.x * worldSize.x, dragViewDelta.y / scrollbarSize.y * worldSize.y};
-        auto centerInWorldPos = Viewport::getCenterInWorldPos();
+        auto centerInWorldPos = Viewport::get().getCenterInWorldPos();
         if (Orientation::Horizontal == _orientation) {
             centerInWorldPos.x = _worldCenterForDragging->x + dragWorldDelta.x;
         } else {
             centerInWorldPos.y = _worldCenterForDragging->y + dragWorldDelta.y;
         }
-        Viewport::setCenterInWorldPos(centerInWorldPos);
+        Viewport::get().setCenterInWorldPos(centerInWorldPos);
     }
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
         _worldCenterForDragging = std::nullopt;
@@ -78,7 +78,7 @@ RealRect _SimulationScrollbar::calcSliderbarRect(RealRect const& scrollbarRect) 
         Orientation::Horizontal == _orientation ? _simulationFacade->getWorldSize().x : _simulationFacade->getWorldSize().y;
     auto size = Orientation::Horizontal == _orientation ? size2d.x : size2d.y;
 
-    auto worldRect = Viewport::getVisibleWorldRect();
+    auto worldRect = Viewport::get().getVisibleWorldRect();
     auto startWorldPos = Orientation::Horizontal == _orientation ? worldRect.topLeft.x : worldRect.topLeft.y;
     auto endWorldPos = Orientation::Horizontal == _orientation ? worldRect.bottomRight.x : worldRect.bottomRight.y;
 

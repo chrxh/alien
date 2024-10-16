@@ -933,7 +933,7 @@ void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
 
 void _GenomeEditorWindow::onCreateSpore()
 {
-    auto pos = Viewport::getCenterInWorldPos();
+    auto pos = Viewport::get().getCenterInWorldPos();
     pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
 

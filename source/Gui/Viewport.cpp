@@ -7,12 +7,6 @@
 
 #include "WindowController.h"
 
-SimulationFacade Viewport::_simulationFacade;
-float Viewport::_zoomFactor = 1.0f;
-float Viewport::_zoomSensitivity = 1.07f;
-RealVector2D Viewport::_worldCenter;
-IntVector2D Viewport::_viewSize;
-
 void Viewport::init(SimulationFacade const& simulationFacade)
 {
     _viewSize = WindowController::getStartupWindowSize();

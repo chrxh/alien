@@ -1274,7 +1274,7 @@ void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
     auto func = [&] {
         auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::GenomeData> {
             if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
-                return ReplaceNetworkResourceRequestData::SimulationData{.zoom = Viewport::getZoomFactor(), .center = Viewport::getCenterInWorldPos()};
+                return ReplaceNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
             } else {
                 return ReplaceNetworkResourceRequestData::GenomeData{.description = _genomeEditorWindow.lock()->getCurrentGenome()};
             }

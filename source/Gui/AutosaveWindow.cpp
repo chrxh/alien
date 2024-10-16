@@ -184,7 +184,7 @@ void _AutosaveWindow::createSavepoint()
     printOverlayMessage("Creating save point ...");
     static int i = 0;
     auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
-    auto saveData = SaveSimulationRequestData{"d:\\test" + std::to_string(++i) + ".sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos()};
+    auto saveData = SaveSimulationRequestData{"d:\\test" + std::to_string(++i) + ".sim", Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
     auto jobId = _persisterFacade->scheduleSaveSimulationToFile(senderInfo, saveData);
 
     _savePoints.emplace_front(SavepointState::InQueue, jobId.value, "", "", 0);

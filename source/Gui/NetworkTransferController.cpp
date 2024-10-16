@@ -72,8 +72,8 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 }
                 _persisterFacade->restart();
 
-                Viewport::setCenterInWorldPos(deserializedSimulation.auxiliaryData.center);
-                Viewport::setZoomFactor(deserializedSimulation.auxiliaryData.zoom);
+                Viewport::get().setCenterInWorldPos(deserializedSimulation.auxiliaryData.center);
+                Viewport::get().setZoomFactor(deserializedSimulation.auxiliaryData.zoom);
                 _temporalControlWindow->onSnapshot();
             } else {
                 _editorController->setOn(true);

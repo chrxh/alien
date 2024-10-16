@@ -76,7 +76,7 @@ void _InspectorWindow::process()
             processParticle(std::get<ParticleDescription>(entity));
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto entityPos = Viewport::mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
+        auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         auto factor = StyleRepository::get().scale(1);
 
         drawList->AddLine(

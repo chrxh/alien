@@ -187,7 +187,7 @@ void _CreatorWindow::processIntern()
 void _CreatorWindow::onDrawing()
 {
     auto mousePos = ImGui::GetMousePos();
-    auto pos = Viewport::mapViewToWorldPosition({mousePos.x, mousePos.y});
+    auto pos = Viewport::get().mapViewToWorldPosition({mousePos.x, mousePos.y});
     if (!_drawingDataDescription.isEmpty()) {
         _simulationFacade->removeSelectedObjects(false);
     }
@@ -364,7 +364,7 @@ void _CreatorWindow::validationAndCorrection()
 
 RealVector2D _CreatorWindow::getRandomPos() const
 {
-    auto result = Viewport::getCenterInWorldPos();
+    auto result = Viewport::get().getCenterInWorldPos();
     result.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     result.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     return result;

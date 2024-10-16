@@ -144,7 +144,7 @@ void _UploadSimulationDialog::onUpload()
 {
     auto data = [&]() -> std::variant<UploadNetworkResourceRequestData::SimulationData, UploadNetworkResourceRequestData::GenomeData> {
         if (_resourceType == NetworkResourceType_Simulation) {
-            return UploadNetworkResourceRequestData::SimulationData{.zoom = Viewport::getZoomFactor(), .center = Viewport::getCenterInWorldPos()};
+            return UploadNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
         } else {
             return UploadNetworkResourceRequestData::GenomeData{.description = _genomeEditorWindow->getCurrentGenome()};
         }
