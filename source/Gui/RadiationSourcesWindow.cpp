@@ -14,7 +14,7 @@ namespace
 }
 
 _RadiationSourcesWindow::_RadiationSourcesWindow(SimulationFacade const& simulationFacade, SimulationInteractionController const& simInteractionController)
-    : _AlienWindow("Radiation sources", "windows.radiation sources", false)
+    : AlienWindow("Radiation sources", "windows.radiation sources", false)
     , _simulationFacade(simulationFacade)
     , _simInteractionController(simInteractionController)
 {}

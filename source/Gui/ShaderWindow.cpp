@@ -11,7 +11,7 @@ namespace
 }
 
 _ShaderWindow::_ShaderWindow(SimulationView const& simulationView)
-: _AlienWindow("Shader parameters", "windows.shader", false)
+: AlienWindow("Shader parameters", "windows.shader", false)
 , _simulationView(simulationView)
 {
 }

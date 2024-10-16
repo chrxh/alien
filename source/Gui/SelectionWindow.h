@@ -4,7 +4,7 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _SelectionWindow : public _AlienWindow
+class _SelectionWindow : public AlienWindow
 {
 public:
     _SelectionWindow(EditorModel const& editorModel);

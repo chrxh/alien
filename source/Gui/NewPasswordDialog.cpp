@@ -9,12 +9,9 @@
 #include "BrowserWindow.h"
 #include "MessageDialog.h"
 
-_NewPasswordDialog::_NewPasswordDialog(
-    SimulationFacade const& simulationFacade,
-    BrowserWindow const& browserWindow)
+_NewPasswordDialog::_NewPasswordDialog(SimulationFacade const& simulationFacade)
     : _AlienDialog("New password")
     , _simulationFacade(simulationFacade)
-    , _browserWindow(browserWindow)
 {}
 
 void _NewPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
@@ -68,5 +65,5 @@ void _NewPasswordDialog::onNewPassword()
         return;
     }
     MessageDialog::get().information("Information", "The password has been successfully set.\nYou are logged in.");
-    _browserWindow->onRefresh();
+    BrowserWindow::get().onRefresh();
 }

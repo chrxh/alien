@@ -6,7 +6,7 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _PatternEditorWindow : public _AlienWindow
+class _PatternEditorWindow : public AlienWindow
 {
 public:
     _PatternEditorWindow(

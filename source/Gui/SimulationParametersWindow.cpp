@@ -53,7 +53,7 @@ _SimulationParametersWindow::_SimulationParametersWindow(
     SimulationFacade const& simulationFacade,
     RadiationSourcesWindow const& radiationSourcesWindow,
     SimulationInteractionController const& simInteractionController)
-    : _AlienWindow("Simulation parameters", "windows.simulation parameters", false)
+    : AlienWindow("Simulation parameters", "windows.simulation parameters", false)
     , _simulationFacade(simulationFacade)
     , _radiationSourcesWindow(radiationSourcesWindow)
     , _simInteractionController(simInteractionController)

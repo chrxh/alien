@@ -14,7 +14,7 @@
 #include "ResizeWorldDialog.h"
 
 _SpatialControlWindow::_SpatialControlWindow(SimulationFacade const& simulationFacade, TemporalControlWindow const& temporalControlWindow)
-    : _AlienWindow("Spatial control", "windows.spatial control", true)
+    : AlienWindow("Spatial control", "windows.spatial control", true)
     , _simulationFacade(simulationFacade)
 {
     _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simulationFacade, temporalControlWindow);

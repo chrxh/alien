@@ -23,7 +23,7 @@ namespace
 _TemporalControlWindow::_TemporalControlWindow(
     SimulationFacade const& simulationFacade,
     StatisticsWindow const& statisticsWindow)
-    : _AlienWindow("Temporal control", "windows.temporal control", true)
+    : AlienWindow("Temporal control", "windows.temporal control", true)
     , _simulationFacade(simulationFacade)
     , _statisticsWindow(statisticsWindow)
 {}

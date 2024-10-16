@@ -5,7 +5,7 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _GettingStartedWindow : public _AlienWindow
+class _GettingStartedWindow : public AlienWindow
 {
 public:
     _GettingStartedWindow();

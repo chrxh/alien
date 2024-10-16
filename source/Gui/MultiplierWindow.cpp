@@ -22,7 +22,7 @@ namespace
 }
 
 _MultiplierWindow::_MultiplierWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade)
-    : _AlienWindow("Multiplier", "editors.multiplier", false)
+    : AlienWindow("Multiplier", "editors.multiplier", false)
     , _editorModel(editorModel)
     , _simulationFacade(simulationFacade)
 {}

@@ -8,7 +8,7 @@
 class _ActivateUserDialog : public _AlienDialog
 {
 public:
-    _ActivateUserDialog(SimulationFacade const& simulationFacade, BrowserWindow const& browserWindow);
+    _ActivateUserDialog(SimulationFacade const& simulationFacade);
     ~_ActivateUserDialog();
 
     void registerCyclicReferences(CreateUserDialogWeakPtr const& createUserDialog);
@@ -20,7 +20,6 @@ private:
     void onActivateUser();
 
     SimulationFacade _simulationFacade; 
-    BrowserWindow _browserWindow;
     CreateUserDialogWeakPtr _createUserDialog;
 
     std::string _userName;

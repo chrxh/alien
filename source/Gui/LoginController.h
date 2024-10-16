@@ -9,7 +9,7 @@ class LoginController
     MAKE_SINGLETON(LoginController);
 public:
 
-    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, ActivateUserDialog const& activateUserDialog, BrowserWindow const& browserWindow);
+    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, ActivateUserDialog const& activateUserDialog);
     void shutdown();
 
     void onLogin();
@@ -36,7 +36,6 @@ private:
     SimulationFacade _simulationFacade; 
     PersisterFacade _persisterFacade;
     ActivateUserDialog _activateUserDialog;
-    BrowserWindow _browserWindow;
 
     TaskProcessor _taskProcessor;
 

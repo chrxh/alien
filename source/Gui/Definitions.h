@@ -5,8 +5,7 @@
 class _MainWindow;
 using MainWindow = std::shared_ptr<_MainWindow>;
 
-class _AlienWindow;
-using AlienWindow = std::shared_ptr<_AlienWindow>;
+class AlienWindow;
 
 class _SimulationView;
 using SimulationView= std::shared_ptr<_SimulationView>;
@@ -109,8 +108,7 @@ using PatternAnalysisDialog = std::shared_ptr<_PatternAnalysisDialog>;
 class _FpsController;
 using FpsController = std::shared_ptr<_FpsController>;
 
-class _BrowserWindow;
-using BrowserWindow = std::shared_ptr<_BrowserWindow>;
+class BrowserWindow;
 
 class _ShaderWindow;
 using ShaderWindow = std::shared_ptr<_ShaderWindow>;

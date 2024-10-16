@@ -14,9 +14,8 @@
 #include "MessageDialog.h"
 #include "OverlayMessageController.h"
 
-_EditSimulationDialog::_EditSimulationDialog(BrowserWindow const& browserWindow)
+_EditSimulationDialog::_EditSimulationDialog()
     : _AlienDialog("")
-    , _browserWindow(browserWindow)
 {}
 
 void _EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
@@ -77,7 +76,7 @@ void _EditSimulationDialog::processForLeaf()
                 if (!NetworkService::get().editResource(rawTO->id, _newName, _newDescription)) {
                     showMessage("Error", "Failed to edit " + resourceTypeString + ".");
                 }
-                _browserWindow->onRefresh();
+                BrowserWindow::get().onRefresh();
             });
             printOverlayMessage("Applying changes ...");
             close();
@@ -115,7 +114,7 @@ void _EditSimulationDialog::processForFolder()
                         break;
                     }
                 }
-                _browserWindow->onRefresh();
+                BrowserWindow::get().onRefresh();
             });
             printOverlayMessage("Applying changes ...");
             close();

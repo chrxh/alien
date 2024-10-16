@@ -4,7 +4,7 @@
 
 #include "AlienWindow.h"
 
-class _RadiationSourcesWindow : public _AlienWindow
+class _RadiationSourcesWindow : public AlienWindow
 {
 public:
     _RadiationSourcesWindow(SimulationFacade const& simulationFacade, SimulationInteractionController const& simInteractionController);

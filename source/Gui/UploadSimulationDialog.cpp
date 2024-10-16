@@ -36,13 +36,11 @@ namespace
 }
 
 _UploadSimulationDialog::_UploadSimulationDialog(
-    BrowserWindow const& browserWindow,
     LoginDialog const& loginDialog,
     SimulationFacade const& simulationFacade,
     GenomeEditorWindow const& genomeEditorWindow)
     : _AlienDialog("")
     , _simulationFacade(simulationFacade)
-    , _browserWindow(browserWindow)
     , _loginDialog(loginDialog)
     , _genomeEditorWindow(genomeEditorWindow)
 {
@@ -155,6 +153,6 @@ void _UploadSimulationDialog::onUpload()
         .resourceWithoutFolderName = _resourceName,
         .resourceDescription = _resourceDescription,
         .workspaceType = workspaceType,
-        .downloadCache = _browserWindow->getSimulationCache(),
+        .downloadCache = BrowserWindow::get().getSimulationCache(),
         .data = data});
 }

@@ -17,7 +17,7 @@ namespace
 }
 
 _AutosaveWindow::_AutosaveWindow(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
-    : _AlienWindow("Autosave (work in progress)", "windows.autosave", false)
+    : AlienWindow("Autosave (work in progress)", "windows.autosave", false)
     , _simulationFacade(simulationFacade)
     , _persisterFacade(persisterFacade)
 {

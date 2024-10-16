@@ -60,20 +60,24 @@ namespace
     auto constexpr NumEmojisPerRow = 5;
 }
 
-_BrowserWindow::_BrowserWindow(
+BrowserWindow::BrowserWindow()
+    : AlienWindow("Browser", "windows.browser", true)
+{}
+
+void BrowserWindow::init(
     SimulationFacade const& simulationFacade,
     PersisterFacade const& persisterFacade,
      StatisticsWindow const& statisticsWindow,
     TemporalControlWindow const& temporalControlWindow,
     EditorController const& editorController)
-    : _AlienWindow("Browser", "windows.browser", true)
-    , _simulationFacade(simulationFacade)
-    , _persisterFacade(persisterFacade)
-    , _statisticsWindow(statisticsWindow)
-    , _temporalControlWindow(temporalControlWindow)
-    , _editorController(editorController)
 {
+    _simulationFacade = simulationFacade;
+    _persisterFacade = persisterFacade;
+    _statisticsWindow = statisticsWindow;
+    _temporalControlWindow = temporalControlWindow;
+    _editorController = editorController;
     _downloadCache = std::make_shared<_DownloadCache>();
+
     _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _emojiProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 
@@ -107,7 +111,7 @@ namespace
         {WorkspaceType_Private, std::string("private")}};
 }
 
-_BrowserWindow::~_BrowserWindow()
+void BrowserWindow::shutdown()
 {
     auto& settings = GlobalSettings::get();
     settings.setInt("windows.browser.resource type", _currentWorkspace.resourceType);
@@ -123,7 +127,7 @@ _BrowserWindow::~_BrowserWindow()
     _lastSessionData.save();
 }
 
-void _BrowserWindow::registerCyclicReferences(
+void BrowserWindow::registerCyclicReferences(
     LoginDialogWeakPtr const& loginDialog,
     UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
     EditSimulationDialogWeakPtr const& editSimulationDialog,
@@ -151,22 +155,22 @@ void _BrowserWindow::registerCyclicReferences(
     _lastSessionData.load(getAllRawTOs());
 }
 
-void _BrowserWindow::onRefresh()
+void BrowserWindow::onRefresh()
 {
     refreshIntern(true);
 }
 
-WorkspaceType _BrowserWindow::getCurrentWorkspaceType() const
+WorkspaceType BrowserWindow::getCurrentWorkspaceType() const
 {
     return _currentWorkspace.workspaceType;
 }
 
-DownloadCache& _BrowserWindow::getSimulationCache()
+DownloadCache& BrowserWindow::getSimulationCache()
 {
     return _downloadCache;
 }
 
-void _BrowserWindow::refreshIntern(bool withRetry)
+void BrowserWindow::refreshIntern(bool withRetry)
 {
     _refreshProcessor->executeTask(
         [&](auto const& senderId) {
@@ -199,7 +203,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
         [](auto const& errors) { MessageDialog::get().information("Error", errors); });
 }
 
-void _BrowserWindow::processIntern()
+void BrowserWindow::processIntern()
 {
     processToolbar();
 
@@ -223,7 +227,7 @@ void _BrowserWindow::processIntern()
     processEmojiWindow();
 }    
 
-void _BrowserWindow::processBackground()
+void BrowserWindow::processBackground()
 {
     auto now = std::chrono::steady_clock::now();
     if (!_lastRefreshTime) {
@@ -237,7 +241,7 @@ void _BrowserWindow::processBackground()
     processPendingRequestIds();
 }
 
-void _BrowserWindow::processToolbar()
+void BrowserWindow::processToolbar()
 {
     std::string resourceTypeString = _currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
     auto isOwnerForSelectedItem = isOwner(_selectedTreeTO);
@@ -361,7 +365,7 @@ void _BrowserWindow::processToolbar()
     AlienImGui::Separator();
 }
 
-void _BrowserWindow::processWorkspace()
+void BrowserWindow::processWorkspace()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
     if (ImGui::BeginChild(
@@ -393,7 +397,7 @@ void _BrowserWindow::processWorkspace()
     ImGui::EndChild();
 }
 
-void _BrowserWindow::processWorkspaceSelectionAndFilter()
+void BrowserWindow::processWorkspaceSelectionAndFilter()
 {
     ImGui::Spacing();
     if (ImGui::BeginTable("##", 2, 0, ImVec2(-1, 0))) {
@@ -430,7 +434,7 @@ void _BrowserWindow::processWorkspaceSelectionAndFilter()
     }
 }
 
-void _BrowserWindow::processMovableSeparator()
+void BrowserWindow::processMovableSeparator()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
     ImGui::Button("##MovableSeparator", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomSpace)));
@@ -450,7 +454,7 @@ namespace
     }
 }
 
-void _BrowserWindow::processUserList()
+void BrowserWindow::processUserList()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
     if (ImGui::BeginChild("##2", ImVec2(sizeAvailable.x, sizeAvailable.y - scale(BrowserBottomSpace)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -525,7 +529,7 @@ void _BrowserWindow::processUserList()
     ImGui::EndChild();
 }
 
-void _BrowserWindow::processStatus()
+void BrowserWindow::processStatus()
 {
     AlienImGui::Separator();
     std::unordered_set<NetworkResourceRawTO> simulations;
@@ -565,7 +569,7 @@ void _BrowserWindow::processStatus()
     ImGui::PopStyleColor();
 }
 
-void _BrowserWindow::processSimulationList()
+void BrowserWindow::processSimulationList()
 {
     ImGui::PushID("SimulationList");
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
@@ -672,7 +676,7 @@ void _BrowserWindow::processSimulationList()
     ImGui::PopID();
 }
 
-void _BrowserWindow::processGenomeList()
+void BrowserWindow::processGenomeList()
 {
     ImGui::PushID("GenomeList");
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
@@ -773,7 +777,7 @@ void _BrowserWindow::processGenomeList()
     ImGui::PopID();
 }
 
-bool _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
+bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
 {
     auto result = false;
 
@@ -824,7 +828,7 @@ bool _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
     return result;
 }
 
-void _BrowserWindow::processDescriptionField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processDescriptionField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -832,7 +836,7 @@ void _BrowserWindow::processDescriptionField(NetworkResourceTreeTO const& treeTO
     }
 }
 
-void _BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -915,7 +919,7 @@ void _BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processTimestampField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processTimestampField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -923,7 +927,7 @@ void _BrowserWindow::processTimestampField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processUserNameField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processUserNameField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -931,7 +935,7 @@ void _BrowserWindow::processUserNameField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processNumDownloadsField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processNumDownloadsField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -939,7 +943,7 @@ void _BrowserWindow::processNumDownloadsField(NetworkResourceTreeTO const& treeT
     }
 }
 
-void _BrowserWindow::processWidthField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processWidthField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -947,7 +951,7 @@ void _BrowserWindow::processWidthField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processHeightField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processHeightField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -955,7 +959,7 @@ void _BrowserWindow::processHeightField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processNumObjectsField(NetworkResourceTreeTO const& treeTO, bool kobjects)
+void BrowserWindow::processNumObjectsField(NetworkResourceTreeTO const& treeTO, bool kobjects)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -967,7 +971,7 @@ void _BrowserWindow::processNumObjectsField(NetworkResourceTreeTO const& treeTO,
     }
 }
 
-void _BrowserWindow::processSizeField(NetworkResourceTreeTO const& treeTO, bool kbyte)
+void BrowserWindow::processSizeField(NetworkResourceTreeTO const& treeTO, bool kbyte)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -979,7 +983,7 @@ void _BrowserWindow::processSizeField(NetworkResourceTreeTO const& treeTO, bool 
     }
 }
 
-void _BrowserWindow::processVersionField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processVersionField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -987,7 +991,7 @@ void _BrowserWindow::processVersionField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-bool _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
+bool BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
 {
     auto result = false;
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourceSymbolColor);
@@ -1058,7 +1062,7 @@ bool _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeT
     return result;
 }
 
-void _BrowserWindow::processEmojiWindow()
+void BrowserWindow::processEmojiWindow()
 {
     if (_activateEmojiPopup) {
         ImGui::OpenPopup("emoji");
@@ -1105,7 +1109,7 @@ void _BrowserWindow::processEmojiWindow()
     }
 }
 
-void _BrowserWindow::processEmojiButton(int emojiType)
+void BrowserWindow::processEmojiButton(int emojiType)
 {
     auto const& emoji = _emojis.at(emojiType);
     ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
@@ -1132,7 +1136,7 @@ void _BrowserWindow::processEmojiButton(int emojiType)
     }
 }
 
-void _BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
+void BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
 {
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDownloadButtonTextColor);
     auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
@@ -1153,7 +1157,7 @@ namespace
     }
 }
 
-void _BrowserWindow::processShortenedText(std::string const& text, bool bold) {
+void BrowserWindow::processShortenedText(std::string const& text, bool bold) {
     auto substrings = splitString(text);
     if (substrings.empty()) {
         return;
@@ -1178,7 +1182,7 @@ void _BrowserWindow::processShortenedText(std::string const& text, bool bold) {
     }
 }
 
-bool _BrowserWindow::processActionButton(std::string const& text)
+bool BrowserWindow::processActionButton(std::string const& text)
 {
     ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImU32)Const::ToolbarButtonHoveredColor);
@@ -1188,7 +1192,7 @@ bool _BrowserWindow::processActionButton(std::string const& text)
     return result;
 }
 
-bool _BrowserWindow::processDetailButton()
+bool BrowserWindow::processDetailButton()
 {
     auto color = Const::DetailButtonColor;
     float h, s, v;
@@ -1200,7 +1204,7 @@ bool _BrowserWindow::processDetailButton()
     return detailClicked;
 }
 
-void _BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
+void BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
 {
     if (_refreshProcessor->pendingTasks()) {
         auto color = ImColor(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
@@ -1219,18 +1223,18 @@ void _BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
     }
 }
 
-void _BrowserWindow::processActivated()
+void BrowserWindow::processActivated()
 {
     onRefresh();
 }
 
-void _BrowserWindow::processPendingRequestIds()
+void BrowserWindow::processPendingRequestIds()
 {
     _refreshProcessor->process();
     _emojiProcessor->process();
 }
 
-void _BrowserWindow::createTreeTOs(Workspace& workspace)
+void BrowserWindow::createTreeTOs(Workspace& workspace)
 {
     //sorting
     if (workspace.rawTOs.size() > 1) {
@@ -1252,12 +1256,12 @@ void _BrowserWindow::createTreeTOs(Workspace& workspace)
     _selectedTreeTO = nullptr;
 }
 
-void _BrowserWindow::sortUserList()
+void BrowserWindow::sortUserList()
 {
     std::sort(_userTOs.begin(), _userTOs.end(), [&](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
 }
 
-void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
+void BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
 {
     ++leaf.rawTO->numDownloads;
 
@@ -1269,7 +1273,7 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
         .downloadCache = _downloadCache});
 }
 
-void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
+void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
 {
     auto func = [&] {
         auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::GenomeData> {
@@ -1288,7 +1292,7 @@ void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
     MessageDialog::get().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
 }
 
-void _BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         _editSimulationDialog.lock()->openForLeaf(treeTO);
@@ -1298,7 +1302,7 @@ void _BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
 {
     auto& source = _workspaces.at(_currentWorkspace);
     auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, source.rawTOs);
@@ -1339,7 +1343,7 @@ void _BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
     printOverlayMessage("Changing visibility ...");
 }
 
-void _BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
 {
     auto& currentWorkspace = _workspaces.at(_currentWorkspace);
     auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, currentWorkspace.rawTOs);
@@ -1366,7 +1370,7 @@ void _BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
     });
 }
 
-void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
+void BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
 {
     CHECK(to->isLeaf());
     auto& leaf = to->getLeaf();
@@ -1402,28 +1406,28 @@ void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType
     }
 }
 
-void _BrowserWindow::onExpandFolders()
+void BrowserWindow::onExpandFolders()
 {
     auto& workspace = _workspaces.at(_currentWorkspace);
     workspace.collapsedFolderNames.clear();
     createTreeTOs(workspace);
 }
 
-void _BrowserWindow::onCollapseFolders()
+void BrowserWindow::onCollapseFolders()
 {
     auto& workspace = _workspaces.at(_currentWorkspace);
     workspace.collapsedFolderNames = NetworkResourceService::getFolderNames(workspace.rawTOs, 1);
     createTreeTOs(workspace);
 }
 
-void _BrowserWindow::openWeblink(std::string const& link)
+void BrowserWindow::openWeblink(std::string const& link)
 {
 #ifdef _WIN32
     ShellExecute(NULL, "open", link.c_str(), NULL, NULL, SW_SHOWNORMAL);
 #endif
 }
 
-bool _BrowserWindow::isOwner(NetworkResourceTreeTO const& treeTO) const
+bool BrowserWindow::isOwner(NetworkResourceTreeTO const& treeTO) const
 {
     if (treeTO == nullptr) {
         return false;
@@ -1435,7 +1439,7 @@ bool _BrowserWindow::isOwner(NetworkResourceTreeTO const& treeTO) const
     return std::ranges::all_of(rawTOs, [&](NetworkResourceRawTO const& rawTO) { return rawTO->userName == userName; });
 }
 
-std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& resourceId, int emojiType)
+std::string BrowserWindow::getUserNamesToEmojiType(std::string const& resourceId, int emojiType)
 {
     std::set<std::string> userNames;
 
@@ -1462,7 +1466,7 @@ std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& resourceI
     return boost::algorithm::join(userNames, ", ");
 }
 
-std::unordered_set<NetworkResourceRawTO> _BrowserWindow::getAllRawTOs() const
+std::unordered_set<NetworkResourceRawTO> BrowserWindow::getAllRawTOs() const
 {
     std::unordered_set<NetworkResourceRawTO> result;
     for (auto const& workspace : _workspaces | std::views::values) {
@@ -1471,7 +1475,7 @@ std::unordered_set<NetworkResourceRawTO> _BrowserWindow::getAllRawTOs() const
     return result;
 }
 
-void _BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
+void BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
 {
     if (to->isLeaf()) {
         auto const& leaf = to->getLeaf();
@@ -1487,7 +1491,7 @@ void _BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
     }
 }
 
-void _BrowserWindow::popTextColor()
+void BrowserWindow::popTextColor()
 {
     ImGui::PopStyleColor();
 }

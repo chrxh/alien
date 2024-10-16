@@ -9,11 +9,9 @@
 #include "CreateUserDialog.h"
 #include "MessageDialog.h"
 
-_DeleteUserDialog::_DeleteUserDialog(BrowserWindow const& browserWindow)
+_DeleteUserDialog::_DeleteUserDialog()
     : _AlienDialog("Delete user")
-    , _browserWindow(browserWindow)
-{
-}
+{}
 
 void _DeleteUserDialog::processIntern()
 {
@@ -49,7 +47,7 @@ void _DeleteUserDialog::onDelete()
 {
     auto userName = *NetworkService::get().getLoggedInUserName();
     if (NetworkService::get().deleteUser()) {
-        _browserWindow->onRefresh();
+        BrowserWindow::get().onRefresh();
         MessageDialog::get().information("Information", "The user '" + userName + "' has been deleted.\nYou are logged out.");
     } else {
         MessageDialog::get().information("Error", "An error occurred on the server.");

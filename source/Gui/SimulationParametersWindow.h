@@ -6,7 +6,7 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _SimulationParametersWindow : public _AlienWindow
+class _SimulationParametersWindow : public AlienWindow
 {
 public:
     _SimulationParametersWindow(
