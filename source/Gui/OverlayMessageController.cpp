@@ -129,6 +129,13 @@ void OverlayMessageController::processLoadingBar()
         }
         drawList->AddRect(
             ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2}, ImColor::HSV(0.66f, 0.8f, 0.6f, 1.0f));
+        drawList->AddText(
+            StyleRepository::get().getReefMediumFont(),
+            scale(16.0f),
+            {center.x - scale(25.0f), center.y - scale(10.0f)},
+            ImColor::HSV(0, 0, 1, 0.7f),
+            "Processing");
+
 
     } else {
         _progressBarRefTimepoint.reset();

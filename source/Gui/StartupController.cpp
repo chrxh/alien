@@ -162,13 +162,6 @@ void _StartupController::processLoadingScreen()
     ImColor textColor = Const::ProgramVersionTextColor;
     textColor.Value.w *= ImGui::GetStyle().Alpha;
 
-    ImColor loadingTextColor = Const::ProgramVersionTextColor;
-    loadingTextColor.Value.w *= ImGui::GetStyle().Alpha * 0.5f;
-
-    //draw 'Initializing' text if it fits
-    if (bottom - scale(230) > bottom / 2 + _logo.height * imageScale / 2) {
-        drawList->AddText(styleRep.getReefLargeFont(), scale(32.0), {center.x - scale(48), bottom - scale(270)}, loadingTextColor, "Initializing");
-    }
     drawList->AddText(styleRep.getReefLargeFont(), scale(48.0f), {center.x - scale(175), bottom - scale(200)}, textColor, "Artificial Life Environment");
 
     auto versionString = "Version " + Const::ProgramVersion;
