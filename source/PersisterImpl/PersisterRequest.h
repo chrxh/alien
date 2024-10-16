@@ -1,14 +1,18 @@
 #pragma once
 
+#include "PersisterInterface/DeleteNetworkResourceRequestData.h"
 #include "PersisterInterface/DownloadNetworkResourceRequestData.h"
+#include "PersisterInterface/EditNetworkResourceRequestData.h"
 #include "PersisterInterface/GetNetworkResourcesRequestData.h"
 #include "PersisterInterface/GetUserNamesForEmojiRequestData.h"
 #include "PersisterInterface/LoginRequestData.h"
+#include "PersisterInterface/MoveNetworkResourceRequestData.h"
 #include "PersisterInterface/ReadSimulationRequestData.h"
 #include "PersisterInterface/PersisterRequestId.h"
 #include "PersisterInterface/ReplaceNetworkResourceRequestData.h"
 #include "PersisterInterface/SenderInfo.h"
 #include "PersisterInterface/SaveSimulationRequestData.h"
+#include "PersisterInterface/ToggleLikeNetworkResourceRequestData.h"
 #include "PersisterInterface/UploadNetworkResourceRequestData.h"
 
 class _PersisterRequest
@@ -75,3 +79,15 @@ using ReplaceNetworkResourceRequest = std::shared_ptr<_ReplaceNetworkResourceReq
 
 using _GetUserNamesForEmojiRequest = _ConcreteRequest<GetUserNamesForEmojiRequestData>;
 using GetUserNamesForEmojiRequest = std::shared_ptr<_GetUserNamesForEmojiRequest>;
+
+using _DeleteNetworkResourceRequest = _ConcreteRequest<DeleteNetworkResourceRequestData>;
+using DeleteNetworkResourceRequest = std::shared_ptr<_DeleteNetworkResourceRequest>;
+
+using _EditNetworkResourceRequest = _ConcreteRequest<EditNetworkResourceRequestData>;
+using EditNetworkResourceRequest = std::shared_ptr<_EditNetworkResourceRequest>;
+
+using _MoveNetworkResourceRequest = _ConcreteRequest<MoveNetworkResourceRequestData>;
+using MoveNetworkResourceRequest = std::shared_ptr<_MoveNetworkResourceRequest>;
+
+using _ToggleLikeNetworkResourceRequest = _ConcreteRequest<ToggleLikeNetworkResourceRequestData>;
+using ToggleLikeNetworkResourceRequest = std::shared_ptr<_ToggleLikeNetworkResourceRequest>;

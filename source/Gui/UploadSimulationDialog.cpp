@@ -142,8 +142,6 @@ void _UploadSimulationDialog::processIntern()
 
 void _UploadSimulationDialog::onUpload()
 {
-    printOverlayMessage("Uploading ...");
-
     auto data = [&]() -> std::variant<UploadNetworkResourceRequestData::SimulationData, UploadNetworkResourceRequestData::GenomeData> {
         if (_resourceType == NetworkResourceType_Simulation) {
             return UploadNetworkResourceRequestData::SimulationData{.zoom = Viewport::getZoomFactor(), .center = Viewport::getCenterInWorldPos()};

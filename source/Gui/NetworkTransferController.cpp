@@ -10,6 +10,7 @@
 #include "EditorController.h"
 #include "GenomeEditorWindow.h"
 #include "BrowserWindow.h"
+#include "OverlayMessageController.h"
 
 void NetworkTransferController::init(
     SimulationController const& simController,
@@ -26,10 +27,13 @@ void NetworkTransferController::init(
     _downloadProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
     _uploadProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
     _replaceProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
+    _deleteProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
 }
 
 void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData const& requestData)
 {
+    printOverlayMessage("Downloading ...");
+
     _downloadProcessor->executeTask(
         [&](auto const& senderId) {
             return _persisterController->scheduleDownloadNetworkResource(
@@ -92,6 +96,8 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
 
 void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const& requestData)
 {
+    printOverlayMessage("Uploading ...");
+
     _uploadProcessor->executeTask(
         [&](auto const& senderId) {
             return _persisterController->scheduleUploadNetworkResource(
@@ -106,6 +112,8 @@ void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const&
 
 void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData const& requestData)
 {
+    printOverlayMessage("Replacing ...");
+
     _replaceProcessor->executeTask(
         [&](auto const& senderId) {
             return _persisterController->scheduleReplaceNetworkResource(
@@ -118,9 +126,26 @@ void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData cons
         [](auto const& errors) { MessageDialog::get().information("Error", errors); });
 }
 
+void NetworkTransferController::onDelete(DeleteNetworkResourceRequestData const& requestData)
+{
+    printOverlayMessage("Deleting ...");
+
+    _deleteProcessor->executeTask(
+        [&](auto const& senderId) {
+            return _persisterController->scheduleDeleteNetworkResource(
+                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
+        },
+        [&](auto const& requestId) {
+            _persisterController->fetchDeleteNetworkResourcesData(requestId);
+            _browserWindow->onRefresh();
+        },
+        [](auto const& errors) { MessageDialog::get().information("Error", errors); });
+}
+
 void NetworkTransferController::process()
 {
     _downloadProcessor->process();
     _uploadProcessor->process();
     _replaceProcessor->process();
+    _deleteProcessor->process();
 }

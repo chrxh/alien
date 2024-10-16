@@ -136,6 +136,46 @@ GetUserNamesForEmojiResultData _PersisterControllerImpl::fetchGetUserNamesForEmo
     return fetchData<_GetUserNamesForEmojiRequestResult, GetUserNamesForEmojiResultData>(id);
 }
 
+PersisterRequestId _PersisterControllerImpl::scheduleDeleteNetworkResource(SenderInfo const& senderInfo, DeleteNetworkResourceRequestData const& data)
+{
+    return scheduleRequest<_DeleteNetworkResourceRequest>(senderInfo, data);
+}
+
+DeleteNetworkResourceResultData _PersisterControllerImpl::fetchDeleteNetworkResourcesData(PersisterRequestId const& id)
+{
+    return fetchData<_DeleteNetworkResourceRequestResult, DeleteNetworkResourceResultData>(id);
+}
+
+PersisterRequestId _PersisterControllerImpl::scheduleEditNetworkResource(SenderInfo const& senderInfo, EditNetworkResourceRequestData const& data)
+{
+    return scheduleRequest<_EditNetworkResourceRequest>(senderInfo, data);
+}
+
+EditNetworkResourceResultData _PersisterControllerImpl::fetchEditNetworkResourcesData(PersisterRequestId const& id)
+{
+    return fetchData<_EditNetworkResourceRequestResult, EditNetworkResourceResultData>(id);
+}
+
+PersisterRequestId _PersisterControllerImpl::scheduleMoveNetworkResource(SenderInfo const& senderInfo, MoveNetworkResourceRequestData const& data)
+{
+    return scheduleRequest<_MoveNetworkResourceRequest>(senderInfo, data);
+}
+
+MoveNetworkResourceResultData _PersisterControllerImpl::fetchMoveNetworkResourcesData(PersisterRequestId const& id)
+{
+    return fetchData<_MoveNetworkResourceRequestResult, MoveNetworkResourceResultData>(id);
+}
+
+PersisterRequestId _PersisterControllerImpl::scheduleToggleLikeNetworkResource(SenderInfo const& senderInfo, ToggleLikeNetworkResourceRequestData const& data)
+{
+    return scheduleRequest<_ToggleLikeNetworkResourceRequest>(senderInfo, data);
+}
+
+ToggleLikeNetworkResourceResultData _PersisterControllerImpl::fetchToggleLikeNetworkResourcesData(PersisterRequestId const& id)
+{
+    return fetchData<_ToggleLikeNetworkResourceRequestResult, ToggleLikeNetworkResourceResultData>(id);
+}
+
 PersisterRequestId _PersisterControllerImpl::generateNewRequestId()
 {
     ++_latestRequestId;
