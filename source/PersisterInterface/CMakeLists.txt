@@ -16,9 +16,8 @@ add_library(PersisterInterface
     LoginResultData.h
     MoveNetworkResourceRequestData.h
     MoveNetworkResourceResultData.h
-    PersisterController.cpp
-    PersisterController.h
     PersisterErrorInfo.h
+    PersisterFacade.h
     PersisterRequestId.h
     PersisterRequestState.h
     ReadSimulationRequestData.h

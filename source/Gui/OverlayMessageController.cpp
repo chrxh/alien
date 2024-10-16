@@ -24,9 +24,9 @@ OverlayMessageController& OverlayMessageController::get()
     return instance;
 }
 
-void OverlayMessageController::init(PersisterController const& persisterController)
+void OverlayMessageController::init(PersisterFacade const& persisterFacade)
 {
-    _persisterController = persisterController;
+    _persisterFacade = persisterFacade;
 }
 
 void OverlayMessageController::process()
@@ -58,7 +58,7 @@ void OverlayMessageController::setOn(bool value)
 
 void OverlayMessageController::processLoadingBar()
 {
-    if (_persisterController->isBusy()) {
+    if (_persisterFacade->isBusy()) {
         if (!_progressBarRefTimepoint.has_value()) {
             _progressBarRefTimepoint = std::chrono::steady_clock::now();
         }

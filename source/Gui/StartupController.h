@@ -12,7 +12,7 @@ class _StartupController
 public:
     _StartupController(
         SimulationController const& simController,
-        PersisterController const& persisterController,
+        PersisterFacade const& persisterFacade,
         TemporalControlWindow const& temporalControlWindow);
 
     void process();
@@ -35,7 +35,7 @@ private:
 
     SimulationController _simController;
     TemporalControlWindow _temporalControlWindow;
-    PersisterController _persisterController;
+    PersisterFacade _persisterFacade;
 
     PersisterRequestId _startupSimRequestId;
     State _state = State::StartLoadSimulation;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PersisterInterface/PersisterController.h"
+#include "PersisterInterface/PersisterFacade.h"
 #include "PersisterInterface/PersisterRequestId.h"
 #include "PersisterInterface/SenderId.h"
 

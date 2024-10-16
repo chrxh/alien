@@ -9,7 +9,7 @@
 class _MainWindow
 {
 public:
-    _MainWindow(SimulationController const& simController, PersisterController const& persisterController, GuiLogger const& logger);
+    _MainWindow(SimulationController const& simController, PersisterFacade const& persisterFacade, GuiLogger const& logger);
     void mainLoop();
     void shutdown();
 
@@ -70,7 +70,7 @@ private:
     NewPasswordDialog _newPasswordDialog;
     ImageToPatternDialog _imageToPatternDialog;
 
-    PersisterController _persisterController;
+    PersisterFacade _persisterFacade;
     SimulationController _simController;
     SimulationInteractionController _simInteractionController;
     StartupController _startupController;

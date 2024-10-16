@@ -2,16 +2,16 @@
 
 #include <thread>
 
-#include "PersisterInterface/PersisterController.h"
+#include "PersisterInterface/PersisterFacade.h"
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
 #include "PersisterWorker.h"
 
-class _PersisterControllerImpl : public _PersisterController
+class _PersisterFacadeImpl : public _PersisterFacade
 {
 public:
-    ~_PersisterControllerImpl() override;
+    ~_PersisterFacadeImpl() override;
 
     void init(SimulationController const& simController) override;
     void shutdown() override;
@@ -80,7 +80,7 @@ private:
 /************************************************************************/
 
 template <typename Request, typename RequestData>
-PersisterRequestId _PersisterControllerImpl::scheduleRequest(SenderInfo const& senderInfo, RequestData const& data)
+PersisterRequestId _PersisterFacadeImpl::scheduleRequest(SenderInfo const& senderInfo, RequestData const& data)
 {
     auto requestId = generateNewRequestId();
     auto request = std::make_shared<Request>(requestId, senderInfo, data);
@@ -91,7 +91,7 @@ PersisterRequestId _PersisterControllerImpl::scheduleRequest(SenderInfo const& s
 }
 
 template <typename RequestResult, typename ResultData>
-ResultData _PersisterControllerImpl::fetchData(PersisterRequestId const& id)
+ResultData _PersisterFacadeImpl::fetchData(PersisterRequestId const& id)
 {
     auto requestResult = std::dynamic_pointer_cast<RequestResult>(_worker->fetchRequestResult(id));
     return requestResult->getData();

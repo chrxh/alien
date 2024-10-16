@@ -1,10 +1,10 @@
 #include "TaskProcessor.h"
 
-TaskProcessor _TaskProcessor::createTaskProcessor(PersisterController const& persisterController)
+TaskProcessor _TaskProcessor::createTaskProcessor(PersisterFacade const& persisterFacade)
 {
     static auto counter = 0;
     ++counter;
-    return std::shared_ptr<_TaskProcessor>(new _TaskProcessor(persisterController, "Processor" + std::to_string(counter)));
+    return std::shared_ptr<_TaskProcessor>(new _TaskProcessor(persisterFacade, "Processor" + std::to_string(counter)));
 }
 
 void _TaskProcessor::executeTask(
@@ -29,7 +29,7 @@ void _TaskProcessor::process()
     }
     std::vector<PersisterRequestId> newRequestIds;
     for (auto const& requestId : _pendingRequestIds) {
-        auto state = _persisterController->getRequestState(requestId);
+        auto state = _persisterFacade->getRequestState(requestId);
         if (state == PersisterRequestState::Finished) {
             _finishFunc(requestId);
         }
@@ -39,13 +39,13 @@ void _TaskProcessor::process()
     }
     _pendingRequestIds = newRequestIds;
 
-    auto criticalErrors = _persisterController->fetchAllErrorInfos(SenderId{_senderId});
+    auto criticalErrors = _persisterFacade->fetchAllErrorInfos(SenderId{_senderId});
     if (!criticalErrors.empty()) {
         _errorFunc(criticalErrors);
     }
 }
 
-_TaskProcessor::_TaskProcessor(PersisterController const& persisterController, std::string const& senderId)
-    : _persisterController(persisterController)
+_TaskProcessor::_TaskProcessor(PersisterFacade const& persisterFacade, std::string const& senderId)
+    : _persisterFacade(persisterFacade)
     , _senderId(senderId)
 {}

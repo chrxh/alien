@@ -9,7 +9,7 @@
 #include "Network/NetworkResourceRawTO.h"
 #include "Network/UserTO.h"
 #include "EngineInterface/SerializerService.h"
-#include "PersisterInterface/PersisterController.h"
+#include "PersisterInterface/PersisterFacade.h"
 
 #include "AlienWindow.h"
 #include "Definitions.h"
@@ -22,7 +22,7 @@ class _BrowserWindow : public _AlienWindow
 public:
     _BrowserWindow(
         SimulationController const& simController,
-        PersisterController const& persisterController,
+        PersisterFacade const& persisterFacade,
         StatisticsWindow const& statisticsWindow,
         TemporalControlWindow const& temporalControlWindow,
         EditorController const& editorController);
@@ -143,7 +143,7 @@ private:
     DownloadCache _downloadCache;
 
     SimulationController _simController;
-    PersisterController _persisterController;
+    PersisterFacade _persisterFacade;
     StatisticsWindow _statisticsWindow;
     TemporalControlWindow _temporalControlWindow;
     LoginDialogWeakPtr _loginDialog;

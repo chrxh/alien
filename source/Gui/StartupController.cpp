@@ -8,7 +8,7 @@
 #include "Base/LoggingService.h"
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
-#include "PersisterInterface/PersisterController.h"
+#include "PersisterInterface/PersisterFacade.h"
 
 #include "OpenGLHelper.h"
 #include "Viewport.h"
@@ -28,11 +28,11 @@ namespace
 
 _StartupController::_StartupController(
     SimulationController const& simController,
-    PersisterController const& persisterController,
+    PersisterFacade const& persisterFacade,
     TemporalControlWindow const& temporalControlWindow)
     : _simController(simController)
     , _temporalControlWindow(temporalControlWindow)
-    , _persisterController(persisterController)
+    , _persisterFacade(persisterFacade)
 {
     log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
@@ -43,7 +43,7 @@ void _StartupController::process()
     if (_state == State::StartLoadSimulation) {
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto readData = ReadSimulationRequestData{Const::AutosaveFile};
-        _startupSimRequestId = _persisterController->scheduleReadSimulationFromFile(senderInfo, readData);
+        _startupSimRequestId = _persisterFacade->scheduleReadSimulationFromFile(senderInfo, readData);
         _startupTimepoint = std::chrono::steady_clock::now();
         _state = State::LoadingSimulation;
         return;
@@ -51,9 +51,9 @@ void _StartupController::process()
 
     if (_state == State::LoadingSimulation) {
         processLoadingScreen();
-        auto requestedSimState = _persisterController->getRequestState(_startupSimRequestId);
+        auto requestedSimState = _persisterFacade->getRequestState(_startupSimRequestId);
         if (requestedSimState == PersisterRequestState::Finished) {
-            auto const& data = _persisterController->fetchReadSimulationData(_startupSimRequestId);
+            auto const& data = _persisterFacade->fetchReadSimulationData(_startupSimRequestId);
             auto const& deserializedSim = data.deserializedSimulation;
             _simController->newSimulation(
                 data.simulationName,

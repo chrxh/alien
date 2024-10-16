@@ -12,7 +12,7 @@ class FileTransferController
     MAKE_SINGLETON(FileTransferController);
 
 public:
-    void init(PersisterController const& persisterController, SimulationController const& simController, TemporalControlWindow const& temporalControlWindow);
+    void init(PersisterFacade const& persisterFacade, SimulationController const& simController, TemporalControlWindow const& temporalControlWindow);
     
     void onOpenSimulation();
     void onSaveSimulation();
@@ -20,7 +20,7 @@ public:
     void process();
 
 private:
-    PersisterController _persisterController;
+    PersisterFacade _persisterFacade;
     SimulationController _simController;
     TemporalControlWindow _temporalControlWindow;
 

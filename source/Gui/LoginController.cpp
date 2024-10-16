@@ -13,15 +13,15 @@
 
 void LoginController::init(
     SimulationController const& simController,
-    PersisterController const& persisterController,
+    PersisterFacade const& persisterFacade,
     ActivateUserDialog const& activateUserDialog,
     BrowserWindow const& browserWindow)
 {
     _simController = simController;
-    _persisterController = persisterController;
+    _persisterFacade = persisterFacade;
     _activateUserDialog = activateUserDialog;
     _browserWindow = browserWindow;
-    _taskProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
+    _taskProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 
     auto& settings = GlobalSettings::get();
     _remember = settings.getBool("controller.login.remember", _remember);
@@ -44,7 +44,7 @@ void LoginController::onLogin()
     if (!_userName.empty()) {
         _taskProcessor->executeTask(
             [&](auto const& senderId) {
-                auto result = _persisterController->scheduleLogin(
+                auto result = _persisterFacade->scheduleLogin(
                     SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true},
                     LoginRequestData{.userName = _userName, .password = _password, .userInfo = getUserInfo()});
                 if (!_remember) {
@@ -54,7 +54,7 @@ void LoginController::onLogin()
                 return result;
             },
             [&](auto const& requestId) {
-                auto const& data = _persisterController->fetchLoginData(requestId);
+                auto const& data = _persisterFacade->fetchLoginData(requestId);
                 if (data.unknownUser) {
                     auto& settings = GlobalSettings::get();
                     auto userName = settings.getString("dialogs.login.user name", "");
