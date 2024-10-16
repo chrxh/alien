@@ -10,13 +10,13 @@
 #include "MessageDialog.h"
 
 _NewPasswordDialog::_NewPasswordDialog(SimulationFacade const& simulationFacade)
-    : _AlienDialog("New password")
+    : AlienDialog("New password")
     , _simulationFacade(simulationFacade)
 {}
 
 void _NewPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
 {
-    _AlienDialog::open();
+    AlienDialog::open();
     _userName = userName;
     _newPassword.clear();
     _confirmationCode.clear();

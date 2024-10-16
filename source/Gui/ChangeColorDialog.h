@@ -4,7 +4,7 @@
 
 #include "AlienDialog.h"
 
-class _ChangeColorDialog : public _AlienDialog
+class _ChangeColorDialog : public AlienDialog
 {
 public:
     _ChangeColorDialog(std::function<GenomeDescription()> const& getGenomeFunc, std::function<void(GenomeDescription const&)> const& setGenomeFunc);

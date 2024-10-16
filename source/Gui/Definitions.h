@@ -113,9 +113,7 @@ class BrowserWindow;
 class _ShaderWindow;
 using ShaderWindow = std::shared_ptr<_ShaderWindow>;
 
-class _LoginDialog;
-using LoginDialog = std::shared_ptr<_LoginDialog>;
-using LoginDialogWeakPtr = std::weak_ptr<_LoginDialog>;
+class LoginDialog;
 
 class _UploadSimulationDialog;
 using UploadSimulationDialog = std::shared_ptr<_UploadSimulationDialog>;

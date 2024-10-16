@@ -1,12 +1,9 @@
 #include "UploadSimulationDialog.h"
 
 #include <imgui.h>
-#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/SerializerService.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/GenomeDescriptionService.h"
 #include "Network/NetworkService.h"
 #include "Network/ValidationService.h"
 
@@ -14,14 +11,11 @@
 #include "MessageDialog.h"
 #include "StyleRepository.h"
 #include "BrowserWindow.h"
-#include "DelayedExecutionController.h"
-#include "OverlayMessageController.h"
 #include "Viewport.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
-#include "SerializationHelperService.h"
 
 namespace
 {
@@ -35,13 +29,9 @@ namespace
         {NetworkResourceType_Genome, "Genome"}};
 }
 
-_UploadSimulationDialog::_UploadSimulationDialog(
-    LoginDialog const& loginDialog,
-    SimulationFacade const& simulationFacade,
-    GenomeEditorWindow const& genomeEditorWindow)
-    : _AlienDialog("")
+_UploadSimulationDialog::_UploadSimulationDialog(SimulationFacade const& simulationFacade, GenomeEditorWindow const& genomeEditorWindow)
+    : AlienDialog("")
     , _simulationFacade(simulationFacade)
-    , _loginDialog(loginDialog)
     , _genomeEditorWindow(genomeEditorWindow)
 {
     auto& settings = GlobalSettings::get();
@@ -62,9 +52,9 @@ void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string
         _folder = folder;
         _resourceName = _resourceNameByFolder[_folder];
         _resourceDescription = _resourceDescriptionByFolder[_folder];
-        _AlienDialog::open();
+        AlienDialog::open();
     } else {
-        _loginDialog->open();
+        LoginDialog::get().open();
     }
 }
 

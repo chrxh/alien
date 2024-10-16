@@ -3,7 +3,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _ExitDialog : public _AlienDialog
+class _ExitDialog : public AlienDialog
 {
 public:
     _ExitDialog(bool& onExit);

@@ -5,7 +5,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _NewPasswordDialog : public _AlienDialog
+class _NewPasswordDialog : public AlienDialog
 {
 public:
     _NewPasswordDialog(SimulationFacade const& simulationFacade);

@@ -5,7 +5,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _ActivateUserDialog : public _AlienDialog
+class _ActivateUserDialog : public AlienDialog
 {
 public:
     _ActivateUserDialog(SimulationFacade const& simulationFacade);

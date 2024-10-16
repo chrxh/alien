@@ -5,7 +5,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _ResetPasswordDialog : public _AlienDialog
+class _ResetPasswordDialog : public AlienDialog
 {
 public:
     _ResetPasswordDialog(NewPasswordDialog const& newPasswordDialog);

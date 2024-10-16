@@ -9,14 +9,14 @@
 #include "TemporalControlWindow.h"
 
 _ResizeWorldDialog::_ResizeWorldDialog(SimulationFacade const& simulationFacade, TemporalControlWindow const& temporalControlWindow)
-    : _AlienDialog("Resize world")
+    : AlienDialog("Resize world")
     , _simulationFacade(simulationFacade)
     , _temporalControlWindow(temporalControlWindow)
 {}
 
 void _ResizeWorldDialog::open()
 {
-    _AlienDialog::open();
+    AlienDialog::open();
 
     auto worldSize = _simulationFacade->getWorldSize();
 

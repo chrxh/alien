@@ -153,9 +153,8 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simulationFacade);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
-    _loginDialog = std::make_shared<_LoginDialog>(_simulationFacade, _persisterFacade, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
-    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(
-        _loginDialog, _simulationFacade, _editorController->getGenomeEditorWindow());
+    LoginDialog::get().init(_simulationFacade, _persisterFacade, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
+    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_simulationFacade, _editorController->getGenomeEditorWindow());
     _editSimulationDialog = std::make_shared<_EditSimulationDialog>();
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>();
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>();
@@ -168,7 +167,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     LoginController::get().init(_simulationFacade, _persisterFacade, _activateUserDialog);
 
     //cyclic references
-    BrowserWindow::get().registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
+    BrowserWindow::get().registerCyclicReferences(_uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
     _activateUserDialog->registerCyclicReferences(_createUserDialog);
     _editorController->registerCyclicReferences(_uploadSimulationDialog, _simInteractionController);
 
@@ -412,7 +411,7 @@ void _MainWindow::processMenubar()
             ImGui::Separator();
             ImGui::BeginDisabled((bool)NetworkService::get().getLoggedInUserName());
             if (ImGui::MenuItem("Login", "ALT+L")) {
-                _loginDialog->open();
+                LoginDialog::get().open();
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
@@ -604,7 +603,7 @@ void _MainWindow::processMenubar()
             BrowserWindow::get().setOn(!BrowserWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_L) && !NetworkService::get().getLoggedInUserName()) {
-            _loginDialog->open();
+            LoginDialog::get().open();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_T)) {
             NetworkService::get().logout();
@@ -729,7 +728,7 @@ void _MainWindow::processDialogs()
     _gpuSettingsDialog->process();
     _displaySettingsDialog->process(); 
     _patternAnalysisDialog->process();
-    _loginDialog->process();
+    LoginDialog::get().process();
     _createUserDialog->process();
     _activateUserDialog->process();
     _uploadSimulationDialog->process();

@@ -128,12 +128,10 @@ void BrowserWindow::shutdown()
 }
 
 void BrowserWindow::registerCyclicReferences(
-    LoginDialogWeakPtr const& loginDialog,
     UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
     EditSimulationDialogWeakPtr const& editSimulationDialog,
     GenomeEditorWindowWeakPtr const& genomeEditorWindow)
 {
-    _loginDialog = loginDialog;
     _uploadSimulationDialog = uploadSimulationDialog;
     _editSimulationDialog = editSimulationDialog;
     _genomeEditorWindow = genomeEditorWindow;
@@ -256,9 +254,7 @@ void BrowserWindow::processToolbar()
     ImGui::SameLine();
     ImGui::BeginDisabled(NetworkService::get().getLoggedInUserName().has_value());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_IN_ALT)) {
-        if (auto loginDialog = _loginDialog.lock()) {
-            loginDialog->open();
-        }
+        LoginDialog::get().open();
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Login or register");
@@ -267,10 +263,8 @@ void BrowserWindow::processToolbar()
     ImGui::SameLine();
     ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_OUT_ALT)) {
-        if (auto loginDialog = _loginDialog.lock()) {
-            NetworkService::get().logout();
-            onRefresh();
-        }
+        NetworkService::get().logout();
+        onRefresh();
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Logout");
@@ -1402,7 +1396,7 @@ void BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
         _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  //invalidate cache entry
         NetworkService::get().toggleReactToResource(leaf.rawTO->id, emojiType);
     } else {
-        _loginDialog.lock()->open();
+        LoginDialog::get().open();
     }
 }
 

@@ -6,10 +6,10 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _UploadSimulationDialog : public _AlienDialog
+class _UploadSimulationDialog : public AlienDialog
 {
 public:
-    _UploadSimulationDialog(LoginDialog const& loginDialog, SimulationFacade const& simulationFacade, GenomeEditorWindow const& genomeEditorWindow);
+    _UploadSimulationDialog(SimulationFacade const& simulationFacade, GenomeEditorWindow const& genomeEditorWindow);
     ~_UploadSimulationDialog();
 
     void open(NetworkResourceType resourceType, std::string const& folder = "");
@@ -29,7 +29,6 @@ private:
     NetworkResourceType _resourceType = NetworkResourceType_Simulation;
     bool _share = false;
 
-    LoginDialog _loginDialog;
     SimulationFacade _simulationFacade;
     GenomeEditorWindow _genomeEditorWindow;
 };

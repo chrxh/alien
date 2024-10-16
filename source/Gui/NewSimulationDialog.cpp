@@ -20,7 +20,7 @@ _NewSimulationDialog::_NewSimulationDialog(
     SimulationFacade const& simulationFacade,
     TemporalControlWindow const& temporalControlWindow,
     StatisticsWindow const& statisticsWindow)
-    : _AlienDialog("New simulation")
+    : AlienDialog("New simulation")
     , _simulationFacade(simulationFacade)
     , _temporalControlWindow(temporalControlWindow)
     , _statisticsWindow(statisticsWindow)

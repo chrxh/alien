@@ -12,7 +12,7 @@
 #include "StyleRepository.h"
 
 _ActivateUserDialog::_ActivateUserDialog(SimulationFacade const& simulationFacade)
-    : _AlienDialog("Activate user")
+    : AlienDialog("Activate user")
     , _simulationFacade(simulationFacade)
 {}
 
@@ -26,7 +26,7 @@ void _ActivateUserDialog::registerCyclicReferences(CreateUserDialogWeakPtr const
 
 void _ActivateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
-    _AlienDialog::open();
+    AlienDialog::open();
     _userName = userName;
     _password = password;
     _userInfo = userInfo;

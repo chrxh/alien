@@ -4,7 +4,7 @@
 #include "AlienImGui.h"
 
 _ExitDialog::_ExitDialog(bool& onExit)
-    : _AlienDialog("Exit")
+    : AlienDialog("Exit")
     , _onExit(onExit)
 {}
 

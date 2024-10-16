@@ -15,13 +15,13 @@
 #include "OverlayMessageController.h"
 
 _EditSimulationDialog::_EditSimulationDialog()
-    : _AlienDialog("")
+    : AlienDialog("")
 {}
 
 void _EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
 {
     changeTitle("Change name or description");
-    _AlienDialog::open();
+    AlienDialog::open();
     _treeTO = treeTO;
 
     auto& rawTO = _treeTO->getLeaf().rawTO;
@@ -32,7 +32,7 @@ void _EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
 void _EditSimulationDialog::openForFolder(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs)
 {
     changeTitle("Change folder name");
-    _AlienDialog::open();
+    AlienDialog::open();
     _treeTO = treeTO;
     _rawTOs = rawTOs;
     

@@ -10,7 +10,7 @@
 #include "ActivateUserDialog.h"
 
 _CreateUserDialog::_CreateUserDialog(ActivateUserDialog const& activateUserDialog)
-    : _AlienDialog("Create user")
+    : AlienDialog("Create user")
     , _activateUserDialog(activateUserDialog)
 {
 }
@@ -21,7 +21,7 @@ _CreateUserDialog::~_CreateUserDialog()
 
 void _CreateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
-    _AlienDialog::open();
+    AlienDialog::open();
     _userName = userName;
     _password = password;
     _email.clear();

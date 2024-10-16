@@ -15,7 +15,7 @@ namespace
 }
 
 _GpuSettingsDialog::_GpuSettingsDialog(SimulationFacade const& simulationFacade)
-    : _AlienDialog("CUDA settings")
+    : AlienDialog("CUDA settings")
     , _simulationFacade(simulationFacade)
 {
     GpuSettings gpuSettings;

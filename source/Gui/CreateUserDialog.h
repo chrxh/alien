@@ -5,7 +5,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _CreateUserDialog : public _AlienDialog
+class _CreateUserDialog : public AlienDialog
 {
 public:
     _CreateUserDialog(ActivateUserDialog const& activateUserDialog);

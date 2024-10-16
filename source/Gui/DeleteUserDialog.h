@@ -5,7 +5,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _DeleteUserDialog : public _AlienDialog
+class _DeleteUserDialog : public AlienDialog
 {
 public:
     _DeleteUserDialog();

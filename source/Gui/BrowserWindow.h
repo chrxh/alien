@@ -31,7 +31,6 @@ public:
     void shutdown();
 
     void registerCyclicReferences(
-        LoginDialogWeakPtr const& loginDialog,
         UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
         EditSimulationDialogWeakPtr const& editSimulationDialog,
         GenomeEditorWindowWeakPtr const& genomeEditorWindow);
@@ -150,7 +149,6 @@ private:
     PersisterFacade _persisterFacade;
     StatisticsWindow _statisticsWindow;
     TemporalControlWindow _temporalControlWindow;
-    LoginDialogWeakPtr _loginDialog;
     EditorController _editorController;
     UploadSimulationDialogWeakPtr _uploadSimulationDialog;
     EditSimulationDialogWeakPtr _editSimulationDialog;

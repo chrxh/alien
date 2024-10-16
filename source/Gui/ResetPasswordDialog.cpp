@@ -7,13 +7,13 @@
 #include "NewPasswordDialog.h"
 
 _ResetPasswordDialog::_ResetPasswordDialog(NewPasswordDialog const& newPasswordDialog)
-    : _AlienDialog("Reset password")
+    : AlienDialog("Reset password")
     , _newPasswordDialog(newPasswordDialog)
 {}
 
 void _ResetPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
 {
-    _AlienDialog::open();
+    AlienDialog::open();
     _userName = userName;
     _email.clear();
     _userInfo = userInfo;

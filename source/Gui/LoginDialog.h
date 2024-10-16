@@ -6,18 +6,21 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _LoginDialog : public _AlienDialog
+class LoginDialog : public AlienDialog
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTOR(LoginDialog);
+
 public:
-    _LoginDialog(
+    void init(
         SimulationFacade const& simulationFacade,
         PersisterFacade const& persisterFacade,
         CreateUserDialog const& createUserDialog,
         ActivateUserDialog const& activateUserDialog,
         ResetPasswordDialog const& resetPasswordDialog);
-    ~_LoginDialog();
 
 private:
+    LoginDialog();
+
     void processIntern();
 
     SimulationFacade _simulationFacade;

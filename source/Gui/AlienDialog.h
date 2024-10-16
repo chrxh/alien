@@ -3,11 +3,11 @@
 #include "Definitions.h"
 #include "EngineInterface/Definitions.h"
 
-class _AlienDialog
+class AlienDialog
 {
 public:
-    _AlienDialog(std::string const& title);
-    virtual ~_AlienDialog();
+    AlienDialog(std::string const& title);
+    virtual ~AlienDialog();
 
     void process();
     virtual void open();

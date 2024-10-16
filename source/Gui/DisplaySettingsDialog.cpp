@@ -17,7 +17,7 @@ namespace
 }
 
 _DisplaySettingsDialog::_DisplaySettingsDialog()
-    : _AlienDialog("Display settings")
+    : AlienDialog("Display settings")
 {
     auto primaryMonitor = glfwGetPrimaryMonitor();
     _videoModes = glfwGetVideoModes(primaryMonitor, &_videoModesCount);
