@@ -180,7 +180,7 @@ void _BrowserWindow::refreshIntern(bool withRetry)
 
             for (auto& [workspaceId, workspace] : _workspaces) {
                 workspace.rawTOs.clear();
-                auto userName = NetworkService::getLoggedInUserName().value_or("");
+                auto userName = NetworkService::get().getLoggedInUserName().value_or("");
                 for (auto const& rawTO : data.resourceTOs) {
                     if (rawTO->resourceType == workspaceId.resourceType) {
                         //public user items should also be visible in private workspace
@@ -250,7 +250,7 @@ void _BrowserWindow::processToolbar()
 
     //login button
     ImGui::SameLine();
-    ImGui::BeginDisabled(NetworkService::getLoggedInUserName().has_value());
+    ImGui::BeginDisabled(NetworkService::get().getLoggedInUserName().has_value());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_IN_ALT)) {
         if (auto loginDialog = _loginDialog.lock()) {
             loginDialog->open();
@@ -261,10 +261,10 @@ void _BrowserWindow::processToolbar()
 
     //logout button
     ImGui::SameLine();
-    ImGui::BeginDisabled(!NetworkService::getLoggedInUserName());
+    ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_OUT_ALT)) {
         if (auto loginDialog = _loginDialog.lock()) {
-            NetworkService::logout();
+            NetworkService::get().logout();
             onRefresh();
         }
     }
@@ -402,7 +402,7 @@ void _BrowserWindow::processWorkspaceSelectionAndFilter()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        auto userName = NetworkService::getLoggedInUserName();
+        auto userName = NetworkService::get().getLoggedInUserName();
         auto privateWorkspaceString = userName.has_value() ? *userName + "'s private workspace" : "Private workspace (need to login)";
         auto workspaceType_reordered = 2 - _currentWorkspace.workspaceType;  //change the order for display
         if (AlienImGui::Switcher(
@@ -464,7 +464,7 @@ void _BrowserWindow::processUserList()
         AlienImGui::Group("Simulators");
         if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
-            auto isLoggedIn = NetworkService::getLoggedInUserName().has_value();
+            auto isLoggedIn = NetworkService::get().getLoggedInUserName().has_value();
             ImGui::TableSetupColumn(
                 isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
                 ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
@@ -488,7 +488,7 @@ void _BrowserWindow::processUserList()
                     ImGui::TableNextRow(0, scale(RowHeight));
 
                     ImGui::TableNextColumn();
-                    auto isBoldFont = isLoggedIn && *NetworkService::getLoggedInUserName() == item->userName;
+                    auto isBoldFont = isLoggedIn && *NetworkService::get().getLoggedInUserName() == item->userName;
 
                     if (item->online) {
                         AlienImGui::OnlineSymbol();
@@ -551,13 +551,13 @@ void _BrowserWindow::processStatus()
     statusText += std::to_string(_userTOs.size()) + " simulators found";
 
     statusText += std::string("  " ICON_FA_INFO_CIRCLE " ");
-    if (auto userName = NetworkService::getLoggedInUserName()) {
-        statusText += "Logged in as " + *userName + " @ " + NetworkService::getServerAddress();  // + ": ";
+    if (auto userName = NetworkService::get().getLoggedInUserName()) {
+        statusText += "Logged in as " + *userName + " @ " + NetworkService::get().getServerAddress();  // + ": ";
     } else {
-        statusText += "Not logged in to " + NetworkService::getServerAddress();  // + ": ";
+        statusText += "Not logged in to " + NetworkService::get().getServerAddress();  // + ": ";
     }
 
-    if (!NetworkService::getLoggedInUserName()) {
+    if (!NetworkService::get().getLoggedInUserName()) {
         statusText += std::string("   " ICON_FA_INFO_CIRCLE " ");
         statusText += "In order to share and upvote simulations you need to log in.";
     }
@@ -1329,7 +1329,7 @@ void _BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
     //apply changes to server
     delayedExecution([rawTOs = rawTOs, this] {
         for (auto const& rawTO : rawTOs) {
-            if (!NetworkService::moveResource(rawTO->id, rawTO->workspaceType)) {
+            if (!NetworkService::get().moveResource(rawTO->id, rawTO->workspaceType)) {
                 MessageDialog::get().information("Error", "Failed to move item.");
                 refreshIntern(true);
                 return;
@@ -1370,7 +1370,7 @@ void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType
 {
     CHECK(to->isLeaf());
     auto& leaf = to->getLeaf();
-    if (NetworkService::getLoggedInUserName()) {
+    if (NetworkService::get().getLoggedInUserName()) {
 
         //remove existing like
         auto findResult = _ownEmojiTypeBySimId.find(leaf.rawTO->id);
@@ -1396,7 +1396,7 @@ void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType
         }
 
         _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  //invalidate cache entry
-        NetworkService::toggleReactToResource(leaf.rawTO->id, emojiType);
+        NetworkService::get().toggleReactToResource(leaf.rawTO->id, emojiType);
     } else {
         _loginDialog.lock()->open();
     }
@@ -1431,7 +1431,7 @@ bool _BrowserWindow::isOwner(NetworkResourceTreeTO const& treeTO) const
     auto const& workspace = _workspaces.at(_currentWorkspace);
 
     auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, workspace.rawTOs);
-    auto userName = NetworkService::getLoggedInUserName().value_or("");
+    auto userName = NetworkService::get().getLoggedInUserName().value_or("");
     return std::ranges::all_of(rawTOs, [&](NetworkResourceRawTO const& rawTO) { return rawTO->userName == userName; });
 }
 

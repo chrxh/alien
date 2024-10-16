@@ -67,12 +67,6 @@ namespace
     }
 }
 
-std::string NetworkService::_serverAddress;
-std::optional<std::string> NetworkService::_loggedInUserName;
-std::optional<std::string> NetworkService::_password;
-std::optional<std::chrono::steady_clock::time_point> NetworkService::_lastRefreshTime;
-Cache<std::string, NetworkService::ResourceData, 20> NetworkService::_downloadCache;
-
 void NetworkService::init()
 {
     _serverAddress = GlobalSettings::get().getString("settings.server", "alien-project.org");

@@ -58,7 +58,7 @@ _UploadSimulationDialog::~_UploadSimulationDialog()
 
 void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder)
 {
-    if (NetworkService::getLoggedInUserName()) {
+    if (NetworkService::get().getLoggedInUserName()) {
         changeTitle("Upload " + BrowserDataTypeToLowerString.at(resourceType));
         _resourceType = resourceType;
         _folder = folder;
