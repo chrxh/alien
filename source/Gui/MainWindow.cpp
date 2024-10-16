@@ -21,7 +21,7 @@
 #include "implot.h"
 #include "Fonts/IconsFontAwesome5.h"
 
-#include "PersisterInterface/PersisterController.h"
+#include "PersisterInterface/PersisterFacade.h"
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationController.h"
 #include "Network/NetworkService.h"
@@ -95,10 +95,10 @@ namespace
     }
 }
 
-_MainWindow::_MainWindow(SimulationController const& simController, PersisterController const& persisterController, GuiLogger const& logger)
+_MainWindow::_MainWindow(SimulationController const& simController, PersisterFacade const& persisterFacade, GuiLogger const& logger)
     : _logger(logger)
     , _simController(simController)
-    , _persisterController(persisterController)
+    , _persisterFacade(persisterFacade)
 {
     IMGUI_CHECKVERSION();
 
@@ -124,7 +124,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
 
     //init controllers, windows and dialogs
     Viewport::init(_simController);
-    _persisterController->init(_simController);
+    _persisterFacade->init(_simController);
     _uiController = std::make_shared<_UiController>();
     _autosaveController = std::make_shared<_AutosaveController>(_simController);
     _editorController =
@@ -138,7 +138,7 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simController, _simInteractionController);
     _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simController, _radiationSourcesWindow, _simInteractionController);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simController);
-    _startupController = std::make_shared<_StartupController>(_simController, _persisterController, _temporalControlWindow);
+    _startupController = std::make_shared<_StartupController>(_simController, _persisterFacade, _temporalControlWindow);
     _exitDialog = std::make_shared<_ExitDialog>(_onExit);
     _aboutDialog = std::make_shared<_AboutDialog>();
     _massOperationsDialog = std::make_shared<_MassOperationsDialog>(_simController);
@@ -149,12 +149,12 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simController);
     _fpsController = std::make_shared<_FpsController>();
     _browserWindow =
-        std::make_shared<_BrowserWindow>(_simController, _persisterController, _statisticsWindow, _temporalControlWindow, _editorController);
+        std::make_shared<_BrowserWindow>(_simController, _persisterFacade, _statisticsWindow, _temporalControlWindow, _editorController);
     _activateUserDialog = std::make_shared<_ActivateUserDialog>(_simController, _browserWindow);
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simController, _browserWindow);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
-    _loginDialog = std::make_shared<_LoginDialog>(_simController, _persisterController, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
+    _loginDialog = std::make_shared<_LoginDialog>(_simController, _persisterFacade, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(
         _browserWindow, _loginDialog, _simController, _editorController->getGenomeEditorWindow());
     _editSimulationDialog = std::make_shared<_EditSimulationDialog>(_browserWindow);
@@ -162,11 +162,11 @@ _MainWindow::_MainWindow(SimulationController const& simController, PersisterCon
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow);
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_simController);
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
-    _autosaveWindow = std::make_shared<_AutosaveWindow>(_simController, _persisterController);
-    OverlayMessageController::get().init(_persisterController);
-    FileTransferController::get().init(_persisterController, _simController, _temporalControlWindow);
-    NetworkTransferController::get().init(_simController, _persisterController, _temporalControlWindow, _editorController, _browserWindow);
-    LoginController::get().init(_simController, _persisterController, _activateUserDialog, _browserWindow);
+    _autosaveWindow = std::make_shared<_AutosaveWindow>(_simController, _persisterFacade);
+    OverlayMessageController::get().init(_persisterFacade);
+    FileTransferController::get().init(_persisterFacade, _simController, _temporalControlWindow);
+    NetworkTransferController::get().init(_simController, _persisterFacade, _temporalControlWindow, _editorController, _browserWindow);
+    LoginController::get().init(_simController, _persisterFacade, _activateUserDialog, _browserWindow);
 
     //cyclic references
     _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
@@ -249,7 +249,7 @@ void _MainWindow::shutdown()
 
     _simulationView.reset();
 
-    _persisterController->shutdown();
+    _persisterFacade->shutdown();
     _simController->closeSimulation();
     NetworkService::shutdown();
 }

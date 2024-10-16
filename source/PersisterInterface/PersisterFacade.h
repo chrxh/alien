@@ -36,10 +36,10 @@
 #include "UploadNetworkResourceRequestData.h"
 #include "UploadNetworkResourceResultData.h"
 
-class _PersisterController
+class _PersisterFacade
 {
 public:
-    virtual ~_PersisterController() = default;
+    virtual ~_PersisterFacade() = default;
 
     //lifecycle control
     virtual void init(SimulationController const& simController) = 0;

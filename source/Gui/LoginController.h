@@ -2,14 +2,14 @@
 
 #include "Base/Singleton.h"
 #include "Definitions.h"
-#include "PersisterInterface/PersisterController.h"
+#include "PersisterInterface/PersisterFacade.h"
 
 class LoginController
 {
     MAKE_SINGLETON(LoginController);
 public:
 
-    void init(SimulationController const& simController, PersisterController const& persisterController, ActivateUserDialog const& activateUserDialog, BrowserWindow const& browserWindow);
+    void init(SimulationController const& simController, PersisterFacade const& persisterFacade, ActivateUserDialog const& activateUserDialog, BrowserWindow const& browserWindow);
     void shutdown();
 
     void onLogin();
@@ -34,7 +34,7 @@ public:
 
 private:
     SimulationController _simController; 
-    PersisterController _persisterController;
+    PersisterFacade _persisterFacade;
     ActivateUserDialog _activateUserDialog;
     BrowserWindow _browserWindow;
 

@@ -6,7 +6,7 @@
 #include "Base/FileLogger.h"
 #include "EngineInterface/SerializerService.h"
 #include "EngineImpl/SimulationControllerImpl.h"
-#include "PersisterImpl/PersisterControllerImpl.h"
+#include "PersisterImpl/PersisterFacadeImpl.h"
 
 #include "MainWindow.h"
 #include "GuiLogger.h"
@@ -33,13 +33,13 @@ int main(int argc, char** argv)
     }
 
     SimulationController simController;
-    PersisterController persisterController;
+    PersisterFacade persisterFacade;
     MainWindow mainWindow;
 
     try {
         simController = std::make_shared<_SimulationControllerImpl>();
-        persisterController = std::make_shared<_PersisterControllerImpl>();
-        mainWindow = std::make_shared<_MainWindow>(simController, persisterController, logger);
+        persisterFacade = std::make_shared<_PersisterFacadeImpl>();
+        mainWindow = std::make_shared<_MainWindow>(simController, persisterFacade, logger);
         mainWindow->mainLoop();
         mainWindow->shutdown();
 

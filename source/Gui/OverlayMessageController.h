@@ -4,14 +4,14 @@
 
 #include "Definitions.h"
 #include "EngineInterface/Definitions.h"
-#include "PersisterInterface/PersisterController.h"
+#include "PersisterInterface/PersisterFacade.h"
 
 class OverlayMessageController
 {
 public:
     static OverlayMessageController& get();
 
-    void init(PersisterController const& persisterController);
+    void init(PersisterFacade const& persisterFacade);
     void process();
 
     void show(std::string const& message, bool withLightning = false);
@@ -22,7 +22,7 @@ private:
     void processLoadingBar();
     void processMessage();
 
-    PersisterController _persisterController;
+    PersisterFacade _persisterFacade;
 
     bool _show = false;
     bool _withLightning = false;

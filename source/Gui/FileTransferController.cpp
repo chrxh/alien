@@ -16,14 +16,14 @@ namespace
 }
 
 void FileTransferController::init(
-    PersisterController const& persisterController,
+    PersisterFacade const& persisterFacade,
     SimulationController const& simController,
     TemporalControlWindow const& temporalControlWindow)
 {
-    _persisterController = persisterController;
+    _persisterFacade = persisterFacade;
     _simController = simController;
     _temporalControlWindow = temporalControlWindow;
-    _openSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
+    _openSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 }
 
 void FileTransferController::onOpenSimulation()
@@ -40,11 +40,11 @@ void FileTransferController::onOpenSimulation()
             [&](auto const& senderId) {
                 auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true};
                 auto readData = ReadSimulationRequestData{firstFilename.string()};
-                return _persisterController->scheduleReadSimulationFromFile(senderInfo, readData);
+                return _persisterFacade->scheduleReadSimulationFromFile(senderInfo, readData);
             },
             [&](auto const& requestId) {
-                auto const& data = _persisterController->fetchReadSimulationData(requestId);
-                _persisterController->shutdown();
+                auto const& data = _persisterFacade->fetchReadSimulationData(requestId);
+                _persisterFacade->shutdown();
 
                 _simController->closeSimulation();
 
@@ -73,7 +73,7 @@ void FileTransferController::onOpenSimulation()
                         data.deserializedSimulation.auxiliaryData.generalSettings,
                         data.deserializedSimulation.auxiliaryData.simulationParameters);
                 }
-                _persisterController->restart();
+                _persisterFacade->restart();
 
                 Viewport::setCenterInWorldPos(data.deserializedSimulation.auxiliaryData.center);
                 Viewport::setZoomFactor(data.deserializedSimulation.auxiliaryData.zoom);
@@ -94,7 +94,7 @@ void FileTransferController::onSaveSimulation()
             printOverlayMessage("Saving ...");
             auto senderInfo = SenderInfo{.senderId = SenderId{FileTransferSenderId}, .wishResultData = false, .wishErrorInfo = true};
             auto saveData = SaveSimulationRequestData{firstFilename.string(), Viewport::getZoomFactor(), Viewport::getCenterInWorldPos()};
-            _persisterController->scheduleSaveSimulationToFile(senderInfo, saveData);
+            _persisterFacade->scheduleSaveSimulationToFile(senderInfo, saveData);
         });
 }
 

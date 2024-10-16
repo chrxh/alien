@@ -1,8 +1,8 @@
 
 add_library(PersisterImpl
     Definitions.h
-    PersisterControllerImpl.cpp
-    PersisterControllerImpl.h
+    PersisterFacadeImpl.cpp
+    PersisterFacadeImpl.h
     PersisterRequest.h
     PersisterRequestError.cpp
     PersisterRequestError.h

@@ -16,10 +16,10 @@ namespace
     auto constexpr AutosaveSenderId = "Autosave";
 }
 
-_AutosaveWindow::_AutosaveWindow(SimulationController const& simController, PersisterController const& persisterController)
+_AutosaveWindow::_AutosaveWindow(SimulationController const& simController, PersisterFacade const& persisterFacade)
     : _AlienWindow("Autosave (work in progress)", "windows.autosave", false)
     , _simController(simController)
-    , _persisterController(persisterController)
+    , _persisterFacade(persisterFacade)
 {
     _settingsOpen = GlobalSettings::get().getBool("windows.autosave.settings.open", _settingsOpen);
     _settingsHeight = GlobalSettings::get().getFloat("windows.autosave.settings.height", _settingsHeight);
@@ -185,7 +185,7 @@ void _AutosaveWindow::createSavepoint()
     static int i = 0;
     auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
     auto saveData = SaveSimulationRequestData{"d:\\test" + std::to_string(++i) + ".sim", Viewport::getZoomFactor(), Viewport::getCenterInWorldPos()};
-    auto jobId = _persisterController->scheduleSaveSimulationToFile(senderInfo, saveData);
+    auto jobId = _persisterFacade->scheduleSaveSimulationToFile(senderInfo, saveData);
 
     _savePoints.emplace_front(SavepointState::InQueue, jobId.value, "", "", 0);
 }
@@ -193,13 +193,13 @@ void _AutosaveWindow::createSavepoint()
 void _AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)
 {
     if (savepoint.state != SavepointState::Persisted) {
-        auto requestState = _persisterController->getRequestState(PersisterRequestId(savepoint.id));
+        auto requestState = _persisterFacade->getRequestState(PersisterRequestId(savepoint.id));
         if (requestState == PersisterRequestState::InProgress) {
             savepoint.state = SavepointState::InProgress;
         }
         if (requestState == PersisterRequestState::Finished) {
             savepoint.state = SavepointState::Persisted;
-            auto jobResult = _persisterController->fetchSavedSimulationData(PersisterRequestId{savepoint.id});
+            auto jobResult = _persisterFacade->fetchSavedSimulationData(PersisterRequestId{savepoint.id});
             savepoint.timestep = jobResult.timestep;
             savepoint.timestamp = StringHelper::format(jobResult.timestamp);
             savepoint.name = jobResult.name;

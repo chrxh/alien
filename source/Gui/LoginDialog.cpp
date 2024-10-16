@@ -18,13 +18,13 @@
 
 _LoginDialog::_LoginDialog(
     SimulationController const& simController,
-    PersisterController const& persisterController,
+    PersisterFacade const& persisterFacade,
     CreateUserDialog const& createUserDialog,
     ActivateUserDialog const& activateUserDialog,
     ResetPasswordDialog const& resetPasswordDialog)
     : _AlienDialog("Login")
     , _simController(simController)
-    , _persisterController(persisterController)
+    , _persisterFacade(persisterFacade)
     , _createUserDialog(createUserDialog)
     , _activateUserDialog(activateUserDialog)
     , _resetPasswordDialog(resetPasswordDialog)

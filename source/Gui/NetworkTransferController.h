@@ -19,7 +19,7 @@ class NetworkTransferController
 public:
     void init(
         SimulationController const& simController,
-        PersisterController const& persisterController,
+        PersisterFacade const& persisterFacade,
         TemporalControlWindow const& temporalControlWindow,
         EditorController const& editorController,
         BrowserWindow const& browserWindow);
@@ -33,7 +33,7 @@ public:
 
 private:
     SimulationController _simController;
-    PersisterController _persisterController;
+    PersisterFacade _persisterFacade;
     TemporalControlWindow _temporalControlWindow;
     EditorController _editorController;
     BrowserWindow _browserWindow;

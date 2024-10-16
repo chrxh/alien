@@ -14,20 +14,20 @@
 
 void NetworkTransferController::init(
     SimulationController const& simController,
-    PersisterController const& persisterController,
+    PersisterFacade const& persisterFacade,
     TemporalControlWindow const& temporalControlWindow,
     EditorController const& editorController,
     BrowserWindow const& browserWindow)
 {
     _simController = simController;
-    _persisterController = persisterController;
+    _persisterFacade = persisterFacade;
     _temporalControlWindow = temporalControlWindow;
     _editorController = editorController;
     _browserWindow = browserWindow;
-    _downloadProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
-    _uploadProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
-    _replaceProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
-    _deleteProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
+    _downloadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _uploadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _replaceProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _deleteProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 }
 
 void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData const& requestData)
@@ -36,14 +36,14 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
 
     _downloadProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterController->scheduleDownloadNetworkResource(
+            return _persisterFacade->scheduleDownloadNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
-            auto data = _persisterController->fetchDownloadNetworkResourcesData(requestId);
+            auto data = _persisterFacade->fetchDownloadNetworkResourcesData(requestId);
 
             if (data.resourceType == NetworkResourceType_Simulation) {
-                _persisterController->shutdown();
+                _persisterFacade->shutdown();
                 _simController->closeSimulation();
                 std::optional<std::string> errorMessage;
                 auto const& deserializedSimulation = std::get<DeserializedSimulation>(data.resourceData);
@@ -70,7 +70,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                         deserializedSimulation.auxiliaryData.generalSettings,
                         deserializedSimulation.auxiliaryData.simulationParameters);
                 }
-                _persisterController->restart();
+                _persisterFacade->restart();
 
                 Viewport::setCenterInWorldPos(deserializedSimulation.auxiliaryData.center);
                 Viewport::setZoomFactor(deserializedSimulation.auxiliaryData.zoom);
@@ -100,11 +100,11 @@ void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const&
 
     _uploadProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterController->scheduleUploadNetworkResource(
+            return _persisterFacade->scheduleUploadNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
-            _persisterController->fetchUploadNetworkResourcesData(requestId);
+            _persisterFacade->fetchUploadNetworkResourcesData(requestId);
             _browserWindow->onRefresh();
         },
         [](auto const& errors) { MessageDialog::get().information("Error", errors); });
@@ -116,11 +116,11 @@ void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData cons
 
     _replaceProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterController->scheduleReplaceNetworkResource(
+            return _persisterFacade->scheduleReplaceNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
-            _persisterController->fetchReplaceNetworkResourcesData(requestId);
+            _persisterFacade->fetchReplaceNetworkResourcesData(requestId);
             _browserWindow->onRefresh();
         },
         [](auto const& errors) { MessageDialog::get().information("Error", errors); });
@@ -132,11 +132,11 @@ void NetworkTransferController::onDelete(DeleteNetworkResourceRequestData const&
 
     _deleteProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterController->scheduleDeleteNetworkResource(
+            return _persisterFacade->scheduleDeleteNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
-            _persisterController->fetchDeleteNetworkResourcesData(requestId);
+            _persisterFacade->fetchDeleteNetworkResourcesData(requestId);
             _browserWindow->onRefresh();
         },
         [](auto const& errors) { MessageDialog::get().information("Error", errors); });

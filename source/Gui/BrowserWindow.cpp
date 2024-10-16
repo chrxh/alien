@@ -62,20 +62,20 @@ namespace
 
 _BrowserWindow::_BrowserWindow(
     SimulationController const& simController,
-    PersisterController const& persisterController,
+    PersisterFacade const& persisterFacade,
      StatisticsWindow const& statisticsWindow,
     TemporalControlWindow const& temporalControlWindow,
     EditorController const& editorController)
     : _AlienWindow("Browser", "windows.browser", true)
     , _simController(simController)
-    , _persisterController(persisterController)
+    , _persisterFacade(persisterFacade)
     , _statisticsWindow(statisticsWindow)
     , _temporalControlWindow(temporalControlWindow)
     , _editorController(editorController)
 {
     _downloadCache = std::make_shared<_DownloadCache>();
-    _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
-    _emojiProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
+    _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _emojiProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 
     auto& settings = GlobalSettings::get();
     _currentWorkspace.resourceType = settings.getInt("windows.browser.resource type", _currentWorkspace.resourceType);
@@ -170,11 +170,11 @@ void _BrowserWindow::refreshIntern(bool withRetry)
 {
     _refreshProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterController->scheduleGetNetworkResources(
+            return _persisterFacade->scheduleGetNetworkResources(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = withRetry}, GetNetworkResourcesRequestData());
         },
         [&](auto const& requestId) {
-            auto data = _persisterController->fetchGetNetworkResourcesData(requestId);
+            auto data = _persisterFacade->fetchGetNetworkResourcesData(requestId);
             _userTOs = data.userTOs;
             _ownEmojiTypeBySimId = data.emojiTypeByResourceId;
 
@@ -1446,12 +1446,12 @@ std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& resourceI
         if (!_emojiProcessor->pendingTasks()) {
             _emojiProcessor->executeTask(
                 [&](auto const& senderId) {
-                    return _persisterController->scheduleGetUserNamesForEmoji(
+                    return _persisterFacade->scheduleGetUserNamesForEmoji(
                         SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = false},
                         GetUserNamesForEmojiRequestData{.resourceId = resourceId, .emojiType = emojiType});
                 },
                 [&](auto const& requestId) {
-                    auto data = _persisterController->fetchGetUserNamesForEmojiData(requestId);
+                    auto data = _persisterFacade->fetchGetUserNamesForEmojiData(requestId);
                     _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(data.resourceId, data.emojiType), data.userNames);
                 },
                 [](auto const& errors) { MessageDialog::get().information("Error", errors); });

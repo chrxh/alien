@@ -4,7 +4,7 @@
 
 #include "Definitions.h"
 #include "AlienWindow.h"
-#include "PersisterInterface/PersisterController.h"
+#include "PersisterInterface/PersisterFacade.h"
 
 enum class SavepointState
 {
@@ -26,7 +26,7 @@ struct SavepointEntry
 class _AutosaveWindow : public _AlienWindow
 {
 public:
-    _AutosaveWindow(SimulationController const& simController, PersisterController const& persisterController);
+    _AutosaveWindow(SimulationController const& simController, PersisterFacade const& persisterFacade);
     ~_AutosaveWindow();
 
 private:
@@ -43,7 +43,7 @@ private:
     void validationAndCorrection();
 
     SimulationController _simController; 
-    PersisterController _persisterController;
+    PersisterFacade _persisterFacade;
 
     bool _settingsOpen = false;
     float _settingsHeight = 130.0f;
