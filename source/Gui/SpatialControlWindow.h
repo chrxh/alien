@@ -6,7 +6,7 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _SpatialControlWindow : public _AlienWindow
+class _SpatialControlWindow : public AlienWindow
 {
 public:
     _SpatialControlWindow(SimulationFacade const& simulationFacade, TemporalControlWindow const& temporalControlWindow);

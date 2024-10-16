@@ -47,7 +47,6 @@ private:
     StatisticsWindow _statisticsWindow;
     LogWindow _logWindow;
     GettingStartedWindow _gettingStartedWindow;
-    BrowserWindow _browserWindow;
     ShaderWindow _shaderWindow;
     RadiationSourcesWindow _radiationSourcesWindow;
     AutosaveWindow _autosaveWindow;

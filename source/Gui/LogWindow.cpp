@@ -11,7 +11,7 @@
 #include "AlienImGui.h"
 
 _LogWindow::_LogWindow(GuiLogger const& logger)
-    : _AlienWindow("Log", "windows.log", false)
+    : AlienWindow("Log", "windows.log", false)
     , _logger(logger)
 {
     _verbose = GlobalSettings::get().getBool("windows.log.verbose", false);

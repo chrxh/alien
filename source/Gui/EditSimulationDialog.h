@@ -8,7 +8,7 @@
 class _EditSimulationDialog : public _AlienDialog
 {
 public:
-    _EditSimulationDialog(BrowserWindow const& browserWindow);
+    _EditSimulationDialog();
     virtual ~_EditSimulationDialog() override = default;
 
     void openForLeaf(NetworkResourceTreeTO const& treeTO);
@@ -25,6 +25,4 @@ private:
     std::string _origFolderName;
     std::string _newName;
     std::string _newDescription;
-
-    BrowserWindow _browserWindow;
 };

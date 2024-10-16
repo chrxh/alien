@@ -8,15 +8,13 @@
 class _NetworkSettingsDialog : public _AlienDialog
 {
 public:
-    _NetworkSettingsDialog(BrowserWindow const& browserWindow);
+    _NetworkSettingsDialog();
 
 private:
     void processIntern();
     void openIntern();
 
     void onChangeSettings();
-
-    BrowserWindow _browserWindow;
 
     std::string _serverAddress;
     std::string _origServerAddress;

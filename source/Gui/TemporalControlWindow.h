@@ -9,7 +9,7 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _TemporalControlWindow : public _AlienWindow
+class _TemporalControlWindow : public AlienWindow
 {
 public:
     _TemporalControlWindow(SimulationFacade const& simulationFacade, StatisticsWindow const& statisticsWindow);

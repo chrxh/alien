@@ -32,7 +32,7 @@ namespace
 }
 
 _StatisticsWindow::_StatisticsWindow(SimulationFacade const& simulationFacade)
-    : _AlienWindow("Statistics", "windows.statistics", false)
+    : AlienWindow("Statistics", "windows.statistics", false)
     , _simulationFacade(simulationFacade)
 {
     auto path = std::filesystem::current_path();

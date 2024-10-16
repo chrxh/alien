@@ -148,28 +148,27 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simulationFacade);
     _fpsController = std::make_shared<_FpsController>();
-    _browserWindow =
-        std::make_shared<_BrowserWindow>(_simulationFacade, _persisterFacade, _statisticsWindow, _temporalControlWindow, _editorController);
-    _activateUserDialog = std::make_shared<_ActivateUserDialog>(_simulationFacade, _browserWindow);
+    BrowserWindow::get().init(_simulationFacade, _persisterFacade, _statisticsWindow, _temporalControlWindow, _editorController);
+    _activateUserDialog = std::make_shared<_ActivateUserDialog>(_simulationFacade);
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog);
-    _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simulationFacade, _browserWindow);
+    _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simulationFacade);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
     _loginDialog = std::make_shared<_LoginDialog>(_simulationFacade, _persisterFacade, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
     _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(
-        _browserWindow, _loginDialog, _simulationFacade, _editorController->getGenomeEditorWindow());
-    _editSimulationDialog = std::make_shared<_EditSimulationDialog>(_browserWindow);
-    _deleteUserDialog = std::make_shared<_DeleteUserDialog>(_browserWindow);
-    _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>(_browserWindow);
+        _loginDialog, _simulationFacade, _editorController->getGenomeEditorWindow());
+    _editSimulationDialog = std::make_shared<_EditSimulationDialog>();
+    _deleteUserDialog = std::make_shared<_DeleteUserDialog>();
+    _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>();
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_simulationFacade);
     _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
     _autosaveWindow = std::make_shared<_AutosaveWindow>(_simulationFacade, _persisterFacade);
     OverlayMessageController::get().init(_persisterFacade);
     FileTransferController::get().init(_persisterFacade, _simulationFacade, _temporalControlWindow);
-    NetworkTransferController::get().init(_simulationFacade, _persisterFacade, _temporalControlWindow, _editorController, _browserWindow);
-    LoginController::get().init(_simulationFacade, _persisterFacade, _activateUserDialog, _browserWindow);
+    NetworkTransferController::get().init(_simulationFacade, _persisterFacade, _temporalControlWindow, _editorController);
+    LoginController::get().init(_simulationFacade, _persisterFacade, _activateUserDialog);
 
     //cyclic references
-    _browserWindow->registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
+    BrowserWindow::get().registerCyclicReferences(_loginDialog, _uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
     _activateUserDialog->registerCyclicReferences(_createUserDialog);
     _editorController->registerCyclicReferences(_uploadSimulationDialog, _simInteractionController);
 
@@ -234,6 +233,8 @@ void _MainWindow::mainLoop()
 
 void _MainWindow::shutdown()
 {
+    BrowserWindow::get().shutdown();
+
     LoginController::get().shutdown();
     WindowController::shutdown();
     _autosaveController->shutdown();
@@ -405,8 +406,8 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_GLOBE "  Network ", _networkMenuToggled, "Network", false)) {
-            if (ImGui::MenuItem("Browser", "ALT+W", _browserWindow->isOn())) {
-                _browserWindow->setOn(!_browserWindow->isOn());
+            if (ImGui::MenuItem("Browser", "ALT+W", BrowserWindow::get().isOn())) {
+                BrowserWindow::get().setOn(!BrowserWindow::get().isOn());
             }
             ImGui::Separator();
             ImGui::BeginDisabled((bool)NetworkService::get().getLoggedInUserName());
@@ -417,7 +418,7 @@ void _MainWindow::processMenubar()
             ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
             if (ImGui::MenuItem("Logout", "ALT+T")) {
                 NetworkService::get().logout();
-                _browserWindow->onRefresh();
+                BrowserWindow::get().onRefresh();
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
@@ -600,14 +601,14 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_W)) {
-            _browserWindow->setOn(!_browserWindow->isOn());
+            BrowserWindow::get().setOn(!BrowserWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_L) && !NetworkService::get().getLoggedInUserName()) {
             _loginDialog->open();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_T)) {
             NetworkService::get().logout();
-            _browserWindow->onRefresh();
+            BrowserWindow::get().onRefresh();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_D) && NetworkService::get().getLoggedInUserName()) {
             _uploadSimulationDialog->open(NetworkResourceType_Simulation);
@@ -751,7 +752,7 @@ void _MainWindow::processWindows()
     _statisticsWindow->process();
     _simulationParametersWindow->process();
     _logWindow->process();
-    _browserWindow->process();
+    BrowserWindow::get().process();
     _gettingStartedWindow->process();
     _shaderWindow->process();
     _radiationSourcesWindow->process();

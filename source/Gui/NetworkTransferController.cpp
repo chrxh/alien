@@ -16,14 +16,12 @@ void NetworkTransferController::init(
     SimulationFacade const& simulationFacade,
     PersisterFacade const& persisterFacade,
     TemporalControlWindow const& temporalControlWindow,
-    EditorController const& editorController,
-    BrowserWindow const& browserWindow)
+    EditorController const& editorController)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
     _temporalControlWindow = temporalControlWindow;
     _editorController = editorController;
-    _browserWindow = browserWindow;
     _downloadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _uploadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _replaceProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
@@ -105,7 +103,7 @@ void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const&
         },
         [&](auto const& requestId) {
             _persisterFacade->fetchUploadNetworkResourcesData(requestId);
-            _browserWindow->onRefresh();
+            BrowserWindow::get().onRefresh();
         },
         [](auto const& errors) { MessageDialog::get().information("Error", errors); });
 }
@@ -121,7 +119,7 @@ void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData cons
         },
         [&](auto const& requestId) {
             _persisterFacade->fetchReplaceNetworkResourcesData(requestId);
-            _browserWindow->onRefresh();
+            BrowserWindow::get().onRefresh();
         },
         [](auto const& errors) { MessageDialog::get().information("Error", errors); });
 }
@@ -137,7 +135,7 @@ void NetworkTransferController::onDelete(DeleteNetworkResourceRequestData const&
         },
         [&](auto const& requestId) {
             _persisterFacade->fetchDeleteNetworkResourcesData(requestId);
-            _browserWindow->onRefresh();
+            BrowserWindow::get().onRefresh();
         },
         [](auto const& errors) { MessageDialog::get().information("Error", errors); });
 }

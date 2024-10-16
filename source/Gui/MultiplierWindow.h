@@ -14,7 +14,7 @@ enum MultiplierMode_
     MultiplierMode_Random
 };
 
-class _MultiplierWindow : public _AlienWindow
+class _MultiplierWindow : public AlienWindow
 {
 public:
     _MultiplierWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade);

@@ -22,7 +22,6 @@ private:
 
     SimulationFacade _simulationFacade;
     PersisterFacade _persisterFacade; 
-    BrowserWindow _browserWindow;
     CreateUserDialog _createUserDialog;
     ActivateUserDialog _activateUserDialog;
     ResetPasswordDialog _resetPasswordDialog;

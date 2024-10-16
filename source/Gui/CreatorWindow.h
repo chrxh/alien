@@ -17,7 +17,7 @@ enum CreationMode_
     CreationMode_Drawing
 };
 
-class _CreatorWindow : public _AlienWindow
+class _CreatorWindow : public AlienWindow
 {
 public:
     _CreatorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade);

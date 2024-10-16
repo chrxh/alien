@@ -36,7 +36,7 @@ namespace
 }
 
 _CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade)
-    : _AlienWindow("Creator", "editors.creator", false), _editorModel(editorModel)
+    : AlienWindow("Creator", "editors.creator", false), _editorModel(editorModel)
     , _simulationFacade(simulationFacade)
 {
 }

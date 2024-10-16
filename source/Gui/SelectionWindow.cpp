@@ -7,7 +7,7 @@
 #include "EditorModel.h"
 
 _SelectionWindow::_SelectionWindow(EditorModel const& editorModel)
-    : _AlienWindow("Selection", "windows.selection", true), _editorModel(editorModel)
+    : AlienWindow("Selection", "windows.selection", true), _editorModel(editorModel)
 {
 }
 

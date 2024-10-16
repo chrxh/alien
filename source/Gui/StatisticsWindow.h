@@ -13,7 +13,7 @@
 
 struct ImPlotPoint;
 
-class _StatisticsWindow : public _AlienWindow
+class _StatisticsWindow : public AlienWindow
 {
 public:
     _StatisticsWindow(SimulationFacade const& simulationFacade);

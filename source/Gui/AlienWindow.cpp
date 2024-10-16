@@ -7,19 +7,19 @@
 #include "StyleRepository.h"
 #include "WindowController.h"
 
-_AlienWindow::_AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn)
+AlienWindow::AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn)
     : _title(title)
     , _settingsNode(settingsNode)
 {
     _on = GlobalSettings::get().getBool(settingsNode + ".active", defaultOn);
 }
 
-_AlienWindow::~_AlienWindow()
+AlienWindow::~AlienWindow()
 {
     GlobalSettings::get().setBool(_settingsNode + ".active", _on);
 }
 
-void _AlienWindow::process()
+void AlienWindow::process()
 {
     processBackground();
 
@@ -43,12 +43,12 @@ void _AlienWindow::process()
     ImGui::PopID();
 }
 
-bool _AlienWindow::isOn() const
+bool AlienWindow::isOn() const
 {
     return _on;
 }
 
-void _AlienWindow::setOn(bool value)
+void AlienWindow::setOn(bool value)
 {
     _on = value;
     if (value) {

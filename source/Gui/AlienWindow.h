@@ -1,13 +1,12 @@
 #pragma once
 
 #include "Definitions.h"
-#include "EngineInterface/Definitions.h"
 
-class _AlienWindow
+class AlienWindow
 {
 public:
-    _AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn);
-    virtual ~_AlienWindow();
+    AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn);
+    virtual ~AlienWindow();
 
     void process();
 

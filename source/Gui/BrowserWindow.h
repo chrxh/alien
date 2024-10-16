@@ -2,6 +2,8 @@
 
 #include <chrono>
 
+#include <imgui.h>
+
 #include "Base/Hashes.h"
 #include "Base/Cache.h"
 #include "EngineInterface/Definitions.h"
@@ -15,18 +17,18 @@
 #include "Definitions.h"
 #include "LastSessionBrowserData.h"
 
-struct ImGuiTableColumnSortSpecs;
-
-class _BrowserWindow : public _AlienWindow
+class BrowserWindow : public AlienWindow
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTOR(BrowserWindow);
+
 public:
-    _BrowserWindow(
+    void init(
         SimulationFacade const& simulationFacade,
         PersisterFacade const& persisterFacade,
         StatisticsWindow const& statisticsWindow,
         TemporalControlWindow const& temporalControlWindow,
         EditorController const& editorController);
-    ~_BrowserWindow();
+    void shutdown();
 
     void registerCyclicReferences(
         LoginDialogWeakPtr const& loginDialog,
@@ -40,6 +42,8 @@ public:
     DownloadCache& getSimulationCache();
 
 private:
+    BrowserWindow();
+
     struct WorkspaceId
     {
         NetworkResourceType resourceType;

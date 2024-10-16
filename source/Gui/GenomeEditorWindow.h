@@ -2,11 +2,12 @@
 
 #include "EngineInterface/GenomeDescriptions.h"
 #include "EngineInterface/PreviewDescriptions.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class _GenomeEditorWindow : public _AlienWindow
+class _GenomeEditorWindow : public AlienWindow
 {
 public:
     _GenomeEditorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade);

@@ -11,12 +11,9 @@
 #include "CreateUserDialog.h"
 #include "StyleRepository.h"
 
-_ActivateUserDialog::_ActivateUserDialog(
-    SimulationFacade const& simulationFacade,
-    BrowserWindow const& browserWindow)
+_ActivateUserDialog::_ActivateUserDialog(SimulationFacade const& simulationFacade)
     : _AlienDialog("Activate user")
     , _simulationFacade(simulationFacade)
-    , _browserWindow(browserWindow)
 {}
 
 _ActivateUserDialog::~_ActivateUserDialog() {}
@@ -91,6 +88,6 @@ void _ActivateUserDialog::onActivateUser()
             "Information",
             "The user '" + _userName
                 + "' has been successfully created.\nYou are logged in and are now able to upload your own simulations\nor upvote others by likes.");
-        _browserWindow->onRefresh();
+        BrowserWindow::get().onRefresh();
     }
 }

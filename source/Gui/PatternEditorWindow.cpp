@@ -29,7 +29,7 @@ _PatternEditorWindow::_PatternEditorWindow(
     EditorModel const& editorModel,
     SimulationFacade const& simulationFacade,
     EditorControllerWeakPtr const& editorController)
-    : _AlienWindow("Pattern editor", "editors.pattern editor", true)
+    : AlienWindow("Pattern editor", "editors.pattern editor", true)
     , _editorModel(editorModel)
     , _simulationFacade(simulationFacade)
     , _editorController(editorController)

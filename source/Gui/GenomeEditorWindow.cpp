@@ -41,7 +41,7 @@ namespace
 }
 
 _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade)
-    : _AlienWindow("Genome editor", "windows.genome editor", false)
+    : AlienWindow("Genome editor", "windows.genome editor", false)
     , _editorModel(editorModel)
     , _simulationFacade(simulationFacade)
 {

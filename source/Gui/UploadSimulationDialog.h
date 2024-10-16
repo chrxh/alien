@@ -9,11 +9,7 @@
 class _UploadSimulationDialog : public _AlienDialog
 {
 public:
-    _UploadSimulationDialog(
-        BrowserWindow const& browserWindow,
-        LoginDialog const& loginDialog,
-        SimulationFacade const& simulationFacade,
-        GenomeEditorWindow const& genomeEditorWindow);
+    _UploadSimulationDialog(LoginDialog const& loginDialog, SimulationFacade const& simulationFacade, GenomeEditorWindow const& genomeEditorWindow);
     ~_UploadSimulationDialog();
 
     void open(NetworkResourceType resourceType, std::string const& folder = "");
@@ -33,7 +29,6 @@ private:
     NetworkResourceType _resourceType = NetworkResourceType_Simulation;
     bool _share = false;
 
-    BrowserWindow _browserWindow;
     LoginDialog _loginDialog;
     SimulationFacade _simulationFacade;
     GenomeEditorWindow _genomeEditorWindow;

@@ -21,8 +21,7 @@ public:
         SimulationFacade const& simulationFacade,
         PersisterFacade const& persisterFacade,
         TemporalControlWindow const& temporalControlWindow,
-        EditorController const& editorController,
-        BrowserWindow const& browserWindow);
+        EditorController const& editorController);
 
     void onDownload(DownloadNetworkResourceRequestData const& requestData);
     void onUpload(UploadNetworkResourceRequestData const& requestData);
@@ -36,7 +35,6 @@ private:
     PersisterFacade _persisterFacade;
     TemporalControlWindow _temporalControlWindow;
     EditorController _editorController;
-    BrowserWindow _browserWindow;
 
     TaskProcessor _downloadProcessor;
     TaskProcessor _uploadProcessor;

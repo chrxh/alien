@@ -13,11 +13,9 @@ namespace
     auto const RightColumnWidth = 150.0f;
 }
 
-_NetworkSettingsDialog::_NetworkSettingsDialog(BrowserWindow const& browserWindow)
+_NetworkSettingsDialog::_NetworkSettingsDialog()
     : _AlienDialog("Network settings")
-    , _browserWindow(browserWindow)
-{
-}
+{}
 
 void _NetworkSettingsDialog::processIntern()
 {
@@ -48,5 +46,5 @@ void _NetworkSettingsDialog::openIntern()
 void _NetworkSettingsDialog::onChangeSettings()
 {
     NetworkService::get().setServerAddress(_serverAddress);
-    _browserWindow->onRefresh();
+    BrowserWindow::get().onRefresh();
 }

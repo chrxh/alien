@@ -23,7 +23,7 @@ struct SavepointEntry
     uint64_t timestep;
 };
 
-class _AutosaveWindow : public _AlienWindow
+class _AutosaveWindow : public AlienWindow
 {
 public:
     _AutosaveWindow(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);

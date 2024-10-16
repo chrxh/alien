@@ -11,16 +11,11 @@
 #include "BrowserWindow.h"
 #include "PersisterInterface/TaskProcessor.h"
 
-void LoginController::init(
-    SimulationFacade const& simulationFacade,
-    PersisterFacade const& persisterFacade,
-    ActivateUserDialog const& activateUserDialog,
-    BrowserWindow const& browserWindow)
+void LoginController::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, ActivateUserDialog const& activateUserDialog)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
     _activateUserDialog = activateUserDialog;
-    _browserWindow = browserWindow;
     _taskProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 
     auto& settings = GlobalSettings::get();
@@ -62,7 +57,7 @@ void LoginController::onLogin()
                     _activateUserDialog->open(userName, password, getUserInfo());
                 }
                 saveSettings();
-                _browserWindow->onRefresh();
+                BrowserWindow::get().onRefresh();
             },
             [&](auto const& criticalErrors) { MessageDialog::get().information("Error", criticalErrors); });
     }

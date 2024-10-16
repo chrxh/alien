@@ -3,7 +3,7 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _LogWindow : public _AlienWindow
+class _LogWindow : public AlienWindow
 {
 public:
     _LogWindow(GuiLogger const& logger);

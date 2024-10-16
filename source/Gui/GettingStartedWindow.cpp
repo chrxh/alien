@@ -11,7 +11,7 @@
 #endif
 
 _GettingStartedWindow::_GettingStartedWindow()
-    : _AlienWindow("Getting started", "windows.getting started", true)
+    : AlienWindow("Getting started", "windows.getting started", true)
 {
     _showAfterStartup = _on;
 }

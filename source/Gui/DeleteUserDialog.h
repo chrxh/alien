@@ -8,13 +8,11 @@
 class _DeleteUserDialog : public _AlienDialog
 {
 public:
-    _DeleteUserDialog(BrowserWindow const& browserWindow);
+    _DeleteUserDialog();
 
 private:
     void processIntern();
     void onDelete();
-
-    BrowserWindow _browserWindow;
 
     std::string _reenteredPassword;
 };
